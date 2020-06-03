@@ -1,0 +1,5 @@
+.tests.smiley {
+    background-image: url("%REMOTE_UI%/smiley.svg");
+    width: 300px;
+    height: 300px;
+}

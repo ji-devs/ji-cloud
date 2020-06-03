@@ -1,0 +1,131 @@
+name: Test, Build, and Deploy
+
+on: [push]
+
+env:
+  GITHUB_SHA: ${{github.sha}}
+
+jobs:
+  tests:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - ${{github.event.repository.name}} - build]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: run tests
+        run: docker build --target tests .
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
+
+      - name: Notify slack if success and deploy will happen
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} preparing for deploy...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: success() && (github.ref == 'refs/heads/master')
+
+  deploy-production:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: tests 
+    env:
+      PROJECT: "ji-kids" 
+      SERVICE: "ji-cloud-templates" 
+      CONTAINER_IMAGE: "ji-cloud-templates"
+      REGION: "europe-west1" 
+    steps:
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - ${{github.event.repository.name}} - deploy]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      # Node section needed to build CSS
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: install node
+        uses: actions/setup-node@v1
+
+      - name: install npm deps
+        run: npm ci --only=production
+
+      # Build CSS
+
+      - name: build CSS
+        run: npm run build
+
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+          project_id: ${{ env.PROJECT }}
+
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - run: gcloud auth configure-docker
+            
+      # Build the Docker image
+      - name: Build
+        run: |        
+          docker build --target release -t gcr.io/"$PROJECT"/"$CONTAINER_IMAGE":"$GITHUB_SHA" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" .
+        env:
+          DOCKER_BUILDKIT: 1
+
+      # Push the Docker image to Google Container Registry
+      - name: Publish
+        run: docker push gcr.io/$PROJECT/$CONTAINER_IMAGE:$GITHUB_SHA
+
+      # Deploy to cloud run
+      - name: Deploy
+        run: gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image gcr.io/"$PROJECT"/"$CONTAINER_IMAGE":"$GITHUB_SHA" --platform managed
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()

@@ -1,0 +1,6 @@
+secret-keys
+target
+Dockerfile
+.dockerignore
+.git
+.gitignore
