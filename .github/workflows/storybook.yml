@@ -1,7 +1,13 @@
 on:
   push:
-    branches:    
-    - 'master/**'
+    branches: [ master ]
+    paths:
+    - 'storybook/**'
+
+  pull_request:
+    branches: [ master ]
+    paths:
+    - 'storybook/**'
 
 jobs:
   bundle:
