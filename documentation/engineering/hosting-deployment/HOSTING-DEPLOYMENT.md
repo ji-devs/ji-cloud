@@ -2,6 +2,16 @@
     <img alt="Hosting and Deployment High Level View" src="./hosting-deployment.drawio.svg">
 </p>
 
+# Firebase vs GCS
+
+Full standalone static sites, such as Storybook and this documentation, are served via Firebase hosting
+
+All other static files - even if they comprise javascript that are used on other sites, are served via Google Cloud Storage and the Fastly CDN in front of it
+
+# CDN
+
+* TODO - document GCS, GCF, and Fastly: https://github.com/fastly/purge-fastly-gcs-trigger
+
 ## Notes:
 
 * The release/sandbox split is consistent. A sandbox frontend will hit sandbox server which hits sandbox sql

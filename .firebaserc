@@ -4,11 +4,15 @@
       "hosting": {
         "ji-cloud-developer-storybook": [
           "ji-cloud-developer-storybook"
+        ],
+		"ji-cloud-developer-documentation": [
+          "ji-cloud-developer-documentation"
         ]
       }
     }
   },
   "projects": {
-    "ji-cloud-developer-sandbox": "ji-cloud-developer-sandbox"
+    "ji-cloud-developer-sandbox": "ji-cloud-developer-sandbox",
+	"ji-cloud": "ji-cloud"
   }
 }

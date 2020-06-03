@@ -1,0 +1,60 @@
+on:
+  push:
+    branches:    
+    - 'master/**'
+    paths:
+    - 'frontend/user/**'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - frontend/user - build]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: install node
+        uses: actions/setup-node@v1
+
+      - name: install npm deps
+        run: npm install
+        working-directory: "./frontend/user"
+
+      - name: build 
+        run: npm run storybook:build-release 
+        working-directory: "./frontend/user"
+      
+      - name: install google cloud sdk
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '295.0.0'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -c -r frontend/user/dist/js gs://ji-cloud-frontend-origin-eu/user/js
+        
+      - name: deploy to firebase (sandbox)
+        uses: w9jds/firebase-action@v1.0.1
+        with:
+          args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-developer-storybook
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
