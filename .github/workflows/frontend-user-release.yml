@@ -1,4 +1,4 @@
-name: [Frontend Release] User
+name: User - Frontend - Release
 
 on:
   push:
