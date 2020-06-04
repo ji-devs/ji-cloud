@@ -20,7 +20,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - frontend/user - build]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - frontend/user]\")"
         id: extract_label
 
       - name: Notify slack
@@ -41,7 +41,7 @@ jobs:
         working-directory: "./frontend/user"
 
       - name: build 
-        run: npm run build 
+        run: npm run build:sandbox
         working-directory: "./frontend/user"
       
       - name: install google cloud sdk

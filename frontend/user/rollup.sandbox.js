@@ -12,6 +12,7 @@ export default {
     plugins: [
         rust({
             serverPath: "/js/",
+			cargoArgs: ["--features", "sandbox"],
             debug: false,
         }),
     ],

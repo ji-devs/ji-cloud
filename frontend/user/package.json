@@ -4,7 +4,8 @@
   "name": "app",
   "version": "0.1.0",
   "scripts": {
-    "build": "npm run clean && rollup --config rollup.prod.js",
+    "build:release": "npm run clean && rollup --config rollup.release.js",
+	"build:sandbox": "npm run clean && rollup --config rollup.sandbox.js",
     "start": "npm run _devfiles && run-p _mediaserver _watch",
     "clean": "rimraf ./dist",
     "_watch": "rollup --config rollup.dev.js --watch",
