@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    [
+      "babel-plugin-root-import",
+      {
+        "paths": [
+          {
+            "rootPathSuffix": "./src/html",
+            "rootPathPrefix": "@html"
+          },
+          {
+            "rootPathSuffix": "./src/utils",
+            "rootPathPrefix": "@utils"
+          }
+        ]
+      }
+    ]
+  ]
+}
