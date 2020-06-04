@@ -2,7 +2,8 @@
   "name": "build-utils",
   "description": "Ji Cloud Build Utils",
   "scripts": {
-    "local-media-server": "node ./local-media-server.js"
+    "local-media-server": "node ./local-media-server.js",
+    "frontend-dev-files": "node ./frontend-dev-files.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -18,7 +18,7 @@ crate-type = ["cdylib"]
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-ji_cloud_shared = {path = "../../common/ji-cloud-shared/rust", features=["frontend"] }
+ji_cloud_shared = {path = "../../shared/rust", features=["frontend"] }
 jsonwebtoken = "7.1.0"
 dominator = "0.5.10"
 wasm-bindgen = {version = "0.2.62", features=["nightly"]}

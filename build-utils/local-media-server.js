@@ -2,12 +2,12 @@ require('dotenv').config();
 
 if(!process.env.LOCAL_CDN_DIR || process.env.LOCAL_CDN_DIR === "") {
     console.log("Local CDN: set [LOCAL_CDN_DIR] in .env");
-    process.exit(0);
+    process.exit(1);
 }
 
 if(!process.env.LOCAL_CDN_PORT || process.env.LOCAL_CDN_PORT === "") {
     console.log("Local CDN: set [LOCAL_CDN_PORT] in .env");
-    process.exit(0);
+    process.exit(1);
 }
 
 const port = parseInt(process.env.LOCAL_CDN_PORT);
