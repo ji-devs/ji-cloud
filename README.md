@@ -1,7 +1,7 @@
 # Build Status
 
 * ![Storybook](https://github.com/jewish-interactive/ji-cloud/workflows/Storybook/badge.svg)
-* ![User - Frontend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Release/badge.svg)
+* ![User - Frontend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Release/badge.svg) / ![User - Frontend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Sandbox/badge.svg)
 
 # Secrets
 
