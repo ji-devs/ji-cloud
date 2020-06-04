@@ -5,9 +5,13 @@ if(!process.env.LOCAL_CDN_DIR || process.env.LOCAL_CDN_DIR === "") {
     process.exit(0);
 }
 
-const os = require('os');
+if(!process.env.LOCAL_CDN_PORT || process.env.LOCAL_CDN_PORT === "") {
+    console.log("Local CDN: set [LOCAL_CDN_PORT] in .env");
+    process.exit(0);
+}
+
+const port = parseInt(process.env.LOCAL_CDN_PORT);
 const path = require('path');
-const fs = require('fs');
 
 const localPath = path.resolve(process.env.LOCAL_CDN_DIR);
 
@@ -22,5 +26,4 @@ app.use(cors());
 app.use(express.static(localPath), serveIndex(localPath, {'icons': true}));
 
 
-//If you change it here - also change it in storybook and app
-app.listen(4102, () => console.log('Local CDN Started!'))
+app.listen(port, () => console.log(`Local CDN Started on port ${port}, serving ${localPath}!`))
