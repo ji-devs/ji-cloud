@@ -1,0 +1,14 @@
+{
+  "name": "build-utils",
+  "description": "Ji Cloud Build Utils",
+  "scripts": {
+    "local-media-server": "node ./local-media-server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "fs-extra": "^9.0.1",
+    "serve-index": "^1.9.1"
+  }
+}
