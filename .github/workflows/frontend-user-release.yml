@@ -1,10 +1,10 @@
-name: Frontend - User 
+name: [Frontend Release] User
 
 on:
   push:
     branches: [ master ]
     paths:
-    - 'storybook/**'
+    - 'frontend/user/**'
 
   pull_request:
     branches: [ master ]
