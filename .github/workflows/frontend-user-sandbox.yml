@@ -1,0 +1,62 @@
+name: User - Frontend - Sandbox
+
+on:
+  push:
+    branches: [ sandbox ]
+    paths:
+    - 'frontend/user/**'
+
+  pull_request:
+    branches: [ sandbox ]
+    paths:
+    - 'frontend/user/**'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - frontend/user - build]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: make nightly the default
+        run: rustup default nightly
+
+      - name: install node
+        uses: actions/setup-node@v1
+
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/user"
+
+      - name: build 
+        run: npm run build 
+        working-directory: "./frontend/user"
+      
+      - name: install google cloud sdk
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '295.0.0'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -c -r frontend/user/dist gs://ji-cloud-sandbox-frontend-origin-eu/user
+        
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
