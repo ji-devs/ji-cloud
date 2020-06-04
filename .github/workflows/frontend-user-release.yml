@@ -30,11 +30,9 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
-        with:
-            toolchain: nightly
-            
+      - name: make nightly the default
+        run: rustup default nightly
+
       - name: install node
         uses: actions/setup-node@v1
 
