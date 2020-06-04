@@ -1,7 +1,13 @@
+name: Frontend - User 
+
 on:
   push:
-    branches:    
-    - 'master/**'
+    branches: [ master ]
+    paths:
+    - 'storybook/**'
+
+  pull_request:
+    branches: [ master ]
     paths:
     - 'frontend/user/**'
 
@@ -28,11 +34,11 @@ jobs:
         uses: actions/setup-node@v1
 
       - name: install npm deps
-        run: npm install
+        run: npm ci 
         working-directory: "./frontend/user"
 
       - name: build 
-        run: npm run storybook:build-release 
+        run: npm run build 
         working-directory: "./frontend/user"
       
       - name: install google cloud sdk
@@ -42,15 +48,8 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -c -r frontend/user/dist/js gs://ji-cloud-frontend-origin-eu/user/js
+        run: gsutil -m rsync -d -c -r frontend/user/dist gs://ji-cloud-frontend-origin-eu/user
         
-      - name: deploy to firebase (sandbox)
-        uses: w9jds/firebase-action@v1.0.1
-        with:
-          args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-developer-storybook
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
