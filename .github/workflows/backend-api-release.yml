@@ -1,4 +1,4 @@
-name: User - Frontend - Release
+name: Api - Backend - Release
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - frontend/user]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - backend/api]\")"
         id: extract_label
 
       - name: Notify slack
