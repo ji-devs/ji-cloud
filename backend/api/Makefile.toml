@@ -46,7 +46,7 @@ args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../com
 
 [tasks.google-sql-proxy]
 env = { CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true }
-script = ["cloud_sql_proxy --instances=ji-cloud-developer-sandbox:europe-west1:ji-cloud-001-sandbox=tcp:3306"]
+script = ["cd ../../build-utils","npm run cloud-sql-proxy"]
 
 ###################
 ## Release       ##
