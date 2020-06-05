@@ -8,7 +8,6 @@ mod settings;
 mod logger;
 mod server;
 mod reject;
-mod pages;
 mod templates;
 mod loader;
 mod db;

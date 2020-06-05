@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::convert::Infallible;
 use ji_cloud_shared::response::HttpStatus;
 use handlebars::Handlebars;
-use crate::pages::direct::{DirectPage, direct_template};
+use crate::templates::direct::{DirectPage, direct_template};
 
 use warp:: {
     http::{

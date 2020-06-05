@@ -1,5 +1,5 @@
 [package]
-name = "ji-cloud-templates"
+name = "ji-cloud-pages"
 version = "0.1.0"
 authors = ["dakom <david.komer@gmail.com>"]
 edition = "2018"
@@ -26,12 +26,11 @@ log = "^0.4"
 futures-util = "0.3.4"
 handlebars = "3.0.1"
 chrono = "0.4.11"
-
-# TODO
-ji_cloud_shared = {path = "../../common/ji-cloud-shared/rust", features=["backend"]}
+ji_cloud_shared = {path = "../../shared/rust", features=["backend"]}
 
 [features]
 local = ["simplelog", "listenfd"]
 quiet = []
 local-quiet = ["local", "quiet"]
 release = []
+sandbox = []

@@ -12,7 +12,7 @@ use crate::templates::register_templates;
 use crate::reject::{CustomWarpRejection, RequiredData};
 use super::cors::get_cors;
 use std::net::SocketAddr;
-use crate::pages::{
+use crate::templates::{
     direct::{DirectPage, direct_template},
     spa::{SpaPage, spa_template},
     epoch::epoch_page
