@@ -1,7 +1,0 @@
-secret-keys
-node_modules
-target
-Dockerfile
-.dockerignore
-.git
-.gitignore
