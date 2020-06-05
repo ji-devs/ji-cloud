@@ -41,6 +41,7 @@ jobs:
 
       - name: build and deploy 
         run: cargo make release
+        working-directory: "./backend/pages"
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
