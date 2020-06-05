@@ -1,5 +1,7 @@
 [![Build Status](https://github.com/jewish-interactive/ji-cloud-api/workflows/Test%2C%20Build%2C%20and%20Deploy/badge.svg)](https://github.com/jewish-interactive/ji-cloud-api/actions)
 
+Temp CICD TODO
+
 # Endpoints
 
 release: https://api.jicloud.org
