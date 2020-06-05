@@ -1,0 +1,74 @@
+###################
+## Dev           ##
+###################
+
+[tasks.dev]
+env = { CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true }
+script = ["npm run dev"]
+
+###################
+## Config        ##
+###################
+
+[config]
+skip_core_tasks = true
+
+[env]
+DOCKER_BUILDKIT = "1"
+
+###################
+## Gcloud        ##
+###################
+
+[tasks.gcloud-configure-docker]
+script_runner = "@shell"
+script = ["gcloud auth configure-docker"]
+
+###################
+## Release       ##
+###################
+
+[tasks.release]
+run_task = [{name = [
+    "gcloud-configure-docker",
+    "docker-build-release",
+    "docker-publish-release",
+    "gcloud-deploy-release",
+]}]
+
+[tasks.docker-build-release]
+command = "docker"
+args = ["build", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-api-js:latest", "."]
+
+[tasks.docker-publish-release]
+command = "docker"
+args = ["push", "gcr.io/ji-cloud/ji-cloud-api-js:latest"]
+
+[tasks.gcloud-deploy-release]
+script_runner = "@shell"
+script = ["gcloud run deploy ji-cloud-api-js --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api-js:latest --platform managed"]
+
+
+###################
+## Sandbox       ##
+###################
+
+[tasks.sandbox]
+run_task = [{name = [
+    "gcloud-configure-docker",
+    "docker-build-sandbox",
+    "docker-publish-sandbox",
+    "gcloud-deploy-sandbox",
+]}]
+
+[tasks.docker-build-sandbox]
+command = "docker"
+args = ["build", "--target", "sandbox", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest", "."]
+
+[tasks.docker-publish-sandbox]
+command = "docker"
+args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest"]
+
+[tasks.gcloud-deploy-sandbox]
+script_runner = "@shell"
+script = ["gcloud run deploy ji-cloud-api-js-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest --platform managed"]
