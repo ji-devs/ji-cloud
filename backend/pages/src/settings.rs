@@ -28,6 +28,7 @@ lazy_static! {
 
 pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
 pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
+pub const HANDLEBARS_PATH:&'static str = "./handlebars";
 
 pub struct Settings {
     pub auth_target: RemoteTarget,
