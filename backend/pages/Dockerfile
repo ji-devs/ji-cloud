@@ -46,16 +46,12 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=release-builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
+    /home/rust/backend/pages/src/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
-COPY --from=release-builder \
-    /home/rust/backend/pages/src/public \
-    /usr/local/bin/cloud-run-app/public
+COPY ./backend/pages/public /user/local/bin/cloud-run-app/public
+COPY ./backend/pages/handlebars /user/local/bin/cloud-run-app/handlebars 
 
-COPY --from=release-builder \
-    /home/rust/backend/pages/src/handlebars \
-    /usr/local/bin/cloud-run-app/handlebars
 
 WORKDIR /usr/local/bin/cloud-run-app/
 
