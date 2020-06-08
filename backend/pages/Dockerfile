@@ -7,12 +7,15 @@ FROM ekidd/rust-musl-builder:latest AS tests
 
 # Add our source code.
 
-ADD . ./
+RUN mkdir -p ./backend/pages
+COPY ./shared ./shared
+COPY ./backend/pages ./backend/pages
 
 # Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
+WORKDIR ./backend/pages
 RUN cargo test
 
 ####################
@@ -23,12 +26,15 @@ FROM ekidd/rust-musl-builder:latest AS release-builder
 
 # Add our source code.
 
-ADD . ./
+RUN mkdir -p ./backend/pages
+COPY ./shared ./shared
+COPY ./backend/pages ./backend/pages
 
 # Fix permissions on source code.
-# RUN sudo chown -R rust:rust /home/rust
+RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
+WORKDIR ./backend/pages
 RUN cargo build --release --features release
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
@@ -43,12 +49,12 @@ COPY --from=release-builder \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
 COPY --from=release-builder \
-    /home/rust/src/public \
+    /home/rust/backend/pages/src/public \
     /usr/local/bin/cloud-run-app/public
 
 COPY --from=release-builder \
-    /home/rust/src/markup \
-    /usr/local/bin/cloud-run-app/markup
+    /home/rust/backend/pages/src/handlebars \
+    /usr/local/bin/cloud-run-app/handlebars
 
 WORKDIR /usr/local/bin/cloud-run-app/
 

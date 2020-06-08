@@ -1,98 +1,30 @@
 ###################
-## Dev           ##
-###################
-
-[tasks.dev]
-run_task = [{name = [
-    "local-quiet",
-]}]
-
-###################
 ## Config        ##
 ###################
 
 [config]
 skip_core_tasks = true
 
-[env]
-DOCKER_BUILDKIT = "1"
-
 ###################
-## Gcloud        ##
+## Dev           ##
 ###################
 
-[tasks.gcloud-configure-docker]
-script_runner = "@shell"
-script = ["gcloud auth configure-docker"]
+[tasks.dev]
+run_task = { name = [ "google-sql-proxy", "server-local-quiet", ], parallel = true }
 
-###############################
-## Local (with autoreload)    #
-## see server.rs              #
-###############################
 
-[tasks.local]
+[tasks.dev-warnings]
 run_task = { name = [ "google-sql-proxy", "server-local", ], parallel = true }
 
-[tasks.local-quiet]
-run_task = { name = [ "google-sql-proxy", "server-local-quiet", ], parallel = true }
 
 [tasks.server-local]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../common/ji-cloud-shared/rust", "-w", ".", "-x", "run --features local"]
+args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local"]
 
 [tasks.server-local-quiet]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../common/ji-cloud-shared/rust", "-w", ".", "-x", "run --features local-quiet"]
+args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet"]
 
 [tasks.google-sql-proxy]
 env = { CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true }
 script = ["cd ../../build-utils","npm run cloud-sql-proxy"]
-
-###################
-## Release       ##
-###################
-
-[tasks.release]
-run_task = [{name = [
-    "gcloud-configure-docker",
-    "docker-build-release",
-    "docker-publish-release",
-    "gcloud-deploy-release",
-]}]
-
-[tasks.docker-build-release]
-command = "docker"
-args = ["build", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-api:latest", "."]
-
-[tasks.docker-publish-release]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud/ji-cloud-api:latest"]
-
-[tasks.gcloud-deploy-release]
-script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api:latest --platform managed"]
-
-
-###################
-## Sandbox       ##
-###################
-
-[tasks.sandbox]
-run_task = [{name = [
-    "gcloud-configure-docker",
-    "docker-build-sandbox",
-    "docker-publish-sandbox",
-    "gcloud-deploy-sandbox",
-]}]
-
-[tasks.docker-build-sandbox]
-command = "docker"
-args = ["build", "--target", "sandbox", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest", "."]
-
-[tasks.docker-publish-sandbox]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest"]
-
-[tasks.gcloud-deploy-sandbox]
-script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest --platform managed"]
