@@ -38,6 +38,8 @@ RUN sudo chown -R rust:rust /home/rust
 WORKDIR ./backend/pages
 RUN cargo build --release --features release
 
+RUN ls -lR /home/rust
+
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
 
