@@ -30,6 +30,7 @@ RUN mkdir -p ./backend/pages
 COPY ./shared ./shared
 COPY ./backend/pages ./backend/pages
 
+
 # Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 

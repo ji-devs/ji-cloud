@@ -31,7 +31,7 @@ run_task = [{name = [
 
 [tasks.docker-build-release-pages]
 command = "docker"
-args = ["build", "-f", "backend/pages/Dockerfile", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-pages:latest", "."]
+args = ["build", "--no-cache", "-f", "backend/pages/Dockerfile", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-pages:latest", "."]
 
 [tasks.docker-publish-release-pages]
 command = "docker"
