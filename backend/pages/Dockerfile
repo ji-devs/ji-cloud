@@ -38,7 +38,8 @@ RUN sudo chown -R rust:rust /home/rust
 WORKDIR ./backend/pages
 RUN cargo build --release --features release
 
-RUN ls -lR /home/rust
+# list stuff
+# RUN ls -lR /home/rust
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
@@ -48,7 +49,7 @@ RUN apk --no-cache add ca-certificates
 RUN mkdir /usr/local/bin/cloud-run-app
 
 COPY --from=release-builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
+    /home/rust/src/backend/pages/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
 COPY ./backend/pages/public /user/local/bin/cloud-run-app/public
