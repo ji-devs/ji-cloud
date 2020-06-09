@@ -1,34 +1,17 @@
-use std::fmt;
 use cfg_if::cfg_if;
-use lazy_static::lazy_static;
 use strum_macros::{Display, EnumString};
 use jsonwebtoken::{EncodingKey, DecodingKey};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use futures_util::future::TryFutureExt;
+use serde::{Deserialize, de::DeserializeOwned, Serialize};
+use std::{
+    fmt,
+    env,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
+use ji_cloud_shared::backend::google::{get_secret, get_google_token, get_google_credentials};
+use once_cell::sync::OnceCell;
 
-lazy_static! {
-    pub static ref SETTINGS:Settings = Settings::new();
-    pub static ref JWT_ENCODING_KEY:EncodingKey = {
-        let secret = std::env::var("JWT_SECRET").expect("must have JWT_SECRET set");
-        EncodingKey::from_secret(secret.as_ref())
-    };
-
-    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    //Keeping a string is a stop-gap measure for now, not ideal
-    pub static ref JWT_DECODING_KEY:String = {
-        let secret = std::env::var("JWT_SECRET").expect("must have JWT_SECRET set");
-
-        secret
-        //DecodingKey::from_secret(secret.as_ref())
-    };
-    pub static ref SHARED_SERVER_SECRET:String = std::env::var("SHARED_SERVER_SECRET").expect("must have SHARED_SERVER_SECRET set");
-    pub static ref DB_CONNECTION:String = std::env::var("DATABASE_URL").expect("must have DATABASE_URL set");
-
-    pub static ref CORS_ORIGINS:Vec<&'static str> = vec!["https://jicloud.org"];
-}
-
-pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
-pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
-pub const HANDLEBARS_PATH:&'static str = "./handlebars";
+pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
 pub struct Settings {
     pub auth_target: RemoteTarget,
@@ -37,7 +20,35 @@ pub struct Settings {
     pub local_insecure: bool,
     pub port: u16,
     pub epoch: Duration,
+    pub jwt_encoding_key: EncodingKey,
+    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
+    //Keeping a string is a stop-gap measure for now, not ideal
+    pub jwt_decoding_key:String,
+    pub inter_server_secret:String,
+    pub db_connection:String,
 }
+
+pub async fn init() {
+    let credentials = get_google_credentials().await;
+    let token = get_google_token(&credentials).await;
+
+    let jwt_secret = get_secret(&token, &credentials.project_id, "JWT_SECRET").await;
+    let db_pass = get_secret(&token, &credentials.project_id, "DB_PASS").await;
+    let inter_server_secret = get_secret(&token, &credentials.project_id, "INTER_SERVER").await;
+
+
+    let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
+
+    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
+    //Keeping a string is a stop-gap measure for now, not ideal
+    SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
+}
+
+pub static CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org"];
+pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
+pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
+pub const HANDLEBARS_PATH:&'static str = "./handlebars";
+
 
 impl Settings {
     pub fn js_api(&self) -> &'static str {
@@ -69,8 +80,9 @@ pub enum RemoteTarget {
 }
 
 
+    //SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
 impl Settings {
-    pub fn new_local() -> Self {
+    pub fn new_local(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
         Self {
             auth_target: RemoteTarget::Local,
             db_target: RemoteTarget::Local,
@@ -78,9 +90,13 @@ impl Settings {
             local_insecure: true,
             port: 8081,
             epoch: get_epoch(),
+            jwt_encoding_key,
+            jwt_decoding_key,
+            inter_server_secret,
+            db_connection: format!("postgres://postgres:{}@localhost:3306/jicloud", db_pass)
         }
     }
-    pub fn new_sandbox() -> Self {
+    pub fn new_sandbox(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
         Self {
             auth_target: RemoteTarget::Sandbox,
             db_target: RemoteTarget::Sandbox,
@@ -88,9 +104,13 @@ impl Settings {
             port: 8080,
             local_insecure: false,
             epoch: get_epoch(),
+            jwt_encoding_key,
+            jwt_decoding_key,
+            inter_server_secret,
+            db_connection: format!("postgres://postgres:{}/jicloud", db_pass)
         }
     }
-    pub fn new_release() -> Self {
+    pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
         Self {
             auth_target: RemoteTarget::Release,
             db_target: RemoteTarget::Release,
@@ -98,6 +118,10 @@ impl Settings {
             port: 8080,
             local_insecure: false,
             epoch: get_epoch(),
+            jwt_encoding_key,
+            jwt_decoding_key,
+            inter_server_secret,
+            db_connection: format!("postgres://postgres:{}/jicloud", db_pass)
         }
     }
 
@@ -107,13 +131,19 @@ impl Settings {
     
     cfg_if! {
         if #[cfg(feature = "local")] {
-            pub fn new() -> Self { Self::new_local() }
+            pub fn new(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self { 
+                Self::new_local(jwt_encoding_key, jwt_decoding_key, inter_server_secret, db_pass) 
+            }
         } else if #[cfg(feature = "sandbox")] {
-            pub fn new() -> Self { Self::new_sandbox() }
+            pub fn new(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self { 
+                Self::new_sandbox(jwt_encoding_key, jwt_decoding_key, inter_server_secret, db_pass) 
+            }
         } else if #[cfg(feature = "release")] {
-            pub fn new() -> Self { Self::new_release() }
+            pub fn new(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self { 
+                Self::new_release(jwt_encoding_key, jwt_decoding_key, inter_server_secret, db_pass) 
+            }
         } else {
-            pub fn new() -> Self { unimplemented!() }
+            pub fn new(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self { unimplemented!() }
         } 
     }
 }

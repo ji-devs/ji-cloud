@@ -22,7 +22,7 @@ struct PageInfo {
 pub async fn spa_template(hb:Arc<Handlebars<'_>>, spa:SpaPage) -> Result<impl warp::Reply, warp::Rejection> {
 
     let info = PageInfo {
-        AppJs: SETTINGS.spa_url(spa.as_ref(), "js/index.js")
+        AppJs: SETTINGS.get().unwrap().spa_url(spa.as_ref(), "js/index.js")
     };
 
     let render = hb.render("spa", &info).unwrap_or_else(|err| err.to_string());

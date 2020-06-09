@@ -15,6 +15,7 @@ use std::net::SocketAddr;
 use crate::templates::{
     direct::{DirectPage, direct_template},
     spa::{SpaPage, spa_template},
+    info::info_template,
     epoch::epoch_page
 };
 use crate::user::auth::has_auth;
@@ -27,11 +28,13 @@ pub fn get_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rej
     let hb = register_templates();
     
 
+            //.and_then(async_clone_fn!(pool; |user, form| { user::register::handle_register(user, form, pool).await }))
     path::end()
         .and_then({ 
             let hb = hb.clone(); 
             move || direct_template(hb.clone(), DirectPage::Home)
         })
+        .or(path!("info").and_then(async_clone_cb!(hb, pool; || { info_template(hb, pool).await })))
         .or(path!("no-auth").and_then({ 
             let hb = hb.clone(); 
             move || direct_template(hb.clone(), DirectPage::NoAuth)

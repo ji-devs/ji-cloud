@@ -5,6 +5,21 @@
 [config]
 skip_core_tasks = true
 
+[env]
+OPENSSL_DIR="C:\\Program Files\\OpenSSL-Win64"
+
+###################
+## Test          ##
+###################
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.test-watch]
+command = "cargo"
+args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test --features local-quiet -- --nocapture"]
+
 ###################
 ## Dev           ##
 ###################

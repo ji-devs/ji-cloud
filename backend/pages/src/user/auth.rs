@@ -16,7 +16,7 @@ use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};
 use std::collections::HashMap;
 use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::{SETTINGS, SHARED_SERVER_SECRET, JWT_ENCODING_KEY, JWT_DECODING_KEY, MAX_SIGNIN_COOKIE};
+use crate::settings::{SETTINGS, MAX_SIGNIN_COOKIE};
 use crate::db::{pg_pool, PgPool, get_db};
 use crate::{async_clone_fn, async_clone_cb};
 
@@ -52,7 +52,7 @@ pub fn has_auth(pool:Option<PgPool>) -> impl Filter<Extract = (AuthClaims,), Err
 fn get_claims(token_string:String) -> Result<AuthClaims, Rejection> {
 
     //see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    let key = jsonwebtoken::DecodingKey::from_secret(JWT_DECODING_KEY.as_ref());
+    let key = jsonwebtoken::DecodingKey::from_secret(SETTINGS.get().unwrap().jwt_decoding_key.as_ref());
 
     let validation = Validation {validate_exp: false, ..Default::default()};
 
@@ -82,8 +82,8 @@ pub fn has_firebase_auth() -> impl Filter<Extract = (String,), Error = Rejection
 
             let response:JsApiResponse = 
                 reqwest::Client::new()
-                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.js_api(), token))
-                    .header("SHARED_SERVER_SECRET", &*SHARED_SERVER_SECRET)
+                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().js_api(), token))
+                    .header("SHARED_SERVER_SECRET", &SETTINGS.get().unwrap().inter_server_secret)
                     .send()
                     .and_then(|res| res.json::<JsApiResponse>())
                     .await

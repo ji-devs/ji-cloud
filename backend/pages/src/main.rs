@@ -27,6 +27,7 @@ async fn main() {
     dotenv().ok();
 
     logger::init_logger();
+    settings::init().await;
 
     start_server().await;
 }

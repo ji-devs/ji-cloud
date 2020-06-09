@@ -626,9 +626,10 @@ dependencies = [
  "handlebars",
  "ji_cloud_shared",
  "jsonwebtoken",
- "lazy_static",
  "listenfd",
  "log 0.4.8",
+ "once_cell",
+ "openssl",
  "reqwest",
  "serde",
  "serde_derive",
@@ -644,7 +645,12 @@ dependencies = [
 name = "ji_cloud_shared"
 version = "0.1.0"
 dependencies = [
+ "base64 0.12.1",
+ "dotenv",
+ "futures-util",
+ "jsonwebtoken",
  "log 0.4.8",
+ "reqwest",
  "serde",
  "serde_json",
  "serde_repr",
