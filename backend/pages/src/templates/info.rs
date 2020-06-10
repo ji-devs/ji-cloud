@@ -4,7 +4,7 @@ use serde_json::json;
 use futures_util::future::TryFutureExt;
 use serde::{Serialize, Deserialize};
 use chrono::{Datelike, Timelike, Utc};
-use ji_cloud_shared::backend::google::{get_secret, get_google_token, get_google_credentials};
+use ji_cloud_shared::backend::google::{get_secret, get_access_token_and_project_id};
 use crate::settings::SETTINGS;
 use crate::reject::{CustomWarpRejection, RequiredData};
 use crate::loader::{load_string, load_json};
@@ -16,11 +16,9 @@ struct Info {
 }
 
 pub async fn info_template(hb:Arc<Handlebars<'_>>, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
+    let (token, project_id) = get_access_token_and_project_id().await;
 
-    let credentials = get_google_credentials().await;
-    let token = get_google_token(&credentials).await;
-
-    let token_sanity = get_secret(&token, &credentials.project_id, "SANITY_TEST").await;
+    let token_sanity = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
     let info = Info {
         TokenSanity: token_sanity,
     };

@@ -8,7 +8,7 @@ use std::{
     env,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
-use ji_cloud_shared::backend::google::{get_secret, get_google_token, get_google_credentials};
+use ji_cloud_shared::backend::google::{get_secret, get_access_token_and_project_id};
 use once_cell::sync::OnceCell;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
@@ -29,12 +29,11 @@ pub struct Settings {
 }
 
 pub async fn init() {
-    let credentials = get_google_credentials().await;
-    let token = get_google_token(&credentials).await;
+    let (token, project_id) = get_access_token_and_project_id().await;
 
-    let jwt_secret = get_secret(&token, &credentials.project_id, "JWT_SECRET").await;
-    let db_pass = get_secret(&token, &credentials.project_id, "DB_PASS").await;
-    let inter_server_secret = get_secret(&token, &credentials.project_id, "INTER_SERVER").await;
+    let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
+    let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;
+    let inter_server_secret = get_secret(token.as_ref(), &project_id, "INTER_SERVER").await;
 
 
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());

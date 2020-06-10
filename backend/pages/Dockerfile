@@ -44,6 +44,9 @@ RUN cargo build --release --features release
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
 
+# Used at runtime
+ENV PROJECT_ID=ji-cloud
+
 RUN apk --no-cache add ca-certificates
 
 RUN mkdir /usr/local/bin/cloud-run-app
@@ -57,6 +60,7 @@ COPY ./backend/pages/handlebars /user/local/bin/cloud-run-app/handlebars
 
 
 WORKDIR /usr/local/bin/cloud-run-app/
+
 
 CMD ["./ji-cloud-pages"]
 
@@ -75,6 +79,9 @@ ADD . ./
 
 # Build our application.
 RUN cargo build --release --features sandbox
+
+# Used at runtime
+ENV PROJECT_ID=ji-cloud-sandbox
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as sandbox 
@@ -96,5 +103,6 @@ COPY --from=sandbox-builder \
     /usr/local/bin/cloud-run-app/handlebars
 
 WORKDIR /usr/local/bin/cloud-run-app/
+
 
 CMD ["./ji-cloud-pages"]

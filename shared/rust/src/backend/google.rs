@@ -50,19 +50,25 @@ impl <'a> GoogleApiClaims <'a> {
     }
 }
 
-pub async fn get_google_credentials() -> GoogleCredentials {
-    let credentials_path = env::var("GOOGLE_APPLICATION_CREDENTIALS").expect("must have GOOGLE_APPLICATION_CREDENTIALS set");
-    let credentials_file = File::open(credentials_path.clone()).expect(&format!("couldn't read {}", credentials_path));
-    let reader = BufReader::new(credentials_file);
-    //let credentials_str = std::fs::read_to_string(credentials_file.clone()).expect(&format!("couldn't read {}", credentials_file));
-
-    serde_json::from_reader(reader).expect("couldn't read google credentials, even though file exists")
+pub async fn get_google_credentials() -> Result<GoogleCredentials, String> {
+    env::var("GOOGLE_APPLICATION_CREDENTIALS")
+        .map_err(|_| "no GOOGLE_APPLICATION_CREDENTIALS set".to_string())
+        .and_then(|credentials_path| {
+            File::open(credentials_path.clone()).map_err(|_| format!("couldn't open {}", credentials_path))
+        })
+        .and_then(|credentials_file| {
+            let reader = BufReader::new(credentials_file);
+            serde_json::from_reader(reader).map_err(|err| format!("{:?}", err))
+        })
 }
 
-pub async fn get_google_token(credentials:&GoogleCredentials) -> String {
+pub async fn get_google_token(credentials:&GoogleCredentials) -> Result<String, String> {
 
     let claims = GoogleApiClaims::new(&credentials);
-    let token_assertion = jwt::encode(&jwt::Header::new(jwt::Algorithm::RS256), &claims, &jwt::EncodingKey::from_rsa_pem(credentials.private_key.as_bytes()).expect("couldn't get encoding key")).expect("couldn't encode jwt for google api request");
+    let token_assertion = jwt::encode(&jwt::Header::new(jwt::Algorithm::RS256), &claims, &jwt::EncodingKey::from_rsa_pem(credentials.private_key.as_bytes())
+        .map_err(|_| "couldn't get encoding key".to_string())?
+    )
+    .map_err(|_| "couldn't encode jwt for google api request".to_string())?;
 
     let form = reqwest::multipart::Form::new()
         .text("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
@@ -74,18 +80,37 @@ pub async fn get_google_token(credentials:&GoogleCredentials) -> String {
         .send()
         .and_then(|res| res.json())
         .await
-        .expect("couldn't get google access token");
+        .map_err(|_| "couldn't get google access token".to_string())?;
     
-    token_response.access_token
+    Ok(token_response.access_token)
 }
 
-pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String {
+pub async fn get_access_token_and_project_id() -> (Option<String>, String) {
+    let credentials = get_google_credentials().await;
+    match credentials {
+        Ok(credentials) => {
+            let token = get_google_token(&credentials).await;
+            (token.ok(), credentials.project_id)
+        },
+        Err(_) => {
+            let project_id = env::var("PROJECT_ID").expect("You must set PROJECT_ID as an env var since there's no GOOGLE_APPLICATION_CREDENTIALS");
+            (None, project_id)
+        }
+    }
+}
+
+pub async fn get_secret<T: AsRef<str>>(token:Option<T>, project_id:&str, secret_name:&str) -> String {
     let api_name = format!("projects/{}/secrets/{}/versions/latest:access", project_id, secret_name);
 
     let path = format!("https://secretmanager.googleapis.com/v1beta1/{}", api_name);
-    let response:GoogleSecretResponse = reqwest::Client::new()
-        .get(&path)
-        .header("Authorization",&format!("Bearer {}", token))
+
+    let request = reqwest::Client::new().get(&path);
+    let request = match token {
+        Some(token) => request.header("Authorization",&format!("Bearer {}", token.as_ref())),
+        None => request
+    };
+
+    let response:GoogleSecretResponse = request
         .send()
         .and_then(|res| res.json())
         .await
@@ -104,9 +129,9 @@ mod tests {
 
         dotenv::dotenv().ok();
 
-        let credentials = get_google_credentials().await;
-        let token = get_google_token(&credentials).await;
-        let secret = get_secret(&token, &credentials.project_id, "SANITY_TEST").await;
+        let credentials = get_google_credentials().await.unwrap();
+        let token = get_google_token(&credentials).await.unwrap();
+        let secret = get_secret(Some(&token), &credentials.project_id, "SANITY_TEST").await;
 
         assert_eq!(secret, "hello_world");
     }
