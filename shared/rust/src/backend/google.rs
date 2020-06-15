@@ -92,7 +92,15 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
     let token_response:GoogleAccessTokenResponse = reqwest::Client::new().get(url)
         .header("Metadata-Flavor","Google")
         .send()
-        .and_then(|res| res.json())
+        .and_then(|res| async move {
+            //res.json()
+            
+            let text = res.text().await.expect("couldn't get response text to log");
+            eprintln!("raw: {}", text); 
+            let json = serde_json::from_str(&text).unwrap();
+            Ok(json)
+
+        })
         .await
         .map_err(|err| format!("couldn't get google access token from metaserver: {:?}", err))?;
     
@@ -124,6 +132,8 @@ pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String
 
     let response:GoogleSecretResponse = request
         .send()
+        .and_then(|res| res.json())
+        /*
         .and_then(|res| async move {
             //res.json()
             
@@ -133,6 +143,7 @@ pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String
             Ok(json)
 
         })
+        */
         .await
         .expect(&format!("couldn't get secret: {}", secret_name));
 
