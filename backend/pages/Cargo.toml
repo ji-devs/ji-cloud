@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 once_cell = "1.4.0"
 percent-encoding = "2.1.0"
-simplelog = "^0.7"
+simplelog = "^0.8"
 listenfd = {version = "^0.3", optional = true }
 jsonwebtoken = "^7.1"
 reqwest = { version = "^0.10", features = ["json"] }
