@@ -18,7 +18,7 @@ pub type PgPool = Pool<ConnectionManager<PgConnection>>;
 pub type Db = PooledConnection<ConnectionManager<PgConnection>>;
 
 pub fn pg_pool() -> PgPool {
-    let manager = ConnectionManager::<PgConnection>::new(&SETTINGS.get().unwrap().db_connection);
+    let manager = ConnectionManager::<PgConnection>::new(&SETTINGS.get().unwrap().db_connection_string);
     if SETTINGS.get().unwrap().db_target == RemoteTarget::Local {
         Pool::builder()
             .max_size(1)

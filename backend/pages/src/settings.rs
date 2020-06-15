@@ -26,7 +26,7 @@ pub struct Settings {
     //Keeping a string is a stop-gap measure for now, not ideal
     pub jwt_decoding_key:String,
     pub inter_server_secret:String,
-    pub db_connection:String,
+    pub db_connection_string:String,
 }
 
 pub async fn init() {
@@ -49,8 +49,34 @@ pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
 pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
 pub const HANDLEBARS_PATH:&'static str = "./handlebars";
 
-const INSTANCE_CONNECTION_NAME:&'static str = "ji-cloud:europe-west1:ji-cloud-test-001";
 
+fn db_connection_string(db_pass:&str, db_target:RemoteTarget) -> String {
+    match db_target {
+        RemoteTarget::Local => format!("postgres://postgres:{}@localhost:3306/jicloud", db_pass),
+        _ => {
+            let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(
+                match db_target {
+                    RemoteTarget::Sandbox => "ji-cloud-developer-sandbox:europe-west2:ji-cloud-002-sandbox",
+                    RemoteTarget::Release => "ji-cloud:europe-west2:ji-cloud-001",
+                    _ => ""
+                }.to_string()
+            );
+            let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
+
+            let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
+
+            let db_user = "postgres";
+            let db_name = "jicloud";
+            let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
+
+            log::info!("connecting to: {}", connection_string);
+
+            connection_string
+        }
+    }
+}
+
+//const INSTANCE_CONNECTION_NAME:&'static str = "ji-cloud:europe-west1:ji-cloud-test-001";
 impl Settings {
     pub fn js_api(&self) -> &'static str {
         match self.auth_target {
@@ -80,22 +106,6 @@ pub enum RemoteTarget {
     Release,
 }
 
-fn get_cloud_connection_string(db_pass:&str) -> String {
-    let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
-
-    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(INSTANCE_CONNECTION_NAME.to_string());
-
-    let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
-
-    let db_user = "postgres";
-    let db_name = "jicloud";
-    let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
-
-    log::info!("connecting to: {}", connection_string);
-
-    connection_string
-
-}
 
     //SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
 impl Settings {
@@ -110,7 +120,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: format!("postgres://postgres:{}@localhost:3306/jicloud", db_pass)
+            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Local),
         }
     }
     pub fn new_sandbox(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -124,7 +134,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: get_cloud_connection_string(&db_pass) 
+            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Sandbox),
         }
     }
     pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -138,7 +148,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: get_cloud_connection_string(&db_pass) 
+            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Release),
         }
     }
 

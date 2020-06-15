@@ -92,6 +92,8 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
     let token_response:GoogleAccessTokenResponse = reqwest::Client::new().get(url)
         .header("Metadata-Flavor","Google")
         .send()
+        .and_then(|res| res.json())
+        /*
         .and_then(|res| async move {
             //res.json()
             
@@ -101,6 +103,7 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
             Ok(json)
 
         })
+        */
         .await
         .map_err(|err| format!("couldn't get google access token from metaserver: {:?}", err))?;
     

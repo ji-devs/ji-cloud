@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 once_cell = "1.4.0"
 percent-encoding = "2.1.0"
-simplelog = {version = "^0.7", optional = true }
+simplelog = "^0.7"
 listenfd = {version = "^0.3", optional = true }
 jsonwebtoken = "^7.1"
 reqwest = { version = "^0.10", features = ["json"] }
@@ -32,7 +32,7 @@ ji_cloud_shared = {path = "../../shared/rust", features=["backend"]}
 openssl = "*"
 
 [features]
-local = ["simplelog", "listenfd"]
+local = ["listenfd"]
 quiet = []
 local-quiet = ["local", "quiet"]
 release = []

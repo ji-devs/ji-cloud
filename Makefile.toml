@@ -39,7 +39,7 @@ args = ["push", "gcr.io/ji-cloud/ji-cloud-pages:latest"]
 
 [tasks.deploy-release-pages]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-pages --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-pages:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-pages --project ji-cloud --region europe-west2 --image gcr.io/ji-cloud/ji-cloud-pages:latest --platform managed"]
 
 #------Sandbox-----------#
 [tasks.sandbox-pages]
@@ -60,7 +60,7 @@ args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest
 
 [tasks.deploy-sandbox-pages]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-pages-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-pages-sandbox --project ji-cloud-developer-sandbox --region europe-west2 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest --platform managed"]
 
 ###################
 ## API           ##
@@ -85,7 +85,7 @@ args = ["push", "gcr.io/ji-cloud/ji-cloud-api:latest"]
 
 [tasks.deploy-release-api]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-api --project ji-cloud --region europe-west2 --image gcr.io/ji-cloud/ji-cloud-api:latest --platform managed"]
 
 #------Sandbox-----------#
 [tasks.sandbox-api]
@@ -106,7 +106,7 @@ args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest"]
 
 [tasks.deploy-sandbox-api]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-sandbox --region europe-west2 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest --platform managed"]
 
 ###################
 ## API-JS        ##
@@ -131,7 +131,7 @@ args = ["push", "gcr.io/ji-cloud/ji-cloud-api-js:latest"]
 
 [tasks.deploy-release-api-js]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-js --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api-js:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-api-js --project ji-cloud --region europe-west2 --image gcr.io/ji-cloud/ji-cloud-api-js:latest --platform managed"]
 
 #------Sandbox-----------#
 [tasks.sandbox-api-js]
@@ -152,4 +152,4 @@ args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:lates
 
 [tasks.deploy-sandbox-api-js]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-js-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest --platform managed"]
+script = ["gcloud run deploy ji-cloud-api-js-sandbox --project ji-cloud-developer-sandbox --region europe-west2 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest --platform managed"]
