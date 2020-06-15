@@ -55,8 +55,8 @@ COPY --from=release-builder \
     /home/rust/src/backend/pages/target/x86_64-unknown-linux-musl/release/ji-cloud-pages \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
-COPY ./backend/pages/public /user/local/bin/cloud-run-app/public
-COPY ./backend/pages/handlebars /user/local/bin/cloud-run-app/handlebars 
+COPY ./backend/pages/public /usr/local/bin/cloud-run-app/public
+COPY ./backend/pages/handlebars /usr/local/bin/cloud-run-app/handlebars 
 
 
 WORKDIR /usr/local/bin/cloud-run-app/
