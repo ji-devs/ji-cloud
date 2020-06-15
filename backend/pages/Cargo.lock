@@ -651,6 +651,8 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "log 0.4.8",
+ "once_cell",
+ "percent-encoding",
  "reqwest",
  "serde",
  "serde_json",

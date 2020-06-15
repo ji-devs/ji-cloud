@@ -7,7 +7,6 @@ extern crate openssl;
 #[macro_use]
 extern crate diesel;
 
-
 mod settings;
 mod logger;
 mod server;
@@ -27,7 +26,9 @@ async fn main() {
     dotenv().ok();
 
     logger::init_logger();
-    settings::init().await;
+
+    settings::init(); 
 
     start_server().await;
 }
+
