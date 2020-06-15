@@ -86,8 +86,8 @@ pub async fn get_google_token_from_credentials(credentials:&GoogleCredentials) -
 }
 
 pub async fn get_google_token_from_metaserver() -> Result<String, String> {
-
-    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity";
+    
+    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
 
     let token_response:GoogleAccessTokenResponse = reqwest::Client::new().get(url)
         .header("Metadata-Flavor","Google")
