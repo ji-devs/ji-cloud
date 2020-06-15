@@ -59,7 +59,9 @@ cfg_if! {
 
 
 async fn _init(target:RemoteTarget) {
-    let (token, project_id) = get_access_token_and_project_id().await.unwrap();
+    log::info!("initializing settings for {:?}", target);
+
+    let (token, project_id) = get_access_token_and_project_id().await.expect("couldn't get access token and project id!");
 
     let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
     let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;
@@ -75,7 +77,7 @@ async fn _init(target:RemoteTarget) {
         RemoteTarget::Local => Settings::new_local(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
         RemoteTarget::Sandbox => Settings::new_sandbox(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
         RemoteTarget::Release => Settings::new_release(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
-    }).unwrap();
+    }).expect("couldn't set settings!");
 }
 
 
