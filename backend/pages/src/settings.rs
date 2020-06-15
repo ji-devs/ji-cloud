@@ -81,7 +81,7 @@ pub enum RemoteTarget {
 fn get_cloud_connection_string(db_pass:&str) -> String {
     let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
 
-    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap();
+    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").expect("Couldn't get INSTANCE_CONNECTION_NAME!");
 
     let db_user = "postgres";
     let db_name = "jicloud";
