@@ -78,6 +78,16 @@ pub enum RemoteTarget {
     Release,
 }
 
+fn get_cloud_connection_string(db_pass:&str) -> String {
+    let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
+
+    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap();
+
+    let db_user = "postgres";
+    let db_name = "jicloud";
+    format!("postgres://{}:{}/{}?host={}/{}", db_user, db_pass, db_name, socket_path, instance_connection) 
+
+}
 
     //SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
 impl Settings {
@@ -106,7 +116,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME").unwrap())
+            db_connection: get_cloud_connection_string(&db_pass) 
         }
     }
     pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -120,7 +130,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME").unwrap())
+            db_connection: get_cloud_connection_string(&db_pass) 
         }
     }
 
