@@ -106,7 +106,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME"))
+            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME").unwrap())
         }
     }
     pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -120,7 +120,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME"))
+            db_connection: format!("postgres://postgres:{}@{}/jicloud", db_pass, std::env::var("INSTANCE_CONNECTION_NAME").unwrap())
         }
     }
 
