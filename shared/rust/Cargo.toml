@@ -23,8 +23,6 @@ jsonwebtoken = {version = "^7.1", optional = true}
 reqwest = { version = "^0.10", features = ["json"], optional = true }
 futures-util = {version = "^0.3", optional = true}
 dotenv = {version = "^0.15", optional = true}
-percent-encoding = {version = "^2.1", optional = true}
-once_cell = {version = "^1.4", optional = true}
 
 [dev-dependencies]
 tokio = { version = "^0.2", features = ["full"] }
@@ -53,9 +51,7 @@ backend = [
     "jsonwebtoken",
     "reqwest",
     "futures-util",
-    "dotenv",
-    "percent-encoding",
-    "once_cell"
+    "dotenv"
 ]
 
 has_google_auth = []

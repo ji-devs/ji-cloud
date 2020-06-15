@@ -16,7 +16,8 @@ use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};
 use std::collections::HashMap;
 use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::{SETTINGS, MAX_SIGNIN_COOKIE};
+use crate::settings::MAX_SIGNIN_COOKIE;
+use crate::settings::{SETTINGS, Settings, RemoteTarget};
 use crate::db::{pg_pool, PgPool, get_db};
 use crate::{async_clone_fn, async_clone_cb};
 

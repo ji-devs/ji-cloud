@@ -1,5 +1,6 @@
 use warp::http::Method;
-use crate::settings::{SETTINGS, CORS_ORIGINS};
+use crate::settings::SETTINGS;
+use crate::settings::CORS_ORIGINS;
 
 pub fn get_cors() -> warp::filters::cors::Builder {
     let builder = warp::cors()

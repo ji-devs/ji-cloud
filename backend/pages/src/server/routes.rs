@@ -4,7 +4,8 @@ use warp::{
     Filter,
     path
 };
-use crate::settings::{SETTINGS, Settings, JSON_BODY_LIMIT};
+use crate::settings::{SETTINGS, Settings};
+use crate::settings::JSON_BODY_LIMIT;
 use crate::reject::handle_rejection;
 use crate::db::{pg_pool, PgPool};
 use crate::{async_clone_fn, async_clone_cb};

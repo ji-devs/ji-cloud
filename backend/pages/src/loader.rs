@@ -1,7 +1,7 @@
 use futures_util::future::TryFutureExt;
 use serde::de::DeserializeOwned;
-use crate::settings::SETTINGS;
 use crate::reject::{CustomWarpRejection, RequiredData};
+use crate::settings::SETTINGS;
 
 pub async fn load_string(path:&str) -> Result<String, warp::Rejection> {
     reqwest::Client::new()

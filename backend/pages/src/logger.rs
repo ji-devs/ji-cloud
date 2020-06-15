@@ -1,5 +1,6 @@
 use crate::settings::SETTINGS;
 use simplelog::*;
+
 pub fn init_logger() {
     CombinedLogger::init(vec![
         TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed).unwrap(),

@@ -73,10 +73,6 @@ fn db_connection_string(db_pass:&str, db_target:RemoteTarget) -> String {
         }
     }
 }
-pub static CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org"];
-pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
-pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
-pub const HANDLEBARS_PATH:&'static str = "./handlebars";
 
 impl Settings {
     pub fn js_api(&self) -> &'static str {
