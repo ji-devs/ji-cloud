@@ -80,7 +80,7 @@ pub async fn get_google_token_from_credentials(credentials:&GoogleCredentials) -
         .send()
         .and_then(|res| res.json())
         .await
-        .map_err(|_| "couldn't get google access token".to_string())?;
+        .map_err(|err| format!("couldn't get google access token: {:?}", err))?;
     
     Ok(token_response.access_token)
 }
@@ -94,7 +94,7 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
         .send()
         .and_then(|res| res.json())
         .await
-        .map_err(|_| "couldn't get google access token from metaserver".to_string())?;
+        .map_err(|err| format!("couldn't get google access token from metaserver: {:?}", err))?;
     
     Ok(token_response.access_token)
 }
