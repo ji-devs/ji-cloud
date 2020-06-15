@@ -62,7 +62,7 @@ pub async fn get_google_credentials() -> Result<GoogleCredentials, String> {
         })
 }
 
-pub async fn get_google_token(credentials:&GoogleCredentials) -> Result<String, String> {
+pub async fn get_google_token_from_credentials(credentials:&GoogleCredentials) -> Result<String, String> {
 
     let claims = GoogleApiClaims::new(&credentials);
     let token_assertion = jwt::encode(&jwt::Header::new(jwt::Algorithm::RS256), &claims, &jwt::EncodingKey::from_rsa_pem(credentials.private_key.as_bytes())
@@ -85,30 +85,42 @@ pub async fn get_google_token(credentials:&GoogleCredentials) -> Result<String, 
     Ok(token_response.access_token)
 }
 
-pub async fn get_access_token_and_project_id() -> (Option<String>, String) {
+pub async fn get_google_token_from_metaserver() -> Result<String, String> {
+
+    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity";
+
+    let token_response:GoogleAccessTokenResponse = reqwest::Client::new().get(url)
+        .header("Metadata-Flavor","Google")
+        .send()
+        .and_then(|res| res.json())
+        .await
+        .map_err(|_| "couldn't get google access token from metaserver".to_string())?;
+    
+    Ok(token_response.access_token)
+}
+
+pub async fn get_access_token_and_project_id() -> Result<(String, String), String> {
     let credentials = get_google_credentials().await;
     match credentials {
         Ok(credentials) => {
-            let token = get_google_token(&credentials).await;
-            (token.ok(), credentials.project_id)
+            let token = get_google_token_from_credentials(&credentials).await?;
+            Ok((token, credentials.project_id))
         },
         Err(_) => {
-            let project_id = env::var("PROJECT_ID").expect("You must set PROJECT_ID as an env var since there's no GOOGLE_APPLICATION_CREDENTIALS");
-            (None, project_id)
+            let project_id = env::var("PROJECT_ID").map_err(|_| "You must set PROJECT_ID as an env var since there's no GOOGLE_APPLICATION_CREDENTIALS".to_string())?;
+            let token = get_google_token_from_metaserver().await?;
+            Ok((token, project_id))
         }
     }
 }
 
-pub async fn get_secret<T: AsRef<str>>(token:Option<T>, project_id:&str, secret_name:&str) -> String {
+pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String {
     let api_name = format!("projects/{}/secrets/{}/versions/latest:access", project_id, secret_name);
 
     let path = format!("https://secretmanager.googleapis.com/v1beta1/{}", api_name);
 
-    let request = reqwest::Client::new().get(&path);
-    let request = match token {
-        Some(token) => request.header("Authorization",&format!("Bearer {}", token.as_ref())),
-        None => request
-    };
+    let request = reqwest::Client::new().get(&path)
+        .header("Authorization",&format!("Bearer {}", token));
 
     let response:GoogleSecretResponse = request
         .send()
@@ -138,8 +150,8 @@ mod tests {
         dotenv::dotenv().ok();
 
         let credentials = get_google_credentials().await.unwrap();
-        let token = get_google_token(&credentials).await.unwrap();
-        let secret = get_secret(Some(&token), &credentials.project_id, "SANITY_TEST").await;
+        let token = get_google_token_from_credentials(&credentials).await.unwrap();
+        let secret = get_secret(&token, &credentials.project_id, "SANITY_TEST").await;
 
         assert_eq!(secret, "hello_world");
     }

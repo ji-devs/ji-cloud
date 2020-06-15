@@ -29,7 +29,7 @@ pub struct Settings {
 }
 
 pub async fn init() {
-    let (token, project_id) = get_access_token_and_project_id().await;
+    let (token, project_id) = get_access_token_and_project_id().await.unwrap();
 
     let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
     let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;

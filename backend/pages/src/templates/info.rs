@@ -16,7 +16,7 @@ struct Info {
 }
 
 pub async fn info_template(hb:Arc<Handlebars<'_>>, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
-    let (token, project_id) = get_access_token_and_project_id().await;
+    let (token, project_id) = get_access_token_and_project_id().await.unwrap();
 
     let token_sanity = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
     let info = Info {
