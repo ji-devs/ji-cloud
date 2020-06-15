@@ -630,6 +630,7 @@ dependencies = [
  "log 0.4.8",
  "once_cell",
  "openssl",
+ "percent-encoding",
  "reqwest",
  "serde",
  "serde_derive",

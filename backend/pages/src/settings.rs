@@ -10,6 +10,7 @@ use std::{
 };
 use ji_cloud_shared::backend::google::{get_secret, get_access_token_and_project_id};
 use once_cell::sync::OnceCell;
+use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS, NON_ALPHANUMERIC};
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -84,9 +85,15 @@ fn get_cloud_connection_string(db_pass:&str) -> String {
 
     let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(INSTANCE_CONNECTION_NAME.to_string());
 
+    let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
+
     let db_user = "postgres";
     let db_name = "jicloud";
-    format!("postgres://{}:{}/{}?host={}/{}", db_user, db_pass, db_name, socket_path, instance_connection) 
+    let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
+
+    log::info!("connecting to: {}", connection_string);
+
+    connection_string
 
 }
 
