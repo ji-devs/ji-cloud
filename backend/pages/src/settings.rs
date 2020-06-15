@@ -48,6 +48,7 @@ pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
 pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
 pub const HANDLEBARS_PATH:&'static str = "./handlebars";
 
+const INSTANCE_CONNECTION_NAME:&'static str = "ji-cloud:europe-west1:ji-cloud-test-001";
 
 impl Settings {
     pub fn js_api(&self) -> &'static str {
@@ -81,7 +82,7 @@ pub enum RemoteTarget {
 fn get_cloud_connection_string(db_pass:&str) -> String {
     let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
 
-    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").expect("Couldn't get INSTANCE_CONNECTION_NAME!");
+    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(INSTANCE_CONNECTION_NAME.to_string());
 
     let db_user = "postgres";
     let db_name = "jicloud";
