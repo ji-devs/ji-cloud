@@ -18,7 +18,7 @@ use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::{SETTINGS, SHARED_SERVER_SECRET, JWT_ENCODING_KEY, JWT_DECODING_KEY, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
+use crate::settings::{SETTINGS, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
 use crate::db::{pg_pool, PgPool, get_db};
 use crate::{async_clone_fn, async_clone_cb};
 
@@ -104,7 +104,7 @@ pub fn has_auth_cookie_no_db_nor_csrf() -> impl Filter<Extract = (AuthClaims,), 
 fn get_claims(token_string:String) -> Result<AuthClaims, Rejection> {
 
     //see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    let key = jsonwebtoken::DecodingKey::from_secret(JWT_DECODING_KEY.as_ref());
+    let key = jsonwebtoken::DecodingKey::from_secret(SETTINGS.get().unwrap().jwt_decoding_key.as_ref());
 
     let validation = Validation {validate_exp: false, ..Default::default()};
 
@@ -134,12 +134,15 @@ pub fn has_firebase_auth() -> impl Filter<Extract = (String,), Error = Rejection
 
             let response:JsApiResponse = 
                 reqwest::Client::new()
-                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.js_api(), token))
-                    .header("SHARED_SERVER_SECRET", &*SHARED_SERVER_SECRET)
+                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().js_api(), token))
+                    .header("INTER_SERVER_SECRET", &SETTINGS.get().unwrap().inter_server_secret)
                     .send()
                     .and_then(|res| res.json::<JsApiResponse>())
                     .await
-                    .map_err(|err| NoAuth::rejection())?;
+                    .map_err(|err| {
+                        log::warn!("js/firebase error, shouldn't happen: {:?}", err);
+                        NoAuth::rejection()
+                    })?;
 
             if response.valid {
 
@@ -174,7 +177,7 @@ pub fn reply_signin_auth(user_id:String, roles: Vec<UserRole>, is_register:bool)
         roles
     };
 
-    let jwt = encode(&Header::default(), &claims, &*JWT_ENCODING_KEY).map_err(|_| InternalError::rejection())?;
+    let jwt = encode(&Header::default(), &claims, &SETTINGS.get().unwrap().jwt_encoding_key).map_err(|_| InternalError::rejection())?;
 
     let reply = {
         if is_register {
@@ -185,7 +188,7 @@ pub fn reply_signin_auth(user_id:String, roles: Vec<UserRole>, is_register:bool)
     };
 
     let reply = {
-        if(SETTINGS.local_insecure) {
+        if(SETTINGS.get().unwrap().local_insecure) {
             warp::reply::with_header(reply, "Set-Cookie", &format!("{}={}; HttpOnly; SameSite=Lax; Max-Age={}", JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE))
         } else {
             warp::reply::with_header(reply, "Set-Cookie", &format!("{}={}; Secure; HttpOnly; SameSite=Lax; Max-Age={}; domain={}", JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN))

@@ -5,11 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "start:sandbox": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev-sandbox": "nodemon src/index.js --target sandbox"
   },
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/secret-manager": "^3.0.0",
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

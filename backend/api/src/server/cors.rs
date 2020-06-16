@@ -7,9 +7,9 @@ pub fn get_cors() -> warp::filters::cors::Builder {
         .allow_headers(vec!["Authorization", "Content-Type", "X-CSRF"])
         .allow_credentials(true);
 
-    if(SETTINGS.local_insecure) {
+    if(SETTINGS.get().unwrap().local_insecure) {
         builder.allow_any_origin()
     } else {
-        builder.allow_origins(CORS_ORIGINS.clone())
+        builder.allow_origins(CORS_ORIGINS.into_iter().map(|x| x.clone()).clone())
     }
 }

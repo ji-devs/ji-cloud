@@ -59,12 +59,8 @@ pub fn open_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error
         format!("ready to rock!!!!")
     }
 
-    fn handle_settings() -> String {
-        format!("Settings: {:?}", &*SETTINGS)
-    }
 
     path::end().map(handle_index)
-        .or(path!("settings").map(handle_settings))
 }
 
 //Decode the body as a specific json type

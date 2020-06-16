@@ -16,7 +16,7 @@ use crate::reply::{reply_ok, reply_err};
 use crate::db::Db;
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
-use crate::settings::{SETTINGS, JWT_ENCODING_KEY};
+use crate::settings::SETTINGS;
 use super::auth::reply_signin_auth;
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode};
 use crate::db::{pg_pool, PgPool, get_db};
@@ -47,7 +47,7 @@ pub async fn handle_get_signin_jwt(auth:AuthClaims) -> Result<impl warp::Reply, 
         roles: auth.roles
     };
 
-    let jwt = encode(&Header::default(), &claims, &*JWT_ENCODING_KEY).map_err(|_| InternalError::rejection())?;
+    let jwt = encode(&Header::default(), &claims, &SETTINGS.get().unwrap().jwt_encoding_key).map_err(|_| InternalError::rejection())?;
 
     reply_ok(SigninEphemeralSuccess{jwt})
 }

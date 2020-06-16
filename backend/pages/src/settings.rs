@@ -1,3 +1,8 @@
+pub static CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org"];
+pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
+pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
+pub const HANDLEBARS_PATH:&'static str = "./handlebars";
+
 use jsonwebtoken::EncodingKey;
 use std::{
     fmt,
@@ -8,10 +13,6 @@ use once_cell::sync::OnceCell;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use cfg_if::cfg_if;
 
-pub static CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org"];
-pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
-pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
-pub const HANDLEBARS_PATH:&'static str = "./handlebars";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum RemoteTarget {
@@ -61,7 +62,11 @@ cfg_if! {
 async fn _init(target:RemoteTarget) {
     log::info!("initializing settings for {:?}", target);
 
-    let (token, project_id) = get_access_token_and_project_id().await.expect("couldn't get access token and project id!");
+    let (token, project_id) = get_access_token_and_project_id(match target {
+        RemoteTarget::Local => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
+        RemoteTarget::Sandbox => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
+        RemoteTarget::Release => "GOOGLE_APPLICATION_CREDENTIALS_DEV_RELEASE",
+    }).await.expect("couldn't get access token and project id!");
 
     let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
     let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;
@@ -149,7 +154,7 @@ impl Settings {
             db_target: RemoteTarget::Local,
             media_url_base: "http://localhost:4102",
             local_insecure: true,
-            port: 8081,
+            port: 8082,
             epoch: get_epoch(),
             jwt_encoding_key,
             jwt_decoding_key,

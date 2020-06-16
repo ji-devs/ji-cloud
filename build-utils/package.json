@@ -4,7 +4,8 @@
   "scripts": {
     "local-media-server": "node ./local-media-server.js",
     "frontend-dev-files": "node ./frontend-dev-files.js",
-	"cloud-sql-proxy": "cloud_sql_proxy --instances=ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox=tcp:6432"
+	"cloud-sql-proxy-sandbox": "cloud_sql_proxy --instances=ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox=tcp:6432",
+	"cloud-sql-proxy-release": "cloud_sql_proxy --instances=ji-cloud:europe-west1:ji-cloud-002=tcp:6432"
   },
   "dependencies": {
     "cors": "^2.8.5",

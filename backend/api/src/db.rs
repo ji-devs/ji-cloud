@@ -11,15 +11,15 @@ use warp::{
     reject::Reject,
     Rejection
 };
-use crate::settings::{SETTINGS, DB_CONNECTION, RemoteTarget};
 use crate::reject::{CustomWarpRejection, PgPoolError};
+use crate::settings::{SETTINGS, Settings, RemoteTarget};
 
 pub type PgPool = Pool<ConnectionManager<PgConnection>>;
 pub type Db = PooledConnection<ConnectionManager<PgConnection>>;
 
 pub fn pg_pool() -> PgPool {
-    let manager = ConnectionManager::<PgConnection>::new(&*DB_CONNECTION);
-    if SETTINGS.db_target == RemoteTarget::Local {
+    let manager = ConnectionManager::<PgConnection>::new(&SETTINGS.get().expect("NO SETTINGS SET!").db_connection_string);
+    if SETTINGS.get().unwrap().db_target == RemoteTarget::Local {
         Pool::builder()
             .max_size(1)
             .build(manager)

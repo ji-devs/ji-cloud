@@ -25,5 +25,7 @@ async fn main() {
 
     logger::init_logger();
 
+    settings::init().await;
+
     start_server().await;
 }

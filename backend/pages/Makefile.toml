@@ -34,11 +34,11 @@ run_task = { name = [ "google-sql-proxy", "server-local-proxy", ], parallel = tr
 
 [tasks.server-local-proxy]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local,sqlproxy"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local,sqlproxy"]
 
 [tasks.server-local-quiet-proxy]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet,sqlproxy"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet,sqlproxy"]
 
 [tasks.dev]
 run_task = { name = [ "server-local-quiet"] }
@@ -50,11 +50,11 @@ run_task = { name = [ "server-local"] }
 
 [tasks.server-local]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local"]
 
 [tasks.server-local-quiet]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet"]
 
 [tasks.google-sql-proxy]
 env = { CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true }

@@ -50,9 +50,9 @@ impl <'a> GoogleApiClaims <'a> {
     }
 }
 
-pub async fn get_google_credentials() -> Result<GoogleCredentials, String> {
-    env::var("GOOGLE_APPLICATION_CREDENTIALS")
-        .map_err(|_| "no GOOGLE_APPLICATION_CREDENTIALS set".to_string())
+pub async fn get_google_credentials(env_var_name:&str) -> Result<GoogleCredentials, String> {
+    env::var(env_var_name)
+        .map_err(|_| format!("no {} set", env_var_name))
         .and_then(|credentials_path| {
             File::open(credentials_path.clone()).map_err(|_| format!("couldn't open {}", credentials_path))
         })
@@ -110,15 +110,15 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
     Ok(token_response.access_token)
 }
 
-pub async fn get_access_token_and_project_id() -> Result<(String, String), String> {
-    let credentials = get_google_credentials().await;
+pub async fn get_access_token_and_project_id(credentials_env_var_name:&str) -> Result<(String, String), String> {
+    let credentials = get_google_credentials(credentials_env_var_name).await;
     match credentials {
         Ok(credentials) => {
             let token = get_google_token_from_credentials(&credentials).await?;
             Ok((token, credentials.project_id))
         },
         Err(_) => {
-            let project_id = env::var("PROJECT_ID").map_err(|_| "You must set PROJECT_ID as an env var since there's no GOOGLE_APPLICATION_CREDENTIALS".to_string())?;
+            let project_id = env::var("PROJECT_ID").map_err(|_| format!("You must set PROJECT_ID as an env var since there's no {}", credentials_env_var_name))?;
             let token = get_google_token_from_metaserver().await?;
             Ok((token, project_id))
         }
@@ -163,7 +163,7 @@ mod tests {
 
         dotenv::dotenv().ok();
 
-        let credentials = get_google_credentials().await.unwrap();
+        let credentials = get_google_credentials("GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX").await.unwrap();
         let token = get_google_token_from_credentials(&credentials).await.unwrap();
         let secret = get_secret(&token, &credentials.project_id, "SANITY_TEST").await;
 
