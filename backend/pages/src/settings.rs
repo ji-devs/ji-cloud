@@ -80,29 +80,42 @@ async fn _init(target:RemoteTarget) {
     }).expect("couldn't set settings!");
 }
 
-
-fn db_connection_string(db_pass:&str, db_target:RemoteTarget) -> String {
-    match db_target {
-        RemoteTarget::Local => format!("postgres://postgres:{}@localhost:3306/jicloud", db_pass),
-        _ => {
-            let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(
-                match db_target {
-                    RemoteTarget::Sandbox => "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox",
-                    RemoteTarget::Release => "ji-cloud:europe-west1:ji-cloud-002",
-                    _ => ""
-                }.to_string()
-            );
-            let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
-
-            let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
-
-            let db_user = "postgres";
-            let db_name = "jicloud";
-            let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
-
-            connection_string
+cfg_if! {
+    if #[cfg(feature = "sqlproxy")] {
+        fn local_db_connection_string(secret_db_pass:&str) -> String {
+            //note - the port number must match the one in build-utils/package.json 
+            //where cloud_sql_proxy is launched - and this must not conflict with 
+            //any other local services
+            format!("postgres://postgres:{}@localhost:6432/jicloud", secret_db_pass)
+        }
+    } else {
+        fn local_db_connection_string(unused_secret_db_pass:&str) -> String {
+            let db_user = std::env::var("LOCAL_DB_USER").expect("When not using Cloud Sql Proxy, set LOCAL_DB_USER in .env");
+            let db_pass = std::env::var("LOCAL_DB_PASS").expect("When not using Cloud Sql Proxy, set LOCAL_DB_PASS in .env");
+            let db_port = std::env::var("LOCAL_DB_PORT").expect("When not using Cloud Sql Proxy, set LOCAL_DB_PORT in .env");
+            let db_name = std::env::var("LOCAL_DB_NAME").expect("When not using Cloud Sql Proxy, set LOCAL_DB_NAME in .env");
+            format!("postgres://{}:{}@localhost:{}/{}", db_user, db_pass, db_port, db_name)
         }
     }
+}
+
+fn remote_db_connection_string(db_pass:&str, db_target:RemoteTarget) -> String {
+    let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(
+        match db_target {
+            RemoteTarget::Sandbox => "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox",
+            RemoteTarget::Release => "ji-cloud:europe-west1:ji-cloud-002",
+            _ => ""
+        }.to_string()
+    );
+    let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
+
+    let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
+
+    let db_user = "postgres";
+    let db_name = "jicloud";
+    let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
+
+    connection_string
 }
 
 impl Settings {
@@ -130,7 +143,7 @@ fn get_epoch() -> Duration {
 
     //SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
 impl Settings {
-    pub fn new_local(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
+    pub fn new_local(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, remote_db_pass:String) -> Self {
         Self {
             auth_target: RemoteTarget::Local,
             db_target: RemoteTarget::Local,
@@ -141,7 +154,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Local),
+            db_connection_string: local_db_connection_string(&remote_db_pass),
         }
     }
     pub fn new_sandbox(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -155,7 +168,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Sandbox),
+            db_connection_string: remote_db_connection_string(&db_pass, RemoteTarget::Sandbox),
         }
     }
     pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -169,7 +182,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Release),
+            db_connection_string: remote_db_connection_string(&db_pass, RemoteTarget::Release),
         }
     }
 

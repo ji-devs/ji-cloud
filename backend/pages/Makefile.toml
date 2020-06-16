@@ -24,12 +24,28 @@ args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test --features lo
 ## Dev           ##
 ###################
 
+[tasks.dev-proxy]
+run_task = { name = [ "google-sql-proxy", "server-local-quiet-proxy", ], parallel = true }
+
+
+[tasks.dev-warnings-proxy]
+run_task = { name = [ "google-sql-proxy", "server-local-proxy", ], parallel = true }
+
+
+[tasks.server-local-proxy]
+command = "systemfd"
+args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local,sqlproxy"]
+
+[tasks.server-local-quiet-proxy]
+command = "systemfd"
+args = ["--no-pid", "-s", "http::8081", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet,sqlproxy"]
+
 [tasks.dev]
-run_task = { name = [ "google-sql-proxy", "server-local-quiet", ], parallel = true }
+run_task = { name = [ "server-local-quiet"] }
 
 
 [tasks.dev-warnings]
-run_task = { name = [ "google-sql-proxy", "server-local", ], parallel = true }
+run_task = { name = [ "server-local"] }
 
 
 [tasks.server-local]

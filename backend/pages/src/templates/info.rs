@@ -12,15 +12,24 @@ use crate::settings::SETTINGS;
 
 #[derive(Serialize, Deserialize)]
 struct Info {
-    TokenSanity: String
+    Secret: String,
+    Roles: Vec<Role>
+}
+
+#[derive(Serialize, Deserialize)]
+struct Role {
+    Id: u32,
+    name: String,
+    about: String
 }
 
 pub async fn info_template(hb:Arc<Handlebars<'_>>, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
     let (token, project_id) = get_access_token_and_project_id().await.unwrap();
 
-    let token_sanity = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
+    let secret_test = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
     let info = Info {
-        TokenSanity: token_sanity,
+        Secret: secret_test,
+        Roles: vec![]
     };
 
     let render = hb.render("info", &info).unwrap_or_else(|err| err.to_string());

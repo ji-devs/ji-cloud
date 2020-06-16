@@ -33,6 +33,7 @@ openssl = "*"
 
 [features]
 local = ["listenfd"]
+sqlproxy = []
 quiet = []
 local-quiet = ["local", "quiet"]
 release = []
