@@ -1,7 +1,7 @@
 ##########
 ## TEST ##
 ##########
-FROM node:latest-slim as tests
+FROM node:current-slim as tests
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --only=production
@@ -11,7 +11,7 @@ CMD [ "npm", "test" ]
 #############
 ## RELEASE ##
 #############
-FROM node:latest-slim as release 
+FROM node:current-slim as release 
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --only=production
@@ -21,7 +21,7 @@ CMD [ "npm", "start" ]
 #############
 ## SANDBOX ##
 #############
-FROM node:latest-slim as sandbox 
+FROM node:current-slim as sandbox 
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --only=production

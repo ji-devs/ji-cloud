@@ -7,12 +7,15 @@ FROM ekidd/rust-musl-builder:latest AS tests
 
 # Add our source code.
 
-ADD . ./
+RUN mkdir -p ./backend/api
+COPY ./shared ./shared
+COPY ./backend/api ./backend/api
 
-# Set permissions on source code.
+# Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
+WORKDIR ./backend/api
 RUN cargo test
 
 ####################
@@ -23,47 +26,70 @@ FROM ekidd/rust-musl-builder:latest AS release-builder
 
 # Add our source code.
 
-ADD . ./
+RUN mkdir -p ./backend/api
+COPY ./shared ./shared
+COPY ./backend/api ./backend/api
 
-# Set permissions on source code.
+# Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
+WORKDIR ./backend/api
 RUN cargo build --release --features release
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
+
+# Used at runtime
+ENV PROJECT_ID=ji-cloud
+
 RUN apk --no-cache add ca-certificates
+
+RUN mkdir /usr/local/bin/cloud-run-app
+
 COPY --from=release-builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
-    /usr/local/bin/
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
+    /usr/local/bin/cloud-run-app/ji-cloud-api
 
-# Execute it
-CMD ["/usr/local/bin/ji-cloud-api"]
+WORKDIR /usr/local/bin/cloud-run-app/
 
+
+CMD ["./ji-cloud-api"]
 
 ####################
-## SANDBOX        ##
+## Sandbox        ##
 ####################
 
 FROM ekidd/rust-musl-builder:latest AS sandbox-builder
 
 # Add our source code.
 
-ADD . ./
+RUN mkdir -p ./backend/api
+COPY ./shared ./shared
+COPY ./backend/api ./backend/api
 
-# Set permissions on source code.
+# Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
+WORKDIR ./backend/api
 RUN cargo build --release --features sandbox
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
-FROM alpine:latest as sandbox
-RUN apk --no-cache add ca-certificates
-COPY --from=sandbox-builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
-    /usr/local/bin/
+FROM alpine:latest as sandbox 
 
-# Execute it
-CMD ["/usr/local/bin/ji-cloud-api"]
+# Used at runtime
+ENV PROJECT_ID=ji-cloud
+
+RUN apk --no-cache add ca-certificates
+
+RUN mkdir /usr/local/bin/cloud-run-app
+
+COPY --from=sandbox-builder \
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
+    /usr/local/bin/cloud-run-app/ji-cloud-api
+
+WORKDIR /usr/local/bin/cloud-run-app/
+
+
+CMD ["./ji-cloud-api"]
