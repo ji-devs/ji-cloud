@@ -1,19 +1,5 @@
 # Google Cloud Setup
 
-### Buckets
-
-Every bucket has:
-  * `allUsers` w/ Object Viewer permissions
-  * Fastly CDN proxy
-  * The service account assigned as Storage Admin if it needs write access
-    * github deployment 
-      * frontend (release and sandbox)
-      * storybook
-      * docs
-    * api
-      * uploads (release and sandbox)
-
-
 ### Backend - Cloud Run
 
 1. Create a service account with a new name
@@ -36,8 +22,11 @@ TODO
 
 Try to keep things in the same region, for example europe-west1
 
-### Ci/Cd and Github Integration
+### Buckets
 
-1. Create a service account for github actions
-2. For backend: Assign this service account to the cloud run instance created above
-3. For frontend: Assign this service account as an admin of the bucket it deploys to
+Every bucket has:
+  * `allUsers` w/ Object Viewer permissions
+  * Fastly CDN proxy
+  * The service account assigned as Storage Admin if it needs write access
+
+See [CI/CD](../ci-cd/ci_cd.md) for more detail

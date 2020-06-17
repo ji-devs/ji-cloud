@@ -39,10 +39,10 @@ jobs:
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
         version: '295.0.0'
-        service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+        service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
     - name: deploy to google cloud
-      run: gsutil -m rsync -d -c -r documentation/output gs://ji-cloud-docs-origin-eu-001
+      run: gsutil -m rsync -d -c -r documentation/output gs://ji-cloud-sandbox-docs-origin-eu-001
 
     - name: Notify slack of all status
       uses: pullreminders/slack-action@master

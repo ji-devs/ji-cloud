@@ -10,6 +10,7 @@
   - [Google Cloud Setup](./engineering/google_cloud/google_cloud.md)
   - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
   - [.env files](./engineering/dot_env.md)
+  - [CI/CD](./engineering/ci-cd/ci_cd.md)
   - [Database Migration](./engineering/database/database_migration.md)
   - [Common Terms and Keys](./engineering/engineering_common.md)
   - [Authentication and Authorization](./engineering/auth/auth.md)
