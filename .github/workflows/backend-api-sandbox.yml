@@ -1,4 +1,4 @@
-name: Api - Backend - Release
+name: Api - Backend - Sandbox 
 
 on:
   push:

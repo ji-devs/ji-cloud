@@ -1,4 +1,4 @@
-name: ApiJs - Backend - Release
+name: ApiJs - Backend - Sandbox 
 
 on:
   push:

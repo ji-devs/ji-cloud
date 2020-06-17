@@ -1,4 +1,4 @@
-name: Pages - Backend - Release
+name: Pages - Backend - Sandbox 
 
 on:
   push:
