@@ -16,3 +16,11 @@
 * FIREBASE_TOKEN (run firebase login:ci)
 
 The GOOGLE_CLOUD keys must be base64 encoded. Literally, take the json string and run it through a bas64 encoder.
+
+### Makefiles and Dockerfiles
+
+Deployment is done via the top-level Makefile.toml as well as Dockerfiles as needed.
+
+The PROJECT_ID and other variables are hardcoded directly in these files as needed (even if that's the process of setting as an env var)
+
+If adjusting, remember to change sandbox vs. release :)

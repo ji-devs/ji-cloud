@@ -135,7 +135,8 @@ pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String
 
     let response:GoogleSecretResponse = request
         .send()
-        //.and_then(|res| res.json())
+        .and_then(|res| res.json())
+        /*
         .and_then(|res| async move {
             //res.json()
             
@@ -145,6 +146,7 @@ pub async fn get_secret(token:&str, project_id:&str, secret_name:&str) -> String
             Ok(json)
 
         })
+        */
         .await
         .expect(&format!("couldn't get secret: {}", secret_name));
 

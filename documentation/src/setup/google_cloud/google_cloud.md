@@ -1,5 +1,14 @@
 # Google Cloud Setup
 
+# Secrets
+
+The runtime secrets are accessed via Gooogle Secret Manager. They are:
+
+  * DB_PASS: the database password
+  * INTER_SERVER: a random string to authenticate inter-server communication
+  * JWT_SECRET: a random string used to sign JWT tokens
+  * SANITY_TEST: not really necessary, just to make it easier to test that things are working correctly
+
 ### Backend - Cloud Run
 
 1. Create a service account with a new name

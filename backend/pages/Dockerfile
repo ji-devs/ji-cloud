@@ -85,7 +85,7 @@ RUN cargo build --release --features sandbox
 FROM alpine:latest as sandbox 
 
 # Used at runtime
-ENV PROJECT_ID=ji-cloud
+ENV PROJECT_ID=ji-cloud-developer-sandbox
 
 RUN apk --no-cache add ca-certificates
 
