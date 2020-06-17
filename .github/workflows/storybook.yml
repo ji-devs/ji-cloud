@@ -41,12 +41,14 @@ jobs:
         run: npm run storybook:build-release 
         working-directory: "./storybook"
 
-      - name: deploy to firebase (sandbox)
-        uses: w9jds/firebase-action@v1.0.1
+      - name: install google cloud sdk
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
-          args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-developer-storybook
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          version: '295.0.0'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -c -r storybook/dist/storybook-build gs://ji-cloud-storybook-origin-eu-001
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

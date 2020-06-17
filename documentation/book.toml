@@ -1,0 +1,9 @@
+[book]
+title = "Ji Cloud Docs"
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "output"
+create-missing = false
