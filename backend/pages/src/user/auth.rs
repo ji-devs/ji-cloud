@@ -14,11 +14,9 @@ use ji_cloud_shared::{
 use serde::{Serialize, Deserialize};
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};
 use std::collections::HashMap;
-use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
 use crate::settings::MAX_SIGNIN_COOKIE;
 use crate::settings::{SETTINGS, Settings, RemoteTarget};
-use crate::db::{pg_pool, PgPool, get_db};
 use crate::{async_clone_fn, async_clone_cb};
 
 //This can be used to early exit if there's no bearer token
@@ -30,23 +28,9 @@ fn has_bearer_token() -> impl Filter<Extract = (String,), Error = warp::Rejectio
 }
 
 
-pub fn has_auth(pool:Option<PgPool>) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
+pub fn has_auth() -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
     warp::filters::cookie::cookie(JWT_COOKIE_NAME)
-        .and_then(async_clone_fn!(pool; |cookie| {
-            let claims = get_claims(cookie)?;
-            
-            if let Some(pool) = pool {
-                let db = get_db(pool)?;
-
-                if get_by_id(&db, &claims.id).is_none() {
-                    Err(NoAuth::rejection())
-                } else {
-                    Ok(claims)
-                }
-            } else {
-                Ok(claims)
-            }
-        }))
+        .and_then(|cookie| async move { get_claims(cookie) })
 }
 
 

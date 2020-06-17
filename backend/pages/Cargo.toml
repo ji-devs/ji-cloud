@@ -19,7 +19,6 @@ cfg-if = "^0.1"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 serde_derive = "^1.0"
-diesel = { version = "^1.4", features = ["chrono", "serde_json", "postgres", "r2d2"] }
 strum = "^0.18"
 strum_macros = "^0.18"
 dotenv = "^0.15"
@@ -28,8 +27,6 @@ futures-util = "0.3.4"
 handlebars = "3.0.1"
 chrono = "0.4.11"
 ji_cloud_shared = {path = "../../shared/rust", features=["backend"]}
-# Needed for Postgres.
-openssl = "*"
 
 [features]
 local = ["listenfd"]

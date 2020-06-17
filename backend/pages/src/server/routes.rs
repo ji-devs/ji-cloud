@@ -1,4 +1,3 @@
-use diesel::{self, prelude::*};
 use warp::{
     http::Method,
     Filter,
@@ -7,7 +6,6 @@ use warp::{
 use crate::settings::{SETTINGS, Settings};
 use crate::settings::JSON_BODY_LIMIT;
 use crate::reject::handle_rejection;
-use crate::db::{pg_pool, PgPool};
 use crate::{async_clone_fn, async_clone_cb};
 use crate::templates::register_templates;
 use crate::reject::{CustomWarpRejection, RequiredData};
@@ -24,7 +22,6 @@ use crate::user::auth::has_auth;
 //All of our routes
 pub fn get_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
 
-    let pool = pg_pool();
 
     let hb = register_templates();
     
@@ -35,13 +32,13 @@ pub fn get_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rej
             let hb = hb.clone(); 
             move || direct_template(hb.clone(), DirectPage::Home)
         })
-        .or(path!("info").and_then(async_clone_cb!(hb, pool; || { info_template(hb, pool).await })))
+        .or(path!("info").and_then(async_clone_cb!(hb; || { info_template(hb).await })))
         .or(path!("no-auth").and_then({ 
             let hb = hb.clone(); 
             move || direct_template(hb.clone(), DirectPage::NoAuth)
         }))
         .or(path!("user" / "profile")
-            .and(has_auth(None))
+            .and(has_auth())
             .and_then({ 
                 let hb = hb.clone(); 
                 move |_| spa_template(hb.clone(), SpaPage::User)
