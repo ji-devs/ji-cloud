@@ -2,12 +2,10 @@ name: Storybook
 
 on:
   push:
-    branches: [ master ]
     paths:
     - 'storybook/**'
 
   pull_request:
-    branches: [ master ]
     paths:
     - 'storybook/**'
 
