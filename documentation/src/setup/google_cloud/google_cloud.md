@@ -23,6 +23,10 @@ The runtime secrets are accessed via Gooogle Secret Manager. They are:
 5. If the Cloud Run instance needs to create files for a storage bucket - assign it as an admin for that bucket (via the bucket page)
 6. Assign the custom domain
 
+### Database
+
+Remember to enable Cloud SQL Admin API
+
 ### Backend - Cloud Functions
 
 TODO

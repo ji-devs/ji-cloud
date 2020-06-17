@@ -27,7 +27,7 @@
   - [Uploads](./engineering/uploads/uploads.md)
 
 - [Design](./design/design.md)
-  - [Themes](./design/THEMES.md)
+  - [Themes](./design/themes.md)
 
 - [Localization](./localization/localization.md)
-  - [Project Fluent](./localization/FLUENT.md)
+  - [Project Fluent](./localization/fluent.md)
