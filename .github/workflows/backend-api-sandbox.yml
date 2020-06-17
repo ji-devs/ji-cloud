@@ -40,7 +40,7 @@ jobs:
         run: cargo install cargo-make
 
       - name: build and deploy 
-        run: cargo make release-api
+        run: cargo make sandbox-api
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
