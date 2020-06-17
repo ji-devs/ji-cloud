@@ -12,7 +12,7 @@ CMD [ "npm", "test" ]
 #############
 ## RELEASE ##
 #############
-FROM node:current-slim as sandbox
+FROM node:current-slim as release 
 RUN mkdir -p ./backend/api-js
 COPY ./shared ./shared
 COPY ./backend/api-js ./backend/api-js
@@ -23,7 +23,7 @@ CMD [ "npm", "start" ]
 #############
 ## SANDBOX ##
 #############
-FROM node:current-slim as release
+FROM node:current-slim as sandbox 
 RUN mkdir -p ./backend/api-js
 COPY ./shared ./shared
 COPY ./backend/api-js ./backend/api-js

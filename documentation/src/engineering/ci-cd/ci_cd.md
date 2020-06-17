@@ -6,6 +6,7 @@
    * frontend (release and sandbox)
    * storybook (sandbox)
    * docs (sandbox)
+   * artifacts.project.appspot.com (release and sandbox, created by google - needed for cloud run deployments)
 
 ### Github Secrets
 

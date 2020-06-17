@@ -7,5 +7,3 @@
 * ![Pages - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Release/badge.svg) / ![Pages - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Sandbox/badge.svg)
 * ![User - Frontend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Release/badge.svg) / ![User - Frontend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Sandbox/badge.svg)
 
-
-
