@@ -1,19 +1,19 @@
 require('dotenv').config();
 
-if(!process.env.LOCAL_CDN_DIR || process.env.LOCAL_CDN_DIR === "") {
-    console.log("Local CDN: set [LOCAL_CDN_DIR] in .env");
+if(!process.env.LOCAL_CDN_MEDIA_DIR || process.env.LOCAL_CDN_MEDIA_DIR === "") {
+    console.log("Local Media server: set [LOCAL_CDN_MEDIA_DIR] in .env");
     process.exit(1);
 }
 
-if(!process.env.LOCAL_CDN_PORT || process.env.LOCAL_CDN_PORT === "") {
-    console.log("Local CDN: set [LOCAL_CDN_PORT] in .env");
+if(!process.env.LOCAL_CDN_MEDIA_PORT || process.env.LOCAL_CDN_MEDIA_PORT === "") {
+    console.log("Local Media server: set [LOCAL_CDN_MEDIA_PORT] in .env");
     process.exit(1);
 }
 
-const port = parseInt(process.env.LOCAL_CDN_PORT);
+const port = parseInt(process.env.LOCAL_CDN_MEDIA_PORT);
 const path = require('path');
 
-const localPath = path.resolve(process.env.LOCAL_CDN_DIR);
+const localPath = path.resolve(process.env.LOCAL_CDN_MEDIA_DIR);
 
 const express = require('express');
 const cors = require('cors');

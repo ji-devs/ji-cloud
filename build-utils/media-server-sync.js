@@ -1,3 +1,15 @@
+require('dotenv').config();
+
+if(!process.env.LOCAL_CDN_MEDIA_DIR || process.env.LOCAL_CDN_MEDIA_DIR === "") {
+    console.log("Media server sync: set [LOCAL_CDN_MEDIA_DIR] in .env");
+    process.exit(1);
+}
+
+if(!process.env.REMOTE_CDN_MEDIA_BUCKET || process.env.REMOTE_CDN_MEDIA_BUCKET === "") {
+    console.log("Media server sync: set [REMOTE_CDN_MEDIA_BUCKET] in .env");
+    process.exit(1);
+}
+
 const spawn = require('cross-spawn');
 const fs = require('fs');
 const os = require('os');
@@ -5,16 +17,9 @@ const path = require('path');
 
 const cmd = process.argv[2];
 
-const CloudStorageMedia = `gs://ji-cloud-eu/`;
+const CloudStorageMedia = `gs://${process.env.REMOTE_CDN_MEDIA_BUCKET}/`;
 
-let localPath = (() => {
-    switch(os.platform()) {
-        case "linux": return `/dropbox/container/Dropbox (Jewish Interactive)/ji-cloud-cdn`;
-        default: return `D:\\Dropbox (Jewish Interactive)\\ji-cloud-cdn`;
-    }
-})();
-
-localPath = path.resolve(localPath);
+const localPath = path.resolve(process.env.LOCAL_CDN_MEDIA_DIR);
 
 
 
