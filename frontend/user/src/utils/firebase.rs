@@ -12,5 +12,5 @@ extern "C" {
 
 
 pub fn setup() {
-    init_firebase(SETTINGS.firebase_dev);
+    init_firebase(SETTINGS.get().unwrap().firebase_dev);
 }

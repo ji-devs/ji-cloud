@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use lazy_static::lazy_static;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}

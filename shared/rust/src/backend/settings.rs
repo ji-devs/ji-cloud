@@ -1,149 +1,90 @@
-use jsonwebtoken::EncodingKey;
-use std::{
-    fmt,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
-use super::google::{get_secret, get_access_token_and_project_id};
-use once_cell::sync::OnceCell;
+
+pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
+pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
+pub const COOKIE_DOMAIN:&'static str = "jicloud.org";
+pub const CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org"];
+
+const REMOTE_DB_USER:&'static str = "postgres";
+const REMOTE_DB_NAME:&'static str = "jicloud";
+const SQL_PROXY_PORT:u32 = 6432; //must match the port number in build-utils/package.json where cloud-sql-proxy is launched
+
+const DB_INSTANCE_SANDBOX:&'static str = "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox";
+const DB_INSTANCE_RELEASE:&'static str = "ji-cloud:europe-west1:ji-cloud-002";
+
+impl RemoteTarget {
+    pub fn google_credentials_env_name(&self) -> &'static str {
+        match self {
+            Self::Local => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
+            Self::Sandbox => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
+            Self::Release => "GOOGLE_APPLICATION_CREDENTIALS_DEV_RELEASE",
+        }
+    }
+
+    pub fn js_api(&self) -> &'static str {
+        match self {
+            Self::Local => "http://localhost:8082",
+            Self::Sandbox => "https://sandbox.api-js.jicloud.org",
+            Self::Release => "https://api-js.jicloud.org",
+        }
+    }
+
+    pub fn media_url_base(&self) -> &'static str {
+        match self {
+            Self::Local => "http://localhost:4102",
+            Self::Sandbox => "https://storage.googleapis.com/ji-cloud-eu",
+            Self::Release => "https://storage.googleapis.com/ji-cloud-eu",
+        }
+    }
+
+}
+
+// No need to set anything below here, the rest are helper functions to make things easier
+
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
-#[derive(Debug, PartialEq, Eq)]
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,
     Sandbox,
     Release,
 }
-
-pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
-
-pub struct Settings {
-    pub auth_target: RemoteTarget,
-    pub db_target: RemoteTarget,
-    pub media_url_base: &'static str,
-    pub local_insecure: bool,
-    pub port: u16,
-    pub epoch: Duration,
-    pub jwt_encoding_key: EncodingKey,
-    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    //Keeping a string is a stop-gap measure for now, not ideal
-    pub jwt_decoding_key:String,
-    pub inter_server_secret:String,
-    pub db_connection_string:String,
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub enum DbTarget {
+    Local,
+    Proxy,
+    Remote(RemoteTarget),
 }
 
-pub async fn init(target:RemoteTarget) {
-    let (token, project_id) = get_access_token_and_project_id().await.unwrap();
-
-    let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
-    let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;
-    let inter_server_secret = get_secret(token.as_ref(), &project_id, "INTER_SERVER").await;
-
-
-    let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
-
-    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    //Keeping a string is a stop-gap measure for now, not ideal
-
-    SETTINGS.set(match target {
-        RemoteTarget::Local => Settings::new_local(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
-        RemoteTarget::Sandbox => Settings::new_sandbox(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
-        RemoteTarget::Release => Settings::new_release(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass),
-    }).unwrap();
-}
-
-fn db_connection_string(db_pass:&str, db_target:RemoteTarget) -> String {
+pub fn db_connection_string(secret_db_pass:&str, db_target:DbTarget) -> String {
     match db_target {
-        RemoteTarget::Local => format!("postgres://postgres:{}@localhost:3306/jicloud", db_pass),
-        _ => {
-            let instance_connection = std::env::var("INSTANCE_CONNECTION_NAME").unwrap_or(
-                match db_target {
-                    RemoteTarget::Sandbox => "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox",
-                    RemoteTarget::Release => "ji-cloud:europe-west1:ji-cloud-002",
-                    _ => ""
-                }.to_string()
-            );
+        DbTarget::Local => {
+            //these are env vars since it depends on developer's local machine
+            let db_user = std::env::var("LOCAL_DB_USER").expect("When not using Cloud Sql Proxy, set LOCAL_DB_USER in .env");
+            let db_pass = std::env::var("LOCAL_DB_PASS").expect("When not using Cloud Sql Proxy, set LOCAL_DB_PASS in .env");
+            let db_port = std::env::var("LOCAL_DB_PORT").expect("When not using Cloud Sql Proxy, set LOCAL_DB_PORT in .env");
+            let db_name = std::env::var("LOCAL_DB_NAME").expect("When not using Cloud Sql Proxy, set LOCAL_DB_NAME in .env");
+            format!("postgres://{}:{}@localhost:{}/{}", db_user, db_pass, db_port, db_name)
+        },
+        DbTarget::Proxy => {
+            //The difference of sandbox vs. remote here depends on invoking cloud-sql-proxy
+            format!("postgres://{}:{}@localhost:{}/{}", REMOTE_DB_USER, secret_db_pass, SQL_PROXY_PORT, REMOTE_DB_NAME)
+        },
+        DbTarget::Remote(remote_target) => {
+            let instance_connection = 
+                std::env::var("INSTANCE_CONNECTION_NAME")
+                    .unwrap_or(match remote_target {
+                        RemoteTarget::Sandbox => DB_INSTANCE_SANDBOX.to_string(),
+                        RemoteTarget::Release => DB_INSTANCE_RELEASE.to_string(), 
+                        _ => panic!("non-dev mode only makes sense for sandbox or release")
+                    });
+
             let socket_path = std::env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
 
             let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
 
-            let db_user = "postgres";
-            let db_name = "jicloud";
-            let connection_string = format!("postgres://{}:{}@{}/{}", db_user, db_pass, full_socket_path, db_name);
+            let connection_string = format!("postgres://{}:{}@{}/{}", REMOTE_DB_USER, secret_db_pass, full_socket_path, REMOTE_DB_NAME);
 
             connection_string
         }
     }
-}
-
-impl Settings {
-    pub fn js_api(&self) -> &'static str {
-        match self.auth_target {
-            RemoteTarget::Local => "http://localhost:8082",
-            RemoteTarget::Sandbox=> "https://sandbox.api-js.jicloud.org",
-            RemoteTarget::Release=> "https://api-js.jicloud.org",
-        }
-    }
-}
-
-impl fmt::Debug for Settings {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "auth_target is [{:?}] and db_target is [{:?}]. port is [{}]", self.auth_target, self.db_target, self.port)
-    }
-}
-fn get_epoch() -> Duration {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-}
-
-
-
-    //SETTINGS.set(Settings::new(jwt_encoding_key, jwt_secret, inter_server_secret, db_pass));
-impl Settings {
-    pub fn new_local(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
-        Self {
-            auth_target: RemoteTarget::Local,
-            db_target: RemoteTarget::Local,
-            media_url_base: "http://localhost:4102",
-            local_insecure: true,
-            port: 8081,
-            epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
-            inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Local),
-        }
-    }
-    pub fn new_sandbox(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
-        Self {
-            auth_target: RemoteTarget::Sandbox,
-            db_target: RemoteTarget::Sandbox,
-            media_url_base: "https://storage.googleapis.com/ji-cloud-eu",
-            port: 8080,
-            local_insecure: false,
-            epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
-            inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Sandbox),
-        }
-    }
-    pub fn new_release(jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
-        Self {
-            auth_target: RemoteTarget::Release,
-            db_target: RemoteTarget::Release,
-            media_url_base: "https://storage.googleapis.com/ji-cloud-eu",
-            port: 8080,
-            local_insecure: false,
-            epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
-            inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, RemoteTarget::Release),
-        }
-    }
-
-    pub fn spa_url(&self, app:&str, path:&str) -> String {
-        format!("{}/spa/{}/{}", self.media_url_base, app, path)
-    }
-    
 }
