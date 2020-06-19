@@ -9,11 +9,11 @@
 - [Setup](./setup/setup.md)
   - [Google Cloud](./setup/google_cloud/google_cloud.md)
   - [.env files](./setup/dot-env/dot_env.md)
+  - [Runtime](./setup/runtime/runtime.md)
   - [CI/CD](./setup/ci-cd/ci_cd.md)
   - [Database](./setup/database/database.md)
   - [Media](./setup/media/media.md)
   - [Storybook](./setup/storybook/storybook.md)
-  - [Runtime](./setup/runtime/runtime.md)
 
 - [Engineering](./engineering/engineering.md)
   - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
