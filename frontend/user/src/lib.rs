@@ -36,8 +36,9 @@ cfg_if! {
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
+    settings::init();
     utils::firebase::setup();
-    log::info!("{:?}", &*settings::SETTINGS);
+    log::info!("{:?}", settings::SETTINGS.get().unwrap());
 
 
     let page = page::Page::new();

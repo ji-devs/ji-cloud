@@ -1,6 +1,6 @@
 use warp::http::Method;
 use crate::settings::SETTINGS;
-use crate::settings::CORS_ORIGINS;
+use ji_cloud_shared::backend::settings::CORS_ORIGINS;
 
 pub fn get_cors() -> warp::filters::cors::Builder {
     let builder = warp::cors()

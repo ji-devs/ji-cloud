@@ -18,7 +18,8 @@ use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::{SETTINGS, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
+use crate::settings::SETTINGS;
+use ji_cloud_shared::backend::settings::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
 use crate::db::{pg_pool, PgPool, get_db};
 use crate::{async_clone_fn, async_clone_cb};
 
@@ -134,7 +135,7 @@ pub fn has_firebase_auth() -> impl Filter<Extract = (String,), Error = Rejection
 
             let response:JsApiResponse = 
                 reqwest::Client::new()
-                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().js_api(), token))
+                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().remote_target.js_api(), token))
                     .header("INTER_SERVER_SECRET", &SETTINGS.get().unwrap().inter_server_secret)
                     .send()
                     .and_then(|res| res.json::<JsApiResponse>())

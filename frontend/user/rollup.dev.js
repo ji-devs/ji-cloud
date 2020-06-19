@@ -15,7 +15,7 @@ export default {
         rust({
             serverPath: "/js/",
             debug: true,
-            watchPatterns: ["src/**", "js/**", "../../common/ji-cloud-shared/rust/src/**"],
+            watchPatterns: ["src/**", "js/**", "../../shared/rust/src/**"],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),

@@ -560,6 +560,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "log 0.4.8",
+ "percent-encoding",
  "reqwest",
  "serde",
  "serde_json",

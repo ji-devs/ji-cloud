@@ -4,7 +4,7 @@ use warp::{
     path
 };
 use crate::settings::{SETTINGS, Settings};
-use crate::settings::JSON_BODY_LIMIT;
+use ji_cloud_shared::backend::settings::JSON_BODY_LIMIT;
 use crate::reject::handle_rejection;
 use crate::{async_clone_fn, async_clone_cb};
 use crate::templates::register_templates;

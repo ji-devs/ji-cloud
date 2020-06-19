@@ -4,7 +4,9 @@ use warp::{
     Filter,
     path
 };
-use crate::settings::{SETTINGS, Settings, JSON_BODY_LIMIT};
+
+use crate::settings::SETTINGS;
+use ji_cloud_shared::backend::settings::JSON_BODY_LIMIT;
 use crate::user::{self, auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_auth_full, has_firebase_auth }};
 use crate::reject::handle_rejection;
 use crate::db::{pg_pool, PgPool};
