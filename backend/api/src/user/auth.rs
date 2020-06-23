@@ -7,9 +7,9 @@ use warp::{
     Rejection
 };
 use ji_cloud_shared::{
-    auth::{SigninSuccess, RegisterSuccess, SigninEphemeralSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
+    auth::{SigninSuccess, RegisterSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserRole,
-    response::ResultResponse
+    api::result::ResultResponse
 };
 use serde::{Serialize, Deserialize};
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};

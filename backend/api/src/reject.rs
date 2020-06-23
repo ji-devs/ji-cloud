@@ -10,7 +10,7 @@
 
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::convert::Infallible;
-use ji_cloud_shared::response::{HttpStatus};
+use ji_cloud_shared::api::result::{HttpStatus};
 
 use warp:: {
     http::{

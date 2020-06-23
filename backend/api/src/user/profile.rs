@@ -10,17 +10,22 @@ use warp::{
 use ji_cloud_shared::{
     auth::AuthClaims,
     user::{User, NoSuchUserError},
+    api::endpoints::{
+        ApiEndpoint,
+        user::Profile,
+    }
 };
-use crate::db::{pg_pool, PgPool, get_db};
-use crate::reply::{reply_err, reply_ok};
+use crate::db::{pg_pool, PgPool, Db, get_db};
+use crate::reply::HandlerResult;
 use super::queries::{get_by_email, get_by_id};
 
-pub async fn handle_get_profile(claims:AuthClaims, pool:PgPool) -> Result<impl warp::Reply, Rejection> {
+
+pub async fn handle_get_profile(claims:AuthClaims, pool:PgPool) -> HandlerResult< <Profile as ApiEndpoint>::Res, <Profile as ApiEndpoint>::Err> {
     let db = get_db(pool)?;
 
-    match get_by_id(&db, &claims.id) {
-        None => reply_err(NoSuchUserError{}),
-        Some(user) => reply_ok(user)
-    }
-
+    Ok(match get_by_id(&db, &claims.id) {
+        None => Err(NoSuchUserError{}),
+        Some(user) => Ok(user)
+    })
 }
+

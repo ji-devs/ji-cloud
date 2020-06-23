@@ -1,6 +1,6 @@
 pub mod user;
 pub mod auth;
-pub mod response;
+pub mod api;
 
 #[cfg(feature = "frontend")]
 pub mod frontend;

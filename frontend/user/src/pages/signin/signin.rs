@@ -3,11 +3,14 @@ use wasm_bindgen::{UnwrapThrowExt, JsCast};
 use ji_cloud_shared::{
     user::UserRole,
     auth::SigninSuccess,
-    response::ResultResponse,
+    api::{
+        result::ResultResponse,
+        endpoints::user::Signin
+    },
     frontend::{
         fetch, 
         storage,
-        routes::Route
+        routes::{Route, UserRoute}
     }
 };
 use js_sys::Promise;
@@ -19,7 +22,7 @@ use crate::{
 
 pub fn on_signin_success(csrf:&str) {
     storage::save_csrf_token(csrf);
-    Route::Profile.redirect();
+    Route::User(UserRoute::Profile).redirect();
 }
 
 pub fn sign_in_email(username:&str, password:&str) {
@@ -35,7 +38,7 @@ fn signin<Happy: FnOnce(SigninSuccess) + 'static, Sad: FnOnce() + 'static>(token
         match JsFuture::from(token_promise).await {
             Ok(token) => {
                 let token = token.as_string().unwrap_throw();
-                match fetch::unwrapped::api_with_token_no_data::<SigninSuccess, ()>(&api_url("user/signin"), &token).await {
+                match Signin::fetch(&token).await {
                     Ok(status) => on_happy(status), 
                     Err(err) => on_sad() 
                 }

@@ -3,13 +3,14 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use ji_cloud_shared::frontend::routes::Route;
+use ji_cloud_shared::frontend::routes::{Route, UserRoute};
 use wasm_bindgen::UnwrapThrowExt;
 use dominator::{Dom, class, html, clone, events};
 use web_sys::Url;
 use crate::router::route_signal;
 use crate::settings::SETTINGS;
 use crate::header::Header;
+use crate::pages::temp::TempDom;
 use crate::pages::signin::SigninDom;
 use crate::pages::register::RegisterDom;
 use crate::pages::profile::ProfileDom;
@@ -32,15 +33,22 @@ impl Page {
                             Header::render(),
                             {
                                 match route {
-                                    Route::Signin => {
-                                        SigninDom::render(SigninDom::new())
+                                    Route::User(user_route) => {
+                                        match user_route {
+                                            UserRoute::Signin => {
+                                                SigninDom::render(SigninDom::new())
+                                            },
+                                            UserRoute::Register => {
+                                                RegisterDom::render(RegisterDom::new())
+                                            },
+                                            UserRoute::Profile => {
+                                                ProfileDom::render(ProfileDom::new()) 
+                                            },
+                                        }
                                     },
-                                    Route::Register => {
-                                        RegisterDom::render(RegisterDom::new())
-                                    },
-                                    Route::Profile => {
-                                        ProfileDom::render(ProfileDom::new()) 
-                                    },
+                                    Route::Temp => {
+                                        TempDom::render(TempDom::new())
+                                    }
                                     _ => {
                                         NotFound::render()
                                     }

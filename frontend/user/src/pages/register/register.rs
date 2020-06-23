@@ -3,7 +3,10 @@ use wasm_bindgen::{UnwrapThrowExt, JsCast};
 use ji_cloud_shared::{
     user::UserRole,
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
-    response::ResultResponse,
+    api::{
+        result::ResultResponse,
+        endpoints::user::Register
+    },
     frontend::fetch
 };
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
@@ -35,7 +38,8 @@ pub fn register_google<Happy: FnOnce(RegisterSuccess) + 'static, Sad: FnOnce(Reg
                     last_name,
                     email: user.email
                 };
-                match fetch::unwrapped::api_with_token::<RegisterSuccess, RegisterError, _>(&api_url("user/register"), &user.token, Some(req)).await {
+
+                match Register::fetch(&user.token, &req).await {
                     Ok(resp) => on_happy(resp),
                     Err(err) => {
                         log::info!("Hmmm got error...");

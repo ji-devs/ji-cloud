@@ -9,7 +9,10 @@ use futures_signals::{
 use ji_cloud_shared::{
     user::{UserRole, User, NoSuchUserError},
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
-    frontend::fetch
+    api::{
+        result::ResultResponse,
+        endpoints::user::Profile
+    },
 };
 use crate::{
     path::api_url,
@@ -24,10 +27,7 @@ pub(super) fn profile_signal(profile:&Mutable<ProfileResult>) -> impl Signal<Ite
         .signal_cloned()
         .map_future(|profile:ProfileResult| async move {
             match profile {
-                None => {
-                    fetch::unwrapped::api_with_auth_no_data::<User, NoSuchUserError>(&api_url("user/profile"))
-                        .await
-                },
+                None => Profile::fetch().await,
                 Some(profile) => profile
             }
         })

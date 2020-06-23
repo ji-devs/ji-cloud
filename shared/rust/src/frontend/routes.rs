@@ -4,11 +4,16 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Route {
     NotFound,
-    Profile,
-    Signin,
-    Register 
+    Temp,
+    User(UserRoute)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UserRoute {
+    Profile,
+    Signin,
+    Register,
+}
 impl Route {
     pub fn redirect(self) {
         web_sys::window()
@@ -25,9 +30,10 @@ impl Route {
         let uri_parts = get_uri_parts(&url, None);
         let uri = uri_parts.join("/");
         match uri.as_ref() {
-            "user/profile" => Self::Profile,
-            "user/signin" => Self::Signin,
-            "user/register" => Self::Register,
+            "user/profile" => Self::User(UserRoute::Profile),
+            "user/signin" => Self::User(UserRoute::Signin),
+            "user/register" => Self::User(UserRoute::Register),
+            "temp" => Self::Temp, 
             _ => Self::NotFound
         }
     }
@@ -37,10 +43,15 @@ impl Route {
 impl From<Route> for &str {
     fn from(route:Route) -> Self {
         match route {
-            Route::Profile => "/user/profile",
-            Route::Signin => "/user/signin",
-            Route::Register => "/user/register",
-            Route::NotFound => "/404"
+            Route::User(user_route) => {
+                match user_route {
+                    UserRoute::Profile => "/user/profile",
+                    UserRoute::Signin => "/user/signin",
+                    UserRoute::Register => "/user/register",
+                }
+            },
+            Route::NotFound => "/404",
+            Route::Temp=> "/temp"
         }
     }
 }

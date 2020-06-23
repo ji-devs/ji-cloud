@@ -1,8 +1,7 @@
 use crate::reject::{CustomWarpRejection, DbQueryError, InternalError};
-use crate::reply::{reply_ok, reply_err};
 use ji_cloud_shared::{
     auth::{RegisterRequest, RegisterError, SigninSuccess},
-    response::ResultResponse,
+    api::result::ResultResponse,
 };
 use crate::db::Db;
 use diesel::prelude::*;
@@ -10,9 +9,11 @@ use diesel::insert_into;
 use super::queries::{get_by_email, get_by_id};
 use super::auth::reply_signin_auth;
 use crate::db::{pg_pool, PgPool, get_db};
+use crate::reply::HandlerResult;
 
 //the user_id is already validated in terms of firebase auth
 
+//register handler doesn't use the usual wrapper since it needs to set the header
 pub async fn handle_register(user_id:String, req:RegisterRequest, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
     use crate::schema::users::dsl::*;
 

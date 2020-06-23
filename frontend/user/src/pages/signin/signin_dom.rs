@@ -8,7 +8,7 @@ use futures_signals::{
 use ji_cloud_shared::{
     user::UserRole,
     auth::SigninSuccess,
-    frontend::routes::Route,
+    frontend::routes::{Route, UserRoute},
 };
 use crate::path;
 
@@ -101,7 +101,7 @@ impl SigninDom {
                             .children(&mut [
                                 text("Or "),
                                 html!("a", {
-                                    .attribute("href", Route::Register.into()) 
+                                    .attribute("href", Route::User(UserRoute::Register).into()) 
                                     .class(["font-medium","text-indigo-600","hover:text-indigo-500","focus:outline-none","focus:underline","transition","ease-in-out","duration-150"])
                                     .children(&mut [
                                         text("register here"),

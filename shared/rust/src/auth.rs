@@ -10,7 +10,7 @@ pub struct SigninSuccess {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct SigninEphemeralSuccess {
+pub struct SingleSignOnSuccess {
     pub jwt: String
 }
 
