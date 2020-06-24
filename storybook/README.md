@@ -6,4 +6,4 @@ See [storybook-for-dominator-boilerplate](https://github.com/dakom/storybook-for
 
 Because we use a remote for media storage, the "copy-media-directory" and associated steps are gone
 
-Temp CICD 004
+Temp CICD 005
