@@ -5,7 +5,6 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use crate::path;
 
 pub struct TempDom { }
 impl TempDom {

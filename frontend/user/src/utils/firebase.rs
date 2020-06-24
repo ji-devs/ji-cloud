@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
-use crate::settings::SETTINGS;
+use ji_cloud_shared::frontend::settings::Settings;
 
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
@@ -11,6 +11,6 @@ extern "C" {
 }
 
 
-pub fn setup() {
-    init_firebase(SETTINGS.get().unwrap().firebase_dev);
+pub fn setup(settings:&Settings) {
+    init_firebase(settings.firebase_dev);
 }

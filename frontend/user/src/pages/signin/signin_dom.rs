@@ -8,9 +8,11 @@ use futures_signals::{
 use ji_cloud_shared::{
     user::UserRole,
     auth::SigninSuccess,
-    frontend::routes::{Route, UserRoute},
+    frontend::{
+        routes::{Route, UserRoute},
+        path
+    }
 };
-use crate::path;
 
 use super::signin::{
     signin_google,

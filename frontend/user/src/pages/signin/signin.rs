@@ -17,7 +17,6 @@ use js_sys::Promise;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use crate::{
     utils::firebase::get_firebase_signin_google,
-    path::api_url
 };
 
 pub fn on_signin_success(csrf:&str) {

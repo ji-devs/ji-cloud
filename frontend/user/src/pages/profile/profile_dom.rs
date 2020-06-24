@@ -12,7 +12,6 @@ use ji_cloud_shared::{
     frontend::fetch
 };
 use crate::{
-    path::api_url,
     pages::signin::on_signin_success
 };
 use super::profile::{profile_signal, ProfileResult};

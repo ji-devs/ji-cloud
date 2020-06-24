@@ -1,12 +1,10 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-mod settings;
 mod router;
 mod page;
 mod pages;
 mod header;
-mod path;
 mod utils;
 mod globals;
 
@@ -36,9 +34,9 @@ cfg_if! {
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    settings::init();
-    utils::firebase::setup();
-    log::info!("{:?}", settings::SETTINGS.get().unwrap());
+    let settings = ji_cloud_shared::frontend::settings::init();
+    log::info!("{:?}", settings);
+    utils::firebase::setup(&settings);
 
 
     let page = page::Page::new();

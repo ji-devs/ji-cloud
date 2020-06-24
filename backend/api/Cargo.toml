@@ -33,10 +33,10 @@ ji_cloud_shared = {path = "../../shared/rust", features=["backend"]}
 openssl = "*"
 
 [features]
-local = ["listenfd"]
+local = ["listenfd", "ji_cloud_shared/local"]
 sqlproxy = []
 quiet = []
 temp = []
 local-quiet = ["local", "quiet"]
-sandbox = []
-release = []
+release = ["ji_cloud_shared/release"]
+sandbox = ["ji_cloud_shared/sandbox"]

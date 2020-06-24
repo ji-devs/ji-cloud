@@ -7,7 +7,6 @@ use ji_cloud_shared::frontend::routes::Route;
 use wasm_bindgen::UnwrapThrowExt;
 use dominator::{Dom, class, html, clone, events};
 use web_sys::Url;
-use crate::settings::SETTINGS;
 
 pub fn route_signal() -> impl Signal<Item = Route> {
     dominator::routing::url()

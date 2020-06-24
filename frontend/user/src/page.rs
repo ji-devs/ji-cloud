@@ -8,7 +8,6 @@ use wasm_bindgen::UnwrapThrowExt;
 use dominator::{Dom, class, html, clone, events};
 use web_sys::Url;
 use crate::router::route_signal;
-use crate::settings::SETTINGS;
 use crate::header::Header;
 use crate::pages::temp::TempDom;
 use crate::pages::signin::SigninDom;

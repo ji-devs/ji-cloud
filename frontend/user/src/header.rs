@@ -7,8 +7,6 @@ use futures_signals::{
 use wasm_bindgen::UnwrapThrowExt;
 use dominator::{Dom, class, html, clone, events, link};
 use web_sys::Url;
-use crate::settings::SETTINGS;
-use crate::path;
 
 pub struct Header {
 }

@@ -47,8 +47,8 @@ web-sys = { version = "0.3.39", features = [
 
 [features]
 default = ["wee_alloc"]
-release = []
-sandbox = []
+release = ["ji_cloud_shared/release"]
+sandbox = ["ji_cloud_shared/sandbox"]
 ts_test = []
 quiet = []
-local = ["wasm-logger", "console_error_panic_hook"]
+local = ["wasm-logger", "console_error_panic_hook", "ji_cloud_shared/local"]

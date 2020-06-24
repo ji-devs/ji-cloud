@@ -8,10 +8,12 @@ use futures_signals::{
 use ji_cloud_shared::{
     user::UserRole,
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
-    frontend::routes::{Route, UserRoute},
+    frontend::{
+        routes::{Route, UserRoute},
+        path
+    }
 };
 use crate::{
-    path,
     pages::signin::on_signin_success
 };
 
@@ -33,7 +35,6 @@ use wasm_bindgen::{UnwrapThrowExt, JsCast};
 
 use dominator::{Dom, svg, class, text, html, clone, events, link};
 use web_sys::Url;
-use crate::settings::SETTINGS;
 use crate::auth::{Auth, register_google};
 use std::rc::Rc;
 */

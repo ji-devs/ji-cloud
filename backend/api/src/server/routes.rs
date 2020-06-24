@@ -1,12 +1,20 @@
+#![feature(iterator_fold_self)]
+
 use diesel::{self, prelude::*};
 use warp::{
     http::Method,
     Filter,
-    path
+    path,
 };
 
 use crate::settings::SETTINGS;
-use ji_cloud_shared::backend::settings::JSON_BODY_LIMIT;
+use ji_cloud_shared::{
+    api::endpoints::{
+        ApiEndpoint,
+        user::{Signin,SingleSignOn,Register,Profile}
+    },
+    backend::settings::JSON_BODY_LIMIT
+};
 use crate::reply::ReplyExt;
 use crate::user::{self, auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_auth_full, has_firebase_auth }};
 use crate::reject::handle_rejection;
@@ -14,6 +22,19 @@ use crate::db::{pg_pool, PgPool};
 use crate::{async_clone_fn, async_clone_cb};
 use super::cors::get_cors;
 use std::net::SocketAddr;
+
+
+// blocked on blocked on https://github.com/seanmonstar/warp/issues/621
+/*
+fn path_from_str(uri:&str) -> impl Filter + Clone {
+    let mut iter = uri.split('/').map(path::path);
+
+    let first = iter.next().unwrap();
+
+    iter.fold(first, |acc, val| acc.and(val))
+}
+*/
+
 
 //All of our routes
 pub fn get_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {

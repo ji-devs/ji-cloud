@@ -14,7 +14,6 @@ use crate::{
     utils::{
         firebase::{get_firebase_register_google},
     },
-    path::api_url
 };
 
 #[derive(Deserialize)]

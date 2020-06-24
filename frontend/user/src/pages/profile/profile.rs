@@ -15,7 +15,6 @@ use ji_cloud_shared::{
     },
 };
 use crate::{
-    path::api_url,
     pages::signin::on_signin_success
 };
 

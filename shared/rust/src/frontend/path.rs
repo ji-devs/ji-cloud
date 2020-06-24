@@ -1,5 +1,4 @@
-use crate::settings::SETTINGS;
-use ji_cloud_shared::frontend::settings::MEDIA_UI_PATH;
+use super::settings::{SETTINGS, MEDIA_UI_PATH};
 
 pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("{}/{}", MEDIA_UI_PATH, path.as_ref()))
