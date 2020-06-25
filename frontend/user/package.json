@@ -6,7 +6,7 @@
   "scripts": {
     "build:release": "npm run clean && rollup --config rollup.release.js",
 	"build:sandbox": "npm run clean && rollup --config rollup.sandbox.js",
-    "start": "npm run _devfiles && run-p _mediaserver _watch",
+    "dev": "npm run _devfiles && run-p _mediaserver _watch",
     "clean": "rimraf ./dist",
     "_watch": "rollup --config rollup.dev.js --watch",
     "_mediaserver": "cd ../../build-utils && npm run local-media-server",
