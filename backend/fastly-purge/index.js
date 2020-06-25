@@ -9,7 +9,6 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
 
   const data = await resp.json();
-  console.log(`Job complete for ${fileName}, purge ID ${data.id}`);
 };
 
 exports.purgeDocs = makePurger("https://docs.jicloud.org");
