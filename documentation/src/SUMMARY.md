@@ -12,10 +12,12 @@
   - [Runtime](./setup/runtime/runtime.md)
   - [CI/CD](./setup/ci-cd/ci_cd.md)
   - [Database](./setup/database/database.md)
+  - [Fastly](./setup/fastly/fastly.md)
   - [Media](./setup/media/media.md)
   - [Storybook](./setup/storybook/storybook.md)
 
 - [Engineering](./engineering/engineering.md)
+  - [Dev Mode Commands](./engineering/commands/commands.md)
   - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
   - [Common Terms and Keys](./engineering/engineering_common.md)
   - [Authentication and Authorization](./engineering/auth/auth.md)
