@@ -1,4 +1,6 @@
 const fetch = require('node-fetch');
+const {Storage} = require('@google-cloud/storage');
+const storage = new Storage();
 
 const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
@@ -7,8 +9,11 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
 
   const resp = await fetch(completeObjectUrl, { method: 'PURGE'})
   if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
+  //const data = await resp.json();
 
-  const data = await resp.json();
+  const metaResp = await storage.bucket(obj.bucket).file(obj.name).setMetadata({
+    cacheControl: 'Cache-Control: max-age=0, s-maxage=86400',
+  });
 };
 
 exports.purgeDocs = makePurger("https://docs.jicloud.org");
