@@ -12,7 +12,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   //const data = await resp.json();
 
   const metaResp = await storage.bucket(obj.bucket).file(obj.name).setMetadata({
-    cacheControl: 'Cache-Control: max-age=0, s-maxage=86400',
+    cacheControl: 'max-age=0, s-maxage=86400',
   });
 };
 
