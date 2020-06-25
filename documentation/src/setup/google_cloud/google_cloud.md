@@ -41,6 +41,6 @@ Every bucket has:
   * `allUsers` w/ Object Viewer permissions
   * Fastly CDN proxy
   * The service account assigned as Storage Admin if it needs write access
-  * Set the default index.html and 404.html via gsutil (since bucket doesn't have domain name, can't be via console)
+  * If not using a CDN, set the default index.html and 404.html (setting it anyway, via gsutil if not using an explicit domain as bucket name, doesn't hurt)
 
 See [CI/CD](../ci-cd/ci_cd.md) for more detail

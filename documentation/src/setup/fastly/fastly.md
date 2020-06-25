@@ -4,6 +4,14 @@ Used for all static assets.
 
 Make sure to set interconnect location that's closest to storage (e.g. Amsterdam Fastly for Belgium Google)
 
-Only needs simple redirect for each origin as a request condition, e.g. `req.http.host == "docs.jicloud.org"` for the docs bucket origin
+Only each origin should have host request condition, in order for that origin to be used for the domain. e.g. `req.http.host == "docs.jicloud.org"`
+
+A bit of _Custom VCL_ in the `recv` block is required to make it fetch index.html for plain directory requests:
+
+```
+if (req.url ~ "\/$") {
+  set req.url = req.url "index.html";
+}
+```
 
 See Fastly documentation for more details
