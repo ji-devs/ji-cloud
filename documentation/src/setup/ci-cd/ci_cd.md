@@ -8,6 +8,10 @@
    * docs (sandbox)
    * artifacts.project.appspot.com (release and sandbox, created by google - needed for cloud run deployments)
 
+Generally speaking, the very first deployment (see below) on a brand new project should be done manually via a local account first, before using ci/cd going forward.
+
+In particular, the first cloud function deployment requires hitting "yes" on "Allow unauthenticated invocations"
+
 ### Github Secrets
 
 * SLACK_BOT_TOKEN (the one that begins "xoxb-")

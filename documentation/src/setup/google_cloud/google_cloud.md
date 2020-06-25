@@ -23,13 +23,18 @@ The runtime secrets are accessed via Gooogle Secret Manager. They are:
 5. If the Cloud Run instance needs to create files for a storage bucket - assign it as an admin for that bucket (via the bucket page)
 6. Assign the custom domain
 
+This is all the same regardless of language
+
+### Backend - Cloud Functions 
+
+Used to purge FastlyCDN when certain buckets change
+
+The domain names need to be set in index.js
+
 ### Database
 
 Remember to enable Cloud SQL Admin API
 
-### Backend - Cloud Functions
-
-TODO
 
 ### Regions
 

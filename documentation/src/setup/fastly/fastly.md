@@ -15,3 +15,9 @@ if (req.url ~ "\/$") {
 ```
 
 See Fastly documentation for more details
+
+# Purging
+
+Some buckets are purged automatically via a google cloud function (see [google cloud](../google_cloud/google_cloud.md) on every file change
+
+Others are not and require manual purging

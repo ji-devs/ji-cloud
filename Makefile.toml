@@ -153,3 +153,43 @@ args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:lates
 [tasks.deploy-sandbox-api-js]
 script_runner = "@shell"
 script = ["gcloud run deploy ji-cloud-api-js-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-js-sandbox:latest --platform managed"]
+
+###################
+## Fastly Purge  ##
+###################
+
+#------Release-----------#
+[tasks.release-fastly-purge]
+run_task = [{name = [
+    "deploy-release-fastly-purge-frontend",
+    "deploy-release-fastly-purge-storybook",
+]}]
+
+[tasks.deploy-release-fastly-purge-frontend]
+script_runner = "@shell"
+script = ["gcloud functions deploy purgeFrontendRelease --project ji-cloud --trigger-resource ji-cloud-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+
+[tasks.deploy-release-fastly-purge-storybook]
+script_runner = "@shell"
+script = ["gcloud functions deploy purgeStorybookRelease --project ji-cloud --trigger-resource ji-cloud-storybook-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+
+#------Sandbox-----------#
+
+[tasks.sandbox-fastly-purge]
+run_task = [{name = [
+    "deploy-sandbox-fastly-purge-frontend",
+    "deploy-sandbox-fastly-purge-storybook",
+    "deploy-sandbox-fastly-purge-docs",
+]}]
+
+[tasks.deploy-sandbox-fastly-purge-frontend]
+script_runner = "@shell"
+script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+
+[tasks.deploy-sandbox-fastly-purge-storybook]
+script_runner = "@shell"
+script = ["gcloud functions deploy purgeStorybookSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-storybook-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+
+[tasks.deploy-sandbox-fastly-purge-docs]
+script_runner = "@shell"
+script = ["gcloud functions deploy purgeDocs --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-docs-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
