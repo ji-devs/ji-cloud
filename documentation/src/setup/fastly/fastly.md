@@ -6,7 +6,7 @@ Make sure to set interconnect location that's closest to storage (e.g. Amsterdam
 
 Only each origin should have host request condition, in order for that origin to be used for the domain. e.g. `req.http.host == "docs.jicloud.org"`
 
-A bit of _Custom VCL_ in the `recv` block is required to make it fetch index.html for plain directory requests:
+A small `VCL Snippet` for the `recv` block is required to make it fetch index.html for plain directory requests:
 
 ```
 if (req.url ~ "\/$") {
