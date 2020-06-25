@@ -1,7 +1,4 @@
-console.log("hello world");
-
 const fetch = require('node-fetch');
-const FASTLY_PUBLIC_BASEURL = "https://www.example.com";
 
 const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
