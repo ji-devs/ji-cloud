@@ -7,13 +7,18 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   const fileName = obj.name.replace(/^\/+/, '');
   const completeObjectUrl = `${baseUrl}/${fileName}`;
 
-  const resp = await fetch(completeObjectUrl, { method: 'PURGE'})
-  if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
-  //const data = await resp.json();
-
-  const metaResp = await storage.bucket(obj.bucket).file(obj.name).setMetadata({
+  storage.bucket(obj.bucket).file(obj.name).setMetadata({
     cacheControl: 'max-age=0, s-maxage=86400',
+  })
+  .then(() => fetch(completeObjectUrl, { method: 'PURGE'}))
+  .then(resp => {
+    if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
+  })
+  .catch(err => {
+    console.error("got error in purge!");
+    console.error(err);
   });
+
 };
 
 exports.purgeDocs = makePurger("https://docs.jicloud.org");
