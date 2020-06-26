@@ -8,6 +8,7 @@
    * docs (sandbox)
    * artifacts.project.appspot.com (release and sandbox, created by google - needed for cloud run deployments)
 4. Also give the github actions service Cloud Run Admin and Cloud Functions Admin permissions 
+5. Also, give the github actions service account user for the AppEngine service account (seems to be required for cloud funcs even w/ cloud func admin)
 
 Generally speaking, the very first deployment (see below) on a brand new project should be done manually via a local account first, before using ci/cd going forward.
 
