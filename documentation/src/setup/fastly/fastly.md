@@ -2,6 +2,8 @@
 
 Used for all static assets.
 
+Dynamic backends are typically through cloud run and so cannot be efficiently cached right now, at least until Google supports straight external IP or a load balancer.
+
 Make sure to set interconnect location that's closest to storage (e.g. Amsterdam Fastly for Belgium Google)
 
 Only each origin should have host request condition, in order for that origin to be used for the domain. e.g. `req.http.host == "docs.jicloud.org"`
@@ -20,7 +22,7 @@ See Fastly documentation for more details
 
 Some buckets are purged automatically via a google cloud function (see [google cloud](../google_cloud/google_cloud.md)) on every file change
 
-Others are not and require manual purging, either because they are never expected to be purged (i.e. uploads) or it would depend on the exact route and very rarely need to be purged (i.e. page templates)
+Others are not and require manual purging, either because they are never expected to be purged (i.e. uploads) or it would depend on the exact route and very rarely need to be purged (i.e. page templates, if/when that is supported for CDN cache)
 
 For buckets that are purged automatically, the file's cache-control headers are set to not cache, as per Fastly's recommendation. This setting is done immediately before the file is purged
 

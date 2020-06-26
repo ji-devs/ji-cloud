@@ -15,9 +15,11 @@
   - [Fastly](./setup/fastly/fastly.md)
   - [Media](./setup/media/media.md)
   - [Storybook](./setup/storybook/storybook.md)
+  - [Load Balancer](./setup/load-balancer/load_balancer.md)
 
 - [Engineering](./engineering/engineering.md)
   - [Dev Mode Commands](./engineering/commands/commands.md)
+  - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
   - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
   - [Common Terms and Keys](./engineering/engineering_common.md)
   - [Authentication and Authorization](./engineering/auth/auth.md)
