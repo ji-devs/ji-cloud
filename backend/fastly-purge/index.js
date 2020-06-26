@@ -22,9 +22,10 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
 };
 
 exports.purgeDocs = makePurger("https://docs.jicloud.org");
+exports.purgeMedia = makePurger("https://media.jicloud.org");
+
 exports.purgeFrontendRelease = makePurger("https://frontend.jicloud.org");
 exports.purgeStorybookRelease = makePurger("https://storybook.jicloud.org");
-
 
 exports.purgeFrontendSandbox = makePurger("https://frontend.sandbox.jicloud.org");
 exports.purgeStorybookSandbox = makePurger("https://storybook.sandbox.jicloud.org");
