@@ -31,6 +31,10 @@ Used to purge FastlyCDN when certain buckets change
 
 The domain names need to be set in index.js
 
+### Backend - Compute Engine (for media sync)
+
+Similar to Cloud Run, but the only access the service account needs besides compute engine is to the target media bucket
+
 ### Database
 
 Remember to enable Cloud SQL Admin API

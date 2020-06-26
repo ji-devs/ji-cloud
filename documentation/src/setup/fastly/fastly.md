@@ -18,7 +18,7 @@ See Fastly documentation for more details
 
 # Purging
 
-Some buckets are purged automatically via a google cloud function (see [google cloud](../google_cloud/google_cloud.md) on every file change
+Some buckets are purged automatically via a google cloud function (see [google cloud](../google_cloud/google_cloud.md)) on every file change
 
 Others are not and require manual purging, either because they are never expected to be purged (i.e. uploads) or it would depend on the exact route and very rarely need to be purged (i.e. page templates)
 

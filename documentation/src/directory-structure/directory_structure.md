@@ -6,6 +6,7 @@
   - api: the main api server (Rust/Warp/Diesel)
   - pages: the main html server (Rust/Handlebars)
   - api-js: supplementary api server for node sdks (JS)
+  - fastly-purge: cloud functions for purging the CDN on file change 
 
 * build-utils: internal tooling and utils
 
