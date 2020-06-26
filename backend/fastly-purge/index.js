@@ -13,6 +13,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   .then(() => fetch(completeObjectUrl, { method: 'PURGE'}))
   .then(resp => {
     if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
+    console.log(`Purged ${fileName}, ID ${data.id}`);
   })
   .catch(err => {
     console.error("got error in purge!");
