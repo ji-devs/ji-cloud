@@ -21,7 +21,10 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
 
 };
 
+//is actually on sandbox (since it's for devs only)
 exports.purgeDocs = makePurger("https://docs.jicloud.org");
+
+//is actually on release (since it's for public)
 exports.purgeMedia = makePurger("https://media.jicloud.org");
 
 exports.purgeFrontendRelease = makePurger("https://frontend.jicloud.org");
