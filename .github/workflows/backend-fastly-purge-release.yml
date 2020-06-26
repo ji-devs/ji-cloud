@@ -2,12 +2,12 @@ name: FastlyPurge - Backend - Release
 
 on:
   push:
-    branches: [ release ]
+    branches: [ master ]
     paths:
     - 'backend/fastly-purge/**'
 
   pull_request:
-    branches: [ Release ]
+    branches: [ master ]
     paths:
     - 'backend/fastly-purge/**'
 
