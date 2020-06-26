@@ -23,3 +23,5 @@ Some buckets are purged automatically via a google cloud function (see [google c
 Others are not and require manual purging, either because they are never expected to be purged (i.e. uploads) or it would depend on the exact route and very rarely need to be purged (i.e. page templates)
 
 For buckets that are purged automatically, the file's cache-control headers are set to not cache, as per Fastly's recommendation. This setting is done immediately before the file is purged
+
+Note that purging only happens when files are changed or added, not when deleted (handling deleting and/or archiving would require an additional cloud function for each origin, and missing files aren't a common use case for the end user. a manual purge, of course, can always be done if there's a real need to remove its existence from the edge cache)
