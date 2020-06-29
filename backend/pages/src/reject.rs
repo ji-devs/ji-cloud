@@ -11,7 +11,7 @@
 use std::sync::Arc;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::convert::Infallible;
-use ji_cloud_shared::response::HttpStatus;
+use ji_cloud_shared::api::result::HttpStatus;
 use handlebars::Handlebars;
 use crate::templates::direct::{DirectPage, direct_template};
 

@@ -557,6 +557,7 @@ name = "ji_cloud_shared"
 version = "0.1.0"
 dependencies = [
  "base64 0.12.2",
+ "cfg-if",
  "futures-util",
  "jsonwebtoken",
  "log 0.4.8",
