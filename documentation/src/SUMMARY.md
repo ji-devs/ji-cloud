@@ -17,6 +17,7 @@
   - [Storybook](./setup/storybook/storybook.md)
   - [Load Balancer](./setup/load-balancer/load_balancer.md)
   - [Frontend](./setup/frontend/frontend.md)
+  - [CORS](./setup/cors/cors.md)
 
 - [Engineering](./engineering/engineering.md)
   - [Dev Mode Commands](./engineering/commands/commands.md)

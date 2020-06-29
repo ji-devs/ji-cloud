@@ -6,9 +6,9 @@ const cwd = sh.pwd().toString();
 
 const getBucket = () => {
     switch(process.argv[2]) {
-        case "--frontend": return "ji-cloud-frontend-origin-eu-001";
+        case "--frontend-release": return "ji-cloud-frontend-origin-eu-001";
         case "--frontend-sandbox": return "ji-cloud-sandbox-frontend-origin-eu-001";
-        case "--uploads": return "ji-cloud-uploads-origin-eu-001";
+        case "--uploads-release": return "ji-cloud-uploads-origin-eu-001";
         case "--uploads-sandbox": return "ji-cloud-sandbox-uploads-origin-eu-001";
         case "--media": return "ji-cloud-media-origin-eu-001";
     }
@@ -18,10 +18,14 @@ const getBucket = () => {
 
 const getConfig = bucket => {
     switch(process.argv[2]) {
-        case "--frontend": 
+        case "--frontend-release": 
+        case "--frontend-sandbox": 
+            return "storage-frontend-cors.json";
+        case "--uploads-release": 
+        case "--uploads-sandbox": 
+            return "storage-uploads-cors.json";
         case "--media": 
-        case "--uploads": 
-            return "storage-app-cors.json";
+            return "storage-media-cors.json";
     }
 
     return null;
@@ -45,7 +49,7 @@ if(bucket === null || configFile === null || action === null) {
     return;
 }
 
-const configPath = path.resolve(cwd, "build-utils", configFile);
+const configPath = path.resolve(cwd, configFile);
 
 if(action === "set") {
     execSync(`gsutil cors set ${configPath} gs://${bucket}`, {stdio:[0,1,2]});

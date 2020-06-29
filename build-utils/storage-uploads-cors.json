@@ -1,0 +1,31 @@
+[
+    {
+        "origin": [
+            "https://sandbox.jicloud.org", 
+            "https://jicloud.org", 
+            "http://localhost:8081", 
+            "http://localhost:8082"
+        ],
+        "responseHeader": [
+            "Origin", 
+            "Accept", 
+            "X-Upload-Content-Type", 
+            "X-Requested-With", 
+            "Authorization", 
+            "Content-Type", 
+            "Content-Length", 
+            "Accept-Encoding", 
+            "X-CSRF-Token",
+            "Access-Control-Allow-Credentials"
+        ],
+        "method": [
+            "GET", 
+            "HEAD", 
+            "PUT", 
+            "DELETE", 
+            "POST", 
+            "OPTIONS"
+        ],
+        "maxAgeSeconds": 1 
+    }
+]
