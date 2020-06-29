@@ -5,7 +5,7 @@ const REMOTE_STATIC = isDev
         : "https://media.jicloud.org";
 
 
-const REMOTE_UI = `${REMOTE_STATIC}/app/ui`;
+const REMOTE_UI = `${REMOTE_STATIC}/ui`;
 
 const plugins = [
     require('postcss-import'),

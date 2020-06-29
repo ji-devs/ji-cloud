@@ -2,7 +2,7 @@ use once_cell::sync::OnceCell;
 use std::fmt;
 use cfg_if::cfg_if;
 
-pub const MEDIA_UI_PATH:&'static str = "app/ui";
+pub const MEDIA_UI_PATH:&'static str = "ui";
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
 #[derive(Clone)]
