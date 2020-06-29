@@ -38,8 +38,7 @@ impl RemoteTarget {
     pub fn media_url_base(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:4102",
-            Self::Sandbox => "https://storage.googleapis.com/ji-cloud-eu",
-            Self::Release => "https://storage.googleapis.com/ji-cloud-eu",
+            Self::Sandbox | Self::Release => "https://media.jicloud.org",
         }
     }
 

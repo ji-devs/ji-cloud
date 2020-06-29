@@ -7,6 +7,12 @@ Release and sandbox are on google cloud and require access through google-cloud-
 
 The connection string needs to be set in different places depending on the project scope, which is covered in the rest of this Setup chapter
 
+# Cloud Sql Proxy
+
+Although the username, password, and database name are set in [.env](../dot-env/dot_env.md) files, the database instance name needs to be passed as a commandline arg to cloud-sql-proxy.
+
+Set this in `build-utils/package.json`. Note that the port and instance should match `SQL_PROXY_PORT` and `DB_INSTANCE_*` in [runtime settings](../runtime-settings/runtime_settings.md)
+
 # Database Migration
 
 While the diesel migrations are setup in the Rust project that needs the schemas, actually running the migrations on the target database is done via a standalone tool: `build-utils/db_migrations`

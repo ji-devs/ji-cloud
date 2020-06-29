@@ -27,8 +27,9 @@ The `build-utils` folder needs a `.env` file with:
 
 LOCAL_CDN_MEDIA_DIR="[PATH-TO-MEDIA-CDN-FOLDER]"
 LOCAL_CDN_PORT=4102
+
 REMOTE_CDN_MEDIA_BUCKET="[MEDIA_BUCKET]"
 ```
 
-The `MEDIA_BUCKET` by default is "ji-cloud-eu"
+The `REMOTE_CDN_MEDIA_BUCKET` isn't actually used right now due to the [media sync strategy](../media/media.md)
 

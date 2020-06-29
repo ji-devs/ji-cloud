@@ -122,7 +122,7 @@ impl Settings {
     }
 
     pub fn spa_url(&self, app:&str, path:&str) -> String {
-        format!("{}/spa/{}/{}", self.remote_target.media_url_base(), app, path)
+        format!("{}/{}/{}", self.remote_target.frontend_url_base(), app, path)
     }
     
 }

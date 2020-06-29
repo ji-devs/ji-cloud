@@ -6,7 +6,11 @@ const cwd = sh.pwd().toString();
 
 const getBucket = () => {
     switch(process.argv[2]) {
-        case "--app": return "ji-cloud-eu";
+        case "--frontend": return "ji-cloud-frontend-origin-eu-001";
+        case "--frontend-sandbox": return "ji-cloud-sandbox-frontend-origin-eu-001";
+        case "--uploads": return "ji-cloud-uploads-origin-eu-001";
+        case "--uploads-sandbox": return "ji-cloud-sandbox-uploads-origin-eu-001";
+        case "--media": return "ji-cloud-media-origin-eu-001";
     }
 
     return null;
@@ -14,7 +18,10 @@ const getBucket = () => {
 
 const getConfig = bucket => {
     switch(process.argv[2]) {
-        case "--app": return "storage-app-cors.json";
+        case "--frontend": 
+        case "--media": 
+        case "--uploads": 
+            return "storage-app-cors.json";
     }
 
     return null;

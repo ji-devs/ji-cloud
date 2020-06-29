@@ -30,3 +30,7 @@ Deployment is done via the top-level Makefile.toml as well as Dockerfiles as nee
 The PROJECT_ID and other variables are hardcoded directly in these files as needed (even if that's the process of setting as an env var)
 
 If adjusting, remember to change sandbox vs. release :)
+
+### Github Actions
+
+A new github action needs to be created for each frontend wasm project. Simply copy/paste from one of the existing actions

@@ -2,7 +2,7 @@ const isDev = process.env["NODE_ENV"] === "development";
 
 const REMOTE_STATIC = isDev
         ? 'http://localhost:4102'
-        : "https://storage.googleapis.com/ji-cloud-eu";
+        : "https://media.jicloud.org";
 
 
 const REMOTE_UI = `${REMOTE_STATIC}/app/ui`;
