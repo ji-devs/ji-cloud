@@ -10,26 +10,31 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     console.log(`got purge request for object: ${obj.name} in bucket ${obj.bucket} filename: ${fileName}`);
     const file = storage.bucket(obj.bucket).file(obj.name);
 
-    file.exists().then(exists => exists[0])
-        .then(exists => {
-            if(!exists) {
-                console.log(`${fileName} doesn't exist in storage, so not setting cacheControl`);
-                return null;
-            } else {
-                return storage.bucket(obj.bucket).file(obj.name).setMetadata({
-                    cacheControl: 'max-age=0, s-maxage=86400',
-                })
-            }
-        })
-        .then(() => fetch(completeObjectUrl, { method: 'PURGE'}))
-        .then(resp => {
-            if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
-            console.log(`Purged ${fileName}, ID ${data.id}`);
-        })
-        .catch(err => {
+    try {
+        const existsData = await file.exists();
+        const exists = existsData[0];
+
+        if(!exists) {
+            console.log(`${fileName} doesn't exist in storage, so not setting cacheControl`);
+        } else {
+            console.log(`${fileName} exists, so setting cacheControl`);
+            await storage.bucket(obj.bucket).file(obj.name).setMetadata({
+                cacheControl: 'max-age=0, s-maxage=86400',
+            });
+        }
+        console.log(`making purge request for ${completeObjectUrl}`);
+
+        const resp = await fetch(completeObjectUrl, { method: 'PURGE'});
+
+        if (!resp.ok) {
+            throw new Error('Unexpected status ' + resp.status);
+        }
+        
+        console.log(`Purged ${fileName}, ID ${data.id}`);
+    } catch(err) {
             console.error("got error in purge!");
             console.error(err);
-        });
+    }
 };
 
 //is actually on sandbox (since it's for devs)
