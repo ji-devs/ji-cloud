@@ -3,23 +3,32 @@ const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 
 const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
-  const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
-  const fileName = obj.name.replace(/^\/+/, '');
-  const completeObjectUrl = `${baseUrl}/${fileName}`;
+    const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
+    const fileName = obj.name.replace(/^\/+/, '');
+    const completeObjectUrl = `${baseUrl}/${fileName}`;
 
-  storage.bucket(obj.bucket).file(obj.name).setMetadata({
-    cacheControl: 'max-age=0, s-maxage=86400',
-  })
-  .then(() => fetch(completeObjectUrl, { method: 'PURGE'}))
-  .then(resp => {
-    if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
-    console.log(`Purged ${fileName}, ID ${data.id}`);
-  })
-  .catch(err => {
-    console.error("got error in purge!");
-    console.error(err);
-  });
+    const file = storage.bucket(obj.bucket).file(obj.name);
 
+    file.exists(exists => exists[0])
+        .then(exists => {
+            if(!exists) {
+                console.log(`${fileName} doesn't exist in storage, so not setting cacheControl`);
+                return null;
+            } else {
+                return storage.bucket(obj.bucket).file(obj.name).setMetadata({
+                    cacheControl: 'max-age=0, s-maxage=86400',
+                })
+            }
+        })
+        .then(() => fetch(completeObjectUrl, { method: 'PURGE'}))
+        .then(resp => {
+            if (!resp.ok) throw new Error('Unexpected status ' + resp.status);
+            console.log(`Purged ${fileName}, ID ${data.id}`);
+        })
+        .catch(err => {
+            console.error("got error in purge!");
+            console.error(err);
+        });
 };
 
 //is actually on sandbox (since it's for devs)
