@@ -7,10 +7,10 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     const fileName = obj.name.replace(/^\/+/, '');
     const completeObjectUrl = `${baseUrl}/${fileName}`;
 
-    console.log(`got purge request for object: ${obj.name} filename: ${fileName}`);
+    console.log(`got purge request for object: ${obj.name} in bucket ${obj.bucket} filename: ${fileName}`);
     const file = storage.bucket(obj.bucket).file(obj.name);
 
-    file.exists(exists => exists[0])
+    file.exists().then(exists => exists[0])
         .then(exists => {
             if(!exists) {
                 console.log(`${fileName} doesn't exist in storage, so not setting cacheControl`);
