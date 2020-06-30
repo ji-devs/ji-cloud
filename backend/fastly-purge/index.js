@@ -7,6 +7,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     const fileName = obj.name.replace(/^\/+/, '');
     const completeObjectUrl = `${baseUrl}/${fileName}`;
 
+    console.log(`got purge request for object: ${obj.name} filename: ${fileName}`);
     const file = storage.bucket(obj.bucket).file(obj.name);
 
     file.exists(exists => exists[0])
