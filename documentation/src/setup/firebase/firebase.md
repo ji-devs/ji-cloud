@@ -2,7 +2,10 @@
 
 The firebase side should be connected to the google cloud, i.e. both release and sandbox projects
 
-## Frontend Auth Config
+Make sure to follow the firebase config - e.g. to allow the domains for oauth
+
+
+## Frontend Config
 
 Edit `frontend/user/js/firebase.js` and put in the config for both sandbox and release
 
