@@ -7,6 +7,7 @@
 - [Directory Structure](./directory-structure/directory_structure.md)
 
 - [Setup](./setup/setup.md)
+  - [Requirements](./setup/requirements/requirements.md)
   - [Google Cloud](./setup/google_cloud/google_cloud.md)
   - [.env files](./setup/dot-env/dot_env.md)
   - [Runtime Settings](./setup/runtime-settings/runtime_settings.md)

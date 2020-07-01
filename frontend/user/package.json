@@ -4,19 +4,20 @@
   "name": "app",
   "version": "0.1.0",
   "scripts": {
-    "build:release": "npm run clean && rollup --config rollup.release.js",
-	"build:sandbox": "npm run clean && rollup --config rollup.sandbox.js",
+    "build:release": "npm run clean && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
+    "build:sandbox": "npm run clean && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js",
     "dev": "npm run _devfiles && run-p _mediaserver _watch",
     "clean": "rimraf ./dist",
-    "_watch": "rollup --config rollup.dev.js --watch",
+    "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
     "_mediaserver": "cd ../../build-utils && npm run local-media-server",
     "_devfiles": "cd ../../build-utils && npm run frontend-dev-files -- user"
   },
   "dependencies": {
     "@wasm-tool/rollup-plugin-rust": "^1.0.3",
+    "cross-env": "^7.0.2",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
-    "rollup": "^2.13.1"
+    "rollup": "^2.18.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
