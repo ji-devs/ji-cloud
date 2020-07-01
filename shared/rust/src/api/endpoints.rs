@@ -37,7 +37,7 @@ pub mod user {
         type Err = ();
         
         fn endpoint_str() -> &'static str {
-            "/user/signin"
+            "user/signin"
         }
     }
 
@@ -57,7 +57,7 @@ pub mod user {
         type Err = ();
         
         fn endpoint_str() -> &'static str {
-            "/user/single-sign-on"
+            "user/single-sign-on"
         }
     }
 
@@ -77,7 +77,7 @@ pub mod user {
         type Err = RegisterError;
         
         fn endpoint_str() -> &'static str {
-            "/user/register"
+            "user/register"
         }
     }
 
