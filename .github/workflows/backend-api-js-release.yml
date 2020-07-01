@@ -5,11 +5,7 @@ on:
     branches: [ master ]
     paths:
     - 'backend/api-js/**'
-
-  pull_request:
-    branches: [ master ]
-    paths:
-    - 'backend/api-js/**'
+    - 'shared/js/**'
 
 jobs:
   bundle:

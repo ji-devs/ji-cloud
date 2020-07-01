@@ -5,11 +5,7 @@ on:
     branches: [ master ]
     paths:
     - 'frontend/user/**'
-
-  pull_request:
-    branches: [ master ]
-    paths:
-    - 'frontend/user/**'
+    - 'shared/rust/**'
 
 jobs:
   bundle:

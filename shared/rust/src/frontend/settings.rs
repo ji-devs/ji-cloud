@@ -22,7 +22,7 @@ impl RemoteTarget {
     pub fn api_url_base(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:8081",
-            Self::Sandbox => "https://sandbox.api.jicloud.org",
+            Self::Sandbox => "https://api.sandbox.jicloud.org",
             Self::Release => "https://api.jicloud.org",
         }
     }
@@ -30,7 +30,7 @@ impl RemoteTarget {
     pub fn api_js_url_base(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:8082",
-            Self::Sandbox => "https://sandbox.api-js.jicloud.org",
+            Self::Sandbox => "https://api-js.sandbox.jicloud.org",
             Self::Release => "https://api-js.jicloud.org",
         }
     }

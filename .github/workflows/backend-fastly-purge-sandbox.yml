@@ -5,11 +5,7 @@ on:
     branches: [ sandbox ]
     paths:
     - 'backend/fastly-purge/**'
-
-  pull_request:
-    branches: [ sandbox ]
-    paths:
-    - 'backend/fastly-purge/**'
+    - 'shared/js/**'
 
 jobs:
   bundle:

@@ -5,11 +5,7 @@ on:
     branches: [ master ]
     paths:
     - 'backend/pages/**'
-
-  pull_request:
-    branches: [ master ]
-    paths:
-    - 'backend/pages/**'
+    - 'shared/rust/**'
 
 jobs:
   bundle:

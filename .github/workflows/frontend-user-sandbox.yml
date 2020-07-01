@@ -5,11 +5,7 @@ on:
     branches: [ sandbox ]
     paths:
     - 'frontend/user/**'
-
-  pull_request:
-    branches: [ sandbox ]
-    paths:
-    - 'frontend/user/**'
+    - 'shared/rust/**'
 
 jobs:
   bundle:
