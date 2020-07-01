@@ -1,7 +1,7 @@
 pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
 pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
 pub const COOKIE_DOMAIN:&'static str = "jicloud.org";
-pub const CORS_ORIGINS:[&'static str;1] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
+pub const CORS_ORIGINS:[&'static str;2] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
 
 const REMOTE_DB_USER:&'static str = "postgres";
 const REMOTE_DB_NAME:&'static str = "jicloud";
