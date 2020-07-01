@@ -18,6 +18,7 @@
   - [Load Balancer](./setup/load-balancer/load_balancer.md)
   - [Frontend](./setup/frontend/frontend.md)
   - [CORS](./setup/cors/cors.md)
+  - [Firebase](./setup/firebase/firebase.md)
 
 - [Engineering](./engineering/engineering.md)
   - [Dev Mode Commands](./engineering/commands/commands.md)
