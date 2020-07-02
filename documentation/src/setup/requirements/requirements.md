@@ -20,5 +20,6 @@ postgres (for the client library):
 Google Cloud SDK (https://cloud.google.com/sdk/docs/quickstarts)
 
 Google SQL Proxy (https://cloud.google.com/sql/docs/mysql/sql-proxy)
+  Make sure to put it somewhere in the path and name it cloud_sql_proxy(.exe)
 
 

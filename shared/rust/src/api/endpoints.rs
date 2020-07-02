@@ -34,7 +34,7 @@ pub mod user {
     impl ApiEndpoint for Signin {
         type Req = ();
         type Res = SigninSuccess;
-        type Err = ();
+        type Err = NoSuchUserError;
         
         fn endpoint_str() -> &'static str {
             "user/signin"

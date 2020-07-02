@@ -8,14 +8,14 @@ use warp::{
 };
 use ji_cloud_shared::{
     auth::{SigninSuccess, SingleSignOnSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
-    user::UserRole,
+    user::{UserRole, NoSuchUserError},
     api::result::ResultResponse,
     api::endpoints::{
         ApiEndpoint,
         user::SingleSignOn,
     }
 };
-use crate::reject::{CustomWarpRejection, NoAuth, AuthCreate, InternalError};
+use crate::reject::{CustomWarpRejection, NoAuth, InternalError};
 use crate::db::Db;
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
@@ -34,9 +34,21 @@ pub async fn handle_signin_credentials(user_id:String, pool:PgPool) -> Result<im
 
     let db = get_db(pool)?;
 
-    let user = super::queries::get_by_id(&db, &user_id).ok_or(NoAuth::rejection())?;
+    match super::queries::get_by_id(&db, &user_id) {
+        Some(user) => reply_signin_auth(user_id, user.roles, false),
+        None => {
 
-    reply_signin_auth(user_id, user.roles, false)
+            //Since the happy path is a WithHeader reply, need wrap the sad path too
+            let reply = warp::reply::json(&ResultResponse::Err::<(), NoSuchUserError>(NoSuchUserError{}));
+            //TODO: https://github.com/seanmonstar/warp/issues/587#issuecomment-633961421
+            //let reply = warp::reply::WithHeader { header: None, reply };
+
+            //placeholder for now until we can really have empty WithHeader
+            let reply = warp::reply::with_header(reply, "foo", "bar");
+            Ok(reply)
+        }
+    }
+
 
 }
 

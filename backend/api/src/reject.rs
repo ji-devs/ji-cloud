@@ -35,10 +35,6 @@ pub struct NoAuth;
 impl Reject for NoAuth {}
 
 #[derive(Debug, Default)]
-pub struct AuthCreate;
-impl Reject for AuthCreate {}
-
-#[derive(Debug, Default)]
 pub struct PgPoolError;
 impl Reject for PgPoolError {}
 
@@ -63,9 +59,6 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
     } else if let Some(NoAuth) = err.find() {
         code = StatusCode::UNAUTHORIZED;
         message = "UNAUTHORIZED";
-    } else if let Some(AuthCreate) = err.find() {
-        code = StatusCode::UNAUTHORIZED;
-        message = "AUTH_CREATE";
     } else if let Some(PgPoolError) = err.find() {
         code = StatusCode::SERVICE_UNAVAILABLE;
         message = "DATABASE POOL ERROR";
@@ -86,6 +79,8 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
         code = StatusCode::INTERNAL_SERVER_ERROR;
         message = "UNHANDLED_REJECTION";
     }
+
+    log::info!("rejection code: {} message: {}", code, message);
 
     let json = warp::reply::json(&HttpStatus {
         code: code.as_u16(),
