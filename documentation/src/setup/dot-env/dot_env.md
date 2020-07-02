@@ -33,3 +33,15 @@ REMOTE_CDN_MEDIA_BUCKET="[MEDIA_BUCKET]"
 
 The `REMOTE_CDN_MEDIA_BUCKET` isn't actually used right now due to the [media sync strategy](../media/media.md)
 
+## Db LOCAL
+
+If using the local docker db (not a requirement), then the `build-utils/db_local` folder needs a `.env` file with:
+
+POSTGRES_PASSWORD=[LOCAL DATABASE PASS]
+POSTGRES_USER=[LOCAL DATABASE USERNAME]
+POSTGRES_DB=[LOCAL DATABASE NAME]
+
+Note that unlike the other `.env` files, there are no quotes here
+
+Otherwise the values should match the other `.env` values above
+
