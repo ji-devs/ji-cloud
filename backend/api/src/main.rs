@@ -1,8 +1,6 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-#[macro_use]
-extern crate diesel;
 
 mod models;
 mod settings;
@@ -12,7 +10,6 @@ mod user;
 mod reject;
 mod reply;
 mod db;
-mod schema;
 #[macro_use]
 mod utils;
 

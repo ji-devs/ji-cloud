@@ -20,7 +20,7 @@ use diesel_migrations::embed_migrations;
 use options::{Opts, Target, get_target};
 use structopt::StructOpt;
 
-embed_migrations!("../../backend/api/migrations");
+embed_migrations!("./migrations");
 
 #[tokio::main]
 async fn main() {

@@ -2,6 +2,7 @@ pub const MAX_SIGNIN_COOKIE:&'static str = "1209600"; // 2 weeks
 pub const JSON_BODY_LIMIT:u64 = 16384; //1024 * 16
 pub const COOKIE_DOMAIN:&'static str = "jicloud.org";
 pub const CORS_ORIGINS:[&'static str;2] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
+pub const DB_POOL_CONNECTIONS:u32 = 5;
 
 const REMOTE_DB_USER:&'static str = "postgres";
 const REMOTE_DB_NAME:&'static str = "jicloud";
@@ -9,6 +10,7 @@ const SQL_PROXY_PORT:u32 = 6432; //must match the port number in build-utils/pac
 
 const DB_INSTANCE_SANDBOX:&'static str = "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox";
 const DB_INSTANCE_RELEASE:&'static str = "ji-cloud:europe-west1:ji-cloud-002";
+
 
 impl RemoteTarget {
     pub fn google_credentials_env_name(&self) -> &'static str {

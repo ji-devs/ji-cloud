@@ -16,23 +16,21 @@ use ji_cloud_shared::{
     }
 };
 use crate::reject::{CustomWarpRejection, NoAuth, InternalError};
-use crate::db::Db;
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use crate::settings::SETTINGS;
 use super::auth::reply_signin_auth;
 use crate::reply::HandlerResult;
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode};
-use crate::db::{pg_pool, PgPool, get_db};
+use sqlx::postgres::PgPool;
 
 //the user_id is already validated in terms of firebase auth
 //now we need to check with the database
 //login handler doesn't use the usual wrapper since it needs to set the header
-pub async fn handle_signin_credentials(user_id:String, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
+pub async fn handle_signin_credentials(user_id:String, db:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
 
     log::info!("Firebase is valid! user id is: {}", user_id);
 
-    let db = get_db(pool)?;
 
     match super::queries::get_by_id(&db, &user_id) {
         Some(user) => reply_signin_auth(user_id, user.roles, false),

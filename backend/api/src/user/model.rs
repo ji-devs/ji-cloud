@@ -1,6 +1,4 @@
-use diesel::prelude::*;
 use ji_cloud_shared::user::User;
-
 
 impl From<UserQuery> for User {
     fn from(u:UserQuery) -> Self {
@@ -15,7 +13,6 @@ impl From<UserQuery> for User {
     }
 }
 
-#[derive(Queryable)]
 pub struct UserQuery {
     pub id: String,
     pub first_name: String,

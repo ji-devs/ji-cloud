@@ -1,9 +1,6 @@
-use std::convert::Infallible;
 use futures_util::future::TryFutureExt;
 use warp::{
-    http::StatusCode,
     Filter, 
-    reject::Reject,
     Rejection
 };
 use ji_cloud_shared::{
@@ -13,14 +10,13 @@ use ji_cloud_shared::{
 };
 use serde::{Serialize, Deserialize};
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};
-use std::collections::HashMap;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use super::queries::{get_by_email, get_by_id};
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
 use crate::settings::SETTINGS;
 use ji_cloud_shared::backend::settings::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
-use crate::db::{pg_pool, PgPool, get_db};
+use sqlx::postgres::PgPool;
 use crate::{async_clone_fn, async_clone_cb};
 
 //This can be used to early exit if there's no bearer token
@@ -32,13 +28,14 @@ fn has_bearer_token() -> impl Filter<Extract = (String,), Error = warp::Rejectio
 }
 
 
-pub fn has_auth_full(pool:PgPool) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
+
+pub fn has_auth_full(db:PgPool) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
     warp::filters::cookie::cookie(JWT_COOKIE_NAME)
         .and(
             warp::header::<String>(CSRF_HEADER_NAME)
             .or_else(|_| async {Err(NoAuth::rejection())})
         )
-        .and_then(async_clone_fn!(pool; |cookie, csrf| {
+        .and_then(async_clone_fn!(db; |cookie, csrf| {
             let claims = 
                 get_claims(cookie)
                     .and_then(|claims| {
@@ -49,7 +46,6 @@ pub fn has_auth_full(pool:PgPool) -> impl Filter<Extract = (AuthClaims,), Error 
                         }
                     })?;
             
-                let db = get_db(pool)?;
 
                 if get_by_id(&db, &claims.id).is_none() {
                     Err(NoAuth::rejection())
@@ -80,12 +76,11 @@ pub fn has_auth_no_db() -> impl Filter<Extract = (AuthClaims,), Error = Rejectio
 }
 
 
-pub fn has_auth_cookie_and_db_no_csrf(pool:PgPool) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
+pub fn has_auth_cookie_and_db_no_csrf(db:PgPool) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
     warp::filters::cookie::cookie(JWT_COOKIE_NAME)
-        .and_then(async_clone_fn!(pool; |cookie| {
+        .and_then(async_clone_fn!(db; |cookie| {
             let claims = get_claims(cookie)?;
             
-            let db = get_db(pool)?;
 
             if get_by_id(&db, &claims.id).is_none() {
                 Err(NoAuth::rejection())

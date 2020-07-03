@@ -5,9 +5,6 @@
 [config]
 skip_core_tasks = true
 
-[env]
-OPENSSL_DIR="C:\\Program Files\\OpenSSL-Win64"
-
 ###################
 ## Test          ##
 ###################

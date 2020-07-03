@@ -37,7 +37,7 @@ cfg_if! {
             // useful shortly). Thus, we'll need to convert our `warp::Filter` into
             // a `hyper::service::MakeService` for use with a `hyper::server::Server`.
             let make_svc = hyper::service::make_service_fn(|_: _| async { Ok::<_, Infallible>(
-                warp::service(get_routes())
+                warp::service(get_routes().await)
             ) });
 
             let mut listenfd = ListenFd::from_env();
@@ -54,7 +54,7 @@ cfg_if! {
         }
     } else { 
         pub async fn start_server() {
-            warp::serve(get_routes())
+            warp::serve(get_routes().await)
                 .run(get_addr())
                 .await;
         }

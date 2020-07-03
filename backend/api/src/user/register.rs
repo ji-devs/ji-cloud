@@ -3,23 +3,17 @@ use ji_cloud_shared::{
     auth::{RegisterRequest, RegisterError, SigninSuccess},
     api::result::ResultResponse,
 };
-use crate::db::Db;
-use diesel::prelude::*;
-use diesel::insert_into;
 use super::queries::{get_by_email, get_by_id};
 use super::auth::reply_signin_auth;
-use crate::db::{pg_pool, PgPool, get_db};
 use crate::reply::HandlerResult;
+use sqlx::postgres::PgPool;
 
 //the user_id is already validated in terms of firebase auth
 
 //register handler doesn't use the usual wrapper since it needs to set the header
-pub async fn handle_register(user_id:String, req:RegisterRequest, pool:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
-    use crate::schema::users::dsl::*;
+pub async fn handle_register(user_id:String, req:RegisterRequest, db:PgPool) -> Result<impl warp::Reply, warp::Rejection> {
 
-    log::info!("user id: {}", user_id);
 
-    let db = get_db(pool)?;
 
     let err:Option<RegisterError> = {
         if get_by_id(&db, &user_id).is_some() {
@@ -49,6 +43,12 @@ pub async fn handle_register(user_id:String, req:RegisterRequest, pool:PgPool) -
             Ok(reply)
         },
         None => {
+            log::error!("TODO - get create user record");
+            //for now, until we bring db back
+            let reply = warp::reply::json(&ResultResponse::Err::<(), ()>(()));
+            let reply = warp::reply::with_header(reply, "foo", "bar");
+            Ok(reply)
+            /*
             insert_into(users)
                 .values((
                     id.eq(&user_id),
@@ -61,6 +61,7 @@ pub async fn handle_register(user_id:String, req:RegisterRequest, pool:PgPool) -
                 .map_err(|_| DbQueryError::rejection())?;
             
             reply_signin_auth(user_id, Vec::new(), true)
+            */
         }
     }
 }
