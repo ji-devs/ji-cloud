@@ -13,7 +13,6 @@ use ji_cloud_shared::{
 use crate::reply::ReplyExt;
 use crate::user::{self, auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_firebase_auth }};
 use crate::reject::handle_rejection;
-use crate::db::pg_pool;
 use crate::{async_clone_fn, async_clone_cb};
 use super::cors::get_cors;
 
@@ -31,8 +30,7 @@ fn path_from_str(uri:&str) -> impl Filter + Clone {
 
 
 //All of our routes
-pub async fn get_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    let pool = pg_pool().await;
+pub async fn get_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     auth_routes(pool.clone())
         .or(protected_routes(pool.clone()))
         .or(open_routes(pool.clone()))

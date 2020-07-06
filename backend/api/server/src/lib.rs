@@ -1,11 +1,23 @@
+//see: https://github.com/rust-lang/cargo/issues/8010
+#![cfg_attr(feature = "quiet", allow(warnings))]
+
+pub mod settings;
+mod models;
+mod logger;
+mod user;
+mod reject;
+mod reply;
 mod routes;
 mod cors;
+#[macro_use]
+mod utils;
 
 use std::net::SocketAddr;
 use std::env;
 use cfg_if::cfg_if;
 use routes::get_routes;
 use crate::settings::SETTINGS;
+use sqlx::postgres::PgPool;
 
 use warp:: {
     http::{
@@ -32,13 +44,16 @@ cfg_if! {
 
         //auto reload on code change
         //see: https://github.com/seanmonstar/warp/blob/master/examples/autoreload.rs
-        pub async fn start_server() {
+        pub async fn start(pool:PgPool) {
             // hyper let's us build a server from a TcpListener (which will be
             // useful shortly). Thus, we'll need to convert our `warp::Filter` into
             // a `hyper::service::MakeService` for use with a `hyper::server::Server`.
-            let make_svc = hyper::service::make_service_fn(|_: _| async { Ok::<_, Infallible>(
-                warp::service(get_routes().await)
-            ) });
+            let make_svc = hyper::service::make_service_fn(move |_: _| {
+                let pool = pool.clone();
+                async move { 
+                    Ok::<_, Infallible>(warp::service(get_routes(pool).await)) 
+                }
+            });
 
             let mut listenfd = ListenFd::from_env();
             // if listenfd doesn't take a TcpListener (i.e. we're not running via
@@ -53,8 +68,8 @@ cfg_if! {
             server.serve(make_svc).await.unwrap();
         }
     } else { 
-        pub async fn start_server() {
-            warp::serve(get_routes().await)
+        pub async fn start(pool:PgPool) {
+            warp::serve(get_routes(pool).await)
                 .run(get_addr())
                 .await;
         }

@@ -1,0 +1,24 @@
+[package]
+name = "ji-cloud-api"
+version = "0.1.0"
+authors = ["dakom <david.komer@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+server = { path = "../server" }
+handler = { path = "../handler" }
+tokio = { version = "^0.2", features = ["full"] }
+sqlx = { version = "0.3", default-features = false, features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono"] }
+simplelog = "^0.8"
+cfg-if = "^0.1"
+log = "^0.4"
+dotenv = "^0.15"
+ji_cloud_shared = {path = "../../../shared/rust", features=["backend"]}
+
+[features]
+local = ["server/local", "handler/local"]
+release = ["server/release", "handler/release"]
+sandbox = ["server/sandbox", "handler/sandbox"]
+quiet = ["server/quiet", "handler/quiet"]
+sqlproxy = []
+local-quiet = ["local", "quiet"]
