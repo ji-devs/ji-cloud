@@ -36,6 +36,7 @@
   - [Uploads](./engineering/uploads/uploads.md)
 
 - [Design](./design/design.md)
+  - [Wireframes](./design/wireframes.md)
   - [Themes](./design/themes.md)
 
 - [Localization](./localization/localization.md)
