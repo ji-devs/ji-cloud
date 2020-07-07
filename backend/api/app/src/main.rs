@@ -2,8 +2,6 @@
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
 mod logger;
-mod db;
-mod settings;
 
 use dotenv::dotenv;
 
@@ -11,12 +9,6 @@ use dotenv::dotenv;
 async fn main() {
     dotenv().ok();
     logger::init_logger();
-    let settings = settings::init().await;
-    server::settings::init().await;
-    handler::settings::init().await;
-
-    let db_pool = db::get_pool(&settings).await;
-
-    server::start(db_pool).await;
+    server::start().await;
     log::info!("app started!");
 }

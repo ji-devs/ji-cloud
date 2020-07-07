@@ -3,5 +3,5 @@
 members = [
     "app",
     "server",
-    "handler",
+    "actions",
 ]

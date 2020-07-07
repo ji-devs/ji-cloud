@@ -54,6 +54,8 @@ cfg_if! {
 
 
 async fn _init(remote_target:RemoteTarget, db_target:DbTarget) {
+    actions::settings::init().await;
+
     log::info!("initializing settings for remote_target: {:?}, db_target: {:?}", remote_target, db_target);
 
     let (token, project_id) = get_access_token_and_project_id(remote_target.google_credentials_env_name()).await.expect("couldn't get access token and project id!");

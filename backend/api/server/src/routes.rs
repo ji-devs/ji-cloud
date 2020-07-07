@@ -11,9 +11,10 @@ use ji_cloud_shared::{
     backend::settings::JSON_BODY_LIMIT
 };
 use crate::reply::ReplyExt;
-use crate::user::{self, auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_firebase_auth }};
+use crate::auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_firebase_auth};
 use crate::reject::handle_rejection;
 use crate::{async_clone_fn, async_clone_cb};
+use crate::endpoints::user;
 use super::cors::get_cors;
 
 
@@ -44,12 +45,12 @@ pub fn auth_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error
     warp::post()
         .and(path!("user" / "signin"))
         .and(has_firebase_auth())
-        .and_then(async_clone_fn!(pool; |user| { user::signin::handle_signin_credentials(user, pool).await }))
+        .and_then(async_clone_fn!(pool; |user| { user::handle_signin_credentials(user, pool).await }))
     .or(
         //signin to get a new jwt only requires the cookie (use case is single signin)
         path!("user" / "get-sso-jwt")
             .and(has_auth_cookie_and_db_no_csrf(pool.clone()))
-            .and_then(|auth| async move { user::signin::handle_get_sso_jwt(auth).await.warp_reply() })
+            .and_then(|auth| async move { user::handle_get_sso_jwt(auth).await.warp_reply() })
     )
     .or(
         //registration only requires the firebase jwt
@@ -57,7 +58,7 @@ pub fn auth_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error
             .and(path!("user" / "register"))
             .and(has_firebase_auth())
             .and(json_body_limit())
-            .and_then(async_clone_fn!(pool; |user, form| { user::register::handle_register(user, form, pool).await }))
+            .and_then(async_clone_fn!(pool; |user, form| { user::handle_register(user, form, pool).await }))
     )
 }
 
@@ -65,7 +66,7 @@ pub fn auth_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error
 pub fn protected_routes(pool:PgPool) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     path!("user" / "profile")
         .and(has_auth_no_db())
-        .and_then(async_clone_fn!(pool; |auth| { user::profile::handle_get_profile(auth, pool).await.warp_reply() }))
+        .and_then(async_clone_fn!(pool; |auth| { user::handle_get_profile(auth, pool).await.warp_reply() }))
 }
 
 //Open/Public routes

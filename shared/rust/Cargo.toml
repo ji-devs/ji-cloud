@@ -59,7 +59,7 @@ backend = [
     "jsonwebtoken",
     "reqwest",
     "futures-util",
-    "percent-encoding"
+    "percent-encoding",
 ]
 
 has_google_auth = []

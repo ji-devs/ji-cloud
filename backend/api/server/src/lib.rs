@@ -2,13 +2,14 @@
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
 pub mod settings;
-mod models;
+mod db;
 mod logger;
-mod user;
 mod reject;
 mod reply;
 mod routes;
 mod cors;
+mod auth;
+mod endpoints;
 #[macro_use]
 mod utils;
 
@@ -28,6 +29,12 @@ use warp:: {
     Filter,
 };
 
+pub async fn start() {
+    crate::settings::init().await;
+    let db_pool = db::get_pool(&SETTINGS.get().unwrap()).await;
+    _start(db_pool).await;
+}
+
 cfg_if! {
     if #[cfg(feature = "local")] {
         use listenfd::ListenFd;
@@ -44,7 +51,7 @@ cfg_if! {
 
         //auto reload on code change
         //see: https://github.com/seanmonstar/warp/blob/master/examples/autoreload.rs
-        pub async fn start(pool:PgPool) {
+        pub async fn _start(pool:PgPool) {
             // hyper let's us build a server from a TcpListener (which will be
             // useful shortly). Thus, we'll need to convert our `warp::Filter` into
             // a `hyper::service::MakeService` for use with a `hyper::server::Server`.
@@ -68,7 +75,7 @@ cfg_if! {
             server.serve(make_svc).await.unwrap();
         }
     } else { 
-        pub async fn start(pool:PgPool) {
+        pub async fn _start(pool:PgPool) {
             warp::serve(get_routes(pool).await)
                 .run(get_addr())
                 .await;
