@@ -88,6 +88,7 @@ pub fn db_connection_string(secret_db_pass:&str, db_target:DbTarget) -> String {
 
             let full_socket_path = utf8_percent_encode(&format!("{}/{}", socket_path, instance_connection), NON_ALPHANUMERIC).to_string();
 
+            log::warn!("connection string is: postgres://{}:PASSWORD@{}/{}", REMOTE_DB_USER, full_socket_path, REMOTE_DB_NAME);
             let connection_string = format!("postgres://{}:{}@{}/{}", REMOTE_DB_USER, secret_db_pass, full_socket_path, REMOTE_DB_NAME);
 
             connection_string
