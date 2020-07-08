@@ -69,7 +69,7 @@ COPY ./shared ./shared
 COPY ./backend/api ./backend/api
 
 # Fix permissions on source code.
-# RUN sudo chown -R rust:rust /home/rust
+RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api/app
