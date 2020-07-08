@@ -25,10 +25,10 @@ log = "^0.4"
 futures-util = "0.3.4"
 rand = "0.7"
 ji_cloud_shared = {path = "../../../shared/rust", features=["backend"]}
-openssl = { version = "^0.10", features = ["vendored"] }
+openssl = { version = "^0.10", features = ["vendored"], optional = true }
 
 [features]
 local = ["ji_cloud_shared/local"]
-release = ["ji_cloud_shared/release"]
-sandbox = ["ji_cloud_shared/sandbox"]
+release = ["ji_cloud_shared/release", "openssl"]
+sandbox = ["ji_cloud_shared/sandbox", "openssl"]
 quiet = []
