@@ -12,6 +12,7 @@ dependencies = [
  "lazy_static",
  "log 0.4.8",
  "once_cell",
+ "openssl",
  "percent-encoding",
  "rand 0.7.3",
  "reqwest",
@@ -699,6 +700,8 @@ dependencies = [
  "dotenv",
  "ji_cloud_shared",
  "log 0.4.8",
+ "openssl",
+ "openssl-probe",
  "server",
  "simplelog",
  "tokio",
@@ -763,9 +766,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.71"
+version = "0.2.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9457b06509d27052635f90d6466700c65095fdf75409b3fbdd903e988b886f49"
+checksum = "a9f8082297d534141b30c8d39e9b1773713ab50fdbe4ff30f750d063b3bfd701"
 
 [[package]]
 name = "linked-hash-map"

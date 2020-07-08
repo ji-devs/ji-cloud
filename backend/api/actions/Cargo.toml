@@ -26,6 +26,9 @@ futures-util = "0.3.4"
 rand = "0.7"
 ji_cloud_shared = {path = "../../../shared/rust", features=["backend"]}
 
+# Needed for Postgres.
+openssl = "*"
+
 [features]
 local = ["ji_cloud_shared/local"]
 release = ["ji_cloud_shared/release"]
