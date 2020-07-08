@@ -31,9 +31,19 @@ jobs:
         with:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+
+      - name: download cargo-make release
+        run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: extract cargo-make to folder 
+        run: unzip -j cargo-make.zip -d cargo-make
       
-      - name: install cargo make 
-        run: cargo install cargo-make
+      - name: add cargo-make to path
+        uses: dakom/actions-path@master
+        with:
+          path: ${{github.workspace}}/cargo-make
 
       - name: build and deploy 
         run: cargo make release-pages
