@@ -2,6 +2,19 @@ const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 
+const hasExtension = ext => target => {
+  const idx = target.lastIndexOf('.');
+  if(idx === -1 || idx === target.length-1) {
+    return false;
+  }
+
+  const str = target.substr(idx + 1);
+
+  return str === ext;
+}
+
+const hasWasmExtension = hasExtension("wasm");
+
 const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
     const fileName = obj.name.replace(/^\/+/, '');
@@ -15,12 +28,17 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
         const exists = existsData[0];
 
         if(!exists) {
-            console.log(`${fileName} doesn't exist in storage, so not setting cacheControl`);
+            console.log(`${fileName} doesn't exist in storage, so not setting metadata`);
         } else {
-            console.log(`${fileName} exists, so setting cacheControl`);
-            await storage.bucket(obj.bucket).file(obj.name).setMetadata({
+            console.log(`${fileName} exists, so setting metadata`);
+            let metaData = {
                 cacheControl: 'max-age=0, s-maxage=86400',
-            });
+            };
+            if(hasWasmExtension(fileName)) {
+                console.log(`${fileName} is wasm, so changing contentType`);
+                metaData.contentType = 'application/application/wasm';
+            }
+            await storage.bucket(obj.bucket).file(obj.name).setMetadata(metaData);
         }
         console.log(`making purge request for ${completeObjectUrl}`);
 
