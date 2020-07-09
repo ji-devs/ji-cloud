@@ -28,7 +28,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
         const exists = existsData[0];
 
         if(!exists) {
-            console.log(`${fileName} doesn't exist in storage, so not setting metadata`);
+            console.warn(`${fileName} doesn't exist in storage (kinda weird), so not setting metadata`);
         } else {
             console.log(`${fileName} exists, so setting metadata`);
             let metaData = {
