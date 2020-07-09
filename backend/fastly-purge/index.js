@@ -36,7 +36,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
             };
             if(hasWasmExtension(fileName)) {
                 console.log(`${fileName} is wasm, so changing contentType`);
-                metaData.contentType = 'application/application/wasm';
+                metaData.contentType = 'application/wasm';
             }
             await storage.bucket(obj.bucket).file(obj.name).setMetadata(metaData);
         }
