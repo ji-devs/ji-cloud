@@ -5,7 +5,7 @@ use std::{
 };
 use ji_cloud_shared::backend::{
     google::{get_secret, get_access_token_and_project_id},
-    settings::{RemoteTarget, DbTarget, db_connection_string},
+    settings::{RemoteTarget, DbTarget, DbCredentials},
 };
 use once_cell::sync::OnceCell;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
@@ -25,7 +25,7 @@ pub struct Settings {
     //Keeping a string is a stop-gap measure for now, not ideal
     pub jwt_decoding_key:String,
     pub inter_server_secret:String,
-    pub db_connection_string:String,
+    pub db_credentials:DbCredentials,
 }
 
 cfg_if! {
@@ -101,7 +101,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, db_target),
+            db_credentials: DbCredentials::new(&db_pass, db_target),
         }
     }
     pub fn new_sandbox(db_target:DbTarget, jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -114,7 +114,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, db_target),
+            db_credentials: DbCredentials::new(&db_pass, db_target),
         }
     }
     pub fn new_release(db_target:DbTarget, jwt_encoding_key:EncodingKey, jwt_decoding_key: String, inter_server_secret:String, db_pass:String) -> Self {
@@ -127,7 +127,7 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_connection_string: db_connection_string(&db_pass, db_target),
+            db_credentials: DbCredentials::new(&db_pass, db_target),
         }
     }
 }
