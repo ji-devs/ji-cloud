@@ -5,13 +5,14 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use ji_cloud_shared::{
+use shared::{
     user::UserRole,
     auth::SigninSuccess,
-    frontend::{
-        routes::{Route, UserRoute},
-        path
-    }
+};
+
+use core::{
+    routes::{Route, UserRoute},
+    path
 };
 
 use super::signin::{

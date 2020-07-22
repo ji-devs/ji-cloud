@@ -5,39 +5,21 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use ji_cloud_shared::{
+use shared::{
     user::UserRole,
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
-    frontend::{
-        routes::{Route, UserRoute},
-        path
-    }
 };
+use core::{
+    routes::{Route, UserRoute},
+    path
+};
+
 use crate::{
     pages::signin::on_signin_success
 };
 
 use super::register::register_google;
 
-/*use std::sync::Arc;
-use lazy_static::lazy_static;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal}
-};
-
-use ji_cloud_shared::{
-    user::UserRole,
-    auth::{RegisterRequest, RegisterSuccess},
-    fetch::ResultResponse
-};
-use wasm_bindgen::{UnwrapThrowExt, JsCast};
-
-use dominator::{Dom, svg, class, text, html, clone, events, link};
-use web_sys::Url;
-use crate::auth::{Auth, register_google};
-use std::rc::Rc;
-*/
 #[derive(Clone)]
 enum State {
     Input,

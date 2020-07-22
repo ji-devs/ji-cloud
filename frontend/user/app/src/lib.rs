@@ -34,7 +34,7 @@ cfg_if! {
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let settings = ji_cloud_shared::frontend::settings::init();
+    let settings = core::settings::init();
     log::info!("{:?}", settings);
     utils::firebase::setup(&settings);
 

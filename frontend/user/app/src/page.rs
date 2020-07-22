@@ -3,7 +3,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use ji_cloud_shared::frontend::routes::{Route, UserRoute};
+use core::routes::{Route, UserRoute};
 use wasm_bindgen::UnwrapThrowExt;
 use dominator::{Dom, class, html, clone, events};
 use web_sys::Url;

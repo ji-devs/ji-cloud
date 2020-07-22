@@ -1,20 +1,22 @@
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::{UnwrapThrowExt, JsCast};
-use ji_cloud_shared::{
+use shared::{
     user::UserRole,
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
     api::{
         result::ResultResponse,
         endpoints::user::Register
     },
-    frontend::fetch
 };
+use core::fetch;
+
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use crate::{
     utils::{
         firebase::{get_firebase_register_google},
     },
 };
+use core::fetch::user::fetch_register;
 
 #[derive(Deserialize)]
 struct GoogleRegisterInfo {
@@ -38,7 +40,7 @@ pub fn register_google<Happy: FnOnce(RegisterSuccess) + 'static, Sad: FnOnce(Reg
                     email: user.email
                 };
 
-                match Register::fetch(&user.token, &req).await {
+                match fetch_register(&user.token, &req).await {
                     Ok(resp) => on_happy(resp),
                     Err(err) => {
                         log::info!("Hmmm got error...");

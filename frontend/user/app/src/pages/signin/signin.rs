@@ -1,17 +1,17 @@
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::{UnwrapThrowExt, JsCast};
-use ji_cloud_shared::{
+use shared::{
     user::UserRole,
     auth::SigninSuccess,
     api::{
         result::ResultResponse,
         endpoints::user::Signin
     },
-    frontend::{
-        fetch, 
-        storage,
-        routes::{Route, UserRoute}
-    }
+};
+use core::{
+    fetch, 
+    storage,
+    routes::{Route, UserRoute}
 };
 use js_sys::Promise;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
@@ -19,6 +19,7 @@ use crate::{
     utils::firebase::get_firebase_signin_google,
 };
 
+use core::fetch::user::fetch_signin;
 pub fn on_signin_success(csrf:&str) {
     storage::save_csrf_token(csrf);
     Route::User(UserRoute::Profile).redirect();
@@ -37,7 +38,7 @@ fn signin<Happy: FnOnce(SigninSuccess) + 'static, Sad: FnOnce() + 'static>(token
         match JsFuture::from(token_promise).await {
             Ok(token) => {
                 let token = token.as_string().unwrap_throw();
-                match Signin::fetch(&token).await {
+                match fetch_signin(&token).await {
                     Ok(status) => on_happy(status), 
                     Err(err) => on_sad() 
                 }

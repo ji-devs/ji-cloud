@@ -6,11 +6,11 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal, MapFuture, MutableSignalCloned },
 };
-use ji_cloud_shared::{
+use shared::{
     user::{UserRole, User, NoSuchUserError},
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
-    frontend::fetch
 };
+use core::fetch;
 use crate::{
     pages::signin::on_signin_success
 };

@@ -1,3 +1,5 @@
+pub mod user;
+
 /*
     There are a few top-level rejections (esp auth-related)
     Everything else is not a rejection, rather it's always resolved (as ResultResponse)
@@ -6,15 +8,13 @@
 */
 
 use wasm_bindgen::prelude::*;
-use crate::api::result::HttpStatus;
+use shared::api::result::{HttpStatus, ResultResponse};
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
-use crate::api::result::ResultResponse;
-use crate::auth::CSRF_HEADER_NAME;
-use crate::frontend::storage::load_csrf_token; 
+use shared::auth::CSRF_HEADER_NAME;
+use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-
 
 #[derive(Debug)]
 pub enum Error {

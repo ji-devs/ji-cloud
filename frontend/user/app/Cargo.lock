@@ -14,20 +14,21 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
+ "config",
  "console_error_panic_hook",
+ "core",
  "dominator",
  "futures",
  "futures-signals",
  "gloo-events",
  "gloo-timers",
- "ji_cloud_shared",
  "js-sys",
  "jsonwebtoken",
  "log",
- "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "shared",
  "strum",
  "strum_macros",
  "wasm-bindgen",
@@ -79,6 +80,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "config"
+version = "0.1.0"
+
+[[package]]
 name = "console_error_panic_hook"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -86,6 +91,27 @@ checksum = "b8d976903543e0c48546a91908f21588a680a8c8f984df9a5d69feccb2b2a211"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "core"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "config",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "serde_repr",
+ "shared",
+ "strum",
+ "strum_macros",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -261,25 +287,6 @@ name = "itoa"
 version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8b7a7c0c47db5545ed3fef7468ee7bb5b74691498139e4b3f6a20685dc6dd8e"
-
-[[package]]
-name = "ji_cloud_shared"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
- "js-sys",
- "log",
- "once_cell",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "serde_repr",
- "strum",
- "strum_macros",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
 
 [[package]]
 name = "js-sys"
@@ -531,6 +538,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "log",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]

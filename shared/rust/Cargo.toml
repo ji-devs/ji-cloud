@@ -1,5 +1,5 @@
 [package]
-name = "ji_cloud_shared"
+name = "shared"
 version = "0.1.0"
 authors = ["David Komer <david.komer@gmail.com>"]
 edition = "2018"
@@ -33,10 +33,6 @@ dotenv = "^0.15"
 
 [features]
 default = []
-sandbox = []
-release = []
-local = []
-
 backend = [
     "base64",
     "jsonwebtoken",

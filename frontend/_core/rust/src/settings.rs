@@ -1,7 +1,7 @@
 use once_cell::sync::OnceCell;
 use std::fmt;
 use cfg_if::cfg_if;
-
+use config::RemoteTarget;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 

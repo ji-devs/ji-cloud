@@ -6,7 +6,7 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal, MapFuture, MutableSignalCloned },
 };
-use ji_cloud_shared::{
+use shared::{
     user::{UserRole, User, NoSuchUserError},
     auth::{RegisterRequest, RegisterSuccess, RegisterError},
     api::{
@@ -17,6 +17,7 @@ use ji_cloud_shared::{
 use crate::{
     pages::signin::on_signin_success
 };
+use core::fetch::user::fetch_profile;
 
 pub(super) type ProfileResult = Option<Result<User, NoSuchUserError>>;
 
@@ -26,7 +27,7 @@ pub(super) fn profile_signal(profile:&Mutable<ProfileResult>) -> impl Signal<Ite
         .signal_cloned()
         .map_future(|profile:ProfileResult| async move {
             match profile {
-                None => Profile::fetch().await,
+                None => fetch_profile().await,
                 Some(profile) => profile
             }
         })

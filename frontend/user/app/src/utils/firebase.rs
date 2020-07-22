@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
-use ji_cloud_shared::frontend::settings::Settings;
+use core::settings::Settings;
 
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
