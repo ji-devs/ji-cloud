@@ -13,8 +13,8 @@
             "rootPathPrefix": "@utils"
           },
 		  {
-            "rootPathSuffix": "../../_common",
-            "rootPathPrefix": "@common"
+            "rootPathSuffix": "../../_core",
+            "rootPathPrefix": "@core"
           }
         ]
       }

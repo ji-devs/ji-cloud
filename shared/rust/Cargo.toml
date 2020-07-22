@@ -36,23 +36,6 @@ default = []
 sandbox = []
 release = []
 local = []
-frontend = [
-    "wasm-bindgen", 
-    "js-sys", 
-    "wasm-bindgen-futures", 
-    "serde-wasm-bindgen",
-    "once_cell",
-    'web-sys/Url',
-    'web-sys/Request',
-    'web-sys/RequestInit',
-    'web-sys/RequestCredentials',
-    'web-sys/Response',
-    'web-sys/RequestMode',
-    'web-sys/Headers',
-    'web-sys/Window',
-    'web-sys/Location',
-    'web-sys/Storage'
-]
 
 backend = [
     "base64",

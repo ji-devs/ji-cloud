@@ -1,5 +1,5 @@
 import {story, storyAbout} from "@utils/stories";
-import {renderTemplate} from "@common/js/render";
+import {renderTemplate} from "@core/js/render";
 import img_element from "@templates/tests/image_element.html";
 import img_css from "@templates/tests/image_css.html";
 

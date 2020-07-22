@@ -1,7 +1,7 @@
 import {story, storyAbout} from "@utils/stories";
-import {renderTemplate as tmpl} from "@common/js/render";
+import {renderTemplate as tmpl} from "@core/js/render";
 import header from "@templates/header.html";
-import button from "@common/templates/button.html";
+import button from "@core/templates/button.html";
 
 export default {
   title: 'Global Header',

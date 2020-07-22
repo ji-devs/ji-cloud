@@ -9,8 +9,8 @@
     "dev": "npm run _devfiles && run-p _mediaserver _watch",
     "clean": "rimraf ./dist",
     "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
-    "_mediaserver": "cd ../../build-utils && npm run local-media-server",
-    "_devfiles": "cd ../../build-utils && npm run frontend-dev-files -- user"
+    "_mediaserver": "cd ../../../build-utils && npm run local-media-server",
+    "_devfiles": "cd ../../../build-utils && npm run frontend-dev-files -- user"
   },
   "dependencies": {
     "@wasm-tool/rollup-plugin-rust": "^1.0.3",
