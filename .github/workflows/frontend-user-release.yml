@@ -4,8 +4,11 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'frontend/user/**'
-    - 'shared/rust/**'
+    - 'config/**'
+    - 'frontend/_common/rust/**'
+    - 'frontend/_common/templates/**'
+    - 'frontend/user/app/**'
+    - 'frontend/user/templates/**'
 
 jobs:
   bundle:
