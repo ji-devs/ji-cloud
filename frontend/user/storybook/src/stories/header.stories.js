@@ -1,6 +1,7 @@
 import {story, storyAbout} from "@utils/stories";
-import {renderTemplate} from "@common/templates";
+import {renderTemplate as tmpl} from "@common/js/render";
 import header from "@templates/header.html";
+import button from "@common/templates/button.html";
 
 export default {
   title: 'Global Header',
@@ -8,7 +9,9 @@ export default {
 
 export const User = storyAbout(
     "user", 
-    () => renderTemplate(header, {signin: ""}), 
+    () => tmpl(header, {
+        signin: tmpl(button, {label: "profile"})
+    }), 
     `## Logging in
       Happens with the auth system
     `
@@ -16,5 +19,7 @@ export const User = storyAbout(
 
 export const Guest = story(
     "guest", 
-    () => renderTemplate(header, {signin: "sign in here"})
+    () => tmpl(header, {
+        signin: tmpl(button, {label: "sign in"})
+    }), 
 );

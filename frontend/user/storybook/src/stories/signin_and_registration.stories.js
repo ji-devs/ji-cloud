@@ -1,5 +1,5 @@
 import {story, storyAbout} from "@utils/stories";
-import {renderTemplate} from "@common/templates";
+import {renderTemplate} from "@common/js/render";
 import signIn from "@templates/signin_and_registration/signin.html";
 import register from "@templates/signin_and_registration/register.html";
 

@@ -13,7 +13,7 @@
             "rootPathPrefix": "@utils"
           },
 		  {
-            "rootPathSuffix": "../../_common/js",
+            "rootPathSuffix": "../../_common",
             "rootPathPrefix": "@common"
           }
         ]
