@@ -1,0 +1,23 @@
+{
+  "plugins": [
+    [
+      "babel-plugin-root-import",
+      {
+        "paths": [
+          {
+            "rootPathSuffix": "../templates",
+            "rootPathPrefix": "@templates"
+          },
+          {
+            "rootPathSuffix": "./src/utils",
+            "rootPathPrefix": "@utils"
+          },
+		  {
+            "rootPathSuffix": "../../_common/js",
+            "rootPathPrefix": "@common"
+          }
+        ]
+      }
+    ]
+  ]
+}

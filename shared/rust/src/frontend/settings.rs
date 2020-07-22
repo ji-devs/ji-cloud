@@ -2,50 +2,13 @@ use once_cell::sync::OnceCell;
 use std::fmt;
 use cfg_if::cfg_if;
 
-pub const MEDIA_UI_PATH:&'static str = "ui";
+
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
 #[derive(Clone)]
 pub struct Settings {
     pub remote_target: RemoteTarget,
     pub firebase_dev: bool,
-}
-
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub enum RemoteTarget {
-    Local,
-    Sandbox,
-    Release,
-}
-
-impl RemoteTarget {
-    pub fn api_url_base(&self) -> &'static str {
-        match self {
-            Self::Local => "http://localhost:8081",
-            Self::Sandbox => "https://api.sandbox.jicloud.org",
-            Self::Release => "https://api.jicloud.org",
-        }
-    }
-
-    pub fn api_js_url_base(&self) -> &'static str {
-        match self {
-            Self::Local => "http://localhost:8082",
-            Self::Sandbox => "https://api-js.sandbox.jicloud.org",
-            Self::Release => "https://api-js.jicloud.org",
-        }
-    }
-
-    pub fn media_url_base(&self) -> &'static str {
-        match self {
-            Self::Local => "http://localhost:4102",
-            Self::Sandbox | Self::Release => "https://media.jicloud.org",
-        }
-    }
-
-
-    pub fn host_url_base(&self) -> Option<&'static str> {
-        None
-    }
 }
 
 cfg_if! {

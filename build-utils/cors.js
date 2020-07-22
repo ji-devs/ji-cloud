@@ -2,15 +2,15 @@ const { execSync } = require('child_process');
 const path = require('path');
 const sh = require('shelljs');
 const cwd = sh.pwd().toString();
-
+const config = require("../config/config.js");
 
 const getBucket = () => {
     switch(process.argv[2]) {
-        case "--frontend-release": return "ji-cloud-frontend-origin-eu-001";
-        case "--frontend-sandbox": return "ji-cloud-sandbox-frontend-origin-eu-001";
-        case "--uploads-release": return "ji-cloud-uploads-origin-eu-001";
-        case "--uploads-sandbox": return "ji-cloud-sandbox-uploads-origin-eu-001";
-        case "--media": return "ji-cloud-media-origin-eu-001";
+        case "--frontend-release": return config.BUCKET_FRONTEND_RELEASE;
+        case "--frontend-sandbox": return config.BUCKET_FRONTEND_SANDBOX;
+        case "--uploads-release": return config.BUCKET_UPLOADS_RELEASE;
+        case "--uploads-sandbox": return config.BUCKET_UPLOADS_SANDBOX;
+        case "--media": return config.BUCKET_MEDIA;
     }
 
     return null;

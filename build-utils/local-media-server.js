@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../config/.env' });
 
 if(!process.env.LOCAL_CDN_MEDIA_DIR || process.env.LOCAL_CDN_MEDIA_DIR === "") {
     console.log("Local Media server: set [LOCAL_CDN_MEDIA_DIR] in .env");
