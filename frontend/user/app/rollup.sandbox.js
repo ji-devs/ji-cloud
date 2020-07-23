@@ -1,5 +1,5 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
-import {URL_FRONTEND_SANDBOX} from "../../shared/js/frontend/settings";
+const {URL_FRONTEND_SANDBOX} = require("../../../config/js");
 
 const NAME = "user";
 
