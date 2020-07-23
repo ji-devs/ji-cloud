@@ -1,7 +1,9 @@
+const configPath = process.env["CONFIG_PATH"] ? process.env["CONFIG_PATH"] : "./config";
+
 const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
-const CONFIG = require("../../config/js");
+const CONFIG = require(configPath);
 
 const hasExtension = ext => target => {
   const idx = target.lastIndexOf('.');

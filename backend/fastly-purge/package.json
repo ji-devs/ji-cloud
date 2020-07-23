@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "cross-env CONFIG_PATH='../../config/js' node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,5 +13,8 @@
   "dependencies": {
     "@google-cloud/storage": "^5.1.1",
     "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.2"
   }
 }
