@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 use std::env;
 use cfg_if::cfg_if;
 use routes::get_routes;
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 
 use warp:: {
     http::{
@@ -63,7 +63,7 @@ cfg_if! {
 
 fn get_addr() -> SocketAddr {
 
-    let mut port = SETTINGS.get().unwrap().port;
+    let mut port = SETTINGS.get().unwrap().pages_port;
 
     match env::var("PORT") {
         Ok(p) => {
@@ -74,6 +74,6 @@ fn get_addr() -> SocketAddr {
         }
         Err(_e) => {},
     };
-    
+
     ([0, 0, 0, 0], port).into()
 }

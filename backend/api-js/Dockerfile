@@ -4,7 +4,7 @@
 FROM node:current-slim as tests
 RUN mkdir -p ./backend/api-js
 COPY ./shared ./shared
-COPY ./config ./config
+COPY ./config/js ./config/js
 COPY ./backend/_core/js ./backend/_core/js
 COPY ./backend/api-js ./backend/api-js
 WORKDIR /backend/api-js
@@ -17,7 +17,7 @@ CMD [ "npm", "test" ]
 FROM node:current-slim as release 
 RUN mkdir -p ./backend/api-js
 COPY ./shared ./shared
-COPY ./config ./config
+COPY ./config/js ./config/js
 COPY ./backend/_core/js ./backend/_core/js
 COPY ./backend/api-js ./backend/api-js
 WORKDIR /backend/api-js
@@ -30,7 +30,7 @@ CMD [ "npm", "start" ]
 FROM node:current-slim as sandbox 
 RUN mkdir -p ./backend/api-js
 COPY ./shared ./shared
-COPY ./config ./config
+COPY ./config/js ./config/js
 COPY ./backend/_core/js ./backend/_core/js
 COPY ./backend/api-js ./backend/api-js
 WORKDIR /backend/api-js

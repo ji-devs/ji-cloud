@@ -9,6 +9,8 @@ FROM ekidd/rust-musl-builder:latest AS tests
 
 RUN mkdir -p ./backend/pages
 COPY ./shared ./shared
+COPY ./config/rust ./config/rust
+COPY ./backend/_core/rust ./backend/_core/rust
 COPY ./backend/pages ./backend/pages
 
 # Fix permissions on source code.
@@ -28,6 +30,8 @@ FROM ekidd/rust-musl-builder:latest AS release-builder
 
 RUN mkdir -p ./backend/pages
 COPY ./shared ./shared
+COPY ./config/rust ./config/rust
+COPY ./backend/_core/rust ./backend/_core/rust
 COPY ./backend/pages ./backend/pages
 
 
@@ -71,6 +75,8 @@ FROM ekidd/rust-musl-builder:latest AS sandbox-builder
 
 RUN mkdir -p ./backend/pages
 COPY ./shared ./shared
+COPY ./config/rust ./config/rust
+COPY ./backend/_core/rust ./backend/_core/rust
 COPY ./backend/pages ./backend/pages
 
 

@@ -4,10 +4,10 @@ use serde_json::json;
 use futures_util::future::TryFutureExt;
 use serde::{Serialize, Deserialize};
 use chrono::{Datelike, Timelike, Utc};
-use ji_cloud_shared::backend::google::{get_secret, get_access_token_and_project_id};
+use core::google::{get_secret, get_access_token_and_project_id};
 use crate::reject::{CustomWarpRejection, RequiredData};
 use crate::loader::{load_string, load_json};
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 
 #[derive(Serialize, Deserialize)]
 struct Info {

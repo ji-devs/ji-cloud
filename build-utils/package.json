@@ -6,13 +6,14 @@
     "frontend-dev-files": "node ./frontend-dev-files.js",
     "cloud-sql-proxy-sandbox": "cloud_sql_proxy --instances=ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox=tcp:6432",
     "cloud-sql-proxy-release": "cloud_sql_proxy --instances=ji-cloud:europe-west1:ji-cloud-002=tcp:6432",
-    "cors:frontend": "npm run _cors:frontend-release && npm run _cors:frontend-sandbox",
+    "cors": "npm-run-all -p _cors:frontend _cors:uploads _cors:media",
+    "_cors:frontend": "npm run _cors:frontend-release && npm run _cors:frontend-sandbox",
     "_cors:frontend-release": "node ./cors.js --frontend-release --set",
     "_cors:frontend-sandbox": "node ./cors.js --frontend-sandbox --set",
-    "cors:uploads": "npm run _cors:uploads-release && npm run _cors:uploads-sandbox",
+    "_cors:uploads": "npm run _cors:uploads-release && npm run _cors:uploads-sandbox",
     "_cors:uploads-release": "node ./cors.js --uploads-release --set",
     "_cors:uploads-sandbox": "node ./cors.js --uploads-sandbox --set",
-    "cors:media": "node ./cors.js --media --set"
+    "_cors:media": "node ./cors.js --media --set"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -21,5 +22,8 @@
     "fs-extra": "^9.0.1",
     "serve-index": "^1.9.1",
     "shelljs": "^0.8.4"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }

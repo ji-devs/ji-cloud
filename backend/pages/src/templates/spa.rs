@@ -4,7 +4,7 @@ use serde_json::json;
 use futures_util::future::TryFutureExt;
 use serde::{Serialize, Deserialize};
 use chrono::{Datelike, Timelike, Utc};
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 use crate::reject::{CustomWarpRejection, RequiredData};
 use crate::loader::{load_string, load_json};
 
@@ -23,7 +23,7 @@ struct PageInfo {
 pub async fn spa_template(hb:Arc<Handlebars<'_>>, spa:SpaPage) -> Result<impl warp::Reply, warp::Rejection> {
 
     let info = PageInfo {
-        AppJs: SETTINGS.get().unwrap().spa_url(spa.as_ref(), "js/index.js"),
+        AppJs: SETTINGS.get().unwrap().remote_target.spa_url(spa.as_ref(), "js/index.js"),
         Firebase: match spa {
             SpaPage::User => true,
             _ => false

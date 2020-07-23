@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const sh = require('shelljs');
 const cwd = sh.pwd().toString();
-const config = require("../config/config.js");
+const config = require("../config/js");
 
 const getBucket = () => {
     switch(process.argv[2]) {

@@ -50,12 +50,24 @@ impl RemoteTarget {
             Self::Sandbox | Self::Release => "https://media.jicloud.org",
         }
     }
+
+	pub fn pages_url(&self) -> &'static str {
+        match self {
+            Self::Local => "http://localhost:8080",
+            Self::Sandbox => "https://sandbox.jicloud.org",
+            Self::Release => "https://jicloud.org",
+        }
+    }
 	
 	pub fn frontend_url(&self) -> &'static str {
         match self {
             Self::Local | Self::Sandbox => "https://frontend.sandbox.jicloud.org",
             Self::Release => "https://frontend.jicloud.org",
         }
+    }
+
+    pub fn spa_url(&self, app:&str, path:&str) -> String {
+        format!("{}/{}/{}", self.frontend_url(), app, path)
     }
 
     pub fn host(&self) -> Option<&'static str> {

@@ -3,8 +3,8 @@ use warp::{
     Filter,
     path
 };
-use crate::settings::{SETTINGS, Settings};
-use ji_cloud_shared::backend::settings::JSON_BODY_LIMIT;
+use core::settings::{SETTINGS, Settings};
+use config::JSON_BODY_LIMIT;
 use crate::reject::handle_rejection;
 use crate::{async_clone_fn, async_clone_cb};
 use crate::templates::register_templates;

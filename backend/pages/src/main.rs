@@ -1,8 +1,6 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-
-mod settings;
 mod logger;
 mod server;
 mod reject;
@@ -14,14 +12,15 @@ mod utils;
 
 use dotenv::dotenv;
 use server::start_server;
+use core::settings::SETTINGS;
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
+    dotenv::from_path("../../config/.env").ok();
 
     logger::init_logger();
 
-    settings::init().await; 
+    core::settings::init().await; 
 
     start_server().await;
 }

@@ -16,7 +16,8 @@ pub struct Settings {
     pub remote_target: RemoteTarget,
     pub db_target: DbTarget,
     pub local_insecure: bool,
-    pub port: u16,
+    pub api_port: u16,
+    pub pages_port: u16,
     pub epoch: Duration,
     pub jwt_encoding_key: EncodingKey,
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
@@ -73,7 +74,7 @@ async fn _init(remote_target:RemoteTarget, db_target:DbTarget) {
 
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "remote_target is [{:?}]. port is [{}]", self.remote_target, self.port)
+        write!(f, "remote_target is [{:?}]. api_port is [{}] pages_port is [{}]", self.remote_target, self.api_port, self.pages_port)
     }
 }
 fn get_epoch() -> Duration {
@@ -90,7 +91,8 @@ impl Settings {
             remote_target: RemoteTarget::Local,
             db_target, 
             local_insecure: true,
-            port: 8081,
+            api_port: std::env::var("LOCAL_API_PORT").expect("set LOCAL_API_PORT").parse().unwrap(),
+            pages_port: std::env::var("LOCAL_PAGES_PORT").expect("set LOCAL_PAGES_PORT").parse().unwrap(),
             epoch: get_epoch(),
             jwt_encoding_key,
             jwt_decoding_key,
@@ -102,7 +104,8 @@ impl Settings {
         Self {
             remote_target: RemoteTarget::Sandbox,
             db_target, 
-            port: 8080,
+            api_port: 8080,
+            pages_port: 8080,
             local_insecure: false,
             epoch: get_epoch(),
             jwt_encoding_key,
@@ -115,7 +118,8 @@ impl Settings {
         Self {
             remote_target: RemoteTarget::Release,
             db_target, 
-            port: 8080,
+            api_port: 8080,
+            pages_port: 8080,
             local_insecure: false,
             epoch: get_epoch(),
             jwt_encoding_key,

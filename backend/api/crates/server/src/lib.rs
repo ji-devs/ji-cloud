@@ -84,7 +84,7 @@ cfg_if! {
 
 fn get_addr() -> SocketAddr {
 
-    let mut port = SETTINGS.get().unwrap().port;
+    let mut port = SETTINGS.get().unwrap().api_port;
 
     match env::var("PORT") {
         Ok(p) => {

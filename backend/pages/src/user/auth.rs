@@ -6,17 +6,17 @@ use warp::{
     reject::Reject,
     Rejection
 };
-use ji_cloud_shared::{
+use shared::{
     auth::{SigninSuccess, RegisterSuccess, SingleSignOnSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserRole,
     api::result::ResultResponse,
-    backend::settings::{RemoteTarget, MAX_SIGNIN_COOKIE}
 };
+use config::{RemoteTarget, MAX_SIGNIN_COOKIE};
 use serde::{Serialize, Deserialize};
 use jsonwebtoken::{encode, Header, dangerous_unsafe_decode, Validation};
 use std::collections::HashMap;
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 use crate::{async_clone_fn, async_clone_cb};
 
 //This can be used to early exit if there's no bearer token
@@ -67,7 +67,7 @@ pub fn has_firebase_auth() -> impl Filter<Extract = (String,), Error = Rejection
 
             let response:JsApiResponse = 
                 reqwest::Client::new()
-                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().remote_target.js_api(), token))
+                    .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().remote_target.api_js_url(), token))
                     .header("SHARED_SERVER_SECRET", &SETTINGS.get().unwrap().inter_server_secret)
                     .send()
                     .and_then(|res| res.json::<JsApiResponse>())

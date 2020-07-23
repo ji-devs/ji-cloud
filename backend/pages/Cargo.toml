@@ -31,9 +31,9 @@ config = {path = "../../config/rust"}
 core = {path = "../_core/rust"}
 
 [features]
-local = ["listenfd"]
+local = ["listenfd", "core/local"]
 sqlproxy = []
 quiet = []
 local-quiet = ["local", "quiet"]
-release = []
-sandbox = []
+release = ["core/release"]
+sandbox = ["core/sandbox"]

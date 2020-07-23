@@ -19,8 +19,11 @@ const settings = require("./settings");
 
       app.use(bodyParser.json());
 
-      const port = process.env.PORT || 8082;
+      const port = process.env.PORT || process.env.LOCAL_API_JS_PORT;
 
+        if(port == null) {
+            throw new Error("set LOCAL_API_JS_PORT in env!");
+        }
       app.listen(port, () => {
         console.log('Ji Cloud API listening on port', port);
       });

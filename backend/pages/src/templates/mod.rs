@@ -5,7 +5,6 @@ pub mod info;
 
 use handlebars::Handlebars;
 use std::sync::Arc;
-use crate::settings::HANDLEBARS_PATH;
 
 pub fn register_templates() -> Arc<Handlebars<'static>> {
     let mut hb = Handlebars::new();
@@ -19,5 +18,5 @@ pub fn register_templates() -> Arc<Handlebars<'static>> {
 }
 
 fn get_path(path:&str) -> String {
-    format!("{}/{}", HANDLEBARS_PATH, path)
+    format!("./handlebars/{}", path)
 }
