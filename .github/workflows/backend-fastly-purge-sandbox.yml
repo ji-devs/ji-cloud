@@ -4,8 +4,8 @@ on:
   push:
     branches: [ sandbox ]
     paths:
+    - 'config/**'
     - 'backend/fastly-purge/**'
-    - 'shared/js/**'
 
 jobs:
   bundle:

@@ -4,8 +4,10 @@ on:
   push:
     branches: [ sandbox ]
     paths:
+    - 'config/**'
+    - 'shared/**'
+    - 'backend/_core/rust/**'
     - 'backend/api/**'
-    - 'shared/rust/**'
 
 jobs:
   bundle:

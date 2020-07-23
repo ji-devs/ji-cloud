@@ -4,6 +4,7 @@ on:
   push:
     branches: [ sandbox ]
     paths:
+    - 'config/**'
     - 'documentation/**'
 
 jobs:

@@ -5,8 +5,9 @@ on:
     branches: [ master ]
     paths:
     - 'config/**'
-    - 'frontend/_common/rust/**'
-    - 'frontend/_common/templates/**'
+    - 'shared/**'
+    - 'frontend/_core/rust/**'
+    - 'frontend/_core/templates/**'
     - 'frontend/user/app/**'
     - 'frontend/user/templates/**'
 

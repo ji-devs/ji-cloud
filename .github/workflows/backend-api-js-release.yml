@@ -4,8 +4,10 @@ on:
   push:
     branches: [ master ]
     paths:
+    - 'config/**'
+    - 'shared/**'
+    - 'backend/_core/js/**'
     - 'backend/api-js/**'
-    - 'shared/js/**'
 
 jobs:
   bundle:

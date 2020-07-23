@@ -5,8 +5,8 @@ on:
     branches: [ sandbox ]
     paths:
     - 'config/**'
-    - 'frontend/_common/js/**'
-    - 'frontend/_common/templates/**'
+    - 'frontend/_core/js/**'
+    - 'frontend/_core/templates/**'
     - 'frontend/user/storybook/**'
     - 'frontend/user/templates/**'
 
