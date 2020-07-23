@@ -1,5 +1,5 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
-import {FRONTEND_SERVER_SANDBOX} from "../../shared/js/frontend/settings";
+import {URL_FRONTEND_SANDBOX} from "../../shared/js/frontend/settings";
 
 const NAME = "user";
 
@@ -14,7 +14,7 @@ export default {
     },
     plugins: [
         rust({
-            serverPath: `${FRONTEND_SERVER_SANDBOX}/${NAME}/js/`,
+            serverPath: `${URL_FRONTEND_SANDBOX}/${NAME}/js/`,
 			cargoArgs: ["--features", "sandbox"],
             debug: false,
         }),

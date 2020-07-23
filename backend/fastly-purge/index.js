@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
+const CONFIG = require("../../config/js");
 
 const hasExtension = ext => target => {
   const idx = target.lastIndexOf('.');
@@ -57,14 +58,11 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     }
 };
 
-//is actually on sandbox (since it's for devs)
-exports.purgeDocs = makePurger("https://docs.jicloud.org");
+exports.purgeDocs = makePurger(CONFIG.URL_DOCS);
+exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
 
-//is actually on release (since it's for public)
-exports.purgeMedia = makePurger("https://media.jicloud.org");
+exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
+exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE);
 
-exports.purgeFrontendRelease = makePurger("https://frontend.jicloud.org");
-exports.purgeStorybookRelease = makePurger("https://storybook.jicloud.org");
-
-exports.purgeFrontendSandbox = makePurger("https://frontend.sandbox.jicloud.org");
-exports.purgeStorybookSandbox = makePurger("https://storybook.sandbox.jicloud.org");
+exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
+exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX);
