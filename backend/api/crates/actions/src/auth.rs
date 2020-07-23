@@ -1,5 +1,5 @@
 use futures_util::future::TryFutureExt;
-use ji_cloud_shared::{
+use shared::{
     auth::{SigninSuccess, RegisterSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserRole,
     api::result::ResultResponse
@@ -9,8 +9,8 @@ use jsonwebtoken as jwt;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use crate::user::get_by_id;
-use crate::settings::SETTINGS;
-use ji_cloud_shared::backend::settings::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
+use core::settings::SETTINGS;
+use config::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
 use sqlx::postgres::PgPool;
 
 pub enum Error {
@@ -77,7 +77,7 @@ pub async fn get_firebase_id(token:&str) -> Result<String, Error> {
 
     let response:JsApiResponse = 
         reqwest::Client::new()
-            .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().remote_target.js_api(), token))
+            .get(&format!("{}/validate-firebase-token/{}", SETTINGS.get().unwrap().remote_target.api_js_url(), token))
             .header("INTER_SERVER_SECRET", &SETTINGS.get().unwrap().inter_server_secret)
             .send()
             .and_then(|res| res.json::<JsApiResponse>())

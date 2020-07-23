@@ -1,7 +1,6 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-pub mod settings;
 mod db;
 mod logger;
 mod reject;
@@ -17,7 +16,7 @@ use std::net::SocketAddr;
 use std::env;
 use cfg_if::cfg_if;
 use routes::get_routes;
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 use sqlx::postgres::PgPool;
 
 use warp:: {
@@ -30,7 +29,7 @@ use warp:: {
 };
 
 pub async fn start() {
-    crate::settings::init().await;
+    core::settings::init().await;
     let db_pool = db::get_pool(&SETTINGS.get().unwrap()).await;
     _start(db_pool).await;
 }

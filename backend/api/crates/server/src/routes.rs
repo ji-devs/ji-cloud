@@ -6,10 +6,11 @@ use warp::{
     path,
 };
 
-use ji_cloud_shared::{
+use shared::{
     api::endpoints::user::{Signin,SingleSignOn,Register,Profile},
-    backend::settings::JSON_BODY_LIMIT
 };
+use config::JSON_BODY_LIMIT;
+
 use crate::reply::ReplyExt;
 use crate::auth::{has_auth_cookie_and_db_no_csrf, has_auth_no_db, has_firebase_auth};
 use crate::reject::handle_rejection;

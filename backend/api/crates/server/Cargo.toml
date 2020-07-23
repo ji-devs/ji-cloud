@@ -1,5 +1,5 @@
 [package]
-name = "actions"
+name = "server"
 version = "0.1.0"
 authors = ["dakom <david.komer@gmail.com>"]
 edition = "2018"
@@ -10,8 +10,11 @@ edition = "2018"
 once_cell = "1.4.0"
 percent-encoding = "2.1.0"
 simplelog = "^0.8"
+listenfd = {version = "^0.3", optional = true }
 jsonwebtoken = "^7.1"
 reqwest = { version = "^0.10", features = ["json"] }
+tokio = { version = "^0.2", features = ["full"] }
+warp = "^0.2"
 cfg-if = "^0.1"
 sqlx = { git = "https://github.com/launchbadge/sqlx", default-features = false, features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono"] }
 chrono = { version = "^0.4", features = ["serde"] }
@@ -24,11 +27,14 @@ lazy_static = "^1.4"
 log = "^0.4"
 futures-util = "0.3.4"
 rand = "0.7"
-ji_cloud_shared = {path = "../../../shared/rust", features=["backend"]}
+shared = {path = "../../../../shared/rust"}
+config = {path = "../../../../config/rust"}
+core = {path = "../../../_core/rust"}
+actions = {path = "../actions"}
 openssl = { version = "^0.10", features = ["vendored"], optional = true }
 
 [features]
-local = ["ji_cloud_shared/local"]
-release = ["ji_cloud_shared/release", "openssl"]
-sandbox = ["ji_cloud_shared/sandbox", "openssl"]
-quiet = []
+local = ["listenfd", "core/local", "actions/local"]
+release = ["core/release", "actions/release", "openssl"]
+sandbox = ["core/sandbox", "actions/sandbox", "openssl"]
+quiet = ["actions/quiet"]

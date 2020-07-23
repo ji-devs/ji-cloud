@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use ji_cloud_shared::api::result::ResultResponse;
+use shared::api::result::ResultResponse;
 use warp::reject::Rejection;
 
 pub trait ReplyExt<T: Serialize + DeserializeOwned,E: Serialize + DeserializeOwned> {

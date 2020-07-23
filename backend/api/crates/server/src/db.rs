@@ -1,6 +1,7 @@
-use sqlx::postgres::{PgPool, PgConnectOptions};
-use crate::settings::Settings;
-use ji_cloud_shared::backend::settings::{DbTarget, DbEndpoint, DB_POOL_CONNECTIONS};
+use sqlx::postgres::{PgPool, PgPoolOptions, PgConnectOptions};
+
+use core::settings::{DbTarget, DbEndpoint, Settings};
+use config::DB_POOL_CONNECTIONS;
 
 pub async fn get_pool(settings:&Settings) -> PgPool {
     //let db_connection_string = &settings.db_credentials.to_string();
@@ -9,24 +10,25 @@ pub async fn get_pool(settings:&Settings) -> PgPool {
 
     let credentials = &settings.db_credentials;
 
-    let options = PgConnectOptions::new()
+    let connect_options = PgConnectOptions::new()
         .username(&credentials.user)
         .password(&credentials.pass)
         .database(&credentials.dbname);
 
-    let options = match &credentials.endpoint {
+    let connect_options = match &credentials.endpoint {
         DbEndpoint::Tcp(host, port) => {
-            options.host(host).port(*port)
+            connect_options.host(host).port(*port)
         },
         DbEndpoint::Socket(path) => {
-            options.socket(path)
+            connect_options.socket(path)
         }
     };
 
-    PgPool::builder()
-        .max_size(n_connections)
-        .build_with(options)
+    PgPoolOptions::new()
+        .max_connections(n_connections)
+        .connect_with(connect_options)
         .await
         .expect("Postgres connection pool could not be created (local)")
+
 
 }

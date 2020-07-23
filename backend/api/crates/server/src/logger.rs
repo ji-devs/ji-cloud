@@ -1,4 +1,4 @@
-use crate::settings::SETTINGS;
+use core::settings::SETTINGS;
 use simplelog::*;
 use cfg_if::cfg_if;
 

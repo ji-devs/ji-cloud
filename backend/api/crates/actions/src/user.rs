@@ -1,4 +1,4 @@
-use ji_cloud_shared::{
+use shared::{
     auth::{RegisterRequest, RegisterError},
     user::{User, NoSuchUserError},
 };

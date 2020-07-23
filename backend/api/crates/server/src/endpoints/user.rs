@@ -1,5 +1,5 @@
 use actions::user::{get_profile, get_by_id, get_by_email, register};
-use ji_cloud_shared::{
+use shared::{
     auth::{AuthClaims, RegisterRequest, RegisterError, SingleSignOnSuccess},
     user::NoSuchUserError,
     api::{
@@ -10,10 +10,10 @@ use ji_cloud_shared::{
         }
     }
 };
+use core::settings::SETTINGS;
 use crate::{
     reply::HandlerResult,
     auth::reply_signin_auth,
-    settings::SETTINGS,
     reject::{CustomWarpRejection, InternalError, DbQueryError}
 };
 use sqlx::postgres::PgPool;

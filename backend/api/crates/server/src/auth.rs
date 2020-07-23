@@ -3,7 +3,7 @@ use warp::{
     Filter, 
     Rejection
 };
-use ji_cloud_shared::{
+use shared::{
     auth::{SigninSuccess, RegisterSuccess, AuthClaims, JWT_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserRole,
     api::result::ResultResponse
@@ -14,8 +14,8 @@ use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use actions::user::get_by_id;
 use crate::reject::{CustomWarpRejection, NoAuth, PgPoolError, InternalError};
-use crate::settings::SETTINGS;
-use ji_cloud_shared::backend::settings::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
+use core::settings::SETTINGS;
+use config::{MAX_SIGNIN_COOKIE, COOKIE_DOMAIN};
 use sqlx::postgres::PgPool;
 use crate::{async_clone_fn, async_clone_cb};
 use actions::auth::{get_claims, check_full, check_no_db, check_no_csrf, get_firebase_id};

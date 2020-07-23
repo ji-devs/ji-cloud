@@ -9,36 +9,5 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
 serde_repr = "^0.1"
-strum = "^0.18"
-strum_macros = "^0.18"
-log = "^0.4"
 serde_json = "^1.0"
 cfg-if = "^0.1"
-wasm-bindgen = {version = "^0.2", features=["nightly"], optional = true }
-js-sys = {version = "^0.3", optional = true }
-wasm-bindgen-futures = {version = "^0.4", optional = true }
-serde-wasm-bindgen = { version = "^0.1", optional = true }
-web-sys = { version = "^0.3", optional = true}
-base64 = {version = "^0.12", optional = true}
-jsonwebtoken = {version = "^7.1", optional = true}
-reqwest = { version = "^0.10", features = ["json"], optional = true }
-futures-util = {version = "^0.3", optional = true}
-percent-encoding = {version = "^2.1", optional = true}
-once_cell = {version = "^1.4", optional = true}
-
-
-[dev-dependencies]
-tokio = { version = "^0.2", features = ["full"] }
-dotenv = "^0.15"
-
-[features]
-default = []
-backend = [
-    "base64",
-    "jsonwebtoken",
-    "reqwest",
-    "futures-util",
-    "percent-encoding",
-]
-
-has_google_auth = []

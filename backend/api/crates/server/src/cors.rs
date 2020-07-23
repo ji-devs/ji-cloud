@@ -1,6 +1,6 @@
 use warp::http::Method;
-use crate::settings::SETTINGS;
-use ji_cloud_shared::backend::settings::CORS_ORIGINS;
+use core::settings::SETTINGS;
+use config::CORS_ORIGINS;
 
 pub fn get_cors() -> warp::filters::cors::Builder {
     let builder = warp::cors()
@@ -8,7 +8,7 @@ pub fn get_cors() -> warp::filters::cors::Builder {
         .allow_headers(vec!["Authorization", "Content-Type", "X-CSRF"])
         .allow_credentials(true);
 
-    if(SETTINGS.get().unwrap().local_insecure) {
+    if SETTINGS.get().unwrap().local_insecure {
         builder.allow_any_origin()
     } else {
         builder.allow_origins(CORS_ORIGINS.into_iter().map(|x| x.clone()).clone())
