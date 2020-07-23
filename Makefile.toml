@@ -157,14 +157,19 @@ script = ["gcloud run deploy ji-cloud-api-js-sandbox --project ji-cloud-develope
 ###################
 ## Fastly Purge  ##
 ###################
+[tasks.copy-config-fastly-purge]
+script_runner = "@shell"
+script = ["cp -R ./config/js/ ./backend/fastly-purge/config/"]
 
 #------Release-----------#
 [tasks.release-fastly-purge]
 run_task = [{name = [
+	"copy-config-fastly-purge",
     "deploy-release-fastly-purge-frontend",
     "deploy-release-fastly-purge-storybook",
     "deploy-release-fastly-purge-media",
 ]}]
+
 
 [tasks.deploy-release-fastly-purge-frontend]
 script_runner = "@shell"
@@ -183,6 +188,7 @@ script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resou
 
 [tasks.sandbox-fastly-purge]
 run_task = [{name = [
+	"copy-config-fastly-purge",
     "deploy-sandbox-fastly-purge-frontend",
     "deploy-sandbox-fastly-purge-storybook",
     "deploy-sandbox-fastly-purge-docs",
