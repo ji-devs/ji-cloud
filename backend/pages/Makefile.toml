@@ -24,8 +24,8 @@ args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test --features lo
 
 [tasks.dev]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local-quiet"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../_core/rust/src", "-w", "-w", ".", "-x", "run --features local-quiet"]
 
 [tasks.dev-noquiet]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../shared/rust", "-w", ".", "-x", "run --features local"]
+args = ["--no-pid", "-s", "http::8082", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../_core/rust/src", "-w", "-w", ".", "-x", "run --features local"]

@@ -133,6 +133,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "config"
+version = "0.1.0"
+
+[[package]]
+name = "core"
+version = "0.1.0"
+dependencies = [
+ "base64 0.12.2",
+ "cfg-if",
+ "config",
+ "futures-util",
+ "jsonwebtoken",
+ "once_cell",
+ "percent-encoding",
+ "reqwest",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -532,10 +552,11 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "chrono",
+ "config",
+ "core",
  "dotenv",
  "futures-util",
  "handlebars",
- "ji_cloud_shared",
  "jsonwebtoken",
  "listenfd",
  "log 0.4.8",
@@ -545,29 +566,12 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "shared",
  "simplelog",
  "strum",
  "strum_macros",
  "tokio",
  "warp",
-]
-
-[[package]]
-name = "ji_cloud_shared"
-version = "0.1.0"
-dependencies = [
- "base64 0.12.2",
- "cfg-if",
- "futures-util",
- "jsonwebtoken",
- "log 0.4.8",
- "percent-encoding",
- "reqwest",
- "serde",
- "serde_json",
- "serde_repr",
- "strum",
- "strum_macros",
 ]
 
 [[package]]
@@ -1428,6 +1432,16 @@ dependencies = [
  "digest",
  "fake-simd",
  "opaque-debug",
+]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "serde",
+ "serde_json",
+ "serde_repr",
 ]
 
 [[package]]

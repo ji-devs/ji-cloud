@@ -26,7 +26,9 @@ log = "^0.4"
 futures-util = "0.3.4"
 handlebars = "3.0.1"
 chrono = "0.4.11"
-ji_cloud_shared = {path = "../../shared/rust", features=["backend"]}
+shared = {path = "../../shared/rust"}
+config = {path = "../../config/rust"}
+core = {path = "../_core/rust"}
 
 [features]
 local = ["listenfd"]
