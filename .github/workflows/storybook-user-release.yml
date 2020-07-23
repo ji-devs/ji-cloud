@@ -1,4 +1,4 @@
-name: Storybook - Release
+name: User - Storybook - Release
 
 on:
   push:
