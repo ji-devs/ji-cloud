@@ -1,6 +1,6 @@
 # CORS
 
-For backend servers, it's configured as part of the [runtime settings](../runtime-settings/runtime_settings.md)
+For backend servers, it's configured as part of the [config](../config/config.md) source (js or rust, as needed).
 
 For static media (including wasm), there is a script in `build-utils`. All that's needed is to `npm run` each of `cors:frontend`, `cors:media`, and `cors:uploads`
 
