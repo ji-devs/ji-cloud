@@ -12,6 +12,7 @@ export default {
         sourcemap: true,
     },
     plugins: [
+
         rust({
             serverPath: "/js/",
             debug: true,

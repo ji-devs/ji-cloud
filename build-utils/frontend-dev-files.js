@@ -15,7 +15,7 @@ switch(process.argv[2]) {
 const path = require('path');
 const fs = require('fs-extra');
 
-const srcPath = path.resolve("../frontend/_common/devfiles");
+const srcPath = path.resolve("../frontend/_core/devfiles");
 const targetPath = `../frontend/${process.argv[2]}/app/dist`;
 
 

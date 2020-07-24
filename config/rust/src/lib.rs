@@ -30,7 +30,7 @@ impl RemoteTarget {
 	
     pub fn api_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8081",
+            Self::Local => "http://localhost:8081", 
             Self::Sandbox => "https://api.sandbox.jicloud.org",
             Self::Release => "https://api.jicloud.org",
         }
@@ -38,7 +38,7 @@ impl RemoteTarget {
 
     pub fn api_js_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8082",
+            Self::Local => "http://localhost:8082", 
             Self::Sandbox => "https://api-js.sandbox.jicloud.org",
             Self::Release => "https://api-js.jicloud.org",
         }
@@ -46,14 +46,14 @@ impl RemoteTarget {
 
     pub fn media_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:4102",
+            Self::Local => "http://localhost:4102", 
             Self::Sandbox | Self::Release => "https://media.jicloud.org",
         }
     }
 
 	pub fn pages_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8080",
+            Self::Local => "http://localhost:8080", 
             Self::Sandbox => "https://sandbox.jicloud.org",
             Self::Release => "https://jicloud.org",
         }

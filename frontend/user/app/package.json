@@ -6,7 +6,7 @@
   "scripts": {
     "build:release": "npm run clean && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
     "build:sandbox": "npm run clean && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js",
-    "dev": "npm run _devfiles && run-p _mediaserver _watch",
+    "start": "npm run _devfiles && run-p _mediaserver _watch",
     "clean": "rimraf ./dist",
     "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
     "_mediaserver": "cd ../../../build-utils && npm run local-media-server",
@@ -20,11 +20,7 @@
     "rollup": "^2.18.1"
   },
   "devDependencies": {
-    "dotenv": "^8.2.0",
     "rollup-plugin-livereload": "^1.3.0",
-    "rollup-plugin-serve": "^1.0.1",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "serve-index": "^1.9.1"
+    "rollup-plugin-serve": "^1.0.1"
   }
 }

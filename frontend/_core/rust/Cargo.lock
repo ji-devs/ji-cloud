@@ -171,12 +171,9 @@ name = "shared"
 version = "0.1.0"
 dependencies = [
  "cfg-if",
- "log",
  "serde",
  "serde_json",
  "serde_repr",
- "strum",
- "strum_macros",
 ]
 
 [[package]]

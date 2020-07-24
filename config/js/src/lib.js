@@ -16,8 +16,8 @@ export const URL_STORYBOOK_SANDBOX = "https://storybook.sandbox.jicloud.org";
 
 const getMediaUrl = isDev => 
 	isDev
-        ? 'http://localhost:4102'
-        : "https://media.jicloud.org";
+        ? `http://localhost:4102`
+        : URL_MEDIA;
 
 
 export const getMediaUrl_UI = isDev =>
