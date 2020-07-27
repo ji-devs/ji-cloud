@@ -1,19 +1,67 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-mod router;
-mod page;
-mod pages;
-mod header;
-mod utils;
-mod globals;
-
-use wasm_bindgen::prelude::*;
-use cfg_if::cfg_if;
-
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+extern crate derive_more;
+
+mod utils;
+mod systems;
+mod components;
+mod dom;
+mod setup;
+
+use cfg_if::cfg_if;
+use wasm_bindgen::prelude::*;
+use std::rc::Rc;
+use shipyard::*;
+use web_sys::{window, Element};
+use crate::utils::templates::TemplateManager;
+
+/*
+mod page;
+mod pages;
+mod header;
+*/
+#[wasm_bindgen(start)]
+pub fn main_js() {
+    setup_logger();
+    let settings = core::settings::init();
+    utils::firebase::setup(&settings);
+
+    //init dom stuff
+    let template_manager = TemplateManager::new(); 
+
+    let document = window().unwrap_throw().document().unwrap_throw();
+    let body:Element = document.body().unwrap_throw().into();
+
+    //body.append_child(&template_manager.body()).unwrap_throw();
+    //body.append_child(&template_manager.footer()).unwrap_throw();
+
+    //init world
+    let world = Rc::new(World::default());
+    world.run_with_data(setup::global_uniques, (
+            template_manager, 
+            document, 
+            body, 
+            world.clone()
+    ));
+    systems::workloads::register(&world);
+
+    world.run(systems::routes::init)
+
+    /*
+
+    let page = page::Page::new();
+
+    dominator::append_dom(&dominator::body(), page.render());
+	*/
+}
+
+
+
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
@@ -31,15 +79,3 @@ cfg_if! {
     }
 }
 
-#[wasm_bindgen(start)]
-pub fn main_js() {
-    setup_logger();
-    let settings = core::settings::init();
-    log::info!("{:?}", settings);
-    utils::firebase::setup(&settings);
-
-
-    let page = page::Page::new();
-
-    dominator::append_dom(&dominator::body(), page.render());
-}

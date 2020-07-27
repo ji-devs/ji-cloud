@@ -21,30 +21,47 @@ config = {path = "../../../config/rust"}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-jsonwebtoken = "7.1.0"
-dominator = "0.5.10"
-wasm-bindgen = {version = "0.2.62", features=["nightly"]}
-futures-signals = "0.3.15"
+jsonwebtoken = "7.2.0"
+wasm-bindgen = { version = "0.2.65", features = ["nightly"] }
 gloo-events = "0.1.1"
 gloo-timers = "0.2.1"
 cfg-if = "0.1.10"
-log = "0.4.8"
-serde = { version = "1.0.106", features = ["derive"] }
+log = "0.4.11"
+serde = { version = "1.0.114", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
-serde_json = "1.0.52"
-futures = "0.3.4"
+serde_json = "1.0.57"
+futures = "0.3.5"
 strum = "0.18.0"
 strum_macros = "0.18.0"
-js-sys = "0.3.39"
-wasm-bindgen-futures = "0.4.12"
-web-sys = { version = "0.3.39", features = [
+js-sys = "0.3.42"
+wasm-bindgen-futures = "0.4.15"
+web-sys = { version = "0.3.42", features = [
     'Url',
     'Request',
     'RequestInit',
     'Response',
     'RequestMode',
     'Headers',
+	'Document', 
+    'DocumentFragment', 
+    'HtmlTemplateElement',
+    'Window',
+    'Storage',
+    'Location',
+    'Element',
+    'CssStyleDeclaration',
+    'DomTokenList',
+    'HtmlCollection',
+    'HtmlInputElement',
+    'KeyboardEvent',
+    'MouseEvent',
 ] }
+derive_more = { version = "0.99.9", default-features = false, features = ["deref", "deref_mut", "nightly"] }
+awsm_web = { version = "0.2.1", features = ["dom"] }
+simple-html-template = { version = "0.1.6", features = ["wasm"] }
+htmlescape = "0.3.1"
+# shipyard = { version = "0.4.1", features = ["non_send", "non_sync"], default-features = false }
+shipyard = { git = "https://github.com/leudz/shipyard.git", features = ["non_send", "non_sync", "panic", "serde1"], default-features = false }
 
 [features]
 default = ["wee_alloc"]
