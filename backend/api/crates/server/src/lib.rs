@@ -30,9 +30,6 @@ cfg_if! {
             hyper:: {
                 self,
                 Server,
-                Body,
-                Request,
-                Response
             },
         };
 

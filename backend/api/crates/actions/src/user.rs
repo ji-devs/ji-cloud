@@ -57,19 +57,25 @@ pub async fn register(
     user_id: &str,
     req: &RegisterRequest,
 ) -> Result<(), RegisterError> {
-    let _ = if get_by_id(&db, &user_id).await.is_some() {
-        Err(RegisterError::TakenId)
-    } else if req.display_name.is_empty() {
-        Err(RegisterError::EmptyDisplayname)
-    } else if req.first_name.is_empty() {
-        Err(RegisterError::EmptyFirstname)
-    } else if req.last_name.is_empty() {
-        Err(RegisterError::EmptyLastname)
-    } else if get_by_email(&db, &req.email).await.is_some() {
-        Err(RegisterError::TakenEmail)
-    } else {
-        Ok(())
-    }?;
+    if get_by_id(&db, &user_id).await.is_some() {
+        return Err(RegisterError::TakenId);
+    }
+
+    if req.display_name.is_empty() {
+        return Err(RegisterError::EmptyDisplayname);
+    }
+
+    if req.first_name.is_empty() {
+        return Err(RegisterError::EmptyFirstname);
+    }
+
+    if req.last_name.is_empty() {
+        return Err(RegisterError::EmptyLastname);
+    }
+
+    if get_by_email(&db, &req.email).await.is_some() {
+        return Err(RegisterError::TakenEmail);
+    }
 
     sqlx::query(
         r#"

@@ -32,20 +32,18 @@ pub async fn handle_register(
     req: RegisterRequest,
     db: PgPool,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let err: Option<RegisterError> = {
-        if get_by_id(&db, &user_id).await.is_some() {
-            Some(RegisterError::TakenId)
-        } else if req.display_name.is_empty() {
-            Some(RegisterError::EmptyDisplayname)
-        } else if req.first_name.is_empty() {
-            Some(RegisterError::EmptyFirstname)
-        } else if req.last_name.is_empty() {
-            Some(RegisterError::EmptyLastname)
-        } else if get_by_email(&db, &req.email).await.is_some() {
-            Some(RegisterError::TakenEmail)
-        } else {
-            None
-        }
+    let err: Option<RegisterError> = if get_by_id(&db, &user_id).await.is_some() {
+        Some(RegisterError::TakenId)
+    } else if req.display_name.is_empty() {
+        Some(RegisterError::EmptyDisplayname)
+    } else if req.first_name.is_empty() {
+        Some(RegisterError::EmptyFirstname)
+    } else if req.last_name.is_empty() {
+        Some(RegisterError::EmptyLastname)
+    } else if get_by_email(&db, &req.email).await.is_some() {
+        Some(RegisterError::TakenEmail)
+    } else {
+        None
     };
 
     match err {

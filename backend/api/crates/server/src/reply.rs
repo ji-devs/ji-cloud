@@ -12,7 +12,7 @@ impl<T: Serialize + DeserializeOwned, E: Serialize + DeserializeOwned> ReplyExt<
     for HandlerResult<T, E>
 {
     fn warp_reply(self) -> Result<warp::reply::Json, warp::reject::Rejection> {
-        self.and_then(|ok| ok.warp_reply())
+        self.and_then(ReplyExt::warp_reply)
     }
 }
 

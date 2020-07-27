@@ -23,7 +23,7 @@ fn has_bearer_token() -> impl Filter<Extract = (String,), Error = warp::Rejectio
 
 //Had some type sig trouble trying to keep this DRY... if you can improve it, great!
 
-pub fn has_auth_full(
+pub fn _has_auth_full(
     db: PgPool,
 ) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
     warp::filters::cookie::cookie(JWT_COOKIE_NAME)
@@ -65,7 +65,7 @@ pub fn has_auth_cookie_and_db_no_csrf(
     })
 }
 
-pub fn has_auth_cookie_no_db_nor_csrf(
+pub fn _has_auth_cookie_no_db_nor_csrf(
 ) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
     warp::filters::cookie::cookie(JWT_COOKIE_NAME).and_then(|cookie: String| async move {
         get_claims(&cookie).map_err(|_| NoAuth::rejection())
