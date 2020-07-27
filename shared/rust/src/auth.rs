@@ -1,17 +1,17 @@
-use serde::{Deserialize, Serialize};
 use crate::user::UserRole;
+use serde::{Deserialize, Serialize};
 
-pub const JWT_COOKIE_NAME:&'static str = "X-JWT";
-pub const CSRF_HEADER_NAME:&'static str = "X-CSRF";
+pub const JWT_COOKIE_NAME: &'static str = "X-JWT";
+pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
 #[derive(Serialize, Deserialize)]
 pub struct SigninSuccess {
-    pub csrf: String
+    pub csrf: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct SingleSignOnSuccess {
-    pub jwt: String
+    pub jwt: String,
 }
 
 #[derive(Serialize, Deserialize)]

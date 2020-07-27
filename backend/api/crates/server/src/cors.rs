@@ -1,6 +1,6 @@
-use warp::http::Method;
-use core::settings::SETTINGS;
 use config::CORS_ORIGINS;
+use core::settings::SETTINGS;
+use warp::http::Method;
 
 pub fn get_cors() -> warp::filters::cors::Builder {
     let builder = warp::cors()
@@ -11,6 +11,6 @@ pub fn get_cors() -> warp::filters::cors::Builder {
     if SETTINGS.get().unwrap().local_insecure {
         builder.allow_any_origin()
     } else {
-        builder.allow_origins(CORS_ORIGINS.into_iter().map(|x| x.clone()).clone())
+        builder.allow_origins(CORS_ORIGINS.iter().cloned())
     }
 }

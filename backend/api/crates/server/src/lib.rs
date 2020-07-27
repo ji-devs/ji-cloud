@@ -1,32 +1,20 @@
-//see: https://github.com/rust-lang/cargo/issues/8010
-#![cfg_attr(feature = "quiet", allow(warnings))]
-
+mod auth;
+mod cors;
 mod db;
+mod endpoints;
 mod logger;
 mod reject;
 mod reply;
 mod routes;
-mod cors;
-mod auth;
-mod endpoints;
 #[macro_use]
 mod utils;
 
-use std::net::SocketAddr;
-use std::env;
 use cfg_if::cfg_if;
-use routes::get_routes;
 use core::settings::SETTINGS;
+use routes::get_routes;
 use sqlx::postgres::PgPool;
-
-use warp:: {
-    http::{
-        Method,
-    },
-    Reply,
-    Rejection,
-    Filter,
-};
+use std::env;
+use std::net::SocketAddr;
 
 pub async fn start() {
     core::settings::init().await;
@@ -42,8 +30,8 @@ cfg_if! {
             hyper:: {
                 self,
                 Server,
-                Body, 
-                Request, 
+                Body,
+                Request,
                 Response
             },
         };
@@ -56,8 +44,8 @@ cfg_if! {
             // a `hyper::service::MakeService` for use with a `hyper::server::Server`.
             let make_svc = hyper::service::make_service_fn(move |_: _| {
                 let pool = pool.clone();
-                async move { 
-                    Ok::<_, Infallible>(warp::service(get_routes(pool).await)) 
+                async move {
+                    Ok::<_, Infallible>(warp::service(get_routes(pool).await))
                 }
             });
 
@@ -73,7 +61,7 @@ cfg_if! {
 
             server.serve(make_svc).await.unwrap();
         }
-    } else { 
+    } else {
         pub async fn _start(pool:PgPool) {
             warp::serve(get_routes(pool).await)
                 .run(get_addr())
@@ -83,18 +71,19 @@ cfg_if! {
 }
 
 fn get_addr() -> SocketAddr {
-
     let mut port = SETTINGS.get().unwrap().api_port;
 
     match env::var("PORT") {
         Ok(p) => {
             match p.parse::<u16>() {
-                Ok(n) => {port = n;},
-                Err(_e) => {},
+                Ok(n) => {
+                    port = n;
+                }
+                Err(_e) => {}
             };
         }
-        Err(_e) => {},
+        Err(_e) => {}
     };
-    
+
     ([0, 0, 0, 0], port).into()
 }

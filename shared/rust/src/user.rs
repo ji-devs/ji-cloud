@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_repr::{Serialize_repr, Deserialize_repr};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
@@ -8,7 +8,7 @@ pub enum UserRole {
 }
 
 impl From<i32> for UserRole {
-    fn from(x:i32) -> Self {
+    fn from(x: i32) -> Self {
         if x == UserRole::Admin as i32 {
             UserRole::Admin
         } else {
@@ -16,7 +16,6 @@ impl From<i32> for UserRole {
         }
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
