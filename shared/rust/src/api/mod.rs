@@ -1,2 +1,2 @@
-pub mod result;
 pub mod endpoints;
+pub mod result;

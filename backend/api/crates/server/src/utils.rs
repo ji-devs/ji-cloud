@@ -1,6 +1,5 @@
 // https://users.rust-lang.org/t/ownership-and-async-move-inside-a-loop/43250/5?u=dakom
 
-
 #[macro_export]
 macro_rules! async_clone_fn {
     ($($share:ident),*; |$($arg:ident),*| { $($tok:tt)* }) => {
@@ -15,7 +14,6 @@ macro_rules! async_clone_fn {
         }
     };
 }
-
 
 #[macro_export]
 macro_rules! async_clone_cb {
