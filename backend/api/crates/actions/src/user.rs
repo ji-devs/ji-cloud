@@ -1,8 +1,4 @@
-use shared::{
-    auth::{RegisterError, RegisterRequest},
-    user::{NoSuchUserError, User},
-};
-use sqlx::postgres::PgPool;
+use shared::{auth::RegisterRequest, user::User};
 
 impl From<UserQuery> for User {
     fn from(u: UserQuery) -> Self {
@@ -27,56 +23,37 @@ pub struct UserQuery {
     pub display_name: String,
 }
 
-pub async fn get_by_email(db: &PgPool, email_addr: &str) -> Option<User> {
-    sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE email = $1")
+pub async fn get_by_email(
+    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
+    email_addr: &str,
+) -> sqlx::Result<Option<User>> {
+    let user = sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE email = $1")
         .bind(email_addr)
         .fetch_optional(db)
-        .await
-        .expect("get by email shouldn't error")
-        .map(|u: UserQuery| u.into())
+        .await?
+        .map(User::from);
+
+    Ok(user)
 }
 
-pub async fn get_by_id(db: &PgPool, user_id: &str) -> Option<User> {
-    sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE id = $1")
+pub async fn get_by_id(
+    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
+    user_id: &str,
+) -> sqlx::Result<Option<User>> {
+    let user = sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE id = $1")
         .bind(user_id)
         .fetch_optional(db)
-        .await
-        .expect("get by id shouldn't error")
-        .map(|u: UserQuery| u.into())
-}
+        .await?
+        .map(|u: UserQuery| u.into());
 
-pub async fn get_profile(db: &PgPool, id: &str) -> Result<User, NoSuchUserError> {
-    match get_by_id(&db, &id).await {
-        None => Err(NoSuchUserError {}),
-        Some(user) => Ok(user),
-    }
+    Ok(user)
 }
 
 pub async fn register(
-    db: &PgPool,
+    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
     user_id: &str,
     req: &RegisterRequest,
-) -> Result<(), RegisterError> {
-    if get_by_id(&db, &user_id).await.is_some() {
-        return Err(RegisterError::TakenId);
-    }
-
-    if req.display_name.is_empty() {
-        return Err(RegisterError::EmptyDisplayname);
-    }
-
-    if req.first_name.is_empty() {
-        return Err(RegisterError::EmptyFirstname);
-    }
-
-    if req.last_name.is_empty() {
-        return Err(RegisterError::EmptyLastname);
-    }
-
-    if get_by_email(&db, &req.email).await.is_some() {
-        return Err(RegisterError::TakenEmail);
-    }
-
+) -> sqlx::Result<()> {
     sqlx::query(
         r#"
             INSERT INTO users 
@@ -92,7 +69,5 @@ pub async fn register(
     .bind(&req.email)
     .execute(db)
     .await
-    .expect("register: insert shouldn't fail");
-
-    Ok(())
+    .map(drop)
 }

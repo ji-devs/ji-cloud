@@ -1,92 +1,134 @@
-use crate::reject::{CustomWarpRejection, InternalError, NoAuth};
-use actions::auth::{check_full, check_no_csrf, check_no_db, get_claims, get_firebase_id};
+use actions::auth::{check_no_csrf, check_no_db, get_firebase_id};
+use actix_web::{
+    http::{header, HeaderMap, HeaderValue},
+    web::Data,
+    FromRequest, HttpMessage, HttpResponse,
+};
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE};
 use core::settings::SETTINGS;
+use futures::future::FutureExt;
+use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::{
-    api::result::ResultResponse,
     auth::{AuthClaims, RegisterSuccess, SigninSuccess, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
     user::UserRole,
 };
 use sqlx::postgres::PgPool;
-use warp::{Filter, Rejection};
 
-//This can be used to early exit if there's no bearer token
-//is just used internally, the top-level uses specific auth guards (firebase, user, etc.)
-fn has_bearer_token() -> impl Filter<Extract = (String,), Error = warp::Rejection> + Clone {
-    warp::header::<String>("Authorization")
-        .or_else(|_| async { Err(NoAuth::rejection()) })
-        .map(|bearer_token: String| bearer_token.replace("Bearer ", ""))
+pub struct FirebaseUser {
+    pub id: String,
 }
 
-//Had some type sig trouble trying to keep this DRY... if you can improve it, great!
+fn bearer_token(headers: &HeaderMap) -> Option<&str> {
+    let header: &HeaderValue = headers.get(header::AUTHORIZATION)?;
 
-pub fn _has_auth_full(
-    db: PgPool,
-) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
-    warp::filters::cookie::cookie(JWT_COOKIE_NAME)
-        .and(
-            warp::header::<String>(CSRF_HEADER_NAME)
-                .or_else(|_| async { Err(NoAuth::rejection()) }),
-        )
-        .and_then(move |cookie: String, csrf: String| {
-            let db = db.clone();
-            async move {
-                check_full(&db, &cookie, &csrf)
-                    .await
-                    .map_err(|_| NoAuth::rejection())
-            }
-        })
+    let header: &str = header.to_str().ok()?;
+
+    // ["Bearer " .. value]
+    header.split("Bearer ").nth(1)
 }
 
-pub fn has_auth_no_db() -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
-    warp::filters::cookie::cookie(JWT_COOKIE_NAME)
-        .and(
-            warp::header::<String>(CSRF_HEADER_NAME)
-                .or_else(|_| async { Err(NoAuth::rejection()) }),
-        )
-        .and_then(|cookie: String, csrf: String| async move {
-            check_no_db(&cookie, &csrf).map_err(|_| NoAuth::rejection())
-        })
+pub struct AuthError;
+
+impl From<AuthError> for actix_web::Error {
+    fn from(_other: AuthError) -> Self {
+        HttpResponse::Unauthorized().into()
+    }
 }
 
-pub fn has_auth_cookie_and_db_no_csrf(
-    db: PgPool,
-) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
-    warp::filters::cookie::cookie(JWT_COOKIE_NAME).and_then(move |cookie: String| {
-        let db = db.clone();
+impl FromRequest for FirebaseUser {
+    type Error = AuthError;
+    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        // this whole dance is to avoid cloning the headers.
+        let token = match bearer_token(req.headers()) {
+            Some(token) => token.to_owned(),
+            None => return futures::future::err(AuthError).boxed(),
+        };
+
         async move {
-            check_no_csrf(&db, &cookie)
+            get_firebase_id(&token)
                 .await
-                .map_err(|_| NoAuth::rejection())
+                .map(|id| Self { id })
+                .map_err(|_| AuthError)
         }
-    })
+        .boxed()
+    }
 }
 
-pub fn _has_auth_cookie_no_db_nor_csrf(
-) -> impl Filter<Extract = (AuthClaims,), Error = Rejection> + Clone {
-    warp::filters::cookie::cookie(JWT_COOKIE_NAME).and_then(|cookie: String| async move {
-        get_claims(&cookie).map_err(|_| NoAuth::rejection())
-    })
+fn csrf_header(headers: &HeaderMap) -> Option<&str> {
+    headers.get(CSRF_HEADER_NAME)?.to_str().ok()
 }
 
-//returns the user id if firebase is authenticated
-pub fn has_firebase_auth() -> impl Filter<Extract = (String,), Error = Rejection> + Clone {
-    has_bearer_token().and_then(|token: String| async move {
-        let token = token.replace("Bearer ", "");
-        get_firebase_id(&token)
-            .await
-            .map_err(|_| NoAuth::rejection())
-    })
+#[repr(transparent)]
+pub struct WrapAuthClaimsNoDb(pub AuthClaims);
+
+impl FromRequest for WrapAuthClaimsNoDb {
+    type Error = AuthError;
+    type Future = futures::future::Ready<Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let cookie = req.cookie(JWT_COOKIE_NAME);
+        let csrf = csrf_header(req.headers());
+
+        let (cookie, csrf) = match (cookie, csrf) {
+            (Some(cookie), Some(csrf)) => (cookie, csrf),
+            _ => return futures::future::err(AuthError),
+        };
+
+        futures::future::ready(
+            // todo: check this use of cookie.name()
+            check_no_db(cookie.name(), csrf)
+                .map(Self)
+                .map_err(|_| AuthError),
+        )
+    }
 }
 
-pub fn reply_signin_auth(
+#[repr(transparent)]
+pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
+
+impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
+    type Error = AuthError;
+    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let db: &Data<PgPool> = req.app_data().unwrap();
+        let db = db.as_ref().clone();
+
+        let cookie = match req.cookie(JWT_COOKIE_NAME) {
+            Some(token) => token.to_owned(),
+            None => return futures::future::err(AuthError).boxed(),
+        };
+
+        async move {
+            // todo: check this use of cookie.name()
+            check_no_csrf(&db, &cookie.name())
+                .await
+                .map(Self)
+                .map_err(|_| AuthError)
+        }
+        .boxed()
+    }
+}
+
+pub fn reply_signin_auth2(
     user_id: String,
     roles: Vec<UserRole>,
     is_register: bool,
-) -> Result<warp::reply::WithHeader<warp::reply::Json>, warp::Rejection> {
+) -> actix_web::Result<HttpResponse> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
     let claims = AuthClaims {
@@ -100,41 +142,27 @@ pub fn reply_signin_auth(
         &claims,
         &SETTINGS.get().unwrap().jwt_encoding_key,
     )
-    .map_err(|_| InternalError::rejection())?;
+    .map_err(|_| HttpResponse::InternalServerError())?;
 
-    let reply = {
-        if is_register {
-            warp::reply::json(&ResultResponse::Ok::<RegisterSuccess, ()>(
-                RegisterSuccess::Signin(csrf),
-            ))
-        } else {
-            warp::reply::json(&ResultResponse::Ok::<SigninSuccess, ()>(SigninSuccess {
-                csrf,
-            }))
-        }
+    let set_cookie = if SETTINGS.get().unwrap().local_insecure {
+        format!(
+            "{}={}; HttpOnly; SameSite=Lax; Max-Age={}",
+            JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE
+        )
+    } else {
+        format!(
+            "{}={}; Secure; HttpOnly; SameSite=Lax; Max-Age={}; domain={}",
+            JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN
+        )
     };
 
-    let reply = {
-        if SETTINGS.get().unwrap().local_insecure {
-            warp::reply::with_header(
-                reply,
-                "Set-Cookie",
-                &format!(
-                    "{}={}; HttpOnly; SameSite=Lax; Max-Age={}",
-                    JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE
-                ),
-            )
-        } else {
-            warp::reply::with_header(
-                reply,
-                "Set-Cookie",
-                &format!(
-                    "{}={}; Secure; HttpOnly; SameSite=Lax; Max-Age={}; domain={}",
-                    JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN
-                ),
-            )
-        }
-    };
-
-    Ok(reply)
+    if is_register {
+        Ok(HttpResponse::Created()
+            .header(header::SET_COOKIE, set_cookie)
+            .json(RegisterSuccess::Signin(csrf)))
+    } else {
+        Ok(HttpResponse::Ok()
+            .header(header::SET_COOKIE, set_cookie)
+            .json(SigninSuccess { csrf }))
+    }
 }
