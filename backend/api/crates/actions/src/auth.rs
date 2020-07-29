@@ -28,16 +28,6 @@ pub fn get_claims(token_string: &str) -> Result<AuthClaims, Error> {
         .map_err(|err| Error::Jwt(err))
 }
 
-pub async fn check_full(db: &PgPool, token_string: &str, csrf: &str) -> Result<AuthClaims, Error> {
-    let claims = check_no_db(token_string, csrf)?;
-
-    if get_by_id(&db, &claims.id).await.is_none() {
-        Err(Error::NoUser)
-    } else {
-        Ok(claims)
-    }
-}
-
 pub fn check_no_db(token_string: &str, csrf: &str) -> Result<AuthClaims, Error> {
     get_claims(token_string).and_then(|claims| {
         if claims.csrf.as_deref() == Some(csrf) {
@@ -50,10 +40,10 @@ pub fn check_no_db(token_string: &str, csrf: &str) -> Result<AuthClaims, Error> 
 pub async fn check_no_csrf(db: &PgPool, token_string: &str) -> Result<AuthClaims, Error> {
     let claims = get_claims(token_string)?;
 
-    if get_by_id(&db, &claims.id).await.is_none() {
-        Err(Error::NoUser)
-    } else {
-        Ok(claims)
+    // todo: handle db errors properly (by returning a error that will cause the server to 500)
+    match get_by_id(db, &claims.id).await {
+        Ok(Some(_)) => Ok(claims),
+        _ => Err(Error::NoUser),
     }
 }
 
