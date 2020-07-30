@@ -516,6 +516,9 @@ dependencies = [
 [[package]]
 name = "config"
 version = "0.1.0"
+dependencies = [
+ "time 0.2.16",
+]
 
 [[package]]
 name = "cookie"
