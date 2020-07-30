@@ -1,4 +1,4 @@
-use crate::user::get_by_id;
+use super::user::get_by_id;
 use core::settings::SETTINGS;
 use futures_util::future::TryFutureExt;
 use jsonwebtoken as jwt;

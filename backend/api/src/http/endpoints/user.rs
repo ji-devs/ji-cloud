@@ -1,7 +1,7 @@
+use crate::db::user::{get_by_email, get_by_id, register};
 use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
-use actions::user::{get_by_email, get_by_id, register};
 use actix_web::{
     get, post,
     web::{Data, Json, ServiceConfig},
