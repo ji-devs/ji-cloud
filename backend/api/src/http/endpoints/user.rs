@@ -1,4 +1,4 @@
-use crate::db::user::{get_by_email, get_by_id, register};
+use crate::db::user::{by_email, by_id, register};
 use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
@@ -26,7 +26,7 @@ async fn handle_signin_credentials(
 ) -> actix_web::Result<HttpResponse> {
     log::info!("Firebase is valid! user id is: {}", user.id);
 
-    match get_by_id(db.as_ref(), &user.id)
+    match by_id(db.as_ref(), &user.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
     {
@@ -48,7 +48,7 @@ async fn validate_register_req(
 ) -> actix_web::Result<()> {
     let e = |err| Err(HttpResponse::UnprocessableEntity().json(err).into());
 
-    if get_by_id(db, &user_id)
+    if by_id(db, &user_id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .is_some()
@@ -56,7 +56,7 @@ async fn validate_register_req(
         return e(RegisterError::TakenId);
     }
 
-    if get_by_email(db, &req.email)
+    if by_email(db, &req.email)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .is_some()
@@ -102,7 +102,7 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err
 
-    get_by_id(db.as_ref(), &claims.0.id)
+    by_id(db.as_ref(), &claims.0.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
