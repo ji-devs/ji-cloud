@@ -1,4 +1,4 @@
-use crate::db::auth::{check_no_csrf, check_no_db, get_firebase_id};
+use crate::jwt::{check_no_csrf, check_no_db};
 use actix_web::{
     cookie::{CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},
@@ -7,6 +7,7 @@ use actix_web::{
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::SETTINGS;
+use firebase::get_firebase_id;
 use futures::future::FutureExt;
 use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
@@ -17,6 +18,8 @@ use shared::{
     user::UserRole,
 };
 use sqlx::postgres::PgPool;
+
+mod firebase;
 
 pub struct FirebaseUser {
     pub id: String,
@@ -38,9 +41,22 @@ impl From<AuthError> for actix_web::Error {
         HttpResponse::Unauthorized().into()
     }
 }
+pub enum StatusError {
+    Auth,
+    InternalServerError,
+}
+
+impl From<StatusError> for actix_web::Error {
+    fn from(other: StatusError) -> Self {
+        match other {
+            StatusError::Auth => HttpResponse::Unauthorized().into(),
+            StatusError::InternalServerError => HttpResponse::InternalServerError().into(),
+        }
+    }
+}
 
 impl FromRequest for FirebaseUser {
-    type Error = AuthError;
+    type Error = StatusError;
     type Future = BoxFuture<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -50,14 +66,15 @@ impl FromRequest for FirebaseUser {
         // this whole dance is to avoid cloning the headers.
         let token = match bearer_token(req.headers()) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(AuthError).boxed(),
+            None => return futures::future::err(StatusError::Auth).boxed(),
         };
 
         async move {
             get_firebase_id(&token)
                 .await
+                .map_err(|_| StatusError::InternalServerError)?
                 .map(|id| Self { id })
-                .map_err(|_| AuthError)
+                .ok_or_else(|| StatusError::Auth)
         }
         .boxed()
     }

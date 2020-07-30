@@ -23,10 +23,7 @@ pub struct UserQuery {
     pub display_name: String,
 }
 
-pub async fn get_by_email(
-    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
-    email_addr: &str,
-) -> sqlx::Result<Option<User>> {
+pub async fn by_email(db: &sqlx::PgPool, email_addr: &str) -> sqlx::Result<Option<User>> {
     let user = sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE email = $1")
         .bind(email_addr)
         .fetch_optional(db)
@@ -36,10 +33,7 @@ pub async fn get_by_email(
     Ok(user)
 }
 
-pub async fn get_by_id(
-    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
-    user_id: &str,
-) -> sqlx::Result<Option<User>> {
+pub async fn by_id(db: &sqlx::PgPool, user_id: &str) -> sqlx::Result<Option<User>> {
     let user = sqlx::query_as::<_, UserQuery>("SELECT * FROM users WHERE id = $1")
         .bind(user_id)
         .fetch_optional(db)
@@ -49,11 +43,7 @@ pub async fn get_by_id(
     Ok(user)
 }
 
-pub async fn register(
-    db: impl sqlx::Executor<'_, Database = sqlx::Postgres>,
-    user_id: &str,
-    req: &RegisterRequest,
-) -> sqlx::Result<()> {
+pub async fn register(db: &sqlx::PgPool, user_id: &str, req: &RegisterRequest) -> sqlx::Result<()> {
     sqlx::query(
         r#"
             INSERT INTO users 

@@ -3,6 +3,7 @@ use core::settings::SETTINGS;
 mod db;
 mod extractor;
 mod http;
+mod jwt;
 mod logger;
 
 #[tokio::main]
