@@ -1070,11 +1070,36 @@ checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 name = "ji-cloud-api"
 version = "0.1.0"
 dependencies = [
+ "actions",
+ "actix-cors",
+ "actix-rt",
+ "actix-service",
+ "actix-web",
+ "anyhow",
  "cfg-if",
+ "chrono",
+ "config",
+ "core",
  "dotenv",
+ "futures",
+ "futures-util",
+ "jsonwebtoken",
+ "lazy_static",
+ "listenfd",
  "log",
- "server",
+ "once_cell",
+ "openssl",
+ "percent-encoding",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "shared",
  "simplelog",
+ "sqlx",
+ "strum",
+ "strum_macros",
  "tokio",
 ]
 
@@ -1818,42 +1843,6 @@ dependencies = [
  "itoa",
  "serde",
  "url",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "actions",
- "actix-cors",
- "actix-rt",
- "actix-service",
- "actix-web",
- "anyhow",
- "cfg-if",
- "chrono",
- "config",
- "core",
- "futures",
- "futures-util",
- "jsonwebtoken",
- "lazy_static",
- "listenfd",
- "log",
- "once_cell",
- "openssl",
- "percent-encoding",
- "rand",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "shared",
- "simplelog",
- "sqlx",
- "strum",
- "strum_macros",
- "tokio",
 ]
 
 [[package]]

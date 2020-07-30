@@ -1,6 +1,5 @@
 mod auth;
 mod cors;
-mod db;
 mod endpoints;
 
 use config::JSON_BODY_LIMIT;
@@ -8,12 +7,6 @@ use core::settings::SETTINGS;
 use sqlx::postgres::PgPool;
 use std::env;
 use std::net::SocketAddr;
-
-pub async fn start() {
-    core::settings::init().await;
-    let db_pool = db::get_pool(&SETTINGS.get().unwrap()).await;
-    _start(db_pool).await;
-}
 
 #[cfg(feature = "local")]
 fn get_tcp_fd() -> Option<std::net::TcpListener> {
@@ -26,10 +19,7 @@ fn get_tcp_fd() -> Option<std::net::TcpListener> {
     None
 }
 
-//auto reload on code change
-//see: https://github.com/seanmonstar/warp/blob/master/examples/autoreload.rs
-pub async fn _start(pool: PgPool) {
-    // todo: de-duplicate this somehow.
+pub async fn run(pool: PgPool) -> anyhow::Result<()> {
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(pool.clone())
@@ -43,12 +33,14 @@ pub async fn _start(pool: PgPool) {
     // the command above), we fall back to explicitly binding to a given
     // host:port.
     let server: _ = if let Some(l) = get_tcp_fd() {
-        server.listen(l).unwrap()
+        server.listen(l)?
     } else {
-        server.bind(get_addr()).unwrap()
+        server.bind(get_addr())?
     };
 
     server.run().await.unwrap();
+
+    Ok(())
 }
 
 fn get_addr() -> SocketAddr {
