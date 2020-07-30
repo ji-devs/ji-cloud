@@ -1,9 +1,9 @@
 use core::settings::SETTINGS;
 
 mod db;
+mod extractor;
 mod http;
 mod logger;
-mod extractor;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

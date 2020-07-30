@@ -1,3 +1,6 @@
+pub mod auth;
+pub mod user;
+
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 use config::DB_POOL_CONNECTIONS;

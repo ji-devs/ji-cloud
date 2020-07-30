@@ -1,4 +1,4 @@
-use actions::auth::{check_no_csrf, check_no_db, get_firebase_id};
+use crate::db::auth::{check_no_csrf, check_no_db, get_firebase_id};
 use actix_web::{
     cookie::{CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},

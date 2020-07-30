@@ -17,7 +17,7 @@ COPY ./backend/api ./backend/api
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
-WORKDIR ./backend/api/main
+WORKDIR ./backend/api
 RUN cargo test
 
 ####################
@@ -38,7 +38,7 @@ COPY ./backend/api ./backend/api
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
-WORKDIR ./backend/api/main
+WORKDIR ./backend/api
 RUN cargo build --release --features release
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
@@ -78,7 +78,7 @@ COPY ./backend/api ./backend/api
 RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
-WORKDIR ./backend/api/main
+WORKDIR ./backend/api
 RUN cargo build --release --features sandbox
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
