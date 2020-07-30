@@ -3,7 +3,7 @@ use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use config::DB_POOL_CONNECTIONS;
 use core::settings::{DbEndpoint, DbTarget, Settings};
 
-pub async fn get_pool(settings: &Settings) -> PgPool {
+pub async fn get_pool(settings: &Settings) -> anyhow::Result<PgPool> {
     //let db_connection_string = &settings.db_credentials.to_string();
     let db_target = settings.db_target;
     let n_connections = if db_target == DbTarget::Local || db_target == DbTarget::Proxy {
@@ -24,9 +24,10 @@ pub async fn get_pool(settings: &Settings) -> PgPool {
         DbEndpoint::Socket(path) => connect_options.socket(path),
     };
 
-    PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(n_connections)
         .connect_with(connect_options)
-        .await
-        .expect("Postgres connection pool could not be created (local)")
+        .await?;
+
+    Ok(pool)
 }
