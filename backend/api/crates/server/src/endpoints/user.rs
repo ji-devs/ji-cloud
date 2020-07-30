@@ -1,5 +1,5 @@
 use crate::auth::{
-    reply_signin_auth2, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actions::user::{get_by_email, get_by_id, register};
 use actix_web::{
@@ -30,7 +30,7 @@ async fn handle_signin_credentials(
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
     {
-        Some(user) => reply_signin_auth2(user.id, user.roles, false),
+        Some(user) => reply_signin_auth(user.id, user.roles, false),
         None => {
             log::info!("hmm couldn't get user by id {}", user.id);
 
@@ -92,7 +92,7 @@ async fn handle_register(
         .await
         .map_err(|_| HttpResponse::InternalServerError())?;
 
-    reply_signin_auth2(user.id, Vec::new(), true)
+    reply_signin_auth(user.id, Vec::new(), true)
 }
 
 #[get("/user/profile")]
@@ -109,8 +109,7 @@ async fn handle_get_profile(
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
-// fixme: this should be just `GET /user/sso-jwt`
-#[get("/user/get-sso-jwt")]
+#[post("/v1/authorize")]
 async fn handle_get_sso_jwt(
     auth: WrapAuthClaimsCookieDbNoCsrf,
 ) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {

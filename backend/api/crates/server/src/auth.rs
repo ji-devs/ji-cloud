@@ -1,10 +1,11 @@
 use actions::auth::{check_no_csrf, check_no_db, get_firebase_id};
 use actix_web::{
+    cookie::{CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},
     web::Data,
     FromRequest, HttpMessage, HttpResponse,
 };
-use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE};
+use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::SETTINGS;
 use futures::future::FutureExt;
 use futures_util::future::BoxFuture;
@@ -86,8 +87,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
         };
 
         futures::future::ready(
-            // todo: check this use of cookie.name()
-            check_no_db(cookie.name(), csrf)
+            check_no_db(cookie.value(), csrf)
                 .map(Self)
                 .map_err(|_| AuthError),
         )
@@ -114,8 +114,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
         };
 
         async move {
-            // todo: check this use of cookie.name()
-            check_no_csrf(&db, &cookie.name())
+            check_no_csrf(&db, &cookie.value())
                 .await
                 .map(Self)
                 .map_err(|_| AuthError)
@@ -124,7 +123,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     }
 }
 
-pub fn reply_signin_auth2(
+pub fn reply_signin_auth(
     user_id: String,
     roles: Vec<UserRole>,
     is_register: bool,
@@ -144,25 +143,22 @@ pub fn reply_signin_auth2(
     )
     .map_err(|_| HttpResponse::InternalServerError())?;
 
-    let set_cookie = if SETTINGS.get().unwrap().local_insecure {
-        format!(
-            "{}={}; HttpOnly; SameSite=Lax; Max-Age={}",
-            JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE
-        )
-    } else {
-        format!(
-            "{}={}; Secure; HttpOnly; SameSite=Lax; Max-Age={}; domain={}",
-            JWT_COOKIE_NAME, jwt, MAX_SIGNIN_COOKIE, COOKIE_DOMAIN
-        )
-    };
+    let mut cookie = CookieBuilder::new(JWT_COOKIE_NAME, jwt)
+        .http_only(true)
+        .same_site(SameSite::Lax)
+        .max_age(MAX_SIGNIN_COOKIE_DURATION);
+
+    if !SETTINGS.get().unwrap().local_insecure {
+        cookie = cookie.domain(COOKIE_DOMAIN);
+    }
 
     if is_register {
         Ok(HttpResponse::Created()
-            .header(header::SET_COOKIE, set_cookie)
+            .cookie(cookie.finish())
             .json(RegisterSuccess::Signin(csrf)))
     } else {
         Ok(HttpResponse::Ok()
-            .header(header::SET_COOKIE, set_cookie)
+            .cookie(cookie.finish())
             .json(SigninSuccess { csrf }))
     }
 }
