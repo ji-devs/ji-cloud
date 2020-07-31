@@ -7,10 +7,12 @@ description = "shared types for ji cloud project"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-serde = { version = "^1.0", features = ["derive"] }
-serde_repr = "^0.1"
-serde_json = "^1.0"
+actix-web = { version = "3.0.0-beta.1", optional = true }
 cfg-if = "^0.1"
+chrono = { version = "0.4.13", features = ["serde"] }
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+serde_repr = "^0.1"
 
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
@@ -19,4 +21,4 @@ features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "o
 optional = true
 
 [features]
-backend = ["sqlx"]
+backend = ["sqlx", "actix-web"]

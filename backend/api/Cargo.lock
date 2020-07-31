@@ -1072,7 +1072,9 @@ dependencies = [
  "sqlx",
  "strum",
  "strum_macros",
+ "time 0.2.16",
  "tokio",
+ "uuid 0.8.1",
 ]
 
 [[package]]
@@ -1853,7 +1855,9 @@ dependencies = [
 name = "shared"
 version = "0.1.0"
 dependencies = [
+ "actix-web",
  "cfg-if",
+ "chrono",
  "serde",
  "serde_json",
  "serde_repr",

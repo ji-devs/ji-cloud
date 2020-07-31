@@ -1,13 +1,13 @@
-use crate::db::user::by_id;
+use crate::{db::user::exists_by_firebase, extractor::FirebaseId};
 use core::settings::SETTINGS;
 use jsonwebtoken as jwt;
 use shared::auth::AuthClaims;
 use sqlx::postgres::PgPool;
 
+#[derive(Debug)]
 pub enum Error {
     Jwt(jwt::errors::Error),
     Csrf,
-    NoUser,
 }
 
 pub fn get_claims(token_string: &str) -> Result<AuthClaims, Error> {
@@ -34,12 +34,14 @@ pub fn check_no_db(token_string: &str, csrf: &str) -> Result<AuthClaims, Error> 
         }
     })
 }
-pub async fn check_no_csrf(db: &PgPool, token_string: &str) -> Result<AuthClaims, Error> {
-    let claims = get_claims(token_string)?;
+pub async fn check_no_csrf(db: &PgPool, token_string: &str) -> anyhow::Result<Option<AuthClaims>> {
+    let claims = get_claims(token_string)
+        .map_err(|e| anyhow::anyhow!("{:?}", e))
+        .unwrap();
 
-    // todo: handle db errors properly (by returning a error that will cause the server to 500)
-    match by_id(db, &claims.id).await {
-        Ok(Some(_)) => Ok(claims),
-        _ => Err(Error::NoUser),
+    // todo: remove the clone here... Just requires making `FirebaseId` use a Cow<'a, str> and making it impl clone, I think.
+    match exists_by_firebase(db, &FirebaseId(claims.id.clone())).await? {
+        true => Ok(Some(claims)),
+        false => Ok(None),
     }
 }

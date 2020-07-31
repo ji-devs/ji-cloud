@@ -1,5 +1,7 @@
-use crate::user::UserRole;
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "backend")]
+use actix_web::HttpResponse;
 
 pub const JWT_COOKIE_NAME: &'static str = "X-JWT";
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
@@ -22,18 +24,25 @@ pub enum RegisterSuccess {
 
 #[derive(Serialize, Deserialize)]
 pub enum RegisterError {
-    EmptyDisplayname,
-    EmptyFirstname,
-    EmptyLastname,
+    EmptyDisplayName,
     TakenEmail,
     TakenId,
+    InternalServerError,
+}
+
+#[cfg(feature = "backend")]
+impl From<RegisterError> for actix_web::Error {
+    fn from(e: RegisterError) -> actix_web::Error {
+        match e {
+            RegisterError::InternalServerError => HttpResponse::InternalServerError().into(),
+            e => HttpResponse::UnprocessableEntity().json(e).into(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct RegisterRequest {
     pub display_name: String,
-    pub first_name: String,
-    pub last_name: String,
     pub email: String,
 }
 
@@ -41,5 +50,4 @@ pub struct RegisterRequest {
 pub struct AuthClaims {
     pub id: String,
     pub csrf: Option<String>,
-    pub roles: Vec<UserRole>,
 }
