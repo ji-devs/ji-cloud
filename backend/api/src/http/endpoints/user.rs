@@ -4,14 +4,14 @@ use crate::extractor::{
 };
 use actix_web::{
     get, post,
-    web::{Data, Json, ServiceConfig},
+    web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
 use core::settings::SETTINGS;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
-        user::{Profile, SingleSignOn},
+        user::{Profile, Register, Signin, SingleSignOn},
         ApiEndpoint,
     },
     auth::{AuthClaims, RegisterError, RegisterRequest, SingleSignOnSuccess},
@@ -19,7 +19,6 @@ use shared::{
 };
 use sqlx::PgPool;
 
-#[post("/user/signin")]
 async fn handle_signin_credentials(
     db: Data<PgPool>,
     user: FirebaseUser,
@@ -79,8 +78,6 @@ async fn validate_register_req(
     Ok(())
 }
 
-//register handler doesn't use the usual wrapper since it needs to set the header
-#[post("/user/register")]
 async fn handle_register(
     db: Data<PgPool>,
     user: FirebaseUser,
@@ -95,7 +92,6 @@ async fn handle_register(
     reply_signin_auth(user.id, Vec::new(), true)
 }
 
-#[get("/user/profile")]
 async fn handle_get_profile(
     db: Data<PgPool>,
     claims: WrapAuthClaimsNoDb,
@@ -109,8 +105,7 @@ async fn handle_get_profile(
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
-#[post("/v1/authorize")]
-async fn handle_get_sso_jwt(
+async fn handle_authorize(
     auth: WrapAuthClaimsCookieDbNoCsrf,
 ) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {
     log::info!("Firebase is valid! user id is: {}", auth.0.id);
@@ -132,8 +127,20 @@ async fn handle_get_sso_jwt(
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.service(handle_get_profile)
-        .service(handle_get_sso_jwt)
-        .service(handle_register)
-        .service(handle_signin_credentials);
+    cfg.route(
+        <Profile as ApiEndpoint>::PATH,
+        web::get().to(handle_get_profile),
+    )
+    .route(
+        <SingleSignOn as ApiEndpoint>::PATH,
+        web::post().to(handle_authorize),
+    )
+    .route(
+        <Register as ApiEndpoint>::PATH,
+        web::post().to(handle_register),
+    )
+    .route(
+        <Signin as ApiEndpoint>::PATH,
+        web::post().to(handle_signin_credentials),
+    );
 }
