@@ -5,20 +5,14 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-extern crate derive_more;
-
 mod utils;
-mod systems;
-mod components;
-mod dom;
-mod setup;
+mod router;
+mod pages;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
-use shipyard::*;
 use web_sys::{window, Element};
-use crate::utils::templates::TemplateManager;
 
 /*
 mod page;
@@ -30,28 +24,10 @@ pub fn main_js() {
     setup_logger();
     let settings = core::settings::init();
     utils::firebase::setup(&settings);
-
     //init dom stuff
-    let template_manager = TemplateManager::new(); 
 
-    let document = window().unwrap_throw().document().unwrap_throw();
-    let body:Element = document.body().unwrap_throw().into();
-
-    //body.append_child(&template_manager.body()).unwrap_throw();
-    //body.append_child(&template_manager.footer()).unwrap_throw();
-
-    //init world
-    let world = Rc::new(World::default());
-    world.run_with_data(setup::global_uniques, (
-            template_manager, 
-            document, 
-            body, 
-            world.clone()
-    ));
-    systems::workloads::register(&world);
-
-    world.run(systems::routes::init)
-
+    let router = router::Router::new();
+    dominator::append_dom(&dominator::body(), router.render());
     /*
 
     let page = page::Page::new();

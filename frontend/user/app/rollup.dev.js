@@ -16,7 +16,7 @@ export default {
         rust({
             serverPath: "/js/",
             debug: true,
-            watchPatterns: ["src/**", "js/**", "../../_core/rust/src/**", "../../../shared/rust/src/**", "../../../config/rust/src/**", "../../../config/js/dist/**"],
+            watchPatterns: ["src/**", "js/**", "../templates/**", "../../_core/rust/src/**", "../../../shared/rust/src/**", "../../../config/rust/src/**", "../../../config/js/dist/**"],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
