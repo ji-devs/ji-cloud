@@ -43,6 +43,7 @@ default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline"]
 
 [features]
+default = ["local"]
 local = ["listenfd", "core/local"]
 release = ["core/release", "openssl"]
 sandbox = ["core/sandbox", "openssl"]
