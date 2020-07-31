@@ -15,7 +15,6 @@ percent-encoding = "2.1.0"
 listenfd = {version = "^0.3", optional = true }
 jsonwebtoken = "^7.1"
 reqwest = { version = "^0.10", features = ["json"] }
-sqlx = { version = "0.4.0-beta.1", default-features = false, features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline"] }
 chrono = { version = "^0.4", features = ["serde"] }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
@@ -25,7 +24,7 @@ strum_macros = "^0.18"
 lazy_static = "^1.4"
 futures-util = "0.3.4"
 rand = "0.7"
-shared = {path = "../../shared/rust"}
+shared = {path = "../../shared/rust", features = ["backend"]}
 config = {path = "../../config/rust"}
 core = {path = "../_core/rust"}
 openssl = { version = "^0.10", features = ["vendored"], optional = true }
@@ -35,6 +34,11 @@ actix-service = "1.0.5"
 actix-web = "3.0.0-beta.1"
 anyhow = "1.0.32"
 futures = "0.3.5"
+
+[dependencies.sqlx]
+version = "0.4.0-beta.1"
+default-features = false
+features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline"]
 
 [features]
 local = ["listenfd", "core/local"]
