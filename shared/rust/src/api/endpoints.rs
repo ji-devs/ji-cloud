@@ -15,7 +15,7 @@ pub mod user {
         auth::{
             RegisterError, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
         },
-        user::{NoSuchUserError, User},
+        user::{NoSuchUserError, UserProfile},
     };
 
     pub struct Signin;
@@ -45,7 +45,7 @@ pub mod user {
     pub struct Profile;
     impl ApiEndpoint for Profile {
         type Req = ();
-        type Res = User;
+        type Res = UserProfile;
         type Err = NoSuchUserError;
         const PATH: &'static str = "/v1/user/me/profile";
     }

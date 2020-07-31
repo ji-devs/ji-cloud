@@ -1,6 +1,9 @@
-use crate::db::user::{by_email, by_id, register};
+use crate::db::{
+    self,
+    user::{profile_by_firebase, register},
+};
 use crate::extractor::{
-    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb, FirebaseId,
 };
 use actix_web::{
     web::{self, Data, Json, ServiceConfig},
@@ -22,61 +25,27 @@ async fn handle_signin_credentials(
     db: Data<PgPool>,
     user: FirebaseUser,
 ) -> actix_web::Result<HttpResponse> {
-    log::info!("Firebase is valid! user id is: {}", user.id);
-
-    match by_id(db.as_ref(), &user.id)
+    if !db::user::exists_by_firebase(&db, &user.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
     {
-        Some(user) => {
-            let (csrf, cookie) = reply_signin_auth(user.id, user.roles)?;
-            Ok(HttpResponse::Ok()
-                .cookie(cookie)
-                .json(SigninSuccess { csrf }))
-        }
-        None => {
-            log::info!("hmm couldn't get user by id {}", user.id);
-
-            Err(HttpResponse::UnprocessableEntity()
-                .json(NoSuchUserError {})
-                .into())
-        }
+        return Err(HttpResponse::UnprocessableEntity()
+            .json(NoSuchUserError {})
+            .into());
     }
+
+    let (csrf, cookie) =
+        reply_signin_auth(user.id).map_err(|_| HttpResponse::InternalServerError())?;
+
+    Ok(HttpResponse::Ok()
+        .cookie(cookie)
+        .json(SigninSuccess { csrf }))
 }
 
-async fn validate_register_req(
-    user_id: &str,
-    db: &PgPool,
-    req: &RegisterRequest,
-) -> actix_web::Result<()> {
-    let e = |err| Err(HttpResponse::UnprocessableEntity().json(err).into());
-
-    if by_id(db, &user_id)
-        .await
-        .map_err(|_| HttpResponse::InternalServerError())?
-        .is_some()
-    {
-        return e(RegisterError::TakenId);
-    }
-
-    if by_email(db, &req.email)
-        .await
-        .map_err(|_| HttpResponse::InternalServerError())?
-        .is_some()
-    {
-        return e(RegisterError::TakenEmail);
-    }
-
+async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterError> {
+    // todo: decide if we should check for an _empty_ email?
     if req.display_name.is_empty() {
-        return e(RegisterError::EmptyDisplayname);
-    }
-
-    if req.first_name.is_empty() {
-        return e(RegisterError::EmptyFirstname);
-    }
-
-    if req.first_name.is_empty() {
-        return e(RegisterError::EmptyLastname);
+        return Err(RegisterError::EmptyDisplayName);
     }
 
     Ok(())
@@ -86,14 +55,14 @@ async fn handle_register(
     db: Data<PgPool>,
     user: FirebaseUser,
     req: Json<RegisterRequest>,
-) -> actix_web::Result<HttpResponse> {
-    validate_register_req(&user.id, &db, &req).await?;
+) -> actix_web::Result<HttpResponse, RegisterError> {
+    validate_register_req(&req).await?;
 
-    register(db.as_ref(), &user.id, &req)
-        .await
-        .map_err(|_| HttpResponse::InternalServerError())?;
+    register(db.as_ref(), &user.id, &req).await?;
 
-    let (csrf, cookie) = reply_signin_auth(user.id, Vec::new())?;
+    let (csrf, cookie) =
+        reply_signin_auth(user.id).map_err(|_| RegisterError::InternalServerError)?;
+
     Ok(HttpResponse::Created()
         .cookie(cookie)
         .json(SigninSuccess { csrf }))
@@ -105,7 +74,7 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err
 
-    by_id(db.as_ref(), &claims.0.id)
+    profile_by_firebase(db.as_ref(), &FirebaseId(claims.0.id))
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
@@ -120,7 +89,6 @@ async fn handle_authorize(
     let claims = AuthClaims {
         id: auth.0.id,
         csrf: None,
-        roles: auth.0.roles,
     };
 
     let jwt = jwt::encode(

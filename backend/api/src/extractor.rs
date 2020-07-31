@@ -13,17 +13,16 @@ use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use shared::{
-    auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
-    user::UserRole,
-};
+use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
 use sqlx::postgres::PgPool;
 
 mod firebase;
 
 pub struct FirebaseUser {
-    pub id: String,
+    pub id: FirebaseId,
 }
+
+pub struct FirebaseId(pub String);
 
 fn bearer_token(headers: &HeaderMap) -> Option<&str> {
     let header: &HeaderValue = headers.get(header::AUTHORIZATION)?;
@@ -73,6 +72,7 @@ impl FromRequest for FirebaseUser {
             get_firebase_id(&token)
                 .await
                 .map_err(|_| StatusError::InternalServerError)?
+                .map(FirebaseId)
                 .map(|id| Self { id })
                 .ok_or_else(|| StatusError::Auth)
         }
@@ -115,7 +115,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
 pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
 
 impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
-    type Error = AuthError;
+    type Error = StatusError;
     type Future = BoxFuture<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -127,37 +127,34 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 
         let cookie = match req.cookie(JWT_COOKIE_NAME) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(AuthError).boxed(),
+            None => return futures::future::err(StatusError::Auth).boxed(),
         };
 
         async move {
             check_no_csrf(&db, &cookie.value())
                 .await
+                .map_err(|_| StatusError::InternalServerError)?
                 .map(Self)
-                .map_err(|_| AuthError)
+                .ok_or(StatusError::Auth)
         }
         .boxed()
     }
 }
 
-pub fn reply_signin_auth(
-    user_id: String,
-    roles: Vec<UserRole>,
-) -> actix_web::Result<(String, Cookie<'static>)> {
+pub fn reply_signin_auth(firebase_id: FirebaseId) -> anyhow::Result<(String, Cookie<'static>)> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
+    // todo: Move FirebaseId to shared and add it to AuthClaims.
     let claims = AuthClaims {
-        id: user_id,
+        id: firebase_id.0,
         csrf: Some(csrf.clone()),
-        roles,
     };
 
     let jwt = jwt::encode(
         &jwt::Header::default(),
         &claims,
         &SETTINGS.get().unwrap().jwt_encoding_key,
-    )
-    .map_err(|_| HttpResponse::InternalServerError())?;
+    )?;
 
     let mut cookie = CookieBuilder::new(JWT_COOKIE_NAME, jwt)
         .http_only(true)
