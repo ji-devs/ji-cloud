@@ -3,7 +3,7 @@ mod cors;
 mod endpoints;
 
 use config::JSON_BODY_LIMIT;
-use core::settings::SETTINGS;
+use core::settings::Settings;
 use sqlx::postgres::PgPool;
 use std::env;
 use std::net::SocketAddr;
@@ -20,12 +20,15 @@ fn get_tcp_fd() -> Option<std::net::TcpListener> {
 }
 
 #[actix_web::main]
-pub async fn run(pool: PgPool) -> anyhow::Result<()> {
+pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
+    let local_insecure = settings.local_insecure;
+    let api_port = settings.api_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(pool.clone())
+            .app_data(settings.clone())
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(cors::get_cors_actix().finish())
+            .wrap(cors::get_cors_actix(local_insecure).finish())
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
     });
@@ -36,7 +39,7 @@ pub async fn run(pool: PgPool) -> anyhow::Result<()> {
     let server: _ = if let Some(l) = get_tcp_fd() {
         server.listen(l)?
     } else {
-        server.bind(get_addr())?
+        server.bind(get_addr(api_port))?
     };
 
     server.run().await.unwrap();
@@ -44,8 +47,8 @@ pub async fn run(pool: PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn get_addr() -> SocketAddr {
-    let mut port = SETTINGS.get().unwrap().api_port;
+fn get_addr(default: u16) -> SocketAddr {
+    let mut port = default;
 
     match env::var("PORT") {
         Ok(p) => {

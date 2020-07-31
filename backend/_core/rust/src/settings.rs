@@ -2,14 +2,12 @@ use super::google::{get_access_token_and_project_id, get_secret};
 use anyhow::Context;
 use config::RemoteTarget;
 use jsonwebtoken::EncodingKey;
-use once_cell::sync::OnceCell;
 use std::{
     env, fmt,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-pub static SETTINGS: OnceCell<Settings> = OnceCell::new();
-
+#[derive(Clone)]
 pub struct Settings {
     pub remote_target: RemoteTarget,
     pub local_insecure: bool,
@@ -35,41 +33,38 @@ compile_error!("At least one of the `local`, `sandbox` or `release` features mus
 compile_error!("Only one of `local`, `sandbox` or `release` features can be enabled.");
 
 #[cfg(all(feature = "local", feature = "sqlproxy"))]
-pub async fn init() -> anyhow::Result<()> {
-    _init(RemoteTarget::Local, DbTarget::Proxy).await;
-    Ok(())
+pub async fn init() -> anyhow::Result<Settings> {
+    _init(RemoteTarget::Local, DbTarget::Proxy).await
 }
 
 #[cfg(all(feature = "local", not(feature = "sqlproxy")))]
-pub async fn init() -> anyhow::Result<()> {
+pub async fn init() -> anyhow::Result<Settings> {
     init_local()
 }
 
 #[cfg(all(feature = "sandbox",))]
-pub async fn init() -> anyhow::Result<()> {
+pub async fn init() -> anyhow::Result<Settings> {
     _init(
         RemoteTarget::Sandbox,
         DbTarget::Remote(RemoteTarget::Sandbox),
     )
-    .await;
-    Ok(())
+    .await
 }
 
 #[cfg(all(feature = "release",))]
-pub async fn init() -> anyhow::Result<()> {
+pub async fn init() -> anyhow::Result<Settings> {
     _init(
         RemoteTarget::Release,
         DbTarget::Remote(RemoteTarget::Release),
     )
-    .await;
-    Ok(())
+    .await
 }
 
 fn req_env(key: &str) -> anyhow::Result<String> {
     env::var(key).map_err(|_| anyhow::anyhow!("Missing required env var `{}`", key))
 }
 
-fn init_local() -> anyhow::Result<()> {
+fn init_local() -> anyhow::Result<Settings> {
     let jwt_secret = req_env("JWT_SECRET")?;
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
 
@@ -77,22 +72,16 @@ fn init_local() -> anyhow::Result<()> {
 
     let db_credentials = DbCredentials::new_local()?;
 
-    let settings = Settings::new(
+    Settings::new(
         RemoteTarget::Local,
         db_credentials,
         jwt_encoding_key,
         jwt_secret,
         inter_server_secret,
-    )?;
-
-    SETTINGS
-        .set(settings)
-        .expect("SETTINGS can only be set once");
-
-    Ok(())
+    )
 }
 
-async fn _init(remote_target: RemoteTarget, db_target: DbTarget) {
+async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Result<Settings> {
     let (token, project_id) =
         get_access_token_and_project_id(remote_target.google_credentials_env_name())
             .await
@@ -109,18 +98,13 @@ async fn _init(remote_target: RemoteTarget, db_target: DbTarget) {
 
     let db_credentials = DbCredentials::new(&db_pass, db_target);
 
-    SETTINGS
-        .set(
-            Settings::new(
-                remote_target,
-                db_credentials,
-                jwt_encoding_key,
-                jwt_secret,
-                inter_server_secret,
-            )
-            .expect("couldn't create settings"),
-        )
-        .expect("couldn't set settings");
+    Settings::new(
+        remote_target,
+        db_credentials,
+        jwt_encoding_key,
+        jwt_secret,
+        inter_server_secret,
+    )
 }
 
 impl fmt::Debug for Settings {
@@ -177,14 +161,14 @@ pub enum DbTarget {
     Remote(RemoteTarget),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DbCredentials {
     pub dbname: String,
     pub user: String,
     pub pass: String,
     pub endpoint: DbEndpoint,
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DbEndpoint {
     Socket(String),
     Tcp(String, u16),

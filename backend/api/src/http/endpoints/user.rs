@@ -3,13 +3,13 @@ use crate::db::{
     user::{profile_by_firebase, register},
 };
 use crate::extractor::{
-    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb, FirebaseId,
+    reply_signin_auth, FirebaseId, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
     web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
-use core::settings::SETTINGS;
+use core::settings::Settings;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
@@ -22,6 +22,7 @@ use shared::{
 use sqlx::PgPool;
 
 async fn handle_signin_credentials(
+    settings: Data<Settings>,
     db: Data<PgPool>,
     user: FirebaseUser,
 ) -> actix_web::Result<HttpResponse> {
@@ -35,7 +36,8 @@ async fn handle_signin_credentials(
     }
 
     let (csrf, cookie) =
-        reply_signin_auth(user.id).map_err(|_| HttpResponse::InternalServerError())?;
+        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
+            .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
@@ -52,6 +54,7 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterErro
 }
 
 async fn handle_register(
+    settings: Data<Settings>,
     db: Data<PgPool>,
     user: FirebaseUser,
     req: Json<RegisterRequest>,
@@ -61,7 +64,8 @@ async fn handle_register(
     register(db.as_ref(), &user.id, &req).await?;
 
     let (csrf, cookie) =
-        reply_signin_auth(user.id).map_err(|_| RegisterError::InternalServerError)?;
+        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
+            .map_err(|_| RegisterError::InternalServerError)?;
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
@@ -82,6 +86,7 @@ async fn handle_get_profile(
 }
 
 async fn handle_authorize(
+    settings: Data<Settings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,
 ) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {
     log::info!("Firebase is valid! user id is: {}", auth.0.id);
@@ -91,12 +96,8 @@ async fn handle_authorize(
         csrf: None,
     };
 
-    let jwt = jwt::encode(
-        &jwt::Header::default(),
-        &claims,
-        &SETTINGS.get().unwrap().jwt_encoding_key,
-    )
-    .map_err(|_| HttpResponse::InternalServerError())?;
+    let jwt = jwt::encode(&jwt::Header::default(), &claims, &settings.jwt_encoding_key)
+        .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(Json(SingleSignOnSuccess { jwt }))
 }
