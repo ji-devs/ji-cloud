@@ -3,17 +3,10 @@ pub mod user;
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 use config::DB_POOL_CONNECTIONS;
-use core::settings::{DbEndpoint, DbTarget, Settings};
+use core::settings::{DbEndpoint, Settings};
 
 pub async fn get_pool(settings: &Settings) -> anyhow::Result<PgPool> {
     //let db_connection_string = &settings.db_credentials.to_string();
-    let db_target = settings.db_target;
-    let n_connections = if db_target == DbTarget::Local || db_target == DbTarget::Proxy {
-        1
-    } else {
-        DB_POOL_CONNECTIONS
-    };
-
     let credentials = &settings.db_credentials;
 
     let connect_options = PgConnectOptions::new()
@@ -27,7 +20,7 @@ pub async fn get_pool(settings: &Settings) -> anyhow::Result<PgPool> {
     };
 
     let pool = PgPoolOptions::new()
-        .max_connections(n_connections)
+        .max_connections(DB_POOL_CONNECTIONS)
         .connect_with(connect_options)
         .await?;
 

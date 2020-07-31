@@ -8,7 +8,7 @@ pub fn get_cors_actix() -> actix_cors::Cors {
         .allowed_headers(&[
             header::AUTHORIZATION,
             header::CONTENT_TYPE,
-            header::HeaderName::from_static("X-CSRF"),
+            header::HeaderName::from_static("x-csrf"),
         ]);
 
     if !SETTINGS.get().unwrap().local_insecure {

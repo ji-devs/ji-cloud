@@ -1,4 +1,5 @@
 use core::settings::SETTINGS;
+use std::thread;
 
 mod db;
 mod extractor;
@@ -12,11 +13,14 @@ async fn main() -> anyhow::Result<()> {
     let _ = dotenv::from_path(".env");
     logger::init_logger();
 
-    core::settings::init().await;
+    core::settings::init().await?;
     let db_pool = db::get_pool(&SETTINGS.get().expect("Settings aren't initialized?")).await?;
 
-    http::run(db_pool).await?;
+    let handle = thread::spawn(|| http::run(db_pool));
+
     log::info!("app started!");
+
+    handle.join().unwrap()?;
 
     Ok(())
 }
