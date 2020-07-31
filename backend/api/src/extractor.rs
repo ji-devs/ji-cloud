@@ -1,6 +1,6 @@
 use crate::jwt::{check_no_csrf, check_no_db};
 use actix_web::{
-    cookie::{CookieBuilder, SameSite},
+    cookie::{Cookie, CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},
     web::Data,
     FromRequest, HttpMessage, HttpResponse,
@@ -14,7 +14,7 @@ use jsonwebtoken as jwt;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::{
-    auth::{AuthClaims, RegisterSuccess, SigninSuccess, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
+    auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
     user::UserRole,
 };
 use sqlx::postgres::PgPool;
@@ -143,8 +143,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 pub fn reply_signin_auth(
     user_id: String,
     roles: Vec<UserRole>,
-    is_register: bool,
-) -> actix_web::Result<HttpResponse> {
+) -> actix_web::Result<(String, Cookie<'static>)> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
     let claims = AuthClaims {
@@ -169,13 +168,5 @@ pub fn reply_signin_auth(
         cookie = cookie.domain(COOKIE_DOMAIN);
     }
 
-    if is_register {
-        Ok(HttpResponse::Created()
-            .cookie(cookie.finish())
-            .json(RegisterSuccess::Signin(csrf)))
-    } else {
-        Ok(HttpResponse::Ok()
-            .cookie(cookie.finish())
-            .json(SigninSuccess { csrf }))
-    }
+    Ok((csrf, cookie.finish()))
 }

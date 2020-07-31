@@ -3,7 +3,6 @@ use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    get, post,
     web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
@@ -14,7 +13,7 @@ use shared::{
         user::{Profile, Register, Signin, SingleSignOn},
         ApiEndpoint,
     },
-    auth::{AuthClaims, RegisterError, RegisterRequest, SingleSignOnSuccess},
+    auth::{AuthClaims, RegisterError, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
     user::NoSuchUserError,
 };
 use sqlx::PgPool;
@@ -29,7 +28,12 @@ async fn handle_signin_credentials(
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
     {
-        Some(user) => reply_signin_auth(user.id, user.roles, false),
+        Some(user) => {
+            let (csrf, cookie) = reply_signin_auth(user.id, user.roles)?;
+            Ok(HttpResponse::Ok()
+                .cookie(cookie)
+                .json(SigninSuccess { csrf }))
+        }
         None => {
             log::info!("hmm couldn't get user by id {}", user.id);
 
@@ -89,7 +93,10 @@ async fn handle_register(
         .await
         .map_err(|_| HttpResponse::InternalServerError())?;
 
-    reply_signin_auth(user.id, Vec::new(), true)
+    let (csrf, cookie) = reply_signin_auth(user.id, Vec::new())?;
+    Ok(HttpResponse::Created()
+        .cookie(cookie)
+        .json(SigninSuccess { csrf }))
 }
 
 async fn handle_get_profile(
