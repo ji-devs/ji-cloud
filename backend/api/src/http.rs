@@ -19,6 +19,7 @@ fn get_tcp_fd() -> Option<std::net::TcpListener> {
     None
 }
 
+#[actix_web::main]
 pub async fn run(pool: PgPool) -> anyhow::Result<()> {
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
