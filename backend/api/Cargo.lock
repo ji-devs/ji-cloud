@@ -516,11 +516,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64",
- "cfg-if",
  "config",
  "futures-util",
  "jsonwebtoken",
- "once_cell",
  "percent-encoding",
  "reqwest",
  "serde",
@@ -1049,7 +1047,6 @@ dependencies = [
  "actix-service",
  "actix-web",
  "anyhow",
- "cfg-if",
  "chrono",
  "config",
  "core",
@@ -1060,7 +1057,6 @@ dependencies = [
  "lazy_static",
  "listenfd",
  "log",
- "once_cell",
  "openssl",
  "percent-encoding",
  "rand",
@@ -1071,8 +1067,6 @@ dependencies = [
  "shared",
  "simplelog",
  "sqlx",
- "strum",
- "strum_macros",
  "time 0.2.16",
  "tokio",
  "uuid 0.8.1",
@@ -2094,24 +2088,6 @@ checksum = "8ee348cb74b87454fff4b551cbf727025810a004f88aeacae7f85b87f4e9a1c1"
 dependencies = [
  "unicode-bidi",
  "unicode-normalization",
-]
-
-[[package]]
-name = "strum"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57bd81eb48f4c437cadc685403cad539345bf703d78e63707418431cecd4522b"
-
-[[package]]
-name = "strum_macros"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87c85aa3f8ea653bfd3ddf25f7ee357ee4d204731f6aa9ad04002306f6e2774c"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
