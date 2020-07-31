@@ -1,5 +1,4 @@
 use crate::{db::user::exists_by_firebase, extractor::FirebaseId};
-use core::settings::SETTINGS;
 use jsonwebtoken as jwt;
 use shared::auth::AuthClaims;
 use sqlx::postgres::PgPool;
@@ -10,10 +9,9 @@ pub enum Error {
     Csrf,
 }
 
-pub fn get_claims(token_string: &str) -> Result<AuthClaims, Error> {
+pub fn get_claims(token_string: &str, jwt_decoding_key: &str) -> Result<AuthClaims, Error> {
     //see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    let key =
-        jsonwebtoken::DecodingKey::from_secret(SETTINGS.get().unwrap().jwt_decoding_key.as_ref());
+    let key = jsonwebtoken::DecodingKey::from_secret(jwt_decoding_key.as_ref());
 
     let validation = jwt::Validation {
         validate_exp: false,
@@ -25,8 +23,12 @@ pub fn get_claims(token_string: &str) -> Result<AuthClaims, Error> {
         .map_err(|err| Error::Jwt(err))
 }
 
-pub fn check_no_db(token_string: &str, csrf: &str) -> Result<AuthClaims, Error> {
-    get_claims(token_string).and_then(|claims| {
+pub fn check_no_db(
+    token_string: &str,
+    csrf: &str,
+    jwt_decoding_key: &str,
+) -> Result<AuthClaims, Error> {
+    get_claims(token_string, jwt_decoding_key).and_then(|claims| {
         if claims.csrf.as_deref() == Some(csrf) {
             Ok(claims)
         } else {
@@ -34,8 +36,12 @@ pub fn check_no_db(token_string: &str, csrf: &str) -> Result<AuthClaims, Error> 
         }
     })
 }
-pub async fn check_no_csrf(db: &PgPool, token_string: &str) -> anyhow::Result<Option<AuthClaims>> {
-    let claims = get_claims(token_string)
+pub async fn check_no_csrf(
+    db: &PgPool,
+    token_string: &str,
+    jwt_decoding_key: &str,
+) -> anyhow::Result<Option<AuthClaims>> {
+    let claims = get_claims(token_string, jwt_decoding_key)
         .map_err(|e| anyhow::anyhow!("{:?}", e))
         .unwrap();
 

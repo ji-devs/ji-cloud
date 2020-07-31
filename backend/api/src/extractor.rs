@@ -6,11 +6,12 @@ use actix_web::{
     FromRequest, HttpMessage, HttpResponse,
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
-use core::settings::SETTINGS;
+use core::settings::Settings;
 use firebase::get_firebase_id;
 use futures::future::FutureExt;
 use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
+use jwt::EncodingKey;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
@@ -62,6 +63,9 @@ impl FromRequest for FirebaseUser {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
+        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings = settings.clone();
+
         // this whole dance is to avoid cloning the headers.
         let token = match bearer_token(req.headers()) {
             Some(token) => token.to_owned(),
@@ -69,12 +73,16 @@ impl FromRequest for FirebaseUser {
         };
 
         async move {
-            get_firebase_id(&token)
-                .await
-                .map_err(|_| StatusError::InternalServerError)?
-                .map(FirebaseId)
-                .map(|id| Self { id })
-                .ok_or_else(|| StatusError::Auth)
+            get_firebase_id(
+                &token,
+                settings.remote_target.api_js_url(),
+                &settings.inter_server_secret,
+            )
+            .await
+            .map_err(|_| StatusError::InternalServerError)?
+            .map(FirebaseId)
+            .map(|id| Self { id })
+            .ok_or_else(|| StatusError::Auth)
         }
         .boxed()
     }
@@ -97,6 +105,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
     ) -> Self::Future {
         let cookie = req.cookie(JWT_COOKIE_NAME);
         let csrf = csrf_header(req.headers());
+        let settings: &Data<Settings> = req.app_data().unwrap();
 
         let (cookie, csrf) = match (cookie, csrf) {
             (Some(cookie), Some(csrf)) => (cookie, csrf),
@@ -104,7 +113,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
         };
 
         futures::future::ready(
-            check_no_db(cookie.value(), csrf)
+            check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key)
                 .map(Self)
                 .map_err(|_| AuthError),
         )
@@ -124,6 +133,8 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     ) -> Self::Future {
         let db: &Data<PgPool> = req.app_data().unwrap();
         let db = db.as_ref().clone();
+        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings = settings.clone();
 
         let cookie = match req.cookie(JWT_COOKIE_NAME) {
             Some(token) => token.to_owned(),
@@ -131,7 +142,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
         };
 
         async move {
-            check_no_csrf(&db, &cookie.value())
+            check_no_csrf(&db, &cookie.value(), &settings.jwt_decoding_key)
                 .await
                 .map_err(|_| StatusError::InternalServerError)?
                 .map(Self)
@@ -141,7 +152,11 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     }
 }
 
-pub fn reply_signin_auth(firebase_id: FirebaseId) -> anyhow::Result<(String, Cookie<'static>)> {
+pub fn reply_signin_auth(
+    firebase_id: FirebaseId,
+    jwt_encoding_key: &EncodingKey,
+    local_insecure: bool,
+) -> anyhow::Result<(String, Cookie<'static>)> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
     // todo: Move FirebaseId to shared and add it to AuthClaims.
@@ -150,18 +165,14 @@ pub fn reply_signin_auth(firebase_id: FirebaseId) -> anyhow::Result<(String, Coo
         csrf: Some(csrf.clone()),
     };
 
-    let jwt = jwt::encode(
-        &jwt::Header::default(),
-        &claims,
-        &SETTINGS.get().unwrap().jwt_encoding_key,
-    )?;
+    let jwt = jwt::encode(&jwt::Header::default(), &claims, jwt_encoding_key)?;
 
     let mut cookie = CookieBuilder::new(JWT_COOKIE_NAME, jwt)
         .http_only(true)
         .same_site(SameSite::Lax)
         .max_age(MAX_SIGNIN_COOKIE_DURATION);
 
-    if !SETTINGS.get().unwrap().local_insecure {
+    if !local_insecure {
         cookie = cookie.domain(COOKIE_DOMAIN);
     }
 

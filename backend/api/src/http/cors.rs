@@ -1,8 +1,7 @@
 use actix_web::http::{header, Method};
 use config::CORS_ORIGINS;
-use core::settings::SETTINGS;
 
-pub fn get_cors_actix() -> actix_cors::Cors {
+pub fn get_cors_actix(local_insecure: bool) -> actix_cors::Cors {
     let mut cors = actix_cors::Cors::new()
         .allowed_methods(&[Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
         .allowed_headers(&[
@@ -11,7 +10,7 @@ pub fn get_cors_actix() -> actix_cors::Cors {
             header::HeaderName::from_static("x-csrf"),
         ]);
 
-    if !SETTINGS.get().unwrap().local_insecure {
+    if !local_insecure {
         for origin in CORS_ORIGINS.iter() {
             cors = cors.allowed_origin(origin);
         }
