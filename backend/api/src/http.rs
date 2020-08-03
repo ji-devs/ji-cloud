@@ -25,8 +25,8 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
     let api_port = settings.api_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
-            .app_data(pool.clone())
-            .app_data(settings.clone())
+            .data(pool.clone())
+            .data(settings.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap(cors::get_cors_actix(local_insecure).finish())
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
