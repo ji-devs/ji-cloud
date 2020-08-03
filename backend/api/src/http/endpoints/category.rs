@@ -1,7 +1,4 @@
-use actix_web::{
-    web::{self, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::{web::ServiceConfig, HttpResponse};
 use shared::api::endpoints::{category, ApiEndpoint};
 
 async fn todo() -> HttpResponse {
@@ -9,17 +6,17 @@ async fn todo() -> HttpResponse {
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(<category::Get as ApiEndpoint>::PATH, web::get().to(todo))
+    cfg.route(category::Get::PATH, category::Get::METHOD.route().to(todo))
         .route(
-            <category::Create as ApiEndpoint>::PATH,
-            web::post().to(todo),
+            category::Create::PATH,
+            category::Create::METHOD.route().to(todo),
         )
         .route(
-            <category::Update as ApiEndpoint>::PATH,
-            web::patch().to(todo),
+            category::Update::PATH,
+            category::Update::METHOD.route().to(todo),
         )
         .route(
-            <category::Delete as ApiEndpoint>::PATH,
-            web::delete().to(todo),
+            category::Delete::PATH,
+            category::Delete::METHOD.route().to(todo),
         );
 }
