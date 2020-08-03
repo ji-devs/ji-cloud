@@ -51,6 +51,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for UserProfile {
 }
 
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+#[cfg(feature = "backend")]
 struct DbUser {
     pub id: String,
     pub scopes: Vec<(UserScope,)>,

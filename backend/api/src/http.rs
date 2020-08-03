@@ -31,6 +31,7 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
             .wrap(cors::get_cors_actix(local_insecure).finish())
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
+            .configure(endpoints::category::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

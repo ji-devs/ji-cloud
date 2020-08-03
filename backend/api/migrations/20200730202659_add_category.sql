@@ -5,6 +5,7 @@ create table "category"
     name       text        not null,
     "index"    int2        not null,
     created_at timestamptz not null default now(),
-    updated_at timestamptz
+    updated_at timestamptz,
+    unique ("index", parent_id)
+        deferrable initially deferred
 );
-
