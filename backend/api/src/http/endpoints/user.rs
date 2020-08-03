@@ -6,7 +6,7 @@ use crate::extractor::{
     reply_signin_auth, FirebaseId, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
+    web::{Data, Json, ServiceConfig},
     HttpResponse,
 };
 use core::settings::Settings;
@@ -104,19 +104,16 @@ async fn handle_authorize(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        <Profile as ApiEndpoint>::PATH,
-        web::get().to(handle_get_profile),
+        Profile::PATH,
+        Profile::METHOD.route().to(handle_get_profile),
     )
     .route(
-        <SingleSignOn as ApiEndpoint>::PATH,
-        web::post().to(handle_authorize),
+        SingleSignOn::PATH,
+        SingleSignOn::METHOD.route().to(handle_authorize),
     )
+    .route(Register::PATH, Register::METHOD.route().to(handle_register))
     .route(
-        <Register as ApiEndpoint>::PATH,
-        web::post().to(handle_register),
-    )
-    .route(
-        <Signin as ApiEndpoint>::PATH,
-        web::post().to(handle_signin_credentials),
+        Signin::PATH,
+        Signin::METHOD.route().to(handle_signin_credentials),
     );
 }
