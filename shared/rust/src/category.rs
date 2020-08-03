@@ -80,9 +80,8 @@ impl From<CategoryGetError> for actix_web::Error {
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateCategoryRequest {
-    pub index: Option<u16>,
     pub name: String,
-    pub parent: Option<CategoryId>,
+    pub parent_id: Option<CategoryId>,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -1,5 +1,32 @@
 {
   "db": "PostgreSQL",
+  "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
+    "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "853522807cb90d2c36fcfe680c729ac368209c7aceafd759e41235f5110110f0": {
     "query": "select exists (select 1 from \"user\" where firebase_id = $1) as \"exists!\"",
     "describe": {
@@ -32,26 +59,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "a5db709ae2b7e647ed7af5e8c7d13f85aea5977aa529a657daa5ff7d1b19eafc": {
-    "query": "select exists (select 1 from \"user\" where firebase_id = $1) as exists",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   }
 }
