@@ -1,4 +1,5 @@
 pub mod user;
+pub mod category;
 
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 

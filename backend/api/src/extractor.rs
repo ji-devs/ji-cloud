@@ -105,7 +105,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
     ) -> Self::Future {
         let cookie = req.cookie(JWT_COOKIE_NAME);
         let csrf = csrf_header(req.headers());
-        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings: &Data<Settings> = req.app_data().expect("Settings??");
 
         let (cookie, csrf) = match (cookie, csrf) {
             (Some(cookie), Some(csrf)) => (cookie, csrf),

@@ -76,7 +76,7 @@ async fn handle_get_profile(
     db: Data<PgPool>,
     claims: WrapAuthClaimsNoDb,
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
-    // todo: figure out how to do `<Profile as ApiEndpoint>::Err
+    // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
     profile_by_firebase(db.as_ref(), &FirebaseId(claims.0.id))
         .await

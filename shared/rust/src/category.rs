@@ -1,20 +1,64 @@
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+#[cfg(feature = "backend")]
+use sqlx::postgres::PgRow;
+
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CategoryId(pub Uuid);
 
 #[derive(Serialize, Deserialize)]
 pub struct CategoryResponse {
-    pub tree: Category,
+    pub categories: Vec<Category>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Category {
-    pub children: Vec<Category>,
+    pub parent_id: Option<CategoryId>,
     pub name: String,
+    pub id: CategoryId,
+    pub index: u16,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+#[cfg(feature = "backend")]
+impl<'r> sqlx::FromRow<'r, PgRow> for Category {
+    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
+        let DbCategory {
+            parent_id,
+            name,
+            id,
+            index,
+            created_at,
+            updated_at,
+        } = DbCategory::from_row(row)?;
+
+        Ok(Category {
+            parent_id,
+            name,
+            id,
+            index: index as u16,
+            created_at,
+            updated_at,
+        })
+    }
+}
+
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+#[cfg(feature = "backend")]
+struct DbCategory {
+    pub parent_id: Option<CategoryId>,
+    pub name: String,
+    pub id: CategoryId,
+    pub index: i16,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 #[non_exhaustive]
@@ -36,14 +80,14 @@ impl From<CategoryGetError> for actix_web::Error {
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateCategoryRequest {
-    pub index: Option<usize>,
+    pub index: Option<u16>,
     pub name: String,
     pub parent: Option<CategoryId>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct NewCategoryResponse {
-    pub index: usize,
+    pub index: u16,
     pub id: CategoryId,
 }
 
@@ -95,7 +139,7 @@ pub enum CategoryUpdateError {
     CategoryNotFound,
     ParentCategoryNotFound,
     Forbidden,
-    OutOfRange { max: usize },
+    OutOfRange { max: u16 },
 }
 
 #[cfg(feature = "backend")]
@@ -124,7 +168,7 @@ pub struct CategoryUpdateRequest {
     /// Will cause an error if you try to move to past the end of the parent.
     ///
     /// If None and parent_id is Some(...) it will append to the end of the new parent.
-    pub index: Option<usize>,
+    pub index: Option<u16>,
 }
 
 fn deserialize_optional_field<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
