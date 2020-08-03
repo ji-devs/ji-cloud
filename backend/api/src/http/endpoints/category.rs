@@ -4,7 +4,10 @@ use actix_web::{
     HttpResponse,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
-use shared::category::{CategoryGetError, CategoryResponse};
+use shared::category::{
+    CategoryCreateError, CategoryGetError, CategoryResponse, CreateCategoryRequest,
+    NewCategoryResponse,
+};
 use sqlx::PgPool;
 
 async fn todo() -> HttpResponse {
@@ -22,6 +25,23 @@ async fn get_categories(
         .map(|it| Json(CategoryResponse { categories: it }))
 }
 
+async fn create_category(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    req: Json<<category::Create as ApiEndpoint>::Req>,
+) -> actix_web::Result<
+    Json<<category::Create as ApiEndpoint>::Res>,
+    <category::Create as ApiEndpoint>::Err,
+> {
+    let CreateCategoryRequest { name, parent_id } = req.into_inner();
+
+    let (id, index) = db::category::create(&db, &name, parent_id)
+        .await
+        .map_err(|_| CategoryCreateError::InternalServerError)?;
+
+    Ok(Json(NewCategoryResponse { id, index }))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         category::Get::PATH,
@@ -29,7 +49,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         category::Create::PATH,
-        category::Create::METHOD.route().to(todo),
+        category::Create::METHOD.route().to(create_category),
     )
     .route(
         category::Update::PATH,
