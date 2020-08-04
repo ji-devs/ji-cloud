@@ -6,13 +6,9 @@ use actix_web::{
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
     CategoryCreateError, CategoryGetError, CategoryId, CategoryResponse, CreateCategoryRequest,
-    NewCategoryResponse,
+    NewCategoryResponse, UpdateCategoryRequest,
 };
 use sqlx::PgPool;
-
-async fn todo() -> HttpResponse {
-    todo!()
-}
 
 async fn get_categories(
     db: Data<PgPool>,
@@ -42,6 +38,30 @@ async fn create_category(
     Ok(Json(NewCategoryResponse { id, index }))
 }
 
+async fn update_category(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
+    path: web::Path<CategoryId>,
+) -> actix_web::Result<HttpResponse, <category::Update as ApiEndpoint>::Err> {
+    let UpdateCategoryRequest {
+        name,
+        parent_id,
+        index,
+    } = req.map_or_else(Default::default, Json::into_inner);
+
+    db::category::update(
+        &db,
+        path.into_inner(),
+        parent_id,
+        name.as_deref(),
+        index.map(|it| it as i16),
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().into())
+}
+
 async fn delete_category(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
@@ -63,7 +83,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         category::Update::PATH,
-        category::Update::METHOD.route().to(todo),
+        category::Update::METHOD.route().to(update_category),
     )
     .route(
         category::Delete::PATH,

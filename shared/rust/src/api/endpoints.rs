@@ -66,7 +66,7 @@ pub mod category {
         api::method::Method,
         category::{
             CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryResponse,
-            CategoryUpdateError, CategoryUpdateRequest, CreateCategoryRequest, NewCategoryResponse,
+            CategoryUpdateError, UpdateCategoryRequest, CreateCategoryRequest, NewCategoryResponse,
         },
     };
 
@@ -90,7 +90,7 @@ pub mod category {
 
     pub struct Update;
     impl ApiEndpoint for Update {
-        type Req = CategoryUpdateRequest;
+        type Req = UpdateCategoryRequest;
         type Res = ();
         type Err = CategoryUpdateError;
         const PATH: &'static str = "/v1/category/{id}";
