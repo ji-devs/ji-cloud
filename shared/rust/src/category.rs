@@ -138,6 +138,7 @@ pub enum CategoryUpdateError {
     CategoryNotFound,
     ParentCategoryNotFound,
     Forbidden,
+    Cycle,
     OutOfRange { max: u16 },
 }
 
@@ -156,12 +157,13 @@ impl From<CategoryUpdateError> for actix_web::Error {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct CategoryUpdateRequest {
+#[derive(Serialize, Deserialize, Default, Eq, PartialEq)]
+pub struct UpdateCategoryRequest {
     pub name: Option<String>,
     /// If None, don't change parents. If Some, change parent to the given CategoryId (or null).
     #[serde(deserialize_with = "deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub parent_id: Option<Option<CategoryId>>,
     /// If None, don't change index. If Some move to _before_ whatever has the given index (ie, 0 moves to the start).
     /// Will cause an error if you try to move to past the end of the parent.
