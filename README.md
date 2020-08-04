@@ -8,3 +8,6 @@
 * ![User - Frontend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Release/badge.svg) / ![User - Frontend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Frontend%20-%20Sandbox/badge.svg)
 * ![User - Storybook - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Storybook%20-%20Release/badge.svg) / ![User - Storybook - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Storybook%20-%20Sandbox/badge.svg)
 
+* ![Admin - Frontend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Frontend%20-%20Release/badge.svg) / ![Admin - Frontend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Frontend%20-%20Sandbox/badge.svg)
+* ![Admin - Storybook - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Storybook%20-%20Release/badge.svg) / ![Admin - Storybook - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Storybook%20-%20Sandbox/badge.svg)
+
