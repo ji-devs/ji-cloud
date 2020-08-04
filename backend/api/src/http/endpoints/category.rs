@@ -5,8 +5,7 @@ use actix_web::{
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryCreateError, CategoryGetError, CategoryId, CategoryResponse, CreateCategoryRequest,
-    NewCategoryResponse, UpdateCategoryRequest,
+    CategoryId, CategoryResponse, CreateCategoryRequest, NewCategoryResponse, UpdateCategoryRequest,
 };
 use sqlx::PgPool;
 
@@ -17,7 +16,7 @@ async fn get_categories(
 {
     db::category::get(&db)
         .await
-        .map_err(|_| CategoryGetError::InternalServerError)
+        .map_err(Into::into)
         .map(|it| Json(CategoryResponse { categories: it }))
 }
 
@@ -31,9 +30,7 @@ async fn create_category(
 > {
     let CreateCategoryRequest { name, parent_id } = req.into_inner();
 
-    let (id, index) = db::category::create(&db, &name, parent_id)
-        .await
-        .map_err(|_| CategoryCreateError::InternalServerError)?;
+    let (id, index) = db::category::create(&db, &name, parent_id).await?;
 
     Ok(Json(NewCategoryResponse { id, index }))
 }
