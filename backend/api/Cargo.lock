@@ -1851,8 +1851,10 @@ name = "shared"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "anyhow",
  "cfg-if",
  "chrono",
+ "log",
  "serde",
  "serde_json",
  "serde_repr",

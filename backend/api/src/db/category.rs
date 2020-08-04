@@ -11,7 +11,6 @@ from category
     )
     .fetch_all(db)
     .await
-    .map_err(|it| dbg!(it))
 }
 
 pub async fn create(
@@ -70,14 +69,10 @@ pub async fn update(
     index: Option<i16>,
 ) -> Result<(), CategoryUpdateError> {
     let current_parent = parent_id.map(|id| id.map(|it| it.0));
-    let mut txn = db
-        .begin()
-        .await
-        .map_err(|_| CategoryUpdateError::InternalServerError)?;
+    let mut txn = db.begin().await?;
 
     txn.execute("set transaction isolation level repeatable read")
-        .await
-        .map_err(|_| CategoryUpdateError::InternalServerError)?;
+        .await?;
 
     let category_info = sqlx::query!(
         r#"
@@ -86,15 +81,13 @@ select parent_id, index from category where id = $1
         id
     )
     .fetch_optional(&mut txn)
-    .await
-    .map_err(|_| CategoryUpdateError::InternalServerError)?
+    .await?
     .ok_or(CategoryUpdateError::CategoryNotFound)?;
 
     if let Some(name) = name {
         sqlx::query!("update category set name = $1 where id = $2", name, id)
             .execute(&mut txn)
-            .await
-            .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            .await?;
     }
 
     let mut current_index = category_info.index;
@@ -102,9 +95,7 @@ select parent_id, index from category where id = $1
         if parent_id != category_info.parent_id {
             // check that the new parent isn't a descendant (to avoid cycles)
             if let Some(new_parent) = parent_id {
-                let would_cycle = would_cycle(&mut txn, id, new_parent)
-                    .await
-                    .map_err(|_| CategoryUpdateError::InternalServerError)?;
+                let would_cycle = would_cycle(&mut txn, id, new_parent).await?;
 
                 if would_cycle {
                     return Err(CategoryUpdateError::Cycle);
@@ -125,14 +116,11 @@ returning index
                 id
             )
             .fetch_one(&mut txn)
-            .await
-            .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            .await?;
 
             current_index = res.index;
 
-            backshift(&mut txn, category_info.parent_id, category_info.index, None)
-                .await
-                .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            backshift(&mut txn, category_info.parent_id, category_info.index, None).await?;
         }
     }
 
@@ -150,14 +138,11 @@ where index >= $1 and parent_id = $2
                 current_parent
             )
             .execute(&mut txn)
-            .await
-            .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            .await?;
         }
 
         if new_index > current_index {
-            backshift(&mut txn, current_parent, current_index, Some(new_index))
-                .await
-                .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            backshift(&mut txn, current_parent, current_index, Some(new_index)).await?;
         }
 
         if new_index != current_index {
@@ -172,17 +157,14 @@ where id = $2
                 id
             )
             .execute(&mut txn)
-            .await
-            .map_err(|_| CategoryUpdateError::InternalServerError)?;
+            .await?;
 
             // update here
             // adjust index, move surrounding categories as needed
         }
     }
 
-    txn.commit()
-        .await
-        .map_err(|_| CategoryUpdateError::InternalServerError)?;
+    txn.commit().await?;
 
     Ok(())
 }
@@ -209,14 +191,10 @@ where index > $1 and index <= $2 is not false and parent_id is not distinct from
 }
 
 pub async fn delete(db: &sqlx::PgPool, id: CategoryId) -> Result<(), CategoryDeleteError> {
-    let mut txn = db
-        .begin()
-        .await
-        .map_err(|_| CategoryDeleteError::InternalServerError)?;
+    let mut txn = db.begin().await?;
 
     txn.execute("set transaction isolation level repeatable read")
-        .await
-        .map_err(|_| CategoryDeleteError::InternalServerError)?;
+        .await?;
 
     let res = sqlx::query!(
         r#"
@@ -235,18 +213,14 @@ returning index, parent_id
             {
                 CategoryDeleteError::Children
             }
-            _ => CategoryDeleteError::InternalServerError,
+            e => e.into(),
         };
     })?
     .ok_or(CategoryDeleteError::CategoryNotFound)?;
 
-    backshift(&mut txn, res.parent_id, res.index, None)
-        .await
-        .map_err(|_| CategoryDeleteError::InternalServerError)?;
+    backshift(&mut txn, res.parent_id, res.index, None).await?;
 
-    txn.commit()
-        .await
-        .map_err(|_| CategoryDeleteError::InternalServerError)?;
+    txn.commit().await?;
 
     Ok(())
 }
