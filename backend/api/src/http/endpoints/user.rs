@@ -1,9 +1,6 @@
-use crate::db::{
-    self,
-    user::{profile_by_firebase, register},
-};
+use crate::db::{self, user::register};
 use crate::extractor::{
-    reply_signin_auth, FirebaseId, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
     web::{Data, Json, ServiceConfig},
@@ -26,17 +23,13 @@ async fn handle_signin_credentials(
     db: Data<PgPool>,
     user: FirebaseUser,
 ) -> actix_web::Result<HttpResponse> {
-    if !db::user::exists_by_firebase(&db, &user.id)
+    let user_id = db::user::firebase_to_id(&db, &user.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
-    {
-        return Err(HttpResponse::UnprocessableEntity()
-            .json(NoSuchUserError {})
-            .into());
-    }
+        .ok_or_else(|| HttpResponse::UnprocessableEntity().json(NoSuchUserError {}))?;
 
     let (csrf, cookie) =
-        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
+        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.local_insecure)
             .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(HttpResponse::Ok()
@@ -61,11 +54,10 @@ async fn handle_register(
 ) -> actix_web::Result<HttpResponse, RegisterError> {
     validate_register_req(&req).await?;
 
-    register(db.as_ref(), &user.id, &req).await?;
+    let id = register(db.as_ref(), &user.id, &req).await?;
 
-    let (csrf, cookie) =
-        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
-            .map_err(|_| RegisterError::InternalServerError)?;
+    let (csrf, cookie) = reply_signin_auth(id, &settings.jwt_encoding_key, settings.local_insecure)
+        .map_err(|_| RegisterError::InternalServerError)?;
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
@@ -78,7 +70,7 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    profile_by_firebase(db.as_ref(), &FirebaseId(claims.0.id))
+    db::user::profile(db.as_ref(), claims.0.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
