@@ -1,11 +1,11 @@
 use crate::{db, extractor::WrapAuthClaimsNoDb};
 use actix_web::{
-    web::{Data, Json, ServiceConfig},
+    web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryCreateError, CategoryGetError, CategoryResponse, CreateCategoryRequest,
+    CategoryCreateError, CategoryGetError, CategoryId, CategoryResponse, CreateCategoryRequest,
     NewCategoryResponse,
 };
 use sqlx::PgPool;
@@ -42,6 +42,16 @@ async fn create_category(
     Ok(Json(NewCategoryResponse { id, index }))
 }
 
+async fn delete_category(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    path: web::Path<CategoryId>,
+) -> actix_web::Result<HttpResponse, <category::Delete as ApiEndpoint>::Err> {
+    db::category::delete(&db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().into())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         category::Get::PATH,
@@ -57,6 +67,6 @@ pub fn configure(cfg: &mut ServiceConfig) {
     )
     .route(
         category::Delete::PATH,
-        category::Delete::METHOD.route().to(todo),
+        category::Delete::METHOD.route().to(delete_category),
     );
 }
