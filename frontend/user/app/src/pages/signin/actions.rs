@@ -10,7 +10,7 @@ use core::{
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use crate::utils::firebase::get_firebase_signin_google;
-use futures_signals::signal::{Mutable, SignalExt};
+use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;
 use super::SigninPage;
@@ -23,73 +23,50 @@ pub enum SigninStatus {
     NoSuchUser,
 }
 
-struct Foo {}
-impl Foo {
-    pub fn hello(&self) {
-        log::info!("foo");
-    }
-}
-impl Drop for Foo {
-    fn drop(&mut self) {
-        log::info!("DROPPED");
-    }
-
-}
-
-//TODO - figure out how to make this spawn_local drop
-//foo is just a placeholder to test (try removing .await to see it drop)
-pub fn side_effects(page:Rc<SigninPage>) {
-    let foo = Foo{};
-
-    spawn_local(clone!(page => async move {
-        foo.hello();
-        page.status.signal_cloned().for_each(|status| {
-            if let Some(status) = status {
-                match status {
-                    SigninStatus::Success(csrf) => {
-                        storage::save_csrf_token(&csrf);
-                        dominator::routing::go_to_url("/user/profile");
-                        //dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
-                        
-                    },
-                    _ => { 
-                        log::info!("status: {:?}", status);
-                    }
+pub async fn run_side_effects(status: impl Signal<Item = Option<SigninStatus>>) {
+    status.for_each(|status| {
+        if let Some(status) = status {
+            match status {
+                SigninStatus::Success(csrf) => {
+                    storage::save_csrf_token(&csrf);
+                    dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
+                    
+                },
+                _ => { 
+                    log::info!("status: {:?}", status);
                 }
             }
+        }
 
-            ready(())
-        }).await;
-    }));
+        ready(())
+    }).await;
 }
 
-pub fn signin_google(page:Rc<SigninPage>) {
-   
-    page.status.set(Some(SigninStatus::Busy));
+pub async fn signin_google(page:Rc<SigninPage>) {
+
 
     let token_promise = unsafe { get_firebase_signin_google() };
 
-    spawn_local(clone!(page => async move {
-        match JsFuture::from(token_promise).await {
-            Ok(token) => {
-                let token = token.as_string().unwrap_throw();
-                let resp:Result<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
-                match resp {
-                    Ok(data) => page.status.set(Some(SigninStatus::Success(data.csrf))),
-                    Err(_) => page.status.set(Some(SigninStatus::NoSuchUser))
-                }
-            },
-            Err(_) => {
-                page.status.set(None);
+    match JsFuture::from(token_promise).await {
+        Ok(token) => {
+            let token = token.as_string().unwrap_throw();
+            let resp:Result<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
+            match resp {
+                Ok(data) => page.status.set(Some(SigninStatus::Success(data.csrf))),
+                Err(_) => page.status.set(Some(SigninStatus::NoSuchUser))
             }
-        };
-
-
-    }));
+        },
+        Err(_) => {
+            page.status.set(None);
+        }
+    };
 }
 
-pub fn signin_email(status:&Mutable<Option<SigninStatus>>, email:&str, pw:&str) {
-    status.set(Some(SigninStatus::Busy));
+pub async fn signin_email(page:Rc<SigninPage>) {
 
+    let refs = page.refs.borrow();
+    let refs = refs.as_ref().unwrap_throw();
+    let email = refs.get_email();
+    let pw = refs.get_pw();
     log::info!("signin clicked! email: {} pw: {}", email, pw);
 }

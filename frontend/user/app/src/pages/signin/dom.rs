@@ -3,30 +3,44 @@ use std::cell::RefCell;
 use wasm_bindgen::UnwrapThrowExt;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal}
+    signal::{Mutable, SignalExt, Signal},
+    CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
-use dominator_helpers::{elem, with_data_id};
+use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
 use super::actions::{self, SigninStatus};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-
+use discard::DiscardOnDrop;
 pub struct SigninPage {
     pub refs: RefCell<Option<SigninPageRefs>>,
     pub status: Mutable<Option<SigninStatus>>,
+    pub side_effects: DiscardOnDrop<CancelableFutureHandle>, //cleaned up automatically on drop
+    pub signin_loader: AsyncLoader
+}
+
+impl Drop for SigninPage {
+    fn drop(&mut self) {
+        log::info!("cleaned up signin page!");
+        //self.signin_loader.cancel();
+    }
 }
 
 impl SigninPage {
     pub fn new() -> Rc<Self> {
-        let _self = Rc::new(Self { 
-            refs: RefCell::new(None) ,
-            status: Mutable::new(None),
-        });
 
-        actions::side_effects(_self.clone());
+        let status = Mutable::new(None);
+        let side_effects = spawn_future(actions::run_side_effects(status.signal_cloned()));
+
+        let _self = Rc::new(Self { 
+            refs: RefCell::new(None),
+            status,
+            side_effects,
+            signin_loader: AsyncLoader::new()
+        });
 
         _self
     }
@@ -35,12 +49,16 @@ impl SigninPage {
         elem!(templates::signin(), {
             .with_data_id!("signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    _self.handle_signin_email();
+                    _self.status.set(Some(SigninStatus::Busy));
+                    _self.signin_loader.load(actions::signin_email(_self.clone()));
                 }))
             })
             .with_data_id!("google-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    actions::signin_google(_self.clone());
+                    _self.status.set(Some(SigninStatus::Busy));
+                    _self.signin_loader.load(actions::signin_google(_self.clone()));
+                    dominator::routing::go_to_url("/user/profile");
+
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {
@@ -53,11 +71,6 @@ impl SigninPage {
         *self.refs.borrow_mut() = Some(SigninPageRefs::new(&parent));
     }
 
-    fn handle_signin_email(&self) {
-        let refs = self.refs.borrow();
-        let refs = refs.as_ref().unwrap_throw();
-        actions::signin_email(&self.status, &refs.get_email(), &refs.get_pw());
-    }
 }
 
 pub struct SigninPageRefs {
