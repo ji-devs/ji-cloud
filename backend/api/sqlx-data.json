@@ -27,12 +27,73 @@
       ]
     }
   },
-  "3fd25338adf60f6e39b1a0b9af9ee0aafcf9838ee69b26c570227a780407d308": {
-    "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and parent_id is not distinct from $2\n",
+  "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677": {
+    "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
+    "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
+    "query": "update category set name = $1 where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4e2cce1d7c10c79ae6d07626a2fa64807f82c50d7e647eddbc7b3d8ee0e19f29": {
+    "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and parent_id = $2\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
+    "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
           "Int2",
           "Uuid"
         ]
@@ -63,6 +124,32 @@
       "nullable": [
         false,
         true
+      ]
+    }
+  },
+  "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
+    "query": "\nselect parent_id, index from category where id = $1\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        false
       ]
     }
   },
@@ -98,6 +185,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
+    "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "would_cycle!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   }
 }
