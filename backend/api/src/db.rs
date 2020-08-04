@@ -1,5 +1,5 @@
-pub mod category;
-pub mod user;
+pub(crate) mod category;
+pub(crate) mod user;
 
 use config::DB_POOL_CONNECTIONS;
 use core::settings::{DbEndpoint, Settings};

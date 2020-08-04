@@ -16,6 +16,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
 use sqlx::postgres::PgPool;
+use uuid::Uuid;
 
 mod firebase;
 
@@ -153,15 +154,14 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 }
 
 pub fn reply_signin_auth(
-    firebase_id: FirebaseId,
+    user_id: Uuid,
     jwt_encoding_key: &EncodingKey,
     local_insecure: bool,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
-    // todo: Move FirebaseId to shared and add it to AuthClaims.
     let claims = AuthClaims {
-        id: firebase_id.0,
+        id: user_id,
         csrf: Some(csrf.clone()),
     };
 
