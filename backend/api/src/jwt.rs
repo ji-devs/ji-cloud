@@ -1,4 +1,4 @@
-use crate::{db::user::exists_by_firebase, extractor::FirebaseId};
+use crate::db;
 use jsonwebtoken as jwt;
 use shared::auth::AuthClaims;
 use sqlx::postgres::PgPool;
@@ -45,8 +45,7 @@ pub async fn check_no_csrf(
         .map_err(|e| anyhow::anyhow!("{:?}", e))
         .unwrap();
 
-    // todo: remove the clone here... Just requires making `FirebaseId` use a Cow<'a, str> and making it impl clone, I think.
-    match exists_by_firebase(db, &FirebaseId(claims.id.clone())).await? {
+    match db::user::exists(db, claims.id).await? {
         true => Ok(Some(claims)),
         false => Ok(None),
     }

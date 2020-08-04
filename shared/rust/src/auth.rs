@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+use uuid::Uuid;
 
 pub const JWT_COOKIE_NAME: &'static str = "X-JWT";
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
@@ -48,6 +49,6 @@ pub struct RegisterRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AuthClaims {
-    pub id: String,
+    pub id: Uuid,
     pub csrf: Option<String>,
 }
