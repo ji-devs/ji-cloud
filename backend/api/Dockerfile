@@ -18,7 +18,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
-RUN cargo test
+RUN cargo test --no-default-features
 
 ####################
 ## RELEASE        ##
@@ -39,7 +39,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
-RUN cargo build --release --features release
+RUN cargo build --release --no-default-features --features release
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
@@ -79,7 +79,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
-RUN cargo build --release --features sandbox
+RUN cargo build --release --no-default-features --features sandbox
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as sandbox 
