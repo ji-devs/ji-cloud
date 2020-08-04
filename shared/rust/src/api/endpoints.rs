@@ -65,8 +65,8 @@ pub mod category {
     use crate::{
         api::method::Method,
         category::{
-            CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryResponse,
-            CategoryUpdateError, UpdateCategoryRequest, CreateCategoryRequest, NewCategoryResponse,
+            CategoryCreateError, CategoryDeleteError, CategoryGetError,
+            CategoryUpdateError, UpdateCategoryRequest, CreateCategoryRequest, NewCategoryResponse, CategoryResponse,
         },
     };
 

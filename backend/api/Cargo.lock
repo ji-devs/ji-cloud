@@ -1854,7 +1854,6 @@ dependencies = [
  "anyhow",
  "cfg-if",
  "chrono",
- "log",
  "serde",
  "serde_json",
  "serde_repr",
