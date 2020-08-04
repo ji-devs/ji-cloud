@@ -1,6 +1,3 @@
-#[cfg(feature = "backend")]
-use sqlx::postgres::PgRow;
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -21,44 +18,11 @@ pub struct CategoryResponse {
 
 #[derive(Serialize, Deserialize)]
 pub struct Category {
-    pub parent_id: Option<CategoryId>,
-    pub name: String,
     pub id: CategoryId,
-    pub index: u16,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: Option<DateTime<Utc>>,
-}
-
-#[cfg(feature = "backend")]
-impl<'r> sqlx::FromRow<'r, PgRow> for Category {
-    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
-        let DbCategory {
-            parent_id,
-            name,
-            id,
-            index,
-            created_at,
-            updated_at,
-        } = DbCategory::from_row(row)?;
-
-        Ok(Category {
-            parent_id,
-            name,
-            id,
-            index: index as u16,
-            created_at,
-            updated_at,
-        })
-    }
-}
-
-#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
-#[cfg(feature = "backend")]
-struct DbCategory {
-    pub parent_id: Option<CategoryId>,
     pub name: String,
-    pub id: CategoryId,
-    pub index: i16,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub children: Vec<Category>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
