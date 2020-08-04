@@ -5,6 +5,7 @@ if(process.argv.length < 3) {
 
 switch(process.argv[2]) {
 	case "user":
+	case "admin":
 		break;
 	default: {
 		console.error("supply valid APP (and note the space) for frontend-dev-files -- [APP]");

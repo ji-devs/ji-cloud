@@ -1,0 +1,38 @@
+{
+  "name": "ji-cloud-storybook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo TODO: add tests",
+    "start": "npm run clean && npm-run-all -p _media-server _storybook-watch",
+    "storybook:build-release": "npm run clean && build-storybook -o ./dist/storybook-build && npm run _css-bundle",
+    "clean": "rimraf ./dist",
+    "_css-bundle": "npm-run-all -p _css-bundle-dev _css-bundle-prod",
+    "_css-bundle-dev": "postcss src/imports.css --env development -o dist/storybook-build/dist/styles.css",
+    "_css-bundle-prod": "postcss src/imports.css --env production -o dist/storybook-build/dist/styles.min.css",
+    "_media-server": "cd ../../../build-utils && npm run local-media-server",
+    "_storybook-watch": "start-storybook -p 6006 -s ./dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@storybook/addon-notes": "^5.3.19",
+    "@storybook/addon-storysource": "^5.3.19",
+    "@storybook/addons": "^5.3.19",
+    "@storybook/html": "^5.3.19",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-root-import": "^6.5.0",
+    "cssnano": "^4.1.10",
+    "html-to-dominator-string": "^1.15.0",
+    "npm-run-all": "^4.1.5",
+    "postcss-cli": "^7.1.1",
+    "postcss-import": "^12.0.1",
+    "postcss-url": "^8.0.0",
+    "restyle-loader": "0.0.3",
+    "rimraf": "^3.0.2",
+    "tailwindcss": "^1.4.6"
+  }
+}
