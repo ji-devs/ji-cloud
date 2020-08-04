@@ -27,6 +27,45 @@
       ]
     }
   },
+  "3fd25338adf60f6e39b1a0b9af9ee0aafcf9838ee69b26c570227a780407d308": {
+    "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and parent_id is not distinct from $2\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "76a022183b6addb81416606a1e9a08f1b30056a36137e1dd630c1cad08acaaef": {
+    "query": "\ndelete from category where id = $1\nreturning index, parent_id\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
   "853522807cb90d2c36fcfe680c729ac368209c7aceafd759e41235f5110110f0": {
     "query": "select exists (select 1 from \"user\" where firebase_id = $1) as \"exists!\"",
     "describe": {
