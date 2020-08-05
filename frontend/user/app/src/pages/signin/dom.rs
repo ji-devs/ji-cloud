@@ -15,10 +15,10 @@ use super::actions::{self, SigninStatus};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
+
 pub struct SigninPage {
     pub refs: RefCell<Option<SigninPageRefs>>,
     pub status: Mutable<Option<SigninStatus>>,
-    pub side_effects: DiscardOnDrop<CancelableFutureHandle>, //cleaned up automatically on drop
     pub signin_loader: AsyncLoader
 }
 
@@ -32,15 +32,13 @@ impl Drop for SigninPage {
 impl SigninPage {
     pub fn new() -> Rc<Self> {
 
-        let status = Mutable::new(None);
-        let side_effects = spawn_future(actions::run_side_effects(status.signal_cloned()));
 
         let _self = Rc::new(Self { 
             refs: RefCell::new(None),
-            status,
-            side_effects,
+            status: Mutable::new(None),
             signin_loader: AsyncLoader::new()
         });
+
 
         _self
     }
@@ -57,7 +55,6 @@ impl SigninPage {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
                     _self.signin_loader.load(actions::signin_google(_self.clone()));
-                    dominator::routing::go_to_url("/user/profile");
 
                 }))
             })

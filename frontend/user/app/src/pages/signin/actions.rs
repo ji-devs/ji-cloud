@@ -16,30 +16,27 @@ use std::rc::Rc;
 use super::SigninPage;
 use futures::future::ready;
 
+//temp
+use futures::future::poll_fn;
+use futures::task::{Context, Poll};
 #[derive(Debug, Clone)]
 pub enum SigninStatus {
-    Success(String),
     Busy,
     NoSuchUser,
 }
 
-pub async fn run_side_effects(status: impl Signal<Item = Option<SigninStatus>>) {
-    status.for_each(|status| {
-        if let Some(status) = status {
-            match status {
-                SigninStatus::Success(csrf) => {
-                    storage::save_csrf_token(&csrf);
-                    dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
-                    
-                },
-                _ => { 
-                    log::info!("status: {:?}", status);
-                }
-            }
-        }
+fn do_success(page:&SigninPage, csrf:String) {
+    storage::save_csrf_token(&csrf);
+    dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
 
-        ready(())
-    }).await;
+    ///generally speaking this kind of thing isn't necessary
+    ///futures will just resolve and be dropped as part of the flow
+    ///but because the oauth flow here opens a separate window
+    ///it's more at risk to leave dangling Futures
+    ///specifically, here, dangling futures which hold the Rc that holds it
+    ///thereby creating a cycle, we need to break by cancelling that future
+    ///see: https://github.com/jewish-interactive/ji-cloud/issues/78
+    page.signin_loader.cancel();
 }
 
 pub async fn signin_google(page:Rc<SigninPage>) {
@@ -52,7 +49,7 @@ pub async fn signin_google(page:Rc<SigninPage>) {
             let token = token.as_string().unwrap_throw();
             let resp:Result<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
             match resp {
-                Ok(data) => page.status.set(Some(SigninStatus::Success(data.csrf))),
+                Ok(data) => do_success(&page, data.csrf),
                 Err(_) => page.status.set(Some(SigninStatus::NoSuchUser))
             }
         },
