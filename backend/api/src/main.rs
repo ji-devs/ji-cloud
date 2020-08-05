@@ -8,8 +8,7 @@ mod logger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let _ = dotenv::from_path("../../../config/.env");
-    let _ = dotenv::from_path(".env");
+    let _ = dotenv::dotenv().ok();
     logger::init_logger();
 
     let settings = core::settings::init().await?;
