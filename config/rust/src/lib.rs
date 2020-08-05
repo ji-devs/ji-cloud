@@ -35,7 +35,7 @@ impl RemoteTarget {
 
     pub fn api_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8081",
+            Self::Local => "http://localhost:8080",
             Self::Sandbox => "https://api.sandbox.jicloud.org",
             Self::Release => "https://api.jicloud.org",
         }
@@ -58,7 +58,7 @@ impl RemoteTarget {
 
     pub fn pages_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8080",
+            Self::Local => "http://localhost:8081",
             Self::Sandbox => "https://sandbox.jicloud.org",
             Self::Release => "https://jicloud.org",
         }
