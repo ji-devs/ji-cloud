@@ -1,0 +1,16 @@
+{
+  "name": "integration-testing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Chloe Ross",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "ava": "^3.11.1",
+    "got": "^11.5.1",
+    "get-port": "^5.1.1"
+  },
+  "scripts": {
+    "test": "ava"
+  }
+}
