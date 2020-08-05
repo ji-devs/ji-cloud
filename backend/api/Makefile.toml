@@ -11,8 +11,12 @@ default_to_workspace = false
 ###################
 
 [tasks.test]
-command = "cargo"
-args = ["test"]
+script= [
+"""
+cargo test
+yarn --cwd integration-testing test
+"""
+]
 
 [tasks.test-watch]
 command = "cargo"

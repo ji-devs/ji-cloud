@@ -51,3 +51,5 @@ $RECYCLE.BIN/
 backend/_core/rust/Cargo.lock
 shared/rust/Cargo.lock
 config/rust/Cargo.lock
+
+backend/api/integration-testing/bin/

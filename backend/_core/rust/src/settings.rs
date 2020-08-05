@@ -1,7 +1,8 @@
+#[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
 use super::google::{get_access_token_and_project_id, get_secret};
-use anyhow::Context;
 use config::RemoteTarget;
 use jsonwebtoken::EncodingKey;
+use sqlx::postgres::PgConnectOptions;
 use std::{
     env, fmt,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -19,7 +20,7 @@ pub struct Settings {
     //Keeping a string is a stop-gap measure for now, not ideal
     pub jwt_decoding_key: String,
     pub inter_server_secret: String,
-    pub db_credentials: DbCredentials,
+    pub connect_options: PgConnectOptions,
 }
 
 #[cfg(not(any(feature = "local", feature = "sandbox", feature = "release")))]
@@ -39,10 +40,21 @@ pub async fn init() -> anyhow::Result<Settings> {
 
 #[cfg(all(feature = "local", not(feature = "sqlproxy")))]
 pub async fn init() -> anyhow::Result<Settings> {
-    init_local()
+    let jwt_secret = req_env("JWT_SECRET")?;
+    let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
+
+    let inter_server_secret = req_env("INTER_SERVER_SECRET")?;
+
+    Settings::new(
+        RemoteTarget::Local,
+        req_env("DATABASE_URL")?.parse::<PgConnectOptions>()?,
+        jwt_encoding_key,
+        jwt_secret,
+        inter_server_secret,
+    )
 }
 
-#[cfg(all(feature = "sandbox",))]
+#[cfg(feature = "sandbox")]
 pub async fn init() -> anyhow::Result<Settings> {
     _init(
         RemoteTarget::Sandbox,
@@ -51,7 +63,7 @@ pub async fn init() -> anyhow::Result<Settings> {
     .await
 }
 
-#[cfg(all(feature = "release",))]
+#[cfg(feature = "release")]
 pub async fn init() -> anyhow::Result<Settings> {
     _init(
         RemoteTarget::Release,
@@ -64,23 +76,7 @@ fn req_env(key: &str) -> anyhow::Result<String> {
     env::var(key).map_err(|_| anyhow::anyhow!("Missing required env var `{}`", key))
 }
 
-fn init_local() -> anyhow::Result<Settings> {
-    let jwt_secret = req_env("JWT_SECRET")?;
-    let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
-
-    let inter_server_secret = req_env("INTER_SERVER_SECRET")?;
-
-    let db_credentials = DbCredentials::new_local()?;
-
-    Settings::new(
-        RemoteTarget::Local,
-        db_credentials,
-        jwt_encoding_key,
-        jwt_secret,
-        inter_server_secret,
-    )
-}
-
+#[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
 async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Result<Settings> {
     let (token, project_id) =
         get_access_token_and_project_id(remote_target.google_credentials_env_name())
@@ -96,11 +92,9 @@ async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Resu
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
 
-    let db_credentials = DbCredentials::new(&db_pass, db_target);
-
     Settings::new(
         remote_target,
-        db_credentials,
+        db_target.into_connect_options(&db_pass),
         jwt_encoding_key,
         jwt_secret,
         inter_server_secret,
@@ -126,7 +120,7 @@ fn get_epoch() -> Duration {
 impl Settings {
     fn new(
         remote_target: RemoteTarget,
-        db_credentials: DbCredentials,
+        connect_options: PgConnectOptions,
         jwt_encoding_key: EncodingKey,
         jwt_decoding_key: String,
         inter_server_secret: String,
@@ -149,59 +143,30 @@ impl Settings {
             jwt_encoding_key,
             jwt_decoding_key,
             inter_server_secret,
-            db_credentials,
+            connect_options,
         })
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
-pub enum DbTarget {
-    Local,
+#[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
+enum DbTarget {
     Proxy,
     Remote(RemoteTarget),
 }
 
-#[derive(Debug, Clone)]
-pub struct DbCredentials {
-    pub dbname: String,
-    pub user: String,
-    pub pass: String,
-    pub endpoint: DbEndpoint,
-}
-#[derive(Debug, Clone)]
-pub enum DbEndpoint {
-    Socket(String),
-    Tcp(String, u16),
-}
+#[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
+impl DbTarget {
+    fn into_connect_options(self, secret_db_pass: &str) -> PgConnectOptions {
+        // Proxy target + remote target
+        let base = PgConnectOptions::new()
+            .username(config::REMOTE_DB_USER)
+            .password(secret_db_pass)
+            .database(config::REMOTE_DB_NAME);
 
-impl DbCredentials {
-    pub fn new_local() -> anyhow::Result<Self> {
-        //these are env vars since it depends on developer's local machine
-        let user = req_env("LOCAL_DB_USER")?;
-        let pass = req_env("LOCAL_DB_PASS")?;
-        let port = req_env("LOCAL_DB_PORT")?
-            .parse()
-            .context("Port must be a u16")?;
-        let dbname = req_env("LOCAL_DB_NAME")?;
-        let host = "localhost".to_string();
+        match self {
+            DbTarget::Proxy => base.host("localhost").port(config::SQL_PROXY_PORT),
 
-        Ok(Self {
-            user,
-            pass,
-            dbname,
-            endpoint: DbEndpoint::Tcp(host, port),
-        })
-    }
-
-    pub fn new(secret_db_pass: &str, db_target: DbTarget) -> Self {
-        match db_target {
-            DbTarget::Local => Self::new_local().unwrap(),
-            DbTarget::Proxy => Self {
-                user: config::REMOTE_DB_USER.to_string(),
-                pass: secret_db_pass.to_string(),
-                dbname: config::REMOTE_DB_NAME.to_string(),
-                endpoint: DbEndpoint::Tcp("localhost".to_string(), config::SQL_PROXY_PORT),
-            },
             DbTarget::Remote(remote_target) => {
                 let instance_connection =
                     env::var("INSTANCE_CONNECTION_NAME").unwrap_or(match remote_target {
@@ -212,29 +177,8 @@ impl DbCredentials {
 
                 let socket_path = env::var("DB_SOCKET_PATH").unwrap_or("/cloudsql".to_string());
 
-                Self {
-                    user: config::REMOTE_DB_USER.to_string(),
-                    pass: secret_db_pass.to_string(),
-                    dbname: config::REMOTE_DB_NAME.to_string(),
-                    endpoint: DbEndpoint::Socket(format!(
-                        "{}/{}",
-                        socket_path, instance_connection
-                    )),
-                }
+                base.socket(format!("{}/{}", socket_path, instance_connection))
             }
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        match &self.endpoint {
-            DbEndpoint::Tcp(host, port) => format!(
-                "postgres:///{}?user={}&password={}&host={}&port={}",
-                self.dbname, self.user, self.pass, host, port
-            ),
-            DbEndpoint::Socket(path) => format!(
-                "postgres:///{}?user={}&password={}&host={}",
-                self.dbname, self.user, self.pass, path
-            ),
         }
     }
 }
