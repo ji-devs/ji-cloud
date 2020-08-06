@@ -5,7 +5,7 @@ use uuid::Uuid;
 pub async fn get(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
     let v: sqlx::types::Json<Vec<Category>> = sqlx::query_scalar(
         r#"
-            select json_agg(structure) from category_tree where parent_id is null
+            select jsonb_agg(structure) from category_tree where parent_id is null
     "#,
     )
     .fetch_one(db)

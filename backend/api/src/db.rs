@@ -3,7 +3,6 @@ pub mod user;
 
 use config::DB_POOL_CONNECTIONS;
 use core::settings::{DbEndpoint, Settings};
-use futures::FutureExt;
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
     Executor,
@@ -25,16 +24,10 @@ pub async fn get_pool(settings: &Settings) -> anyhow::Result<PgPool> {
 
     let pool = PgPoolOptions::new()
         .max_connections(DB_POOL_CONNECTIONS)
-        .after_connect(|conn| {
-            async move {
-                conn.execute(include_str!("category-tree.sql"))
-                    .await
-                    .map(drop)
-            }
-            .boxed()
-        })
         .connect_with(connect_options)
         .await?;
+
+    pool.execute(include_str!("view/category-tree.sql")).await?;
 
     Ok(pool)
 }
