@@ -8,7 +8,18 @@ module.exports = {
     './src/html/**/*.tsx',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        jiblue: '#83aef7',
+        jihoverblue: '#6698ed'
+      },
+      fontSize: {
+        18: '18px',
+      },
+      fontFamily: {
+        azoSans: 'azo-sans-web'
+      },
+    },
   },
   variants: {},
   plugins: [],
