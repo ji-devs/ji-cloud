@@ -23,7 +23,7 @@ const app = express();
 
 app.options('*', cors());
 app.use(cors());
-app.use(express.static(localPath), serveIndex(localPath, {'icons': true}));
+app.use(express.static(localPath, {cacheControl: false}), serveIndex(localPath, {'icons': true}));
 
 
 app.listen(port, () => console.log(`Local CDN Started on port ${port}, serving ${localPath}!`))
