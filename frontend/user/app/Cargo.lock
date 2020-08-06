@@ -51,9 +51,14 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bfff749c01c040fc3702937019577c92bbfa11f65bf116c2975c93e745aa27f"
 dependencies = [
+ "futures",
  "js-sys",
  "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
@@ -120,6 +125,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
+ "awsm_web",
  "cfg-if",
  "config",
  "js-sys",

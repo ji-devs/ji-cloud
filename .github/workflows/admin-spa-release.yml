@@ -1,4 +1,4 @@
-name: Admin - Frontend - Release
+name: Admin - Spa - Release
 
 on:
   push:

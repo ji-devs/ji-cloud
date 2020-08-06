@@ -1,4 +1,4 @@
-name: User - Frontend - Release
+name: User - Spa - Release
 
 on:
   push:

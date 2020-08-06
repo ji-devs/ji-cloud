@@ -9,9 +9,12 @@ export default {
 export const Buttons = story(
     "Buttons", 
     () => `
-        <div class="flex">
-            <div class="m-3">${tmpl(button, {label: "button 1"})}</div>
-            <div class="m-3">${tmpl(button, {label: "button 2"})}</div>
-        </div>
+        <section>
+            <h2> Different kinds of buttons: </h2>
+            <div class="flex">
+                <div class="m-3">${tmpl(button, {label: "button 1"})}</div>
+                <div class="m-3">${tmpl(button, {label: "button 2"})}</div>
+            </div>
+        </section>
     `
 );
