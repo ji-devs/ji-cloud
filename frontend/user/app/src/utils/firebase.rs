@@ -12,5 +12,5 @@ extern "C" {
 
 
 pub fn setup(settings:&Settings) {
-    init_firebase(settings.firebase_dev);
+    unsafe { init_firebase(settings.firebase_dev); }
 }

@@ -16,7 +16,7 @@ module.exports = {
         18: '18px',
       },
       fontFamily: {
-        azoSans: 'AzoSans'
+        azoSans: 'azo-sans-web'
       },
     },
   },

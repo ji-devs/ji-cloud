@@ -6,21 +6,21 @@
 
 - [Directory Structure](./directory-structure/directory_structure.md)
 
-- [Setup](./setup/setup.md)
+- [One-time Setup](./setup/setup.md)
   - [Requirements](./setup/requirements/requirements.md)
+  - [Config](./setup/config/config.md)
   - [Google Cloud](./setup/google_cloud/google_cloud.md)
-  - [.env files](./setup/dot-env/dot_env.md)
   - [secret keys](./setup/secret-keys/secret_keys.md)
-  - [Runtime Settings](./setup/runtime-settings/runtime_settings.md)
   - [CI/CD](./setup/ci-cd/ci_cd.md)
   - [Database](./setup/database/database.md)
   - [Fastly](./setup/fastly/fastly.md)
   - [Media](./setup/media/media.md)
-  - [Storybook](./setup/storybook/storybook.md)
   - [Load Balancer](./setup/load-balancer/load_balancer.md)
-  - [Frontend](./setup/frontend/frontend.md)
   - [CORS](./setup/cors/cors.md)
   - [Firebase](./setup/firebase/firebase.md)
+
+- [Boilerplate](./boilerplate/boilerplate.md)
+  - [Frontend](./boilerplate/frontend/frontend.md)
 
 - [Engineering](./engineering/engineering.md)
   - [Dev Mode Commands](./engineering/commands/commands.md)

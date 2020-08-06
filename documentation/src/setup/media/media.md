@@ -2,7 +2,7 @@
 
 Media is synced via Dropbox, in order to allow graphics, audio, and other media artists to contribute their work without going through git.
 
-The local dev configuration happens like everything else ([.env](../dot-env/dot_env.md), [runtime](../runtime/runtime.md), etc.)
+The local dev configuration happens like everything else in [config](../config/config.md)
 
 In order to have media updates automatically propogate all the way up to the CDN, a bit of manual setup work needs to be done first:
 

@@ -1,0 +1,11 @@
+.green {
+    color: green;
+}
+
+.cell {
+    @apply w-1/3 bg-indigo-200 h-12 text-center;
+}
+
+header.fancy {
+    font-family: 'Dancing Script', cursive;
+}

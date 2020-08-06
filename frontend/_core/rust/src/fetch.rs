@@ -15,6 +15,7 @@ use shared::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
+use awsm_web::loaders::fetch::fetch_with_headers_and_data;
 
 #[derive(Debug)]
 pub enum Error {
@@ -25,6 +26,34 @@ pub enum Error {
     JsValue(JsValue),
 }
 
+pub const POST:&'static str = "POST";
+pub const GET:&'static str = "GET";
+
+pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:&str, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let bearer = format!("Bearer {}", token);
+    fetch_with_headers_and_data(url, method, true, &vec![("Authorization", &bearer)], data).await
+        .unwrap()
+        .json()
+        .await
+        .unwrap()
+}
+
+pub async fn api_with_auth<T, E, Payload>(url: &str, method:&str, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let csrf = load_csrf_token().unwrap_throw();
+    
+    fetch_with_headers_and_data(url, method, true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await
+        .unwrap()
+        .json()
+        .await
+        .unwrap()
+}
+
+/**** DEPRECATED BELOW HERE - JUST FOR REFERENCE ***/
+/*
 // unwrap is the usual case, where anything other than a ResultResponse is a panic / dev error
 // Therefore we can treat the ResultResponse itself as a Result
 pub async fn api_with_auth_unwrap<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize>(url: &str, data:Option<Payload>) -> Result<T, E> {
@@ -184,3 +213,4 @@ pub fn get_request_with_headers<A: AsRef<str>, B: AsRef<str>>(url: &str, pairs: 
     Ok(req)
 }
 
+*/

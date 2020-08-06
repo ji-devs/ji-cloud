@@ -2,8 +2,7 @@
 
 ## Database 
 
-1. All database schema changes happen through diesel migrations
-2. Create the proper up/down sql files to update automatically
+1. Remember to do migrations on sandbox/release (do this automatically?)
 
 ## Server 
 

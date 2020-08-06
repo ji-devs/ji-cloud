@@ -1,0 +1,57 @@
+{
+  "db": "PostgreSQL",
+  "853522807cb90d2c36fcfe680c729ac368209c7aceafd759e41235f5110110f0": {
+    "query": "select exists (select 1 from \"user\" where firebase_id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "9c77f8f085bf91d662c3650e68cbabab6997431a5782692f96d17183c23da3b2": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, display_name, email) \nVALUES \n    ($1, $2, $3::text)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a5db709ae2b7e647ed7af5e8c7d13f85aea5977aa529a657daa5ff7d1b19eafc": {
+    "query": "select exists (select 1 from \"user\" where firebase_id = $1) as exists",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  }
+}

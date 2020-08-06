@@ -1,15 +1,47 @@
-use std::sync::Arc;
+use core::routes::{Route, UserRoute};
+use std::rc::Rc;
+use wasm_bindgen::UnwrapThrowExt;
+use web_sys::Url;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use core::routes::Route;
-use wasm_bindgen::UnwrapThrowExt;
-use dominator::{Dom, class, html, clone, events};
-use web_sys::Url;
+use dominator::{Dom, html};
+use crate::pages::signin::SigninPage;
 
-pub fn route_signal() -> impl Signal<Item = Route> {
-    dominator::routing::url()
-        .signal_ref(|url| Route::from_url(&url))
+pub struct Router {
 }
 
+impl Router {
+    pub fn new() -> Self {
+        Self { }
+    }
+
+    fn signal() -> impl Signal<Item = Route> {
+        dominator::routing::url()
+            .signal_ref(|url| Route::from_url(&url))
+    }
+
+    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
+        Self::signal()
+            .map(|route| {
+                match route {
+                    Route::User(route) => {
+                        match route {
+                            UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
+                            UserRoute::Profile => {
+                                log::info!("TODO!");
+                                None
+                            },
+                            _ => None
+                        }
+                    }
+                    _ => None
+                }
+            })
+    }
+    
+    pub fn render(&self) -> Dom {
+        html!("main", { .child_signal(Self::dom_signal()) } )
+    }
+}

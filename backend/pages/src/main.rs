@@ -16,7 +16,7 @@ use core::settings::SETTINGS;
 
 #[tokio::main]
 async fn main() {
-    dotenv::from_path("../../config/.env").ok();
+    dotenv::dotenv().ok();
 
     logger::init_logger();
 

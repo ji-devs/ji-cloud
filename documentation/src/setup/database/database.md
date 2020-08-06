@@ -11,9 +11,9 @@ Note that "local" is up to the dev... could be in Docker, or native, it doesn't 
 
 # Cloud Sql Proxy
 
-Although the username, password, and database name are set in [.env](../dot-env/dot_env.md) files, the database instance name needs to be passed as a commandline arg to cloud-sql-proxy.
+Although the username, password, and database name are set in [config/.env](../config/config.md) files, the database instance name needs to be passed as a commandline arg to cloud-sql-proxy.
 
-Set this in `build-utils/package.json`. Note that the port and instance should match `SQL_PROXY_PORT` and `DB_INSTANCE_*` in [runtime settings](../runtime-settings/runtime_settings.md)
+Set this in `build-utils/package.json`. Note that the port and instance should match `SQL_PROXY_PORT` and `DB_INSTANCE_*` in the [config](../config/config.md) too. 
 
 # Database Migration
 

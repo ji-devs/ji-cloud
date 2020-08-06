@@ -1,19 +1,43 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
-mod router;
-mod page;
-mod pages;
-mod header;
-mod utils;
-mod globals;
-
-use wasm_bindgen::prelude::*;
-use cfg_if::cfg_if;
-
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+mod utils;
+mod router;
+mod pages;
+
+use cfg_if::cfg_if;
+use wasm_bindgen::prelude::*;
+use std::rc::Rc;
+use web_sys::{window, Element};
+
+/*
+mod page;
+mod pages;
+mod header;
+*/
+#[wasm_bindgen(start)]
+pub fn main_js() {
+    setup_logger();
+    let settings = core::settings::init();
+    utils::firebase::setup(&settings);
+    //init dom stuff
+
+    let router = router::Router::new();
+    dominator::append_dom(&dominator::body(), router.render());
+    /*
+
+    let page = page::Page::new();
+
+    dominator::append_dom(&dominator::body(), page.render());
+	*/
+}
+
+
+
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
@@ -31,15 +55,3 @@ cfg_if! {
     }
 }
 
-#[wasm_bindgen(start)]
-pub fn main_js() {
-    setup_logger();
-    let settings = core::settings::init();
-    log::info!("{:?}", settings);
-    utils::firebase::setup(&settings);
-
-
-    let page = page::Page::new();
-
-    dominator::append_dom(&dominator::body(), page.render());
-}
