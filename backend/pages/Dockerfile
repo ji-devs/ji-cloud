@@ -85,7 +85,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/pages
-RUN cargo build --release --features sandbox 
+RUN cargo build --release --no-default-features --features sandbox 
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as sandbox 
@@ -102,7 +102,6 @@ COPY --from=sandbox-builder \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
 COPY ./backend/pages/public /usr/local/bin/cloud-run-app/public
-COPY ./backend/pages/handlebars /usr/local/bin/cloud-run-app/handlebars 
 
 WORKDIR /usr/local/bin/cloud-run-app/
 

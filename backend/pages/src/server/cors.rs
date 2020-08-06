@@ -1,16 +1,20 @@
-use warp::http::Method;
-use core::settings::SETTINGS;
+use actix_web::http::{header, Method};
 use config::CORS_ORIGINS;
 
-pub fn get_cors() -> warp::filters::cors::Builder {
-    let builder = warp::cors()
-        .allow_methods(&[Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
-        .allow_headers(vec!["Authorization", "Content-Type", "X-CSRF"])
-        .allow_credentials(true);
+pub fn get(local_insecure: bool) -> actix_cors::Cors {
+    let mut cors = actix_cors::Cors::new()
+        .allowed_methods(&[Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
+        .allowed_headers(&[
+            header::AUTHORIZATION,
+            header::CONTENT_TYPE,
+            header::HeaderName::from_static("x-csrf"),
+        ]);
 
-    if(SETTINGS.get().unwrap().local_insecure) {
-        builder.allow_any_origin()
-    } else {
-        builder.allow_origins(CORS_ORIGINS.into_iter().map(|x| x.clone()).clone())
+    if !local_insecure {
+        for origin in CORS_ORIGINS.iter() {
+            cors = cors.allowed_origin(origin);
+        }
     }
+
+    cors
 }

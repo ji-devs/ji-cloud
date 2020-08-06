@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://storybook.jicloud.org/dist/styles.min.css">
+    <style>
+        li {
+            margin-left: 20px;
+        }
+    </style>
+    <title>Ji Cloud</title>
+
+    {% if local_dev -%}
+    <script src="/static/js/reload.js"></script>
+    {% endif -%}
+</head>
+
+<body>
+    <div>
+        Secret Check: {{ secret }}
+    </div>
+    <div>
+        Roles:
+        <ul>
+            <li>Foo</li>
+        </ul>
+    </div>
+</body>
+
+</html>

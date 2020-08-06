@@ -1,36 +1,42 @@
-use std::sync::Arc;
-use handlebars::Handlebars;
-use serde_json::json;
-use futures_util::future::TryFutureExt;
-use serde::{Serialize, Deserialize};
-use chrono::{Datelike, Timelike, Utc};
-use core::settings::SETTINGS;
-use crate::reject::{CustomWarpRejection, RequiredData};
-use crate::loader::{load_string, load_json};
+use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
+use config::RemoteTarget;
+use core::settings::Settings;
 
-#[derive(Eq, PartialEq, strum_macros::Display, strum_macros::AsRefStr)]
-#[strum(serialize_all = "lowercase")]
+use askama::Template;
+
+#[derive(Eq, PartialEq, Copy, Clone)]
 pub enum SpaPage {
-    User
+    User,
 }
 
-#[derive(Serialize, Deserialize)]
-struct PageInfo {
-    AppJs: String,
-    Firebase: bool,
-}
-
-pub async fn spa_template(hb:Arc<Handlebars<'_>>, spa:SpaPage) -> Result<impl warp::Reply, warp::Rejection> {
-
-    let info = PageInfo {
-        AppJs: SETTINGS.get().unwrap().remote_target.spa_url(spa.as_ref(), "js/index.js"),
-        Firebase: match spa {
-            SpaPage::User => true,
-            _ => false
+impl SpaPage {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::User => "user",
         }
+    }
+}
+
+#[derive(Template)]
+#[template(path = "spa.html")]
+struct SpaPageInfo {
+    app_js: String,
+    firebase: bool,
+    local_dev: bool,
+}
+
+fn spa_template(settings: &Settings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
+    let info = SpaPageInfo {
+        app_js: settings.remote_target.spa_url(spa.as_str(), "js/index.js"),
+        firebase: matches!(spa, SpaPage::User),
+        local_dev: matches!(settings.remote_target, RemoteTarget::Local),
     };
 
-    let render = hb.render("spa", &info).unwrap_or_else(|err| err.to_string());
+    let info = info.render().map_err(ErrorInternalServerError)?;
 
-    Ok(warp::reply::html(render))
+    Ok(actix_web::HttpResponse::Ok().body(info))
+}
+
+pub async fn spa_user_template(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::User)
 }
