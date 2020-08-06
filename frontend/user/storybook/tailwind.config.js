@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       colors: {
         jiblue: '#83aef7',
+        jihoverblue: '#6698ed'
       },
       fontSize: {
         18: '18px',
