@@ -1,17 +1,17 @@
-create or replace temp recursive view category_tree(index, id, parent_id, structure) as
+create or replace recursive view category_tree(index, id, parent_id, structure) as
 (
 select index::int2,
        id,
        parent_id,
-       json_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at)
+       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at)
 from category co
 where not (select exists(select 1 from category ci where ci.parent_id = co.id))
 union all
 select co.index::int2,
        id,
        parent_id,
-       json_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at, 'children',
-                         json_agg(_lat.structure))
+       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at, 'children',
+                         jsonb_agg(_lat.structure))
 from category co
          join lateral (
     select ct.structure
