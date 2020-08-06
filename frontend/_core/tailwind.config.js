@@ -3,12 +3,12 @@ console.log("__dirname = " + __dirname);
 
 module.exports = {
   purge: [
-    './src/html/**/*.js',
-    './src/html/**/*.ts',
+    './src/**/*.js',
+    './src/**/*.ts',
     '../templates/**/*.html',
+    //this isn't really valid when running from _core itself
+    //but doesn't seem to break anything
     '../../_core/templates/**/*.html',
-    './src/html/**/*.jsx',
-    './src/html/**/*.tsx',
   ],
   theme: {
     extend: {},
