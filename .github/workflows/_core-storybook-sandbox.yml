@@ -1,4 +1,4 @@
-name: Core - Storybook - Release
+name: Core - Storybook - Sandbox 
 
 on:
   push:
