@@ -1,3 +1,6 @@
+console.log("process.cwd() = " + process.cwd());
+console.log("__dirname = " + __dirname);
+
 module.exports = {
   purge: [
     './src/html/**/*.js',
