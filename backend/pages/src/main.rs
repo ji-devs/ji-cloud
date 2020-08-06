@@ -1,27 +1,22 @@
-//see: https://github.com/rust-lang/cargo/issues/8010
-#![cfg_attr(feature = "quiet", allow(warnings))]
+use std::thread;
 
 mod logger;
 mod server;
-mod reject;
 mod templates;
-mod loader;
-mod user;
-#[macro_use]
-mod utils;
-
-use dotenv::dotenv;
-use server::start_server;
-use core::settings::SETTINGS;
 
 #[tokio::main]
-async fn main() {
-    dotenv::dotenv().ok();
+async fn main() -> anyhow::Result<()> {
+    let _ = dotenv::dotenv();
 
-    logger::init_logger();
+    logger::init_logger()?;
 
-    core::settings::init().await; 
+    let settings = core::settings::init().await?;
 
-    start_server().await;
+    let handle = thread::spawn(|| server::run(settings));
+
+    log::info!("app started!");
+
+    handle.join().unwrap()?;
+
+    Ok(())
 }
-

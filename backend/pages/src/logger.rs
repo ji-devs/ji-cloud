@@ -1,25 +1,15 @@
 use simplelog::*;
-use cfg_if::cfg_if;
 
-cfg_if! {
-    if #[cfg(feature = "local")] {
-        pub fn init_logger() { 
+#[cfg(feature = "local")]
+pub fn init_logger() -> anyhow::Result<()> {
+    TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed)?;
 
-            CombinedLogger::init(vec![
-                TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed),
-                //WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
-            ])
-            .unwrap();
+    Ok(())
+}
 
-        }
-    } else { 
-        pub fn init_logger() { 
-            CombinedLogger::init(vec![
-                SimpleLogger::new(LevelFilter::Info, Config::default()),
-                //WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_binary.log").unwrap()),
-            ])
-            .unwrap();
-        }
-        
-    } 
+#[cfg(not(feature = "local"))]
+pub fn init_logger() -> anyhow::Result<()> {
+    SimpleLogger::init(LevelFilter::Info, Config::default())?;
+
+    Ok(())
 }

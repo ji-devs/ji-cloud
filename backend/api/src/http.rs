@@ -5,22 +5,14 @@ mod endpoints;
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
-use core::settings::Settings;
+use core::{
+    http::{get_addr, get_tcp_fd},
+    settings::Settings,
+};
 use futures::Future;
 use sqlx::postgres::PgPool;
 use std::env;
 use std::net::SocketAddr;
-
-#[cfg(feature = "local")]
-fn get_tcp_fd() -> Option<std::net::TcpListener> {
-    listenfd::ListenFd::from_env().take_tcp_listener(0).unwrap()
-}
-
-#[cfg(not(feature = "local"))]
-fn get_tcp_fd() -> Option<std::net::TcpListener> {
-    // we don't have listenfd here.
-    None
-}
 
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
@@ -53,7 +45,7 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
             .data(settings.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
-            .wrap(cors::get_cors_actix(local_insecure).finish())
+            .wrap(cors::get(local_insecure).finish())
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
@@ -71,22 +63,4 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
     server.run().await.unwrap();
 
     Ok(())
-}
-
-fn get_addr(default: u16) -> SocketAddr {
-    let mut port = default;
-
-    match env::var("PORT") {
-        Ok(p) => {
-            match p.parse::<u16>() {
-                Ok(n) => {
-                    port = n;
-                }
-                Err(_e) => {}
-            };
-        }
-        Err(_e) => {}
-    };
-
-    ([0, 0, 0, 0], port).into()
 }

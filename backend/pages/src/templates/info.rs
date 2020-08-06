@@ -1,39 +1,37 @@
-use std::sync::Arc;
-use handlebars::Handlebars;
-use serde_json::json;
-use futures_util::future::TryFutureExt;
-use serde::{Serialize, Deserialize};
-use chrono::{Datelike, Timelike, Utc};
-use core::google::{get_secret, get_access_token_and_project_id};
-use crate::reject::{CustomWarpRejection, RequiredData};
-use crate::loader::{load_string, load_json};
-use core::settings::SETTINGS;
+use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
+use askama::Template;
+use config::RemoteTarget;
+use core::google::{get_access_token_and_project_id, get_secret};
+use core::settings::Settings;
 
-#[derive(Serialize, Deserialize)]
-struct Info {
-    Secret: String,
-    Roles: Vec<Role>
-}
-
-#[derive(Serialize, Deserialize)]
 struct Role {
-    Id: u32,
-    name: String,
-    about: String
+    _id: u32,
+    _name: String,
+    _about: String,
 }
 
-pub async fn info_template(hb:Arc<Handlebars<'_>>) -> Result<impl warp::Reply, warp::Rejection> {
+#[derive(Template)]
+#[template(path = "info.html")]
+struct Info {
+    secret: String,
+    _roles: Vec<Role>,
+    local_dev: bool,
+}
 
-    let (token, project_id) = get_access_token_and_project_id(SETTINGS.get().unwrap().remote_target.google_credentials_env_name()).await.expect("couldn't get access token and project id!");
-
+pub async fn info_template(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
+    let (token, project_id) =
+        get_access_token_and_project_id(settings.remote_target.google_credentials_env_name())
+            .await
+            .expect("couldn't get access token and project id!");
 
     let secret_test = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
     let info = Info {
-        Secret: secret_test,
-        Roles: vec![]
+        secret: secret_test,
+        _roles: vec![],
+        local_dev: matches!(settings.remote_target, RemoteTarget::Local),
     };
 
-    let render = hb.render("info", &info).unwrap_or_else(|err| err.to_string());
+    let info = info.render().map_err(ErrorInternalServerError)?;
 
-    Ok(warp::reply::html(render))
+    Ok(actix_web::HttpResponse::Ok().body(info))
 }
