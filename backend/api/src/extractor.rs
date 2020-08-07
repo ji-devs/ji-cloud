@@ -78,6 +78,7 @@ impl FromRequest for FirebaseUser {
                 &token,
                 settings.remote_target.api_js_url(),
                 &settings.inter_server_secret,
+                settings.local_no_auth,
             )
             .await
             .map_err(|_| StatusError::InternalServerError)?

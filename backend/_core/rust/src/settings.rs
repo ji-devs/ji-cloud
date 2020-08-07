@@ -12,6 +12,7 @@ use std::{
 pub struct Settings {
     pub remote_target: RemoteTarget,
     pub local_insecure: bool,
+    pub local_no_auth: bool,
     pub api_port: u16,
     pub pages_port: u16,
     pub epoch: Duration,
@@ -134,11 +135,17 @@ impl Settings {
             RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
         };
 
+        let local_insecure = remote_target == RemoteTarget::Local;
+
+        let local_no_auth = local_insecure
+            && env::var("LOCAL_NO_FIREBASE_AUTH").map_or(false, |it| it.parse().unwrap_or(false));
+
         Ok(Self {
             remote_target,
             api_port,
             pages_port,
-            local_insecure: remote_target == RemoteTarget::Local,
+            local_insecure,
+            local_no_auth,
             epoch: get_epoch(),
             jwt_encoding_key,
             jwt_decoding_key,

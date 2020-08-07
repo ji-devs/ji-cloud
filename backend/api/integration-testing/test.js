@@ -6,6 +6,16 @@ const { execSync, exec, spawnSync } = require('child_process');
 const { argv, stdout } = require('process');
 const { copyFile, copyFileSync, mkdirSync } = require('fs');
 const path = require('path');
+const tough = require('tough-cookie');
+function hookServerStarted(server) {
+    return new Promise(resolve => {
+        server.stdout.on('data', function (data) {
+            if (data.toString().includes(`Starting "actix-web-service-`)) {
+                resolve();
+            }
+        });
+    })
+}
 
 test.before(async t => {
     execSync("cargo build --manifest-path ../Cargo.toml");
@@ -31,10 +41,20 @@ test.beforeEach(async t => {
 
     execSync("cargo sqlx migrate run", { cwd: parentDir, env: { DATABASE_URL: `${db_url}`, PGUSER: "postgres" }, encoding: 'utf8' })
 
-    const env = { LOCAL_API_PORT: port, DATABASE_URL: `${db_url}`, PGUSER: "postgres", JWT_SECRET: "abc123", INTER_SERVER_SECRET: "aaa", LOCAL_PAGES_PORT: 0 };
+    const env = {
+        LOCAL_API_PORT: port,
+        DATABASE_URL: `${db_url}`,
+        PGUSER: "postgres",
+        JWT_SECRET: "abc123",
+        INTER_SERVER_SECRET: "aaa",
+        LOCAL_PAGES_PORT: 0,
+        LOCAL_NO_FIREBASE_AUTH: true
+    };
 
     t.context.port = port;
     t.context.server = exec("bin/ji-cloud-api", { env: env, encoding: 'utf8' });
+
+    await hookServerStarted(t.context.server);
 })
 
 test.afterEach.always(t => {
@@ -48,7 +68,31 @@ test("pass", async t => {
     t.is(e.response.statusCode, 404)
 })
 
-test.todo("register user")
+// to whom it might concern, this JWT is made of the following header, payload:
+// {"alg": "HS256", "typ": "JWT"}
+// {"sub": "SGkgdGhpcyBpcyBhIHRlc3QgdG9rZW4K"}
+// The secret used is `aaaaa`
+const TEST_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyJ9.GjY_3h8RAe5cH4cDGwPNpVP72MRZLGPTYdnZU7y4VMI";
+
+
+test("register user", async t => {
+    const cookieJar = new tough.CookieJar();
+    const { body } = await got.post('http://0.0.0.0/v1/user', {
+        cookieJar,
+        port: t.context.port,
+        json: {
+            display_name: "test",
+            email: "test@test.test"
+        },
+        responseType: 'json',
+        headers: {
+            authorization: "Bearer " + TEST_JWT,
+        }
+    })
+
+    t.not(body.csrf, null);
+})
+
 test.todo("auth fail")
 test.todo("user profile");
 
