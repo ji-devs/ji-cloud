@@ -74,9 +74,27 @@ test("pass", async t => {
 // The secret used is `aaaaa`
 const TEST_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyJ9.GjY_3h8RAe5cH4cDGwPNpVP72MRZLGPTYdnZU7y4VMI";
 
+test("missing auth (firebase)", async t => {
+    const e = await t.throwsAsync(got.post('http://0.0.0.0/v1/user', {
+        port: t.context.port,
+        // As you can see, we properly have the body, so the only thing that should cause this to fail is...
+        json: {
+            display_name: "test",
+            email: "test@test.test"
+        },
+        responseType: 'json',
+        headers: {
+            // ... the fact that we're skipping out on authorization
+            // authorization: "Bearer " + TEST_JWT,
+        }
+    }));
+
+    t.is(e.response.statusCode, 401);
+})
 
 test("register user", async t => {
     const cookieJar = new tough.CookieJar();
+
     const { body } = await got.post('http://0.0.0.0/v1/user', {
         cookieJar,
         port: t.context.port,
@@ -93,7 +111,6 @@ test("register user", async t => {
     t.not(body.csrf, null);
 })
 
-test.todo("auth fail")
 test.todo("user profile");
 
 test.todo("create category");
