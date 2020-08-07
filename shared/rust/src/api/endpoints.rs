@@ -66,14 +66,13 @@ pub mod category {
         api::method::Method,
         category::{
             CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryResponse,
-            CategoryUpdateError, CreateCategoryRequest, GetCategoryInverseTreeRequest,
-            NewCategoryResponse, UpdateCategoryRequest,
+            CategoryUpdateError, CreateCategoryRequest, NewCategoryResponse, UpdateCategoryRequest, GetCategoryRequest,
         },
     };
 
     pub struct Get;
     impl ApiEndpoint for Get {
-        type Req = ();
+        type Req = GetCategoryRequest;
         type Res = CategoryResponse;
         type Err = CategoryGetError;
         const PATH: &'static str = "/v1/category";
@@ -87,15 +86,6 @@ pub mod category {
         type Err = CategoryCreateError;
         const PATH: &'static str = "/v1/category";
         const METHOD: Method = Method::Post;
-    }
-
-    pub struct GetInverse;
-    impl ApiEndpoint for GetInverse {
-        type Req = GetCategoryInverseTreeRequest;
-        type Res = CategoryResponse;
-        type Err = CategoryGetError;
-        const PATH: &'static str = "/v1/category/inverse";
-        const METHOD: Method = Method::Get;
     }
 
     pub struct Update;

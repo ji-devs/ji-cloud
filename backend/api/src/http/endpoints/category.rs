@@ -6,35 +6,28 @@ use actix_web::{
 use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryId, CategoryResponse, CreateCategoryRequest, GetCategoryInverseTreeRequest,
-    NewCategoryResponse, UpdateCategoryRequest,
+    CategoryId, CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
+    UpdateCategoryRequest,
 };
 use sqlx::PgPool;
-use std::str::FromStr;
-use web::Query;
 
 async fn get_categories(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    // _claims: WrapAuthClaimsNoDb,
+    req: Option<QsQuery<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
 {
-    db::category::get(&db)
-        .await
-        .map_err(Into::into)
-        .map(|it| Json(CategoryResponse { categories: it }))
-}
+    let req = req.map_or_else(GetCategoryRequest::default, QsQuery::into_inner);
 
-async fn get_categories_inverse(
-    db: Data<PgPool>,
-    // _claims: WrapAuthClaimsNoDb,
-    req: QsQuery<<category::GetInverse as ApiEndpoint>::Req>,
-) -> Result<
-    Json<<category::GetInverse as ApiEndpoint>::Res>,
-    <category::GetInverse as ApiEndpoint>::Err,
-> {
-    db::category::get_inverse_tree(&db, &req.roots)
-        .await
-        .map_err(Into::into)
+    let res = if req.invert {
+        db::category::get_inverse_tree(&db, &req.roots).await
+    } else if req.roots.is_empty() {
+        db::category::get(&db).await
+    } else {
+        db::category::get_multi(&db, &req.roots).await
+    };
+
+    res.map_err(Into::into)
         .map(|it| Json(CategoryResponse { categories: it }))
 }
 
@@ -92,18 +85,10 @@ fn qs_array_cfg() -> QsQueryConfig {
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(
-        category::Get::PATH,
-        category::Get::METHOD.route().to(get_categories),
-    )
-    .service(
-        web::resource(category::GetInverse::PATH)
+    cfg.service(
+        web::resource(category::Get::PATH)
             .app_data(qs_array_cfg())
-            .route(
-                category::GetInverse::METHOD
-                    .route()
-                    .to(get_categories_inverse),
-            ),
+            .route(category::Get::METHOD.route().to(get_categories)),
     )
     .route(
         category::Create::PATH,
