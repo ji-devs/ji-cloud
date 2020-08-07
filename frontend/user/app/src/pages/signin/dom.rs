@@ -15,6 +15,7 @@ use super::actions::{self, SigninStatus};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
+use core::routes::{Route, UserRoute};
 
 pub struct SigninPage {
     pub refs: RefCell<Option<SigninPageRefs>>,
@@ -56,6 +57,11 @@ impl SigninPage {
                     _self.status.set(Some(SigninStatus::Busy));
                     _self.signin_loader.load(actions::signin_google(_self.clone()));
 
+                }))
+            })
+            .with_data_id!("register-link", {
+                .event(clone!(_self => move |_evt:events::Click| {
+                    dominator::routing::go_to_url( Route::User(UserRoute::Register).into());
                 }))
             })
             .with_data_id!("status-message", {
