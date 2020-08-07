@@ -58,6 +58,14 @@ impl SigninPage {
 
                 }))
             })
+            .with_data_id!("status-message", {
+                .text_signal(_self.status.signal_ref(|status| {
+                    status
+                        .as_ref()
+                        .map(|status| status.to_string())
+                        .unwrap_or("".to_string())
+                }))
+            })
             .after_inserted(clone!(_self => move |elem| {
                 _self.stash_refs(elem)
             }))

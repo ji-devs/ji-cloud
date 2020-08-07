@@ -4,7 +4,10 @@ use shared::{
 };
 use core::{
     routes::{Route, UserRoute},
-    fetch::user::fetch_signin,
+    fetch::{
+        FetchResult,
+        user::fetch_signin,
+    },
     storage,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -23,6 +26,15 @@ use futures::task::{Context, Poll};
 pub enum SigninStatus {
     Busy,
     NoSuchUser,
+}
+
+impl SigninStatus {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Busy => "logging in...".to_string(),
+            Self::NoSuchUser => "unable to log in!".to_string(),
+        }
+    }
 }
 
 fn do_success(page:&SigninPage, csrf:String) {
@@ -47,10 +59,12 @@ pub async fn signin_google(page:Rc<SigninPage>) {
     match JsFuture::from(token_promise).await {
         Ok(token) => {
             let token = token.as_string().unwrap_throw();
-            let resp:Result<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
+            let resp:FetchResult<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
             match resp {
                 Ok(data) => do_success(&page, data.csrf),
-                Err(_) => page.status.set(Some(SigninStatus::NoSuchUser))
+                Err(_) => {
+                    page.status.set(Some(SigninStatus::NoSuchUser))
+                }
             }
         },
         Err(_) => {
