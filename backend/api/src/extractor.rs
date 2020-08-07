@@ -26,13 +26,19 @@ pub struct FirebaseUser {
 
 pub struct FirebaseId(pub String);
 
+// stolen from the stdlib and modified (to work on stable)
+fn split_once<'a>(s: &'a str, delimiter: char) -> Option<(&'a str, &'a str)> {
+    let start = s.find(delimiter)?;
+    let end = start + delimiter.len_utf8();
+    Some((&s[..start], &s[end..]))
+}
+
 fn bearer_token(headers: &HeaderMap) -> Option<&str> {
     let header: &HeaderValue = headers.get(header::AUTHORIZATION)?;
 
-    let header: &str = header.to_str().ok()?;
-
-    // ["Bearer " .. value]
-    header.split("Bearer ").nth(1)
+    split_once(header.to_str().ok()?, ' ')
+        .filter(|(kind, _)| kind.eq_ignore_ascii_case("bearer"))
+        .map(|(_, token)| token)
 }
 
 pub struct AuthError;
