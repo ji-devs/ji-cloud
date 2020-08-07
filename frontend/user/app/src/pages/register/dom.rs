@@ -11,29 +11,27 @@ use dominator::{Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
-use super::actions::{self, SigninStatus};
+use super::actions::{self, RegisterStatus};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
 
-pub struct SigninPage {
-    pub refs: RefCell<Option<SigninPageRefs>>,
-    pub status: Mutable<Option<SigninStatus>>,
+pub struct RegisterPage {
+    pub refs: RefCell<Option<RegisterPageRefs>>,
+    pub status: Mutable<Option<RegisterStatus>>,
     pub loader: AsyncLoader
 }
 
-impl Drop for SigninPage {
+impl Drop for RegisterPage {
     fn drop(&mut self) {
-        log::info!("cleaned up signin page!");
+        log::info!("cleaned up register page!");
         //self.signin_loader.cancel();
     }
 }
 
-impl SigninPage {
+impl RegisterPage {
     pub fn new() -> Rc<Self> {
-
-
         let _self = Rc::new(Self { 
             refs: RefCell::new(None),
             status: Mutable::new(None),
@@ -45,23 +43,23 @@ impl SigninPage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::signin(), {
-            .with_data_id!("signin", {
+        elem!(templates::register(), {
+            .with_data_id!("login-link", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    _self.status.set(Some(SigninStatus::Busy));
-                    _self.loader.load(actions::signin_email(_self.clone()));
+                    dominator::routing::go_to_url( Route::User(UserRoute::Signin).into());
                 }))
             })
-            .with_data_id!("google-signin", {
-                .event(clone!(_self => move |_evt:events::Click| {
-                    _self.status.set(Some(SigninStatus::Busy));
-                    _self.loader.load(actions::signin_google(_self.clone()));
+            .with_data_id!("google-register", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    let tos = _self.refs.borrow();
+                    let tos = &tos.as_ref().unwrap_throw().terms_of_service;
 
-                }))
-            })
-            .with_data_id!("register-link", {
-                .event(clone!(_self => move |_evt:events::Click| {
-                    dominator::routing::go_to_url( Route::User(UserRoute::Register).into());
+                    if !tos.check_validity() {
+                        tos.report_validity();
+                    } else {
+                        _self.status.set(Some(RegisterStatus::Busy));
+                        _self.loader.load(actions::register_google(_self.clone()));
+                    }
                 }))
             })
             .with_data_id!("status-message", {
@@ -79,28 +77,20 @@ impl SigninPage {
     }
 
     fn stash_refs(&self, parent:HtmlElement) {
-        *self.refs.borrow_mut() = Some(SigninPageRefs::new(&parent));
+        *self.refs.borrow_mut() = Some(RegisterPageRefs::new(&parent));
     }
 
 }
 
-pub struct SigninPageRefs {
-    email: HtmlInputElement,
-    pw: HtmlInputElement,
+pub struct RegisterPageRefs {
+    terms_of_service: HtmlInputElement,
 }
 
-impl SigninPageRefs {
+impl RegisterPageRefs {
     pub fn new(parent:&HtmlElement) -> Self {
         Self {
-            email: parent.select(&data_id("email")),
-            pw: parent.select(&data_id("pw")),
+            terms_of_service: parent.select(&data_id("terms_of_service")),
         }
     }
 
-    pub fn get_email(&self) -> String {
-        self.email.value()
-    }
-    pub fn get_pw(&self) -> String {
-        self.pw.value()
-    }
 }

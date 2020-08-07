@@ -6,10 +6,11 @@
     </h2>
     <p class="mt-2 text-center text-sm leading-5 text-gray-600 max-w">
       Or
-      <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
+      <a data-id="login-link" href="javascript:void(0)" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
         login here
       </a>
     </p>
+    <div data-id="status-message" class="text-red-700 text-center"></div>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -54,7 +55,7 @@
 
         <div class="mt-6 flex items-center justify-between">
           <div class="flex items-center">
-            <input id="terms_of_service" type="checkbox" required class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out" />
+            <input data-id="terms_of_service" id="terms_of_service" type="checkbox" required class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out" />
             <label for="terms_of_service" class="ml-2 block text-sm leading-5 text-gray-900">
               I accept the
                 <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
@@ -89,7 +90,7 @@
         <div class="mt-6 grid grid-cols-3 gap-3">
           <div>
             <span class="w-full inline-flex rounded-md shadow-sm">
-              <button type="button" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-sm leading-5 font-medium text-gray-500 hover:text-gray-400 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition duration-150 ease-in-out" aria-label="Sign in with Facebook">
+              <button data-id="google-register" type="button" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md bg-white text-sm leading-5 font-medium text-gray-500 hover:text-gray-400 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition duration-150 ease-in-out" aria-label="Sign in with Facebook">
                 <img class="h-5" src="%MEDIA_UI%/social/google-g.svg" />
               </button>
             </span>

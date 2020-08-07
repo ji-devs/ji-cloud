@@ -48,7 +48,7 @@ fn do_success(page:&SigninPage, csrf:String) {
     ///specifically, here, dangling futures which hold the Rc that holds it
     ///thereby creating a cycle, we need to break by cancelling that future
     ///see: https://github.com/jewish-interactive/ji-cloud/issues/78
-    page.signin_loader.cancel();
+    page.loader.cancel();
 }
 
 pub async fn signin_google(page:Rc<SigninPage>) {
@@ -68,6 +68,7 @@ pub async fn signin_google(page:Rc<SigninPage>) {
             }
         },
         Err(_) => {
+            //not really an error, probably a cancel
             page.status.set(None);
         }
     };

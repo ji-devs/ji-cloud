@@ -10,6 +10,9 @@ thread_local! {
 pub fn signin() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(SIGNIN))
 }
+pub fn register() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(REGISTER))
+}
 
 //pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
 
@@ -33,6 +36,7 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
             (SIGNIN, get_template_str(include_str!("../../../templates/signin_and_registration/signin.html"))),
+            (REGISTER, get_template_str(include_str!("../../../templates/signin_and_registration/register.html"))),
             (WAIT, get_template_str(include_str!("../../../templates/signin_and_registration/wait.html"))),
         ]);
 
