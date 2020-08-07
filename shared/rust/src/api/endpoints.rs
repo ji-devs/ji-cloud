@@ -65,8 +65,9 @@ pub mod category {
     use crate::{
         api::method::Method,
         category::{
-            CategoryCreateError, CategoryDeleteError, CategoryGetError,
-            CategoryUpdateError, UpdateCategoryRequest, CreateCategoryRequest, NewCategoryResponse, CategoryResponse,
+            CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryResponse,
+            CategoryUpdateError, CreateCategoryRequest, GetCategoryInverseTreeRequest,
+            NewCategoryResponse, UpdateCategoryRequest,
         },
     };
 
@@ -86,6 +87,15 @@ pub mod category {
         type Err = CategoryCreateError;
         const PATH: &'static str = "/v1/category";
         const METHOD: Method = Method::Post;
+    }
+
+    pub struct GetInverse;
+    impl ApiEndpoint for GetInverse {
+        type Req = GetCategoryInverseTreeRequest;
+        type Res = CategoryResponse;
+        type Err = CategoryGetError;
+        const PATH: &'static str = "/v1/category/inverse";
+        const METHOD: Method = Method::Get;
     }
 
     pub struct Update;

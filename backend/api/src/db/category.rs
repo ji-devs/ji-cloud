@@ -5,9 +5,49 @@ use uuid::Uuid;
 pub async fn get(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
     let v: sqlx::types::Json<Vec<Category>> = sqlx::query_scalar(
         r#"
-            select jsonb_agg(structure) from category_tree where parent_id is null
+            select jsonb_agg(structure order by index) from category_tree where parent_id is null
     "#,
     )
+    .fetch_one(db)
+    .await?;
+
+    Ok(v.0)
+}
+
+pub async fn get_inverse_tree(db: &sqlx::PgPool, roots: &[Uuid]) -> anyhow::Result<Vec<Category>> {
+    let v: sqlx::types::Json<_> = sqlx::query_scalar(
+        r#"
+    with recursive inverse_category_tree(index, id, parent_id, structure) as
+    (
+        select index::int2,
+               id,
+               parent_id,
+               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
+                                  updated_at)
+        from category co
+        where id = any ($1::uuid[])
+        union all
+        select co.index::int2,
+               id,
+               parent_id,
+               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
+                                  updated_at, 'children',
+                                  jsonb_agg(_lat.structure))
+        from category co
+                 join lateral (
+            select ct.structure
+            from inverse_category_tree ct
+            where ct.parent_id = co.id
+            order by ct.index
+            ) _lat on true
+        group by co.id
+    )
+select coalesce(jsonb_agg(structure order by index), '[]') as tree
+from inverse_category_tree
+where parent_id is null;
+"#,
+    )
+    .bind(roots)
     .fetch_one(db)
     .await?;
 

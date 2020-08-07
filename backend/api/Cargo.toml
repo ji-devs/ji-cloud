@@ -33,6 +33,11 @@ time = "0.2.16"
 tokio = { version = "0.2", features = ["full"] }
 uuid = "0.8.1"
 
+[dependencies.serde_qs]
+git = "https://github.com/izik1/serde_qs"
+rev = "720e9c24fb271dca1254198084ab8c85312ae705"
+features = ["actix"]
+
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
 default-features = false

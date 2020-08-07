@@ -3,11 +3,15 @@ use actix_web::{
     web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
+use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryId, CategoryResponse, CreateCategoryRequest, NewCategoryResponse, UpdateCategoryRequest,
+    CategoryId, CategoryResponse, CreateCategoryRequest, GetCategoryInverseTreeRequest,
+    NewCategoryResponse, UpdateCategoryRequest,
 };
 use sqlx::PgPool;
+use std::str::FromStr;
+use web::Query;
 
 async fn get_categories(
     db: Data<PgPool>,
@@ -15,6 +19,20 @@ async fn get_categories(
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
 {
     db::category::get(&db)
+        .await
+        .map_err(Into::into)
+        .map(|it| Json(CategoryResponse { categories: it }))
+}
+
+async fn get_categories_inverse(
+    db: Data<PgPool>,
+    // _claims: WrapAuthClaimsNoDb,
+    req: QsQuery<<category::GetInverse as ApiEndpoint>::Req>,
+) -> Result<
+    Json<<category::GetInverse as ApiEndpoint>::Res>,
+    <category::GetInverse as ApiEndpoint>::Err,
+> {
+    db::category::get_inverse_tree(&db, &req.roots)
         .await
         .map_err(Into::into)
         .map(|it| Json(CategoryResponse { categories: it }))
@@ -69,10 +87,23 @@ async fn delete_category(
     Ok(HttpResponse::NoContent().into())
 }
 
+fn qs_array_cfg() -> QsQueryConfig {
+    QsQueryConfig::default().qs_config(serde_qs::Config::new(2, false))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         category::Get::PATH,
         category::Get::METHOD.route().to(get_categories),
+    )
+    .service(
+        web::resource(category::GetInverse::PATH)
+            .app_data(qs_array_cfg())
+            .route(
+                category::GetInverse::METHOD
+                    .route()
+                    .to(get_categories_inverse),
+            ),
     )
     .route(
         category::Create::PATH,
