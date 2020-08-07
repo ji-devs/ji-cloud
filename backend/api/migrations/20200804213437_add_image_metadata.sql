@@ -1,3 +1,27 @@
+create table style
+(
+    id           uuid primary key     default uuid_generate_v1mc(),
+    display_name text        not null,
+    created_at   timestamptz not null default now(),
+    updated_at   timestamptz
+);
+
+create table age_range
+(
+    id           uuid primary key     default uuid_generate_v1mc(),
+    display_name text        not null,
+    created_at   timestamptz not null default now(),
+    updated_at   timestamptz
+);
+
+create table affiliation
+(
+    id           uuid primary key     default uuid_generate_v1mc(),
+    display_name text        not null,
+    created_at   timestamptz not null default now(),
+    updated_at   timestamptz
+);
+
 create table image_metadata
 (
     id          uuid primary key     default uuid_generate_v1mc(),
@@ -13,26 +37,25 @@ create table image_metadata
 create table image_style
 (
     image_id   uuid        not null references image_metadata (id),
-    style      int2        not null,
+    style_id   uuid        not null references style (id),
     created_at timestamptz not null default now(),
-    unique (image_id, style)
+    unique (image_id, style_id)
 );
 
 create table image_age_range
 (
-    image_id   uuid        not null references image_metadata (id),
-    age_range  int2        not null,
-    created_at timestamptz not null default now(),
-    unique (image_id, age_range)
-
+    image_id     uuid        not null references image_metadata (id),
+    age_range_id uuid        not null references age_range (id),
+    created_at   timestamptz not null default now(),
+    unique (image_id, age_range_id)
 );
 
 create table image_affiliation
 (
-    image_id    uuid        not null references image_metadata (id),
-    affiliation int2        not null,
-    created_at  timestamptz not null default now(),
-    unique (image_id, affiliation)
+    image_id       uuid        not null references image_metadata (id),
+    affiliation_id uuid        not null references affiliation (id),
+    created_at     timestamptz not null default now(),
+    unique (image_id, affiliation_id)
 
 );
 
