@@ -2,11 +2,26 @@ use shared::category::{Category, CategoryDeleteError, CategoryId, CategoryUpdate
 use sqlx::{postgres::PgDatabaseError, Executor};
 use uuid::Uuid;
 
-pub async fn get(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
-    let v: sqlx::types::Json<Vec<Category>> = sqlx::query_scalar(
+pub async fn get_multi(db: &sqlx::PgPool, roots: &[Uuid]) -> anyhow::Result<Vec<Category>> {
+    let v: sqlx::types::Json<_> = sqlx::query_scalar(
         r#"
-            select jsonb_agg(structure order by index) from category_tree where parent_id is null
-    "#,
+select jsonb_agg(structure order by index)
+from category_tree
+where id = any($1::uuid[])
+"#,
+    )
+    .bind(roots)
+    .fetch_one(db)
+    .await?;
+
+    Ok(v.0)
+}
+
+pub async fn get(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
+    let v: sqlx::types::Json<_> = sqlx::query_scalar(
+        r#"
+select jsonb_agg(structure order by index) from category_tree where parent_id is null
+"#,
     )
     .fetch_one(db)
     .await?;

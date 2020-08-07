@@ -33,11 +33,14 @@ pub struct CreateCategoryRequest {
     pub parent_id: Option<CategoryId>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GetCategoryInverseTreeRequest {
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct GetCategoryRequest {
     // fixme: Use CategoryId, unfortunately, sqlx doesn't currently allow for passing of T
     // the backend _could_ transmute the `CategoryId`s into `Uuid`s, but that's `unsafe`.
+    #[serde(default)]
     pub roots: Vec<Uuid>,
+    #[serde(default)]
+    pub invert: bool,
 }
 
 #[derive(Serialize, Deserialize)]
