@@ -7,8 +7,9 @@
   "private": true,
   "devDependencies": {
     "ava": "^3.11.1",
+    "get-port": "^5.1.1",
     "got": "^11.5.1",
-    "get-port": "^5.1.1"
+    "tough-cookie": "^4.0.0"
   },
   "scripts": {
     "test": "ava"
