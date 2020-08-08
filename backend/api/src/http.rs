@@ -11,8 +11,6 @@ use core::{
 };
 use futures::Future;
 use sqlx::postgres::PgPool;
-use std::env;
-use std::net::SocketAddr;
 
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,

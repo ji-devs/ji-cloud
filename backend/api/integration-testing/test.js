@@ -7,6 +7,7 @@ const { argv, stdout } = require('process');
 const { copyFile, copyFileSync, mkdirSync } = require('fs');
 const path = require('path');
 const tough = require('tough-cookie');
+const { TLSSocket } = require('tls');
 function hookServerStarted(server) {
     return new Promise(resolve => {
         server.stdout.on('data', function (data) {
@@ -18,6 +19,8 @@ function hookServerStarted(server) {
 }
 
 test.before(async t => {
+    t.context.parentDir = path.resolve(process.cwd(), '..');
+
     execSync("cargo build --manifest-path ../Cargo.toml");
 
     try {
@@ -36,14 +39,16 @@ test.before(async t => {
 test.beforeEach(async t => {
     const port = await getPort();
 
-    var parentDir = path.resolve(process.cwd(), '..');
-    const db_url = execSync("../../script/ephemeralpg/pg_tmp.sh", { encoding: 'utf8' });
+    var parentDir = t.context.parentDir;
+    const dbUrl = execSync("../../script/ephemeralpg/pg_tmp.sh", { encoding: 'utf8' });
 
-    execSync("cargo sqlx migrate run", { cwd: parentDir, env: { DATABASE_URL: `${db_url}`, PGUSER: "postgres" }, encoding: 'utf8' })
+    t.context.dbUrl = dbUrl;
+
+    execSync("cargo sqlx migrate run", { cwd: parentDir, env: { DATABASE_URL: `${dbUrl}`, PGUSER: "postgres" }, encoding: 'utf8' });
 
     const env = {
         LOCAL_API_PORT: port,
-        DATABASE_URL: `${db_url}`,
+        DATABASE_URL: `${dbUrl}`,
         PGUSER: "postgres",
         JWT_SECRET: "abc123",
         INTER_SERVER_SECRET: "aaa",
@@ -111,7 +116,57 @@ test("register user", async t => {
     t.not(body.csrf, null);
 })
 
-test.todo("user profile");
+test("login user", async t => {
+    const parentDir = t.context.parentDir;
+    const dbUrl = t.context.dbUrl;
+
+    execSync(`/usr/bin/psql -f fixtures/1_user.sql ${dbUrl}`, { cwd: parentDir, env: { PGUSER: "postgres" }, encoding: 'utf8' });
+
+    const cookieJar = new tough.CookieJar();
+
+    const { body } = await got.post('http://0.0.0.0/v1/login', {
+        cookieJar,
+        port: t.context.port,
+        responseType: 'json',
+        headers: {
+            authorization: "Bearer " + TEST_JWT,
+        }
+    });
+
+    t.not(body.csrf, null);
+})
+
+test("user profile", async t => {
+    const parentDir = t.context.parentDir;
+    const dbUrl = t.context.dbUrl;
+
+    execSync(`/usr/bin/psql -f fixtures/1_user.sql ${dbUrl}`, { cwd: parentDir, env: { PGUSER: "postgres" }, encoding: 'utf8' });
+
+    const cookieJar = new tough.CookieJar();
+
+    const login = await got.post('http://0.0.0.0/v1/login', {
+        cookieJar,
+        port: t.context.port,
+        responseType: 'json',
+        headers: {
+            authorization: "Bearer " + TEST_JWT,
+        }
+    });
+
+    const profile = await got.get('http://0.0.0.0/v1/user/me/profile', {
+        cookieJar,
+        port: t.context.port,
+        responseType: 'json',
+        headers: {
+            "X-CSRF": login.body.csrf,
+        }
+    });
+
+    t.deepEqual(profile.body.display_name, "test");
+    t.deepEqual(profile.body.email, "test@test.test");
+    t.deepEqual(profile.body.id, "1f241e1b-b537-493f-a230-075cb16315be");
+    t.deepEqual(profile.body.scopes, []);
+})
 
 test.todo("create category");
 test.todo("delete category");

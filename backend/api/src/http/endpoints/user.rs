@@ -70,8 +70,8 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    db::user::profile(db.as_ref(), claims.0.id)
-        .await
+    dbg!(db::user::profile(db.as_ref(), claims.0.id)
+        .await)
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
