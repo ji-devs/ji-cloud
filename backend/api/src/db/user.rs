@@ -15,7 +15,7 @@ display_name,
 email::text as email,
 created_at,
 updated_at,
-array(select scope from user_scope where user_scope.user_id = "user".id) as scopes
+array(select row(scope) from user_scope where user_scope.user_id = "user".id) as scopes
 from "user"
 where id = $1"#,
     )

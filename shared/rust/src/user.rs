@@ -7,7 +7,7 @@ use sqlx::postgres::PgRow;
 use uuid::Uuid;
 // note that this is unstable and will totally be split into many things later on
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
-#[repr(i8)]
+#[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum UserScope {
     Admin = 1,
