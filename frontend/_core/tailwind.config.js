@@ -11,8 +11,27 @@ module.exports = {
     '../../_core/templates/**/*.html',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        jiblueLight: '#83aef7',
+        jiblueMedium: '#6698ed',
+        jiblueDark: '#2b54b8'
+
+      },
+      fontSize: {
+        14:'14px',
+        18: '18px',
+
+      },
+      fontFamily: {
+        azoSans: 'azo-sans-web'
+      },
+    },
   },
-  variants: {},
+  variants: {
+    backgroundColor: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
+    border: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
+    transitionProperty: ['responsive', 'motion-safe', 'motion-reduce'],
+  },
   plugins: [],
 }

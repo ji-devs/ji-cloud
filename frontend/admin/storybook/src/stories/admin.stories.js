@@ -6,8 +6,21 @@ export default {
   title: 'Admin page',
 }
 
-export const Admin = storyAbout(
-    "admin - temp", 
-    () => tmpl(sidebar),
-    `## Admin placeholder page`
+export const Sidebar = story(
+    "Sidebar",
+    () => tmpl(sidebar, {
+      navbarLink: "Label images",
+}),
+
+);
+
+export const MainPage = storyAbout(
+    "Main Page",
+    () => tmpl(sidebar, {
+      navbarLink: "Label images",
+
+
+  }),
+    `## Main page of image uploader
+    `
 );
