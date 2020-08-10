@@ -78,6 +78,10 @@ impl RemoteTarget {
     pub fn host(&self) -> Option<&'static str> {
         None
     }
+	
+	pub fn media_ui_url(&self) -> String {
+		format!("{}/ui", self.media_url())
+	}
 
     pub fn replace_media_ui<S: AsRef<str>>(&self, s: S) -> String {
         s.as_ref()
