@@ -20,6 +20,7 @@ sqlx = { version = "0.4.0-beta.1", default-features = false, features = ["postgr
 listenfd = { version = "0.3.3", optional = true }
 
 [features]
+sqlproxy = []
 local = ["listenfd"]
 release = []
 sandbox = []

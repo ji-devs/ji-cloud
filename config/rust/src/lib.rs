@@ -2,8 +2,13 @@ use time::Duration;
 
 pub const MEDIA_UI_PATH: &str = "ui";
 pub const MAX_SIGNIN_COOKIE_DURATION: Duration = Duration::weeks(2); // 2 weeks
+pub const JWK_ISSUER_URL: &str = "https://securetoken.google.com";
+pub const JWK_URL: &str = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
+
+/// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
+/// as there's no way to get the string number of seconds from it `const`ly
 #[deprecated = "use `MAX_SIGNIN_COOKIE_DURATION.whole_seconds()` instead"]
-pub const MAX_SIGNIN_COOKIE: &str = "1209600"; // `MAX_SIGNIN_COOKIE_DURATION` but as seconds, as there's no way to get the string number of
+pub const MAX_SIGNIN_COOKIE: &str = "1209600";
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 pub const COOKIE_DOMAIN: &str = "jicloud.org";
 pub const CORS_ORIGINS: [&str; 2] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
@@ -78,10 +83,10 @@ impl RemoteTarget {
     pub fn host(&self) -> Option<&'static str> {
         None
     }
-	
-	pub fn media_ui_url(&self) -> String {
-		format!("{}/ui", self.media_url())
-	}
+
+    pub fn media_ui_url(&self) -> String {
+        format!("{}/ui", self.media_url())
+    }
 
     pub fn replace_media_ui<S: AsRef<str>>(&self, s: S) -> String {
         s.as_ref()

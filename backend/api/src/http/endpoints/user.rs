@@ -13,7 +13,8 @@ use shared::{
         user::{Profile, Register, Signin, SingleSignOn},
         ApiEndpoint,
     },
-    auth::{AuthClaims, RegisterError, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    error::auth::RegisterError,
     user::NoSuchUserError,
 };
 use sqlx::PgPool;
@@ -56,8 +57,8 @@ async fn handle_register(
 
     let id = register(db.as_ref(), &user.id, &req).await?;
 
-    let (csrf, cookie) = reply_signin_auth(id, &settings.jwt_encoding_key, settings.local_insecure)
-        .map_err(|_| RegisterError::InternalServerError)?;
+    let (csrf, cookie) =
+        reply_signin_auth(id, &settings.jwt_encoding_key, settings.local_insecure)?;
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
@@ -70,8 +71,7 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    dbg!(db::user::profile(db.as_ref(), claims.0.id)
-        .await)
+    dbg!(db::user::profile(db.as_ref(), claims.0.id).await)
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
@@ -81,8 +81,6 @@ async fn handle_authorize(
     settings: Data<Settings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,
 ) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {
-    log::info!("Firebase is valid! user id is: {}", auth.0.id);
-
     let claims = AuthClaims {
         id: auth.0.id,
         csrf: None,

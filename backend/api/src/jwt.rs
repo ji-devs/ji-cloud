@@ -27,14 +27,13 @@ pub fn check_no_db(
     token_string: &str,
     csrf: &str,
     jwt_decoding_key: &str,
-) -> Result<AuthClaims, Error> {
-    get_claims(token_string, jwt_decoding_key).and_then(|claims| {
-        if claims.csrf.as_deref() == Some(csrf) {
-            Ok(claims)
-        } else {
-            Err(Error::Csrf)
-        }
-    })
+) -> Result<Option<AuthClaims>, Error> {
+    let claims = get_claims(token_string, jwt_decoding_key)?;
+    if claims.csrf.as_deref() == Some(csrf) {
+        Ok(Some(claims))
+    } else {
+        Ok(None)
+    }
 }
 pub async fn check_no_csrf(
     db: &PgPool,

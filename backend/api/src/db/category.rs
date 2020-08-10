@@ -1,5 +1,8 @@
 use futures::TryStreamExt;
-use shared::category::{Category, CategoryDeleteError, CategoryId, CategoryUpdateError};
+use shared::{
+    category::{Category, CategoryId},
+    error::category::{CategoryDeleteError, CategoryUpdateError},
+};
 use sqlx::{postgres::PgDatabaseError, Executor};
 use uuid::Uuid;
 

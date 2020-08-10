@@ -75,9 +75,9 @@ test("pass", async t => {
 
 // to whom it might concern, this JWT is made of the following header, payload:
 // {"alg": "HS256", "typ": "JWT"}
-// {"sub": "SGkgdGhpcyBpcyBhIHRlc3QgdG9rZW4K"}
+// {"sub": "SGkgdGhpcyBpcyBhIHRlc3QgdG9rZW4K", "iat": 1597096685, "auth_time": 1597096686 }
 // The secret used is `aaaaa`
-const TEST_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyJ9.GjY_3h8RAe5cH4cDGwPNpVP72MRZLGPTYdnZU7y4VMI";
+const TEST_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.BNpCIBuNq0bhgXuAEqrAfPpIein0Y54hj352d2ke1sI";
 
 test("missing auth (firebase)", async t => {
     const e = await t.throwsAsync(got.post('http://0.0.0.0/v1/user', {
