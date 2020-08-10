@@ -4,60 +4,66 @@ use shared::{
     user::UserProfile,
 };
 use sqlx::postgres::PgDatabaseError;
+use uuid::Uuid;
 
-pub async fn profile_by_firebase(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
-) -> sqlx::Result<Option<UserProfile>> {
+pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<Option<UserProfile>> {
     sqlx::query_as(
         r#"
 select
-firebase_id,
+id,
 display_name,
 email::text as email,
 created_at,
 updated_at,
-array(select scope from user_scope where user_scope.user_id = "user".id) as scopes
+array(select row(scope) from user_scope where user_scope.user_id = "user".id) as scopes
 from "user"
-where firebase_id = $1"#,
+where id = $1"#,
     )
     .bind(id)
     .fetch_optional(db)
     .await
 }
 
-pub async fn exists_by_firebase(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
-) -> sqlx::Result<bool> {
+pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
     sqlx::query!(
-        r#"select exists (select 1 from "user" where firebase_id = $1) as "exists!""#,
-        id
+        r#"select exists (select 1 from "user" where id = $1) as "exists!""#,
+        id,
     )
     .fetch_one(db)
     .await
     .map(|it| it.exists)
 }
 
+pub async fn firebase_to_id(
+    db: &sqlx::PgPool,
+    FirebaseId(id): &FirebaseId,
+) -> sqlx::Result<Option<Uuid>> {
+    sqlx::query!(r#"select id from "user" where firebase_id = $1"#, id)
+        .fetch_optional(db)
+        .await
+        .map(|it| it.map(|it| it.id))
+}
+
 pub async fn register(
     db: &sqlx::PgPool,
     FirebaseId(id): &FirebaseId,
     req: &RegisterRequest,
-) -> Result<(), RegisterError> {
+) -> Result<Uuid, RegisterError> {
     sqlx::query!(
         r#"
 INSERT INTO "user" 
     (firebase_id, display_name, email) 
 VALUES 
     ($1, $2, $3::text)
+returning id
         "#,
         id,
         &req.display_name,
         &req.email
     )
-    .execute(db)
+    .fetch_one(db)
     .await
-    .map(drop)
+    .map(|it| it.id)
     .map_err(|err| match err {
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()

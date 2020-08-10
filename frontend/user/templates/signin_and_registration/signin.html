@@ -1,5 +1,6 @@
 <div data-id="signin">
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+
   <div class="sm:mx-auto sm:w-full sm:max-w-md">
     <img class="mx-auto h-12 w-auto" src="%MEDIA_UI%/ji-logo.png" alt="Workflow" />
     <h2 class="mt-6 text-center text-3xl leading-9 font-extrabold text-gray-900">
@@ -7,10 +8,12 @@
     </h2>
     <p class="mt-2 text-center text-sm leading-5 text-gray-600 max-w">
       Or
-      <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
+      <a data-id="register-link" href="javascript:void(0)" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
         register here 
       </a>
     </p>
+
+    <div data-id="status-message" class="text-red-700 text-center"></div>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

@@ -25,7 +25,7 @@
 - [Engineering](./engineering/engineering.md)
   - [Dev Mode Commands](./engineering/commands/commands.md)
   - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
-  - [Hosting and Deployment](./engineering/hosting-deployment/hosting_deployment.md)
+  - [Templates](./engineering/templates/templates.md)
   - [Common Terms and Keys](./engineering/engineering_common.md)
   - [Authentication and Authorization](./engineering/auth/auth.md)
   - [Frontend Pipeline](./engineering/pipelines/frontend.md)

@@ -1,12 +1,9 @@
-use crate::db::{
-    self,
-    user::{profile_by_firebase, register},
-};
+use crate::db::{self, user::register};
 use crate::extractor::{
-    reply_signin_auth, FirebaseId, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
+    web::{Data, Json, ServiceConfig},
     HttpResponse,
 };
 use core::settings::Settings;
@@ -26,17 +23,13 @@ async fn handle_signin_credentials(
     db: Data<PgPool>,
     user: FirebaseUser,
 ) -> actix_web::Result<HttpResponse> {
-    if !db::user::exists_by_firebase(&db, &user.id)
+    let user_id = db::user::firebase_to_id(&db, &user.id)
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
-    {
-        return Err(HttpResponse::UnprocessableEntity()
-            .json(NoSuchUserError {})
-            .into());
-    }
+        .ok_or_else(|| HttpResponse::UnprocessableEntity().json(NoSuchUserError {}))?;
 
     let (csrf, cookie) =
-        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
+        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.local_insecure)
             .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(HttpResponse::Ok()
@@ -61,11 +54,10 @@ async fn handle_register(
 ) -> actix_web::Result<HttpResponse, RegisterError> {
     validate_register_req(&req).await?;
 
-    register(db.as_ref(), &user.id, &req).await?;
+    let id = register(db.as_ref(), &user.id, &req).await?;
 
-    let (csrf, cookie) =
-        reply_signin_auth(user.id, &settings.jwt_encoding_key, settings.local_insecure)
-            .map_err(|_| RegisterError::InternalServerError)?;
+    let (csrf, cookie) = reply_signin_auth(id, &settings.jwt_encoding_key, settings.local_insecure)
+        .map_err(|_| RegisterError::InternalServerError)?;
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
@@ -76,10 +68,10 @@ async fn handle_get_profile(
     db: Data<PgPool>,
     claims: WrapAuthClaimsNoDb,
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
-    // todo: figure out how to do `<Profile as ApiEndpoint>::Err
+    // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    profile_by_firebase(db.as_ref(), &FirebaseId(claims.0.id))
-        .await
+    dbg!(db::user::profile(db.as_ref(), claims.0.id)
+        .await)
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
@@ -104,19 +96,16 @@ async fn handle_authorize(
 
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
-        <Profile as ApiEndpoint>::PATH,
-        web::get().to(handle_get_profile),
+        Profile::PATH,
+        Profile::METHOD.route().to(handle_get_profile),
     )
     .route(
-        <SingleSignOn as ApiEndpoint>::PATH,
-        web::post().to(handle_authorize),
+        SingleSignOn::PATH,
+        SingleSignOn::METHOD.route().to(handle_authorize),
     )
+    .route(Register::PATH, Register::METHOD.route().to(handle_register))
     .route(
-        <Register as ApiEndpoint>::PATH,
-        web::post().to(handle_register),
-    )
-    .route(
-        <Signin as ApiEndpoint>::PATH,
-        web::post().to(handle_signin_credentials),
+        Signin::PATH,
+        Signin::METHOD.route().to(handle_signin_credentials),
     );
 }

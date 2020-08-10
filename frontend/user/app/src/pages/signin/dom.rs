@@ -15,11 +15,12 @@ use super::actions::{self, SigninStatus};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
+use core::routes::{Route, UserRoute};
 
 pub struct SigninPage {
     pub refs: RefCell<Option<SigninPageRefs>>,
     pub status: Mutable<Option<SigninStatus>>,
-    pub signin_loader: AsyncLoader
+    pub loader: AsyncLoader
 }
 
 impl Drop for SigninPage {
@@ -36,7 +37,7 @@ impl SigninPage {
         let _self = Rc::new(Self { 
             refs: RefCell::new(None),
             status: Mutable::new(None),
-            signin_loader: AsyncLoader::new()
+            loader: AsyncLoader::new()
         });
 
 
@@ -48,14 +49,27 @@ impl SigninPage {
             .with_data_id!("signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
-                    _self.signin_loader.load(actions::signin_email(_self.clone()));
+                    _self.loader.load(actions::signin_email(_self.clone()));
                 }))
             })
             .with_data_id!("google-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
-                    _self.signin_loader.load(actions::signin_google(_self.clone()));
+                    _self.loader.load(actions::signin_google(_self.clone()));
 
+                }))
+            })
+            .with_data_id!("register-link", {
+                .event(clone!(_self => move |_evt:events::Click| {
+                    dominator::routing::go_to_url( Route::User(UserRoute::Register).into());
+                }))
+            })
+            .with_data_id!("status-message", {
+                .text_signal(_self.status.signal_ref(|status| {
+                    status
+                        .as_ref()
+                        .map(|status| status.to_string())
+                        .unwrap_or("".to_string())
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {

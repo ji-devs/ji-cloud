@@ -12,7 +12,8 @@ async fn main() -> anyhow::Result<()> {
     logger::init_logger();
 
     let settings = core::settings::init().await?;
-    let db_pool = db::get_pool(&settings).await?;
+
+    let db_pool = db::get_pool(settings.connect_options.clone()).await?;
 
     let handle = thread::spawn(|| http::run(db_pool, settings));
 

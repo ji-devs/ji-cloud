@@ -1,8 +1,9 @@
 use actix_web::http::{header, Method};
 use config::CORS_ORIGINS;
 
-pub fn get_cors_actix(local_insecure: bool) -> actix_cors::Cors {
+pub fn get(local_insecure: bool) -> actix_cors::Cors {
     let mut cors = actix_cors::Cors::new()
+        .supports_credentials()
         .allowed_methods(&[Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
         .allowed_headers(&[
             header::AUTHORIZATION,

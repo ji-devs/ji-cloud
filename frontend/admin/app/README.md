@@ -1,3 +1,3 @@
-Handles `/user/*` routes
+Handles `/admin/*` routes
 
-Temp CICD 018
+Temp CICD 001

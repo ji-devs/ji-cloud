@@ -4,7 +4,10 @@ use shared::{
 };
 use core::{
     routes::{Route, UserRoute},
-    fetch::user::fetch_signin,
+    fetch::{
+        FetchResult,
+        user::fetch_signin,
+    },
     storage,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -25,6 +28,15 @@ pub enum SigninStatus {
     NoSuchUser,
 }
 
+impl SigninStatus {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Busy => "logging in...".to_string(),
+            Self::NoSuchUser => "unable to log in!".to_string(),
+        }
+    }
+}
+
 fn do_success(page:&SigninPage, csrf:String) {
     storage::save_csrf_token(&csrf);
     dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
@@ -36,7 +48,7 @@ fn do_success(page:&SigninPage, csrf:String) {
     ///specifically, here, dangling futures which hold the Rc that holds it
     ///thereby creating a cycle, we need to break by cancelling that future
     ///see: https://github.com/jewish-interactive/ji-cloud/issues/78
-    page.signin_loader.cancel();
+    page.loader.cancel();
 }
 
 pub async fn signin_google(page:Rc<SigninPage>) {
@@ -47,13 +59,16 @@ pub async fn signin_google(page:Rc<SigninPage>) {
     match JsFuture::from(token_promise).await {
         Ok(token) => {
             let token = token.as_string().unwrap_throw();
-            let resp:Result<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
+            let resp:FetchResult<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
             match resp {
                 Ok(data) => do_success(&page, data.csrf),
-                Err(_) => page.status.set(Some(SigninStatus::NoSuchUser))
+                Err(_) => {
+                    page.status.set(Some(SigninStatus::NoSuchUser))
+                }
             }
         },
         Err(_) => {
+            //not really an error, probably a cancel
             page.status.set(None);
         }
     };

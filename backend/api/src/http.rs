@@ -2,21 +2,35 @@ mod auth;
 mod cors;
 mod endpoints;
 
+use actix_service::Service;
+use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
-use core::settings::Settings;
+use core::{
+    http::{get_addr, get_tcp_fd},
+    settings::Settings,
+};
+use futures::Future;
 use sqlx::postgres::PgPool;
-use std::env;
-use std::net::SocketAddr;
 
-#[cfg(feature = "local")]
-fn get_tcp_fd() -> Option<std::net::TcpListener> {
-    listenfd::ListenFd::from_env().take_tcp_listener(0).unwrap()
-}
+fn log_ise<B: MessageBody, T>(
+    req: ServiceRequest,
+    srv: &mut T,
+) -> impl Future<Output = actix_web::Result<T::Response>>
+where
+    T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
+{
+    let fut = srv.call(req);
+    async {
+        let res = fut.await?;
 
-#[cfg(not(feature = "local"))]
-fn get_tcp_fd() -> Option<std::net::TcpListener> {
-    // we don't have listenfd here.
-    None
+        if res.status() == 500 {
+            if let Some(err) = res.response().extensions().get::<anyhow::Error>() {
+                log::error!("ISE while responding to request: {:?}", err);
+            }
+        }
+
+        Ok(res)
+    }
 }
 
 #[actix_web::main]
@@ -25,12 +39,14 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
     let api_port = settings.api_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
-            .app_data(pool.clone())
-            .app_data(settings.clone())
+            .data(pool.clone())
+            .data(settings.clone())
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(cors::get_cors_actix(local_insecure).finish())
+            .wrap_fn(log_ise)
+            .wrap(cors::get(local_insecure).finish())
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
+            .configure(endpoints::category::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
@@ -45,22 +61,4 @@ pub async fn run(pool: PgPool, settings: Settings) -> anyhow::Result<()> {
     server.run().await.unwrap();
 
     Ok(())
-}
-
-fn get_addr(default: u16) -> SocketAddr {
-    let mut port = default;
-
-    match env::var("PORT") {
-        Ok(p) => {
-            match p.parse::<u16>() {
-                Ok(n) => {
-                    port = n;
-                }
-                Err(_e) => {}
-            };
-        }
-        Err(_e) => {}
-    };
-
-    ([0, 0, 0, 0], port).into()
 }

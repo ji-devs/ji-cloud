@@ -4,9 +4,10 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
 // note that this is unstable and will totally be split into many things later on
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
-#[repr(i8)]
+#[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum UserScope {
     Admin = 1,
@@ -14,7 +15,7 @@ pub enum UserScope {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
-    pub firebase_id: String,
+    pub id: Uuid,
     pub scopes: Vec<UserScope>,
     pub email: String,
     pub display_name: String,
@@ -40,7 +41,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for UserProfile {
         } = DbUser::from_row(row)?;
 
         Ok(Self {
-            firebase_id: id,
+            id,
             scopes: scopes.into_iter().map(|(it,)| it).collect(),
             email,
             display_name,
@@ -51,8 +52,9 @@ impl<'r> sqlx::FromRow<'r, PgRow> for UserProfile {
 }
 
 #[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+#[cfg(feature = "backend")]
 struct DbUser {
-    pub id: String,
+    pub id: Uuid,
     pub scopes: Vec<(UserScope,)>,
     pub email: String,
     pub display_name: String,

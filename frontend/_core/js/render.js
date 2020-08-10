@@ -1,17 +1,11 @@
-import {getMediaUrl_UI} from "../../../config/js"; 
-
-const isDev = process.env["NODE_ENV"] === "development";
-
-const MEDIA_UI = getMediaUrl_UI(isDev);
-
+//Very simple replacement of `${pattern}`
+//Probably not safe, but only used for storybook / internal dev anyway
 export function renderTemplate(template, data) {
-	const base = template.replace(/%MEDIA_UI%/g, MEDIA_UI);
-	
-	if(data == null) {
-		return base;
-	} else {
-		return interpolate(base, data);
-	}
+    if(data == null) {
+            return template;
+    } else {
+            return interpolate(template, data);
+    }
 }
 
 //See: https://stackoverflow.com/a/47358102

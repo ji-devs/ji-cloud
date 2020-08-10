@@ -16,6 +16,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
 use sqlx::postgres::PgPool;
+use uuid::Uuid;
 
 mod firebase;
 
@@ -25,13 +26,19 @@ pub struct FirebaseUser {
 
 pub struct FirebaseId(pub String);
 
+// stolen from the stdlib and modified (to work on stable)
+fn split_once<'a>(s: &'a str, delimiter: char) -> Option<(&'a str, &'a str)> {
+    let start = s.find(delimiter)?;
+    let end = start + delimiter.len_utf8();
+    Some((&s[..start], &s[end..]))
+}
+
 fn bearer_token(headers: &HeaderMap) -> Option<&str> {
     let header: &HeaderValue = headers.get(header::AUTHORIZATION)?;
 
-    let header: &str = header.to_str().ok()?;
-
-    // ["Bearer " .. value]
-    header.split("Bearer ").nth(1)
+    split_once(header.to_str().ok()?, ' ')
+        .filter(|(kind, _)| kind.eq_ignore_ascii_case("bearer"))
+        .map(|(_, token)| token)
 }
 
 pub struct AuthError;
@@ -77,6 +84,7 @@ impl FromRequest for FirebaseUser {
                 &token,
                 settings.remote_target.api_js_url(),
                 &settings.inter_server_secret,
+                settings.local_no_auth,
             )
             .await
             .map_err(|_| StatusError::InternalServerError)?
@@ -105,7 +113,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
     ) -> Self::Future {
         let cookie = req.cookie(JWT_COOKIE_NAME);
         let csrf = csrf_header(req.headers());
-        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings: &Data<Settings> = req.app_data().expect("Settings??");
 
         let (cookie, csrf) = match (cookie, csrf) {
             (Some(cookie), Some(csrf)) => (cookie, csrf),
@@ -153,15 +161,14 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 }
 
 pub fn reply_signin_auth(
-    firebase_id: FirebaseId,
+    user_id: Uuid,
     jwt_encoding_key: &EncodingKey,
     local_insecure: bool,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
     let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
 
-    // todo: Move FirebaseId to shared and add it to AuthClaims.
     let claims = AuthClaims {
-        id: firebase_id.0,
+        id: user_id,
         csrf: Some(csrf.clone()),
     };
 

@@ -1,7 +1,7 @@
 import {story, storyAbout} from "@utils/stories";
 import {renderTemplate as tmpl} from "@core/js/render";
 import sidebar from "@templates/admin/media-uploader/sidebar.html";
-import button from "@core/templates/button.html";
+import button from "@core/templates/_buttons/button.html";
 
 export default {
   title: 'Admin Page - image uploader',

@@ -29,27 +29,37 @@ pub enum Error {
 pub const POST:&'static str = "POST";
 pub const GET:&'static str = "GET";
 
-pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:&str, data:Option<Payload>) -> Result<T, E> 
+//either a serialized error or a native error (like 401, 403, etc.)
+pub type FetchError<E> = Result<E, awsm_web::errors::Error>;
+pub type FetchResult<T, E> = Result<T, FetchError<E>>;
+
+pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:&str, data:Option<Payload>) -> FetchResult<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
-    fetch_with_headers_and_data(url, method, true, &vec![("Authorization", &bearer)], data).await
-        .unwrap()
-        .json()
-        .await
-        .unwrap()
+
+ 
+    match fetch_with_headers_and_data(url, method, true, &vec![("Authorization", &bearer)], data).await {
+        //TODO - not sure why we need to re-wrap
+        //since actix is returning a Result... OR IS IT?!?!?
+        Ok(res) => Ok(res.json().await.unwrap()),
+        Err(err) => {
+            Err(Err(err))
+        }
+    }
 }
 
-pub async fn api_with_auth<T, E, Payload>(url: &str, method:&str, data:Option<Payload>) -> Result<T, E> 
+pub async fn api_with_auth<T, E, Payload>(url: &str, method:&str, data:Option<Payload>) -> FetchResult<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap_throw();
     
-    fetch_with_headers_and_data(url, method, true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await
-        .unwrap()
-        .json()
-        .await
-        .unwrap()
+    match fetch_with_headers_and_data(url, method, true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+        Ok(res) => Ok(res.json().await.unwrap()),
+        Err(err) => {
+            Err(Err(err))
+        }
+    }
 }
 
 /**** DEPRECATED BELOW HERE - JUST FOR REFERENCE ***/

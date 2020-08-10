@@ -13,6 +13,9 @@ jobs:
   bundle:
     runs-on: ubuntu-latest
     steps:
+      - name: Set env
+        run: echo ::set-env name=workspace::$GITHUB_WORKSPACE
+
       - name: checkout repo
         uses: actions/checkout@v1
 
@@ -36,8 +39,10 @@ jobs:
         working-directory: "./frontend/_core/storybook"
 
       - name: build 
-        run: npm run storybook:build-release 
+        run: npm run storybook:build-sandbox
         working-directory: "./frontend/_core/storybook"
+        env:
+          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -46,7 +51,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -c -r frontend/_core/storybook/dist/storybook-build gs://ji-cloud-sandbox-storybook-origin-eu-001/core
+        run: gsutil -m rsync -d -r frontend/_core/storybook/dist/storybook-build gs://ji-cloud-sandbox-storybook-origin-eu-001/core
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
