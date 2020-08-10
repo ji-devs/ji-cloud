@@ -57,7 +57,7 @@ COPY --from=release-builder \
     /usr/local/bin/cloud-run-app/ji-cloud-pages
 
 COPY ./backend/pages/public /usr/local/bin/cloud-run-app/public
-COPY ./backend/pages/handlebars /usr/local/bin/cloud-run-app/handlebars 
+COPY ./backend/pages/templates /usr/local/bin/cloud-run-app/templates
 
 
 WORKDIR /usr/local/bin/cloud-run-app/
