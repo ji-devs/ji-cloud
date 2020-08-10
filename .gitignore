@@ -7,6 +7,7 @@ documentation/output
 _secret-keys
 wasm-pack.log
 yarn-*.log
+.template_output
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat
