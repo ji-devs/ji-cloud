@@ -14,6 +14,9 @@ jobs:
   bundle:
     runs-on: ubuntu-latest
     steps:
+      - name: Set env
+        run: echo ::set-env name=workspace::$GITHUB_WORKSPACE
+
       - name: checkout repo
         uses: actions/checkout@v1
 
@@ -39,6 +42,8 @@ jobs:
       - name: build 
         run: npm run storybook:build-sandbox
         working-directory: "./frontend/admin/storybook"
+        env:
+          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
