@@ -1,8 +1,5 @@
 use crate::extractor::FirebaseId;
-use shared::{
-    auth::{RegisterError, RegisterRequest},
-    user::UserProfile,
-};
+use shared::{auth::RegisterRequest, error::auth::RegisterError, user::UserProfile};
 use sqlx::postgres::PgDatabaseError;
 use uuid::Uuid;
 
@@ -77,6 +74,7 @@ returning id
         {
             RegisterError::TakenEmail
         }
-        _ => RegisterError::InternalServerError,
+
+        e => e.into(),
     })
 }
