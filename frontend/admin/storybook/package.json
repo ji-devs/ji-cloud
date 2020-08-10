@@ -5,14 +5,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo TODO: add tests",
-    "start": "npm run clean && npm-run-all -p _media-server _storybook-watch",
-    "storybook:build-release": "npm run clean && build-storybook -o ./dist/storybook-build && npm run _css-bundle",
+    "start": "npm run clean && npm-run-all -p _media-server _storybook-watch _templates-watch",
+    "storybook:build-release": "npm run clean && npm run _templates-build:release && build-storybook -o ./dist/storybook-build && npm run _css-bundle",
+    "storybook:build-sandbox": "npm run clean && npm run _templates-build:sandbox && build-storybook -o ./dist/storybook-build && npm run _css-bundle",
     "clean": "rimraf ./dist",
     "_css-bundle": "npm-run-all -p _css-bundle-dev _css-bundle-prod",
     "_css-bundle-dev": "postcss src/imports.css --env development -o dist/storybook-build/dist/styles.css",
     "_css-bundle-prod": "postcss src/imports.css --env production -o dist/storybook-build/dist/styles.min.css",
     "_media-server": "cd ../../../build-utils && npm run local-media-server",
-    "_storybook-watch": "start-storybook -p 6006 -s ./dist"
+    "_storybook-watch": "start-storybook -p 6006 -s ./dist",
+    "_templates-build:sandbox": "cd ../../../build-utils/templates && cargo run -- --remote-target sandbox --project admin\"",
+    "_templates-build:release": "cd ../../../build-utils/templates && cargo run -- --remote-target release --project admin\"",
+    "_templates-watch": "cd ../../../build-utils/templates && cargo watch -w ../../frontend/_core/templates -w ../../frontend/admin/templates -x \"run -- --remote-target local --project admin\""
   },
   "keywords": [],
   "author": "",

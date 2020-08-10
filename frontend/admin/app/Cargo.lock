@@ -10,6 +10,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b602bfe940d21c130f3895acd65221e8a61270debe89d628b9cb4e3ccb8569b"
+
+[[package]]
 name = "app"
 version = "0.1.0"
 dependencies = [
@@ -51,9 +57,14 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bfff749c01c040fc3702937019577c92bbfa11f65bf116c2975c93e745aa27f"
 dependencies = [
+ "futures",
  "js-sys",
  "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
@@ -120,6 +131,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
+ "awsm_web",
  "cfg-if",
  "config",
  "js-sys",
@@ -594,11 +606,13 @@ checksum = "2579985fda508104f7587689507983eadd6a6e84dd35d6d115361f530916fa0d"
 name = "shared"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "cfg-if",
  "chrono",
  "serde",
  "serde_json",
  "serde_repr",
+ "uuid",
 ]
 
 [[package]]
@@ -796,6 +810,15 @@ name = "untrusted"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
+
+[[package]]
+name = "uuid"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "version_check"
