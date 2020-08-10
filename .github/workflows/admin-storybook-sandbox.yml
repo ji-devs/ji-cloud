@@ -37,7 +37,7 @@ jobs:
         working-directory: "./frontend/admin/storybook"
 
       - name: build 
-        run: npm run storybook:build-release 
+        run: npm run storybook:build-sandbox
         working-directory: "./frontend/admin/storybook"
 
       - name: install google cloud sdk
