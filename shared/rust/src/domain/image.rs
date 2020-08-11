@@ -1,4 +1,4 @@
-use self::meta::{AffilitionId, AgeRangeId, StyleId};
+use self::meta::{AffiliationId, AgeRangeId, StyleId};
 use super::category::CategoryId;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,9 @@ use uuid::Uuid;
 
 pub mod meta;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageId(pub Uuid);
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,7 +20,7 @@ pub struct CreateRequest {
     pub publish_at: Option<DateTime<Utc>>,
     pub styles: Vec<StyleId>,
     pub age_ranges: Vec<AgeRangeId>,
-    pub affiliations: Vec<AffilitionId>,
+    pub affiliations: Vec<AffiliationId>,
     pub categories: Vec<CategoryId>,
 }
 
@@ -35,7 +37,7 @@ pub struct UpdateRequest {
     pub publish_at: Option<Option<DateTime<Utc>>>,
     pub styles: Option<Vec<StyleId>>,
     pub age_ranges: Option<Vec<AgeRangeId>>,
-    pub affiliations: Option<Vec<AffilitionId>>,
+    pub affiliations: Option<Vec<AffiliationId>>,
     pub categories: Option<Vec<CategoryId>>,
 }
 
@@ -48,7 +50,7 @@ pub struct GetResponse {
     pub publish_at: Option<DateTime<Utc>>,
     pub styles: Vec<StyleId>,
     pub age_ranges: Vec<AgeRangeId>,
-    pub affiliations: Vec<AffilitionId>,
+    pub affiliations: Vec<AffiliationId>,
     pub categories: Vec<CategoryId>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,

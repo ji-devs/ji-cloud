@@ -18,6 +18,12 @@ function hookServerStarted(server) {
     })
 }
 
+function hookProcEnd(proc) {
+    return new Promise(resolve => {
+        proc.on('close', () => resolve())
+    })
+}
+
 test.before(async t => {
     t.context.parentDir = path.resolve(process.cwd(), '..');
 
@@ -62,9 +68,11 @@ test.beforeEach(async t => {
     await hookServerStarted(t.context.server);
 })
 
-test.afterEach.always(t => {
+test.afterEach.always(async t => {
     if (t.context.server) {
+        let exitHook = hookProcEnd(t.context.server);
         t.context.server.kill('SIGTERM');
+        await exitHook;
     }
 })
 
@@ -173,3 +181,43 @@ test.todo("update category");
 test.todo("metadata/affliation");
 test.todo("metadata/age-range");
 test.todo("metadata/affliations");
+
+test("create image meta", async t => {
+    const parentDir = t.context.parentDir;
+    const dbUrl = t.context.dbUrl;
+
+    execSync(`/usr/bin/psql -f fixtures/1_user.sql ${dbUrl}`, { cwd: parentDir, env: { PGUSER: "postgres" }, encoding: 'utf8' });
+
+    const cookieJar = new tough.CookieJar();
+
+    const login = await got.post('http://0.0.0.0/v1/login', {
+        cookieJar,
+        port: t.context.port,
+        responseType: 'json',
+        headers: {
+            authorization: "Bearer " + TEST_JWT,
+        }
+    });
+
+    const image = await got.post('http://0.0.0.0/v1/image', {
+        cookieJar,
+        port: t.context.port,
+        responseType: 'json',
+        headers: {
+            "X-CSRF": login.body.csrf,
+        },
+        json: {
+            name: "test",
+            description: "testest",
+            is_premium: false,
+            publish_at: null,
+            styles: [],
+            age_ranges: [],
+            affiliations: [],
+            categories: []
+        }
+    });
+
+    t.deepEqual(typeof (image.body.id), "string");
+    t.deepEqual(typeof (image.body.upload_url), "string");
+})
