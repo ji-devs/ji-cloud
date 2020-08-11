@@ -1,4 +1,7 @@
-use crate::jwt::{check_no_csrf, check_no_db};
+use crate::{
+    jwkkeys::{self, JwkVerifier},
+    jwt::{check_no_csrf, check_no_db},
+};
 use actix_web::{
     cookie::{Cookie, CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},
@@ -7,7 +10,6 @@ use actix_web::{
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::Settings;
-use firebase::get_firebase_id;
 use futures::future::FutureExt;
 use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
@@ -15,10 +17,17 @@ use jwt::EncodingKey;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
+use shared::error::auth::FirebaseError;
 use sqlx::postgres::PgPool;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use uuid::Uuid;
 
-mod firebase;
+fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
+    let claims: jwkkeys::Claims = jsonwebtoken::dangerous_insecure_decode(&token).ok()?.claims;
+    let user_id = claims.sub;
+    Some(FirebaseId(user_id))
+}
 
 pub struct FirebaseUser {
     pub id: FirebaseId,
@@ -48,6 +57,7 @@ impl From<AuthError> for actix_web::Error {
         HttpResponse::Unauthorized().into()
     }
 }
+
 pub enum StatusError {
     Auth,
     InternalServerError,
@@ -63,7 +73,7 @@ impl From<StatusError> for actix_web::Error {
 }
 
 impl FromRequest for FirebaseUser {
-    type Error = StatusError;
+    type Error = FirebaseError;
     type Future = BoxFuture<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -72,25 +82,34 @@ impl FromRequest for FirebaseUser {
     ) -> Self::Future {
         let settings: &Data<Settings> = req.app_data().unwrap();
         let settings = settings.clone();
+        let jwk_verifier: &Arc<RwLock<JwkVerifier>> = req.app_data().unwrap();
+        let jwk_verifier = jwk_verifier.clone();
 
         // this whole dance is to avoid cloning the headers.
         let token = match bearer_token(req.headers()) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(StatusError::Auth).boxed(),
+            None => return futures::future::err(FirebaseError::MissingBearerToken).boxed(),
         };
 
-        async move {
-            get_firebase_id(
-                &token,
-                settings.remote_target.api_js_url(),
-                &settings.inter_server_secret,
-                settings.local_no_auth,
+        // HACK for testing don't verify external auth, just it's valid.
+        if settings.local_no_auth {
+            return futures::future::ready(
+                try_insecure_decode(&token)
+                    .map(|id| Self { id })
+                    .ok_or_else(|| FirebaseError::InvalidToken),
             )
-            .await
-            .map_err(|_| StatusError::InternalServerError)?
-            .map(FirebaseId)
-            .map(|id| Self { id })
-            .ok_or_else(|| StatusError::Auth)
+            .boxed();
+        }
+
+        async move {
+            // todo: more specific errors.
+            let id = jwk_verifier
+                .read()
+                .await
+                .verify(&token)
+                .map_err(|_| FirebaseError::InvalidToken)?;
+
+            Ok(Self { id })
         }
         .boxed()
     }
@@ -122,8 +141,9 @@ impl FromRequest for WrapAuthClaimsNoDb {
 
         futures::future::ready(
             check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key)
-                .map(Self)
-                .map_err(|_| AuthError),
+                .map_err(|_| AuthError)
+                .and_then(|it| it.ok_or(AuthError))
+                .map(Self),
         )
     }
 }

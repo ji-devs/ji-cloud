@@ -3,21 +3,39 @@ use actix_web::{
     web::{self, Data, Json, ServiceConfig},
     HttpResponse,
 };
+use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryId, CategoryResponse, CreateCategoryRequest, NewCategoryResponse, UpdateCategoryRequest,
+    CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
+    NewCategoryResponse, UpdateCategoryRequest,
 };
 use sqlx::PgPool;
 
 async fn get_categories(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    // _claims: WrapAuthClaimsNoDb,
+    req: Option<QsQuery<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
 {
-    db::category::get(&db)
-        .await
-        .map_err(Into::into)
-        .map(|it| Json(CategoryResponse { categories: it }))
+    let req = req.map_or_else(GetCategoryRequest::default, QsQuery::into_inner);
+
+    db::category::get_subtree(&db, &req.ids).await?;
+
+    let categories = match req.scope {
+        Some(CategoryTreeScope::Decendants) if req.ids.is_empty() => {
+            db::category::get_tree(&db).await?
+        }
+        Some(CategoryTreeScope::Ancestors) | None if req.ids.is_empty() => {
+            db::category::get_top_level(&db).await?
+        }
+        Some(CategoryTreeScope::Decendants) => db::category::get_subtree(&db, &req.ids).await?,
+        Some(CategoryTreeScope::Ancestors) => {
+            db::category::get_ancestor_tree(&db, &req.ids).await?
+        }
+        None => db::category::get_exact(&db, &req.ids).await?,
+    };
+
+    Ok(Json(CategoryResponse { categories }))
 }
 
 async fn create_category(
@@ -69,10 +87,15 @@ async fn delete_category(
     Ok(HttpResponse::NoContent().into())
 }
 
+fn qs_array_cfg() -> QsQueryConfig {
+    QsQueryConfig::default().qs_config(serde_qs::Config::new(2, false))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.route(
-        category::Get::PATH,
-        category::Get::METHOD.route().to(get_categories),
+    cfg.service(
+        web::resource(category::Get::PATH)
+            .app_data(qs_array_cfg())
+            .route(category::Get::METHOD.route().to(get_categories)),
     )
     .route(
         category::Create::PATH,

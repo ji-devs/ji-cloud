@@ -601,6 +601,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "data-encoding"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72aa14c04dfae8dd7d8a2b1cb7ca2152618cd01336dbfe704b8dcbf8d41dbd69"
+
+[[package]]
 name = "derive_more"
 version = "0.99.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -666,6 +672,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "error-chain"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d2f06b9cac1506ece98fe3231e3cc9c4410ec3d5b1f24ae1c8946f0742cdefc"
+dependencies = [
+ "backtrace",
+ "version_check",
 ]
 
 [[package]]
@@ -1066,6 +1082,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "serde_qs",
  "shared",
  "simplelog",
  "sqlx",
@@ -1790,6 +1807,19 @@ dependencies = [
  "indexmap",
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serde_qs"
+version = "0.6.1"
+source = "git+https://github.com/izik1/serde_qs?rev=720e9c24fb271dca1254198084ab8c85312ae705#720e9c24fb271dca1254198084ab8c85312ae705"
+dependencies = [
+ "actix-web",
+ "data-encoding",
+ "error-chain",
+ "futures",
+ "percent-encoding",
  "serde",
 ]
 

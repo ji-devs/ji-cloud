@@ -2,11 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-mod error;
-
-pub use error::{CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryUpdateError};
-
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CategoryId(pub Uuid);
@@ -16,7 +12,7 @@ pub struct CategoryResponse {
     pub categories: Vec<Category>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Category {
     pub id: CategoryId,
     pub name: String,
@@ -27,10 +23,26 @@ pub struct Category {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub enum CategoryTreeScope {
+    Ancestors,
+    Decendants,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct CreateCategoryRequest {
     pub name: String,
     pub parent_id: Option<CategoryId>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct GetCategoryRequest {
+    // fixme: Use CategoryId, unfortunately, sqlx doesn't currently allow for passing of T
+    // the backend _could_ transmute the `CategoryId`s into `Uuid`s, but that's `unsafe`.
+    #[serde(default)]
+    pub ids: Vec<Uuid>,
+    #[serde(default)]
+    pub scope: Option<CategoryTreeScope>,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -17,8 +17,13 @@ fn main() {
     context.insert("MEDIA_UI", &opts.get_remote_target().media_ui_url());
 
     let mut tera = get_tera(&opts.get_core_template_path());
+    if opts.project != "_core" {
+        tera.extend(&get_tera(&opts.get_project_template_path())).unwrap();
+    }
+    if opts.demo {
+        tera.extend(&get_tera(&opts.get_demo_template_path())).unwrap();
+    }
 
-    tera.extend(&get_tera(&opts.get_project_template_path())).unwrap();
     tera.build_inheritance_chains().unwrap();
     tera.check_macro_files().unwrap();
 

@@ -13,12 +13,16 @@ pub fn signin() -> HtmlElement {
 pub fn register() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(REGISTER))
 }
+pub fn profile() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(PROFILE))
+}
 
 //pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
 
 const SIGNIN:&'static str = "signin";
 const WAIT:&'static str = "wait";
 const REGISTER:&'static str = "register";
+const PROFILE:&'static str = "profile";
 
 pub struct Templates {
     pub cache: TemplateCache<'static>
@@ -35,9 +39,10 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (SIGNIN, get_template_str(include_str!("../../../templates/signin_and_registration/signin.html"))),
-            (REGISTER, get_template_str(include_str!("../../../templates/signin_and_registration/register.html"))),
-            (WAIT, get_template_str(include_str!("../../../templates/signin_and_registration/wait.html"))),
+            (SIGNIN, get_template_str(include_str!("../../../.template_output/signin_and_registration/signin.html"))),
+            (REGISTER, get_template_str(include_str!("../../../.template_output/signin_and_registration/register.html"))),
+            (WAIT, get_template_str(include_str!("../../../.template_output/signin_and_registration/wait.html"))),
+            (PROFILE, get_template_str(include_str!("../../../.template_output/profile.html"))),
         ]);
 
         Self { cache }

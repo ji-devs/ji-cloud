@@ -24,10 +24,11 @@ log = "0.4"
 shared = {path = "../../shared/rust"}
 simplelog = "0.8"
 tokio = { version = "0.2", features = ["full"] }
+openssl = { version = "0.10", features = ["vendored"], optional = true }
 
 [features]
 default = ["local"]
 local = ["listenfd", "core/local"]
 sqlproxy = []
-release = ["core/release"]
-sandbox = ["core/sandbox"]
+release = ["core/release", "openssl"]
+sandbox = ["core/sandbox", "openssl"]

@@ -17,9 +17,8 @@ pub mod user {
 
     use crate::{
         api::method::Method,
-        auth::{
-            RegisterError, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
-        },
+        auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
+        error::auth::RegisterError,
         user::{NoSuchUserError, UserProfile},
     };
 
@@ -65,14 +64,17 @@ pub mod category {
     use crate::{
         api::method::Method,
         category::{
-            CategoryCreateError, CategoryDeleteError, CategoryGetError,
-            CategoryUpdateError, UpdateCategoryRequest, CreateCategoryRequest, NewCategoryResponse, CategoryResponse,
+            CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
+            UpdateCategoryRequest,
+        },
+        error::category::{
+            CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryUpdateError,
         },
     };
 
     pub struct Get;
     impl ApiEndpoint for Get {
-        type Req = ();
+        type Req = GetCategoryRequest;
         type Res = CategoryResponse;
         type Err = CategoryGetError;
         const PATH: &'static str = "/v1/category";

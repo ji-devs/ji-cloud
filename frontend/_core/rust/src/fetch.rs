@@ -1,5 +1,5 @@
 pub mod user;
-
+pub mod admin;
 /*
     There are a few top-level rejections (esp auth-related)
     Everything else is not a rejection, rather it's always resolved (as ResultResponse)
@@ -8,7 +8,10 @@ pub mod user;
 */
 
 use wasm_bindgen::prelude::*;
-use shared::api::result::{HttpStatus, ResultResponse};
+use shared::api::{
+    method::Method,
+    result::{HttpStatus, ResultResponse}
+};
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
 use shared::auth::CSRF_HEADER_NAME;
@@ -33,13 +36,13 @@ pub const GET:&'static str = "GET";
 pub type FetchError<E> = Result<E, awsm_web::errors::Error>;
 pub type FetchResult<T, E> = Result<T, FetchError<E>>;
 
-pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:&str, data:Option<Payload>) -> FetchResult<T, E> 
+pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> FetchResult<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
 
  
-    match fetch_with_headers_and_data(url, method, true, &vec![("Authorization", &bearer)], data).await {
+    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data).await {
         //TODO - not sure why we need to re-wrap
         //since actix is returning a Result... OR IS IT?!?!?
         Ok(res) => Ok(res.json().await.unwrap()),
@@ -49,12 +52,12 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
-pub async fn api_with_auth<T, E, Payload>(url: &str, method:&str, data:Option<Payload>) -> FetchResult<T, E> 
+pub async fn api_with_auth<T, E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().unwrap_throw();
-    
-    match fetch_with_headers_and_data(url, method, true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+    let csrf = load_csrf_token().unwrap();
+
+    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
         Ok(res) => Ok(res.json().await.unwrap()),
         Err(err) => {
             Err(Err(err))

@@ -1,7 +1,4 @@
 use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "backend")]
-use actix_web::HttpResponse;
 use uuid::Uuid;
 
 pub const JWT_COOKIE_NAME: &'static str = "X-JWT";
@@ -21,24 +18,6 @@ pub struct SingleSignOnSuccess {
 pub enum RegisterSuccess {
     Signin(String),
     ConfirmEmail,
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum RegisterError {
-    EmptyDisplayName,
-    TakenEmail,
-    TakenId,
-    InternalServerError,
-}
-
-#[cfg(feature = "backend")]
-impl From<RegisterError> for actix_web::Error {
-    fn from(e: RegisterError) -> actix_web::Error {
-        match e {
-            RegisterError::InternalServerError => HttpResponse::InternalServerError().into(),
-            e => HttpResponse::UnprocessableEntity().json(e).into(),
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize)]
