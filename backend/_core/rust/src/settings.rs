@@ -44,15 +44,16 @@ pub async fn init() -> anyhow::Result<Settings> {
 pub async fn init() -> anyhow::Result<Settings> {
     let jwt_secret = req_env("JWT_SECRET")?;
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
-
+    let project_id = env::var("PROJECT_ID").unwrap_or_default();
+    let issuer = format!("{}/{}", config::JWK_ISSUER_URL, project_id);
+  
     Settings::new(
         RemoteTarget::Local,
         req_env("DATABASE_URL")?.parse::<PgConnectOptions>()?,
         jwt_encoding_key,
         jwt_secret,
-        // no project locally.
-        String::new(),
-        String::new(),
+        project_id,
+        issuer,
     )
 }
 

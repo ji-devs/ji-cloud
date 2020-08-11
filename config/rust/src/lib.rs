@@ -46,14 +46,6 @@ impl RemoteTarget {
         }
     }
 
-    pub fn api_js_url(&self) -> &'static str {
-        match self {
-            Self::Local => "http://localhost:8082",
-            Self::Sandbox => "https://api-js.sandbox.jicloud.org",
-            Self::Release => "https://api-js.jicloud.org",
-        }
-    }
-
     pub fn media_url(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:4102",
