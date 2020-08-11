@@ -1088,6 +1088,7 @@ dependencies = [
  "sqlx",
  "time 0.2.16",
  "tokio",
+ "url",
  "uuid 0.8.1",
 ]
 

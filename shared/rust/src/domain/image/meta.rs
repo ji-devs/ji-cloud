@@ -15,7 +15,7 @@ pub struct AgeRangeId(pub Uuid);
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct AffilitionId(pub Uuid);
+pub struct AffiliationId(pub Uuid);
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Style {
@@ -33,7 +33,7 @@ pub struct AgeRange {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Affiliation {
-    pub id: AffilitionId,
+    pub id: AffiliationId,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }

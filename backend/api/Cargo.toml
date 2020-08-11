@@ -31,6 +31,7 @@ shared = {path = "../../shared/rust", features = ["backend"]}
 simplelog = "0.8"
 time = "0.2.16"
 tokio = { version = "0.2", features = ["full"] }
+url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
 
 [dependencies.serde_qs]
