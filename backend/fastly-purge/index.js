@@ -18,7 +18,18 @@ const hasExtension = ext => target => {
 
 const hasWasmExtension = hasExtension("wasm");
 
-const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
+const getMetadata = (cacheInBrowser) => {
+    return cacheInBrowser
+        ?   {
+                cacheControl: "max-age=3600",
+            }
+        :   {
+                cacheControl: "no-store, must-revalidate",
+                surrogateControl: "max-age=3600",
+            };
+
+}
+const makePurger = (FASTLY_PUBLIC_BASEURL, cacheInBrowser) => async (obj, context) => {
     const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
     const fileName = obj.name.replace(/^\/+/, '');
     const completeObjectUrl = `${baseUrl}/${fileName}`;
@@ -34,9 +45,8 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
             console.warn(`${fileName} doesn't exist in storage (kinda weird), so not setting metadata`);
         } else {
             console.log(`${fileName} exists, so setting metadata`);
-            let metaData = {
-                cacheControl: 'max-age=0, s-maxage=86400',
-            };
+            let metaData = getMetadata(cacheInBrowser); 
+
             if(hasWasmExtension(fileName)) {
                 console.log(`${fileName} is wasm, so changing contentType`);
                 metaData.contentType = 'application/wasm';
@@ -60,11 +70,11 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
     }
 };
 
-exports.purgeDocs = makePurger(CONFIG.URL_DOCS);
-exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
+exports.purgeDocs = makePurger(CONFIG.URL_DOCS, false);
+exports.purgeMedia = makePurger(CONFIG.URL_MEDIA, true);
 
-exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
-exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE);
+exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE, false);
+exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE, false);
 
-exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
-exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX);
+exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX, false);
+exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX, false);
