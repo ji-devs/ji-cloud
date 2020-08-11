@@ -6,8 +6,8 @@ use actix_web::{
 use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::category::{
-    CategoryId, CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
-    UpdateCategoryRequest,
+    CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
+    NewCategoryResponse, UpdateCategoryRequest,
 };
 use sqlx::PgPool;
 
@@ -19,16 +19,23 @@ async fn get_categories(
 {
     let req = req.map_or_else(GetCategoryRequest::default, QsQuery::into_inner);
 
-    let res = if req.invert {
-        db::category::get_inverse_tree(&db, &req.roots).await
-    } else if req.roots.is_empty() {
-        db::category::get(&db).await
-    } else {
-        db::category::get_multi(&db, &req.roots).await
+    db::category::get_subtree(&db, &req.ids).await?;
+
+    let categories = match req.scope {
+        Some(CategoryTreeScope::Decendants) if req.ids.is_empty() => {
+            db::category::get_tree(&db).await?
+        }
+        Some(CategoryTreeScope::Ancestors) | None if req.ids.is_empty() => {
+            db::category::get_top_level(&db).await?
+        }
+        Some(CategoryTreeScope::Decendants) => db::category::get_subtree(&db, &req.ids).await?,
+        Some(CategoryTreeScope::Ancestors) => {
+            db::category::get_ancestor_tree(&db, &req.ids).await?
+        }
+        None => db::category::get_exact(&db, &req.ids).await?,
     };
 
-    res.map_err(Into::into)
-        .map(|it| Json(CategoryResponse { categories: it }))
+    Ok(Json(CategoryResponse { categories }))
 }
 
 async fn create_category(
