@@ -7,12 +7,13 @@ use std::fmt;
 thread_local! {
     pub static TEMPLATES: Templates = Templates::new(); 
 }
-/*
-pub fn signin() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(SIGNIN))
+pub fn categories() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
 }
-*/
 
+//pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
+
+const CATEGORIES:&'static str = "categories";
 
 pub struct Templates {
     pub cache: TemplateCache<'static>
@@ -29,7 +30,7 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            //(SIGNIN, get_template_str(include_str!("../../../templates/signin_and_registration/signin.html"))),
+            (CATEGORIES, get_template_str(include_str!("../../../.template_output/temp/categories.html"))),
         ]);
 
         Self { cache }

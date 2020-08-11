@@ -6,18 +6,18 @@ use crate::{
 };
 
 pub async fn fetch_signin(token:&str) -> FetchResult < <Signin as ApiEndpoint>::Res, <Signin as ApiEndpoint>::Err> {
-    api_with_token::< _, _, ()>(&api_url(Signin::PATH), token, POST, None).await
+    api_with_token::< _, _, ()>(&api_url(Signin::PATH), token, Signin::METHOD, None).await
 }
 
 pub async fn fetch_single_signon(token:&str) -> FetchResult < <SingleSignOn as ApiEndpoint>::Res, <SingleSignOn as ApiEndpoint>::Err> {
-    api_with_token::< _, _, ()>(&api_url(SingleSignOn::PATH), token, POST, None).await
+    api_with_token::< _, _, ()>(&api_url(SingleSignOn::PATH), token, SingleSignOn::METHOD, None).await
 }
 
 
 pub async fn fetch_register(token:&str, req:&<Register as ApiEndpoint>::Req) -> FetchResult < <Register as ApiEndpoint>::Res, <Register as ApiEndpoint>::Err> {
-    api_with_token(&api_url(Register::PATH), token, POST, Some(req)).await
+    api_with_token(&api_url(Register::PATH), token, Register::METHOD, Some(req)).await
 }
 
 pub async fn fetch_profile() -> FetchResult < <Profile as ApiEndpoint>::Res, <Profile as ApiEndpoint>::Err> {
-    api_with_auth::< _, _, ()>(&api_url(Profile::PATH), GET, None).await
+    api_with_auth::< _, _, ()>(&api_url(Profile::PATH), Profile::METHOD, None).await
 }

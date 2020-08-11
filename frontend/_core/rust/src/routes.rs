@@ -5,7 +5,8 @@ use wasm_bindgen::prelude::*;
 pub enum Route {
     NotFound,
     Temp,
-    User(UserRoute)
+    User(UserRoute),
+    Admin(AdminRoute)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14,6 +15,11 @@ pub enum UserRoute {
     Signin,
     Register,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AdminRoute {
+    Categories,
+}
+
 impl Route {
     pub fn redirect(self) {
         web_sys::window()
@@ -33,6 +39,7 @@ impl Route {
             "user/profile" => Self::User(UserRoute::Profile),
             "user/signin" => Self::User(UserRoute::Signin),
             "user/register" => Self::User(UserRoute::Register),
+            "admin/categories" => Self::Admin(AdminRoute::Categories),
             "temp" => Self::Temp, 
             _ => Self::NotFound
         }
@@ -43,11 +50,16 @@ impl Route {
 impl From<Route> for &str {
     fn from(route:Route) -> Self {
         match route {
-            Route::User(user_route) => {
-                match user_route {
+            Route::User(route) => {
+                match route {
                     UserRoute::Profile => "/user/profile",
                     UserRoute::Signin => "/user/signin",
                     UserRoute::Register => "/user/register",
+                }
+            },
+            Route::Admin(route) => {
+                match route {
+                    AdminRoute::Categories=> "/admin/categories",
                 }
             },
             Route::NotFound => "/404",
