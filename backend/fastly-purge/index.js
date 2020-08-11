@@ -13,23 +13,45 @@ const hasExtension = ext => target => {
 
   const str = target.substr(idx + 1);
 
-  return str === ext;
+  return str.toLowerCase() === ext.toLowerCase();
 }
+
 
 const hasWasmExtension = hasExtension("wasm");
 
-const getMetadata = (cacheInBrowser) => {
-    return cacheInBrowser
+const getMetadata = filename => {
+
+    //these don't get dynamic filenames and do require immediate changes in the browser
+    //they are still cached on the fastly side
+    const noBrowserCache = ["wasm", "html", "css"].some(ext => hasExtension(ext) (filename));
+
+    if(noBrowserCache) {
+        console.log(`not caching ${fileName} in browser`);
+    } else {
+        console.log(`caching ${fileName} in browser`);
+    }
+
+    let metaData = noBrowserCache
         ?   {
-                cacheControl: "max-age=3600",
+                cacheControl: "no-store, must-revalidate",
+                //doesn't work
+                //surrogateControl: "max-age=2628000",
             }
         :   {
-                cacheControl: "no-store, must-revalidate",
-                surrogateControl: "max-age=3600",
+                cacheControl: "max-age=3600",
+                //doesn't work
+                //surrogateControl: "max-age=2628000",
             };
 
+    if(hasWasmExtension(fileName)) {
+        console.log(`${fileName} is wasm, so changing contentType`);
+        metaData.contentType = 'application/wasm';
+    }
+
+    return metaData;
+
 }
-const makePurger = (FASTLY_PUBLIC_BASEURL, cacheInBrowser) => async (obj, context) => {
+const makePurger = FASTLY_PUBLIC_BASEURL => async (obj, context) => {
     const baseUrl = FASTLY_PUBLIC_BASEURL.replace(/\/+$/, '');
     const fileName = obj.name.replace(/^\/+/, '');
     const completeObjectUrl = `${baseUrl}/${fileName}`;
@@ -45,13 +67,7 @@ const makePurger = (FASTLY_PUBLIC_BASEURL, cacheInBrowser) => async (obj, contex
             console.warn(`${fileName} doesn't exist in storage (kinda weird), so not setting metadata`);
         } else {
             console.log(`${fileName} exists, so setting metadata`);
-            let metaData = getMetadata(cacheInBrowser); 
-
-            if(hasWasmExtension(fileName)) {
-                console.log(`${fileName} is wasm, so changing contentType`);
-                metaData.contentType = 'application/wasm';
-            }
-            await storage.bucket(obj.bucket).file(obj.name).setMetadata(metaData);
+            await storage.bucket(obj.bucket).file(obj.name).setMetadata(getMetadata(fileName));
         }
         console.log(`making purge request for ${completeObjectUrl}`);
 
@@ -70,11 +86,11 @@ const makePurger = (FASTLY_PUBLIC_BASEURL, cacheInBrowser) => async (obj, contex
     }
 };
 
-exports.purgeDocs = makePurger(CONFIG.URL_DOCS, false);
-exports.purgeMedia = makePurger(CONFIG.URL_MEDIA, true);
+exports.purgeDocs = makePurger(CONFIG.URL_DOCS);
+exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
 
-exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE, false);
-exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE, false);
+exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
+exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE);
 
-exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX, false);
-exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX, false);
+exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
+exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX);
