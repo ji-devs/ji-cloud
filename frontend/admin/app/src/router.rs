@@ -1,4 +1,4 @@
-use core::routes::{Route, UserRoute};
+use core::routes::{Route, AdminRoute};
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
@@ -7,9 +7,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::signin::SigninPage;
-use crate::pages::register::RegisterPage;
-use crate::pages::profile::ProfilePage;
+use crate::pages::categories::CategoriesPage;
 
 pub struct Router {
 }
@@ -28,11 +26,9 @@ impl Router {
         Self::signal()
             .map(|route| {
                 match route {
-                    Route::User(route) => {
+                    Route::Admin(route) => {
                         match route {
-                            UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
-                            UserRoute::Register => Some(RegisterPage::render(RegisterPage::new())),
-                            UserRoute::Profile => Some(ProfilePage::render(ProfilePage::new())),
+                            AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
                             _ => None
                         }
                     }

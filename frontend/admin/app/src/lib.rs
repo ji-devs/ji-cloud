@@ -6,18 +6,33 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod utils;
+mod router;
+mod pages;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
 
+/*
+mod page;
+mod pages;
+mod header;
+*/
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
     let settings = core::settings::init();
+    //init dom stuff
 
-    dominator::append_dom(&dominator::body(), dominator::html!("div", { .text("hello world!") }));
+    let router = router::Router::new();
+    dominator::append_dom(&dominator::body(), router.render());
+    /*
+
+    let page = page::Page::new();
+
+    dominator::append_dom(&dominator::body(), page.render());
+	*/
 }
 
 

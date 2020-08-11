@@ -1,5 +1,6 @@
 use shared::{
-    auth::{RegisterRequest, RegisterSuccess, RegisterError},
+    auth::{RegisterRequest, RegisterSuccess},
+    error::auth::RegisterError,
     user::NoSuchUserError
 };
 use core::{
