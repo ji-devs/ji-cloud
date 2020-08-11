@@ -16,7 +16,7 @@ use jsonwebtoken as jwt;
 use jwt::EncodingKey;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use shared::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
+use shared::domain::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
 use shared::error::auth::FirebaseError;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;

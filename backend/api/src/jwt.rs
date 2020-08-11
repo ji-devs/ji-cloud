@@ -1,6 +1,6 @@
 use crate::db;
 use jsonwebtoken as jwt;
-use shared::auth::AuthClaims;
+use shared::domain::auth::AuthClaims;
 use sqlx::postgres::PgPool;
 
 #[derive(Debug)]

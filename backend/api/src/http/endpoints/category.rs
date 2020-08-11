@@ -5,7 +5,7 @@ use actix_web::{
 };
 use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
-use shared::category::{
+use shared::domain::category::{
     CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
     NewCategoryResponse, UpdateCategoryRequest,
 };
