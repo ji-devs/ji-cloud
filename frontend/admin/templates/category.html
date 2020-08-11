@@ -1,0 +1,24 @@
+{% import "_sidebar/sidebar-macros.html" as Sidebar %}
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+
+<div class="flex">
+{{ Sidebar::sidebar(navbarLink="Label images", navbarLinkJig="Label JIGS", dataId="btn-1") }}
+  <div class="w-full">
+    <h1 class="">Label Images</h1>
+    <div class="bordersolid border-b-2 w-full border-grey-400"></div>
+    <div class="flex mb-4">
+      <div class="w-1/2 bg-gray-400">
+        <div class="flex">
+          <div class="flex">
+            <p>Categories</p>
+            <input type="search" name="" value="">
+          </div>
+          {{ ButtonMacros::blue(label="+ Add Category", dataId="btn-1") }}
+        </div>
+      </div>
+      <div class="w-1/2 bg-gray-500 h-12"></div>
+    </div>
+
+
+  </div>
+</div>

@@ -17,6 +17,9 @@ module.exports = {
         jiblueMedium: '#6698ed',
         jiblueDark: '#2b54b8',
         jigreen: '#6eca90',
+        jibuttonBlue:'#5590fc',
+
+
 
       },
       fontSize: {
@@ -29,7 +32,10 @@ module.exports = {
       },
       width: {
         259: '259px',
-      }
+      },
+      borderRadius: {
+        20: '20px'
+      },
     },
   },
   variants: {
