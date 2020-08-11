@@ -81,5 +81,4 @@ impl From<DeleteError> for actix_web::Error {
     }
 }
 
-#[cfg(feature = "backend")]
 from_anyhow![GetError, CreateError, UpdateError, DeleteError,];

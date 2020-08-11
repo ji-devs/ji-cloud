@@ -94,7 +94,6 @@ impl From<CategoryUpdateError> for actix_web::Error {
     }
 }
 
-#[cfg(feature = "backend")]
 from_anyhow![
     CategoryGetError,
     CategoryCreateError,

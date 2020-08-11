@@ -162,13 +162,14 @@ test("user profile", async t => {
         }
     });
 
-    t.deepEqual(profile.body.display_name, "test");
-    t.deepEqual(profile.body.email, "test@test.test");
-    t.deepEqual(profile.body.id, "1f241e1b-b537-493f-a230-075cb16315be");
-    t.deepEqual(profile.body.scopes, []);
+    t.snapshot(profile.body);
 })
 
 test.todo("create category");
 test.todo("delete category");
 test.todo("get categories");
 test.todo("update category");
+
+test.todo("metadata/affliation");
+test.todo("metadata/age-range");
+test.todo("metadata/affliations");
