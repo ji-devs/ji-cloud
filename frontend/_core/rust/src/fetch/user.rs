@@ -19,5 +19,5 @@ pub async fn fetch_register(token:&str, req:&<Register as ApiEndpoint>::Req) -> 
 }
 
 pub async fn fetch_profile() -> FetchResult < <Profile as ApiEndpoint>::Res, <Profile as ApiEndpoint>::Err> {
-    api_with_auth::< _, _, ()>(&api_url(Profile::PATH), POST, None).await
+    api_with_auth::< _, _, ()>(&api_url(Profile::PATH), GET, None).await
 }

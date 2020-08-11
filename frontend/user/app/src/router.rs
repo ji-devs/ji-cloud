@@ -9,6 +9,7 @@ use futures_signals::{
 use dominator::{Dom, html};
 use crate::pages::signin::SigninPage;
 use crate::pages::register::RegisterPage;
+use crate::pages::profile::ProfilePage;
 
 pub struct Router {
 }
@@ -31,10 +32,7 @@ impl Router {
                         match route {
                             UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
                             UserRoute::Register => Some(RegisterPage::render(RegisterPage::new())),
-                            UserRoute::Profile => {
-                                log::info!("TODO!");
-                                None
-                            },
+                            UserRoute::Profile => Some(ProfilePage::render(ProfilePage::new())),
                             _ => None
                         }
                     }
