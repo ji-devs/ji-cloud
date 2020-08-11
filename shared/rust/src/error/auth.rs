@@ -43,5 +43,4 @@ impl From<FirebaseError> for actix_web::Error {
     }
 }
 
-#[cfg(feature = "backend")]
 from_anyhow![RegisterError, FirebaseError];

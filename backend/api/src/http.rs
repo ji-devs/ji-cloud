@@ -55,6 +55,7 @@ pub async fn run(
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
+            .configure(endpoints::image::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
