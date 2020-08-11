@@ -1,5 +1,3 @@
 pub mod api;
-pub mod auth;
-pub mod user;
-pub mod category;
 pub mod error;
+pub mod domain;

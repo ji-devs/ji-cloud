@@ -1,6 +1,6 @@
 use futures::TryStreamExt;
 use shared::{
-    category::{Category, CategoryId},
+    domain::category::{Category, CategoryId},
     error::category::{CategoryDeleteError, CategoryUpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, Executor};

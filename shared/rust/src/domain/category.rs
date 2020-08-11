@@ -55,7 +55,7 @@ pub struct NewCategoryResponse {
 pub struct UpdateCategoryRequest {
     pub name: Option<String>,
     /// If None, don't change parents. If Some, change parent to the given CategoryId (or null).
-    #[serde(deserialize_with = "deserialize_optional_field")]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub parent_id: Option<Option<CategoryId>>,
@@ -64,12 +64,4 @@ pub struct UpdateCategoryRequest {
     ///
     /// If None and parent_id is Some(...) it will append to the end of the new parent.
     pub index: Option<u16>,
-}
-
-fn deserialize_optional_field<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
-where
-    D: serde::Deserializer<'de>,
-    T: Deserialize<'de>,
-{
-    Ok(Some(Option::deserialize(deserializer)?))
 }
