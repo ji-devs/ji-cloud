@@ -40,6 +40,26 @@
       "nullable": []
     }
   },
+  "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
+    "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
     "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
     "describe": {
@@ -61,6 +81,46 @@
       ]
     }
   },
+  "2304834612daefc37b933358ec4579f3dbb925a1be3984b38bc7e6093753b5cb": {
+    "query": "\n    with recursive inverse_category_tree(index, id, parent_id, structure) as\n    (\n        select index::int2,\n               id,\n               parent_id,\n               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                  updated_at)\n        from category co\n        where id = any ($1::uuid[])\n        union all\n        select co.index::int2,\n               id,\n               parent_id,\n               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                  updated_at, 'children',\n                                  jsonb_agg(_lat.structure))\n        from category co\n                 join lateral (\n            select ct.structure\n            from inverse_category_tree ct\n            where ct.parent_id = co.id\n            order by ct.index\n            ) _lat on true\n        group by co.id\n    )\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom inverse_category_tree\nwhere parent_id is null;\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
+    "query": "select id from \"user\" where firebase_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
     "query": "update category set name = $1 where id = $2",
     "describe": {
@@ -72,6 +132,42 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "411526cce8e49dd777e3dbc44db4fcd5ef5e954602c4ae1d5c04a221dd78da93": {
+    "query": "\nselect id as \"id: CategoryId\", name, created_at, updated_at\nfrom category\nwhere parent_id is null\norder by index\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
   "4e2cce1d7c10c79ae6d07626a2fa64807f82c50d7e647eddbc7b3d8ee0e19f29": {
@@ -127,6 +223,26 @@
       ]
     }
   },
+  "7b0494c65d69bcd3a68352f58afb483e7ed96dca12c8b36c03e4c421749782cc": {
+    "query": "\nselect coalesce(jsonb_agg(structure order by t.ord), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\ninner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
     "query": "\nselect parent_id, index from category where id = $1\n    ",
     "describe": {
@@ -153,38 +269,64 @@
       ]
     }
   },
-  "853522807cb90d2c36fcfe680c729ac368209c7aceafd759e41235f5110110f0": {
-    "query": "select exists (select 1 from \"user\" where firebase_id = $1) as \"exists!\"",
+  "83c4e421a83eb284ceab3d18858a6c5718d8e2d82679ac07c2e6edeb228ee0e3": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, display_name, email) \nVALUES \n    ($1, $2, $3::text)\nreturning id\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
+          "name": "id",
+          "type_info": "Uuid"
         }
       ],
       "parameters": {
         "Left": [
+          "Text",
+          "Text",
           "Text"
         ]
       },
       "nullable": [
-        null
+        false
       ]
     }
   },
-  "9c77f8f085bf91d662c3650e68cbabab6997431a5782692f96d17183c23da3b2": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, display_name, email) \nVALUES \n    ($1, $2, $3::text)\n        ",
+  "9ebbeeb42bbded2e27d8aca7e692b80d0d426806d748339d3eb9020887ccedc0": {
+    "query": "\nselect id as \"id: CategoryId\", name, created_at, updated_at\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
     "describe": {
-      "columns": [],
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
       "parameters": {
         "Left": [
-          "Text",
-          "Text",
-          "Text"
+          "UuidArray"
         ]
       },
-      "nullable": []
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
   "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
@@ -202,6 +344,24 @@
           "Uuid",
           "Uuid"
         ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "f2f217bc1d8325874ca079c39e498b5fbc0c3f9d7901c4ba8493f452b2db381e": {
+    "query": "\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree where parent_id is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
       },
       "nullable": [
         null

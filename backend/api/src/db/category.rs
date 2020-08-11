@@ -1,36 +1,82 @@
+use futures::TryStreamExt;
 use shared::category::{Category, CategoryDeleteError, CategoryId, CategoryUpdateError};
 use sqlx::{postgres::PgDatabaseError, Executor};
 use uuid::Uuid;
 
-pub async fn get_multi(db: &sqlx::PgPool, roots: &[Uuid]) -> anyhow::Result<Vec<Category>> {
-    let v: sqlx::types::Json<_> = sqlx::query_scalar(
+pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
+    sqlx::query!(
         r#"
-select jsonb_agg(structure order by index)
+select id as "id: CategoryId", name, created_at, updated_at
+from category
+where parent_id is null
+order by index
+"#
+    )
+    .fetch(db)
+    .map_ok(|it| Category {
+        id: it.id,
+        created_at: it.created_at,
+        updated_at: it.updated_at,
+        name: it.name,
+        children: vec![],
+    })
+    .try_collect()
+    .await
+    .map_err(Into::into)
+}
+
+pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> anyhow::Result<Vec<Category>> {
+    sqlx::query!(
+        r#"
+select id as "id: CategoryId", name, created_at, updated_at
+from category
+         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+order by t.ord
+"#,
+        ids
+    )
+    .fetch(db)
+    .map_ok(|it| Category {
+        id: it.id,
+        created_at: it.created_at,
+        updated_at: it.updated_at,
+        name: it.name,
+        children: vec![],
+    })
+    .try_collect()
+    .await
+    .map_err(Into::into)
+}
+
+pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
+    sqlx::query!(
+        r#"
+select coalesce(jsonb_agg(structure order by t.ord), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
 from category_tree
-where id = any($1::uuid[])
+inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 "#,
+        ids
     )
-    .bind(roots)
+    // .bind(ids)
     .fetch_one(db)
-    .await?;
-
-    Ok(v.0)
+    .await
+    .map(|it| it.categories.0)
 }
 
-pub async fn get(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
-    let v: sqlx::types::Json<_> = sqlx::query_scalar(
+pub async fn get_tree(db: &sqlx::PgPool) -> sqlx::Result<Vec<Category>> {
+    sqlx::query!(
         r#"
-select jsonb_agg(structure order by index) from category_tree where parent_id is null
+select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
+from category_tree where parent_id is null
 "#,
     )
     .fetch_one(db)
-    .await?;
-
-    Ok(v.0)
+    .await
+    .map(|it| it.categories.0)
 }
 
-pub async fn get_inverse_tree(db: &sqlx::PgPool, roots: &[Uuid]) -> anyhow::Result<Vec<Category>> {
-    let v: sqlx::types::Json<_> = sqlx::query_scalar(
+pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
+    sqlx::query!(
         r#"
     with recursive inverse_category_tree(index, id, parent_id, structure) as
     (
@@ -57,16 +103,14 @@ pub async fn get_inverse_tree(db: &sqlx::PgPool, roots: &[Uuid]) -> anyhow::Resu
             ) _lat on true
         group by co.id
     )
-select coalesce(jsonb_agg(structure order by index), '[]') as tree
+select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
 from inverse_category_tree
 where parent_id is null;
-"#,
+"#, ids
     )
-    .bind(roots)
     .fetch_one(db)
-    .await?;
-
-    Ok(v.0)
+    .await
+    .map(|it| it.categories.0)
 }
 
 pub async fn create(
