@@ -5,9 +5,8 @@
 * backend: servers and backend utils deployed to Cloud Run, Cloud Functions, etc.
   - _core
     - (js/rust): common library used between backend apps
-  - api: the main api server (Rust/Warp/Diesel)
-  - pages: the main html server (Rust/Handlebars)
-  - api-js: supplementary api server for node sdks (JS)
+  - api: the main api server (Rust/actix-web/sqlx)
+  - pages: the main html server (Rust/askama)
   - fastly-purge: cloud functions for purging the CDN on file change 
 
 * build-utils: internal tooling and utils
