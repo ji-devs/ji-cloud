@@ -15,7 +15,8 @@ module.exports = {
       colors: {
         jiblueLight: '#83aef7',
         jiblueMedium: '#6698ed',
-        jiblueDark: '#2b54b8'
+        jiblueDark: '#2b54b8',
+        jigreen: '#6eca90',
 
       },
       fontSize: {
@@ -26,6 +27,9 @@ module.exports = {
       fontFamily: {
         azoSans: 'azo-sans-web'
       },
+      width: {
+        259: '259px',
+      }
     },
   },
   variants: {
