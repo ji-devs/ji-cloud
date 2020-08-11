@@ -18,6 +18,10 @@ pub struct Opts {
     // show output 
     #[structopt(short, long)]
     pub verbose: bool,
+
+    // include storybook/demo-templates dir 
+    #[structopt(short, long)]
+    pub demo: bool,
 }
 
 impl Opts {
@@ -39,8 +43,8 @@ impl Opts {
         }
 
         path
-
     }
+
     pub fn get_core_template_path(&self) -> PathBuf {
         let path = self.get_frontend_path().join("_core").join("templates");
 
@@ -50,6 +54,19 @@ impl Opts {
 
         path
 
+    }
+
+    pub fn get_demo_template_path(&self) -> PathBuf {
+
+        let path = self.get_project_path()
+            .join("storybook")
+            .join("demo-templates");
+
+        if !path.exists() {
+            panic!("demo template path does not exist!");
+        }
+
+        path
     }
 
     pub fn get_project_output_path(&self) -> PathBuf {
