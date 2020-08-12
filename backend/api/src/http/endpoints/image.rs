@@ -9,7 +9,7 @@ use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
     domain::image::{meta::MetaKind, CreateResponse, GetResponse, ImageId, UpdateRequest},
-    error::image::{CreateError, GetError, UpdateError},
+    error::image::{CreateError, DeleteError, GetError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use url::Url;
@@ -183,6 +183,18 @@ async fn update(
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
 
+async fn delete(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    req: Path<ImageId>,
+) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {
+    if db::image::delete(&db, req.into_inner()).await? {
+        Ok(HttpResponse::new(StatusCode::NO_CONTENT))
+    } else {
+        Err(DeleteError::NotFound)
+    }
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     meta::configure(cfg);
     cfg.route(
@@ -193,5 +205,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),
+    )
+    .route(
+        image::Delete::PATH,
+        image::Delete::METHOD.route().to(delete),
     );
 }
