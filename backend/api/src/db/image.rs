@@ -229,3 +229,20 @@ where id = $1
     .fetch_optional(db)
     .await
 }
+
+pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<bool> {
+    let mut conn = db.begin().await?;
+
+    // first, clear any metadata it might have.
+    update_metadata(&mut conn, image, Some(&[]), Some(&[]), Some(&[]), Some(&[])).await?;
+
+    // then drop.
+    let exists = sqlx::query!(
+        "delete from image_metadata where id = $1 returning 1 as exists",
+        image.0
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .is_some();
+    Ok(exists)
+}
