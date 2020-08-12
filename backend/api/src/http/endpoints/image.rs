@@ -1,12 +1,12 @@
 use crate::{db, extractor::WrapAuthClaimsNoDb};
 use actix_web::{
     http,
-    web::{Data, Json, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
 };
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::{meta::MetaKind, CreateResponse},
-    error::image::CreateError,
+    domain::image::{meta::MetaKind, CreateResponse, GetResponse, ImageId},
+    error::image::{CreateError, GetError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use url::Url;
@@ -89,6 +89,8 @@ pub async fn create(
     .await
     .map_err(handle_metadata_err)?;
 
+    txn.commit().await?;
+
     Ok((
         Json(CreateResponse {
             id,
@@ -98,10 +100,22 @@ pub async fn create(
     ))
 }
 
+pub async fn get(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    req: Path<ImageId>,
+) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
+    db::image::get(&db, req.into_inner())
+        .await?
+        .map(|image| Json(GetResponse { image }))
+        .ok_or(GetError::NotFound)
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     meta::configure(cfg);
     cfg.route(
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
-    );
+    )
+    .route(image::Get::PATH, image::Get::METHOD.route().to(get));
 }
