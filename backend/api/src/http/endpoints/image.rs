@@ -5,12 +5,53 @@ use actix_web::{
 };
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::CreateResponse,
+    domain::image::{meta::MetaKind, CreateResponse},
+    error::image::CreateError,
 };
-use sqlx::PgPool;
+use sqlx::{postgres::PgDatabaseError, PgPool};
 use url::Url;
+use uuid::Uuid;
 
 mod meta;
+
+// attempts to grab a uuid out of a string in the shape:
+// Key (<key>)=(<uuid>)<postfix>
+fn extract_uuid(s: &str) -> Option<Uuid> {
+    // <uuid>)<postfix)
+    let s = dbg!(s.split("(").nth(2)?);
+    let s = dbg!(&s[0..s.find(")")?]);
+    s.parse().ok()
+}
+
+fn handle_metadata_err(err: sqlx::Error) -> CreateError {
+    let db_err = match &err {
+        sqlx::Error::Database(e) => e.downcast_ref::<PgDatabaseError>(),
+        _ => return err.into(),
+    };
+
+    let id = db_err.detail().and_then(extract_uuid);
+
+    match dbg!(db_err.constraint()) {
+        Some("image_affiliation_affiliation_id_fkey") => CreateError::MissingMetadata {
+            id,
+            kind: MetaKind::Affiliation,
+        },
+
+        Some("image_age_range_age_range_id_fkey") => CreateError::MissingMetadata {
+            id,
+            kind: MetaKind::AgeRange,
+        },
+
+        Some("image_style_style_id_fkey") => CreateError::MissingMetadata {
+            id,
+            kind: MetaKind::Style,
+        },
+
+        Some("image_category_category_id_fkey") => CreateError::MissingCategory(id),
+
+        _ => return err.into(),
+    }
+}
 
 pub async fn create(
     db: Data<PgPool>,
@@ -43,8 +84,10 @@ pub async fn create(
         &req.affiliations,
         &req.age_ranges,
         &req.styles,
+        &req.categories,
     )
-    .await?;
+    .await
+    .map_err(handle_metadata_err)?;
 
     Ok((
         Json(CreateResponse {

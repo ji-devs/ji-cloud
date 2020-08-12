@@ -1,8 +1,10 @@
 #[cfg(feature = "backend")]
 use super::anyhow_to_ise;
+use crate::domain::image::meta::MetaKind;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
@@ -29,6 +31,11 @@ impl From<GetError> for actix_web::Error {
 pub enum CreateError {
     #[serde(skip)]
     InternalServerError(anyhow::Error),
+    MissingMetadata {
+        id: Option<Uuid>,
+        kind: MetaKind,
+    },
+    MissingCategory(Option<Uuid>),
     Forbidden,
 }
 
@@ -37,10 +44,15 @@ impl From<CreateError> for actix_web::Error {
     fn from(e: CreateError) -> actix_web::Error {
         match e {
             CreateError::InternalServerError(e) => anyhow_to_ise(e),
+            e @ CreateError::MissingMetadata { .. } | e @ CreateError::MissingCategory(_) => {
+                HttpResponse::UnprocessableEntity().json(e).into()
+            }
             CreateError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
 }
+
+
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 pub enum UpdateError {
