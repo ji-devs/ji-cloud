@@ -3,10 +3,10 @@ use shared::domain::{
     category::CategoryId,
     image::{
         meta::{AffiliationId, AgeRangeId, StyleId},
-        ImageId,
+        Image, ImageId,
     },
 };
-use sqlx::PgConnection;
+use sqlx::{PgConnection, PgPool};
 use std::fmt::Write;
 pub(crate) mod meta;
 
@@ -124,4 +124,28 @@ pub async fn add_metadata(
     }
 
     Ok(())
+}
+
+pub async fn get(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
+    sqlx::query_as(
+r#"
+select id,
+       name,
+       description,
+       is_premium,
+       publish_at,
+       created_at,
+       updated_at,
+       array((select row (category_id) from image_categories where image_id = id))     as categories,
+       array((select row (style_id) from image_style where image_id = id))             as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+from image_metadata
+where id = $1
+"#,
+       
+    )
+    .bind(id)
+    .fetch_optional(db)
+    .await
 }
