@@ -1,6 +1,10 @@
+{% import "_sidebar/sidebar-macros.html" as Sidebar %}
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+{% import "_titles/titles-macros.html" as Titles %}
 <div class="text-azoSans flex">
-  <div>
-    <h1 class="bordersolid border-b-2 border-grey-400">Label Images</h1>
+  <div class="w-full">
+
+    {{ Titles::pagetitle(label="Label Images", dataId="#") }}
     <div class="flex py-4 px-2">
       <div class="flex-1">
         <p>We found ${results}</p>

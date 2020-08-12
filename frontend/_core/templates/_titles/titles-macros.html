@@ -1,0 +1,34 @@
+{% macro pagetitle(label, dataId="") %}
+<h1 class="">{{label}}</h1>
+<div class="bordersolid border-b-2 w-full border-grey-400"></div>
+{% endmacro pagetitle %}
+
+
+
+{% macro categorytitleselected(label, dataId="") %}
+<div class="flex items-center justify-between bg-jibackgroundBlue border-jigreen border-l-8 border-l-solid rounded-md mb-2">
+  <div class="flex py-3">
+    <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+    <p>{{label}}</p>
+  </div>
+  <div class="flex mr-2">
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+  </div>
+</div>
+{% endmacro categorytitleselected %}
+
+{% macro categorytitle(label, dataId="") %}
+<div class="flex items-center justify-between bg-white border-jiborderblue border-l-8 border-2 border-l-solid rounded-md mb-2">
+  <div class="flex py-3">
+    <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+    <p>{{label}}</p>
+  </div>
+  <div class="flex mr-2">
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+  </div>
+</div>
+{% endmacro categorytitle %}

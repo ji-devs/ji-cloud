@@ -18,7 +18,9 @@ module.exports = {
         jiblueDark: '#2b54b8',
         jigreen: '#6eca90',
         jibuttonBlue:'#5590fc',
-
+        jibackgroundBlue: "#e6f0ff",
+        jiborderblue: "#e6f0ff;",
+        jibluelighter: "#a6c6f8"
 
 
       },
