@@ -2,11 +2,14 @@ use crate::{db, extractor::WrapAuthClaimsNoDb};
 use actix_web::{
     http,
     web::{Data, Json, Path, ServiceConfig},
+    HttpResponse,
 };
+use db::image::nul_if_empty;
+use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::{meta::MetaKind, CreateResponse, GetResponse, ImageId},
-    error::image::{CreateError, GetError},
+    domain::image::{meta::MetaKind, CreateResponse, GetResponse, ImageId, UpdateRequest},
+    error::image::{CreateError, GetError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use url::Url;
@@ -23,37 +26,67 @@ fn extract_uuid(s: &str) -> Option<Uuid> {
     s.parse().ok()
 }
 
-fn handle_metadata_err(err: sqlx::Error) -> CreateError {
+enum MetaWrapperError {
+    Sqlx(sqlx::Error),
+    MissingMetadata { id: Option<Uuid>, kind: MetaKind },
+    MissingCategory(Option<Uuid>),
+}
+
+impl From<MetaWrapperError> for CreateError {
+    fn from(e: MetaWrapperError) -> Self {
+        match e {
+            MetaWrapperError::Sqlx(e) => CreateError::InternalServerError(e.into()),
+            MetaWrapperError::MissingMetadata { id, kind } => {
+                CreateError::MissingMetadata { id, kind }
+            }
+            MetaWrapperError::MissingCategory(id) => CreateError::MissingCategory(id),
+        }
+    }
+}
+
+impl From<MetaWrapperError> for UpdateError {
+    fn from(e: MetaWrapperError) -> Self {
+        match e {
+            MetaWrapperError::Sqlx(e) => UpdateError::InternalServerError(e.into()),
+            MetaWrapperError::MissingMetadata { id, kind } => {
+                UpdateError::MissingMetadata { id, kind }
+            }
+            MetaWrapperError::MissingCategory(id) => UpdateError::MissingCategory(id),
+        }
+    }
+}
+
+fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
     let db_err = match &err {
         sqlx::Error::Database(e) => e.downcast_ref::<PgDatabaseError>(),
-        _ => return err.into(),
+        _ => return MetaWrapperError::Sqlx(err),
     };
 
     let id = db_err.detail().and_then(extract_uuid);
 
-    match dbg!(db_err.constraint()) {
-        Some("image_affiliation_affiliation_id_fkey") => CreateError::MissingMetadata {
+    match db_err.constraint() {
+        Some("image_affiliation_affiliation_id_fkey") => MetaWrapperError::MissingMetadata {
             id,
             kind: MetaKind::Affiliation,
         },
 
-        Some("image_age_range_age_range_id_fkey") => CreateError::MissingMetadata {
+        Some("image_age_range_age_range_id_fkey") => MetaWrapperError::MissingMetadata {
             id,
             kind: MetaKind::AgeRange,
         },
 
-        Some("image_style_style_id_fkey") => CreateError::MissingMetadata {
+        Some("image_style_style_id_fkey") => MetaWrapperError::MissingMetadata {
             id,
             kind: MetaKind::Style,
         },
 
-        Some("image_category_category_id_fkey") => CreateError::MissingCategory(id),
+        Some("image_category_category_id_fkey") => MetaWrapperError::MissingCategory(id),
 
-        _ => return err.into(),
+        _ => MetaWrapperError::Sqlx(err),
     }
 }
 
-pub async fn create(
+async fn create(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Json<<image::Create as ApiEndpoint>::Req>,
@@ -77,14 +110,13 @@ pub async fn create(
     )
     .await?;
 
-    // todo: don't 500 when one of the ids doesn't exist.
-    db::image::add_metadata(
+    db::image::update_metadata(
         &mut txn,
         id,
-        &req.affiliations,
-        &req.age_ranges,
-        &req.styles,
-        &req.categories,
+        nul_if_empty(&req.affiliations),
+        nul_if_empty(&req.age_ranges),
+        nul_if_empty(&req.styles),
+        nul_if_empty(&req.categories),
     )
     .await
     .map_err(handle_metadata_err)?;
@@ -100,7 +132,7 @@ pub async fn create(
     ))
 }
 
-pub async fn get(
+async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
@@ -111,11 +143,55 @@ pub async fn get(
         .ok_or(GetError::NotFound)
 }
 
+async fn update(
+    db: Data<PgPool>,
+    _claims: WrapAuthClaimsNoDb,
+    req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
+    id: Path<ImageId>,
+) -> Result<HttpResponse, <image::UpdateMetadata as ApiEndpoint>::Err> {
+    let req = req.map_or_else(UpdateRequest::default, Json::into_inner);
+    let id = id.into_inner();
+    let mut txn = db.begin().await?;
+
+    // todo: check for 404
+    let exists = db::image::update(
+        &mut txn,
+        id,
+        req.name,
+        req.description,
+        req.is_premium,
+        req.publish_at,
+    )
+    .await?;
+
+    if !exists {
+        return Err(UpdateError::NotFound);
+    }
+
+    // do stuff... Then
+    db::image::update_metadata(
+        &mut txn,
+        id,
+        req.affiliations.as_deref(),
+        req.age_ranges.as_deref(),
+        req.styles.as_deref(),
+        req.categories.as_deref(),
+    )
+    .await
+    .map_err(handle_metadata_err)?;
+
+    Ok(HttpResponse::new(StatusCode::NO_CONTENT))
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     meta::configure(cfg);
     cfg.route(
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    .route(image::Get::PATH, image::Get::METHOD.route().to(get));
+    .route(image::Get::PATH, image::Get::METHOD.route().to(get))
+    .route(
+        image::UpdateMetadata::PATH,
+        image::UpdateMetadata::METHOD.route().to(update),
+    );
 }

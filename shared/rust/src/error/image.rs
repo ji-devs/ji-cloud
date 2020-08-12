@@ -52,12 +52,16 @@ impl From<CreateError> for actix_web::Error {
     }
 }
 
-
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 pub enum UpdateError {
     #[serde(skip)]
     InternalServerError(anyhow::Error),
+    MissingMetadata {
+        id: Option<Uuid>,
+        kind: MetaKind,
+    },
+    MissingCategory(Option<Uuid>),
     NotFound,
     Forbidden,
 }
@@ -68,6 +72,9 @@ impl From<UpdateError> for actix_web::Error {
         match e {
             UpdateError::InternalServerError(e) => anyhow_to_ise(e),
             UpdateError::NotFound => HttpResponse::NotFound().into(),
+            e @ UpdateError::MissingMetadata { .. } | e @ UpdateError::MissingCategory(_) => {
+                HttpResponse::UnprocessableEntity().json(e).into()
+            }
             UpdateError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
