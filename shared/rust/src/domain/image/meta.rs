@@ -52,3 +52,10 @@ pub struct AgeRangeResponse {
 pub struct AffiliationResponse {
     pub affiliations: Vec<Affiliation>,
 }
+
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub enum MetaKind {
+    Affiliation,
+    Style,
+    AgeRange,
+}

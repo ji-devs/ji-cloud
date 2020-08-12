@@ -1,7 +1,10 @@
 use chrono::{DateTime, Utc};
-use shared::domain::image::{
-    meta::{AffiliationId, AgeRangeId, StyleId},
-    ImageId,
+use shared::domain::{
+    category::CategoryId,
+    image::{
+        meta::{AffiliationId, AgeRangeId, StyleId},
+        ImageId,
+    },
 };
 use sqlx::PgConnection;
 use std::fmt::Write;
@@ -38,7 +41,7 @@ fn generate_metadata_insert(meta_kind: &str, binds: usize) -> String {
     debug_assert_ne!(binds, i16::MAX as usize);
 
     let mut s = format!(
-        "insert into image_{0} (image_id, {0}_id), values($1, $2)",
+        "insert into image_{0} (image_id, {0}_id) values($1, $2)",
         meta_kind
     );
 
@@ -57,6 +60,7 @@ pub async fn add_metadata(
     affiliations: &[AffiliationId],
     age_ranges: &[AgeRangeId],
     styles: &[StyleId],
+    categories: &[CategoryId],
 ) -> sqlx::Result<()> {
     // todo: don't remove ones that are in the respective arrays.
     sqlx::query!("delete from image_affiliation where image_id = $1", image.0)
@@ -71,34 +75,49 @@ pub async fn add_metadata(
         .execute(&mut *conn)
         .await?;
 
+    sqlx::query!("delete from image_categories where image_id = $1", image.0)
+        .execute(&mut *conn)
+        .await?;
+
     for affiliations in affiliations.chunks(i16::MAX as usize - 1) {
         let query = generate_metadata_insert("affiliation", affiliations.len());
         let mut query = sqlx::query(&query);
 
         for affiliation in affiliations {
-            query = query.bind(image.0).bind(affiliation.0);
+            query = query.bind(image).bind(affiliation);
         }
 
         query.execute(&mut *conn).await?;
     }
 
     for age_ranges in age_ranges.chunks(i16::MAX as usize - 1) {
-        let query = generate_metadata_insert("age_range", affiliations.len());
+        let query = generate_metadata_insert("age_range", age_ranges.len());
         let mut query = sqlx::query(&query);
 
         for age_range in age_ranges {
-            query = query.bind(image.0).bind(age_range.0);
+            query = query.bind(image).bind(age_range);
         }
 
         query.execute(&mut *conn).await?;
     }
 
     for styles in styles.chunks(i16::MAX as usize - 1) {
-        let query = generate_metadata_insert("style", affiliations.len());
+        let query = generate_metadata_insert("style", styles.len());
         let mut query = sqlx::query(&query);
 
         for style in styles {
-            query = query.bind(image.0).bind(style.0);
+            query = query.bind(image).bind(style);
+        }
+
+        query.execute(&mut *conn).await?;
+    }
+
+    for categories in categories.chunks(i16::MAX as usize - 1) {
+        let query = generate_metadata_insert("categories", categories.len());
+        let mut query = sqlx::query(&query);
+
+        for category in categories {
+            query = query.bind(image).bind(category);
         }
 
         query.execute(&mut *conn).await?;
