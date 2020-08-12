@@ -26,13 +26,11 @@ pub struct CreateRequest {
     pub categories: Vec<CategoryId>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct UpdateRequest {
     pub name: Option<String>,
     pub description: Option<String>,
     pub is_premium: Option<bool>,
-    // Note that once `publish_at` on the resource is in the past, it becomes immutable
-    //  (which means that setting this will do nothing)
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
