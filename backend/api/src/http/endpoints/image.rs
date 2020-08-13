@@ -1,4 +1,4 @@
-use crate::{db, extractor::WrapAuthClaimsNoDb};
+use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
 use actix_web::{
     http,
     web::{Data, Json, Path, ServiceConfig},
@@ -12,7 +12,6 @@ use shared::{
     error::image::{CreateError, DeleteError, GetError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
-use url::Url;
 use uuid::Uuid;
 
 mod meta;
@@ -88,6 +87,7 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 
 async fn create(
     db: Data<PgPool>,
+    s3: Data<S3Client>,
     _claims: WrapAuthClaimsNoDb,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
@@ -96,13 +96,9 @@ async fn create(
 > {
     let req = req.into_inner();
 
-    // TODO: actually get this from aws, this is just a fake url to make stuff work
-    let presigned_url: Url = "https://aws.wubwub".parse()?;
-
     let mut txn = db.begin().await?;
     let id = db::image::create(
         &mut txn,
-        presigned_url.as_str(),
         &req.name,
         &req.description,
         req.is_premium,
@@ -126,7 +122,7 @@ async fn create(
     Ok((
         Json(CreateResponse {
             id,
-            upload_url: presigned_url,
+            upload_url: s3.presigned_image_put_url(id).await?.parse()?,
         }),
         http::StatusCode::CREATED,
     ))
@@ -134,13 +130,20 @@ async fn create(
 
 async fn get(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    s3: Data<S3Client>,
+    // _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
 ) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
-    db::image::get(&db, req.into_inner())
+    let metadata = db::image::get(&db, req.into_inner())
         .await?
-        .map(|image| Json(GetResponse { image }))
-        .ok_or(GetError::NotFound)
+        .ok_or(GetError::NotFound)?;
+
+    let id = metadata.id;
+
+    Ok(Json(GetResponse {
+        metadata,
+        url: s3.presigned_image_get_url(id).await?.parse()?,
+    }))
 }
 
 async fn update(
@@ -153,7 +156,6 @@ async fn update(
     let id = id.into_inner();
     let mut txn = db.begin().await?;
 
-    // todo: check for 404
     let exists = db::image::update(
         &mut txn,
         id,
@@ -168,7 +170,6 @@ async fn update(
         return Err(UpdateError::NotFound);
     }
 
-    // do stuff... Then
     db::image::update_metadata(
         &mut txn,
         id,

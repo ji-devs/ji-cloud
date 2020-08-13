@@ -75,7 +75,7 @@ pub async fn init() -> anyhow::Result<Settings> {
     .await
 }
 
-fn req_env(key: &str) -> anyhow::Result<String> {
+pub fn req_env(key: &str) -> anyhow::Result<String> {
     env::var(key).map_err(|_| anyhow::anyhow!("Missing required env var `{}`", key))
 }
 

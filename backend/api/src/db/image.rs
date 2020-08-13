@@ -50,7 +50,6 @@ impl Metadata for CategoryId {
 
 pub async fn create(
     conn: &mut PgConnection,
-    source: &str,
     name: &str,
     description: &str,
     is_premium: bool,
@@ -58,11 +57,10 @@ pub async fn create(
 ) -> sqlx::Result<ImageId> {
     let id: ImageId = sqlx::query!(
         r#"
-insert into image_metadata (name, source, description, is_premium, publish_at) values ($1, $2, $3, $4, $5)
+insert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)
 returning id as "id: ImageId"
         "#,
         name,
-        source,
         description,
         is_premium,
         publish_at,

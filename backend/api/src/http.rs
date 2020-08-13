@@ -2,7 +2,7 @@ mod auth;
 mod cors;
 mod endpoints;
 
-use crate::jwkkeys::JwkVerifier;
+use crate::{jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
@@ -11,6 +11,7 @@ use core::{
     settings::Settings,
 };
 use futures::Future;
+use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -41,6 +42,7 @@ pub async fn run(
     pool: PgPool,
     settings: Settings,
     jwk_verifier: Arc<RwLock<JwkVerifier>>,
+    s3: S3Client,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.local_insecure;
     let api_port = settings.api_port;
@@ -48,6 +50,7 @@ pub async fn run(
         actix_web::App::new()
             .data(pool.clone())
             .data(settings.clone())
+            .data(s3.clone())
             .app_data(jwk_verifier.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)

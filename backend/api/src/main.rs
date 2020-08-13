@@ -1,12 +1,7 @@
 use jwkkeys::JwkConfiguration;
 use std::thread;
 
-mod db;
-mod extractor;
-mod http;
-mod jwkkeys;
-mod jwt;
-mod logger;
+use ji_cloud_api::*;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -23,9 +18,11 @@ async fn main() -> anyhow::Result<()> {
 
     let _ = jwkkeys::run_task(jwk_verifier.clone());
 
+    let client = s3::S3Client::from_env()?;
+
     let db_pool = db::get_pool(settings.connect_options.clone()).await?;
 
-    let handle = thread::spawn(|| http::run(db_pool, settings, jwk_verifier));
+    let handle = thread::spawn(|| http::run(db_pool, settings, jwk_verifier, client));
 
     log::info!("app started!");
 
