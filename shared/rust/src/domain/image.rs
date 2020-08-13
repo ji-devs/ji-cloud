@@ -43,7 +43,8 @@ pub struct UpdateRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetResponse {
-    pub image: Image,
+    pub metadata: Image,
+    pub url: Url,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

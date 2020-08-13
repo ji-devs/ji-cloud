@@ -214,3 +214,7 @@ test("create image meta", async t => {
     t.deepEqual(typeof (image.body.id), "string");
     t.deepEqual(typeof (image.body.upload_url), "string");
 })
+
+test.todo("GET image");
+test.todo("UPDATE image");
+test.todo("DELETE image");
