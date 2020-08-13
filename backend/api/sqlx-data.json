@@ -27,6 +27,26 @@
       ]
     }
   },
+  "092ad10c9eea04cf0631f10e4808b66df6d4f4db9013f0b96a9ecdaac09399ce": {
+    "query": "delete from image_metadata where id = $1 returning 1 as exists",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
     "describe": {
@@ -34,18 +54,6 @@
       "parameters": {
         "Left": [
           "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "0e3aba274404f834bec98f9a2bc83ab2ad7435e4c31214d59202928c16320a90": {
-    "query": "delete from image_categories where image_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
           "Uuid"
         ]
       },
@@ -182,6 +190,29 @@
       ]
     }
   },
+  "4da15c8f7c51da73da193a2fc4ed3c4f889bc0ebe3646543f8888d136c0b1c75": {
+    "query": "\ninsert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)\nreturning id as \"id: ImageId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "4e2cce1d7c10c79ae6d07626a2fa64807f82c50d7e647eddbc7b3d8ee0e19f29": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and parent_id = $2\n                ",
     "describe": {
@@ -189,18 +220,6 @@
       "parameters": {
         "Left": [
           "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4fad334a8c3fadfbf005e5fdc7f1ea17b18e8b74cde0d5075e47f646da507976": {
-    "query": "delete from image_style where image_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
           "Uuid"
         ]
       },
@@ -221,30 +240,6 @@
       "nullable": []
     }
   },
-  "697a1e9bc1a3c16debd0f4fb4d6793bcd56899da21f772ddb81c18ceb8d6312a": {
-    "query": "\ninsert into image_metadata (name, source, description, is_premium, publish_at) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "700d168b5ba8f8387711546e14356882965e322cc5f9762b28bdfcc75ae229e5": {
     "query": "\nwith recursive category_tree(index, id, parent_id, structure) as\n(\nselect index::int2,\n       id,\n       parent_id,\n       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at)\nfrom category co\nwhere not (select exists(select 1 from category ci where ci.parent_id = co.id))\nunion all\nselect co.index::int2,\n       id,\n       parent_id,\n       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at, 'children',\n                         jsonb_agg(_lat.structure))\nfrom category co\n         join lateral (\n    select ct.structure\n    from category_tree ct\n    where ct.parent_id = co.id\n    order by ct.index\n    ) _lat on true\ngroup by co.id\n)\nselect coalesce(jsonb_agg(structure order by t.ord), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\ninner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\n",
     "describe": {
@@ -263,6 +258,21 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "7038777fa4cd28dac1759e3b17744192f4cfc0af398cfc3d502c956755aafea3": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2 is distinct from name or\n       $3 is distinct from description or\n       $4 is distinct from is_premium)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "76a022183b6addb81416606a1e9a08f1b30056a36137e1dd630c1cad08acaaef": {
@@ -366,6 +376,26 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
+    "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -506,25 +536,14 @@
       ]
     }
   },
-  "fba209fc0cde6487c36f0bd337a71ce5138e48fb1d668e026ba5e75eb25496bd": {
-    "query": "delete from image_affiliation where image_id = $1",
+  "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
+    "query": "\nupdate image_metadata\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "fec5f76b91f254f7815595762c1af67891499118040302ecc6150e9f7b530434": {
-    "query": "delete from image_age_range where image_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
+          "Uuid",
+          "Timestamptz"
         ]
       },
       "nullable": []
