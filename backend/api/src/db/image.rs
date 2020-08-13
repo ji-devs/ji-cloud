@@ -6,7 +6,7 @@ use shared::domain::{
         Image, ImageId,
     },
 };
-use sqlx::{Encode, PgConnection, PgPool, Postgres, Type};
+use sqlx::{PgConnection, PgPool};
 use std::fmt::Write;
 use uuid::Uuid;
 pub(crate) mod meta;
