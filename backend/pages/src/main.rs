@@ -10,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init_logger()?;
 
-    let settings = core::settings::init().await?;
+    let settings = core::settings::init().await?.runtime;
 
     let handle = thread::spawn(|| server::run(settings));
 

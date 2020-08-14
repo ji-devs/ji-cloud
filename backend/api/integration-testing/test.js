@@ -62,7 +62,8 @@ test.beforeEach(async t => {
         JWT_SECRET: "abc123",
         INTER_SERVER_SECRET: "aaa",
         LOCAL_PAGES_PORT: 0,
-        LOCAL_NO_FIREBASE_AUTH: true
+        LOCAL_NO_FIREBASE_AUTH: true,
+        S3_LOCAL_DISABLE_CLIENT: true
     };
 
     t.context.port = port;
@@ -216,5 +217,6 @@ test("create image meta", async t => {
 })
 
 test.todo("GET image");
+test.todo("GET images");
 test.todo("UPDATE image");
 test.todo("DELETE image");

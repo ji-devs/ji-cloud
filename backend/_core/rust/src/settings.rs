@@ -1,28 +1,101 @@
 #[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
 use super::google::{get_access_token_and_project_id, get_secret};
 use config::RemoteTarget;
-use jsonwebtoken::EncodingKey;
+use jsonwebtoken::{DecodingKey, EncodingKey};
 use sqlx::postgres::PgConnectOptions;
 use std::{
     env, fmt,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-#[derive(Clone)]
 pub struct Settings {
+    pub init: InitSettings,
+    pub runtime: RuntimeSettings,
+}
+
+// Settings that are only useful to setup the program
+pub struct InitSettings {
+    pub jwk_audience: String,
+    pub jwk_issuer: String,
+    pub connect_options: PgConnectOptions,
+    pub s3_endpoint: String,
+    pub s3_bucket: String,
+    pub s3_disable_local: bool,
+}
+
+impl InitSettings {
+    pub fn new(project_id: String, connect_options: PgConnectOptions) -> anyhow::Result<Self> {
+        let s3_endpoint = req_env("S3_ENDPOINT")?;
+        let s3_bucket = req_env("S3_BUCKET")?;
+        let s3_disable_local = env_bool("S3_LOCAL_DISABLE_CLIENT");
+
+        let issuer = format!("{}/{}", config::JWK_ISSUER_URL, project_id);
+
+        Ok(InitSettings {
+            jwk_audience: project_id,
+            jwk_issuer: issuer,
+            connect_options,
+            s3_endpoint,
+            s3_bucket,
+            s3_disable_local,
+        })
+    }
+}
+
+#[derive(Clone)]
+pub struct RuntimeSettings {
     pub remote_target: RemoteTarget,
-    pub local_insecure: bool,
-    pub local_no_auth: bool,
+    firebase_no_auth: bool,
     pub api_port: u16,
     pub pages_port: u16,
     pub epoch: Duration,
     pub jwt_encoding_key: EncodingKey,
-    pub jwk_audience: String,
-    pub jwk_issuer: String,
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
-    pub jwt_decoding_key: String,
-    pub connect_options: PgConnectOptions,
+    jwt_decoding_key: String,
+}
+
+impl RuntimeSettings {
+    fn new(
+        remote_target: RemoteTarget,
+        jwt_encoding_key: EncodingKey,
+        jwt_decoding_key: String,
+    ) -> anyhow::Result<Self> {
+        let (api_port, pages_port) = match remote_target {
+            RemoteTarget::Local => (
+                req_env("LOCAL_API_PORT")?.parse()?,
+                req_env("LOCAL_PAGES_PORT")?.parse()?,
+            ),
+
+            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
+        };
+
+        let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
+
+        dbg!(std::mem::size_of::<Self>());
+
+        Ok(Self {
+            remote_target,
+            api_port,
+            pages_port,
+            firebase_no_auth,
+            epoch: get_epoch(),
+            jwt_encoding_key,
+            jwt_decoding_key,
+        })
+    }
+
+    pub fn is_local(&self) -> bool {
+        matches!(self.remote_target, RemoteTarget::Local)
+    }
+
+    pub fn firebase_assume_valid(&self) -> bool {
+        self.is_local() && self.firebase_no_auth
+    }
+
+    pub fn jwt_decoding_key(&self) -> DecodingKey {
+        DecodingKey::from_secret(self.jwt_decoding_key.as_bytes())
+    }
 }
 
 #[cfg(not(any(feature = "local", feature = "sandbox", feature = "release")))]
@@ -45,16 +118,14 @@ pub async fn init() -> anyhow::Result<Settings> {
     let jwt_secret = req_env("JWT_SECRET")?;
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
     let project_id = env::var("PROJECT_ID").unwrap_or_default();
-    let issuer = format!("{}/{}", config::JWK_ISSUER_URL, project_id);
-  
-    Settings::new(
-        RemoteTarget::Local,
-        req_env("DATABASE_URL")?.parse::<PgConnectOptions>()?,
-        jwt_encoding_key,
-        jwt_secret,
-        project_id,
-        issuer,
-    )
+
+    Ok(Settings {
+        runtime: RuntimeSettings::new(RemoteTarget::Local, jwt_encoding_key, jwt_secret)?,
+        init: InitSettings::new(
+            project_id,
+            req_env("DATABASE_URL")?.parse::<PgConnectOptions>()?,
+        )?,
+    })
 }
 
 #[cfg(feature = "sandbox")]
@@ -79,6 +150,10 @@ pub fn req_env(key: &str) -> anyhow::Result<String> {
     env::var(key).map_err(|_| anyhow::anyhow!("Missing required env var `{}`", key))
 }
 
+pub fn env_bool(key: &str) -> bool {
+    env::var(key).map_or(false, |it| ["true", "1", "y"].contains(&it.as_ref()))
+}
+
 #[cfg(any(not(feature = "local"), feature = "sqlproxy"))]
 async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Result<Settings> {
     let (token, project_id) =
@@ -94,17 +169,13 @@ async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Resu
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
 
-    Settings::new(
-        remote_target,
-        db_target.into_connect_options(&db_pass),
-        jwt_encoding_key,
-        jwt_secret,
-        project_id.to_owned(),
-        format!("{}/{}", config::JWK_ISSUER_URL, project_id),
-    )
+    Ok(Settings {
+        init: InitSettings::new(project_id, db_target.into_connect_options(&db_pass))?,
+        runtime: RuntimeSettings::new(remote_target, jwt_encoding_key, jwt_secret)?,
+    })
 }
 
-impl fmt::Debug for Settings {
+impl fmt::Debug for RuntimeSettings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // when finish_non_exaustive is stable, use that.
         f.debug_struct("Settings")
@@ -114,49 +185,11 @@ impl fmt::Debug for Settings {
             .finish()
     }
 }
+
 fn get_epoch() -> Duration {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
-}
-
-impl Settings {
-    fn new(
-        remote_target: RemoteTarget,
-        connect_options: PgConnectOptions,
-        jwt_encoding_key: EncodingKey,
-        jwt_decoding_key: String,
-        jwk_audience: String,
-        jwk_issuer: String,
-    ) -> anyhow::Result<Self> {
-        let (api_port, pages_port) = match remote_target {
-            RemoteTarget::Local => (
-                req_env("LOCAL_API_PORT")?.parse()?,
-                req_env("LOCAL_PAGES_PORT")?.parse()?,
-            ),
-
-            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
-        };
-
-        let local_insecure = remote_target == RemoteTarget::Local;
-
-        let local_no_auth = local_insecure
-            && env::var("LOCAL_NO_FIREBASE_AUTH").map_or(false, |it| it.parse().unwrap_or(false));
-
-        Ok(Self {
-            remote_target,
-            api_port,
-            pages_port,
-            local_insecure,
-            local_no_auth,
-            epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
-            jwk_audience,
-            jwk_issuer,
-            connect_options,
-        })
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]

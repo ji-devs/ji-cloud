@@ -7,8 +7,8 @@ use crate::{
 
 pub mod meta;
 
-pub struct Get;
-impl ApiEndpoint for Get {
+pub struct GetOne;
+impl ApiEndpoint for GetOne {
     type Req = ();
     type Res = GetResponse;
     type Err = GetError;

@@ -1,5 +1,5 @@
 use crate::db;
-use jsonwebtoken as jwt;
+use jsonwebtoken::{self as jwt, DecodingKey};
 use shared::domain::auth::AuthClaims;
 use sqlx::postgres::PgPool;
 
@@ -9,9 +9,8 @@ pub enum Error {
     Csrf,
 }
 
-pub fn get_claims(token_string: &str, jwt_decoding_key: &str) -> Result<AuthClaims, Error> {
+pub fn get_claims(token_string: &str, key: DecodingKey) -> Result<AuthClaims, Error> {
     //see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    let key = jsonwebtoken::DecodingKey::from_secret(jwt_decoding_key.as_ref());
 
     let validation = jwt::Validation {
         validate_exp: false,
@@ -26,21 +25,21 @@ pub fn get_claims(token_string: &str, jwt_decoding_key: &str) -> Result<AuthClai
 pub fn check_no_db(
     token_string: &str,
     csrf: &str,
-    jwt_decoding_key: &str,
+    key: DecodingKey,
 ) -> Result<Option<AuthClaims>, Error> {
-    let claims = get_claims(token_string, jwt_decoding_key)?;
+    let claims = get_claims(token_string, key)?;
     if claims.csrf.as_deref() == Some(csrf) {
         Ok(Some(claims))
     } else {
         Ok(None)
     }
 }
-pub async fn check_no_csrf(
+pub async fn check_no_csrf<'a>(
     db: &PgPool,
     token_string: &str,
-    jwt_decoding_key: &str,
+    key: DecodingKey<'a>,
 ) -> anyhow::Result<Option<AuthClaims>> {
-    let claims = get_claims(token_string, jwt_decoding_key)
+    let claims = get_claims(token_string, key)
         .map_err(|e| anyhow::anyhow!("{:?}", e))
         .unwrap();
 
