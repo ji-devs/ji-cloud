@@ -206,7 +206,7 @@ where id = $1
     Ok(true)
 }
 
-pub async fn get(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
+pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
     sqlx::query_as(
 r#"
 select id,

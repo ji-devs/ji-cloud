@@ -8,7 +8,7 @@ use db::image::nul_if_empty;
 use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::{meta::MetaKind, CreateResponse, GetResponse, ImageId, UpdateRequest},
+    domain::image::{meta::MetaKind, CreateResponse, GetOneResponse, ImageId, UpdateRequest},
     error::image::{CreateError, DeleteError, GetError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
@@ -134,7 +134,17 @@ async fn get_one(
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
 ) -> Result<Json<<image::GetOne as ApiEndpoint>::Res>, <image::GetOne as ApiEndpoint>::Err> {
-    let metadata = db::image::get(&db, req.into_inner())
+    let metadata = db::image::get_one(&db, req.into_inner())
+        .await?
+        .ok_or(GetError::NotFound)?;
+
+    let id = metadata.id;
+
+    Ok(Json(GetOneResponse {
+        metadata,
+        url: s3.presigned_image_get_url(id).await?,
+    }))
+}
         .await?
         .ok_or(GetError::NotFound)?;
 
