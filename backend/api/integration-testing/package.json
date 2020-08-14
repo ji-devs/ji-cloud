@@ -16,7 +16,9 @@
     "tough-cookie": "^4.0.0"
   },
   "scripts": {
-    "test": "ava",
+    "test:build": "cargo build --manifest-path ../Cargo.toml",
+    "test:ava": "ava",
+    "test": "yarn run test:build && yarn run test:ava",
     "lint": "eslint .  --ext .js"
   }
 }

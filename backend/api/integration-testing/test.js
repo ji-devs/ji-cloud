@@ -32,13 +32,14 @@ function hookServerStarted(server) {
 }
 
 async function runFixtures(files, dbUrl, parentDir) {
-    const results = [];
+    const args = [dbUrl];
+
     // eslint-disable-next-line no-restricted-syntax
     for (const file of files) {
-        results.push(spawnAsync('/usr/bin/psql', ['-f', file, dbUrl], { cwd: parentDir, env: { PGUSER: 'postgres' }, encoding: 'utf8' }));
+        args.push('-f', file);
     }
 
-    await Promise.all(results);
+    await spawnAsync('/usr/bin/psql', args, { cwd: parentDir, env: { PGUSER: 'postgres' }, encoding: 'utf8' });
 }
 
 async function login() {
@@ -55,8 +56,6 @@ async function login() {
 
 test.before(async (t) => {
     t.context.parentDir = path.resolve(process.cwd(), '..');
-
-    await spawnAsync('cargo', ['build', '--manifest-path', '../Cargo.toml']);
 
     try {
         await mkdir('bin');
@@ -103,7 +102,7 @@ test.beforeEach(async (t) => {
     await hookServerStarted(t.context.server.child);
 });
 
-test.afterEach.always(async (t) => {
+test.afterEach.always("kill server", async (t) => {
     if (t.context.server) {
         try {
             t.context.server.child.kill('SIGKILL');
