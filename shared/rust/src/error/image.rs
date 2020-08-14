@@ -85,8 +85,8 @@ impl From<UpdateError> for actix_web::Error {
 pub enum DeleteError {
     #[serde(skip)]
     InternalServerError(anyhow::Error),
-    NotFound,
     Forbidden,
+    Conflict,
 }
 
 #[cfg(feature = "backend")]
@@ -94,8 +94,8 @@ impl From<DeleteError> for actix_web::Error {
     fn from(e: DeleteError) -> actix_web::Error {
         match e {
             DeleteError::InternalServerError(e) => anyhow_to_ise(e),
-            DeleteError::NotFound => HttpResponse::NotFound().into(),
             DeleteError::Forbidden => HttpResponse::Forbidden().into(),
+            DeleteError::Conflict => HttpResponse::Conflict().into(),
         }
     }
 }

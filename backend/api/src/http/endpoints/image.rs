@@ -131,7 +131,7 @@ async fn create(
 async fn get(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    // _claims: WrapAuthClaimsNoDb,
+    _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
 ) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
     let metadata = db::image::get(&db, req.into_inner())
@@ -184,16 +184,25 @@ async fn update(
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
 
+fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
+    match err {
+        sqlx::Error::Database(e) if e.downcast_ref::<PgDatabaseError>().constraint().is_some() => {
+            DeleteError::Conflict
+        }
+        _ => DeleteError::InternalServerError(err.into()),
+    }
+}
+
 async fn delete(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
 ) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {
-    if db::image::delete(&db, req.into_inner()).await? {
-        Ok(HttpResponse::new(StatusCode::NO_CONTENT))
-    } else {
-        Err(DeleteError::NotFound)
-    }
+    db::image::delete(&db, req.into_inner())
+        .await
+        .map_err(check_conflict_image_delete)?;
+
+    Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
