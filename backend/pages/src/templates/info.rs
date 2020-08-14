@@ -1,8 +1,7 @@
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
 use askama::Template;
-use config::RemoteTarget;
 use core::google::{get_access_token_and_project_id, get_secret};
-use core::settings::Settings;
+use core::settings::RuntimeSettings;
 
 struct Role {
     _id: u32,
@@ -18,7 +17,7 @@ struct Info {
     local_dev: bool,
 }
 
-pub async fn info_template(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
+pub async fn info_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     let (token, project_id) =
         get_access_token_and_project_id(settings.remote_target.google_credentials_env_name())
             .await
@@ -28,7 +27,7 @@ pub async fn info_template(settings: Data<Settings>) -> actix_web::Result<HttpRe
     let info = Info {
         secret: secret_test,
         _roles: vec![],
-        local_dev: matches!(settings.remote_target, RemoteTarget::Local),
+        local_dev: settings.is_local(),
     };
 
     let info = info.render().map_err(ErrorInternalServerError)?;

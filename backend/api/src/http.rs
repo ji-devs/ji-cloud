@@ -8,7 +8,7 @@ use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
-    settings::Settings,
+    settings::RuntimeSettings,
 };
 use futures::Future;
 use s3::S3Client;
@@ -40,11 +40,11 @@ where
 #[actix_web::main]
 pub async fn run(
     pool: PgPool,
-    settings: Settings,
+    settings: RuntimeSettings,
     jwk_verifier: Arc<RwLock<JwkVerifier>>,
     s3: S3Client,
 ) -> anyhow::Result<()> {
-    let local_insecure = settings.local_insecure;
+    let local_insecure = settings.is_local();
     let api_port = settings.api_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()

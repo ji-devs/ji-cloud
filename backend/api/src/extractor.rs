@@ -9,7 +9,7 @@ use actix_web::{
     FromRequest, HttpMessage, HttpResponse,
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
-use core::settings::Settings;
+use core::settings::RuntimeSettings;
 use futures::future::FutureExt;
 use futures_util::future::BoxFuture;
 use jsonwebtoken as jwt;
@@ -80,7 +80,7 @@ impl FromRequest for FirebaseUser {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
         let settings = settings.clone();
         let jwk_verifier: &Arc<RwLock<JwkVerifier>> = req.app_data().unwrap();
         let jwk_verifier = jwk_verifier.clone();
@@ -91,8 +91,8 @@ impl FromRequest for FirebaseUser {
             None => return futures::future::err(FirebaseError::MissingBearerToken).boxed(),
         };
 
-        // HACK for testing don't verify external auth, just it's valid.
-        if settings.local_no_auth {
+        // HACK for testing.
+        if settings.firebase_assume_valid() {
             return futures::future::ready(
                 try_insecure_decode(&token)
                     .map(|id| Self { id })
@@ -132,7 +132,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
     ) -> Self::Future {
         let cookie = req.cookie(JWT_COOKIE_NAME);
         let csrf = csrf_header(req.headers());
-        let settings: &Data<Settings> = req.app_data().expect("Settings??");
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
 
         let (cookie, csrf) = match (cookie, csrf) {
             (Some(cookie), Some(csrf)) => (cookie, csrf),
@@ -140,7 +140,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
         };
 
         futures::future::ready(
-            check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key)
+            check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
                 .map_err(|_| AuthError)
                 .and_then(|it| it.ok_or(AuthError))
                 .map(Self),
@@ -161,7 +161,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     ) -> Self::Future {
         let db: &Data<PgPool> = req.app_data().unwrap();
         let db = db.as_ref().clone();
-        let settings: &Data<Settings> = req.app_data().unwrap();
+        let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
         let settings = settings.clone();
 
         let cookie = match req.cookie(JWT_COOKIE_NAME) {
@@ -170,7 +170,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
         };
 
         async move {
-            check_no_csrf(&db, &cookie.value(), &settings.jwt_decoding_key)
+            check_no_csrf(&db, &cookie.value(), settings.jwt_decoding_key())
                 .await
                 .map_err(|_| StatusError::InternalServerError)?
                 .map(Self)

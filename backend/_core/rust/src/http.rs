@@ -12,19 +12,7 @@ pub fn get_tcp_fd() -> Option<TcpListener> {
 }
 
 pub fn get_addr(default: u16) -> SocketAddr {
-    let mut port = default;
-
-    match std::env::var("PORT") {
-        Ok(p) => {
-            match p.parse::<u16>() {
-                Ok(n) => {
-                    port = n;
-                }
-                Err(_e) => {}
-            };
-        }
-        Err(_e) => {}
-    };
+    let port = std::env::var("PORT").map_or(default, |it| it.parse().unwrap_or(default));
 
     ([0, 0, 0, 0], port).into()
 }

@@ -122,18 +122,18 @@ async fn create(
     Ok((
         Json(CreateResponse {
             id,
-            upload_url: s3.presigned_image_put_url(id).await?.parse()?,
+            upload_url: s3.presigned_image_put_url(id).await?,
         }),
         http::StatusCode::CREATED,
     ))
 }
 
-async fn get(
+async fn get_one(
     db: Data<PgPool>,
     s3: Data<S3Client>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
-) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
+) -> Result<Json<<image::GetOne as ApiEndpoint>::Res>, <image::GetOne as ApiEndpoint>::Err> {
     let metadata = db::image::get(&db, req.into_inner())
         .await?
         .ok_or(GetError::NotFound)?;
@@ -142,7 +142,7 @@ async fn get(
 
     Ok(Json(GetResponse {
         metadata,
-        url: s3.presigned_image_get_url(id).await?.parse()?,
+        url: s3.presigned_image_get_url(id).await?,
     }))
 }
 
@@ -197,10 +197,14 @@ async fn delete(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
+    s3: Data<S3Client>,
 ) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {
-    db::image::delete(&db, req.into_inner())
+    let image = req.into_inner();
+    db::image::delete(&db, image)
         .await
         .map_err(check_conflict_image_delete)?;
+
+    s3.delete_image(image).await?;
 
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
@@ -211,7 +215,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    .route(image::Get::PATH, image::Get::METHOD.route().to(get))
+    .route(
+        image::GetOne::PATH,
+        image::GetOne::METHOD.route().to(get_one),
+    )
     .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),
