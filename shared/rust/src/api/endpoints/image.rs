@@ -1,8 +1,8 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::image::{CreateRequest, CreateResponse, GetOneResponse, UpdateRequest},
-    error::image::{CreateError, DeleteError, GetError, UpdateError},
+    domain::image::{CreateRequest, CreateResponse, GetOneResponse, GetResponse, UpdateRequest},
+    error::image::{CreateError, DeleteError, GetOneError, UpdateError, GetError},
 };
 
 pub mod meta;
@@ -11,6 +11,15 @@ pub struct GetOne;
 impl ApiEndpoint for GetOne {
     type Req = ();
     type Res = GetOneResponse;
+    type Err = GetOneError;
+    const PATH: &'static str = "/v1/image/{id}";
+    const METHOD: Method = Method::Get;
+}
+
+pub struct Get;
+impl ApiEndpoint for Get {
+    type Req = ();
+    type Res = GetResponse;
     type Err = GetError;
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Get;

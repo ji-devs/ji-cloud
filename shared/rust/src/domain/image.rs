@@ -42,6 +42,11 @@ pub struct UpdateRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct GetResponse {
+    pub images: Vec<GetOneResponse>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GetOneResponse {
     pub metadata: Image,
     pub url: Url,
