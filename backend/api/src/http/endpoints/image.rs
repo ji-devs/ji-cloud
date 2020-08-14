@@ -23,8 +23,8 @@ mod meta;
 // Key (<key>)=(<uuid>)<postfix>
 fn extract_uuid(s: &str) -> Option<Uuid> {
     // <uuid>)<postfix)
-    let s = dbg!(s.split("(").nth(2)?);
-    let s = dbg!(&s[0..s.find(")")?]);
+    let s = s.split("(").nth(2)?;
+    let s = &s[0..s.find(")")?];
     s.parse().ok()
 }
 
@@ -64,6 +64,8 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         _ => return MetaWrapperError::Sqlx(err),
     };
 
+    dbg!(db_err);
+
     let id = db_err.detail().and_then(extract_uuid);
 
     match db_err.constraint() {
@@ -91,7 +93,7 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    _claims: WrapAuthClaimsNoDb,
+    // _claims: WrapAuthClaimsNoDb,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (Json<<image::Create as ApiEndpoint>::Res>, http::StatusCode),

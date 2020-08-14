@@ -39,17 +39,9 @@ pub struct Affiliation {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct StyleResponse {
+pub struct GetResponse {
     pub styles: Vec<Style>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AgeRangeResponse {
     pub age_ranges: Vec<AgeRange>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AffiliationResponse {
     pub affiliations: Vec<Affiliation>,
 }
 

@@ -1,31 +1,13 @@
 use crate::{
     api::{ApiEndpoint, Method},
-    domain::image::meta::{AffiliationResponse, AgeRangeResponse, StyleResponse},
+    domain::image::meta::GetResponse,
 };
 
-pub struct GetAffiliations;
-impl ApiEndpoint for GetAffiliations {
+pub struct Get;
+impl ApiEndpoint for Get {
     type Req = ();
-    type Res = AffiliationResponse;
+    type Res = GetResponse;
     type Err = ();
-    const PATH: &'static str = "/v1/image/meta/affiliation";
-    const METHOD: Method = Method::Get;
-}
-
-pub struct GetStyle;
-impl ApiEndpoint for GetStyle {
-    type Req = ();
-    type Res = StyleResponse;
-    type Err = ();
-    const PATH: &'static str = "/v1/image/meta/style";
-    const METHOD: Method = Method::Get;
-}
-
-pub struct GetAgeRange;
-impl ApiEndpoint for GetAgeRange {
-    type Req = ();
-    type Res = AgeRangeResponse;
-    type Err = ();
-    const PATH: &'static str = "/v1/image/meta/age-range";
+    const PATH: &'static str = "/v1/image/metadata";
     const METHOD: Method = Method::Get;
 }
