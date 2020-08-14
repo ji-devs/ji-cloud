@@ -1,5 +1,5 @@
 use rusoto_core::{
-    credential::{EnvironmentProvider, ProvideAwsCredentials},
+    credential::{AwsCredentials, EnvironmentProvider, ProvideAwsCredentials},
     HttpClient, Region,
 };
 use rusoto_s3::{
@@ -11,7 +11,7 @@ use url::Url;
 
 #[derive(Clone)]
 pub struct S3Client {
-    creds_provider: EnvironmentProvider,
+    creds: AwsCredentials,
     region: Region,
     bucket: String,
     client: Option<rusoto_s3::S3Client>,
@@ -22,19 +22,19 @@ fn image_id_to_key(ImageId(id): ImageId) -> String {
 }
 
 impl S3Client {
-    // todo: move it over to core
-    pub fn new(endpoint: String, bucket: String, use_client: bool) -> anyhow::Result<Self> {
+    pub async fn new(endpoint: String, bucket: String, use_client: bool) -> anyhow::Result<Self> {
         let region = Region::Custom {
             name: "auto".to_owned(),
             endpoint,
         };
 
-        let credentials = EnvironmentProvider::with_prefix("S3");
+        // todo: use static provider.
+        let credentials_provider = EnvironmentProvider::with_prefix("S3");
 
         let client = if use_client {
             Some(rusoto_s3::S3Client::new_with(
                 HttpClient::new()?,
-                credentials.clone(),
+                credentials_provider.clone(),
                 region.clone(),
             ))
         } else {
@@ -43,13 +43,13 @@ impl S3Client {
 
         Ok(Self {
             region,
-            creds_provider: credentials,
+            creds: credentials_provider.credentials().await?,
             bucket,
             client,
         })
     }
 
-    pub async fn presigned_image_get_url(&self, image: ImageId) -> anyhow::Result<Url> {
+    pub fn presigned_image_get_url(&self, image: ImageId) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
             bucket: self.bucket.clone(),
             key: image_id_to_key(image),
@@ -57,14 +57,14 @@ impl S3Client {
         }
         .get_presigned_url(
             &self.region,
-            &self.creds_provider.credentials().await?,
+            &self.creds,
             &PreSignedRequestOption::default(),
         );
 
         Ok(url.parse()?)
     }
 
-    pub async fn presigned_image_put_url(&self, image: ImageId) -> anyhow::Result<Url> {
+    pub fn presigned_image_put_url(&self, image: ImageId) -> anyhow::Result<Url> {
         let url = PutObjectRequest {
             bucket: self.bucket.clone(),
             key: image_id_to_key(image),
@@ -72,7 +72,7 @@ impl S3Client {
         }
         .get_presigned_url(
             &self.region,
-            &self.creds_provider.credentials().await?,
+            &self.creds,
             &PreSignedRequestOption::default(),
         );
 

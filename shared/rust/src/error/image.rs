@@ -8,10 +8,29 @@ use uuid::Uuid;
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
-pub enum GetError {
+pub enum GetOneError {
     #[serde(skip)]
     InternalServerError(anyhow::Error),
     NotFound,
+    Forbidden,
+}
+
+#[cfg(feature = "backend")]
+impl From<GetOneError> for actix_web::Error {
+    fn from(e: GetOneError) -> actix_web::Error {
+        match e {
+            GetOneError::InternalServerError(e) => anyhow_to_ise(e),
+            GetOneError::NotFound => HttpResponse::NotFound().into(),
+            GetOneError::Forbidden => HttpResponse::Forbidden().into(),
+        }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
+pub enum GetError {
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
     Forbidden,
 }
 
@@ -20,7 +39,6 @@ impl From<GetError> for actix_web::Error {
     fn from(e: GetError) -> actix_web::Error {
         match e {
             GetError::InternalServerError(e) => anyhow_to_ise(e),
-            GetError::NotFound => HttpResponse::NotFound().into(),
             GetError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
@@ -100,4 +118,4 @@ impl From<DeleteError> for actix_web::Error {
     }
 }
 
-from_anyhow![GetError, CreateError, UpdateError, DeleteError,];
+from_anyhow![GetOneError, GetError, CreateError, UpdateError, DeleteError,];

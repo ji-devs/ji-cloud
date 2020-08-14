@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     let s3_use_client = !(runtime.is_local() && init.s3_disable_local);
 
-    let client = s3::S3Client::new(init.s3_endpoint, init.s3_bucket, s3_use_client)?;
+    let client = s3::S3Client::new(init.s3_endpoint, init.s3_bucket, s3_use_client).await?;
 
     let db_pool = db::get_pool(init.connect_options).await?;
 

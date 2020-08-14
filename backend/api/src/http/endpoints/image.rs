@@ -1,15 +1,18 @@
 use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
 use actix_web::{
     http,
-    web::{Data, Json, Path, ServiceConfig},
+    web::{Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
 use db::image::nul_if_empty;
+use futures::TryStreamExt;
 use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::{meta::MetaKind, CreateResponse, GetOneResponse, ImageId, UpdateRequest},
-    error::image::{CreateError, DeleteError, GetError, UpdateError},
+    domain::image::{
+        meta::MetaKind, CreateResponse, GetOneResponse, GetResponse, Image, ImageId, UpdateRequest,
+    },
+    error::image::{CreateError, DeleteError, GetError, GetOneError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -122,7 +125,7 @@ async fn create(
     Ok((
         Json(CreateResponse {
             id,
-            upload_url: s3.presigned_image_put_url(id).await?,
+            upload_url: s3.presigned_image_put_url(id)?,
         }),
         http::StatusCode::CREATED,
     ))
@@ -136,24 +139,37 @@ async fn get_one(
 ) -> Result<Json<<image::GetOne as ApiEndpoint>::Res>, <image::GetOne as ApiEndpoint>::Err> {
     let metadata = db::image::get_one(&db, req.into_inner())
         .await?
-        .ok_or(GetError::NotFound)?;
+        .ok_or(GetOneError::NotFound)?;
 
     let id = metadata.id;
 
     Ok(Json(GetOneResponse {
         metadata,
-        url: s3.presigned_image_get_url(id).await?,
+        url: s3.presigned_image_get_url(id)?,
     }))
 }
-        .await?
-        .ok_or(GetError::NotFound)?;
 
-    let id = metadata.id;
+// todo: use algolia
+async fn get(
+    db: Data<PgPool>,
+    s3: Data<S3Client>,
+    _claims: WrapAuthClaimsNoDb,
+    query: Option<Query<<image::Get as ApiEndpoint>::Req>>,
+) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
+    let _query = query.map_or_else(Default::default, Query::into_inner);
 
-    Ok(Json(GetResponse {
-        metadata,
-        url: s3.presigned_image_get_url(id).await?,
-    }))
+    let images: Vec<_> = db::image::get(db.as_ref())
+        .err_into::<GetError>()
+        .and_then(|metadata: Image| async {
+            Ok(GetOneResponse {
+                url: s3.presigned_image_get_url(metadata.id)?,
+                metadata,
+            })
+        })
+        .try_collect()
+        .await?;
+
+    Ok(Json(GetResponse { images }))
 }
 
 async fn update(
@@ -229,6 +245,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::GetOne::PATH,
         image::GetOne::METHOD.route().to(get_one),
     )
+    .route(image::Get::PATH, image::Get::METHOD.route().to(get))
     .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),

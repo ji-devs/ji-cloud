@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
     image::{
@@ -226,6 +227,25 @@ where id = $1
     .bind(id)
     .fetch_optional(db)
     .await
+}
+
+pub fn get<'a>(db: &'a PgPool) -> BoxStream<'a, sqlx::Result<Image>> {
+    sqlx::query_as(
+r#"
+select id,
+       name,
+       description,
+       is_premium,
+       publish_at,
+       created_at,
+       updated_at,
+       array((select row (category_id) from image_categories where image_id = id))     as categories,
+       array((select row (style_id) from image_style where image_id = id))             as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+from image_metadata
+"#)
+    .fetch(db)
 }
 
 pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
