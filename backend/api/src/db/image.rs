@@ -119,7 +119,7 @@ fn generate_metadata_insert(meta_kind: &str, binds: usize) -> String {
 }
 
 pub fn nul_if_empty<T>(arr: &[T]) -> Option<&[T]> {
-    if arr.is_empty() {
+    if !arr.is_empty() {
         Some(arr)
     } else {
         None
