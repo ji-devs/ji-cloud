@@ -59,7 +59,7 @@ create table image_affiliation
 
 );
 
-create table image_categories
+create table image_category
 (
     image_id    uuid        not null references image_metadata (id),
     category_id uuid        not null references category (id),

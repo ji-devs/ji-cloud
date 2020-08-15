@@ -50,4 +50,5 @@ pub enum MetaKind {
     Affiliation,
     Style,
     AgeRange,
+    Category,
 }
