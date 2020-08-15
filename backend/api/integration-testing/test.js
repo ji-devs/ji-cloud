@@ -265,6 +265,9 @@ test(createImage, {
 });
 
 test(createImageError, { kind: 'styles', kindName: 'Style', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
+test(createImageError, { kind: 'affiliations', kindName: 'Affiliation', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
+test(createImageError, { kind: 'age_ranges', kindName: 'AgeRange', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
+test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
 
 test.todo('GET image');
 test.todo('GET images');

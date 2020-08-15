@@ -31,7 +31,6 @@ fn extract_uuid(s: &str) -> Option<Uuid> {
 enum MetaWrapperError {
     Sqlx(sqlx::Error),
     MissingMetadata { id: Option<Uuid>, kind: MetaKind },
-    MissingCategory(Option<Uuid>),
 }
 
 impl From<MetaWrapperError> for CreateError {
@@ -41,7 +40,6 @@ impl From<MetaWrapperError> for CreateError {
             MetaWrapperError::MissingMetadata { id, kind } => {
                 CreateError::MissingMetadata { id, kind }
             }
-            MetaWrapperError::MissingCategory(id) => CreateError::MissingCategory(id),
         }
     }
 }
@@ -53,7 +51,6 @@ impl From<MetaWrapperError> for UpdateError {
             MetaWrapperError::MissingMetadata { id, kind } => {
                 UpdateError::MissingMetadata { id, kind }
             }
-            MetaWrapperError::MissingCategory(id) => UpdateError::MissingCategory(id),
         }
     }
 }
@@ -63,8 +60,6 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         sqlx::Error::Database(e) => e.downcast_ref::<PgDatabaseError>(),
         _ => return MetaWrapperError::Sqlx(err),
     };
-
-    dbg!(db_err);
 
     let id = db_err.detail().and_then(extract_uuid);
 
@@ -84,7 +79,10 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
             kind: MetaKind::Style,
         },
 
-        Some("image_category_category_id_fkey") => MetaWrapperError::MissingCategory(id),
+        Some("image_category_category_id_fkey") => MetaWrapperError::MissingMetadata {
+            id,
+            kind: MetaKind::Category,
+        },
 
         _ => MetaWrapperError::Sqlx(err),
     }

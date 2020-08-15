@@ -53,7 +53,6 @@ pub enum CreateError {
         id: Option<Uuid>,
         kind: MetaKind,
     },
-    MissingCategory(Option<Uuid>),
     Forbidden,
 }
 
@@ -62,7 +61,7 @@ impl From<CreateError> for actix_web::Error {
     fn from(e: CreateError) -> actix_web::Error {
         match e {
             CreateError::InternalServerError(e) => anyhow_to_ise(e),
-            e @ CreateError::MissingMetadata { .. } | e @ CreateError::MissingCategory(_) => {
+            e @ CreateError::MissingMetadata { .. } => {
                 HttpResponse::UnprocessableEntity().json(e).into()
             }
             CreateError::Forbidden => HttpResponse::Forbidden().into(),

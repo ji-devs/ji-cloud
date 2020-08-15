@@ -42,7 +42,7 @@ impl Metadata for AgeRangeId {
 }
 
 impl Metadata for CategoryId {
-    const TABLE: &'static str = "categories";
+    const TABLE: &'static str = "category";
 
     fn as_uuid(&self) -> Uuid {
         self.0
