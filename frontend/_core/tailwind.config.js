@@ -19,8 +19,8 @@ module.exports = {
         jigreen: '#6eca90',
         jibuttonBlue:'#5590fc',
         jibackgroundBlue: "#e6f0ff",
-        jiborderblue: "#e6f0ff;",
-        jibluelighter: "#a6c6f8"
+        jibluelighter: "#a6c6f8",
+        jiborderGrey: "#e5e7ef",
 
 
       },
@@ -34,10 +34,14 @@ module.exports = {
       },
       width: {
         259: '259px',
+        112: '112px',
       },
       borderRadius: {
         20: '20px'
       },
+      inset: {
+        40:'40px',
+      }
     },
   },
   variants: {

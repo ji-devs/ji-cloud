@@ -8,10 +8,10 @@
   {{ Titles::pagetitle(label="Edit categories", dataId="#") }}
     <div class="flex mb-2">
       <div class="w-1/2">
-        <div class="flex justify-between">
-          <div class="flex">
+        <div class="flex justify-between py-3">
+          <div class="flex items-center">
             <p>Categories</p>
-            <input type="search" name="" value="">
+            <input type="search" name="" value="" class="rounded-full py-2 px-4 border-jiborderGrey solid border ml-2" placeholder="Categories Search">
           </div>
           {{ ButtonMacros::blue(label="+ Add Category", dataId="btn-1") }}
         </div>
@@ -20,7 +20,7 @@
         {{ Titles::categorytitle(label="Characters", dataId="#") }}
         {{ Titles::categorytitle(label="Songs", dataId="#") }}
       </div>
-      <div class="w-1/2 bg-gray-500 h-12"></div>
+      <div class="w-1/2"></div>
     </div>
 
 
