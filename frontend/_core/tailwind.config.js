@@ -21,9 +21,9 @@ module.exports = {
         jibackgroundBlue: "#e6f0ff",
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
-
-
+        jibackgroundGrey:'#f8f9fd',
       },
+
       fontSize: {
         14:'14px',
         18: '18px',
@@ -41,6 +41,8 @@ module.exports = {
       },
       inset: {
         40:'40px',
+        10:'10px',
+        25:'25%'
       }
     },
   },

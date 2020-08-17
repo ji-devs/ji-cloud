@@ -1,0 +1,15 @@
+.jibluelighter:hover .dots {
+  background-color: "#5590fc";
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance:none;
+}
+
+.spacer{
+  left:-28px;
+  top: -10px
+}
