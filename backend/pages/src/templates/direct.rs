@@ -33,7 +33,3 @@ fn direct_template(
 pub async fn direct_template_404(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
     direct_template(&settings, "Not Found!", StatusCode::NOT_FOUND)
 }
-
-pub async fn direct_template_no_auth(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
-    direct_template(&settings, "No Auth!", StatusCode::UNAUTHORIZED)
-}

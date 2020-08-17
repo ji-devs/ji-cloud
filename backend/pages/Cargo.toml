@@ -1,34 +1,32 @@
 [package]
 name = "ji-cloud-pages"
-version = "0.1.0"
-authors = ["dakom <david.komer@gmail.com>"]
+version = "0.2.0"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = [
+    "dakom <david.komer@gmail.com>",
+    "Chloe Ross <chloe@launchbadge.com>"
+]
 
 [dependencies]
 actix-cors = "0.3.0-alpha.1"
 actix-files = "0.3.0-beta.1"
-actix-rt = "1.0.0"
-actix-service = "1.0.5"
+actix-rt = "1.1.1"
+actix-service = "1.0.6"
 actix-web = "3.0.0-beta.1"
 anyhow = "1.0.32"
 askama = "0.10.3"
-config = {path = "../../config/rust"}
-core = {path = "../_core/rust"}
-dotenv = "0.15"
+config = { path = "../../config/rust" }
+core = { path = "../_core/rust" }
+dotenv = "0.15.0"
 futures = "0.3.5"
-jsonwebtoken = "7.1"
-listenfd = {version = "0.3", optional = true }
-log = "0.4"
-shared = {path = "../../shared/rust"}
-simplelog = "0.8"
-tokio = { version = "0.2", features = ["full"] }
-openssl = { version = "0.10", features = ["vendored"], optional = true }
+listenfd = { version = "0.3.3", optional = true }
+log = "0.4.11"
+shared = { path = "../../shared/rust" }
+openssl = { version = "0.10.30", features = [ "vendored" ], optional = true }
+simplelog = "0.8.0"
 
 [features]
-default = ["local"]
-local = ["listenfd", "core/local"]
-sqlproxy = []
-release = ["core/release", "openssl"]
-sandbox = ["core/sandbox", "openssl"]
+default = [ "local" ]
+local = [ "listenfd", "core/local" ]
+release = [ "core/release", "openssl" ]
+sandbox = [ "core/sandbox", "openssl" ]

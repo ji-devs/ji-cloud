@@ -1,10 +1,8 @@
-use std::thread;
-
 mod logger;
 mod server;
 mod templates;
 
-#[tokio::main]
+#[actix_rt::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv();
 
@@ -12,11 +10,5 @@ async fn main() -> anyhow::Result<()> {
 
     let settings = core::settings::init().await?;
 
-    let handle = thread::spawn(|| server::run(settings));
-
-    log::info!("app started!");
-
-    handle.join().unwrap()?;
-
-    Ok(())
+    server::run(settings).await
 }
