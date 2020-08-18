@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["dakom <david.komer@gmail.com>"]
 edition = "2018"
 default-run = "ji-cloud-api"
+
 [dependencies]
 actix-cors = "0.3.0-alpha.1"
 actix-rt = "1.0.0"

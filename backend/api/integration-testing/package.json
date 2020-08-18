@@ -16,7 +16,7 @@
     "tough-cookie": "^4.0.0"
   },
   "scripts": {
-    "test:build": "cargo build --manifest-path ../Cargo.toml",
+    "test:build": "cargo fetch --manifest-path ../Cargo.toml && cargo build --manifest-path ../Cargo.toml --bin ji-cloud-api --offline",
     "test:ava": "ava",
     "test": "yarn run test:build && yarn run test:ava",
     "lint": "eslint .  --ext .js"
