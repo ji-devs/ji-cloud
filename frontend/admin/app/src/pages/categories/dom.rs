@@ -72,11 +72,31 @@ impl CategoriesPage {
                     )
                 })))
             })
+            .with_data_id!("cat-create-container", {
+                .visible_signal(_self.loader_status.signal_ref(|status| match status {
+                    None => false,
+                    Some(res) => match res {
+                        Ok(_) => true,
+                        Err(_) => false
+                    }
+                }))
+            })
             .with_data_id!("cat-create", {
                 .event(clone!(_self => move |_evt:events::Click| {
+                    let input = _self.refs.borrow();
+                    let input = &input.as_ref().unwrap_throw().new_name;
+                    let value = input.value();
+
+                    input.set_value("");
+
+                    //temp until api is working
+                    let mut categories = _self.categories.borrow_mut();
+                    let cat = MutableCategory::new_temp(value.clone());
+                    categories.as_mut().unwrap_throw().lock_mut().push_cloned(cat);
+
                     spawn_local(
-                        create_category(_self.clone(), _self.clone().refs.borrow().as_ref().unwrap_throw().new_name.value())
-                        );
+                        create_category(_self.clone(), value)
+                    );
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {

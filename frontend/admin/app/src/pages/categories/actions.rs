@@ -32,10 +32,16 @@ impl MutableCategory {
             children: Rc::new(convert_categories(cat.children))
         }
     }
-    //temp
     pub fn new_direct(name:String, id: CategoryId) -> Self {
         Self {
             id: id.0.to_string(),
+            name,
+            children: Rc::new(MutableVec::new())
+        }
+    }
+    pub fn new_temp(name:String) -> Self {
+        Self {
+            id: name.clone(),
             name,
             children: Rc::new(MutableVec::new())
         }
