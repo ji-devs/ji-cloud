@@ -23,6 +23,11 @@ mod jwk;
 #[cfg(feature = "jwk")]
 pub use jwk::JwkSettings;
 
+#[cfg(feature = "algolia")]
+mod algolia;
+
+pub use algolia::AlgoliaSettings;
+
 pub struct SettingsManager {
     token: Option<String>,
     project_id: String,
@@ -96,6 +101,11 @@ impl SettingsManager {
 
             Ok(opts.socket(format!("{}/{}", socket_path, instance_connection)))
         }
+    }
+
+    #[cfg(feature = "algolia")]
+    pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
+        AlgoliaSettings::new()
     }
 
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {

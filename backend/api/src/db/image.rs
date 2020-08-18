@@ -156,8 +156,8 @@ pub async fn update_metadata(
 pub async fn update(
     conn: &mut PgConnection,
     id: ImageId,
-    name: Option<String>,
-    description: Option<String>,
+    name: Option<&str>,
+    description: Option<&str>,
     is_premium: Option<bool>,
     publish_at: Option<Option<DateTime<Utc>>>,
 ) -> sqlx::Result<bool> {

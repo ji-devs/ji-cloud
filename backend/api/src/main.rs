@@ -17,11 +17,13 @@ async fn main() -> anyhow::Result<()> {
 
     let s3 = settings.s3_settings().await?;
 
-    let client = s3::S3Client::new(s3.endpoint, s3.bucket, s3.use_client).await?;
+    let s3 = s3::S3Client::new(s3.endpoint, s3.bucket, s3.use_client).await?;
+
+    let algolia = algolia::AlgoliaClient::new(settings.algolia_settings().await?)?;
 
     let db_pool = db::get_pool(settings.db_connect_options().await?).await?;
 
-    let handle = thread::spawn(|| http::run(db_pool, runtime, jwk_verifier, client));
+    let handle = thread::spawn(|| http::run(db_pool, runtime, jwk_verifier, s3, algolia));
 
     log::info!("app started!");
 
