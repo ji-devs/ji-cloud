@@ -2,7 +2,7 @@ mod auth;
 mod cors;
 mod endpoints;
 
-use crate::{jwkkeys::JwkVerifier, s3};
+use crate::{algolia::AlgoliaClient, jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
@@ -42,6 +42,7 @@ pub async fn run(
     settings: RuntimeSettings,
     jwk_verifier: Arc<JwkVerifier>,
     s3: S3Client,
+    algolia: AlgoliaClient,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -50,6 +51,7 @@ pub async fn run(
             .data(pool.clone())
             .data(settings.clone())
             .data(s3.clone())
+            .data(algolia.clone())
             .app_data(jwk_verifier.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)

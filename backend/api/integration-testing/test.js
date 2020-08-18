@@ -89,7 +89,10 @@ test.beforeEach(async (t) => {
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,
         DISABLE_GOOGLE_CLOUD: true,
-        PROJECT_ID: ""
+        PROJECT_ID: "",
+        ALGOLIA_APPLICATION_ID: "",
+        ALGOLIA_KEY: "",
+        ALGOLIA_LOCAL_DISABLE_CLIENT: true,
     };
 
     t.context.port = port;
@@ -101,6 +104,10 @@ test.beforeEach(async (t) => {
     };
 
     await hookServerStarted(t.context.server.child);
+
+    t.context.server.child.stderr.on('data', (data) => {
+        console.warn(data.toString());
+    });
 });
 
 test.afterEach.always("kill server", async (t) => {

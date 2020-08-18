@@ -1,4 +1,4 @@
-use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
+use crate::{algolia::AlgoliaClient, db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
 use actix_web::{
     http,
     web::{Data, Json, Path, Query, ServiceConfig},
@@ -91,7 +91,8 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    // _claims: WrapAuthClaimsNoDb,
+    algolia: Data<AlgoliaClient>,
+    _claims: WrapAuthClaimsNoDb,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (Json<<image::Create as ApiEndpoint>::Res>, http::StatusCode),
@@ -121,6 +122,16 @@ async fn create(
     .map_err(handle_metadata_err)?;
 
     txn.commit().await?;
+
+    algolia
+        .put_image(
+            id,
+            crate::algolia::Image {
+                name: &req.name,
+                description: &req.description,
+            },
+        )
+        .await?;
 
     Ok((
         Json(CreateResponse {
@@ -174,6 +185,7 @@ async fn get(
 
 async fn update(
     db: Data<PgPool>,
+    algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
@@ -185,8 +197,8 @@ async fn update(
     let exists = db::image::update(
         &mut txn,
         id,
-        req.name,
-        req.description,
+        req.name.as_deref(),
+        req.description.as_deref(),
         req.is_premium,
         req.publish_at,
     )
@@ -207,6 +219,16 @@ async fn update(
     .await
     .map_err(handle_metadata_err)?;
 
+    algolia
+        .update_image(
+            id,
+            crate::algolia::ImageUpdate {
+                name: req.name.as_deref(),
+                description: req.description.as_deref(),
+            },
+        )
+        .await?;
+
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
 
@@ -221,6 +243,7 @@ fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
 
 async fn delete(
     db: Data<PgPool>,
+    algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
     s3: Data<S3Client>,
@@ -231,6 +254,8 @@ async fn delete(
         .map_err(check_conflict_image_delete)?;
 
     s3.delete_image(image).await?;
+
+    algolia.delete_image(image).await?;
 
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
