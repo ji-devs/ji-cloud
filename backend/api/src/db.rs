@@ -11,5 +11,7 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
         .connect_with(connect_options)
         .await?;
 
+    sqlx::migrate!("./migrations").run(&pool).await?;
+
     Ok(pool)
 }

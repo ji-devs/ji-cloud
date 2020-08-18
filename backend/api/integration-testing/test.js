@@ -72,15 +72,14 @@ test.before(async (t) => {
 test.beforeEach(async (t) => {
     let port = getPort();
 
-    const { parentDir } = t.context;
     const dbUrl = await spawnAsync('../../script/ephemeralpg/pg_tmp.sh', { encoding: 'utf8' }).then((it) => it.stdout);
+
+    port = await port;
 
     t.context.dbUrl = dbUrl;
 
-    await spawnAsync('cargo', ['sqlx', 'migrate', 'run'], { cwd: parentDir, env: { DATABASE_URL: dbUrl, PGUSER: 'postgres' }, encoding: 'utf8' });
-    port = await port;
-
     const env = {
+        cwd: t.context.parentDir,
         LOCAL_API_PORT: port,
         DATABASE_URL: dbUrl,
         PGUSER: 'postgres',
