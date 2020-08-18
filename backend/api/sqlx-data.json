@@ -27,26 +27,6 @@
       ]
     }
   },
-  "092ad10c9eea04cf0631f10e4808b66df6d4f4db9013f0b96a9ecdaac09399ce": {
-    "query": "delete from image_metadata where id = $1 returning 1 as exists",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
     "describe": {
@@ -234,6 +214,18 @@
         "Left": [
           "Int2",
           "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
+    "query": "delete from image_metadata where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
           "Uuid"
         ]
       },
