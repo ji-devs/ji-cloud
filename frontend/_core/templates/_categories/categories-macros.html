@@ -1,0 +1,58 @@
+{% macro category(label, dataId="") %}
+<div class="bg-jibackgroundBlue border-jigreen border-l-8 border-l-solid rounded-md mb-2">
+
+
+<div class="flex items-center justify-between ">
+  <div class="flex py-3">
+    <img class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px-active.svg" alt="">
+    <p>{{label}}</p>
+  </div>
+  <div class="flex mr-2 ellipses relative">
+
+    <!--Find a way to change color of ellipses when hover -->
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    <div class="absolute right-40 p-2 hidden">
+      <ul class="bg-white rounded-md shadow-md w-112 py-3">
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="px-3" href="#">Add a child</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Rename</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Delete</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Hide</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+<ul class="px-14 ml-16 pb-1">
+  <li class="relative">Letters
+    <div class="absolute border-l-2 border-b-2 border-jiblueLight w-6 h-6 spacer">
+
+    </div>
+  </li>
+  <li class="relative">Letters
+    <div class="absolute border-l-2 border-b-2 border-jiblueLight w-6 h-6 spacer">
+
+    </div>
+  </li>
+</ul>
+</div>
+{% endmacro category %}
+
+
+{% macro subcategory(label, dataId="") %}
+<li class="relative">{{label}}
+  <div class="absolute border-l-2 border-b-2 border-jiblueLight w-6 h-6 spacer">
+
+  </div>
+</li>
+{% endmacro subcategory %}

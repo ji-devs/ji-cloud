@@ -15,3 +15,16 @@ export const story = (name, component) => {
     }
     return component;
 }
+
+
+const getClassNames = hidden =>
+{
+hidden
+    ? {container: "hidden", label: "hidden"}
+    : {container: "block", label: "w-259"};
+//hidden state
+tmpl(openSidebar, {classNames: getClassNames(true)})
+//visible state
+tmpl(openSidebar, {classNames: getClassNames(false)})
+
+}

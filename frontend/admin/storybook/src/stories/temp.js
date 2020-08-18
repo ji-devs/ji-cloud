@@ -11,7 +11,7 @@ export const TemplateExample = story(
     "Template Example",
     () => tmpl(example, {
         navbarLink: "Label images",
-        dynamicButtonLabel: "from story!",
+        dynamicButtonLabel: "hello",
     }),
 
 );
