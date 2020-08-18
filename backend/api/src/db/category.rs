@@ -52,30 +52,29 @@ order by t.ord
 }
 
 pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query!(
+    sqlx::query_scalar(
         r#"
 select coalesce(jsonb_agg(structure order by t.ord), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
 from category_tree
 inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 "#,
-        ids
     )
-    // .bind(ids)
+    .bind(ids)
     .fetch_one(db)
     .await
-    .map(|it| it.categories.0)
+    .map(|it: sqlx::types::Json<Vec<Category>>| it.0)
 }
 
 pub async fn get_tree(db: &sqlx::PgPool) -> sqlx::Result<Vec<Category>> {
-    sqlx::query!(
+    sqlx::query_scalar(
         r#"
-select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
+select coalesce(jsonb_agg(structure order by index), '[]') as "categories"
 from category_tree where parent_id is null
 "#,
     )
     .fetch_one(db)
     .await
-    .map(|it| it.categories.0)
+    .map(|it: sqlx::types::Json<Vec<Category>>| it.0)
 }
 
 pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
