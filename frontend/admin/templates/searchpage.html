@@ -1,10 +1,11 @@
 {% import "_sidebar/sidebar-macros.html" as Sidebar %}
 {% import "_buttons/button-macros.html" as ButtonMacros %}
 {% import "_titles/titles-macros.html" as Titles %}
+{% import "_components/components-macros.html" as Components %}
 <div class="text-azoSans flex">
   <div class="w-full">
-
     {{ Titles::pagetitle(label="Label Images", dataId="#") }}
+    {{ Components::searchbar(dataId="#") }}
     <div class="flex py-4 px-2">
       <div class="flex-1">
         <p>We found ${results}</p>
@@ -26,21 +27,21 @@
     </div>
     <div class="grid grid-cols-5 gap-4">
       <div>
-        <img src="%MEDIA_UI%/red-sea-book.png" alt="">
+        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
         <div class="flex items-center justify-center relative">
           <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
           <p>Moses part the nile</p>
         </div>
       </div>
       <div>
-        <img src="%MEDIA_UI%/red-sea-book.png" alt="">
+        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
         <div class="flex items-center justify-center relative">
           <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
           <p>Moses part the nile</p>
         </div>
       </div>
       <div>
-        <img src="%MEDIA_UI%/red-sea-book.png" alt="">
+        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
         <div class="flex items-center justify-center relative">
           <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
           <p>Moses part the nile</p>
