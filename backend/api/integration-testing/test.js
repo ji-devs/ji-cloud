@@ -84,7 +84,6 @@ test.beforeEach(async (t) => {
         DATABASE_URL: dbUrl,
         PGUSER: 'postgres',
         JWT_SECRET: 'abc123',
-        INTER_SERVER_SECRET: 'aaa',
         LOCAL_PAGES_PORT: 0,
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,

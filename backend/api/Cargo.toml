@@ -35,7 +35,7 @@ time = "0.2.16"
 tokio = { version = "0.2", features = ["full"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
-algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "7384f4bd2ba71b8b365a70820f57510568cab881" }
+algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "c2402fffae3b8caa7315d28dbe1f7caea57e991e" }
 
 [dependencies.serde_qs]
 git = "https://github.com/izik1/serde_qs"
