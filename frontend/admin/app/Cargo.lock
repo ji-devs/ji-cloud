@@ -58,9 +58,9 @@ checksum = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
 
 [[package]]
 name = "awsm_web"
-version = "0.4.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bfff749c01c040fc3702937019577c92bbfa11f65bf116c2975c93e745aa27f"
+checksum = "c90ed19a44d00bd14ebd4e592d670f3830881ddbb97a32ce438ec50becceb630"
 dependencies = [
  "futures",
  "js-sys",

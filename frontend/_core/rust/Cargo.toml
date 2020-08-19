@@ -36,7 +36,7 @@ web-sys = { version = "^0.3", features = [
 ] }
 shared = {path = "../../../shared/rust"}
 config = {path = "../../../config/rust"}
-awsm_web = {version = "^0.4", features = ["loaders", "serde_iso"]}
+awsm_web = {version = "^0.5", features = ["loaders", "serde_iso"]}
 
 [features]
 local = []
