@@ -18,14 +18,7 @@ macro_rules! with_client {
         c
     }};
 
-    ($client:expr) => {{
-        let c: &Inner = match &$client {
-            Some(c) => c,
-            None => return Ok(()),
-        };
-
-        c
-    }};
+    ($client:expr) => { with_client!($client; ()) };
 }
 
 #[derive(Serialize, Debug)]
