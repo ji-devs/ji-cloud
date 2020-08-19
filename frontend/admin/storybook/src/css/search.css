@@ -13,3 +13,7 @@ input[type="search"]::-webkit-search-results-decoration {
   left:-28px;
   top: -10px
 }
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
