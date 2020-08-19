@@ -86,11 +86,11 @@ const makePurger = FASTLY_PUBLIC_BASEURL => async (obj, context) => {
     }
 };
 
-exports.purgeDocs = makePurger(CONFIG.URL_DOCS);
-exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
+exports.purgeDocs = makePurger(CONFIG.URL_DOCS, false);
+exports.purgeMedia = makePurger(CONFIG.URL_MEDIA, true);
 
-exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
-exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE);
+exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE, false);
+exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE, false);
 
-exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
-exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX);
+exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX, false);
+exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX, false);

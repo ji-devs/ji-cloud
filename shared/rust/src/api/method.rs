@@ -20,3 +20,14 @@ impl Method {
         }
     }
 }
+
+impl Method {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Delete => "DELETE",
+            Self::Get => "GET",
+            Self::Patch => "PATCH",
+            Self::Post => "POST",
+        }
+    }
+}

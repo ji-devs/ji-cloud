@@ -13,6 +13,3 @@ pub fn api_url(path:&str) -> String {
     format!("{}{}", SETTINGS.get().unwrap().remote_target.api_url(), path)
 }
 
-pub fn api_js_url(path:&str) -> String {
-    format!("{}/{}", SETTINGS.get().unwrap().remote_target.api_js_url(), path)
-}

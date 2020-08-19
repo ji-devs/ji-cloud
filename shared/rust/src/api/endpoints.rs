@@ -17,9 +17,8 @@ pub mod user {
 
     use crate::{
         api::method::Method,
-        auth::{
-            RegisterError, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
-        },
+        auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
+        error::auth::RegisterError,
         user::{NoSuchUserError, UserProfile},
     };
 
@@ -65,8 +64,11 @@ pub mod category {
     use crate::{
         api::method::Method,
         category::{
-            CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryResponse,
-            CategoryUpdateError, CreateCategoryRequest, NewCategoryResponse, UpdateCategoryRequest, GetCategoryRequest,
+            CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
+            UpdateCategoryRequest,
+        },
+        error::category::{
+            CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryUpdateError,
         },
     };
 

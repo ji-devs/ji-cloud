@@ -17,10 +17,11 @@ pub struct Settings {
     pub pages_port: u16,
     pub epoch: Duration,
     pub jwt_encoding_key: EncodingKey,
+    pub jwk_audience: String,
+    pub jwk_issuer: String,
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
     pub jwt_decoding_key: String,
-    pub inter_server_secret: String,
     pub connect_options: PgConnectOptions,
 }
 
@@ -43,15 +44,16 @@ pub async fn init() -> anyhow::Result<Settings> {
 pub async fn init() -> anyhow::Result<Settings> {
     let jwt_secret = req_env("JWT_SECRET")?;
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
-
-    let inter_server_secret = req_env("INTER_SERVER_SECRET")?;
-
+    let project_id = env::var("PROJECT_ID").unwrap_or_default();
+    let issuer = format!("{}/{}", config::JWK_ISSUER_URL, project_id);
+  
     Settings::new(
         RemoteTarget::Local,
         req_env("DATABASE_URL")?.parse::<PgConnectOptions>()?,
         jwt_encoding_key,
         jwt_secret,
-        inter_server_secret,
+        project_id,
+        issuer,
     )
 }
 
@@ -86,7 +88,6 @@ async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Resu
 
     let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
     let db_pass = get_secret(token.as_ref(), &project_id, "DB_PASS").await;
-    let inter_server_secret = get_secret(token.as_ref(), &project_id, "INTER_SERVER").await;
 
     let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
 
@@ -98,7 +99,8 @@ async fn _init(remote_target: RemoteTarget, db_target: DbTarget) -> anyhow::Resu
         db_target.into_connect_options(&db_pass),
         jwt_encoding_key,
         jwt_secret,
-        inter_server_secret,
+        project_id.to_owned(),
+        format!("{}/{}", config::JWK_ISSUER_URL, project_id),
     )
 }
 
@@ -124,7 +126,8 @@ impl Settings {
         connect_options: PgConnectOptions,
         jwt_encoding_key: EncodingKey,
         jwt_decoding_key: String,
-        inter_server_secret: String,
+        jwk_audience: String,
+        jwk_issuer: String,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -149,7 +152,8 @@ impl Settings {
             epoch: get_epoch(),
             jwt_encoding_key,
             jwt_decoding_key,
-            inter_server_secret,
+            jwk_audience,
+            jwk_issuer,
             connect_options,
         })
     }

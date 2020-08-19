@@ -40,7 +40,7 @@ async fn get_categories(
 
 async fn create_category(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    // _claims: WrapAuthClaimsNoDb,
     req: Json<<category::Create as ApiEndpoint>::Req>,
 ) -> actix_web::Result<
     Json<<category::Create as ApiEndpoint>::Res>,
@@ -95,11 +95,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.service(
         web::resource(category::Get::PATH)
             .app_data(qs_array_cfg())
-            .route(category::Get::METHOD.route().to(get_categories)),
-    )
-    .route(
-        category::Create::PATH,
-        category::Create::METHOD.route().to(create_category),
+            .route(category::Get::METHOD.route().to(get_categories))
+            .route(category::Create::METHOD.route().to(create_category)),
     )
     .route(
         category::Update::PATH,

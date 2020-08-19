@@ -223,26 +223,6 @@
       ]
     }
   },
-  "7b0494c65d69bcd3a68352f58afb483e7ed96dca12c8b36c03e4c421749782cc": {
-    "query": "\nselect coalesce(jsonb_agg(structure order by t.ord), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\ninner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "categories!: sqlx::types::Json<Vec<Category>>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
     "query": "\nselect parent_id, index from category where id = $1\n    ",
     "describe": {
@@ -344,24 +324,6 @@
           "Uuid",
           "Uuid"
         ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "f2f217bc1d8325874ca079c39e498b5fbc0c3f9d7901c4ba8493f452b2db381e": {
-    "query": "\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree where parent_id is null\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "categories!: sqlx::types::Json<Vec<Category>>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
       },
       "nullable": [
         null
