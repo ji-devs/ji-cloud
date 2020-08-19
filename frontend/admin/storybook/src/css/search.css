@@ -17,3 +17,11 @@ input[type="search"]::-webkit-search-results-decoration {
 * {
   font-family: 'Poppins', sans-serif;
 }
+
+
+.titleoptions .ellipses {
+  display: none;
+}
+.titleoptions:hover .ellipses{
+  display: flex;
+}

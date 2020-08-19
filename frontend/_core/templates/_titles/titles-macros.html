@@ -8,18 +8,19 @@
 <!--Find a way to switch between these two or simply change background color and border color-->
 {% macro categorytitleselected(label, dataId="") %}
 <!-- When toggling between active and not active bg-white border-jibackgroundBlue  should change to bg-jibackgroundBlue border-jigreen -->
-<div class="flex items-center justify-between bg-jibackgroundBlue border-jigreen border-l-8 border-l-solid rounded-md mb-2">
+<div class="flex items-center  bg-jibackgroundBlue border-jigreen border-l-8 border-l-solid rounded-md mb-2 titleoptions">
   <div class="flex py-3">
     <img class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
     <p>{{label}}</p>
   </div>
-  <div class="flex mr-2 relative">
-
+  <div class="flex mr-2 relative pl-2">
+    <div class="ellipses">
     <!--Find a way to change color of ellipses when hover -->
-    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
-    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
-    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
-    <div class="absolute p-2">
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    </div>
+    <div class="absolute p-2 hidden dropdown">
       <ul class="bg-white rounded-md shadow-md w-112 py-3 font-normal">
         <li class="hover:bg-jibackgroundBlue">
           <a class="px-3" href="#">Add a child</a>
@@ -40,15 +41,34 @@
 {% endmacro categorytitleselected %}
 
 {% macro categorytitle(label, dataId="") %}
-<div class="flex items-center justify-between bg-white border-jibackgroundBlue border-l-8 border-2 border-l-solid rounded-md mb-2">
+<div class="flex items-center bg-white border-jibackgroundBlue border-l-8 border-2 border-l-solid rounded-md mb-2 titleoptions">
   <div class="flex py-3">
     <img class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
     <p>{{label}}</p>
   </div>
-  <div class="flex mr-2">
-    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
-    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
-    <div class="bg-jibluelighter rounded-full h-2 w-2 mr-1"></div>
+  <div class="flex mr-2 relative pl-2">
+    <div class="ellipses">
+    <!--Find a way to change color of ellipses when hover -->
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+      <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    </div>
+    <div class="absolute p-2 hidden dropdown">
+      <ul class="bg-white rounded-md shadow-md w-112 py-3 font-normal">
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="px-3" href="#">Add a child</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Rename</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Delete</a>
+        </li>
+        <li class="hover:bg-jibackgroundBlue">
+          <a class="p-3" href="#">Hide</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 {% endmacro categorytitle %}
