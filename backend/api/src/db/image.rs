@@ -217,7 +217,7 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_categories where image_id = id))     as categories,
+       array((select row (category_id) from image_category where image_id = id))     as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
@@ -229,7 +229,7 @@ where id = $1
     .await
 }
 
-pub fn get<'a>(db: &'a PgPool) -> BoxStream<'a, sqlx::Result<Image>> {
+pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Image>> {
     sqlx::query_as(
 r#"
 select id,
@@ -239,12 +239,14 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_categories where image_id = id))     as categories,
+       array((select row (category_id) from image_category where image_id = id))     as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
 from image_metadata
-"#)
+inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+order by t.ord
+"#).bind(ids)
     .fetch(db)
 }
 

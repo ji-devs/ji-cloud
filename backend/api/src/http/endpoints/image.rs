@@ -160,16 +160,18 @@ async fn get_one(
     }))
 }
 
-// todo: use algolia
 async fn get(
     db: Data<PgPool>,
     s3: Data<S3Client>,
+    algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
     query: Option<Query<<image::Get as ApiEndpoint>::Req>>,
 ) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
-    let _query = query.map_or_else(Default::default, Query::into_inner);
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let images: Vec<_> = db::image::get(db.as_ref())
+    let ids = algolia.search_image(&query.q).await?;
+
+    let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<GetError>()
         .and_then(|metadata: Image| async {
             Ok(GetOneResponse {

@@ -41,6 +41,11 @@ pub struct UpdateRequest {
     pub categories: Option<Vec<CategoryId>>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct GetQuery {
+    pub q: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetResponse {
     pub images: Vec<GetOneResponse>,
