@@ -1,9 +1,9 @@
-use core::settings::AlgoliaSettings;
 use algolia::{
     request::{PartialUpdateQuery, SearchQuery},
     response::SearchResponse,
     Client as Inner,
 };
+use core::settings::AlgoliaSettings;
 use serde::{Deserialize, Serialize};
 use shared::domain::image::ImageId;
 use uuid::Uuid;
@@ -47,7 +47,7 @@ impl AlgoliaClient {
             let app_id = algolia::AppId::new(settings.application_id);
             let api_key = algolia::ApiKey(settings.key);
 
-            Some(Inner::new(app_id, api_key).map_err(|e| anyhow::anyhow!(e))?)
+            Some(Inner::new(app_id, api_key)?)
         } else {
             None
         };
@@ -68,8 +68,7 @@ impl AlgoliaClient {
                     ..SearchQuery::default()
                 },
             )
-            .await
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .await?;
 
         results
             .hits
@@ -82,8 +81,7 @@ impl AlgoliaClient {
     pub async fn put_image(&self, ImageId(id): ImageId, img: Image<'_>) -> anyhow::Result<()> {
         with_client!(self.inner)
             .add_or_update_object("image", &id.to_string(), &img)
-            .await
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .await?;
 
         Ok(())
     }
@@ -102,8 +100,7 @@ impl AlgoliaClient {
                     create_if_not_exists: false,
                 },
             )
-            .await
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .await?;
 
         Ok(())
     }
@@ -111,8 +108,7 @@ impl AlgoliaClient {
     pub async fn delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
         with_client!(self.inner)
             .delete_object("image", &id.to_string())
-            .await
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .await?;
 
         Ok(())
     }
