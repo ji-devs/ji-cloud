@@ -26,7 +26,7 @@ struct SpaPageInfo {
 
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let info = SpaPageInfo {
-        app_js: settings.remote_target.spa_url(spa.as_str(), "js/index.js"),
+        app_js: settings.remote_target().spa_url(spa.as_str(), "js/index.js"),
         firebase: matches!(spa, SpaPage::User),
         local_dev: settings.is_local(),
     };

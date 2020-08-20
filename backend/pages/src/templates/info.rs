@@ -19,11 +19,15 @@ struct Info {
 
 pub async fn info_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     let (token, project_id) =
-        get_access_token_and_project_id(settings.remote_target.google_credentials_env_name())
+        get_access_token_and_project_id(settings.remote_target().google_credentials_env_name())
             .await
             .expect("couldn't get access token and project id!");
 
-    let secret_test = get_secret(token.as_ref(), &project_id, "SANITY_TEST").await;
+    let secret_test = get_secret(token.as_ref(), &project_id, "SANITY_TEST")
+        .await
+        .map_err(ErrorInternalServerError)?;
+
+        
     let info = Info {
         secret: secret_test,
         _roles: vec![],

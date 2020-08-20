@@ -35,7 +35,6 @@ where
     }
 }
 
-#[actix_web::main]
 pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let pages_port = settings.pages_port;
