@@ -6,17 +6,39 @@
 skip_core_tasks = true
 default_to_workspace = false
 
+[tasks.fetch]
+command = "cargo"
+args = ["fetch"]
+
+[tasks.build-api-offline]
+command = "cargo"
+args = ["build", "--offline", "--bin", "ji-cloud-api"]
+dependencies = ["fetch", "check-sqlx"]
+
+[tasks.check-sqlx]
+command = "cargo"
+args = ["sqlx", "prepare", "--check", "--", "--lib"]
+
 ###################
 ## Test          ##
 ###################
 
+[tasks.test-cargo]
+command = "cargo"
+args = ["test"]
+dependencies = ["check-sqlx"]
+
+[tasks.test-integration]
+command = "yarn"
+args = ["--cwd", "integration-testing", "test:ava", "-v"]
+dependencies = ["build-api-offline"]
+
 [tasks.test]
-script= [
-"""
-cargo test
-yarn --cwd integration-testing test
-"""
-]
+run_task = { name = [
+    # we currently don't have any tests ran via cargo, so, save some time.
+    # "test-cargo",
+    "test-integration"
+] }
 
 [tasks.test-watch]
 command = "cargo"

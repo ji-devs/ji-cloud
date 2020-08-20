@@ -47,10 +47,7 @@ impl From<CategoryCreateError> for actix_web::Error {
 pub enum CategoryDeleteError {
     #[serde(skip)]
     InternalServerError(anyhow::Error),
-    CategoryNotFound,
     Forbidden,
-    // todo: should the IDs of the children be here?
-    Children,
 }
 
 #[cfg(feature = "backend")]
@@ -58,9 +55,7 @@ impl From<CategoryDeleteError> for actix_web::Error {
     fn from(e: CategoryDeleteError) -> actix_web::Error {
         match e {
             CategoryDeleteError::InternalServerError(e) => anyhow_to_ise(e),
-            CategoryDeleteError::CategoryNotFound => HttpResponse::NotFound().into(),
             CategoryDeleteError::Forbidden => HttpResponse::Forbidden().into(),
-            e => HttpResponse::UnprocessableEntity().json(e).into(),
         }
     }
 }
