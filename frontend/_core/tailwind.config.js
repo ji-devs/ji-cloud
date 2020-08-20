@@ -30,7 +30,7 @@ module.exports = {
 
       },
       fontFamily: {
-        azoSans: 'azo-sans-web'
+        poppins: 'Poppins',
       },
       width: {
         259: '259px',

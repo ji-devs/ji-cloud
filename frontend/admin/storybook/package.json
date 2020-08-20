@@ -24,9 +24,9 @@
   "devDependencies": {
     "@babel/core": "^7.11.1",
     "@storybook/addon-notes": "^5.3.19",
-    "@storybook/addon-storysource": "^5.3.19",
-    "@storybook/addons": "^5.3.19",
-    "@storybook/html": "^5.3.19",
+    "@storybook/addon-storysource": "^6.0.13",
+    "@storybook/addons": "^6.0.13",
+    "@storybook/html": "^6.0.13",
     "babel-loader": "^8.1.0",
     "babel-plugin-root-import": "^6.5.0",
     "cssnano": "^4.1.10",
