@@ -21,6 +21,8 @@ pub struct Category {
     pub children: Vec<Category>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
+    pub image_count: u64,
+    pub jig_count: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

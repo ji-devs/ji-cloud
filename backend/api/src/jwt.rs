@@ -6,7 +6,7 @@ use sqlx::postgres::PgPool;
 #[derive(Debug)]
 pub enum Error {
     Jwt(jwt::errors::Error),
-    Csrf,
+    // Csrf,
 }
 
 pub fn get_claims(token_string: &str, key: DecodingKey) -> Result<AuthClaims, Error> {

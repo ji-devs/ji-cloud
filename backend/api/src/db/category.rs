@@ -3,17 +3,22 @@ use shared::{
     domain::category::{Category, CategoryId},
     error::category::{CategoryDeleteError, CategoryUpdateError},
 };
-use sqlx::{postgres::PgDatabaseError, Executor};
+use sqlx::Executor;
 use uuid::Uuid;
 
 pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
     sqlx::query!(
         r#"
-select id as "id: CategoryId", name, created_at, updated_at
+select id                                                                 as "id: CategoryId",
+       name,
+       created_at,
+       updated_at,
+       (select count(*)::int8 from image_category where category_id = id) as "image_count!",
+       0::int8                                                            as "jig_count!"
 from category
 where parent_id is null
 order by index
-"#
+ "#
     )
     .fetch(db)
     .map_ok(|it| Category {
@@ -22,6 +27,8 @@ order by index
         updated_at: it.updated_at,
         name: it.name,
         children: vec![],
+        image_count: it.image_count as u64,
+        jig_count: it.jig_count as u64,
     })
     .try_collect()
     .await
@@ -31,7 +38,13 @@ order by index
 pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> anyhow::Result<Vec<Category>> {
     sqlx::query!(
         r#"
-select id as "id: CategoryId", name, created_at, updated_at
+select id                                                                 as "id: CategoryId",
+       name,
+       created_at,
+       updated_at,
+       (select count(*)::int8 from image_category where category_id = id) as "image_count!",
+       0::int8                                                            as "jig_count!"
+
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -45,6 +58,8 @@ order by t.ord
         updated_at: it.updated_at,
         name: it.name,
         children: vec![],
+        image_count: it.image_count as u64,
+        jig_count: it.jig_count as u64,
     })
     .try_collect()
     .await
@@ -52,112 +67,24 @@ order by t.ord
 }
 
 pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query!(
-        r#"
-with recursive category_tree(index, id, parent_id, structure) as
-(
-select index::int2,
-       id,
-       parent_id,
-       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at)
-from category co
-where not (select exists(select 1 from category ci where ci.parent_id = co.id))
-union all
-select co.index::int2,
-       id,
-       parent_id,
-       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at, 'children',
-                         jsonb_agg(_lat.structure))
-from category co
-         join lateral (
-    select ct.structure
-    from category_tree ct
-    where ct.parent_id = co.id
-    order by ct.index
-    ) _lat on true
-group by co.id
-)
-select coalesce(jsonb_agg(structure order by t.ord), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
-from category_tree
-inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
-"#, ids
-    )
-    .fetch_one(db)
-    .await
-    .map(|it| it.categories.0)
+    sqlx::query_file!("query/category/get_subtree.sql", ids)
+        .fetch_one(db)
+        .await
+        .map(|it| it.categories.0)
 }
 
 pub async fn get_tree(db: &sqlx::PgPool) -> sqlx::Result<Vec<Category>> {
-    sqlx::query!(
-        r#"
-with recursive category_tree(index, id, parent_id, structure) as
-(
-select index::int2,
-       id,
-       parent_id,
-       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at)
-from category co
-where not (select exists(select 1 from category ci where ci.parent_id = co.id))
-union all
-select co.index::int2,
-       id,
-       parent_id,
-       jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at', updated_at, 'children',
-                         jsonb_agg(_lat.structure))
-from category co
-         join lateral (
-    select ct.structure
-    from category_tree ct
-    where ct.parent_id = co.id
-    order by ct.index
-    ) _lat on true
-group by co.id
-)
-select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
-from category_tree where parent_id is null
-"#,
-    )
-    .fetch_one(db)
-    .await
-    .map(|it| it.categories.0)
+    sqlx::query_file!("query/category/get_tree.sql")
+        .fetch_one(db)
+        .await
+        .map(|it| it.categories.0)
 }
 
 pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query!(
-        r#"
-    with recursive inverse_category_tree(index, id, parent_id, structure) as
-    (
-        select index::int2,
-               id,
-               parent_id,
-               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
-                                  updated_at)
-        from category co
-        where id = any ($1::uuid[])
-        union all
-        select co.index::int2,
-               id,
-               parent_id,
-               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
-                                  updated_at, 'children',
-                                  jsonb_agg(_lat.structure))
-        from category co
-                 join lateral (
-            select ct.structure
-            from inverse_category_tree ct
-            where ct.parent_id = co.id
-            order by ct.index
-            ) _lat on true
-        group by co.id
-    )
-select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
-from inverse_category_tree
-where parent_id is null;
-"#, ids
-    )
-    .fetch_one(db)
-    .await
-    .map(|it| it.categories.0)
+    sqlx::query_file!("query/category/get_ancestor_tree.sql", ids)
+        .fetch_one(db)
+        .await
+        .map(|it| it.categories.0)
 }
 
 pub async fn create(
@@ -344,28 +271,15 @@ pub async fn delete(db: &sqlx::PgPool, id: CategoryId) -> Result<(), CategoryDel
         .await?;
 
     let res = sqlx::query!(
-        r#"
-delete from category where id = $1
-returning index, parent_id
-    "#,
+        "delete from category where id = $1 returning index, parent_id",
         id.0
     )
     .fetch_optional(&mut txn)
-    .await
-    .map_err(|err| {
-        return match err {
-            sqlx::Error::Database(err)
-                if err.downcast_ref::<PgDatabaseError>().constraint()
-                    == Some("category_parent_id_fkey") =>
-            {
-                CategoryDeleteError::Children
-            }
-            e => e.into(),
-        };
-    })?
-    .ok_or(CategoryDeleteError::CategoryNotFound)?;
+    .await?;
 
-    backshift(&mut txn, res.parent_id, res.index, None).await?;
+    if let Some(res) = res {
+        backshift(&mut txn, res.parent_id, res.index, None).await?;
+    }
 
     txn.commit().await?;
 
