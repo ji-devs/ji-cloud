@@ -14,7 +14,7 @@ use shared::api::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
-use shared::auth::CSRF_HEADER_NAME;
+use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;

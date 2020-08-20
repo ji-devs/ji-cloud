@@ -1,4 +1,4 @@
-use shared::category::*;
+use shared::domain::category::*;
 use core::{
     routes::{Route, UserRoute},
     fetch::{

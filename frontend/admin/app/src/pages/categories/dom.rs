@@ -17,8 +17,10 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
-use shared::user::UserProfile;
-use shared::category::Category;
+use shared::domain::{
+    user::UserProfile,
+    category::Category
+};
 use super::actions::*;
 
 pub struct CategoriesPage {
@@ -88,11 +90,6 @@ impl CategoriesPage {
                     let value = input.value();
 
                     input.set_value("");
-
-                    //temp until api is working
-                    let mut categories = _self.categories.borrow_mut();
-                    let cat = MutableCategory::new_temp(value.clone());
-                    categories.as_mut().unwrap_throw().lock_mut().push_cloned(cat);
 
                     spawn_local(
                         create_category(_self.clone(), value)

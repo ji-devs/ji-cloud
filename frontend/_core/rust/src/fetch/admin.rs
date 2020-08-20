@@ -1,7 +1,7 @@
 pub mod category {
     use shared::{
         api::endpoints::{ApiEndpoint, category::*},
-        category::*
+        domain::category::*
     };
     use crate::{
         path::api_url,
