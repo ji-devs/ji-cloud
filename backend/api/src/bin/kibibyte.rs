@@ -1,4 +1,4 @@
-use core::settings::req_env;
+use core::env::req_env;
 use ji_cloud_api::*;
 use rusoto_core::{credential::EnvironmentProvider, HttpClient, Region};
 use rusoto_s3::{CreateBucketRequest, S3};

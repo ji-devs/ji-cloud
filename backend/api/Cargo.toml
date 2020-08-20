@@ -13,7 +13,6 @@ actix-web = "3.0.0-beta.1"
 anyhow = "1.0.32"
 chrono = "0.4.13"
 config = {path = "../../config/rust"}
-core = {path = "../_core/rust"}
 dotenv = "0.15"
 futures = "0.3.5"
 futures-util = "0.3.4"
@@ -46,6 +45,11 @@ features = ["actix"]
 version = "0.4.0-beta.1"
 default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
+
+[dependencies.core]
+path = "../_core/rust"
+features = ["s3", "db", "jwk"]
+
 
 [features]
 default = ["local"]

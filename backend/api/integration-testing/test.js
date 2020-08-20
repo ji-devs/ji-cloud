@@ -88,6 +88,8 @@ test.beforeEach(async (t) => {
         LOCAL_PAGES_PORT: 0,
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,
+        DISABLE_GOOGLE_CLOUD: true,
+        PROJECT_ID: ""
     };
 
     t.context.port = port;

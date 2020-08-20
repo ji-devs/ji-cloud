@@ -12,12 +12,6 @@ use std::{
 };
 use tokio::{sync::RwLock, task::JoinHandle};
 
-#[derive(Debug)]
-pub struct JwkConfiguration {
-    pub audience: String,
-    pub issuer: String,
-}
-
 #[derive(Debug, Deserialize)]
 struct KeyResponse {
     keys: Vec<JwkKey>,
@@ -177,7 +171,9 @@ pub fn run_task(verifier: Arc<RwLock<JwkVerifier>>) -> JoinHandle<()> {
     })
 }
 
-pub async fn create_verifier(config: JwkConfiguration) -> anyhow::Result<Arc<RwLock<JwkVerifier>>> {
+pub async fn create_verifier(
+    config: core::settings::JwkSettings,
+) -> anyhow::Result<Arc<RwLock<JwkVerifier>>> {
     let keys: JwkKeys = fetch_keys_for_config().await?;
 
     let verifier = JwkVerifier::new(keys.keys, config.issuer, config.audience);
