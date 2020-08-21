@@ -14,7 +14,6 @@ use futures::Future;
 use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
-use tokio::sync::RwLock;
 
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
@@ -41,7 +40,7 @@ where
 pub async fn run(
     pool: PgPool,
     settings: RuntimeSettings,
-    jwk_verifier: Arc<RwLock<JwkVerifier>>,
+    jwk_verifier: Arc<JwkVerifier>,
     s3: S3Client,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
