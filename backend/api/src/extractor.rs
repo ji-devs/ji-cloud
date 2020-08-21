@@ -20,7 +20,6 @@ use shared::domain::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
 use shared::error::auth::FirebaseError;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
-use tokio::sync::RwLock;
 use uuid::Uuid;
 
 fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
@@ -82,7 +81,7 @@ impl FromRequest for FirebaseUser {
     ) -> Self::Future {
         let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
         let settings = settings.clone();
-        let jwk_verifier: &Arc<RwLock<JwkVerifier>> = req.app_data().unwrap();
+        let jwk_verifier: &Arc<JwkVerifier> = req.app_data().unwrap();
         let jwk_verifier = jwk_verifier.clone();
 
         // this whole dance is to avoid cloning the headers.
@@ -104,9 +103,8 @@ impl FromRequest for FirebaseUser {
         async move {
             // todo: more specific errors.
             let id = jwk_verifier
-                .read()
+                .verify(&token, 3)
                 .await
-                .verify(&token)
                 .map_err(|_| FirebaseError::InvalidToken)?;
 
             Ok(Self { id })

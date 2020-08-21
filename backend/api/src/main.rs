@@ -9,9 +9,9 @@ async fn main() -> anyhow::Result<()> {
 
     let settings: SettingsManager = SettingsManager::new().await?;
 
-    let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?).await?;
-
     let runtime = settings.runtime_settings().await?;
+
+    let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?);
 
     let _ = jwkkeys::run_task(jwk_verifier.clone());
 
