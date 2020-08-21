@@ -2,7 +2,7 @@ import {story, storyAbout} from "@utils/stories";
 import {renderTemplate as tmpl} from "@core/js/render";
 import sidebar from "@templates/sidebar.html";
 import searchpage from "@templates/searchpage.html";
-import categorypage from "@templates/category.html";
+import categorypage from "@templates/categories/categories-page.html";
 
 export default {
   title: 'Admin page',

@@ -1,6 +1,8 @@
 use simple_html_template::{TemplateCache, html_map};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
+
 use core::settings::SETTINGS;
 use std::fmt;
 
@@ -10,10 +12,17 @@ thread_local! {
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
 }
+pub fn category(id:&str, name:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(CATEGORY, &html_map!(
+        "id" => id,
+        "name" => name,
+    )).unwrap())
+}
 
 //pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
 
 const CATEGORIES:&'static str = "categories";
+const CATEGORY:&'static str = "category";
 
 pub struct Templates {
     pub cache: TemplateCache<'static>
@@ -30,7 +39,8 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (CATEGORIES, get_template_str(include_str!("../../../.template_output/temp/categories.html"))),
+            (CATEGORIES, get_template_str(include_str!("../../../.template_output/categories/categories-page.html"))),
+            (CATEGORY, get_template_str(include_str!("../../../.template_output/categories/category.html"))),
         ]);
 
         Self { cache }

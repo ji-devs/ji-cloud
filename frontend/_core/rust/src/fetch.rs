@@ -61,10 +61,22 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
         Ok(res) => {
             let res = res.json_from_str().await.unwrap();
-            let foo = serde_json::to_string(&res).unwrap();
-            log::info!("{:?}", foo);
-
             Ok(res)
+        },
+        Err(err) => {
+            Err(Err(err))
+        }
+    }
+}
+
+pub async fn api_with_auth_no_result<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let csrf = load_csrf_token().unwrap();
+
+    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+        Ok(_) => {
+            Ok(())
         },
         Err(err) => {
             Err(Err(err))

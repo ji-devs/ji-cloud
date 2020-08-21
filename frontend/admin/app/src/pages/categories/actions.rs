@@ -17,48 +17,56 @@ use std::rc::Rc;
 use super::CategoriesPage;
 use futures::future::ready;
 
-#[derive(Clone)]
+
 pub struct MutableCategory {
     pub id: String,
     pub name: String,
-    pub children: Rc<MutableVec<MutableCategory>>,
+    pub children: MutableVec<Rc<MutableCategory>>,
+    pub parent: Option<Rc<MutableCategory>>,
 }
 
 impl MutableCategory {
-    pub fn new(cat:Category) -> Self {
-        Self {
-            id: cat.id.0.to_string(),
-            name: cat.name,
-            children: Rc::new(convert_categories(cat.children))
-        }
-    }
-    pub fn new_direct(name:String, id: CategoryId) -> Self {
-        Self {
-            id: id.0.to_string(),
+    pub fn append_child(name:String, id: String, parent: Option<Rc<MutableCategory>>) -> Rc<Self> {
+        let parent_clone = parent.clone();
+        let _self = Rc::new(Self {
+            id,
             name,
-            children: Rc::new(MutableVec::new())
+            children: MutableVec::new(),
+            parent
+        });
+
+        if let Some(parent) = parent_clone {
+            parent.children.lock_mut().push_cloned(_self.clone());
         }
+
+        _self
     }
-    pub fn new_temp(name:String) -> Self {
-        Self {
-            id: name.clone(),
-            name,
-            children: Rc::new(MutableVec::new())
-        }
+
+    pub fn delete(&self) {
+        self.parent.as_ref().unwrap_throw().children.lock_mut().retain(|cat| cat.id != self.id);
     }
 }
 
-fn convert_categories(cats:Vec<Category>) -> MutableVec<MutableCategory> {
-    MutableVec::new_with_values(cats.into_iter().map(MutableCategory::new).collect())
-}
 pub async fn load_categories(page:Rc<CategoriesPage>) {
+
+    fn load_children(categories:Vec<Category>, parent:Rc<MutableCategory>) {
+        for cat in categories.into_iter() {
+            let item = MutableCategory::append_child(cat.name.to_string(), cat.id.0.to_string(), Some(parent.clone()));
+            if !cat.children.is_empty() {
+                load_children(cat.children, item);
+            }
+        }
+    }
 
     log::info!("it should try to load...");
     let resp = fetch_category::get_all().await;
     match resp {
         Ok(resp) => {
-            log::info!("got categories!");
-            *page.categories.borrow_mut() = Some(convert_categories(resp.categories));
+            let mut categories:Vec<Category> = resp.categories;
+            let mut parent:Rc<MutableCategory> = page.categories_root.clone();
+            
+            load_children(categories, parent);
+
             page.loader_status.set(Some(Ok(())));
         }, 
         Err(err) => {
@@ -77,29 +85,44 @@ pub async fn load_categories(page:Rc<CategoriesPage>) {
 }
 
 
-pub async fn create_category(page:Rc<CategoriesPage>, name:String) {
-    let resp = fetch_category::create(name.clone(), None).await;
+pub fn create_category(parent:Rc<MutableCategory>, name:String) {
+    spawn_local(async move {
+        let parent_id = {
+            if parent.parent.is_none() {
+                None
+            } else {
+                Some(parent.id.as_ref())
+            }
+        };
+        let resp = fetch_category::create(name.clone(), parent_id).await;
 
-    match resp {
-        Ok(resp) => {
-
-            let mut categories = page.categories.borrow_mut();
-            let mut categories = categories.as_mut().unwrap();
-
-            let cat = MutableCategory::new_direct(name, resp.id);
-            categories.lock_mut().push_cloned(cat);
-
-        }, 
-        Err(err) => {
-            match err {
-                Ok(err) => {
-                    log::info!("{}", serde_json::to_string(&err).unwrap());
-                },
-                Err(err) => {
-                    log::info!("{:?}", err); 
-                    //log::info!("internal error?");
+        match resp {
+            Ok(resp) => {
+                let _ = MutableCategory::append_child(name, resp.id.0.to_string(), Some(parent.clone()));
+            }, 
+            Err(err) => {
+                match err {
+                    Ok(err) => {
+                        log::info!("{}", serde_json::to_string(&err).unwrap());
+                    },
+                    Err(err) => {
+                        log::info!("{:?}", err); 
+                        //log::info!("internal error?");
+                    }
                 }
             }
         }
-    }
+    })
+}
+
+pub fn delete_category(cat:&MutableCategory) {
+    cat.delete();
+    let id = cat.id.clone();
+
+    spawn_local(
+        async move {
+            fetch_category::delete(&id).await;
+            ()
+        }
+    )
 }
