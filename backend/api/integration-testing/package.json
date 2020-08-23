@@ -6,12 +6,19 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@expo/spawn-async": "^1.5.0",
     "ava": "^3.11.1",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
     "get-port": "^5.1.1",
     "got": "^11.5.1",
     "tough-cookie": "^4.0.0"
   },
   "scripts": {
-    "test": "ava"
+    "test:build": "cargo fetch --manifest-path ../Cargo.toml && cargo build --manifest-path ../Cargo.toml --bin ji-cloud-api --offline",
+    "test:ava": "ava",
+    "test": "yarn run test:build && yarn run test:ava",
+    "lint": "eslint .  --ext .js"
   }
 }

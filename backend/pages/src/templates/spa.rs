@@ -1,6 +1,5 @@
 use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
-use config::RemoteTarget;
-use core::settings::Settings;
+use core::settings::RuntimeSettings;
 
 use askama::Template;
 
@@ -25,11 +24,11 @@ struct SpaPageInfo {
     local_dev: bool,
 }
 
-fn spa_template(settings: &Settings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
+fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let info = SpaPageInfo {
-        app_js: settings.remote_target.spa_url(spa.as_str(), "js/index.js"),
+        app_js: settings.remote_target().spa_url(spa.as_str(), "js/index.js"),
         firebase: matches!(spa, SpaPage::User),
-        local_dev: matches!(settings.remote_target, RemoteTarget::Local),
+        local_dev: settings.is_local(),
     };
 
     let info = info.render().map_err(ErrorInternalServerError)?;
@@ -37,6 +36,6 @@ fn spa_template(settings: &Settings, spa: SpaPage) -> actix_web::Result<HttpResp
     Ok(actix_web::HttpResponse::Ok().body(info))
 }
 
-pub async fn spa_user_template(settings: Data<Settings>) -> actix_web::Result<HttpResponse> {
+pub async fn spa_user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::User)
 }

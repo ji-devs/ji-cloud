@@ -1,5 +1,8 @@
 use crate::extractor::FirebaseId;
-use shared::{auth::RegisterRequest, error::auth::RegisterError, user::UserProfile};
+use shared::{
+    domain::{auth::RegisterRequest, user::UserProfile},
+    error::auth::RegisterError,
+};
 use sqlx::postgres::PgDatabaseError;
 use uuid::Uuid;
 

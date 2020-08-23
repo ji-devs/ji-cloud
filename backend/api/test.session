@@ -5,18 +5,18 @@
         "httpie": "2.2.0"
     },
     "auth": {
-        "raw_auth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyJ9.GjY_3h8RAe5cH4cDGwPNpVP72MRZLGPTYdnZU7y4VMI",
+        "raw_auth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.BNpCIBuNq0bhgXuAEqrAfPpIein0Y54hj352d2ke1sI",
         "type": "jwt"
     },
     "cookies": {
         "X-JWT": {
-            "expires": 1598057741,
+            "expires": 1599087240,
             "path": "/v1",
             "secure": false,
-            "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjFmMjQxZTFiLWI1MzctNDkzZi1hMjMwLTA3NWNiMTYzMTViZSIsImNzcmYiOiJVdUtDVFFHSU1TM0ZEWGdrIn0.gmeBbS6_7zMdBPmwQVSCQ_4vbgc0UoCv19cnAa1MZPc"
+            "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjFmMjQxZTFiLWI1MzctNDkzZi1hMjMwLTA3NWNiMTYzMTViZSIsImNzcmYiOiJtVkQwdHUydVIyWmt4c2M4In0.fV99wNagaVjtWBomYQ0Aj5h_-pqSBhF_kxzvyJTwpDg"
         }
     },
     "headers": {
-        "X-CSRF": "UuKCTQGIMS3FDXgk"
+        "X-CSRF": "mVD0tu2uR2Zkxsc8"
     }
 }

@@ -1,31 +1,29 @@
-use jwkkeys::JwkConfiguration;
+use core::settings::SettingsManager;
+use ji_cloud_api::*;
 use std::thread;
-
-mod db;
-mod extractor;
-mod http;
-mod jwkkeys;
-mod jwt;
-mod logger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv().ok();
     logger::init_logger();
 
-    let settings = core::settings::init().await?;
+    let settings: SettingsManager = SettingsManager::new().await?;
 
-    let jwk_verifier = jwkkeys::create_verifier(JwkConfiguration {
-        audience: settings.jwk_audience.clone(),
-        issuer: settings.jwk_issuer.clone(),
-    })
-    .await?;
+    let runtime = settings.runtime_settings().await?;
+
+    let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?);
 
     let _ = jwkkeys::run_task(jwk_verifier.clone());
 
-    let db_pool = db::get_pool(settings.connect_options.clone()).await?;
+    let s3 = settings.s3_settings().await?;
 
-    let handle = thread::spawn(|| http::run(db_pool, settings, jwk_verifier));
+    let s3 = s3::S3Client::new(s3.endpoint, s3.bucket, s3.use_client).await?;
+
+    let algolia = algolia::AlgoliaClient::new(settings.algolia_settings().await?)?;
+
+    let db_pool = db::get_pool(settings.db_connect_options().await?).await?;
+
+    let handle = thread::spawn(|| http::run(db_pool, runtime, jwk_verifier, s3, algolia));
 
     log::info!("app started!");
 

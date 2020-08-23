@@ -8,7 +8,7 @@ use futures_signals::{
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, HtmlInputElement};
-use dominator::{Dom, html, events, clone};
+use dominator::{DomBuilder, Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
@@ -17,15 +17,17 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
-use shared::user::UserProfile;
-use shared::category::Category;
+use shared::domain::{
+    user::UserProfile,
+    category::Category
+};
 use super::actions::*;
 
 pub struct CategoriesPage {
     pub refs: RefCell<Option<CategoryPageRefs>>,
     pub loader_status: Mutable<Option<Result<(), ()>>>,
     pub loader: AsyncLoader,
-    pub categories: RefCell<Option<MutableVec<MutableCategory>>>
+    pub categories_root: Rc<MutableCategory>, 
 }
 
 impl Drop for CategoriesPage {
@@ -41,7 +43,7 @@ impl CategoriesPage {
             refs: RefCell::new(None),
             loader_status: Mutable::new(None),
             loader: AsyncLoader::new(),
-            categories: RefCell::new(None),
+            categories_root: MutableCategory::append_child("root".to_string(), "-1".to_string(), None) 
         });
 
         _self.loader.load(load_categories(_self.clone()));
@@ -50,53 +52,44 @@ impl CategoriesPage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::categories(), {
-            .with_data_id!("categories", {
-                .child_signal(_self.loader_status.signal_ref(clone!(_self => move |status| {
-                    Some(status
-                        .as_ref()
-                        .map(|status| match status {
-                            Ok(_) => {
-                                html!("div", {
-                                    .children_signal_vec({
-                                        let categories = _self.categories.borrow();
-                                        categories.as_ref().unwrap_throw().signal_vec_cloned().map(|category| {
-                                            MutableCategoryDom::render(MutableCategoryDom::new(category))
-                                        })
-                                    })
-                                })
-                            },
-                            Err(_) => html!("div", {.text("error!")})
-                        })
-                        .unwrap_or(html!("div", {.text("loading...")}))
-                    )
-                })))
-            })
-            .with_data_id!("cat-create-container", {
-                .visible_signal(_self.loader_status.signal_ref(|status| match status {
-                    None => false,
-                    Some(res) => match res {
-                        Ok(_) => true,
-                        Err(_) => false
+        html!("div", {
+            .child_signal(_self.loader_status.signal_ref(clone!(_self => move |status| 
+                Some(
+                    match status {
+                        None => Self::render_loading(),
+                        Some(res) => match res {
+                            Ok(_) => Self::render_loaded(_self.clone()),
+                            Err(_) => Self::render_load_failed() 
+                        }
                     }
-                }))
+                )
+            )))
+        })
+    }
+
+    pub fn render_loading() -> Dom {
+        html!("div", {.text("loading")})
+    }
+    pub fn render_load_failed() -> Dom {
+        html!("div", {.text("failed!")})
+    }
+
+    pub fn render_loaded(_self: Rc<Self>) -> Dom {
+        elem!(templates::categories(), {
+            .with_data_id!("list", {
+                .child({
+                    MutableCategoryDom::render(MutableCategoryDom::new(_self.categories_root.clone()), _self.clone())
+                })
             })
-            .with_data_id!("cat-create", {
+            .with_data_id!("new-cat-btn", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     let input = _self.refs.borrow();
-                    let input = &input.as_ref().unwrap_throw().new_name;
+                    let input = &input.as_ref().unwrap_throw().input_new;
                     let value = input.value();
 
                     input.set_value("");
 
-                    //temp until api is working
-                    let mut categories = _self.categories.borrow_mut();
-                    let cat = MutableCategory::new_temp(value.clone());
-                    categories.as_mut().unwrap_throw().lock_mut().push_cloned(cat);
-
-                    spawn_local(
-                        create_category(_self.clone(), value)
-                    );
+                    create_category(_self.categories_root.clone(), value);
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {
@@ -112,35 +105,75 @@ impl CategoriesPage {
 }
 
 pub struct CategoryPageRefs {
-    new_name: HtmlInputElement,
+    input_new: HtmlInputElement,
 }
 
 impl CategoryPageRefs {
     pub fn new(parent:&HtmlElement) -> Self {
         Self {
-            new_name: parent.select(&data_id("cat-new-name")),
+            input_new: parent.select(&data_id("new-cat-input")),
         }
     }
 
 }
 
 pub struct MutableCategoryDom {
-    category:MutableCategory
+    category:Rc<MutableCategory>,
+    menu_visible: Mutable<bool>
 }
 
 impl MutableCategoryDom {
-    pub fn new(category:MutableCategory) -> Rc<Self> {
-        let _self = Rc::new(Self { category });
+    pub fn new(category:Rc<MutableCategory>) -> Rc<Self> {
+        let _self = Rc::new(Self { 
+            category ,
+            menu_visible: Mutable::new(false),
+        });
         _self
     }
     
-    pub fn render(_self: Rc<Self>) -> Dom {
-        html!("div", { 
-            .text(&_self.category.name)
-            .children_signal_vec(_self.category.children.signal_vec_cloned().map(|category| {
-                MutableCategoryDom::render(MutableCategoryDom::new(category))
-            }))
-        })
+    pub fn render(_self: Rc<Self>, _page:Rc<CategoriesPage>) -> Dom {
+        if _self.category.parent.is_none() {
+            html!("div", {
+                .children_signal_vec(_self.category.children.signal_vec_cloned().map(
+                    clone!(_page, _self => move |category| {
+                        MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
+                    })
+                ))
+            })
+        } else {
+            elem!(templates::category(&_self.category.id, &_self.category.name), {
+                .with_data_id!("children", {
+                    .children_signal_vec(_self.category.children.signal_vec_cloned().map(
+                        clone!(_page, _self => move |category| {
+                            MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
+                        })
+                    ))
+                })
+                .with_data_id!("menu", {
+                    .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
+                    .with_data_id!("close", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            _self.menu_visible.set(false);
+                        }))
+                    })
+                    .with_data_id!("add", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            create_category(_self.category.clone(), "New Category".to_string());
+                        }))
+                    })
+                    .with_data_id!("delete", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            delete_category(&_self.category);
+                        }))
+                    })
+                })
+                .with_data_id!("menu-toggle-btn", {
+                    .event(clone!(_self => move |_evt:events::Click| {
+                        _self.menu_visible.replace_with(|x| !*x);
+                    }))
+                })
+            })
+        }
     }
 
 }
