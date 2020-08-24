@@ -18,24 +18,24 @@ const CATEGORY_SUB:&'static str = "category_sub";
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
 }
-pub fn category_main(id:&str, name:&str, selected:bool) -> HtmlElement {
+pub fn category_main(id:&str, selected:bool) -> HtmlElement {
     if selected {
         TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_SELECTED, &html_map!(
             "id" => id,
-            "name" => name,
+            "name" => "replace_me",
         )).unwrap())
     } else {
         TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_DESELECTED, &html_map!(
             "id" => id,
-            "name" => name,
+            "name" => "replace_me",
         )).unwrap())
     }
 }
 
-pub fn category_sub(id:&str, name:&str) -> HtmlElement {
+pub fn category_sub(id:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_SUB, &html_map!(
         "id" => id,
-        "name" => name,
+        "name" => "replace_me",
     )).unwrap())
 }
 

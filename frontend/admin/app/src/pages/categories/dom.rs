@@ -122,6 +122,7 @@ pub struct MutableCategoryDom {
     category:Rc<MutableCategory>,
     menu_visible: Mutable<bool>,
     selected: Mutable<bool>,
+    editing_mode: Mutable<bool>,
 }
 
 impl MutableCategoryDom {
@@ -130,6 +131,7 @@ impl MutableCategoryDom {
             category ,
             menu_visible: Mutable::new(false),
             selected: Mutable::new(false),
+            editing_mode: Mutable::new(false),
         });
         _self
     }
@@ -146,36 +148,60 @@ impl MutableCategoryDom {
                         })
                     ))
                 })
+                .with_data_id!("input", {
+                    .class_signal("hidden", _self.editing_mode.signal().map(|editing| !editing))
+                    .property_signal("value", _self.category.name.signal_cloned()) 
+                    .event(clone!(_self => move |evt:events::Input| {
+                        if let Some(value) = evt.value() {
+                            _self.category.name.set(value);
+                        }
+                    }))
+                })
+                .with_data_id!("display", {
+                    .text_signal(_self.category.name.signal_cloned())
+                    .class_signal("hidden", _self.editing_mode.signal())
+                })
                 .with_data_id!("menu", {
                     .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
                     .with_data_id!("close", {
                         .event(clone!(_self => move |_evt:events::Click| {
+                            _self.editing_mode.set(false);
                             _self.menu_visible.set(false);
                         }))
                     })
                     .with_data_id!("add", {
                         .event(clone!(_self => move |_evt:events::Click| {
+                            _self.menu_visible.set(false);
                             create_category(_self.category.clone(), "New Category".to_string());
                         }))
                     })
                     .with_data_id!("delete", {
                         .event(clone!(_self => move |_evt:events::Click| {
+                            _self.menu_visible.set(false);
                             delete_category(&_self.category);
                         }))
                     })
                     .with_data_id!("move-up", {
                         .event(clone!(_self => move |_evt:events::Click| {
+                            _self.menu_visible.set(false);
                             move_up(&_self.category);
                         }))
                     })
                     .with_data_id!("move-down", {
                         .event(clone!(_self => move |_evt:events::Click| {
+                            _self.menu_visible.set(false);
                             move_down(&_self.category);
+                        }))
+                    })
+                    .with_data_id!("rename", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            _self.editing_mode.set(true);
                         }))
                     })
                 })
                 .with_data_id!("menu-toggle-btn", {
                     .event(clone!(_self => move |_evt:events::Click| {
+                        log::info!("MENY TOGGLED!");
                         _self.menu_visible.replace_with(|x| !*x);
                     }))
                 })
@@ -186,61 +212,27 @@ impl MutableCategoryDom {
             let is_main_tree = parent.parent.is_none();
            
             if is_main_tree {
-let _self2 = _self.clone();
-
-html!("div", {
-    .child_signal(map_ref! {
-        let selected = _self.selected.signal(), 
-        let name = _self.category.name.signal_cloned() =>  move {
-            let builder = init_elem(_self2.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self2.category.id, name, *selected)));
-            let _self3 = _self2.clone();
-
-            let builder = apply_methods!(builder, {
-                .with_data_id!("arrow", {
-                    .event(move |_evt:events::Click| {
-                        _self3.selected.set(!selected);
-                    })
-                })
-            });
-
-            Some(builder.into_dom())
-        }
-    })
-})
-                /*
-                let _self = _self.clone();
-
                 html!("div", {
-                    .child_signal(map_ref! {
-                            let selected = _self.selected.signal(), 
-                            let name = _self.category.name.signal_cloned() => 
-                                move {
-                                    let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self.category.id, name, *selected)));
-                                    let builder = apply_methods!(builder, {
-                                        .with_data_id!("arrow", {
-                                            .event(clone!(_self => move |_evt:events::Click| {
-                                                _self.selected.set(!selected);
-                                            }))
-                                        })
-                                    });
+                    .child_signal(_self.selected.signal().map(clone!(_self, _page => move |selected| {
+                            let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self.category.id, selected)));
+                            let builder = apply_methods!(builder, {
+                                .with_data_id!("arrow", {
+                                    .event(clone!(_self => move |_evt:events::Click| {
+                                        _self.selected.set(!selected);
+                                    }))
+                                })
+                            });
 
-                                    Some(builder.into_dom())
-                                }
-
-                    })
+                            Some(builder.into_dom())
+                        }))
+                    )
                 })
-                */
             } else {
                 html!("div", {
-                    .child_signal(map_ref! {
-                            let selected = _self.selected.signal(), 
-                            let name = _self.category.name.signal_cloned() => 
-                                move {
-                                    let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_sub(&_self.category.id, name)));
-                                    Some(builder.into_dom())
-                                }
-
-                    })
+                    .child_signal(_self.selected.signal().map(clone!(_self, _page => move |selected| {
+                        let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_sub(&_self.category.id)));
+                        Some(builder.into_dom())
+                    })))
                 })
             }
         } else {

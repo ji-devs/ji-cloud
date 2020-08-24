@@ -168,12 +168,14 @@ pub fn move_up(cat:&MutableCategory) {
     if let Some((before, after)) = cat.move_up() {
         let id = cat.id.clone();
 
+        /*
         spawn_local(
             async move {
                 fetch_category::move_before_sibling(&id, before.try_into().unwrap()).await;
                 ()
             }
         )
+        */
     }
 }
 pub fn move_down(cat:&MutableCategory) {
@@ -182,6 +184,7 @@ pub fn move_down(cat:&MutableCategory) {
         let parent_id = cat.parent.as_ref().unwrap_throw().id.clone();
         let parent_len = cat.parent_len().unwrap_throw();
 
+        /*
         spawn_local(
             async move {
                 if after == parent_len-1 {
@@ -192,6 +195,7 @@ pub fn move_down(cat:&MutableCategory) {
                 ()
             }
         )
+        */
     }
 }
 

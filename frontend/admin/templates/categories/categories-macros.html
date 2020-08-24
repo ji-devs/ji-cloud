@@ -8,7 +8,10 @@
       {% else %}
         <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
       {% endif %}
-      <p class="font-medium">{{label}}</p>
+      <p class="font-medium">
+        <span data-id="display"></span>
+        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
+      </p>
     </div>
     {{ self::menu() }}
   </div>
@@ -18,7 +21,10 @@
 
 {% macro sub(label, dataId="") %}
     <ul data-id="{{dataId}}" class="px-14 ml-16 pb-1 mt-2">
-      <li class="relative titleoptions flex items-center">{{label}}
+      <li class="relative titleoptions flex items-center">
+        <span data-id="display"></span>
+        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
+        
         <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
         </div>
         {{ self::menu() }}
