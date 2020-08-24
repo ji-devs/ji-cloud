@@ -9,20 +9,35 @@ use std::fmt;
 thread_local! {
     pub static TEMPLATES: Templates = Templates::new(); 
 }
+
+const CATEGORIES:&'static str = "categories";
+const CATEGORY_MAIN_SELECTED:&'static str = "category_main_selected";
+const CATEGORY_MAIN_DESELECTED:&'static str = "category_main_deselected";
+const CATEGORY_SUB:&'static str = "category_sub";
+
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
 }
-pub fn category(id:&str, name:&str) -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem(CATEGORY, &html_map!(
+pub fn category_main(id:&str, name:&str, selected:bool) -> HtmlElement {
+    if selected {
+        TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_SELECTED, &html_map!(
+            "id" => id,
+            "name" => name,
+        )).unwrap())
+    } else {
+        TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_DESELECTED, &html_map!(
+            "id" => id,
+            "name" => name,
+        )).unwrap())
+    }
+}
+pub fn category_sub(id:&str, name:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_SUB, &html_map!(
         "id" => id,
         "name" => name,
     )).unwrap())
 }
 
-//pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
-
-const CATEGORIES:&'static str = "categories";
-const CATEGORY:&'static str = "category";
 
 pub struct Templates {
     pub cache: TemplateCache<'static>
@@ -40,7 +55,9 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
             (CATEGORIES, get_template_str(include_str!("../../../.template_output/categories/categories-page.html"))),
-            (CATEGORY, get_template_str(include_str!("../../../.template_output/categories/category.html"))),
+            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_selected.html"))),
+            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_deselected.html"))),
+            (CATEGORY_SUB, get_template_str(include_str!("../../../.template_output/categories/category_sub.html"))),
         ]);
 
         Self { cache }

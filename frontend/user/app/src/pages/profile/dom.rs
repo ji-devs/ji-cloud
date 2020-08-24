@@ -16,7 +16,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
-use shared::user::UserProfile;
+use shared::domain::user::UserProfile;
 
 pub struct ProfilePage {
     pub status: Mutable<Option<Result<UserProfile, ()>>>,

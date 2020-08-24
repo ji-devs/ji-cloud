@@ -1,6 +1,5 @@
 {% import "_sidebar/sidebar-macros.html" as Sidebar %}
 {% import "_buttons/button-macros.html" as ButtonMacros %}
-{% import "_titles/titles-macros.html" as Titles %}
 {% import "_input/input-macros.html" as Input %}
 {% import "_image/imagedisplay-macros.html" as Image %}  
 
@@ -12,9 +11,16 @@
     </div>
     <div class="bordersolid border-b-2 w-full border-grey-400"></div>
 
-    <div class="flex py-4 px-2 items-center justify-between">
-      <div class="flex">
-        <p>We found <span class="text-jibuttonBlue">${results}</span> images for passover</p>
+<div class="font-poppins flex">
+  <div class="w-full">
+    {# --- THESE TWO LINES WERE IN _titles --- #}
+      <h1 class="text-2xl py-2 mb-4 font-poppins font-light">Label Images</h1>
+      <div class="bordersolid border-b-2 w-full border-grey-400"></div>
+    {# --- #}
+    {{ Input::searchbox(dataId="#") }}
+    <div class="flex py-4 px-2">
+      <div class="flex-1">
+        <p>We found ${results}</p>
       </div>
       <div class="flex ml-auto mr-auto">
         <div class="flex">
