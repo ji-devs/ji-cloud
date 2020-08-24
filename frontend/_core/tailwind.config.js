@@ -16,13 +16,16 @@ module.exports = {
         jiblueLight: '#83aef7',
         jiblueMedium: '#6698ed',
         jiblueDark: '#2b54b8',
+        jinumberblue: '#c4dbfe',
         jigreen: '#6eca90',
         jibuttonBlue:'#5590fc',
         jibackgroundBlue: "#e6f0ff",
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
         jibackgroundGrey:'#f8f9fd',
+        jigreyinputborder:'#d3d3d3;',
       },
+
 
       fontSize: {
         14:'14px',
@@ -35,6 +38,7 @@ module.exports = {
       width: {
         259: '259px',
         112: '112px',
+        150: '150px',
       },
       borderRadius: {
         20: '20px'

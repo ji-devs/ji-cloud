@@ -4,3 +4,15 @@
   <input data-id="{{inputDataId}}" type="search" name="" value="" class="rounded-full py-2 px-4 border-jiborderGrey bg-jibackgroundGrey solid border ml-2 outline-none focus:outline-none" placeholder="Categories Search">
 </div>
 {% endmacro searchbox %}
+
+{% macro select(inputDataId="") %}
+<div class="relative">
+  <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="absolute transform rotate-90 right-0">
+  <select class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
+    <option value="">Show all</option>
+    <option value="">Show published</option>
+    <option value="">Show saved</option>
+
+  </select>
+</div>
+{% endmacro select %}

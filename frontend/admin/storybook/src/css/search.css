@@ -1,5 +1,5 @@
 .jibluelighter:hover .dots {
-  background-color: "#5590fc";
+  background-color: #5590fc;
 }
 
 input[type="search"]::-webkit-search-decoration,
@@ -24,4 +24,13 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 .titleoptions:hover .ellipses{
   display: flex;
+}
+
+.arrow {
+  fill: red;
+}
+
+.searchpage input[type="search"]:active{
+  border-color: #5590fc;
+  border-width:2px;
 }

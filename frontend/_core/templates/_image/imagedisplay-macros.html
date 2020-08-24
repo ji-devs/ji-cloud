@@ -1,0 +1,9 @@
+{% macro imagelabel(imagelink, inputDataId="") %}
+  <div>
+    <img src="{{MEDIA_UI}}/{{imagelink}}" alt="">
+    <div class="flex items-center justify-center relative">
+      <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
+      <p>Moses part the nile</p>
+    </div>
+  </div>
+{% endmacro imagelabel %}
