@@ -17,13 +17,13 @@ module.exports = {
         jiblueMedium: '#6698ed',
         jiblueDark: '#2b54b8',
         jinumberblue: '#c4dbfe',
-        jigreen: '#6eca90',
+        jigreen: '#61D592',
         jibuttonBlue:'#5590fc',
         jibackgroundBlue: "#e6f0ff",
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
         jibackgroundGrey:'#f8f9fd',
-        jigreyinputborder:'#d3d3d3;',
+        jigreyinputborder:'#d3d3d3;'
       },
 
 
