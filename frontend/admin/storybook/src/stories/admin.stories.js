@@ -2,7 +2,7 @@ import {story, storyAbout} from "@utils/stories";
 import {renderTemplate as tmpl} from "@core/js/render";
 import sidebar from "@templates/sidebar.html";
 import searchpage from "@templates/searchpage.html";
-import categorypage from "@templates/categories/categories-page.html";
+import categories from "@templates/_demo/categories.html";
 
 export default {
   title: 'Admin page',
@@ -29,7 +29,7 @@ export const SearchPage = story(
 
 export const CategoryPage = story(
     "Category Page",
-    () => tmpl(categorypage, {
+    () => tmpl(categories, {
 
     }),
 

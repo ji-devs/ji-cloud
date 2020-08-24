@@ -8,7 +8,7 @@ use futures_signals::{
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, clone};
+use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
@@ -119,7 +119,8 @@ impl CategoryPageRefs {
 
 pub struct MutableCategoryDom {
     category:Rc<MutableCategory>,
-    menu_visible: Mutable<bool>
+    menu_visible: Mutable<bool>,
+    selected: Mutable<bool>,
 }
 
 impl MutableCategoryDom {
@@ -127,21 +128,26 @@ impl MutableCategoryDom {
         let _self = Rc::new(Self { 
             category ,
             menu_visible: Mutable::new(false),
+            selected: Mutable::new(false),
         });
         _self
     }
     
     pub fn render(_self: Rc<Self>, _page:Rc<CategoriesPage>) -> Dom {
-        if _self.category.parent.is_none() {
-            html!("div", {
-                .children_signal_vec(_self.category.children.signal_vec_cloned().map(
-                    clone!(_page, _self => move |category| {
-                        MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
-                    })
-                ))
-            })
-        } else {
-            elem!(templates::category(&_self.category.id, &_self.category.name), {
+        if let Some(parent) = &_self.category.parent {
+            let is_parent_tree = parent.parent.is_none();
+           
+            let base_elem:HtmlElement = {
+                if is_parent_tree {
+                    //todo - selected should be signal based
+                    templates::category_main(&_self.category.id, &_self.category.name, false)
+                } else {
+                    templates::category_sub(&_self.category.id, &_self.category.name)
+                }
+            };
+
+            apply_methods!(DomBuilder::new(base_elem), {
+
                 .with_data_id!("children", {
                     .children_signal_vec(_self.category.children.signal_vec_cloned().map(
                         clone!(_page, _self => move |category| {
@@ -149,6 +155,7 @@ impl MutableCategoryDom {
                         })
                     ))
                 })
+                /*
                 .with_data_id!("menu", {
                     .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
                     .with_data_id!("close", {
@@ -172,6 +179,16 @@ impl MutableCategoryDom {
                         _self.menu_visible.replace_with(|x| !*x);
                     }))
                 })
+                */
+            })
+            .into_dom()
+        } else {
+            html!("div", {
+                .children_signal_vec(_self.category.children.signal_vec_cloned().map(
+                    clone!(_page, _self => move |category| {
+                        MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
+                    })
+                ))
             })
         }
     }

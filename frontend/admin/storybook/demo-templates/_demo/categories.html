@@ -20,7 +20,11 @@
           {{ ButtonMacros::blue(label="+ Add Category", dataId="new-cat-btn") }}
         </div>
        
-        <div data-id="list"></div>
+        <div data-id="list">
+            {{ Category::main(label="Main Selected", selected=true, dataId="") }}
+            {{ Category::main(label="Main Deselected", selected=false, dataId="") }}
+            {{ Category::sub(label="Sub Level", selected=true, dataId="") }}
+        </div>
       </div>
       <div class="w-1/2"></div>
     </div>

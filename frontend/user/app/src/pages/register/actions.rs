@@ -1,7 +1,9 @@
 use shared::{
-    auth::{RegisterRequest, RegisterSuccess},
+    domain::{
+        auth::{RegisterRequest, RegisterSuccess},
+        user::NoSuchUserError
+    },
     error::auth::RegisterError,
-    user::NoSuchUserError
 };
 use core::{
     routes::{Route, UserRoute},
