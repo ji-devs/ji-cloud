@@ -13,14 +13,10 @@
 
 <div class="font-poppins flex">
   <div class="w-full">
-    {# --- THESE TWO LINES WERE IN _titles --- #}
-      <h1 class="text-2xl py-2 mb-4 font-poppins font-light">Label Images</h1>
-      <div class="bordersolid border-b-2 w-full border-grey-400"></div>
-    {# --- #}
-    {{ Input::searchbox(dataId="#") }}
+
     <div class="flex py-4 px-2">
-      <div class="flex-1">
-        <p>We found ${results}</p>
+      <div class="flex">
+        <p>We found <span class="text-jibuttonBlue">${results}</span> images for passover</p>
       </div>
       <div class="flex ml-auto mr-auto">
         <div class="flex">
