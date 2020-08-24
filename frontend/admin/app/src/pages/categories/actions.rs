@@ -1,4 +1,5 @@
 use shared::domain::category::*;
+use std::convert::TryInto;
 use core::{
     routes::{Route, UserRoute},
     fetch::{
@@ -7,11 +8,10 @@ use core::{
     },
     storage,
 };
-use futures_signals::signal_vec::MutableVec;
+use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;
 use super::CategoriesPage;
@@ -20,7 +20,7 @@ use futures::future::ready;
 
 pub struct MutableCategory {
     pub id: String,
-    pub name: String,
+    pub name: Mutable<String>,
     pub children: MutableVec<Rc<MutableCategory>>,
     pub parent: Option<Rc<MutableCategory>>,
 }
@@ -30,7 +30,7 @@ impl MutableCategory {
         let parent_clone = parent.clone();
         let _self = Rc::new(Self {
             id,
-            name,
+            name: Mutable::new(name),
             children: MutableVec::new(),
             parent
         });
@@ -42,8 +42,43 @@ impl MutableCategory {
         _self
     }
 
+    pub fn parent_index(&self) -> Option<usize> {
+        self.parent.as_ref().map(|parent| {
+            parent.children.lock_ref().as_slice().iter().position(|x| x.id == self.id)
+        })
+        .flatten()
+    }
+    pub fn parent_len(&self) -> Option<usize> {
+        self.parent.as_ref().map(|parent| {
+            parent.children.lock_ref().as_slice().iter().len()
+        })
+    }
+
     pub fn delete(&self) {
         self.parent.as_ref().unwrap_throw().children.lock_mut().retain(|cat| cat.id != self.id);
+    }
+
+    pub fn move_up(&self) -> Option<(usize, usize)> {
+        let current_index = self.parent_index().unwrap_throw();
+        if current_index > 0 {
+            let info = (current_index, current_index -1);
+            self.parent.as_ref().unwrap_throw().children.lock_mut().move_from_to(info.0, info.1);
+
+            Some(info)
+        } else {
+            None
+        }
+    }
+    pub fn move_down(&self) -> Option<(usize, usize)> {
+        let current_index = self.parent_index().unwrap_throw();
+        let parent_len = self.parent_len().unwrap_throw();
+        if current_index < parent_len - 1 {
+            let info = (current_index, current_index + 1);
+            self.parent.as_ref().unwrap_throw().children.lock_mut().move_from_to(info.0, info.1);
+            Some(info)
+        } else {
+            None
+        }
     }
 }
 
@@ -119,10 +154,48 @@ pub fn delete_category(cat:&MutableCategory) {
     cat.delete();
     let id = cat.id.clone();
 
+
     spawn_local(
         async move {
             fetch_category::delete(&id).await;
             ()
         }
     )
+}
+
+
+pub fn move_up(cat:&MutableCategory) {
+    if let Some((before, after)) = cat.move_up() {
+        let id = cat.id.clone();
+
+        spawn_local(
+            async move {
+                fetch_category::move_before_sibling(&id, before.try_into().unwrap()).await;
+                ()
+            }
+        )
+    }
+}
+pub fn move_down(cat:&MutableCategory) {
+    if let Some((before, after)) = cat.move_down() {
+        let id = cat.id.clone();
+        let parent_id = cat.parent.as_ref().unwrap_throw().id.clone();
+        let parent_len = cat.parent_len().unwrap_throw();
+
+        spawn_local(
+            async move {
+                if after == parent_len-1 {
+                    fetch_category::move_end(&id, &parent_id).await;
+                } else {
+                    fetch_category::move_before_sibling(&id, (after+1).try_into().unwrap()).await;
+                }
+                ()
+            }
+        )
+    }
+}
+
+
+pub fn rename_category(cat:&MutableCategory, name:&str) {
+    cat.name.set(name.to_string());
 }

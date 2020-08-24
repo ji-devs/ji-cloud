@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal},
@@ -134,19 +135,9 @@ impl MutableCategoryDom {
     }
     
     pub fn render(_self: Rc<Self>, _page:Rc<CategoriesPage>) -> Dom {
-        if let Some(parent) = &_self.category.parent {
-            let is_parent_tree = parent.parent.is_none();
-           
-            let base_elem:HtmlElement = {
-                if is_parent_tree {
-                    //todo - selected should be signal based
-                    templates::category_main(&_self.category.id, &_self.category.name, false)
-                } else {
-                    templates::category_sub(&_self.category.id, &_self.category.name)
-                }
-            };
 
-            apply_methods!(DomBuilder::new(base_elem), {
+        fn init_elem(_self:Rc<MutableCategoryDom>, _page:Rc<CategoriesPage>, dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+            apply_methods!(dom, {
 
                 .with_data_id!("children", {
                     .children_signal_vec(_self.category.children.signal_vec_cloned().map(
@@ -155,7 +146,6 @@ impl MutableCategoryDom {
                         })
                     ))
                 })
-                /*
                 .with_data_id!("menu", {
                     .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
                     .with_data_id!("close", {
@@ -173,15 +163,86 @@ impl MutableCategoryDom {
                             delete_category(&_self.category);
                         }))
                     })
+                    .with_data_id!("move-up", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            move_up(&_self.category);
+                        }))
+                    })
+                    .with_data_id!("move-down", {
+                        .event(clone!(_self => move |_evt:events::Click| {
+                            move_down(&_self.category);
+                        }))
+                    })
                 })
                 .with_data_id!("menu-toggle-btn", {
                     .event(clone!(_self => move |_evt:events::Click| {
                         _self.menu_visible.replace_with(|x| !*x);
                     }))
                 })
-                */
             })
-            .into_dom()
+        }
+
+        if let Some(parent) = &_self.category.parent {
+            let is_main_tree = parent.parent.is_none();
+           
+            if is_main_tree {
+let _self2 = _self.clone();
+
+html!("div", {
+    .child_signal(map_ref! {
+        let selected = _self.selected.signal(), 
+        let name = _self.category.name.signal_cloned() =>  move {
+            let builder = init_elem(_self2.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self2.category.id, name, *selected)));
+            let _self3 = _self2.clone();
+
+            let builder = apply_methods!(builder, {
+                .with_data_id!("arrow", {
+                    .event(move |_evt:events::Click| {
+                        _self3.selected.set(!selected);
+                    })
+                })
+            });
+
+            Some(builder.into_dom())
+        }
+    })
+})
+                /*
+                let _self = _self.clone();
+
+                html!("div", {
+                    .child_signal(map_ref! {
+                            let selected = _self.selected.signal(), 
+                            let name = _self.category.name.signal_cloned() => 
+                                move {
+                                    let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self.category.id, name, *selected)));
+                                    let builder = apply_methods!(builder, {
+                                        .with_data_id!("arrow", {
+                                            .event(clone!(_self => move |_evt:events::Click| {
+                                                _self.selected.set(!selected);
+                                            }))
+                                        })
+                                    });
+
+                                    Some(builder.into_dom())
+                                }
+
+                    })
+                })
+                */
+            } else {
+                html!("div", {
+                    .child_signal(map_ref! {
+                            let selected = _self.selected.signal(), 
+                            let name = _self.category.name.signal_cloned() => 
+                                move {
+                                    let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_sub(&_self.category.id, name)));
+                                    Some(builder.into_dom())
+                                }
+
+                    })
+                })
+            }
         } else {
             html!("div", {
                 .children_signal_vec(_self.category.children.signal_vec_cloned().map(

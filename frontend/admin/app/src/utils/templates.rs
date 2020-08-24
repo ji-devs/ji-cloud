@@ -31,6 +31,7 @@ pub fn category_main(id:&str, name:&str, selected:bool) -> HtmlElement {
         )).unwrap())
     }
 }
+
 pub fn category_sub(id:&str, name:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_SUB, &html_map!(
         "id" => id,
