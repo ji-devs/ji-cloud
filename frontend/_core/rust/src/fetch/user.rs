@@ -2,7 +2,7 @@ use shared::api::endpoints::user::*;
 use shared::api::endpoints::ApiEndpoint;
 use crate::{
     path::api_url,
-    fetch::{POST, GET, api_with_token, api_with_auth, FetchResult}
+    fetch::{api_with_token, api_with_auth, FetchResult}
 };
 
 pub async fn fetch_signin(token:&str) -> FetchResult < <Signin as ApiEndpoint>::Res, <Signin as ApiEndpoint>::Err> {

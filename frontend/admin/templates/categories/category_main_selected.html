@@ -1,0 +1,5 @@
+{% import "categories/categories-macros.html" as Categories %}
+
+<div data-id="${id}">
+    {{ Categories::main(label="${name}", selected=true, dataId="${id}") }}
+</div>
