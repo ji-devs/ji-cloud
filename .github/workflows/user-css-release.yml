@@ -1,16 +1,11 @@
-name: Admin - Storybook - Sandbox
+name: User - CSS - Release
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
-    - 'config/**'
     - 'frontend/_core/css/**'
-    - 'frontend/admin/css/**'
-    - 'frontend/_core/js/**'
-    - 'frontend/_core/templates/**'
-    - 'frontend/admin/storybook/**'
-    - 'frontend/admin/templates/**'
+    - 'frontend/user/css/**'
 
 jobs:
   bundle:
@@ -24,7 +19,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - admin/storybook]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - user/css]\")"
         id: extract_label
 
       - name: Notify slack
@@ -39,22 +34,20 @@ jobs:
 
       - name: install npm deps
         run: npm install
-        working-directory: "./frontend/admin/storybook"
+        working-directory: "./frontend/user/css"
 
-      - name: build 
-        run: npm run storybook:build-sandbox
-        working-directory: "./frontend/admin/storybook"
-        env:
-          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
+      - name: bundle 
+        run: npm run bundle
+        working-directory: "./frontend/user/css"
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/admin/storybook/dist/storybook-build gs://ji-cloud-sandbox-storybook-origin-eu-001/admin
+        run: gsutil -m rsync -d -r frontend/user/css/dist gs://ji-cloud-frontend-origin-eu-001/user/css
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
