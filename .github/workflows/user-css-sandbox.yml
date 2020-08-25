@@ -2,7 +2,7 @@ name: User - CSS - Sandbox
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'frontend/_core/css/**'
     - 'frontend/user/css/**'
