@@ -41,6 +41,10 @@ jobs:
         run: npm install
         working-directory: "./frontend/user/css"
         
+      - name: install core js deps
+        run: npm install
+        working-directory: "./frontend/_core/js"
+        
       - name: install npm deps
         run: npm install
         working-directory: "./frontend/user/storybook"
