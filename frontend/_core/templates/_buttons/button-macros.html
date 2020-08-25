@@ -5,8 +5,12 @@
 </button>
 {% endmacro orange %}
 
-{% macro blue(label, dataId="") %}
-<button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-3 py-1 font-poppins font-medium">
-    {{label}}
+{% macro blue(label, dataId="", hover) %}
+<button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-3 py-1 font-poppins font-medium hover:{{hover}}">
+<div class="flex justify-center items-center">
+  <img src="{{MEDIA_UI}}/Icon_Plus.svg" alt="">
+  {{label}}
+</div>
+
 </button>
 {% endmacro blue %}

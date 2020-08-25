@@ -39,6 +39,11 @@ module.exports = {
         259: '259px',
         112: '112px',
         150: '150px',
+        288: '288px'
+      },
+      height: {
+        216: '216px',
+        185: '185px',
       },
       borderRadius: {
         20: '20px'
@@ -47,6 +52,9 @@ module.exports = {
         40:'40px',
         10:'10px',
         25:'25%'
+      },
+      borderWidth: {
+        3: '3px'
       }
     },
   },
