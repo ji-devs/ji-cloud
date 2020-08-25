@@ -1,6 +1,17 @@
+export function renderTemplate(template, data) {
+    const fragment = renderTemplateFragment(template, data);
+    return fragment.firstElementChild;
+}
+
+export function renderTemplateFragment(template, data) {
+    const str = renderTemplateString(template, data);
+    const el = document.createElement("template");
+    el.innerHTML = str;
+    return el.content;
+}
 //Very simple replacement of `${pattern}`
 //Probably not safe, but only used for storybook / internal dev anyway
-export function renderTemplate(template, data) {
+export function renderTemplateString(template, data) {
     if(data == null) {
             return template;
     } else {
