@@ -1,1 +1,1 @@
-import "./imports.css";
+import "../../css/dist/styles.css";

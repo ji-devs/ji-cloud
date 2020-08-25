@@ -1,47 +1,25 @@
-import {story, storyAbout} from "@utils/stories";
-import {renderTemplate as tmpl} from "@core/js/render";
+import {renderTemplate as tmpl} from "@utils/render";
 import sidebar from "@templates/sidebar.html";
 import searchpage from "@templates/searchpage.html";
 import categories from "@templates/_demo/categories.html";
 
 export default {
-  title: 'Admin page',
+  title: 'Admin Page',
 }
 
-export const Sidebar = story(
-    "Sidebar",
-    () => tmpl(sidebar, {
+export const Sidebar = () => 
+    tmpl(sidebar, {
       navbarLink: "Label images",
-    }),
+    });
 
-);
 
-export const SearchPage = story(
-    "Search Page",
-    () => tmpl(searchpage, {
+export const SearchPage = () =>
+    tmpl(searchpage, {
       navbarLink: "Label images",
       results: 48,
+    });
 
-    }),
+export const CategoryPage = () => tmpl(categories, {});
 
+export const MainPage = () => tmpl(sidebar, { navbarLink: "Label images", });
 
-);
-
-export const CategoryPage = story(
-    "Category Page",
-    () => tmpl(categories, {
-
-    }),
-
-);
-
-export const MainPage = storyAbout(
-    "Main Page",
-    () => tmpl(sidebar, {
-      navbarLink: "Label images",
-
-
-  }),
-    `## Main page of image uploader
-    `
-);
