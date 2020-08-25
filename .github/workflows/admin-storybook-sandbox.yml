@@ -37,6 +37,10 @@ jobs:
       - name: install node
         uses: actions/setup-node@v1
 
+      - name: install css deps
+        run: npm install
+        working-directory: "./frontend/admin/css"
+        
       - name: install npm deps
         run: npm install
         working-directory: "./frontend/admin/storybook"
