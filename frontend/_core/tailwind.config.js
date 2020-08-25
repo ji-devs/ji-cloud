@@ -15,17 +15,35 @@ module.exports = {
       colors: {
         jiblueLight: '#83aef7',
         jiblueMedium: '#6698ed',
-        jiblueDark: '#2b54b8'
-
+        jiblueDark: '#2b54b8',
+        jigreen: '#6eca90',
+        jibuttonBlue:'#5590fc',
+        jibackgroundBlue: "#e6f0ff",
+        jibluelighter: "#a6c6f8",
+        jiborderGrey: "#e5e7ef",
+        jibackgroundGrey:'#f8f9fd',
       },
+
       fontSize: {
         14:'14px',
         18: '18px',
 
       },
       fontFamily: {
-        azoSans: 'azo-sans-web'
+        poppins: 'Poppins',
       },
+      width: {
+        259: '259px',
+        112: '112px',
+      },
+      borderRadius: {
+        20: '20px'
+      },
+      inset: {
+        40:'40px',
+        10:'10px',
+        25:'25%'
+      }
     },
   },
   variants: {

@@ -81,26 +81,6 @@
       ]
     }
   },
-  "2304834612daefc37b933358ec4579f3dbb925a1be3984b38bc7e6093753b5cb": {
-    "query": "\n    with recursive inverse_category_tree(index, id, parent_id, structure) as\n    (\n        select index::int2,\n               id,\n               parent_id,\n               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                  updated_at)\n        from category co\n        where id = any ($1::uuid[])\n        union all\n        select co.index::int2,\n               id,\n               parent_id,\n               jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                  updated_at, 'children',\n                                  jsonb_agg(_lat.structure))\n        from category co\n                 join lateral (\n            select ct.structure\n            from inverse_category_tree ct\n            where ct.parent_id = co.id\n            order by ct.index\n            ) _lat on true\n        group by co.id\n    )\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom inverse_category_tree\nwhere parent_id is null;\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "categories!: sqlx::types::Json<Vec<Category>>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
@@ -134,39 +114,26 @@
       "nullable": []
     }
   },
-  "411526cce8e49dd777e3dbc44db4fcd5ef5e954602c4ae1d5c04a221dd78da93": {
-    "query": "\nselect id as \"id: CategoryId\", name, created_at, updated_at\nfrom category\nwhere parent_id is null\norder by index\n",
+  "4da15c8f7c51da73da193a2fc4ed3c4f889bc0ebe3646543f8888d136c0b1c75": {
+    "query": "\ninsert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)\nreturning id as \"id: ImageId\"\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: CategoryId",
+          "name": "id: ImageId",
           "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz"
+        ]
       },
       "nullable": [
-        false,
-        false,
-        false,
-        true
+        false
       ]
     }
   },
@@ -197,8 +164,40 @@
       "nullable": []
     }
   },
-  "76a022183b6addb81416606a1e9a08f1b30056a36137e1dd630c1cad08acaaef": {
-    "query": "\ndelete from category where id = $1\nreturning index, parent_id\n    ",
+  "53fec36823e02cb73f6d0a7bed3044bae804c63b0c02be9823e336bb2e634d24": {
+    "query": "with recursive category_tree(index, id, parent_id, structure) as\n                   (\n                       select index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                                 updated_at,\n                                                 'image_count',\n                                                 (select count(*) from image_category where category_id = id)::int8,\n                                                 'jig_count', 0::int8)\n                       from category co\n                       where not (select exists(select 1 from category ci where ci.parent_id = co.id))\n                       union all\n                       select co.index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                                 updated_at, 'children',\n                                                 jsonb_agg(_lat.structure),\n                                                 'image_count',\n                                                 (select count(*) from image_category where category_id = id)::int8,\n                                                 'jig_count', 0::int8)\n                       from category co\n                                join lateral (\n                           select ct.structure\n                           from category_tree ct\n                           where ct.parent_id = co.id\n                           order by ct.index\n                           ) _lat on true\n                       group by co.id\n                   )\nselect coalesce(jsonb_agg(structure order by t.ord), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
+    "query": "delete from image_metadata where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
+    "query": "delete from category where id = $1 returning index, parent_id",
     "describe": {
       "columns": [
         {
@@ -223,23 +222,48 @@
       ]
     }
   },
-  "7b0494c65d69bcd3a68352f58afb483e7ed96dca12c8b36c03e4c421749782cc": {
-    "query": "\nselect coalesce(jsonb_agg(structure order by t.ord), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\ninner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\n",
+  "7038777fa4cd28dac1759e3b17744192f4cfc0af398cfc3d502c956755aafea3": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2 is distinct from name or\n       $3 is distinct from description or\n       $4 is distinct from is_premium)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "7e072768b590478364590b47a9103afe6dc395767d26b6f5d00ab9f9650767e8": {
+    "query": "select id as \"id: AgeRangeId\", created_at, updated_at from style",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "categories!: sqlx::types::Json<Vec<Category>>",
-          "type_info": "Jsonb"
+          "name": "id: AgeRangeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
+        "Left": []
       },
       "nullable": [
-        null
+        false,
+        false,
+        true
       ]
     }
   },
@@ -291,8 +315,58 @@
       ]
     }
   },
-  "9ebbeeb42bbded2e27d8aca7e692b80d0d426806d748339d3eb9020887ccedc0": {
-    "query": "\nselect id as \"id: CategoryId\", name, created_at, updated_at\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
+  "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
+    "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "b5a8cb5f926cb6fa399f15b6e2f0433b369c39e2fc689484682db5b167fb60b6": {
+    "query": "select id as \"id: AffiliationId\", created_at, updated_at from style",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AffiliationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
     "describe": {
       "columns": [
         {
@@ -314,6 +388,69 @@
           "ordinal": 3,
           "name": "updated_at",
           "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "e4d30b237fbf3c2ce8af775f2a658a34ec68d80ba56735b24c91bc72ba86a255": {
+    "query": "select id as \"id: StyleId\", created_at, updated_at from style",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: StyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "e5d81cb14fd145e1c902d5b997ff8b73a085a4f5dce71e7160db17e5c8fedbae": {
+    "query": "with recursive inverse_category_tree(index, id, parent_id, structure) as\n                   (\n                       select index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                                 updated_at,\n                                                 'image_count',\n                                                 (select count(*) from image_category where category_id = id)::int8,\n                                                 'jig_count', 0::int8)\n                       from category co\n                       where id = any ($1::uuid[])\n                       union all\n                       select co.index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                                 updated_at, 'children',\n                                                 jsonb_agg(_lat.structure),\n                                                 'image_count',\n                                                 (select count(*) from image_category where category_id = id)::int8,\n                                                 'jig_count', 0::int8)\n                       from category co\n                                join lateral (\n                           select ct.structure\n                           from inverse_category_tree ct\n                           where ct.parent_id = co.id\n                           order by ct.index\n                           ) _lat on true\n                       group by co.id\n                   )\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom inverse_category_tree\nwhere parent_id is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
         }
       ],
       "parameters": {
@@ -322,10 +459,25 @@
         ]
       },
       "nullable": [
-        false,
-        false,
-        false,
-        true
+        null
+      ]
+    }
+  },
+  "e7f62344be775e2fd0318f833eff7976e13494eaa30568c90515e6d15fa8204a": {
+    "query": "with recursive category_tree(index, id, parent_id, structure) as\n                   (\n                       select index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object(\n                                      'id', id,\n                                      'name', name, 'created_at', created_at, 'updated_at',\n                                      updated_at,\n                                      'image_count',\n                                      (select count(*) from image_category where category_id = id)::int8,\n                                      'jig_count', 0::int8\n                                  )\n                       from category co\n                       where not (select exists(select 1 from category ci where ci.parent_id = co.id))\n                       union all\n                       select co.index::int2,\n                              id,\n                              parent_id,\n                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',\n                                                 updated_at, 'children',\n                                                 jsonb_agg(_lat.structure),\n                                                 'image_count',\n                                                 (select count(*) from image_category where category_id = id)::int8,\n                                                 'jig_count', 0::int8)\n                       from category co\n                                join lateral (\n                           select ct.structure\n                           from category_tree ct\n                           where ct.parent_id = co.id\n                           order by ct.index\n                           ) _lat on true\n                       group by co.id\n                   )\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree\nwhere parent_id is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "categories!: sqlx::types::Json<Vec<Category>>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -350,22 +502,67 @@
       ]
     }
   },
-  "f2f217bc1d8325874ca079c39e498b5fbc0c3f9d7901c4ba8493f452b2db381e": {
-    "query": "\nselect coalesce(jsonb_agg(structure order by index), '[]') as \"categories!: sqlx::types::Json<Vec<Category>>\"\nfrom category_tree where parent_id is null\n",
+  "fa66e89e6b008f41f95a2489415e76fd57f37f08d64ad6c59809033b7b105a66": {
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\n\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "categories!: sqlx::types::Json<Vec<Category>>",
-          "type_info": "Jsonb"
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "UuidArray"
+        ]
       },
       "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null,
         null
       ]
+    }
+  },
+  "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
+    "query": "\nupdate image_metadata\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
     }
   }
 }

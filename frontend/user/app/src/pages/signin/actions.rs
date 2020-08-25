@@ -1,4 +1,4 @@
-use shared::{
+use shared::domain::{
     auth::SigninSuccess,
     user::NoSuchUserError
 };

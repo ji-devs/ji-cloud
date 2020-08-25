@@ -1,8 +1,9 @@
+use crate::env::req_env;
+use anyhow::Context;
 use futures_util::future::TryFutureExt;
 use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
 use std::{
-    env,
     fs::File,
     io::BufReader,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -56,30 +57,28 @@ impl<'a> GoogleApiClaims<'a> {
     }
 }
 
-pub async fn get_google_credentials(env_var_name: &str) -> Result<GoogleCredentials, String> {
-    env::var(env_var_name)
-        .map_err(|_| format!("no {} set", env_var_name))
-        .and_then(|credentials_path| {
-            File::open(credentials_path.clone())
-                .map_err(|_| format!("couldn't open {}", credentials_path))
-        })
-        .and_then(|credentials_file| {
-            let reader = BufReader::new(credentials_file);
-            serde_json::from_reader(reader).map_err(|err| format!("{:?}", err))
-        })
+pub fn get_google_credentials(env_var_name: &str) -> anyhow::Result<GoogleCredentials> {
+    let credentials = req_env(env_var_name)?;
+
+    let credentials = File::open(credentials.clone())
+        .with_context(|| anyhow::anyhow!("Couldn't open {}", credentials))?;
+
+    let credentials = serde_json::from_reader(BufReader::new(credentials))?;
+
+    Ok(credentials)
 }
 
 pub async fn get_google_token_from_credentials(
     credentials: &GoogleCredentials,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let claims = GoogleApiClaims::new(&credentials);
     let token_assertion = jwt::encode(
         &jwt::Header::new(jwt::Algorithm::RS256),
         &claims,
         &jwt::EncodingKey::from_rsa_pem(credentials.private_key.as_bytes())
-            .map_err(|_| "couldn't get encoding key".to_string())?,
+            .with_context(|| anyhow::anyhow!("couldn't get encoding key".to_string()))?,
     )
-    .map_err(|_| "couldn't encode jwt for google api request".to_string())?;
+    .with_context(|| anyhow::anyhow!("couldn't encode jwt for google api request"))?;
 
     let form = reqwest::multipart::Form::new()
         .text("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
@@ -91,12 +90,12 @@ pub async fn get_google_token_from_credentials(
         .send()
         .and_then(|res| res.json())
         .await
-        .map_err(|err| format!("couldn't get google access token: {:?}", err))?;
+        .with_context(|| anyhow::anyhow!("couldn't get google access token"))?;
 
     Ok(token_response.access_token)
 }
 
-pub async fn get_google_token_from_metaserver() -> Result<String, String> {
+pub async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
     let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
 
     let token_response: GoogleAccessTokenResponse = reqwest::Client::new()
@@ -115,7 +114,7 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
         */
         .await
         .map_err(|err| {
-            format!(
+            anyhow::anyhow!(
                 "couldn't get google access token from metaserver: {:?}",
                 err
             )
@@ -124,18 +123,25 @@ pub async fn get_google_token_from_metaserver() -> Result<String, String> {
     Ok(token_response.access_token)
 }
 
+pub fn get_project_id(credentials_env_var: Option<&str>) -> anyhow::Result<String> {
+    match credentials_env_var.and_then(|var| get_google_credentials(var).ok()) {
+        Some(credentials) => Ok(credentials.project_id),
+        None => req_env("PROJECT_ID"),
+    }
+}
+
 pub async fn get_access_token_and_project_id(
     credentials_env_var_name: &str,
-) -> Result<(String, String), String> {
-    let credentials = get_google_credentials(credentials_env_var_name).await;
+) -> anyhow::Result<(String, String)> {
+    let credentials = get_google_credentials(credentials_env_var_name);
     match credentials {
         Ok(credentials) => {
             let token = get_google_token_from_credentials(&credentials).await?;
             Ok((token, credentials.project_id))
         }
         Err(_) => {
-            let project_id = env::var("PROJECT_ID").map_err(|_| {
-                format!(
+            let project_id = req_env("PROJECT_ID").with_context(|| {
+                anyhow::anyhow!(
                     "You must set PROJECT_ID as an env var since there's no {}",
                     credentials_env_var_name
                 )
@@ -146,7 +152,13 @@ pub async fn get_access_token_and_project_id(
     }
 }
 
-pub async fn get_secret(token: &str, project_id: &str, secret_name: &str) -> String {
+pub async fn get_secret(
+    token: &str,
+    project_id: &str,
+    secret_name: &str,
+) -> anyhow::Result<String> {
+    // todo: skip the unwraps
+
     let api_name = format!(
         "projects/{}/secrets/{}/versions/latest:access",
         project_id, secret_name
@@ -161,20 +173,11 @@ pub async fn get_secret(token: &str, project_id: &str, secret_name: &str) -> Str
     let response: GoogleSecretResponse = request
         .send()
         .and_then(|res| res.json())
-        /*
-        .and_then(|res| async move {
-            //res.json()
-            let text = res.text().await.expect("couldn't get response text to log");
-            eprintln!("raw: {}", text);
-            let json = serde_json::from_str(&text).unwrap();
-            Ok(json)
-        })
-        */
         .await
         .expect(&format!("couldn't get secret: {}", secret_name));
 
     let bytes: Vec<u8> = base64::decode(response.payload.data).unwrap();
-    std::str::from_utf8(&bytes).unwrap().to_string()
+    Ok(std::str::from_utf8(&bytes).unwrap().to_string())
 }
 
 #[cfg(all(test, feature = "has_google_auth"))]

@@ -5,7 +5,7 @@ use actix_web::{
 };
 use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
-use shared::category::{
+use shared::domain::category::{
     CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
     NewCategoryResponse, UpdateCategoryRequest,
 };
@@ -13,13 +13,11 @@ use sqlx::PgPool;
 
 async fn get_categories(
     db: Data<PgPool>,
-    // _claims: WrapAuthClaimsNoDb,
+    _claims: WrapAuthClaimsNoDb,
     req: Option<QsQuery<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
 {
     let req = req.map_or_else(GetCategoryRequest::default, QsQuery::into_inner);
-
-    db::category::get_subtree(&db, &req.ids).await?;
 
     let categories = match req.scope {
         Some(CategoryTreeScope::Decendants) if req.ids.is_empty() => {
@@ -95,11 +93,8 @@ pub fn configure(cfg: &mut ServiceConfig) {
     cfg.service(
         web::resource(category::Get::PATH)
             .app_data(qs_array_cfg())
-            .route(category::Get::METHOD.route().to(get_categories)),
-    )
-    .route(
-        category::Create::PATH,
-        category::Create::METHOD.route().to(create_category),
+            .route(category::Get::METHOD.route().to(get_categories))
+            .route(category::Create::METHOD.route().to(create_category)),
     )
     .route(
         category::Update::PATH,

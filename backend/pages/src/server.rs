@@ -10,7 +10,7 @@ use actix_web::{
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
-    settings::Settings,
+    settings::RuntimeSettings,
 };
 use futures::Future;
 
@@ -35,9 +35,8 @@ where
     }
 }
 
-#[actix_web::main]
-pub async fn run(settings: Settings) -> anyhow::Result<()> {
-    let local_insecure = settings.local_insecure;
+pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
+    let local_insecure = settings.is_local();
     let pages_port = settings.pages_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()

@@ -1,0 +1,69 @@
+{% macro main(label, selected, dataId="") %}
+<div class="{% if selected %} bg-jibackgroundBlue border-jigreen {% endif %} border-l-8 border-l-solid rounded-md mb-2">
+  <div class="flex items-center titleoptions">
+    <div class="flex py-3">
+      <!--Find a way to toggle between this {{MEDIA_UI}}/icon-chevron-categories-24-px.svg and the image inside-->
+      {% if selected %}
+        <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px-active.svg" alt="">
+      {% else %}
+        <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+      {% endif %}
+      <p class="font-medium">
+        <span data-id="display">{{label}}</span>
+        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
+      </p>
+    </div>
+    {{ self::menu() }}
+  </div>
+  <div data-id="children" {% if not selected %} class="hidden"{% endif %} > </div>
+</div>
+{% endmacro parent %}
+
+{% macro sub(label, dataId="") %}
+    <ul data-id="{{dataId}}" class="px-14 ml-16 pb-1 mt-2">
+      <li class="relative titleoptions flex items-center">
+        <span data-id="display">{{label}}</span>
+        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
+        
+        <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+        </div>
+        {{ self::menu() }}
+      </li>
+      <div data-id="children"></div>
+    </ul>
+{% endmacro child %}
+
+{% macro menu() %}
+<div class="flex mr-2 relative pl-2">
+  <div data-id="menu-toggle-btn" class="ellipses">
+  <!--Find a way to change color of ellipses when hover -->
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+    <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
+  </div>
+  <div data-id="menu" class="absolute p-2 z-40 dropdown hidden cursor-pointer">
+    <div data-id="close" class="px-3">X</div>
+    <ul class="bg-white rounded-md shadow-md w-112 py-3">
+      <li data-id="add" class="hover:bg-jibackgroundBlue">
+        <div class="px-3">Add a child</div>
+      </li>
+      <li data-id="rename" class="hover:bg-jibackgroundBlue">
+        <div class="p-3">Rename</div>
+      </li>
+      <li data-id="move-up" class="hover:bg-jibackgroundBlue">
+        <div class="p-3">Move Up</div>
+      </li>
+      <li data-id="move-down" class="hover:bg-jibackgroundBlue">
+        <div class="p-3">Move Down</div>
+      </li>
+      <li data-id="delete" class="hover:bg-jibackgroundBlue">
+        <div class="p-3">Delete</div>
+      </li>
+      <li data-id="hide" class="hover:bg-jibackgroundBlue">
+        <div class="p-3">Hide</div>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endmacro menu %}
+

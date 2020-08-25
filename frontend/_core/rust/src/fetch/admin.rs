@@ -1,11 +1,11 @@
 pub mod category {
     use shared::{
         api::endpoints::{ApiEndpoint, category::*},
-        category::*
+        domain::category::*
     };
     use crate::{
         path::api_url,
-        fetch::{api_with_auth, FetchResult}
+        fetch::{api_with_auth, api_with_auth_no_result, FetchResult}
     };
     use uuid::Uuid;
     use wasm_bindgen::UnwrapThrowExt;
@@ -42,7 +42,7 @@ pub mod category {
     }
 
     pub async fn rename(id:&str, name:String) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("id",id);
+        let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: Some(name),
@@ -52,19 +52,29 @@ pub mod category {
         api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
-    pub async fn move_before_sibling(id:&str, parent_id: Option<&str>, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("id",id);
+    pub async fn move_before_sibling(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
+        let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: None,
-            parent_id: parent_id.map(|id| Some(category_id_from_str(id))),
+            parent_id: None, 
+            index: Some(before_sibling_index) 
+        };
+        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+    }
+    pub async fn move_before_sibling_new_parent(id:&str, parent_id: &str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
+        let path = Update::PATH.replace("{id}",id);
+        
+        let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
+            name: None,
+            parent_id: Some(Some(category_id_from_str(parent_id))),
             index: Some(before_sibling_index) 
         };
         api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn move_before_sibling_root(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("id",id);
+        let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: None,
@@ -74,8 +84,8 @@ pub mod category {
         api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
-    pub async fn move_end_parent(id:&str, parent_id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("id",id);
+    pub async fn move_end(id:&str, parent_id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
+        let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: None,
@@ -86,7 +96,7 @@ pub mod category {
     }
 
     pub async fn move_end_root(id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("id",id);
+        let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: None,
@@ -97,9 +107,9 @@ pub mod category {
     }
 
     pub async fn delete(id:&str) -> FetchResult < <Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err> {
-        let path = Delete::PATH.replace("id",id);
+        let path = Delete::PATH.replace("{id}",id);
 
-        api_with_auth::<_,_,()>(&api_url(&path), Delete::METHOD, None).await
+        api_with_auth_no_result::<_,()>(&api_url(&path), Delete::METHOD, None).await
     }
 }
 

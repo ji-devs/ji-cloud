@@ -2,18 +2,18 @@ mod auth;
 mod cors;
 mod endpoints;
 
-use crate::jwkkeys::JwkVerifier;
+use crate::{algolia::AlgoliaClient, jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
-    settings::Settings,
+    settings::RuntimeSettings,
 };
 use futures::Future;
+use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
-use tokio::sync::RwLock;
 
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
@@ -39,15 +39,19 @@ where
 #[actix_web::main]
 pub async fn run(
     pool: PgPool,
-    settings: Settings,
-    jwk_verifier: Arc<RwLock<JwkVerifier>>,
+    settings: RuntimeSettings,
+    jwk_verifier: Arc<JwkVerifier>,
+    s3: S3Client,
+    algolia: AlgoliaClient,
 ) -> anyhow::Result<()> {
-    let local_insecure = settings.local_insecure;
+    let local_insecure = settings.is_local();
     let api_port = settings.api_port;
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .data(pool.clone())
             .data(settings.clone())
+            .data(s3.clone())
+            .data(algolia.clone())
             .app_data(jwk_verifier.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
@@ -55,6 +59,7 @@ pub async fn run(
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
+            .configure(endpoints::image::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

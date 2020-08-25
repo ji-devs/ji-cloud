@@ -6,21 +6,21 @@ use actix_web::{
     web::{Data, Json, ServiceConfig},
     HttpResponse,
 };
-use core::settings::Settings;
+use core::settings::RuntimeSettings;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
         user::{Profile, Register, Signin, SingleSignOn},
         ApiEndpoint,
     },
-    auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    domain::auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    domain::user::NoSuchUserError,
     error::auth::RegisterError,
-    user::NoSuchUserError,
 };
 use sqlx::PgPool;
 
 async fn handle_signin_credentials(
-    settings: Data<Settings>,
+    settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: FirebaseUser,
 ) -> actix_web::Result<HttpResponse> {
@@ -30,7 +30,7 @@ async fn handle_signin_credentials(
         .ok_or_else(|| HttpResponse::UnprocessableEntity().json(NoSuchUserError {}))?;
 
     let (csrf, cookie) =
-        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.local_insecure)
+        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())
             .map_err(|_| HttpResponse::InternalServerError())?;
 
     Ok(HttpResponse::Ok()
@@ -48,7 +48,7 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterErro
 }
 
 async fn handle_register(
-    settings: Data<Settings>,
+    settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: FirebaseUser,
     req: Json<RegisterRequest>,
@@ -57,8 +57,7 @@ async fn handle_register(
 
     let id = register(db.as_ref(), &user.id, &req).await?;
 
-    let (csrf, cookie) =
-        reply_signin_auth(id, &settings.jwt_encoding_key, settings.local_insecure)?;
+    let (csrf, cookie) = reply_signin_auth(id, &settings.jwt_encoding_key, settings.is_local())?;
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
@@ -71,14 +70,15 @@ async fn handle_get_profile(
 ) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    dbg!(db::user::profile(db.as_ref(), claims.0.id).await)
+    db::user::profile(db.as_ref(), claims.0.id)
+        .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
         .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
 async fn handle_authorize(
-    settings: Data<Settings>,
+    settings: Data<RuntimeSettings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,
 ) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {
     let claims = AuthClaims {

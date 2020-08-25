@@ -57,7 +57,7 @@ serde_json = "1.0.57"
 futures = "0.3.5"
 log = "0.4.11"
 cfg-if = "0.1.10"
-awsm_web = { version = "0.4.1", features = ["dom"] }
+awsm_web = { version = "0.5.0", features = ["dom"] }
 discard = "1.0.4"
 
 #SPA specific

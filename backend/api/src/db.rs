@@ -1,11 +1,9 @@
 pub(crate) mod category;
+pub(crate) mod image;
 pub(crate) mod user;
 
 use config::DB_POOL_CONNECTIONS;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPool, PgPoolOptions},
-    Executor,
-};
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPool> {
     let pool = PgPoolOptions::new()
@@ -13,7 +11,7 @@ pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPoo
         .connect_with(connect_options)
         .await?;
 
-    pool.execute(include_str!("view/category-tree.sql")).await?;
+    sqlx::migrate!("./migrations").run(&pool).await?;
 
     Ok(pool)
 }

@@ -14,11 +14,12 @@ use shared::api::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
-use shared::auth::CSRF_HEADER_NAME;
+use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
 use awsm_web::loaders::fetch::fetch_with_headers_and_data;
+
 
 #[derive(Debug)]
 pub enum Error {
@@ -45,7 +46,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     match fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data).await {
         //TODO - not sure why we need to re-wrap
         //since actix is returning a Result... OR IS IT?!?!?
-        Ok(res) => Ok(res.json().await.unwrap()),
+        Ok(res) => Ok(res.json_from_str().await.unwrap()),
         Err(err) => {
             Err(Err(err))
         }
@@ -58,7 +59,25 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     let csrf = load_csrf_token().unwrap();
 
     match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
-        Ok(res) => Ok(res.json().await.unwrap()),
+        Ok(res) => {
+            let res = res.json_from_str().await.unwrap();
+            Ok(res)
+        },
+        Err(err) => {
+            Err(Err(err))
+        }
+    }
+}
+
+pub async fn api_with_auth_no_result<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let csrf = load_csrf_token().unwrap();
+
+    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+        Ok(_) => {
+            Ok(())
+        },
         Err(err) => {
             Err(Err(err))
         }

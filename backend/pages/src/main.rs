@@ -1,22 +1,16 @@
-use std::thread;
+use core::settings::SettingsManager;
 
 mod logger;
 mod server;
 mod templates;
 
-#[tokio::main]
+#[actix_rt::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv();
 
     logger::init_logger()?;
 
-    let settings = core::settings::init().await?;
+    let settings: SettingsManager = core::settings::SettingsManager::new().await?;
 
-    let handle = thread::spawn(|| server::run(settings));
-
-    log::info!("app started!");
-
-    handle.join().unwrap()?;
-
-    Ok(())
+    server::run(settings.runtime_settings().await?).await
 }

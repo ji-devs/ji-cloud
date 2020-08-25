@@ -1,10 +1,11 @@
 [package]
 name = "core"
 version = "0.1.0"
-authors = ["David Komer <david.komer@gmail.com>"]
+authors = [
+    "David Komer <david.komer@gmail.com>",
+    "Chloe Ross <chloe@launchbadge.com>",
+]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1.0.32"
@@ -16,11 +17,15 @@ percent-encoding = "2.1"
 reqwest = {version = "0.10", features = ["json"]}
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-sqlx = { version = "0.4.0-beta.1", default-features = false, features = ["postgres", "runtime-tokio"] }
+sqlx = { version = "0.4.0-beta.1", default-features = false, features = ["postgres", "runtime-tokio"], optional=true }
 listenfd = { version = "0.3.3", optional = true }
 
 [features]
-sqlproxy = []
+sqlproxy = ["db"]
 local = ["listenfd"]
 release = []
 sandbox = []
+s3 = []
+jwk = []
+db = ["sqlx"]
+algolia = []
