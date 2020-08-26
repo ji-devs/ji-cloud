@@ -8,7 +8,7 @@
     "bundle": "npm-run-all -p _bundle-dev _bundle-prod",
     "_bundle-dev": "postcss src/index.css --env development -o dist/styles.css",
     "_bundle-prod": "postcss src/index.css --env production -o dist/styles.min.css",
-	"_bundle-for-storybook": "postcss src/index.css --env production -o dist/styles.css"
+    "_bundle-for-storybook": "postcss src/index.css --env production -o dist/styles.css"
   },
   "author": "",
   "license": "ISC",
