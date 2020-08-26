@@ -20,3 +20,15 @@
   </select>
 </div>
 {% endmacro select %}
+
+
+{% macro description(label,inputDataId="") %}
+<div class="mb-4">
+  <label for="name" class="pl-2">
+    <span class="text-jibuttonBlue">{{label}}</span>
+    <div class="flex items-center border-b border-jiborderGrey py">
+        <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 pl-2  leading-tight focus:outline-none" type="text" placeholder="Jane Doe" aria-label="Full name">
+    </div>
+  </label>
+</div>
+{% endmacro description %}

@@ -4,6 +4,7 @@ import sidebar from "@templates/sidebar.html";
 import searchpage from "@templates/searchpage.html";
 import categories from "@templates/_demo/categories.html";
 import addimage from "@templates//imageadd.html";
+import imagelabel from "@templates//imagelabel.html";
 
 export default {
   title: 'Admin page',
@@ -31,6 +32,15 @@ export const SearchPage = story(
 export const AddImage = story(
     "Add image",
     () => tmpl(addimage, {
+
+    }),
+
+
+);
+
+export const ImageLabel = story(
+    "Image label",
+    () => tmpl(imagelabel, {
 
     }),
 
