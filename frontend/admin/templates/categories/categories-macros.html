@@ -8,7 +8,7 @@
       {% else %}
         <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
       {% endif %}
-      <p class="font-medium">
+      <p class="font-normal">
         <span data-id="display">{{label}}</span>
         <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
       </p>
@@ -24,7 +24,7 @@
       <li class="relative titleoptions flex items-center">
         <span data-id="display">{{label}}</span>
         <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
-        
+
         <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
         </div>
         {{ self::menu() }}
@@ -42,28 +42,28 @@
     <div class="bg-jibluelighter dots rounded-full h-2 w-2 mr-1"></div>
   </div>
   <div data-id="menu" class="absolute p-2 z-40 dropdown hidden cursor-pointer">
-    <div data-id="close" class="px-3">X</div>
-    <ul class="bg-white rounded-md shadow-md w-112 py-3">
+
+    <ul class="bg-white rounded-md shadow-md w-150 py-3 text-sm relative">
+      <div data-id="close" class="px-3 absolute right-0"><img src="{{MEDIA_UI}}/icon-close-menu.svg" alt=""></div>
       <li data-id="add" class="hover:bg-jibackgroundBlue">
-        <div class="px-3">Add a child</div>
+        <div class="p-2 pl-4">Add a child</div>
       </li>
       <li data-id="rename" class="hover:bg-jibackgroundBlue">
-        <div class="p-3">Rename</div>
+        <div class="p-2 pl-4">Rename</div>
       </li>
       <li data-id="move-up" class="hover:bg-jibackgroundBlue">
-        <div class="p-3">Move Up</div>
+        <div class="p-2 pl-4">Move Up</div>
       </li>
       <li data-id="move-down" class="hover:bg-jibackgroundBlue">
-        <div class="p-3">Move Down</div>
+        <div class="p-2 pl-4">Move Down</div>
       </li>
       <li data-id="delete" class="hover:bg-jibackgroundBlue">
-        <div class="p-3">Delete</div>
+        <div class="p-2 pl-4">Delete</div>
       </li>
       <li data-id="hide" class="hover:bg-jibackgroundBlue">
-        <div class="p-3">Hide</div>
+        <div class="p-2 pl-4">Hide</div>
       </li>
     </ul>
   </div>
 </div>
 {% endmacro menu %}
-
