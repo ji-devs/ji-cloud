@@ -16,13 +16,16 @@ module.exports = {
         jiblueLight: '#83aef7',
         jiblueMedium: '#6698ed',
         jiblueDark: '#2b54b8',
-        jigreen: '#6eca90',
+        jinumberblue: '#c4dbfe',
+        jigreen: '#61D592',
         jibuttonBlue:'#5590fc',
         jibackgroundBlue: "#e6f0ff",
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
         jibackgroundGrey:'#f8f9fd',
+        jigreyinputborder:'#d3d3d3;'
       },
+
 
       fontSize: {
         14:'14px',
@@ -35,6 +38,12 @@ module.exports = {
       width: {
         259: '259px',
         112: '112px',
+        150: '150px',
+        288: '288px'
+      },
+      height: {
+        216: '216px',
+        185: '185px',
       },
       borderRadius: {
         20: '20px'
@@ -43,6 +52,9 @@ module.exports = {
         40:'40px',
         10:'10px',
         25:'25%'
+      },
+      borderWidth: {
+        3: '3px'
       }
     },
   },
