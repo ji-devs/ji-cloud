@@ -14,6 +14,8 @@ const CATEGORIES:&'static str = "categories";
 const CATEGORY_MAIN_SELECTED:&'static str = "category_main_selected";
 const CATEGORY_MAIN_DESELECTED:&'static str = "category_main_deselected";
 const CATEGORY_SUB:&'static str = "category_sub";
+const CATEGORY_LABEL_DISPLAY:&'static str = "category_label_display";
+const CATEGORY_LABEL_INPUT:&'static str = "category_label_input";
 
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
@@ -22,12 +24,10 @@ pub fn category_main(id:&str, selected:bool) -> HtmlElement {
     if selected {
         TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_SELECTED, &html_map!(
             "id" => id,
-            "name" => "replace_me",
         )).unwrap())
     } else {
         TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_MAIN_DESELECTED, &html_map!(
             "id" => id,
-            "name" => "replace_me",
         )).unwrap())
     }
 }
@@ -35,8 +35,13 @@ pub fn category_main(id:&str, selected:bool) -> HtmlElement {
 pub fn category_sub(id:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CATEGORY_SUB, &html_map!(
         "id" => id,
-        "name" => "replace_me",
     )).unwrap())
+}
+pub fn category_label_input() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORY_LABEL_INPUT))
+}
+pub fn category_label_display() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORY_LABEL_DISPLAY))
 }
 
 
@@ -59,6 +64,8 @@ impl Templates {
             (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_selected.html"))),
             (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_deselected.html"))),
             (CATEGORY_SUB, get_template_str(include_str!("../../../.template_output/categories/category_sub.html"))),
+            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../.template_output/categories/category_label_display.html"))),
+            (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../.template_output/categories/category_label_input.html"))),
         ]);
 
         Self { cache }

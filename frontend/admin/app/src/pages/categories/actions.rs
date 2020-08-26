@@ -20,13 +20,13 @@ use futures::future::ready;
 
 pub struct MutableCategory {
     pub id: String,
-    pub name: Mutable<String>,
+    pub name: Mutable<Option<String>>,
     pub children: MutableVec<Rc<MutableCategory>>,
     pub parent: Option<Rc<MutableCategory>>,
 }
 
 impl MutableCategory {
-    pub fn append_child(name:String, id: String, parent: Option<Rc<MutableCategory>>) -> Rc<Self> {
+    pub fn append_child(name:Option<String>, id: String, parent: Option<Rc<MutableCategory>>) -> Rc<Self> {
         let parent_clone = parent.clone();
         let _self = Rc::new(Self {
             id,
@@ -86,7 +86,7 @@ pub async fn load_categories(page:Rc<CategoriesPage>) {
 
     fn load_children(categories:Vec<Category>, parent:Rc<MutableCategory>) {
         for cat in categories.into_iter() {
-            let item = MutableCategory::append_child(cat.name.to_string(), cat.id.0.to_string(), Some(parent.clone()));
+            let item = MutableCategory::append_child(Some(cat.name.to_string()), cat.id.0.to_string(), Some(parent.clone()));
             if !cat.children.is_empty() {
                 load_children(cat.children, item);
             }
@@ -120,7 +120,7 @@ pub async fn load_categories(page:Rc<CategoriesPage>) {
 }
 
 
-pub fn create_category(parent:Rc<MutableCategory>, name:String) {
+pub fn create_category(parent:Rc<MutableCategory>) {
     spawn_local(async move {
         let parent_id = {
             if parent.parent.is_none() {
@@ -129,11 +129,11 @@ pub fn create_category(parent:Rc<MutableCategory>, name:String) {
                 Some(parent.id.as_ref())
             }
         };
-        let resp = fetch_category::create(name.clone(), parent_id).await;
+        let resp = fetch_category::create(super::data::EMPTY_NAME.to_string(), parent_id).await;
 
         match resp {
             Ok(resp) => {
-                let _ = MutableCategory::append_child(name, resp.id.0.to_string(), Some(parent.clone()));
+                let _ = MutableCategory::append_child(None, resp.id.0.to_string(), Some(parent.clone()));
             }, 
             Err(err) => {
                 match err {
@@ -168,14 +168,12 @@ pub fn move_up(cat:&MutableCategory) {
     if let Some((before, after)) = cat.move_up() {
         let id = cat.id.clone();
 
-        /*
         spawn_local(
             async move {
                 fetch_category::move_before_sibling(&id, before.try_into().unwrap()).await;
                 ()
             }
         )
-        */
     }
 }
 pub fn move_down(cat:&MutableCategory) {
@@ -184,7 +182,6 @@ pub fn move_down(cat:&MutableCategory) {
         let parent_id = cat.parent.as_ref().unwrap_throw().id.clone();
         let parent_len = cat.parent_len().unwrap_throw();
 
-        /*
         spawn_local(
             async move {
                 if after == parent_len-1 {
@@ -195,11 +192,17 @@ pub fn move_down(cat:&MutableCategory) {
                 ()
             }
         )
-        */
     }
 }
 
 
-pub fn rename_category(cat:&MutableCategory, name:&str) {
-    cat.name.set(name.to_string());
+pub fn rename_category(cat:&MutableCategory, name:String) {
+    let id = cat.id.clone();
+
+    spawn_local(
+        async move {
+            fetch_category::rename(&id, name).await;
+            ()
+        }
+    )
 }
