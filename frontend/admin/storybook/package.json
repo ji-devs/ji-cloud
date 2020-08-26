@@ -10,7 +10,7 @@
     "storybook:build-release": "npm run clean && npm run _css-build && npm run _templates-build:release && build-storybook -o ./dist/storybook-build",
     "storybook:build-sandbox": "npm run clean && npm run _css-build && npm run _templates-build:sandbox && build-storybook -o ./dist/storybook-build",
     "clean": "rimraf ./dist",
-    "_css-build": "cd ../css && npm run _bundle-for-storybook",
+    "_css-build": "cd ../css && npm run _bundle-dev",
     "_css-watch": "cd ../css && npm run watch",
     "_media-server": "cd ../../../build-utils && npm run local-media-server",
     "_storybook-watch": "start-storybook -p 6006 -s ./dist",
