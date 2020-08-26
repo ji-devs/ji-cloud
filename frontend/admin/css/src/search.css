@@ -1,5 +1,5 @@
 .jibluelighter:hover .dots {
-  background-color: "#5590fc";
+  background-color: #5590fc;
 }
 
 input[type="search"]::-webkit-search-decoration,
@@ -14,10 +14,6 @@ input[type="search"]::-webkit-search-results-decoration {
   top: -10px
 }
 
-* {
-  font-family: 'Poppins', sans-serif;
-}
-
 
 .titleoptions .ellipses {
   display: none;
@@ -25,3 +21,23 @@ input[type="search"]::-webkit-search-results-decoration {
 .titleoptions:hover .ellipses{
   display: flex;
 }
+
+.arrow {
+  fill: red;
+}
+
+.searchpage input[type="search"]:focus{
+  border-color: #5590fc;
+
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.addImage:hover button{
+background-color: #2b54b8;
+
+};

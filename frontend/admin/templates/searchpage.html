@@ -1,61 +1,54 @@
 {% import "_sidebar/sidebar-macros.html" as Sidebar %}
 {% import "_buttons/button-macros.html" as ButtonMacros %}
 {% import "_input/input-macros.html" as Input %}
+{% import "_image/imagedisplay-macros.html" as Image %}
+
+<!-- Naomi - this was in the PR, so leaving it - but it looks like an incompalte fragment?
+<div class="font-poppins flex searchpage">
+  <div class="w-full px-8 pt-6">
+    <div class="flex items-center py-2 mb-4 justify-between">
+      <h1 class="text-2xl font-poppins font-light">Label Image</h1>
+      {{ Input::searchbox(dataId="#") }}
+    </div>
+    <div class="bordersolid border-b-2 w-full border-grey-400"></div>
+-->
 
 <div class="font-poppins flex">
   <div class="w-full">
-    {# --- THESE TWO LINES WERE IN _titles --- #}
-      <h1 class="text-2xl py-2 mb-4 font-poppins font-light">Label Images</h1>
-      <div class="bordersolid border-b-2 w-full border-grey-400"></div>
-    {# --- #}
-    {{ Input::searchbox(dataId="#") }}
+
     <div class="flex py-4 px-2">
-      <div class="flex-1">
-        <p>We found ${results}</p>
+      <div class="flex">
+        <p>We found <span class="text-jibuttonBlue">${results}</span> images for passover</p>
       </div>
-      <div class="flex-1">
+      <div class="flex ml-auto mr-auto">
         <div class="flex">
-          <p>&lt; Back</p>
-          <p>Page
-            <span>1</span>
-            of
-            <span>10</span>
+          <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="transform rotate-180 arrow">
+          <p class="mr-2">
+            Back
           </p>
-          <p>Next &gt;</p>
+          <div class="flex mx-6">Page
+              <input type="number" class="h-6 w-6 bg-jibackgroundBlue text-center flex justify-center items-center mx-1 border border-jinumberblue text-jibuttonBlue focus:outline-none">
+
+            of
+            <span class="mx-1">10</span>
+          </div>
+          <div class="flex">
+            <p>Next</p>
+            <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="arrow">
+          </div>
         </div>
       </div>
-      <div class="flex-1">
-        <input type="search" name="" value="" class="border">
+      <div class="flex ml-auto mr-0">
+        {{ Input::select(dataId="#") }}
       </div>
     </div>
     <div class="grid grid-cols-5 gap-4">
-      <div>
-        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
-        <div class="flex items-center justify-center relative">
-          <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
-          <p>Moses part the nile</p>
-        </div>
-      </div>
-      <div>
-        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
-        <div class="flex items-center justify-center relative">
-          <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
-          <p>Moses part the nile</p>
-        </div>
-      </div>
-      <div>
-        <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
-        <div class="flex items-center justify-center relative">
-          <div class="rounded-full h-3 w-3 flex items-center justify-center bg-indigo-400 absolute left-0 ml-2"></div>
-          <p>Moses part the nile</p>
-        </div>
-      </div>
-      <div class="">2</div>
-      <div class="">2</div>
-      <div class="">2</div>
-      <div class="">2</div>
-      <div class="">2</div>
-      <div class="">2</div>
+      {{ Image::imagelabel(imagelink="red-sea-book.png", dataId="#") }}
+      {{ Image::imagelabel(imagelink="3971-small.png", dataId="#") }}
+      {{ Image::imagelabel(imagelink="261.png", dataId="#") }}
+      {{ Image::imagelabel(imagelink="sticker-244-2019-04-09-thumb.png", dataId="#") }}
+
+
       <div>9</div>
     </div>
   </div>

@@ -17,9 +17,13 @@
             <p class="text-jibuttonBlue font-medium">Categories</p>
             {{ Input::searchbox(inputDataId="new-cat-input") }}
           </div>
-          {{ ButtonMacros::blue(label="+ Add Category", dataId="new-cat-btn") }}
+          {{ ButtonMacros::blue(label="+ Add Category", dataId="new-cat-btn", hover="") }}
         </div>
-       
+
+        {{ Category::menu(label="Hebrew", dataId="#") }}
+        {{ Category::menu(label="Characters", dataId="#") }}
+        {{ Category::menu(label="Songs", dataId="#") }}
+        {{ Category::menu(label="Songs", dataId="#") }}
         <div data-id="list"></div>
       </div>
       <div class="w-1/2"></div>
