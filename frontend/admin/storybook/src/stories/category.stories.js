@@ -1,9 +1,11 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId, toggleClassesId, setTextId} from "@utils/dom";
 import categoriesPage from "@templates/categories/categories-page.html";
 import categoryMainSelected from "@templates/categories/category_main_selected.html";
 import categoryMainDeselected from "@templates/categories/category_main_deselected.html";
 import categorySub from "@templates/categories/category_sub.html";
+import categoryLabelDisplay from "@templates/categories/category_label_display.html";
+import categoryLabelInput from "@templates/categories/category_label_input.html";
 
 export default {
   title: 'Categories',
@@ -12,8 +14,8 @@ export default {
 export const SingleItem = () => {
     const page = tmpl(categoriesPage, {});
     
-    appendId(page, "list", tmpl(categoryMainDeselected, {name: "deselected"}));
-    appendId(page, "list", tmpl(categoryMainSelected, {name: "selected"}));
+    appendId(page, "list", setLabel(tmpl(categoryMainDeselected), "deselected")); 
+    appendId(page, "list", setLabel(tmpl(categoryMainSelected), "selected")); 
     return page;
 }
 
@@ -27,21 +29,29 @@ export const MultiItem = () => {
 export const WithMenu = () => {
     const page = tmpl(categoriesPage, {});
 
-    appendId(page, "list", toggleClassesId(tmpl(categoryMainSelected, {name: "with menu"}), "menu", ["hidden"], false));
+    const element = setLabel(tmpl(categoryMainSelected), "with menu");
+    appendId(page, "list", toggleClassesId(element, "menu", ["hidden"], false));
 
     return page;
 }
 
+function setLabel(parentElement, label) {
+
+    const element = tmpl(categoryLabelDisplay);
+    element.innerText = label;
+
+    return appendId(parentElement, "label", element);
+}
 function createTree(selected) {
     const subItems = [
-        tmpl(categorySub, {name: "sub item 1"}),
-        tmpl(categorySub, {name: "sub item 2"}),
+        setLabel(tmpl(categorySub), "sub item 1"),
+        setLabel(tmpl(categorySub), "sub item 2"),
     ];
 
     subItems.forEach(subItem => {
         const subSubItems = [
-            tmpl(categorySub, {name: "sub item A"}),
-            tmpl(categorySub, {name: "sub item B"}),
+            setLabel(tmpl(categorySub), "sub item A"),
+            setLabel(tmpl(categorySub), "sub item B"),
         ];
         subSubItems.forEach(subSubItem => {
             appendId(subItem, "children", subSubItem);
@@ -49,8 +59,8 @@ function createTree(selected) {
     });
 
     const mainItem = selected 
-        ? tmpl(categoryMainSelected, {name: "selected"})
-        : tmpl(categoryMainDeselected, {name: "deselected"});
+        ? setLabel(tmpl(categoryMainDeselected), "deselected")
+        : setLabel(tmpl(categoryMainSelected), "selected");
 
     subItems.forEach(subItem=> {
         appendId(mainItem, "children", subItem);

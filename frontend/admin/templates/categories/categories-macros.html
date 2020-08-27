@@ -1,4 +1,4 @@
-{% macro main(label, selected, dataId="") %}
+{% macro main(selected, dataId="") %}
 <div class="{% if selected %} bg-jibackgroundBlue border-jigreen {% endif %} border-l-8 border-l-solid rounded-md mb-2">
   <div class="flex items-center titleoptions">
     <div class="flex py-3">
@@ -8,10 +8,7 @@
       {% else %}
         <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
       {% endif %}
-      <p class="font-normal">
-        <span data-id="display">{{label}}</span>
-        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
-      </p>
+      <p data-id="label" class="font-normal"></p>
     </div>
     {{ self::menu() }}
   </div>
@@ -19,12 +16,10 @@
 </div>
 {% endmacro parent %}
 
-{% macro sub(label, dataId="") %}
+{% macro sub(dataId="") %}
     <ul data-id="{{dataId}}" class="px-14 ml-16 pb-1 mt-2">
       <li class="relative titleoptions flex items-center">
-        <span data-id="display">{{label}}</span>
-        <input data-id="input" type="text" class="hidden" value="{{label}}"></input>
-
+        <div data-id="label"></div>
         <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
         </div>
         {{ self::menu() }}

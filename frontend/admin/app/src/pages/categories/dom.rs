@@ -25,7 +25,6 @@ use shared::domain::{
 use super::actions::*;
 
 pub struct CategoriesPage {
-    pub refs: RefCell<Option<CategoryPageRefs>>,
     pub loader_status: Mutable<Option<Result<(), ()>>>,
     pub loader: AsyncLoader,
     pub categories_root: Rc<MutableCategory>, 
@@ -41,10 +40,9 @@ impl Drop for CategoriesPage {
 impl CategoriesPage {
     pub fn new() -> Rc<Self> {
         let _self = Rc::new(Self { 
-            refs: RefCell::new(None),
             loader_status: Mutable::new(None),
             loader: AsyncLoader::new(),
-            categories_root: MutableCategory::append_child("root".to_string(), "-1".to_string(), None) 
+            categories_root: MutableCategory::append_child(Some("root".to_string()), "-1".to_string(), None) 
         });
 
         _self.loader.load(load_categories(_self.clone()));
@@ -84,36 +82,10 @@ impl CategoriesPage {
             })
             .with_data_id!("new-cat-btn", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    let input = _self.refs.borrow();
-                    let input = &input.as_ref().unwrap_throw().input_new;
-                    let value = input.value();
-
-                    input.set_value("");
-
-                    create_category(_self.categories_root.clone(), value);
+                    create_category(_self.categories_root.clone());
                 }))
             })
-            .after_inserted(clone!(_self => move |elem| {
-                _self.stash_refs(elem)
-            }))
         })
-    }
-
-    fn stash_refs(&self, parent:HtmlElement) {
-        *self.refs.borrow_mut() = Some(CategoryPageRefs::new(&parent));
-    }
-
-}
-
-pub struct CategoryPageRefs {
-    input_new: HtmlInputElement,
-}
-
-impl CategoryPageRefs {
-    pub fn new(parent:&HtmlElement) -> Self {
-        Self {
-            input_new: parent.select(&data_id("new-cat-input")),
-        }
     }
 
 }
@@ -127,11 +99,13 @@ pub struct MutableCategoryDom {
 
 impl MutableCategoryDom {
     pub fn new(category:Rc<MutableCategory>) -> Rc<Self> {
+        let editing_mode = category.name.lock_ref().is_none();
+
         let _self = Rc::new(Self { 
             category ,
             menu_visible: Mutable::new(false),
             selected: Mutable::new(false),
-            editing_mode: Mutable::new(false),
+            editing_mode: Mutable::new(editing_mode),
         });
         _self
     }
@@ -148,18 +122,44 @@ impl MutableCategoryDom {
                         })
                     ))
                 })
-                .with_data_id!("input", {
-                    .class_signal("hidden", _self.editing_mode.signal().map(|editing| !editing))
-                    .property_signal("value", _self.category.name.signal_cloned()) 
-                    .event(clone!(_self => move |evt:events::Input| {
-                        if let Some(value) = evt.value() {
-                            _self.category.name.set(value);
-                        }
-                    }))
-                })
-                .with_data_id!("display", {
-                    .text_signal(_self.category.name.signal_cloned())
-                    .class_signal("hidden", _self.editing_mode.signal())
+                .with_data_id!("label", {
+                    .child_signal(_self.editing_mode.signal().map(clone!(_self => move |editing| {
+                        let name_signal = _self.category.name.signal_ref(|name| {
+                            match name {
+                                Some(name) => name.clone(),
+                                None => super::data::EMPTY_NAME.to_string()
+                            }
+                        });
+
+                        Some(if editing {
+                            elem!(templates::category_label_input(), {
+                                .property_signal("value", name_signal) 
+                                    /*
+                                .event(clone!(_self => move |evt:events::Input| {
+                                    if let Some(value) = evt.value() {
+                                        _self.category.name.set(Some(value));
+                                    }
+                                }))
+                                */
+                                .event(clone!(_self => move |evt:events::KeyDown| {
+                                    if evt.key() == "Enter" {
+                                        if let Some(target) = evt.target() {
+                                            let input:HtmlInputElement = target.unchecked_into();
+                                            let value = input.value();
+                                            _self.category.name.set(Some(value.clone()));
+                                            _self.editing_mode.set(false);
+                                            rename_category(&_self.category, value);
+                                        }
+                                    } else if evt.key() == "Escape" {
+                                        _self.editing_mode.set(false);
+                                    }
+                                }))
+                                .focused(true)
+                            })
+                        } else {
+                            elem!(templates::category_label_display(), { .text_signal(name_signal) })
+                        })
+                    })))
                 })
                 .with_data_id!("menu", {
                     .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
@@ -172,7 +172,7 @@ impl MutableCategoryDom {
                     .with_data_id!("add", {
                         .event(clone!(_self => move |_evt:events::Click| {
                             _self.menu_visible.set(false);
-                            create_category(_self.category.clone(), "New Category".to_string());
+                            create_category(_self.category.clone());
                         }))
                     })
                     .with_data_id!("delete", {
@@ -196,8 +196,12 @@ impl MutableCategoryDom {
                     .with_data_id!("rename", {
                         .event(clone!(_self => move |_evt:events::Click| {
                             _self.editing_mode.set(true);
+                            _self.menu_visible.set(false);
                         }))
                     })
+                    .global_event(clone!(_self => move |_evt:events::Click| {
+                        //TODO close if clicked outside menu
+                    }))
                 })
                 .with_data_id!("menu-toggle-btn", {
                     .event(clone!(_self => move |_evt:events::Click| {

@@ -5,7 +5,7 @@ pub mod category {
     };
     use crate::{
         path::api_url,
-        fetch::{api_with_auth, api_with_auth_no_result, FetchResult}
+        fetch::{api_with_auth, api_with_auth_empty, FetchResult}
     };
     use uuid::Uuid;
     use wasm_bindgen::UnwrapThrowExt;
@@ -49,7 +49,7 @@ pub mod category {
             parent_id: None,
             index: None
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn move_before_sibling(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -60,7 +60,7 @@ pub mod category {
             parent_id: None, 
             index: Some(before_sibling_index) 
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
     pub async fn move_before_sibling_new_parent(id:&str, parent_id: &str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
         let path = Update::PATH.replace("{id}",id);
@@ -70,7 +70,7 @@ pub mod category {
             parent_id: Some(Some(category_id_from_str(parent_id))),
             index: Some(before_sibling_index) 
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn move_before_sibling_root(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -81,7 +81,7 @@ pub mod category {
             parent_id: Some(None),
             index: Some(before_sibling_index) 
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn move_end(id:&str, parent_id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -92,7 +92,7 @@ pub mod category {
             parent_id: Some(Some(category_id_from_str(parent_id))),
             index: None 
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn move_end_root(id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -103,13 +103,13 @@ pub mod category {
             parent_id: Some(None),
             index: None 
         };
-        api_with_auth(&api_url(&path), Update::METHOD, Some(req)).await
+        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
     pub async fn delete(id:&str) -> FetchResult < <Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err> {
         let path = Delete::PATH.replace("{id}",id);
 
-        api_with_auth_no_result::<_,()>(&api_url(&path), Delete::METHOD, None).await
+        api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await
     }
 }
 
