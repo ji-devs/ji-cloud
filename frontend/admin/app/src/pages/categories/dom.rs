@@ -231,7 +231,7 @@ impl MutableCategoryDom {
                                         log::info!("GLOBAL CLICK");
                                         if let Some(target) = evt.target() {
                                             let element:Element = target.unchecked_into();
-                                            if !element.closest_data_id("menu").is_some() {
+                                            if !element.closest_data_id("menu-container").is_some() {
                                                 _tree.borrow_mut().close_menu();
                                             }
                                         }
