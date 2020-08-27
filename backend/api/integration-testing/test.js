@@ -192,10 +192,73 @@ test('user profile', async (t) => {
     t.snapshot(profile.body);
 });
 
-test.todo('create category');
+test('create category', async (t) => {
+    await runFixtures(['fixtures/1_user.sql'], t.context.dbUrl, t.context.parentDir);
+
+    const category = await got.post('http://0.0.0.0/v1/category', {
+        ...t.context.loggedInReqBase,
+        json: {
+            name: 'One',
+        },
+    });
+
+    t.deepEqual(typeof (category.body.id), 'string');
+    t.deepEqual(typeof (category.body.index), 'number');
+})
+
 test.todo('delete category');
-test.todo('get categories');
 test.todo('update category');
+
+test('get categories', async (t) => {
+    await runFixtures(['fixtures/1_user.sql', 'fixtures/3_category_ordering.sql'], t.context.dbUrl, t.context.parentDir);
+
+    const categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
+
+    t.snapshot(categories.body);
+})
+
+test('update category ordering', async (t) => {
+    const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';
+    await runFixtures(['fixtures/1_user.sql', 'fixtures/3_category_ordering.sql'], t.context.dbUrl, t.context.parentDir);
+
+    const updateResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
+        ...t.context.loggedInReqBase,
+        json: {
+            index: 0,
+        }
+    });
+
+    t.deepEqual(updateResp.statusCode, 204);
+
+    let categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
+
+    // ignore updated at (but make sure it exists, and is a string)
+    categories.body.categories.forEach(it => {
+        t.deepEqual(typeof (it.updated_at), 'string');
+        delete it.updated_at;
+    });
+
+    t.snapshot(categories.body);
+
+    const revertResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
+        ...t.context.loggedInReqBase,
+        json: {
+            index: 2,
+        }
+    });
+
+    t.deepEqual(revertResp.statusCode, 204);
+
+    categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
+
+    // ignore updated at (but make sure it exists, and is a string)
+    categories.body.categories.forEach(it => {
+        t.deepEqual(typeof (it.updated_at), 'string');
+        delete it.updated_at;
+    });
+
+    t.snapshot(categories.body);
+})
 
 test('GET metadata', async (t) => {
     await runFixtures(['fixtures/1_user.sql', 'fixtures/2_image_meta_kinds.sql'], t.context.dbUrl, t.context.parentDir);

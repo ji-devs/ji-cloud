@@ -137,19 +137,6 @@
       ]
     }
   },
-  "4e2cce1d7c10c79ae6d07626a2fa64807f82c50d7e647eddbc7b3d8ee0e19f29": {
-    "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and parent_id = $2\n                ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int2",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -363,6 +350,20 @@
         false,
         true
       ]
+    }
+  },
+  "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac": {
+    "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
