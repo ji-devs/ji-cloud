@@ -1,11 +1,12 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId, setTextId} from "@utils/dom";
 import categoriesPage from "@templates/categories/categories-page.html";
-import categoryMainSelected from "@templates/categories/category_main_selected.html";
-import categoryMainDeselected from "@templates/categories/category_main_deselected.html";
-import categorySub from "@templates/categories/category_sub.html";
-import categoryLabelDisplay from "@templates/categories/category_label_display.html";
-import categoryLabelInput from "@templates/categories/category_label_input.html";
+import categoryMainSelected from "@templates/categories/category-main-selected.html";
+import categoryMainDeselected from "@templates/categories/category-main-deselected.html";
+import categorySub from "@templates/categories/category-sub.html";
+import categoryMenu from "@templates/categories/category-menu.html";
+import categoryLabelDisplay from "@templates/categories/category-label-display.html";
+import categoryLabelInput from "@templates/categories/category-label-input.html";
 
 export default {
   title: 'Categories',
@@ -30,7 +31,10 @@ export const WithMenu = () => {
     const page = tmpl(categoriesPage, {});
 
     const element = setLabel(tmpl(categoryMainSelected), "with menu");
-    appendId(page, "list", toggleClassesId(element, "menu", ["hidden"], false));
+    const menu = tmpl(categoryMenu);
+
+    appendId(element, "menu-container", menu);
+    appendId(page, "list", element); 
 
     return page;
 }
