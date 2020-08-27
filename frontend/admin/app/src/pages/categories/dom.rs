@@ -124,23 +124,20 @@ impl MutableCategoryDom {
                 })
                 .with_data_id!("label", {
                     .child_signal(_self.editing_mode.signal().map(clone!(_self => move |editing| {
-                        let name_signal = _self.category.name.signal_ref(|name| {
-                            match name {
+                        let id = _self.category.id.clone();
+                        let name_signal = _self.category.name.signal_ref(move |name| {
+                            let name = match name {
                                 Some(name) => name.clone(),
                                 None => super::data::EMPTY_NAME.to_string()
-                            }
+                            };
+
+                            name
+                            //format!("{} - {}", name, id)
                         });
 
                         Some(if editing {
                             elem!(templates::category_label_input(), {
                                 .property_signal("value", name_signal) 
-                                    /*
-                                .event(clone!(_self => move |evt:events::Input| {
-                                    if let Some(value) = evt.value() {
-                                        _self.category.name.set(Some(value));
-                                    }
-                                }))
-                                */
                                 .event(clone!(_self => move |evt:events::KeyDown| {
                                     if evt.key() == "Enter" {
                                         if let Some(target) = evt.target() {
