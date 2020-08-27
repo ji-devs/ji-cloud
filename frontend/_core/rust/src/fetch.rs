@@ -69,7 +69,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
-pub async fn api_with_auth_no_result<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<(), E> 
+pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
