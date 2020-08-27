@@ -16,20 +16,51 @@
     <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
     <div class="pl-1 pr-2">
       <div class="flex justify-between mb-6">
-        <label>
-          <input class="ml-2" type="checkbox">
-          <span class="text-sm">
-            Premium image
-          </span>
-
-        </label>
+      {{ Input::checkbox(label="Premium Image", dataId="#") }}
         <p class="text-sm text-jibuttonBlue flex items-center leading-6">Replace</p>
       </div>
     {{ Input::description(label="Image Name", inputDataId="#") }}
     {{ Input::description(label="Image Description", inputDataId="#") }}
     </div>
   </div>
-  <div class="w-2/5 border-l-2 h-screen"></div>
+  <div class="w-2/5 border-l-2 h-screen px-6">
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label for="" class="text-jibuttonBlue flex items-center ml-2">Image style</label>
+        <form class="flex flex-col" action="index.html" method="post">
+          {{ Input::checkbox(label="Clipart", dataId="#") }}
+          {{ Input::checkbox(label="Photo", dataId="#") }}
+          {{ Input::checkbox(label="B & W", dataId="#") }}
+          {{ Input::checkbox(label="Drawing", dataId="#") }}
+          {{ Input::checkbox(label="Comic", dataId="#") }}
+        </form>
+      </div>
+
+      <div>
+        <div class="mb-4">
+          <label for="name" class="">
+            <span class="text-jibuttonBlue">To be used for:</span>
+            <div class="flex items-center border-b border-jiborderGrey py-2">
+                <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm mr-2">Etz Chaim</div>
+                <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm">Rimon</div>
+                <div class="rounded-full py px-2 text-sm">+2</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label for="" class="text-jibuttonBlue flex items-center ml-2">Suitable for age</label>
+          <form class="flex flex-col" action="index.html" method="post">
+            {{ Input::checkbox(label="All ages", dataId="#") }}
+            {{ Input::checkbox(label="Kindergarden", dataId="#") }}
+            {{ Input::checkbox(label="Elementary", dataId="#") }}
+            {{ Input::checkbox(label="Middle School", dataId="#") }}
+            {{ Input::checkbox(label="High School", dataId="#") }}
+            {{ Input::checkbox(label="University", dataId="#") }}
+          </form>
+        </div>
+      </div>
+  </div>
+  </div>
   <div class="w-2/5 bg-gray-500 h-12"></div>
 </div>
   </div>
