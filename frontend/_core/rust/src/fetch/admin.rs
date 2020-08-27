@@ -52,34 +52,13 @@ pub mod category {
         api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
-    pub async fn move_before_sibling(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
+    pub async fn move_to(id:&str, index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
         let path = Update::PATH.replace("{id}",id);
         
         let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
             name: None,
             parent_id: None, 
-            index: Some(before_sibling_index) 
-        };
-        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
-    }
-    pub async fn move_before_sibling_new_parent(id:&str, parent_id: &str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("{id}",id);
-        
-        let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
-            name: None,
-            parent_id: Some(Some(category_id_from_str(parent_id))),
-            index: Some(before_sibling_index) 
-        };
-        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
-    }
-
-    pub async fn move_before_sibling_root(id:&str, before_sibling_index:u16) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("{id}",id);
-        
-        let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
-            name: None,
-            parent_id: Some(None),
-            index: Some(before_sibling_index) 
+            index: Some(index) 
         };
         api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
@@ -95,36 +74,9 @@ pub mod category {
         api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
     }
 
-    pub async fn move_end_root(id:&str) -> FetchResult < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
-        let path = Update::PATH.replace("{id}",id);
-        
-        let req:<Update as ApiEndpoint>::Req = UpdateCategoryRequest {
-            name: None,
-            parent_id: Some(None),
-            index: None 
-        };
-        api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
-    }
-
     pub async fn delete(id:&str) -> FetchResult < <Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err> {
         let path = Delete::PATH.replace("{id}",id);
 
         api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await
     }
 }
-
-/*
- *pub struct UpdateCategoryRequest {
-    pub name: Option<String>,
-    /// If None, don't change parents. If Some, change parent to the given CategoryId (or null).
-    #[serde(deserialize_with = "deserialize_optional_field")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub parent_id: Option<Option<CategoryId>>,
-    /// If None, don't change index. If Some move to _before_ whatever has the given index (ie, 0 moves to the start).
-    /// Will cause an error if you try to move to past the end of the parent.
-    ///
-    /// If None and parent_id is Some(...) it will append to the end of the new parent.
-    pub index: Option<u16>,
-}
-*/
