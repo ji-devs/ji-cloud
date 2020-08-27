@@ -85,8 +85,6 @@ impl MutableCategory {
 
             let id = self.id.clone();
 
-            log::info!("moving from {} to {}", current_index, target_index);
-
             spawn_local(
                 async move {
                     fetch_category::move_to(&id, target_index.try_into().unwrap()).await;
@@ -106,15 +104,10 @@ impl MutableCategory {
             let parent_id = self.parent.as_ref().unwrap_throw().id.clone();
             let parent_len = self.parent_len().unwrap_throw();
 
-            log::info!("moving from {} to {}", current_index, target_index);
 
             spawn_local(
                 async move {
-                    if target_index == parent_len-1 {
-                        fetch_category::move_end(&id, &parent_id).await;
-                    } else {
-                        fetch_category::move_to(&id, target_index.try_into().unwrap()).await;
-                    }
+                    fetch_category::move_to(&id, target_index.try_into().unwrap()).await;
                     ()
                 }
             )
