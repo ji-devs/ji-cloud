@@ -228,7 +228,7 @@ test('get categories', async (t) => {
 async function getNestedCategories(t, options) {
     await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.parentDir);
 
-    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options)}`, t.context.loggedInReqBase);
+    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'brackets', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
 
     t.snapshot(categories.body);
 }
@@ -266,9 +266,9 @@ test('ancestors', getNestedCategories, {
     ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
 });
 
-// test('exact', getNestedCategories, {
-//     ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'f3201ca4-e90f-11ea-8281-9ba17cec4e22'],
-// });
+test('exact', getNestedCategories, {
+    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', '01cff7d8-e910-11ea-8281-7f86c625a156'],
+});
 
 test('update category ordering', async (t) => {
     const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';

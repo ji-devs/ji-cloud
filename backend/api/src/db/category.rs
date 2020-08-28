@@ -36,7 +36,7 @@ order by index
     .map_err(Into::into)
 }
 
-pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> anyhow::Result<Vec<Category>> {
+pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query!(
         r#"
 select id                                                                 as "id: CategoryId",
@@ -64,7 +64,6 @@ order by t.ord
     })
     .try_collect()
     .await
-    .map_err(Into::into)
 }
 
 pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
