@@ -1,34 +1,23 @@
-with recursive inverse_category_tree(index, id, parent_id, structure) as
+with recursive links as
                    (
-                       select index::int2,
-                              id,
-                              parent_id,
-                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
-                                                 updated_at,
-                                                 'image_count',
-                                                 (select count(*) from image_category where category_id = id)::int8,
-                                                 'jig_count', 0::int8)
+                       select id,
+                              parent_id
                        from category co
                        where id = any ($1::uuid[])
                        union all
-                       select co.index::int2,
-                              id,
-                              parent_id,
-                              jsonb_build_object('id', id, 'name', name, 'created_at', created_at, 'updated_at',
-                                                 updated_at, 'children',
-                                                 jsonb_agg(_lat.structure),
-                                                 'image_count',
-                                                 (select count(*) from image_category where category_id = id)::int8,
-                                                 'jig_count', 0::int8)
+                       select co.id,
+                              co.parent_id
                        from category co
-                                join lateral (
-                           select ct.structure
-                           from inverse_category_tree ct
-                           where ct.parent_id = co.id
-                           order by ct.index
-                           ) _lat on true
-                       group by co.id
+                                inner join links ct on (ct.parent_id = co.id)
                    )
-select coalesce(jsonb_agg(structure order by index), '[]') as "categories!: sqlx::types::Json<Vec<Category>>"
-from inverse_category_tree
-where parent_id is null
+
+select distinct id,
+       category.parent_id,
+       name,
+       category.index,
+       created_at,
+       updated_at,
+       (select count(*) from image_category where category_id = id)::int8 as "image_count!",
+       0::int8                                                            as "jig_count!"
+from category
+         inner join links using (id);
