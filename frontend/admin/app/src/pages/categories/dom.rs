@@ -22,7 +22,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category
 };
-use super::actions::*;
+use super::{data::*, actions::*};
 
 pub struct CategoriesPage {
     pub loader_status: Mutable<Option<Result<(), ()>>>,
@@ -167,6 +167,14 @@ impl MutableCategoryDom {
                                         _self.editing_mode.set(false);
                                     }
                                 }))
+                                .global_event(clone!(_self => move |evt:events::MouseDown| {
+                                    if let Some(target) = evt.target() {
+                                        let element:Element = target.unchecked_into();
+                                        if !element.closest_data_id("input").is_some() {
+                                            _self.editing_mode.set(false);
+                                        }
+                                    }
+                                }))
                                 .focused(true)
                             })
                         } else {
@@ -228,7 +236,6 @@ impl MutableCategoryDom {
                                         }))
                                     })
                                     .global_event(clone!(_self, _tree => move |evt:events::Click| {
-                                        log::info!("GLOBAL CLICK");
                                         if let Some(target) = evt.target() {
                                             let element:Element = target.unchecked_into();
                                             if !element.closest_data_id("menu-container").is_some() {
