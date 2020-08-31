@@ -1,3 +1,4 @@
+use crate::domain::{build_tree, RawCategory};
 use futures::TryStreamExt;
 use shared::{
     domain::category::{Category, CategoryId},
@@ -35,7 +36,7 @@ order by index
     .map_err(Into::into)
 }
 
-pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> anyhow::Result<Vec<Category>> {
+pub async fn get_exact(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
     sqlx::query!(
         r#"
 select id                                                                 as "id: CategoryId",
@@ -63,28 +64,40 @@ order by t.ord
     })
     .try_collect()
     .await
-    .map_err(Into::into)
 }
 
 pub async fn get_subtree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query_file!("query/category/get_subtree.sql", ids)
-        .fetch_one(db)
+    sqlx::query_file_as!(RawCategory, "query/category/get_subtree.sql", ids)
+        .fetch_all(db)
         .await
-        .map(|it| it.categories.0)
+        .map(build_tree)
 }
 
 pub async fn get_tree(db: &sqlx::PgPool) -> sqlx::Result<Vec<Category>> {
-    sqlx::query_file!("query/category/get_tree.sql")
-        .fetch_one(db)
-        .await
-        .map(|it| it.categories.0)
+    sqlx::query_as!(
+        RawCategory,
+        r#"
+select id,
+       parent_id,
+       name,
+       index,
+       created_at,
+       updated_at,
+       (select count(*) from image_category where category_id = id)::int8 as "image_count!",
+       0::int8                                                            as "jig_count!"
+from category
+"#
+    )
+    .fetch_all(db)
+    .await
+    .map(build_tree)
 }
 
 pub async fn get_ancestor_tree(db: &sqlx::PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Category>> {
-    sqlx::query_file!("query/category/get_ancestor_tree.sql", ids)
-        .fetch_one(db)
+    sqlx::query_file_as!(RawCategory, "query/category/get_ancestor_tree.sql", ids)
+        .fetch_all(db)
         .await
-        .map(|it| it.categories.0)
+        .map(build_tree)
 }
 
 pub async fn create(

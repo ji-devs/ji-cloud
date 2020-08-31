@@ -18,6 +18,10 @@ const CATEGORY_LABEL_DISPLAY:&'static str = "category-label-display";
 const CATEGORY_LABEL_INPUT:&'static str = "category-label-input";
 const CATEGORY_MENU:&'static str = "category-menu";
 
+const IMAGES_PAGE:&'static str = "images-page";
+const IMAGE_ADD:&'static str = "image-add";
+const IMAGE_EDIT:&'static str = "image-edit";
+
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
 }
@@ -48,6 +52,15 @@ pub fn category_menu() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORY_MENU))
 }
 
+pub fn images_page() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGES_PAGE))
+}
+pub fn image_add() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_ADD))
+}
+pub fn image_edit() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_EDIT))
+}
 
 pub struct Templates {
     pub cache: TemplateCache<'static>
@@ -71,6 +84,9 @@ impl Templates {
             (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../.template_output/categories/category-label-display.html"))),
             (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../.template_output/categories/category-label-input.html"))),
             (CATEGORY_MENU, get_template_str(include_str!("../../../.template_output/categories/category-menu.html"))),
+            (IMAGES_PAGE, get_template_str(include_str!("../../../.template_output/images/images-page.html"))),
+            (IMAGE_ADD, get_template_str(include_str!("../../../.template_output/images/image-add.html"))),
+            (IMAGE_EDIT, get_template_str(include_str!("../../../.template_output/images/image-edit.html"))),
         ]);
 
         Self { cache }

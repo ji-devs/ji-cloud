@@ -18,6 +18,7 @@ pub enum UserRoute {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AdminRoute {
     Categories,
+    Images,
 }
 
 impl Route {
@@ -40,6 +41,7 @@ impl Route {
             "user/signin" => Self::User(UserRoute::Signin),
             "user/register" => Self::User(UserRoute::Register),
             "admin/categories" => Self::Admin(AdminRoute::Categories),
+            "admin/images" => Self::Admin(AdminRoute::Images),
             "temp" => Self::Temp, 
             _ => Self::NotFound
         }
@@ -59,7 +61,8 @@ impl From<Route> for &str {
             },
             Route::Admin(route) => {
                 match route {
-                    AdminRoute::Categories=> "/admin/categories",
+                    AdminRoute::Categories => "/admin/categories",
+                    AdminRoute::Images => "/admin/images",
                 }
             },
             Route::NotFound => "/404",

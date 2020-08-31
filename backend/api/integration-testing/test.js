@@ -6,6 +6,7 @@ const { mkdir, copyFile } = require('fs').promises;
 const path = require('path');
 const tough = require('tough-cookie');
 const spawnAsync = require('@expo/spawn-async');
+const qs = require('qs');
 
 // to whom it might concern, this JWT is made of the following header, payload:
 // {"alg": "HS256", "typ": "JWT"}
@@ -20,6 +21,13 @@ const COOKIE = 'X-JWT=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
 
 // login csrf
 const CSRF = 'RuQuZb5AoGSdxIGA';
+
+const fixtures = {
+    user: 'fixtures/1_user.sql',
+    imageMetaKinds: 'fixtures/2_image_meta_kinds.sql',
+    categoryOrdering: 'fixtures/3_category_ordering.sql',
+    categoryNesting: 'fixtures/4_category_nesting.sql'
+};
 
 function hookServerStarted(server) {
     return new Promise((resolve) => {
@@ -168,7 +176,7 @@ test('register user', async (t) => {
 });
 
 test('login user', async (t) => {
-    await runFixtures(['fixtures/1_user.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
 
     const cookieJar = new tough.CookieJar();
 
@@ -185,7 +193,7 @@ test('login user', async (t) => {
 });
 
 test('user profile', async (t) => {
-    await runFixtures(['fixtures/1_user.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
 
     const profile = await got.get('http://0.0.0.0/v1/user/me/profile', t.context.loggedInReqBase);
 
@@ -193,7 +201,7 @@ test('user profile', async (t) => {
 });
 
 test('create category', async (t) => {
-    await runFixtures(['fixtures/1_user.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
 
     const category = await got.post('http://0.0.0.0/v1/category', {
         ...t.context.loggedInReqBase,
@@ -210,16 +218,61 @@ test.todo('delete category');
 test.todo('update category');
 
 test('get categories', async (t) => {
-    await runFixtures(['fixtures/1_user.sql', 'fixtures/3_category_ordering.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.parentDir);
 
     const categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
 
     t.snapshot(categories.body);
-})
+});
+
+async function getNestedCategories(t, options) {
+    await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.parentDir);
+
+    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'brackets', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
+
+    t.snapshot(categories.body);
+}
+
+getNestedCategories.title = (providedTitle = '', meta) => {
+    const {
+        scope, ids
+    } = {
+        scope: null, ids: [], ...meta,
+    };
+
+    let title;
+
+    if (providedTitle != '') {
+        title = `get categories nested - ${providedTitle}`;
+    } else {
+        title = 'get categories nested'
+    }
+
+    return `${title} - scope=${scope || ''}, ids=${ids}`;
+};
+
+test('top level', getNestedCategories);
+test('whole tree', getNestedCategories, {
+    scope: "Decendants",
+});
+
+test('tree overlapping', getNestedCategories, {
+    scope: "Decendants",
+    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
+});
+
+test('ancestors', getNestedCategories, {
+    scope: "Ancestors",
+    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
+});
+
+test('exact', getNestedCategories, {
+    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', '01cff7d8-e910-11ea-8281-7f86c625a156'],
+});
 
 test('update category ordering', async (t) => {
     const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';
-    await runFixtures(['fixtures/1_user.sql', 'fixtures/3_category_ordering.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.parentDir);
 
     const updateResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
         ...t.context.loggedInReqBase,
@@ -261,7 +314,7 @@ test('update category ordering', async (t) => {
 })
 
 test('GET metadata', async (t) => {
-    await runFixtures(['fixtures/1_user.sql', 'fixtures/2_image_meta_kinds.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
 
     const meta = await got.get('http://0.0.0.0/v1/image/metadata', t.context.loggedInReqBase);
 
@@ -269,7 +322,7 @@ test('GET metadata', async (t) => {
 });
 
 async function createImage(t, meta) {
-    await runFixtures(['fixtures/1_user.sql', 'fixtures/2_image_meta_kinds.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
 
     const image = await got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
@@ -301,7 +354,7 @@ createImage.title = (providedTitle = 'create image meta', meta) => {
 };
 
 async function createImageError(t, args) {
-    await runFixtures(['fixtures/1_user.sql'], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
     const error = await t.throwsAsync(got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
         json: {
