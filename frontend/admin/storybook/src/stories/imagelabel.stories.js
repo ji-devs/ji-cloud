@@ -12,19 +12,19 @@ export const ImageLabel = () =>
       navbarLink: "Label images",
     });
 
-    export const WithMenu = () => {
-        const page = tmpl(imagelabel, {});
+export const WithMenu = () => {
+    const page = tmpl(imagelabel, {});
+    const menu = tmpl(imageLabelFilter, {});
 
-        const element = setLabel(tmpl(imageLabelFilter), "with menu");
-        appendId(page, "list", toggleClassesId(element, "menu", ["hidden"], false));
+    appendId(page, "menu-container", menu)
 
-        return page;
-    };
+    return page;
+};
 
-    function setLabel(parentElement, label) {
+function setLabel(parentElement, label) {
 
-        const element = tmpl(imageLabelfilter);
-        element.innerText = label;
+    const element = tmpl(imageLabelFilter);
+    // element.innerText = label;
 
-        return appendId(parentElement, "label", element);
-    };
+    return appendId(parentElement, "label", element);
+};
