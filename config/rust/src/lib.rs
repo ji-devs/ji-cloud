@@ -3,7 +3,8 @@ use time::Duration;
 pub const MEDIA_UI_PATH: &str = "ui";
 pub const MAX_SIGNIN_COOKIE_DURATION: Duration = Duration::weeks(2); // 2 weeks
 pub const JWK_ISSUER_URL: &str = "https://securetoken.google.com";
-pub const JWK_URL: &str = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
+pub const JWK_URL: &str =
+    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
 
 /// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
 /// as there's no way to get the string number of seconds from it `const`ly
@@ -30,7 +31,22 @@ pub enum RemoteTarget {
 }
 
 impl RemoteTarget {
-    pub fn google_credentials_env_name(&self) -> &'static str {
+    pub const fn s3_endpoint(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox | Self::Release => Some("https://storage.googleapis.com"),
+        }
+    }
+
+    pub const fn s3_bucket(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => Some("ji-cloud-sandbox-uploads-origin-eu-001"),
+            Self::Release => Some("ji-cloud-uploads-origin-eu-001"),
+        }
+    }
+
+    pub const fn google_credentials_env_name(&self) -> &'static str {
         match self {
             Self::Local => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
             Self::Sandbox => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
@@ -38,7 +54,7 @@ impl RemoteTarget {
         }
     }
 
-    pub fn api_url(&self) -> &'static str {
+    pub const fn api_url(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:8080",
             Self::Sandbox => "https://api.sandbox.jicloud.org",
@@ -46,14 +62,14 @@ impl RemoteTarget {
         }
     }
 
-    pub fn media_url(&self) -> &'static str {
+    pub const fn media_url(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:4102",
             Self::Sandbox | Self::Release => "https://media.jicloud.org",
         }
     }
 
-    pub fn pages_url(&self) -> &'static str {
+    pub const fn pages_url(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:8081",
             Self::Sandbox => "https://sandbox.jicloud.org",
@@ -61,7 +77,7 @@ impl RemoteTarget {
         }
     }
 
-    pub fn frontend_url(&self) -> &'static str {
+    pub const fn frontend_url(&self) -> &'static str {
         match self {
             Self::Local | Self::Sandbox => "https://frontend.sandbox.jicloud.org",
             Self::Release => "https://frontend.jicloud.org",
@@ -72,7 +88,7 @@ impl RemoteTarget {
         format!("{}/{}/{}", self.frontend_url(), app, path)
     }
 
-    pub fn host(&self) -> Option<&'static str> {
+    pub const fn host(&self) -> Option<&'static str> {
         None
     }
 
