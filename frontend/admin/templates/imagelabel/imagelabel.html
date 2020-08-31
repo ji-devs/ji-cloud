@@ -31,7 +31,7 @@
     {{ Input::description(label="Image Description", inputDataId="#") }}
     </div>
   </div>
-  <div class="w-2/5 border-l-2 h-screen px-6">
+  <div class="border-l-2 h-screen px-6">
     <div class="grid grid-cols-2">
       <div>
         <label for="" class="text-jibuttonBlue flex items-center ml-2">Image style</label>
@@ -44,9 +44,9 @@
         </form>
       </div>
 
-      <div class="relative">
+      <div class="relative w-272">
         <div data-id="menu-container"></div>
-        <div class="mb-4 w-272">
+        <div class="mb-4">
 
           <label for="name" class="">
             <span class="text-jibuttonBlue">To be used for:</span>
@@ -59,6 +59,7 @@
             </div>
           </label>
         </div>
+        <!--If error message is needed add class "border-r border-jierrorred and text-jierrorred for label"-->
         <div>
           <label for="" class="text-jibuttonBlue flex items-center ml-2">Suitable for age</label>
           <form class="flex flex-col" action="index.html" method="post">
