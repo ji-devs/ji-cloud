@@ -8,8 +8,20 @@ pub struct S3Settings {
 
 impl S3Settings {
     pub(crate) fn new(is_local: bool) -> anyhow::Result<Self> {
+        #[cfg(feature = "local")]
         let endpoint = req_env("S3_ENDPOINT")?;
-        let bucket = req_env("S3_BUCKET")?;
+
+        #[cfg(not(feature = "local"))]
+        let endpoint = "https://storage.googleapis.com";
+
+        let bucket = if cfg!(feature = "sandbox") {
+            String::from("ji-cloud-sandbox-uploads-origin-eu-001")
+        } else if cfg!(feature = "release") {
+            String::from("ji-cloud-uploads-origin-eu-001")
+        } else {
+            req_env("S3_BUCKET")?
+        };
+
         let disable_local = env_bool("S3_LOCAL_DISABLE_CLIENT");
 
         Ok(Self {
