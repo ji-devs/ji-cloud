@@ -2,6 +2,7 @@ import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
 import imagelabel from "@templates/imagelabel/imagelabel.html";
 import imageLabelFilter from "@templates/imagelabel/imagelabel-filter.html";
+import labelcategory from "@templates/imagelabel/imagelabel-category.html";
 
 export default {
   title: 'Image labeler',
@@ -19,6 +20,12 @@ export const WithMenu = () => {
     appendId(page, "menu-container", menu)
 
     return page;
+};
+
+export const LabelCategory = () => {
+  tmpl(labelcategory, {});
+
+        return labelcategory;
 };
 
 function setLabel(parentElement, label) {

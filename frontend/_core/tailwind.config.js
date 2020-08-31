@@ -37,15 +37,19 @@ module.exports = {
         poppins: 'Poppins',
       },
       width: {
-        259: '259px',
+        30: '30px',
         112: '112px',
         150: '150px',
-        288: '288px'
+        259: '259px',
+        272:'272px',
+        288: '288px',
+
       },
       height: {
         216: '216px',
         185: '185px',
         696: '696px',
+        20: '20px',
 
       },
       maxHeight: {

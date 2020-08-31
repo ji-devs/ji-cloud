@@ -16,10 +16,11 @@ input[type="search"]::-webkit-search-results-decoration {
 
 
 .titleoptions .ellipses {
-  display: none;
+  visibility: hidden;
 }
 .titleoptions:hover .ellipses{
   display: flex;
+  visibility: visible;
 }
 
 .arrow {
