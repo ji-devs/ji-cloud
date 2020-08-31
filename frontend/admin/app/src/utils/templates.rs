@@ -11,11 +11,12 @@ thread_local! {
 }
 
 const CATEGORIES:&'static str = "categories";
-const CATEGORY_MAIN_SELECTED:&'static str = "category_main_selected";
-const CATEGORY_MAIN_DESELECTED:&'static str = "category_main_deselected";
-const CATEGORY_SUB:&'static str = "category_sub";
-const CATEGORY_LABEL_DISPLAY:&'static str = "category_label_display";
-const CATEGORY_LABEL_INPUT:&'static str = "category_label_input";
+const CATEGORY_MAIN_SELECTED:&'static str = "category-main-selected";
+const CATEGORY_MAIN_DESELECTED:&'static str = "category-main-deselected";
+const CATEGORY_SUB:&'static str = "category-sub";
+const CATEGORY_LABEL_DISPLAY:&'static str = "category-label-display";
+const CATEGORY_LABEL_INPUT:&'static str = "category-label-input";
+const CATEGORY_MENU:&'static str = "category-menu";
 
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
@@ -43,6 +44,9 @@ pub fn category_label_input() -> HtmlElement {
 pub fn category_label_display() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORY_LABEL_DISPLAY))
 }
+pub fn category_menu() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORY_MENU))
+}
 
 
 pub struct Templates {
@@ -61,11 +65,12 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
             (CATEGORIES, get_template_str(include_str!("../../../.template_output/categories/categories-page.html"))),
-            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_selected.html"))),
-            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../.template_output/categories/category_main_deselected.html"))),
-            (CATEGORY_SUB, get_template_str(include_str!("../../../.template_output/categories/category_sub.html"))),
-            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../.template_output/categories/category_label_display.html"))),
-            (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../.template_output/categories/category_label_input.html"))),
+            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../.template_output/categories/category-main-selected.html"))),
+            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../.template_output/categories/category-main-deselected.html"))),
+            (CATEGORY_SUB, get_template_str(include_str!("../../../.template_output/categories/category-sub.html"))),
+            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../.template_output/categories/category-label-display.html"))),
+            (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../.template_output/categories/category-label-input.html"))),
+            (CATEGORY_MENU, get_template_str(include_str!("../../../.template_output/categories/category-menu.html"))),
         ]);
 
         Self { cache }

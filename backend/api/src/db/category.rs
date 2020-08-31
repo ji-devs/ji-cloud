@@ -206,9 +206,10 @@ returning index
 update category
 set updated_at = now(),
     index = index + 1
-where index >= $1 and parent_id = $2
+where index >= $1 and index < $2 and parent_id is not distinct from $3
                 "#,
-                index,
+                new_index,
+                current_index,
                 current_parent
             )
             .execute(&mut txn)
@@ -232,9 +233,6 @@ where id = $2
             )
             .execute(&mut txn)
             .await?;
-
-            // update here
-            // adjust index, move surrounding categories as needed
         }
     }
 

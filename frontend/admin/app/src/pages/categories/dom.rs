@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-use web_sys::{HtmlElement, HtmlInputElement};
+use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
@@ -22,7 +22,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category
 };
-use super::actions::*;
+use super::{data::*, actions::*};
 
 pub struct CategoriesPage {
     pub loader_status: Mutable<Option<Result<(), ()>>>,
@@ -77,7 +77,7 @@ impl CategoriesPage {
         elem!(templates::categories(), {
             .with_data_id!("list", {
                 .child({
-                    MutableCategoryDom::render(MutableCategoryDom::new(_self.categories_root.clone()), _self.clone())
+                    MutableCategoryDom::render(Rc::new(RefCell::new(TreeState::new())), MutableCategoryDom::new(_self.categories_root.clone()), _self.clone())
                 })
             })
             .with_data_id!("new-cat-btn", {
@@ -90,9 +90,31 @@ impl CategoriesPage {
 
 }
 
+pub struct TreeState {
+    pub current_menu: Option<Rc<Mutable<bool>>>
+}
+impl TreeState {
+    pub fn new() -> Self {
+        Self { current_menu: None }
+    }
+    pub fn close_menu(&mut self) {
+        if let Some(menu_visible) = &self.current_menu {
+            menu_visible.set(false);
+        }
+
+        self.current_menu = None; 
+    }
+    pub fn open_menu(&mut self, menu:Rc<Mutable<bool>>) {
+        self.close_menu();
+
+        menu.set(true);
+        self.current_menu = Some(menu); 
+    }
+}
+
 pub struct MutableCategoryDom {
     category:Rc<MutableCategory>,
-    menu_visible: Mutable<bool>,
+    menu_visible: Rc<Mutable<bool>>,
     selected: Mutable<bool>,
     editing_mode: Mutable<bool>,
 }
@@ -103,110 +125,132 @@ impl MutableCategoryDom {
 
         let _self = Rc::new(Self { 
             category ,
-            menu_visible: Mutable::new(false),
+            menu_visible: Rc::new(Mutable::new(false)),
             selected: Mutable::new(false),
             editing_mode: Mutable::new(editing_mode),
         });
         _self
     }
     
-    pub fn render(_self: Rc<Self>, _page:Rc<CategoriesPage>) -> Dom {
+    pub fn render(_tree: Rc<RefCell<TreeState>>, _self: Rc<Self>, _page:Rc<CategoriesPage>) -> Dom {
 
-        fn init_elem(_self:Rc<MutableCategoryDom>, _page:Rc<CategoriesPage>, dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+        fn init_elem(_tree: Rc<RefCell<TreeState>>, _self:Rc<MutableCategoryDom>, _page:Rc<CategoriesPage>, dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
             apply_methods!(dom, {
 
                 .with_data_id!("children", {
                     .children_signal_vec(_self.category.children.signal_vec_cloned().map(
-                        clone!(_page, _self => move |category| {
-                            MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
+                        clone!(_page, _self, _tree => move |category| {
+                            MutableCategoryDom::render(_tree.clone(), MutableCategoryDom::new(category), _page.clone())
                         })
                     ))
                 })
                 .with_data_id!("label", {
                     .child_signal(_self.editing_mode.signal().map(clone!(_self => move |editing| {
-                        let name_signal = _self.category.name.signal_ref(|name| {
-                            match name {
-                                Some(name) => name.clone(),
-                                None => super::data::EMPTY_NAME.to_string()
-                            }
-                        });
 
                         Some(if editing {
                             elem!(templates::category_label_input(), {
-                                .property_signal("value", name_signal) 
-                                    /*
-                                .event(clone!(_self => move |evt:events::Input| {
-                                    if let Some(value) = evt.value() {
-                                        _self.category.name.set(Some(value));
+                                .property("value", {
+                                    match &*_self.category.name.lock_ref() {
+                                        Some(name) => name.clone(),
+                                        None => super::data::EMPTY_NAME.to_string()
                                     }
-                                }))
-                                */
+                                }) 
                                 .event(clone!(_self => move |evt:events::KeyDown| {
                                     if evt.key() == "Enter" {
                                         if let Some(target) = evt.target() {
                                             let input:HtmlInputElement = target.unchecked_into();
                                             let value = input.value();
-                                            _self.category.name.set(Some(value.clone()));
                                             _self.editing_mode.set(false);
-                                            rename_category(&_self.category, value);
+                                            _self.category.rename(value);
                                         }
                                     } else if evt.key() == "Escape" {
                                         _self.editing_mode.set(false);
                                     }
                                 }))
+                                .global_event(clone!(_self => move |evt:events::MouseDown| {
+                                    if let Some(target) = evt.target() {
+                                        let element:Element = target.unchecked_into();
+                                        if !element.closest_data_id("input").is_some() {
+                                            _self.editing_mode.set(false);
+                                        }
+                                    }
+                                }))
                                 .focused(true)
                             })
                         } else {
+                            let name_signal = _self.category.name.signal_ref(move |name| {
+                                let name = match name {
+                                    Some(name) => name.clone(),
+                                    None => super::data::EMPTY_NAME.to_string()
+                                };
+
+                                name
+                            });
                             elem!(templates::category_label_display(), { .text_signal(name_signal) })
                         })
                     })))
                 })
-                .with_data_id!("menu", {
-                    .class_signal("hidden", _self.menu_visible.signal_ref(|x| !*x))
-                    .with_data_id!("close", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.editing_mode.set(false);
-                            _self.menu_visible.set(false);
-                        }))
-                    })
-                    .with_data_id!("add", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.menu_visible.set(false);
-                            create_category(_self.category.clone());
-                        }))
-                    })
-                    .with_data_id!("delete", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.menu_visible.set(false);
-                            delete_category(&_self.category);
-                        }))
-                    })
-                    .with_data_id!("move-up", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.menu_visible.set(false);
-                            move_up(&_self.category);
-                        }))
-                    })
-                    .with_data_id!("move-down", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.menu_visible.set(false);
-                            move_down(&_self.category);
-                        }))
-                    })
-                    .with_data_id!("rename", {
-                        .event(clone!(_self => move |_evt:events::Click| {
-                            _self.editing_mode.set(true);
-                            _self.menu_visible.set(false);
-                        }))
-                    })
-                    .global_event(clone!(_self => move |_evt:events::Click| {
-                        //TODO close if clicked outside menu
-                    }))
+                .with_data_id!("menu-container", {
+                    .child_signal(_self.menu_visible.signal().map(clone!(_self, _tree => move |menu_visible| {
+                        if !menu_visible {
+                            None
+                        } else { 
+                            Some(
+                                elem!(templates::category_menu(), {
+                                    .with_data_id!("close", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _self.editing_mode.set(false);
+                                            _tree.borrow_mut().close_menu();
+                                        }))
+                                    })
+                                    .with_data_id!("add", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _tree.borrow_mut().close_menu();
+
+                                            _self.selected.set(true);
+                                            create_category(_self.category.clone());
+                                        }))
+                                    })
+                                    .with_data_id!("delete", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _tree.borrow_mut().close_menu();
+                                            _self.category.delete();
+                                        }))
+                                    })
+                                    .with_data_id!("move-up", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _tree.borrow_mut().close_menu();
+                                            _self.category.move_up();
+                                        }))
+                                    })
+                                    .with_data_id!("move-down", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _tree.borrow_mut().close_menu();
+                                            _self.category.move_down();
+                                        }))
+                                    })
+                                    .with_data_id!("rename", {
+                                        .event(clone!(_self, _tree => move |_evt:events::Click| {
+                                            _tree.borrow_mut().close_menu();
+                                            _self.editing_mode.set(true);
+                                        }))
+                                    })
+                                    .global_event(clone!(_self, _tree => move |evt:events::Click| {
+                                        if let Some(target) = evt.target() {
+                                            let element:Element = target.unchecked_into();
+                                            if !element.closest_data_id("menu-container").is_some() {
+                                                _tree.borrow_mut().close_menu();
+                                            }
+                                        }
+                                    }))
+                                })
+                            )
+                        }
+                    })))
                 })
                 .with_data_id!("menu-toggle-btn", {
-                    .event(clone!(_self => move |_evt:events::Click| {
-                        log::info!("MENY TOGGLED!");
-                        _self.menu_visible.replace_with(|x| !*x);
+                    .event(clone!(_self, _tree => move |_evt:events::Click| {
+                        _tree.borrow_mut().open_menu(_self.menu_visible.clone());
                     }))
                 })
             })
@@ -218,7 +262,7 @@ impl MutableCategoryDom {
             if is_main_tree {
                 html!("div", {
                     .child_signal(_self.selected.signal().map(clone!(_self, _page => move |selected| {
-                            let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self.category.id, selected)));
+                            let builder = init_elem(_tree.clone(), _self.clone(), _page.clone(), DomBuilder::new(templates::category_main(&_self.category.id, selected)));
                             let builder = apply_methods!(builder, {
                                 .with_data_id!("arrow", {
                                     .event(clone!(_self => move |_evt:events::Click| {
@@ -234,7 +278,7 @@ impl MutableCategoryDom {
             } else {
                 html!("div", {
                     .child_signal(_self.selected.signal().map(clone!(_self, _page => move |selected| {
-                        let builder = init_elem(_self.clone(), _page.clone(), DomBuilder::new(templates::category_sub(&_self.category.id)));
+                        let builder = init_elem(_tree.clone(), _self.clone(), _page.clone(), DomBuilder::new(templates::category_sub(&_self.category.id)));
                         Some(builder.into_dom())
                     })))
                 })
@@ -242,8 +286,8 @@ impl MutableCategoryDom {
         } else {
             html!("div", {
                 .children_signal_vec(_self.category.children.signal_vec_cloned().map(
-                    clone!(_page, _self => move |category| {
-                        MutableCategoryDom::render(MutableCategoryDom::new(category), _page.clone())
+                    clone!(_page, _self, _tree => move |category| {
+                        MutableCategoryDom::render(_tree.clone(), MutableCategoryDom::new(category), _page.clone())
                     })
                 ))
             })
