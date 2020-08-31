@@ -31,8 +31,6 @@ impl RuntimeSettings {
 
         let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
 
-        dbg!(std::mem::size_of::<Self>());
-
         Ok(Self {
             api_port,
             pages_port,

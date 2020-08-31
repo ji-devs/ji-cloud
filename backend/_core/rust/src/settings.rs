@@ -2,11 +2,12 @@
 use sqlx::postgres::PgConnectOptions;
 
 use crate::env::req_env;
-use crate::google::{get_access_token_and_project_id, get_project_id, get_secret};
+use crate::google::{get_access_token_and_project_id, get_secret};
 #[cfg(any(feature = "s3", feature = "db"))]
 use config::RemoteTarget;
 
 use jsonwebtoken::EncodingKey;
+use yup_oauth2::AccessToken;
 
 mod runtime;
 pub use runtime::RuntimeSettings;
@@ -26,10 +27,11 @@ pub use jwk::JwkSettings;
 #[cfg(feature = "algolia")]
 mod algolia;
 
+#[cfg(feature = "algolia")]
 pub use algolia::AlgoliaSettings;
 
 pub struct SettingsManager {
-    token: Option<String>,
+    token: Option<AccessToken>,
     project_id: String,
 }
 
@@ -57,7 +59,7 @@ impl SettingsManager {
 
             (Some(token), project_id)
         } else {
-            let project_id = get_project_id(None)?;
+            let project_id = req_env("PROJECT_ID")?;
             (None, project_id)
         };
 
@@ -66,7 +68,28 @@ impl SettingsManager {
 
     #[cfg(feature = "s3")]
     pub async fn s3_settings(&self) -> anyhow::Result<S3Settings> {
-        S3Settings::new(crate::REMOTE_TARGET == RemoteTarget::Local)
+        let endpoint = match crate::REMOTE_TARGET.s3_endpoint() {
+            Some(e) => e.to_string(),
+            None => self.get_secret("S3_ENDPOINT").await?,
+        };
+
+        let bucket = match crate::REMOTE_TARGET.s3_bucket() {
+            Some(b) => b.to_string(),
+            None => self.get_secret("S3_BUCKET").await?,
+        };
+
+        let access_key_id = self.get_secret("S3_ACCESS_KEY_ID").await?;
+        let secret_access_key = self.get_secret("S3_SECRET_ACCESS_KEY").await?;
+
+        let disable_local = crate::env::env_bool("S3_LOCAL_DISABLE_CLIENT");
+
+        Ok(S3Settings {
+            endpoint,
+            bucket,
+            use_client: crate::REMOTE_TARGET != RemoteTarget::Local || !disable_local,
+            access_key_id,
+            secret_access_key,
+        })
     }
 
     #[cfg(feature = "jwk")]
@@ -105,7 +128,10 @@ impl SettingsManager {
 
     #[cfg(feature = "algolia")]
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        AlgoliaSettings::new()
+        let application_id = self.get_secret("ALGOLIA_APPLICATION_ID").await?;
+        let key = self.get_secret("ALGOLIA_KEY").await?;
+
+        Ok(AlgoliaSettings::new(application_id, key))
     }
 
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {

@@ -1,5 +1,6 @@
+use core::settings::S3Settings;
 use rusoto_core::{
-    credential::{AwsCredentials, EnvironmentProvider, ProvideAwsCredentials},
+    credential::{AwsCredentials, StaticProvider},
     HttpClient, Region,
 };
 use rusoto_s3::{
@@ -22,19 +23,28 @@ fn image_id_to_key(ImageId(id): ImageId) -> String {
 }
 
 impl S3Client {
-    pub async fn new(endpoint: String, bucket: String, use_client: bool) -> anyhow::Result<Self> {
+    pub fn new(s3_settings: S3Settings) -> anyhow::Result<Self> {
+        let S3Settings {
+            endpoint,
+            bucket,
+            access_key_id,
+            secret_access_key,
+            use_client,
+        } = s3_settings;
+
         let region = Region::Custom {
             name: "auto".to_owned(),
             endpoint,
         };
 
-        // todo: use static provider.
-        let credentials_provider = EnvironmentProvider::with_prefix("S3");
+        let creds = AwsCredentials::new(access_key_id, secret_access_key, None, None);
+
+        let credentials_provider = StaticProvider::from(creds.clone());
 
         let client = if use_client {
             Some(rusoto_s3::S3Client::new_with(
                 HttpClient::new()?,
-                credentials_provider.clone(),
+                credentials_provider,
                 region.clone(),
             ))
         } else {
@@ -43,7 +53,7 @@ impl S3Client {
 
         Ok(Self {
             region,
-            creds: credentials_provider.credentials().await?,
+            creds,
             bucket,
             client,
         })
