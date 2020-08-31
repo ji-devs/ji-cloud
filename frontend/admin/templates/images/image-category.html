@@ -41,7 +41,51 @@
 
 
           <div data-id="list"></div>
-            {{ Categories::main(selected=true, dataId="${id}")}}
+          <div class=" border-jibackgroundBlue border-l-8 border-2 rounded-md mb-2">
+            <div class="flex items-center titleoptions">
+              <div class="flex py-3">
+                  <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+                <p data-id="label" class="font-medium">Hebrew</p>
+              </div>
+
+            </div>
+            <div data-id="children" {% if not selected %} class="hidden"{% endif %} > </div>
+          </div>
+          <div class=" border-jibackgroundBlue border-l-8 border-l-jigreen border-2 rounded-md mb-2">
+            <div class="flex items-center titleoptions">
+              <div class="flex py-3">
+                  <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px-active.svg" alt="">
+                <p data-id="label" class="font-medium">Hebrew</p>
+              </div>
+
+            </div>
+            <ul data-id="${id}" class="px-14 ml-16 pb-1 mt-2">
+                <li class="relative titleoptions flex items-center">
+                <div data-id="label"></div>
+                <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+                </div>
+                <span class="flex">
+                  <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+                  <p class="font-normal">Grammar</p>
+                </span>
+                </li>
+                <li class="relative titleoptions flex items-center">
+                <div data-id="label"></div>
+                <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+                </div>
+                <span class="flex">
+                  <label>
+                    <input class="ml-2" type="checkbox">
+                    <span class="text-normal ml-2">
+                      Hello
+                    </span>
+
+                  </label>
+                </span>
+                </li>
+                <div data-id="children"></div>
+            </ul>
+          </div>
         </div>
 
       </div>
@@ -62,7 +106,31 @@
 
     </div>
     <div class="bg-jibackgroundBlue h-696 w-full rounded-md">
+      <div class="flex items-center titleoptions">
+        <div class="flex pt-3 pl-2">
+            <p data-id="label" class="font-medium">Hebrew</p>
+        </div>
 
+      </div>
+      <ul data-id="${id}" class="px-14 ml-16 pb-1 mt-2">
+          <li class="relative titleoptions flex items-center">
+          <div data-id="label"></div>
+          <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+          </div>
+            <p class="font-normal">Grammar</p>
+          </li>
+          <li class="relative titleoptions flex items-center">
+          <div data-id="label"></div>
+          <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+          </div>
+
+        <span class="text-normal ml-2">
+                Hello
+
+          </span>
+          </li>
+          <div data-id="children"></div>
+      </ul>
     </div>
   </div>
 </div>
