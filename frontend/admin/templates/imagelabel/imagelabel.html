@@ -1,0 +1,80 @@
+{% import "_sidebar/sidebar-macros.html" as Sidebar %}
+{% import "_input/input-macros.html" as Input %}
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+{% import "categories/categories-macros.html" as Categories %}
+
+
+
+<div class="flex">
+{{ Sidebar::sidebar(navbarLink="Label images", navbarLinkJig="Label JIGS", dataId="btn-1") }}
+  <div class="w-full px-8 pt-6">
+    <div class="flex items-center py-2 mb-4 justify-between">
+      <h1 class="text-2xl font-poppins font-light">Label Image</h1>
+      <div class="flex border rounded-full border-jierrorred text-jierrorred py-2 px-4">
+
+        <img src="{{MEDIA_UI}}/done-24-px.svg" alt="">
+
+        <p>Error message</p>
+      </div>
+      {{ Input::searchbox(dataId="#") }}
+    </div>
+    <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
+    <div class="flex">
+  <div class="w-1/5">
+    <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
+    <div class="pl-1 pr-2">
+      <div class="flex justify-between mb-6">
+      {{ Input::checkbox(label="Premium Image", dataId="#") }}
+        <p class="text-sm text-jibuttonBlue flex items-center leading-6">Replace</p>
+      </div>
+    {{ Input::description(label="Image Name", inputDataId="#") }}
+    {{ Input::description(label="Image Description", inputDataId="#") }}
+    </div>
+  </div>
+  <div class="border-l-2 h-screen px-6">
+    <div class="grid grid-cols-2">
+      <div>
+        <label for="" class="text-jibuttonBlue flex items-center ml-2">Image style</label>
+        <form class="flex flex-col" action="index.html" method="post">
+          {{ Input::checkbox(label="Clipart", dataId="#") }}
+          {{ Input::checkbox(label="Photo", dataId="#") }}
+          {{ Input::checkbox(label="B & W", dataId="#") }}
+          {{ Input::checkbox(label="Drawing", dataId="#") }}
+          {{ Input::checkbox(label="Comic", dataId="#") }}
+        </form>
+      </div>
+
+      <div class="relative w-272">
+        <div data-id="menu-container"></div>
+        <div class="mb-4">
+
+          <label for="name" class="">
+            <span class="text-jibuttonBlue">To be used for:</span>
+            <div class="flex items-center border-b border-jiborderGrey py-2 relative">
+                <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm mr-2">Etz Chaim</div>
+                <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm">Rimon</div>
+                <div class="rounded-full py px-2 text-sm">+2</div>
+                <img src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10 top-25">
+
+            </div>
+          </label>
+        </div>
+        <!--If error message is needed add class "border-r border-jierrorred and text-jierrorred for label"-->
+        <div>
+          <label for="" class="text-jibuttonBlue flex items-center ml-2">Suitable for age</label>
+          <form class="flex flex-col" action="index.html" method="post">
+            {{ Input::checkbox(label="All ages", dataId="#") }}
+            {{ Input::checkbox(label="Kindergarden", dataId="#") }}
+            {{ Input::checkbox(label="Elementary", dataId="#") }}
+            {{ Input::checkbox(label="Middle School", dataId="#") }}
+            {{ Input::checkbox(label="High School", dataId="#") }}
+            {{ Input::checkbox(label="University", dataId="#") }}
+          </form>
+        </div>
+      </div>
+  </div>
+  </div>
+  <div class="w-2/5"></div>
+</div>
+  </div>
+</div>

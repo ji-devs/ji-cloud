@@ -32,3 +32,14 @@
   </label>
 </div>
 {% endmacro description %}
+
+
+{% macro checkbox(label,inputDataId="", class="") %}
+<label>
+  <input class="ml-2" type="checkbox" class={{class}}>
+  <span class="text-sm">
+    {{label}}
+  </span>
+
+</label>
+{% endmacro checkbox %}

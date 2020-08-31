@@ -23,7 +23,8 @@ module.exports = {
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
         jibackgroundGrey:'#f8f9fd',
-        jigreyinputborder:'#d3d3d3;'
+        jigreyinputborder:'#d3d3d3;',
+        jierrorred: '#e36486',
       },
 
 
@@ -36,14 +37,23 @@ module.exports = {
         poppins: 'Poppins',
       },
       width: {
-        259: '259px',
+        30: '30px',
         112: '112px',
         150: '150px',
-        288: '288px'
+        259: '259px',
+        272:'272px',
+        288: '288px',
+
       },
       height: {
         216: '216px',
         185: '185px',
+        696: '696px',
+        20: '20px',
+
+      },
+      maxHeight: {
+        284: '284px'
       },
       borderRadius: {
         20: '20px'
@@ -51,7 +61,8 @@ module.exports = {
       inset: {
         40:'40px',
         10:'10px',
-        25:'25%'
+        25:'25%',
+        '-10': '-10px'
       },
       borderWidth: {
         3: '3px'
