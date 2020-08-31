@@ -23,7 +23,8 @@ module.exports = {
         jibluelighter: "#a6c6f8",
         jiborderGrey: "#e5e7ef",
         jibackgroundGrey:'#f8f9fd',
-        jigreyinputborder:'#d3d3d3;'
+        jigreyinputborder:'#d3d3d3;',
+        jierrorred: '#e36486',
       },
 
 
@@ -44,6 +45,10 @@ module.exports = {
       height: {
         216: '216px',
         185: '185px',
+
+      },
+      maxHeight: {
+        284: '284px'
       },
       borderRadius: {
         20: '20px'
@@ -51,7 +56,8 @@ module.exports = {
       inset: {
         40:'40px',
         10:'10px',
-        25:'25%'
+        25:'25%',
+        '-10': '-10px'
       },
       borderWidth: {
         3: '3px'
