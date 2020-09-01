@@ -426,28 +426,6 @@
       ]
     }
   },
-  "83c4e421a83eb284ceab3d18858a6c5718d8e2d82679ac07c2e6edeb228ee0e3": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, display_name, email) \nVALUES \n    ($1, $2, $3::text)\nreturning id\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -464,6 +442,133 @@
         ]
       },
       "nullable": [
+        null
+      ]
+    }
+  },
+  "9dc9fad0bfc26db9e0cccacc83c0b6a46e20655c957db2fb3270c6534b21a374": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "bb7aec7fcb9e1ec06729d0c2d8fa161f8aeb9d691fc3a11657bdd1c67dafddc2": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\"\n from \"user\"\n where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
         null
       ]
     }

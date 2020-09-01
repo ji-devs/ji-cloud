@@ -40,7 +40,7 @@ async fn handle_signin_credentials(
 
 async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterError> {
     // todo: decide if we should check for an _empty_ email?
-    if req.display_name.is_empty() {
+    if req.username.is_empty() {
         return Err(RegisterError::EmptyDisplayName);
     }
 

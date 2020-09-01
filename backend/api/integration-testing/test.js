@@ -164,8 +164,15 @@ test('register user', async (t) => {
         cookieJar,
         port: t.context.port,
         json: {
-            display_name: 'test',
+            username: 'test',
             email: 'test@test.test',
+            given_name: 'Bobby',
+            family_name: 'Tables',
+            language: 'en_US',
+            locale: 'en_US',
+            opt_into_edu_resources: true,
+            over_18: true,
+            timezone: 'US/Pacific-New'
         },
         responseType: 'json',
         headers: {
@@ -411,7 +418,7 @@ test('update image - empty', async t => {
 test('update image - is_premium', async t => {
     await runFixtures([fixtures.user, fixtures.imageMetaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
 
-    await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } });
+    await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } }));
 
     const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
     const metadata = resp.body.metadata;

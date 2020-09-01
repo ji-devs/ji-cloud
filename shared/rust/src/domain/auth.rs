@@ -22,8 +22,16 @@ pub enum RegisterSuccess {
 
 #[derive(Serialize, Deserialize)]
 pub struct RegisterRequest {
-    pub display_name: String,
+    pub username: String,
     pub email: String,
+    pub over_18: bool,
+    pub given_name: String,
+    pub family_name: String,
+    // todo: create a struct that enforces format like `en_us`
+    pub language: String,
+    pub locale: String,
+    pub timezone: chrono_tz::Tz,
+    pub opt_into_edu_resources: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
