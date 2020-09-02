@@ -44,6 +44,8 @@ web-sys = { version = "0.3.44", features = [
     'HtmlInputElement',
     'KeyboardEvent',
     'MouseEvent',
+    'FileList',
+    'File',
 ] }
 wasm-bindgen-futures = "0.4.17"
 simple-html-template = { version = "0.2.2", features = ["wasm"] }
