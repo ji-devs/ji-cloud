@@ -54,7 +54,7 @@ pub async fn create(
     name: &str,
     description: &str,
     is_premium: bool,
-    publish_at: Option<&DateTime<Utc>>,
+    publish_at: Option<DateTime<Utc>>,
 ) -> sqlx::Result<ImageId> {
     let id: ImageId = sqlx::query!(
         r#"
