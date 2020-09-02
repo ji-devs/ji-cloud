@@ -24,20 +24,13 @@ use shared::domain::{
 };
 use super::{data::*, actions::*};
 
-pub struct ImagesPage {
-    page_mode: Mutable<PageMode>
-}
-
 #[derive(Copy, Clone)]
 enum PageMode {
     Add
 }
 
-impl Drop for ImagesPage {
-    fn drop(&mut self) {
-        log::info!("cleaned up images page!");
-        //self.signin_loader.cancel();
-    }
+pub struct ImagesPage {
+    page_mode: Mutable<PageMode>
 }
 
 impl ImagesPage {
@@ -53,16 +46,52 @@ impl ImagesPage {
         elem!(templates::images_page(), {
             .with_data_id!("page-contents", {
                 .child_signal(_self.page_mode.signal().map(clone!(_self => move |page_mode| {
-                    Some(elem!(templates::image_add(), {
-
-                        .with_data_id!("add-btn", {
-                            .event(clone!(_self => move |_evt:events::Click| {
-                                log::info!("TODO - add image");
-                            }))
-                        })
-                    }))
+                    Some(ImageAdd::render(ImageAdd::new()))
                 })))
             })
+        })
+    }
+}
+
+pub struct ImageAdd {
+    file_input:RefCell<Option<HtmlInputElement>>
+}
+
+impl ImageAdd{
+    pub fn new() -> Rc<Self> {
+        let _self = Rc::new(Self { 
+            file_input: RefCell::new(None)
+        });
+
+        _self
+    }
+    
+    pub fn render(_self: Rc<Self>) -> Dom {
+
+        elem!(templates::image_add(), {
+            .with_data_id!("add-btn", {
+                .event(clone!(_self => move |_evt:events::Click| {
+                    if let Some(file_input) = _self.file_input.borrow().as_ref() {
+                        file_input.click();
+                    }
+                }))
+            })
+            .with_data_id!("file", {
+                .event(clone!(_self => move |_evt:events::Change| {
+                    let file =
+                        _self.file_input.borrow().as_ref()
+                            .and_then(|input| input.files())
+                            .and_then(|files| files.get(0));
+
+                    if let Some(file) = file {
+                        log::info!("uploading {}", file.name()); 
+                    }
+                }))
+
+            })
+            .after_inserted(clone!(_self => move |elem| {
+                *_self.file_input.borrow_mut() = Some(elem.select(&data_id("file")));
+            }))
         })
     }
 }
