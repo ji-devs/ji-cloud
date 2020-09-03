@@ -78,8 +78,8 @@ impl SettingsManager {
             None => self.get_secret("S3_BUCKET").await?,
         };
 
-        let access_key_id = self.get_secret("S3_ACCESS_KEY_ID").await?;
-        let secret_access_key = self.get_secret("S3_SECRET_ACCESS_KEY").await?;
+        let access_key_id = self.get_secret("GOOGLE_S3_ACCESS_KEY").await?;
+        let secret_access_key = self.get_secret("GOOGLE_S3_ACCESS_SECRET").await?;
 
         let disable_local = crate::env::env_bool("S3_LOCAL_DISABLE_CLIENT");
 
@@ -128,7 +128,7 @@ impl SettingsManager {
 
     #[cfg(feature = "algolia")]
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        let application_id = self.get_secret("ALGOLIA_APPLICATION_ID").await?;
+        let application_id = self.get_secret("ALGOLIA_PROJECT_ID").await?;
         let key = self.get_secret("ALGOLIA_KEY").await?;
 
         Ok(AlgoliaSettings::new(application_id, key))
