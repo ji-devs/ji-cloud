@@ -43,12 +43,57 @@ pub async fn get_access_token_and_project_id(
         }
 
         Err(_) => {
+            debug_google_token_from_metaserver().await?;
+            debug_google_project_id_from_metaserver().await?;
+
             let token = get_google_token_from_metaserver().await?;
             let project_id = get_google_project_id_from_metaserver().await?;
 
             Ok((token, project_id))
         }
     }
+}
+
+pub async fn debug_google_project_id_from_metaserver() -> anyhow::Result<()> {
+    let url = "http://metadata.google.internal/computeMetadata/v1/project/project-id";
+
+    let token_response: serde_json::Value = reqwest::Client::new()
+        .get(url)
+        .header("Metadata-Flavor", "Google")
+        .send()
+        .and_then(|res| res.json())
+        .await
+        .map_err(|err| {
+            anyhow::anyhow!(
+                "couldn't get google access token from metaserver: {:?}",
+                err
+            )
+        })?;
+
+    println!("project_id = {:?}", token_response);
+
+    Ok(())
+}
+
+pub async fn debug_google_token_from_metaserver() -> anyhow::Result<()> {
+    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
+
+    let token_response: serde_json::Value = reqwest::Client::new()
+        .get(url)
+        .header("Metadata-Flavor", "Google")
+        .send()
+        .and_then(|res| res.json())
+        .await
+        .map_err(|err| {
+            anyhow::anyhow!(
+                "couldn't get google access token from metaserver: {:?}",
+                err
+            )
+        })?;
+
+    println!("token = {:?}", token_response);
+
+    Ok(())
 }
 
 pub async fn get_google_token_from_metaserver() -> anyhow::Result<AccessToken> {
