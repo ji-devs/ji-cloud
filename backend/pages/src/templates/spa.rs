@@ -6,12 +6,14 @@ use askama::Template;
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum SpaPage {
     User,
+    Admin,
 }
 
 impl SpaPage {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::User => "user",
+            Self::Admin => "admin",
         }
     }
 }
@@ -20,6 +22,7 @@ impl SpaPage {
 #[template(path = "spa.html")]
 struct SpaPageInfo {
     app_js: String,
+    app_css: String,
     firebase: bool,
     local_dev: bool,
 }
@@ -27,6 +30,7 @@ struct SpaPageInfo {
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let info = SpaPageInfo {
         app_js: settings.remote_target().spa_url(spa.as_str(), "js/index.js"),
+        app_css: settings.remote_target().spa_url(spa.as_str(), "css/styles.min.css"),
         firebase: matches!(spa, SpaPage::User),
         local_dev: settings.is_local(),
     };
@@ -38,4 +42,8 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
 
 pub async fn spa_user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::User)
+}
+
+pub async fn spa_admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Admin)
 }
