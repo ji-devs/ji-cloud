@@ -7,7 +7,6 @@ use crate::google::{get_access_token_and_project_id, get_secret};
 use config::RemoteTarget;
 
 use jsonwebtoken::EncodingKey;
-use yup_oauth2::AccessToken;
 
 mod runtime;
 pub use runtime::RuntimeSettings;
@@ -31,7 +30,7 @@ mod algolia;
 pub use algolia::AlgoliaSettings;
 
 pub struct SettingsManager {
-    token: Option<AccessToken>,
+    token: Option<String>,
     project_id: String,
 }
 

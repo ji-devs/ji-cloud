@@ -27,7 +27,7 @@ async fn get_google_token_from_credentials(
 
 pub async fn get_access_token_and_project_id(
     credentials_env_key: &str,
-) -> anyhow::Result<(AccessToken, String)> {
+) -> anyhow::Result<(String, String)> {
     match req_env(credentials_env_key) {
         Ok(credentials_file) => {
             let credentials = yup_oauth2::read_service_account_key(credentials_file).await?;
@@ -39,91 +39,27 @@ pub async fn get_access_token_and_project_id(
 
             let token = get_google_token_from_credentials(credentials).await?;
 
-            Ok((token, project_id))
+            Ok((token.as_str().to_owned(), project_id))
         }
 
         Err(_) => {
-            debug_google_token_from_metaserver().await?;
-            debug_google_project_id_from_metaserver().await?;
-
             let token = get_google_token_from_metaserver().await?;
-            let project_id = get_google_project_id_from_metaserver().await?;
+            let project_id = req_env("PROJECT_ID")?;
 
             Ok((token, project_id))
         }
     }
 }
 
-pub async fn debug_google_project_id_from_metaserver() -> anyhow::Result<()> {
-    let url = "http://metadata.google.internal/computeMetadata/v1/project/project-id";
-
-    let token_response: serde_json::Value = reqwest::Client::new()
-        .get(url)
-        .header("Metadata-Flavor", "Google")
-        .send()
-        .and_then(|res| res.json())
-        .await
-        .map_err(|err| {
-            anyhow::anyhow!(
-                "couldn't get google access token from metaserver: {:?}",
-                err
-            )
-        })?;
-
-    println!("project_id = {:?}", token_response);
-
-    Ok(())
-}
-
-pub async fn debug_google_token_from_metaserver() -> anyhow::Result<()> {
-    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
-
-    let token_response: serde_json::Value = reqwest::Client::new()
-        .get(url)
-        .header("Metadata-Flavor", "Google")
-        .send()
-        .and_then(|res| res.json())
-        .await
-        .map_err(|err| {
-            anyhow::anyhow!(
-                "couldn't get google access token from metaserver: {:?}",
-                err
-            )
-        })?;
-
-    println!("token = {:?}", token_response);
-
-    Ok(())
-}
-
-pub async fn get_google_token_from_metaserver() -> anyhow::Result<AccessToken> {
-    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
-
-    let token_response: AccessToken = reqwest::Client::new()
-        .get(url)
-        .header("Metadata-Flavor", "Google")
-        .send()
-        .and_then(|res| res.json())
-        .await
-        .map_err(|err| {
-            anyhow::anyhow!(
-                "couldn't get google access token from metaserver: {:?}",
-                err
-            )
-        })?;
-
-    Ok(token_response)
-}
-
-pub async fn get_google_project_id_from_metaserver() -> anyhow::Result<String> {
+pub async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
     #[derive(Deserialize)]
-    struct GoogleProjectResponse {
-        project_id: String,
+    struct GoogleAccessTokenResponse {
+        access_token: String,
     }
 
-    let url = "http://metadata.google.internal/computeMetadata/v1/project/project-id";
+    let url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
 
-    let resp: GoogleProjectResponse = reqwest::Client::new()
+    let token_response: GoogleAccessTokenResponse = reqwest::Client::new()
         .get(url)
         .header("Metadata-Flavor", "Google")
         .send()
@@ -136,21 +72,19 @@ pub async fn get_google_project_id_from_metaserver() -> anyhow::Result<String> {
             )
         })?;
 
-    Ok(resp.project_id)
+    Ok(token_response.access_token)
 }
 
 pub async fn get_secret(
-    token: &AccessToken,
+    token: &str,
     project_id: &str,
     secret_name: &str,
 ) -> anyhow::Result<String> {
-    anyhow::ensure!(!token.is_expired(), "Token is expired");
-
     let path = format!("https://secretmanager.googleapis.com/v1beta1/projects/{}/secrets/{}/versions/latest:access", project_id, secret_name);
 
     let request = reqwest::Client::new()
         .get(&path)
-        .header("Authorization", &format!("Bearer {}", token.as_str()));
+        .header("Authorization", &format!("Bearer {}", token));
 
     let response: GoogleSecretResponse = request
         .send()
@@ -159,6 +93,7 @@ pub async fn get_secret(
         .with_context(|| anyhow!("couldn't get secret: {}", secret_name))?;
 
     let bytes: Vec<u8> = base64::decode(response.payload.data)?;
+
     Ok(String::from_utf8(bytes)?)
 }
 
