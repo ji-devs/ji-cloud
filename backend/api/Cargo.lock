@@ -576,6 +576,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "listenfd",
+ "log",
  "percent-encoding",
  "reqwest",
  "serde",

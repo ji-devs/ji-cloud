@@ -88,31 +88,11 @@ pub async fn get_secret(
 
     let response: GoogleSecretResponse = request
         .send()
-        .and_then(|res| res.json())
+        .and_then(reqwest::Response::json)
         .await
         .with_context(|| anyhow!("couldn't get secret: {}", secret_name))?;
 
     let bytes: Vec<u8> = base64::decode(response.payload.data)?;
 
     Ok(String::from_utf8(bytes)?)
-}
-
-#[cfg(all(test, feature = "has_google_auth"))]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_secrets() {
-        dotenv::dotenv().ok();
-
-        let credentials = get_google_credentials("GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX")
-            .await
-            .unwrap();
-        let token = get_google_token_from_credentials(&credentials)
-            .await
-            .unwrap();
-        let secret = get_secret(&token, &credentials.project_id, "SANITY_TEST").await;
-
-        assert_eq!(secret, "hello_world");
-    }
 }
