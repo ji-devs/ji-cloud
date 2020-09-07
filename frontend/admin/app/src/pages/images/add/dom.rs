@@ -56,14 +56,9 @@ impl ImageAdd{
                     if let Some(file) = file {
                         spawn_local(async move {
                             let id = actions::create_image(file).await.unwrap_throw();
-                            log::info!("file id: {}", id); 
+                            let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
+                            dominator::routing::go_to_url(&route);
                         });
-                        /*
-                        log::info!("uploading {}", file.name()); 
-                        let id = file.name();
-                        let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
-                        dominator::routing::go_to_url(&route);
-                        */
                     }
                 }))
 
