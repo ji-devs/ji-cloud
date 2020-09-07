@@ -2,8 +2,8 @@
 @import "tailwindcss/components";
 
 
-@import "css/header";
-@import "css/tests";
+@import "header";
+@import "tests";
 @import "../../../_core/css/button";
 @import "../../../_core/css/sidebar";
 @import "tailwindcss/utilities";

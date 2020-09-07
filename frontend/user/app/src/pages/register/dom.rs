@@ -46,7 +46,9 @@ impl RegisterPage {
         elem!(templates::register(), {
             .with_data_id!("login-link", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    dominator::routing::go_to_url( Route::User(UserRoute::Signin).into());
+
+                    let route:String = Route::User(UserRoute::Signin).into();
+                    dominator::routing::go_to_url(&route);
                 }))
             })
             .with_data_id!("google-register", {

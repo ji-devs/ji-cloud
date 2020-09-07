@@ -1,7 +1,7 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Route {
     NotFound,
     Temp,
@@ -9,25 +9,24 @@ pub enum Route {
     Admin(AdminRoute)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UserRoute {
     Profile,
     Signin,
     Register,
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AdminRoute {
     Categories,
     Images,
+    ImageEdit(String),
 }
 
 impl Route {
     pub fn redirect(self) {
-        web_sys::window()
-            .unwrap_throw()
-            .location()
-            .set_href(self.into())
-            .unwrap_throw();
+        let location = web_sys::window().unwrap_throw().location();
+        let s:String = self.into();
+        location.set_href(&s).unwrap_throw();
     }
 
     //TODO - make this and the From for &str via proc-macro so it only needs to be written once
@@ -36,37 +35,54 @@ impl Route {
         let url = Url::new(&url).unwrap_throw();
         let uri_parts = get_uri_parts(&url, None);
         let uri = uri_parts.join("/");
-        match uri.as_ref() {
-            "user/profile" => Self::User(UserRoute::Profile),
-            "user/signin" => Self::User(UserRoute::Signin),
-            "user/register" => Self::User(UserRoute::Register),
-            "admin/categories" => Self::Admin(AdminRoute::Categories),
-            "admin/images" => Self::Admin(AdminRoute::Images),
-            "temp" => Self::Temp, 
-            _ => Self::NotFound
+        let route = match uri.as_ref() {
+            "user/profile" => Some(Self::User(UserRoute::Profile)),
+            "user/signin" => Some(Self::User(UserRoute::Signin)),
+            "user/register" => Some(Self::User(UserRoute::Register)),
+            "admin/categories" => Some(Self::Admin(AdminRoute::Categories)),
+            "admin/images" => Some(Self::Admin(AdminRoute::Images)),
+            "temp" => Some(Self::Temp),
+            _ => None
+        };
+
+        if let Some(route) = route {
+            return route;
         }
+
+        if uri_parts[0] == "admin" {
+            if uri_parts.len() < 3 {
+                return Self::NotFound;
+            }
+
+            if uri_parts[1] == "image-edit" {
+                return Self::Admin(AdminRoute::ImageEdit(uri_parts[2].clone()));
+            }
+        }
+        
+        Self::NotFound
     }
 }
 
 
-impl From<Route> for &str {
+impl From<Route> for String {
     fn from(route:Route) -> Self {
         match route {
             Route::User(route) => {
                 match route {
-                    UserRoute::Profile => "/user/profile",
-                    UserRoute::Signin => "/user/signin",
-                    UserRoute::Register => "/user/register",
+                    UserRoute::Profile => "/user/profile".to_string(),
+                    UserRoute::Signin => "/user/signin".to_string(),
+                    UserRoute::Register => "/user/register".to_string(),
                 }
             },
             Route::Admin(route) => {
                 match route {
-                    AdminRoute::Categories => "/admin/categories",
-                    AdminRoute::Images => "/admin/images",
+                    AdminRoute::Categories => "/admin/categories".to_string(),
+                    AdminRoute::Images => "/admin/images".to_string(),
+                    AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
                 }
             },
-            Route::NotFound => "/404",
-            Route::Temp=> "/temp"
+            Route::NotFound => "/404".to_string(),
+            Route::Temp=> "/temp".to_string()
         }
     }
 }
