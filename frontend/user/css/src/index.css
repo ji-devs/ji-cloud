@@ -2,9 +2,14 @@
 @import "tailwindcss/components";
 
 
+<<<<<<< HEAD:frontend/user/storybook/src/imports.css
 @import "css/header";
 @import "css/tests";
 @import "css/jig";
+=======
+@import "header";
+@import "tests";
+>>>>>>> upstream/sandbox:frontend/user/css/src/index.css
 @import "../../../_core/css/button";
 @import "../../../_core/css/sidebar";
 @import "tailwindcss/utilities";

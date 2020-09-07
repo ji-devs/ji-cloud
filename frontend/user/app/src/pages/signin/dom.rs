@@ -61,7 +61,9 @@ impl SigninPage {
             })
             .with_data_id!("register-link", {
                 .event(clone!(_self => move |_evt:events::Click| {
-                    dominator::routing::go_to_url( Route::User(UserRoute::Register).into());
+
+                    let route:String = Route::User(UserRoute::Register).into();
+                    dominator::routing::go_to_url(&route);
                 }))
             })
             .with_data_id!("status-message", {

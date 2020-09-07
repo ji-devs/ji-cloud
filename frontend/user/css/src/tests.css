@@ -1,5 +1,5 @@
 .tests.smiley {
-    background-image: url("%MEDIA_UI%/smiley.svg");
+    background-image: url("{{MEDIA_UI}}/smiley.svg");
     width: 300px;
     height: 300px;
 }

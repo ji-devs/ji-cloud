@@ -21,38 +21,21 @@ use shared::domain::{
     user::UserProfile,
     category::Category
 };
-use super::add::ImageAdd;
-use super::edit::ImageEdit;
 
-#[derive(Clone, Debug)]
-pub enum PageMode {
-    Add,
-    Edit(String)
+pub struct ImageEdit {
+    id: Mutable<String>
 }
 
-pub struct ImagesPage {
-    page_mode: Mutable<PageMode>
-}
-
-impl ImagesPage {
-    pub fn new(mode:PageMode) -> Rc<Self> {
+impl ImageEdit{
+    pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            page_mode: Mutable::new(mode),
+            id: Mutable::new(id),
         });
 
         _self
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::images_page(), {
-            .with_data_id!("page-contents", {
-                .child_signal(_self.page_mode.signal_cloned().map(clone!(_self => move |page_mode| {
-                    match page_mode {
-                        PageMode::Add => Some(ImageAdd::render(ImageAdd::new())),
-                        PageMode::Edit(id) => Some(ImageEdit::render(ImageEdit::new(id)))
-                    }
-                })))
-            })
-        })
+        elem!(templates::image_edit(), { })
     }
 }

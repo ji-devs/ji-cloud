@@ -6,7 +6,7 @@ const MEDIA_UI = getMediaUrl_UI(isDev);
 
 const plugins = [
     require('postcss-import'),
-    require('postcss-url')({ url: ({url}) => url.replace("%MEDIA_UI%", MEDIA_UI), }),
+    require('postcss-url')({ url: ({url}) => url.replace("{{MEDIA_UI}}", MEDIA_UI), }),
     require('tailwindcss')('../../_core/tailwind.config.js'),
     require('autoprefixer'),
 ];

@@ -82,7 +82,9 @@ pub async fn register_google(page:Rc<RegisterPage>) {
 }
 fn do_success(page:&RegisterPage, csrf:String) {
     storage::save_csrf_token(&csrf);
-    dominator::routing::go_to_url( Route::User(UserRoute::Profile).into());
+
+    let route:String = Route::User(UserRoute::Profile).into();
+    dominator::routing::go_to_url(&route);
 
     ///generally speaking this kind of thing isn't necessary
     ///futures will just resolve and be dropped as part of the flow
