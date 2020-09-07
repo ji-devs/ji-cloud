@@ -25,7 +25,14 @@
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">JIG no.</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author's badge</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Date</th>
+        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">
+          <div class="">
+            Date
+            <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg" alt="">
+          </div>
+
+
+        </th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Instruction language</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Curators</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Privacy</th>
@@ -181,5 +188,10 @@
 
     </tbody>
   </table>
+  <div class="p-2 w-272">
+    <p>Filter by date:</p>
 
+    <input type="date" id="datepicker" name="datepicker">
+
+  </div>
 </div>

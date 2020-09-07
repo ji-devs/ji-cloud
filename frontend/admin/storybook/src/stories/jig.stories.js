@@ -6,6 +6,7 @@ import jigprivacy from "@templates/jig/jig-privacy.html";
 import jigfilter from "@templates/jig/jig-filter.html";
 
 
+
 export default {
   title: 'JIG',
 }
