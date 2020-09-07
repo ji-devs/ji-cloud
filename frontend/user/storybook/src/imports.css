@@ -4,6 +4,7 @@
 
 @import "css/header";
 @import "css/tests";
+@import "css/jig";
 @import "../../../_core/css/button";
 @import "../../../_core/css/sidebar";
 @import "tailwindcss/utilities";

@@ -4,7 +4,16 @@
 <div class="w-full px-8 pt-6">
   <div class="flex items-center py-2 mb-4 justify-between">
     <h1 class="text-2xl font-poppins font-light">Label JIGS</h1>
-    {{ Input::searchbox(dataId="#") }}
+    <div class="">
+      <div class="flex relative">
+        <img src="{{MEDIA_UI}}/icon-filter-idle.svg" alt="">
+        {{ Input::searchbox(dataId="#",label='JIGs search') }}
+        <div data-id="jig-filter"></div>
+      </div>
+
+    </div>
+
+
   </div>
   <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
 
@@ -57,9 +66,34 @@
           <p>Gila, Anat</p>
         </td>
         <td class="border px-1 py-1 align-top">
-
+          <img src="{{MEDIA_UI}}/Icon_Privacy_Private_32.svg">
         </td>
         <td class="border px-1 py-1 align-top">
+          <div class="stars-rating flex border border-jiborderGrey rounded-full px-2 py-1">
+            <!--When hover add class "selected-star" to that div and previous div-->
+            <div class="star px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+            <div class="star px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+
+            <div class="star three px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+          </div>
 
         </td>
         <td class="border px-1 py-1 align-top">
@@ -69,6 +103,81 @@
           <p>In progress</p>
         </td>
       </tr>
+      <tr>
+        <td class="border px-2 py-1">
+          <div class="flex">
+            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
+            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
+            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
+          </div>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <a href="#" class="underline text-jibuttonBlue">Hebrew letters</a>
+        </td>
+        <td class="border px-1 py-1 align-top">1234567</td>
+        <td class="border px-1 py-1 align-top tooltip relative">
+          <p class=" underline text-jibuttonBlue ">Michael Wikes</p>
+          <div data-id="tooltip"></div>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <span class="flex">
+            <img src="{{MEDIA_UI}}/crown.svg">
+            <p>JI team</p>
+          </span>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <p class="">Aug. 5, 2020</p>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <p class="">English</p>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <p>Gila, Anat</p>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <div class="relative">
+            <img src="{{MEDIA_UI}}/Icon_Privacy_Hide_32_red.svg">
+            <div data-id="privacy-dropdown"></div>
+          </div>
+
+        </td>
+        <td class="border px-1 py-1 align-top bg-jiyellowbackground">
+          <!--When all three stars are picked add class full-rating-->
+          <div class="stars-rating full-rating flex border border-jiborderGrey bg-jiyellowstar rounded-full px-2 py-1">
+            <!--When hover add class "selected-star" to that div and previous div-->
+            <div class="star px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+            <div class="star px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+
+            <div class="star three px-1">
+              <svg id="Icon_Star_16_Idle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                <path id="Path_364" data-name="Path 364"
+                  d="M16,418.784q0-.373-.539-.464l-4.827-.736L8.471,413q-.182-.413-.471-.413T7.529,413l-2.164,4.587-4.827.736q-.538.091-.538.464a.783.783,0,0,0,.24.484l3.5,3.569-.827,5.041a1.736,1.736,0,0,0-.019.2.615.615,0,0,0,.1.358.343.343,0,0,0,.3.146.788.788,0,0,0,.385-.121L8,426.084l4.318,2.38a.751.751,0,0,0,.384.121.333.333,0,0,0,.293-.146.615.615,0,0,0,.1-.358,1.583,1.583,0,0,0-.009-.2l-.827-5.041,3.49-3.569A.74.74,0,0,0,16,418.784Z"
+                  transform="translate(0 -412.584)" fill="#d6d8de" />
+              </svg>
+            </div>
+          </div>
+
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <p>1</p>
+        </td>
+        <td class="border px-1 py-1 align-top">
+          <p>In progress</p>
+        </td>
+      </tr>
+
 
     </tbody>
   </table>

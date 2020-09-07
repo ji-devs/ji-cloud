@@ -1,82 +1,13 @@
 {% import "_input/input-macros.html" as Input %}
 {% import "_buttons/button-macros.html" as ButtonMacros %}
 {% import "categories/categories-macros.html" as Categories %}
-<div class="w-full px-8 pt-6">
-  <div class="flex items-center py-2 mb-4 justify-between">
-    <h1 class="text-2xl font-poppins font-light">Label JIGS</h1>
-    {{ Input::searchbox(dataId="#") }}
+
+  <div class="tooltip-content bg-jibuttonBlue text-white top-20 left-70p absolute py-2 pr-2">
+    <div class="relative pl-4 pr-8">
+      <p>Michael.Wikes@gmail.com <br>USA</p>
+      <img src={{MEDIA_UI}}/content-copy-24-px.svg class="absolute top-0 right-0">
+      <p class="absolute bottom-0 right-0">Copied</p>
+    </div>
+
+    <i class="absolute top-50p"></i>
   </div>
-  <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
-
-  <table class="table-auto">
-    <thead>
-      <tr>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left"></th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">JIG name</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">JIG no.</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author's badge</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Date</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Instruction language</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Curators</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Privacy</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Rate</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Version</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border px-2 py-1">
-          <div class="flex">
-            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
-            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
-            <img class="w-112" src="{{MEDIA_UI}}/red-sea-book.png">
-          </div>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <a href="#" class="underline text-jibuttonBlue">Hebrew letters</a>
-        </td>
-        <td class="border px-1 py-1 align-top">1234567</td>
-        <td class="border px-1 py-1 align-top">
-          <p class=" underline text-jibuttonBlue ">Michael Wikes</p>
-          <div class="tooltip">
-            <div class="tooltip-content">
-              <p>Michael.Wikes@gmail.com <br>USA</p>
-              <i></i>
-            </div>
-          </div>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <span class="flex">
-            <img src="{{MEDIA_UI}}/crown.svg">
-            <p>JI team</p>
-          </span>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <p class="">Aug. 5, 2020</p>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <p class="">English</p>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <p>Gila, Anat</p>
-        </td>
-        <td class="border px-1 py-1 align-top">
-
-        </td>
-        <td class="border px-1 py-1 align-top">
-
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <p>1</p>
-        </td>
-        <td class="border px-1 py-1 align-top">
-          <p>In progress</p>
-        </td>
-      </tr>
-
-    </tbody>
-  </table>
-
-</div>

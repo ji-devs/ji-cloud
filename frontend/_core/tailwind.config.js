@@ -25,6 +25,9 @@ module.exports = {
         jibackgroundGrey:'#f8f9fd',
         jigreyinputborder:'#d3d3d3;',
         jierrorred: '#e36486',
+        jiyellowbackground: '#fdf5d0',
+        jiyellowstar:'#fccd63',
+        jigreyicon: '#d6d8de',
       },
 
 
@@ -42,6 +45,7 @@ module.exports = {
         112: '112px',
         117: '117px',
         150: '150px',
+        190: '190px',
         259: '259px',
         272:'272px',
         288: '288px',
@@ -67,6 +71,8 @@ module.exports = {
         '-10': '-10px',
         50:'50px',
         '50p':'50%',
+        '70p': '70%',
+        20: '20px'
       },
       borderWidth: {
         3: '3px'
