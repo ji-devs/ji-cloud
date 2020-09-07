@@ -38,6 +38,7 @@ async fn main() {
                 Target::Sandbox => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
                 Target::Release => "GOOGLE_APPLICATION_CREDENTIALS_DEV_RELEASE",
             };
+
             let (token, project_id) = get_access_token_and_project_id(credentials_env_var).await.expect("couldn't get access token and project id!");
 
             let jwt_secret = get_secret(token.as_ref(), &project_id, "JWT_SECRET").await;
@@ -57,7 +58,7 @@ async fn main() {
         println!("\nConnection string:\n{}\n", db_connection_string);
     } else {
         let db_connection = PgConnection::establish(&db_connection_string).expect(&format!("Error connecting to database"));
-        
+
         if(opts.verbose) {
             embedded_migrations::run_with_output(&db_connection, &mut std::io::stdout());
         } else {

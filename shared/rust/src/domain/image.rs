@@ -14,12 +14,36 @@ pub mod meta;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageId(pub Uuid);
 
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+pub enum Publish {
+    At(DateTime<Utc>),
+    In(std::time::Duration),
+}
+
+impl Publish {
+    pub fn now() -> Self {
+        Self::In(std::time::Duration::new(0, 0))
+    }
+}
+
+impl From<Publish> for DateTime<Utc> {
+    fn from(publish: Publish) -> Self {
+        match publish {
+            Publish::At(t) => t,
+            Publish::In(d) => {
+                // todo: error instead of panicing
+                Utc::now() + chrono::Duration::from_std(d).expect("Really really big duration?")
+            }
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateRequest {
     pub name: String,
     pub description: String,
     pub is_premium: bool,
-    pub publish_at: Option<DateTime<Utc>>,
+    pub publish_at: Option<Publish>,
     pub styles: Vec<StyleId>,
     pub age_ranges: Vec<AgeRangeId>,
     pub affiliations: Vec<AffiliationId>,
@@ -34,7 +58,7 @@ pub struct UpdateRequest {
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub publish_at: Option<Option<DateTime<Utc>>>,
+    pub publish_at: Option<Option<Publish>>,
     pub styles: Option<Vec<StyleId>>,
     pub age_ranges: Option<Vec<AgeRangeId>>,
     pub affiliations: Option<Vec<AffiliationId>>,

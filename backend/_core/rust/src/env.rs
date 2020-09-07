@@ -1,5 +1,7 @@
 use std::env;
 
+pub(crate) mod keys;
+
 pub fn req_env(key: &str) -> anyhow::Result<String> {
     env::var(key).map_err(|_| anyhow::anyhow!("Missing required env var `{}`", key))
 }

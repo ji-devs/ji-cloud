@@ -1,8 +1,7 @@
-
-use shared::domain::category::{Category, CategoryId};
-use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use shared::domain::category::{Category, CategoryId};
 use std::collections::HashMap;
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub(crate) struct RawCategory {

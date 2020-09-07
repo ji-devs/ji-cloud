@@ -4,6 +4,7 @@ use actix_web::{
     web::{Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
+use chrono::{DateTime, Utc};
 use db::image::nul_if_empty;
 use futures::TryStreamExt;
 use http::StatusCode;
@@ -106,7 +107,7 @@ async fn create(
         &req.name,
         &req.description,
         req.is_premium,
-        req.publish_at.as_ref(),
+        req.publish_at.map(DateTime::<Utc>::from),
     )
     .await?;
 
@@ -202,7 +203,7 @@ async fn update(
         req.name.as_deref(),
         req.description.as_deref(),
         req.is_premium,
-        req.publish_at,
+        req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
     .await?;
 
