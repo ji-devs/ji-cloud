@@ -1,3 +1,4 @@
-mod image_add;
+mod dom;
+mod actions;
 
-pub use image_add::*;
+pub use dom::*;

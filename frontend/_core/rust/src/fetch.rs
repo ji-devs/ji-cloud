@@ -18,7 +18,8 @@ use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::fetch_with_headers_and_data;
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file};
+use web_sys::File;
 
 
 #[derive(Debug)]
@@ -36,6 +37,12 @@ pub const GET:&'static str = "GET";
 //either a serialized error or a native error (like 401, 403, etc.)
 pub type FetchError<E> = Result<E, awsm_web::errors::Error>;
 pub type FetchResult<T, E> = Result<T, FetchError<E>>;
+
+pub async fn upload_file(url:&str, file:&File) -> Result<(), awsm_web::errors::Error> {
+    fetch_upload_file(url, file)
+        .await
+        .map(|res| ())
+}
 
 pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> FetchResult<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize

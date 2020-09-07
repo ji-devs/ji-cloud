@@ -21,6 +21,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category
 };
+use super::actions;
 
 pub struct ImageAdd {
     file_input:RefCell<Option<HtmlInputElement>>
@@ -53,6 +54,10 @@ impl ImageAdd{
                             .and_then(|files| files.get(0));
 
                     if let Some(file) = file {
+                        spawn_local(async move {
+                            let id = actions::create_image(file).await.unwrap_throw();
+                            log::info!("file id: {}", id); 
+                        });
                         /*
                         log::info!("uploading {}", file.name()); 
                         let id = file.name();
@@ -69,4 +74,3 @@ impl ImageAdd{
         })
     }
 }
-
