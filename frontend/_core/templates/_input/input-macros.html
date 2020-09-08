@@ -5,10 +5,10 @@
 </div>
 {% endmacro searchbox %}
 
-{% macro select(inputDataId="") %}
+{% macro select(selectDataId="") %}
 <div class="relative">
   <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="absolute transform rotate-90 right-0">
-  <select class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
+  <select data-id="{{selectDataId}}" class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
     <option value="">Show all</option>
     <option value="">
       <div class="rounded-full bg-jigreen h-2 w-2">
@@ -27,7 +27,7 @@
   <label for="name" class="pl-2">
     <span class="text-jibuttonBlue">{{label}}</span>
     <div class="flex items-center border-b border-jiborderGrey py">
-      <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 pl-2  leading-tight focus:outline-none" type="text" placeholder="Jane Doe" aria-label="Full name">
+      <input data-id="{{inputDataId}}" class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 pl-2  leading-tight focus:outline-none" type="text" placeholder="Jane Doe" aria-label="Full name">
     </div>
   </label>
 </div>
@@ -36,7 +36,7 @@
 
 {% macro checkbox(label,inputDataId="", class="") %}
 <label>
-  <input class="ml-2" type="checkbox" class={{class}}>
+  <input class="ml-2" data-id="{{inputDataId}}" type="checkbox" class={{class}}>
   <span class="text-sm">
     {{label}}
   </span>

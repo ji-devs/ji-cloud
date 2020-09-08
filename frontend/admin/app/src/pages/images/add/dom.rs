@@ -21,6 +21,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category
 };
+use super::actions;
 
 pub struct ImageAdd {
     file_input:RefCell<Option<HtmlInputElement>>
@@ -53,10 +54,11 @@ impl ImageAdd{
                             .and_then(|files| files.get(0));
 
                     if let Some(file) = file {
-                        log::info!("uploading {}", file.name()); 
-                        let id = file.name();
-                        let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
-                        dominator::routing::go_to_url(&route);
+                        spawn_local(async move {
+                            let id = actions::create_image(file).await.unwrap_throw();
+                            let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
+                            dominator::routing::go_to_url(&route);
+                        });
                     }
                 }))
 
