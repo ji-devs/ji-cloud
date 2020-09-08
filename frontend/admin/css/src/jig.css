@@ -1,0 +1,64 @@
+.tooltip {
+    display:inline-block;
+    position:relative;
+    text-align:left;
+
+}
+
+.tooltip .tooltip-content {
+    min-width:200px;
+    margin-left:20px;
+    transform:translate(0, -50%);
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    z-index:99999999;
+    display: none;
+
+
+}
+
+.tooltip:hover .tooltip-content {
+    display:block;
+}
+
+.tooltip .tooltip-content i {
+    right:100%;
+    margin-top:-12px;
+    width:12px;
+    height:24px;
+    overflow:hidden;
+}
+
+.tooltip .tooltip-content i::after {
+    content:'';
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:0;
+    top:50%;
+    transform:translate(50%,-50%) rotate(-45deg);
+    background-color: #5590fc;
+
+}
+
+.selected-star path{
+  fill: #fccd63;
+}
+
+.full-rating path {
+  fill: #fff
+}
+
+.one:hover .blue {
+  fill:#5590fc;
+}
+
+.two:hover  .nonsearch{
+  fill: #ef4350;
+}
+
+.three:hover .force path
+{
+  fill: #ef4350;
+}
