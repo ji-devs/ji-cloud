@@ -28,6 +28,8 @@ module.exports = {
         jiyellowbackground: '#fdf5d0',
         jiyellowstar:'#fccd63',
         jigreyicon: '#d6d8de',
+        jiorange:'#fc7551',
+        jiorangehover: '#ea685d',
       },
 
 

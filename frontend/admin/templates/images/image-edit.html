@@ -17,7 +17,7 @@
     {{ Input::searchbox(dataId="#", label="Search Image") }}
   </div>
   <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
-  <div class="flex">
+  <div class="flex relative">
     <div class="w-1/5">
       <img src="{{MEDIA_UI}}/red-sea-book.png" alt="">
       <div class="pl-1 pr-2">
@@ -80,7 +80,10 @@
 
 
     <div class="w-2/5">
-      <button data-id="next">TEMP NEXT</button>
+
+    </div>
+    <div class="absolute right-0 bottom-10">
+      {{ ButtonMacros::orange(label="Next", dataId="#") }}
     </div>
   </div>
 </div>
