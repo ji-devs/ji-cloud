@@ -62,6 +62,14 @@ impl RemoteTarget {
         }
     }
 
+    pub const fn upload_url(&self) -> &'static str {
+        match self {
+            Self::Local => "http://localhost:9000",
+            Self::Sandbox => "https://uploads.sandbox.jicloud.org",
+            Self::Release => "https://uploads.jicloud.org",
+        }
+    }
+
     pub const fn media_url(&self) -> &'static str {
         match self {
             Self::Local => "http://localhost:4102",
