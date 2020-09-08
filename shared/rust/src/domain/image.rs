@@ -1,13 +1,11 @@
-use self::meta::{AffiliationId, AgeRangeId, StyleId};
 use super::category::CategoryId;
+use super::meta::{AffiliationId, AgeRangeId, StyleId};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
 use url::Url;
 use uuid::Uuid;
-
-pub mod meta;
 
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

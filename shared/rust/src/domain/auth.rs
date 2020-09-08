@@ -32,6 +32,7 @@ pub struct RegisterRequest {
     pub locale: String,
     pub timezone: chrono_tz::Tz,
     pub opt_into_edu_resources: bool,
+    pub organization: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -17,6 +17,11 @@ pub struct AgeRangeId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct AffiliationId(pub Uuid);
 
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct SubjectId(pub Uuid);
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Style {
     pub id: StyleId,
@@ -42,10 +47,19 @@ pub struct Affiliation {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Subject {
+    pub id: SubjectId,
+    pub display_name: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GetResponse {
     pub styles: Vec<Style>,
     pub age_ranges: Vec<AgeRange>,
     pub affiliations: Vec<Affiliation>,
+    pub subjects: Vec<Subject>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -54,4 +68,5 @@ pub enum MetaKind {
     Style,
     AgeRange,
     Category,
+    Subject,
 }

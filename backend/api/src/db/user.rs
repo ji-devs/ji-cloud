@@ -3,6 +3,7 @@ use chrono_tz::Tz;
 use shared::{
     domain::{
         auth::RegisterRequest,
+        meta::SubjectId,
         user::{UserProfile, UserScope},
     },
     error::auth::RegisterError,
@@ -27,7 +28,9 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
         timezone,
         created_at,
         updated_at,
-        array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>"
+        organization,
+        array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
+        array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>"
  from "user"
  where id = $1"#,
         id
@@ -59,6 +62,8 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
             .map_err(|_| anyhow::anyhow!("invalid scope"))?,
         created_at: row.created_at,
         updated_at: row.updated_at,
+        organization: row.organization,
+        subjects: row.subjects.into_iter().map(SubjectId).collect(),
     }))
 }
 
@@ -90,9 +95,9 @@ pub async fn register(
     sqlx::query!(
         r#"
 INSERT INTO "user" 
-    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources) 
+    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) 
 VALUES 
-    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10)
+    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)
 returning id
         "#,
         id,
@@ -105,6 +110,7 @@ returning id
         &req.locale,
         req.timezone.name(),
         req.opt_into_edu_resources,
+        &req.organization,
     )
     .fetch_one(db)
     .await
