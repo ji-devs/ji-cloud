@@ -10,15 +10,14 @@ use futures::TryStreamExt;
 use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
-    domain::image::{
-        meta::MetaKind, CreateResponse, GetOneResponse, GetResponse, Image, ImageId, UpdateRequest,
+    domain::{
+        image::{CreateResponse, GetOneResponse, GetResponse, Image, ImageId, UpdateRequest},
+        meta::MetaKind,
     },
     error::image::{CreateError, DeleteError, GetError, GetOneError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
-
-mod meta;
 
 // attempts to grab a uuid out of a string in the shape:
 // Key (<key>)=(<uuid>)<postfix>
@@ -266,7 +265,6 @@ async fn delete(
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
-    meta::configure(cfg);
     cfg.route(
         image::Create::PATH,
         image::Create::METHOD.route().to(create),

@@ -289,6 +289,36 @@
       "nullable": []
     }
   },
+  "4a26a8a4a7c5ec4d470518bca3b997c1e52616ad93a56e7b28fdb485c50f228c": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "4da15c8f7c51da73da193a2fc4ed3c4f889bc0ebe3646543f8888d136c0b1c75": {
     "query": "\ninsert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)\nreturning id as \"id: ImageId\"\n        ",
     "describe": {
@@ -400,6 +430,42 @@
       ]
     }
   },
+  "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
+    "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: SubjectId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
     "query": "\nselect parent_id, index from category where id = $1\n    ",
     "describe": {
@@ -446,37 +512,8 @@
       ]
     }
   },
-  "9dc9fad0bfc26db9e0cccacc83c0b6a46e20655c957db2fb3270c6534b21a374": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10)\nreturning id\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "bb7aec7fcb9e1ec06729d0c2d8fa161f8aeb9d691fc3a11657bdd1c67dafddc2": {
-    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\"\n from \"user\"\n where id = $1",
+  "9c5d608dc8981569bf51033b3150e3e81f1266efc1c508184637e090b145d20e": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
     "describe": {
       "columns": [
         {
@@ -546,8 +583,18 @@
         },
         {
           "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
           "name": "scopes!: Vec<i16>",
           "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 15,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
         }
       ],
       "parameters": {
@@ -569,6 +616,8 @@
         false,
         false,
         true,
+        false,
+        null,
         null
       ]
     }

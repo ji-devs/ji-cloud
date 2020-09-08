@@ -1,6 +1,6 @@
 #[cfg(feature = "backend")]
 use super::anyhow_to_ise;
-use crate::domain::image::meta::MetaKind;
+use crate::domain::meta::MetaKind;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};

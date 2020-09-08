@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
+use super::meta::SubjectId;
+
 // note that this is unstable and will totally be split into many things later on
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[repr(i16)]
@@ -36,6 +38,8 @@ pub struct UserProfile {
     pub scopes: Vec<UserScope>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
+    pub organization: String,
+    pub subjects: Vec<SubjectId>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

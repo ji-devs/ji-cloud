@@ -2,15 +2,12 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{
-        meta::{AffiliationId, AgeRangeId, StyleId},
-        Image, ImageId,
-    },
+    image::{Image, ImageId},
+    meta::{AffiliationId, AgeRangeId, StyleId},
 };
 use sqlx::{PgConnection, PgPool};
 use std::fmt::Write;
 use uuid::Uuid;
-pub(crate) mod meta;
 
 trait Metadata {
     const TABLE: &'static str;

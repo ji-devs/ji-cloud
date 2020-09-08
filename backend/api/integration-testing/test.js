@@ -24,7 +24,7 @@ const CSRF = 'RuQuZb5AoGSdxIGA';
 
 const fixtures = {
     user: 'fixtures/1_user.sql',
-    imageMetaKinds: 'fixtures/2_image_meta_kinds.sql',
+    metaKinds: 'fixtures/2_meta_kinds.sql',
     categoryOrdering: 'fixtures/3_category_ordering.sql',
     categoryNesting: 'fixtures/4_category_nesting.sql',
     image: 'fixtures/5_image.sql',
@@ -172,7 +172,8 @@ test('register user', async (t) => {
             locale: 'en_US',
             opt_into_edu_resources: true,
             over_18: true,
-            timezone: 'US/Pacific-New'
+            timezone: 'US/Pacific-New',
+            organization: 'test organization'
         },
         responseType: 'json',
         headers: {
@@ -322,15 +323,15 @@ test('update category ordering', async (t) => {
 })
 
 test('GET metadata', async (t) => {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
 
-    const meta = await got.get('http://0.0.0.0/v1/image/metadata', t.context.loggedInReqBase);
+    const meta = await got.get('http://0.0.0.0/v1/metadata', t.context.loggedInReqBase);
 
     t.snapshot(meta.body);
 });
 
 async function createImage(t, meta) {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
 
     const image = await got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
