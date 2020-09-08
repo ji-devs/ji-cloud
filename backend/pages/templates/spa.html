@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <link rel="stylesheet" type="text/css" href="{{ app_css }}">
+    <link rel="stylesheet" type="text/css" href="{{ app_css|safe }}">
     <title>Ji Cloud</title>
 
     {% if local_dev -%}
@@ -19,7 +19,7 @@
 </head>
 
 <body>
-    <script src="{{ app_js }}"></script>
+    <script src="{{ app_js|safe }}"></script>
 </body>
 
 </html>
