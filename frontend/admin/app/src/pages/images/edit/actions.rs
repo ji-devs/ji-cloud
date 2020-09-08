@@ -1,5 +1,5 @@
 use shared::{
-    api::endpoints::{ApiEndpoint, image::meta},
+    api::endpoints::{ApiEndpoint, image::meta, image::*},
     domain::image::*,
     error::image::*
 };
@@ -11,6 +11,48 @@ use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
 use url::Url;
 use web_sys::File;
+
+pub async fn get_image_url(id:&str) -> Result<String, ()> {
+    _get_image(id).await
+        .map_err(|err| {
+            //log::error!("{:?}", err);
+            ()
+        })
+        .map(|res| {
+            res.url.to_string()
+        })
+}
+
+pub async fn get_image_meta(id:&str) -> Result<(), ()> {
+
+    /*
+     *id: ImageId
+name: String
+description: String
+is_premium: bool
+publish_at: Option<DateTime<Utc>>
+styles: Vec<StyleId>
+age_ranges: Vec<AgeRangeId>
+affiliations: Vec<AffiliationId>
+categories: Vec<CategoryId>
+created_at: DateTime<Utc>
+updated_at: Option<DateTime<Utc>>
+*/
+    _get_image(id).await
+        .map_err(|err| {
+            //log::error!("{:?}", err);
+            ()
+        })
+        .map(|res| {
+            () 
+        })
+}
+
+async fn _get_image(id:&str) -> FetchResult < <GetOne as ApiEndpoint>::Res, <GetOne as ApiEndpoint>::Err> {
+
+    let path = GetOne::PATH.replace("{id}",id);
+    api_with_auth::<_, _, ()>(&api_url(&path), GetOne::METHOD, None).await
+}
 
 #[derive(Debug, Clone)]
 pub struct MetaOptions {

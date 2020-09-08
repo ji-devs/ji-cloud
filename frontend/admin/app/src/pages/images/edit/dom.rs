@@ -35,39 +35,54 @@ pub struct ImageEdit {
     styles: RefCell<HashSet<String>>,
     age_ranges: RefCell<HashSet<String>>,
     affiliations: RefCell<HashSet<String>>,
+    meta_loaded: Mutable<bool> 
 }
 
 impl ImageEdit{
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            id: Mutable::new(id),
+            id: Mutable::new(id.clone()),
             error_message: Mutable::new(None),
             refs: RefCell::new(None),
             meta_options: Mutable::new(None),
             styles: RefCell::new(HashSet::new()),
             age_ranges: RefCell::new(HashSet::new()),
             affiliations: RefCell::new(HashSet::new()),
+            meta_loaded: Mutable::new(false)
         });
 
         let _self_clone = _self.clone();
 
         spawn_local(async move {
-            match actions::MetaOptions::load().await {
+            let options = actions::MetaOptions::load().await;
+            let meta = actions::get_image_meta(&id).await;
+
+            match options {
                 Ok(meta_options) => { _self_clone.meta_options.set(Some(meta_options)); } 
                 Err(_) => { log::error!("GOT ERROR!!"); }
             }
+
+            match meta {
+                Ok(meta) => { } 
+                Err(_) => { log::error!("GOT ERROR!!"); }
+            }
+
         });
         _self
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
+            //todo - refactor so that all inputs are mapped to mutable fields (live save)
             .child_signal(_self.meta_options.signal_cloned().map(clone!(_self => move |meta_options| {
                 meta_options.map(|meta_options| {
                     elem!(templates::image_edit(), { 
                         .with_data_id!("img", {
-                            .property_signal("src", _self.id.signal_cloned().map(|id| {
-                                upload_image_url(&id)
+                            .property_signal("src", _self.id.signal_cloned().map_future(|id| {
+                                async move {
+                                    let url = actions::get_image_url(&id).await.unwrap_throw();
+                                    url
+                                }
                             }))
                         })
                         .with_data_id!("error", {
