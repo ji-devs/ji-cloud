@@ -18,7 +18,7 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
     routes::{Route, UserRoute},
-    path::upload_url
+    path::upload_image_url
 };
 use shared::domain::{
     user::UserProfile,
@@ -67,7 +67,7 @@ impl ImageEdit{
                     elem!(templates::image_edit(), { 
                         .with_data_id!("img", {
                             .property_signal("src", _self.id.signal_cloned().map(|id| {
-                                upload_url(&id)
+                                upload_image_url(&id)
                             }))
                         })
                         .with_data_id!("error", {
