@@ -20,6 +20,7 @@ pub struct AffiliationId(pub Uuid);
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Style {
     pub id: StyleId,
+    pub display_name: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
@@ -27,6 +28,7 @@ pub struct Style {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AgeRange {
     pub id: AgeRangeId,
+    pub display_name: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
@@ -34,6 +36,7 @@ pub struct AgeRange {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Affiliation {
     pub id: AffiliationId,
+    pub display_name: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
