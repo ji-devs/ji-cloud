@@ -241,6 +241,21 @@
       ]
     }
   },
+  "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
@@ -383,21 +398,6 @@
         false,
         true
       ]
-    }
-  },
-  "7038777fa4cd28dac1759e3b17744192f4cfc0af398cfc3d502c956755aafea3": {
-    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2 is distinct from name or\n       $3 is distinct from description or\n       $4 is distinct from is_premium)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      },
-      "nullable": []
     }
   },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {

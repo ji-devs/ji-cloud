@@ -26,7 +26,8 @@ const fixtures = {
     user: 'fixtures/1_user.sql',
     imageMetaKinds: 'fixtures/2_image_meta_kinds.sql',
     categoryOrdering: 'fixtures/3_category_ordering.sql',
-    categoryNesting: 'fixtures/4_category_nesting.sql'
+    categoryNesting: 'fixtures/4_category_nesting.sql',
+    image: 'fixtures/5_image.sql',
 };
 
 function hookServerStarted(server) {
@@ -394,5 +395,30 @@ test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0
 
 test.todo('GET image');
 test.todo('GET images');
-test.todo('UPDATE image');
 test.todo('DELETE image');
+
+// todo: test builder
+test('update image - empty', async t => {
+    await runFixtures([fixtures.user, fixtures.imageMetaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+
+    t.snapshot(resp.body.metadata);
+});
+
+test('update image - is_premium', async t => {
+    await runFixtures([fixtures.user, fixtures.imageMetaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } });
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+    const metadata = resp.body.metadata;
+
+    // can't snapshot update timestamps for obvious reasons.
+    t.deepEqual(typeof (metadata.updated_at), 'string');
+    delete metadata.updated_at;
+
+    t.snapshot(metadata);
+});
