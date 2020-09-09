@@ -29,7 +29,6 @@ module.exports = {
         jiyellowstar:'#fccd63',
         jigreyicon: '#d6d8de',
         jiorange:'#fc7551',
-        jiorangehover: '#ea685d',
       },
 
 
@@ -47,6 +46,7 @@ module.exports = {
         112: '112px',
         117: '117px',
         150: '150px',
+        176: '176px',
         190: '190px',
         259: '259px',
         272:'272px',
