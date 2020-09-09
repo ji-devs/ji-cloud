@@ -1,5 +1,41 @@
 {
   "db": "PostgreSQL",
+  "0352a39223a9bb7c9d4c66cc673a8324a3e56ea9c6fdc1b87f2dcb8233499eb3": {
+    "query": "select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AgeRangeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -287,6 +323,42 @@
       "nullable": []
     }
   },
+  "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
+    "query": "select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AffiliationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "query": "delete from category where id = $1 returning index, parent_id",
     "describe": {
@@ -326,36 +398,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "7e072768b590478364590b47a9103afe6dc395767d26b6f5d00ab9f9650767e8": {
-    "query": "select id as \"id: AgeRangeId\", created_at, updated_at from style",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: AgeRangeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 2,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        true
-      ]
     }
   },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
@@ -426,22 +468,27 @@
       ]
     }
   },
-  "b5a8cb5f926cb6fa399f15b6e2f0433b369c39e2fc689484682db5b167fb60b6": {
-    "query": "select id as \"id: AffiliationId\", created_at, updated_at from style",
+  "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {
+    "query": "select id as \"id: StyleId\", display_name, created_at, updated_at from style",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: AffiliationId",
+          "name": "id: StyleId",
           "type_info": "Uuid"
         },
         {
           "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
           "name": "created_at",
           "type_info": "Timestamptz"
         },
         {
-          "ordinal": 2,
+          "ordinal": 3,
           "name": "updated_at",
           "type_info": "Timestamptz"
         }
@@ -450,6 +497,7 @@
         "Left": []
       },
       "nullable": [
+        false,
         false,
         false,
         true
@@ -515,36 +563,6 @@
         true,
         null,
         null
-      ]
-    }
-  },
-  "e4d30b237fbf3c2ce8af775f2a658a34ec68d80ba56735b24c91bc72ba86a255": {
-    "query": "select id as \"id: StyleId\", created_at, updated_at from style",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: StyleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 2,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        true
       ]
     }
   },
