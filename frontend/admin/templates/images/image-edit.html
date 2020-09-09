@@ -28,49 +28,7 @@
           {{ Input::description(label="Image Description", inputDataId="description") }}
         </div>
       </div>
-      <div class="border-l-2 h-screen px-6 w-2/5">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="" class="text-jibuttonBlue flex items-center ml-2">Image style</label>
-            <div data-id="styles" class="flex flex-col">
-            </div>
-          </div>
-          <!-- ... -->
-          <div>
-            <div class="relative w-272">
-              <div data-id="menu-container"></div>
-              <div class="mb-4">
-                ​
-                <label for="name" class="">
-                  <span class="text-jibuttonBlue">To be used for:</span>
-                  <div class="flex items-center border-b border-jiborderGrey py-2 relative">
-                    <!--
-                  <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm mr-2">Etz Chaim</div>
-                  <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm">Rimon</div>
-                  <div class="rounded-full py px-2 text-sm">+2</div>
-                  -->
-                    <img src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10 top-25">
-                    ​
-                  </div>
-                </label>
-              </div>
-              <!--If error message is needed add class "border-r border-jierrorred and text-jierrorred for label"-->
-              <div>
-                <label for="" class="text-jibuttonBlue flex items-center ml-2">Suitable for age</label>
-                <div data-id="age_ranges" class="flex flex-col">
-                </div>
-              </div>
-              <div>
-                <label for="" class="text-jibuttonBlue flex items-center ml-2">Suitable for Jewish stream</label>
-                <div data-id="affiliations" class="flex flex-col">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
+      <div data-id="right-area"></div>
 
       <div class="w-2/5">
 

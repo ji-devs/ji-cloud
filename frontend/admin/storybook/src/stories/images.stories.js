@@ -4,10 +4,12 @@ import checkbox from "@templates/_input/checkbox.html";
 import imagesPage from "@templates/images/images-page.html";
 import imageAdd from "@templates/images/image-add.html";
 import imageEdit from "@templates/images/image-edit.html";
+import imageEditMeta from "@templates/images/image-edit-meta.html";
+import imageEditCategories from "@templates/images/image-edit-categories.html";
 import imageFilter from "@templates/images/image-filter.html";
 import imageFilterBubble from "@templates/images/image-filter-bubble.html";
 import imageFilterOption from "@templates/images/image-filter-option.html";
-import imageCategory from "@templates/images/image-category.html";
+import imageCategories from "@templates/images/image-categories.html";
 import imageSummary from "@templates/images/image-summary.html";
 
 export default {
@@ -25,15 +27,34 @@ export const Add = () =>  {
 }
 export const Edit = () =>  {
     const pageContainer = tmpl(imagesPage);
+    const editContainer = tmpl(imageEdit);
+    const editMeta = tmpl(imageEditMeta);
 
-    const pageContents = populateMetaOptions(tmpl(imageEdit));
+    appendId(editContainer, "right-area", editMeta);
+
+    const pageContents = populateMetaOptions(editContainer);
+
+    appendId(pageContainer, "page-contents", pageContents);
+
+    return pageContainer;
+}
+export const Categories = () =>  {
+    const pageContainer = tmpl(imagesPage);
+    const editContainer = tmpl(imageEdit);
+    const editCategories = tmpl(imageEditCategories);
+
+    console.log(imageEditCategories);
+
+    appendId(editContainer, "right-area", editCategories);
+
+    const pageContents = editContainer; 
 
     appendId(pageContainer, "page-contents", pageContents);
 
     return pageContainer;
 }
 
-
+/*
 export const WithMenu = () => {
 
     const pageContainer = tmpl(imagesPage);
@@ -59,6 +80,7 @@ export const WithMenu = () => {
     return pageContainer;
 
 };
+*/
 
 function populateMetaOptions(container) {
   ["Clipart", "Photo", "B & W", "Drawing", "Comic"]

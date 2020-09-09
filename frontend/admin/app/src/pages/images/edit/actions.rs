@@ -1,6 +1,6 @@
 use shared::{
     api::endpoints::{ApiEndpoint, image::meta, image::*},
-    domain::image::*,
+    domain::image::{*, meta::{StyleId, AgeRangeId, AffiliationId}},
     error::image::*
 };
 use core::{
@@ -11,6 +11,144 @@ use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
 use url::Url;
 use web_sys::File;
+
+pub type Id = String;
+
+pub async fn save(
+    id:String,
+    is_premium: bool,
+    name: String,
+    description: String,
+    styles: impl IntoIterator<Item=String>,
+    age_ranges: impl IntoIterator<Item=String>,
+    affiliations: impl IntoIterator<Item=String>,
+) -> Result<(), UpdateError>
+{
+    let path = UpdateMetadata::PATH.replace("{id}",&id);
+    let data = UpdateRequest {
+        name: Some(name),
+        description: Some(description),
+        is_premium: Some(is_premium),
+        styles: Some(styles
+                        .into_iter()
+                        .map(|id| Uuid::parse_str(&id).unwrap_throw())
+                        .map(|id| StyleId(id))
+                        .collect()),
+        age_ranges: Some(age_ranges
+                        .into_iter()
+                        .map(|id| Uuid::parse_str(&id).unwrap_throw())
+                        .map(|id| AgeRangeId(id))
+                        .collect()),
+        affiliations: Some(affiliations
+                        .into_iter()
+                        .map(|id| Uuid::parse_str(&id).unwrap_throw())
+                        .map(|id| AffiliationId(id))
+                        .collect()),
+        categories: None,
+        publish_at: None,
+    };
+    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+
+    res
+        .map_err(|err| {
+            match err {
+                Ok(err) => err,
+                Err(err) => UpdateError::InternalServerError(err)
+            }
+        })
+
+}
+
+
+#[derive(Clone)]
+pub struct Init {
+    pub name: String,
+    pub description: String,
+    pub is_premium: bool,
+    pub styles: Vec<(Id, String, bool)>,
+    pub age_ranges: Vec<(Id, String, bool)>,
+    pub affiliations: Vec<(Id, String, bool)>,
+    pub categories: Vec<(Id, String, bool)>,
+}
+
+impl Init {
+    pub async fn load(id:&str) -> Result<Self, ()> {
+        let options = MetaOptions::load().await?;
+
+        let image:Image = _get_image(id).await
+            .map_err(|err| () )
+            .map(|res| res.metadata)?;
+
+
+
+        let styles:Vec<(Id, String, bool)> = 
+            options.styles
+                .into_iter()
+                .map(|(id, label)| {
+                    let contains = 
+                        image.styles
+                            .iter()
+                            .map(|style| style.0.to_string())
+                            .any(|x| x == id);
+                    (id, label, contains)
+                })
+                .collect();
+
+        let age_ranges:Vec<(Id, String, bool)> = 
+            options.age_ranges
+                .into_iter()
+                .map(|(id, label)| {
+                    let contains = 
+                        image.age_ranges
+                            .iter()
+                            .map(|age_range| age_range.0.to_string())
+                            .any(|x| x == id);
+                    (id, label, contains)
+                })
+                .collect();
+
+        let affiliations:Vec<(Id, String, bool)> = 
+            options.affiliations
+                .into_iter()
+                .map(|(id, label)| {
+                    let contains = 
+                        image.affiliations
+                            .iter()
+                            .map(|affiliation| affiliation.0.to_string())
+                            .any(|x| x == id);
+                    (id, label, contains)
+                })
+                .collect();
+
+                /* TODO - load global categories
+        let categories:Vec<(Id, String, bool)> = 
+            options.categories
+                .into_iter()
+                .map(|(id, label)| {
+                    let contains = 
+                        image.categories
+                            .iter()
+                            .map(|cat| cat.0.to_string())
+                            .any(|x| x == id);
+                    (id, label, contains)
+                })
+                .collect();
+                */
+
+        let Image {name, description, is_premium, ..} = image;
+
+        Ok(Self {
+            name,
+            description,
+            is_premium,
+            styles,
+            age_ranges,
+            affiliations,
+            categories: Vec::new(),
+        })
+    }
+}
 
 pub async fn get_image_url(id:&str) -> Result<String, ()> {
     _get_image(id).await
@@ -23,31 +161,6 @@ pub async fn get_image_url(id:&str) -> Result<String, ()> {
         })
 }
 
-pub async fn get_image_meta(id:&str) -> Result<(), ()> {
-
-    /*
-     *id: ImageId
-name: String
-description: String
-is_premium: bool
-publish_at: Option<DateTime<Utc>>
-styles: Vec<StyleId>
-age_ranges: Vec<AgeRangeId>
-affiliations: Vec<AffiliationId>
-categories: Vec<CategoryId>
-created_at: DateTime<Utc>
-updated_at: Option<DateTime<Utc>>
-*/
-    _get_image(id).await
-        .map_err(|err| {
-            //log::error!("{:?}", err);
-            ()
-        })
-        .map(|res| {
-            () 
-        })
-}
-
 async fn _get_image(id:&str) -> FetchResult < <GetOne as ApiEndpoint>::Res, <GetOne as ApiEndpoint>::Err> {
 
     let path = GetOne::PATH.replace("{id}",id);
@@ -56,9 +169,9 @@ async fn _get_image(id:&str) -> FetchResult < <GetOne as ApiEndpoint>::Res, <Get
 
 #[derive(Debug, Clone)]
 pub struct MetaOptions {
-    pub styles: Vec<(String, String)>,
-    pub age_ranges: Vec<(String, String)>,
-    pub affiliations: Vec<(String, String)>,
+    pub styles: Vec<(Id, String)>,
+    pub age_ranges: Vec<(Id, String)>,
+    pub affiliations: Vec<(Id, String)>,
 }
 
 impl MetaOptions {
@@ -71,12 +184,7 @@ impl MetaOptions {
             .map(|res| {
                 Self {
                     styles: 
-                        vec![
-                            ("1".to_string(), "style 1".to_string()),
-                            ("2".to_string(), "style 2".to_string()),
-                        ],
-
-                        /*res.styles
+                        res.styles
                             .into_iter()
                             .map(|style| {
                                 let label = "LABEL HERE".to_string();
@@ -84,13 +192,7 @@ impl MetaOptions {
                                 (id, label)
                             })
                             .collect(),
-                            */
                     age_ranges: 
-                        vec![
-                            ("1".to_string(), "age 1".to_string()),
-                            ("2".to_string(), "age 2".to_string()),
-                        ],
-                        /*
                         res.age_ranges
                             .into_iter()
                             .map(|age_range| {
@@ -99,13 +201,7 @@ impl MetaOptions {
                                 (id, label)
                             })
                             .collect(),
-                            */
                     affiliations: 
-                        vec![
-                            ("1".to_string(), "affiliation 1".to_string()),
-                            ("2".to_string(), "affiliation 2".to_string()),
-                        ],
-                        /*
                         res.affiliations
                             .into_iter()
                             .map(|affiliation| {
@@ -114,7 +210,6 @@ impl MetaOptions {
                                 (id, label)
                             })
                             .collect(),
-                            */
                 }
             })
     }

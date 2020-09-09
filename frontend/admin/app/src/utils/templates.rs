@@ -21,6 +21,8 @@ const CATEGORY_MENU:&'static str = "category-menu";
 const IMAGES_PAGE:&'static str = "images-page";
 const IMAGE_ADD:&'static str = "image-add";
 const IMAGE_EDIT:&'static str = "image-edit";
+const IMAGE_EDIT_META:&'static str = "image-edit-meta";
+const IMAGE_EDIT_CATEGORIES:&'static str = "image-edit-categories";
 
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
@@ -61,6 +63,12 @@ pub fn image_add() -> HtmlElement {
 pub fn image_edit() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_EDIT))
 }
+pub fn image_edit_meta() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_EDIT_META))
+}
+pub fn image_edit_categories() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_EDIT_CATEGORIES))
+}
 
 pub fn checkbox(id:&str, label:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CHECKBOX, &html_map!{
@@ -93,6 +101,8 @@ impl Templates {
             (IMAGES_PAGE, get_template_str(include_str!("../../../.template_output/images/images-page.html"))),
             (IMAGE_ADD, get_template_str(include_str!("../../../.template_output/images/image-add.html"))),
             (IMAGE_EDIT, get_template_str(include_str!("../../../.template_output/images/image-edit.html"))),
+            (IMAGE_EDIT_META, get_template_str(include_str!("../../../.template_output/images/image-edit-meta.html"))),
+            (IMAGE_EDIT_CATEGORIES, get_template_str(include_str!("../../../.template_output/images/image-edit-categories.html"))),
             (CHECKBOX, get_template_str(include_str!("../../../.template_output/_input/checkbox.html"))),
         ]);
 
