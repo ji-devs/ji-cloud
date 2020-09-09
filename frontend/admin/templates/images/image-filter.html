@@ -11,44 +11,14 @@
       <div class="flex items-center border-b border-jibuttonBlue py-2 relative">
 
           <img src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10">
-          <input data-id="" type="search" name="" value="" class="ml-2 bg-jibackgroundGrey outline-none focus:outline-none" placeholder="">
+          <input data-id="search" type="search" name="" value="" class="ml-2 bg-jibackgroundGrey outline-none focus:outline-none" placeholder="">
 
       </div>
-      <div class="flex my-2 p-2">
-        <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm mr-2">Etz Chaim</div>
-        <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm">Rimon</div>
+      <div data-id="bubbles" class="flex my-2 p-2">
       </div>
 
     </label>
-    <div class="flex flex-col max-h-284 overflow-auto">
-      <!--If selected add class bg-jiborderGrey -->
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
-      <div>
-        {{ Input::checkbox(label="All ages", dataId="#", class="px-2") }}
-      </div>
+    <div data-id="options" class="flex flex-col max-h-284 overflow-auto">
 
     </div>
 

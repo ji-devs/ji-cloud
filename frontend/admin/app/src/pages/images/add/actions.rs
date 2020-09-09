@@ -18,12 +18,15 @@ pub async fn create_image(file:File) -> Result<String, ()> {
         Ok(res) => {
             let CreateResponse { id, upload_url} = res;
             let id = id.0.to_string();
+            log::info!("got id: {}", id);
+
             upload_file(&upload_url.to_string(), &file).await
                 .map_err(|_| ())
                 .map(|_| id)
         }
     }
 }
+
 
 async fn _create_image_api() -> FetchResult < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
     let req:<Create as ApiEndpoint>::Req = CreateRequest {
@@ -36,17 +39,6 @@ async fn _create_image_api() -> FetchResult < <Create as ApiEndpoint>::Res, <Cre
         affiliations: Vec::new(),
         categories: Vec::new()
     };
-        /*
-         *pub name: String,
-    pub description: String,
-    pub is_premium: bool,
-    pub publish_at: Option<Publish>,
-    pub styles: Vec<StyleId>,
-    pub age_ranges: Vec<AgeRangeId>,
-    pub affiliations: Vec<AffiliationId>,
-    pub categories: Vec<CategoryId>,
-    */
-    
 
     api_with_auth(&api_url(Create::PATH), Create::METHOD, Some(req)).await
 }

@@ -19,7 +19,9 @@ pub enum UserRoute {
 pub enum AdminRoute {
     Categories,
     Images,
+    ImageAdd,
     ImageEdit(String),
+    ImageSummary(String),
 }
 
 impl Route {
@@ -41,6 +43,7 @@ impl Route {
             "user/register" => Some(Self::User(UserRoute::Register)),
             "admin/categories" => Some(Self::Admin(AdminRoute::Categories)),
             "admin/images" => Some(Self::Admin(AdminRoute::Images)),
+            "admin/image-add" => Some(Self::Admin(AdminRoute::ImageAdd)),
             "temp" => Some(Self::Temp),
             _ => None
         };
@@ -54,8 +57,12 @@ impl Route {
                 return Self::NotFound;
             }
 
-            if uri_parts[1] == "image-edit" {
-                return Self::Admin(AdminRoute::ImageEdit(uri_parts[2].clone()));
+            return {
+                match uri_parts[1].as_ref() {
+                    "image-edit" => Self::Admin(AdminRoute::ImageEdit(uri_parts[2].clone())),
+                    "image-summary" => Self::Admin(AdminRoute::ImageSummary(uri_parts[2].clone())),
+                    _ => Self::NotFound
+                }
             }
         }
         
@@ -78,7 +85,9 @@ impl From<Route> for String {
                 match route {
                     AdminRoute::Categories => "/admin/categories".to_string(),
                     AdminRoute::Images => "/admin/images".to_string(),
+                    AdminRoute::ImageAdd => "/admin/image-add".to_string(),
                     AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
+                    AdminRoute::ImageSummary(id) => format!("/admin/image-summary/{}", id),
                 }
             },
             Route::NotFound => "/404".to_string(),

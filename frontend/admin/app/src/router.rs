@@ -32,7 +32,7 @@ impl Router {
                     Route::Admin(route) => {
                         match route {
                             AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
-                            AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
+                            AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
                             AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
                             _ => None
                         }
