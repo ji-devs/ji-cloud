@@ -222,6 +222,8 @@ async fn update(
     .await
     .map_err(handle_metadata_err)?;
 
+    txn.commit().await?;
+
     algolia
         .update_image(
             id,
