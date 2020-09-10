@@ -45,7 +45,7 @@ impl CategoriesPage {
             categories_root: MutableCategory::append_child(Some("root".to_string()), "-1".to_string(), None) 
         });
 
-        _self.loader.load(load_categories(_self.clone()));
+        _self.loader.load(load_categories_page(_self.clone()));
 
         _self
     }
