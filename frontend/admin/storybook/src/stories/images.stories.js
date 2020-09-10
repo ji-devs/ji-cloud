@@ -8,8 +8,7 @@ import imageEditMeta from "@templates/images/image-edit-meta.html";
 import imageEditCategories from "@templates/images/image-edit-categories.html";
 import imageEditCategoriesParent from "@templates/images/image-edit-categories-parent.html";
 import imageEditCategoriesParentEnd from "@templates/images/image-edit-categories-parent-end.html";
-import imageEditCategoriesChildOpen from "@templates/images/image-edit-categories-child-open.html";
-import imageEditCategoriesChildClosed from "@templates/images/image-edit-categories-child-closed.html";
+import imageEditCategoriesChild from "@templates/images/image-edit-categories-child.html";
 import imageEditCategoriesChildEnd from "@templates/images/image-edit-categories-child-end.html";
 import imageEditCategoriesSumParent from "@templates/images/image-edit-categories-sum-parent.html";
 import imageEditCategoriesSumChild from "@templates/images/image-edit-categories-sum-child.html";
@@ -54,10 +53,11 @@ export const Categories = () =>  {
     const cat2 = tmpl(imageEditCategoriesParent, {name: "Hebrew"});
     toggleClassesId(cat2, "arrow", ["transform","rotate-90","-m-1"], true);
 
-    const cat2Child1 = tmpl(imageEditCategoriesChildOpen, {name: "Vocabulary"});
+    const cat2Child1 = tmpl(imageEditCategoriesChild, {name: "Vocabulary"});
+    toggleClassesId(cat2Child1, "arrow", ["transform","rotate-90","-m-1"], true);
     const cat2Child1Child = tmpl(imageEditCategoriesChildEnd, {name: "Blah"});
     const cat2Child2 = tmpl(imageEditCategoriesChildEnd, {name: "Parsha"});
-    const cat2Child3 = tmpl(imageEditCategoriesChildClosed, {name: "Shapes"});
+    const cat2Child3 = tmpl(imageEditCategoriesChild, {name: "Shapes"});
     appendId(cat2Child1, "children", cat2Child1Child);
     [cat2Child1, cat2Child2, cat2Child3].forEach(x => appendId(cat2, "children", x));
 
