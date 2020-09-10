@@ -52,6 +52,8 @@ export const Categories = () =>  {
     const cat1 = tmpl(imageEditCategoriesParentEnd, {name: "English"});
 
     const cat2 = tmpl(imageEditCategoriesParent, {name: "Hebrew"});
+    toggleClassesId(cat2, "arrow", ["transform","rotate-90","-m-1"], true);
+
     const cat2Child1 = tmpl(imageEditCategoriesChildOpen, {name: "Vocabulary"});
     const cat2Child1Child = tmpl(imageEditCategoriesChildEnd, {name: "Blah"});
     const cat2Child2 = tmpl(imageEditCategoriesChildEnd, {name: "Parsha"});
@@ -59,7 +61,9 @@ export const Categories = () =>  {
     appendId(cat2Child1, "children", cat2Child1Child);
     [cat2Child1, cat2Child2, cat2Child3].forEach(x => appendId(cat2, "children", x));
 
-    [cat1, cat2].forEach(cat => appendId(editCategories, "select-list", cat));
+    const cat3 = tmpl(imageEditCategoriesParent, {name: "Spanish"});
+
+    [cat1, cat2, cat3].forEach(cat => appendId(editCategories, "select-list", cat));
 
     const sum1 = tmpl(imageEditCategoriesSumParent, {name: "English"});
     const sum2 = tmpl(imageEditCategoriesSumParent, {name: "Hebrew"});
