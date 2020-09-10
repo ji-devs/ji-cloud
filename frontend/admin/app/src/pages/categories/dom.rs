@@ -117,6 +117,7 @@ pub struct MutableCategoryDom {
     menu_visible: Rc<Mutable<bool>>,
     selected: Mutable<bool>,
     editing_mode: Mutable<bool>,
+    latest_text_input: RefCell<Option<HtmlInputElement>>
 }
 
 impl MutableCategoryDom {
@@ -128,6 +129,7 @@ impl MutableCategoryDom {
             menu_visible: Rc::new(Mutable::new(false)),
             selected: Mutable::new(false),
             editing_mode: Mutable::new(editing_mode),
+            latest_text_input: RefCell::new(None),
         });
         _self
     }
@@ -171,11 +173,21 @@ impl MutableCategoryDom {
                                     if let Some(target) = evt.target() {
                                         let element:Element = target.unchecked_into();
                                         if !element.closest_data_id("input").is_some() {
+                                            //can't use target since it's specifically NOT the
+                                            //input here (click outside)
+                                            //that's why we needed to stash the after_inserted
+                                            if let Some(input) = &*_self.latest_text_input.borrow() {
+                                                let value = input.value();
+                                                _self.category.rename(value);
+                                            }
                                             _self.editing_mode.set(false);
                                         }
                                     }
                                 }))
                                 .focused(true)
+                                .after_inserted(clone!(_self => move |elem| {
+                                    *_self.latest_text_input.borrow_mut() = Some(elem.unchecked_into());
+                                }))
                             })
                         } else {
                             let name_signal = _self.category.name.signal_ref(move |name| {
@@ -186,7 +198,13 @@ impl MutableCategoryDom {
 
                                 name
                             });
-                            elem!(templates::category_label_display(), { .text_signal(name_signal) })
+                            elem!(templates::category_label_display(), { 
+                                .text_signal(name_signal) 
+
+                                .event(clone!(_self => move |_evt:events::DoubleClick| {
+                                    _self.editing_mode.set(true);
+                                }))
+                            })
                         })
                     })))
                 })

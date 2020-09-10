@@ -25,7 +25,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category,
 };
-use super::actions::{self, Init, Id};
+use super::actions::{self, Init, Id, InitCategory, InitCategoryMode};
 use std::collections::HashSet;
 
 pub struct ImageEdit {
@@ -282,8 +282,47 @@ impl ImageEdit{
         })
     }
     fn render_section_categories(_self: Rc<Self>, init:&Init) -> Dom {
-        elem!(templates::image_edit_categories(), {})
+        elem!(templates::image_edit_categories(), {
+            .with_data_id!("select-list", {
+                .children(init.categories.iter().map(clone!(_self => move |cat| {
+                    Self::render_category_select(_self.clone(), cat)
+                })))
+            })
+        })
     }
+
+    fn render_category_select(_self: Rc<Self>, cat: &InitCategory) -> Dom {
+        match cat.mode {
+            InitCategoryMode::Parent => {
+                if cat.is_end {
+                    elem!(templates::image_edit_category_parent_end(&cat.name), {})
+                } else {
+                    elem!(templates::image_edit_category_parent(&cat.name), {
+                        .with_data_id!("children", {
+                            .children(cat.children.iter().map(clone!(_self => move |cat| {
+                                Self::render_category_select(_self.clone(), cat)
+                            })))
+                        })
+                    })
+                }
+            },
+            InitCategoryMode::Child => {
+                if cat.is_end {
+                    elem!(templates::image_edit_category_child_end(&cat.name), {})
+                } else {
+                    elem!(templates::image_edit_category_child(&cat.name), {
+                        .with_data_id!("children", {
+                            .children(cat.children.iter().map(clone!(_self => move |cat| {
+                                Self::render_category_select(_self.clone(), cat)
+                            })))
+                        })
+                    })
+                }
+            },
+            
+        }
+    }
+
 }
 
 fn is_checked(possible:&[(Id, String)], item_list:&[Id], id:&Id) -> bool {

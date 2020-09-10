@@ -79,12 +79,19 @@ pub struct InitCategory {
     pub id: Id,
     pub name: String,
     pub assigned: bool,
+    pub mode: InitCategoryMode,
+    pub is_end: bool,
     pub children: Vec<InitCategory>
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum InitCategoryMode {
+    Parent,
+    Child,
+}
 
 impl InitCategory {
-    fn convert(cat:Category, image:&Image) -> InitCategory {
+    fn convert(cat:Category, image:&Image, mode: InitCategoryMode) -> InitCategory {
 
         let assigned = 
             image.categories
@@ -93,17 +100,21 @@ impl InitCategory {
 
         let name = cat.name.to_string();
         let id = cat.id.0.to_string();
+
+        let is_end = cat.children.is_empty();
         let children = 
             cat.children
                 .into_iter()
-                .map(|child| Self::convert(child, image))
+                .map(|child| Self::convert(child, image, InitCategoryMode::Child))
                 .collect();
 
         InitCategory {
             id,
             name,
             assigned,
-            children
+            children,
+            mode,
+            is_end
         }
     }
 }
@@ -122,7 +133,7 @@ impl Init {
         let categories:Vec<InitCategory> =
             categories
                 .into_iter()
-                .map(|cat| { InitCategory::convert(cat, &image) })
+                .map(|cat| { InitCategory::convert(cat, &image, InitCategoryMode::Parent) })
                 .collect();
 
         let styles:Vec<(Id, String, bool)> = 
