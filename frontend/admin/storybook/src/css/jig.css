@@ -49,3 +49,8 @@
     background-color:#EEEEEE;
     box-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
+
+/* Datepicker */
+::-webkit-datetime-edit-month-field { visibility: hidden}
+::-webkit-datetime-edit-day-field { visibility: hidden }
+::-webkit-datetime-edit-year-field { visibility: hidden  }

@@ -26,25 +26,35 @@
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Author's badge</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">
-          <div class="flex relative">
+          <div class="flex relative justify-between">
             Date
-            <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg" alt="">
+            <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg " alt="">
           </div>
-          <div class="p-2 w-272 absolute bg-jibackgroundGrey">
+          <!-- <div class="p-2 w-272 absolute bg-jibackgroundGrey">
             <p>Filter by date:</p>
 
-            <input type="date" id="datepicker" name="datepicker">
+            <input type="date" id="datepicker" name="datepicker" class="outline-none focus:outline-none">
 
-          </div>
+          </div> -->
 
 
         </th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Instruction language</th>
+        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left flex relative justify-between">Instruction language
+          <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg" alt="">
+
+          <div data-id="language-filter">
+
+          </div>
+        </th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Curators</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Privacy</th>
+        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left flex justify-between relative">Privacy <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg" alt="">
+          <div data-id="privacy-filter"></div>
+        </th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Rate</th>
         <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Version</th>
-        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left">Status</th>
+        <th class="px-1 py-2 font-medium text-jibuttonBlue text-left flex justify-center relative">Status <img src="{{MEDIA_UI}}/icon-filter-table-column-selected.svg" alt="">
+          <div data-id="jig-status"></div>
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -79,7 +89,10 @@
           <p>Gila, Anat</p>
         </td>
         <td class="border px-1 py-1 align-top">
-          <img src="{{MEDIA_UI}}/Icon_Privacy_Private_32.svg">
+          <div class="flex justify-center">
+            <img src="{{MEDIA_UI}}/Icon_Privacy_Private_32.svg">
+          </div>
+
         </td>
         <td class="border px-1 py-1 align-top">
           <div class="stars-rating flex border border-jiborderGrey rounded-full px-2 py-1">
@@ -148,7 +161,7 @@
           <p>Gila, Anat</p>
         </td>
         <td class="border px-1 py-1 align-top">
-          <div class="relative">
+          <div class="relative flex justify-center">
             <img src="{{MEDIA_UI}}/Icon_Privacy_Hide_32_red.svg">
             <div data-id="privacy-dropdown"></div>
           </div>

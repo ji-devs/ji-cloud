@@ -9,7 +9,6 @@ import imageEditCategories from "@templates/images/image-edit-categories.html";
 import imageFilter from "@templates/images/image-filter.html";
 import imageFilterBubble from "@templates/images/image-filter-bubble.html";
 import imageFilterOption from "@templates/images/image-filter-option.html";
-import imageCategories from "@templates/images/image-categories.html";
 import imageSummary from "@templates/images/image-summary.html";
 
 export default {
@@ -47,7 +46,7 @@ export const Categories = () =>  {
 
     appendId(editContainer, "right-area", editCategories);
 
-    const pageContents = editContainer; 
+    const pageContents = editContainer;
 
     appendId(pageContainer, "page-contents", pageContents);
 
