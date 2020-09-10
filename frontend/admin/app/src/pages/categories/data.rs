@@ -2,10 +2,7 @@ use shared::domain::category::*;
 use std::convert::TryInto;
 use core::{
     routes::{Route, UserRoute},
-    fetch::{
-        FetchResult,
-        admin::category as fetch_category,
-    },
+    fetch::FetchResult,
     storage,
 };
 use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
@@ -17,7 +14,7 @@ use std::rc::Rc;
 use super::CategoriesPage;
 use futures::future::ready;
 pub const EMPTY_NAME:&'static str = "New Category";
-
+use super::actions;
 
 pub struct MutableCategory {
     pub id: String,
@@ -49,7 +46,7 @@ impl MutableCategory {
 
         spawn_local(
             async move {
-                fetch_category::rename(&id, name).await;
+                actions::rename(&id, name).await;
                 ()
             }
         )
@@ -72,7 +69,7 @@ impl MutableCategory {
         let id = self.id.clone();
         spawn_local(
             async move {
-                fetch_category::delete(&id).await;
+                actions::delete(&id).await;
                 ()
             }
         )
@@ -88,7 +85,7 @@ impl MutableCategory {
 
             spawn_local(
                 async move {
-                    fetch_category::move_to(&id, target_index.try_into().unwrap()).await;
+                    actions::move_to(&id, target_index.try_into().unwrap()).await;
                     ()
                 }
             )
@@ -108,7 +105,7 @@ impl MutableCategory {
 
             spawn_local(
                 async move {
-                    fetch_category::move_to(&id, target_index.try_into().unwrap()).await;
+                    actions::move_to(&id, target_index.try_into().unwrap()).await;
                     ()
                 }
             )

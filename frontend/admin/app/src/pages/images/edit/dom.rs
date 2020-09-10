@@ -58,7 +58,7 @@ impl ImageEdit{
             affiliations: RefCell::new(HashSet::new()),
             init: Mutable::new(None),
             save_loader: AsyncLoader::new(),
-            section: Mutable::new(Section::Meta),
+            section: Mutable::new(Section::Categories),
         });
 
         let _self_clone = _self.clone();
@@ -128,7 +128,6 @@ impl ImageEdit{
     
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
-            //todo - refactor so that all inputs are mapped to mutable fields (live save)
             .child_signal(_self.init.signal_cloned().map(clone!(_self => move |init| {
                 init.map(|init:Init| {
                     elem!(templates::image_edit(), { 
@@ -253,43 +252,15 @@ impl ImageEdit{
                 )
             })
 
-            /*
-            .with_data_id!("age_ranges", {
-                .children(
-                    init.age_ranges
-                        .into_iter()
-                        .map(|(id, label, contains)| {
-                            elem!(templates::checkbox(&id, &label), {
-                                .with_data_id!(id, {
-                                    .property("checked", contains)
-                                    .event(clone!(_self => move |evt:events::Change| {
-                                        if let Some(checked) = evt.checked() {
-                                            {
-                                                let mut age_ranges = _self.age_ranges.borrow_mut();
-                                                if checked {
-                                                    age_ranges.insert(id.to_string());
-                                                } else {
-                                                    age_ranges.remove(&id);
-                                                }
-                                            }
-                                            Self::save(_self.clone());
-                                        }
-                                    }))
-                                })
-                            })
-                        })
-                )
-            })
-
             .with_data_id!("affiliations", {
                 .children(
                     init.affiliations
-                        .into_iter()
+                        .iter()
                         .map(|(id, label, contains)| {
                             elem!(templates::checkbox(&id, &label), {
                                 .with_data_id!(id, {
-                                    .property("checked", contains)
-                                    .event(clone!(_self => move |evt:events::Change| {
+                                    .property("checked", *contains)
+                                    .event(clone!(_self, id => move |evt:events::Change| {
                                         if let Some(checked) = evt.checked() {
                                             {
                                                 let mut affiliations = _self.affiliations.borrow_mut();
@@ -307,7 +278,7 @@ impl ImageEdit{
                         })
                 )
             })
-            */
+
         })
     }
     fn render_section_categories(_self: Rc<Self>, init:&Init) -> Dom {

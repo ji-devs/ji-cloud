@@ -1,7 +1,8 @@
 use shared::{
     api::endpoints::{ApiEndpoint, image::meta, image::*},
     domain::image::{*, meta::{StyleId, AgeRangeId, AffiliationId}},
-    error::image::*
+    error::image::*,
+    domain::category::*,
 };
 use core::{
     path::api_url,
@@ -11,6 +12,7 @@ use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
 use url::Url;
 use web_sys::File;
+use crate::pages::categories::actions::load_categories;
 
 pub type Id = String;
 
@@ -69,7 +71,41 @@ pub struct Init {
     pub styles: Vec<(Id, String, bool)>,
     pub age_ranges: Vec<(Id, String, bool)>,
     pub affiliations: Vec<(Id, String, bool)>,
-    pub categories: Vec<(Id, String, bool)>,
+    pub categories: Vec<InitCategory>,
+}
+
+#[derive(Clone, Debug)]
+pub struct InitCategory {
+    pub id: Id,
+    pub name: String,
+    pub assigned: bool,
+    pub children: Vec<InitCategory>
+}
+
+
+impl InitCategory {
+    fn convert(cat:Category, image:&Image) -> InitCategory {
+
+        let assigned = 
+            image.categories
+                .iter()
+                .any(|id| *id == cat.id);
+
+        let name = cat.name.to_string();
+        let id = cat.id.0.to_string();
+        let children = 
+            cat.children
+                .into_iter()
+                .map(|child| Self::convert(child, image))
+                .collect();
+
+        InitCategory {
+            id,
+            name,
+            assigned,
+            children
+        }
+    }
 }
 
 impl Init {
@@ -81,6 +117,13 @@ impl Init {
             .map(|res| res.metadata)?;
 
 
+        let categories = load_categories().await.map_err(|_| ())?.categories;
+
+        let categories:Vec<InitCategory> =
+            categories
+                .into_iter()
+                .map(|cat| { InitCategory::convert(cat, &image) })
+                .collect();
 
         let styles:Vec<(Id, String, bool)> = 
             options.styles
@@ -121,20 +164,6 @@ impl Init {
                 })
                 .collect();
 
-                /* TODO - load global categories
-        let categories:Vec<(Id, String, bool)> = 
-            options.categories
-                .into_iter()
-                .map(|(id, label)| {
-                    let contains = 
-                        image.categories
-                            .iter()
-                            .map(|cat| cat.0.to_string())
-                            .any(|x| x == id);
-                    (id, label, contains)
-                })
-                .collect();
-                */
 
         let Image {name, description, is_premium, ..} = image;
 
@@ -145,7 +174,7 @@ impl Init {
             styles,
             age_ranges,
             affiliations,
-            categories: Vec::new(),
+            categories,
         })
     }
 }

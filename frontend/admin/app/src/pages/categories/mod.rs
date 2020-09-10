@@ -1,4 +1,4 @@
-mod actions;
+pub mod actions;
 mod dom;
 mod data;
 
