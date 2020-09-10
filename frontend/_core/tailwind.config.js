@@ -29,6 +29,7 @@ module.exports = {
         jiyellowstar:'#fccd63',
         jigreyicon: '#d6d8de',
         jiorange:'#fc7551',
+        jisideblue:'#def4ff',
       },
 
 
@@ -51,6 +52,7 @@ module.exports = {
         259: '259px',
         272:'272px',
         288: '288px',
+        297: '297px',
 
       },
       height: {
@@ -78,7 +80,11 @@ module.exports = {
       },
       borderWidth: {
         3: '3px'
-      }
+      },
+      backgroundImage: theme => ({
+        'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
+
+        })
     },
   },
   variants: {
