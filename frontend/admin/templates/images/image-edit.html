@@ -22,7 +22,8 @@
         <div class="pl-1 pr-2">
           <div class="flex justify-between mb-6">
             {{ Input::checkbox(label="Premium Image", inputDataId="premium") }}
-            <p class="text-sm text-jibuttonBlue flex items-center leading-6">Replace</p>
+            <p data-id="replace-btn" class="text-sm text-jibuttonBlue flex items-center leading-6 cursor-pointer">Replace</p>
+            <input type="file" data-id="file" multiple accept="image/*" class="hidden">
           </div>
           {{ Input::description(label="Image Name", inputDataId="name") }}
           {{ Input::description(label="Image Description", inputDataId="description") }}

@@ -45,7 +45,8 @@ pub struct ImageEdit {
 #[derive(Clone, Copy, Debug)]
 enum Section {
     Meta,
-    Categories
+    Categories,
+    Overview
 }
 
 
@@ -93,6 +94,7 @@ impl ImageEdit{
     }
 
 
+    //could be made more efficient by 
     fn save(_self: Rc<Self>) {
         let _self_clone = _self.clone();
         if let Some(refs) = _self.refs.borrow().as_ref() {
@@ -123,10 +125,25 @@ impl ImageEdit{
                     .map(|s| s.to_string())
                     .collect();
 
+            let categories:Vec<String> =
+                _self.selected_categories
+                    .lock_ref()
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect();
+
             _self.save_loader.load(async move {
                 _self_clone.error_message.set(None);
 
-                if let Err(err) = actions::save(id, is_premium, name, description, styles, age_ranges, affiliations).await {
+                if let Err(err) = actions::save(
+                    id, 
+                    is_premium, 
+                    name, description, 
+                    styles, 
+                    age_ranges, 
+                    affiliations,
+                    categories
+                ).await {
                     let msg = match err {
                         UpdateError::MissingMetadata{id, kind} => {
                             format!("missing metadata!")
@@ -177,6 +194,9 @@ impl ImageEdit{
                                     Section::Meta => {
                                         _self.section.set(Section::Categories);
                                     },
+                                    Section::Categories => {
+                                        _self.section.set(Section::Overview);
+                                    },
                                     _ => {
                                         log::info!("GO NEXT");
                                     }
@@ -198,6 +218,35 @@ impl ImageEdit{
                                 Self::save(_self.clone());
                             }))
                         })
+
+                        .with_data_id!("replace-btn", {
+                            .event(clone!(_self => move |_evt:events::Click| {
+                                if let Some(refs) = _self.refs.borrow().as_ref() {
+                                    refs.file_input.click();
+                                }
+                            }))
+                        })
+                        .with_data_id!("file", {
+                            .event(clone!(_self => move |_evt:events::Change| {
+                                let file =
+                                    _self.refs
+                                        .borrow()
+                                        .as_ref()
+                                        .and_then(|refs| refs.file());
+
+                                if let Some(file) = file {
+                                    spawn_local(async move {
+                                        log::info!("TODO - API with FILE");
+                                        /*
+                                        let id = actions::create_image(file).await.unwrap_throw();
+                                        let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
+                                        dominator::routing::go_to_url(&route);
+                                        */
+                                    });
+                                }
+                            }))
+
+                        })
                         .after_inserted(clone!(_self => move |elem| {
                             *_self.refs.borrow_mut() = Some(ImageEditRefs::new(elem));
                         }))
@@ -206,6 +255,7 @@ impl ImageEdit{
                                 Some(match section {
                                     Section::Meta => Self::render_section_meta(_self.clone(), &init),
                                     Section::Categories => Self::render_section_categories(_self.clone(), &init),
+                                    Section::Overview => Self::render_section_overview(_self.clone(), &init),
                                 })
                             })))
                         })
@@ -216,6 +266,10 @@ impl ImageEdit{
         })
     }
     
+    fn render_section_overview(_self: Rc<Self>, init:&Init) -> Dom {
+        html!("div", {.text("overview here")})
+    }
+
     fn render_section_meta(_self: Rc<Self>, init:&Init) -> Dom {
         elem!(templates::image_edit_meta(), {
             .with_data_id!("styles", {
@@ -394,12 +448,15 @@ impl ImageEdit{
                     )
                 })
                 .with_data_id!("arrow", {
+                    .class_signal(
+                        ["transform", "rotate-90", "-m-1"],
+                        _self.category_expansions.borrow().get(&id).unwrap_throw().signal()
+                    )
                     .event(clone!(_self, id => move |evt:events::Click| {
                         _self.category_expansions.borrow()
                             .get(&id)
                             .unwrap_throw()
                             .replace_with(|x| !*x);
-
                     }))
                 })
             })
@@ -414,7 +471,8 @@ fn is_checked(possible:&[(Id, String)], item_list:&[Id], id:&Id) -> bool {
 struct ImageEditRefs {
     is_premium_elem: HtmlInputElement,
     name_elem: HtmlInputElement,
-    description_elem: HtmlInputElement
+    description_elem: HtmlInputElement,
+    file_input:HtmlInputElement
 }
 
 impl ImageEditRefs {
@@ -423,6 +481,7 @@ impl ImageEditRefs {
             is_premium_elem: elem.select(&data_id("premium")),
             name_elem: elem.select(&data_id("name")),
             description_elem: elem.select(&data_id("description")),
+            file_input: elem.select(&data_id("file")),
         }
     }
 
@@ -436,6 +495,11 @@ impl ImageEditRefs {
 
     pub fn description(&self) -> String {
         self.description_elem.value()
+    }
+
+    pub fn file(&self) -> Option<web_sys::File> {
+        self.file_input.files()
+            .and_then(|files| files.get(0))
     }
 
     /*

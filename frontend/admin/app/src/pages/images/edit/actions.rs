@@ -25,6 +25,7 @@ pub async fn save(
     styles: impl IntoIterator<Item=String>,
     age_ranges: impl IntoIterator<Item=String>,
     affiliations: impl IntoIterator<Item=String>,
+    categories: impl IntoIterator<Item=String>,
 ) -> Result<(), UpdateError>
 {
     let path = UpdateMetadata::PATH.replace("{id}",&id);
@@ -47,7 +48,11 @@ pub async fn save(
                         .map(|id| Uuid::parse_str(&id).unwrap_throw())
                         .map(|id| AffiliationId(id))
                         .collect()),
-        categories: None,
+        categories: Some(categories
+                        .into_iter()
+                        .map(|id| Uuid::parse_str(&id).unwrap_throw())
+                        .map(|id| CategoryId(id))
+                        .collect()),
         publish_at: None,
     };
     let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
