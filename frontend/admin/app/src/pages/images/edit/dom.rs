@@ -25,7 +25,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category,
 };
-use super::actions::{self, Init, Id, InitCategory, InitCategoryMode};
+use super::actions::{self, Init, Id, EditCategory, EditCategoryMode};
 use std::collections::{HashSet, HashMap};
 
 pub struct ImageEdit {
@@ -38,7 +38,8 @@ pub struct ImageEdit {
     init: Mutable<Option<Init>>,
     section: Mutable<Section>,
     save_loader: AsyncLoader,
-    category_expansions: RefCell<HashMap<Id, Mutable<bool>>>
+    category_expansions: RefCell<HashMap<Id, Mutable<bool>>>,
+    selected_categories: Mutable<HashSet<Id>> 
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -60,7 +61,8 @@ impl ImageEdit{
             init: Mutable::new(None),
             save_loader: AsyncLoader::new(),
             section: Mutable::new(Section::Categories),
-            category_expansions: RefCell::new(HashMap::new())
+            category_expansions: RefCell::new(HashMap::new()),
+            selected_categories: Mutable::new(HashSet::new()) 
         });
 
         let _self_clone = _self.clone();
@@ -68,7 +70,7 @@ impl ImageEdit{
         spawn_local(async move {
             match actions::Init::load(&id).await {
                 Ok(init) => {
-                    fn set_expansions(curr:&Vec<InitCategory>, expansions: &mut HashMap<Id, Mutable<bool>>) {
+                    fn set_expansions(curr:&Vec<EditCategory>, expansions: &mut HashMap<Id, Mutable<bool>>) {
                         for cat in curr.iter() {
                             expansions.insert(cat.id.clone(), Mutable::new(false));
                             if !cat.children.is_empty() {
@@ -78,6 +80,10 @@ impl ImageEdit{
                     };
                     let mut expansions = _self_clone.category_expansions.borrow_mut();
                     set_expansions(&init.categories, &mut expansions);
+                    let mut selected_categories = _self_clone.selected_categories.lock_mut();
+                    for id in init.selected_categories.iter() {
+                        selected_categories.insert(id.to_string());
+                    }
                     _self_clone.init.set(Some(init)); 
                 },
                 Err(_) => { log::error!("GOT ERROR!!"); }
@@ -302,82 +308,101 @@ impl ImageEdit{
                     Self::render_category_select(_self.clone(), cat.clone())
                 })))
             })
+            .with_data_id!("summary-list", {
+                .children(init.categories.iter().map(clone!(_self => move |cat| {
+                    Self::render_category_summary(_self.clone(), cat.clone())
+                })))
+            })
         })
     }
 
-    fn render_category_select(_self: Rc<Self>, cat: InitCategory) -> Dom {
+    fn render_category_summary(_self: Rc<Self>, cat: EditCategory) -> Dom {
         let id = cat.id.clone();
-        match cat.mode {
-            InitCategoryMode::Parent => {
+
+        let elem = match cat.mode {
+            EditCategoryMode::Parent => templates::image_edit_category_summary_parent(&cat.name),
+            EditCategoryMode::Child => templates::image_edit_category_summary_child(&cat.name)
+        };
+
+        elem!(elem, {
+            .with_data_id!("children", {
+                .children(cat.children.iter().map(clone!(_self => move |cat| {
+                    Self::render_category_summary(_self.clone(), cat.clone())
+                })))
+            })
+            .class_signal("hidden", _self.selected_categories.signal_ref(move |selected| {
+                !cat.contains_leaf_set(selected)
+            }))
+        })
+    }
+
+    //TODO - make more DRY!... it's not so much parent vs child, more like end vs. not end
+    fn render_category_select(_self: Rc<Self>, cat: EditCategory) -> Dom {
+        let id = cat.id.clone();
+
+        let elem = match cat.mode {
+            EditCategoryMode::Parent => {
                 if cat.is_end {
-                    elem!(templates::image_edit_category_parent_end(&cat.name), {})
+                    templates::image_edit_category_parent_end(&cat.name)
                 } else {
-                    elem!(templates::image_edit_category_parent(&cat.name), {
-                        .with_data_id!("children", {
-                            .children_signal_vec(
-                                _self.category_expansions.borrow().get(&cat.id).unwrap_throw().signal().map(clone!(_self => move |expanded| {
-                                        if expanded {
-                                            let children:Vec<Dom> = cat.children.iter().map(clone!(_self => move |cat| {
-                                                Self::render_category_select(_self.clone(), cat.clone())
-                                            })).collect();
-                                            children
-                                        } else {
-                                            Vec::new()
-                                        }
-                                }))
-                                .to_signal_vec()
-                            )
-                        })
-                        .with_data_id!("arrow", {
-                            .event(clone!(_self, id => move |evt:events::Click| {
-                                _self.category_expansions.borrow()
-                                    .get(&id)
-                                    .unwrap_throw()
-                                    .replace_with(|x| !*x);
-
-                            }))
-                        })
-                    })
+                    templates::image_edit_category_parent(&cat.name)
                 }
-            },
-            InitCategoryMode::Child => {
+            }
+            EditCategoryMode::Child => {
                 if cat.is_end {
-                    elem!(templates::image_edit_category_child_end(&cat.name), {})
+                    templates::image_edit_category_child_end(&cat.name)
                 } else {
-                    elem!(templates::image_edit_category_child(&cat.name), {
-                        //TODO - consolidate this with above... just get element first and then
-                        //apply methods
-                        //Also - arrow class should depend on the expansions signal too
-                        .with_data_id!("children", {
-                            .children_signal_vec(
-                                _self.category_expansions.borrow().get(&cat.id).unwrap_throw().signal().map(clone!(_self => move |expanded| {
-                                        if expanded {
-                                            let children:Vec<Dom> = cat.children.iter().map(clone!(_self => move |cat| {
-                                                Self::render_category_select(_self.clone(), cat.clone())
-                                            })).collect();
-                                            children
-                                        } else {
-                                            Vec::new()
-                                        }
-                                }))
-                                .to_signal_vec()
-                            )
-                        })
-                        .with_data_id!("arrow", {
-                            .event(clone!(_self, id => move |evt:events::Click| {
-                                _self.category_expansions.borrow()
-                                    .get(&id)
-                                    .unwrap_throw()
-                                    .replace_with(|x| !*x);
-
-                            }))
-                        })
-
-
-                    })
+                    templates::image_edit_category_child(&cat.name)
                 }
-            },
-            
+            }
+        };
+
+        if cat.is_end {
+            elem!(elem, {
+                .with_data_id!("checkbox", {
+                    .property("checked", cat.assigned)
+                    .event(clone!(_self, id => move |evt:events::Change| {
+                        if let Some(checked) = evt.checked() {
+                            {
+                                let mut selected = _self.selected_categories.lock_mut();
+                                if checked {
+                                    selected.insert(id.to_string());
+                                } else {
+                                    selected.remove(&id);
+                                }
+                            }
+                            Self::save(_self.clone());
+                        }
+                    }))
+                })
+            })
+        } else {
+            elem!(elem, {
+                .with_data_id!("children", {
+                    .children_signal_vec(
+                        _self.category_expansions.borrow().get(&cat.id).unwrap_throw().signal().map(clone!(_self => move |expanded| {
+                                if expanded {
+                                    let children:Vec<Dom> = cat.children.iter().map(clone!(_self => move |cat| {
+                                        Self::render_category_select(_self.clone(), cat.clone())
+                                    })).collect();
+                                    children
+                                } else {
+                                    Vec::new()
+                                }
+                        }))
+                        .to_signal_vec()
+                    )
+                })
+                .with_data_id!("arrow", {
+                    .event(clone!(_self, id => move |evt:events::Click| {
+                        _self.category_expansions.borrow()
+                            .get(&id)
+                            .unwrap_throw()
+                            .replace_with(|x| !*x);
+
+                    }))
+                })
+            })
         }
     }
 
@@ -419,3 +444,4 @@ impl ImageEditRefs {
     }
     */
 }
+
