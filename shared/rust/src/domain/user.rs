@@ -6,10 +6,12 @@ use uuid::Uuid;
 use super::meta::SubjectId;
 
 // note that this is unstable and will totally be split into many things later on
-#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize,  PartialEq, Debug, Clone)]
+#[non_exhaustive]
 #[repr(i16)]
 pub enum UserScope {
-    Admin = 1,
+    ManageCategory = 2,
+    ManageImage = 3,
 }
 
 impl TryFrom<i16> for UserScope {
@@ -17,7 +19,8 @@ impl TryFrom<i16> for UserScope {
 
     fn try_from(i: i16) -> Result<Self, Self::Error> {
         match i {
-            1 => Ok(Self::Admin),
+            2 => Ok(Self::ManageCategory),
+            3 => Ok(Self::ManageImage),
             _ => Err(()),
         }
     }

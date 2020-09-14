@@ -1211,6 +1211,7 @@ dependencies = [
  "log",
  "openssl",
  "percent-encoding",
+ "pin-project",
  "rand",
  "reqwest",
  "rusoto_core",
@@ -2127,17 +2128,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_repr"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dc6b7951b17b051f3210b063f12cc17320e2fe30ae05b0fe2a3abb068551c76"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "serde_urlencoded"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2192,7 +2182,6 @@ dependencies = [
  "chrono-tz",
  "serde",
  "serde_json",
- "serde_repr",
  "sqlx",
  "url",
  "uuid 0.8.1",

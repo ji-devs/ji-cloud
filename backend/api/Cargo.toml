@@ -24,6 +24,7 @@ listenfd = {version = "0.3", optional = true }
 log = "0.4"
 openssl = { version = "0.10", features = ["vendored"], optional = true }
 percent-encoding = "2.1.0"
+pin-project = "0.4.23"
 rand = "0.7"
 reqwest = { version = "0.10", features = ["json"] }
 rusoto_core = "0.45.0"
