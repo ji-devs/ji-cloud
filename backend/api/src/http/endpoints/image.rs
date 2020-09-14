@@ -1,4 +1,7 @@
-use crate::{algolia::AlgoliaClient, db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
+use crate::{
+    algolia::AlgoliaClient, db, extractor::AuthUserWithScope, extractor::ScopeManageImage,
+    extractor::WrapAuthClaimsNoDb, s3::S3Client,
+};
 use actix_web::{
     http,
     web::{Data, Json, Path, Query, ServiceConfig},
@@ -92,7 +95,7 @@ async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (Json<<image::Create as ApiEndpoint>::Res>, http::StatusCode),
@@ -188,7 +191,7 @@ async fn get(
 async fn update(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
 ) -> Result<HttpResponse, <image::UpdateMetadata as ApiEndpoint>::Err> {
@@ -248,7 +251,7 @@ fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
 async fn delete(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
 ) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {

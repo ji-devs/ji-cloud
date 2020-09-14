@@ -10,8 +10,6 @@ pub enum Error {
 }
 
 pub fn get_claims(token_string: &str, key: DecodingKey) -> Result<AuthClaims, Error> {
-    //see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-
     let validation = jwt::Validation {
         validate_exp: false,
         ..Default::default()
@@ -34,10 +32,10 @@ pub fn check_no_db(
         Ok(None)
     }
 }
-pub async fn check_no_csrf<'a>(
+pub async fn check_no_csrf(
     db: &PgPool,
     token_string: &str,
-    key: DecodingKey<'a>,
+    key: DecodingKey<'_>,
 ) -> anyhow::Result<Option<AuthClaims>> {
     let claims = get_claims(token_string, key)
         .map_err(|e| anyhow::anyhow!("{:?}", e))

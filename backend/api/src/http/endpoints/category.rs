@@ -1,4 +1,6 @@
-use crate::{db, extractor::WrapAuthClaimsNoDb};
+use crate::{
+    db, extractor::AuthUserWithScope, extractor::ScopeManageCategory, extractor::WrapAuthClaimsNoDb,
+};
 use actix_web::{
     web::{self, Data, Json, ServiceConfig},
     HttpResponse,
@@ -38,7 +40,7 @@ async fn get_categories(
 
 async fn create_category(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Json<<category::Create as ApiEndpoint>::Req>,
 ) -> actix_web::Result<
     Json<<category::Create as ApiEndpoint>::Res>,
@@ -53,7 +55,7 @@ async fn create_category(
 
 async fn update_category(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
     path: web::Path<CategoryId>,
 ) -> actix_web::Result<HttpResponse, <category::Update as ApiEndpoint>::Err> {
@@ -77,7 +79,7 @@ async fn update_category(
 
 async fn delete_category(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageCategory>,
     path: web::Path<CategoryId>,
 ) -> actix_web::Result<HttpResponse, <category::Delete as ApiEndpoint>::Err> {
     db::category::delete(&db, path.into_inner()).await?;
