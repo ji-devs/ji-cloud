@@ -1,4 +1,4 @@
-import {renderTemplate as tmpl} from "@utils/template";
+import {renderTemplate as tmpl, renderDivText} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
 import checkbox from "@templates/_input/checkbox.html";
 import imagesPage from "@templates/images/images-page.html";
@@ -15,7 +15,7 @@ import imageEditCategoriesSumChild from "@templates/images/image-edit-categories
 import imageFilter from "@templates/images/image-filter.html";
 import imageFilterBubble from "@templates/images/image-filter-bubble.html";
 import imageFilterOption from "@templates/images/image-filter-option.html";
-import imageSummary from "@templates/images/image-summary.html";
+import imageOverview from "@templates/images/image-edit-overview.html";
 
 export default {
   title: 'Image labeler',
@@ -83,6 +83,46 @@ export const Categories = () =>  {
 
     return pageContainer;
 }
+export const Overview = () => {
+    const pageContainer = tmpl(imagesPage);
+    const editContainer = tmpl(imageEdit);
+    const overview = tmpl(imageOverview, {
+      name: "Moses parts the Nile",
+      description: "An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile."
+    });
+    ["Clipart", "Photo", "B & W", "Drawing", "Comic"]
+      .forEach(style => {
+        appendId(overview, "styles", renderDivText(style));
+      });
+    ["All ages", "Kindergarden", "Elementary", "Middle School", "High School", "University"]
+      .forEach(age_range => {
+        appendId(overview, "age_ranges", renderDivText(age_range));
+      });
+
+    ["All", "No religion", "Reform/Conservative", "Orthodox", "Charedi"]
+      .forEach(affiliation => {
+        appendId(overview, "affiliations", renderDivText(affiliation));
+      });
+
+
+    const sum1 = tmpl(imageEditCategoriesSumParent, {name: "English"});
+    const sum2 = tmpl(imageEditCategoriesSumParent, {name: "Hebrew"});
+    const sum2Child1 = tmpl(imageEditCategoriesSumChild, {name: "Vocabulary"});
+    const sum2Child1Child = tmpl(imageEditCategoriesSumChild, {name: "Blah"});
+
+    appendId(sum2Child1, "children", sum2Child1Child);
+    appendId(sum2, "children", sum2Child1);
+
+    [sum1, sum2].forEach(sum => appendId(overview, "category-summaries", sum));
+
+    appendId(editContainer, "right-area", overview);
+
+    const pageContents = editContainer ;
+
+    appendId(pageContainer, "page-contents", pageContents);
+
+    return pageContainer;
+};
 
 /*
 export const WithMenu = () => {
@@ -141,24 +181,3 @@ function makeFilterOption(label) {
 function makeCheckbox(label) {
   return tmpl(checkbox, {label, id: label});
 }
-/*
-export const LabelCategory = () => {
-  tmpl(labelcategory, {});
-
-        return labelcategory;
-};
-
-export const ImageSummary = () => {
-  tmpl(imagesummary, {});
-
-        return imagesummary;
-};
-
-function setLabel(parentElement, label) {
-
-    const element = tmpl(imageLabelFilter);
-    // element.innerText = label;
-
-    return appendId(parentElement, "label", element);
-};
-*/

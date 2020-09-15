@@ -1,8 +1,7 @@
 use shared::{
-    api::endpoints::{ApiEndpoint, image::meta, image::*},
-    domain::image::{*, meta::{StyleId, AgeRangeId, AffiliationId}},
+    api::endpoints::{ApiEndpoint, image::*, self},
+    domain::{image::*, meta::*, category::*},
     error::image::*,
-    domain::category::*,
 };
 use core::{
     path::api_url,
@@ -264,7 +263,7 @@ impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         _load_meta_options().await
             .map_err(|err| {
-                log::error!("{:?}", err);
+                //log::error!("{:?}", err);
                 ()
             })
             .map(|res| {
@@ -301,7 +300,7 @@ impl MetaOptions {
     }
 }
 
-async fn _load_meta_options() -> FetchResult < <meta::Get as ApiEndpoint>::Res, <meta::Get as ApiEndpoint>::Err> {
-    log::info!("{}", api_url(meta::Get::PATH));
-    api_with_auth::<_, _, ()>(&api_url(meta::Get::PATH), meta::Get::METHOD, None).await
+async fn _load_meta_options() -> FetchResult < <endpoints::meta::Get as ApiEndpoint>::Res, <endpoints::meta::Get as ApiEndpoint>::Err> {
+    log::info!("{}", api_url(endpoints::meta::Get::PATH));
+    api_with_auth::<_, _, ()>(&api_url(endpoints::meta::Get::PATH), endpoints::meta::Get::METHOD, None).await
 }

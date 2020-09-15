@@ -29,6 +29,7 @@ const IMAGE_EDIT_CATEGORIES_PARENT:&'static str = "image-edit-categories-parent"
 const IMAGE_EDIT_CATEGORIES_PARENT_END:&'static str = "image-edit-categories-parent-end";
 const IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD:&'static str = "image-edit-categories-sum-child";
 const IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT:&'static str = "image-edit-categories-sum-parent";
+const IMAGE_EDIT_OVERVIEW:&'static str = "image-edit-overview";
 
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
@@ -107,6 +108,12 @@ pub fn image_edit_category_summary_child(name:&str) -> HtmlElement {
         "name" => name
     }).unwrap_throw())
 }
+pub fn image_edit_overview(name:&str, description:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_EDIT_OVERVIEW, &html_map!{
+        "name" => name,
+        "description" => description,
+    }).unwrap_throw())
+}
 
 pub fn checkbox(id:&str, label:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CHECKBOX, &html_map!{
@@ -147,6 +154,7 @@ impl Templates {
             (IMAGE_EDIT_CATEGORIES_PARENT_END, get_template_str(include_str!("../../../.template_output/images/image-edit-categories-parent-end.html"))),
             (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, get_template_str(include_str!("../../../.template_output/images/image-edit-categories-sum-child.html"))),
             (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, get_template_str(include_str!("../../../.template_output/images/image-edit-categories-sum-parent.html"))),
+            (IMAGE_EDIT_OVERVIEW, get_template_str(include_str!("../../../.template_output/images/image-edit-overview.html"))),
             (CHECKBOX, get_template_str(include_str!("../../../.template_output/_input/checkbox.html"))),
         ]);
 

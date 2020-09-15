@@ -31,6 +31,7 @@ use std::collections::{HashSet, HashMap};
 pub struct ImageEdit {
     id: Mutable<String>,
     error_message: Mutable<Option<String>>,
+    publish_message: Mutable<Option<String>>,
     refs:RefCell<Option<ImageEditRefs>>,
     styles: RefCell<HashSet<String>>,
     age_ranges: RefCell<HashSet<String>>,
@@ -49,19 +50,29 @@ enum Section {
     Overview
 }
 
-
+struct SaveInfo {
+    pub id: String,
+    pub is_premium: bool,
+    pub name:String,
+    pub description: String,
+    pub styles: Vec<String>,
+    pub age_ranges: Vec<String>,
+    pub affiliations: Vec<String>,
+    pub categories: Vec<String>,
+}
 impl ImageEdit{
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
             id: Mutable::new(id.clone()),
             error_message: Mutable::new(None),
+            publish_message: Mutable::new(None),
             refs: RefCell::new(None),
             styles: RefCell::new(HashSet::new()),
             age_ranges: RefCell::new(HashSet::new()),
             affiliations: RefCell::new(HashSet::new()),
             init: Mutable::new(None),
             save_loader: AsyncLoader::new(),
-            section: Mutable::new(Section::Categories),
+            section: Mutable::new(Section::Overview),
             category_expansions: RefCell::new(HashMap::new()),
             selected_categories: Mutable::new(HashSet::new()) 
         });
@@ -94,43 +105,70 @@ impl ImageEdit{
     }
 
 
+    fn get_save_info(_self: Rc<Self>) -> Option<SaveInfo> {
+        _self.refs
+            .borrow()
+            .as_ref()
+            .map(|refs| {
+                let id = _self.id.get_cloned();
+                let is_premium = refs.is_premium();
+                let name = refs.name();
+                let description = refs.description();
+
+                let styles:Vec<String> = 
+                    _self.styles
+                        .borrow()
+                        .iter()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                let age_ranges:Vec<String> =
+                    _self.age_ranges
+                        .borrow()
+                        .iter()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                let affiliations:Vec<String> =
+                    _self.affiliations
+                        .borrow()
+                        .iter()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                let categories:Vec<String> =
+                    _self.selected_categories
+                        .lock_ref()
+                        .iter()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                SaveInfo {
+                    id,
+                    is_premium,
+                    name,
+                    description,
+                    styles,
+                    age_ranges,
+                    affiliations,
+                    categories
+                }
+            })
+    }
     //could be made more efficient by 
     fn save(_self: Rc<Self>) {
         let _self_clone = _self.clone();
-        if let Some(refs) = _self.refs.borrow().as_ref() {
-            
-            let id = _self.id.get_cloned();
-            let is_premium = refs.is_premium();
-            let name = refs.name();
-            let description = refs.description();
-
-            let styles:Vec<String> = 
-                _self.styles
-                    .borrow()
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect();
-
-            let age_ranges:Vec<String> =
-                _self.age_ranges
-                    .borrow()
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect();
-
-            let affiliations:Vec<String> =
-                _self.affiliations
-                    .borrow()
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect();
-
-            let categories:Vec<String> =
-                _self.selected_categories
-                    .lock_ref()
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect();
+        if let Some(info) = Self::get_save_info(_self.clone()) {
+            let SaveInfo {
+                id,
+                is_premium,
+                name,
+                description,
+                styles,
+                age_ranges,
+                affiliations,
+                categories
+            } = info;
 
             _self.save_loader.load(async move {
                 _self_clone.error_message.set(None);
@@ -187,6 +225,17 @@ impl ImageEdit{
                                 }))
                             })
                         })
+                        .with_data_id!("published", {
+                            .class_signal("hidden", _self.publish_message.signal_ref(|msg| msg.is_none()))
+                            .with_data_id!("publish-img", {
+                                .property_signal("src", _self.id.signal_cloned().map_future(|id| {
+                                    async move {
+                                        let url = actions::get_image_url(&id).await.unwrap_throw();
+                                        url
+                                    }
+                                }))
+                            })
+                        })
                         .with_data_id!("next", {
                             .event(clone!(_self => move |_evt:events::Click| {
                                 let section = { *_self.section.lock_ref() };
@@ -197,9 +246,16 @@ impl ImageEdit{
                                     Section::Categories => {
                                         _self.section.set(Section::Overview);
                                     },
-                                    _ => {
-                                        log::info!("GO NEXT");
+                                    Section::Overview => {
+                                        _self.publish_message.set(Some("Done!".to_string()));
+                                        //TODO - publish!
                                     }
+                                }
+                            }))
+                            .text_signal(_self.section.signal().map(|section| {
+                                match section {
+                                    Section::Meta | Section::Categories => "Next".to_string(),
+                                    Section::Overview => "Publish".to_string(),
                                 }
                             }))
                         })
@@ -267,7 +323,56 @@ impl ImageEdit{
     }
     
     fn render_section_overview(_self: Rc<Self>, init:&Init) -> Dom {
-        html!("div", {.text("overview here")})
+
+        if let Some(info) = Self::get_save_info(_self.clone()) {
+            let SaveInfo {
+                id,
+                is_premium,
+                name,
+                description,
+                styles,
+                age_ranges,
+                affiliations,
+                categories
+            } = info;
+
+            let name = "Smiley";
+            let description = "Face";
+
+            let styles = vec!["Style 1".to_string(), "Style 2".to_string()];
+            let age_ranges = vec!["Age 1".to_string(), "Age 2".to_string()];
+            let affiliations = vec!["Affiliation 1".to_string(), "Affiliation 2".to_string()];
+
+            elem!(templates::image_edit_overview(&name, &description), {
+                .with_data_id!("styles", {
+                    .children(styles.into_iter().map(|label| html!("div", {.text(&label)})))
+                })
+                .with_data_id!("age_ranges", {
+                    .children(age_ranges.into_iter().map(|label| html!("div", {.text(&label)})))
+                })
+                .with_data_id!("affiliations", {
+                    .children(affiliations.into_iter().map(|label| html!("div", {.text(&label)})))
+                })
+                .with_data_id!("category-summaries", {
+                    .children(init.categories.iter().map(clone!(_self => move |cat| {
+                        Self::render_category_summary(_self.clone(), cat.clone())
+                    })))
+                })
+                .with_data_id!("edit-meta", {
+                    .event(clone!(_self => move |evt:events::Click| {
+                        _self.section.set(Section::Meta);
+                    }))
+                })
+                .with_data_id!("edit-categories", {
+                    .event(clone!(_self => move |evt:events::Click| {
+                        _self.section.set(Section::Categories);
+                    }))
+                })
+            
+            })
+        } else {
+            html!("div")
+        }
     }
 
     fn render_section_meta(_self: Rc<Self>, init:&Init) -> Dom {

@@ -13,12 +13,20 @@
         ​
         <p data-id="message"></p>
       </div>
+
+      <div data-id="published">
+        <div class="flex items-center text-jigreen border border-jigreen rounded-md p-2 bg-white z-10 absolute top-50 left-50p">
+          <img data-id="publish-img" class="w-76">
+          <img src="{{MEDIA_UI}}/done-24-px-v.svg" class="px-3">
+          <p>Image was published</p>
+        </div>
+      </div>
       {{ Input::searchbox(dataId="#", label="Search Image") }}
     </div>
     <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
     <div class="flex relative">
       <div class="w-1/5">
-        <img data-id="img" src="{{MEDIA_UI}}/red-sea-book.png" alt="">
+        <img data-id="img" alt="">
         <div class="pl-1 pr-2">
           <div class="flex justify-between mb-6">
             {{ Input::checkbox(label="Premium Image", inputDataId="premium") }}
@@ -34,7 +42,7 @@
       </div>
 
       <div class="absolute right-0 bottom-10">
-        {{ ButtonMacros::orange(label="Next", dataId="next") }}
+        {{ ButtonMacros::orange(label="", dataId="next") }}
       </div>
     </div>
   </div>
