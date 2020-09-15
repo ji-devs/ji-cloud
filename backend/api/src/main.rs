@@ -1,15 +1,16 @@
 use core::settings::SettingsManager;
-use ji_cloud_api::*;
+use ji_cloud_api::{algolia, db, http, jwkkeys, logger, s3};
 use std::thread;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv().ok();
-    logger::init_logger();
+
+    logger::init()?;
 
     let settings: SettingsManager = SettingsManager::new().await?;
 
-    let runtime = settings.runtime_settings().await?;
+    let runtime_settings = settings.runtime_settings().await?;
 
     let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?);
 
@@ -21,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     let db_pool = db::get_pool(settings.db_connect_options().await?).await?;
 
-    let handle = thread::spawn(|| http::run(db_pool, runtime, jwk_verifier, s3, algolia));
+    let handle = thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia));
 
     log::info!("app started!");
 

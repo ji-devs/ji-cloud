@@ -2,30 +2,32 @@ use super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::image::{
-        CreateRequest, CreateResponse, GetOneResponse, GetQuery, GetResponse, UpdateRequest,
+        CreateRequest, CreateResponse, GetResponse, SearchQuery, SearchResponse, UpdateRequest,
     },
-    error::image::{CreateError, DeleteError, GetError, GetOneError, UpdateError},
+    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
 };
 
-
-pub struct GetOne;
-impl ApiEndpoint for GetOne {
+/// Get an image by ID.
+pub struct Get;
+impl ApiEndpoint for Get {
     type Req = ();
-    type Res = GetOneResponse;
-    type Err = GetOneError;
+    type Res = GetResponse;
+    type Err = GetError;
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Get;
 }
 
-pub struct Get;
-impl ApiEndpoint for Get {
-    type Req = GetQuery;
-    type Res = GetResponse;
-    type Err = GetError;
+/// Search for images.
+pub struct Search;
+impl ApiEndpoint for Search {
+    type Req = SearchQuery;
+    type Res = SearchResponse;
+    type Err = SearchError;
     const PATH: &'static str = "/v1/image";
     const METHOD: Method = Method::Get;
 }
 
+/// Create an image.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateRequest;
@@ -35,6 +37,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
+/// Update an image's metadata.
 pub struct UpdateMetadata;
 impl ApiEndpoint for UpdateMetadata {
     type Req = UpdateRequest;
@@ -44,6 +47,7 @@ impl ApiEndpoint for UpdateMetadata {
     const METHOD: Method = Method::Patch;
 }
 
+/// Delete an image.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
