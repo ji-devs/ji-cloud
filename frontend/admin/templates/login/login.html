@@ -1,5 +1,18 @@
-<div class="bg-jisideblues">
-  <div class="bg-shapes bg-no-repeat w-297 h-screen">
+{% import "login/signup-macros.html" as SignUp %}
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+<div class="flex">
+  <div class="bg-jisideblue bg-shapes bg-no-repeat bg-auto bg-center h-screen w-480 min-w-300">
+  </div>
+  <div class="p-80">
+    <h1 class="text-jititleorange text-5xl font-light mb-8">Login</h1>
+    <div class="w-297">
+      {{ SignUp::signupinput(label="User name",width="w-297", dataId="${id}") }}
+      {{ SignUp::signupinput(label="Password",width="w-297", dataId="${id}") }}
 
+
+      <p class="text-right text-jibuttonBlue mb-12"><a href="#">Forgot your Password?</a></p>
+      {{ ButtonMacros::orange(label="Submit", dataId="btn-1") }}
+      <p class="text-jibuttonBlue  mt-6">Don't have an account yet? <a href="#">Sign in</a></p>
+    </div>
   </div>
 </div>

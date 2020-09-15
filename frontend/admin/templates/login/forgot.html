@@ -1,0 +1,17 @@
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+{% import "login/signup-macros.html" as SignUp %}
+
+<div class="flex">
+  <div class="bg-jisideblue bg-shapes bg-no-repeat bg-auto bg-center h-screen w-480 min-w-300">
+  </div>
+  <div class="p-80">
+    <h1 class="text-jititleorange text-5xl font-light mb-8">Create a new password</h1>
+    <div class="">
+      {{ SignUp::signupinput(label="Enter new password",width="w-297", dataId="${id}") }}
+      {{ SignUp::signupinput(label="Re-enter password",width="w-297", dataId="${id}") }}
+
+      {{ ButtonMacros::orange(label="Set Password", dataId="btn-1") }}
+      <p class="mt-6">You’ll be logged in automatically after this</p>
+    </div>
+  </div>
+</div>
