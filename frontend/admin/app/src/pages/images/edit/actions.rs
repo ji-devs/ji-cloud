@@ -78,7 +78,7 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
         age_ranges: None,
         affiliations: None,
         categories: None,
-        publish_at: Some(None),
+        publish_at: Some(Some(Publish::now())),
     };
     let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
         = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;

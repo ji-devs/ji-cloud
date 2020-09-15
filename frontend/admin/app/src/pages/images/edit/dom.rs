@@ -290,16 +290,19 @@ impl ImageEdit{
                             }))
                         })
                         .with_data_id!("premium", {
+                            .property("checked",  *&init.is_premium)
                             .event(clone!(_self => move |_evt:events::Change| {
                                 Self::save(_self.clone());
                             }))
                         })
                         .with_data_id!("name", {
+                            .property("value", &init.name )
                             .event(clone!(_self => move |_evt:events::Input| {
                                 Self::save(_self.clone());
                             }))
                         })
                         .with_data_id!("description", {
+                            .property("value", &init.description)
                             .event(clone!(_self => move |_evt:events::Input| {
                                 Self::save(_self.clone());
                             }))
