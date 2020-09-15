@@ -3,6 +3,7 @@ use crate::{
     domain::meta::GetResponse,
 };
 
+/// Get metadata.
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
