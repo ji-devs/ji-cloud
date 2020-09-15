@@ -1,8 +1,7 @@
 use shared::{
-    api::endpoints::{ApiEndpoint, image::meta, image::*},
-    domain::image::{*, meta::{StyleId, AgeRangeId, AffiliationId}},
+    api::endpoints::{ApiEndpoint, image::*, self},
+    domain::{image::*, meta::*, category::*},
     error::image::*,
-    domain::category::*,
 };
 use core::{
     path::api_url,
@@ -13,6 +12,7 @@ use wasm_bindgen::UnwrapThrowExt;
 use url::Url;
 use web_sys::File;
 use crate::pages::categories::actions::load_categories;
+use std::collections::{HashMap, HashSet};
 
 pub type Id = String;
 
@@ -24,6 +24,7 @@ pub async fn save(
     styles: impl IntoIterator<Item=String>,
     age_ranges: impl IntoIterator<Item=String>,
     affiliations: impl IntoIterator<Item=String>,
+    categories: impl IntoIterator<Item=String>,
 ) -> Result<(), UpdateError>
 {
     let path = UpdateMetadata::PATH.replace("{id}",&id);
@@ -46,7 +47,11 @@ pub async fn save(
                         .map(|id| Uuid::parse_str(&id).unwrap_throw())
                         .map(|id| AffiliationId(id))
                         .collect()),
-        categories: None,
+        categories: Some(categories
+                        .into_iter()
+                        .map(|id| Uuid::parse_str(&id).unwrap_throw())
+                        .map(|id| CategoryId(id))
+                        .collect()),
         publish_at: None,
     };
     let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
@@ -71,41 +76,52 @@ pub struct Init {
     pub styles: Vec<(Id, String, bool)>,
     pub age_ranges: Vec<(Id, String, bool)>,
     pub affiliations: Vec<(Id, String, bool)>,
-    pub categories: Vec<InitCategory>,
+    pub categories: Vec<EditCategory>,
+    pub selected_categories: HashSet<Id>,
 }
 
 #[derive(Clone, Debug)]
-pub struct InitCategory {
+pub struct EditCategory {
     pub id: Id,
     pub name: String,
     pub assigned: bool,
-    pub children: Vec<InitCategory>
+    pub mode: EditCategoryMode,
+    pub is_end: bool,
+    pub children: Vec<EditCategory>,
+    pub parent: Option<Id>
 }
 
+impl EditCategory {
+    pub fn contains_leaf_set(&self, leafs:&HashSet<Id>) -> bool {
+        
+        if leafs.contains(&self.id) {
+            true
+        } else {
+            for cat in self.children.iter() {
+                if cat.contains_leaf_set(leafs) {
+                    return true
+                }
+            }
 
-impl InitCategory {
-    fn convert(cat:Category, image:&Image) -> InitCategory {
-
-        let assigned = 
-            image.categories
-                .iter()
-                .any(|id| *id == cat.id);
-
-        let name = cat.name.to_string();
-        let id = cat.id.0.to_string();
-        let children = 
-            cat.children
-                .into_iter()
-                .map(|child| Self::convert(child, image))
-                .collect();
-
-        InitCategory {
-            id,
-            name,
-            assigned,
-            children
+            false
         }
     }
+}
+
+fn get_selected_categories(categories:&[EditCategory]) -> HashSet<Id> {
+    fn push_assignments(categories: &[EditCategory], coll:&mut HashSet<Id>) {
+        for cat in categories.iter() {
+            if cat.assigned {
+                coll.insert(cat.id.clone());
+            }
+            push_assignments(&cat.children, coll);
+        }
+    }
+
+    let mut coll = HashSet::new();
+    push_assignments(categories, &mut coll);
+
+    coll
 }
 
 impl Init {
@@ -119,11 +135,14 @@ impl Init {
 
         let categories = load_categories().await.map_err(|_| ())?.categories;
 
-        let categories:Vec<InitCategory> =
+        let categories:Vec<EditCategory> =
             categories
                 .into_iter()
-                .map(|cat| { InitCategory::convert(cat, &image) })
+                .map(|cat| { EditCategory::convert(cat, None, &image, EditCategoryMode::Parent) })
                 .collect();
+
+        let selected_categories = get_selected_categories(&categories);
+
 
         let styles:Vec<(Id, String, bool)> = 
             options.styles
@@ -175,10 +194,47 @@ impl Init {
             age_ranges,
             affiliations,
             categories,
+            selected_categories
         })
     }
+
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum EditCategoryMode {
+    Parent,
+    Child,
+}
+
+impl EditCategory {
+    fn convert(cat:Category, parent: Option<Id>, image:&Image, mode: EditCategoryMode) -> EditCategory {
+
+        let assigned = 
+            image.categories
+                .iter()
+                .any(|id| *id == cat.id);
+
+        let name = cat.name.to_string();
+        let id = cat.id.0.to_string();
+
+        let is_end = cat.children.is_empty();
+        let children = 
+            cat.children
+                .into_iter()
+                .map(|child| Self::convert(child, Some(id.clone()), image, EditCategoryMode::Child))
+                .collect();
+
+        EditCategory {
+            id,
+            name,
+            assigned,
+            children,
+            mode,
+            is_end,
+            parent
+        }
+    }
+}
 pub async fn get_image_url(id:&str) -> Result<String, ()> {
     _get_image(id).await
         .map_err(|err| {
@@ -207,7 +263,7 @@ impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         _load_meta_options().await
             .map_err(|err| {
-                log::error!("{:?}", err);
+                //log::error!("{:?}", err);
                 ()
             })
             .map(|res| {
@@ -244,7 +300,7 @@ impl MetaOptions {
     }
 }
 
-async fn _load_meta_options() -> FetchResult < <meta::Get as ApiEndpoint>::Res, <meta::Get as ApiEndpoint>::Err> {
-    log::info!("{}", api_url(meta::Get::PATH));
-    api_with_auth::<_, _, ()>(&api_url(meta::Get::PATH), meta::Get::METHOD, None).await
+async fn _load_meta_options() -> FetchResult < <endpoints::meta::Get as ApiEndpoint>::Res, <endpoints::meta::Get as ApiEndpoint>::Err> {
+    log::info!("{}", api_url(endpoints::meta::Get::PATH));
+    api_with_auth::<_, _, ()>(&api_url(endpoints::meta::Get::PATH), endpoints::meta::Get::METHOD, None).await
 }

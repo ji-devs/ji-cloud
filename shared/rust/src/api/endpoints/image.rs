@@ -7,7 +7,6 @@ use crate::{
     error::image::{CreateError, DeleteError, GetError, GetOneError, UpdateError},
 };
 
-pub mod meta;
 
 pub struct GetOne;
 impl ApiEndpoint for GetOne {

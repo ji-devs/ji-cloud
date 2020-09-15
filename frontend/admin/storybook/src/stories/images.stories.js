@@ -1,4 +1,4 @@
-import {renderTemplate as tmpl} from "@utils/template";
+import {renderTemplate as tmpl, renderDivText} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
 import checkbox from "@templates/_input/checkbox.html";
 import imagesPage from "@templates/images/images-page.html";
@@ -8,15 +8,14 @@ import imageEditMeta from "@templates/images/image-edit-meta.html";
 import imageEditCategories from "@templates/images/image-edit-categories.html";
 import imageEditCategoriesParent from "@templates/images/image-edit-categories-parent.html";
 import imageEditCategoriesParentEnd from "@templates/images/image-edit-categories-parent-end.html";
-import imageEditCategoriesChildOpen from "@templates/images/image-edit-categories-child-open.html";
-import imageEditCategoriesChildClosed from "@templates/images/image-edit-categories-child-closed.html";
+import imageEditCategoriesChild from "@templates/images/image-edit-categories-child.html";
 import imageEditCategoriesChildEnd from "@templates/images/image-edit-categories-child-end.html";
 import imageEditCategoriesSumParent from "@templates/images/image-edit-categories-sum-parent.html";
 import imageEditCategoriesSumChild from "@templates/images/image-edit-categories-sum-child.html";
 import imageFilter from "@templates/images/image-filter.html";
 import imageFilterBubble from "@templates/images/image-filter-bubble.html";
 import imageFilterOption from "@templates/images/image-filter-option.html";
-import imageSummary from "@templates/images/image-summary.html";
+import imageOverview from "@templates/images/image-edit-overview.html";
 
 export default {
   title: 'Image labeler',
@@ -52,14 +51,19 @@ export const Categories = () =>  {
     const cat1 = tmpl(imageEditCategoriesParentEnd, {name: "English"});
 
     const cat2 = tmpl(imageEditCategoriesParent, {name: "Hebrew"});
-    const cat2Child1 = tmpl(imageEditCategoriesChildOpen, {name: "Vocabulary"});
+    toggleClassesId(cat2, "arrow", ["transform","rotate-90","-m-1"], true);
+
+    const cat2Child1 = tmpl(imageEditCategoriesChild, {name: "Vocabulary"});
+    toggleClassesId(cat2Child1, "arrow", ["transform","rotate-90","-m-1"], true);
     const cat2Child1Child = tmpl(imageEditCategoriesChildEnd, {name: "Blah"});
     const cat2Child2 = tmpl(imageEditCategoriesChildEnd, {name: "Parsha"});
-    const cat2Child3 = tmpl(imageEditCategoriesChildClosed, {name: "Shapes"});
+    const cat2Child3 = tmpl(imageEditCategoriesChild, {name: "Shapes"});
     appendId(cat2Child1, "children", cat2Child1Child);
     [cat2Child1, cat2Child2, cat2Child3].forEach(x => appendId(cat2, "children", x));
 
-    [cat1, cat2].forEach(cat => appendId(editCategories, "select-list", cat));
+    const cat3 = tmpl(imageEditCategoriesParent, {name: "Spanish"});
+
+    [cat1, cat2, cat3].forEach(cat => appendId(editCategories, "select-list", cat));
 
     const sum1 = tmpl(imageEditCategoriesSumParent, {name: "English"});
     const sum2 = tmpl(imageEditCategoriesSumParent, {name: "Hebrew"});
@@ -79,6 +83,46 @@ export const Categories = () =>  {
 
     return pageContainer;
 }
+export const Overview = () => {
+    const pageContainer = tmpl(imagesPage);
+    const editContainer = tmpl(imageEdit);
+    const overview = tmpl(imageOverview, {
+      name: "Moses parts the Nile",
+      description: "An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile."
+    });
+    ["Clipart", "Photo", "B & W", "Drawing", "Comic"]
+      .forEach(style => {
+        appendId(overview, "styles", renderDivText(style));
+      });
+    ["All ages", "Kindergarden", "Elementary", "Middle School", "High School", "University"]
+      .forEach(age_range => {
+        appendId(overview, "age_ranges", renderDivText(age_range));
+      });
+
+    ["All", "No religion", "Reform/Conservative", "Orthodox", "Charedi"]
+      .forEach(affiliation => {
+        appendId(overview, "affiliations", renderDivText(affiliation));
+      });
+
+
+    const sum1 = tmpl(imageEditCategoriesSumParent, {name: "English"});
+    const sum2 = tmpl(imageEditCategoriesSumParent, {name: "Hebrew"});
+    const sum2Child1 = tmpl(imageEditCategoriesSumChild, {name: "Vocabulary"});
+    const sum2Child1Child = tmpl(imageEditCategoriesSumChild, {name: "Blah"});
+
+    appendId(sum2Child1, "children", sum2Child1Child);
+    appendId(sum2, "children", sum2Child1);
+
+    [sum1, sum2].forEach(sum => appendId(overview, "category-summaries", sum));
+
+    appendId(editContainer, "right-area", overview);
+
+    const pageContents = editContainer ;
+
+    appendId(pageContainer, "page-contents", pageContents);
+
+    return pageContainer;
+};
 
 /*
 export const WithMenu = () => {
@@ -137,24 +181,3 @@ function makeFilterOption(label) {
 function makeCheckbox(label) {
   return tmpl(checkbox, {label, id: label});
 }
-/*
-export const LabelCategory = () => {
-  tmpl(labelcategory, {});
-
-        return labelcategory;
-};
-
-export const ImageSummary = () => {
-  tmpl(imagesummary, {});
-
-        return imagesummary;
-};
-
-function setLabel(parentElement, label) {
-
-    const element = tmpl(imageLabelFilter);
-    // element.innerText = label;
-
-    return appendId(parentElement, "label", element);
-};
-*/

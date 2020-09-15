@@ -1,5 +1,5 @@
-use shared::domain::image::meta::{
-    Affiliation, AffiliationId, AgeRange, AgeRangeId, Style, StyleId,
+use shared::domain::meta::{
+    Affiliation, AffiliationId, AgeRange, AgeRangeId, Style, StyleId, Subject, SubjectId,
 };
 use sqlx::PgPool;
 
@@ -25,6 +25,15 @@ pub async fn get_affiliations(db: &PgPool) -> sqlx::Result<Vec<Affiliation>> {
     sqlx::query_as!(
         Affiliation,
         r#"select id as "id: AffiliationId", display_name, created_at, updated_at from affiliation"#
+    )
+    .fetch_all(db)
+    .await
+}
+
+pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
+    sqlx::query_as!(
+        Subject,
+        r#"select subject_id as "id: SubjectId", display_name, created_at, updated_at from subject"#
     )
     .fetch_all(db)
     .await

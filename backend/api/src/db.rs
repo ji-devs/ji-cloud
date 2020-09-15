@@ -1,6 +1,7 @@
 pub(crate) mod category;
 pub(crate) mod image;
 pub(crate) mod user;
+pub(crate) mod meta;
 
 use config::DB_POOL_CONNECTIONS;
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};

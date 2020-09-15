@@ -1,63 +1,46 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
-#[cfg(feature = "backend")]
-use sqlx::postgres::PgRow;
+use std::convert::TryFrom;
 use uuid::Uuid;
+
+use super::meta::SubjectId;
+
 // note that this is unstable and will totally be split into many things later on
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[repr(i16)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum UserScope {
     Admin = 1,
+}
+
+impl TryFrom<i16> for UserScope {
+    type Error = ();
+
+    fn try_from(i: i16) -> Result<Self, Self::Error> {
+        match i {
+            1 => Ok(Self::Admin),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {
     pub id: Uuid,
-    pub scopes: Vec<UserScope>,
+    pub username: String,
     pub email: String,
-    pub display_name: String,
+    pub given_name: String,
+    pub family_name: String,
+    pub language: String,
+    pub locale: String,
+    pub opt_into_edu_resources: bool,
+    pub over_18: bool,
+    pub timezone: chrono_tz::Tz,
+    pub scopes: Vec<UserScope>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
+    pub organization: String,
+    pub subjects: Vec<SubjectId>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NoSuchUserError {}
-
-// HACK: we can't get `Vec<UserRole>` directly from the DB, so we have to work around it for now.
-// see: https://github.com/launchbadge/sqlx/issues/298
-#[cfg(feature = "backend")]
-impl<'r> sqlx::FromRow<'r, PgRow> for UserProfile {
-    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
-        let DbUser {
-            id,
-            scopes,
-            email,
-            display_name,
-            created_at,
-            updated_at,
-        } = DbUser::from_row(row)?;
-
-        Ok(Self {
-            id,
-            scopes: scopes.into_iter().map(|(it,)| it).collect(),
-            email,
-            display_name,
-            created_at,
-            updated_at,
-        })
-    }
-}
-
-#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
-#[cfg(feature = "backend")]
-struct DbUser {
-    pub id: Uuid,
-    pub scopes: Vec<(UserScope,)>,
-    pub email: String,
-    pub display_name: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: Option<DateTime<Utc>>,
-}

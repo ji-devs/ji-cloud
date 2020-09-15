@@ -2,15 +2,12 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{
-        meta::{AffiliationId, AgeRangeId, StyleId},
-        Image, ImageId,
-    },
+    image::{Image, ImageId},
+    meta::{AffiliationId, AgeRangeId, StyleId},
 };
 use sqlx::{PgConnection, PgPool};
 use std::fmt::Write;
 use uuid::Uuid;
-pub(crate) mod meta;
 
 trait Metadata {
     const TABLE: &'static str;
@@ -193,13 +190,13 @@ set name        = coalesce($2, name),
     is_premium  = coalesce($4, is_premium),
     updated_at  = now()
 where id = $1
-  and ($2 is distinct from name or
-       $3 is distinct from description or
-       $4 is distinct from is_premium)"#,
+  and (($2::text is not null and $2 is distinct from name) or
+       ($3::text is not null and $3 is distinct from description) or
+       ($4::boolean is not null and $4 is distinct from is_premium))"#,
         id.0,
         name,
         description,
-        is_premium
+        is_premium,
     )
     .execute(conn)
     .await?;

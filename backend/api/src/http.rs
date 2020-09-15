@@ -60,6 +60,7 @@ pub async fn run(
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
             .configure(endpoints::image::configure)
+            .configure(endpoints::meta::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
