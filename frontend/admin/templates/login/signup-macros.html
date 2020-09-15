@@ -1,0 +1,17 @@
+{% macro signupinput(label, width, dataId="") %}
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
+  <input type="text" class="focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+  <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
+</div>
+{% endmacro signupinput %}
+
+{% macro signupselect(label, width, dataId="") %}
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4 signupselect">
+  <select type="text" class=" focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+    <option>Select or type</option>
+    <option value="" England</option>
+    <option value="">US</option>
+  </select>
+  <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
+</div>
+{% endmacro signupselect %}

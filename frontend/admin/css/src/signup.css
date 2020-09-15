@@ -1,0 +1,21 @@
+.signupselect{
+
+    background: url(https://i.ibb.co/fCsFTVL/icn-dropdown-chevron.png) no-repeat right;
+    background-origin: content-box;
+
+}
+
+.signupselect select {
+  -webkit-appearance: none;
+  background: transparent;
+
+}
+
+.schoollist img {
+  visibility: hidden;
+}
+
+.schoollist .selected, .schoollist .selected img {
+  color: #5590fc;
+  visibility: visible;
+}

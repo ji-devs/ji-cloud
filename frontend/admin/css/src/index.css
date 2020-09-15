@@ -6,6 +6,7 @@
 @import "tests";
 @import "search";
 @import "jig";
+@import "signup";
 
 @import "tailwindcss/utilities";
 
