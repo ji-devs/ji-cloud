@@ -67,6 +67,31 @@ pub async fn save(
 
 }
 
+pub async fn publish( id:String) -> Result<(), UpdateError>
+{
+    let path = UpdateMetadata::PATH.replace("{id}",&id);
+    let data = UpdateRequest {
+        name: None, 
+        description: None, 
+        is_premium: None, 
+        styles: None,
+        age_ranges: None,
+        affiliations: None,
+        categories: None,
+        publish_at: Some(None),
+    };
+    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+
+    res
+        .map_err(|err| {
+            match err {
+                Ok(err) => err,
+                Err(err) => UpdateError::InternalServerError(err)
+            }
+        })
+
+}
 
 #[derive(Clone)]
 pub struct Init {
