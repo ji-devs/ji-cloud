@@ -1,5 +1,6 @@
 import {renderTemplate as tmpl, renderDivText} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId, toggleClassesId, setTextId, setValueId} from "@utils/dom";
+import {MEDIA_UI} from "@utils/path";
 import checkbox from "@templates/_input/checkbox.html";
 import imagesPage from "@templates/images/images-page.html";
 import imageAdd from "@templates/images/image-add.html";
@@ -16,6 +17,9 @@ import imageFilter from "@templates/images/image-filter.html";
 import imageFilterBubble from "@templates/images/image-filter-bubble.html";
 import imageFilterOption from "@templates/images/image-filter-option.html";
 import imageOverview from "@templates/images/image-edit-overview.html";
+import imagesSearch from "@templates/images/images-search.html";
+import imageGridItemRed from "@templates/_image/image-grid-item-red.html";
+import imageGridItemGreen from "@templates/_image/image-grid-item-green.html";
 
 export default {
   title: 'Image labeler',
@@ -124,6 +128,30 @@ export const Overview = () => {
     return pageContainer;
 };
 
+export const Search = () => {
+    const pageContainer = tmpl(imagesPage);
+    const searchContainer = tmpl(imagesSearch);
+
+    setTextId(searchContainer, "n-results", "42");
+    setValueId(searchContainer, "curr-page", "9");
+
+    [
+      ["red-sea-book.png", "Red Sea"],
+      ["red-sea-book.png", "Red Sea"]
+    ].forEach(([filename, label], idx) => {
+      const id = idx;
+      const template = idx % 2 == 0 ? imageGridItemGreen : imageGridItemRed;
+      const src = `${MEDIA_UI}/${filename}`;
+      const img = tmpl(template, {id: id, label, src});
+      appendId(searchContainer, "grid", img);
+    });
+
+    const pageContents = searchContainer;
+
+    appendId(pageContainer, "page-contents", pageContents);
+
+    return pageContainer;
+}
 /*
 export const WithMenu = () => {
 

@@ -39,6 +39,7 @@ pub struct ImageEdit {
     init: Mutable<Option<Init>>,
     section: Mutable<Section>,
     save_loader: AsyncLoader,
+    publish_loader: AsyncLoader,
     category_expansions: RefCell<HashMap<Id, Mutable<bool>>>,
     selected_categories: Mutable<HashSet<Id>> 
 }
@@ -72,7 +73,8 @@ impl ImageEdit{
             affiliations: RefCell::new(HashSet::new()),
             init: Mutable::new(None),
             save_loader: AsyncLoader::new(),
-            section: Mutable::new(Section::Overview),
+            publish_loader: AsyncLoader::new(),
+            section: Mutable::new(Section::Meta),
             category_expansions: RefCell::new(HashMap::new()),
             selected_categories: Mutable::new(HashSet::new()) 
         });
@@ -155,7 +157,8 @@ impl ImageEdit{
                 }
             })
     }
-    //could be made more efficient by 
+    //could be made more efficient by just saving each part as needed
+    //but not a big deal (and then each would need its own AsyncLoader)
     fn save(_self: Rc<Self>) {
         let _self_clone = _self.clone();
         if let Some(info) = Self::get_save_info(_self.clone()) {
@@ -199,6 +202,34 @@ impl ImageEdit{
             });
 
         }
+    }
+
+    fn publish(_self: Rc<Self>) {
+        let _self_clone = _self.clone();
+
+        let id = _self.id.get_cloned();
+        _self_clone.publish_loader.load(async move {
+            _self.error_message.set(None);
+
+            if let Err(err) = actions::publish(id).await {
+                let msg = match err {
+                    UpdateError::MissingMetadata{id, kind} => {
+                        format!("missing metadata!")
+                    },
+                    UpdateError::MissingCategory(cat) => {
+                        format!("missing category!")
+                    },
+                    _ => {
+                        format!("internal error!")
+                    }
+                };
+
+                _self.error_message.set(Some(msg));
+            } else {
+                //TODO - self-expire message
+                _self.publish_message.set(Some("Done!".to_string()));
+            }
+        });
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
@@ -247,8 +278,7 @@ impl ImageEdit{
                                         _self.section.set(Section::Overview);
                                     },
                                     Section::Overview => {
-                                        _self.publish_message.set(Some("Done!".to_string()));
-                                        //TODO - publish!
+                                        Self::publish(_self.clone());
                                     }
                                 }
                             }))
@@ -260,16 +290,19 @@ impl ImageEdit{
                             }))
                         })
                         .with_data_id!("premium", {
+                            .property("checked",  *&init.is_premium)
                             .event(clone!(_self => move |_evt:events::Change| {
                                 Self::save(_self.clone());
                             }))
                         })
                         .with_data_id!("name", {
+                            .property("value", &init.name )
                             .event(clone!(_self => move |_evt:events::Input| {
                                 Self::save(_self.clone());
                             }))
                         })
                         .with_data_id!("description", {
+                            .property("value", &init.description)
                             .event(clone!(_self => move |_evt:events::Input| {
                                 Self::save(_self.clone());
                             }))
@@ -339,9 +372,11 @@ impl ImageEdit{
             let name = "Smiley";
             let description = "Face";
 
-            let styles = vec!["Style 1".to_string(), "Style 2".to_string()];
+            /*
+             * let styles = vec!["Style 1".to_string(), "Style 2".to_string()];
             let age_ranges = vec!["Age 1".to_string(), "Age 2".to_string()];
             let affiliations = vec!["Affiliation 1".to_string(), "Affiliation 2".to_string()];
+            */
 
             elem!(templates::image_edit_overview(&name, &description), {
                 .with_data_id!("styles", {
