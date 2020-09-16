@@ -35,6 +35,7 @@ module.exports = {
         jisignupgrey: '#dee1eb',
         jidarkgrey: '#e2e5eb',
         jibuttongreen: '#72cb91',
+        jiimagegreen: '#6eca90',
       },
 
 
@@ -57,6 +58,7 @@ module.exports = {
         190: '190px',
         259: '259px',
         272:'272px',
+        274: '274px',
         288: '288px',
         297: '297px',
         393: '393px',
