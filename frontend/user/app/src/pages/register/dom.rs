@@ -53,6 +53,7 @@ impl RegisterPage {
             })
             .with_data_id!("google-register", {
                 .event(clone!(_self => move |evt:events::Click| {
+                    /*
                     let tos = _self.refs.borrow();
                     let tos = &tos.as_ref().unwrap_throw().terms_of_service;
 
@@ -62,6 +63,9 @@ impl RegisterPage {
                         _self.status.set(Some(RegisterStatus::Busy));
                         _self.loader.load(actions::register_google(_self.clone()));
                     }
+                    */
+                    _self.status.set(Some(RegisterStatus::Busy));
+                    _self.loader.load(actions::register_google(_self.clone()));
                 }))
             })
             .with_data_id!("status-message", {
@@ -85,14 +89,28 @@ impl RegisterPage {
 }
 
 pub struct RegisterPageRefs {
-    terms_of_service: HtmlInputElement,
+    username: HtmlInputElement,
+    family_name: HtmlInputElement,
+    given_name: HtmlInputElement,
 }
 
 impl RegisterPageRefs {
     pub fn new(parent:&HtmlElement) -> Self {
         Self {
-            terms_of_service: parent.select(&data_id("terms_of_service")),
+            username: parent.select(&data_id("username")),
+            family_name: parent.select(&data_id("family-name")),
+            given_name: parent.select(&data_id("given-name")),
         }
+    }
+
+    pub fn username(&self) -> String {
+        self.username.value()
+    }
+    pub fn family_name(&self) -> String {
+        self.family_name.value()
+    }
+    pub fn given_name(&self) -> String {
+        self.given_name.value()
     }
 
 }
