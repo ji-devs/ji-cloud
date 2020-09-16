@@ -1,7 +1,17 @@
-pub mod env;
-pub mod google;
+//! Common configuration for the ji-cloud Rust backend servers.
+
+#![deny(missing_docs)]
+
+/// Environment helpers.
+pub(crate) mod env;
+
+/// Interaction with google.
+pub(crate) mod google;
+
+/// Common http configuration.
 pub mod http;
 
+/// Keeps track of settings.
 #[cfg(any(feature = "local", feature = "sandbox", feature = "release",))]
 pub mod settings;
 

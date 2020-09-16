@@ -52,7 +52,7 @@ features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "o
 
 [dependencies.core]
 path = "../_core/rust"
-features = ["s3", "db", "jwk", "algolia"]
+features = ["db"]
 
 
 [features]
