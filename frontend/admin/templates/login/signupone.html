@@ -12,17 +12,17 @@
         <div class="">
           <p class="text-2xl mb-8">General info</p>
           <div class="flex">
-            {{ SignUp::signupinput(label="First name*",width="w-297", dataId="${id}") }}
+            {{ SignUp::signupinput(label="First name*",width="w-297",inputwidth="w-296", dataId="${id}") }}
             <div class="spacer w-30"></div>
-            {{ SignUp::signupinput(label="Family name*",width="w-297", dataId="${id}") }}
+            {{ SignUp::signupinput(label="Family name*",width="w-297",inputwidth="w-296", dataId="${id}") }}
           </div>
-          {{ SignUp::signupinput(label="Create a User name*",width="w-full", dataId="${id}") }}
+          {{ SignUp::signupinput(label="Create a User name*",width="w-full",inputwidth="w-full", dataId="${id}") }}
           <div class="flex">
-            {{ SignUp::signupinput(label="Password*",width="w-297", dataId="${id}") }}
+            {{ SignUp::signupinput(label="Password*",width="w-297",inputwidth="w-296", dataId="${id}") }}
             <div class="spacer w-30"></div>
-            {{ SignUp::signupinput(label="Confirm your password*",width="w-297", dataId="${id}") }}
+            {{ SignUp::signupinput(label="Confirm your password*",width="w-297",inputwidth="w-296", dataId="${id}") }}
           </div>
-          {{ SignUp::signupinput(label="Email*",width="w-full", dataId="${id}") }}
+          {{ SignUp::signupinput(label="Email*",width="w-full",inputwidth="w-full", dataId="${id}") }}
           {{ Input::checkbox(label="I am over 18", dataId="${id}", class="px-2") }}
           <div class="mt-2">
             {{ ButtonMacros::orange(label="Next", dataId="btn-1") }}
@@ -33,7 +33,7 @@
         </div>
         <div class="">
           <p class="text-2xl mb-8">Login with Google</p>
-          {{ SignUp::signupinput(label="Your Google Email*",width="w-297", dataId="${id}") }}
+          {{ SignUp::signupinput(label="Your Google Email*",width="w-297",inputwidth="w-296", dataId="${id}") }}
           {{ Input::checkbox(label="I am over 18", dataId="${id}", class="px-2") }}
           <div class="mt-2">
             {{ ButtonMacros::orange(label="Next", dataId="btn-1") }}

@@ -16,6 +16,7 @@ module.exports = {
         jiblueLight: '#83aef7',
         jiblueMedium: '#6698ed',
         jiblueDark: '#2b54b8',
+        jiblueadd: '#dae7fd',
         jinumberblue: '#c4dbfe',
         jigreen: '#61D592',
         jibuttonBlue:'#5590fc',
@@ -35,9 +36,8 @@ module.exports = {
         jisignupgrey: '#dee1eb',
         jidarkgrey: '#e2e5eb',
         jibuttongreen: '#72cb91',
-      
-      },
 
+      },
 
       fontSize: {
         14:'14px',
@@ -60,13 +60,15 @@ module.exports = {
         272:'272px',
         274: '274px',
         288: '288px',
+        296: '296px',
         297: '297px',
         393: '393px',
         480: '480px',
         624: '624px',
         763: '763px',
         867: '867px',
-        '50p': '50%'
+        '50p': '50%',
+
 
       },
       maxWidth: {
