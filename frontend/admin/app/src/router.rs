@@ -34,7 +34,7 @@ impl Router {
                             AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
                             AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
                             AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
-                            _ => None
+                            AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Search))),
                         }
                     }
                     _ => None

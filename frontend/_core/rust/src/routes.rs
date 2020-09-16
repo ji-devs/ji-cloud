@@ -21,7 +21,6 @@ pub enum AdminRoute {
     Images,
     ImageAdd,
     ImageEdit(String),
-    ImageSummary(String),
 }
 
 impl Route {
@@ -60,7 +59,6 @@ impl Route {
             return {
                 match uri_parts[1].as_ref() {
                     "image-edit" => Self::Admin(AdminRoute::ImageEdit(uri_parts[2].clone())),
-                    "image-summary" => Self::Admin(AdminRoute::ImageSummary(uri_parts[2].clone())),
                     _ => Self::NotFound
                 }
             }
@@ -87,7 +85,6 @@ impl From<Route> for String {
                     AdminRoute::Images => "/admin/images".to_string(),
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
                     AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
-                    AdminRoute::ImageSummary(id) => format!("/admin/image-summary/{}", id),
                 }
             },
             Route::NotFound => "/404".to_string(),

@@ -23,11 +23,13 @@ use shared::domain::{
 };
 use super::add::ImageAdd;
 use super::edit::ImageEdit;
+use super::search::ImageSearch;
 
 #[derive(Clone, Debug)]
 pub enum PageMode {
     Add,
-    Edit(String)
+    Edit(String),
+    Search 
 }
 
 pub struct ImagesPage {
@@ -49,7 +51,8 @@ impl ImagesPage {
                 .child_signal(_self.page_mode.signal_cloned().map(clone!(_self => move |page_mode| {
                     match page_mode {
                         PageMode::Add => Some(ImageAdd::render(ImageAdd::new())),
-                        PageMode::Edit(id) => Some(ImageEdit::render(ImageEdit::new(id)))
+                        PageMode::Edit(id) => Some(ImageEdit::render(ImageEdit::new(id))),
+                        PageMode::Search => Some(ImageSearch::render(ImageSearch::new())),
                     }
                 })))
             })
