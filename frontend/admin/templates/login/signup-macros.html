@@ -1,6 +1,8 @@
-{% macro signupinput(label, width, dataId="") %}
+{% macro signupinput(label, width, inputwidth, dataId="") %}
+<!--when error add class name error-->
+<!--When active add class focus-->
 <div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
-  <input type="text" class="focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+  <input type="text" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
   <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
 </div>
 {% endmacro signupinput %}

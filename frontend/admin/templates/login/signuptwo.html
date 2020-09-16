@@ -30,11 +30,13 @@
 
           {{ SignUp::signupselect(label="Preferred language of communication*",width="w-full", dataId="${id}") }}
 
+          <div class="h-30">
 
-          <div class="">
+          </div>
+          <div class="mt-2">
             {{ Input::checkbox(label="I have read the terms and conditions ", dataId="${id}", class="px-2") }}
           </div>
-          <div class="">
+          <div class="mt-2">
             {{ Input::checkbox(label="I would like to receive educational resources", dataId="${id}", class="px-2") }}
           </div>
 

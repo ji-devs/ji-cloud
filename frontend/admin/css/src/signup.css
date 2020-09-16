@@ -19,3 +19,31 @@
   color: #5590fc;
   visibility: visible;
 }
+
+.error input{
+  background-color: #fff4f4 !important;
+  border-right: solid 1px #f00813;
+}
+
+.error {
+  background-color: #fff4f4 !important;
+  border: solid 1px #f00813 ;
+}
+
+.focus {
+  border: solid 1px #5590fc;
+  background-color: #e6f0ff !important;
+}
+
+.focus input{
+  border-right: solid 1px #5590fc;
+  background-color: #e6f0ff;
+}
+
+.focus label {
+   background-color: #e6f0ff;
+}
+
+.w-full input{
+  border-right: none;
+}
