@@ -1,9 +1,9 @@
 {% macro gridItemColored(src, label, colorClass, dataId="") %}
-  <div>
-    <img src="{{src}}" alt="">
-    <div class="flex items-center justify-center relative">
-      <div class="rounded-full h-3 w-3 flex items-center justify-center {{colorClass}} absolute left-0 ml-2"></div>
-      <p>{{label}}</p>
-    </div>
+<div>
+  <img src="{{src}}" alt="">
+  <div class="flex items-center justify-center relative w-274">
+    <div class="rounded-full h-3 w-3 flex items-center justify-center {{colorClass}} absolute left-0 ml-2"></div>
+    <p>{{label}}</p>
   </div>
+</div>
 {% endmacro gridItemColored %}
