@@ -41,6 +41,8 @@ export const Edit = () =>  {
 
     appendId(editContainer, "right-area", editMeta);
 
+    setTextId(editContainer, "next", "Next");
+
     const pageContents = populateMetaOptions(editContainer);
 
     appendId(pageContainer, "page-contents", pageContents);
@@ -50,6 +52,7 @@ export const Edit = () =>  {
 export const Categories = () =>  {
     const pageContainer = tmpl(imagesPage);
     const editContainer = tmpl(imageEdit);
+    setTextId(editContainer, "next", "Next");
     const editCategories = tmpl(imageEditCategories);
 
     const cat1 = tmpl(imageEditCategoriesParentEnd, {name: "English"});
@@ -90,6 +93,7 @@ export const Categories = () =>  {
 export const Overview = () => {
     const pageContainer = tmpl(imagesPage);
     const editContainer = tmpl(imageEdit);
+    setTextId(editContainer, "next", "Publish");
     const overview = tmpl(imageOverview, {
       name: "Moses parts the Nile",
       description: "An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile."
