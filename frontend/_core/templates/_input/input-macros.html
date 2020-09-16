@@ -5,18 +5,13 @@
 </div>
 {% endmacro searchbox %}
 
-{% macro select(selectDataId="") %}
+{% macro select(selectDataId="", options) %}
 <div class="relative">
   <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="absolute transform rotate-90 right-0">
   <select data-id="{{selectDataId}}" class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
-    <option value="">Show all</option>
-    <option value="">
-      <div class="rounded-full bg-jigreen h-2 w-2">
-      </div>
-      Show published
-    </option>
-    <option value="">Show saved</option>
-
+  {% for option in options %}
+    <option value="{{loop.index0}}">{{option}}</option>
+  {% endfor %}
   </select>
 </div>
 {% endmacro select %}
