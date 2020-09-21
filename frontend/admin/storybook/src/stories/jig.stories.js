@@ -7,6 +7,7 @@ import jigfilter from "@templates/jig/jig-filter.html";
 import jiglanguage from "@templates/jig/jig-language-filter.html";
 import jigprivacyfilter from "@templates/jig/privacy-filter.html";
 import jigstatus from "@templates/jig/jig-status.html";
+import jigtofrom from "@templates/jig/jig-tofrom.html";
 
 export default {
   title: 'JIG',
@@ -77,6 +78,16 @@ export const JigStatus = () =>  {
     const pageContents = tmpl(jigstatus);
 
     appendId(pageContainer, "jig-status", pageContents);
+
+    return pageContainer;
+}
+
+export const JigToFrom = () =>  {
+    const pageContainer = tmpl(jigtable);
+
+    const pageContents = tmpl(jigtofrom);
+
+    appendId(pageContainer, "jig-tofrom", pageContents);
 
     return pageContainer;
 }

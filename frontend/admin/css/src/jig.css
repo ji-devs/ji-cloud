@@ -62,3 +62,10 @@
 {
   fill: #ef4350;
 }
+
+select {
+  -webkit-appearance: none;
+-moz-appearance: none;
+}
+
+.select-icon {pointer-events: none;}
