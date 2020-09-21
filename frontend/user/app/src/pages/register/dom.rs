@@ -18,19 +18,44 @@ use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
 
 pub struct RegisterPage {
+    pub step: Mutable<Step> 
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum Step {
+    One,
+    Two,
+    Three,
+    ConfirmEmail,
+    Final
+}
+impl RegisterPage  {
+    pub fn new() -> Rc<Self> {
+        let _self = Rc::new(Self { 
+            step: Mutable::new(Step::One) 
+        });
+        _self
+    }
+    
+    pub fn render(_self: Rc<Self>) -> Dom {
+        html!("div", {
+            .child_signal(_self.step.signal_ref(clone!(_self => move |step| {
+                Some(match step {
+                    Step::One => RegisterStep1::render(RegisterStep1::new()),
+                    _ => html!("div", {.text("TODO")})
+                })
+            })))
+        })
+    }
+}
+
+pub struct RegisterStep1 {
     pub refs: RefCell<Option<RegisterPageRefs>>,
     pub status: Mutable<Option<RegisterStatus>>,
     pub loader: AsyncLoader
 }
 
-impl Drop for RegisterPage {
-    fn drop(&mut self) {
-        log::info!("cleaned up register page!");
-        //self.signin_loader.cancel();
-    }
-}
-
-impl RegisterPage {
+impl RegisterStep1 {
     pub fn new() -> Rc<Self> {
         let _self = Rc::new(Self { 
             refs: RefCell::new(None),
@@ -43,7 +68,7 @@ impl RegisterPage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::register(), {
+        elem!(templates::register_step1(), {
             .with_data_id!("login-link", {
                 .event(clone!(_self => move |_evt:events::Click| {
 
@@ -65,7 +90,7 @@ impl RegisterPage {
                     }
                     */
                     _self.status.set(Some(RegisterStatus::Busy));
-                    _self.loader.load(actions::register_google(_self.clone()));
+                    //_self.loader.load(actions::register_google(_self.clone()));
                 }))
             })
             .with_data_id!("status-message", {

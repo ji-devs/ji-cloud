@@ -1,5 +1,5 @@
 {% import "_buttons/button-macros.html" as ButtonMacros %}
-{% import "login/signup-macros.html" as SignUp %}
+{% import "user-macros.html" as User %}
 {% import "_input/input-macros.html" as Input %}
 
 <div class="flex">
@@ -13,13 +13,13 @@
           <p class="text-lg mb-8 w-480">Tell us more about yourself so that we can tailor
             the content according to your specific needs</p>
           <div class="flex">
-            {{ SignUp::signupselect(label="Country*",width="w-297", dataId="${id}") }}
+            {{ User::user_select(label="Country*",width="w-297", dataId="${id}") }}
             <div class="spacer w-30"></div>
-            {{ SignUp::signupselect(label="State*",width="w-297", dataId="${id}") }}
+            {{ User::user_select(label="State*",width="w-297", dataId="${id}") }}
           </div>
-          {{ SignUp::signupselect(label="City*",width="w-297", dataId="${id}") }}
+          {{ User::user_select(label="City*",width="w-297", dataId="${id}") }}
           <div class="relative">
-            <div class="bg-jilogingrey h-64 w-full relative rounded-lg px-4 py-2 mb-4 signupselect">
+            <div class="bg-jilogingrey h-64 w-full relative rounded-lg px-4 py-2 mb-4 user_select">
               <div type="text" class=" focus:outline-none w-fill bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
                 Type or select from list
               </div>
@@ -28,7 +28,7 @@
             <div data-id="school-filter"></div>
           </div>
 
-          {{ SignUp::signupselect(label="Preferred language of communication*",width="w-full", dataId="${id}") }}
+          {{ User::user_select(label="Preferred language of communication*",width="w-full", dataId="${id}") }}
 
           <div class="h-30">
 

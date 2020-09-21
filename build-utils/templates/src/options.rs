@@ -19,6 +19,10 @@ pub struct Opts {
     #[structopt(short, long)]
     pub verbose: bool,
 
+    // clean before building 
+    #[structopt(short, long)]
+    pub clean: bool,
+
     // include storybook/demo-templates dir 
     #[structopt(short, long)]
     pub demo: bool,

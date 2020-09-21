@@ -1,6 +1,6 @@
-use shared::domain::{
-    auth::SigninSuccess,
-    user::NoSuchUserError
+use shared::{
+    domain::auth::SigninSuccess,
+    error::user::NoSuchUserError,
 };
 use core::{
     routes::{Route, UserRoute},

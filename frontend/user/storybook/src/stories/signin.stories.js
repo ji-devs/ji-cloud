@@ -1,4 +1,17 @@
 import {renderTemplate as tmpl} from "@utils/template";
+import signin from "@templates/signin.html";
+
+export default {
+  title: 'Sign In',
+}
+
+export const Signin = () =>
+    tmpl(signin, {
+
+});
+
+/*
+import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
 import login from "@templates/login/login.html";
 import forgotpassword from "@templates/login/forgot.html";
@@ -69,3 +82,4 @@ export const SchoolFilter = () =>  {
 
     return pageContainer;
 }
+*/
