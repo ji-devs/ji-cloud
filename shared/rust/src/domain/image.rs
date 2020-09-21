@@ -76,12 +76,15 @@ pub struct CreateRequest {
 /// All fields are optional, any field that is [`None`] will not be updated.
 pub struct UpdateRequest {
     /// If `Some` change the image's name to this name.
+    #[serde(default)]
     pub name: Option<String>,
 
     /// If `Some` change the image's description to this description.
+    #[serde(default)]
     pub description: Option<String>,
 
     /// If `Some` mark the image as premium or not.
+    #[serde(default)]
     pub is_premium: Option<bool>,
 
     /// If `Some`, change the `publish_at` to the given `Option<Publish>`.
@@ -97,15 +100,19 @@ pub struct UpdateRequest {
     pub publish_at: Option<Option<Publish>>,
 
     /// If `Some` replace the image's styles with these.
+    #[serde(default)]
     pub styles: Option<Vec<StyleId>>,
 
     /// If `Some` replace the image's age ranges with these.
+    #[serde(default)]
     pub age_ranges: Option<Vec<AgeRangeId>>,
 
     /// If `Some` replace the image's affiliations with these.
+    #[serde(default)]
     pub affiliations: Option<Vec<AffiliationId>>,
 
     /// If `Some` replace the image's categories with these.
+    #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
 }
 

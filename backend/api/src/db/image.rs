@@ -85,10 +85,10 @@ async fn recycle_metadata<'a, T: Metadata>(
 
     for meta in meta.chunks(i16::MAX as usize - 1) {
         let query = generate_metadata_insert(T::TABLE, meta.len());
-        let mut query = sqlx::query(&query);
+        let mut query = sqlx::query(&query).bind(image.0);
 
         for meta in meta {
-            query = query.bind(image.0).bind(meta.as_uuid());
+            query = query.bind(meta.as_uuid());
         }
 
         query.execute(&mut *conn).await?;
@@ -106,10 +106,8 @@ fn generate_metadata_insert(meta_kind: &str, binds: usize) -> String {
         meta_kind
     );
 
-    for i in 3..=binds {
-        write!(s, ",($1,${})", i)
-            .ok()
-            .expect("write to String shouldn't fail");
+    for i in 1..binds {
+        write!(s, ", ($1, ${})", i + 2).expect("write to String shouldn't fail");
     }
 
     s
@@ -214,7 +212,7 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))     as categories,
+       array((select row (category_id) from image_category where image_id = id))       as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
@@ -236,7 +234,7 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))     as categories,
+       array((select row (category_id) from image_category where image_id = id))       as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations

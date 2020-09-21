@@ -381,15 +381,16 @@ async function createImageError(t, args) {
 
     t.deepEqual(error.response.statusCode, 422);
 
-    const { MissingMetadata } = error.response.body;
+    const { NonExistantMetadata } = error.response.body;
 
-    t.deepEqual(MissingMetadata.id, args.id);
-    t.deepEqual(MissingMetadata.kind, args.kindName);
+    t.deepEqual(NonExistantMetadata.id, args.id);
+    t.deepEqual(NonExistantMetadata.kind, args.kindName);
 }
 
 createImageError.title = (providedTitle = 'create image error', args) => `${providedTitle} (${args.kindName})`;
 
 test(createImage);
+test(createImage, { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] });
 test(createImage, {
     styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2'],
     affiliations: ['c0cd4446-de76-11ea-b7ab-93987e8aa112'],
@@ -407,7 +408,7 @@ test.todo('DELETE image');
 
 // todo: test builder
 test('update image - empty', async t => {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
 
     await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
 
@@ -417,7 +418,7 @@ test('update image - empty', async t => {
 });
 
 test('update image - is_premium', async t => {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
 
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } }));
 
@@ -426,6 +427,22 @@ test('update image - is_premium', async t => {
 
     // can't snapshot update timestamps for obvious reasons.
     t.deepEqual(typeof (metadata.updated_at), 'string');
+    delete metadata.updated_at;
+
+    t.snapshot(metadata);
+});
+
+test('update image - two styles', async t => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] } }));
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+    console.log(resp.body);
+    const metadata = resp.body.metadata;
+
+    // can't snapshot update timestamps for obvious reasons.
+    // t.deepEqual(typeof (metadata.updated_at), 'string');
     delete metadata.updated_at;
 
     t.snapshot(metadata);
