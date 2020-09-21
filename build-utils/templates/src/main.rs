@@ -13,6 +13,12 @@ fn main() {
     let opts = Opts::from_args();
     init_logger(&opts);
 
+    let dest = &opts.get_project_output_path();
+    if opts.clean && dest.exists() {
+        fs::remove_dir_all(dest).unwrap();
+    }
+
+
     let mut context = Context::new();
     context.insert("MEDIA_UI", &opts.get_remote_target().media_ui_url());
 
@@ -27,7 +33,6 @@ fn main() {
     tera.build_inheritance_chains().unwrap();
     tera.check_macro_files().unwrap();
 
-    let dest = &opts.get_project_output_path();
 
     let macro_names:Vec<&str> =
         tera.templates

@@ -1,9 +1,9 @@
 use shared::{
-    domain::{
-        auth::{RegisterRequest, RegisterSuccess},
+    domain::auth::{RegisterRequest, RegisterSuccess},
+    error::{
+        auth::RegisterError,
         user::NoSuchUserError
-    },
-    error::auth::RegisterError,
+    }
 };
 use core::{
     routes::{Route, UserRoute},
@@ -20,7 +20,7 @@ use crate::utils::firebase::get_firebase_register_google;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;
-use super::RegisterPage;
+use super::dom::*;
 use futures::future::ready;
 
 //temp
@@ -43,6 +43,7 @@ impl RegisterStatus {
         }
     }
 }
+/*
 
 #[derive(Deserialize)]
 struct GoogleRegisterInfo {
@@ -51,6 +52,7 @@ struct GoogleRegisterInfo {
     name: String,
     token: String
 }
+
 pub async fn register_google(page:Rc<RegisterPage>) {
     let token_promise = unsafe { get_firebase_register_google() };
 
@@ -130,3 +132,4 @@ fn parse_name(name:&str) -> (String, String) {
         (names_split[0..len-1].join(" "), names_split[len-1].to_string())
     }
 }
+*/

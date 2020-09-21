@@ -1,14 +1,14 @@
-{% macro signupinput(label, width, inputwidth, dataId="") %}
+{% macro user_input(label, width, inputwidth, inputDataId="") %}
 <!--when error add class name error-->
 <!--When active add class focus-->
 <div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
-  <input type="text" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
+  <input type="text" data-id="{{inputDataId}}" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
   <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
 </div>
-{% endmacro signupinput %}
+{% endmacro user_input %}
 
-{% macro signupselect(label, width, dataId="") %}
-<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4 signupselect">
+{% macro user_select(label, width, dataId="") %}
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4 user_select">
   <select type="text" class=" focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
     <option>Select or type</option>
     <option value="" England</option>
@@ -16,4 +16,4 @@
   </select>
   <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
 </div>
-{% endmacro signupselect %}
+{% endmacro user_select %}

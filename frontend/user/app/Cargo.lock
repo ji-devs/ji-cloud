@@ -804,12 +804,10 @@ name = "shared"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "cfg-if",
  "chrono",
  "chrono-tz",
  "serde",
  "serde_json",
- "serde_repr",
  "url",
  "uuid",
 ]
