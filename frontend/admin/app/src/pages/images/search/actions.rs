@@ -20,7 +20,7 @@ pub struct BasicImage {
     pub text: String
 }
 impl BasicImage {
-    pub fn new(resp:GetOneResponse) -> Self {
+    pub fn new(resp:GetResponse) -> Self {
         Self {
             id: resp.metadata.id.0.to_string(),
             src: resp.url.to_string(),
@@ -39,7 +39,7 @@ pub async fn search_images(query:String) -> Result<Vec<BasicImage>, ()> {
         })
         //.map_err(|_| ())
         .map(|res| {
-            let GetResponse { images } = res;
+            let SearchResponse { images } = res;
             images
                 .into_iter()
                 .map(BasicImage::new)
@@ -48,8 +48,8 @@ pub async fn search_images(query:String) -> Result<Vec<BasicImage>, ()> {
 }
 
 
-async fn _search_images_api(query:String) -> FetchResult < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
-    let req = GetQuery {
+async fn _search_images_api(query:String) -> FetchResult < <Search as ApiEndpoint>::Res, <Search as ApiEndpoint>::Err> {
+    let req = SearchQuery {
         q: query
     };
 

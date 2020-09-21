@@ -186,11 +186,8 @@ impl ImageEdit{
                     categories
                 ).await {
                     let msg = match err {
-                        UpdateError::MissingMetadata{id, kind} => {
+                        UpdateError::NonExistantMetadata{id, kind} => {
                             format!("missing metadata!")
-                        },
-                        UpdateError::MissingCategory(cat) => {
-                            format!("missing category!")
                         },
                         _ => {
                             format!("internal error!")
@@ -213,11 +210,8 @@ impl ImageEdit{
 
             if let Err(err) = actions::publish(id).await {
                 let msg = match err {
-                    UpdateError::MissingMetadata{id, kind} => {
+                    UpdateError::NonExistantMetadata{id, kind} => {
                         format!("missing metadata!")
-                    },
-                    UpdateError::MissingCategory(cat) => {
-                        format!("missing category!")
                     },
                     _ => {
                         format!("internal error!")

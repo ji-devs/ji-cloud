@@ -271,10 +271,10 @@ pub async fn get_image_url(id:&str) -> Result<String, ()> {
         })
 }
 
-async fn _get_image(id:&str) -> FetchResult < <GetOne as ApiEndpoint>::Res, <GetOne as ApiEndpoint>::Err> {
+async fn _get_image(id:&str) -> FetchResult < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
 
-    let path = GetOne::PATH.replace("{id}",id);
-    api_with_auth::<_, _, ()>(&api_url(&path), GetOne::METHOD, None).await
+    let path = Get::PATH.replace("{id}",id);
+    api_with_auth::<_, _, ()>(&api_url(&path), Get::METHOD, None).await
 }
 
 #[derive(Debug, Clone)]

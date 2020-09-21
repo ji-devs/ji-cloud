@@ -20,7 +20,7 @@ use core::routes::{Route, AdminRoute};
 use shared::domain::{
     user::UserProfile,
     category::Category,
-    image::GetOneResponse,
+    image::GetResponse,
 };
 
 use super::actions::*;
