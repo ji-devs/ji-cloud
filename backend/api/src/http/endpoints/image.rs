@@ -14,10 +14,10 @@ use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
     domain::{
-        image::{CreateResponse, GetResponse, SearchResponse, Image, ImageId, UpdateRequest},
+        image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
         meta::MetaKind,
     },
-    error::image::{CreateError, DeleteError, SearchError, GetError, UpdateError},
+    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -272,10 +272,7 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    .route(
-        image::Get::PATH,
-        image::Get::METHOD.route().to(get_one),
-    )
+    .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(image::Search::PATH, image::Search::METHOD.route().to(get))
     .route(
         image::UpdateMetadata::PATH,
