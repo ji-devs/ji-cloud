@@ -36,6 +36,7 @@ module.exports = {
         jisignupgrey: '#dee1eb',
         jidarkgrey: '#e2e5eb',
         jibuttongreen: '#72cb91',
+        jigooglegrey: '#f0f1f4',
 
       },
 
@@ -46,6 +47,7 @@ module.exports = {
       },
       fontFamily: {
         poppins: 'Poppins',
+        sans: 'Roboto',
       },
       width: {
         10: '10px',

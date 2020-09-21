@@ -6,7 +6,18 @@
   <div class="p-80">
     <h1 class="text-jititleorange text-5xl font-light mb-8">Login</h1>
     <div class="w-297">
-      <div data-id="google-signin" class="cursor-pointer mb-8">SIGNIN WITH GOOGLE</div>
+      <div data-id="google-signin" class="cursor-pointer mb-8">
+        <div class="border rounded-sm border-jigooglegrey shadow-md h-64">
+          <span class="flex items-center font-sans font-normal text-lg"><img src="{{MEDIA_UI}}/icn-google-button-64.svg" alt="">Sign in with Google</span>
+
+        </div>
+      </div>
+      <div class="flex items-center justify-center mb-8">
+        <hr class="w-112 mr-5">
+        <p>or</p>
+        <hr class="w-112 ml-5">
+
+      </div>
       <div data-id="status-message"></div>
       {{ User::user_input(label="User name",width="w-297",inputwidth="w-296", dataId="${id}") }}
       {{ User::user_input(label="Password",width="w-297", inputwidth="w-296", dataId="${id}") }}
