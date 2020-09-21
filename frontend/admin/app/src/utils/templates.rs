@@ -30,6 +30,10 @@ const IMAGE_EDIT_CATEGORIES_PARENT_END:&'static str = "image-edit-categories-par
 const IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD:&'static str = "image-edit-categories-sum-child";
 const IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT:&'static str = "image-edit-categories-sum-parent";
 const IMAGE_EDIT_OVERVIEW:&'static str = "image-edit-overview";
+const IMAGES_SEARCH:&'static str = "images-search";
+const IMAGE_GRID_ITEM_RED:&'static str = "image-grid-item-red";
+const IMAGE_GRID_ITEM_GREEN:&'static str = "image-grid-item-green";
+
 
 pub fn categories() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CATEGORIES))
@@ -115,6 +119,22 @@ pub fn image_edit_overview(name:&str, description:&str) -> HtmlElement {
     }).unwrap_throw())
 }
 
+pub fn images_search() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGES_SEARCH))
+}
+pub fn image_grid_item_green(src:&str, label:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_GRID_ITEM_GREEN, &html_map!{
+        "src" => src,
+        "label" => label,
+    }).unwrap_throw())
+}
+pub fn image_grid_item_red(src:&str, label:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_GRID_ITEM_RED, &html_map!{
+        "src" => src,
+        "label" => label,
+    }).unwrap_throw())
+}
+
 pub fn checkbox(id:&str, label:&str) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(CHECKBOX, &html_map!{
         "label" => label,
@@ -155,6 +175,9 @@ impl Templates {
             (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, get_template_str(include_str!("../../../.template_output/images/image-edit-categories-sum-child.html"))),
             (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, get_template_str(include_str!("../../../.template_output/images/image-edit-categories-sum-parent.html"))),
             (IMAGE_EDIT_OVERVIEW, get_template_str(include_str!("../../../.template_output/images/image-edit-overview.html"))),
+            (IMAGES_SEARCH, get_template_str(include_str!("../../../.template_output/images/images-search.html"))),
+            (IMAGE_GRID_ITEM_RED, get_template_str(include_str!("../../../.template_output/_image/image-grid-item-red.html"))),
+            (IMAGE_GRID_ITEM_GREEN, get_template_str(include_str!("../../../.template_output/_image/image-grid-item-green.html"))),
             (CHECKBOX, get_template_str(include_str!("../../../.template_output/_input/checkbox.html"))),
         ]);
 

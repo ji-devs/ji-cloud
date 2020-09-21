@@ -54,13 +54,27 @@ struct GoogleRegisterInfo {
 pub async fn register_google(page:Rc<RegisterPage>) {
     let token_promise = unsafe { get_firebase_register_google() };
 
+    let refs = page.refs.borrow();
+    let refs = refs.as_ref().unwrap_throw();
+
+    let username = refs.username();
+    let family_name = refs.family_name();
+    let given_name = refs.given_name();
     match JsFuture::from(token_promise).await {
         Ok(info) => {
             let user:GoogleRegisterInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
             //let (first_name, last_name) = parse_name(&user.name);
             let req = RegisterRequest {
-                display_name: user.name,
-                email: user.email
+                username,
+                email: user.email,
+                over_18: true,
+                given_name,
+                family_name,
+                language: "en".to_string(),
+                locale: "en".to_string(),
+                timezone: chrono_tz::Tz::Asia__Jerusalem,
+                opt_into_edu_resources: true,
+                organization: "ji".to_string()
             };
 
             let resp:FetchResult<RegisterSuccess, RegisterError> = fetch_register(&user.token, &req).await;

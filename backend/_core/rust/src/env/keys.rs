@@ -18,6 +18,7 @@ pub mod s3 {
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
 }
 
+#[cfg(feature = "db")]
 pub mod db {
     pub const DATABASE_URL: &str = "DATABASE_URL";
     pub const PASSWORD: &str = "DB_PASS";

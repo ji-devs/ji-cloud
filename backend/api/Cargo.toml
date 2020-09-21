@@ -1,15 +1,18 @@
 [package]
 name = "ji-cloud-api"
 version = "0.1.0"
-authors = ["dakom <david.komer@gmail.com>"]
+authors = [
+    "dakom <david.komer@gmail.com>",
+    "Chloe Ross <orangesnowfox@gmail.com>" # chloe@launchbadge.com 
+]
 edition = "2018"
 default-run = "ji-cloud-api"
 
 [dependencies]
-actix-cors = "0.3.0-alpha.1"
+actix-cors = "0.3.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
-actix-web = "3.0.0-beta.1"
+actix-web = "3.0.0"
 algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "551b896ad4235d674a8ec38f0c00dfc6e52c5a08" }
 anyhow = "1.0.32"
 chrono = "0.4.13"
@@ -17,13 +20,12 @@ chrono-tz = "0.5.3"
 config = {path = "../../config/rust"}
 dotenv = "0.15"
 futures = "0.3.5"
-futures-util = "0.3.4"
 jsonwebtoken = "7.2"
-lazy_static = "1.4"
 listenfd = {version = "0.3", optional = true }
 log = "0.4"
 openssl = { version = "0.10", features = ["vendored"], optional = true }
 percent-encoding = "2.1.0"
+pin-project = "0.4.23"
 rand = "0.7"
 reqwest = { version = "0.10", features = ["json"] }
 rusoto_core = "0.45.0"
@@ -34,7 +36,7 @@ serde_json = "1.0"
 shared = {path = "../../shared/rust", features = ["backend"]}
 simplelog = "0.8"
 time = "0.2.16"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "0.2", features = ["rt-threaded"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
 
@@ -50,7 +52,7 @@ features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "o
 
 [dependencies.core]
 path = "../_core/rust"
-features = ["s3", "db", "jwk", "algolia"]
+features = ["db"]
 
 
 [features]

@@ -863,5 +863,26 @@
       },
       "nullable": []
     }
+  },
+  "fddb73f2c44ea4cd230b443e60390a8b79a3560d28e240d5e1d75e8334087196": {
+    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and scope = $2) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
   }
 }

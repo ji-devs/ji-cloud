@@ -1,4 +1,7 @@
-use crate::{algolia::AlgoliaClient, db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
+use crate::{
+    algolia::AlgoliaClient, db, extractor::AuthUserWithScope, extractor::ScopeManageImage,
+    extractor::WrapAuthClaimsNoDb, s3::S3Client,
+};
 use actix_web::{
     http,
     web::{Data, Json, Path, Query, ServiceConfig},
@@ -11,10 +14,10 @@ use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
     domain::{
-        image::{CreateResponse, GetOneResponse, GetResponse, Image, ImageId, UpdateRequest},
+        image::{CreateResponse, GetResponse, SearchResponse, Image, ImageId, UpdateRequest},
         meta::MetaKind,
     },
-    error::image::{CreateError, DeleteError, GetError, GetOneError, UpdateError},
+    error::image::{CreateError, DeleteError, SearchError, GetError, UpdateError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -38,7 +41,7 @@ impl From<MetaWrapperError> for CreateError {
         match e {
             MetaWrapperError::Sqlx(e) => CreateError::InternalServerError(e.into()),
             MetaWrapperError::MissingMetadata { id, kind } => {
-                CreateError::MissingMetadata { id, kind }
+                CreateError::NonExistantMetadata { id, kind }
             }
         }
     }
@@ -49,7 +52,7 @@ impl From<MetaWrapperError> for UpdateError {
         match e {
             MetaWrapperError::Sqlx(e) => UpdateError::InternalServerError(e.into()),
             MetaWrapperError::MissingMetadata { id, kind } => {
-                UpdateError::MissingMetadata { id, kind }
+                UpdateError::NonExistantMetadata { id, kind }
             }
         }
     }
@@ -92,7 +95,7 @@ async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (Json<<image::Create as ApiEndpoint>::Res>, http::StatusCode),
@@ -147,14 +150,14 @@ async fn get_one(
     s3: Data<S3Client>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
-) -> Result<Json<<image::GetOne as ApiEndpoint>::Res>, <image::GetOne as ApiEndpoint>::Err> {
+) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
     let metadata = db::image::get_one(&db, req.into_inner())
         .await?
-        .ok_or(GetOneError::NotFound)?;
+        .ok_or(GetError::NotFound)?;
 
     let id = metadata.id;
 
-    Ok(Json(GetOneResponse {
+    Ok(Json(GetResponse {
         metadata,
         url: s3.presigned_image_get_url(id)?,
     }))
@@ -165,16 +168,16 @@ async fn get(
     s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
-    query: Option<Query<<image::Get as ApiEndpoint>::Req>>,
-) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
+    query: Option<Query<<image::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<image::Search as ApiEndpoint>::Res>, <image::Search as ApiEndpoint>::Err> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let ids = algolia.search_image(&query.q).await?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
-        .err_into::<GetError>()
+        .err_into::<SearchError>()
         .and_then(|metadata: Image| async {
-            Ok(GetOneResponse {
+            Ok(GetResponse {
                 url: s3.presigned_image_get_url(metadata.id)?,
                 metadata,
             })
@@ -182,13 +185,13 @@ async fn get(
         .try_collect()
         .await?;
 
-    Ok(Json(GetResponse { images }))
+    Ok(Json(SearchResponse { images }))
 }
 
 async fn update(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
 ) -> Result<HttpResponse, <image::UpdateMetadata as ApiEndpoint>::Err> {
@@ -248,7 +251,7 @@ fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
 async fn delete(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
 ) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {
@@ -270,10 +273,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
         image::Create::METHOD.route().to(create),
     )
     .route(
-        image::GetOne::PATH,
-        image::GetOne::METHOD.route().to(get_one),
+        image::Get::PATH,
+        image::Get::METHOD.route().to(get_one),
     )
-    .route(image::Get::PATH, image::Get::METHOD.route().to(get))
+    .route(image::Search::PATH, image::Search::METHOD.route().to(get))
     .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),

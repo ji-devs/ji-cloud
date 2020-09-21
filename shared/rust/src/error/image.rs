@@ -1,3 +1,5 @@
+//! Errors for image routes.
+
 #[cfg(feature = "backend")]
 use super::anyhow_to_ise;
 use crate::domain::meta::MetaKind;
@@ -6,32 +8,19 @@ use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[non_exhaustive]
-#[derive(Serialize, Deserialize)]
-pub enum GetOneError {
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-    NotFound,
-    Forbidden,
-}
-
-#[cfg(feature = "backend")]
-impl From<GetOneError> for actix_web::Error {
-    fn from(e: GetOneError) -> actix_web::Error {
-        match e {
-            GetOneError::InternalServerError(e) => anyhow_to_ise(e),
-            GetOneError::NotFound => HttpResponse::NotFound().into(),
-            GetOneError::Forbidden => HttpResponse::Forbidden().into(),
-        }
-    }
-}
-
+/// Error occurred while getting a single image.
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 pub enum GetError {
+    /// The image does not exist.
+    NotFound,
+
+    /// The user has insufficient permissions to access the image.
+    Forbidden,
+
+    /// An internal server error occurred.
     #[serde(skip)]
     InternalServerError(anyhow::Error),
-    Forbidden,
 }
 
 #[cfg(feature = "backend")]
@@ -39,6 +28,7 @@ impl From<GetError> for actix_web::Error {
     fn from(e: GetError) -> actix_web::Error {
         match e {
             GetError::InternalServerError(e) => anyhow_to_ise(e),
+            GetError::NotFound => HttpResponse::NotFound().into(),
             GetError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
@@ -46,14 +36,45 @@ impl From<GetError> for actix_web::Error {
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
-pub enum CreateError {
+/// Error occurred while searching for images.
+pub enum SearchError {
+    // todo: is this variant useful?
+    /// The user has insufficient permissions to search for images.
+    Forbidden,
+
+    /// An internal server error occurred.
     #[serde(skip)]
     InternalServerError(anyhow::Error),
-    MissingMetadata {
+}
+
+#[cfg(feature = "backend")]
+impl From<SearchError> for actix_web::Error {
+    fn from(e: SearchError) -> actix_web::Error {
+        match e {
+            SearchError::InternalServerError(e) => anyhow_to_ise(e),
+            SearchError::Forbidden => HttpResponse::Forbidden().into(),
+        }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
+/// Error occurred while creating an image.
+pub enum CreateError {
+    /// A given item of metadata doesn't exist.
+    NonExistantMetadata {
+        /// The (Optional) id of the item.
         id: Option<Uuid>,
+        /// The item's kind.
         kind: MetaKind,
     },
+
+    /// User has insufficient permissions to create an image.
     Forbidden,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
 }
 
 #[cfg(feature = "backend")]
@@ -61,7 +82,7 @@ impl From<CreateError> for actix_web::Error {
     fn from(e: CreateError) -> actix_web::Error {
         match e {
             CreateError::InternalServerError(e) => anyhow_to_ise(e),
-            e @ CreateError::MissingMetadata { .. } => {
+            e @ CreateError::NonExistantMetadata { .. } => {
                 HttpResponse::UnprocessableEntity().json(e).into()
             }
             CreateError::Forbidden => HttpResponse::Forbidden().into(),
@@ -71,16 +92,25 @@ impl From<CreateError> for actix_web::Error {
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
+/// Error occurred while updating an image.
 pub enum UpdateError {
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-    MissingMetadata {
+    /// A given item of metadata doesn't exist.
+    NonExistantMetadata {
+        /// The (Optional) id of the item.
         id: Option<Uuid>,
+        /// The item's kind.
         kind: MetaKind,
     },
-    MissingCategory(Option<Uuid>),
+
+    /// The category was not found.
     NotFound,
+
+    /// User has insufficient permissions to update the image.
     Forbidden,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
 }
 
 #[cfg(feature = "backend")]
@@ -89,7 +119,7 @@ impl From<UpdateError> for actix_web::Error {
         match e {
             UpdateError::InternalServerError(e) => anyhow_to_ise(e),
             UpdateError::NotFound => HttpResponse::NotFound().into(),
-            e @ UpdateError::MissingMetadata { .. } | e @ UpdateError::MissingCategory(_) => {
+            e @ UpdateError::NonExistantMetadata { .. } => {
                 HttpResponse::UnprocessableEntity().json(e).into()
             }
             UpdateError::Forbidden => HttpResponse::Forbidden().into(),
@@ -99,11 +129,18 @@ impl From<UpdateError> for actix_web::Error {
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
+/// Error occurred while deleting an image.
 pub enum DeleteError {
+    /// User has insufficient permissions to delete the image.
+    Forbidden,
+
+    // todo: [conflict] With what?
+    /// Deleting the image would cause a conflict.
+    Conflict,
+
+    /// An internal server error occurred.
     #[serde(skip)]
     InternalServerError(anyhow::Error),
-    Forbidden,
-    Conflict,
 }
 
 #[cfg(feature = "backend")]
@@ -117,4 +154,4 @@ impl From<DeleteError> for actix_web::Error {
     }
 }
 
-from_anyhow![GetOneError, GetError, CreateError, UpdateError, DeleteError,];
+from_anyhow![GetError, SearchError, CreateError, UpdateError, DeleteError,];

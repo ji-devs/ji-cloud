@@ -14,8 +14,8 @@ use shared::{
         ApiEndpoint,
     },
     domain::auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
-    domain::user::NoSuchUserError,
     error::auth::RegisterError,
+    error::user::NoSuchUserError,
 };
 use sqlx::PgPool;
 

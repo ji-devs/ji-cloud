@@ -75,12 +75,3 @@ pub async fn signin_google(page:Rc<SigninPage>) {
         }
     };
 }
-
-pub async fn signin_email(page:Rc<SigninPage>) {
-
-    let refs = page.refs.borrow();
-    let refs = refs.as_ref().unwrap_throw();
-    let email = refs.get_email();
-    let pw = refs.get_pw();
-    log::info!("signin clicked! email: {} pw: {}", email, pw);
-}

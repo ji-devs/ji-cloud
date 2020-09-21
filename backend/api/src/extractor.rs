@@ -1,6 +1,7 @@
 use crate::{
     jwkkeys::{self, JwkVerifier},
     jwt::{check_no_csrf, check_no_db},
+    more_futures::ReadyOrNot,
 };
 use actix_web::{
     cookie::{Cookie, CookieBuilder, SameSite},
@@ -10,16 +11,18 @@ use actix_web::{
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::RuntimeSettings;
-use futures::future::FutureExt;
-use futures_util::future::BoxFuture;
+use futures::future::{self, FutureExt};
 use jsonwebtoken as jwt;
 use jwt::EncodingKey;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use shared::domain::auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME};
+use shared::domain::{
+    auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
+    user::UserScope,
+};
 use shared::error::auth::FirebaseError;
 use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use std::{marker::PhantomData, sync::Arc};
 use uuid::Uuid;
 
 fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
@@ -59,6 +62,7 @@ impl From<AuthError> for actix_web::Error {
 
 pub enum StatusError {
     Auth,
+    Forbidden,
     InternalServerError,
 }
 
@@ -66,6 +70,7 @@ impl From<StatusError> for actix_web::Error {
     fn from(other: StatusError) -> Self {
         match other {
             StatusError::Auth => HttpResponse::Unauthorized().into(),
+            StatusError::Forbidden => HttpResponse::Forbidden().into(),
             StatusError::InternalServerError => HttpResponse::InternalServerError().into(),
         }
     }
@@ -73,7 +78,7 @@ impl From<StatusError> for actix_web::Error {
 
 impl FromRequest for FirebaseUser {
     type Error = FirebaseError;
-    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
@@ -87,7 +92,7 @@ impl FromRequest for FirebaseUser {
         // this whole dance is to avoid cloning the headers.
         let token = match bearer_token(req.headers()) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(FirebaseError::MissingBearerToken).boxed(),
+            None => return futures::future::err(FirebaseError::MissingBearerToken).into(),
         };
 
         // HACK for testing.
@@ -97,7 +102,7 @@ impl FromRequest for FirebaseUser {
                     .map(|id| Self { id })
                     .ok_or_else(|| FirebaseError::InvalidToken),
             )
-            .boxed();
+            .into();
         }
 
         async move {
@@ -110,6 +115,7 @@ impl FromRequest for FirebaseUser {
             Ok(Self { id })
         }
         .boxed()
+        .into()
     }
 }
 
@@ -122,7 +128,7 @@ pub struct WrapAuthClaimsNoDb(pub AuthClaims);
 
 impl FromRequest for WrapAuthClaimsNoDb {
     type Error = AuthError;
-    type Future = futures::future::Ready<Result<Self, Self::Error>>;
+    type Future = future::Ready<Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
@@ -134,10 +140,10 @@ impl FromRequest for WrapAuthClaimsNoDb {
 
         let (cookie, csrf) = match (cookie, csrf) {
             (Some(cookie), Some(csrf)) => (cookie, csrf),
-            _ => return futures::future::err(AuthError),
+            _ => return future::err(AuthError),
         };
 
-        futures::future::ready(
+        future::ready(
             check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
                 .map_err(|_| AuthError)
                 .and_then(|it| it.ok_or(AuthError))
@@ -146,12 +152,93 @@ impl FromRequest for WrapAuthClaimsNoDb {
     }
 }
 
+// fixme: replace with const-generics once stable
+pub trait Scope {
+    fn scope() -> UserScope;
+}
+
+pub(crate) struct ScopeManageCategory;
+
+impl Scope for ScopeManageCategory {
+    fn scope() -> UserScope {
+        UserScope::ManageCategory
+    }
+}
+
+pub(crate) struct ScopeManageImage;
+
+impl Scope for ScopeManageImage {
+    fn scope() -> UserScope {
+        UserScope::ManageImage
+    }
+}
+
+#[repr(transparent)]
+pub struct AuthUserWithScope<S: Scope> {
+    pub claims: AuthClaims,
+    _phantom: PhantomData<S>,
+}
+
+impl<S: Scope> FromRequest for AuthUserWithScope<S> {
+    type Error = StatusError;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let cookie = req.cookie(JWT_COOKIE_NAME);
+        let csrf = csrf_header(req.headers());
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let (cookie, csrf) = match (cookie, csrf) {
+            (Some(cookie), Some(csrf)) => (cookie, csrf),
+            _ => return future::err(StatusError::Auth).into(),
+        };
+
+        // get claims and check csrf
+        let claims = check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
+            .map_err(|_| StatusError::Auth)
+            .and_then(|it| it.ok_or(StatusError::Auth));
+
+        let claims = match claims {
+            Ok(claims) => claims,
+            Err(e) => return future::err(e).into(),
+        };
+
+        async move {
+            let has_scope = sqlx::query!(
+                r#"select exists(select 1 from "user_scope" where user_id = $1 and scope = $2) as "exists!""#,
+                claims.id,
+                S::scope() as i16
+            )
+            .fetch_one(&db)
+            .await
+            .map(|it| it.exists)
+            .map_err(|_| StatusError::InternalServerError)?;
+
+            if !has_scope {
+                return Err(StatusError::Forbidden);
+            }
+
+            Ok(Self {
+                claims,
+                _phantom: PhantomData,
+            })
+        }
+        .boxed()
+        .into()
+    }
+}
+
 #[repr(transparent)]
 pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
 
 impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     type Error = StatusError;
-    type Future = BoxFuture<'static, Result<Self, Self::Error>>;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
@@ -164,7 +251,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 
         let cookie = match req.cookie(JWT_COOKIE_NAME) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(StatusError::Auth).boxed(),
+            None => return future::err(StatusError::Auth).into(),
         };
 
         async move {
@@ -175,6 +262,7 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
                 .ok_or(StatusError::Auth)
         }
         .boxed()
+        .into()
     }
 }
 
