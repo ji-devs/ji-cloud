@@ -1,16 +1,13 @@
 use crate::extractor::FirebaseId;
 use chrono_tz::Tz;
-use shared::{
-    domain::{
-        auth::RegisterRequest,
-        meta::SubjectId,
-        user::{UserProfile, UserScope},
-    },
-    error::auth::RegisterError,
-};
+use shared::{domain::{auth::RegisterRequest, meta::SubjectId, user::{OtherUser, UserProfile, UserScope}}, error::auth::RegisterError};
 use sqlx::postgres::PgDatabaseError;
 use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
+
+pub async fn by_name(db: &sqlx::PgPool, name: &str) -> anyhow::Result<Option<OtherUser>> {
+    Ok(sqlx::query_as!(OtherUser, r#"select id from "user" where username = $1"#, name).fetch_optional(db).await?)
+}
 
 pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
