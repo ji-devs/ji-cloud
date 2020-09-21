@@ -3,7 +3,7 @@ use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{Data, Json, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
@@ -16,10 +16,19 @@ use shared::{
     domain::auth::{
         AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
     },
+    domain::user::OtherUser,
     error::auth::RegisterError,
     error::user::NoSuchUserError,
+    error::InternalServerError,
 };
 use sqlx::PgPool;
+
+async fn user_by_name(
+    db: Data<PgPool>,
+    username: Path<String>,
+) -> Result<Option<OtherUser>, InternalServerError> {
+    Ok(db::user::by_name(db.as_ref(), &username.into_inner()).await?)
+}
 
 async fn handle_signin_credentials(
     settings: Data<RuntimeSettings>,
