@@ -19,14 +19,14 @@
           </div>
           {{ User::user_input(label="Create a User name*",width="w-full",inputwidth="w-full", inputDataId="username") }}
           <div class="flex">
-            {{ User::user_input(label="Password*",width="w-297",inputwidth="w-296", dataId="${id}") }}
+            {{ User::user_pw(label="Password*",width="w-297",inputwidth="w-296", inputDataId="pw") }}
             <div class="spacer w-30"></div>
-            {{ User::user_input(label="Confirm your password*",width="w-297",inputwidth="w-296", dataId="${id}") }}
+            {{ User::user_pw(label="Confirm your password*",width="w-297",inputwidth="w-296", inputDataId="pw-confirm") }}
           </div>
-          {{ User::user_input(label="Email*",width="w-full",inputwidth="w-full", dataId="${id}") }}
-          {{ Input::checkbox(label="I am over 18", dataId="${id}", class="px-2") }}
+          {{ User::user_input(label="Email*",width="w-full",inputwidth="w-full", inputDataId="email") }}
+          {{ Input::checkbox(label="I am over 18", inputDataId="over-18", required=true, class="px-2") }}
           <div class="mt-2">
-            {{ ButtonMacros::orange(label="Next", dataId="btn-1") }}
+            {{ ButtonMacros::orange(label="Next", dataId="next-btn") }}
           </div>
 
           <p class="text-jibuttonBlue mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer">Login</span></p>

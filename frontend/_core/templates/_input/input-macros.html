@@ -29,9 +29,9 @@
 {% endmacro description %}
 
 
-{% macro checkbox(label,inputDataId="", class="") %}
+{% macro checkbox(label,required=false, inputDataId="", class="") %}
 <label>
-  <input class="ml-2" data-id="{{inputDataId}}" type="checkbox" class="{{class}}">
+  <input class="ml-2" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
   <span class="text-sm">
     {{label}}
   </span>
