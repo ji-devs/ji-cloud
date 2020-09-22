@@ -47,3 +47,18 @@
 .w-full input{
   border-right: none;
 }
+
+.weak {
+  width:25%;
+  background-color: #f84f57;
+}
+
+.average {
+  width:50%;
+  background-color: #fccd63;
+}
+
+.secure {
+  width: 75%;
+  background-color:#42cc7a; 
+}

@@ -8,42 +8,20 @@
   <div class="px-80 py-60">
     <h1 class="text-jititleorange text-5xl font-light mb-8">Sign up - Step 1</h1>
     <div class="">
+      <div data-id="status-message"></div>
       <div class="flex">
-        <div class="">
-          <p class="text-2xl mb-8">General info</p>
-          <div data-id="status-message"></div>
-          <div class="flex">
-            {{ User::user_input(label="First name*",width="w-297",inputwidth="w-296", inputDataId="given-name") }}
-            <div class="spacer w-30"></div>
-            {{ User::user_input(label="Family name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
-          </div>
-          {{ User::user_input(label="Create a User name*",width="w-full",inputwidth="w-full", inputDataId="username") }}
-          <div class="flex">
-            {{ User::user_pw(label="Password*",width="w-297",inputwidth="w-296", inputDataId="pw") }}
-            <div class="spacer w-30"></div>
-            {{ User::user_pw(label="Confirm your password*",width="w-297",inputwidth="w-296", inputDataId="pw-confirm") }}
-          </div>
-          {{ User::user_input(label="Email*",width="w-full",inputwidth="w-full", inputDataId="email") }}
-          {{ Input::checkbox(label="I am over 18", inputDataId="over-18", required=true, class="px-2") }}
-          <div class="mt-2">
-            {{ ButtonMacros::orange(label="Next", dataId="next-btn") }}
-          </div>
-
-          <p class="text-jibuttonBlue mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer">Login</span></p>
-
-        </div>
-        <div class="">
-          <p data-id="google-register" class="text-2xl mb-8 cursor-pointer">Login with Google</p>
-        </div>
-
+        {{ User::user_input(label="First name*",width="w-297",inputwidth="w-296", inputDataId="given-name") }}
+        <div class="spacer w-30"></div>
+        {{ User::user_input(label="Family name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
       </div>
 
+      {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="email") }}
+      {{ Input::checkbox(label="I am over 18", inputDataId="over-18", required=true, class="px-2") }}
+      <div class="mt-2">
+        {{ ButtonMacros::orange(label="Next", dataId="next-btn") }}
+      </div>
 
-
-
-
-
-
+      <p class="text-jibuttonBlue mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer">Login</span></p>
 
     </div>
   </div>
