@@ -1,0 +1,37 @@
+<div class="mb-4 absolute z-10 w-full top-0">
+  <!--This should be toggled when clicking on filter FILTERBOX-->
+  <div class="bg-jilogingrey rounded-md shadow">
+    <label for="name" class="">
+      <span class="text-jibuttonBlue p-2">School/Organization*</span>
+      <div class="flex items-center border-b border-jisignupgrey py-2 relative">
+
+        <img src="{{MEDIA_UI}}/icn-dropdown-chevron.svg" alt="" class="absolute right-16">
+        <input data-id="search" type="search" name="" value="" class="ml-2 bg-jibackgroundGrey outline-none focus:outline-none" placeholder="">
+
+      </div>
+      <!--When picked the <li> should get the class selected-->
+      <ul class="p-2 schoollist">
+        <li class="flex items-center"><img class="mr-2" src="{{MEDIA_UI}}/icn-check-chevron.svg" alt="">
+          Add new
+          <input type="text" class="bg-jidarkgrey rounded mx-2 px-2 text-sm w-393 h-32 focus:outline-none focus:bg-jiblueadd" name="" value="" placeholder="Type the name of your school/organization">
+          <button class="bg-jiorange hover:jiorangehover text-white font-normal text-sm py-1 px-4 rounded-20">
+            Add
+          </button>
+
+        </li>
+        <li class="flex selected"><img class="mr-2" src="{{MEDIA_UI}}/icn-check-chevron.svg" alt="">School 1</li>
+        <li class="flex"><img class="mr-2" src="{{MEDIA_UI}}/icn-check-chevron.svg" alt="">School 2</li>
+
+      </ul>
+
+    </label>
+    <div data-id="options" class="flex flex-col max-h-284 overflow-auto">
+
+    </div>
+
+
+
+
+  </div>
+
+</div>

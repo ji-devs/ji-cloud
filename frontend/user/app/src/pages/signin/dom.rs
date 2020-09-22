@@ -18,7 +18,6 @@ use discard::DiscardOnDrop;
 use core::routes::{Route, UserRoute};
 
 pub struct SigninPage {
-    pub refs: RefCell<Option<SigninPageRefs>>,
     pub status: Mutable<Option<SigninStatus>>,
     pub loader: AsyncLoader
 }
@@ -35,7 +34,6 @@ impl SigninPage {
 
 
         let _self = Rc::new(Self { 
-            refs: RefCell::new(None),
             status: Mutable::new(None),
             loader: AsyncLoader::new()
         });
@@ -46,12 +44,14 @@ impl SigninPage {
     
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::signin(), {
+            /*
             .with_data_id!("signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
                     _self.loader.load(actions::signin_email(_self.clone()));
                 }))
             })
+            */
             .with_data_id!("google-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
@@ -74,35 +74,8 @@ impl SigninPage {
                         .unwrap_or("".to_string())
                 }))
             })
-            .after_inserted(clone!(_self => move |elem| {
-                _self.stash_refs(elem)
-            }))
         })
     }
 
-    fn stash_refs(&self, parent:HtmlElement) {
-        *self.refs.borrow_mut() = Some(SigninPageRefs::new(&parent));
-    }
 
-}
-
-pub struct SigninPageRefs {
-    email: HtmlInputElement,
-    pw: HtmlInputElement,
-}
-
-impl SigninPageRefs {
-    pub fn new(parent:&HtmlElement) -> Self {
-        Self {
-            email: parent.select(&data_id("email")),
-            pw: parent.select(&data_id("pw")),
-        }
-    }
-
-    pub fn get_email(&self) -> String {
-        self.email.value()
-    }
-    pub fn get_pw(&self) -> String {
-        self.pw.value()
-    }
 }

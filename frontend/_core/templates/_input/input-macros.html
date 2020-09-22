@@ -1,22 +1,17 @@
-{% macro searchbox(inputDataId="") %}
-<div class="relative" >
-  <img src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10 top-25">
-  <input data-id="{{inputDataId}}" type="search" name="" value="" class="rounded-full py-2 px-4 border-jiborderGrey bg-jibackgroundGrey solid border ml-2 outline-none focus:outline-none" placeholder="Categories Search">
+{% macro searchbox(inputDataId="", label) %}
+<div class="relative">
+  <img data-id="search-btn" src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10 top-25 cursor-pointer">
+  <input data-id="{{inputDataId}}" type="search" name="" value="" class="rounded-full py-2 px-4 border-jiborderGrey bg-jibackgroundGrey solid border ml-2 outline-none focus:outline-none" placeholder="{{label}}">
 </div>
 {% endmacro searchbox %}
 
-{% macro select(inputDataId="") %}
+{% macro select(selectDataId="", options) %}
 <div class="relative">
   <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="absolute transform rotate-90 right-0">
-  <select class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
-    <option value="">Show all</option>
-    <option value="">
-      <div class="rounded-full bg-jigreen h-2 w-2">
-      </div>
-      Show published
-    </option>
-    <option value="">Show saved</option>
-
+  <select data-id="{{selectDataId}}" class="appearance-none border-0 border-b-2 border-jigreyinputborder w-150 focus:outline-none" name="">
+  {% for option in options %}
+    <option value="{{loop.index0}}">{{option}}</option>
+  {% endfor %}
   </select>
 </div>
 {% endmacro select %}
@@ -27,16 +22,16 @@
   <label for="name" class="pl-2">
     <span class="text-jibuttonBlue">{{label}}</span>
     <div class="flex items-center border-b border-jiborderGrey py">
-        <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 pl-2  leading-tight focus:outline-none" type="text" placeholder="Jane Doe" aria-label="Full name">
+      <input data-id="{{inputDataId}}" class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 pl-2  leading-tight focus:outline-none" type="text" placeholder="Jane Doe" aria-label="Full name">
     </div>
   </label>
 </div>
 {% endmacro description %}
 
 
-{% macro checkbox(label,inputDataId="", class="") %}
+{% macro checkbox(label,required=false, inputDataId="", class="") %}
 <label>
-  <input class="ml-2" type="checkbox" class={{class}}>
+  <input class="ml-2" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
   <span class="text-sm">
     {{label}}
   </span>

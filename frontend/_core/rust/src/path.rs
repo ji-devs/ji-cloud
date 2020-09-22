@@ -13,3 +13,11 @@ pub fn api_url(path:&str) -> String {
     format!("{}{}", SETTINGS.get().unwrap().remote_target.api_url(), path)
 }
 
+pub fn upload_url(path:&str) -> String {
+    format!("{}/{}", SETTINGS.get().unwrap().remote_target.upload_url(), path)
+}
+
+pub fn upload_image_url(path:&str) -> String {
+    format!("{}/image/{}", SETTINGS.get().unwrap().remote_target.upload_url(), path)
+}
+

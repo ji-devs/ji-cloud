@@ -1,34 +1,121 @@
 #[cfg(feature = "db")]
 use sqlx::postgres::PgConnectOptions;
 
-use crate::env::{keys, req_env};
-use crate::google::{get_access_token_and_project_id, get_secret};
-#[cfg(any(feature = "s3", feature = "db"))]
+use crate::{
+    env::{env_bool, keys, req_env},
+    google::{get_access_token_and_project_id, get_secret},
+};
 use config::RemoteTarget;
+use jsonwebtoken::{DecodingKey, EncodingKey};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use jsonwebtoken::EncodingKey;
+/// Settings that are accessed at runtime (as compared to startup time)
+#[derive(Clone)]
+pub struct RuntimeSettings {
+    firebase_no_auth: bool,
 
-mod runtime;
-pub use runtime::RuntimeSettings;
+    /// The port that the api runs on.
+    pub api_port: u16,
 
-#[cfg(feature = "s3")]
-mod s3;
+    /// The code that the pages api runs on.
+    pub pages_port: u16,
 
-#[cfg(feature = "s3")]
-pub use s3::S3Settings;
+    /// When the server started.
+    pub epoch: Duration,
 
-#[cfg(feature = "jwk")]
-mod jwk;
+    /// Used to encode jwt tokens.
+    pub jwt_encoding_key: EncodingKey,
 
-#[cfg(feature = "jwk")]
-pub use jwk::JwkSettings;
+    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
+    //Keeping a string is a stop-gap measure for now, not ideal
+    /// Used to _decode_ jwt tokens.
+    jwt_decoding_key: String,
+}
 
-#[cfg(feature = "algolia")]
-mod algolia;
+impl RuntimeSettings {
+    pub(crate) fn new(
+        jwt_encoding_key: EncodingKey,
+        jwt_decoding_key: String,
+    ) -> anyhow::Result<Self> {
+        let (api_port, pages_port) = match crate::REMOTE_TARGET {
+            RemoteTarget::Local => (
+                req_env("LOCAL_API_PORT")?.parse()?,
+                req_env("LOCAL_PAGES_PORT")?.parse()?,
+            ),
 
-#[cfg(feature = "algolia")]
-pub use algolia::AlgoliaSettings;
+            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
+        };
 
+        let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
+
+        Ok(Self {
+            api_port,
+            pages_port,
+            firebase_no_auth,
+            epoch: get_epoch(),
+            jwt_encoding_key,
+            jwt_decoding_key,
+        })
+    }
+
+    // shh, we're pretending not to be pulling this out of the aether
+    /// The `RemoteTarget` that the settings are for.
+    pub fn remote_target(&self) -> RemoteTarget {
+        crate::REMOTE_TARGET
+    }
+
+    /// Are we running "locally" (dev)?
+    pub fn is_local(&self) -> bool {
+        matches!(self.remote_target(), RemoteTarget::Local)
+    }
+
+    /// Should we assume that anything that says firebase sent it is right?
+    pub fn firebase_assume_valid(&self) -> bool {
+        self.is_local() && self.firebase_no_auth
+    }
+
+    /// Get key used to decode jwt tokens.
+    pub fn jwt_decoding_key(&self) -> DecodingKey {
+        DecodingKey::from_secret(self.jwt_decoding_key.as_bytes())
+    }
+}
+
+/// Settings for initializing a S3 client
+pub struct S3Settings {
+    /// The s3 endpoint to connect to.
+    pub endpoint: String,
+
+    /// The s3 bucket that should be used for media.
+    pub bucket: String,
+
+    /// Should a s3 client be started? (for things like deleting images)
+    pub use_client: bool,
+
+    /// What's the access key's id?
+    pub access_key_id: String,
+
+    /// What's the access key's secret?
+    pub secret_access_key: String,
+}
+
+/// Settings for managing JWKs from Google.
+#[derive(Debug)]
+pub struct JwkSettings {
+    /// What audience should JWTs be checked for?
+    pub audience: String,
+    /// What issuer should JWTs be checked for?
+    pub issuer: String,
+}
+
+/// Settings to initialize a algolia client.
+pub struct AlgoliaSettings {
+    /// The AppID to provide to the algolia client.
+    pub application_id: String,
+    /// The key to use for the algolia client.
+    pub key: String,
+}
+
+/// Manages access to settings.
 pub struct SettingsManager {
     token: Option<String>,
     project_id: String,
@@ -49,6 +136,8 @@ impl SettingsManager {
         }
     }
 
+    // Sometimes unused due to some features not existing sometimes.
+    #[allow(dead_code)]
     async fn get_secret_with_backup(
         &self,
         primary_key: &str,
@@ -74,6 +163,10 @@ impl SettingsManager {
         }
     }
 
+    /// Create a new instance of `Self`
+    ///
+    /// # Errors
+    /// If it is decided that we need to use google cloud but fail, or we don't use google cloud and the `PROJECT_ID` env var is missing.
     pub async fn new() -> anyhow::Result<Self> {
         let use_google_cloud = !crate::env::env_bool(keys::google::DISABLE);
 
@@ -91,7 +184,7 @@ impl SettingsManager {
         Ok(Self { token, project_id })
     }
 
-    #[cfg(feature = "s3")]
+    /// Load the settings for s3.
     pub async fn s3_settings(&self) -> anyhow::Result<S3Settings> {
         let endpoint = match crate::REMOTE_TARGET.s3_endpoint() {
             Some(e) => e.to_string(),
@@ -121,11 +214,17 @@ impl SettingsManager {
         })
     }
 
-    #[cfg(feature = "jwk")]
+    /// Load the settings for JWKs.
     pub async fn jwk_settings(&self) -> anyhow::Result<JwkSettings> {
-        JwkSettings::new(self.project_id.clone())
+        let issuer = format!("{}/{}", config::JWK_ISSUER_URL, &self.project_id);
+
+        Ok(JwkSettings {
+            audience: self.project_id.clone(),
+            issuer,
+        })
     }
 
+    /// Load the settings for connecting to the db.
     #[cfg(feature = "db")]
     pub async fn db_connect_options(&self) -> anyhow::Result<PgConnectOptions> {
         if crate::REMOTE_TARGET == RemoteTarget::Local && !SQL_PROXY {
@@ -157,7 +256,7 @@ impl SettingsManager {
         }
     }
 
-    #[cfg(feature = "algolia")]
+    /// Load the settings for Algolia.
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
         let application_id = self
             .get_secret_with_backup(
@@ -168,13 +267,28 @@ impl SettingsManager {
 
         let key = self.get_secret(keys::algolia::KEY).await?;
 
-        Ok(AlgoliaSettings::new(application_id, key))
+        let disable_local = env_bool(keys::algolia::DISABLE);
+        if matches!(crate::REMOTE_TARGET, RemoteTarget::Local) && disable_local {
+            return Ok(None);
+        }
+
+        Ok(Some(AlgoliaSettings {
+            application_id,
+            key,
+        }))
     }
 
+    /// Load the `RuntimeSettings`.
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
         let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
         let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
 
         RuntimeSettings::new(jwt_encoding_key, jwt_secret)
     }
+}
+
+fn get_epoch() -> Duration {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
 }

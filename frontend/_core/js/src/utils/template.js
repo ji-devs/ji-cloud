@@ -9,6 +9,11 @@ export function renderTemplateFragment(template, data) {
     el.innerHTML = str;
     return el.content;
 }
+
+export function renderDivText(text) {
+	return renderTemplate(`<div>${text}</div>`, {text});
+}
+
 //Very simple replacement of `${pattern}`
 //Probably not safe, but only used for storybook / internal dev anyway
 export function renderTemplateString(template, data) {

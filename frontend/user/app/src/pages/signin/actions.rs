@@ -1,6 +1,6 @@
-use shared::domain::{
-    auth::SigninSuccess,
-    user::NoSuchUserError
+use shared::{
+    domain::auth::SigninSuccess,
+    error::user::NoSuchUserError,
 };
 use core::{
     routes::{Route, UserRoute},
@@ -74,13 +74,4 @@ pub async fn signin_google(page:Rc<SigninPage>) {
             page.status.set(None);
         }
     };
-}
-
-pub async fn signin_email(page:Rc<SigninPage>) {
-
-    let refs = page.refs.borrow();
-    let refs = refs.as_ref().unwrap_throw();
-    let email = refs.get_email();
-    let pw = refs.get_pw();
-    log::info!("signin clicked! email: {} pw: {}", email, pw);
 }

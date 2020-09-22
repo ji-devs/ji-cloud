@@ -1,63 +1,85 @@
+//! Types for users.
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
-
-#[cfg(feature = "backend")]
-use sqlx::postgres::PgRow;
+use std::convert::TryFrom;
 use uuid::Uuid;
-// note that this is unstable and will totally be split into many things later on
-#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug, Clone)]
+
+use super::meta::SubjectId;
+
+/// Represents a user's permissions.
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
+#[non_exhaustive]
 #[repr(i16)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum UserScope {
+    /// The user has access to everything(?)
     Admin = 1,
+
+    /// The user can create/delete/modify categories
+    ManageCategory = 2,
+
+    /// The user can create/delete/modify images.
+    ManageImage = 3,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct UserProfile {
-    pub id: Uuid,
-    pub scopes: Vec<UserScope>,
-    pub email: String,
-    pub display_name: String,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: Option<DateTime<Utc>>,
-}
+impl TryFrom<i16> for UserScope {
+    type Error = ();
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct NoSuchUserError {}
-
-// HACK: we can't get `Vec<UserRole>` directly from the DB, so we have to work around it for now.
-// see: https://github.com/launchbadge/sqlx/issues/298
-#[cfg(feature = "backend")]
-impl<'r> sqlx::FromRow<'r, PgRow> for UserProfile {
-    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
-        let DbUser {
-            id,
-            scopes,
-            email,
-            display_name,
-            created_at,
-            updated_at,
-        } = DbUser::from_row(row)?;
-
-        Ok(Self {
-            id,
-            scopes: scopes.into_iter().map(|(it,)| it).collect(),
-            email,
-            display_name,
-            created_at,
-            updated_at,
-        })
+    fn try_from(i: i16) -> Result<Self, Self::Error> {
+        match i {
+            1 => Ok(Self::Admin),
+            2 => Ok(Self::ManageCategory),
+            3 => Ok(Self::ManageImage),
+            _ => Err(()),
+        }
     }
 }
 
-#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
-#[cfg(feature = "backend")]
-struct DbUser {
+/// A user's profile.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserProfile {
+    /// The user's id.
     pub id: Uuid,
-    pub scopes: Vec<(UserScope,)>,
+
+    /// The user's username.
+    pub username: String,
+
+    /// The user's email address.
     pub email: String,
-    pub display_name: String,
+
+    /// The user's given name (first name)
+    pub given_name: String,
+
+    /// The user's family name (last name)
+    pub family_name: String,
+
+    /// The user's preferred language.
+    pub language: String,
+
+    /// The user's preferred locale.
+    pub locale: String,
+
+    /// Does the user want educational resources sent to them?
+    pub opt_into_edu_resources: bool,
+
+    /// Is the user over 18 years old?
+    pub over_18: bool,
+
+    /// The user's timezone.
+    pub timezone: chrono_tz::Tz,
+
+    /// The scopes associated with the user.
+    pub scopes: Vec<UserScope>,
+
+    /// When the user was created.
     pub created_at: DateTime<Utc>,
+
+    /// When the user was last updated.
     pub updated_at: Option<DateTime<Utc>>,
+
+    /// The organization that the user belongs to.
+    pub organization: String,
+
+    /// The user's taught subjects.
+    pub subjects: Vec<SubjectId>,
 }

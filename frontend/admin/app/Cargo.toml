@@ -61,6 +61,10 @@ log = "0.4.11"
 cfg-if = "0.1.10"
 awsm_web = { version = "0.5.0", features = ["dom"] }
 discard = "1.0.4"
+uuid = { version = "^0.8", features = ["serde", "wasm-bindgen"] }
+serde_qs = "^0.6"
+url = "2.1.1"
+
 
 [features]
 default = ["wee_alloc"]

@@ -1,5 +1,41 @@
 {
   "db": "PostgreSQL",
+  "0352a39223a9bb7c9d4c66cc673a8324a3e56ea9c6fdc1b87f2dcb8233499eb3": {
+    "query": "select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AgeRangeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -205,6 +241,21 @@
       ]
     }
   },
+  "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
@@ -236,6 +287,36 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "4a26a8a4a7c5ec4d470518bca3b997c1e52616ad93a56e7b28fdb485c50f228c": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "4da15c8f7c51da73da193a2fc4ed3c4f889bc0ebe3646543f8888d136c0b1c75": {
@@ -287,6 +368,42 @@
       "nullable": []
     }
   },
+  "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
+    "query": "select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AffiliationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "query": "delete from category where id = $1 returning index, parent_id",
     "describe": {
@@ -313,37 +430,27 @@
       ]
     }
   },
-  "7038777fa4cd28dac1759e3b17744192f4cfc0af398cfc3d502c956755aafea3": {
-    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2 is distinct from name or\n       $3 is distinct from description or\n       $4 is distinct from is_premium)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "7e072768b590478364590b47a9103afe6dc395767d26b6f5d00ab9f9650767e8": {
-    "query": "select id as \"id: AgeRangeId\", created_at, updated_at from style",
+  "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
+    "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: AgeRangeId",
+          "name": "id: SubjectId",
           "type_info": "Uuid"
         },
         {
           "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
           "name": "created_at",
           "type_info": "Timestamptz"
         },
         {
-          "ordinal": 2,
+          "ordinal": 3,
           "name": "updated_at",
           "type_info": "Timestamptz"
         }
@@ -352,6 +459,7 @@
         "Left": []
       },
       "nullable": [
+        false,
         false,
         false,
         true
@@ -384,28 +492,6 @@
       ]
     }
   },
-  "83c4e421a83eb284ceab3d18858a6c5718d8e2d82679ac07c2e6edeb228ee0e3": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, display_name, email) \nVALUES \n    ($1, $2, $3::text)\nreturning id\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -426,22 +512,137 @@
       ]
     }
   },
-  "b5a8cb5f926cb6fa399f15b6e2f0433b369c39e2fc689484682db5b167fb60b6": {
-    "query": "select id as \"id: AffiliationId\", created_at, updated_at from style",
+  "9c5d608dc8981569bf51033b3150e3e81f1266efc1c508184637e090b145d20e": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: AffiliationId",
+          "name": "id",
           "type_info": "Uuid"
         },
         {
           "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
           "name": "created_at",
           "type_info": "Timestamptz"
         },
         {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 15,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        null,
+        null
+      ]
+    }
+  },
+  "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {
+    "query": "select id as \"id: StyleId\", display_name, created_at, updated_at from style",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: StyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
           "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
           "name": "updated_at",
           "type_info": "Timestamptz"
         }
@@ -450,6 +651,7 @@
         "Left": []
       },
       "nullable": [
+        false,
         false,
         false,
         true
@@ -515,36 +717,6 @@
         true,
         null,
         null
-      ]
-    }
-  },
-  "e4d30b237fbf3c2ce8af775f2a658a34ec68d80ba56735b24c91bc72ba86a255": {
-    "query": "select id as \"id: StyleId\", created_at, updated_at from style",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: StyleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 2,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        true
       ]
     }
   },
@@ -690,6 +862,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "fddb73f2c44ea4cd230b443e60390a8b79a3560d28e240d5e1d75e8334087196": {
+    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and scope = $2) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   }
 }

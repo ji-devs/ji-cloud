@@ -1,16 +1,24 @@
-
 {% macro orange(label, dataId="") %}
-<button data-id="{{dataId}}" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
-    {{label}}
+<button data-id="{{dataId}}" class="bg-jiorange hover:jiorangehover text-white font-normal min-w-112 py-1 px-4 rounded-20">
+  {{label}}
 </button>
 {% endmacro orange %}
 
 {% macro blue(label, dataId="", hover) %}
 <button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-3 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
-<div class="flex justify-center items-center">
-  <img src="{{MEDIA_UI}}/Icon_Plus.svg" alt="">
-  {{label}}
-</div>
+  <div class="flex justify-center items-center">
+    <img src="{{MEDIA_UI}}/Icon_Plus.svg" alt="">
+    {{label}}
+  </div>
 
 </button>
 {% endmacro blue %}
+
+{% macro green(label, dataId="") %}
+<button data-id="{{dataId}}" class="bg-jibuttongreen text-white font-normal min-w-112 py-2 px-4 rounded-lg">
+  <div class="flex">
+    <img src="{{MEDIA_UI}}/icon-sent.svg" alt="" class="mr-2">
+    {{label}}
+  </div>
+</button>
+{% endmacro green %}

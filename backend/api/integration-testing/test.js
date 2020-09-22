@@ -24,9 +24,10 @@ const CSRF = 'RuQuZb5AoGSdxIGA';
 
 const fixtures = {
     user: 'fixtures/1_user.sql',
-    imageMetaKinds: 'fixtures/2_image_meta_kinds.sql',
+    metaKinds: 'fixtures/2_meta_kinds.sql',
     categoryOrdering: 'fixtures/3_category_ordering.sql',
-    categoryNesting: 'fixtures/4_category_nesting.sql'
+    categoryNesting: 'fixtures/4_category_nesting.sql',
+    image: 'fixtures/5_image.sql',
 };
 
 function hookServerStarted(server) {
@@ -163,8 +164,16 @@ test('register user', async (t) => {
         cookieJar,
         port: t.context.port,
         json: {
-            display_name: 'test',
+            username: 'test',
             email: 'test@test.test',
+            given_name: 'Bobby',
+            family_name: 'Tables',
+            language: 'en_US',
+            locale: 'en_US',
+            opt_into_edu_resources: true,
+            over_18: true,
+            timezone: 'US/Pacific-New',
+            organization: 'test organization'
         },
         responseType: 'json',
         headers: {
@@ -314,15 +323,15 @@ test('update category ordering', async (t) => {
 })
 
 test('GET metadata', async (t) => {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
 
-    const meta = await got.get('http://0.0.0.0/v1/image/metadata', t.context.loggedInReqBase);
+    const meta = await got.get('http://0.0.0.0/v1/metadata', t.context.loggedInReqBase);
 
     t.snapshot(meta.body);
 });
 
 async function createImage(t, meta) {
-    await runFixtures([fixtures.user, fixtures.imageMetaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
 
     const image = await got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
@@ -372,15 +381,16 @@ async function createImageError(t, args) {
 
     t.deepEqual(error.response.statusCode, 422);
 
-    const { MissingMetadata } = error.response.body;
+    const { NonExistantMetadata } = error.response.body;
 
-    t.deepEqual(MissingMetadata.id, args.id);
-    t.deepEqual(MissingMetadata.kind, args.kindName);
+    t.deepEqual(NonExistantMetadata.id, args.id);
+    t.deepEqual(NonExistantMetadata.kind, args.kindName);
 }
 
 createImageError.title = (providedTitle = 'create image error', args) => `${providedTitle} (${args.kindName})`;
 
 test(createImage);
+test(createImage, { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] });
 test(createImage, {
     styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2'],
     affiliations: ['c0cd4446-de76-11ea-b7ab-93987e8aa112'],
@@ -394,5 +404,46 @@ test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0
 
 test.todo('GET image');
 test.todo('GET images');
-test.todo('UPDATE image');
 test.todo('DELETE image');
+
+// todo: test builder
+test('update image - empty', async t => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+
+    t.snapshot(resp.body.metadata);
+});
+
+test('update image - is_premium', async t => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } }));
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+    const metadata = resp.body.metadata;
+
+    // can't snapshot update timestamps for obvious reasons.
+    t.deepEqual(typeof (metadata.updated_at), 'string');
+    delete metadata.updated_at;
+
+    t.snapshot(metadata);
+});
+
+test('update image - two styles', async t => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+
+    await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] } }));
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+    console.log(resp.body);
+    const metadata = resp.body.metadata;
+
+    // can't snapshot update timestamps for obvious reasons.
+    // t.deepEqual(typeof (metadata.updated_at), 'string');
+    delete metadata.updated_at;
+
+    t.snapshot(metadata);
+});

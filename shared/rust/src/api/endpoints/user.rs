@@ -4,11 +4,13 @@ use crate::{
     api::method::Method,
     domain::{
         auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
-        user::{NoSuchUserError, UserProfile},
+        user::UserProfile,
     },
     error::auth::RegisterError,
+    error::user::NoSuchUserError,
 };
 
+/// Sign in.
 pub struct Signin;
 impl ApiEndpoint for Signin {
     type Req = ();
@@ -18,6 +20,7 @@ impl ApiEndpoint for Signin {
     const METHOD: Method = Method::Post;
 }
 
+/// Sign in via SSO.
 pub struct SingleSignOn;
 impl ApiEndpoint for SingleSignOn {
     type Req = ();
@@ -27,6 +30,7 @@ impl ApiEndpoint for SingleSignOn {
     const METHOD: Method = Method::Post;
 }
 
+/// Register a new user.
 pub struct Register;
 impl ApiEndpoint for Register {
     type Req = RegisterRequest;
@@ -36,6 +40,7 @@ impl ApiEndpoint for Register {
     const METHOD: Method = Method::Post;
 }
 
+/// Fetch a user's profile.
 pub struct Profile;
 impl ApiEndpoint for Profile {
     type Req = ();

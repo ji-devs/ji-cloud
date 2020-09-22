@@ -71,10 +71,21 @@ export function get_firebase_signin_google() {
         });
 }
 
-export function get_firebase_signin_email(username, password) {
+export function get_firebase_signin_email(email, password) {
     return firebase
         .auth()
-        .signInWithEmailAndPassword(username, password)
+        .signInWithEmailAndPassword(email, password)
+        .then(user => user.getIdToken())
+        .then(idToken => {
+            firebase.auth().signOut();
+            return idToken
+        });
+}
+
+export function get_firebase_register_email(email, password) {
+    return firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
         .then(user => user.getIdToken())
         .then(idToken => {
             firebase.auth().signOut();

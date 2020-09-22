@@ -1,0 +1,50 @@
+{% import "_buttons/button-macros.html" as ButtonMacros %}
+{% import "user-macros.html" as User %}
+{% import "_input/input-macros.html" as Input %}
+
+<div class="flex">
+  <div class="bg-jisideblue bg-shapes bg-no-repeat bg-auto bg-center h-screen w-480 min-w-300">
+  </div>
+  <div class="px-80 py-60">
+    <h1 class="text-jititleorange text-5xl font-light mb-8">Sign up - Step 2</h1>
+    <div class="">
+      <div class="flex">
+        <div class="">
+          <p class="text-lg mb-8 w-480">Tell us more about yourself so that we can tailor
+            the content according to your specific needs</p>
+          <div class="flex">
+            {{ User::user_select(label="Country*",width="w-297", dataId="${id}") }}
+            <div class="spacer w-30"></div>
+            {{ User::user_select(label="State*",width="w-297", dataId="${id}") }}
+          </div>
+          {{ User::user_select(label="City*",width="w-297", dataId="${id}") }}
+          <div class="relative">
+            <div class="bg-jilogingrey h-64 w-full relative rounded-lg px-4 py-2 mb-4 user_select">
+              <div type="text" class=" focus:outline-none w-fill bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+                Type or select from list
+              </div>
+              <label class="absolute left-0 ml-4 text-jibuttonBlue">School/Organization*</label>
+            </div>
+            <div data-id="school-filter"></div>
+          </div>
+
+          {{ User::user_select(label="Preferred language of communication*",width="w-full", dataId="${id}") }}
+
+          <div class="h-30">
+
+          </div>
+          <div class="mt-2">
+            {{ Input::checkbox(label="I have read the terms and conditions ", dataId="${id}", class="px-2") }}
+          </div>
+          <div class="mt-2">
+            {{ Input::checkbox(label="I would like to receive educational resources", dataId="${id}", class="px-2") }}
+          </div>
+
+
+          <div class="mt-2">
+            {{ ButtonMacros::orange(label="One more step", dataId="btn-1") }}
+          </div>
+        </div>
+
+
+      </div>

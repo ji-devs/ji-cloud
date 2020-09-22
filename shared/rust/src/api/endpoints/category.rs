@@ -10,6 +10,7 @@ use crate::{
     },
 };
 
+/// Get a tree of categories.
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = GetCategoryRequest;
@@ -19,6 +20,7 @@ impl ApiEndpoint for Get {
     const METHOD: Method = Method::Get;
 }
 
+/// Create a category.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateCategoryRequest;
@@ -28,6 +30,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
+/// Update a category.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = UpdateCategoryRequest;
@@ -37,6 +40,7 @@ impl ApiEndpoint for Update {
     const METHOD: Method = Method::Patch;
 }
 
+/// Delete a category.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

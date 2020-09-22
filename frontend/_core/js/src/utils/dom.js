@@ -33,6 +33,12 @@ export function setTextId(element, id, text) {
     return element;
 }
 
+export function setValueId(element, id, text) {
+    const container = element.querySelector(dataId(id));
+    container.value = text;
+    return element;
+}
+
 export function dataId(id) {
     return `[data-id='${id}']`;
 }
