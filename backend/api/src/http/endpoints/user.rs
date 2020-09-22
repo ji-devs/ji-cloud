@@ -13,7 +13,9 @@ use shared::{
         user::{Profile, Register, Signin, SingleSignOn},
         ApiEndpoint,
     },
-    domain::auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    domain::auth::{
+        AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
+    },
     error::auth::RegisterError,
     error::user::NoSuchUserError,
 };
@@ -61,7 +63,7 @@ async fn handle_register(
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
-        .json(SigninSuccess { csrf }))
+        .json(RegisterSuccess::Signin(csrf)))
 }
 
 async fn handle_get_profile(
