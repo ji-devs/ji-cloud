@@ -27,15 +27,17 @@ use shared::domain::{
 };
 use super::actions::{self, Init, Id, EditCategory, EditCategoryMode};
 use std::collections::{HashSet, HashMap};
+use gloo::timers::callback::Timeout;
+
 
 pub struct ImageEdit {
     id: Mutable<String>,
     error_message: Mutable<Option<String>>,
     publish_message: Mutable<Option<String>>,
     refs:RefCell<Option<ImageEditRefs>>,
-    styles: RefCell<HashSet<String>>,
-    age_ranges: RefCell<HashSet<String>>,
-    affiliations: RefCell<HashSet<String>>,
+    styles: RefCell<HashSet<Id>>,
+    age_ranges: RefCell<HashSet<Id>>,
+    affiliations: RefCell<HashSet<Id>>,
     init: Mutable<Option<Init>>,
     section: Mutable<Section>,
     save_loader: AsyncLoader,
@@ -56,27 +58,31 @@ struct SaveInfo {
     pub is_premium: bool,
     pub name:String,
     pub description: String,
-    pub styles: Vec<String>,
-    pub age_ranges: Vec<String>,
-    pub affiliations: Vec<String>,
-    pub categories: Vec<String>,
+    pub styles: Vec<Id>,
+    pub age_ranges: Vec<Id>,
+    pub affiliations: Vec<Id>,
+    pub categories: Vec<Id>,
 }
 impl ImageEdit{
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
+            //core
             id: Mutable::new(id.clone()),
+            //UI
             error_message: Mutable::new(None),
             publish_message: Mutable::new(None),
             refs: RefCell::new(None),
+            section: Mutable::new(Section::Meta),
+            category_expansions: RefCell::new(HashMap::new()),
+            //Load/Save
+            init: Mutable::new(None),
+            publish_loader: AsyncLoader::new(),
+            save_loader: AsyncLoader::new(),
+            //Data
             styles: RefCell::new(HashSet::new()),
             age_ranges: RefCell::new(HashSet::new()),
             affiliations: RefCell::new(HashSet::new()),
-            init: Mutable::new(None),
-            save_loader: AsyncLoader::new(),
-            publish_loader: AsyncLoader::new(),
-            section: Mutable::new(Section::Meta),
-            category_expansions: RefCell::new(HashMap::new()),
-            selected_categories: Mutable::new(HashSet::new()) 
+            selected_categories: Mutable::new(HashSet::new()),
         });
 
         let _self_clone = _self.clone();
@@ -84,6 +90,30 @@ impl ImageEdit{
         spawn_local(async move {
             match actions::Init::load(&id).await {
                 Ok(init) => {
+                    //These maps have to be set on init
+                    //Even though the elements themselves aren't like "controlled components"
+                    //It is not required for things which have no indirection, like
+                    //name, description, and is_premium
+                    let mut styles = _self.styles.borrow_mut();
+                    for (id, _, _) in init.styles.iter().filter(|(_, _, contains)| *contains) {
+                        styles.insert(id.to_string());
+                    }
+
+                    let mut age_ranges = _self.age_ranges.borrow_mut();
+                    for (id, _, _) in init.age_ranges.iter().filter(|(_, _, contains)| *contains) {
+                        age_ranges.insert(id.to_string());
+                    }
+
+                    let mut affiliations = _self.affiliations.borrow_mut();
+                    for (id, _, _) in init.affiliations.iter().filter(|(_, _, contains)| *contains) {
+                        affiliations.insert(id.to_string());
+                    }
+
+                    let mut selected_categories = _self.selected_categories.lock_mut();
+                    for id in init.selected_categories.iter() {
+                        selected_categories.insert(id.to_string());
+                    }
+
                     fn set_expansions(curr:&Vec<EditCategory>, expansions: &mut HashMap<Id, Mutable<bool>>) {
                         for cat in curr.iter() {
                             expansions.insert(cat.id.clone(), Mutable::new(false));
@@ -92,18 +122,14 @@ impl ImageEdit{
                             }
                         }
                     };
-                    let mut expansions = _self_clone.category_expansions.borrow_mut();
-                    set_expansions(&init.categories, &mut expansions);
-                    let mut selected_categories = _self_clone.selected_categories.lock_mut();
-                    for id in init.selected_categories.iter() {
-                        selected_categories.insert(id.to_string());
-                    }
-                    _self_clone.init.set(Some(init)); 
+                    set_expansions(&init.categories, &mut _self.category_expansions.borrow_mut());
+
+                    _self.init.set(Some(init)); 
                 },
                 Err(_) => { log::error!("GOT ERROR!!"); }
             }
         });
-        _self
+        _self_clone
     }
 
 
@@ -220,8 +246,11 @@ impl ImageEdit{
 
                 _self.error_message.set(Some(msg));
             } else {
-                //TODO - self-expire message
                 _self.publish_message.set(Some("Done!".to_string()));
+                Timeout::new(3_000, clone!(_self => move || {
+                    _self.publish_message.set(None);
+                }))
+                .forget();
             }
         });
     }
@@ -352,25 +381,39 @@ impl ImageEdit{
     fn render_section_overview(_self: Rc<Self>, init:&Init) -> Dom {
 
         if let Some(info) = Self::get_save_info(_self.clone()) {
+
+            let styles:Vec<String> = init.styles.iter().filter_map(|(id, label, _)| {
+                if info.styles.contains(id) {
+                    Some(label.clone())
+                } else {
+                    None
+                }
+            }).collect();
+
+            let age_ranges:Vec<String> = init.age_ranges.iter().filter_map(|(id, label, _)| {
+                if info.age_ranges.contains(id) {
+                    Some(label.clone())
+                } else {
+                    None
+                }
+            }).collect();
+
+            let affiliations:Vec<String> = init.affiliations.iter().filter_map(|(id, label, _)| {
+                if info.affiliations.contains(id) {
+                    Some(label.clone())
+                } else {
+                    None
+                }
+            }).collect();
+
             let SaveInfo {
                 id,
                 is_premium,
                 name,
                 description,
-                styles,
-                age_ranges,
-                affiliations,
-                categories
+                categories,
+                ..
             } = info;
-
-            let name = "Smiley";
-            let description = "Face";
-
-            /*
-             * let styles = vec!["Style 1".to_string(), "Style 2".to_string()];
-            let age_ranges = vec!["Age 1".to_string(), "Age 2".to_string()];
-            let affiliations = vec!["Affiliation 1".to_string(), "Affiliation 2".to_string()];
-            */
 
             elem!(templates::image_edit_overview(&name, &description), {
                 .with_data_id!("styles", {
@@ -524,7 +567,6 @@ impl ImageEdit{
         })
     }
 
-    //TODO - make more DRY!... it's not so much parent vs child, more like end vs. not end
     fn render_category_select(_self: Rc<Self>, cat: EditCategory) -> Dom {
         let id = cat.id.clone();
 

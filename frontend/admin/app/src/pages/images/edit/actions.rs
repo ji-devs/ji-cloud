@@ -297,7 +297,7 @@ impl MetaOptions {
                         res.styles
                             .into_iter()
                             .map(|style| {
-                                let label = "LABEL HERE".to_string();
+                                let label = style.display_name; 
                                 let id = style.id.0.to_string();
                                 (id, label)
                             })
@@ -306,7 +306,7 @@ impl MetaOptions {
                         res.age_ranges
                             .into_iter()
                             .map(|age_range| {
-                                let label = "LABEL HERE".to_string();
+                                let label = age_range.display_name; 
                                 let id = age_range.id.0.to_string();
                                 (id, label)
                             })
@@ -315,7 +315,7 @@ impl MetaOptions {
                         res.affiliations
                             .into_iter()
                             .map(|affiliation| {
-                                let label = "LABEL HERE".to_string();
+                                let label = affiliation.display_name; 
                                 let id = affiliation.id.0.to_string();
                                 (id, label)
                             })
