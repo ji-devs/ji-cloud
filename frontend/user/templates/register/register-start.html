@@ -6,7 +6,7 @@
   <div class="p-80">
     <h1 class="text-jititleorange text-5xl font-light mb-8">Sign Up</h1>
     <div class="w-297">
-      <div data-id="google-signin" class="cursor-pointer mb-8">
+      <div data-id="google-register" class="cursor-pointer mb-8">
         <div class="border rounded-sm border-jigooglegrey shadow-md h-64">
           <span class="flex items-center font-sans font-normal text-lg"><img src="{{MEDIA_UI}}/icn-google-button-64.svg" alt="">Sign in with Google</span>
 
@@ -19,20 +19,20 @@
 
       </div>
       <div data-id="status-message"></div>
-      {{ User::user_input(label="Email",width="w-297",inputwidth="w-296", dataId="${id}") }}
+      {{ User::user_input(label="Email",width="w-297",inputwidth="w-296", inputDataId="email") }}
       <div class="rounded-full w-259 h-10 mb-4">
         <!--Toggle class weak average and secure-->
         <div class="h-full rounded-full">
 
         </div>
       </div>
-      {{ User::user_pw(label="Create Password",width="w-297", inputwidth="w-296", dataId="${id}") }}
+      {{ User::user_pw(label="Create Password",width="w-297", inputwidth="w-296", inputDataId="pw") }}
 
       <div class="h-56">
 
       </div>
-      {{ ButtonMacros::orange(label="Submit", dataId="btn-1") }}
-      <p class="text-jibuttonBlue  mt-6">Already have an account? <span data-id="register-link" class="cursor-pointer">Sign in</span></p>
+      {{ ButtonMacros::orange(label="Submit", dataId="submit") }}
+      <p class="text-jibuttonBlue  mt-6">Already have an account? <span data-id="signin-link" class="cursor-pointer">Sign in</span></p>
     </div>
   </div>
 </div>

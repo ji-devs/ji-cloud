@@ -4,7 +4,7 @@ import register2 from "@templates/register/register-2.html";
 import register3 from "@templates/register/register-3.html";
 import registerSentEmail from "@templates/register/register-sent-email.html";
 import registerFinal from "@templates/register/register-final.html";
-import registergoogle from "@templates/register/register-google.html";
+import registerStart from "@templates/register/register-start.html";
 
 export default {
   title: 'Register',
@@ -15,8 +15,8 @@ export const Step1 = () => {
     return page;
 }
 
-export const RegisterGoogle = () => {
-    const page = tmpl(registergoogle);
+export const RegisterStart = () => {
+    const page = tmpl(registerStart);
     return page;
 }
 

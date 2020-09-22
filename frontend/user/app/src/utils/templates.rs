@@ -8,6 +8,7 @@ use std::fmt;
 
 const SIGNIN:&'static str = "signin";
 
+const REGISTER_START:&'static str = "register_start";
 const REGISTER_STEP1:&'static str = "register_step1";
 const REGISTER_STEP2:&'static str = "register_step2";
 const REGISTER_STEP3:&'static str = "register_step3";
@@ -25,6 +26,9 @@ thread_local! {
 }
 pub fn signin() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(SIGNIN))
+}
+pub fn register_start() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(REGISTER_START))
 }
 pub fn register_step1() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(REGISTER_STEP1))
@@ -72,6 +76,7 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
             (SIGNIN, get_template_str(include_str!("../../../.template_output/signin.html"))),
+            (REGISTER_START, get_template_str(include_str!("../../../.template_output/register/register-start.html"))),
             (REGISTER_STEP1, get_template_str(include_str!("../../../.template_output/register/register-1.html"))),
             (REGISTER_STEP2, get_template_str(include_str!("../../../.template_output/register/register-2.html"))),
             (REGISTER_STEP3, get_template_str(include_str!("../../../.template_output/register/register-3.html"))),
