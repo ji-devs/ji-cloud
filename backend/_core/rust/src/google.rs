@@ -25,6 +25,7 @@ async fn get_google_token_from_credentials(
     Ok(token)
 }
 
+/// Attempts to load an access token and project id from the given env var.
 pub async fn get_access_token_and_project_id(
     credentials_env_key: &str,
 ) -> anyhow::Result<(String, String)> {
@@ -51,7 +52,7 @@ pub async fn get_access_token_and_project_id(
     }
 }
 
-pub async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
+pub(crate) async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
     #[derive(Deserialize)]
     struct GoogleAccessTokenResponse {
         access_token: String,
@@ -75,6 +76,7 @@ pub async fn get_google_token_from_metaserver() -> anyhow::Result<String> {
     Ok(token_response.access_token)
 }
 
+/// Gets `secret_name` from GCS via the given `token` and `project_id`
 pub async fn get_secret(
     token: &str,
     project_id: &str,
