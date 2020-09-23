@@ -3,6 +3,7 @@ use crate::{
     api::Method,
     domain::image::{
         CreateRequest, CreateResponse, GetResponse, SearchQuery, SearchResponse, UpdateRequest,
+        UpdateResponse,
     },
     error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
 };
@@ -41,7 +42,7 @@ impl ApiEndpoint for Create {
 pub struct UpdateMetadata;
 impl ApiEndpoint for UpdateMetadata {
     type Req = UpdateRequest;
-    type Res = ();
+    type Res = UpdateResponse;
     type Err = UpdateError;
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Patch;
