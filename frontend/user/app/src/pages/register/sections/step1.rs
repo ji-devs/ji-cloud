@@ -90,7 +90,7 @@ impl RegisterStep1 {
             })
             .after_inserted(clone!(_self => move |elem| {
                 _self.stash_refs(elem);
-                Self::set_debug_data(_self);
+                //Self::set_debug_data(_self);
             }))
         })
     }
@@ -129,13 +129,15 @@ impl RegisterStep1 {
     }
 
     fn set_debug_data(_self:Rc<Self>) {
+        /*
         let refs = _self.refs.borrow_mut();
         let mut refs = refs.as_ref().unwrap_throw();
-
+        
         refs.given_name.set_value("David");
         refs.family_name.set_value("Komer");
         refs.over_18.set_checked(true);
         refs.user_name.set_value("dakom");
+        */
     }
 
 }
