@@ -14,7 +14,10 @@ use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
     domain::{
-        image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
+        image::{
+            CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest,
+            UpdateResponse,
+        },
         meta::MetaKind,
     },
     error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
@@ -190,11 +193,15 @@ async fn get(
 
 async fn update(
     db: Data<PgPool>,
+    s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
-) -> Result<HttpResponse, <image::UpdateMetadata as ApiEndpoint>::Err> {
+) -> Result<
+    Json<<image::UpdateMetadata as ApiEndpoint>::Res>,
+    <image::UpdateMetadata as ApiEndpoint>::Err,
+> {
     let req = req.map_or_else(UpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
@@ -236,7 +243,9 @@ async fn update(
         )
         .await?;
 
-    Ok(HttpResponse::new(StatusCode::NO_CONTENT))
+    Ok(Json(UpdateResponse {
+        replace_url: s3.presigned_image_put_url(id)?,
+    }))
 }
 
 fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {

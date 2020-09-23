@@ -186,6 +186,13 @@ pub struct CreateResponse {
     pub upload_url: Url,
 }
 
+/// Response for updating an image.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateResponse {
+    /// The URL to upload the image data to.
+    pub replace_url: Url,
+}
+
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.
 // see: https://github.com/launchbadge/sqlx/issues/298
 #[cfg(feature = "backend")]
