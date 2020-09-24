@@ -1,4 +1,3 @@
-pub mod user;
 /*
     There are a few top-level rejections (esp auth-related)
     Everything else is not a rejection, rather it's always resolved (as ResultResponse)

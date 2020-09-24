@@ -4,6 +4,7 @@ use crate::{
     api::method::Method,
     domain::{
         auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
+        user::OtherUser,
         user::UserProfile,
     },
     error::auth::RegisterError,
@@ -47,5 +48,15 @@ impl ApiEndpoint for Profile {
     type Res = UserProfile;
     type Err = NoSuchUserError;
     const PATH: &'static str = "/v1/user/me/profile";
+    const METHOD: Method = Method::Get;
+}
+
+/// Find a user by username.
+pub struct UserByName;
+impl ApiEndpoint for UserByName {
+    type Req = ();
+    type Res = OtherUser;
+    type Err = NoSuchUserError;
+    const PATH: &'static str = "/v1/user/{name}";
     const METHOD: Method = Method::Get;
 }

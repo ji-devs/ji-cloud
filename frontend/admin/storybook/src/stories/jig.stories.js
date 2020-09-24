@@ -8,6 +8,7 @@ import jiglanguage from "@templates/jig/jig-language-filter.html";
 import jigprivacyfilter from "@templates/jig/privacy-filter.html";
 import jigstatus from "@templates/jig/jig-status.html";
 import jigtofrom from "@templates/jig/jig-tofrom.html";
+import jigcreatorone from "@templates/jig/jig-creator-one.html";
 
 export default {
   title: 'JIG',
@@ -19,6 +20,10 @@ export const JigTable = () =>
 
 });
 
+export const JigCreatorOne = () =>
+    tmpl(jigcreatorone, {
+
+});
 
 
 

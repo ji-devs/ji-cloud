@@ -35,6 +35,13 @@ impl TryFrom<i16> for UserScope {
     }
 }
 
+/// Publically accessable information about a user.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OtherUser {
+    /// The user's id.
+    pub id: Uuid,
+}
+
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserProfile {

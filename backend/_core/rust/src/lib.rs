@@ -6,7 +6,7 @@
 pub(crate) mod env;
 
 /// Interaction with google.
-pub(crate) mod google;
+pub mod google;
 
 /// Common http configuration.
 pub mod http;

@@ -1,4 +1,5 @@
 use shared::{
+    api::endpoints::{ApiEndpoint, user::*,},
     domain::auth::{RegisterRequest, RegisterSuccess},
     error::{
         auth::RegisterError,
@@ -6,11 +7,9 @@ use shared::{
     }
 };
 use core::{
+    path::api_url,
     routes::{Route, UserRoute},
-    fetch::{
-        FetchResult,
-        user::fetch_register,
-    },
+    fetch::{FetchResult, api_with_token},
 };
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::UnwrapThrowExt;
@@ -25,53 +24,6 @@ use futures::future::ready;
 //temp
 use futures::future::poll_fn;
 use futures::task::{Context, Poll};
-#[derive(Debug, Clone)]
-pub enum RegisterStatus {
-    Busy,
-    Failure,
-    ConfirmEmail,
-    EmptyPw,
-    PwMismatch,
-    PwWeak,
-    EmptyGivenName,
-    EmptyLastName,
-    EmptyUserName,
-    EmptyEmail,
-    EmailExists,
-    UsernameExists,
-    Over18,
-    UnknownFirebase,
-    Technical 
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum PwInvalid {
-    Empty,
-    Mismatch
-}
-
-impl RegisterStatus {
-    pub fn to_string(&self) -> String {
-        match self {
-            Self::Busy => "registering...",
-            Self::Failure => "failed to register!",
-            Self::ConfirmEmail => "confirm your email!",
-            Self::EmptyPw => "supply a password!",
-            Self::PwMismatch => "passwords don't match!",
-            Self::PwWeak => "weak password!",
-            Self::EmptyGivenName => "supply a first name!",
-            Self::EmptyLastName => "supply a last name!",
-            Self::EmptyUserName => "supply a user name!",
-            Self::EmptyEmail => "supply an email address!",
-            Self::Over18 => "Check the age restriction!",
-            Self::UsernameExists => "Username in use!",
-            Self::EmailExists => "Email in use!",
-            Self::UnknownFirebase => "firebase error!",
-            Self::Technical => "technical error!",
-        }.to_string()
-    }
-}
-
 
 
 pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterStatus> {
@@ -143,7 +95,8 @@ pub async fn create_user(
         organization: "ji".to_string()
     };
 
-    let resp:FetchResult<RegisterSuccess, RegisterError> = fetch_register(&token, &req).await;
+    let resp:FetchResult<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
+
     match resp {
         Ok(resp) => match resp {
             RegisterSuccess::Signin(csrf) => Ok(csrf),

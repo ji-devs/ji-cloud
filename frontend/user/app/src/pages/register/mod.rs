@@ -1,4 +1,5 @@
 mod dom;
-mod actions;
+mod sections;
+mod data;
 
 pub use dom::RegisterPage;
