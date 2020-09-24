@@ -10,7 +10,7 @@ use core::settings::RuntimeSettings;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
-        user::{Profile, Register, Signin, SingleSignOn},
+        user::{Profile, Register, Signin, SingleSignOn, UserByName},
         ApiEndpoint,
     },
     domain::auth::{
@@ -26,8 +26,10 @@ use sqlx::PgPool;
 async fn user_by_name(
     db: Data<PgPool>,
     username: Path<String>,
-) -> Result<Option<OtherUser>, InternalServerError> {
-    Ok(db::user::by_name(db.as_ref(), &username.into_inner()).await?)
+) -> Result<Option<Json<OtherUser>>, InternalServerError> {
+    Ok(db::user::by_name(db.as_ref(), &username.into_inner())
+        .await?
+        .map(Json))
 }
 
 async fn handle_signin_credentials(
@@ -116,5 +118,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         Signin::PATH,
         Signin::METHOD.route().to(handle_signin_credentials),
+    )
+    .route(
+        UserByName::PATH,
+        UserByName::METHOD.route().to(user_by_name),
     );
 }
