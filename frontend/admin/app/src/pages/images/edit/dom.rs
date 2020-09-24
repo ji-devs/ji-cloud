@@ -347,13 +347,17 @@ impl ImageEdit{
                                         .and_then(|refs| refs.file());
 
                                 if let Some(file) = file {
+                                    let _self = _self.clone();
                                     spawn_local(async move {
-                                        log::info!("TODO - API with FILE");
-                                        /*
-                                        let id = actions::create_image(file).await.unwrap_throw();
-                                        let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
-                                        dominator::routing::go_to_url(&route);
-                                        */
+                                        match actions::replace_url(&_self.id.get_cloned(), file).await {
+                                            Err(_) => {
+                                                _self.error_message.set(Some("Couldn't upload image".to_string()))
+                                            },
+                                            Ok(_) => {
+                                                //to trigger the src change
+                                                _self.id.replace_with(|id| id.to_string());
+                                            }
+                                        }
                                     });
                                 }
                             }))

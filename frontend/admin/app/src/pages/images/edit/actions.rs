@@ -55,7 +55,7 @@ pub async fn save(
         publish_at: None,
     };
     let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map_err(|err| {
@@ -64,6 +64,7 @@ pub async fn save(
                 Err(err) => UpdateError::InternalServerError(err)
             }
         })
+        .map(|_| ())
 
 }
 
@@ -81,7 +82,7 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
         publish_at: Some(Some(Publish::now())),
     };
     let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map_err(|err| {
@@ -90,7 +91,39 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
                 Err(err) => UpdateError::InternalServerError(err)
             }
         })
+        .map(|_| ())
 
+}
+
+pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
+{
+    let path = UpdateMetadata::PATH.replace("{id}",&id);
+    let data = UpdateRequest {
+        name: None, 
+        description: None, 
+        is_premium: None, 
+        styles: None,
+        age_ranges: None,
+        affiliations: None,
+        categories: None,
+        publish_at: None, 
+    };
+    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+        = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+
+    let url = res
+        .map_err(|err| {
+            match err {
+                Ok(err) => err,
+                Err(err) => UpdateError::InternalServerError(err)
+            }
+        })
+        .map(|update_response| update_response.replace_url)?;
+
+
+    upload_file(&url.to_string(), &file)
+        .await
+        .map_err(|err| err.into())
 }
 
 #[derive(Clone)]

@@ -57,6 +57,6 @@ async fn _search_images_api(query:String) -> FetchResult < <Search as ApiEndpoin
     //since this mistake is hard to catch when forgotten
     let query = serde_qs::to_string(&req).unwrap_throw();
 
-    let path = api_url(&format!("{}?{}", Get::PATH, query)); 
-    api_with_auth::<_,_,()>(&path, Get::METHOD, None).await
+    let path = api_url(&format!("{}?{}", Search::PATH, query)); 
+    api_with_auth::<_,_,()>(&path, Search::METHOD, None).await
 }
