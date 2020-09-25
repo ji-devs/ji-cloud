@@ -17,7 +17,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    routes::{Route, UserRoute},
+    routes::{Route, AdminRoute},
     path::upload_image_url
 };
 use shared::error::image::UpdateError;
@@ -266,6 +266,21 @@ impl ImageEdit{
                                     let url = actions::get_image_url(&id).await.unwrap_throw();
                                     url
                                 }
+                            }))
+                        })
+                        .with_data_id!("delete", {
+                            .event(clone!(_self => move |_evt:events::Click| {
+                                spawn_local(clone!(_self => async move {
+                                    match actions::delete(_self.id.get_cloned()).await {
+                                        Err(_) => {
+                                            _self.error_message.set(Some("Couldn't delete image".to_string()))
+                                        },
+                                        Ok(_) => {
+                                            let route:String = Route::Admin(AdminRoute::Images).into();
+                                            dominator::routing::go_to_url(&route);
+                                        }
+                                    }
+                                }));
                             }))
                         })
                         .with_data_id!("error", {

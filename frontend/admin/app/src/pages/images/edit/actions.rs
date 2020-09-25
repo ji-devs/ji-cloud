@@ -95,6 +95,22 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
 
 }
 
+pub async fn delete( id:String) -> Result<(), DeleteError>
+{
+    let path = Delete::PATH.replace("{id}",&id);
+    let res:FetchResult<<Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err>
+        = api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await;
+
+    res
+        .map_err(|err| {
+            match err {
+                Ok(err) => err,
+                Err(err) => DeleteError::InternalServerError(err)
+            }
+        })
+        .map(|_| ())
+
+}
 pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
 {
     let path = UpdateMetadata::PATH.replace("{id}",&id);
