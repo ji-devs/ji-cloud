@@ -39,6 +39,12 @@ export function setValueId(element, id, text) {
     return element;
 }
 
+export function setAttributeId(element, id, attr, value) {
+    const container = element.querySelector(dataId(id));
+    container.setAttribute(attr, value);
+    return element;
+}
+
 export function dataId(id) {
     return `[data-id='${id}']`;
 }
