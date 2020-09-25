@@ -1,8 +1,6 @@
 use structopt::StructOpt;
-use std::env;
 use std::path::{Path, PathBuf};
 use config::RemoteTarget;
-use crate::data::*;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "database migrations", about = "A little util to run database migrations")]
@@ -15,12 +13,35 @@ pub struct Opts {
     #[structopt(short, long)]
     pub verbose: bool,
 
+    /// batch size to help throttle connections 
+    #[structopt(long, parse(try_from_str), default_value = "10")]
+    pub batch_size: usize,
+
     /// dry run 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub dry_run: bool,
+
+    /// limit (debugging only) 
+    #[structopt(long, parse(try_from_str), default_value = "2")]
+    pub limit_debug: usize,
+
+    /// sleep ms (debugging and dry-run only) 
+    #[structopt(long, parse(try_from_str), default_value = "2000")]
+    pub sleep_debug: u64,
+
+    /// debug mode 
+    #[structopt(long, parse(try_from_str), default_value = "false")]
+    pub debug: bool,
 }
 
 impl Opts {
+    pub fn sanitize(&mut self) {
+        if self.debug {
+            log::warn!("sanitization: forcing dry_run since debug is true");
+            self.dry_run = true;
+        } 
+    }
+
     pub fn get_remote_target(&self) -> RemoteTarget {
 
         match self.remote_target.as_ref() {  
