@@ -4,8 +4,9 @@ use algolia::{
     Client as Inner,
 };
 use core::settings::AlgoliaSettings;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use shared::domain::image::ImageId;
+use std::convert::TryInto;
 use uuid::Uuid;
 
 macro_rules! with_client {
@@ -38,9 +39,6 @@ pub struct AlgoliaClient {
     inner: Option<Inner>,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Empty {}
-
 impl AlgoliaClient {
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
         let inner = if let Some(settings) = settings {
@@ -56,26 +54,39 @@ impl AlgoliaClient {
     }
 
     // todo: return ImageId (can't because of repr issues in sqlx)
-    pub async fn search_image(&self, query: &str) -> anyhow::Result<Vec<Uuid>> {
-        let client = with_client!(self.inner; vec![]);
+    pub async fn search_image(
+        &self,
+        query: &str,
+        page: Option<u32>,
+    ) -> anyhow::Result<(Vec<Uuid>, u32)> {
+        let client = with_client!(self.inner; (vec![], 0));
 
-        let results: SearchResponse<Empty> = client
+        let mut filters = algolia::filter::AndFilter { filters: vec![] };
+
+        
+
+        let results: SearchResponse = client
             .search(
                 "image",
                 SearchQuery {
-                    query: Some(query.to_owned()),
+                    query: Some(query),
+                    page,
                     get_ranking_info: true,
-                    ..SearchQuery::default()
+                    filters: Some(filters),
+                    hits_per_page: None,
                 },
             )
             .await?;
 
-        results
+        let pages = results.page_count.try_into()?;
+
+        let results = results
             .hits
             .into_iter()
             .map(|hit| hit.object_id.parse())
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(Into::into)
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok((results, pages))
     }
 
     pub async fn put_image(&self, ImageId(id): ImageId, img: Image<'_>) -> anyhow::Result<()> {

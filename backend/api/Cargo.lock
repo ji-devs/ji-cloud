@@ -306,7 +306,7 @@ dependencies = [
 [[package]]
 name = "algolia"
 version = "0.1.0"
-source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=551b896ad4235d674a8ec38f0c00dfc6e52c5a08#551b896ad4235d674a8ec38f0c00dfc6e52c5a08"
+source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=73869c3269a8476a678c4113b61511d3e2a6ca5d#73869c3269a8476a678c4113b61511d3e2a6ca5d"
 dependencies = [
  "chrono",
  "rand",
@@ -467,6 +467,18 @@ checksum = "0cb036c3eade309815c15ddbacec5b22c4d1f3983a774ab2eac2e3e9ea85568e"
 dependencies = [
  "brotli-sys",
  "libc",
+]
+
+[[package]]
+name = "bstr"
+version = "0.2.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31accafdb70df7871592c058eca3985b71104e15ac32f64706022c58867da931"
+dependencies = [
+ "lazy_static",
+ "memchr",
+ "regex-automata",
+ "serde",
 ]
 
 [[package]]
@@ -684,6 +696,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "csv"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00affe7f6ab566df61b4be3ce8cf16bc2576bca0963ceb0955e45d514bf9a279"
+dependencies = [
+ "bstr",
+ "csv-core",
+ "itoa",
+ "ryu",
+ "serde",
+]
+
+[[package]]
+name = "csv-core"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b2466559f260f48ad25fe6317b3c8dac77b5bdb5763ac7d9d6103530663bc90"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "ct-logs"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -691,12 +725,6 @@ checksum = "4d3686f5fa27dbc1d76c751300376e167c5a43387f44bb451fd1c24776e49113"
 dependencies = [
  "sct",
 ]
-
-[[package]]
-name = "data-encoding"
-version = "2.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d0e2d24e5ee3b23a01de38eefdcd978907890701f08ffffd4cb457ca4ee8d6"
 
 [[package]]
 name = "derive_more"
@@ -785,16 +813,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "error-chain"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d2f06b9cac1506ece98fe3231e3cc9c4410ec3d5b1f24ae1c8946f0742cdefc"
-dependencies = [
- "backtrace",
- "version_check",
 ]
 
 [[package]]
@@ -1228,7 +1246,6 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "serde_qs",
  "shared",
  "simplelog",
  "sqlx",
@@ -1803,6 +1820,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "regex-automata"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae1ded71d66a4a97f5e961fd0cb25a5f366a42a41570d16a763a69c092c26ae4"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
 name = "regex-syntax"
 version = "0.6.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2125,19 +2151,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_qs"
-version = "0.6.1"
-source = "git+https://github.com/izik1/serde_qs?rev=720e9c24fb271dca1254198084ab8c85312ae705#720e9c24fb271dca1254198084ab8c85312ae705"
-dependencies = [
- "actix-web",
- "data-encoding",
- "error-chain",
- "futures",
- "percent-encoding",
- "serde",
-]
-
-[[package]]
 name = "serde_urlencoded"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2189,6 +2202,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "chrono-tz",
+ "csv",
  "serde",
  "serde_json",
  "sqlx",

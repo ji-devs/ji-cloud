@@ -121,6 +121,13 @@ pub struct UpdateRequest {
 pub struct SearchQuery {
     /// The query string.
     pub q: String,
+
+    /// The page number of the images to get.
+    pub page: Option<u32>,
+
+
+    /// Optionally filter by `is_premium`
+    pub is_premium: Option<bool>,
 }
 
 /// Response for successful search.
@@ -128,6 +135,9 @@ pub struct SearchQuery {
 pub struct SearchResponse {
     /// the images returned.
     pub images: Vec<GetResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
 }
 
 /// Response for getting a single image.
