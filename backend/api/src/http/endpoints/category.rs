@@ -2,10 +2,9 @@ use crate::{
     db, extractor::AuthUserWithScope, extractor::ScopeManageCategory, extractor::WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
+    web::{self, Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
-use serde_qs::actix::{QsQuery, QsQueryConfig};
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::domain::category::{
     CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
@@ -16,10 +15,10 @@ use sqlx::PgPool;
 async fn get_categories(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
-    req: Option<QsQuery<<category::Get as ApiEndpoint>::Req>>,
+    req: Option<Query<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
 {
-    let req = req.map_or_else(GetCategoryRequest::default, QsQuery::into_inner);
+    let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
 
     let categories = match req.scope {
         Some(CategoryTreeScope::Decendants) if req.ids.is_empty() => {
@@ -87,16 +86,14 @@ async fn delete_category(
     Ok(HttpResponse::NoContent().into())
 }
 
-fn qs_array_cfg() -> QsQueryConfig {
-    QsQueryConfig::default().qs_config(serde_qs::Config::new(2, false))
-}
-
 pub fn configure(cfg: &mut ServiceConfig) {
-    cfg.service(
-        web::resource(category::Get::PATH)
-            .app_data(qs_array_cfg())
-            .route(category::Get::METHOD.route().to(get_categories))
-            .route(category::Create::METHOD.route().to(create_category)),
+    cfg.route(
+        category::Get::PATH,
+        category::Get::METHOD.route().to(get_categories),
+    )
+    .route(
+        category::Create::PATH,
+        category::Create::METHOD.route().to(create_category),
     )
     .route(
         category::Update::PATH,

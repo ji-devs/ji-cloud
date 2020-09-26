@@ -237,7 +237,7 @@ test('get categories', async (t) => {
 async function getNestedCategories(t, options) {
     await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.parentDir);
 
-    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'brackets', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
+    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'comma', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
 
     t.snapshot(categories.body);
 }

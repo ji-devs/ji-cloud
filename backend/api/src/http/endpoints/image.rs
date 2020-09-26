@@ -175,7 +175,7 @@ async fn get(
 ) -> Result<Json<<image::Search as ApiEndpoint>::Res>, <image::Search as ApiEndpoint>::Err> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let ids = algolia.search_image(&query.q).await?;
+    let (ids, pages) = algolia.search_image(&query.q, query.page.clone()).await?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<SearchError>()
@@ -188,7 +188,7 @@ async fn get(
         .try_collect()
         .await?;
 
-    Ok(Json(SearchResponse { images }))
+    Ok(Json(SearchResponse { images, pages }))
 }
 
 async fn update(
