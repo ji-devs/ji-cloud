@@ -123,11 +123,47 @@ pub struct SearchQuery {
     pub q: String,
 
     /// The page number of the images to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
+    /// Optionally filter by `styles`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub styles: Vec<StyleId>,
+
+    /// Optionally filter by `age_ranges`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// Optionally filter by `affiliations`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// Optionally filter by `categories`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<CategoryId>,
 
     /// Optionally filter by `is_premium`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_premium: Option<bool>,
+
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
 }
 
 /// Response for successful search.
