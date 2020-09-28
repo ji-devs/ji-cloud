@@ -135,6 +135,10 @@ async fn create(
             crate::algolia::Image {
                 name: &req.name,
                 description: &req.description,
+                affiliations: &req.affiliations,
+                age_ranges: &req.age_ranges,
+                styles: &req.styles,
+                categories: &req.categories,
             },
         )
         .await?;
@@ -175,7 +179,18 @@ async fn get(
 ) -> Result<Json<<image::Search as ApiEndpoint>::Res>, <image::Search as ApiEndpoint>::Err> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (ids, pages) = algolia.search_image(&query.q, query.page.clone()).await?;
+    let (ids, pages) = algolia
+        .search_image(
+            &query.q,
+            query.page,
+            query.is_premium,
+            query.is_published,
+            &query.styles,
+            &query.age_ranges,
+            &query.affiliations,
+            &query.categories,
+        )
+        .await?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<SearchError>()
@@ -239,6 +254,10 @@ async fn update(
             crate::algolia::ImageUpdate {
                 name: req.name.as_deref(),
                 description: req.description.as_deref(),
+                affiliations: req.affiliations.as_deref(),
+                age_ranges: req.age_ranges.as_deref(),
+                styles: req.styles.as_deref(),
+                categories: req.categories.as_deref(),
             },
         )
         .await?;

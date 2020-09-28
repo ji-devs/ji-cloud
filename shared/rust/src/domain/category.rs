@@ -12,6 +12,8 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CategoryId(pub Uuid);
 
+into_uuid!(CategoryId);
+
 #[derive(Serialize, Deserialize)]
 /// The response returned when a request for categories is successful.
 pub struct CategoryResponse {
