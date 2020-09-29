@@ -97,7 +97,6 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    algolia: Data<AlgoliaClient>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
@@ -128,20 +127,6 @@ async fn create(
     .map_err(handle_metadata_err)?;
 
     txn.commit().await?;
-
-    algolia
-        .put_image(
-            id,
-            crate::algolia::Image {
-                name: &req.name,
-                description: &req.description,
-                affiliations: &req.affiliations,
-                age_ranges: &req.age_ranges,
-                styles: &req.styles,
-                categories: &req.categories,
-            },
-        )
-        .await?;
 
     Ok((
         Json(CreateResponse {
@@ -209,7 +194,6 @@ async fn get(
 async fn update(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    algolia: Data<AlgoliaClient>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
@@ -248,20 +232,6 @@ async fn update(
 
     txn.commit().await?;
 
-    algolia
-        .update_image(
-            id,
-            crate::algolia::ImageUpdate {
-                name: req.name.as_deref(),
-                description: req.description.as_deref(),
-                affiliations: req.affiliations.as_deref(),
-                age_ranges: req.age_ranges.as_deref(),
-                styles: req.styles.as_deref(),
-                categories: req.categories.as_deref(),
-            },
-        )
-        .await?;
-
     Ok(Json(UpdateResponse {
         replace_url: s3.presigned_image_put_url(id)?,
     }))
@@ -288,9 +258,13 @@ async fn delete(
         .await
         .map_err(check_conflict_image_delete)?;
 
-    s3.delete_image(image).await?;
+    if let Err(e) = s3.delete_image(image).await {
+        log::warn!("failed to delete image from s3: {}", e);
+    }
 
-    algolia.delete_image(image).await?;
+    if let Err(e) = algolia.delete_image(image).await {
+        log::warn!("failed to delete image from algolia: {}", e);
+    }
 
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
