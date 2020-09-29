@@ -35,6 +35,7 @@ pub enum RegisterStatus {
     EmptyEmail,
     EmailExists,
     UsernameExists,
+    IdExists,
     Over18,
     UnknownFirebase,
     Technical 
@@ -63,6 +64,7 @@ impl RegisterStatus {
             Self::UsernameExists => "Username in use!",
             Self::EmailExists => "Email in use!",
             Self::UnknownFirebase => "firebase error!",
+            Self::IdExists => "id exists!",
             Self::Technical => "technical error!",
         }.to_string()
     }

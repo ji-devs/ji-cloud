@@ -5,7 +5,7 @@ use shared::{
 };
 use core::{
     path::api_url,
-    fetch::{api_with_auth, api_with_auth_empty, FetchResult, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
@@ -32,12 +32,9 @@ impl BasicImage {
 
 pub async fn search_images(query:String) -> Result<Vec<BasicImage>, ()> {
     _search_images_api(query).await
-        .map_err(|err| { 
-            if let Err(err) = err {
-                log::error!("{:?}", err);
-            }
+        .map_err(|err:SearchError| { 
+            ()
         })
-        //.map_err(|_| ())
         .map(|res| {
             let SearchResponse { images } = res;
             images
@@ -48,7 +45,7 @@ pub async fn search_images(query:String) -> Result<Vec<BasicImage>, ()> {
 }
 
 
-async fn _search_images_api(query:String) -> FetchResult < <Search as ApiEndpoint>::Res, <Search as ApiEndpoint>::Err> {
+async fn _search_images_api(query:String) -> Result < <Search as ApiEndpoint>::Res, <Search as ApiEndpoint>::Err> {
     let req = SearchQuery {
         q: query
     };

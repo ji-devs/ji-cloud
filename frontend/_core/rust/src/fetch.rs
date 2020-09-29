@@ -31,9 +31,10 @@ pub enum Error {
 pub const POST:&'static str = "POST";
 pub const GET:&'static str = "GET";
 
+const DESERIALIZE_ERR:&'static str = "couldn't deserialize error in fetch";
+const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
+
 //either a serialized error or a native error (like 401, 403, etc.)
-pub type FetchError<E> = Result<E, anyhow::Error>;
-pub type FetchResult<T, E> = Result<T, FetchError<E>>;
 
 pub async fn upload_file(url:&str, file:&File) -> Result<(), anyhow::Error> {
     fetch_upload_file(url, file)
@@ -42,50 +43,51 @@ pub async fn upload_file(url:&str, file:&File) -> Result<(), anyhow::Error> {
         .map_err(|err| anyhow::Error::msg(err.to_string()))
 }
 
-pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> FetchResult<T, E> 
+pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
 
  
-    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data).await {
-        //TODO - not sure why we need to re-wrap
-        //since actix is returning a Result... OR IS IT?!?!?
-        Ok(res) => Ok(res.json_from_str().await.unwrap()),
-        Err(err) => {
-            Err(Err(anyhow::Error::msg(err.to_string())))
-        }
+    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
+        .await
+        .unwrap();
+    if res.ok() {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+    } else {
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
 
-pub async fn api_with_auth<T, E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<T, E> 
+pub async fn api_with_auth<T, E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
 
-    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
-        Ok(res) => {
-            let res = res.json_from_str().await.unwrap();
-            Ok(res)
-        },
-        Err(err) => {
-            Err(Err(anyhow::Error::msg(err.to_string())))
-        }
+    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+        .await
+        .unwrap_throw();
+
+
+    if res.ok() {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+    } else {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
 
-pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> FetchResult<(), E> 
+pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
 
-    match fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
-        Ok(_) => {
-            Ok(())
-        },
-        Err(err) => {
-            Err(Err(anyhow::Error::msg(err.to_string())))
-        }
+    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+        .await
+        .unwrap_throw();
+    if res.ok() {
+        Ok(())
+    } else {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
 

@@ -8,6 +8,7 @@ _secret-keys
 wasm-pack.log
 yarn-*.log
 .template_output
+minio.exe
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat

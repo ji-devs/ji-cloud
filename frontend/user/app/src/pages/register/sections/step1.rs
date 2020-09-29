@@ -25,7 +25,7 @@ use discard::DiscardOnDrop;
 use core::{
     path::api_url,
     routes::{Route, UserRoute},
-    fetch::{FetchResult, api_with_token},
+    fetch::api_with_token,
     storage,
 };
 use crate::utils::firebase::*;
@@ -215,15 +215,23 @@ pub async fn create_user(
         organization: "ji".to_string()
     };
 
-    let resp:FetchResult<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
+    let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
+
 
     match resp {
         Ok(resp) => match resp {
             RegisterSuccess::Signin(csrf) => Ok(csrf),
             RegisterSuccess::ConfirmEmail => Err(RegisterStatus::ConfirmEmail)
         }, 
-        Err(_) => {
-            Err(RegisterStatus::Technical)
+        Err(err) => {
+            let status = match err {
+                RegisterError::TakenId => RegisterStatus::IdExists,
+                RegisterError::TakenEmail => RegisterStatus::EmailExists,
+                RegisterError::EmptyDisplayName => RegisterStatus::EmptyUserName,
+                _ => RegisterStatus::Technical
+            };
+
+            Err(status)
         }
     }
 }

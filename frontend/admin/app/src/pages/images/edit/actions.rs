@@ -5,7 +5,7 @@ use shared::{
 };
 use core::{
     path::api_url,
-    fetch::{api_with_auth, api_with_auth_empty, FetchResult, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
@@ -54,16 +54,10 @@ pub async fn save(
                         .collect()),
         publish_at: None,
     };
-    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+    let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
         = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     res
-        .map_err(|err| {
-            match err {
-                Ok(err) => err,
-                Err(err) => UpdateError::InternalServerError(err)
-            }
-        })
         .map(|_| ())
 
 }
@@ -81,16 +75,10 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
         categories: None,
         publish_at: Some(Some(Publish::now())),
     };
-    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+    let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
         = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     res
-        .map_err(|err| {
-            match err {
-                Ok(err) => err,
-                Err(err) => UpdateError::InternalServerError(err)
-            }
-        })
         .map(|_| ())
 
 }
@@ -98,16 +86,10 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
 pub async fn delete( id:String) -> Result<(), DeleteError>
 {
     let path = Delete::PATH.replace("{id}",&id);
-    let res:FetchResult<<Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err>
+    let res:Result<<Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err>
         = api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await;
 
     res
-        .map_err(|err| {
-            match err {
-                Ok(err) => err,
-                Err(err) => DeleteError::InternalServerError(err)
-            }
-        })
         .map(|_| ())
 
 }
@@ -124,16 +106,10 @@ pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
         categories: None,
         publish_at: None, 
     };
-    let res:FetchResult<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
+    let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
         = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     let url = res
-        .map_err(|err| {
-            match err {
-                Ok(err) => err,
-                Err(err) => UpdateError::InternalServerError(err)
-            }
-        })
         .map(|update_response| update_response.replace_url)?;
 
 
@@ -320,7 +296,7 @@ pub async fn get_image_url(id:&str) -> Result<String, ()> {
         })
 }
 
-async fn _get_image(id:&str) -> FetchResult < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
+async fn _get_image(id:&str) -> Result < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
 
     let path = Get::PATH.replace("{id}",id);
     api_with_auth::<_, _, ()>(&api_url(&path), Get::METHOD, None).await
@@ -374,7 +350,7 @@ impl MetaOptions {
     }
 }
 
-async fn _load_meta_options() -> FetchResult < <endpoints::meta::Get as ApiEndpoint>::Res, <endpoints::meta::Get as ApiEndpoint>::Err> {
+async fn _load_meta_options() -> Result < <endpoints::meta::Get as ApiEndpoint>::Res, <endpoints::meta::Get as ApiEndpoint>::Err> {
     log::info!("{}", api_url(endpoints::meta::Get::PATH));
     api_with_auth::<_, _, ()>(&api_url(endpoints::meta::Get::PATH), endpoints::meta::Get::METHOD, None).await
 }
