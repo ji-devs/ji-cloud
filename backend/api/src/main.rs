@@ -22,6 +22,13 @@ async fn main() -> anyhow::Result<()> {
 
     let db_pool = db::get_pool(settings.db_connect_options().await?).await?;
 
+    let algolia_syncer = algolia::Updater {
+        db: db_pool.clone(),
+        algolia_client: algolia.clone(),
+    };
+
+    let _ = algolia_syncer.spawn();
+
     let handle = thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia));
 
     log::info!("app started!");

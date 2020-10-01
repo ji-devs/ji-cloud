@@ -1,13 +1,12 @@
 use shared::{
+    api::endpoints::{ApiEndpoint, user::*,},
     domain::auth::SigninSuccess,
     error::user::NoSuchUserError,
 };
 use core::{
+    path::api_url,
     routes::{Route, UserRoute},
-    fetch::{
-        FetchResult,
-        user::fetch_signin,
-    },
+    fetch::api_with_token,
     storage,
 };
 use wasm_bindgen::UnwrapThrowExt;
@@ -61,7 +60,9 @@ pub async fn signin_google(page:Rc<SigninPage>) {
     match JsFuture::from(token_promise).await {
         Ok(token) => {
             let token = token.as_string().unwrap_throw();
-            let resp:FetchResult<SigninSuccess, NoSuchUserError> = fetch_signin(&token).await;
+            let resp:Result<SigninSuccess, NoSuchUserError> = 
+                api_with_token::< _, _, ()>(&api_url(Signin::PATH), &token, Signin::METHOD, None).await;
+
             match resp {
                 Ok(data) => do_success(&page, data.csrf),
                 Err(_) => {

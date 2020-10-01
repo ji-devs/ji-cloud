@@ -2,7 +2,6 @@ use shared::domain::category::*;
 use std::convert::TryInto;
 use core::{
     routes::{Route, UserRoute},
-    fetch::FetchResult,
     storage,
 };
 use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};

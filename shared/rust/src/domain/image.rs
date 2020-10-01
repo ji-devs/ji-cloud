@@ -121,6 +121,49 @@ pub struct UpdateRequest {
 pub struct SearchQuery {
     /// The query string.
     pub q: String,
+
+    /// The page number of the images to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// Optionally filter by `styles`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub styles: Vec<StyleId>,
+
+    /// Optionally filter by `age_ranges`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// Optionally filter by `affiliations`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// Optionally filter by `categories`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<CategoryId>,
+
+    /// Optionally filter by `is_premium`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_premium: Option<bool>,
+
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
 }
 
 /// Response for successful search.
@@ -128,6 +171,9 @@ pub struct SearchQuery {
 pub struct SearchResponse {
     /// the images returned.
     pub images: Vec<GetResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
 }
 
 /// Response for getting a single image.
@@ -184,6 +230,13 @@ pub struct CreateResponse {
 
     /// The URL to upload the image data to.
     pub upload_url: Url,
+}
+
+/// Response for updating an image.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateResponse {
+    /// The URL to upload the image data to.
+    pub replace_url: Url,
 }
 
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.

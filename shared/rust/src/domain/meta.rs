@@ -40,6 +40,8 @@ pub struct AffiliationId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct SubjectId(pub Uuid);
 
+into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId);
+
 /// Represents a style.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Style {

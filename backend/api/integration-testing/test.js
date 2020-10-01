@@ -237,7 +237,7 @@ test('get categories', async (t) => {
 async function getNestedCategories(t, options) {
     await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.parentDir);
 
-    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'brackets', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
+    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'comma', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
 
     t.snapshot(categories.body);
 }
@@ -438,7 +438,6 @@ test('update image - two styles', async t => {
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] } }));
 
     const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
-    console.log(resp.body);
     const metadata = resp.body.metadata;
 
     // can't snapshot update timestamps for obvious reasons.

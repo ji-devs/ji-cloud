@@ -3,21 +3,34 @@ use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{Data, Json, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
-        user::{Profile, Register, Signin, SingleSignOn},
+        user::{Profile, Register, Signin, SingleSignOn, UserByName},
         ApiEndpoint,
     },
-    domain::auth::{AuthClaims, RegisterRequest, SigninSuccess, SingleSignOnSuccess},
+    domain::auth::{
+        AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
+    },
+    domain::user::OtherUser,
     error::auth::RegisterError,
     error::user::NoSuchUserError,
+    error::InternalServerError,
 };
 use sqlx::PgPool;
+
+async fn user_by_name(
+    db: Data<PgPool>,
+    username: Path<String>,
+) -> Result<Option<Json<OtherUser>>, InternalServerError> {
+    Ok(db::user::by_name(db.as_ref(), &username.into_inner())
+        .await?
+        .map(Json))
+}
 
 async fn handle_signin_credentials(
     settings: Data<RuntimeSettings>,
@@ -61,7 +74,7 @@ async fn handle_register(
 
     Ok(HttpResponse::Created()
         .cookie(cookie)
-        .json(SigninSuccess { csrf }))
+        .json(RegisterSuccess::Signin(csrf)))
 }
 
 async fn handle_get_profile(
@@ -105,5 +118,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         Signin::PATH,
         Signin::METHOD.route().to(handle_signin_credentials),
+    )
+    .route(
+        UserByName::PATH,
+        UserByName::METHOD.route().to(user_by_name),
     );
 }

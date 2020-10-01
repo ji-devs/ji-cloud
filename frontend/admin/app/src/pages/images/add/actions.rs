@@ -5,7 +5,7 @@ use shared::{
 };
 use core::{
     path::api_url,
-    fetch::{api_with_auth, api_with_auth_empty, FetchResult, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
@@ -28,7 +28,7 @@ pub async fn create_image(file:File) -> Result<String, ()> {
 }
 
 
-async fn _create_image_api() -> FetchResult < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
+async fn _create_image_api() -> Result < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
     let req:<Create as ApiEndpoint>::Req = CreateRequest {
         name: "".to_string(),
         description: "".to_string(),
@@ -53,7 +53,7 @@ async fn _create_image_api() -> FetchResult < <Create as ApiEndpoint>::Res, <Cre
         Uuid::parse_str(id).unwrap_throw()
     }
 
-    pub async fn get_all() -> FetchResult < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
+    pub async fn get_all() -> Result < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
         let req:<Get as ApiEndpoint>::Req = GetCategoryRequest {
             ids: Vec::new(), 
             scope: Some(CategoryTreeScope::Decendants)

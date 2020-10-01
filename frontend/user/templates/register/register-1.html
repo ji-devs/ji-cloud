@@ -15,10 +15,10 @@
         {{ User::user_input(label="Family name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
       </div>
 
-      {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="email") }}
+      {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="user-name") }}
       {{ Input::checkbox(label="I am over 18", inputDataId="over-18", required=true, class="px-2") }}
       <div class="mt-2">
-        {{ ButtonMacros::orange(label="Next", dataId="next-btn") }}
+        {{ ButtonMacros::orange(label="Next", dataId="next") }}
       </div>
 
       <p class="text-jibuttonBlue mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer">Login</span></p>

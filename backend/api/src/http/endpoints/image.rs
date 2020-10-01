@@ -14,7 +14,10 @@ use http::StatusCode;
 use shared::{
     api::{endpoints::image, ApiEndpoint},
     domain::{
-        image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
+        image::{
+            CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest,
+            UpdateResponse,
+        },
         meta::MetaKind,
     },
     error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
@@ -94,7 +97,6 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 async fn create(
     db: Data<PgPool>,
     s3: Data<S3Client>,
-    algolia: Data<AlgoliaClient>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<image::Create as ApiEndpoint>::Req>,
 ) -> Result<
@@ -125,16 +127,6 @@ async fn create(
     .map_err(handle_metadata_err)?;
 
     txn.commit().await?;
-
-    algolia
-        .put_image(
-            id,
-            crate::algolia::Image {
-                name: &req.name,
-                description: &req.description,
-            },
-        )
-        .await?;
 
     Ok((
         Json(CreateResponse {
@@ -172,7 +164,18 @@ async fn get(
 ) -> Result<Json<<image::Search as ApiEndpoint>::Res>, <image::Search as ApiEndpoint>::Err> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let ids = algolia.search_image(&query.q).await?;
+    let (ids, pages) = algolia
+        .search_image(
+            &query.q,
+            query.page,
+            query.is_premium,
+            query.is_published,
+            &query.styles,
+            &query.age_ranges,
+            &query.affiliations,
+            &query.categories,
+        )
+        .await?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<SearchError>()
@@ -185,16 +188,19 @@ async fn get(
         .try_collect()
         .await?;
 
-    Ok(Json(SearchResponse { images }))
+    Ok(Json(SearchResponse { images, pages }))
 }
 
 async fn update(
     db: Data<PgPool>,
-    algolia: Data<AlgoliaClient>,
+    s3: Data<S3Client>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
-) -> Result<HttpResponse, <image::UpdateMetadata as ApiEndpoint>::Err> {
+) -> Result<
+    Json<<image::UpdateMetadata as ApiEndpoint>::Res>,
+    <image::UpdateMetadata as ApiEndpoint>::Err,
+> {
     let req = req.map_or_else(UpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
@@ -226,17 +232,9 @@ async fn update(
 
     txn.commit().await?;
 
-    algolia
-        .update_image(
-            id,
-            crate::algolia::ImageUpdate {
-                name: req.name.as_deref(),
-                description: req.description.as_deref(),
-            },
-        )
-        .await?;
-
-    Ok(HttpResponse::new(StatusCode::NO_CONTENT))
+    Ok(Json(UpdateResponse {
+        replace_url: s3.presigned_image_put_url(id)?,
+    }))
 }
 
 fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
@@ -260,9 +258,13 @@ async fn delete(
         .await
         .map_err(check_conflict_image_delete)?;
 
-    s3.delete_image(image).await?;
+    if let Err(e) = s3.delete_image(image).await {
+        log::warn!("failed to delete image from s3: {}", e);
+    }
 
-    algolia.delete_image(image).await?;
+    if let Err(e) = algolia.delete_image(image).await {
+        log::warn!("failed to delete image from algolia: {}", e);
+    }
 
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }

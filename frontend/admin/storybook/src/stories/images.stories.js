@@ -20,6 +20,7 @@ import imageOverview from "@templates/images/image-edit-overview.html";
 import imagesSearch from "@templates/images/images-search.html";
 import imageGridItemRed from "@templates/_image/image-grid-item-red.html";
 import imageGridItemGreen from "@templates/_image/image-grid-item-green.html";
+import { setAttributeId } from "../../../../_core/js/src/utils/dom";
 
 export default {
   title: 'Image labeler',
@@ -41,6 +42,8 @@ export const Edit = () =>  {
 
     appendId(editContainer, "right-area", editMeta);
 
+    setAttributeId(editContainer, "img", "src", `${MEDIA_UI}/red-sea-book.png`);
+
     setTextId(editContainer, "next", "Next");
 
     const pageContents = populateMetaOptions(editContainer);
@@ -52,6 +55,7 @@ export const Edit = () =>  {
 export const Categories = () =>  {
     const pageContainer = tmpl(imagesPage);
     const editContainer = tmpl(imageEdit);
+    setAttributeId(editContainer, "img", "src", `${MEDIA_UI}/red-sea-book.png`);
     setTextId(editContainer, "next", "Next");
     const editCategories = tmpl(imageEditCategories);
 
@@ -93,6 +97,7 @@ export const Categories = () =>  {
 export const Overview = () => {
     const pageContainer = tmpl(imagesPage);
     const editContainer = tmpl(imageEdit);
+    setAttributeId(editContainer, "img", "src", `${MEDIA_UI}/red-sea-book.png`);
     setTextId(editContainer, "next", "Publish");
     const overview = tmpl(imageOverview, {
       name: "Moses parts the Nile",
@@ -185,7 +190,7 @@ export const WithMenu = () => {
 */
 
 function populateMetaOptions(container) {
-  ["Clipart", "Photo", "B & W", "Drawing", "Comic"]
+  ["Clipart", "Photo", "B & W", "Drawing", "Comic", "frame", "Icon / Emoji / Button", "Word / Label", "Layout"]
     .forEach(style => {
       appendId(container, "styles", makeCheckbox(style));
     });
