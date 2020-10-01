@@ -9,6 +9,7 @@ import jigprivacyfilter from "@templates/jig/privacy-filter.html";
 import jigstatus from "@templates/jig/jig-status.html";
 import jigtofrom from "@templates/jig/jig-tofrom.html";
 import jigcreatorone from "@templates/jig/jig-creator-one.html";
+import jigaddmodule from "@templates/jig/jig-add-module.html";
 
 export default {
   title: 'JIG',
@@ -22,6 +23,11 @@ export const JigTable = () =>
 
 export const JigCreatorOne = () =>
     tmpl(jigcreatorone, {
+
+});
+
+export const JigAddModule = () =>
+    tmpl(jigaddmodule, {
 
 });
 
