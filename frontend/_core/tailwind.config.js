@@ -1,5 +1,8 @@
-console.log("process.cwd() = " + process.cwd());
-console.log("__dirname = " + __dirname);
+const {getMediaUrl_UI} = require("../../config/js");
+const isDev = process.env["NODE_ENV"] === "development";
+const MEDIA_UI = getMediaUrl_UI(isDev);
+console.log(`media ui: ${MEDIA_UI}`);
+
 
 module.exports = {
   purge: [
@@ -37,6 +40,11 @@ module.exports = {
         jidarkgrey: '#e2e5eb',
         jibuttongreen: '#72cb91',
         jigooglegrey: '#f0f1f4',
+        jicreatorblue: '#edf7ff',
+        jigrey: '#a1a8ad',
+        jigreyfocus: '#d8d8d8',
+        jiheadergrey: '#4a4a4a',
+        jijigbordergrey: '#a1a8ad'
 
       },
 
@@ -52,12 +60,15 @@ module.exports = {
       width: {
         10: '10px',
         30: '30px',
+        68: '68px',
         76: '76px',
         102: '102px',
         112: '112px',
         117: '117px',
         150: '150px',
+        160: '160px',
         176: '176px',
+        186: '186px',
         190: '190px',
         259: '259px',
         270: '270px',
@@ -66,12 +77,17 @@ module.exports = {
         288: '288px',
         296: '296px',
         297: '297px',
+        325: '325px',
+        360: '360px',
         393: '393px',
+        408: '408px',
         480: '480px',
         624: '624px',
+        640: '640px',
         763: '763px',
         867: '867px',
         '50p': '50%',
+        '1/7': '14.28%'
 
 
       },
@@ -84,14 +100,19 @@ module.exports = {
         300: '300px',
       },
       height: {
-        216: '216px',
-        185: '185px',
-        696: '696px',
         10: '10px',
         20: '20px',
+        24: '24px',
         32: '32px',
         56: '56px',
         64: '64px',
+        140: '140px',
+        160: '160px',
+        185: '185px',
+        216: '216px',
+        383: '383px',
+        537: '537px',
+        696: '696px',
 
       },
       backgroundPosition:{
@@ -102,7 +123,8 @@ module.exports = {
       },
       borderRadius: {
         16: '16px',
-        20: '20px'
+        20: '20px',
+        36: '36px',
       },
       inset: {
         40:'40px',
@@ -121,10 +143,12 @@ module.exports = {
       },
       padding:{
         60:'60px',
-        80: '80px'
+        80: '80px',
+        255: '255px',
       },
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
+        'poster': `url('${MEDIA_UI}/Icn_Module_Poster.svg')`
 
         })
     },
