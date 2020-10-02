@@ -132,6 +132,14 @@ returning id
         {
             RegisterError::TakenId
         }
+
+        sqlx::Error::Database(err)
+            if err.downcast_ref::<PgDatabaseError>().constraint()
+                == Some("user_username_key") =>
+        {
+            RegisterError::TakenUsername
+        }
+
         // fixme: This doesn't actually trigger right now because emails aren't marked `unique`
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint() == Some("user_email_key") =>
