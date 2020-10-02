@@ -4,6 +4,7 @@ use crate::{
     extractor::AuthUserWithScope,
     extractor::ScopeManageImage,
     extractor::WrapAuthClaimsNoDb,
+    image_ops::generate_images,
     s3::{S3Client, S3ImageKind},
 };
 use actix_web::{
@@ -15,7 +16,6 @@ use chrono::{DateTime, Utc};
 use db::image::nul_if_empty;
 use futures::TryStreamExt;
 use http::StatusCode;
-use image::{ColorType, ImageOutputFormat};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -134,13 +134,7 @@ async fn create(
 
     txn.commit().await?;
 
-    Ok((
-        Json(CreateResponse {
-            id,
-            // upload_url: s3.presigned_image_put_url(id)?,
-        }),
-        http::StatusCode::CREATED,
-    ))
+    Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
 }
 
 async fn upload(
@@ -156,41 +150,7 @@ async fn upload(
 
     let res: Result<_, UploadError> = tokio::task::spawn_blocking(move || {
         let original = image::load_from_memory(&bytes).map_err(|_| UploadError::InvalidImage)?;
-
-        let resized = crate::image_ops::generate_resized(&original, kind);
-        let thumbnail = crate::image_ops::generate_thumbnail(&original);
-
-        let original = {
-            let mut buffer = Vec::new();
-            original.write_to(&mut buffer, ImageOutputFormat::Png)?;
-            buffer
-        };
-
-        let resized = {
-            let mut buffer = Vec::new();
-            let encoder = image::png::PngEncoder::new(&mut buffer);
-            encoder.encode(
-                resized.as_raw(),
-                resized.width(),
-                resized.height(),
-                ColorType::Rgba8,
-            )?;
-            buffer
-        };
-
-        let thumbnail = {
-            let mut buffer = Vec::new();
-            let encoder = image::png::PngEncoder::new(&mut buffer);
-            encoder.encode(
-                thumbnail.as_raw(),
-                thumbnail.width(),
-                thumbnail.height(),
-                ColorType::Rgba8,
-            )?;
-            buffer
-        };
-
-        Ok((original, resized, thumbnail))
+        Ok(generate_images(original, kind)?)
     })
     .await?;
 
