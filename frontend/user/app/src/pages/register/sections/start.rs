@@ -156,7 +156,7 @@ impl RegisterPageRefs {
 
 //Actions
 pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterStatus> {
-    let token_promise = unsafe { get_firebase_register_email(email, pw) };
+    let token_promise = unsafe { firebase_register_email(email, pw) };
 
     JsFuture::from(token_promise).await
         .map(|info| {
@@ -166,10 +166,14 @@ pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterSta
         .map_err(|err| {
             match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
                 Ok(err) => {
-                    match err.code.as_ref() {
+                    let code:&str = err.code.as_ref();
+                    match code {
                         "auth/email-already-in-use" => RegisterStatus::EmailExists,
                         "auth/weak-password" => RegisterStatus::PwWeak,
-                        _ => RegisterStatus::UnknownFirebase
+                        _ => {
+                            log::warn!("firebase error: {}", code);
+                            RegisterStatus::UnknownFirebase
+                        }
                     }
                 },
                 Err(uhh) => {
@@ -180,7 +184,7 @@ pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterSta
 }
 
 pub async fn register_google() -> Result<GoogleRegisterInfo, Option<RegisterStatus>> {
-    let token_promise = unsafe { get_firebase_register_google() };
+    let token_promise = unsafe { firebase_register_google() };
 
     JsFuture::from(token_promise).await
         .map(|info| {

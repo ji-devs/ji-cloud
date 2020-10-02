@@ -6,10 +6,11 @@ use serde::{Serialize, Deserialize};
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
     pub fn init_firebase(dev:bool);
-    pub fn get_firebase_signin_email(email:&str, password:&str) -> Promise;
-    pub fn get_firebase_register_email(email:&str, password:&str) -> Promise;
-    pub fn get_firebase_signin_google() -> Promise;
-    pub fn get_firebase_register_google() -> Promise;
+    pub fn firebase_signin_email(email:&str, password:&str) -> Promise;
+    pub fn firebase_register_email(email:&str, password:&str) -> Promise;
+    pub fn firebase_signin_google() -> Promise;
+    pub fn firebase_register_google() -> Promise;
+    pub fn firebase_forgot_password(email:&str) -> Promise;
 }
 
 #[derive(Deserialize, Debug)]

@@ -36,18 +36,20 @@ export function init_firebase(dev) {
 }
 
 
-export function get_firebase_register_google() {
+export function firebase_register_google() {
 
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
-    return firebase
-        .auth()
-        .signInWithPopup(provider)
+    return complete_register(firebase.auth().signInWithPopup(provider));
+}
+export function firebase_register_email(email, password) {
+    return complete_register(firebase.auth().createUserWithEmailAndPassword(email, password));
+}
+
+function complete_register(promise) {
+    return promise
         .then(({user}) => 
-            user.emailVerified ? user : Promise.reject("EMAIL_VERIFIED")
-        )
-        .then(user => 
             user.getIdToken()
                 .then(token => ({token, name: user.displayName, email: user.email, avatar: user.photoURL}))
         )
@@ -56,25 +58,28 @@ export function get_firebase_register_google() {
             return result; 
         });
 }
-export function get_firebase_signin_google() {
+
+export function firebase_signin_google() {
 
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
-    return firebase
-        .auth()
-        .signInWithPopup(provider)
-        .then(({user}) => user.getIdToken())
-        .then(idToken => {
-            firebase.auth().signOut();
-            return idToken
-        });
+    return complete_signin(firebase.auth().signInWithPopup(provider));
 }
 
-export function get_firebase_signin_email(email, password) {
-    return firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password)
+export function firebase_signin_email(email, password) {
+    return complete_signin(firebase.auth().signInWithEmailAndPassword(email, password));
+}
+
+function complete_signin(promise) {
+    return promise
+        .then(({user}) => 
+            user.emailVerified 
+            ? user 
+            : Promise.reject({
+                code: "internal/confirm-email"
+            })
+        )
         .then(user => user.getIdToken())
         .then(idToken => {
             firebase.auth().signOut();
@@ -82,17 +87,11 @@ export function get_firebase_signin_email(email, password) {
         });
 }
 
-export function get_firebase_register_email(email, password) {
+export function firebase_forgot_password(email) {
     return firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(user => user.getIdToken())
-        .then(idToken => {
-            firebase.auth().signOut();
-            return idToken
-        });
+        .sendPasswordResetEmail(email)
 }
-
 
 function getCookie(name) {
   var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
