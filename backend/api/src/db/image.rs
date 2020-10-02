@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{Image, ImageId},
+    image::{Image, ImageId, ImageKind},
     meta::{AffiliationId, AgeRangeId, StyleId},
 };
 use sqlx::{PgConnection, PgPool};
@@ -52,16 +52,18 @@ pub async fn create(
     description: &str,
     is_premium: bool,
     publish_at: Option<DateTime<Utc>>,
+    kind: ImageKind,
 ) -> sqlx::Result<ImageId> {
     let id: ImageId = sqlx::query!(
         r#"
-insert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)
+insert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)
 returning id as "id: ImageId"
         "#,
         name,
         description,
         is_premium,
         publish_at,
+        kind as i16,
     )
     .fetch_one(conn)
     .await?
@@ -256,4 +258,14 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
         .execute(&mut conn)
         .await
         .map(drop)
+}
+
+pub async fn get_image_kind(db: &PgPool, image: ImageId) -> sqlx::Result<Option<ImageKind>> {
+    sqlx::query!(
+        r#"select kind as "kind: ImageKind" from image_metadata where id = $1"#,
+        image.0
+    )
+    .fetch_optional(db)
+    .await
+    .map(|opt| opt.map(|it| it.kind))
 }

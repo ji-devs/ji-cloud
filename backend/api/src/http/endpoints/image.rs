@@ -1,29 +1,32 @@
 use crate::{
-    algolia::AlgoliaClient, db, extractor::AuthUserWithScope, extractor::ScopeManageImage,
-    extractor::WrapAuthClaimsNoDb, s3::S3Client,
+    algolia::AlgoliaClient,
+    db,
+    extractor::AuthUserWithScope,
+    extractor::ScopeManageImage,
+    extractor::WrapAuthClaimsNoDb,
+    s3::{S3Client, S3ImageKind},
 };
 use actix_web::{
     http,
-    web::{Data, Json, Path, Query, ServiceConfig},
+    web::{self, Bytes, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
 use db::image::nul_if_empty;
 use futures::TryStreamExt;
 use http::StatusCode;
+use image::{ColorType, ImageOutputFormat};
 use shared::{
-    api::{endpoints::image, ApiEndpoint},
+    api::{endpoints, ApiEndpoint},
     domain::{
-        image::{
-            CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest,
-            UpdateResponse,
-        },
+        image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
         meta::MetaKind,
     },
-    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
+    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError, UploadError},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
+use web::PayloadConfig;
 
 // attempts to grab a uuid out of a string in the shape:
 // Key (<key>)=(<uuid>)<postfix>
@@ -96,12 +99,14 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 
 async fn create(
     db: Data<PgPool>,
-    s3: Data<S3Client>,
     _claims: AuthUserWithScope<ScopeManageImage>,
-    req: Json<<image::Create as ApiEndpoint>::Req>,
+    req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
 ) -> Result<
-    (Json<<image::Create as ApiEndpoint>::Res>, http::StatusCode),
-    <image::Create as ApiEndpoint>::Err,
+    (
+        Json<<endpoints::image::Create as ApiEndpoint>::Res>,
+        http::StatusCode,
+    ),
+    <endpoints::image::Create as ApiEndpoint>::Err,
 > {
     let req = req.into_inner();
 
@@ -112,6 +117,7 @@ async fn create(
         &req.description,
         req.is_premium,
         req.publish_at.map(DateTime::<Utc>::from),
+        req.kind,
     )
     .await?;
 
@@ -131,10 +137,67 @@ async fn create(
     Ok((
         Json(CreateResponse {
             id,
-            upload_url: s3.presigned_image_put_url(id)?,
+            // upload_url: s3.presigned_image_put_url(id)?,
         }),
         http::StatusCode::CREATED,
     ))
+}
+
+async fn upload(
+    db: Data<PgPool>,
+    s3: Data<S3Client>,
+    _claims: AuthUserWithScope<ScopeManageImage>,
+    Path(id): Path<ImageId>,
+    bytes: Bytes,
+) -> Result<HttpResponse, <endpoints::image::Upload as ApiEndpoint>::Err> {
+    let kind = db::image::get_image_kind(db.as_ref(), id)
+        .await?
+        .ok_or(UploadError::NotFound)?;
+
+    let res: Result<_, UploadError> = tokio::task::spawn_blocking(move || {
+        let original = image::load_from_memory(&bytes).map_err(|_| UploadError::InvalidImage)?;
+
+        let resized = crate::image_ops::generate_resized(&original, kind);
+        let thumbnail = crate::image_ops::generate_thumbnail(&original);
+
+        let original = {
+            let mut buffer = Vec::new();
+            original.write_to(&mut buffer, ImageOutputFormat::Png)?;
+            buffer
+        };
+
+        let resized = {
+            let mut buffer = Vec::new();
+            let encoder = image::png::PngEncoder::new(&mut buffer);
+            encoder.encode(
+                resized.as_raw(),
+                resized.width(),
+                resized.height(),
+                ColorType::Rgba8,
+            )?;
+            buffer
+        };
+
+        let thumbnail = {
+            let mut buffer = Vec::new();
+            let encoder = image::png::PngEncoder::new(&mut buffer);
+            encoder.encode(
+                thumbnail.as_raw(),
+                thumbnail.width(),
+                thumbnail.height(),
+                ColorType::Rgba8,
+            )?;
+            buffer
+        };
+
+        Ok((original, resized, thumbnail))
+    })
+    .await?;
+
+    let (original, resized, thumbnail) = res?;
+    s3.upload_images(id, original, resized, thumbnail).await?;
+
+    Ok(HttpResponse::NoContent().into())
 }
 
 async fn get_one(
@@ -142,7 +205,10 @@ async fn get_one(
     s3: Data<S3Client>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
-) -> Result<Json<<image::Get as ApiEndpoint>::Res>, <image::Get as ApiEndpoint>::Err> {
+) -> Result<
+    Json<<endpoints::image::Get as ApiEndpoint>::Res>,
+    <endpoints::image::Get as ApiEndpoint>::Err,
+> {
     let metadata = db::image::get_one(&db, req.into_inner())
         .await?
         .ok_or(GetError::NotFound)?;
@@ -151,7 +217,8 @@ async fn get_one(
 
     Ok(Json(GetResponse {
         metadata,
-        url: s3.presigned_image_get_url(id)?,
+        url: s3.presigned_image_get_url(S3ImageKind::Resized, id)?,
+        thumbnail_url: s3.presigned_image_get_url(S3ImageKind::Thumbnail, id)?,
     }))
 }
 
@@ -160,8 +227,11 @@ async fn get(
     s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
-    query: Option<Query<<image::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<image::Search as ApiEndpoint>::Res>, <image::Search as ApiEndpoint>::Err> {
+    query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
+) -> Result<
+    Json<<endpoints::image::Search as ApiEndpoint>::Res>,
+    <endpoints::image::Search as ApiEndpoint>::Err,
+> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let (ids, pages) = algolia
@@ -181,7 +251,8 @@ async fn get(
         .err_into::<SearchError>()
         .and_then(|metadata: Image| async {
             Ok(GetResponse {
-                url: s3.presigned_image_get_url(metadata.id)?,
+                url: s3.presigned_image_get_url(S3ImageKind::Resized, metadata.id)?,
+                thumbnail_url: s3.presigned_image_get_url(S3ImageKind::Thumbnail, metadata.id)?,
                 metadata,
             })
         })
@@ -193,14 +264,10 @@ async fn get(
 
 async fn update(
     db: Data<PgPool>,
-    s3: Data<S3Client>,
     _claims: AuthUserWithScope<ScopeManageImage>,
-    req: Option<Json<<image::UpdateMetadata as ApiEndpoint>::Req>>,
+    req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
-) -> Result<
-    Json<<image::UpdateMetadata as ApiEndpoint>::Res>,
-    <image::UpdateMetadata as ApiEndpoint>::Err,
-> {
+) -> Result<HttpResponse, <endpoints::image::UpdateMetadata as ApiEndpoint>::Err> {
     let req = req.map_or_else(UpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
@@ -232,9 +299,7 @@ async fn update(
 
     txn.commit().await?;
 
-    Ok(Json(UpdateResponse {
-        replace_url: s3.presigned_image_put_url(id)?,
-    }))
+    Ok(HttpResponse::NoContent().into())
 }
 
 fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
@@ -252,27 +317,33 @@ async fn delete(
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
-) -> Result<HttpResponse, <image::Delete as ApiEndpoint>::Err> {
+) -> Result<HttpResponse, <endpoints::image::Delete as ApiEndpoint>::Err> {
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
         .map_err(check_conflict_image_delete)?;
 
-    if let Err(e) = s3.delete_image(image).await {
-        log::warn!("failed to delete image from s3: {}", e);
-    }
-
-    if let Err(e) = algolia.delete_image(image).await {
-        log::warn!("failed to delete image from algolia: {}", e);
-    }
+    let ((), (), (), ()) = futures::future::join4(
+        s3.delete_image(S3ImageKind::Original, image),
+        s3.delete_image(S3ImageKind::Resized, image),
+        s3.delete_image(S3ImageKind::Thumbnail, image),
+        algolia.delete_image(image),
+    )
+    .await;
 
     Ok(HttpResponse::new(StatusCode::NO_CONTENT))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
+    use endpoints::image;
     cfg.route(
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
+    )
+    .service(
+        web::resource(image::Upload::PATH)
+            .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
+            .route(image::Upload::METHOD.route().to(upload)),
     )
     .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(image::Search::PATH, image::Search::METHOD.route().to(get))

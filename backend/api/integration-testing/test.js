@@ -387,12 +387,12 @@ async function createImage(t, meta) {
             age_ranges: [],
             affiliations: [],
             categories: [],
+            kind: 'Canvas',
             ...meta,
         },
     });
 
     t.deepEqual(typeof (image.body.id), 'string');
-    t.deepEqual(typeof (image.body.upload_url), 'string');
 }
 
 createImage.title = (providedTitle = 'create image meta', meta) => {
@@ -418,6 +418,7 @@ async function createImageError(t, args) {
             age_ranges: [],
             affiliations: [],
             categories: [],
+            kind: 'Canvas',
             [args.kind]: [args.id],
         },
     }));
@@ -448,6 +449,7 @@ test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0
 test.todo('GET image');
 test.todo('GET images');
 test.todo('DELETE image');
+test.todo('PATCH image/raw (upload image)');
 
 // todo: test builder
 test('update image - empty', async t => {

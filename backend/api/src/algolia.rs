@@ -1,10 +1,5 @@
 use algolia::{
-    filter::AndFilterable,
-    filter::BooleanFilter,
-    filter::CmpFilter,
-    filter::CommonFilter,
-    filter::FacetFilter,
-    filter::FilterOperator,
+    filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
     request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
     Client as Inner,
@@ -38,8 +33,11 @@ pub struct Updater {
 
 impl Updater {
     pub fn spawn(self) -> JoinHandle<()> {
-        dbg!("test");
         tokio::task::spawn(async move {
+            if self.algolia_client.inner.is_none() {
+                return;
+            }
+
             loop {
                 let iteration_start = Instant::now();
 
@@ -264,7 +262,17 @@ impl AlgoliaClient {
         Ok((results, pages))
     }
 
-    pub async fn delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
+    pub async fn delete_image(&self, id: ImageId) {
+        if let Err(e) = self.try_delete_image(id).await {
+            log::warn!(
+                "failed to delete image with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
         with_client!(self.inner)
             .delete_object("image", &id.to_string())
             .await?;
