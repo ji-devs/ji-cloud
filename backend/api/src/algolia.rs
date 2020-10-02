@@ -5,7 +5,7 @@ use algolia::{
     filter::CommonFilter,
     filter::FacetFilter,
     filter::FilterOperator,
-    request::{BatchWriteRequests, PartialUpdateQuery, SearchQuery},
+    request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
     Client as Inner,
 };
