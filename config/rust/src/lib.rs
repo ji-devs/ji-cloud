@@ -15,6 +15,8 @@ pub const COOKIE_DOMAIN: &str = "jicloud.org";
 pub const CORS_ORIGINS: [&str; 2] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
 pub const DB_POOL_CONNECTIONS: u32 = 5;
 
+pub const IMAGE_BODY_SIZE_LIMIT: u64 = 1024 * 1024 * 10; // 10 MB
+
 pub const REMOTE_DB_USER: &str = "postgres";
 pub const REMOTE_DB_NAME: &str = "jicloud";
 pub const SQL_PROXY_PORT: u16 = 6432; //must match the port number in build-utils/package.json where cloud-sql-proxy is launched

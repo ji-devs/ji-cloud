@@ -3,6 +3,7 @@ pub mod db;
 mod domain;
 mod extractor;
 pub mod http;
+mod image_ops;
 pub mod jwkkeys;
 mod jwt;
 pub mod logger;

@@ -3,9 +3,8 @@ use crate::{
     api::Method,
     domain::image::{
         CreateRequest, CreateResponse, GetResponse, SearchQuery, SearchResponse, UpdateRequest,
-        UpdateResponse,
     },
-    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError},
+    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError, UploadError},
 };
 
 /// Get an image by ID.
@@ -38,11 +37,23 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
+/// Upload an image
+/// Note: can be used to update the raw data associated with the image.
+pub struct Upload;
+impl ApiEndpoint for Upload {
+    // raw bytes
+    type Req = ();
+    type Res = ();
+    type Err = UploadError;
+    const PATH: &'static str = "/v1/image/{id}/raw";
+    const METHOD: Method = Method::Patch;
+}
+
 /// Update an image's metadata.
 pub struct UpdateMetadata;
 impl ApiEndpoint for UpdateMetadata {
     type Req = UpdateRequest;
-    type Res = UpdateResponse;
+    type Res = ();
     type Err = UpdateError;
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Patch;
