@@ -1,0 +1,11 @@
+{% import "_common/sidebar/sidebar-macros.html" as Sidebar %}
+{% import "_common/input/input-macros.html" as Input %}
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "admin/categories/categories-macros.html" as Categories %}
+
+
+
+<div class="flex">
+  {{ Sidebar::sidebar(navbarLink="Label images", navbarLinkJig="Label JIGS", dataId="btn-1") }}
+  <div data-id="page-contents" class="w-full"></div>
+</div>

@@ -24,7 +24,7 @@ fs.copy(path.resolve(`../frontend/${SPA}/css/dist/styles.min.css`), path.resolve
   .catch(err => console.error(err));
 
 //HTML
-const src = path.resolve("../frontend/_core/devfiles/index.html")
+const src = path.resolve("../frontend/core/devfiles/index.html")
 const dest = path.resolve(`../frontend/${SPA}/app/dist/index.html`);
 
 fs.readFile(src, 'utf-8')

@@ -1,0 +1,65 @@
+{% import "_common/sidebar/sidebar-macros.html" as Sidebar %}
+{% import "_common/input/input-macros.html" as Input %}
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "admin/categories/categories-macros.html" as Categories %}
+<div class="flex">
+  <div class="w-2/5 h-screen pl-6">
+    <div class="w-full">
+      <div class="flex mb-2">
+        <div class="w-full">
+          <div class="flex justify-between pb-3 flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-jibuttonBlue font-medium">General summary</p>
+              <p data-id="edit-meta" class="text-jibuttonBlue font-medium cursor-pointer">Edit</p>
+            </div>
+            <div class="bg-jibackgroundBlue h-696 w-full rounded-md p-4">
+              <div class="mb-6">
+                <p class="text-jibuttonBlue font-medium">Image name</p>
+                <p class="font-medium">${name}</p>
+              </div>
+              <div>
+                <p class="text-jibuttonBlue font-medium">Image description</p>
+                <p class="font-normal">${description}</p>
+              </div>
+              <div>
+                <p class="text-jibuttonBlue font-medium">Image style</p>
+                <p data-id="styles" class="font-normal"></p>
+              </div>
+              <div>
+                <p class="text-jibuttonBlue font-medium">Suitable for age</p>
+                <p data-id="age_ranges" class="font-normal"></p>
+              </div>
+              <div>
+                <p class="text-jibuttonBlue font-medium">Suitable for Jewish Stream</p>
+                <p data-id="affiliations" class="font-normal"></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </div>
+  </div>
+  <div class="w-2/5 h-screen pl-6">
+    <div class="w-full">
+      <div class="flex mb-2">
+        <div class="w-full">
+          <div class="flex justify-between pb-3 flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-jibuttonBlue font-medium">Categories summary</p>
+              <p data-id="edit-categories" class="text-jibuttonBlue font-medium cursor-pointer">Edit</p>
+            </div>
+            <div class="bg-jibackgroundBlue h-696 w-full rounded-md">
+              <div data-id="category-summaries"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

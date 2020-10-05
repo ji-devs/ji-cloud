@@ -12,8 +12,8 @@ pub struct Opts {
     pub remote_target: String,
 
     // project dir 
-    #[structopt(short, long)]
-    pub project: String,
+    #[structopt(short, long, required_unless="all-projects")]
+    pub project: Option<String>,
 
     // show output 
     #[structopt(short, long)]
@@ -26,6 +26,10 @@ pub struct Opts {
     // include storybook/demo-templates dir 
     #[structopt(short, long)]
     pub demo: bool,
+
+    // show output 
+    #[structopt(short, long)]
+    pub all_projects: bool,
 }
 
 impl Opts {
@@ -38,19 +42,18 @@ impl Opts {
             _ => panic!("target must be local, sandbox, or release")
         }
     }
-
-    pub fn get_project_template_path(&self) -> PathBuf {
-        let path = self.get_project_path().join("templates");
+    pub fn get_base_template_path(&self) -> PathBuf {
+        let path = self.get_frontend_path().join("templates");
 
         if !path.exists() {
-            panic!("template path for [{}] does not exist!", &self.project);
+            panic!("base template path does not exist!");
         }
 
         path
-    }
 
-    pub fn get_core_template_path(&self) -> PathBuf {
-        let path = self.get_frontend_path().join("_core").join("templates");
+    }
+    pub fn get_common_template_path(&self) -> PathBuf {
+        let path = self.get_base_template_path().join("_common");
 
         if !path.exists() {
             panic!("core template path does not exist!");
@@ -60,11 +63,20 @@ impl Opts {
 
     }
 
+    pub fn get_project_template_path(&self) -> PathBuf {
+        let project = self.project.as_ref().unwrap();
+        let path = self.get_base_template_path().join(&project);
+        if !path.exists() {
+            panic!("template path for [{}] does not exist!", &project);
+        }
+
+        path
+    }
+
+
     pub fn get_demo_template_path(&self) -> PathBuf {
 
-        let path = self.get_project_path()
-            .join("storybook")
-            .join("demo-templates");
+        let path = self.get_frontend_path().join("storybook").join("demo-templates");
 
         if !path.exists() {
             panic!("demo template path does not exist!");
@@ -74,17 +86,14 @@ impl Opts {
     }
 
     pub fn get_project_output_path(&self) -> PathBuf {
-        self.get_project_path().join(".template_output")
+        self.get_frontend_path().join(".template_output")
     }
+
 
     fn get_frontend_path(&self) -> PathBuf {
         Path::new(&env::var("LOCAL_CDN_FRONTEND_DIR").expect("needs env var LOCAL_CDN_FRONTEND_DIR")).to_path_buf()
     }
 
-    fn get_project_path(&self) -> PathBuf {
-        self.get_frontend_path()
-            .join(&self.project)
-    }
 }
 
 

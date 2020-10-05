@@ -1,0 +1,5 @@
+{% import "admin/categories/categories-macros.html" as Categories %}
+
+<div data-id="${id}">
+    {{ Categories::main(selected=false, dataId="${id}") }}
+</div>

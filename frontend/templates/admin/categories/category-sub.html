@@ -1,0 +1,11 @@
+{% import "admin/categories/categories-macros.html" as Categories %}
+
+<ul data-id="${id}" class="px-14 ml-16 pb-1 mt-2">
+    <li class="relative titleoptions flex items-center">
+    <div data-id="label"></div>
+    <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
+    </div>
+    {{ Categories::menu_container() }}
+    </li>
+    <div data-id="children"></div>
+</ul>
