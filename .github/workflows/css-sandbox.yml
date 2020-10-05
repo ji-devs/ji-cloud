@@ -1,18 +1,11 @@
-name: Admin - Storybook - Release
-
+name: CSS - Sandbox 
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'config/**'
-    - 'frontend/_core/css/**'
-    - 'frontend/admin/css/**'
-    - 'frontend/_core/js/**'
-    - 'frontend/_core/templates/**'
-    - 'frontend/admin/storybook/**'
-    - 'frontend/admin/templates/**'
-
+    - 'frontend/css/**'
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -25,7 +18,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - admin/storybook]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - css]\")"
         id: extract_label
 
       - name: Notify slack
@@ -38,32 +31,22 @@ jobs:
       - name: install node
         uses: actions/setup-node@v1
 
-      - name: install css deps
-        run: npm install
-        working-directory: "./frontend/admin/css"
-
-      - name: install core js deps
-        run: npm install
-        working-directory: "./frontend/_core/js"
-        
       - name: install npm deps
         run: npm install
-        working-directory: "./frontend/admin/storybook"
+        working-directory: "./frontend/css"
 
-      - name: build 
-        run: npm run storybook:build-release 
-        working-directory: "./frontend/admin/storybook"
-        env:
-          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
+      - name: bundle 
+        run: npm run bundle
+        working-directory: "./frontend/css"
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/admin/storybook/dist/storybook-build gs://ji-cloud-storybook-origin-eu-001/admin
+        run: gsutil -m rsync -d -r frontend/css/dist gs://ji-cloud-sandbox-frontend-origin-eu-001/_css
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
