@@ -6,10 +6,10 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'frontend/_core/rust/**'
-    - 'frontend/_core/templates/**'
-    - 'frontend/user/app/**'
-    - 'frontend/user/templates/**'
+    - 'frontend/core/**'
+    - 'frontend/templates/_common/**'
+    - 'frontend/templates/user/**'
+    - 'frontend/app/user/**'
 
 jobs:
   bundle:
@@ -41,11 +41,11 @@ jobs:
 
       - name: install npm deps
         run: npm ci 
-        working-directory: "./frontend/user/app"
+        working-directory: "./frontend/app/user"
 
       - name: build 
         run: npm run build:release
-        working-directory: "./frontend/user/app"
+        working-directory: "./frontend/app/user"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
       
@@ -56,7 +56,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/user/app/dist/js gs://ji-cloud-frontend-origin-eu-001/user/js
+        run: gsutil -m rsync -d -r frontend/app/user/dist/js gs://ji-cloud-frontend-origin-eu-001/user/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

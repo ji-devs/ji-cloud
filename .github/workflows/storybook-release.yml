@@ -1,15 +1,14 @@
-name: Admin - Spa - Sandbox
+name: Storybook - Release
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
-    - 'shared/**'
-    - 'frontend/core/**'
-    - 'frontend/templates/_common/**'
-    - 'frontend/templates/admin/**'
-    - 'frontend/app/admin/**'
+    - 'frontend/core/js/**'
+    - 'frontend/css/**'
+    - 'frontend/templates/**'
+    - 'frontend/storybook/**'
 
 jobs:
   bundle:
@@ -23,7 +22,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - admin/spa]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - storybook]\")"
         id: extract_label
 
       - name: Notify slack
@@ -33,31 +32,40 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: make nightly the default
-        run: rustup default nightly
-
       - name: install node
         uses: actions/setup-node@v1
 
+      - name: install css deps
+        run: npm install
+        working-directory: "./frontend/css"
+
+      - name: css bundle 
+        run: npm run bundle
+        working-directory: "./frontend/css"
+
+      - name: install core js deps
+        run: npm install
+        working-directory: "./frontend/core/js"
+        
       - name: install npm deps
-        run: npm ci 
-        working-directory: "./frontend/app/admin"
+        run: npm install
+        working-directory: "./frontend/storybook"
 
       - name: build 
-        run: npm run build:sandbox
-        working-directory: "./frontend/app/admin"
+        run: npm run storybook:build-release 
+        working-directory: "./frontend/storybook"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
-      
+
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/app/admin/dist/js gs://ji-cloud-sandbox-frontend-origin-eu-001/admin/js
-        
+        run: gsutil -m rsync -d -r frontend/storybook/dist/storybook-build gs://ji-cloud-storybook-origin-eu-001/_storybook
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:

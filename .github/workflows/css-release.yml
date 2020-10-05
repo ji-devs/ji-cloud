@@ -1,16 +1,11 @@
-name: Admin - Spa - Sandbox
+name: CSS - Release
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
-    - 'shared/**'
-    - 'frontend/core/**'
-    - 'frontend/templates/_common/**'
-    - 'frontend/templates/admin/**'
-    - 'frontend/app/admin/**'
-
+    - 'frontend/css/**'
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -23,7 +18,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - admin/spa]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - css]\")"
         id: extract_label
 
       - name: Notify slack
@@ -33,31 +28,26 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: make nightly the default
-        run: rustup default nightly
-
       - name: install node
         uses: actions/setup-node@v1
 
       - name: install npm deps
-        run: npm ci 
-        working-directory: "./frontend/app/admin"
+        run: npm install
+        working-directory: "./frontend/css"
 
-      - name: build 
-        run: npm run build:sandbox
-        working-directory: "./frontend/app/admin"
-        env:
-          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
-      
+      - name: bundle 
+        run: npm run bundle
+        working-directory: "./frontend/css"
+
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/app/admin/dist/js gs://ji-cloud-sandbox-frontend-origin-eu-001/admin/js
-        
+        run: gsutil -m rsync -d -r frontend/css/dist gs://ji-cloud-frontend-origin-eu-001/_css
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:

@@ -14,7 +14,7 @@ Most of the capability should work out of the box.
 At build time, the templates are collated from 3 locations and then output to one place (`.template_output/` which is gitignored). This output folder is made available to storybook via the `@templates` import alias. Original directory structure from each location is preserved.
 
 The location of source templates are:
-  * `frontend/_core/templates` - common reusable templates for use in multiple projects
+  * `frontend/core/templates` - common reusable templates for use in multiple projects
   * `frontend/[APP]/templates` - the templates for the specific app
   * `frontend/[APP]/storybook/demo-templates` - templates that are only used for demo purposes in storybook (these won't be available to the APP itself at build time)
 
