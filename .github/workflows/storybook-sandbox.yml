@@ -1,8 +1,8 @@
-name: Storybook - Release
+name: Storybook - Sandbox
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'config/**'
     - 'frontend/core/js/**'
