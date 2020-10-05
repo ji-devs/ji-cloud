@@ -6,6 +6,10 @@
   "scripts": {
     "watch": "postcss -w src/index.css --env development -o dist/styles.css",
     "bundle": "npm-run-all -p _bundle-dev _bundle-prod",
+<<<<<<< HEAD:frontend/css/package.json
+    "bundle-remote-storybook": "postcss src/index.css --env production -o dist/styles.css",
+=======
+>>>>>>> parent of e82a685... github workflows:frontend/user/css/package.json
     "_bundle-dev": "postcss src/index.css --env development -o dist/styles.css",
     "_bundle-prod": "postcss src/index.css --env production -o dist/styles.min.css"
   },
