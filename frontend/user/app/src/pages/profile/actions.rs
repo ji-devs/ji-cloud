@@ -15,7 +15,7 @@ use core::{
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use crate::utils::firebase::get_firebase_register_google;
+use crate::utils::firebase::firebase_register_google;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;

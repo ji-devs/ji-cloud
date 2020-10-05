@@ -19,6 +19,7 @@ use core::routes::{Route, UserRoute};
 
 pub struct SigninPage {
     pub status: Mutable<Option<SigninStatus>>,
+    pub refs: RefCell<Option<SigninPageRefs>>,
     pub loader: AsyncLoader
 }
 
@@ -35,7 +36,8 @@ impl SigninPage {
 
         let _self = Rc::new(Self { 
             status: Mutable::new(None),
-            loader: AsyncLoader::new()
+            loader: AsyncLoader::new(),
+            refs: RefCell::new(None),
         });
 
 
@@ -44,18 +46,36 @@ impl SigninPage {
     
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::signin(), {
-            /*
-            .with_data_id!("signin", {
+            .with_data_id!("email-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
-                    _self.loader.load(actions::signin_email(_self.clone()));
+                    _self.loader.load(clone!(_self => async move {
+
+                        let SigninInfo {email, password} = _self.refs.borrow().as_ref().unwrap_throw().get_info();
+                        match actions::signin_email(&email, &password).await {
+                            Ok(csrf) => {
+                                actions::do_success(&_self, csrf);
+                            },
+                            Err(err) => {
+                                _self.status.set(err);
+                            }
+                        }
+                    }));
                 }))
             })
-            */
             .with_data_id!("google-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));
-                    _self.loader.load(actions::signin_google(_self.clone()));
+                    _self.loader.load(clone!(_self => async move {
+                        match actions::signin_google().await {
+                            Ok(csrf) => {
+                                actions::do_success(&_self, csrf);
+                            },
+                            Err(err) => {
+                                _self.status.set(err);
+                            }
+                        }
+                    }));
 
                 }))
             })
@@ -66,6 +86,22 @@ impl SigninPage {
                     dominator::routing::go_to_url(&route);
                 }))
             })
+            .with_data_id!("forgot-password", {
+                .event(clone!(_self => move |_evt:events::Click| {
+                    _self.loader.load(clone!(_self => async move {
+
+                        let SigninInfo {email, ..} = _self.refs.borrow().as_ref().unwrap_throw().get_info();
+                        match actions::forgot_password(&email).await {
+                            Ok(csrf) => {
+                                _self.status.set(Some(SigninStatus::PasswordResetSent));
+                            },
+                            Err(err) => {
+                                _self.status.set(Some(err));
+                            }
+                        }
+                    }));
+                }))
+            })
             .with_data_id!("status-message", {
                 .text_signal(_self.status.signal_ref(|status| {
                     status
@@ -74,8 +110,34 @@ impl SigninPage {
                         .unwrap_or("".to_string())
                 }))
             })
+            .after_inserted(clone!(_self => move |elem| {
+                *_self.refs.borrow_mut() = Some(SigninPageRefs::new(&elem));
+            }))
         })
     }
+}
+pub struct SigninPageRefs {
+    email: HtmlInputElement,
+    password: HtmlInputElement,
+}
 
+pub struct SigninInfo {
+    pub email: String, 
+    pub password: String, 
+}
 
+impl SigninPageRefs {
+    pub fn new(parent:&HtmlElement) -> Self {
+        Self {
+            email: parent.select(&data_id("email")),
+            password: parent.select(&data_id("password")),
+        }
+    }
+
+    pub fn get_info(&self) -> SigninInfo {
+        let email = self.email.value();
+        let password = self.password.value();
+    
+        SigninInfo { email, password } 
+    }
 }

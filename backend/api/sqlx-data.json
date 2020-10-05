@@ -76,6 +76,19 @@
       "nullable": []
     }
   },
+  "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
+    "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "UuidArray"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
     "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\"",
     "describe": {
@@ -489,6 +502,62 @@
       "nullable": [
         true,
         false
+      ]
+    }
+  },
+  "8887dc91e41762e76d9be079dc67e92b06b51df37b30da1c59c6d57f31300260": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at < updated_at is not false and updated_at <= $1 is not false\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
       ]
     }
   },
