@@ -2,7 +2,7 @@
   "hosting": [
     {
       "target": "ji-cloud-developer-storybook",
-      "public": "storybook/dist/storybook-build",
+      "public": "frontend/storybook/dist/storybook-build",
       "ignore": [
         "firebase.json",
         "**/.*",
