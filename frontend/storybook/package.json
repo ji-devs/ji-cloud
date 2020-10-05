@@ -21,19 +21,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-<<<<<<< HEAD
-    "@babel/core": "^7.11.4",
-    "@storybook/addon-actions": "^6.0.17",
-    "@storybook/addon-essentials": "^6.0.17",
-    "@storybook/addon-links": "^6.0.17",
-    "@storybook/html": "^6.0.17",
-=======
     "@babel/core": "^7.11.6",
     "@storybook/addon-actions": "^6.0.26",
     "@storybook/addon-essentials": "^6.0.26",
     "@storybook/addon-links": "^6.0.26",
     "@storybook/html": "^6.0.26",
->>>>>>> c23b6e6a79057f627c7926babd18e93245abe11e
     "babel-loader": "^8.1.0",
     "babel-plugin-root-import": "^6.5.0",
     "npm-run-all": "^4.1.5",
