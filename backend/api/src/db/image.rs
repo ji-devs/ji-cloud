@@ -1,3 +1,4 @@
+use super::recycle_metadata;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
@@ -6,45 +7,7 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId, StyleId},
 };
 use sqlx::{PgConnection, PgPool};
-use std::fmt::Write;
 use uuid::Uuid;
-
-trait Metadata {
-    const TABLE: &'static str;
-    fn as_uuid(&self) -> Uuid;
-}
-
-impl Metadata for AffiliationId {
-    const TABLE: &'static str = "affiliation";
-
-    fn as_uuid(&self) -> Uuid {
-        self.0
-    }
-}
-
-impl Metadata for StyleId {
-    const TABLE: &'static str = "style";
-
-    fn as_uuid(&self) -> Uuid {
-        self.0
-    }
-}
-
-impl Metadata for AgeRangeId {
-    const TABLE: &'static str = "age_range";
-
-    fn as_uuid(&self) -> Uuid {
-        self.0
-    }
-}
-
-impl Metadata for CategoryId {
-    const TABLE: &'static str = "category";
-
-    fn as_uuid(&self) -> Uuid {
-        self.0
-    }
-}
 
 pub async fn create(
     conn: &mut PgConnection,
@@ -72,57 +35,6 @@ returning id as "id: ImageId"
     Ok(id)
 }
 
-async fn recycle_metadata<'a, T: Metadata>(
-    conn: &mut PgConnection,
-    image: ImageId,
-    meta: &[T],
-) -> sqlx::Result<()> {
-    sqlx::query(&format!(
-        "delete from image_{} where image_id = $1",
-        T::TABLE
-    ))
-    .bind(image.0)
-    .execute(&mut *conn)
-    .await?;
-
-    for meta in meta.chunks(i16::MAX as usize - 1) {
-        let query = generate_metadata_insert(T::TABLE, meta.len());
-        let mut query = sqlx::query(&query).bind(image.0);
-
-        for meta in meta {
-            query = query.bind(meta.as_uuid());
-        }
-
-        query.execute(&mut *conn).await?;
-    }
-
-    Ok(())
-}
-
-fn generate_metadata_insert(meta_kind: &str, binds: usize) -> String {
-    debug_assert_ne!(binds, 0);
-    debug_assert_ne!(binds, i16::MAX as usize);
-
-    let mut s = format!(
-        "insert into image_{0} (image_id, {0}_id) values($1, $2)",
-        meta_kind
-    );
-
-    for i in 1..binds {
-        write!(s, ", ($1, ${})", i + 2).expect("write to String shouldn't fail");
-    }
-
-    s
-}
-
-pub fn nul_if_empty<T>(arr: &[T]) -> Option<&[T]> {
-    if !arr.is_empty() {
-        Some(arr)
-    } else {
-        None
-    }
-}
-
 pub async fn update_metadata(
     conn: &mut PgConnection,
     image: ImageId,
@@ -131,20 +43,22 @@ pub async fn update_metadata(
     styles: Option<&[StyleId]>,
     categories: Option<&[CategoryId]>,
 ) -> sqlx::Result<()> {
+    const TABLE: &str = "image";
+
     if let Some(affiliations) = affiliations {
-        recycle_metadata(&mut *conn, image, affiliations).await?;
+        recycle_metadata(&mut *conn, TABLE, image.0, affiliations).await?;
     }
 
     if let Some(age_ranges) = age_ranges {
-        recycle_metadata(&mut *conn, image, age_ranges).await?;
+        recycle_metadata(&mut *conn, TABLE, image.0, age_ranges).await?;
     }
 
     if let Some(styles) = styles {
-        recycle_metadata(&mut *conn, image, styles).await?;
+        recycle_metadata(&mut *conn, TABLE, image.0, styles).await?;
     }
 
     if let Some(categories) = categories {
-        recycle_metadata(&mut *conn, image, categories).await?;
+        recycle_metadata(&mut *conn, TABLE, image.0, categories).await?;
     }
 
     Ok(())

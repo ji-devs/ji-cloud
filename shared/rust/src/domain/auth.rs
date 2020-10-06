@@ -1,5 +1,6 @@
 //! Types for authorization.
 
+use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -72,7 +73,29 @@ pub struct RegisterRequest {
     pub opt_into_edu_resources: bool,
 
     /// The organization that the user belongs to.
-    pub organization: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<String>,
+
+    /// The user's taught subjects.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub subjects: Vec<SubjectId>,
+
+    /// The user's age-ranges.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// The user's affiliations.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// The user's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub geocode: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

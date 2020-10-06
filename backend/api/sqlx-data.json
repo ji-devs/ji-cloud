@@ -109,6 +109,134 @@
       ]
     }
   },
+  "140fcd94aee0ae0b0fbecff7b028ce6480159aec45d096f06df28eb227fcf783": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        geocode,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "geocode",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 16,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "1b88f0ec5158d04c34ef416bf283ddfc0d383330b242991a77db61e9b5de948c": {
     "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\n\nfrom path\n         inner join category using (id);\n",
     "describe": {
@@ -578,116 +706,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "9c5d608dc8981569bf51033b3150e3e81f1266efc1c508184637e090b145d20e": {
-    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "firebase_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 10,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 13,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 15,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null,
         null
       ]
     }
