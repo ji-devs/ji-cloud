@@ -13,7 +13,7 @@ use actix_web::{
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
-use db::image::nul_if_empty;
+use db::nul_if_empty;
 use futures::TryStreamExt;
 use http::StatusCode;
 use shared::{
