@@ -57,14 +57,12 @@ jobs:
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
 
-      - name: install google cloud sdk
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - name: deploy to firebase
+        uses: w9jds/firebase-action@v1.0.1
         with:
-          version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
-
-      - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/storybook/dist/storybook-build gs://ji-cloud-sandbox-storybook-origin-eu-001/_storybook
+          args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-storybook
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

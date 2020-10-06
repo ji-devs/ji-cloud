@@ -1,7 +1,22 @@
 {
   "hosting": [
     {
-      "target": "ji-cloud-developer-storybook",
+      "target": "ji-cloud-sandbox-storybook",
+      "public": "frontend/storybook/dist/storybook-build",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "ji-cloud-storybook",
       "public": "frontend/storybook/dist/storybook-build",
       "ignore": [
         "firebase.json",
