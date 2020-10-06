@@ -92,6 +92,14 @@ impl RemoteTarget {
         }
     }
 
+    pub fn css_url(&self, minified:bool) -> String {
+        if minified {
+            format!("{}/_css/styles.min.css", self.frontend_url())
+        } else {
+            format!("{}/_css/styles.css", self.frontend_url())
+        }
+    }
+
     pub fn spa_url(&self, app: &str, path: &str) -> String {
         format!("{}/{}/{}", self.frontend_url(), app, path)
     }
