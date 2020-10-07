@@ -14,9 +14,9 @@
     "_css-watch": "cd ../css && npm run watch",
     "_media-server": "cd ../../build-utils && npm run local-media-server",
     "_storybook-watch": "start-storybook -p 6006 -s ./dist",
-    "_templates-build:sandbox": "cd ../../build-utils/templates && cargo run -- --remote-target sandbox --all-projects --demo",
-    "_templates-build:release": "cd ../../build-utils/templates && cargo run -- --remote-target release --all-projects --demo",
-    "_templates-watch": "cd ../../build-utils/templates && cargo watch -w ../../frontend/templates -w ../../frontend/storybook/demo-templates -x \"run -- --remote-target local --all-projects --demo\""
+    "_templates-build:sandbox": "cd ../../build-utils/templates && cargo run -- --remote-target sandbox --demo",
+    "_templates-build:release": "cd ../../build-utils/templates && cargo run -- --remote-target release --demo",
+    "_templates-watch": "cd ../../build-utils/templates && cargo watch -w ../../frontend/templates -w ../../frontend/storybook/demo-templates -x \"run -- --remote-target local --demo\""
   },
   "author": "",
   "license": "ISC",

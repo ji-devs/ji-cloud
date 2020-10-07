@@ -212,7 +212,11 @@ pub async fn create_user(
         locale: "en".to_string(),
         timezone: chrono_tz::Tz::Asia__Jerusalem,
         opt_into_edu_resources: true,
-        organization: "ji".to_string()
+        organization: Some("ji".to_string()),
+        affiliations: vec![],
+        age_ranges: vec![],
+        subjects: vec![],
+        geocode: None,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
