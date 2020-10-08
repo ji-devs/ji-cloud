@@ -19,7 +19,8 @@ use discard::DiscardOnDrop;
 use core::routes::{Route, AdminRoute};
 use shared::domain::{
     user::UserProfile,
-    category::Category
+    category::Category,
+    image::ImageKind,
 };
 use super::actions;
 
@@ -55,7 +56,7 @@ impl ImageAdd{
 
                     if let Some(file) = file {
                         spawn_local(async move {
-                            let id = actions::create_image(file).await.unwrap_throw();
+                            let id = actions::create_image(file, get_image_kind()).await.unwrap_throw();
                             let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
                             dominator::routing::go_to_url(&route);
                         });
@@ -67,5 +68,20 @@ impl ImageAdd{
                 *_self.file_input.borrow_mut() = Some(elem.select(&data_id("file")));
             }))
         })
+    }
+}
+
+fn get_image_kind() -> ImageKind {
+    let document:web_sys::Document = 
+        web_sys::window()
+            .unwrap_throw()
+            .document()
+            .unwrap_throw();
+
+    let input:HtmlInputElement = document.select("input[name='img_kind']:checked");
+    match input.value().as_ref() {
+        "sticker" => ImageKind::Sticker,
+        "canvas" => ImageKind::Canvas,
+        _ => panic!("unknown img kind!")
     }
 }

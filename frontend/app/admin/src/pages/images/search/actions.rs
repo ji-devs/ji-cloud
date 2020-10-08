@@ -30,24 +30,34 @@ impl BasicImage {
     }
 }
 
-pub async fn search_images(query:String) -> Result<Vec<BasicImage>, ()> {
-    _search_images_api(query).await
+pub async fn search_images(query:String, page: Option<u32>, is_published: Option<bool>) -> Result<(Vec<BasicImage>, u32), ()> {
+    _search_images_api(query, page, is_published).await
         .map_err(|err:SearchError| { 
             ()
         })
         .map(|res| {
-            let SearchResponse { images } = res;
-            images
+            let SearchResponse { images, pages } = res;
+            let images:Vec<BasicImage> = images
                 .into_iter()
                 .map(BasicImage::new)
-                .collect()
+                .collect();
+
+            (images, pages)
         })
 }
 
 
-async fn _search_images_api(query:String) -> Result < <Search as ApiEndpoint>::Res, <Search as ApiEndpoint>::Err> {
+async fn _search_images_api(query:String, page: Option<u32>, is_published: Option<bool>) -> Result < <Search as ApiEndpoint>::Res, <Search as ApiEndpoint>::Err> {
     let req = SearchQuery {
-        q: query
+        q: query,
+        page,
+        is_published,
+        //future query powers :)
+        styles: Vec::new(),
+        age_ranges: Vec::new(),
+        affiliations: Vec::new(),
+        categories: Vec::new(),
+        is_premium: None,
     };
 
     //TODO - maybe make query / serde_qs part of basic fetch options

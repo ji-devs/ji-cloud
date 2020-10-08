@@ -141,7 +141,7 @@ export const Search = () => {
     const searchContainer = tmpl(imagesSearch);
 
     setTextId(searchContainer, "n-results", "42");
-    setValueId(searchContainer, "curr-page", "9");
+    setValueId(searchContainer, "page", "9");
 
     [
       ["red-sea-book.png", "Red Sea"],

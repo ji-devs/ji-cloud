@@ -8,8 +8,8 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-use web_sys::{HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
+use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlSelectElement};
+use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
@@ -27,8 +27,11 @@ use super::actions::*;
 
 pub struct ImageSearch {
     query_input:RefCell<Option<HtmlInputElement>>,
+    page_input:RefCell<Option<HtmlInputElement>>,
+    is_published:RefCell<Option<bool>>,
     query: Mutable<String>,
     state: Mutable<SearchState>,
+    pages: Mutable<u32>,
     error: Mutable<Option<String>>,
     results: MutableVec<BasicImage>,
     loader: AsyncLoader,
@@ -46,9 +49,12 @@ impl ImageSearch {
     pub fn new() -> Rc<Self> {
         let _self = Rc::new(Self { 
             query_input: RefCell::new(None),
+            page_input: RefCell::new(None),
+            is_published: RefCell::new(None),
             query: Mutable::new("".to_string()),
             error: Mutable::new(None),
             state: Mutable::new(SearchState::None),
+            pages: Mutable::new(0),
             results: MutableVec::new(),
             loader: AsyncLoader::new(),
         });
@@ -70,13 +76,25 @@ impl ImageSearch {
             }
         };
 
+        let page = {
+            let page_input = _self.page_input.borrow();
+            let page:String = page_input.as_ref().unwrap_throw().value();
+            let page:u32 = page.parse().unwrap_throw();
+            Some(page)
+        };
+        let is_published = {
+            let is_published = _self.is_published.borrow();
+            *is_published
+        };
+
         _self.query.set(query.clone());
 
         _self.clone().loader.load(async move {
-            let results = search_images(query).await; 
+            let results = search_images(query, page, is_published).await; 
             match results {
-                Ok(results) => {
-                    _self.results.lock_mut().replace_cloned(results);
+                Ok((images, pages)) => {
+                    _self.results.lock_mut().replace_cloned(images);
+                    *_self.pages.lock_mut() = pages;
                 },
                 Err(_) => _self.error.set(Some("got an error!".to_string())),
             }
@@ -106,6 +124,28 @@ impl ImageSearch {
                         })
                     }))
                 })
+            })
+            .with_data_id!("page", {
+                .event(clone!(_self => move |evt:events::Change| {
+                    //TODO - re-trigger search?
+                }))
+                .after_inserted(clone!(_self => move |elem| {
+                    *_self.page_input.borrow_mut() = Some(elem.unchecked_into()); 
+                }))
+            })
+
+            //TODO - need https://github.com/dakom/dominator-helpers/issues/1#issue-717271232
+            .with_data_id!("filter" => HtmlSelectElement, {
+                .with_node!(element => {
+                    .event(clone!(_self => move |evt:events::Change| {
+                        let value = element.value();
+                        //TODO - change is_published
+                        log::info!("{}", value);
+                    }))
+                })
+            })
+            .with_data_id!("pages", {
+                .text_signal(_self.pages.signal().map(|pages| format!("{}", pages)))
             })
             .with_data_id!("error-message", {
                 .class_signal("hidden", _self.error.signal_ref(|err| err.is_none()))

@@ -12,15 +12,17 @@ use wasm_bindgen::UnwrapThrowExt;
 use url::Url;
 use web_sys::File;
 
-pub async fn create_image(file:File) -> Result<String, ()> {
-    match _create_image_api().await {
+pub async fn create_image(file:File, kind: ImageKind) -> Result<String, ()> {
+    match _create_image_api(kind).await {
         Err(_) => { return Err(()) },
         Ok(res) => {
-            let CreateResponse { id, upload_url} = res;
+            let CreateResponse { id} = res;
             let id = id.0.to_string();
             log::info!("got id: {}", id);
 
-            upload_file(&upload_url.to_string(), &file).await
+            let path = Upload::PATH.replace("{id}",&id);
+            upload_file(&path, &file)
+                .await
                 .map_err(|_| ())
                 .map(|_| id)
         }
@@ -28,7 +30,7 @@ pub async fn create_image(file:File) -> Result<String, ()> {
 }
 
 
-async fn _create_image_api() -> Result < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
+async fn _create_image_api(kind: ImageKind) -> Result < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
     let req:<Create as ApiEndpoint>::Req = CreateRequest {
         name: "".to_string(),
         description: "".to_string(),
@@ -37,7 +39,8 @@ async fn _create_image_api() -> Result < <Create as ApiEndpoint>::Res, <Create a
         styles: Vec::new(),
         age_ranges: Vec::new(),
         affiliations: Vec::new(),
-        categories: Vec::new()
+        categories: Vec::new(),
+        kind
     };
 
     api_with_auth(&api_url(Create::PATH), Create::METHOD, Some(req)).await
