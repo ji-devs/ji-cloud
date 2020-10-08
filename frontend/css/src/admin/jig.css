@@ -78,3 +78,7 @@ select {
  width: 8px;
  margin-left: -1em;
 }
+
+.jig-creator-active {
+  border-left-color: #5590fc !important;
+}
