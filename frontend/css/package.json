@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "postcss -w src/index.css --env development -o dist/styles.css",
     "bundle": "npm-run-all -p _bundle-dev _bundle-prod",
-	"bundle-remote-storybook": "postcss src/index.css --env production -o dist/styles.css",
+    "bundle-remote-storybook": "postcss src/index.css --env production -o dist/styles.css",
     "_bundle-dev": "postcss src/index.css --env development -o dist/styles.css",
     "_bundle-prod": "postcss src/index.css --env production -o dist/styles.min.css"
   },
