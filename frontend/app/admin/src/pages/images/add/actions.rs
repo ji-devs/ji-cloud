@@ -21,7 +21,7 @@ pub async fn create_image(file:File, kind: ImageKind) -> Result<String, ()> {
             log::info!("got id: {}", id);
 
             let path = Upload::PATH.replace("{id}",&id);
-            upload_file(&path, &file)
+            upload_file(&path, &file, Upload::METHOD.as_str())
                 .await
                 .map_err(|_| ())
                 .map(|_| id)

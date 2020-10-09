@@ -65,6 +65,7 @@ impl ImageSearch {
     }
    
     pub fn do_search(_self: Rc<Self>) {
+
         _self.state.set(SearchState::Loading);
         _self.error.set(None);
 
@@ -76,12 +77,18 @@ impl ImageSearch {
             }
         };
 
-        let page = {
+        let page:u32 = {
             let page_input = _self.page_input.borrow();
-            let page:String = page_input.as_ref().unwrap_throw().value();
-            let page:u32 = page.parse().unwrap_throw();
-            Some(page)
+            match page_input.as_ref() {
+                Some(input) => {
+                    let page:String = input.value();
+                    let page:u32 = page.parse().unwrap_throw();
+                    page
+                },
+                None => 0 
+            }
         };
+
         let is_published = {
             let is_published = _self.is_published.borrow();
             *is_published
@@ -90,7 +97,7 @@ impl ImageSearch {
         _self.query.set(query.clone());
 
         _self.clone().loader.load(async move {
-            let results = search_images(query, page, is_published).await; 
+            let results = search_images(query, Some(page), is_published).await; 
             match results {
                 Ok((images, pages)) => {
                     _self.results.lock_mut().replace_cloned(images);
@@ -127,7 +134,7 @@ impl ImageSearch {
             })
             .with_data_id!("page", {
                 .event(clone!(_self => move |evt:events::Change| {
-                    //TODO - re-trigger search?
+                    Self::do_search(_self.clone());
                 }))
                 .after_inserted(clone!(_self => move |elem| {
                     *_self.page_input.borrow_mut() = Some(elem.unchecked_into()); 
@@ -139,11 +146,17 @@ impl ImageSearch {
                 .with_node!(element => {
                     .event(clone!(_self => move |evt:events::Change| {
                         let value = element.value();
-                        //TODO - change is_published
-                        log::info!("{}", value);
+                        *_self.is_published.borrow_mut() = match value.as_ref() {
+                            "0" => None,
+                            "1" => Some(true),
+                            "2" => Some(false),
+                            _ => panic!("unsupported filter!"),
+                        };
+                        Self::do_search(_self.clone());
                     }))
                 })
             })
+
             .with_data_id!("pages", {
                 .text_signal(_self.pages.signal().map(|pages| format!("{}", pages)))
             })

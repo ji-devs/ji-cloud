@@ -36,8 +36,8 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 //either a serialized error or a native error (like 401, 403, etc.)
 
-pub async fn upload_file(url:&str, file:&File) -> Result<(), anyhow::Error> {
-    fetch_upload_file(url, file)
+pub async fn upload_file(url:&str, file:&File, method:&str) -> Result<(), anyhow::Error> {
+    fetch_upload_file(url, file, method)
         .await
         .map(|res| ())
         .map_err(|err| anyhow::Error::msg(err.to_string()))

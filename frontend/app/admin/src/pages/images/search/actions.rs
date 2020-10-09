@@ -23,7 +23,7 @@ impl BasicImage {
     pub fn new(resp:GetResponse) -> Self {
         Self {
             id: resp.metadata.id.0.to_string(),
-            src: resp.url.to_string(),
+            src: resp.thumbnail_url.to_string(),
             is_published: resp.metadata.publish_at.is_some(),
             text: resp.metadata.name
         }

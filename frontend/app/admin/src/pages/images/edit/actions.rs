@@ -96,7 +96,7 @@ pub async fn delete( id:String) -> Result<(), DeleteError>
 pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
 {
     let path = Upload::PATH.replace("{id}",&id);
-    upload_file(&path, &file)
+    upload_file(&path, &file, Upload::METHOD.as_str())
         .await
         .map_err(|err| UpdateError::InternalServerError(err.into()))
 }
@@ -275,7 +275,7 @@ pub async fn get_image_url(id:&str) -> Result<String, ()> {
             ()
         })
         .map(|res| {
-            res.url.to_string()
+            res.thumbnail_url.to_string()
         })
 }
 
