@@ -39,7 +39,8 @@ module.exports = {
         jigrey: '#a1a8ad',
         jigreyfocus: '#d8d8d8',
         jiheadergrey: '#4a4a4a',
-        jijigbordergrey: '#a1a8ad'
+        jijigbordergrey: '#a1a8ad',
+        jioverlayblue: '#e5f3ff',
 
       },
 
@@ -76,6 +77,7 @@ module.exports = {
         360: '360px',
         393: '393px',
         408: '408px',
+        419: '419px',
         480: '480px',
         624: '624px',
         640: '640px',
@@ -105,6 +107,7 @@ module.exports = {
         160: '160px',
         185: '185px',
         216: '216px',
+        262: '262px',
         383: '383px',
         537: '537px',
         696: '696px',
@@ -146,6 +149,9 @@ module.exports = {
         60:'60px',
         80: '80px',
         255: '255px',
+      },
+      cursor:{
+        grab: 'grab'
       },
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
