@@ -58,8 +58,7 @@ impl ImageAdd{
                         spawn_local(async move {
                             let id = actions::create_image(file, get_image_kind()).await.unwrap_throw();
                             let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
-                            log::info!("url: {}", route);
-                            //dominator::routing::go_to_url(&route);
+                            dominator::routing::go_to_url(&route);
                         });
                     }
                 }))

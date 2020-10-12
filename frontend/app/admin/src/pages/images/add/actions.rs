@@ -18,9 +18,8 @@ pub async fn create_image(file:File, kind: ImageKind) -> Result<String, ()> {
         Ok(res) => {
             let CreateResponse { id} = res;
             let id = id.0.to_string();
-            log::info!("got id: {}", id);
 
-            let path = Upload::PATH.replace("{id}",&id);
+            let path = api_url(&Upload::PATH.replace("{id}",&id));
             upload_file(&path, &file, Upload::METHOD.as_str())
                 .await
                 .map_err(|_| ())
