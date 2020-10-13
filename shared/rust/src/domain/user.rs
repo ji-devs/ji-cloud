@@ -35,6 +35,24 @@ impl TryFrom<i16> for UserScope {
     }
 }
 
+/// Query to lookup a user by unique data
+/// no filters will return that the user does not exist.
+/// multiple filters will act as a logical `OR` of them (multiple choices will return an arbitrary user).
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct UserLookupQuery {
+    /// The user ID we're filtering by.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<Uuid>,
+
+    /// The *Firebase* ID we're filtering by.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub firebase_id: Option<String>,
+
+    /// The name we're filtering by.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
 /// Publically accessable information about a user.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OtherUser {
