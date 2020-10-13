@@ -780,6 +780,28 @@
       "nullable": []
     }
   },
+  "d3d8991c6bd250cd87a4d5eb211ceec43f77e6e9eaeb75d114c2bd350ac25467": {
+    "query": "select id from \"user\" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
     "describe": {
@@ -825,26 +847,6 @@
         true,
         null,
         null
-      ]
-    }
-  },
-  "e071495e0bf5589a94030f12c1b9faa86cb69654686e8b1fda098cc0d14a25c0": {
-    "query": "select id from \"user\" where username = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
       ]
     }
   },

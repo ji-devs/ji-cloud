@@ -3,33 +3,45 @@ use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use actix_web::{
-    web::{Data, Json, Path, ServiceConfig},
+    web::{Data, Json, Query, ServiceConfig},
     HttpResponse,
 };
 use core::settings::RuntimeSettings;
 use jsonwebtoken as jwt;
 use shared::{
     api::endpoints::{
-        user::{Profile, Register, Signin, SingleSignOn, UserByName},
+        user::{Profile, Register, Signin, SingleSignOn, UserLookup},
         ApiEndpoint,
     },
     domain::auth::{
         AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
     },
     domain::user::OtherUser,
+    domain::user::UserLookupQuery,
     error::auth::RegisterError,
     error::user::NoSuchUserError,
     error::InternalServerError,
 };
 use sqlx::PgPool;
 
-async fn user_by_name(
+async fn user_lookup(
     db: Data<PgPool>,
-    username: Path<String>,
+    query: Query<UserLookupQuery>,
 ) -> Result<Option<Json<OtherUser>>, InternalServerError> {
-    Ok(db::user::by_name(db.as_ref(), &username.into_inner())
-        .await?
-        .map(Json))
+    let query = query.into_inner();
+
+    if query.id.is_none() && query.firebase_id.is_none() && query.name.is_none() {
+        return Ok(None);
+    }
+
+    Ok(db::user::lookup(
+        db.as_ref(),
+        query.id,
+        query.firebase_id.as_deref(),
+        query.name.as_deref(),
+    )
+    .await?
+    .map(Json))
 }
 
 async fn handle_signin_credentials(
@@ -119,8 +131,5 @@ pub fn configure(cfg: &mut ServiceConfig) {
         Signin::PATH,
         Signin::METHOD.route().to(handle_signin_credentials),
     )
-    .route(
-        UserByName::PATH,
-        UserByName::METHOD.route().to(user_by_name),
-    );
+    .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup));
 }
