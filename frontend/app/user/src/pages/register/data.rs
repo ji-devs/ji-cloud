@@ -18,6 +18,12 @@ pub struct RegisterData {
     pub user_name: Option<String>,
     pub given_name: Option<String>,
     pub family_name: Option<String>,
+    pub edu_resources: bool,
+    pub lang: Option<String>,
+    pub geocode: Option<String>,
+    pub affiliations: Vec<String>,
+    pub age_ranges: Vec<String>,
+    pub subjects: Vec<String>,
 }
 
 
@@ -36,6 +42,8 @@ pub enum RegisterStatus {
     EmailExists,
     UsernameExists,
     IdExists,
+    Geocode,
+    Language,
     Over18,
     UnknownFirebase,
     Technical 
@@ -61,6 +69,8 @@ impl RegisterStatus {
             Self::EmptyUserName => "supply a user name!",
             Self::EmptyEmail => "supply an email address!",
             Self::Over18 => "Check the age restriction!",
+            Self::Geocode => "Supply a geocode!",
+            Self::Language => "Choose a language!",
             Self::UsernameExists => "Username in use!",
             Self::EmailExists => "Email in use!",
             Self::UnknownFirebase => "firebase error!",

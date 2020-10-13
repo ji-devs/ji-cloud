@@ -79,6 +79,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
+//TODO - get rid of this, use specialization
 pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {

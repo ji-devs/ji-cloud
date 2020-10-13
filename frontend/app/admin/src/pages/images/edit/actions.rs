@@ -55,7 +55,7 @@ pub async fn save(
         publish_at: None,
     };
     let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map(|_| ())

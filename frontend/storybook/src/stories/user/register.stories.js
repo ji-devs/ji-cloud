@@ -10,13 +10,13 @@ export default {
   title: 'User/Register',
 }
 
-export const Step1 = () => {
-    const page = tmpl(register1);
+export const Start = () => {
+    const page = tmpl(registerStart);
     return page;
 }
 
-export const RegisterStart = () => {
-    const page = tmpl(registerStart);
+export const Step1 = () => {
+    const page = tmpl(register1);
     return page;
 }
 
