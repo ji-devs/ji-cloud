@@ -13,7 +13,7 @@ actix-cors = "0.3.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
 actix-web = "3.0.0"
-algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "61911d09cbf0c4361c73afe64fdbd881cdbb0f95" }
+algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "85975c32cc9396c3e4ae6df7158948579b9989f4" }
 anyhow = "1.0.32"
 chrono = "0.4.13"
 chrono-tz = "0.5.3"
