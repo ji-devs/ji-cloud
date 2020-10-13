@@ -9,6 +9,31 @@ use sqlx::postgres::PgRow;
 use url::Url;
 use uuid::Uuid;
 
+/// Represents different kinds of images (which affects how the size is stored in the db)
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[repr(i16)]
+pub enum ImageKind {
+    /// The image is a canvas (background) image
+    Canvas = 0,
+    /// The image is a sticker.
+    Sticker = 1,
+}
+
+impl ImageKind {
+    /// The size of a thumbnail (WxH pixels).
+    pub const THUMBNAIL_SIZE: (u32, u32) = (256, 144);
+
+    /// Gets the proper size of the image once resized.
+    pub const fn size(self) -> (u32, u32) {
+        match self {
+            // note: these are placeholder values and *not* the actual final values.
+            Self::Canvas => (2560, 1440),
+            Self::Sticker => (2048, 1152),
+        }
+    }
+}
+
 /// Wrapper type around [`Uuid`], represents the ID of a image.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
@@ -51,22 +76,32 @@ impl From<Publish> for DateTime<Utc> {
 pub struct CreateRequest {
     /// The name of the image.
     pub name: String,
+
     /// The description of the image.
     pub description: String,
+
     /// Is the image premium?
     pub is_premium: bool,
+
     /// When to publish the image.
     ///
     /// If [`Some`] publish the image according to the `Publish`. Otherwise, don't publish it.
     pub publish_at: Option<Publish>,
+
     /// The image's styles.
     pub styles: Vec<StyleId>,
+
     /// The image's age ranges.
     pub age_ranges: Vec<AgeRangeId>,
+
     /// The image's affiliations.
     pub affiliations: Vec<AffiliationId>,
+
     /// The image's categories.
     pub categories: Vec<CategoryId>,
+
+    /// What kind of image this is.
+    pub kind: ImageKind,
 }
 
 // todo: # errors doc section.
@@ -121,6 +156,49 @@ pub struct UpdateRequest {
 pub struct SearchQuery {
     /// The query string.
     pub q: String,
+
+    /// The page number of the images to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// Optionally filter by `styles`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub styles: Vec<StyleId>,
+
+    /// Optionally filter by `age_ranges`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// Optionally filter by `affiliations`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// Optionally filter by `categories`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<CategoryId>,
+
+    /// Optionally filter by `is_premium`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_premium: Option<bool>,
+
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
 }
 
 /// Response for successful search.
@@ -128,6 +206,9 @@ pub struct SearchQuery {
 pub struct SearchResponse {
     /// the images returned.
     pub images: Vec<GetResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
 }
 
 /// Response for getting a single image.
@@ -135,8 +216,12 @@ pub struct SearchResponse {
 pub struct GetResponse {
     /// The image metadata.
     pub metadata: Image,
+
     /// A url that can be used to retrieve the image.
     pub url: Url,
+
+    /// A url that can be used to retrieve a thumbnail of the image.
+    pub thumbnail_url: Url,
 }
 
 /// Over the wire representation of an image's metadata.
@@ -181,16 +266,6 @@ pub struct Image {
 pub struct CreateResponse {
     /// The ID of the newly created image.
     pub id: ImageId,
-
-    /// The URL to upload the image data to.
-    pub upload_url: Url,
-}
-
-/// Response for updating an image.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateResponse {
-    /// The URL to upload the image data to.
-    pub replace_url: Url,
 }
 
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.

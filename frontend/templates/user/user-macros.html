@@ -1,0 +1,29 @@
+{% macro user_input(label, width, inputwidth, inputDataId="") %}
+<!--when error add class name error-->
+<!--When active add class focus-->
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
+  <input type="text" data-id="{{inputDataId}}" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
+  <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
+</div>
+{% endmacro user_input %}
+
+{% macro user_pw(label, width, inputwidth, inputDataId="") %}
+<!--when error add class name error-->
+<!--When active add class focus-->
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
+  <input type="password" data-id="{{inputDataId}}" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
+  <img src="{{MEDIA_UI}}/icn-show-idle.svg" alt="" class="absolute bottom-10 right-10">
+  <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
+</div>
+{% endmacro user_pw %}
+
+{% macro lang_select(label, width, selectDataId="") %}
+<div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4 user_select">
+  <select data-id="{{selectDataId}}" type="text" class=" focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+    <option>Select or type</option>
+    <option value="en">English</option>
+    <option value="he">עברית</option>
+  </select>
+  <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
+</div>
+{% endmacro lang_select %}

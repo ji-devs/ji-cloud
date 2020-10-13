@@ -12,6 +12,8 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct CategoryId(pub Uuid);
 
+into_uuid!(CategoryId);
+
 #[derive(Serialize, Deserialize)]
 /// The response returned when a request for categories is successful.
 pub struct CategoryResponse {
@@ -69,7 +71,6 @@ pub struct CreateCategoryRequest {
     pub parent_id: Option<CategoryId>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
 /// Request to get a tree of categories.
 ///
 /// # Examples
@@ -102,11 +103,14 @@ pub struct CreateCategoryRequest {
 /// ```no_run
 /// GetCategoryRequest { ids: vec![id1, id2, ...], scope: Some(CategoryTreeScope::Decendants) }
 /// ```
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct GetCategoryRequest {
     // fixme: Use CategoryId, unfortunately, sqlx doesn't currently allow for passing of T
     // the backend _could_ transmute the `CategoryId`s into `Uuid`s, but that's `unsafe`.
     /// The exact ids to be included in the response.
     #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
     pub ids: Vec<Uuid>,
 
     /// Which direction to follow the tree.

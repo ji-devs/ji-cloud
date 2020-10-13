@@ -16,8 +16,11 @@ pub enum RegisterError {
     /// Another user with the provided email already exists.
     TakenEmail,
 
-    /// Another user with the provided firebase-id already exists
+    /// Another user with the provided firebase-id already exis.ts
     TakenId,
+
+    /// Another user with the provided username already exists.
+    TakenUsername,
 
     /// An internal server error occurred.
     #[serde(skip)]

@@ -1,21 +1,22 @@
 //! Types that travel over the wire.
 
+macro_rules! into_uuid {
+    ( $( $t:ty ),+ $(,)? ) => {
+        $(
+            impl From<$t> for uuid::Uuid {
+                fn from(t: $t) -> Self {
+                    t.0
+                }
+            }
+        )+
+    };
+}
+
 pub mod auth;
 pub mod category;
 pub mod image;
 pub mod meta;
+mod ser;
 pub mod user;
 
-/// Hack to deserialize an Optional [`Option<T>`]
-///
-/// This is to differentiate between "missing" values and null values.
-/// For example in json `{"v": null}` and `{}` are different things, in the first one, `v` is `null`, but in the second, v is `undefined`.
-///
-/// [`Option<T>`]: https://doc.rust-lang.org/stable/std/option/enum.Option.html
-fn deserialize_optional_field<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
-where
-    D: serde::Deserializer<'de>,
-    T: serde::Deserialize<'de>,
-{
-    Ok(Some(serde::Deserialize::deserialize(deserializer)?))
-}
+use ser::{csv_encode_uuids, deserialize_optional_field, from_csv};

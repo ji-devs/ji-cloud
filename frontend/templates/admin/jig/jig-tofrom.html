@@ -1,0 +1,78 @@
+{% import "admin/jig/jig-macros.html" as JIGS %}
+
+<div class="absolute bg-jibackgroundGrey z-20">
+  <div class="w-270">
+    <p class="p-2 ">Filter by date:</p>
+    <div class="flex items-center border-b border-jibuttonBlue py-2 relative">
+
+      <img src="{{MEDIA_UI}}/icon-white-bg-default.svg" alt="" class="absolute right-10">
+      <input data-id="" type="search" name="" value="" class="bg-jibackgroundGrey outline-none focus:outline-none" placeholder="">
+
+    </div>
+
+  </div>
+  <div class="flex">
+    <div class="w-270">
+      <p class="p-2 ">From date</p>
+
+
+      <div class="flex justify-end">
+        {{ JIGS::datepickerselect(dataId="${id}", label="JAN") }}
+        {{ JIGS::datepickerselect(dataId="${id}", label="2020") }}
+
+
+      </div>
+      <div class="p-2">
+        <table class="w-270 pl-2 table-fixed content-center">
+          <thead>
+            <tr class="text-black">
+              <th class="font-normal w-1/7 ">S</th>
+              <th class="font-normal w-1/7 ">M</th>
+              <th class="font-normal w-1/7 ">T</th>
+              <th class="font-normal w-1/7 ">W</th>
+              <th class="font-normal w-1/7 ">T</th>
+              <th class="font-normal w-1/7 ">F</th>
+              <th class="font-normal w-1/7 ">S</th>
+            </tr>
+          </thead>
+        </table>
+        <p class="flex justify-end">TODAY</p>
+      </div>
+
+    </div>
+
+    <div class="w-270 px-2">
+      <p class="p-2 ">To date</p>
+
+
+      <div class="flex justify-end">
+        {{ JIGS::datepickerselect(dataId="${id}", label="JAN") }}
+        {{ JIGS::datepickerselect(dataId="${id}", label="2020") }}
+
+
+      </div>
+      <div class="p-2">
+        <table class="w-270">
+          <thead>
+            <tr class="text-black font-light">
+              <th class="font-normal">S</th>
+              <th class="font-normal">M</th>
+              <th class="font-normal">T</th>
+              <th class="font-normal">W</th>
+              <th class="font-normal">T</th>
+              <th class="font-normal">F</th>
+              <th class="font-normal">S</th>
+            </tr>
+          </thead>
+        </table>
+        <p class="flex justify-end">TODAY</p>
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+
+</div>

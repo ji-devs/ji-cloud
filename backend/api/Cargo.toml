@@ -13,7 +13,7 @@ actix-cors = "0.3.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
 actix-web = "3.0.0"
-algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "551b896ad4235d674a8ec38f0c00dfc6e52c5a08" }
+algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "61911d09cbf0c4361c73afe64fdbd881cdbb0f95" }
 anyhow = "1.0.32"
 chrono = "0.4.13"
 chrono-tz = "0.5.3"
@@ -39,11 +39,7 @@ time = "0.2.16"
 tokio = { version = "0.2", features = ["rt-threaded"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
-
-[dependencies.serde_qs]
-git = "https://github.com/izik1/serde_qs"
-rev = "720e9c24fb271dca1254198084ab8c85312ae705"
-features = ["actix"]
+image = "0.23.10"
 
 [dependencies.sqlx]
 version = "0.4.0-beta.1"

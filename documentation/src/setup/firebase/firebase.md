@@ -7,7 +7,7 @@ Make sure to follow the firebase config - e.g. to allow the domains for oauth
 
 ## Frontend Config
 
-Edit `frontend/user/js/firebase.js` and put in the config for both sandbox and release
+Edit `frontend/app/user/js/firebase.js` and put in the config for both sandbox and release
 
 These aren't secrets, it's okay to be checked into the repo and it will be publically viewable through the browser anyway
 

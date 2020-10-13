@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "author": "David Komer <david.komer@gmail.com>",
+  "name": "app",
+  "version": "0.1.0",
+  "scripts": {
+    "build:release": "npm run clean && npm run _templates-build:release && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
+    "build:sandbox": "npm run clean && npm run _templates-build:sandbox && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js",
+    "start": "npm run _devfiles && run-p _mediaserver _watch _templates-watch",
+    "clean": "rimraf ./dist",
+    "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
+    "_mediaserver": "cd ../../../build-utils && npm run local-media-server",
+    "_devfiles": "cd ../../../build-utils && npm run frontend-dev-files -- user",
+    "_templates-build:sandbox": "cd ../../../build-utils/templates && cargo run -- --remote-target sandbox",
+    "_templates-build:release": "cd ../../../build-utils/templates && cargo run -- --remote-target release",
+    "_templates-watch": "cd ../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/user -x \"run -- --remote-target local"
+  },
+  "dependencies": {
+    "@wasm-tool/rollup-plugin-rust": "^1.0.4",
+    "cross-env": "^7.0.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.23.0"
+  },
+  "devDependencies": {
+    "rollup-plugin-livereload": "^1.3.0",
+    "rollup-plugin-serve": "^1.0.3"
+  }
+}

@@ -11,10 +11,6 @@ pub struct Opts {
     #[structopt(short, long)]
     pub remote_target: String,
 
-    // project dir 
-    #[structopt(short, long)]
-    pub project: String,
-
     // show output 
     #[structopt(short, long)]
     pub verbose: bool,
@@ -38,22 +34,11 @@ impl Opts {
             _ => panic!("target must be local, sandbox, or release")
         }
     }
-
-    pub fn get_project_template_path(&self) -> PathBuf {
-        let path = self.get_project_path().join("templates");
-
-        if !path.exists() {
-            panic!("template path for [{}] does not exist!", &self.project);
-        }
-
-        path
-    }
-
-    pub fn get_core_template_path(&self) -> PathBuf {
-        let path = self.get_frontend_path().join("_core").join("templates");
+    pub fn get_base_template_path(&self) -> PathBuf {
+        let path = self.get_frontend_path().join("templates");
 
         if !path.exists() {
-            panic!("core template path does not exist!");
+            panic!("base template path does not exist!");
         }
 
         path
@@ -62,9 +47,7 @@ impl Opts {
 
     pub fn get_demo_template_path(&self) -> PathBuf {
 
-        let path = self.get_project_path()
-            .join("storybook")
-            .join("demo-templates");
+        let path = self.get_frontend_path().join("storybook").join("demo-templates");
 
         if !path.exists() {
             panic!("demo template path does not exist!");
@@ -73,18 +56,15 @@ impl Opts {
         path
     }
 
-    pub fn get_project_output_path(&self) -> PathBuf {
-        self.get_project_path().join(".template_output")
+    pub fn get_output_path(&self) -> PathBuf {
+        self.get_frontend_path().join(".template_output")
     }
+
 
     fn get_frontend_path(&self) -> PathBuf {
         Path::new(&env::var("LOCAL_CDN_FRONTEND_DIR").expect("needs env var LOCAL_CDN_FRONTEND_DIR")).to_path_buf()
     }
 
-    fn get_project_path(&self) -> PathBuf {
-        self.get_frontend_path()
-            .join(&self.project)
-    }
 }
 
 

@@ -76,6 +76,19 @@
       "nullable": []
     }
   },
+  "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
+    "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "UuidArray"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
     "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\"",
     "describe": {
@@ -92,6 +105,134 @@
         ]
       },
       "nullable": [
+        null
+      ]
+    }
+  },
+  "140fcd94aee0ae0b0fbecff7b028ce6480159aec45d096f06df28eb227fcf783": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        geocode,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "geocode",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 15,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 16,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
         null
       ]
     }
@@ -319,29 +460,6 @@
       ]
     }
   },
-  "4da15c8f7c51da73da193a2fc4ed3c4f889bc0ebe3646543f8888d136c0b1c75": {
-    "query": "\ninsert into image_metadata (name, description, is_premium, publish_at) values ($1, $2, $3, $4)\nreturning id as \"id: ImageId\"\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Bool",
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -430,6 +548,30 @@
       ]
     }
   },
+  "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
+    "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
     "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
     "describe": {
@@ -492,6 +634,62 @@
       ]
     }
   },
+  "8887dc91e41762e76d9be079dc67e92b06b51df37b30da1c59c6d57f31300260": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at < updated_at is not false and updated_at <= $1 is not false\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -512,89 +710,14 @@
       ]
     }
   },
-  "9c5d608dc8981569bf51033b3150e3e81f1266efc1c508184637e090b145d20e": {
-    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+  "b8c3158be83930526198c18609e10617952b2e57fe7f73c1f5e8b2068baf8f10": {
+    "query": "select kind as \"kind: ImageKind\" from image_metadata where id = $1",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "firebase_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 10,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 13,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 15,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
         }
       ],
       "parameters": {
@@ -603,22 +726,7 @@
         ]
       },
       "nullable": [
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        null,
-        null
+        false
       ]
     }
   },
@@ -717,6 +825,26 @@
         true,
         null,
         null
+      ]
+    }
+  },
+  "e071495e0bf5589a94030f12c1b9faa86cb69654686e8b1fda098cc0d14a25c0": {
+    "query": "select id from \"user\" where username = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },

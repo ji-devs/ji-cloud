@@ -1,0 +1,31 @@
+{% import "_common/input/input-macros.html" as Input %}
+
+<div class="mb-4 absolute z-10 w-272 left-0 top-50">
+  <!--This should be toggled when clicking on filter FILTERBOX-->
+  <div class="bg-jibackgroundGrey rounded-md shadow py-2">
+    <label for="name" class="">
+      <span class="text-jibuttonBlue px-2">Filter by:</span>
+      <div class="flex items-center border-b border-jigreyicon py-2 relative">
+
+        <img src="{{MEDIA_UI}}/icn-search-24-px.svg" alt="" class="absolute right-10">
+        <input data-id="" type="search" name="" value="" class="ml-2 bg-jibackgroundGrey outline-none focus:outline-none" placeholder="">
+
+      </div>
+      <div class="flex my-2 p-2 w-full -m-3">
+        {{ Input::searchbox(dataId="#",label="Search categories") }}
+      </div>
+      <div class="flex my-2 px-2">
+        <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm mr-2">Hebrew</div>
+        <div class="rounded-full py px-2 border-jibuttonBlue bg-jinumberblue border text-sm">Holidays</div>
+
+      </div>
+
+    </label>
+
+
+
+
+
+  </div>
+
+</div>

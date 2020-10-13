@@ -1,0 +1,210 @@
+use std::rc::Rc;
+use std::cell::RefCell;
+use wasm_bindgen::UnwrapThrowExt;
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt, Signal},
+    CancelableFutureHandle, 
+};
+use web_sys::{HtmlElement, HtmlInputElement};
+use dominator::{Dom, html, events, clone};
+use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use crate::utils::templates;
+use awsm_web::dom::*;
+use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
+use futures::future::ready;
+use discard::DiscardOnDrop;
+use core::{
+    routes::{Route, UserRoute},
+    storage,
+};
+use crate::utils::firebase::*;
+use super::super::data::*;
+
+pub struct RegisterStart {
+    pub refs: RefCell<Option<RegisterPageRefs>>,
+    pub status: Mutable<Option<RegisterStatus>>,
+    pub step: Rc<Mutable<Step>>,
+    pub data: Rc<RefCell<RegisterData>>,
+    pub loader: AsyncLoader
+}
+
+impl RegisterStart {
+    pub fn new(step:Rc<Mutable<Step>>, data:Rc<RefCell<RegisterData>>) -> Rc<Self> {
+        let _self = Rc::new(Self { 
+            refs: RefCell::new(None),
+            status: Mutable::new(None),
+            loader: AsyncLoader::new(),
+            data,
+            step,
+        });
+
+
+        _self
+    }
+    
+    pub fn render(_self: Rc<Self>) -> Dom {
+        elem!(templates::register_start(), {
+            .with_data_id!("signin-link", {
+                .event(clone!(_self => move |_evt:events::Click| {
+
+                    let route:String = Route::User(UserRoute::Signin).into();
+                    dominator::routing::go_to_url(&route);
+                }))
+            })
+            .with_data_id!("google-register", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.status.set(Some(RegisterStatus::Busy));
+                    _self.loader.load(clone!(_self => async move {
+                        match register_google().await {
+                            Ok(info) => {
+                                let mut data = _self.data.borrow_mut();
+                                data.token = Some(info.token);
+                                data.email= Some(info.email);
+                                _self.step.set(Step::One);
+                            },
+                            Err(maybeError) => {
+                                _self.status.set(maybeError);
+                            }
+                        }
+                    }));
+                }))
+            })
+            .with_data_id!("status-message", {
+                .text_signal(_self.status.signal_ref(|status| {
+                    status
+                        .as_ref()
+                        .map(|status| status.to_string())
+                        .unwrap_or("".to_string())
+                }))
+            })
+
+            .with_data_id!("submit", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    let refs = _self.refs.borrow();
+                    let refs = refs.as_ref().unwrap_throw();
+
+                
+                    match (refs.email(), refs.pw()) {
+                        (Err(err), _) | (_, Err(err)) => _self.status.set(Some(err)),
+
+                        (Ok(email), Ok(pw)) => {
+                            _self.status.set(Some(RegisterStatus::Busy));
+                            _self.loader.load(clone!(_self => async move {
+                                match register_email(&email, &pw).await {
+                                    Ok(token) => {
+                                        let mut data = _self.data.borrow_mut();
+                                        data.token = Some(token);
+                                        data.email= Some(email);
+                                        _self.step.set(Step::One);
+                                    },
+                                    Err(err) => {
+                                        _self.status.set(Some(err));
+                                    }
+                                }
+                            }));
+                        }
+                    }
+                }))
+            })
+            .after_inserted(clone!(_self => move |elem| {
+                _self.stash_refs(elem);
+                //Self::set_debug_data(_self);
+            }))
+        })
+    }
+
+    fn stash_refs(&self, parent:HtmlElement) {
+        *self.refs.borrow_mut() = Some(RegisterPageRefs::new(&parent));
+    }
+
+}
+
+pub struct RegisterPageRefs {
+    email: HtmlInputElement,
+    pw: HtmlInputElement,
+}
+
+impl RegisterPageRefs {
+    pub fn new(parent:&HtmlElement) -> Self {
+        Self {
+            email: parent.select(&data_id("email")),
+            pw: parent.select(&data_id("pw")),
+        }
+    }
+
+    pub fn pw(&self) -> Result<String, RegisterStatus> {
+        let pw:String = self.pw.value();
+
+        if pw.is_empty() {
+            Err(RegisterStatus::EmptyPw)
+        } else {
+            Ok(pw)
+        }
+    }
+    pub fn email(&self) -> Result<String, RegisterStatus> {
+        let email:String = self.email.value();
+
+        if email.is_empty() {
+            Err(RegisterStatus::EmptyEmail)
+        } else {
+            Ok(email)
+        }
+    }
+
+}
+
+//Actions
+pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterStatus> {
+    let token_promise = unsafe { firebase_register_email(email, pw) };
+
+    JsFuture::from(token_promise).await
+        .map(|info| {
+            let user:EmailRegisterInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
+            user.token
+        })
+        .map_err(|err| {
+            match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
+                Ok(err) => {
+                    let code:&str = err.code.as_ref();
+                    match code {
+                        "auth/email-already-in-use" => RegisterStatus::EmailExists,
+                        "auth/weak-password" => RegisterStatus::PwWeak,
+                        _ => {
+                            log::warn!("firebase error: {}", code);
+                            RegisterStatus::UnknownFirebase
+                        }
+                    }
+                },
+                Err(uhh) => {
+                    RegisterStatus::Technical
+                }
+            }
+        })
+}
+
+pub async fn register_google() -> Result<GoogleRegisterInfo, Option<RegisterStatus>> {
+    let token_promise = unsafe { firebase_register_google() };
+
+    JsFuture::from(token_promise).await
+        .map(|info| {
+            serde_wasm_bindgen::from_value::<GoogleRegisterInfo>(info).unwrap_throw()
+        })
+        .map_err(|err| {
+            None
+            /*
+            match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
+                Ok(err) => {
+                    match err.code.as_ref() {
+                        "auth/email-already-in-use" => RegisterStatus::EmailExists,
+                        "auth/weak-password" => RegisterStatus::PwWeak,
+                        _ => RegisterStatus::UnknownFirebase
+                    }
+                },
+                Err(uhh) => {
+                    RegisterStatus::Technical
+                }
+            }
+            */
+        })
+}

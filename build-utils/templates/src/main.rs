@@ -13,7 +13,7 @@ fn main() {
     let opts = Opts::from_args();
     init_logger(&opts);
 
-    let dest = &opts.get_project_output_path();
+    let dest = &opts.get_output_path();
     if opts.clean && dest.exists() {
         fs::remove_dir_all(dest).unwrap();
     }
@@ -22,14 +22,11 @@ fn main() {
     let mut context = Context::new();
     context.insert("MEDIA_UI", &opts.get_remote_target().media_ui_url());
 
-    let mut tera = get_tera(&opts.get_core_template_path());
-    if opts.project != "_core" {
-        tera.extend(&get_tera(&opts.get_project_template_path())).unwrap();
-    }
+    let mut tera = get_tera(&opts.get_base_template_path());
+
     if opts.demo {
         tera.extend(&get_tera(&opts.get_demo_template_path())).unwrap();
     }
-
     tera.build_inheritance_chains().unwrap();
     tera.check_macro_files().unwrap();
 

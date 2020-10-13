@@ -2,17 +2,24 @@
   "targets": {
     "ji-cloud-developer-sandbox": {
       "hosting": {
-        "ji-cloud-developer-storybook": [
-          "ji-cloud-developer-storybook"
+        "ji-cloud-sandbox-storybook": [
+          "ji-cloud-sandbox-storybook"
         ],
-		"ji-cloud-developer-documentation": [
+		      "ji-cloud-developer-documentation": [
           "ji-cloud-developer-documentation"
+        ]
+      }
+    },
+    "ji-cloud": {
+      "hosting": {
+        "ji-cloud-storybook": [
+          "ji-cloud-storybook"
         ]
       }
     }
   },
   "projects": {
     "ji-cloud-developer-sandbox": "ji-cloud-developer-sandbox",
-	"ji-cloud": "ji-cloud"
+	  "ji-cloud": "ji-cloud"
   }
 }

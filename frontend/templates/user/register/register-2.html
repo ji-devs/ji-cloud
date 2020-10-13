@@ -1,0 +1,44 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+{% import "user/user-macros.html" as User %}
+
+<div class="flex">
+  <div class="bg-jisideblue bg-shapes bg-no-repeat bg-auto bg-center h-screen w-480 min-w-300">
+  </div>
+  <div class="px-80 py-60">
+    <h1 class="text-jititleorange text-5xl font-light mb-8">Sign up - Step 2</h1>
+    <div class="">
+      <div data-id="status-message"></div>
+      <div class="flex">
+        <div class="">
+          <p class="text-lg mb-8 w-480">Tell us more about yourself so that we can tailor
+            the content according to your specific needs</p>
+          <div class="flex">
+            <div class="spacer w-30"></div>
+            {{ User::user_input(label="Geocode*",width="w-297",inputwidth="w-296", inputDataId="geocode") }}
+          </div>
+
+
+          {{ User::lang_select(label="Preferred language of communication*",width="w-full", selectDataId="lang") }}
+
+          <div class="h-30">
+
+          </div>
+          <div class="mt-2">
+            {{ Input::checkbox(label="I have read the terms and conditions ", required=true, inputDataId="tos", class="px-2") }}
+          </div>
+          <div class="mt-2">
+            {{ Input::checkbox(label="I would like to receive educational resources", inputDataId="edu_resources", class="px-2") }}
+          </div>
+
+
+          <div class="mt-2">
+            {{ ButtonMacros::orange(label="One more step", dataId="next") }}
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>

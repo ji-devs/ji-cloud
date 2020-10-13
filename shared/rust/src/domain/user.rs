@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
-use super::meta::SubjectId;
+use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 
 /// Represents a user's permissions.
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
@@ -76,17 +76,40 @@ pub struct UserProfile {
     pub timezone: chrono_tz::Tz,
 
     /// The scopes associated with the user.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub scopes: Vec<UserScope>,
 
     /// When the user was created.
     pub created_at: DateTime<Utc>,
 
     /// When the user was last updated.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<DateTime<Utc>>,
 
     /// The organization that the user belongs to.
-    pub organization: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<String>,
 
     /// The user's taught subjects.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub subjects: Vec<SubjectId>,
+
+    /// The user's age-ranges.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// The user's affiliations.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// The user's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub geocode: Option<String>,
 }
