@@ -39,7 +39,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
-RUN cargo build --release --no-default-features --features release
+RUN cargo build --release --no-default-features
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as release
@@ -58,7 +58,7 @@ COPY --from=release-builder \
 WORKDIR /usr/local/bin/cloud-run-app/
 
 
-CMD ["./ji-cloud-api"]
+CMD ["./ji-cloud-api", "release"]
 
 ####################
 ## Sandbox        ##
@@ -79,7 +79,7 @@ RUN sudo chown -R rust:rust /home/rust
 
 # Build our application.
 WORKDIR ./backend/api
-RUN cargo build --release --no-default-features --features sandbox
+RUN cargo build --release --no-default-features
 
 # Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as sandbox 
@@ -98,4 +98,4 @@ COPY --from=sandbox-builder \
 WORKDIR /usr/local/bin/cloud-run-app/
 
 
-CMD ["./ji-cloud-api"]
+CMD ["./ji-cloud-api", "sandbox"]
