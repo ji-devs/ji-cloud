@@ -30,6 +30,8 @@ pub mod algolia {
     pub const APPLICATION_ID_OLD: &str = "ALGOLIA_APPLICATION_ID";
     pub const APPLICATION_ID_NEW: &str = "ALGOLIA_PROJECT_ID";
 
+    pub const IMAGE_INDEX: &str = "ALGOLIA_IMAGE_INDEX";
+
     pub const KEY: &str = "ALGOLIA_KEY";
     pub const DISABLE: &str = "ALGOLIA_LOCAL_DISABLE_CLIENT";
 }

@@ -113,6 +113,8 @@ pub struct AlgoliaSettings {
     pub application_id: String,
     /// The key to use for the algolia client.
     pub key: String,
+    /// The index to use for operations on the algolia client.
+    pub index: String,
 }
 
 /// Manages access to settings.
@@ -272,9 +274,18 @@ impl SettingsManager {
             return Ok(None);
         }
 
+        let index = match crate::REMOTE_TARGET.algolia_image_index() {
+            Some(it) => it.to_owned(),
+            None => match self.get_secret(keys::algolia::IMAGE_INDEX).await {
+                Ok(it) =>it,
+                Err(_) => return Ok(None),
+            }
+        };
+
         Ok(Some(AlgoliaSettings {
             application_id,
             key,
+            index,
         }))
     }
 
