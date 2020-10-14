@@ -1,4 +1,4 @@
-use core::settings::SettingsManager;
+use core::settings::{self, SettingsManager};
 
 mod logger;
 mod server;
@@ -10,7 +10,12 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init_logger()?;
 
-    let settings: SettingsManager = core::settings::SettingsManager::new().await?;
+    let remote_target = settings::read_remote_target()?;
 
-    server::run(settings.runtime_settings().await?).await
+    let settings = SettingsManager::new(remote_target)
+        .await?
+        .runtime_settings()
+        .await?;
+
+    server::run(settings).await
 }

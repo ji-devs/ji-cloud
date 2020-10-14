@@ -9,6 +9,28 @@ use config::RemoteTarget;
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+/// Reads a `RemoteTarget` from the arguments passed to the command.
+pub fn read_remote_target() -> anyhow::Result<RemoteTarget> {
+    let remote_target = match std::env::args().nth(1).as_deref() {
+        Some("local") => RemoteTarget::Local,
+        Some("sandbox") => RemoteTarget::Sandbox,
+        Some("release") => RemoteTarget::Release,
+        Some(s) => anyhow::bail!(
+            "Unknown remote target: {} (expected local|sandbox|release)",
+            s
+        ),
+        None => RemoteTarget::Local,
+    };
+
+    Ok(remote_target)
+}
+
+/// Reads weather or not sql_proxy should be used for database connections.
+#[cfg(feature = "db")]
+pub fn read_sql_proxy() -> bool {
+    std::env::args().any(|s| s == "sqlproxy")
+}
+
 /// Settings that are accessed at runtime (as compared to startup time)
 #[derive(Clone)]
 pub struct RuntimeSettings {
@@ -30,14 +52,17 @@ pub struct RuntimeSettings {
     //Keeping a string is a stop-gap measure for now, not ideal
     /// Used to _decode_ jwt tokens.
     jwt_decoding_key: String,
+
+    remote_target: RemoteTarget,
 }
 
 impl RuntimeSettings {
     pub(crate) fn new(
         jwt_encoding_key: EncodingKey,
         jwt_decoding_key: String,
+        remote_target: RemoteTarget,
     ) -> anyhow::Result<Self> {
-        let (api_port, pages_port) = match crate::REMOTE_TARGET {
+        let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
                 req_env("LOCAL_API_PORT")?.parse()?,
                 req_env("LOCAL_PAGES_PORT")?.parse()?,
@@ -55,13 +80,14 @@ impl RuntimeSettings {
             epoch: get_epoch(),
             jwt_encoding_key,
             jwt_decoding_key,
+            remote_target,
         })
     }
 
     // shh, we're pretending not to be pulling this out of the aether
     /// The `RemoteTarget` that the settings are for.
     pub fn remote_target(&self) -> RemoteTarget {
-        crate::REMOTE_TARGET
+        self.remote_target
     }
 
     /// Are we running "locally" (dev)?
@@ -119,13 +145,8 @@ pub struct AlgoliaSettings {
 pub struct SettingsManager {
     token: Option<String>,
     project_id: String,
+    remote_target: RemoteTarget,
 }
-
-#[cfg(all(feature = "sqlproxy", feature = "db"))]
-const SQL_PROXY: bool = true;
-
-#[cfg(all(not(feature = "sqlproxy"), feature = "db"))]
-const SQL_PROXY: bool = false;
 
 impl SettingsManager {
     async fn get_secret(&self, secret: &str) -> anyhow::Result<String> {
@@ -167,12 +188,12 @@ impl SettingsManager {
     ///
     /// # Errors
     /// If it is decided that we need to use google cloud but fail, or we don't use google cloud and the `PROJECT_ID` env var is missing.
-    pub async fn new() -> anyhow::Result<Self> {
+    pub async fn new(remote_target: RemoteTarget) -> anyhow::Result<Self> {
         let use_google_cloud = !crate::env::env_bool(keys::google::DISABLE);
 
         let (token, project_id) = if use_google_cloud {
             let (token, project_id) =
-                get_access_token_and_project_id(crate::REMOTE_TARGET.google_credentials_env_name())
+                get_access_token_and_project_id(remote_target.google_credentials_env_name())
                     .await?;
 
             (Some(token), project_id)
@@ -181,17 +202,21 @@ impl SettingsManager {
             (None, project_id)
         };
 
-        Ok(Self { token, project_id })
+        Ok(Self {
+            token,
+            project_id,
+            remote_target,
+        })
     }
 
     /// Load the settings for s3.
     pub async fn s3_settings(&self) -> anyhow::Result<S3Settings> {
-        let endpoint = match crate::REMOTE_TARGET.s3_endpoint() {
+        let endpoint = match self.remote_target.s3_endpoint() {
             Some(e) => e.to_string(),
             None => self.get_secret(keys::s3::ENDPOINT).await?,
         };
 
-        let bucket = match crate::REMOTE_TARGET.s3_bucket() {
+        let bucket = match self.remote_target.s3_bucket() {
             Some(b) => b.to_string(),
             None => self.get_secret(keys::s3::BUCKET).await?,
         };
@@ -208,7 +233,7 @@ impl SettingsManager {
         Ok(S3Settings {
             endpoint,
             bucket,
-            use_client: crate::REMOTE_TARGET != RemoteTarget::Local || !disable_local,
+            use_client: self.remote_target != RemoteTarget::Local || !disable_local,
             access_key_id,
             secret_access_key,
         })
@@ -226,8 +251,8 @@ impl SettingsManager {
 
     /// Load the settings for connecting to the db.
     #[cfg(feature = "db")]
-    pub async fn db_connect_options(&self) -> anyhow::Result<PgConnectOptions> {
-        if crate::REMOTE_TARGET == RemoteTarget::Local && !SQL_PROXY {
+    pub async fn db_connect_options(&self, sql_proxy: bool) -> anyhow::Result<PgConnectOptions> {
+        if self.remote_target == RemoteTarget::Local && !sql_proxy {
             return Ok(crate::env::req_env(keys::db::DATABASE_URL)?.parse::<PgConnectOptions>()?);
         }
 
@@ -238,14 +263,14 @@ impl SettingsManager {
             .password(&db_pass)
             .database(config::REMOTE_DB_NAME);
 
-        if SQL_PROXY {
+        if sql_proxy {
             Ok(opts.host("localhost").port(config::SQL_PROXY_PORT))
         } else {
             let instance_connection = std::env::var(keys::db::INSTANCE_CONNECTION_NAME).unwrap_or(
-                match crate::REMOTE_TARGET {
+                match self.remote_target {
                     RemoteTarget::Sandbox => config::DB_INSTANCE_SANDBOX.to_string(),
                     RemoteTarget::Release => config::DB_INSTANCE_RELEASE.to_string(),
-                    _ => panic!("non-dev mode only makes sense for sandbox or release"),
+                    _ => unreachable!(),
                 },
             );
 
@@ -268,7 +293,7 @@ impl SettingsManager {
         let key = self.get_secret(keys::algolia::KEY).await?;
 
         let disable_local = env_bool(keys::algolia::DISABLE);
-        if matches!(crate::REMOTE_TARGET, RemoteTarget::Local) && disable_local {
+        if matches!(self.remote_target, RemoteTarget::Local) && disable_local {
             return Ok(None);
         }
 
@@ -283,7 +308,7 @@ impl SettingsManager {
         let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
         let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
 
-        RuntimeSettings::new(jwt_encoding_key, jwt_secret)
+        RuntimeSettings::new(jwt_encoding_key, jwt_secret, self.remote_target)
     }
 }
 
