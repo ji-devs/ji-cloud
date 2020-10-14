@@ -17,47 +17,16 @@
 
       <div class="w-867 rounded-md bg-jibackgroundGrey p-6 mb-6">
         <p class="text-jibuttonBlue ml-2 mb-2">Which age group are you interested in?</p>
-        <div class="flex mb-8">
-          {{ Input::checkbox(label="Kindergarden", inputDataId="age-group-0", class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Elementry school", inputDataId="age-group-1",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Middle school", inputDataId="age-group-2",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="High school", inputDataId="age-group-3",  class="px-2") }}
+        <div data-id="age_ranges" class="flex mb-8">
         </div>
-        <p class="text-jibuttonBlue ml-2 mb-2">What subjets do you teach?</p>
-        <div class="flex mb-4">
-          {{ Input::checkbox(label="Hebrew language", inputDataId="subject-0",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Jewish Holidays",  inputDataId="subject-1", class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Jewish Texts", inputDataId="subject-2",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Israel", inputDataId="subject-3",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Jewish Life", inputDataId="subject-4",  class="px-2") }}
-          <div class="w-10"></div>
-          {{ Input::checkbox(label="Prayer", inputDataId="subject-5",  class="px-2") }}
+        <p class="text-jibuttonBlue ml-2 mb-2">What subjects do you teach?</p>
+        <div data-id="subjects" class="flex mb-4">
         </div>
 
       </div>
       <div class="w-867 rounded-md bg-jibackgroundGrey p-6">
         <p class="text-jibuttonBlue ml-2 mb-2">Content from which streams of Judaism do you want to see?</p>
-        <div class="flex flex-col mb-4">
-          {{ Input::checkbox(label="Show me everything", inputDataId="affiliation-0",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="No religious content", inputDataId="affiliation-1",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="Reform content", inputDataId="affiliation-2",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="Conservative content", inputDataId="affiliation-3",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="Orthodox content", inputDataId="affiliation-4",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="Charedi content", inputDataId="affiliation-5",  class="px-2") }}
-          <div class="h-10"></div>
-          {{ Input::checkbox(label="Israeli secular content", inputDataId="affiliation-6",  class="px-2") }}
+        <div data-id="affiliations" class="flex flex-col mb-4">
         </div>
 
 

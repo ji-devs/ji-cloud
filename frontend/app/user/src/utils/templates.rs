@@ -6,6 +6,7 @@ use std::fmt;
 
 //pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
 
+const CHECKBOX:&'static str = "checkbox";
 const SIGNIN:&'static str = "signin";
 
 const REGISTER_START:&'static str = "register_start";
@@ -23,6 +24,13 @@ const FORGOT_PASSWORD:&'static str = "forgot_password";
 
 thread_local! {
     pub static TEMPLATES: Templates = Templates::new(); 
+}
+
+pub fn checkbox(id:&str, label:&str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(CHECKBOX, &html_map!{
+        "label" => label,
+        "id" => id
+    }).unwrap())
 }
 pub fn signin() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(SIGNIN))
@@ -86,6 +94,8 @@ impl Templates {
             (EMAIL_CONFIRM, get_template_str(include_str!("../../../../.template_output/user/email-confirmation.html"))),
             (EMAIL_CHANGE, get_template_str(include_str!("../../../../.template_output/user/email-change.html"))),
             (FORGOT_PASSWORD, get_template_str(include_str!("../../../../.template_output/user/forgot-password.html"))),
+
+            (CHECKBOX, get_template_str(include_str!("../../../../.template_output/_common/input/checkbox.html"))),
         ]);
 
         Self { cache }
