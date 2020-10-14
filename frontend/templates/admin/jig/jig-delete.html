@@ -1,0 +1,19 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+
+<div class="">
+
+  <div class="h-full w-full bg-jioverlayblue absolute z-10 opacity-75">
+
+  </div>
+  <div class="absolute w-419 h-262 bg-white z-20 left-0 right-0 ml-auto mr-auto top-50p transform -translate-y-1/2 p-4 rounded-md shadow-md">
+    <h1 class="text-jititleorange text-3xl font-light mb-2">Warning</h1>
+
+    <hr>
+    <p class="mt-4 mb-20">Are you sure you want to delete the module?</p>
+    <div class="flex items-center justify-between">
+      <p class="text-jibuttonBlue">Yes, delete module</p>
+      {{ ButtonMacros::orange(label="Don't delete", dataId="next") }}
+
+    </div>
+  </div>
+</div>
