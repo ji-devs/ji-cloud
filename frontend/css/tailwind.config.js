@@ -39,8 +39,8 @@ module.exports = {
         jigrey: '#a1a8ad',
         jigreyfocus: '#d8d8d8',
         jiheadergrey: '#4a4a4a',
-        jijigbordergrey: '#a1a8ad',
         jioverlayblue: '#e5f3ff',
+        jiggreen: '#42cc7a',
 
       },
 
@@ -66,6 +66,7 @@ module.exports = {
         176: '176px',
         186: '186px',
         190: '190px',
+        200: '200px',
         259: '259px',
         270: '270px',
         272:'272px',
@@ -79,10 +80,13 @@ module.exports = {
         408: '408px',
         419: '419px',
         480: '480px',
+        516: '516px',
         624: '624px',
         640: '640px',
         763: '763px',
         867: '867px',
+        992: '992px',
+        1212: '1212px',
         '50p': '50%',
         '1/7': '14.28%'
 
@@ -103,6 +107,7 @@ module.exports = {
         32: '32px',
         56: '56px',
         64: '64px',
+        114: '114px',
         140: '140px',
         160: '160px',
         185: '185px',
@@ -110,6 +115,7 @@ module.exports = {
         262: '262px',
         383: '383px',
         537: '537px',
+        681: '681px',
         696: '696px',
 
       },
@@ -149,6 +155,7 @@ module.exports = {
         60:'60px',
         80: '80px',
         255: '255px',
+        '16:9': '56.25%'
       },
       cursor:{
         grab: 'grab'
