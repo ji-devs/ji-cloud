@@ -11,7 +11,7 @@ publish = false
 [dependencies]
 anyhow = "1.0.32"
 base64 = "0.12"
-config = {path = "../../../config/rust"}
+config = {path = "../../config/rust"}
 futures-util = "0.3"
 jsonwebtoken = "7.1"
 percent-encoding = "2.1"
