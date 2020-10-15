@@ -47,7 +47,7 @@ default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
 
 [dependencies.core]
-path = "../_core/rust"
+path = "../core"
 features = ["db"]
 
 

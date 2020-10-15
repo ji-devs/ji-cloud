@@ -15,7 +15,7 @@ actix-web = "3.0.0-beta.1"
 anyhow = "1.0.32"
 askama = "0.10.3"
 config = {path = "../../config/rust"}
-core = {path = "../_core/rust"}
+core = {path = "../core"}
 dotenv = "0.15"
 futures = "0.3.5"
 jsonwebtoken = "7.1"

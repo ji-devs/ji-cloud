@@ -299,12 +299,12 @@ impl SettingsManager {
             return Ok(None);
         }
 
-        let index = match crate::REMOTE_TARGET.algolia_image_index() {
+        let index = match self.remote_target.algolia_image_index() {
             Some(it) => it.to_owned(),
             None => match self.get_secret(keys::algolia::IMAGE_INDEX).await {
-                Ok(it) =>it,
+                Ok(it) => it,
                 Err(_) => return Ok(None),
-            }
+            },
         };
 
         Ok(Some(AlgoliaSettings {

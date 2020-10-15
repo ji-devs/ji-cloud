@@ -195,12 +195,11 @@ impl AlgoliaClient {
                 inner: Some(Inner::new(app_id, api_key)?),
                 index: settings.index,
             })
-
         } else {
             Ok(Self {
                 inner: None,
                 index: String::new(),
-            })    
+            })
         }
     }
 
