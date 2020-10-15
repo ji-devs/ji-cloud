@@ -33,12 +33,12 @@ const getMetadata = filename => {
 
     let metaData = noBrowserCache
         ?   {
-                cacheControl: "no-store, must-revalidate",
+                cacheControl: "no-cache, no-store, max-age=0, must-revalidate",
                 //doesn't work
                 //surrogateControl: "max-age=2628000",
             }
         :   {
-                cacheControl: "max-age=3600",
+                cacheControl: "public, max-age=3600",
                 //doesn't work
                 //surrogateControl: "max-age=2628000",
             };
