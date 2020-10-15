@@ -6,7 +6,7 @@
 
 # Build Status
 
-* ![Documentation](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation/badge.svg)
+* ![Documentation - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Release/badge.svg) / * ![Documentation - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Sandbox/badge.svg) 
 * ![FastlyPurge- Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Release/badge.svg) / ![FastlyPurge- Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Sandbox/badge.svg)
 
 ----
