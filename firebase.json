@@ -16,6 +16,25 @@
       ]
     },
     {
+      "target": "ji-cloud-sandbox-docs",
+      "public": "temp-docs",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "book/**",
+          "destination": "/book/index.html"
+        },
+        {
+          "source": "crate/**",
+          "destination": "/crate/shared/index.html"
+        }
+      ]
+    },
+    {
       "target": "ji-cloud-storybook",
       "public": "frontend/storybook/dist/storybook-build",
       "ignore": [
@@ -30,9 +49,9 @@
         }
       ]
     },
-	{
-      "target": "ji-cloud-developer-documentation",
-      "public": "documentation/dist",
+    {
+      "target": "ji-cloud-docs",
+      "public": "temp-docs",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -40,8 +59,12 @@
       ],
       "rewrites": [
         {
-          "source": "**",
-          "destination": "/index.html"
+          "source": "book/**",
+          "destination": "/book/index.html"
+        },
+        {
+          "source": "shared/**",
+          "destination": "/shared/index.html"
         }
       ]
     }

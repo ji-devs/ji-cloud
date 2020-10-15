@@ -285,6 +285,7 @@ async fn _get_image(id:&str) -> Result < <Get as ApiEndpoint>::Res, <Get as ApiE
     api_with_auth::<_, _, ()>(&api_url(&path), Get::METHOD, None).await
 }
 
+//TODO - move to _core
 #[derive(Debug, Clone)]
 pub struct MetaOptions {
     pub styles: Vec<(Id, String)>,

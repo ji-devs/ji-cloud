@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 pub type Token = String;
 pub type Email = String;
 
@@ -21,9 +23,9 @@ pub struct RegisterData {
     pub edu_resources: bool,
     pub lang: Option<String>,
     pub geocode: Option<String>,
-    pub affiliations: Vec<String>,
-    pub age_ranges: Vec<String>,
-    pub subjects: Vec<String>,
+    pub affiliations: HashSet<String>,
+    pub age_ranges: HashSet<String>,
+    pub subjects: HashSet<String>,
 }
 
 

@@ -1,4 +1,4 @@
-name: Documentation - Book
+name: Documentation - Sandbox
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
     - 'config/**'
     - 'documentation/**'
+    - 'shared/rust/**'
 
 jobs:
   build:
@@ -26,21 +27,34 @@ jobs:
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-    - name: install mdbook 
-      run: cargo install mdbook 
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: 'latest'
 
-    - name: build documentation
+    - name: make tmp docs directory
+      run: mkdir ./temp-docs
+
+    - name: build book 
       run: mdbook build
       working-directory: ./documentation
 
-    - name: install google cloud sdk
-      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-      with:
-        version: '295.0.0'
-        service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+    - name: build shared-crate
+      run: cargo doc
+      working-directory: ./shared/rust
+    
+    - name: copy book 
+      run: cp -R documentation/output ./temp-docs/book
 
-    - name: deploy to google cloud
-      run: gsutil -m rsync -d -r documentation/output gs://ji-cloud-sandbox-docs-origin-eu-001/book
+    - name: copy shared-crate 
+      run: cp -R shared/rust/target/doc ./temp-docs/crate
+
+    - name: deploy to firebase
+      uses: w9jds/firebase-action@v1.0.1
+      with:
+        args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-docs
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
     - name: Notify slack of all status
       uses: pullreminders/slack-action@master
