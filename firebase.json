@@ -29,8 +29,8 @@
           "destination": "/book/index.html"
         },
         {
-          "source": "shared/**",
-          "destination": "/shared/index.html"
+          "source": "crate/**",
+          "destination": "/crate/shared/index.html"
         }
       ]
     },
@@ -67,6 +67,6 @@
           "destination": "/shared/index.html"
         }
       ]
-    },
+    }
   ]
 }

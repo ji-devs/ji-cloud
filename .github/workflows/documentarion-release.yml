@@ -27,8 +27,10 @@ jobs:
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-    - name: install mdbook 
-      run: cargo install mdbook 
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: 'latest'
 
     - name: make tmp docs directory
       run: mkdir ./temp-docs
@@ -45,13 +47,7 @@ jobs:
       run: cp -R documentation/output ./temp-docs/book
 
     - name: copy shared-crate 
-      run: cp -R shared/rust/target/doc ./temp-docs/shared
-    
-    - name: sanity check book 
-      run: ls -la ./temp-docs/book
-
-    - name: sanity check shared
-      run: ls -la ./temp-docs/shared
+      run: cp -R shared/rust/target/doc ./temp-docs/crate
 
     - name: deploy to firebase
       uses: w9jds/firebase-action@v1.0.1
