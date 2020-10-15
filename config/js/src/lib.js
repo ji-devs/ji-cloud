@@ -12,7 +12,8 @@ export const URL_FRONTEND_RELEASE = "https://frontend.jicloud.org";
 export const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jicloud.org";
 export const URL_STORYBOOK_RELEASE = "https://storybook.jicloud.org";
 export const URL_STORYBOOK_SANDBOX = "https://storybook.sandbox.jicloud.org";
-
+export const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
+export const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
 const getMediaUrl = isDev => 
 	isDev
