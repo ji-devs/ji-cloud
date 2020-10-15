@@ -120,7 +120,7 @@ script = ["cp -R ./config/js/ ./backend/fastly-purge/config/"]
 run_task = [{name = [
 	"copy-config-fastly-purge",
     "deploy-release-fastly-purge-frontend",
-    "deploy-release-fastly-purge-storybook",
+    "deploy-release-fastly-purge-uploads",
     "deploy-release-fastly-purge-media",
 ]}]
 
@@ -129,9 +129,9 @@ run_task = [{name = [
 script_runner = "@shell"
 script = ["gcloud functions deploy purgeFrontendRelease --project ji-cloud --trigger-resource ji-cloud-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
 
-[tasks.deploy-release-fastly-purge-storybook]
+[tasks.deploy-release-fastly-purge-uploads]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeStorybookRelease --project ji-cloud --trigger-resource ji-cloud-storybook-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeUploadsRelease --project ji-cloud --trigger-resource ji-cloud-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
 
 # the media is on release project since it's used by release project (media.jicloud.org)
 [tasks.deploy-release-fastly-purge-media]
@@ -144,19 +144,13 @@ script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resou
 run_task = [{name = [
 	"copy-config-fastly-purge",
     "deploy-sandbox-fastly-purge-frontend",
-    "deploy-sandbox-fastly-purge-storybook",
-    "deploy-sandbox-fastly-purge-docs",
+    "deploy-sandbox-fastly-purge-uploads",
 ]}]
 
 [tasks.deploy-sandbox-fastly-purge-frontend]
 script_runner = "@shell"
 script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
 
-[tasks.deploy-sandbox-fastly-purge-storybook]
+[tasks.deploy-sandbox-fastly-purge-uploads]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeStorybookSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-storybook-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
-
-# the docs is on sandbox project since it's for dev only 
-[tasks.deploy-sandbox-fastly-purge-docs]
-script_runner = "@shell"
-script = ["gcloud functions deploy purgeDocs --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-docs-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
