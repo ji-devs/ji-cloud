@@ -23,7 +23,7 @@ const getMetadata = filename => {
 
     //these don't get dynamic filenames and do require immediate changes in the browser
     //they are still cached on the fastly side
-    const noBrowserCache = ["wasm", "html", "css"].some(ext => hasExtension(ext) (filename));
+    const noBrowserCache = ["html", "css"].some(ext => hasExtension(ext) (filename));
 
     if(noBrowserCache) {
         console.log(`not caching ${filename} in browser`);
