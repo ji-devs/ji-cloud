@@ -8,6 +8,7 @@ export default {
         index: "./Cargo.toml",
     },
     output: {
+        entryFileNames: "[name]-[hash].js",
         dir: "dist/js/",
         format: "iife",
         sourcemap: true,
