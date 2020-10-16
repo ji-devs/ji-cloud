@@ -16,6 +16,7 @@
 
 ----
 
+* ![Jig - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Jig%20-%20Spa%20-%20Release/badge.svg) / ![Jig - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Jig%20-%20Spa%20-%20Sandbox/badge.svg)
 * ![User - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Spa%20-%20Release/badge.svg) / ![User - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Spa%20-%20Sandbox/badge.svg)
 * ![Admin - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Spa%20-%20Release/badge.svg) / ![Admin - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Spa%20-%20Sandbox/badge.svg)
 
