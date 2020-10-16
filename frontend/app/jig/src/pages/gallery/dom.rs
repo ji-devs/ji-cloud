@@ -35,8 +35,6 @@ impl GalleryPage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-
-        elem!(templates::gallery(), {
-        })
+        elem!(templates::gallery(), { })
     }
 }
