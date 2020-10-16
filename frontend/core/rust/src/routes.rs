@@ -5,7 +5,8 @@ use wasm_bindgen::prelude::*;
 pub enum Route {
     NotFound,
     User(UserRoute),
-    Admin(AdminRoute)
+    Admin(AdminRoute),
+    Jig(JigRoute),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,6 +21,19 @@ pub enum AdminRoute {
     Images,
     ImageAdd,
     ImageEdit(String),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JigRoute {
+    Gallery,
+    Edit(String),
+    Play(String, JigPlayMode),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JigPlayMode {
+    Producer,
+    Audience 
 }
 
 impl Route {
@@ -45,6 +59,10 @@ impl Route {
             ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-edit", id] => Self::Admin(AdminRoute::ImageEdit(id.to_string())),
+            ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
+            ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
+            ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
             _ => Self::NotFound
         }
     }
@@ -67,6 +85,18 @@ impl From<Route> for String {
                     AdminRoute::Images => "/admin/images".to_string(),
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
                     AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
+                }
+            },
+            Route::Jig(route) => {
+                match route {
+                    JigRoute::Gallery => "/jig/gallery".to_string(),
+                    JigRoute::Edit(id) => format!("/jig/edit/{}", id),
+                    JigRoute::Play(id, mode) => {
+                        match mode {
+                            JigPlayMode::Audience => format!("/jig/play/{}", id),
+                            JigPlayMode::Producer => format!("/jig/play-producer/{}", id),
+                        }
+                    }
                 }
             },
             Route::NotFound => "/404".to_string(),
