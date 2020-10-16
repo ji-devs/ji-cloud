@@ -5,7 +5,7 @@
 @import "admin/header";
 @import "admin/tests";
 @import "admin/search";
-@import "admin/jig";
+@import "jig/jig";
 
 @import "tailwindcss/utilities";
 

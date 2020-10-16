@@ -13,7 +13,7 @@
     "_devfiles": "cd ../../../build-utils && npm run frontend-dev-files -- jig",
     "_templates-build:sandbox": "cd ../../../build-utils/templates && cargo run -- --remote-target sandbox",
     "_templates-build:release": "cd ../../../build-utils/templates && cargo run -- --remote-target release",
-    "_templates-prebuild-watch": "cd ../../../build-utils/templates && cargo run -- --remote-target local",
+    "_templates-prebuild-watch": "rimraf ../../.template_output && cd ../../../build-utils/templates && cargo run -- --remote-target local",
     "_templates-watch": "cd ../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/jig -x \"run -- --remote-target local"
   },
   "dependencies": {
