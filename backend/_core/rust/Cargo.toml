@@ -24,8 +24,4 @@ yup-oauth2 = "4.1.2"
 log = "0.4.11"
 
 [features]
-sqlproxy = ["db"]
-local = ["listenfd"]
-release = []
-sandbox = []
 db = ["sqlx"]

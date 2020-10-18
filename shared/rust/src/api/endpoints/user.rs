@@ -4,11 +4,9 @@ use crate::{
     api::method::Method,
     domain::{
         auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
-        user::OtherUser,
-        user::UserProfile,
+        user::{OtherUser, UserLookupQuery, UserProfile},
     },
-    error::auth::RegisterError,
-    error::user::NoSuchUserError,
+    error::{auth::RegisterError, user::NoSuchUserError},
 };
 
 /// Sign in.
@@ -52,11 +50,11 @@ impl ApiEndpoint for Profile {
 }
 
 /// Find a user by username.
-pub struct UserByName;
-impl ApiEndpoint for UserByName {
-    type Req = ();
+pub struct UserLookup;
+impl ApiEndpoint for UserLookup {
+    type Req = UserLookupQuery;
     type Res = OtherUser;
     type Err = NoSuchUserError;
-    const PATH: &'static str = "/v1/user/{name}";
+    const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Get;
 }

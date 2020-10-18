@@ -23,7 +23,7 @@ const getMetadata = filename => {
 
     //these don't get dynamic filenames and do require immediate changes in the browser
     //they are still cached on the fastly side
-    const noBrowserCache = ["wasm", "html", "css"].some(ext => hasExtension(ext) (filename));
+    const noBrowserCache = ["html", "css"].some(ext => hasExtension(ext) (filename));
 
     if(noBrowserCache) {
         console.log(`not caching ${filename} in browser`);
@@ -33,12 +33,12 @@ const getMetadata = filename => {
 
     let metaData = noBrowserCache
         ?   {
-                cacheControl: "no-store, must-revalidate",
+                cacheControl: "no-cache, no-store, max-age=0, must-revalidate",
                 //doesn't work
                 //surrogateControl: "max-age=2628000",
             }
         :   {
-                cacheControl: "max-age=3600",
+                cacheControl: "public, max-age=3600",
                 //doesn't work
                 //surrogateControl: "max-age=2628000",
             };
@@ -86,11 +86,9 @@ const makePurger = FASTLY_PUBLIC_BASEURL => async (obj, context) => {
     }
 };
 
-exports.purgeDocs = makePurger(CONFIG.URL_DOCS, false);
-exports.purgeMedia = makePurger(CONFIG.URL_MEDIA, true);
+exports.purgeMedia = makePurger(CONFIG.URL_MEDIA);
 
-exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE, false);
-exports.purgeStorybookRelease = makePurger(CONFIG.URL_STORYBOOK_RELEASE, false);
-
-exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX, false);
-exports.purgeStorybookSandbox = makePurger(CONFIG.URL_STORYBOOK_SANDBOX, false);
+exports.purgeFrontendRelease = makePurger(CONFIG.URL_FRONTEND_RELEASE);
+exports.purgeFrontendSandbox = makePurger(CONFIG.URL_FRONTEND_SANDBOX);
+exports.purgeUploadsRelease = makePurger(CONFIG.URL_UPLOADS_RELEASE);
+exports.purgeUploadsSandbox = makePurger(CONFIG.URL_UPLOADS_SANDBOX);

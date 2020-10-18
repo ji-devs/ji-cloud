@@ -30,7 +30,7 @@ struct SpaPageInfo {
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let info = SpaPageInfo {
         app_js: settings.remote_target().spa_url(spa.as_str(), "js/index.js"),
-        app_css: settings.remote_target().spa_url(spa.as_str(), "css/styles.min.css"),
+        app_css: settings.remote_target().css_url(true),
         firebase: matches!(spa, SpaPage::User),
         local_dev: settings.is_local(),
     };

@@ -14,6 +14,12 @@ const qs = require('qs');
 // The secret used is `aaaaa`
 const TEST_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.BNpCIBuNq0bhgXuAEqrAfPpIein0Y54hj352d2ke1sI';
 
+// this jwt is used for register *erroring*
+// {"alg": "HS256", "typ": "JWT"}
+// {"sub": "JmaZTj2b5X9ksf5oFSXnCdVuLJkMROCS", "iat": 1597096685, "auth_time": 1597096686 }
+// The secret used is `aaaaa`
+const REGISTER_ERR_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKbWFaVGoyYjVYOWtzZjVvRlNYbkNkVnVMSmtNUk9DUyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.fxdYc2Dhr6RVrWFkh8xh-ROz6fYKI9yW7WKJuaEfdqs';
+
 // login cookie
 const COOKIE = 'X-JWT=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
     + 'eyJpZCI6IjFmMjQxZTFiLWI1MzctNDkzZi1hMjMwLTA3NWNiMTYzMTViZSIsImNzcmYiOiJSdVF1WmI1QW9HU2R4SUdBIn0.osvyaIW4Mt-3Em4kkuvO4wXAsCVA9gZwkqXlQvQETAs; '
@@ -184,6 +190,43 @@ test('register user', async (t) => {
     t.not(body.csrf, null);
 });
 
+async function registerDuplicateUserError(t, args) {
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+
+    const cookieJar = new tough.CookieJar();
+
+    const error = await t.throwsAsync(got.post('http://0.0.0.0/v1/user', {
+        cookieJar,
+        port: t.context.port,
+        json: {
+            username: 'test2',
+            email: 'test2@test.test',
+            given_name: 'Bobby',
+            family_name: 'Tables',
+            language: 'en_US',
+            locale: 'en_US',
+            opt_into_edu_resources: true,
+            over_18: true,
+            timezone: 'US/Pacific-New',
+            organization: 'test organization',
+            [args.key]: args.value,
+        },
+        responseType: 'json',
+        headers: {
+            authorization: `Bearer ${args.jwt}`,
+        },
+    }));
+
+    t.is(error.response.statusCode, 422);
+    t.snapshot(error.response.body);
+}
+
+registerDuplicateUserError.title = (providedTitle = 'register duplicate user error', args) => `${providedTitle} (${args.key != '' ? args.key : 'id'})`;
+
+test(registerDuplicateUserError, { jwt: TEST_JWT, key: '', value: '' });
+test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'username', value: 'test' });
+test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'email', value: 'test@test.test' });
+
 test('login user', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
 
@@ -344,12 +387,12 @@ async function createImage(t, meta) {
             age_ranges: [],
             affiliations: [],
             categories: [],
+            kind: 'Canvas',
             ...meta,
         },
     });
 
     t.deepEqual(typeof (image.body.id), 'string');
-    t.deepEqual(typeof (image.body.upload_url), 'string');
 }
 
 createImage.title = (providedTitle = 'create image meta', meta) => {
@@ -375,6 +418,7 @@ async function createImageError(t, args) {
             age_ranges: [],
             affiliations: [],
             categories: [],
+            kind: 'Canvas',
             [args.kind]: [args.id],
         },
     }));
@@ -405,6 +449,7 @@ test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0
 test.todo('GET image');
 test.todo('GET images');
 test.todo('DELETE image');
+test.todo('PATCH image/raw (upload image)');
 
 // todo: test builder
 test('update image - empty', async t => {

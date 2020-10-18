@@ -4,10 +4,10 @@ use std::net::{SocketAddr, TcpListener};
 ///
 /// [`TcpListener`]: https://doc.rust-lang.org/stable/std/net/struct.TcpListener.html
 pub fn get_tcp_fd() -> Option<TcpListener> {
-    #[cfg(feature = "local")]
+    #[cfg(feature = "listenfd")]
     let fd = listenfd::ListenFd::from_env().take_tcp_listener(0).unwrap();
 
-    #[cfg(not(feature = "local"))]
+    #[cfg(not(feature = "listenfd"))]
     let fd = None;
 
     fd

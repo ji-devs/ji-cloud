@@ -11,6 +11,7 @@ const SPA = process.argv[2];
 switch(SPA) {
 	case "user":
 	case "admin":
+	case "jig":
 		break;
 	default: {
 		console.error("supply valid APP (and note the space) for frontend-dev-files -- [APP]");
@@ -19,13 +20,13 @@ switch(SPA) {
 }
 
 //CSS
-execSync(`npm run _bundle-prod`, {cwd: path.resolve(`../frontend/${SPA}/css`)});
-fs.copy(path.resolve(`../frontend/${SPA}/css/dist/styles.min.css`), path.resolve(`../frontend/${SPA}/app/dist/css/styles.min.css`))
+execSync(`npm run _bundle-prod`, {cwd: path.resolve(`../frontend/css`)});
+fs.copy(path.resolve(`../frontend/css/dist/styles.min.css`), path.resolve(`../frontend/app/${SPA}/dist/css/styles.min.css`))
   .catch(err => console.error(err));
 
 //HTML
 const src = path.resolve("../frontend/core/devfiles/index.html")
-const dest = path.resolve(`../frontend/${SPA}/app/dist/index.html`);
+const dest = path.resolve(`../frontend/app/${SPA}/dist/index.html`);
 
 fs.readFile(src, 'utf-8')
     .then(html => html.replace("{{SPA}}", SPA))

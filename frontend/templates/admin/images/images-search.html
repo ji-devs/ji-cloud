@@ -25,10 +25,10 @@
                 Back
               </p>
               <div class="flex mx-6">Page
-                  <input data-id="curr-page" type="number" class="h-6 w-6 bg-jibackgroundBlue text-center flex justify-center items-center mx-1 border border-jinumberblue text-jibuttonBlue focus:outline-none">
+                  <input data-id="page" value="0" type="number" class="h-6 w-6 bg-jibackgroundBlue text-center flex justify-center items-center mx-1 border border-jinumberblue text-jibuttonBlue focus:outline-none">
 
                 of
-                <span class="mx-1">10</span>
+                <span data-id="pages" class="mx-1"></span>
               </div>
               <div class="flex">
                 <p>Next</p>
@@ -37,7 +37,7 @@
             </div>
           </div>
           <div class="flex ml-auto mr-0">
-            {{ Input::select(dataId="filter", options=["Show All", "Show Published", "Show Saved"]) }}
+            {{ Input::select(selectDataId="filter", options=["Show All", "Show Published", "Show Saved"]) }}
           </div>
         </div>
         <div data-id="grid" class="grid grid-cols-5 gap-4">

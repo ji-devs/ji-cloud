@@ -1,11 +1,6 @@
 use algolia::{
-    filter::AndFilterable,
-    filter::BooleanFilter,
-    filter::CmpFilter,
-    filter::CommonFilter,
-    filter::FacetFilter,
-    filter::FilterOperator,
-    request::{BatchWriteRequests, PartialUpdateQuery, SearchQuery},
+    filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
+    request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
     Client as Inner,
 };
@@ -38,8 +33,11 @@ pub struct Updater {
 
 impl Updater {
     pub fn spawn(self) -> JoinHandle<()> {
-        dbg!("test");
         tokio::task::spawn(async move {
+            if self.algolia_client.inner.is_none() {
+                return;
+            }
+
             loop {
                 let iteration_start = Instant::now();
 
@@ -153,6 +151,7 @@ pub struct ImageUpdate<'a> {
 #[derive(Clone)]
 pub struct AlgoliaClient {
     inner: Option<Inner>,
+    index: String,
 }
 
 fn filters_for_ids<T: Into<Uuid> + Copy>(
@@ -175,7 +174,7 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
 impl AlgoliaClient {
     async fn batch_images(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = with_client!(self.inner; vec![])
-            .batch("image", &batch)
+            .batch(&self.index, &batch)
             .await?;
 
         let ids: Result<_, _> = resp
@@ -188,16 +187,21 @@ impl AlgoliaClient {
     }
 
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
-        let inner = if let Some(settings) = settings {
+        if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
             let api_key = algolia::ApiKey(settings.key);
 
-            Some(Inner::new(app_id, api_key)?)
-        } else {
-            None
-        };
+            Ok(Self {
+                inner: Some(Inner::new(app_id, api_key)?),
+                index: settings.index,
+            })
 
-        Ok(Self { inner })
+        } else {
+            Ok(Self {
+                inner: None,
+                index: String::new(),
+            })    
+        }
     }
 
     // todo: return ImageId (can't because of repr issues in sqlx)
@@ -242,7 +246,7 @@ impl AlgoliaClient {
 
         let results: SearchResponse = client
             .search(
-                "image",
+                &self.index,
                 SearchQuery {
                     query: Some(query),
                     page,
@@ -264,9 +268,19 @@ impl AlgoliaClient {
         Ok((results, pages))
     }
 
-    pub async fn delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
+    pub async fn delete_image(&self, id: ImageId) {
+        if let Err(e) = self.try_delete_image(id).await {
+            log::warn!(
+                "failed to delete image with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
         with_client!(self.inner)
-            .delete_object("image", &id.to_string())
+            .delete_object(&self.index, &id.to_string())
             .await?;
 
         Ok(())

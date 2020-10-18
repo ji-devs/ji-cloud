@@ -92,6 +92,37 @@ impl From<CreateError> for actix_web::Error {
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
+/// Error occurred while uploading an image.
+pub enum UploadError {
+    /// User has insufficient permissions to upload the image.
+    Forbidden,
+
+    /// The image does not exist.
+    NotFound,
+
+    /// Couldn't parse the body into an image
+    InvalidImage,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
+}
+
+#[cfg(feature = "backend")]
+impl From<UploadError> for actix_web::Error {
+    fn from(e: UploadError) -> actix_web::Error {
+        match e {
+            UploadError::InternalServerError(e) => anyhow_to_ise(e),
+            UploadError::NotFound => HttpResponse::NotFound().json(e).into(),
+            // should this be 400 instead?
+            UploadError::InvalidImage => HttpResponse::UnprocessableEntity().json(e).into(),
+            UploadError::Forbidden => HttpResponse::Forbidden().json(e).into(),
+        }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
 /// Error occurred while updating an image.
 pub enum UpdateError {
     /// A given item of metadata doesn't exist.
@@ -154,4 +185,11 @@ impl From<DeleteError> for actix_web::Error {
     }
 }
 
-from_anyhow![GetError, SearchError, CreateError, UpdateError, DeleteError,];
+from_anyhow![
+    GetError,
+    SearchError,
+    CreateError,
+    UpdateError,
+    DeleteError,
+    UploadError
+];

@@ -17,13 +17,13 @@
 </div>
 {% endmacro user_pw %}
 
-{% macro user_select(label, width, dataId="") %}
+{% macro lang_select(label, width, selectDataId="") %}
 <div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4 user_select">
-  <select type="text" class=" focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
+  <select data-id="{{selectDataId}}" type="text" class=" focus:outline-none {{width}} bg-jilogingrey absolute bottom-0 mb-2 px-4 left-0">
     <option>Select or type</option>
-    <option value="" England</option>
-    <option value="">US</option>
+    <option value="en">English</option>
+    <option value="he">עברית</option>
   </select>
   <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
 </div>
-{% endmacro user_select %}
+{% endmacro lang_select %}

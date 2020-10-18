@@ -74,16 +74,11 @@ impl RegisterStep1 {
                         Err(err) => _self.status.set(Some(err)),
 
                         Ok(info) => {
-                            _self.status.set(Some(RegisterStatus::Busy));
-                            _self.loader.load(clone!(_self => async move {
-                                { 
-                                    let mut data = _self.data.borrow_mut();
-                                    data.user_name = Some(info.user_name);
-                                    data.given_name = Some(info.given_name);
-                                    data.family_name = Some(info.family_name);
-                                }
-                                Self::complete_registration(_self.clone(), &_self.data.borrow()).await;
-                            }));
+                            let mut data = _self.data.borrow_mut();
+                            data.user_name = Some(info.user_name);
+                            data.given_name = Some(info.given_name);
+                            data.family_name = Some(info.family_name);
+                            _self.step.set(Step::Two);
                         }
                     }
                 }))
@@ -95,35 +90,6 @@ impl RegisterStep1 {
         })
     }
 
-    async fn complete_registration(_self: Rc<Self>, data:&RegisterData) {
-        let RegisterData { token, email, user_name, given_name, family_name} = data;
-        let token = token.as_ref().unwrap_throw().to_string();
-        let email = email.as_ref().unwrap_throw().to_string();
-        let user_name = user_name.as_ref().unwrap_throw().to_string();
-        let given_name = given_name.as_ref().unwrap_throw().to_string();
-        let family_name = family_name.as_ref().unwrap_throw().to_string();
-
-        match create_user(token, user_name, given_name, family_name, email).await {
-            Ok(csrf) => {
-                storage::save_csrf_token(&csrf);
-
-                let route:String = Route::User(UserRoute::Profile).into();
-                dominator::routing::go_to_url(&route);
-
-                ///generally speaking this kind of thing isn't necessary
-                ///futures will just resolve and be dropped as part of the flow
-                ///but because the oauth flow here opens a separate window
-                ///it's more at risk to leave dangling Futures
-                ///specifically, here, dangling futures which hold the Rc that holds it
-                ///thereby creating a cycle, we need to break by cancelling that future
-                ///see: https://github.com/jewish-interactive/ji-cloud/issues/78
-                _self.loader.cancel();
-            },
-            Err(err) => {
-                _self.status.set(Some(err));
-            }
-        }
-    }
     fn stash_refs(&self, parent:HtmlElement) {
         *self.refs.borrow_mut() = Some(RegisterPageRefs::new(&parent));
     }
@@ -212,7 +178,11 @@ pub async fn create_user(
         locale: "en".to_string(),
         timezone: chrono_tz::Tz::Asia__Jerusalem,
         opt_into_edu_resources: true,
-        organization: "ji".to_string()
+        organization: Some("ji".to_string()),
+        affiliations: vec![],
+        age_ranges: vec![],
+        subjects: vec![],
+        geocode: None,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;

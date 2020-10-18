@@ -4,9 +4,9 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Route {
     NotFound,
-    Temp,
     User(UserRoute),
-    Admin(AdminRoute)
+    Admin(AdminRoute),
+    Jig(JigRoute),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,6 +23,19 @@ pub enum AdminRoute {
     ImageEdit(String),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JigRoute {
+    Gallery,
+    Edit(String),
+    Play(String, JigPlayMode),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JigPlayMode {
+    Producer,
+    Audience 
+}
+
 impl Route {
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_throw().location();
@@ -30,41 +43,28 @@ impl Route {
         location.set_href(&s).unwrap_throw();
     }
 
-    //TODO - make this and the From for &str via proc-macro so it only needs to be written once
     pub fn from_url(url:&str) -> Self {
-        //take into account possibly different hostname
         let url = Url::new(&url).unwrap_throw();
-        let uri_parts = get_uri_parts(&url, None);
-        let uri = uri_parts.join("/");
-        let route = match uri.as_ref() {
-            "user/profile" => Some(Self::User(UserRoute::Profile)),
-            "user/signin" => Some(Self::User(UserRoute::Signin)),
-            "user/register" => Some(Self::User(UserRoute::Register)),
-            "admin/categories" => Some(Self::Admin(AdminRoute::Categories)),
-            "admin/images" => Some(Self::Admin(AdminRoute::Images)),
-            "admin/image-add" => Some(Self::Admin(AdminRoute::ImageAdd)),
-            "temp" => Some(Self::Temp),
-            _ => None
-        };
+        let paths = url.pathname();
+        let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
+        let paths = paths.as_slice();
 
-        if let Some(route) = route {
-            return route;
+        log::info!("{:?}", paths);
+
+        match paths {
+            ["user", "profile"] => Self::User(UserRoute::Profile),
+            ["user", "signin"] => Self::User(UserRoute::Signin),
+            ["user", "register"] => Self::User(UserRoute::Register),
+            ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
+            ["admin", "images"] => Self::Admin(AdminRoute::Images),
+            ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
+            ["admin", "image-edit", id] => Self::Admin(AdminRoute::ImageEdit(id.to_string())),
+            ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
+            ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
+            ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
+            _ => Self::NotFound
         }
-
-        if uri_parts[0] == "admin" {
-            if uri_parts.len() < 3 {
-                return Self::NotFound;
-            }
-
-            return {
-                match uri_parts[1].as_ref() {
-                    "image-edit" => Self::Admin(AdminRoute::ImageEdit(uri_parts[2].clone())),
-                    _ => Self::NotFound
-                }
-            }
-        }
-        
-        Self::NotFound
     }
 }
 
@@ -87,39 +87,20 @@ impl From<Route> for String {
                     AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
                 }
             },
+            Route::Jig(route) => {
+                match route {
+                    JigRoute::Gallery => "/jig/gallery".to_string(),
+                    JigRoute::Edit(id) => format!("/jig/edit/{}", id),
+                    JigRoute::Play(id, mode) => {
+                        match mode {
+                            JigPlayMode::Audience => format!("/jig/play/{}", id),
+                            JigPlayMode::Producer => format!("/jig/play-producer/{}", id),
+                        }
+                    }
+                }
+            },
             Route::NotFound => "/404".to_string(),
-            Route::Temp=> "/temp".to_string()
         }
     }
 }
 
-fn get_uri_parts(url:&Url, host_url_base: Option<&'static str>) -> Vec<String> {
-    let pathname = &url.pathname();
-
-    if pathname == "" {
-        Vec::new()
-    } else {
-        let uri = get_root(pathname, host_url_base);
-        if uri == "" {
-            vec![]
-        } else {
-            uri.split("/").map(|s| s.to_string()).collect()
-        }
-    }
-}
-
-//simple stripping of host dir like if deploying to example.com/foo
-fn get_root<'a>(input: &'a str, host_url_base: Option<&'static str>) -> &'a str {
-    let stripped = match host_url_base {
-        None => input,
-        Some(host_dir) => {
-            input
-                .find(host_dir)
-                .map(|len| input.split_at(len + host_dir.len() - 1).1)
-                .or(Some(input))
-                .unwrap()
-        }
-    };
-
-    stripped.trim_matches('/')
-}

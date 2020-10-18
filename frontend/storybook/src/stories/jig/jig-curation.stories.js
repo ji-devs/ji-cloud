@@ -1,14 +1,14 @@
 
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import jigtable from "@templates/admin/jig/jig-table.html";
-import jigtooltip from "@templates/admin/jig/jig-copyemail.html";
-import jigprivacy from "@templates/admin/jig/jig-privacy.html";
-import jigfilter from "@templates/admin/jig/jig-filter.html";
-import jiglanguage from "@templates/admin/jig/jig-language-filter.html";
-import jigprivacyfilter from "@templates/admin/jig/privacy-filter.html";
-import jigstatus from "@templates/admin/jig/jig-status.html";
-import jigtofrom from "@templates/admin/jig/jig-tofrom.html";
+import jigtable from "@templates/jig/jig-table.html";
+import jigtooltip from "@templates/jig/jig-copyemail.html";
+import jigprivacy from "@templates/jig/jig-privacy.html";
+import jigfilter from "@templates/jig/jig-filter.html";
+import jiglanguage from "@templates/jig/jig-language-filter.html";
+import jigprivacyfilter from "@templates/jig/privacy-filter.html";
+import jigstatus from "@templates/jig/jig-status.html";
+import jigtofrom from "@templates/jig/jig-tofrom.html";
 
 export default {
   title: 'JIG/Curation',

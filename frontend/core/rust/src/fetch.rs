@@ -16,7 +16,7 @@ use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file};
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file, fetch_upload_file_with_headers};
 use web_sys::File;
 
 #[derive(Debug)]
@@ -36,8 +36,11 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 //either a serialized error or a native error (like 401, 403, etc.)
 
-pub async fn upload_file(url:&str, file:&File) -> Result<(), anyhow::Error> {
-    fetch_upload_file(url, file)
+pub async fn upload_file(url:&str, file:&File, method:&str) -> Result<(), anyhow::Error> {
+
+    let csrf = load_csrf_token().unwrap();
+
+    fetch_upload_file_with_headers(url, file, method, true,&vec![(CSRF_HEADER_NAME, &csrf)])
         .await
         .map(|res| ())
         .map_err(|err| anyhow::Error::msg(err.to_string()))
@@ -76,6 +79,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
+//TODO - get rid of this, use specialization
 pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
