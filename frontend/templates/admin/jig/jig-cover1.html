@@ -1,7 +1,7 @@
 {% import "_common/buttons/button-macros.html" as ButtonMacros %}
 
 <div class="flex bg-jibackgroundBlue  h-full min-h-screen">
-  <div class="sidebar w-72 bg-white h-full min-h-screen fixed shadow-sm flex flex-col items-center">
+  <div class="sidebar w-72 bg-white h-full min-h-screen fixed shadow-sm flex flex-col items-center hidden">
     <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8">
     <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
     <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
@@ -12,15 +12,16 @@
       <h1 class="text-jibuttonBlue font-bold">02</h1>
     </div>
   </div>
-  <div class="bg-white ml-12 w-516 p-8">
-    <div class="flex justify-between">
+  <div class="bg-white ml-12 w-516 ">
+    <div class="flex justify-between p-6">
       <div class="">
         <p>Select</p>
       </div>
       <!-- bg-jibuttonBlue text-white for active and bg-jigooglegrey and text-black for inactive -->
       <div class="flex mb-4">
-        <div class="h-24 w-68 bg-jibuttonBlue rounded-md flex items-center justify-center mx-2">
-          <p class="text-white text-sm">Layout</p>
+
+        <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
+          <p class="text-black text-sm">Starting layout</p>
         </div>
         <div class="border-r border-jiheadergrey">
 
@@ -28,19 +29,21 @@
         <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
           <p class="text-black text-sm">Theme</p>
         </div>
-        <div class="border-r border-jiheadergrey">
-
-        </div>
-        <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
-          <p class="text-black text-sm">Media</p>
-        </div>
       </div>
 
     </div>
-    <div class="w-full border-b border-jigrey mb-4">
+    <div class="border-t border-b border-jidarkgrey py-4">
+      <div class="flex items-center pl-6">
+        <p>Add</p>
+        <img src="{{MEDIA_UI}}/icn-text-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-image-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-background-color-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-record-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="">
+      </div>
     </div>
-    <p>Select Layout</p>
-    <div class="flex flex-wrap">
+    <p class="pl-6 pt-4">Select Layout</p>
+    <div class="flex flex-wrap p-6">
       <!-- When selected with these classes. When not selected bg-white text-black -->
       <div class="w-236 h-177 border bg-jibuttonBlue rounded-md flex flex-col items-center p-2">
         <img class="w-200 mb-2" src="{{MEDIA_UI}}/Layout_Background_Color.png" alt="">

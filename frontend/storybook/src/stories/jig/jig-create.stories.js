@@ -6,6 +6,7 @@ import dropbox from "@templates/admin/jig/jig-add-dropbox.html";
 import jigdelete from "@templates/admin/jig/jig-delete.html";
 import jiglandingpage from "@templates/admin/jig/jig-landingpage.html";
 import jignavigation from "@templates/admin/jig/jig-navigation.html";
+import jigcoverone from "@templates/admin/jig/jig-cover1.html";
 
 export default {
   title: 'JIG/Create',
@@ -28,6 +29,11 @@ export const JigLandingPage = () =>
 
 export const JigNavigation = () =>
     tmpl(jignavigation, {
+
+});
+
+export const JigCoverOne = () =>
+    tmpl(jigcoverone, {
 
 });
 
