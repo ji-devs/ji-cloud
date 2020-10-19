@@ -39,9 +39,9 @@ pub struct CreateResponse {
     pub id: JigId,
 }
 
-/// Response for successfully getting a JIG.
+/// The over-the-wire representation of a JIG.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GetResponse {
+pub struct Jig {
     /// The ID of the JIG.
     pub id: JigId,
 
@@ -61,10 +61,17 @@ pub struct GetResponse {
     pub creator_id: Option<Uuid>,
 
     /// The current author
-    pub author_id: Uuid,
+    pub author_id: Option<Uuid>,
 
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
+}
+
+/// The response returned when a request for `GET`ing a jig is successful.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetResponse {
+    /// The requested JIG.
+    pub jig: Jig,
 }
 
 /// Request for updating a JIG.

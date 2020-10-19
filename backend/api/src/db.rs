@@ -1,5 +1,6 @@
 pub(crate) mod category;
 pub(crate) mod image;
+pub(crate) mod jig;
 pub(crate) mod meta;
 pub(crate) mod user;
 

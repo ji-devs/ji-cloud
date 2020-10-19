@@ -20,6 +20,9 @@ pub enum UserScope {
 
     /// The user can create/delete/modify images.
     ManageImage = 3,
+
+    /// The user can create/delete/modify jigs.
+    ManageJig = 4,
 }
 
 impl TryFrom<i16> for UserScope {
