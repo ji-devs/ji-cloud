@@ -13,6 +13,6 @@ create table jig (
 );
 
 create table jig_module (
-    jig_id uuid  not null,
+    jig_id uuid  not null references jig (id) on delete cascade,
     module jsonb not null
 );

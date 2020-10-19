@@ -1,4 +1,4 @@
-use crate::{api::Method, domain::image::UpdateRequest, domain::jig::{CreateRequest, CreateResponse, GetResponse}, error::{
+use crate::{api::Method, domain::jig::{CreateRequest, CreateResponse, GetResponse, UpdateRequest}, error::{
         jig::{CreateError, UpdateError},
         DeleteError, GetError,
     }};
