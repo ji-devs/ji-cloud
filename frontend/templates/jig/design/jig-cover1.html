@@ -1,6 +1,6 @@
 {% import "_common/buttons/button-macros.html" as ButtonMacros %}
 
-<div class="flex bg-jibackgroundBlue  h-full min-h-screen">
+<div class="flex bg-jibackgroundBlue h-full min-w-full w-auto min-h-screen">
   <div class="sidebar w-72 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
     <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8">
     <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
@@ -42,15 +42,25 @@
         <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="">
       </div>
     </div>
-    <div class="px-4">
+    <div class="px-4 ">
       <p class=" pt-4">Select Layout</p>
-      <div class="flex flex-wrap pt-4">
+      <div class="grid grid-cols-2 pt-4">
         <!-- When selected with these classes. When not selected bg-white text-black -->
-        <div class="w-236 h-177 border bg-jibuttonBlue rounded-md flex flex-col items-center p-2">
+
+        <div class="max-w-236 h-177 border bg-jibuttonBlue rounded-md flex flex-col items-center p-2">
+          <img class="w-200 mb-2" src="{{MEDIA_UI}}/Layout_Background_Color.png" alt="">
+          <p class="text-white">Background color</p>
+        </div>
+        <div class="max-w-236 h-177 border bg-jibuttonBlue rounded-md flex flex-col items-center p-2">
+          <img class="w-200 mb-2" src="{{MEDIA_UI}}/Layout_Background_Color.png" alt="">
+          <p class="text-white">Background color</p>
+        </div>
+        <div class="max-w-236 h-177 border bg-jibuttonBlue rounded-md flex flex-col items-center p-2">
           <img class="w-200 mb-2" src="{{MEDIA_UI}}/Layout_Background_Color.png" alt="">
           <p class="text-white">Background color</p>
         </div>
       </div>
+
     </div>
 
   </div>
@@ -85,7 +95,7 @@
       <h1 class="text-jititleorange text-4xl font-light mb-4">Create a Cover Page</h1>
       <p class="font-light text-lg">Introduce your topic</p>
       <p class="font-light text-lg">Use the blue panel for selecting layouts, themes, and adding content</p>
-      <div class="w-1212 h-681 bg-white mt-4 rounded-sm mb-4">
+      <div class="max-w-1212 h-681 bg-white mt-4 rounded-sm mb-4">
 
       </div>
       <div class="flex justify-end w-full">
