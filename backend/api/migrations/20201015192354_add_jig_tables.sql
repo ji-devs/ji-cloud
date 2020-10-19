@@ -8,10 +8,11 @@ create table jig (
     creator_id   uuid references "user" (id) on delete set null,
     author_id    uuid references "user" (id) on delete set null,
     created_at   timestamptz   not null default now(),
-    updated_at   timestamptz
+    updated_at   timestamptz,
+    publish_at   timestamptz
 );
 
 create table jig_module (
     jig_id uuid  not null,
     module jsonb not null
-)
+);

@@ -8,32 +8,6 @@ use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Error occurred while getting a single image.
-#[non_exhaustive]
-#[derive(Serialize, Deserialize)]
-pub enum GetError {
-    /// The image does not exist.
-    NotFound,
-
-    /// The user has insufficient permissions to access the image.
-    Forbidden,
-
-    /// An internal server error occurred.
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-}
-
-#[cfg(feature = "backend")]
-impl From<GetError> for actix_web::Error {
-    fn from(e: GetError) -> actix_web::Error {
-        match e {
-            GetError::InternalServerError(e) => anyhow_to_ise(e),
-            GetError::NotFound => HttpResponse::NotFound().into(),
-            GetError::Forbidden => HttpResponse::Forbidden().into(),
-        }
-    }
-}
-
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while searching for images.
@@ -133,7 +107,7 @@ pub enum UpdateError {
         kind: MetaKind,
     },
 
-    /// The category was not found.
+    /// The image was not found.
     NotFound,
 
     /// User has insufficient permissions to update the image.
@@ -158,38 +132,4 @@ impl From<UpdateError> for actix_web::Error {
     }
 }
 
-#[non_exhaustive]
-#[derive(Serialize, Deserialize)]
-/// Error occurred while deleting an image.
-pub enum DeleteError {
-    /// User has insufficient permissions to delete the image.
-    Forbidden,
-
-    // todo: [conflict] With what?
-    /// Deleting the image would cause a conflict.
-    Conflict,
-
-    /// An internal server error occurred.
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-}
-
-#[cfg(feature = "backend")]
-impl From<DeleteError> for actix_web::Error {
-    fn from(e: DeleteError) -> actix_web::Error {
-        match e {
-            DeleteError::InternalServerError(e) => anyhow_to_ise(e),
-            DeleteError::Forbidden => HttpResponse::Forbidden().into(),
-            DeleteError::Conflict => HttpResponse::Conflict().into(),
-        }
-    }
-}
-
-from_anyhow![
-    GetError,
-    SearchError,
-    CreateError,
-    UpdateError,
-    DeleteError,
-    UploadError
-];
+from_anyhow![SearchError, CreateError, UpdateError, UploadError];

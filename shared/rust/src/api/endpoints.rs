@@ -33,3 +33,6 @@ pub mod meta;
 
 /// User endpoints.
 pub mod user;
+
+/// JIG endpoints.
+pub mod jig;

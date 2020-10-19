@@ -1,4 +1,4 @@
-//! Errors for category routes.
+//! Errors for JIG routes.
 
 #[cfg(feature = "backend")]
 use super::anyhow_to_ise;
@@ -8,12 +8,9 @@ use serde::{Deserialize, Serialize};
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
-/// Error occurred while creating a category.
+/// Error occurred while creating a JIG.
 pub enum CreateError {
-    /// The given parent category does not exist.
-    ParentCategoryNotFound,
-
-    /// The user has insufficient permissions to create categories.
+    /// User has insufficient permissions to create the JIG.
     Forbidden,
 
     /// An internal server error occurred.
@@ -26,7 +23,6 @@ impl From<CreateError> for actix_web::Error {
     fn from(e: CreateError) -> actix_web::Error {
         match e {
             CreateError::InternalServerError(e) => anyhow_to_ise(e),
-            CreateError::ParentCategoryNotFound => HttpResponse::NotFound().into(),
             CreateError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
@@ -34,25 +30,13 @@ impl From<CreateError> for actix_web::Error {
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
-/// Error occurred while updating a category.
+/// Error occurred while updating an image.
 pub enum UpdateError {
-    /// The category didn't exist.
-    CategoryNotFound,
+    /// The JIG was not found.
+    NotFound,
 
-    /// The *new* parent category didn't exist.
-    ParentCategoryNotFound,
-
-    /// The user has insufficient permissions to update the category.
+    /// User has insufficient permissions to update the JIG.
     Forbidden,
-
-    /// The update would create a cycle between this category and its parents.
-    Cycle,
-
-    /// Moving the category to the given index would cause a gap between its siblings and itself.
-    OutOfRange {
-        /// The highest index a category could be moved to in its new parent.
-        max: u16,
-    },
 
     /// An internal server error occurred.
     #[serde(skip)]
@@ -64,11 +48,8 @@ impl From<UpdateError> for actix_web::Error {
     fn from(e: UpdateError) -> actix_web::Error {
         match e {
             UpdateError::InternalServerError(e) => anyhow_to_ise(e),
-            e @ UpdateError::CategoryNotFound | e @ UpdateError::ParentCategoryNotFound => {
-                HttpResponse::NotFound().json(e).into()
-            }
+            UpdateError::NotFound => HttpResponse::NotFound().into(),
             UpdateError::Forbidden => HttpResponse::Forbidden().into(),
-            e => HttpResponse::UnprocessableEntity().json(e).into(),
         }
     }
 }
