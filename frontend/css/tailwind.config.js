@@ -134,11 +134,13 @@ module.exports = {
       maxHeight: {
         284: '284px',
         681: '681px',
+        83.5: '83.5px',
       },
       minWidth: {
         516: '516px'
       },
       maxWidth: {
+        83.5: '83.5px',
         1212: '1212px'
       },
       borderRadius: {
