@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Wrapper type around [`Uuid`], represents the ID of a image.
+/// Wrapper type around [`Uuid`], represents the ID of a JIG.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -13,22 +13,40 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigId(pub Uuid);
 
+/// Wrapper type around [`Uuid`], represents the ID of a module.
+///
+/// [`Uuid`]: ../../uuid/struct.Uuid.html
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct ModuleId(pub Uuid);
+
 /// Request to create a new JIG.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct CreateRequest {
     /// The JIG's name.
-    pub display_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub display_name: Option<String>,
 
     /// The JIG's cover module.
-    pub cover: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub cover: Option<ModuleId>,
 
     /// The JIG's ending module.
-    pub ending: serde_json::Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub ending: Option<ModuleId>,
 
     /// The JIG's remaining modules.
-    pub modules: Vec<serde_json::Value>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub modules: Vec<ModuleId>,
 
     /// When the JIG should be considered published (if at all).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub publish_at: Option<Publish>,
 }
 
@@ -49,13 +67,13 @@ pub struct Jig {
     pub display_name: String,
 
     /// The JIG's cover module.
-    pub cover: serde_json::Value,
+    pub cover_id: Option<ModuleId>,
 
     /// The JIG's ending module.
-    pub ending: serde_json::Value,
+    pub ending_id: Option<ModuleId>,
 
     /// The JIG's remaining modules.
-    pub modules: Vec<serde_json::Value>,
+    pub module_ids: Vec<ModuleId>,
 
     /// The ID of the JIG's original creator (`None` if unknown).
     pub creator_id: Option<Uuid>,
@@ -85,17 +103,17 @@ pub struct UpdateRequest {
     /// The JIG's cover module.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub cover: Option<serde_json::Value>,
+    pub cover: Option<ModuleId>,
 
     /// The JIG's ending module.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub ending: Option<serde_json::Value>,
+    pub ending: Option<ModuleId>,
 
     /// The JIG's remaining modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub modules: Option<Vec<serde_json::Value>>,
+    pub modules: Option<Vec<ModuleId>>,
 
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]

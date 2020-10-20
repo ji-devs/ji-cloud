@@ -3,14 +3,7 @@ use actix_web::{
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
-use shared::{
-    api::{endpoints::jig, ApiEndpoint},
-    domain::jig::CreateResponse,
-    domain::jig::GetResponse,
-    domain::jig::JigId,
-    error::jig::UpdateError,
-    error::GetError,
-};
+use shared::{api::{endpoints::jig, ApiEndpoint}, domain::jig::CreateResponse, domain::jig::GetResponse, domain::jig::{CreateRequest, JigId}, error::GetError, error::jig::UpdateError};
 use sqlx::PgPool;
 
 use crate::{
@@ -21,15 +14,16 @@ use crate::{
 async fn create(
     db: Data<PgPool>,
     auth: AuthUserWithScope<ScopeManageJig>,
-    Json(req): Json<<jig::Create as ApiEndpoint>::Req>,
+    req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, <jig::Create as ApiEndpoint>::Err> {
+    let req = req.map_or_else(CreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.id;
     let id = db::jig::create(
         &*db,
-        &req.display_name,
-        &req.cover,
+        req.display_name.as_deref(),
+        req.cover,
         &req.modules,
-        &req.ending,
+        req.ending,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
     )
@@ -60,9 +54,9 @@ async fn update(
         path.into_inner(),
         req.display_name.as_deref(),
         req.author_id,
-        req.cover.as_ref(),
+        req.cover,
         req.modules.as_deref(),
-        req.ending.as_ref(),
+        req.ending,
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
     .await?;
