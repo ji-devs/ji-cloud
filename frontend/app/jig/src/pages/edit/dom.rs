@@ -22,23 +22,59 @@ use shared::domain::{
     category::Category,
     image::ImageKind,
 };
+use super::{data::*, module_selector::*, sidebar::*};
 
 pub struct EditPage {
-    pub id:String
+    pub id:String,
+    pub right_section:Mutable<RightSection>,
+    pub jig: Mutable<Option<Jig>>
 }
+
+#[derive(Clone, Copy, Debug)]
+pub enum RightSection {
+    ModuleSelect
+}
+
+
 
 impl EditPage {
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            id
+            id,
+            right_section: Mutable::new(RightSection::ModuleSelect),
+            jig: Mutable::new(None)
         });
 
-        _self
+        let _self_clone = _self.clone();
+
+        spawn_local(async move {
+            //TODO - load jig
+            _self.jig.set(Some(Jig::new()))
+            //_self.jig.set(Some(Jig::mock()))
+        });
+
+        _self_clone
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
 
-        elem!(templates::edit(), {
+        elem!(templates::edit_page(), {
+            .with_data_id!("sidebar", {
+                .child_signal(Sidebar::render(Sidebar::new(_self.jig.clone())))
+            })
+            .with_data_id!("right-area", {
+                .child_signal(_self.right_section.signal_ref(|section| {
+                    Some(
+                        match section {
+                            RightSection::ModuleSelect => {
+                                ModuleSelect::render(ModuleSelect::new())
+                            }
+                        }
+                    )
+                }))
+            })
         })
     }
 }
+
+

@@ -51,7 +51,7 @@ web-sys = { version = "0.3.45", features = [
 wasm-bindgen-futures = "0.4.18"
 simple-html-template = { version = "0.2.3", features = ["wasm"] }
 htmlescape = "0.3.1"
-dominator = "0.5.12"
+dominator = "0.5.13"
 futures-signals = "0.3.15"
 dominator_helpers = "0.3.5"
 serde = { version = "1.0.117", features = ["derive"] }

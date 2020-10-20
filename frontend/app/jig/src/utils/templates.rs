@@ -10,15 +10,38 @@ thread_local! {
 }
 
 
-const GALLERY:&'static str = "gallery";
-const EDIT:&'static str = "edit";
-
+const GALLERY_PAGE:&'static str = "gallery";
+const EDIT_PAGE:&'static str = "@templates/jig/edit/edit-page.html";
+const EDIT_SIDEBAR_SECTION:&'static str = "@templates/jig/edit/sidebar.html";
+const EDIT_MENU_SECTION:&'static str = "@templates/jig/edit/menu.html";
+const EDIT_DELETE_POPUP:&'static str = "@templates/jig/edit/delete-popup.html";
+const EDIT_MODULE_LEFT:&'static str = "@templates/jig/edit/sidebar-module-left.html";
+const EDIT_MODULE_RIGHT:&'static str = "@templates/jig/edit/sidebar-module-right.html";
+const EDIT_MODULE_SELECTION:&'static str = "@templates/jig/edit/module-selection.html";
 
 pub fn gallery() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(GALLERY))
+    TEMPLATES.with(|t| t.cache.render_elem_plain(GALLERY_PAGE))
 }
-pub fn edit() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT))
+pub fn edit_page() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_PAGE))
+}
+pub fn edit_sidebar_section() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_SIDEBAR_SECTION))
+}
+pub fn edit_menu_section() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MENU_SECTION))
+}
+pub fn edit_delete_popup() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_DELETE_POPUP))
+}
+pub fn edit_module_left() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_LEFT))
+}
+pub fn edit_module_right() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_RIGHT))
+}
+pub fn edit_module_selection() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_SELECTION))
 }
 
 pub struct Templates {
@@ -36,8 +59,14 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (GALLERY, get_template_str(include_str!("../../../../.template_output/jig/gallery/jig-creator-one.html"))),
-            (EDIT, get_template_str(include_str!("../../../../.template_output/jig/edit/jig-add-module.html"))),
+            (GALLERY_PAGE, get_template_str(include_str!("../../../../.template_output/jig/gallery/jig-creator-one.html"))),
+            (EDIT_PAGE, get_template_str(include_str!("../../../../.template_output/jig/edit/edit-page.html"))),
+            (EDIT_SIDEBAR_SECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar.html"))),
+            (EDIT_MENU_SECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/menu.html"))),
+            (EDIT_DELETE_POPUP, get_template_str(include_str!("../../../../.template_output/jig/edit/delete-popup.html"))),
+            (EDIT_MODULE_LEFT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-left.html"))),
+            (EDIT_MODULE_RIGHT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-right.html"))),
+            (EDIT_MODULE_SELECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/module-selection.html"))),
         ]);
 
         Self { cache }
