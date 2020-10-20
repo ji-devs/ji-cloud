@@ -2,7 +2,6 @@ const { default: test } = require('ava');
 
 const got = require('got');
 const getPort = require('get-port');
-const { mkdir, copyFile } = require('fs').promises;
 const path = require('path');
 const tough = require('tough-cookie');
 const spawnAsync = require('@expo/spawn-async');
@@ -29,11 +28,11 @@ const COOKIE = 'X-JWT=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
 const CSRF = 'RuQuZb5AoGSdxIGA';
 
 const fixtures = {
-    user: 'fixtures/1_user.sql',
-    metaKinds: 'fixtures/2_meta_kinds.sql',
-    categoryOrdering: 'fixtures/3_category_ordering.sql',
-    categoryNesting: 'fixtures/4_category_nesting.sql',
-    image: 'fixtures/5_image.sql',
+    user: '1_user.sql',
+    metaKinds: '2_meta_kinds.sql',
+    categoryOrdering: '3_category_ordering.sql',
+    categoryNesting: '4_category_nesting.sql',
+    image: '5_image.sql',
 };
 
 function hookServerStarted(server) {
@@ -46,15 +45,15 @@ function hookServerStarted(server) {
     });
 }
 
-async function runFixtures(files, dbUrl, parentDir) {
+async function runFixtures(files, dbUrl, dir) {
     const args = [dbUrl];
 
     // eslint-disable-next-line no-restricted-syntax
     for (const file of files) {
-        args.push('-f', file);
+        args.push('-f', path.resolve(dir, file));
     }
 
-    await spawnAsync('/usr/bin/psql', args, { cwd: parentDir, env: { PGUSER: 'postgres' }, encoding: 'utf8' });
+    await spawnAsync('/usr/bin/psql', args, { env: { PGUSER: 'postgres' }, encoding: 'utf8' });
 }
 
 async function login() {
@@ -71,30 +70,21 @@ async function login() {
 
 test.before(async (t) => {
     t.context.parentDir = path.resolve(process.cwd(), '..');
-
-    try {
-        await mkdir('bin');
-    } catch (e) {
-        if (e && e.code === 'EEXIST') {
-            // ignore it.
-        } else {
-            throw e;
-        }
-    }
-    await copyFile('../target/debug/ji-cloud-api', 'bin/ji-cloud-api');
+    t.context.BIN_FILE = process.env.BIN_FILE || '../target/debug/ji-cloud-api';
+    t.context.PG_TMP = process.env.PG_TMP || '../../script/ephemeralpg/pg_tmp.sh';
+    t.context.FIXTURES_DIR = process.env.FIXTURES_DIR || path.resolve(t.context.parentDir, 'fixtures');
 });
 
 test.beforeEach(async (t) => {
     let port = getPort();
 
-    const dbUrl = await spawnAsync('../../script/ephemeralpg/pg_tmp.sh', { encoding: 'utf8' }).then((it) => it.stdout);
+    const dbUrl = await spawnAsync(t.context.PG_TMP, { encoding: 'utf8' }).then((it) => it.stdout);
 
     port = await port;
 
     t.context.dbUrl = dbUrl;
 
     const env = {
-        cwd: t.context.parentDir,
         LOCAL_API_PORT: port,
         DATABASE_URL: dbUrl,
         PGUSER: 'postgres',
@@ -102,6 +92,10 @@ test.beforeEach(async (t) => {
         LOCAL_PAGES_PORT: 0,
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,
+        S3_ENDPOINT: '',
+        S3_BUCKET: '',
+        GOOGLE_S3_ACCESS_KEY: '',
+        GOOGLE_S3_ACCESS_SECRET: '',
         DISABLE_GOOGLE_CLOUD: true,
         PROJECT_ID: "",
         ALGOLIA_APPLICATION_ID: "",
@@ -110,7 +104,7 @@ test.beforeEach(async (t) => {
     };
 
     t.context.port = port;
-    t.context.server = spawnAsync('bin/ji-cloud-api', { env, encoding: 'utf8' });
+    t.context.server = spawnAsync(t.context.BIN_FILE, { env, encoding: 'utf8' });
     t.context.loggedInReqBase = {
         ...await login(),
         port,
@@ -191,7 +185,7 @@ test('register user', async (t) => {
 });
 
 async function registerDuplicateUserError(t, args) {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const cookieJar = new tough.CookieJar();
 
@@ -228,7 +222,7 @@ test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'username', value
 test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'email', value: 'test@test.test' });
 
 test('login user', async (t) => {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const cookieJar = new tough.CookieJar();
 
@@ -245,7 +239,7 @@ test('login user', async (t) => {
 });
 
 test('user profile', async (t) => {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const profile = await got.get('http://0.0.0.0/v1/user/me/profile', t.context.loggedInReqBase);
 
@@ -253,7 +247,7 @@ test('user profile', async (t) => {
 });
 
 test('create category', async (t) => {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const category = await got.post('http://0.0.0.0/v1/category', {
         ...t.context.loggedInReqBase,
@@ -270,7 +264,7 @@ test.todo('delete category');
 test.todo('update category');
 
 test('get categories', async (t) => {
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
 
@@ -278,7 +272,7 @@ test('get categories', async (t) => {
 });
 
 async function getNestedCategories(t, options) {
-    await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'comma', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
 
@@ -324,7 +318,7 @@ test('exact', getNestedCategories, {
 
 test('update category ordering', async (t) => {
     const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const updateResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
         ...t.context.loggedInReqBase,
@@ -366,7 +360,7 @@ test('update category ordering', async (t) => {
 })
 
 test('GET metadata', async (t) => {
-    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const meta = await got.get('http://0.0.0.0/v1/metadata', t.context.loggedInReqBase);
 
@@ -374,7 +368,7 @@ test('GET metadata', async (t) => {
 });
 
 async function createImage(t, meta) {
-    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const image = await got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
@@ -406,7 +400,7 @@ createImage.title = (providedTitle = 'create image meta', meta) => {
 };
 
 async function createImageError(t, args) {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
     const error = await t.throwsAsync(got.post('http://0.0.0.0/v1/image', {
         ...t.context.loggedInReqBase,
         json: {
@@ -453,7 +447,7 @@ test.todo('PATCH image/raw (upload image)');
 
 // todo: test builder
 test('update image - empty', async t => {
-    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
 
@@ -463,7 +457,7 @@ test('update image - empty', async t => {
 });
 
 test('update image - is_premium', async t => {
-    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } }));
 
@@ -478,7 +472,7 @@ test('update image - is_premium', async t => {
 });
 
 test('update image - two styles', async t => {
-    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.parentDir);
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] } }));
 
