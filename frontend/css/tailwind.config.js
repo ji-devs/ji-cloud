@@ -97,7 +97,9 @@ module.exports = {
 
       },
       maxWidth: {
-        480: '480px'
+        236: '236px',
+        480: '480px',
+
       },
       minWidth: {
         112: '112px',
@@ -130,7 +132,14 @@ module.exports = {
         'right-center':"265px center"
       },
       maxHeight: {
-        284: '284px'
+        284: '284px',
+        681: '681px',
+      },
+      minWidth: {
+        516: '516px'
+      },
+      maxWidth: {
+        1212: '1212px'
       },
       borderRadius: {
         16: '16px',
@@ -138,7 +147,8 @@ module.exports = {
         36: '36px',
       },
       inset: {
-
+        20:'20px',
+        25: '25px',
         40:'40px',
         45: '45px',
         10:'10px',
