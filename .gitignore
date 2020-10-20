@@ -10,6 +10,7 @@ yarn-*.log
 .template_output
 minio.exe
 firebase-debug.log
+.idea
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat

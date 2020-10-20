@@ -36,8 +36,8 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (GALLERY, get_template_str(include_str!("../../../../.template_output/jig/jig-creator-one.html"))),
-            (EDIT, get_template_str(include_str!("../../../../.template_output/jig/jig-add-module.html"))),
+            (GALLERY, get_template_str(include_str!("../../../../.template_output/jig/gallery/jig-creator-one.html"))),
+            (EDIT, get_template_str(include_str!("../../../../.template_output/jig/edit/jig-add-module.html"))),
         ]);
 
         Self { cache }

@@ -1,35 +1,57 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId, toggleClassesId, setTextId} from "@utils/dom";
 //these are the Add templates
-import jigaddmodule from "@templates/jig/edit/jig-add-module.html";
-import dropbox from "@templates/jig/edit/jig-add-dropbox.html";
-import jigdelete from "@templates/jig/edit/jig-delete.html";
+import editPage from "@templates/jig/edit/edit-page.html";
+import sidebarSection from "@templates/jig/edit/sidebar.html";
+import menuSection from "@templates/jig/edit/menu.html";
+import deletePopup from "@templates/jig/edit/delete-popup.html";
+import moduleLeft from "@templates/jig/edit/sidebar-module-left.html";
+import moduleRight from "@templates/jig/edit/sidebar-module-right.html";
+import ModuleSelection from "@templates/jig/edit/module-selection.html";
 
 export default {
-  title: 'JIG/Create',
+  title: 'JIG/Edit',
 }
 
-export const JigAddModule = () =>
-    tmpl(jigaddmodule, {
+export const EditPage = () => {
+    const page = tmpl(editPage, { });
+    const sidebar = tmpl(sidebarSection, {});
+    const moduleSelection = tmpl(ModuleSelection, {});
 
-});
+    const modules = Array(4).fill(0).map((_, idx) => {
+        const module = tmpl(idx % 2 == 0 ? moduleLeft : moduleRight);
 
-export const Dropbox = () =>  {
-    const pageContainer = tmpl(jigaddmodule);
+        setTextId(module, "title", `Title ${idx+1}`);
+        setTextId(module, "subtitle", `Subtitle ${idx+1}`);
 
-    const pageContents = tmpl(dropbox);
+        return module;
+    });
 
-    appendId(pageContainer, "jig-dropbox", pageContents);
+    appendId(page, "sidebar", sidebar);
+    appendId(page, "right-area", moduleSelection);
 
-    return pageContainer;
+    modules.forEach(module => appendId(page, "modules", module));
+
+    return page;
+}
+export const Menu = () =>  {
+    const page = tmpl(editPage, { });
+    const sidebar = tmpl(sidebarSection, {});
+    const menu = tmpl(menuSection, {});
+
+    appendId(page, "sidebar", sidebar);
+    appendId(sidebar, "menu", menu);
+
+    return page;
 }
 
 export const JigDelete = () =>  {
-    const pageContainer = tmpl(jigaddmodule);
+    const page = tmpl(editPage, { });
+    const sidebar = tmpl(sidebarSection, {});
+    const deleteEl = tmpl(deletePopup, {});
 
-    const pageContents = tmpl(jigdelete);
+    appendId(page, "sidebar", sidebar);
+    appendId(page, "delete-popup", deleteEl);
 
-    appendId(pageContainer, "jigdelete", pageContents);
-
-    return pageContainer;
+    return page;
 }
