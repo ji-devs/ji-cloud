@@ -38,18 +38,22 @@ impl ModuleSelect {
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::edit_module_selection(), {
             .with_data_id!("poster", {
-                .event(|evt:events::DragStart| {
-                    if let Some(data_transfer) = evt.data_transfer() {
-
-                        data_transfer.set_data("text/plain", "poster");
-                        data_transfer.set_drop_effect("all");
-                    } else {
-                        log::error!("no data transfer - use a real computer!!!");
-                    }
-                })
+                .event(drag_callback("poster".to_string()))
+            })
+            .with_data_id!("memory_game", {
+                .event(drag_callback("memory_game".to_string()))
             })
         })
     }
 }
 
-
+fn drag_callback(name:String) -> impl Fn(events::DragStart) {
+    move |evt:events::DragStart| {
+        if let Some(data_transfer) = evt.data_transfer() {
+            data_transfer.set_data("text/plain", &name);
+            data_transfer.set_drop_effect("all");
+        } else {
+            log::error!("no data transfer - use a real computer!!!");
+        }
+    }
+}

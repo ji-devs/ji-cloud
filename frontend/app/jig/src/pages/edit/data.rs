@@ -2,26 +2,51 @@
 //
 #[derive(Clone, Debug)]
 pub struct Jig {
+    pub id: Id,
     pub title: String,
     pub cover: Option<Id>,
     pub ending: Option<Id>,
-    pub modules: Vec<Option<Module>>
+    pub modules: Vec<Module>
 }
 
 
 #[derive(Clone, Debug)]
 pub struct Module {
     pub id: Id,
-    pub kind: ModuleKind, 
+    pub kind: Option<ModuleKind>, 
 }
 
+impl Module {
+    //TODO - all these need backend API stuff
+    pub async fn load_new() -> Module {
+        Module {
+            id: "blah_blah".to_string(),
+            kind: None, 
+        }
+    }
+    pub async fn change_kind(&mut self, kind:ModuleKind) {
+        self.kind = Some(kind);
+    }
+}
+
+//BACKEND STUFF TODO
+pub async fn delete_module(id:Id) {
+
+}
 impl Jig {
-    pub fn new() -> Self {
+    pub async fn load(id:Id) -> Self {
+        //TODO - really load it from backend
         Self {
+            id,
             title: "".to_string(),
             cover: None,
             ending: None,
-            modules: vec![None],
+            modules: vec![
+                Module {
+                    id: "foo".to_string(),
+                    kind: None
+                }
+            ],
         }
     }
     /*

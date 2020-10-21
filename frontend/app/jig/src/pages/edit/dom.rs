@@ -25,7 +25,6 @@ use shared::domain::{
 use super::{data::*, module_selector::*, sidebar::*};
 
 pub struct EditPage {
-    pub id:String,
     pub right_section:Mutable<RightSection>,
     pub jig: Mutable<Option<Jig>>
 }
@@ -40,7 +39,6 @@ pub enum RightSection {
 impl EditPage {
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            id,
             right_section: Mutable::new(RightSection::ModuleSelect),
             jig: Mutable::new(None)
         });
@@ -48,9 +46,8 @@ impl EditPage {
         let _self_clone = _self.clone();
 
         spawn_local(async move {
-            //TODO - load jig
-            _self.jig.set(Some(Jig::new()))
-            //_self.jig.set(Some(Jig::mock()))
+            let jig = Jig::load(id).await;
+            _self.jig.set(Some(jig));
         });
 
         _self_clone
