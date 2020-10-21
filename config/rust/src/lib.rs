@@ -40,6 +40,14 @@ impl RemoteTarget {
         }
     }
 
+    pub const fn algolia_image_index(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => Some("image_sandbox"),
+            Self::Release => Some("image_release"),
+        }
+    }
+
     pub const fn s3_bucket(&self) -> Option<&'static str> {
         match self {
             Self::Local => None,
@@ -94,7 +102,7 @@ impl RemoteTarget {
         }
     }
 
-    pub fn css_url(&self, minified:bool) -> String {
+    pub fn css_url(&self, minified: bool) -> String {
         if minified {
             format!("{}/_css/styles.min.css", self.frontend_url())
         } else {

@@ -16,10 +16,17 @@ use uuid::Uuid;
 
 use super::{nul_if_empty, recycle_metadata};
 
-pub async fn by_name(db: &sqlx::PgPool, name: &str) -> anyhow::Result<Option<OtherUser>> {
+pub async fn lookup(
+    db: &sqlx::PgPool,
+    id: Option<Uuid>,
+    firebase_id: Option<&str>,
+    name: Option<&str>,
+) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select id from "user" where username = $1"#,
+        r#"select id from "user" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)"#,
+        id,
+        firebase_id,
         name
     )
     .fetch_optional(db)

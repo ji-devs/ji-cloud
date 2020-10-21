@@ -4,7 +4,10 @@ use crate::{
     domain::image::{
         CreateRequest, CreateResponse, GetResponse, SearchQuery, SearchResponse, UpdateRequest,
     },
-    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError, UploadError},
+    error::{
+        image::{CreateError, SearchError, UpdateError, UploadError},
+        DeleteError, GetError,
+    },
 };
 
 /// Get an image by ID.

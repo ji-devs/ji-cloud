@@ -22,7 +22,10 @@ use shared::{
         image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
         meta::MetaKind,
     },
-    error::image::{CreateError, DeleteError, GetError, SearchError, UpdateError, UploadError},
+    error::{
+        image::{CreateError, SearchError, UpdateError, UploadError},
+        DeleteError, GetError,
+    },
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;

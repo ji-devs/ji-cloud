@@ -12,6 +12,13 @@
 </div>
 {% endmacro jigsearchbox %}
 
+{% macro jigsearchboxfull(inputDataId="", label) %}
+<div class="relative">
+  <img data-id="search-btn" src="{{MEDIA_UI}}/search-24-px.svg" alt="" class="absolute right-10 top-25 cursor-pointer">
+  <input data-id="{{inputDataId}}" type="search" name="" value="" class="w-full rounded-full py-2 px-4 border-jiborderGrey focus:border-jigreyfocus focus:bg-jibackgroundGrey solid border ml-2 outline-none focus:outline-none" placeholder="{{label}}">
+</div>
+{% endmacro jigsearchboxfull %}
+
 {% macro select(selectDataId="", options) %}
 <div class="relative">
   <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="absolute transform rotate-90 right-0">

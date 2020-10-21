@@ -27,7 +27,6 @@ pub async fn info_template(settings: Data<RuntimeSettings>) -> actix_web::Result
         .await
         .map_err(ErrorInternalServerError)?;
 
-        
     let info = Info {
         secret: secret_test,
         _roles: vec![],

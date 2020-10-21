@@ -118,3 +118,8 @@ select {
 .jig-tooltip .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.jig-image-selected {
+  border: solid 1px #f0f1f4 ;
+
+}

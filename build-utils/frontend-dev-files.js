@@ -11,6 +11,7 @@ const SPA = process.argv[2];
 switch(SPA) {
 	case "user":
 	case "admin":
+	case "jig":
 		break;
 	default: {
 		console.error("supply valid APP (and note the space) for frontend-dev-files -- [APP]");

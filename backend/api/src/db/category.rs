@@ -2,7 +2,7 @@ use crate::domain::{build_tree, RawCategory};
 use futures::TryStreamExt;
 use shared::{
     domain::category::{Category, CategoryId},
-    error::category::{CategoryDeleteError, CategoryUpdateError},
+    error::{category::UpdateError, DeleteError},
 };
 use sqlx::Executor;
 use uuid::Uuid;
@@ -154,7 +154,7 @@ pub async fn update(
     parent_id: Option<Option<CategoryId>>,
     name: Option<&str>,
     index: Option<i16>,
-) -> Result<(), CategoryUpdateError> {
+) -> Result<(), UpdateError> {
     let current_parent = parent_id.map(|id| id.map(|it| it.0));
     let mut txn = db.begin().await?;
 
@@ -169,7 +169,7 @@ select parent_id, index from category where id = $1
     )
     .fetch_optional(&mut txn)
     .await?
-    .ok_or(CategoryUpdateError::CategoryNotFound)?;
+    .ok_or(UpdateError::CategoryNotFound)?;
 
     if let Some(name) = name {
         sqlx::query!("update category set name = $1 where id = $2", name, id)
@@ -185,7 +185,7 @@ select parent_id, index from category where id = $1
                 let would_cycle = would_cycle(&mut txn, id, new_parent).await?;
 
                 if would_cycle {
-                    return Err(CategoryUpdateError::Cycle);
+                    return Err(UpdateError::Cycle);
                 }
             }
 
@@ -275,7 +275,7 @@ where index > $1 and index <= $2 is not false and parent_id is not distinct from
     .map(drop)
 }
 
-pub async fn delete(db: &sqlx::PgPool, id: CategoryId) -> Result<(), CategoryDeleteError> {
+pub async fn delete(db: &sqlx::PgPool, id: CategoryId) -> Result<(), DeleteError> {
     let mut txn = db.begin().await?;
 
     txn.execute("set transaction isolation level repeatable read")

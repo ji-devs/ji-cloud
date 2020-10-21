@@ -173,6 +173,14 @@ impl Scope for ScopeManageImage {
     }
 }
 
+pub(crate) struct ScopeManageJig;
+
+impl Scope for ScopeManageJig {
+    fn scope() -> UserScope {
+        UserScope::ManageJig
+    }
+}
+
 #[repr(transparent)]
 pub struct AuthUserWithScope<S: Scope> {
     pub claims: AuthClaims,

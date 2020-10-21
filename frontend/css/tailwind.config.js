@@ -41,6 +41,7 @@ module.exports = {
         jiheadergrey: '#4a4a4a',
         jioverlayblue: '#e5f3ff',
         jiggreen: '#42cc7a',
+        jiimagegrey: '#f8f8f8',
 
       },
 
@@ -57,7 +58,9 @@ module.exports = {
         10: '10px',
         30: '30px',
         68: '68px',
+        72: '72px',
         76: '76px',
+        83.5: '83.5px',
         102: '102px',
         112: '112px',
         117: '117px',
@@ -67,9 +70,10 @@ module.exports = {
         186: '186px',
         190: '190px',
         200: '200px',
+        236: '236px',
         259: '259px',
         270: '270px',
-        272:'272px',
+        272: '272px',
         274: '274px',
         288: '288px',
         296: '296px',
@@ -93,7 +97,9 @@ module.exports = {
 
       },
       maxWidth: {
-        480: '480px'
+        236: '236px',
+        480: '480px',
+
       },
       minWidth: {
         112: '112px',
@@ -101,15 +107,18 @@ module.exports = {
         300: '300px',
       },
       height: {
+        1: '1px',
         10: '10px',
         20: '20px',
         24: '24px',
         32: '32px',
         56: '56px',
         64: '64px',
+        83.5: '83.5px',
         114: '114px',
         140: '140px',
         160: '160px',
+        177: '177px',
         185: '185px',
         216: '216px',
         262: '262px',
@@ -123,7 +132,16 @@ module.exports = {
         'right-center':"265px center"
       },
       maxHeight: {
-        284: '284px'
+        284: '284px',
+        681: '681px',
+        83.5: '83.5px',
+      },
+      minWidth: {
+        516: '516px'
+      },
+      maxWidth: {
+        83.5: '83.5px',
+        1212: '1212px'
       },
       borderRadius: {
         16: '16px',
@@ -131,7 +149,8 @@ module.exports = {
         36: '36px',
       },
       inset: {
-
+        20:'20px',
+        25: '25px',
         40:'40px',
         45: '45px',
         10:'10px',

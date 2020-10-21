@@ -8,30 +8,8 @@ use serde::{Deserialize, Serialize};
 
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
-/// Error occurred while geting a category.
-pub enum CategoryGetError {
-    /// The user has insufficient permissions to access the route or category.
-    Forbidden,
-
-    /// An internal server error occurred.
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-}
-
-#[cfg(feature = "backend")]
-impl From<CategoryGetError> for actix_web::Error {
-    fn from(e: CategoryGetError) -> actix_web::Error {
-        match e {
-            CategoryGetError::InternalServerError(e) => anyhow_to_ise(e),
-            CategoryGetError::Forbidden => HttpResponse::Forbidden().into(),
-        }
-    }
-}
-
-#[non_exhaustive]
-#[derive(Serialize, Deserialize)]
 /// Error occurred while creating a category.
-pub enum CategoryCreateError {
+pub enum CreateError {
     /// The given parent category does not exist.
     ParentCategoryNotFound,
 
@@ -44,34 +22,12 @@ pub enum CategoryCreateError {
 }
 
 #[cfg(feature = "backend")]
-impl From<CategoryCreateError> for actix_web::Error {
-    fn from(e: CategoryCreateError) -> actix_web::Error {
+impl From<CreateError> for actix_web::Error {
+    fn from(e: CreateError) -> actix_web::Error {
         match e {
-            CategoryCreateError::InternalServerError(e) => anyhow_to_ise(e),
-            CategoryCreateError::ParentCategoryNotFound => HttpResponse::NotFound().into(),
-            CategoryCreateError::Forbidden => HttpResponse::Forbidden().into(),
-        }
-    }
-}
-
-#[non_exhaustive]
-#[derive(Serialize, Deserialize)]
-/// Error occurred while deleting a category.
-pub enum CategoryDeleteError {
-    /// The user has insufficient permissions to delete the category.
-    Forbidden,
-
-    /// An internal server error occurred.
-    #[serde(skip)]
-    InternalServerError(anyhow::Error),
-}
-
-#[cfg(feature = "backend")]
-impl From<CategoryDeleteError> for actix_web::Error {
-    fn from(e: CategoryDeleteError) -> actix_web::Error {
-        match e {
-            CategoryDeleteError::InternalServerError(e) => anyhow_to_ise(e),
-            CategoryDeleteError::Forbidden => HttpResponse::Forbidden().into(),
+            CreateError::InternalServerError(e) => anyhow_to_ise(e),
+            CreateError::ParentCategoryNotFound => HttpResponse::NotFound().into(),
+            CreateError::Forbidden => HttpResponse::Forbidden().into(),
         }
     }
 }
@@ -79,7 +35,7 @@ impl From<CategoryDeleteError> for actix_web::Error {
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating a category.
-pub enum CategoryUpdateError {
+pub enum UpdateError {
     /// The category didn't exist.
     CategoryNotFound,
 
@@ -104,23 +60,17 @@ pub enum CategoryUpdateError {
 }
 
 #[cfg(feature = "backend")]
-impl From<CategoryUpdateError> for actix_web::Error {
-    fn from(e: CategoryUpdateError) -> actix_web::Error {
+impl From<UpdateError> for actix_web::Error {
+    fn from(e: UpdateError) -> actix_web::Error {
         match e {
-            CategoryUpdateError::InternalServerError(e) => anyhow_to_ise(e),
-            e @ CategoryUpdateError::CategoryNotFound
-            | e @ CategoryUpdateError::ParentCategoryNotFound => {
+            UpdateError::InternalServerError(e) => anyhow_to_ise(e),
+            e @ UpdateError::CategoryNotFound | e @ UpdateError::ParentCategoryNotFound => {
                 HttpResponse::NotFound().json(e).into()
             }
-            CategoryUpdateError::Forbidden => HttpResponse::Forbidden().into(),
+            UpdateError::Forbidden => HttpResponse::Forbidden().into(),
             e => HttpResponse::UnprocessableEntity().json(e).into(),
         }
     }
 }
 
-from_anyhow![
-    CategoryGetError,
-    CategoryCreateError,
-    CategoryDeleteError,
-    CategoryUpdateError
-];
+from_anyhow![CreateError, UpdateError];
