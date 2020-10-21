@@ -2,7 +2,7 @@ name: Documentation - Release
 
 on:
   push:
-    branches: [ release ]
+    branches: [ master ]
     paths:
     - 'config/**'
     - 'documentation/**'
