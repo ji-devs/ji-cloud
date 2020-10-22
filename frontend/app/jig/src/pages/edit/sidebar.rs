@@ -9,7 +9,7 @@ use futures_signals::{
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
+use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
@@ -34,14 +34,17 @@ enum Direction {
 }
 pub struct Sidebar {
     pub jig: Mutable<Option<Jig>>,
-    pub menu_index: Mutable<Option<usize>>,
+    pub menu_index: Mutable<Option<usize>>, //which menu is currently open
+    pub reorder_target: Mutable<Option<usize>>, //target of current drag
+
 }
 
 impl Sidebar {
     pub fn new(jig:Mutable<Option<Jig>>) -> Rc<Self> {
         let _self = Rc::new(Self {
             jig,
-            menu_index: Mutable::new(None)
+            menu_index: Mutable::new(None),
+            reorder_target: Mutable::new(None)
         });
 
         _self
@@ -51,6 +54,15 @@ impl Sidebar {
         _self.jig.signal_ref(clone!(_self => move |jig| {
             jig.as_ref().map(|jig| {
                 elem!(templates::edit_sidebar_section(), {
+                    .with_data_id!("title" => HtmlInputElement, {
+                        .with_node!(input => {
+                            .event(clone!(_self => move |evt:events::Input| {
+                                let value = input.value();
+
+                                log::warn!("TODO - save new title: {}", value);
+                            }))
+                        })
+                    })
                     .with_data_id!("add-btn-first", {
                         .event(clone!(_self => move |evt:events::Click| {
                             Self::add_empty_module(_self.clone(), 0);
@@ -71,9 +83,9 @@ impl Sidebar {
 
     fn add_empty_module(_self: Rc<Self>, before_index:usize) {
         spawn_local(async move {
-            let module = Module::load_new().await;
+            let module = module_service::add().await; 
             if let Some(jig) = &mut *_self.jig.lock_mut() {
-                //TODO - sync with backend!
+                log::warn!("TODO - save new empty module!"); 
                 jig.modules.insert(before_index, module);
             }
         });
@@ -109,6 +121,31 @@ impl Sidebar {
             }
         };
         elem!(elem, {
+            .event(clone!(index => move |evt:events::DragStart| {
+                if let Some(data_transfer) = evt.data_transfer() {
+                    data_transfer.set_data("module_order", &index.to_string());
+                    data_transfer.set_drop_effect("all");
+                } else {
+                    log::error!("no data transfer - use a real computer!!!");
+                }
+            }))
+
+            .with_data_id!("drag-border", {
+                .class_signal("hidden", 
+                    _self.reorder_target.signal().map(clone!(index => move |x| {
+                        if let Some(target_index) = x {
+                            if target_index == index {
+                                false 
+                            } else {
+                                true 
+                            }
+                        } else {
+                            true 
+                        }
+                    }))
+                )
+            })
+
             .with_data_id!("label", {
                 .visible(module.kind.is_none()) 
             })
@@ -130,7 +167,7 @@ impl Sidebar {
                                             let module_id = module_id.clone();
                                             if let Some(jig) = &mut *_self.jig.lock_mut() {
                                                 spawn_local(async move {
-                                                    delete_module(module_id).await;
+                                                    module_service::delete(module_id).await;
                                                 });
 
                                                 jig.modules.remove(index);
@@ -185,29 +222,74 @@ impl Sidebar {
             })
             .event_preventable(clone!(_self => move |evt:events::DragOver| {
                 if let Some(data_transfer) = evt.data_transfer() {
-                    if let Ok(data) = data_transfer.get_data("text/plain") {
+                    let mut is_drop_target = false;
+                    if let Ok(data) = data_transfer.get_data("module_kind") {
                         if let Some(jig) = &*_self.jig.lock_ref() {
                             if jig.modules[index].kind.is_none() { 
-                                evt.prevent_default();
+                                is_drop_target = true;
                             }
                         }
+                    } 
+
+                    if let Ok(data) = data_transfer.get_data("module_order") {
+                        _self.reorder_target.set(Some(index));
+                        is_drop_target = true;
+                    }
+
+                    if is_drop_target {
+                        evt.prevent_default();
                     }
                 }
             }))
+            .event(clone!(_self => move |evt:events::DragEnd| {
+                _self.reorder_target.set(None);
+            }))
             .event(clone!(_self => move |evt:events::Drop| {
+                _self.reorder_target.set(None);
                 if let Some(data_transfer) = evt.data_transfer() {
-                    if let Ok(data) = data_transfer.get_data("text/plain") {
-                        if let Some(kind) = ModuleKind::from_str(&data) {
+                    let module_kind:Option<ModuleKind> = 
+                        data_transfer.get_data("module_kind")
+                            .ok()
+                            .and_then(|data| ModuleKind::from_str(&data));
+
+                    let module_order:Option<usize> = 
+                        data_transfer.get_data("module_order")
+                            .ok()
+                            .and_then(|data:String| data.parse::<usize>().ok());
+
+                    match (module_kind, module_order) {
+                        (Some(kind), None) => {
                             let _self = _self.clone();
                             spawn_local(async move {
                                 if let Some(jig) = &mut *_self.jig.lock_mut() {
                                     let mut module = &mut jig.modules[index];
-                                    module.change_kind(kind).await;
+                                    module.kind = Some(kind);
+                                    let id = module.id.clone();
+                                    spawn_local(async move {
+                                        module_service::change_kind(id, kind).await;
+                                    });
                                 }
                             });
-                        } else {
-                            log::warn!("unsupported module type {}!", data);
+                        },
+                        (None, Some(orig)) => {
+                            let _self = _self.clone();
+                            spawn_local(async move {
+                                if let Some(jig) = &mut *_self.jig.lock_mut() {
+                                    let mut modules = &mut jig.modules;
+                                    let mut target_index = index;
+                                    if orig < index {
+                                        target_index = index - 1;
+                                    }
+                                    //Is there a single function that does this?
+                                    let module = modules.remove(orig);
+                                    modules.insert(target_index, module);
+                                    spawn_local(async move {
+                                        module_service::reorder(orig, target_index).await;
+                                    });
+                                }
+                            });
                         }
+                        _ => {}
                     }
                 }
             }))

@@ -16,22 +16,25 @@ pub struct Module {
     pub kind: Option<ModuleKind>, 
 }
 
-impl Module {
-    //TODO - all these need backend API stuff
-    pub async fn load_new() -> Module {
+pub(super) mod module_service {
+    use super::*;
+
+    pub async fn add() -> Module {
+        log::warn!("TODO - add new module!"); 
         Module {
             id: "blah_blah".to_string(),
             kind: None, 
         }
     }
-    pub async fn change_kind(&mut self, kind:ModuleKind) {
-        self.kind = Some(kind);
+    pub async fn delete(id:Id) {
+        log::warn!("TODO - delete module!"); 
     }
-}
-
-//BACKEND STUFF TODO
-pub async fn delete_module(id:Id) {
-
+    pub async fn reorder(from:usize, to:usize) {
+        log::warn!("TODO - reorder module!"); 
+    }
+    pub async fn change_kind(id:Id, kind:ModuleKind) {
+        log::warn!("TODO - change module kind!"); 
+    }
 }
 impl Jig {
     pub async fn load(id:Id) -> Self {
@@ -49,24 +52,33 @@ impl Jig {
             ],
         }
     }
-    /*
-    pub fn mock() -> Self {
+    pub async fn mock(id:Id) -> Self {
+        //TODO - really load it from backend
         Self {
-            title: "Hello World".to_string(),
-            cover: Some("1".to_string()),
-            ending: Some("2".to_string()),
+            id,
+            title: "hello world".to_string(),
+            cover: None,
+            ending: None,
             modules: vec!["3", "4", "5", "6"]
                 .into_iter()
-                .map(|x| Some(x.to_string()))
+                .map(|x| Module {
+                    id: x.to_string(),
+                    kind: {
+                        if x == "4" {
+                            Some(ModuleKind::MemoryGame)
+                        } else {
+                            None
+                        }
+                    }
+                })
                 .collect()
         }
     }
-    */
 }
 
 pub type Id = String;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum ModuleKind{
     Poster,
     MemoryGame,

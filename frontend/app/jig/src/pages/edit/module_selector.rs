@@ -50,7 +50,7 @@ impl ModuleSelect {
 fn drag_callback(name:String) -> impl Fn(events::DragStart) {
     move |evt:events::DragStart| {
         if let Some(data_transfer) = evt.data_transfer() {
-            data_transfer.set_data("text/plain", &name);
+            data_transfer.set_data("module_kind", &name);
             data_transfer.set_drop_effect("all");
         } else {
             log::error!("no data transfer - use a real computer!!!");

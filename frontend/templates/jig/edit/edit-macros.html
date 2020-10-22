@@ -1,10 +1,12 @@
 {% macro sidebar_module(is_left) %}
 
-<div class="h-160 border-solid border-jidarkgrey border-b relative p-4">
+<div draggable="true" class="h-160 border-solid border-jidarkgrey border-b relative p-4">
+
+  <div data-id="drag-border" class="border border-orange-600 h-10"></div>
 
   <div data-id="menu"></div>
   <img data-id="menu-btn" src="{{MEDIA_UI}}/icn-menu-jig.svg" alt="" class="absolute right-10 top-10 cursor-pointer">
-
+  
   {% if is_left %}
     <img data-id="add-btn" src="{{MEDIA_UI}}/Link_Left.svg" alt="" class="absolute top-95 right-115 z-10 cursor-pointer">
     <div class="absolute right-45 z-20">
@@ -20,6 +22,7 @@
   </div>
   <h1 data-id="title" class="text-xl font-bold text-jibuttonBlue"></h1>
   <p data-id="subtitle"></p>
+
 </div>
 
 {% endmacro sidebar_module %}
