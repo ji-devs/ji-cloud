@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
-use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
@@ -223,7 +223,8 @@ impl Sidebar {
             .event_preventable(clone!(_self => move |evt:events::DragOver| {
                 if let Some(data_transfer) = evt.data_transfer() {
                     let mut is_drop_target = false;
-                    if let Ok(data) = data_transfer.get_data("module_kind") {
+
+                    if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
                         if let Some(jig) = &*_self.jig.lock_ref() {
                             if jig.modules[index].kind.is_none() { 
                                 is_drop_target = true;
@@ -231,7 +232,7 @@ impl Sidebar {
                         }
                     } 
 
-                    if let Ok(data) = data_transfer.get_data("module_order") {
+                    if data_transfer.types().index_of(&JsValue::from_str("module_order"), 0) != -1 {
                         _self.reorder_target.set(Some(index));
                         is_drop_target = true;
                     }
