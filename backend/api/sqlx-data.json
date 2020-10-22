@@ -1,5 +1,18 @@
 {
   "db": "PostgreSQL",
+  "000c1e0b4e5fa3480f332977348170c6abb8f036e467ea432197f8af584fcd56": {
+    "query": "insert into jig_module (jig_id, module) values ($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "0352a39223a9bb7c9d4c66cc673a8324a3e56ea9c6fdc1b87f2dcb8233499eb3": {
     "query": "select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range",
     "describe": {
@@ -397,6 +410,18 @@
       "nullable": []
     }
   },
+  "32bc8fe3fd1a0c9b4de8b504337d29e7f300a1b0a299ba593458ed8f145f321f": {
+    "query": "delete from jig where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
@@ -430,6 +455,26 @@
       "nullable": []
     }
   },
+  "47fb0f5546e32d096bbffdd9ffd5d17be73c08c132620e2a7fae90b87dd954e1": {
+    "query": "select exists(select 1 from jig where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "4a26a8a4a7c5ec4d470518bca3b997c1e52616ad93a56e7b28fdb485c50f228c": {
     "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n        ",
     "describe": {
@@ -460,6 +505,68 @@
       ]
     }
   },
+  "4b414785d2485e524942591110d8d281dd09461ba10d78b107954a2be51247d6": {
+    "query": "\nselect \n    id as \"id: JigId\",\n    display_name,\n    cover,\n    ending,\n    creator_id,\n    author_id,\n    publish_at,\n    array(select module from jig_module where jig_id = $1) as \"modules!\"\nfrom jig\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "cover",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 3,
+          "name": "ending",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 4,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "modules!",
+          "type_info": "JsonbArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null
+      ]
+    }
+  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -484,6 +591,30 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "61491c541cfadf8755f1dbc4c0fde1091d4648fb3c6da90a23c1cd01982befff": {
+    "query": "\ninsert into jig\n    (display_name, cover, ending, creator_id, author_id, publish_at)\nvalues ($1, $2, $3, $4, $4, $5)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Jsonb",
+          "Jsonb",
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
@@ -520,6 +651,18 @@
         false,
         true
       ]
+    }
+  },
+  "636342d58945675c620fb5016f6a32bb94c463f879276812bd5440405dc67cca": {
+    "query": "delete from jig_module where jig_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
@@ -710,6 +853,22 @@
       ]
     }
   },
+  "b7e7ca18332254ae31d2c83a9204cdb199d869f5b6fc9741b4ef6916290bafcc": {
+    "query": "\nupdate jig\nset display_name        = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    cover  = coalesce($4, cover),\n    ending  = coalesce($5, ending),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::jsonb is not null and $4 is distinct from cover) or\n       ($5::jsonb is not null and $5 is distinct from ending))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid",
+          "Jsonb",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "b8c3158be83930526198c18609e10617952b2e57fe7f73c1f5e8b2068baf8f10": {
     "query": "select kind as \"kind: ImageKind\" from image_metadata where id = $1",
     "describe": {
@@ -728,6 +887,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "b905ebd3fd48e7f0b745d22fbcad52f94b84cb750a6b3bf39b0f6cd2a596742a": {
+    "query": "\nupdate jig\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
     }
   },
   "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {
