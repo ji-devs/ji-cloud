@@ -3,7 +3,14 @@ use actix_web::{
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
-use shared::{api::{endpoints::jig, ApiEndpoint}, domain::jig::CreateResponse, domain::jig::GetResponse, domain::jig::{CreateRequest, JigId}, error::GetError, error::jig::UpdateError};
+use shared::{
+    api::{endpoints::jig, ApiEndpoint},
+    domain::jig::CreateResponse,
+    domain::jig::GetResponse,
+    domain::jig::{CreateRequest, JigId},
+    error::jig::UpdateError,
+    error::GetError,
+};
 use sqlx::PgPool;
 
 use crate::{
