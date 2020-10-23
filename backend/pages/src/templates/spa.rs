@@ -7,6 +7,7 @@ use askama::Template;
 pub enum SpaPage {
     User,
     Admin,
+    Jig,
 }
 
 impl SpaPage {
@@ -14,6 +15,7 @@ impl SpaPage {
         match self {
             Self::User => "user",
             Self::Admin => "admin",
+            Self::Jig => "jig",
         }
     }
 }
@@ -42,12 +44,18 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
     Ok(actix_web::HttpResponse::Ok().body(info))
 }
 
-pub async fn spa_user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::User)
 }
 
-pub async fn spa_admin_template(
+pub async fn admin_template(
     settings: Data<RuntimeSettings>,
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Admin)
+}
+
+pub async fn jig_template(
+    settings: Data<RuntimeSettings>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Jig)
 }
