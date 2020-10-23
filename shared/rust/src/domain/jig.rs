@@ -64,16 +64,16 @@ pub struct Jig {
     pub id: JigId,
 
     /// The JIG's name.
-    pub display_name: String,
+    pub display_name: Option<String>,
 
     /// The JIG's cover module.
-    pub cover_id: Option<ModuleId>,
+    pub cover: LiteModule,
 
     /// The JIG's ending module.
-    pub ending_id: Option<ModuleId>,
+    pub ending: LiteModule,
 
     /// The JIG's remaining modules.
-    pub module_ids: Vec<ModuleId>,
+    pub modules: Vec<LiteModule>,
 
     /// The ID of the JIG's original creator (`None` if unknown).
     pub creator_id: Option<Uuid>,
@@ -83,6 +83,31 @@ pub struct Jig {
 
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
+}
+
+/// Represents the various kinds of data a module can represent.
+#[repr(i16)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[derive(Serialize, Deserialize, Debug)]
+pub enum ModuleKind {
+    /// The module represents a Poster.
+    Poster = 0,
+
+    /// The module represents a Memory Game.
+    MemoryGame = 1,
+
+    /// The module represents the first / last page of a jig.
+    DesignPage = 2,
+}
+
+/// Minimal information about a module.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LiteModule {
+    /// The module's ID.
+    pub id: ModuleId,
+
+    /// Which kind of module this is.
+    pub kind: Option<ModuleKind>,
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
