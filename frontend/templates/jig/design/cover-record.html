@@ -51,11 +51,25 @@
         <p class="">Record general introduction</p>
       </div>
       <div class="bg-jilogingrey flex items-center justify-center h-293 rounded-lg ">
-        <img src="{{MEDIA_UI}}/group-12398.svg" alt="">
-      </div>
-      <div class="flex justify-center mt-4">
+        <!-- when finished recording image should change to group-12539.svg -->
+        <img src="{{MEDIA_UI}}/group-12398.svg" alt="" class="hidden">
+        <!-- when uploading -->
+        <div class="h-32 w-320 bg-jisignupgrey rounded-full relative">
+          <div class="absolute h-32 w-1/4 bg-jibuttongreen rounded-full">
 
+          </div>
+        </div>
+      </div>
+      <!-- This div is displayed when recording  -->
+      <!-- border-dotted border-jibuttonBlue border-4 added when active -->
+      <div class="flex justify-center mt-4">
         {{ ButtonMacros::bluejig(label="Record", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
+      </div>
+      <!-- This div displayed when finished recording -->
+      <div class="flex mt-4 items-center">
+        <p class="w-1/3 text-jibuttonBlue">Clear</p>
+        {{ ButtonMacros::bluejig(label="Play", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
+
       </div>
 
     </div>

@@ -5,6 +5,7 @@ import jigcoverone from "@templates/jig/design/jig-cover1.html";
 import jigaddimage from "@templates/jig/design/cover-add-image.html";
 import jigaddtext from "@templates/jig/design/add-text.html";
 import jigrecord from "@templates/jig/design/cover-record.html";
+import jigaudio from "@templates/jig/design/cover-audio.html";
 export default {
   title: 'JIG/Design',
 }
@@ -16,6 +17,11 @@ export const JigNavigation = () =>
 
 export const JigRecord = () =>
     tmpl(jigrecord, {
+
+});
+
+export const JigAudio = () =>
+    tmpl(jigaudio, {
 
 });
 

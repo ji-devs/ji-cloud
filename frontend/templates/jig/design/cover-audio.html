@@ -14,7 +14,7 @@
     </div>
   </div>
   <div class="bg-white ml-6 w-516 ">
-    <div class="flex  p-4">
+    <div class="flex justify-between p-4">
       <div class="">
         <p>Select</p>
       </div>
@@ -24,7 +24,9 @@
         <div class="h-24 w-112 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
           <p class="text-black text-sm">Starting layout</p>
         </div>
+        <div class="border-r border-jiheadergrey">
 
+        </div>
         <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
           <p class="text-black text-sm">Theme</p>
         </div>
@@ -35,62 +37,36 @@
       <div class="flex items-center pl-4">
         <p>Add</p>
         <img src="{{MEDIA_UI}}/icn-text-jig.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-image-jig-active.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-image-jig.svg" alt="">
         <img src="{{MEDIA_UI}}/icn-background-color-jig.svg" alt="">
         <img src="{{MEDIA_UI}}/icn-record-jig.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig-active.svg" alt="">
       </div>
     </div>
 
     <div class="px-4">
-      <div class="flex justify-between pt-4 ">
-        <p class="">Recent</p>
-        <p class="text-jibuttonBlue">Show All</p>
-      </div>
-      <div class="grid grid-cols-4 mb-2">
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1 jig-image-selected ">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-      </div>
+
       <div class="h-1 w-full bg-jidarkgrey "></div>
-      <div class="flex justify-between py-4 ">
-        <p class="">Select Layout</p>
-        <p class="text-jibuttonBlue">Upload your own</p>
+      <div class=" py-4 ">
+        <p class="">Use an instruction file from your computer</p>
       </div>
-      <div class="flex justify-end pr-2 pb-2">
-        {{ Input::checkbox(label="JI Stickers", required=true, inputDataId="tos", class="px-2") }}
-        {{ Input::checkbox(label="Web", required=true, inputDataId="tos", class="px-2") }}
+      <!-- border-dotted border-jibuttonBlue border-4 when dropping audio -->
+      <div class="bg-jilogingrey flex flex-col items-center justify-center h-293 rounded-lg border-dotted border-jibuttonBlue border-4">
+        <div class="rounded-full h-96 w-96 bg-jibackgroundBlue flex items-center justify-center">
+          <!-- when finished recording image should change to group-12539.svg -->
+
+          <img src="{{MEDIA_UI}}/icn-sound-f-ile-frame.svg" alt="" class="">
+
+        </div>
+        <p class="mt-4">File name</p>
 
       </div>
-      <div class="-ml-2">
-        {{ Input::jigsearchboxfull(label="Search", required=true, inputDataId="tos", class="") }}
+      <!-- This div is displayed when recording  -->
+      <div class="flex justify-center mt-4">
+        {{ ButtonMacros::bluejig(label="Add file", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
+      </div>
 
-      </div>
-      <div class="mt-2 mb-4">
-        {{ Input::checkbox(label="Show only backgrounds", required=true, inputDataId="tos", class="") }}
 
-      </div>
-      <div class="grid grid-cols-4 grid-container">
-        <!-- When increased size add class row-span-3 col-span-3 and remove max-h-83.5 max-w-83.5-->
-        <div class=" bg-jiimagegrey flex justify-center items-center m-1 row-span-3 col-span-3">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1 small">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1 small">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1 small">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-        <div class="max-h-83.5 max-w-83.5 bg-jiimagegrey flex justify-center items-center m-1 small">
-          <img src="{{MEDIA_UI}}/sticker-4991-2018-08-17-full.png" alt="" class="h-full ">
-        </div>
-      </div>
     </div>
   </div>
   <div class="flex flex-col w-full">
