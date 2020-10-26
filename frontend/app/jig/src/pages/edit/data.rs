@@ -65,7 +65,8 @@ impl Jig {
                     id: x.to_string(),
                     kind: {
                         if x == "4" {
-                            Some(ModuleKind::MemoryGame)
+                            //Some(ModuleKind::MemoryGame)
+                            None
                         } else {
                             None
                         }

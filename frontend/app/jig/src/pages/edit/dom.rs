@@ -54,22 +54,27 @@ impl EditPage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-
-        elem!(templates::edit_page(), {
-            .with_data_id!("sidebar", {
-                .child_signal(Sidebar::render(Sidebar::new(_self.jig.clone())))
-            })
-            .with_data_id!("right-area", {
-                .child_signal(_self.right_section.signal_ref(|section| {
-                    Some(
-                        match section {
-                            RightSection::ModuleSelect => {
-                                ModuleSelect::render(ModuleSelect::new())
-                            }
-                        }
-                    )
-                }))
-            })
+        html!("div", {
+            .child_signal(_self.jig.signal_cloned().map(clone!(_self => move |jig| {
+                jig.map(|jig| {
+                    elem!(templates::edit_page(), {
+                        .with_data_id!("sidebar", {
+                            .child(Sidebar::render(Sidebar::new(jig)))
+                        })
+                        .with_data_id!("right-area", {
+                            .child_signal(_self.right_section.signal_ref(|section| {
+                                Some(
+                                    match section {
+                                        RightSection::ModuleSelect => {
+                                            ModuleSelect::render(ModuleSelect::new())
+                                        }
+                                    }
+                                )
+                            }))
+                        })
+                    })
+                })
+            })))
         })
     }
 }
