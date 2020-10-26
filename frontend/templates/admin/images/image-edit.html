@@ -27,11 +27,17 @@
     <div class="flex relative">
       <div class="w-1/5">
         <img data-id="img" alt="">
-		<button data-id="delete">DELETE</button>
         <div class="pl-1 pr-2">
           <div class="flex justify-between mb-6">
             {{ Input::checkbox(label="Premium Image", inputDataId="premium") }}
-            <p data-id="replace-btn" class="text-sm text-jibuttonBlue flex items-center leading-6 cursor-pointer">Replace</p>
+            <div class="text-sm text-jibuttonBlue flex items-center h-20">
+              <p data-id="replace-btn" class="leading-6 cursor-pointer pr-1">Replace</p>
+              <div class="h-20 w-2 bg-jibuttonBlue">
+
+              </div>
+              <p data-id="delete" class="cursor-pointer pl-1">Delete</p>
+            </div>
+
             <input type="file" data-id="file" multiple accept="image/*" class="hidden">
           </div>
           {{ Input::description(label="Image Name", inputDataId="name") }}

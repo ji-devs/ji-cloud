@@ -75,6 +75,7 @@ module.exports = {
         sans: 'Roboto',
       },
       width: {
+        2: '2px',
         10: '10px',
         30: '30px',
         44: '44px',
