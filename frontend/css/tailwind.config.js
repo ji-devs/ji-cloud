@@ -209,6 +209,9 @@ module.exports = {
         255: '255px',
         '16:9': '56.25%'
       },
+      margin:{
+        50: '50px',
+      },
       cursor:{
         grab: 'grab'
       },
