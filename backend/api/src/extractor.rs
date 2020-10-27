@@ -181,6 +181,14 @@ impl Scope for ScopeManageJig {
     }
 }
 
+pub(crate) struct ScopeManageModule;
+
+impl Scope for ScopeManageModule {
+    fn scope() -> UserScope {
+        UserScope::ManageModule
+    }
+}
+
 #[repr(transparent)]
 pub struct AuthUserWithScope<S: Scope> {
     pub claims: AuthClaims,
