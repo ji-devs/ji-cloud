@@ -5,11 +5,11 @@ use actix_web::{
 use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
-    domain::jig::CreateResponse,
-    domain::jig::GetResponse,
-    domain::jig::{CreateRequest, JigId},
-    error::jig::UpdateError,
-    error::GetError,
+    domain::{
+        jig::{CreateRequest, GetResponse, JigId},
+        CreateResponse,
+    },
+    error::{jig::UpdateError, GetError},
 };
 use sqlx::PgPool;
 

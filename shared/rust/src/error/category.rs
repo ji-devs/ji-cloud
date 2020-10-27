@@ -6,6 +6,7 @@ use super::anyhow_to_ise;
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 
+// fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating a category.
@@ -32,6 +33,7 @@ impl From<CreateError> for actix_web::Error {
     }
 }
 
+// fixme: if breaking changes can ever be made, replace with `crate::error::UpdateError`
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating a category.

@@ -22,6 +22,14 @@ pub mod user;
 
 use chrono::Utc;
 use ser::{csv_encode_uuids, deserialize_optional_field, from_csv};
+use uuid::Uuid;
+
+/// Response for successfuly creating a Resource.
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct CreateResponse<T: Into<Uuid>> {
+    /// The newly created resource's ID.
+    pub id: T,
+}
 
 /// Represents when to publish an image.
 #[derive(Copy, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize, Debug)]
