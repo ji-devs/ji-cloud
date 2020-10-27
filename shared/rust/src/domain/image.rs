@@ -236,12 +236,8 @@ pub struct Image {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Response for successfully creating an image.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CreateResponse {
-    /// The ID of the newly created image.
-    pub id: ImageId,
-}
+/// Response for successfuly creating a Image.
+pub type CreateResponse = super::CreateResponse<ImageId>;
 
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.
 // see: https://github.com/launchbadge/sqlx/issues/298
@@ -293,3 +289,5 @@ struct DbImage {
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
+
+into_uuid![ImageId];
