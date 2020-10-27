@@ -23,6 +23,9 @@ pub enum UserScope {
 
     /// The user can create/delete/modify jigs.
     ManageJig = 4,
+
+    /// The user can create/delete/modify module.
+    ManageModule = 5,
 }
 
 impl TryFrom<i16> for UserScope {
