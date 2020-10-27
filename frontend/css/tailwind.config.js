@@ -42,6 +42,26 @@ module.exports = {
         jioverlayblue: '#e5f3ff',
         jiggreen: '#42cc7a',
         jiimagegrey: '#f8f8f8',
+        jicolorborder: '#c7d3db',
+        jicolorpickeryellow:'#fff445',
+        jicolorpickerorange: '#fac72d',
+        jicolorpickerorangedark: '#feae2a',
+        jicolorpickerred: '#f34826',
+        jicolorpickerpink: '#fb178d',
+        jicolorpickerpinkdark: '#da0f63',
+        jicolorpickerfuschia: '#f74ac8',
+        jicolorpickerpurple: '#9517ac',
+        jicolorpickerpurpledark: '#7a28fb',
+        jicolorpickerbluedark: '#414cb3',
+        jicolorpickerblue: '#2d9bf0',
+        jicolorpickerteal: '#22cdd4',
+        jicolorpickergreendark: '#18a789',
+        jicolorpickergreen: '#8fd150',
+        jicolorpickerlime: '#cfe741',
+        jicolorpickerbluelight:'#bbccf8',
+        jicolorpickergreyblue:'#dce9f5',
+        jicolorpickergreylight:'#e6e6e6',
+        jicolorpickergrey:'#808080',
 
       },
 
@@ -55,9 +75,11 @@ module.exports = {
         sans: 'Roboto',
       },
       width: {
+        2: '2px',
         10: '10px',
         30: '30px',
         44: '44px',
+        56: '56px',
         68: '68px',
         72: '72px',
         76: '76px',
@@ -89,6 +111,7 @@ module.exports = {
         408: '408px',
         419: '419px',
         480: '480px',
+        504: '504px',
         516: '516px',
         624: '624px',
         640: '640px',
@@ -119,6 +142,7 @@ module.exports = {
         32: '32px',
         56: '56px',
         64: '64px',
+        68: '68px',
         83.5: '83.5px',
         96: '96px',
         114: '114px',
@@ -131,6 +155,7 @@ module.exports = {
         293: '293px',
         383: '383px',
         537: '537px',
+        581: '581px',
         681: '681px',
         696: '696px',
 
@@ -183,6 +208,9 @@ module.exports = {
         80: '80px',
         255: '255px',
         '16:9': '56.25%'
+      },
+      margin:{
+        50: '50px',
       },
       cursor:{
         grab: 'grab'
