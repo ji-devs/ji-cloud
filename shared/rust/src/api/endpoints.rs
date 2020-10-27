@@ -36,3 +36,6 @@ pub mod user;
 
 /// JIG endpoints.
 pub mod jig;
+
+/// Module endpoints.
+pub mod module;

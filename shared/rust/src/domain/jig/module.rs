@@ -60,6 +60,7 @@ pub struct CreateRequest {
 }
 
 /// Response for successfully finding a module
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GetResponse {
     /// The module we found
     pub module: Module,
