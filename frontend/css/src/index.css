@@ -6,6 +6,8 @@
 @import "admin/tests";
 @import "admin/search";
 @import "jig/jig";
+@import "memory/memory";
+
 
 @import "tailwindcss/utilities";
 

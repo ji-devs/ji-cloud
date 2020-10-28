@@ -62,6 +62,8 @@ module.exports = {
         jicolorpickergreyblue:'#dce9f5',
         jicolorpickergreylight:'#e6e6e6',
         jicolorpickergrey:'#808080',
+        jimemoryblue:'#d1e8ff',
+        jimemorybluehover:'#387af4',
 
       },
 
@@ -107,6 +109,7 @@ module.exports = {
         320: '320px',
         325: '325px',
         360: '360px',
+        389: '389px',
         393: '393px',
         408: '408px',
         419: '419px',
@@ -154,6 +157,7 @@ module.exports = {
         262: '262px',
         293: '293px',
         383: '383px',
+        387: '387px',
         537: '537px',
         581: '581px',
         681: '681px',
@@ -178,9 +182,11 @@ module.exports = {
       borderRadius: {
         16: '16px',
         20: '20px',
+        24: '24px',
         36: '36px',
       },
       inset: {
+        10: '10px',
         20:'20px',
         25: '25px',
         26: '26px',
@@ -198,7 +204,9 @@ module.exports = {
         70: '70px',
         95: '95px',
         115: '115px',
+        '-120': '-120px',
         160: '160px',
+
       },
       borderWidth: {
         3: '3px'
@@ -210,6 +218,7 @@ module.exports = {
         '16:9': '56.25%'
       },
       margin:{
+        '25p': '25%',
         50: '50px',
       },
       cursor:{
