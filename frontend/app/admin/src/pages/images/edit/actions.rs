@@ -4,7 +4,6 @@ use shared::{
     error::{*, image::*,}
 };
 use core::{
-    path::api_url,
     fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
@@ -55,7 +54,7 @@ pub async fn save(
         publish_at: None,
     };
     let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth_empty(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth_empty(&path, UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map(|_| ())
@@ -76,7 +75,7 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
         publish_at: Some(Some(Publish::now())),
     };
     let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth(&api_url(&path), UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth(&path, UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map(|_| ())
@@ -87,7 +86,7 @@ pub async fn delete( id:String) -> Result<(), DeleteError>
 {
     let path = Delete::PATH.replace("{id}",&id);
     let res:Result<<Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err>
-        = api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await;
+        = api_with_auth_empty::<_,()>(&path, Delete::METHOD, None).await;
 
     res
         .map(|_| ())
@@ -95,7 +94,7 @@ pub async fn delete( id:String) -> Result<(), DeleteError>
 }
 pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
 {
-    let path = api_url(&Upload::PATH.replace("{id}",&id));
+    let path = Upload::PATH.replace("{id}",&id);
     upload_file(&path, &file, Upload::METHOD.as_str())
         .await
         .map_err(|err| UpdateError::InternalServerError(err.into()))
@@ -282,7 +281,7 @@ pub async fn get_image_url(id:&str) -> Result<String, ()> {
 async fn _get_image(id:&str) -> Result < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
 
     let path = Get::PATH.replace("{id}",id);
-    api_with_auth::<_, _, ()>(&api_url(&path), Get::METHOD, None).await
+    api_with_auth::<_, _, ()>(&path, Get::METHOD, None).await
 }
 
 //TODO - move to _core
@@ -335,6 +334,5 @@ impl MetaOptions {
 }
 
 async fn _load_meta_options() -> Result < <endpoints::meta::Get as ApiEndpoint>::Res, <endpoints::meta::Get as ApiEndpoint>::Err> {
-    log::info!("{}", api_url(endpoints::meta::Get::PATH));
-    api_with_auth::<_, _, ()>(&api_url(endpoints::meta::Get::PATH), endpoints::meta::Get::METHOD, None).await
+    api_with_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await
 }

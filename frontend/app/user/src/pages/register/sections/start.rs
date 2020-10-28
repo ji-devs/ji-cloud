@@ -239,7 +239,6 @@ use shared::{
 };
 
 use core::{
-    path::api_url,
     fetch::api_no_auth,
 };
 pub async fn firebase_id_exists(firebase_id:String) -> bool {
@@ -249,7 +248,7 @@ pub async fn firebase_id_exists(firebase_id:String) -> bool {
         name: None
     };
 
-    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&api_url(UserLookup::PATH), UserLookup::METHOD, Some(query)).await;
+    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
 
     resp.is_ok()
 

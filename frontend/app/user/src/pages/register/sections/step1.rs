@@ -24,7 +24,6 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::{api_no_auth, api_with_token},
     storage,
@@ -196,7 +195,7 @@ pub async fn username_exists(name:String) -> bool {
         name: Some(name) 
     };
 
-    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&api_url(UserLookup::PATH), UserLookup::METHOD, Some(query)).await;
+    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
 
     resp.is_ok()
 }

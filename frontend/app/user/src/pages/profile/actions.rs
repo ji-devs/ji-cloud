@@ -7,7 +7,6 @@ use shared::{
     }
 };
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::api_with_auth,
     storage,
@@ -27,7 +26,7 @@ use futures::future::poll_fn;
 use futures::task::{Context, Poll};
 
 pub async fn load_profile(page:Rc<ProfilePage>) {
-    let resp:Result<UserProfile, NoSuchUserError> = api_with_auth::< _, _, ()>(&api_url(Profile::PATH), Profile::METHOD, None).await;
+    let resp:Result<UserProfile, NoSuchUserError> = api_with_auth::< _, _, ()>(&Profile::PATH, Profile::METHOD, None).await;
 
     match resp {
         Ok(profile) => {

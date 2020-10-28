@@ -4,7 +4,6 @@ use shared::{
     error::image::*
 };
 use core::{
-    path::api_url,
     fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
@@ -19,7 +18,7 @@ pub async fn create_image(file:File, kind: ImageKind) -> Result<String, ()> {
             let CreateResponse { id} = res;
             let id = id.0.to_string();
 
-            let path = api_url(&Upload::PATH.replace("{id}",&id));
+            let path = Upload::PATH.replace("{id}",&id);
             upload_file(&path, &file, Upload::METHOD.as_str())
                 .await
                 .map_err(|_| ())
@@ -42,7 +41,7 @@ async fn _create_image_api(kind: ImageKind) -> Result < <Create as ApiEndpoint>:
         kind
     };
 
-    api_with_auth(&api_url(Create::PATH), Create::METHOD, Some(req)).await
+    api_with_auth(Create::PATH, Create::METHOD, Some(req)).await
 }
 /*
 

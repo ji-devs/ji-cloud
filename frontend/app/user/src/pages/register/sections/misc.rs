@@ -23,7 +23,6 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::api_with_token,
     storage,

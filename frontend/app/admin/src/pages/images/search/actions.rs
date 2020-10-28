@@ -4,7 +4,6 @@ use shared::{
     error::image::*
 };
 use core::{
-    path::api_url,
     fetch::{api_with_auth, api_with_auth_empty, upload_file}
 };
 use uuid::Uuid;
@@ -60,5 +59,5 @@ async fn _search_images_api(query:String, page: Option<u32>, is_published: Optio
         is_premium: None,
     };
 
-    api_with_auth(&api_url(Search::PATH), Search::METHOD, Some(req)).await
+    api_with_auth(Search::PATH, Search::METHOD, Some(req)).await
 }

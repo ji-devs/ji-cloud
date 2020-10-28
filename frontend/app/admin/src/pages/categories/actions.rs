@@ -2,7 +2,6 @@ use std::convert::TryInto;
 use core::{
     routes::{Route, UserRoute},
     fetch::{api_with_auth, api_with_auth_empty},
-    path::api_url,
     storage,
 };
 use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
@@ -88,7 +87,7 @@ pub async fn load_categories() -> Result < <Get as ApiEndpoint>::Res, <Get as Ap
         scope: Some(CategoryTreeScope::Decendants)
     };
     
-    api_with_auth(&api_url(Get::PATH), Get::METHOD, Some(req)).await
+    api_with_auth(Get::PATH, Get::METHOD, Some(req)).await
 }
 
 async fn _create(name:String, parent_id: Option<&str>) -> Result < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
@@ -97,7 +96,7 @@ async fn _create(name:String, parent_id: Option<&str>) -> Result < <Create as Ap
         name,
         parent_id: parent_id.map(category_id_from_str)
     };
-    api_with_auth(&api_url(Create::PATH), Create::METHOD, Some(req)).await
+    api_with_auth(Create::PATH, Create::METHOD, Some(req)).await
 }
 
 pub async fn rename(id:&str, name:String) -> Result < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -108,7 +107,7 @@ pub async fn rename(id:&str, name:String) -> Result < <Update as ApiEndpoint>::R
         parent_id: None,
         index: None
     };
-    api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
+    api_with_auth_empty(&path, Update::METHOD, Some(req)).await
 }
 
 pub async fn move_to(id:&str, index:u16) -> Result < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -119,7 +118,7 @@ pub async fn move_to(id:&str, index:u16) -> Result < <Update as ApiEndpoint>::Re
         parent_id: None, 
         index: Some(index) 
     };
-    api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
+    api_with_auth_empty(&path, Update::METHOD, Some(req)).await
 }
 
 pub async fn move_end(id:&str, parent_id:&str) -> Result < <Update as ApiEndpoint>::Res, <Update as ApiEndpoint>::Err> {
@@ -130,11 +129,11 @@ pub async fn move_end(id:&str, parent_id:&str) -> Result < <Update as ApiEndpoin
         parent_id: Some(Some(category_id_from_str(parent_id))),
         index: None 
     };
-    api_with_auth_empty(&api_url(&path), Update::METHOD, Some(req)).await
+    api_with_auth_empty(&path, Update::METHOD, Some(req)).await
 }
 
 pub async fn delete(id:&str) -> Result < <Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err> {
     let path = Delete::PATH.replace("{id}",id);
 
-    api_with_auth_empty::<_,()>(&api_url(&path), Delete::METHOD, None).await
+    api_with_auth_empty::<_,()>(&path, Delete::METHOD, None).await
 }
