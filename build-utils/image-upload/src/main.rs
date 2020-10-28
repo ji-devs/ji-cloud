@@ -1,5 +1,6 @@
 mod options;
 mod data;
+mod report;
 
 use std::future::Future;
 use dotenv::dotenv;
@@ -8,12 +9,14 @@ use options::Opts;
 use structopt::StructOpt;
 use tokio_util::codec::{BytesCodec, FramedRead};
 use data::*;
+use report::*;
 use shared::{
     api::{ApiEndpoint, endpoints::image::*},
     domain::image::*
 };
 use reqwest::Body;
-use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
+use std::sync::{Arc, atomic::{AtomicUsize, Ordering}, RwLock};
+use std::collections::HashMap;
 use futures::stream::{FuturesUnordered, StreamExt};
 use tokio::time::{delay_for, Duration};
 
@@ -43,9 +46,8 @@ async fn main() {
 
     let credentials = Arc::new(Credentials::new());
     let opts = Arc::new(opts);
-    //just used for logging/debugging - makes it easier to see the process order
-    let count = Arc::new(AtomicUsize::new(0));
-    let mut jobs = get_futures(count.clone(), opts.clone(), credentials.clone());
+    let report = Arc::new(RwLock::new(Report::default()));
+    let mut jobs = get_futures(opts.clone(), credentials.clone(), report.clone());
     let mut futures = FuturesUnordered::new();
 
     let batch_size = *&opts.batch_size;
@@ -60,59 +62,104 @@ async fn main() {
     }
     while let Some(_) = futures.next().await {}
 
-    log::info!("finished: {} items uploaded!", count.load(Ordering::SeqCst));
+    {
+        let report = report.read().unwrap();
+        log::info!("writing report...");
+        report.write_csv(&opts);
+        log::info!("finished: {}/{} items uploaded ({} skipped, {} total)!", report.n_uploaded, report.n_to_upload, report.n_skipped, report.n_skipped + report.n_to_upload);
+    }
 }
 
-fn get_futures(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Credentials>) -> Vec<impl Future> {
+fn get_futures(opts:Arc<Opts>, credentials:Arc<Credentials>, report:Arc<RwLock<Report>>) -> Vec<impl Future> {
 
     let is_debug = *&opts.debug;
     let limit_debug = *&opts.limit_debug;
 
-    let iter = 
-        load_albums(&opts) 
+    let albums = load_albums(&opts);
+
+    let mut skip_albums:Vec<Album> = Vec::new();
+    let mut upload_albums:Vec<UploadAlbum> = Vec::new();
+
+    {
+        let mut total_index:usize = 0;
+        let mut skip_count:usize = 0;
+        let mut upload_count:usize = 0;
+
+        let mut report = report.write().unwrap();
+        for (album_index, album) in albums.into_iter().enumerate() {
+            let mut report_album:ReportAlbum = (&album).into(); 
+            let mut skip_album = Album::new(album.id.clone(), album.name.clone());
+            let mut upload_album = UploadAlbum::new(album.id, album.name);
+             
+
+            for (item_index, item) in album.list.into_iter().enumerate() {
+                //only upload sticker types
+                if item.item_type == 0 {
+                    upload_album.list.push(UploadAlbumItem::new(total_index, album_index, item_index, item));
+                    upload_count += 1;
+                } else {
+                    {
+                        report_album.list[item_index].is_skipped = true;
+                    }
+                    skip_album.list.push(item);
+                    skip_count += 1;
+                }
+                total_index += 1;
+            }
+
+            report.albums.push(report_album);
+
+            skip_albums.push(skip_album);
+            upload_albums.push(upload_album);
+        }
+        report.n_skipped = skip_count; 
+        report.n_to_upload = upload_count; 
+    }
+    
+    
+    let upload_futures = upload_albums
         .into_iter()
         .flat_map(move |album| {
             let opts = opts.clone();
             let credentials = credentials.clone();
-            let count = count.clone();
             let album_name = Arc::new(album.name);
             let album_id = Arc::new(album.id);
+            let report = report.clone();
             album.list
                 .into_iter()
                 .map({
                     move |item| {
-                        upload_image(count.clone(), opts.clone(), credentials.clone(), album_name.clone(), album_id.clone(), item.sprite)
+                        upload_image(opts.clone(), credentials.clone(), album_name.clone(), album_id.clone(), item, report.clone())
                     }
                 })
         })
         .into_iter();
 
     if is_debug {
-        iter.take(limit_debug).collect()
+        upload_futures.take(limit_debug).collect()
     } else {
-        iter.collect()
+        upload_futures.collect()
     }
 
 }
 
-async fn upload_image(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Credentials>, album_name:Arc<String>, album_id: Arc<String>, file_name:String) {
+async fn upload_image(opts:Arc<Opts>, credentials:Arc<Credentials>, album_name:Arc<String>, album_id: Arc<String>, item: UploadAlbumItem, report: Arc<RwLock<Report>>) {
     let album_id = &album_id;
     let album_name = &album_name;
 
-    let path = opts.get_image_path(album_id, &file_name);
+    let path = opts.get_image_path(album_id, &item.name);
 
-    let count_num = count.fetch_add(1, Ordering::SeqCst) +1;
-
-    log::info!("uploading #{}: {}/{}", count_num, album_name, file_name);
+    let item_count = item.total_index+1;
+    log::info!("uploading #{}: {}/{}", item_count, album_name, item.name);
 
     let content_type = {
-        if file_name.contains(".png") {
+        if item.name.contains(".png") {
             "image/png"
-        } else if file_name.contains(".jpg") {
+        } else if item.name.contains(".jpg") {
             "image/jpeg"
-        } else if file_name.contains(".gif") {
+        } else if item.name.contains(".gif") {
             "image/gif"
-        } else if file_name.contains(".svg") {
+        } else if item.name.contains(".svg") {
             "image/svg+xml"
         } else {
             panic!("unknown content type!");
@@ -124,7 +171,7 @@ async fn upload_image(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Cr
     let file_size = file.metadata().await.unwrap().len();
 
     if opts.dry_run {
-        log::info!("Skipping due to dry run: #{} {}/{}", count_num, album_name, file_name);
+        log::info!("Skipping due to dry run: #{} {}/{}", item_count, album_name, item.name);
         if opts.debug && opts.sleep_debug != 0 {
             delay_for(Duration::from_millis(opts.sleep_debug)).await;
         }
@@ -133,15 +180,23 @@ async fn upload_image(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Cr
 
     let url = format!("{}{}", opts.get_remote_target().api_url(), Create::PATH);
 
+    let kind = match item.kind {
+        AlbumItemKind => ImageKind::Sticker,
+        AlbumItemKind => ImageKind::Canvas,
+        //2: Animation
+        //3: Foreground
+        _ => panic!("unsupported album item kind: {:?}", item.kind)
+    };
     let req_data = CreateRequest {
-        name: file_name.to_string(),
+        name: item.name.to_string(),
         description: format!("from {} pack", album_name), 
         is_premium: false,
         publish_at: None,
         styles: Vec::new(),
         age_ranges: Vec::new(),
         affiliations: Vec::new(),
-        categories: Vec::new()
+        categories: Vec::new(),
+        kind
     };
 
     let request = reqwest::Client::new()
@@ -166,13 +221,22 @@ async fn upload_image(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Cr
         .await
         .unwrap();
 
-    let CreateResponse { id, upload_url} = res;
+    let CreateResponse { id } = res;
+   
+    {
+        let mut report = report.write().unwrap();
+        report.albums[item.album_index].list[item.item_index].remote_id = Some(id.0.to_string());
+    }
+    let upload_url = format!("{}{}", 
+       opts.get_remote_target().api_url(), 
+       Upload::PATH.replace("{id}",&id.0.to_string())
+    );
 
     let stream = FramedRead::new(file, BytesCodec::new());
     let body = Body::wrap_stream(stream);
 
     let request = reqwest::Client::new()
-        .put(&upload_url.to_string())
+        .put(&upload_url)
         .header("Content-Type", content_type)
         .header("Content-Length", file_size) 
         .body(body);
@@ -187,7 +251,11 @@ async fn upload_image(count:Arc<AtomicUsize>, opts:Arc<Opts>, credentials:Arc<Cr
         panic!("Failed to upload image!");
     }
 
-    log::info!("uploaded #{} {}/{}. id {}", count_num, album_name, file_name, id.0);
+    {
+        let mut report = report.write().unwrap();
+        report.n_uploaded += 1; 
+    }
+    log::info!("uploaded #{} {}/{}. id {}", item_count, album_name, item.name, id.0);
 }
 
 fn load_albums(opts:&Opts) -> Vec<Album> {

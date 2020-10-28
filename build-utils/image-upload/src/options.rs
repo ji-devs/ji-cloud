@@ -5,12 +5,15 @@ use config::RemoteTarget;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "database migrations", about = "A little util to run database migrations")]
 pub struct Opts {
+    #[structopt(long, default_value="report.csv", parse(from_os_str))]
+    pub report_csv_path: PathBuf,
+
     // local, sandbox, or release 
-    #[structopt(short, long)]
+    #[structopt(long, default_value = "local")]
     pub remote_target: String,
 
     // show output 
-    #[structopt(short, long)]
+    #[structopt(short, long, parse(try_from_str), default_value = "true")]
     pub verbose: bool,
 
     /// batch size to help throttle connections 
@@ -18,7 +21,7 @@ pub struct Opts {
     pub batch_size: usize,
 
     /// dry run 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub dry_run: bool,
 
     /// limit (debugging only) 
@@ -39,6 +42,7 @@ impl Opts {
         if self.debug {
             log::warn!("sanitization: forcing dry_run since debug is true");
             self.dry_run = true;
+            self.remote_target = "local".to_string();
         } 
     }
 
