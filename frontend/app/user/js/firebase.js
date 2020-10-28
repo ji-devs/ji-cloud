@@ -43,6 +43,7 @@ export function firebase_register_google() {
     provider.addScope('email');
     return complete_register(firebase.auth().signInWithPopup(provider));
 }
+
 export function firebase_register_email(email, password) {
     return complete_register(firebase.auth().createUserWithEmailAndPassword(email, password));
 }
@@ -100,6 +101,19 @@ export function firebase_forgot_password(email) {
         .sendPasswordResetEmail(email)
 }
 
+export function firebase_send_confirmation_email(url) {
+    return firebase
+        .auth()
+        .currentUser
+        .sendEmailVerification({ url })
+}
+
+export function firebase_change_email(email) {
+    return firebase
+        .auth()
+        .currentUser
+        .updateEmail(email)
+}
 function getCookie(name) {
   var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
   return v ? v[2] : null;
