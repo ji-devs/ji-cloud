@@ -315,6 +315,38 @@
       ]
     }
   },
+  "1b9308d5a11b4d9344f345f35f18a409739ee06dec1af08f409a2138e6f6aae6": {
+    "query": "select id as \"id: ModuleId\", contents as \"body\", kind as \"kind: ModuleKind\" from module where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true
+      ]
+    }
+  },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
     "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
     "describe": {
@@ -842,6 +874,18 @@
       ]
     }
   },
+  "a65d6faacf645998fcfcb81b52a3832b543dbd604ad8d4f23cb8a72c20514a09": {
+    "query": "delete from module where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "b190ecb81821a1fdd8e475f05cfeb181c207ecb91f15d7daaf7fd664c51a1d86": {
     "query": "\nselect id                                             as \"id: JigId\",\n       display_name,\n       cover_id                                       as \"cover_id: ModuleId\",\n       (select kind from module where id = cover_id)  as \"cover_kind: ModuleKind\",\n       ending_id                                      as \"ending_id: ModuleId\",\n       (select kind from module where id = ending_id) as \"ending_kind: ModuleKind\",\n       creator_id,\n       author_id,\n       publish_at,\n       array(select row (module_id, kind)\n             from jig_module\n                      inner join module on module_id = module.id\n             where jig_id = $1\n             order by \"index\")                        as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\"\nfrom jig\nwhere id = $1",
     "describe": {
@@ -997,6 +1041,49 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "c372a34b6b9e1b5ab8cb7488118c6d76b3213c212490d4ff30bed1efdddb68d7": {
+    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind)\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\nreturning true as \"exists!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "c74b0259cc8af2e9853d43ac21be654cdd42c0b154e2c922fc772cc92fe07c08": {
+    "query": "insert into module (kind, contents) values ($1, $2) returning id as \"id: ModuleId\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "d3d8991c6bd250cd87a4d5eb211ceec43f77e6e9eaeb75d114c2bd350ac25467": {
