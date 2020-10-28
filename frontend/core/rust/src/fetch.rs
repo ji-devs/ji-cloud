@@ -16,7 +16,7 @@ use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file, fetch_upload_file_with_headers};
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_file_with_headers};
 use web_sys::File;
 
 #[derive(Debug)]
@@ -46,13 +46,42 @@ pub async fn upload_file(url:&str, file:&File, method:&str) -> Result<(), anyhow
         .map_err(|err| anyhow::Error::msg(err.to_string()))
 }
 
+fn get_query<'a, T: Serialize>(url:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
+    if method == Method::Get {
+        if let Some(data) = data {
+            let query = serde_qs::to_string(&data).unwrap_throw();
+            let path = format!("{}?{}", url, query);
+            (path, None)
+        } else {
+            (url.to_string(), None)
+        }
+    } else {
+        (url.to_string(), data)
+    }
+}
+pub async fn api_no_auth<T, E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
+    let (url, data) = get_query(url, method, data);
+
+    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap();
+
+    if res.ok() {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+    } else {
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+    }
+}
+
 pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
 
+    let (url, data) = get_query(url, method, data);
  
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
         .await
         .unwrap();
     if res.ok() {
@@ -67,7 +96,9 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 {
     let csrf = load_csrf_token().unwrap();
 
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+    let (url, data) = get_query(url, method, data);
+
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
         .await
         .unwrap_throw();
 
@@ -84,8 +115,10 @@ pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Opti
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
+    
+    let (url, data) = get_query(url, method, data);
 
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
         .await
         .unwrap_throw();
     if res.ok() {

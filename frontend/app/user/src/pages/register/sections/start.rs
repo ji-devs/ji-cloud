@@ -61,6 +61,7 @@ impl RegisterStart {
                                 let mut data = _self.data.borrow_mut();
                                 data.token = Some(info.token);
                                 data.email= Some(info.email);
+                                data.confirmed_email = info.email_verified;
                                 _self.step.set(Step::One);
                             },
                             Err(maybeError) => {
@@ -92,10 +93,11 @@ impl RegisterStart {
                             _self.status.set(Some(RegisterStatus::Busy));
                             _self.loader.load(clone!(_self => async move {
                                 match register_email(&email, &pw).await {
-                                    Ok(token) => {
+                                    Ok(info) => {
                                         let mut data = _self.data.borrow_mut();
-                                        data.token = Some(token);
+                                        data.token = Some(info.token);
                                         data.email= Some(email);
+                                        data.confirmed_email = info.email_verified;
                                         _self.step.set(Step::One);
                                     },
                                     Err(err) => {
@@ -155,13 +157,13 @@ impl RegisterPageRefs {
 }
 
 //Actions
-pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterStatus> {
+pub async fn register_email(email: &str, pw: &str) -> Result<EmailRegisterInfo, RegisterStatus> {
     let token_promise = unsafe { firebase_register_email(email, pw) };
 
-    JsFuture::from(token_promise).await
+    let firebase_res = JsFuture::from(token_promise).await
         .map(|info| {
             let user:EmailRegisterInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
-            user.token
+            user
         })
         .map_err(|err| {
             match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
@@ -180,13 +182,23 @@ pub async fn register_email(email: &str, pw: &str) -> Result<String, RegisterSta
                     RegisterStatus::Technical
                 }
             }
-        })
+        });
+
+    if let Ok(user) = firebase_res {
+        if !firebase_id_exists(user.firebase_id.clone()).await {
+            Ok(user)
+        } else {
+            Err(RegisterStatus::IdExists)
+        }
+    } else {
+        firebase_res
+    }
 }
 
 pub async fn register_google() -> Result<GoogleRegisterInfo, Option<RegisterStatus>> {
     let token_promise = unsafe { firebase_register_google() };
 
-    JsFuture::from(token_promise).await
+    let firebase_res = JsFuture::from(token_promise).await
         .map(|info| {
             serde_wasm_bindgen::from_value::<GoogleRegisterInfo>(info).unwrap_throw()
         })
@@ -206,5 +218,39 @@ pub async fn register_google() -> Result<GoogleRegisterInfo, Option<RegisterStat
                 }
             }
             */
-        })
+        });
+
+
+    if let Ok(info) = firebase_res {
+        if !firebase_id_exists(info.firebase_id.clone()).await {
+            Ok(info)
+        } else {
+            Err(Some(RegisterStatus::IdExists))
+        }
+    } else {
+        firebase_res
+    }
+}
+
+use shared::{
+    api::{ApiEndpoint, endpoints::user::UserLookup},
+    domain::user::{UserLookupQuery, OtherUser},
+    error::{auth::RegisterError, user::NoSuchUserError},
+};
+
+use core::{
+    path::api_url,
+    fetch::api_no_auth,
+};
+pub async fn firebase_id_exists(firebase_id:String) -> bool {
+    let query = UserLookupQuery {
+        id: None,
+        firebase_id: Some(firebase_id),
+        name: None
+    };
+
+    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&api_url(UserLookup::PATH), UserLookup::METHOD, Some(query)).await;
+
+    resp.is_ok()
+
 }

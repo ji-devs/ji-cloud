@@ -23,12 +23,16 @@ pub struct GoogleRegisterInfo {
     pub avatar: String,
     pub email: String,
     pub name: String,
-    pub token: String
+    pub token: String,
+    pub firebase_id: String,
+    pub email_verified: bool,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct EmailRegisterInfo {
-    pub token: String
+    pub token: String,
+    pub firebase_id: String,
+    pub email_verified: bool,
 }
 
 pub fn setup(settings:&Settings) {

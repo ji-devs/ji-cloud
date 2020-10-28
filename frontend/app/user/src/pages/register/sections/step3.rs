@@ -157,7 +157,11 @@ impl RegisterStep3 {
                             Ok(csrf) => {
                                 storage::save_csrf_token(&csrf);
 
-                                _self.step.set(Step::Final);
+                                if _self.data.borrow().confirmed_email {
+                                    _self.step.set(Step::Final);
+                                } else {
+                                    _self.step.set(Step::ConfirmEmail);
+                                }
                                 //let route:String = Route::User(UserRoute::Profile).into();
                                 //dominator::routing::go_to_url(&route);
 
@@ -212,7 +216,7 @@ pub async fn create_user(data: RegisterData) -> Result<String, RegisterStatus> {
             .map(|id| Uuid::parse_str(&id).unwrap_throw())
             .map(|id| SubjectId(id))
             .collect(),
-        geocode: data.geocode,
+        geocode: data.location_json,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;
