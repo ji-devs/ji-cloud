@@ -2,7 +2,7 @@ use crate::templates::{
     direct::{direct_template_home, direct_template_no_auth},
     epoch::epoch_page,
     info::info_template,
-    spa::{spa_user_template, spa_admin_template}
+    spa::{spa_admin_template, spa_user_template},
 };
 use actix_web::web::{self, ServiceConfig};
 

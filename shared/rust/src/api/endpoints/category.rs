@@ -5,8 +5,9 @@ use crate::{
         CategoryResponse, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
         UpdateCategoryRequest,
     },
-    error::category::{
-        CategoryCreateError, CategoryDeleteError, CategoryGetError, CategoryUpdateError,
+    error::{
+        category::{CreateError, UpdateError},
+        DeleteError, GetError,
     },
 };
 
@@ -15,7 +16,7 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = GetCategoryRequest;
     type Res = CategoryResponse;
-    type Err = CategoryGetError;
+    type Err = GetError;
     const PATH: &'static str = "/v1/category";
     const METHOD: Method = Method::Get;
 }
@@ -25,7 +26,7 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateCategoryRequest;
     type Res = NewCategoryResponse;
-    type Err = CategoryCreateError;
+    type Err = CreateError;
     const PATH: &'static str = "/v1/category";
     const METHOD: Method = Method::Post;
 }
@@ -35,7 +36,7 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = UpdateCategoryRequest;
     type Res = ();
-    type Err = CategoryUpdateError;
+    type Err = UpdateError;
     const PATH: &'static str = "/v1/category/{id}";
     const METHOD: Method = Method::Patch;
 }
@@ -45,7 +46,7 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
-    type Err = CategoryDeleteError;
+    type Err = DeleteError;
     const PATH: &'static str = "/v1/category/{id}";
     const METHOD: Method = Method::Delete;
 }

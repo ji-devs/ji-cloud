@@ -29,7 +29,9 @@ struct SpaPageInfo {
 
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
     let info = SpaPageInfo {
-        app_js: settings.remote_target().spa_url(spa.as_str(), "js/index.js"),
+        app_js: settings
+            .remote_target()
+            .spa_url(spa.as_str(), "js/index.js"),
         app_css: settings.remote_target().css_url(true),
         firebase: matches!(spa, SpaPage::User),
         local_dev: settings.is_local(),
@@ -44,6 +46,8 @@ pub async fn spa_user_template(settings: Data<RuntimeSettings>) -> actix_web::Re
     spa_template(&settings, SpaPage::User)
 }
 
-pub async fn spa_admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+pub async fn spa_admin_template(
+    settings: Data<RuntimeSettings>,
+) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Admin)
 }

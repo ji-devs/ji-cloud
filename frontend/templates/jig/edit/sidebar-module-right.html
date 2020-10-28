@@ -1,13 +1,5 @@
-<div class="h-160 border-solid border-jidarkgrey border-b relative p-4">
-  <img data-id="menu-btn" src="{{MEDIA_UI}}/icn-menu-jig.svg" alt="" class="absolute right-10 top-10 cursor-pointer">
-  <img data-id="add-btn" src="{{MEDIA_UI}}/Link_Right.svg" alt="" class="absolute top-95 right-50 z-10 cursor-pointer">
-  <div class="absolute right-70 z-20">
-    <div class="relative">
-      <img src="{{MEDIA_UI}}/jig-gear-wheel.svg" class="" alt="">
-      <p class="absolute text-center text-white top-20 left-25">Drag <br>activity <br>here</p>
-    </div>
+{% import "jig/edit/edit-macros.html" as Jig %}
 
-  </div>
-  <h1 data-id="title" class="text-xl font-bold text-jibuttonBlue"></h1>
-  <p data-id="subtitle"></p>
+<div data-id="${id}">
+    {{ Jig::sidebar_module(is_left=false) }}
 </div>

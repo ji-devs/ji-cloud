@@ -1,7 +1,7 @@
 use shared::{
     api::endpoints::{ApiEndpoint, image::*, self},
-    domain::{image::*, meta::*, category::*},
-    error::image::*,
+    domain::{image::*, meta::*, category::*, Publish},
+    error::{*, image::*,}
 };
 use core::{
     path::api_url,

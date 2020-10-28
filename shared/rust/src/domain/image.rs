@@ -1,7 +1,10 @@
 //! Types for images.
 
-use super::category::CategoryId;
-use super::meta::{AffiliationId, AgeRangeId, StyleId};
+use super::{
+    category::CategoryId,
+    meta::{AffiliationId, AgeRangeId, StyleId},
+    Publish,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
@@ -41,34 +44,6 @@ impl ImageKind {
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct ImageId(pub Uuid);
-
-/// Represents when to publish an image.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-pub enum Publish {
-    /// Publish the image *at* the given time.
-    At(DateTime<Utc>),
-    /// Publish the image *in* the given amount of time from now.
-    In(std::time::Duration),
-}
-
-impl Publish {
-    /// creates an instance of `Self` that will publish "right now"
-    pub fn now() -> Self {
-        Self::In(std::time::Duration::new(0, 0))
-    }
-}
-
-impl From<Publish> for DateTime<Utc> {
-    fn from(publish: Publish) -> Self {
-        match publish {
-            Publish::At(t) => t,
-            Publish::In(d) => {
-                // todo: error instead of panicing
-                Utc::now() + chrono::Duration::from_std(d).expect("Really really big duration?")
-            }
-        }
-    }
-}
 
 // todo: # errors doc section
 /// Request to create a new image.

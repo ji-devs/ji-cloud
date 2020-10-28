@@ -22,23 +22,61 @@ use shared::domain::{
     category::Category,
     image::ImageKind,
 };
+use super::{data::*, module_selector::*, sidebar::*};
 
 pub struct EditPage {
-    pub id:String
+    pub right_section:Mutable<RightSection>,
+    pub jig: Mutable<Option<Jig>>
 }
+
+#[derive(Clone, Copy, Debug)]
+pub enum RightSection {
+    ModuleSelect
+}
+
+
 
 impl EditPage {
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            id
+            right_section: Mutable::new(RightSection::ModuleSelect),
+            jig: Mutable::new(None)
         });
 
-        _self
+        let _self_clone = _self.clone();
+
+        spawn_local(async move {
+            let jig = Jig::mock(id).await;
+            _self.jig.set(Some(jig));
+        });
+
+        _self_clone
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-
-        elem!(templates::edit(), {
+        html!("div", {
+            .child_signal(_self.jig.signal_cloned().map(clone!(_self => move |jig| {
+                jig.map(|jig| {
+                    elem!(templates::edit_page(), {
+                        .with_data_id!("sidebar", {
+                            .child(Sidebar::render(Sidebar::new(jig)))
+                        })
+                        .with_data_id!("right-area", {
+                            .child_signal(_self.right_section.signal_ref(|section| {
+                                Some(
+                                    match section {
+                                        RightSection::ModuleSelect => {
+                                            ModuleSelect::render(ModuleSelect::new())
+                                        }
+                                    }
+                                )
+                            }))
+                        })
+                    })
+                })
+            })))
         })
     }
 }
+
+

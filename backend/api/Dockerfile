@@ -1,47 +1,52 @@
-##########
-## TEST ##
-##########
-# Even though we're not building a static binary
-# Use the same environment in tests and release
-FROM ekidd/rust-musl-builder:latest AS tests 
+####################
+## BUILDER        ##
+####################
+
+FROM ekidd/rust-musl-builder:latest AS api-builder
 
 # Add our source code.
 
 RUN mkdir -p ./backend/api
 COPY ./shared ./shared
 COPY ./config/rust ./config/rust
-COPY ./backend/_core/rust ./backend/_core/rust
+COPY ./backend/core ./backend/core
 COPY ./backend/api ./backend/api
 
 # Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
-# Build our application.
-WORKDIR ./backend/api
-RUN cargo test --no-default-features
-
-####################
-## RELEASE        ##
-####################
-
-FROM ekidd/rust-musl-builder:latest AS release-builder
-
-# Add our source code.
-
-RUN mkdir -p ./backend/api
-COPY ./shared ./shared
-COPY ./config/rust ./config/rust
-COPY ./backend/_core/rust ./backend/_core/rust
-COPY ./backend/api ./backend/api
-
-# Fix permissions on source code.
-RUN sudo chown -R rust:rust /home/rust
+RUN rm -r backend/api/integration-testing backend/api/fixtures
 
 # Build our application.
 WORKDIR ./backend/api
 RUN cargo build --release --no-default-features
 
-# Now, we need to build our _real_ Docker container, copying in the binary.
+##########
+## TEST ##
+##########
+
+FROM alpine:latest as test
+
+RUN apk --no-cache add yarn bash postgresql postgresql-contrib
+
+COPY ./backend/script/ephemeralpg/pg_tmp.sh \ 
+    ./backend/api/integration-testing \
+    integration-testing/
+
+COPY ./backend/api/fixtures/ integration-testing/fixtures
+
+COPY --from=api-builder \
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
+    ./integration-testing/ji-cloud-api
+
+WORKDIR ./integration-testing
+RUN yarn && chown -R postgres:postgres .
+RUN ls && su postgres -c 'BIN_FILE="./ji-cloud-api" PG_TMP="./pg_tmp.sh" FIXTURES_DIR=fixtures yarn test:ava --timeout 2m'
+
+####################
+## Release        ##
+####################
+
 FROM alpine:latest as release
 
 # Used at runtime
@@ -51,7 +56,7 @@ RUN apk --no-cache add ca-certificates
 
 RUN mkdir /usr/local/bin/cloud-run-app
 
-COPY --from=release-builder \
+COPY --from=api-builder \
     /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
     /usr/local/bin/cloud-run-app/ji-cloud-api
 
@@ -64,24 +69,6 @@ CMD ["./ji-cloud-api", "release"]
 ## Sandbox        ##
 ####################
 
-FROM ekidd/rust-musl-builder:latest AS sandbox-builder
-
-# Add our source code.
-
-RUN mkdir -p ./backend/api
-COPY ./shared ./shared
-COPY ./config/rust ./config/rust
-COPY ./backend/_core/rust ./backend/_core/rust
-COPY ./backend/api ./backend/api
-
-# Fix permissions on source code.
-RUN sudo chown -R rust:rust /home/rust
-
-# Build our application.
-WORKDIR ./backend/api
-RUN cargo build --release --no-default-features
-
-# Now, we need to build our _real_ Docker container, copying in the binary.
 FROM alpine:latest as sandbox 
 
 # Used at runtime
@@ -91,7 +78,7 @@ RUN apk --no-cache add ca-certificates
 
 RUN mkdir /usr/local/bin/cloud-run-app
 
-COPY --from=sandbox-builder \
+COPY --from=api-builder \
     /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/ji-cloud-api \
     /usr/local/bin/cloud-run-app/ji-cloud-api
 
