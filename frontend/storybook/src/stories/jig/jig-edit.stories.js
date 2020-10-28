@@ -1,5 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, toggleClassesId, setAttributeId, setTextId} from "@utils/dom";
+import {MEDIA_UI} from "@utils/path";
 //these are the Add templates
 import editPage from "@templates/jig/edit/edit-page.html";
 import sidebarSection from "@templates/jig/edit/sidebar.html";
@@ -57,7 +58,10 @@ function makeModule(idx) {
 
     setTextId(module, "title", `Title ${idx+1}`);
     setTextId(module, "subtitle", `Subtitle ${idx+1}`);
-    toggleClassesId(module, "drag-border", ["hidden"], true);
 
+    if(idx == 1) {
+        setAttributeId(module, "img", "src", `${MEDIA_UI}/icn-module-poster2.png`);
+        toggleClassesId(module, "label", ["hidden"], true);
+    }
     return module;
 }
