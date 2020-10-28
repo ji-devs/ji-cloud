@@ -11,6 +11,7 @@ yarn-*.log
 minio.exe
 firebase-debug.log
 .idea
+build-utils/image-upload/report.csv
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat

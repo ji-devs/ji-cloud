@@ -14,6 +14,15 @@
 </button>
 {% endmacro blue %}
 
+{% macro bluejig(label, dataId="", hover) %}
+<button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-3 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
+  <div class="flex justify-center items-center">
+    {{label}}
+  </div>
+
+</button>
+{% endmacro bluejig %}
+
 {% macro green(label, dataId="") %}
 <button data-id="{{dataId}}" class="bg-jibuttongreen text-white font-normal min-w-112 py-2 px-4 rounded-lg">
   <div class="flex">

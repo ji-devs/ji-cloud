@@ -51,7 +51,14 @@ function complete_register(promise) {
     return promise
         .then(({user}) => 
             user.getIdToken()
-                .then(token => ({token, name: user.displayName, email: user.email, avatar: user.photoURL}))
+                .then(token => ({
+                    token,
+                    email_verified: user.emailVerified,
+                    firebase_id: user.uid,
+                    name: user.displayName, 
+                    email: user.email, 
+                    avatar: user.photoURL
+                }))
         )
         .then(result => {
             firebase.auth().signOut();

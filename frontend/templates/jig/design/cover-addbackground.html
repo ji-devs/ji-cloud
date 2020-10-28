@@ -1,0 +1,171 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+
+<div class="flex bg-jibackgroundBlue h-full min-w-full w-auto min-h-screen">
+  <div class="sidebar w-72 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
+    <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8">
+    <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
+    <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
+    <div class="h-160 bg-jibackgroundGrey border-l-8 border-jibuttonBlue w-full pt-4 pl-2">
+      <h1 class="text-jibuttonBlue font-bold">01</h1>
+    </div>
+    <div class="h-160  w-full pt-4 pl-2 border-jidarkgrey border-b pl-4">
+      <h1 class="text-jibuttonBlue font-bold">02</h1>
+    </div>
+  </div>
+  <div class="bg-white ml-6 w-516 ">
+    <div class="flex p-4">
+      <div class="">
+        <p>Select</p>
+      </div>
+      <!-- bg-jibuttonBlue text-white for active and bg-jigooglegrey and text-black for inactive -->
+      <div class="flex mb-4">
+
+        <div class="h-24 w-112 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
+          <p class="text-black text-sm">Starting layout</p>
+        </div>
+
+        <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
+          <p class="text-black text-sm">Theme</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="border-t border-b border-jidarkgrey py-4">
+      <div class="flex items-center pl-4">
+        <p class="mr-4">Add</p>
+        <img src="{{MEDIA_UI}}/icn-text-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-image-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-background-color-jig-active.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-record-jig.svg" alt="">
+        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="">
+      </div>
+    </div>
+    <div class="px-4">
+      <p class=" pt-4">Select color for the background</p>
+      <div class="grid grid-cols-6 mt-4 w-516">
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-white color-selected">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickeryellow">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerorange">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerorangedark">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerred">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerpink">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerpinkdark">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerfuschia">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerpurple">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerpurpledark">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerbluedark">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerblue">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerteal">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickergreendark">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickergreen">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerlime">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickerbluelight">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickergreyblue">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickergreylight">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-jicolorpickergrey">
+
+        </div>
+        <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4 pr-4 bg-black">
+
+        </div>
+
+
+      </div>
+      <div class="h-1 w-full bg-jidarkgrey my-2">
+
+      </div>
+      <div class="flex items-center">
+        <img src="{{MEDIA_UI}}/Icon_PlusBlue.svg" alt="" class="h-24">
+        <p class="text-jibuttonBlue">Add Color</p>
+      </div>
+      <div class="" data-id="addcolor">
+
+      </div>
+    </div>
+
+  </div>
+  <div class=" flex flex-col w-full">
+    <div class="flex justify-center items-center mt-4 self-end mr-4">
+
+      <div class="bg-white w-325 h-56 rounded-full shadow-md">
+        <div class="flex items-center h-full p-2">
+          <div class="flex mx-4 pr-4 border-r border-jiheadergrey">
+            <img src="{{MEDIA_UI}}/icn-undo.svg" alt="" class="mx-2">
+
+            <img src="{{MEDIA_UI}}/icn-redo.svg" alt="" class="mx-2">
+
+          </div>
+          <div class="pr-4 border-r border-jiheadergrey">
+            <p>Preview</p>
+          </div>
+          <div class="pl-4">
+            <div class="h-24 w-68 bg-jibuttonBlue rounded-md flex items-center justify-center ">
+              <p class="text-white text-sm">Share</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ml-12">
+        <img src="{{MEDIA_UI}}/Creator@2x.png" alt="">
+      </div>
+    </div>
+    <div class="pl-8 -mt-16">
+      <h1 class="text-jititleorange text-4xl font-light mb-4">Create a Cover Page</h1>
+      <p class="font-light text-lg">Introduce your topic</p>
+      <p class="font-light text-lg">Use the blue panel for selecting layouts, themes, and adding content</p>
+      <div class="max-w-1212 h-681 bg-white mt-4 rounded-sm mb-4">
+
+      </div>
+      <div class="flex justify-end w-full">
+        {{ ButtonMacros::orange(label="Try for free", dataId="next") }}
+      </div>
+
+
+
+    </div>
+  </div>
+</div>

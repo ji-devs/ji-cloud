@@ -3,19 +3,20 @@ use std::cell::RefCell;
 use wasm_bindgen::UnwrapThrowExt;
 use shared::{
     api::endpoints::{ApiEndpoint, user::*,},
-    domain::auth::{RegisterRequest, RegisterSuccess},
-    error::{
-        auth::RegisterError,
-        user::NoSuchUserError
-    }
+    domain::{
+        user::{UserLookupQuery, OtherUser},
+        auth::{RegisterRequest, RegisterSuccess},
+    },
+    error::{auth::RegisterError, user::NoSuchUserError},
 };
+
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal},
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, HtmlInputElement};
-use dominator::{Dom, html, events, clone};
+use dominator::{Dom, html, events, clone, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use awsm_web::dom::*;
@@ -23,9 +24,8 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
-    fetch::api_with_token,
+    fetch::{api_no_auth, api_with_token},
     storage,
 };
 use crate::utils::firebase::*;
@@ -36,7 +36,7 @@ pub struct RegisterStep1 {
     pub status: Mutable<Option<RegisterStatus>>,
     pub step: Rc<Mutable<Step>>,
     pub data: Rc<RefCell<RegisterData>>,
-    pub loader: AsyncLoader
+    pub username_taken_loader: AsyncLoader
 }
 
 impl RegisterStep1 {
@@ -44,7 +44,7 @@ impl RegisterStep1 {
         let _self = Rc::new(Self { 
             refs: RefCell::new(None),
             status: Mutable::new(None),
-            loader: AsyncLoader::new(),
+            username_taken_loader: AsyncLoader::new(),
             data,
             step
         });
@@ -64,23 +64,49 @@ impl RegisterStep1 {
                 }))
             })
 
+            .with_data_id!("user-name" => HtmlInputElement, {
+                .with_node!(input => {
+                    .event(clone!(_self => move |_: events::Input| { 
+                        let value = input.value();
+
+                        _self.username_taken_loader.load(clone!(_self => async move {
+                            _self.status.set(None);
+                            if username_exists(value).await {
+                                _self.status.set(Some(RegisterStatus::UsernameExists));
+
+                            }
+                        }))
+                    }))
+                })
+            })
+
             .with_data_id!("next", {
                 .event(clone!(_self => move |evt:events::Click| {
-                    let refs = _self.refs.borrow();
-                    let refs = refs.as_ref().unwrap_throw();
 
-                
-                    match refs.get_basic_info() {
-                        Err(err) => _self.status.set(Some(err)),
+                    _self.status.set(None);
 
-                        Ok(info) => {
-                            let mut data = _self.data.borrow_mut();
-                            data.user_name = Some(info.user_name);
-                            data.given_name = Some(info.given_name);
-                            data.family_name = Some(info.family_name);
-                            _self.step.set(Step::Two);
+                    _self.username_taken_loader.load(clone!(_self => async move {
+                        let refs = _self.refs.borrow();
+                        let refs = refs.as_ref().unwrap_throw();
+                    
+                        match refs.get_basic_info() {
+                            Err(err) => _self.status.set(Some(err)),
+
+                            Ok(info) => {
+
+                                if username_exists(info.user_name.clone()).await {
+                                    _self.status.set(Some(RegisterStatus::UsernameExists));
+
+                                } else {
+                                    let mut data = _self.data.borrow_mut();
+                                    data.user_name = Some(info.user_name);
+                                    data.given_name = Some(info.given_name);
+                                    data.family_name = Some(info.family_name);
+                                    _self.step.set(Step::Two);
+                                }
+                            }
                         }
-                    }
+                    }))
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {
@@ -161,47 +187,15 @@ impl RegisterPageRefs {
 }
 
 //Actions
-pub async fn create_user(
-    token: String,
-    username: String,
-    given_name: String,
-    family_name: String,
-    email: String,
-) -> Result<String, RegisterStatus> {
-    let req = RegisterRequest {
-        username,
-        email,
-        given_name,
-        family_name,
-        over_18: true,
-        language: "en".to_string(),
-        locale: "en".to_string(),
-        timezone: chrono_tz::Tz::Asia__Jerusalem,
-        opt_into_edu_resources: true,
-        organization: Some("ji".to_string()),
-        affiliations: vec![],
-        age_ranges: vec![],
-        subjects: vec![],
-        geocode: None,
+pub async fn username_exists(name:String) -> bool {
+
+    let query = UserLookupQuery {
+        id: None,
+        firebase_id: None, 
+        name: Some(name) 
     };
 
-    let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
+    let resp:Result<OtherUser, NoSuchUserError> = api_no_auth(&UserLookup::PATH, UserLookup::METHOD, Some(query)).await;
 
-
-    match resp {
-        Ok(resp) => match resp {
-            RegisterSuccess::Signin(csrf) => Ok(csrf),
-            RegisterSuccess::ConfirmEmail => Err(RegisterStatus::ConfirmEmail)
-        }, 
-        Err(err) => {
-            let status = match err {
-                RegisterError::TakenId => RegisterStatus::IdExists,
-                RegisterError::TakenEmail => RegisterStatus::EmailExists,
-                RegisterError::EmptyDisplayName => RegisterStatus::EmptyUserName,
-                _ => RegisterStatus::Technical
-            };
-
-            Err(status)
-        }
-    }
+    resp.is_ok()
 }

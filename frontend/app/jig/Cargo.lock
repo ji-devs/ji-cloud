@@ -27,7 +27,6 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
- "serde_qs",
  "shared",
  "simple-html-template",
  "url",
@@ -47,11 +46,13 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "awsm_web"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6df70b8c30ad13fb51e2226c338d30513ff7297b2537c2cbb701808358f2d058"
+checksum = "9bb9f8af4f87b741d8a22f49a546497eaae243c7879e3813b9dbfb4ed64b0369"
 dependencies = [
+ "discard",
  "futures",
+ "gloo-timers",
  "js-sys",
  "log",
  "serde",
@@ -416,6 +417,8 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47204a46aaff920a1ea58b11d03dec6f704287d27561724a4631e450654a891f"
 dependencies = [
+ "futures-channel",
+ "futures-core",
  "js-sys",
  "wasm-bindgen",
  "web-sys",

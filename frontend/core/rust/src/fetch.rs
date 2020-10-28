@@ -16,8 +16,9 @@ use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file, fetch_upload_file_with_headers};
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_file_with_headers};
 use web_sys::File;
+use super::settings::SETTINGS;
 
 #[derive(Debug)]
 pub enum Error {
@@ -46,13 +47,47 @@ pub async fn upload_file(url:&str, file:&File, method:&str) -> Result<(), anyhow
         .map_err(|err| anyhow::Error::msg(err.to_string()))
 }
 
-pub async fn api_with_token<T, E, Payload>(url: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
+fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
+
+    let api_url = SETTINGS.get().unwrap().remote_target.api_url();
+
+    if method == Method::Get {
+        if let Some(data) = data {
+            let query = serde_qs::to_string(&data).unwrap_throw();
+            let url = format!("{}{}?{}", api_url, endpoint, query);
+            (url, None)
+        } else {
+            let url = format!("{}{}", api_url, endpoint);
+            (url, None)
+        }
+    } else {
+        let url = format!("{}{}", api_url, endpoint);
+        (url, data)
+    }
+}
+pub async fn api_no_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
+    let (url, data) = api_get_query(endpoint, method, data);
+
+    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap();
+
+    if res.ok() {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+    } else {
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+    }
+}
+
+pub async fn api_with_token<T, E, Payload>(endpoint: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
 
+    let (url, data) = api_get_query(endpoint, method, data);
  
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
         .await
         .unwrap();
     if res.ok() {
@@ -62,12 +97,14 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
-pub async fn api_with_auth<T, E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
 
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+    let (url, data) = api_get_query(endpoint, method, data);
+
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
         .await
         .unwrap_throw();
 
@@ -80,12 +117,14 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 }
 
 //TODO - get rid of this, use specialization
-pub async fn api_with_auth_empty<E, Payload>(url: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+pub async fn api_with_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let csrf = load_csrf_token().unwrap();
+    
+    let (url, data) = api_get_query(endpoint, method, data);
 
-    let res = fetch_with_headers_and_data(url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
         .await
         .unwrap_throw();
     if res.ok() {

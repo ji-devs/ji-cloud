@@ -54,14 +54,14 @@ run_task = { name = [ "google-sql-proxy", "server-local-proxy", ], parallel = tr
 
 [tasks.server-local-proxy]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../_core/rust/src", "-w", ".", "-x", "run -- local sqlproxy"]
+args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../core/src", "-w", ".", "-x", "run -- local sqlproxy"]
 
 [tasks.dev]
 run_task = { name = [ "server-local"] }
 
 [tasks.server-local]
 command = "systemfd"
-args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../_core/rust/src", "-w", ".", "-x", "run -- local"]
+args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../core/src", "-w", ".", "-x", "run -- local"]
 
 # note: this doesn't currently work, because `cloud-sql-proxy` doesn't exist.
 [tasks.google-sql-proxy]

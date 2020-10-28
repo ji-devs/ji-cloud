@@ -1,0 +1,9 @@
+.left {
+  
+  z-index:10;
+}
+
+.right{
+  margin-top:10px;
+  margin-left: -10px;
+}

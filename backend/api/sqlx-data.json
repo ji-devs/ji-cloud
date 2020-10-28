@@ -237,6 +237,22 @@
       ]
     }
   },
+  "19cf8c137d4072d2231ba5708f31fbd415f665a338de2473cf1aca4390e46a61": {
+    "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    cover_id  = coalesce($4, cover_id),\n    ending_id  = coalesce($5, ending_id),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::uuid is not null and $4 is distinct from cover_id) or\n       ($5::uuid is not null and $5 is distinct from ending_id))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "1b88f0ec5158d04c34ef416bf283ddfc0d383330b242991a77db61e9b5de948c": {
     "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\n\nfrom path\n         inner join category using (id);\n",
     "describe": {
@@ -397,6 +413,18 @@
       "nullable": []
     }
   },
+  "32bc8fe3fd1a0c9b4de8b504337d29e7f300a1b0a299ba593458ed8f145f321f": {
+    "query": "delete from jig where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
@@ -428,6 +456,40 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "46fccf7d3c9f71b3c15e06ef08705676557e4a47ab331baed7f1754804e0eaf6": {
+    "query": "\ninsert into jig_module (jig_id, \"index\", module_id)\nvalues ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "47fb0f5546e32d096bbffdd9ffd5d17be73c08c132620e2a7fae90b87dd954e1": {
+    "query": "select exists(select 1 from jig where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "4a26a8a4a7c5ec4d470518bca3b997c1e52616ad93a56e7b28fdb485c50f228c": {
@@ -486,6 +548,26 @@
       "nullable": []
     }
   },
+  "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {
+    "query": "\ninsert into module (kind)\nvalues ($1)\nreturning id as \"id: ModuleId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
     "query": "select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation",
     "describe": {
@@ -522,6 +604,42 @@
       ]
     }
   },
+  "62a5573f3774ed3c06160100a4a20acd85eee9df7ec45bdc5b55633765ddcbd4": {
+    "query": "\ninsert into jig\n    (display_name, cover_id, ending_id, creator_id, author_id, publish_at)\nvalues ($1, $2, $3, $4, $4, $5)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "636342d58945675c620fb5016f6a32bb94c463f879276812bd5440405dc67cca": {
+    "query": "delete from jig_module where jig_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "query": "delete from category where id = $1 returning index, parent_id",
     "describe": {
@@ -546,6 +664,20 @@
         false,
         true
       ]
+    }
+  },
+  "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
+    "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
@@ -710,6 +842,80 @@
       ]
     }
   },
+  "b190ecb81821a1fdd8e475f05cfeb181c207ecb91f15d7daaf7fd664c51a1d86": {
+    "query": "\nselect id                                             as \"id: JigId\",\n       display_name,\n       cover_id                                       as \"cover_id: ModuleId\",\n       (select kind from module where id = cover_id)  as \"cover_kind: ModuleKind\",\n       ending_id                                      as \"ending_id: ModuleId\",\n       (select kind from module where id = ending_id) as \"ending_kind: ModuleKind\",\n       creator_id,\n       author_id,\n       publish_at,\n       array(select row (module_id, kind)\n             from jig_module\n                      inner join module on module_id = module.id\n             where jig_id = $1\n             order by \"index\")                        as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\"\nfrom jig\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "cover_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "cover_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "ending_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "ending_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 6,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 7,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 8,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        null,
+        false,
+        null,
+        true,
+        true,
+        true,
+        null
+      ]
+    }
+  },
   "b8c3158be83930526198c18609e10617952b2e57fe7f73c1f5e8b2068baf8f10": {
     "query": "select kind as \"kind: ImageKind\" from image_metadata where id = $1",
     "describe": {
@@ -728,6 +934,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "b905ebd3fd48e7f0b745d22fbcad52f94b84cb750a6b3bf39b0f6cd2a596742a": {
+    "query": "\nupdate jig\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
     }
   },
   "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {

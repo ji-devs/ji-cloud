@@ -9,9 +9,12 @@ pub fn media_url(path:&str) -> String {
     format!("{}/{}", SETTINGS.get().unwrap().remote_target.media_url(), path)
 }
 
+// moved to fetch in order to force consolidation at the compiler level
+/*
 pub fn api_url(path:&str) -> String {
     format!("{}{}", SETTINGS.get().unwrap().remote_target.api_url(), path)
 }
+*/
 
 pub fn upload_url(path:&str) -> String {
     format!("{}/{}", SETTINGS.get().unwrap().remote_target.upload_url(), path)

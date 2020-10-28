@@ -4,7 +4,6 @@ use shared::{
     error::user::NoSuchUserError,
 };
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::api_with_token,
     storage,
@@ -101,7 +100,7 @@ async fn signin_firebase(token_promise:js_sys::Promise, error_is_cancel:bool) ->
         Ok(token) => {
             let token = token.as_string().unwrap_throw();
             let resp:Result<SigninSuccess, NoSuchUserError> = 
-                api_with_token::< _, _, ()>(&api_url(Signin::PATH), &token, Signin::METHOD, None).await;
+                api_with_token::< _, _, ()>(&Signin::PATH, &token, Signin::METHOD, None).await;
             
             match resp {
                 Ok(data) => Ok(data.csrf), 

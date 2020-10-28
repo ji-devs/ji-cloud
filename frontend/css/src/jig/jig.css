@@ -124,3 +124,39 @@ select {
   border-radius: 4px;
 
 }
+
+.color-selected::before {
+  content: '';
+  height: 68px;
+  width: 68px;
+  border-radius:50%;
+  border: solid 3px #5590fc;
+  display:flex;
+  margin-top:-7px;
+  margin-left: -7px;
+
+}
+
+.input-color-container {
+  position: relative;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border: solid 2px #ddd;
+  border-radius: 40px;
+}
+
+.input-color {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  width: 56px;
+  height: 56px;
+  border: none;
+}
+
+.input-color-label {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #fff;
+}

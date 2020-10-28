@@ -28,7 +28,6 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::{api_with_token, api_with_auth},
     storage,
@@ -157,7 +156,11 @@ impl RegisterStep3 {
                             Ok(csrf) => {
                                 storage::save_csrf_token(&csrf);
 
-                                _self.step.set(Step::Final);
+                                if _self.data.borrow().confirmed_email {
+                                    _self.step.set(Step::Final);
+                                } else {
+                                    _self.step.set(Step::ConfirmEmail);
+                                }
                                 //let route:String = Route::User(UserRoute::Profile).into();
                                 //dominator::routing::go_to_url(&route);
 
@@ -212,10 +215,10 @@ pub async fn create_user(data: RegisterData) -> Result<String, RegisterStatus> {
             .map(|id| Uuid::parse_str(&id).unwrap_throw())
             .map(|id| SubjectId(id))
             .collect(),
-        geocode: data.geocode,
+        geocode: data.location_json,
     };
 
-    let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;
+    let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&Register::PATH, &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;
 
 
     match resp {
@@ -249,7 +252,7 @@ pub struct MetaOptions {
 impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         //Probably doesn't need auth - just regular fetch from awsm_web
-        let resp:Result<GetResponse, ()> = api_with_auth::<_, _, ()>(&api_url(endpoints::meta::Get::PATH), endpoints::meta::Get::METHOD, None).await;
+        let resp:Result<GetResponse, ()> = api_with_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await;
         resp
             .map_err(|err| {
                 //log::error!("{:?}", err);

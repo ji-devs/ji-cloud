@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
-use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::prelude::*;
 use shared::{
     api::endpoints::{ApiEndpoint, user::*,},
     domain::auth::{RegisterRequest, RegisterSuccess},
@@ -23,16 +23,17 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    path::api_url,
     routes::{Route, UserRoute},
     fetch::api_with_token,
     storage,
 };
 use crate::utils::firebase::*;
 use super::super::data::*;
+use crate::utils::google_maps::*;
 
 pub struct RegisterStep2 {
     pub tos: RefCell<Option<HtmlInputElement>>,
+    pub maps_callback: RefCell<Option<Closure<dyn FnMut(String)>>>,
     pub status: Mutable<Option<RegisterStatus>>,
     pub step: Rc<Mutable<Step>>,
     pub data: Rc<RefCell<RegisterData>>,
@@ -42,6 +43,7 @@ impl RegisterStep2 {
     pub fn new(step:Rc<Mutable<Step>>, data: Rc<RefCell<RegisterData>>) -> Rc<Self> {
         let _self = Rc::new(Self { 
             tos: RefCell::new(None),
+            maps_callback: RefCell::new(None),
             status: Mutable::new(None),
             data,
             step
@@ -73,8 +75,8 @@ impl RegisterStep2 {
                         tos.report_validity();
                     } else if data.lang.is_none() {
                         _self.status.set(Some(RegisterStatus::Language));
-                    } else if data.geocode.is_none() {
-                        _self.status.set(Some(RegisterStatus::Geocode));
+                    } else if data.location_json.is_none() {
+                        _self.status.set(Some(RegisterStatus::Location));
                     } else {
                         _self.step.set(Step::Three);
                     }
@@ -91,19 +93,27 @@ impl RegisterStep2 {
                 })
             })
 
-            .with_data_id!("geocode" => HtmlInputElement, {
-                .with_node!(input => {
-                    .event(clone!(_self => move |_: events::Change| { 
+            .with_data_id!("location" => HtmlInputElement, {
+                .after_inserted(clone!(_self => move |elem| {
+
+                    let cb = Closure::wrap(Box::new(clone!(_self => move |location_json:String| {
                         let mut data = _self.data.borrow_mut();
-                        let value = input.value();
-                        data.geocode = {
-                            if value.is_empty() {
-                                None
-                            } else {
-                                Some(value)
-                            }
-                        };
-                    }))
+                        if location_json == "" {
+                            data.location_json = None;
+                        } else {
+                            data.location_json = Some(location_json);
+                        }
+                    })) as Box<dyn FnMut(String)>);
+
+                    //doesn't actually have to be unsafe but rust-analyzer doesn't like it
+                    unsafe { bind_google_maps(elem, &cb); }
+
+                    *_self.maps_callback.borrow_mut() = Some(cb);
+                }))
+
+                .event(|_:events::Focus| {
+                    //doesn't actually have to be unsafe but rust-analyzer doesn't like it
+                    unsafe { geolocate(); }
                 })
             })
 
@@ -136,49 +146,3 @@ impl RegisterStep2 {
 
 }
 
-
-//Actions
-pub async fn create_user(
-    token: String,
-    username: String,
-    given_name: String,
-    family_name: String,
-    email: String,
-) -> Result<String, RegisterStatus> {
-    let req = RegisterRequest {
-        username,
-        email,
-        given_name,
-        family_name,
-        over_18: true,
-        language: "en".to_string(),
-        locale: "en".to_string(),
-        timezone: chrono_tz::Tz::Asia__Jerusalem,
-        opt_into_edu_resources: true,
-        organization: Some("ji".to_string()),
-        affiliations: vec![],
-        age_ranges: vec![],
-        subjects: vec![],
-        geocode: None,
-    };
-
-    let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&api_url(Register::PATH), &token, Register::METHOD, Some(req)).await;
-
-
-    match resp {
-        Ok(resp) => match resp {
-            RegisterSuccess::Signin(csrf) => Ok(csrf),
-            RegisterSuccess::ConfirmEmail => Err(RegisterStatus::ConfirmEmail)
-        }, 
-        Err(err) => {
-            let status = match err {
-                RegisterError::TakenId => RegisterStatus::IdExists,
-                RegisterError::TakenEmail => RegisterStatus::EmailExists,
-                RegisterError::EmptyDisplayName => RegisterStatus::EmptyUserName,
-                _ => RegisterStatus::Technical
-            };
-
-            Err(status)
-        }
-    }
-}
