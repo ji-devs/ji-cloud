@@ -27,7 +27,6 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
- "serde_qs",
  "shared",
  "simple-html-template",
  "url",

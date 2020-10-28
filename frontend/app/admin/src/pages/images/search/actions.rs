@@ -60,10 +60,5 @@ async fn _search_images_api(query:String, page: Option<u32>, is_published: Optio
         is_premium: None,
     };
 
-    //TODO - maybe make query / serde_qs part of basic fetch options
-    //since this mistake is hard to catch when forgotten
-    let query = serde_qs::to_string(&req).unwrap_throw();
-
-    let path = api_url(&format!("{}?{}", Search::PATH, query)); 
-    api_with_auth::<_,_,()>(&path, Search::METHOD, None).await
+    api_with_auth(&api_url(Search::PATH), Search::METHOD, Some(req)).await
 }

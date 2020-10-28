@@ -88,11 +88,7 @@ pub async fn load_categories() -> Result < <Get as ApiEndpoint>::Res, <Get as Ap
         scope: Some(CategoryTreeScope::Decendants)
     };
     
-    let query = serde_qs::to_string(&req).unwrap_throw();
-
-    let path = api_url(&format!("{}?{}", Get::PATH, query)); 
-
-    api_with_auth::<_,_,()>(&path, Get::METHOD, None).await
+    api_with_auth(&api_url(Get::PATH), Get::METHOD, Some(req)).await
 }
 
 async fn _create(name:String, parent_id: Option<&str>) -> Result < <Create as ApiEndpoint>::Res, <Create as ApiEndpoint>::Err> {
