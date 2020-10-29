@@ -62,6 +62,7 @@ pub async fn run(
             .configure(endpoints::image::configure)
             .configure(endpoints::meta::configure)
             .configure(endpoints::jig::configure)
+            .configure(endpoints::module::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

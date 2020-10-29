@@ -1,53 +1,53 @@
 use crate::{
     api::Method,
     domain::{
-        jig::{CreateRequest, GetResponse, JigId, UpdateRequest},
+        jig::{
+            module::{CreateRequest, GetResponse, UpdateRequest},
+            ModuleId,
+        },
         CreateResponse,
     },
-    error::{
-        jig::{CreateError, UpdateError},
-        DeleteError, GetError,
-    },
+    error::{CreateError, DeleteError, GetError, UpdateError},
 };
 
 use super::ApiEndpoint;
 
-/// Get a JIG by ID.
+/// Get a Module by ID.
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = GetResponse;
     type Err = GetError;
-    const PATH: &'static str = "/v1/jig/{id}";
+    const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Get;
 }
 
-/// Create a JIG.
+/// Create a Module.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateRequest;
-    type Res = CreateResponse<JigId>;
+    type Res = CreateResponse<ModuleId>;
     type Err = CreateError;
-    const PATH: &'static str = "/v1/jig";
+    const PATH: &'static str = "/v1/module";
     const METHOD: Method = Method::Post;
 }
 
-/// Update a JIG.
+/// Update a Module.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = UpdateRequest;
     type Res = ();
     type Err = UpdateError;
-    const PATH: &'static str = "/v1/jig/{id}";
+    const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Patch;
 }
 
-/// Delete a JIG.
+/// Delete a Moduule.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
     type Err = DeleteError;
-    const PATH: &'static str = "/v1/jig/{id}";
+    const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Delete;
 }

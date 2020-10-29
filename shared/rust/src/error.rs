@@ -19,6 +19,17 @@ pub mod category;
 pub mod image;
 pub mod jig;
 
+/// Stand-in for the `!` (`Never`) type, while waiting for it to be stablized.
+#[derive(Serialize, Deserialize)]
+pub enum Infallible {}
+
+#[cfg(feature = "backend")]
+impl From<Infallible> for actix_web::Error {
+    fn from(e: Infallible) -> Self {
+        match e {}
+    }
+}
+
 /// User errors.
 pub mod user {
 
@@ -108,4 +119,62 @@ impl From<DeleteError> for actix_web::Error {
     }
 }
 
-from_anyhow![GetError, DeleteError];
+// fixme: (if this breaking change is ever possible): Use a `CommonError` type
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
+/// Error occurred while creating a Resource.
+pub enum CreateError<T = Infallible> {
+    /// User has insufficient permissions to create the Resource.
+    Forbidden,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
+
+    /// Some more specific error has occured (see the documentation for the specific `T`)
+    Extra(T),
+}
+
+#[cfg(feature = "backend")]
+impl<T: Into<actix_web::Error>> From<CreateError<T>> for actix_web::Error {
+    fn from(e: CreateError<T>) -> actix_web::Error {
+        match e {
+            CreateError::InternalServerError(e) => anyhow_to_ise(e),
+            CreateError::Forbidden => actix_web::HttpResponse::Forbidden().into(),
+            CreateError::Extra(e) => e.into(),
+        }
+    }
+}
+
+// fixme: (if this breaking change is ever possible): Use a `CommonError` type
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
+/// Error occurred while updating a Resource.
+pub enum UpdateError<T = Infallible> {
+    /// The Resource was not found.
+    NotFound,
+
+    /// User has insufficient permissions to update the Resource.
+    Forbidden,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
+
+    /// Some more specific error has occured (see the documentation for the specific `T`)
+    Extra(T),
+}
+
+#[cfg(feature = "backend")]
+impl<T: Into<actix_web::Error>> From<UpdateError<T>> for actix_web::Error {
+    fn from(e: UpdateError<T>) -> actix_web::Error {
+        match e {
+            UpdateError::InternalServerError(e) => anyhow_to_ise(e),
+            UpdateError::NotFound => actix_web::HttpResponse::NotFound().into(),
+            UpdateError::Forbidden => actix_web::HttpResponse::Forbidden().into(),
+            UpdateError::Extra(e) => e.into(),
+        }
+    }
+}
+
+from_anyhow![GetError, DeleteError, CreateError, UpdateError];

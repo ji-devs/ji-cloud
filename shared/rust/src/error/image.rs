@@ -2,9 +2,9 @@
 
 #[cfg(feature = "backend")]
 use super::anyhow_to_ise;
-use crate::domain::meta::MetaKind;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+use crate::domain::meta::MetaKind;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -31,6 +31,7 @@ impl From<SearchError> for actix_web::Error {
     }
 }
 
+// fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
 #[non_exhaustive]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating an image.
