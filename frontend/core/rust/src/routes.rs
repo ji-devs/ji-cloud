@@ -4,6 +4,7 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Route {
     NotFound,
+    NoAuth,
     User(UserRoute),
     Admin(AdminRoute),
     Jig(JigRoute),
@@ -11,10 +12,19 @@ pub enum Route {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UserRoute {
-    Profile,
+    Profile(ProfileSection),
     Signin,
     Register,
+    SendEmailConfirmation,
+    GotEmailConfirmation,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ProfileSection {
+    Landing,
+    ChangeEmail
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AdminRoute {
     Categories,
@@ -52,9 +62,12 @@ impl Route {
         log::info!("{:?}", paths);
 
         match paths {
-            ["user", "profile"] => Self::User(UserRoute::Profile),
+            ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
+            ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "signin"] => Self::User(UserRoute::Signin),
             ["user", "register"] => Self::User(UserRoute::Register),
+            ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
+            ["user", "got-email-confirmation"] => Self::User(UserRoute::GotEmailConfirmation),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "images"] => Self::Admin(AdminRoute::Images),
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
@@ -63,6 +76,8 @@ impl Route {
             ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
             ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
             ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
+            ["no-auth"] => Self::NoAuth,
+
             _ => Self::NotFound
         }
     }
@@ -72,11 +87,16 @@ impl Route {
 impl From<Route> for String {
     fn from(route:Route) -> Self {
         match route {
+            Route::NoAuth => "/no-auth".to_string(),
+
             Route::User(route) => {
                 match route {
-                    UserRoute::Profile => "/user/profile".to_string(),
+                    UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
+                    UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
                     UserRoute::Signin => "/user/signin".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
+                    UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
+                    UserRoute::GotEmailConfirmation => "/user/got-email-confirmation".to_string(),
                 }
             },
             Route::Admin(route) => {

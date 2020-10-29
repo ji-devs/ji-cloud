@@ -89,7 +89,7 @@ impl RemoteTarget {
 
     pub const fn pages_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8081",
+            Self::Local => "http://localhost:10001",
             Self::Sandbox => "https://sandbox.jicloud.org",
             Self::Release => "https://jicloud.org",
         }

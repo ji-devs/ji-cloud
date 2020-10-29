@@ -8,31 +8,37 @@
 */
 
 export function init_firebase(dev) {
+    return new Promise((resolve, reject) => {
+        const firebaseDevConfig = {
+            apiKey: "AIzaSyALsii1P1nKENhgszj1tz8pRqCXct3eck0",
+            authDomain: "ji-cloud-developer-sandbox.firebaseapp.com",
+            databaseURL: "https://ji-cloud-developer-sandbox.firebaseio.com",
+            projectId: "ji-cloud-developer-sandbox",
+            storageBucket: "ji-cloud-developer-sandbox.appspot.com",
+            messagingSenderId: "735837525944",
+            appId: "1:735837525944:web:10e1fc18d5d10f04c3614d"
+        };
 
-    const firebaseDevConfig = {
-        apiKey: "AIzaSyALsii1P1nKENhgszj1tz8pRqCXct3eck0",
-        authDomain: "ji-cloud-developer-sandbox.firebaseapp.com",
-        databaseURL: "https://ji-cloud-developer-sandbox.firebaseio.com",
-        projectId: "ji-cloud-developer-sandbox",
-        storageBucket: "ji-cloud-developer-sandbox.appspot.com",
-        messagingSenderId: "735837525944",
-        appId: "1:735837525944:web:10e1fc18d5d10f04c3614d"
-    };
-
-    const firebaseProdConfig = {
-        apiKey: "AIzaSyB1aDTWI5nez8SJe6oGp-o2LErxAEDSktQ",
-        authDomain: "ji-cloud.firebaseapp.com",
-        databaseURL: "https://ji-cloud.firebaseio.com",
-        projectId: "ji-cloud",
-        storageBucket: "ji-cloud.appspot.com",
-        messagingSenderId: "516631917755",
-        appId: "1:516631917755:web:842b4c92c60041dd5ca59e",
-        measurementId: "G-4V46KRQZPB"
-    };
+        const firebaseProdConfig = {
+            apiKey: "AIzaSyB1aDTWI5nez8SJe6oGp-o2LErxAEDSktQ",
+            authDomain: "ji-cloud.firebaseapp.com",
+            databaseURL: "https://ji-cloud.firebaseio.com",
+            projectId: "ji-cloud",
+            storageBucket: "ji-cloud.appspot.com",
+            messagingSenderId: "516631917755",
+            appId: "1:516631917755:web:842b4c92c60041dd5ca59e",
+            measurementId: "G-4V46KRQZPB"
+        };
 
 
-    firebase.initializeApp(dev ? firebaseDevConfig : firebaseProdConfig);
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+        firebase.initializeApp(dev ? firebaseDevConfig : firebaseProdConfig);
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+
+        firebase.auth().onAuthStateChanged((user) => {
+            console.log(`firebase user exists: ${user != null}`);
+            resolve(); 
+        });
+    });
 }
 
 
@@ -62,7 +68,11 @@ function complete_register(promise) {
                 }))
         )
         .then(result => {
-            firebase.auth().signOut();
+            //ideally we would sign out - but "confirm email"
+            //depends on active firebase id
+            //would be better to move that to backend and signout here
+            //
+            //firebase.auth().signOut();
             return result; 
         });
 }
@@ -80,9 +90,10 @@ export function firebase_signin_email(email, password) {
 }
 
 function complete_signin(promise) {
+
     return promise
         .then(({user}) => 
-            user.emailVerified 
+            user.emailVerified && true == false
             ? user 
             : Promise.reject({
                 code: "internal/confirm-email"
@@ -90,7 +101,12 @@ function complete_signin(promise) {
         )
         .then(user => user.getIdToken())
         .then(idToken => {
-            firebase.auth().signOut();
+
+            //ideally we would sign out - but "confirm email"
+            //depends on active firebase id
+            //would be better to move that to backend and signout here
+            //
+            //firebase.auth().signOut();
             return idToken
         });
 }
@@ -102,17 +118,25 @@ export function firebase_forgot_password(email) {
 }
 
 export function firebase_send_confirmation_email(url) {
-    return firebase
-        .auth()
-        .currentUser
-        .sendEmailVerification({ url })
+    const currentUser = firebase.auth().currentUser;
+    if(currentUser) {
+        return currentUser.sendEmailVerification({ url });
+    } else {
+        return Promise.reject({
+            code: "internal/no-user"
+        });
+    }
 }
 
 export function firebase_change_email(email) {
-    return firebase
-        .auth()
-        .currentUser
-        .updateEmail(email)
+    const currentUser = firebase.auth().currentUser;
+    if(currentUser) {
+        return currentUser.updateEmail(email);
+    } else {
+        return Promise.reject({
+            code: "internal/no-user"
+        });
+    }
 }
 function getCookie(name) {
   var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');

@@ -1,4 +1,4 @@
-use core::routes::{Route, UserRoute};
+use core::routes::*;
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
@@ -9,7 +9,8 @@ use futures_signals::{
 use dominator::{Dom, html};
 use crate::pages::signin::SigninPage;
 use crate::pages::register::RegisterPage;
-use crate::pages::profile::ProfilePage;
+use crate::pages::profile::{ProfilePage, ProfileEmailChangePage};
+use crate::pages::email_confirmation::{SendEmailConfirmationPage, GotEmailConfirmationPage};
 
 pub struct Router {
 }
@@ -32,7 +33,10 @@ impl Router {
                         match route {
                             UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
                             UserRoute::Register => Some(RegisterPage::render(RegisterPage::new())),
-                            UserRoute::Profile => Some(ProfilePage::render(ProfilePage::new())),
+                            UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render(ProfilePage::new())),
+                            UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),
+                            UserRoute::SendEmailConfirmation => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new())),
+                            UserRoute::GotEmailConfirmation => Some(GotEmailConfirmationPage::render(GotEmailConfirmationPage::new())),
                             _ => None
                         }
                     }

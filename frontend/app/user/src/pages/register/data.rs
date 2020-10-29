@@ -9,7 +9,6 @@ pub enum Step {
     One,
     Two,
     Three,
-    ConfirmEmail,
     Final
 }
 

@@ -4,7 +4,7 @@ use shared::{
     error::user::NoSuchUserError,
 };
 use core::{
-    routes::{Route, UserRoute},
+    routes::*,
     fetch::api_with_token,
     storage,
 };
@@ -19,7 +19,7 @@ use futures::future::ready;
 //temp
 use futures::future::poll_fn;
 use futures::task::{Context, Poll};
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SigninStatus {
     Busy,
     NoSuchUser,
@@ -49,11 +49,16 @@ impl SigninStatus {
         match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
             Ok(err) => {
                 let code:&str = err.code.as_ref();
+                log::info!("{}", code);
                 let status = match code {
                     "auth/wrong-password" => Self::BadPassword,
                     "auth/user-not-found" => Self::NoSuchUser,
                     "auth/invalid-email" => Self::InvalidEmail,
-                    "internal/confirm-email" => Self::ConfirmEmail,
+                    "internal/confirm-email" => {
+                        let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                        dominator::routing::go_to_url(&route);
+                        Self::ConfirmEmail
+                    },
                     _ => {
                         log::warn!("firebase error: {}", code);
                         Self::UnknownFirebase
@@ -72,7 +77,7 @@ impl SigninStatus {
 pub fn do_success(page:&SigninPage, csrf:String) {
     storage::save_csrf_token(&csrf);
 
-    let route:String = Route::User(UserRoute::Profile).into();
+    let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
     dominator::routing::go_to_url(&route);
 
     ///generally speaking this kind of thing isn't necessary
@@ -108,11 +113,12 @@ async fn signin_firebase(token_promise:js_sys::Promise, error_is_cancel:bool) ->
             }
         },
         Err(err) => {
-            if error_is_cancel {
-                Err(None)
+            let err_status = SigninStatus::from_firebase_err(err);
+            if err_status == SigninStatus::ConfirmEmail || !error_is_cancel {
+                Err(Some(err_status))
             } else {
-                Err(Some(SigninStatus::from_firebase_err(err)))
-            }
+                Err(None)
+            } 
         }
     }
 }

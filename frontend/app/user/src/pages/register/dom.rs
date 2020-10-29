@@ -19,7 +19,7 @@ use core::{
     storage,
 };
 
-use super::sections::{start::RegisterStart, step1::RegisterStep1, step2::RegisterStep2, step3::RegisterStep3, misc::{RegisterConfirmEmail, RegisterFinal}};
+use super::sections::{start::RegisterStart, step1::RegisterStep1, step2::RegisterStep2, step3::RegisterStep3, misc::RegisterFinal};
 use super::data::*;
 
 pub struct RegisterPage {
@@ -47,7 +47,6 @@ impl RegisterPage  {
                     Step::One => RegisterStep1::render(RegisterStep1::new(_self.step.clone(), _self.data.clone())),
                     Step::Two=> RegisterStep2::render(RegisterStep2::new(_self.step.clone(), _self.data.clone())),
                     Step::Three=> RegisterStep3::render(RegisterStep3::new(_self.step.clone(), _self.data.clone())),
-                    Step::ConfirmEmail=> RegisterConfirmEmail::render(RegisterConfirmEmail::new(_self.step.clone(), _self.data.clone())),
                     Step::Final=> RegisterFinal::render(RegisterFinal::new(_self.step.clone(), _self.data.clone())),
                 })
             })))

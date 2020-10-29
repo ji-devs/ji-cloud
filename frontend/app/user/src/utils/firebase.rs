@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
-    pub fn init_firebase(dev:bool);
+    pub fn init_firebase(dev:bool) -> Promise;
 
     //auth docs in general: https://firebase.google.com/docs/reference/js/firebase.auth.Auth
     pub fn firebase_signin_email(email:&str, password:&str) -> Promise;
@@ -40,8 +40,4 @@ pub struct EmailRegisterInfo {
     pub token: String,
     pub firebase_id: String,
     pub email_verified: bool,
-}
-
-pub fn setup(settings:&Settings) {
-    unsafe { init_firebase(settings.firebase_dev); }
 }

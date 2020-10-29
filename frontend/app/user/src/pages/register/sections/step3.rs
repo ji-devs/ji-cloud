@@ -159,7 +159,8 @@ impl RegisterStep3 {
                                 if _self.data.borrow().confirmed_email {
                                     _self.step.set(Step::Final);
                                 } else {
-                                    _self.step.set(Step::ConfirmEmail);
+                                    let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                                    dominator::routing::go_to_url(&route);
                                 }
                                 //let route:String = Route::User(UserRoute::Profile).into();
                                 //dominator::routing::go_to_url(&route);
