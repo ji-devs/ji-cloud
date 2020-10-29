@@ -93,7 +93,7 @@ function complete_signin(promise) {
 
     return promise
         .then(({user}) => 
-            user.emailVerified && true == false
+            user.emailVerified
             ? user 
             : Promise.reject({
                 code: "internal/confirm-email"
