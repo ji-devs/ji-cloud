@@ -2,7 +2,6 @@ import {renderTemplate as tmpl} from "@utils/template";
 import register1 from "@templates/user/register/register-1.html";
 import register2 from "@templates/user/register/register-2.html";
 import register3 from "@templates/user/register/register-3.html";
-import registerSentEmail from "@templates/user/register/register-sent-email.html";
 import registerFinal from "@templates/user/register/register-final.html";
 import registerStart from "@templates/user/register/register-start.html";
 
@@ -27,11 +26,6 @@ export const Step2 = () => {
 
 export const Step3 = () => {
     const page = tmpl(register3);
-    return page;
-}
-
-export const SentEmail = () => {
-    const page = tmpl(registerSentEmail);
     return page;
 }
 
