@@ -65,7 +65,7 @@ select
     array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
     array((select category_id from image_category where image_id = image_metadata.id)) as "categories!"
 from image_metadata
-where last_synced_at < updated_at is not false and updated_at <= $1 is not false
+where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
 limit 100
 "#, &sync_time
         )
