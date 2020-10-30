@@ -6,7 +6,7 @@ use algolia::{
 };
 use chrono::Utc;
 use core::settings::AlgoliaSettings;
-use futures::TryStreamExt;
+use futures::{future::BoxFuture, TryStreamExt};
 use serde::Serialize;
 use shared::domain::{
     category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
@@ -171,7 +171,92 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
+#[derive(Copy, Clone, Debug)]
+enum ResyncKind {
+    None,
+    Complete,
+}
+
+fn algolia_bad_batch_object<'a>(
+    client: &'a Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    Box::pin(async move {
+        client.delete_object(index, "batch").await?;
+        Ok(())
+    })
+}
+
+const ALGOLIA_INDEXING_MIGRATIONS: &'static [(
+    ResyncKind,
+    for<'a> fn(&'a Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
+)] = &[(ResyncKind::Complete, algolia_bad_batch_object)];
+
+const ALGOLIA_INDEXING_VERSION: i16 = ALGOLIA_INDEXING_MIGRATIONS.len() as i16;
+
 impl AlgoliaClient {
+    pub async fn migrate(&self, pool: &PgPool) -> anyhow::Result<()> {
+        // We can't exactly access algolia if we don't have a client.
+        let inner = with_client!(self.inner; ());
+
+        let mut txn = pool.begin().await?;
+
+        let algolia_version = sqlx::query!(
+            r#"
+with new_row as (
+    insert into "settings" (algolia_index_name) values($1) on conflict(singleton) do nothing returning algolia_index_version    
+)
+select algolia_index_version as "algolia_index_version!" from new_row
+union
+select algolia_index_version as "algolia_index_version!" from "settings" where algolia_index_name = $1
+"#, &self.index,
+        )
+        .fetch_optional(&mut txn)
+        .await?
+        .ok_or_else(|| anyhow::anyhow!("algolia index mismatch (error is to avoid messing up algolia indexes by using already existing dbs, unfortunately no checking can be done to ensure that it works the other way around.)"))?
+        .algolia_index_version;
+
+        if algolia_version == ALGOLIA_INDEXING_VERSION {
+            return Ok(());
+        }
+
+        let migrations_to_run = &ALGOLIA_INDEXING_MIGRATIONS[(algolia_version as usize)..];
+
+        for (_, updater) in migrations_to_run {
+            updater(inner, &self.index).await?;
+        }
+
+        // currently this can only be "no resync" or "complete resync" but eventually
+        // we might want to be able to "resync everything that's only had an initial sync" or "everything that has had an update"
+        let resync_mask =
+            migrations_to_run
+                .iter()
+                .fold(ResyncKind::None, |acc, &(curr, _)| match (acc, curr) {
+                    (_, ResyncKind::Complete) | (ResyncKind::Complete, _) => ResyncKind::Complete,
+                    _ => ResyncKind::None,
+                });
+
+        match resync_mask {
+            ResyncKind::Complete => {
+                sqlx::query!("update image_metadata set last_synced_at = null")
+                    .execute(&mut txn)
+                    .await?;
+            }
+            ResyncKind::None => {}
+        }
+
+        sqlx::query!(
+            r#"update "settings" set algolia_index_version = $1"#,
+            ALGOLIA_INDEXING_VERSION
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        Ok(())
+    }
+
     async fn batch_images(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = with_client!(self.inner; vec![])
             .batch(&self.index, &batch)
