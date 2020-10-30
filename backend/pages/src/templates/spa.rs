@@ -26,16 +26,24 @@ struct SpaPageInfo {
     app_js: String,
     app_css: String,
     firebase: bool,
+    google_maps_url: Option<String>,
     local_dev: bool,
 }
 
 fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
+    let google_maps_url = match spa {
+        // todo: `Cow::borrowed` ('static)
+        SpaPage::User => Some(settings.remote_target().google_maps_url().to_owned()),
+        _ => None,
+    };
+
     let info = SpaPageInfo {
         app_js: settings
             .remote_target()
             .spa_url(spa.as_str(), "js/index.js"),
         app_css: settings.remote_target().css_url(true),
         firebase: matches!(spa, SpaPage::User),
+        google_maps_url,
         local_dev: settings.is_local(),
     };
 
@@ -48,14 +56,10 @@ pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result
     spa_template(&settings, SpaPage::User)
 }
 
-pub async fn admin_template(
-    settings: Data<RuntimeSettings>,
-) -> actix_web::Result<HttpResponse> {
+pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Admin)
 }
 
-pub async fn jig_template(
-    settings: Data<RuntimeSettings>,
-) -> actix_web::Result<HttpResponse> {
+pub async fn jig_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Jig)
 }
