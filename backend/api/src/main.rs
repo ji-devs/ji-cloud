@@ -33,6 +33,9 @@ async fn main() -> anyhow::Result<()> {
         (runtime_settings, jwk_verifier, s3, algolia, db_pool)
     };
 
+    // todo: find a better place for this...
+    algolia.migrate(&db_pool).await?;
+
     let algolia_syncer = algolia::Updater {
         db: db_pool.clone(),
         algolia_client: algolia.clone(),
