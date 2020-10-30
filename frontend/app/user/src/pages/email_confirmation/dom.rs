@@ -11,7 +11,10 @@ use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::{templates, firebase::*};
-use awsm_web::dom::*;
+use awsm_web::{
+    dom::*,
+    loaders::helpers::timeout
+};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
@@ -27,7 +30,8 @@ pub struct SendEmailConfirmationPage {
 pub enum Status {
     FirstSending,
     AdditionalSending,
-    Sent,
+    SentBanner,
+    SentFinished,
     NoUser,
     UnknownFirebaseError,
     TechnicalError
@@ -70,7 +74,7 @@ impl SendEmailConfirmationPage {
         let _self_clone = _self.clone();
 
         _self_clone.loader.load(async move {
-            _self.status.set(send_email_confirmation().await);
+            send_email_confirmation(_self.clone()).await;
         });
 
         _self_clone
@@ -88,6 +92,9 @@ impl SendEmailConfirmationPage {
                 } else {
                     Some(
                         elem!(templates::send_email_confirmation(), {
+                            .with_data_id!("sent-notification", {
+                                .apply_if(*status != Status::SentBanner, |dom| dom.class("hidden"))
+                            })
                             .with_data_id!("status", {
                                 .text({
                                     match status {
@@ -99,10 +106,11 @@ impl SendEmailConfirmationPage {
                                 })
                             })
                             .with_data_id!("resend-email", {
+                                .apply_if(*status == Status::SentBanner, |dom| dom.class("hidden"))
                                 .event(clone!(_self => move |evt:events::Click| {
                                     _self.loader.load(clone!(_self => async move {
                                         _self.status.set(Status::AdditionalSending);
-                                        _self.status.set(send_email_confirmation().await);
+                                        send_email_confirmation(_self.clone()).await;
                                     }));
                                 }))
                             })
@@ -121,16 +129,36 @@ impl SendEmailConfirmationPage {
 
 }
 
-async fn send_email_confirmation() -> Status {
+async fn send_email_confirmation(dom:Rc<SendEmailConfirmationPage>) {
 
     let base_url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url() };
     let route:String = Route::User(UserRoute::GotEmailConfirmation).into();
     let url = format!("{}{}", base_url, route);
     let token_promise = unsafe { firebase_send_confirmation_email(&url) };
     match JsFuture::from(token_promise).await {
-        Ok(_) => Status::Sent,
-        Err(err) => Status::from_firebase_err(err)
+        Ok(_) => {
+            dom.status.set(Status::SentBanner);
+            //TODO: FIXME!
+            timeout(5_000, async { }).await;
+            dom.status.set(Status::SentFinished);
+        },
+        Err(err) => {
+            dom.status.set(Status::from_firebase_err(err));
+        }
     }
+
+    /*
+    dom.status.set(Status::SentBanner);
+    /*
+    TimeoutFuture::new(3_000, clone!(dom => move || {
+        dom.status.set(Status::SentFinished);
+    }));
+    */
+
+    timeout(5_000, async { }).await;
+
+    dom.status.set(Status::SentFinished);
+    */
 }
 
 pub struct GotEmailConfirmationPage {

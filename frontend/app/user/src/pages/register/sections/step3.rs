@@ -154,9 +154,9 @@ impl RegisterStep3 {
                         //TODO - get selected from HashSets
                         match create_user(_self.data.borrow().clone()).await {
                             Ok(csrf) => {
-                                storage::save_csrf_token(&csrf);
 
                                 if _self.data.borrow().confirmed_email {
+                                    storage::save_csrf_token(&csrf);
                                     _self.step.set(Step::Final);
                                 } else {
                                     let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
