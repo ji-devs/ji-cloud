@@ -13,13 +13,13 @@ use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::{templates, firebase::*};
 use awsm_web::{
     dom::*,
-    loaders::helpers::timeout
 };
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::routes::*;
 use shared::domain::user::UserProfile;
+use gloo_timers::future::TimeoutFuture;
 
 pub struct SendEmailConfirmationPage {
     pub status: Mutable<Status>,
@@ -130,7 +130,6 @@ impl SendEmailConfirmationPage {
 }
 
 async fn send_email_confirmation(dom:Rc<SendEmailConfirmationPage>) {
-
     let base_url = unsafe { SETTINGS.get_unchecked().remote_target.pages_url() };
     let route:String = Route::User(UserRoute::GotEmailConfirmation).into();
     let url = format!("{}{}", base_url, route);
@@ -138,8 +137,7 @@ async fn send_email_confirmation(dom:Rc<SendEmailConfirmationPage>) {
     match JsFuture::from(token_promise).await {
         Ok(_) => {
             dom.status.set(Status::SentBanner);
-            //TODO: FIXME!
-            timeout(5_000, async { }).await;
+            TimeoutFuture::new(2_000).await;
             dom.status.set(Status::SentFinished);
         },
         Err(err) => {
@@ -147,18 +145,6 @@ async fn send_email_confirmation(dom:Rc<SendEmailConfirmationPage>) {
         }
     }
 
-    /*
-    dom.status.set(Status::SentBanner);
-    /*
-    TimeoutFuture::new(3_000, clone!(dom => move || {
-        dom.status.set(Status::SentFinished);
-    }));
-    */
-
-    timeout(5_000, async { }).await;
-
-    dom.status.set(Status::SentFinished);
-    */
 }
 
 pub struct GotEmailConfirmationPage {

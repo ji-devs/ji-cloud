@@ -31,6 +31,7 @@ dependencies = [
  "dominator_helpers",
  "futures",
  "futures-signals",
+ "gloo-timers",
  "htmlescape",
  "js-sys",
  "jsonwebtoken",
@@ -56,9 +57,9 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "awsm_web"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bb9f8af4f87b741d8a22f49a546497eaae243c7879e3813b9dbfb4ed64b0369"
+checksum = "d23e58d99194a77aee9732ce657f45369c4f3270e1827479923ca083500eb4cd"
 dependencies = [
  "discard",
  "futures",

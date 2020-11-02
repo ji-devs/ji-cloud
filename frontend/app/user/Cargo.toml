@@ -59,8 +59,9 @@ serde_json = "1.0.59"
 futures = "0.3.7"
 log = "0.4.11"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.6.4", features = ["dom", "loaders"] }
+awsm_web = { version = "0.6.5", features = ["dom", "loaders"] }
 discard = "1.0.4"
+gloo-timers = { version = "^0.2", features = ["futures"]}
 
 #SPA specific
 jsonwebtoken = "7.2.0"
