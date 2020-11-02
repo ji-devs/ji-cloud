@@ -95,7 +95,7 @@ pub struct RegisterRequest {
     /// The user's location
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geocode: Option<String>,
+    pub location: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
