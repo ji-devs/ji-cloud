@@ -50,7 +50,7 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
         created_at,
         updated_at,
         organization,
-        geocode,
+        location,
         array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
         array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
         array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
@@ -88,7 +88,7 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
         created_at: row.created_at,
         updated_at: row.updated_at,
         organization: row.organization,
-        geocode: row.geocode,
+        location: row.location,
         subjects: row.subjects.into_iter().map(SubjectId).collect(),
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),
@@ -125,9 +125,9 @@ pub async fn register(
     let user_id = sqlx::query!(
         r#"
 INSERT INTO "user" 
-    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) 
+    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
 VALUES 
-    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)
+    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 returning id
         "#,
         id,
@@ -141,6 +141,7 @@ returning id
         req.timezone.name(),
         req.opt_into_edu_resources,
         req.organization.as_deref(),
+        req.location.as_ref(),
     )
     .fetch_one(&mut txn)
     .await
