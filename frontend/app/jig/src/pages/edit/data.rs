@@ -1,3 +1,6 @@
+pub type Id = String;
+use shared::domain::jig::ModuleKind;
+
 //Probably going to move to shared or core
 //
 #[derive(Clone, Debug)]
@@ -16,26 +19,6 @@ pub struct Module {
     pub kind: Option<ModuleKind>, 
 }
 
-pub(super) mod module_service {
-    use super::*;
-
-    pub async fn add() -> Module {
-        log::warn!("TODO - add new module!"); 
-        Module {
-            id: "blah_blah".to_string(),
-            kind: None, 
-        }
-    }
-    pub async fn delete(id:Id) {
-        log::warn!("TODO - delete module!"); 
-    }
-    pub async fn reorder(from:usize, to:usize) {
-        log::warn!("TODO - reorder module!"); 
-    }
-    pub async fn change_kind(id:Id, kind:ModuleKind) {
-        log::warn!("TODO - change module kind!"); 
-    }
-}
 impl Jig {
     pub async fn load(id:Id) -> Self {
         //TODO - really load it from backend
@@ -65,32 +48,14 @@ impl Jig {
                     id: x.to_string(),
                     kind: {
                         if x == "4" {
-                            //Some(ModuleKind::MemoryGame)
-                            None
+                            Some(ModuleKind::MemoryGame)
+                            //None
                         } else {
                             None
                         }
                     }
                 })
                 .collect()
-        }
-    }
-}
-
-pub type Id = String;
-
-#[derive(Clone, Copy, Debug)]
-pub enum ModuleKind{
-    Poster,
-    MemoryGame,
-}
-
-impl ModuleKind{
-    pub fn from_str(s:&str) -> Option<Self> {
-        match s {
-            "poster" => Some(Self::Poster),
-            "memory_game" => Some(Self::MemoryGame),
-            _ => None
         }
     }
 }

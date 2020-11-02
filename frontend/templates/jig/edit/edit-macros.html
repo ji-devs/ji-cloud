@@ -3,23 +3,22 @@
 <div draggable="true" class="h-160 border-solid border-jidarkgrey border-b relative p-4">
 
   <div data-id="menu"></div>
-  <img data-id="menu-btn" src="{{MEDIA_UI}}/icn-menu-jig.svg" alt="" class="absolute right-10 top-10 cursor-pointer">
+  <img data-id="menu-btn" src="{{MEDIA_UI}}/icn-menu-jig.svg" alt="" class="absolute right-10 top-10 cursor-pointer z-10">
 
   {% if is_left %}
   <img data-id="add-btn" src="{{MEDIA_UI}}/Link_Left.svg" alt="" class="absolute top-95 right-115 z-10 cursor-pointer">
   <div class="absolute right-45 z-20">
-    {% else %}
-    <img data-id="add-btn" src="{{MEDIA_UI}}/Link_Right.svg" alt="" class="absolute top-95 right-50 z-10 cursor-pointer">
-    <div class="absolute right-20 top-0 z-20">
-      {% endif %}
-      <div class="relative">
-        <img data-id="img" src="{{MEDIA_UI}}/JIG_Gear@2x.png" class="" alt="">
-        <p data-id="label" class="hidden absolute text-center text-white top-20 left-25">Drag <br>activity <br>here</p>
-      </div>
+  {% else %}
+  <img data-id="add-btn" src="{{MEDIA_UI}}/Link_Right.svg" alt="" class="absolute top-95 right-50 z-10 cursor-pointer">
+  <div class="absolute right-20 top-0 z-20">
+  {% endif %}
+  <div class="relative">
+    <img data-id="img" src="{{MEDIA_UI}}/JIG_Gear@2x.png" class="" alt="">
+  </div>
 
-    </div>
-    <h1 data-id="title" class="text-xl font-bold text-jibuttonBlue"></h1>
-    <p data-id="subtitle"></p>
+  </div>
+  <h1 data-id="title" class="text-xl font-bold text-jibuttonBlue"></h1>
+  <p data-id="subtitle"></p>
 
   </div>
 

@@ -25,7 +25,6 @@ export const GotEmailConfirmation = () => {
     return page;
 }
 
-
 export const ForgotPassword = () => {
     const page = tmpl(forgotPassword);
     return page;

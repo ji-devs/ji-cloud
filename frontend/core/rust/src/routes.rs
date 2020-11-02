@@ -1,5 +1,8 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
+use shared::domain::jig::ModuleKind;
+
+pub type Id = String;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Route {
@@ -8,6 +11,7 @@ pub enum Route {
     User(UserRoute),
     Admin(AdminRoute),
     Jig(JigRoute),
+    Module(ModuleRoute),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -30,14 +34,14 @@ pub enum AdminRoute {
     Categories,
     Images,
     ImageAdd,
-    ImageEdit(String),
+    ImageEdit(Id),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum JigRoute {
     Gallery,
-    Edit(String),
-    Play(String, JigPlayMode),
+    Edit(Id),
+    Play(Id, JigPlayMode),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -45,6 +49,12 @@ pub enum JigPlayMode {
     Producer,
     Audience 
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ModuleRoute {
+    Edit(ModuleKind, Id),
+}
+
 
 impl Route {
     pub fn redirect(self) {
@@ -76,6 +86,7 @@ impl Route {
             ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
             ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
             ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
+            ["module", "edit", kind, id] => Self::Module(ModuleRoute::Edit(module_kind_from_str(kind).expect_throw("unknown module kind!"), id.to_string())),
             ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
@@ -83,6 +94,22 @@ impl Route {
     }
 }
 
+pub fn module_kind_from_str(kind:&str) -> Option<ModuleKind> {
+    match kind {
+        "poster" => Some(ModuleKind::Poster),
+        "design-page" => Some(ModuleKind::DesignPage),
+        "memory-game" => Some(ModuleKind::MemoryGame),
+        _ => None
+    }
+}
+
+pub fn module_kind_to_str(kind:ModuleKind) -> &'static str {
+    match kind {
+        ModuleKind::Poster => "poster",
+        ModuleKind::DesignPage => "design-page",
+        ModuleKind::MemoryGame => "memory-game",
+    }
+}
 
 impl From<Route> for String {
     fn from(route:Route) -> Self {
@@ -117,6 +144,11 @@ impl From<Route> for String {
                             JigPlayMode::Producer => format!("/jig/play-producer/{}", id),
                         }
                     }
+                }
+            },
+            Route::Module(route) => {
+                match route {
+                    ModuleRoute::Edit(kind, id) => format!("/module/edit/{}/{}", module_kind_to_str(kind), id),
                 }
             },
             Route::NotFound => "/404".to_string(),
