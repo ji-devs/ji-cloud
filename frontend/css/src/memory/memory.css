@@ -8,6 +8,13 @@
   margin-left: -10px;
 }
 
+.preview-left{
+  margin-top: 10px;
+  z-index: 10;
+  margin-right: -60px
+}
+
+
 
 .memory-add-word, .memory-error {
 

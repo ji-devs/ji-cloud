@@ -4,7 +4,7 @@ import memorycreator from "@templates/memory/memory-creator.html";
 import memorystepone from "@templates/memory/memory-step-one.html";
 import addword from "@templates/memory/add-word-tooltip.html";
 import worderror from "@templates/memory/memory-error.html";
-import worderror from "@templates/memory/memory-step-two.html";
+import memorysteptwo from "@templates/memory/memory-step-two.html";
 
 
 export default {
