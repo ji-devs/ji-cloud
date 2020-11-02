@@ -14,7 +14,7 @@ pub struct ModuleId(pub Uuid);
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ModuleKind {
     /// The module represents a Poster.
     Poster = 0,
