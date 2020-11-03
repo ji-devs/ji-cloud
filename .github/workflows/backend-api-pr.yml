@@ -8,7 +8,9 @@ on:
     - 'backend/core/**'
     - 'backend/api/**'
   push:
-    - branches: [ master, sandbox ]
+    branches: 
+    - master
+    - sandbox
 
 jobs:
   format:
