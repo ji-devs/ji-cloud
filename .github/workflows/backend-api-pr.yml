@@ -56,45 +56,6 @@ jobs:
           args: >
             --manifest-path backend/api/Cargo.toml
             --no-default-features
-  sqlxcheck:
-    name: sqlx Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            backend/api/target
-          key: ${{ runner.os }}-sqlx-check-${{ hashFiles('backend/api/Cargo.lock') }}
-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: >
-            sqlx-cli 
-            --version 0.1.0-beta.1
-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: sqlx
-          args: >
-            prepare
-            --check
-            --
-            --lib
-            --manifest-path backend/api/Cargo.toml
-            --no-default-features
-
 
   # work in progress: currently yarn doesn't work right
   # test:
