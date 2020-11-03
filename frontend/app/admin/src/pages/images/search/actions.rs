@@ -4,7 +4,7 @@ use shared::{
     error::image::*
 };
 use core::{
-    fetch::{api_with_auth, api_with_auth_empty, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;

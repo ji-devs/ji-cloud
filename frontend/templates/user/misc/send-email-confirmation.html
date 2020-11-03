@@ -1,8 +1,7 @@
-{% import "_common/buttons/button-macros.html" as ButtonMacros %}
-
 <div class="flex">
   <div class="bg-jisideblue bg-shapes bg-no-repeat bg-auto bg-center h-screen w-480 min-w-300">
   </div>
+  <div data-id="status" class=""></div>
   <div class="px-80 py-60">
     <h1 class="text-jititleorange text-5xl font-light mb-8">We just sent you an email</h1>
     <div class="">
@@ -12,15 +11,15 @@
         It might had got to the promotion or spam’s folders
       </p>
 
-      <button class="bg-jibuttongreen text-white font-normal min-w-112 px-4 h-56 rounded-16 mb-6">
+      <button data-id="sent-notification" class="bg-jibuttongreen text-white font-normal min-w-112 px-4 h-56 rounded-16 mb-6">
         <div class="flex">
           <img src="{{MEDIA_UI}}/icon-sent.svg" alt="" class="mr-2">
           <p>We have just sent you another email</p>
         </div>
       </button>
-      <p class="text-jibuttonBlue"><a href="#">Change email account</a></p>
-
-
+      <p data-id="resend-email" class="text-jibuttonBlue mb-6 cursor-pointer">I didn’t receive an email, Please send again</p>
+      <p data-id="change-email" class="text-jibuttonBlue cursor-pointer">Change email account</p>
     </div>
   </div>
 </div>
+

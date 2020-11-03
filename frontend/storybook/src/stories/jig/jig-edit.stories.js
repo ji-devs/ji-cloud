@@ -61,7 +61,6 @@ function makeModule(idx) {
 
     if(idx == 1) {
         setAttributeId(module, "img", "src", `${MEDIA_UI}/icn-module-poster2.png`);
-        toggleClassesId(module, "label", ["hidden"], true);
     }
     return module;
 }

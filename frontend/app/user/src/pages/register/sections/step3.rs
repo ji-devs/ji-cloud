@@ -154,12 +154,13 @@ impl RegisterStep3 {
                         //TODO - get selected from HashSets
                         match create_user(_self.data.borrow().clone()).await {
                             Ok(csrf) => {
-                                storage::save_csrf_token(&csrf);
 
                                 if _self.data.borrow().confirmed_email {
+                                    storage::save_csrf_token(&csrf);
                                     _self.step.set(Step::Final);
                                 } else {
-                                    _self.step.set(Step::ConfirmEmail);
+                                    let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                                    dominator::routing::go_to_url(&route);
                                 }
                                 //let route:String = Route::User(UserRoute::Profile).into();
                                 //dominator::routing::go_to_url(&route);
@@ -215,7 +216,7 @@ pub async fn create_user(data: RegisterData) -> Result<String, RegisterStatus> {
             .map(|id| Uuid::parse_str(&id).unwrap_throw())
             .map(|id| SubjectId(id))
             .collect(),
-        geocode: data.location_json,
+        location: data.location_json,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&Register::PATH, &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;

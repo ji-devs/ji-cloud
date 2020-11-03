@@ -89,7 +89,7 @@ impl RemoteTarget {
 
     pub const fn pages_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:8081",
+            Self::Local => "http://localhost:10001",
             Self::Sandbox => "https://sandbox.jicloud.org",
             Self::Release => "https://jicloud.org",
         }
@@ -125,5 +125,14 @@ impl RemoteTarget {
     pub fn replace_media_ui<S: AsRef<str>>(&self, s: S) -> String {
         s.as_ref()
             .replace("%MEDIA_UI%", &format!("{}/ui", self.media_url()))
+    }
+
+    pub fn google_maps_url(&self) -> &'static str {
+        match self {
+            // these are _apparently_ public?
+            Self::Local
+            | Self::Sandbox => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I&libraries=places",
+            Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCU1HygSZgK4L3qPdRmrV-dTnS1GBBiqyE&libraries=places"
+        }
     }
 }

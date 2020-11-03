@@ -36,6 +36,62 @@
       ]
     }
   },
+  "03ee2b51096d52ea9e5042b9b0c863a0da386b861c80f7dc81f658ae5405c230": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -105,134 +161,6 @@
         ]
       },
       "nullable": [
-        null
-      ]
-    }
-  },
-  "140fcd94aee0ae0b0fbecff7b028ce6480159aec45d096f06df28eb227fcf783": {
-    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        geocode,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "firebase_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "email!",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "given_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "family_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "language",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "locale",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "opt_into_edu_resources",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 9,
-          "name": "over_18",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 10,
-          "name": "timezone",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 11,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 12,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 13,
-          "name": "organization",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 14,
-          "name": "geocode",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 15,
-          "name": "scopes!: Vec<i16>",
-          "type_info": "Int2Array"
-        },
-        {
-          "ordinal": 16,
-          "name": "subjects!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 17,
-          "name": "affiliations!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 18,
-          "name": "age_ranges!: Vec<Uuid>",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        null,
-        null,
-        null,
         null
       ]
     }
@@ -430,6 +358,154 @@
       ]
     }
   },
+  "2a38d6204b4e0dc27a944c0af4c85f89a1dd12fd6507e136b70430422ff4a066": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        location,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 15,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 16,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "2d3582ab7cfac01ef24e5462ea6dc2dbb379dd99e24236162975bda3702de5b8": {
+    "query": "\nwith new_row as (\n    insert into \"settings\" (algolia_index_name) values($1) on conflict(singleton) do nothing returning algolia_index_version    \n)\nselect algolia_index_version as \"algolia_index_version!\" from new_row\nunion\nselect algolia_index_version as \"algolia_index_version!\" from \"settings\" where algolia_index_name = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "algolia_index_version!",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -521,36 +597,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "4a26a8a4a7c5ec4d470518bca3b997c1e52616ad93a56e7b28fdb485c50f228c": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
       ]
     }
   },
@@ -798,62 +844,6 @@
       ]
     }
   },
-  "8887dc91e41762e76d9be079dc67e92b06b51df37b30da1c59c6d57f31300260": {
-    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at < updated_at is not false and updated_at <= $1 is not false\nlimit 100\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -958,6 +948,18 @@
         true,
         null
       ]
+    }
+  },
+  "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
+    "query": "update \"settings\" set algolia_index_version = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "b8c3158be83930526198c18609e10617952b2e57fe7f73c1f5e8b2068baf8f10": {
@@ -1156,6 +1158,37 @@
       ]
     }
   },
+  "e97f7e0f4996d2e1a7c870880fd11e30a2b14f8fbcffcef9be1227afc05b67a7": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
     "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
     "describe": {
@@ -1175,6 +1208,16 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
+    "query": "update image_metadata set last_synced_at = null",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
     }
   },
   "fa66e89e6b008f41f95a2489415e76fd57f37f08d64ad6c59809033b7b105a66": {

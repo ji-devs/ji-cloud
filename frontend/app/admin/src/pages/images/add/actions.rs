@@ -4,7 +4,7 @@ use shared::{
     error::image::*
 };
 use core::{
-    fetch::{api_with_auth, api_with_auth_empty, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
@@ -19,7 +19,7 @@ pub async fn create_image(file:File, kind: ImageKind) -> Result<String, ()> {
             let id = id.0.to_string();
 
             let path = Upload::PATH.replace("{id}",&id);
-            upload_file(&path, &file, Upload::METHOD.as_str())
+            api_upload_file(&path, &file, Upload::METHOD)
                 .await
                 .map_err(|_| ())
                 .map(|_| id)

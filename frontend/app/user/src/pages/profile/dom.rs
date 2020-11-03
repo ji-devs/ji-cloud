@@ -64,3 +64,19 @@ fn get_profile_string(profile:&UserProfile) -> String {
     format!("{:?}", profile)
 
 }
+
+
+pub struct ProfileEmailChangePage {
+}
+impl ProfileEmailChangePage {
+    pub fn new() -> Rc<Self> {
+        let _self = Rc::new(Self { });
+
+        _self
+    }
+    
+    pub fn render(_self: Rc<Self>) -> Dom {
+        elem!(templates::profile_email_change(), { })
+    }
+
+}

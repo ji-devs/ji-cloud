@@ -312,7 +312,11 @@ dependencies = [
 [[package]]
 name = "algolia"
 version = "0.1.0"
+<<<<<<< HEAD
 source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=85975c32cc9396c3e4ae6df7158948579b9989f4#85975c32cc9396c3e4ae6df7158948579b9989f4"
+=======
+source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=d1285842e01ddb15b82c8c72e3e1d3a4e2d19074#d1285842e01ddb15b82c8c72e3e1d3a4e2d19074"
+>>>>>>> sandbox
 dependencies = [
  "chrono",
  "rand",
