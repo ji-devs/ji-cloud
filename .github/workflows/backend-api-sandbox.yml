@@ -6,7 +6,7 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'backend/_core/rust/**'
+    - 'backend/core/**'
     - 'backend/api/**'
 
 jobs:

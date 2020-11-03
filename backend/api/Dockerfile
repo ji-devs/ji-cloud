@@ -41,7 +41,7 @@ COPY --from=api-builder \
 
 WORKDIR ./integration-testing
 RUN yarn && chown -R postgres:postgres .
-RUN ls && su postgres -c 'BIN_FILE="./ji-cloud-api" PG_TMP="./pg_tmp.sh" FIXTURES_DIR=fixtures yarn test:ava --timeout 2m'
+RUN su postgres -c 'BIN_FILE="./ji-cloud-api" PG_TMP="./pg_tmp.sh" FIXTURES_DIR=fixtures yarn test:ava --timeout 2m'
 
 ####################
 ## Release        ##

@@ -117,5 +117,4 @@ pub struct UpdateRequest {
     pub publish_at: Option<Option<Publish>>,
 }
 
-
 into_uuid![JigId];

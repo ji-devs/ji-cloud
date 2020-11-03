@@ -1,0 +1,143 @@
+name: Api - Backend - PR 
+
+on:
+  pull_request:
+    paths:
+    - 'config/**'
+    - 'shared/**'
+    - 'backend/core/**'
+    - 'backend/api/**'
+  push:
+    - branches: [ master, sandbox ]
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --manifest-path backend/api/Cargo.toml -- --check
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/api/target
+          key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: >
+            --manifest-path backend/api/Cargo.toml
+            --no-default-features
+  sqlxcheck:
+    name: sqlx Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/api/target
+          key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: --version 0.1.0-beta.1
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: sqlx
+          args: >
+            prepare
+            --
+            --lib
+            --manifest-path backend/api/Cargo.toml
+            --no-default-features
+
+
+  # work in progress: currently yarn doesn't work right
+  # test:
+  #   name: Test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - run: sudo apt update
+  #     - run: sudo apt install postgresql-10 postgresql-contrib-10
+
+  #     # - uses: actions-rs/toolchain@v1
+  #     #   with:
+  #     #     profile: minimal
+  #     #     toolchain: stable
+  #     #     override: true
+
+  #     - uses: actions/cache@v2
+  #       with:
+  #         path: |
+  #           ~/.cargo/registry
+  #           ~/.cargo/git
+  #           backend/api/target
+  #         key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+
+  #     - uses: actions/cache@v2
+  #       with:
+  #         path: |
+  #          'backend/api/integration-testing/node_modules'
+  #          '~/.cache/yarn'
+  #          '~/.yarn'
+  #         key: ${{ runner.os }}-test-js-${{ hashFiles('backend/api/integration-testing/yarn.lock') }}
+
+  #     - run: find backend/api/integration-testing/ -exec chown postgres:postgres {} ";"
+  #     - run: mkdir ~/.yarn && find ~/.yarn -exec chown postgres:postgres {} ";"
+  #     - run: touch ~/.yarnrc && chown postgres:postgres ~/.yarnrc
+  #     - run: sudo -u postgres yarn install --frozen-lockfile --global-folder /tmp/yarn/global --cache-folder /tmp/yarn/cache
+  #       working-directory: 'backend/api/integration-testing'
+
+  #     # - uses: borales/actions-yarn@v2.0.0
+  #     #   working-directory: 'backend/api/integration-testing'
+  #     #   with:
+  #     #     cmd: install
+
+  #     - run: sudo -u postgres env PGHOST=localhost PGUSER=postgres PATH="/usr/lib/postgresql/10/bin:$PATH" yarn --global-folder /tmp/yarn/global --cache-folder /tmp/yarn/cache test:ava
+  #       working-directory: 'backend/api/integration-testing' 
+
+  #     # - uses: borales/actions-yarn@v2.0.0
+  #     #   working-directory: 'backend/api/integration-testing'
+  #     #   with:
+  #     #     cmd: test:ava
+
