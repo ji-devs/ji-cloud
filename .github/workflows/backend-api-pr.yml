@@ -75,18 +75,21 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             backend/api/target
-          key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+          key: ${{ runner.os }}-sqlx-check-${{ hashFiles('backend/api/Cargo.lock') }}
 
       - uses: actions-rs/cargo@v1
         with:
           command: install
-          args: --version 0.1.0-beta.1
+          args: >
+            sqlx-cli 
+            --version 0.1.0-beta.1
 
       - uses: actions-rs/cargo@v1
         with:
           command: sqlx
           args: >
             prepare
+            --check
             --
             --lib
             --manifest-path backend/api/Cargo.toml
