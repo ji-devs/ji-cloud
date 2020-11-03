@@ -181,8 +181,9 @@ async fn upload_image(opts:Arc<Opts>, credentials:Arc<Credentials>, album_name:A
     let url = format!("{}{}", opts.get_remote_target().api_url(), Create::PATH);
 
     let kind = match item.kind {
-        AlbumItemKind => ImageKind::Sticker,
-        AlbumItemKind => ImageKind::Canvas,
+        AlbumItemKind::Sticker => ImageKind::Sticker,
+        AlbumItemKind::Foreground => ImageKind::Canvas,
+        AlbumItemKind::Background => ImageKind::Canvas,
         //2: Animation
         //3: Foreground
         _ => panic!("unsupported album item kind: {:?}", item.kind)
@@ -236,7 +237,9 @@ async fn upload_image(opts:Arc<Opts>, credentials:Arc<Credentials>, album_name:A
     let body = Body::wrap_stream(stream);
 
     let request = reqwest::Client::new()
-        .put(&upload_url)
+        .patch(&upload_url)
+        .header("X-CSRF", &credentials.csrf)
+        .header("Cookie", &format!("X-JWT={}", credentials.token))
         .header("Content-Type", content_type)
         .header("Content-Length", file_size) 
         .body(body);

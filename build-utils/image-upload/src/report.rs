@@ -50,11 +50,11 @@ pub struct ReportAlbumItem {
 #[derive(Serialize, Debug)]
 pub struct CsvItem<'a> {
     pub album_id: &'a str,
-    pub album_name: &'a str,
+    pub remote_id: Option<String>,
     pub name: &'a str,
-    pub remote_id: &'a Option<String>,
     pub kind: AlbumItemKind,
     pub is_skipped: bool,
+    pub album_name: &'a str,
 }
 
 impl Report {
@@ -71,7 +71,7 @@ impl Report {
                     album_id,
                     album_name,
                     name: &item.name,
-                    remote_id: &item.remote_id,
+                    remote_id: item.remote_id.as_ref().map(make_link),
                     kind: item.kind,
                     is_skipped: item.is_skipped
                 };
@@ -80,4 +80,9 @@ impl Report {
         }
         wtr.flush().unwrap();
     }
+}
+
+fn make_link<T: AsRef<str>>(id:T) -> String {
+    let id = id.as_ref();
+    format!(r#"=HYPERLINK("https://jicloud.org/admin/image-edit/{}","{}")"#, id, id)
 }
