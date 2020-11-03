@@ -32,7 +32,8 @@ impl Router {
                     Route::User(route) => {
                         match route {
                             UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
-                            UserRoute::Register => Some(RegisterPage::render(RegisterPage::new())),
+                            UserRoute::Register => Some(RegisterPage::render(RegisterPage::new(None))),
+                            UserRoute::ContinueRegistration(user) => Some(RegisterPage::render(RegisterPage::new(Some(user)))),
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render(ProfilePage::new())),
                             UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),
                             UserRoute::SendEmailConfirmation => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new())),

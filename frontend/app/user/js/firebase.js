@@ -54,18 +54,21 @@ export function firebase_register_email(email, password) {
     return complete_register(firebase.auth().createUserWithEmailAndPassword(email, password));
 }
 
+function packageUserInfo(user) {
+    return {
+        email_verified: user.emailVerified,
+        firebase_id: user.uid,
+        name: user.displayName, 
+        email: user.email, 
+        avatar: user.photoURL
+    }
+}
+
 function complete_register(promise) {
     return promise
         .then(({user}) => 
             user.getIdToken()
-                .then(token => ({
-                    token,
-                    email_verified: user.emailVerified,
-                    firebase_id: user.uid,
-                    name: user.displayName, 
-                    email: user.email, 
-                    avatar: user.photoURL
-                }))
+                .then(token => ({ token, ...packageUserInfo(user)}))
         )
         .then(result => {
             //ideally we would sign out - but "confirm email"
@@ -99,15 +102,18 @@ function complete_signin(promise) {
                 code: "internal/confirm-email"
             })
         )
-        .then(user => user.getIdToken())
-        .then(idToken => {
+        .then(user => 
+            user.getIdToken()
+                .then(token => ({ token, ...packageUserInfo(user)}))
+        )
+        .then(result => {
 
             //ideally we would sign out - but "confirm email"
             //depends on active firebase id
             //would be better to move that to backend and signout here
             //
             //firebase.auth().signOut();
-            return idToken
+            return result
         });
 }
 

@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 use js_sys::Promise;
 use core::settings::Settings;
 use serde::{Serialize, Deserialize};
+pub use core::firebase::*;
 
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
@@ -18,26 +19,4 @@ extern "C" {
     pub fn firebase_send_confirmation_email(url:&str) -> Promise;
     //https://firebase.google.com/docs/reference/js/firebase.User#updateemail
     pub fn firebase_change_email(email:&str) -> Promise; 
-}
-
-#[derive(Deserialize, Debug)]
-pub struct FirebaseError {
-    pub code: String 
-}
-
-#[derive(Deserialize, Debug)]
-pub struct GoogleRegisterInfo {
-    pub avatar: String,
-    pub email: String,
-    pub name: String,
-    pub token: String,
-    pub firebase_id: String,
-    pub email_verified: bool,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct EmailRegisterInfo {
-    pub token: String,
-    pub firebase_id: String,
-    pub email_verified: bool,
 }

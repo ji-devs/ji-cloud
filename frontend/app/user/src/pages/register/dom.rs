@@ -16,6 +16,7 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
     routes::{Route, UserRoute},
+    firebase::*,
     storage,
 };
 
@@ -29,10 +30,16 @@ pub struct RegisterPage {
 
 
 impl RegisterPage  {
-    pub fn new() -> Rc<Self> {
+    pub fn new(user:Option<FirebaseUserInfo>) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            step: Rc::new(Mutable::new(Step::Start)),
-            data: Rc::new(RefCell::new(RegisterData::default())),
+            step: Rc::new(Mutable::new({
+                if user.is_some() {
+                    Step::One
+                } else {
+                    Step::Start
+                }
+            })),
+            data: Rc::new(RefCell::new(user.into())),
         });
         _self
     }

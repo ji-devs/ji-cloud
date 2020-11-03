@@ -216,7 +216,7 @@ pub async fn create_user(data: RegisterData) -> Result<String, RegisterStatus> {
             .map(|id| Uuid::parse_str(&id).unwrap_throw())
             .map(|id| SubjectId(id))
             .collect(),
-        geocode: data.location_json,
+        location: data.location_json,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&Register::PATH, &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;

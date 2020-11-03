@@ -1,6 +1,8 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::jig::ModuleKind;
+use crate::firebase::FirebaseUserInfo;
+use serde::{Serialize, Deserialize};
 
 pub type Id = String;
 
@@ -17,6 +19,7 @@ pub enum Route {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UserRoute {
     Profile(ProfileSection),
+    ContinueRegistration(FirebaseUserInfo),
     Signin,
     Register,
     SendEmailConfirmation,
@@ -55,6 +58,11 @@ pub enum ModuleRoute {
     Edit(ModuleKind, Id),
 }
 
+//Just for serializing across local routes
+#[derive(Serialize, Deserialize)]
+struct FirebaseUserQuery {
+    pub user: String  //json-encoded FirebaseUserInfo
+}
 
 impl Route {
     pub fn redirect(self) {
@@ -68,14 +76,21 @@ impl Route {
         let paths = url.pathname();
         let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
         let paths = paths.as_slice();
-
-        log::info!("{:?}", paths);
+        let params = url.search_params();
 
         match paths {
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "signin"] => Self::User(UserRoute::Signin),
             ["user", "register"] => Self::User(UserRoute::Register),
+            ["user", "continue-registration"] => {
+                if let Some(user) = params.get("user") {
+                    let user:FirebaseUserInfo = serde_json::from_str(&user).unwrap_throw();
+                    Self::User(UserRoute::ContinueRegistration(user))
+                } else {
+                    Self::NoAuth
+                }
+            }
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
             ["user", "got-email-confirmation"] => Self::User(UserRoute::GotEmailConfirmation),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
@@ -120,6 +135,12 @@ impl From<Route> for String {
                 match route {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
                     UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
+                    UserRoute::ContinueRegistration(user) => {
+                        let user = serde_json::to_string(&user).unwrap_throw();
+                        let query = FirebaseUserQuery { user };
+                        let query = serde_qs::to_string(&query).unwrap_throw();
+                        format!("/user/continue-registration?{}", query) 
+                    }
                     UserRoute::Signin => "/user/signin".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
