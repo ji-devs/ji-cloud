@@ -29,12 +29,13 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
     routes::{Route, UserRoute},
-    fetch::{api_with_token, api_with_auth},
+    fetch::{api_no_auth, api_with_token},
     storage,
 };
 use std::collections::HashSet;
 use crate::utils::firebase::*;
 use super::super::data::*;
+
 
 pub struct RegisterStep3 {
     pub status: Mutable<Option<RegisterStatus>>,
@@ -253,7 +254,7 @@ pub struct MetaOptions {
 impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         //Probably doesn't need auth - just regular fetch from awsm_web
-        let resp:Result<GetResponse, ()> = api_with_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await;
+        let resp:Result<GetResponse, ()> = api_no_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await;
         resp
             .map_err(|err| {
                 //log::error!("{:?}", err);
