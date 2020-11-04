@@ -1,5 +1,5 @@
 {% macro orange(label, dataId="") %}
-<button data-id="{{dataId}}" class="bg-jiorange hover:jiorangehover text-white font-normal min-w-112 py-1 px-4 rounded-20">
+<button data-id="{{dataId}}" class="bg-jiorange focus:outline-none hover:jiorangehover text-white font-normal min-w-112 py-1 px-4 rounded-20">
   {{label}}
 </button>
 {% endmacro orange %}
@@ -15,7 +15,7 @@
 {% endmacro blue %}
 
 {% macro bluejig(label, dataId="", hover) %}
-<button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-3 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
+<button data-id="{{dataId}}" class="bg-jibuttonBlue text-white rounded-20 px-4 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
   <div class="flex justify-center items-center">
     {{label}}
   </div>

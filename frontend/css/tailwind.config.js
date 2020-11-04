@@ -70,6 +70,7 @@ module.exports = {
         jimemorypink: '#ffdede',
         jimemorypinkborder: '#e36486',
         jimemorygreenlight: '#eafaf0',
+        jimemorycardgreen: '#7fd29c',
 
       },
 
@@ -118,6 +119,7 @@ module.exports = {
         288: '288px',
         296: '296px',
         297: '297px',
+        306: '306px',
         320: '320px',
         325: '325px',
         360: '360px',
@@ -134,6 +136,7 @@ module.exports = {
         867: '867px',
         992: '992px',
         1212: '1212px',
+        1666:'1666px',
         '50p': '50%',
         '1/7': '14.28%'
 
@@ -179,6 +182,7 @@ module.exports = {
         668: '668px',
         681: '681px',
         696: '696px',
+        935: '935px'
 
       },
       backgroundPosition:{
@@ -235,13 +239,19 @@ module.exports = {
         '16:9': '56.25%'
       },
       margin:{
+        '-10': '-10px',
         '-15': '-15px',
         '25p': '25%',
         50: '50px',
+        100: '100px',
       },
       cursor:{
         grab: 'grab'
       },
+      spacing:{
+        18:'18px',
+      },
+    
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
         'poster': `url('${MEDIA_UI}/Icn_Module_Poster.svg')`
