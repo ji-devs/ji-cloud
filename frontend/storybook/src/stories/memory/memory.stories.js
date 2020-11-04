@@ -6,6 +6,8 @@ import addword from "@templates/memory/add-word-tooltip.html";
 import worderror from "@templates/memory/memory-error.html";
 import memorysteptwo from "@templates/memory/memory-step-two.html";
 import memorystepthree from "@templates/memory/memory-step-three.html";
+import memorystepfour from "@templates/memory/memory-step-four.html";
+
 
 export default {
   title: 'Games/memory',
@@ -28,6 +30,11 @@ export const MemoryStepTwo = () =>
 
 export const MemoryStepThree = () =>
     tmpl(memorystepthree, {
+
+});
+
+export const MemoryStepFour = () =>
+    tmpl(memorystepfour, {
 
 });
 

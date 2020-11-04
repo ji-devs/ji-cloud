@@ -2,8 +2,8 @@
 {% import "_common/input/input-macros.html" as Input %}
 
 <div class="flex bg-jibackgroundBlue h-full min-w-full w-auto min-h-screen">
-  <div class="sidebar w-72 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
-    <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8">
+  <div class="sidebar w-72 flex-shrink-0 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
+    <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8 ml-auto mr-auto">
     <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
     <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
     <div class="h-160 bg-jibackgroundGrey border-l-8 border-jibuttonBlue w-full pt-4 pl-2">
@@ -13,18 +13,17 @@
       <h1 class="text-jibuttonBlue font-bold">02</h1>
     </div>
   </div>
-  <div class="bg-white ml-6 w-516 ">
-    <div class="flex p-4">
+  <div class="bg-white ml-6 w-516 flex-shrink-0">
+    <div class="flex p-8">
       <div class="">
         <p>Select</p>
       </div>
       <!-- bg-jibuttonBlue text-white for active and bg-jigooglegrey and text-black for inactive -->
       <div class="flex mb-4">
 
-        <div class="h-24 w-112 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
-          <p class="text-black text-sm">Starting layout</p>
+        <div class="h-24 w-112 bg-jigooglegrey rounded-md flex items-center justify-center ml-6 mr-2">
+          <p class=" text-black text-sm">Starting layout</p>
         </div>
-
         <div class="h-24 w-68 bg-jigooglegrey rounded-md flex items-center justify-center mx-2">
           <p class="text-black text-sm">Theme</p>
         </div>
@@ -32,18 +31,18 @@
 
     </div>
     <div class="border-t border-b border-jidarkgrey py-4">
-      <div class="flex items-center pl-4">
-        <p class="mr-4">Add</p>
-        <img src="{{MEDIA_UI}}/icn-text-jig.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-image-jig.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-background-color-jig-active.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-record-jig.svg" alt="">
-        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="">
+      <div class="flex items-center pl-8">
+        <p class="mr-5">Add</p>
+        <img src="{{MEDIA_UI}}/icn-text-jig.svg" alt="" class="ml-2">
+        <img src="{{MEDIA_UI}}/icn-image-jig.svg" alt="" class="ml-2">
+        <img src="{{MEDIA_UI}}/icn-background-color-jig.svg" alt="" class="ml-2">
+        <img src="{{MEDIA_UI}}/icn-record-jig-active.svg" alt="" class="ml-2">
+        <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig.svg" alt="" class="ml-2">
       </div>
     </div>
-    <div class="px-4">
+    <div class="px-8">
       <p class=" pt-4">Select color for the background</p>
-      <div class="grid grid-cols-6 mt-4 w-516">
+      <div class="grid grid-cols-6 gap-8 mt-4">
         <div class="rounded-full h-56 w-56 border border-jicolorborder mb-4">
 
         </div>
@@ -126,7 +125,7 @@
     </div>
 
   </div>
-  <div class=" flex flex-col w-full">
+  <div class=" flex flex-col w-full flex-1">
     <div class="flex justify-center items-center mt-4 self-end mr-4">
 
       <div class="bg-white w-325 h-56 rounded-full shadow-md">

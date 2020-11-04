@@ -1,0 +1,74 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+{% import "user/user-macros.html" as User %}
+
+<div class="flex bg-jibackgroundBlue h-full min-w-full w-auto min-h-screen">
+  <div class="sidebar w-72 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
+    <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8 ml-auto mr-auto">
+    <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
+    <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
+    <div class="h-160 bg-jibackgroundGrey border-l-8 border-jibuttonBlue w-full pt-4 pl-2">
+      <h1 class="text-jibuttonBlue font-bold">01</h1>
+    </div>
+    <div class="h-160  w-full pt-4 pl-2 border-jidarkgrey border-b pl-4">
+      <h1 class="text-jibuttonBlue font-bold">02</h1>
+    </div>
+  </div>
+  <div class="w-1666 px-20 py-4">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <div class="flex flex-col items-center ">
+          <div class="rounded-full h-48 w-48 bg-jimemorygreenlight border-jigreen border flex items-center justify-center text-white">
+            <p class="text-jigreen">1</p>
+          </div>
+          <p class="text-jigreen">Content</p>
+        </div>
+        <div class="w-41 h-1 bg-jigrey -mt-15">
+
+        </div>
+        <div class="flex flex-col items-center text-jigreen">
+          <div class="rounded-full h-48 w-48 bg-jimemorygreenlight border border-jigreen flex items-center justify-center">
+            <p>2</p>
+          </div>
+          <p class="text-jigreen">Design</p>
+        </div>
+        <div class="w-41 h-1 bg-jigrey -mt-15">
+
+        </div>
+        <div class="flex flex-col items-center text-jigreen">
+          <div class="rounded-full h-48 w-48 bg-jimemorygreenlight border border-jigreen flex items-center justify-center">
+            <p>3</p>
+          </div>
+          <p class="text-jigreen">Instructions</p>
+        </div>
+        <div class="w-41 h-1 bg-jigrey -mt-15">
+
+        </div>
+        <div class="flex flex-col items-center text-white">
+          <div class="rounded-full h-48 w-48 bg-jibuttonBlue border border-jibuttonBlue flex items-center justify-center">
+            <p>4</p>
+          </div>
+          <p class="text-jibuttonBlue">Preview</p>
+        </div>
+        <h1 class="text-jititleorange text-4xl font-light mb-4 ml-20">Preview Mode</h1>
+      </div>
+      <div class="mt-3">
+        {{ ButtonMacros::orange(label="Next", dataId="next") }}
+      </div>
+    </div>
+    <div class="h-935 w-full bg-white rounded-md mt-6 flex p-6">
+      <div class="w-306 border-r border-jiheadergrey flex justify-center">
+        <h2>My pairs</h2>
+      </div>
+      <div class="flex flex-col items-center w-full">
+        <h2>Find the matching pairs</h2>
+        <div class="grid grid-cols-7 mt-6">
+          <div class="w-160 h-160 rounded-lg bg-jimemorycardgreen">
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
