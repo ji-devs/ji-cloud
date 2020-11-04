@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo TODO: add tests",
     "start": "npm run clean && npm run _css-build-remote && npm run _templates-prebuild-watch && npm-run-all -p _media-server _storybook-watch _css-watch _templates-watch",
-    "start:nomedia": "npm run clean && npm run _css-build-remote && npm-run-all -p _css-watch _storybook-watch _templates-watch",
+    "start:nomedia": "npm run clean && npm run _css-build-remote && npm run _templates-prebuild-watch && npm-run-all -p _css-watch _storybook-watch _templates-watch",
     "storybook:build-release": "npm run clean && npm run _css-build-remote && npm run _templates-build:release && build-storybook -o ./dist/storybook-build",
     "storybook:build-sandbox": "npm run clean && npm run _css-build-remote && npm run _templates-build:sandbox && build-storybook -o ./dist/storybook-build",
     "clean": "rimraf ./dist",

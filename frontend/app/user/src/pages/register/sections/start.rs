@@ -157,12 +157,12 @@ impl RegisterPageRefs {
 }
 
 //Actions
-pub async fn register_email(email: &str, pw: &str) -> Result<EmailRegisterInfo, RegisterStatus> {
+pub async fn register_email(email: &str, pw: &str) -> Result<EmailUserInfo, RegisterStatus> {
     let token_promise = unsafe { firebase_register_email(email, pw) };
 
     let firebase_res = JsFuture::from(token_promise).await
         .map(|info| {
-            let user:EmailRegisterInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
+            let user:EmailUserInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
             user
         })
         .map_err(|err| {
@@ -195,12 +195,12 @@ pub async fn register_email(email: &str, pw: &str) -> Result<EmailRegisterInfo, 
     }
 }
 
-pub async fn register_google() -> Result<GoogleRegisterInfo, Option<RegisterStatus>> {
+pub async fn register_google() -> Result<GoogleUserInfo, Option<RegisterStatus>> {
     let token_promise = unsafe { firebase_register_google() };
 
     let firebase_res = JsFuture::from(token_promise).await
         .map(|info| {
-            serde_wasm_bindgen::from_value::<GoogleRegisterInfo>(info).unwrap_throw()
+            serde_wasm_bindgen::from_value::<GoogleUserInfo>(info).unwrap_throw()
         })
         .map_err(|err| {
             None

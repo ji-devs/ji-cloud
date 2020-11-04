@@ -29,12 +29,13 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
     routes::{Route, UserRoute},
-    fetch::{api_with_token, api_with_auth},
+    fetch::{api_no_auth, api_with_token},
     storage,
 };
 use std::collections::HashSet;
 use crate::utils::firebase::*;
 use super::super::data::*;
+
 
 pub struct RegisterStep3 {
     pub status: Mutable<Option<RegisterStatus>>,
@@ -154,12 +155,13 @@ impl RegisterStep3 {
                         //TODO - get selected from HashSets
                         match create_user(_self.data.borrow().clone()).await {
                             Ok(csrf) => {
-                                storage::save_csrf_token(&csrf);
 
                                 if _self.data.borrow().confirmed_email {
+                                    storage::save_csrf_token(&csrf);
                                     _self.step.set(Step::Final);
                                 } else {
-                                    _self.step.set(Step::ConfirmEmail);
+                                    let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                                    dominator::routing::go_to_url(&route);
                                 }
                                 //let route:String = Route::User(UserRoute::Profile).into();
                                 //dominator::routing::go_to_url(&route);
@@ -215,7 +217,7 @@ pub async fn create_user(data: RegisterData) -> Result<String, RegisterStatus> {
             .map(|id| Uuid::parse_str(&id).unwrap_throw())
             .map(|id| SubjectId(id))
             .collect(),
-        geocode: data.location_json,
+        location: data.location_json,
     };
 
     let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&Register::PATH, &data.token.unwrap_or_default(), Register::METHOD, Some(req)).await;
@@ -252,7 +254,7 @@ pub struct MetaOptions {
 impl MetaOptions {
     pub async fn load() -> Result<Self, ()> {
         //Probably doesn't need auth - just regular fetch from awsm_web
-        let resp:Result<GetResponse, ()> = api_with_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await;
+        let resp:Result<GetResponse, ()> = api_no_auth::<_, _, ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await;
         resp
             .map_err(|err| {
                 //log::error!("{:?}", err);

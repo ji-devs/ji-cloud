@@ -1,9 +1,14 @@
 //! Types for JIGs.
 
+pub mod module;
+
 use super::Publish;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+// avoid breaking Changes
+pub use module::{LiteModule, ModuleId, ModuleKind};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 ///
@@ -12,14 +17,6 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct JigId(pub Uuid);
-
-/// Wrapper type around [`Uuid`], represents the ID of a module.
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-pub struct ModuleId(pub Uuid);
 
 /// Request to create a new JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -50,13 +47,6 @@ pub struct CreateRequest {
     pub publish_at: Option<Publish>,
 }
 
-/// Response for successfully creating a JIG.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CreateResponse {
-    /// The ID of the newly created JIG.
-    pub id: JigId,
-}
-
 /// The over-the-wire representation of a JIG.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Jig {
@@ -83,31 +73,6 @@ pub struct Jig {
 
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
-}
-
-/// Represents the various kinds of data a module can represent.
-#[repr(i16)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[derive(Serialize, Deserialize, Debug)]
-pub enum ModuleKind {
-    /// The module represents a Poster.
-    Poster = 0,
-
-    /// The module represents a Memory Game.
-    MemoryGame = 1,
-
-    /// The module represents the first / last page of a jig.
-    DesignPage = 2,
-}
-
-/// Minimal information about a module.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LiteModule {
-    /// The module's ID.
-    pub id: ModuleId,
-
-    /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
@@ -151,3 +116,5 @@ pub struct UpdateRequest {
     #[serde(default)]
     pub publish_at: Option<Option<Publish>>,
 }
+
+into_uuid![JigId];

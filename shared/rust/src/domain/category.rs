@@ -78,29 +78,29 @@ pub struct CreateCategoryRequest {
 /// There are a few different use cases.
 ///
 /// ### get root categories.
-/// ```no_run
+/// ```ignore
 /// GetCategoryRequest { ids: vec![], scope: None }
 /// ```
 ///
 /// Additionally, you can do the same with `scope: Some(CategoryTreeScope::Ancestors)` but it is not considered the cannonical form.
 ///
 /// ### get all categories
-/// ```no_run
+/// ```ignore
 /// GetCategoryRequest { ids: vec![], scope: Some(CategoryTreeScope::Decendants) }
 /// ```
 ///
 /// ### get exact categories
-/// ```no_run
+/// ```ignore
 /// GetCategoryRequest { ids: vec![id1, id2, ...], scope: None }
 /// ```
 ///
 /// ### get exact categories and their ancestors
-/// ```no_run
+/// ```ignore
 /// GetCategoryRequest { ids: vec![id1, id2, ...], scope: Some(CategoryTreeScope::Ancestors) }
 /// ```
 ///
 /// ### get exact categories and their decendants.
-/// ```no_run
+/// ```ignore
 /// GetCategoryRequest { ids: vec![id1, id2, ...], scope: Some(CategoryTreeScope::Decendants) }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Default)]

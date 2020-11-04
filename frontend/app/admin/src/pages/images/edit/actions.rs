@@ -1,10 +1,10 @@
 use shared::{
     api::endpoints::{ApiEndpoint, image::*, self},
     domain::{image::*, meta::*, category::*, Publish},
-    error::{*, image::*,}
+    error::{image::*,self}
 };
 use core::{
-    fetch::{api_with_auth, api_with_auth_empty, upload_file}
+    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
 };
 use uuid::Uuid;
 use wasm_bindgen::UnwrapThrowExt;
@@ -82,7 +82,7 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
 
 }
 
-pub async fn delete( id:String) -> Result<(), DeleteError>
+pub async fn delete( id:String) -> Result<(), error::DeleteError>
 {
     let path = Delete::PATH.replace("{id}",&id);
     let res:Result<<Delete as ApiEndpoint>::Res, <Delete as ApiEndpoint>::Err>
@@ -95,7 +95,7 @@ pub async fn delete( id:String) -> Result<(), DeleteError>
 pub async fn replace_url(id:&str, file:web_sys::File) -> Result<(), UpdateError>
 {
     let path = Upload::PATH.replace("{id}",&id);
-    upload_file(&path, &file, Upload::METHOD.as_str())
+    api_upload_file(&path, &file, Upload::METHOD)
         .await
         .map_err(|err| UpdateError::InternalServerError(err.into()))
 }

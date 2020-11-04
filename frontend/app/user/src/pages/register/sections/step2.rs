@@ -101,7 +101,8 @@ impl RegisterStep2 {
                         if location_json == "" {
                             data.location_json = None;
                         } else {
-                            data.location_json = Some(location_json);
+                            let value:serde_json::Value = serde_json::from_str(&location_json).unwrap_throw();
+                            data.location_json = Some(value);
                         }
                     })) as Box<dyn FnMut(String)>);
 

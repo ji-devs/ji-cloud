@@ -16,10 +16,11 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
     routes::{Route, UserRoute},
+    firebase::*,
     storage,
 };
 
-use super::sections::{start::RegisterStart, step1::RegisterStep1, step2::RegisterStep2, step3::RegisterStep3, misc::{RegisterConfirmEmail, RegisterFinal}};
+use super::sections::{start::RegisterStart, step1::RegisterStep1, step2::RegisterStep2, step3::RegisterStep3, misc::RegisterFinal};
 use super::data::*;
 
 pub struct RegisterPage {
@@ -29,10 +30,16 @@ pub struct RegisterPage {
 
 
 impl RegisterPage  {
-    pub fn new() -> Rc<Self> {
+    pub fn new(user:Option<FirebaseUserInfo>) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            step: Rc::new(Mutable::new(Step::Start)),
-            data: Rc::new(RefCell::new(RegisterData::default())),
+            step: Rc::new(Mutable::new({
+                if user.is_some() {
+                    Step::One
+                } else {
+                    Step::Start
+                }
+            })),
+            data: Rc::new(RefCell::new(user.into())),
         });
         _self
     }
@@ -47,7 +54,6 @@ impl RegisterPage  {
                     Step::One => RegisterStep1::render(RegisterStep1::new(_self.step.clone(), _self.data.clone())),
                     Step::Two=> RegisterStep2::render(RegisterStep2::new(_self.step.clone(), _self.data.clone())),
                     Step::Three=> RegisterStep3::render(RegisterStep3::new(_self.step.clone(), _self.data.clone())),
-                    Step::ConfirmEmail=> RegisterConfirmEmail::render(RegisterConfirmEmail::new(_self.step.clone(), _self.data.clone())),
                     Step::Final=> RegisterFinal::render(RegisterFinal::new(_self.step.clone(), _self.data.clone())),
                 })
             })))

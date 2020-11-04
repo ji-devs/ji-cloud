@@ -13,27 +13,30 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
-
+use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 /*
 mod page;
 mod pages;
 mod header;
 */
 #[wasm_bindgen(start)]
-pub fn main_js() {
+pub async fn main_js() {
     setup_logger();
     let settings = core::settings::init();
-    utils::firebase::setup(&settings);
-    //init dom stuff
 
-    let router = router::Router::new();
-    dominator::append_dom(&dominator::body(), router.render());
-    /*
 
-    let page = page::Page::new();
 
-    dominator::append_dom(&dominator::body(), page.render());
-	*/
+    let promise = unsafe { utils::firebase::init_firebase(settings.firebase_dev) };
+
+    match JsFuture::from(promise).await {
+        Ok(_) => {
+            let router = router::Router::new();
+            dominator::append_dom(&dominator::body(), router.render());
+        },
+        Err(err) => {
+            log::error!("could not initialize firebase!"); 
+        }
+    }
 }
 
 

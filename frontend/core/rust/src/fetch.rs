@@ -37,15 +37,6 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 //either a serialized error or a native error (like 401, 403, etc.)
 
-pub async fn upload_file(url:&str, file:&File, method:&str) -> Result<(), anyhow::Error> {
-
-    let csrf = load_csrf_token().unwrap();
-
-    fetch_upload_file_with_headers(url, file, method, true,&vec![(CSRF_HEADER_NAME, &csrf)])
-        .await
-        .map(|res| ())
-        .map_err(|err| anyhow::Error::msg(err.to_string()))
-}
 
 fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
 
@@ -65,6 +56,19 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
         (url, data)
     }
 }
+
+pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), anyhow::Error> {
+
+    let (url, _) = api_get_query::<()>(endpoint, method, None);
+
+    let csrf = load_csrf_token().unwrap();
+
+    fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)])
+        .await
+        .map(|res| ())
+        .map_err(|err| anyhow::Error::msg(err.to_string()))
+}
+
 pub async fn api_no_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
 

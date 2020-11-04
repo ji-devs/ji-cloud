@@ -46,6 +46,23 @@ impl SigninPage {
     
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::signin(), {
+            .future(_self.status.signal_cloned().for_each(|status| {
+                if let Some(status) = status {
+                    match status {
+                        SigninStatus::ConfirmEmail => {
+                            let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                            dominator::routing::go_to_url(&route);
+                        },
+                        SigninStatus::NoSuchDbUser(user) => {
+                            let route:String = Route::User(UserRoute::ContinueRegistration(user)).into();
+                            dominator::routing::go_to_url(&route);
+                        },
+                        _ => {}
+                    }
+                }
+                ready(())
+            }))
+
             .with_data_id!("email-signin", {
                 .event(clone!(_self => move |_evt:events::Click| {
                     _self.status.set(Some(SigninStatus::Busy));

@@ -13,35 +13,34 @@ use shared::{
         user::{Profile, Register, Signin, SingleSignOn, UserLookup},
         ApiEndpoint,
     },
-    domain::auth::{
-        AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
+    domain::{
+        auth::{AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
+        user::UserLookupQuery,
     },
-    domain::user::OtherUser,
-    domain::user::UserLookupQuery,
-    error::auth::RegisterError,
-    error::user::NoSuchUserError,
-    error::InternalServerError,
+    error::{auth::RegisterError, user::NoSuchUserError, InternalServerError},
 };
 use sqlx::PgPool;
 
 async fn user_lookup(
     db: Data<PgPool>,
     query: Query<UserLookupQuery>,
-) -> Result<Option<Json<OtherUser>>, InternalServerError> {
+) -> actix_web::Result<Json<<UserLookup as ApiEndpoint>::Res>> {
     let query = query.into_inner();
 
     if query.id.is_none() && query.firebase_id.is_none() && query.name.is_none() {
-        return Ok(None);
+        return Err(HttpResponse::NotFound().json(NoSuchUserError {}).into());
     }
 
-    Ok(db::user::lookup(
+    db::user::lookup(
         db.as_ref(),
         query.id,
         query.firebase_id.as_deref(),
         query.name.as_deref(),
     )
-    .await?
-    .map(Json))
+    .await
+    .map_err(InternalServerError::from)?
+    .map(Json)
+    .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
 async fn handle_signin_credentials(

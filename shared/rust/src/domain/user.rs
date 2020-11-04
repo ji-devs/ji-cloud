@@ -23,6 +23,9 @@ pub enum UserScope {
 
     /// The user can create/delete/modify jigs.
     ManageJig = 4,
+
+    /// The user can create/delete/modify module.
+    ManageModule = 5,
 }
 
 impl TryFrom<i16> for UserScope {
@@ -132,5 +135,5 @@ pub struct UserProfile {
     /// The user's location
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geocode: Option<String>,
+    pub location: Option<serde_json::Value>,
 }

@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use core::firebase::*;
 
 pub type Token = String;
 pub type Email = String;
@@ -9,7 +10,6 @@ pub enum Step {
     One,
     Two,
     Three,
-    ConfirmEmail,
     Final
 }
 
@@ -22,13 +22,27 @@ pub struct RegisterData {
     pub family_name: Option<String>,
     pub edu_resources: bool,
     pub lang: Option<String>,
-    pub location_json: Option<String>,
+    pub location_json: Option<serde_json::Value>,
     pub affiliations: HashSet<String>,
     pub age_ranges: HashSet<String>,
     pub subjects: HashSet<String>,
     pub confirmed_email: bool,
 }
 
+impl From<Option<FirebaseUserInfo>> for RegisterData {
+    fn from(user:Option<FirebaseUserInfo>) -> Self {
+        let mut data = Self::default();
+
+        //continue registration flow
+        if let Some(user) = user {
+            data.token = Some(user.token().to_string());
+            data.email = Some(user.email().to_string());
+            data.confirmed_email = user.email_verified();
+        }
+
+        data
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum RegisterStatus {

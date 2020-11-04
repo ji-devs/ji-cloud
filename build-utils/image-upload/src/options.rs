@@ -21,7 +21,7 @@ pub struct Opts {
     pub batch_size: usize,
 
     /// dry run 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub dry_run: bool,
 
     /// limit (debugging only) 
@@ -40,9 +40,9 @@ pub struct Opts {
 impl Opts {
     pub fn sanitize(&mut self) {
         if self.debug {
-            log::warn!("sanitization: forcing dry_run since debug is true");
-            self.dry_run = true;
-            self.remote_target = "local".to_string();
+            //log::warn!("sanitization: forcing dry_run since debug is true");
+            //self.dry_run = true;
+            //self.remote_target = "local".to_string();
         } 
     }
 

@@ -97,9 +97,9 @@ test.beforeEach(async (t) => {
         GOOGLE_S3_ACCESS_KEY: '',
         GOOGLE_S3_ACCESS_SECRET: '',
         DISABLE_GOOGLE_CLOUD: true,
-        PROJECT_ID: "",
-        ALGOLIA_APPLICATION_ID: "",
-        ALGOLIA_KEY: "",
+        PROJECT_ID: '',
+        ALGOLIA_APPLICATION_ID: '',
+        ALGOLIA_KEY: '',
         ALGOLIA_LOCAL_DISABLE_CLIENT: true,
     };
 
@@ -118,7 +118,7 @@ test.beforeEach(async (t) => {
     });
 });
 
-test.afterEach.always("kill server", async (t) => {
+test.afterEach.always('kill server', async (t) => {
     if (t.context.server) {
         try {
             t.context.server.child.kill('SIGKILL');
@@ -173,7 +173,7 @@ test('register user', async (t) => {
             opt_into_edu_resources: true,
             over_18: true,
             timezone: 'US/Pacific-New',
-            organization: 'test organization'
+            organization: 'test organization',
         },
         responseType: 'json',
         headers: {
@@ -215,7 +215,7 @@ async function registerDuplicateUserError(t, args) {
     t.snapshot(error.response.body);
 }
 
-registerDuplicateUserError.title = (providedTitle = 'register duplicate user error', args) => `${providedTitle} (${args.key != '' ? args.key : 'id'})`;
+registerDuplicateUserError.title = (providedTitle = 'register duplicate user error', args) => `${providedTitle} (${args.key !== '' ? args.key : 'id'})`;
 
 test(registerDuplicateUserError, { jwt: TEST_JWT, key: '', value: '' });
 test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'username', value: 'test' });
@@ -258,10 +258,56 @@ test('create category', async (t) => {
 
     t.deepEqual(typeof (category.body.id), 'string');
     t.deepEqual(typeof (category.body.index), 'number');
-})
+});
 
-test.todo('delete category');
-test.todo('update category');
+function assertCategoryUpdatedAt(t, categories) {
+    categories.forEach((it) => {
+        if (it.children) {
+            assertCategoryUpdatedAt(t, it.children);
+        }
+
+        t.true(it.updated_at === null || typeof (it.updated_at) === 'string');
+        delete it.updated_at;
+    });
+}
+
+test('delete category', async (t) => {
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
+    await t.notThrowsAsync(got.delete(
+        'http://0.0.0.0/v1/category/7fe19326-e883-11ea-93f0-5343493c17c4',
+        t.context.loggedInReqBase,
+    ));
+
+    const { body: resp } = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
+
+    assertCategoryUpdatedAt(t, resp.categories);
+
+    t.snapshot(resp);
+});
+
+async function updateCategoryFactory(t, args) {
+    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    await t.notThrowsAsync(got.patch(`http://0.0.0.0/v1/category/${args.category}`, {
+        ...t.context.loggedInReqBase,
+        json: args.json,
+    }));
+
+    const { body: resp } = await got.get('http://0.0.0.0/v1/category?scope=Decendants', t.context.loggedInReqBase);
+
+    assertCategoryUpdatedAt(t, resp.categories);
+
+    t.snapshot(resp);
+}
+
+updateCategoryFactory.title = (providedTitle = 'update category', args) => `${providedTitle} - (id: ${args.category}, ${JSON.stringify(args.json)})`;
+
+// todo: combine the following several tests into a test factory.
+
+test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', json: { parent_id: '81c4796a-e883-11ea-93f0-df2484ab6b11' } });
+test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', json: { parent_id: null, index: 0 } });
+test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { index: 1 } });
+test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { name: 'abc123' } });
 
 test('get categories', async (t) => {
     await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
@@ -281,17 +327,17 @@ async function getNestedCategories(t, options) {
 
 getNestedCategories.title = (providedTitle = '', meta) => {
     const {
-        scope, ids
+        scope, ids,
     } = {
         scope: null, ids: [], ...meta,
     };
 
     let title;
 
-    if (providedTitle != '') {
+    if (providedTitle !== '') {
         title = `get categories nested - ${providedTitle}`;
     } else {
-        title = 'get categories nested'
+        title = 'get categories nested';
     }
 
     return `${title} - scope=${scope || ''}, ids=${ids}`;
@@ -299,16 +345,16 @@ getNestedCategories.title = (providedTitle = '', meta) => {
 
 test('top level', getNestedCategories);
 test('whole tree', getNestedCategories, {
-    scope: "Decendants",
+    scope: 'Decendants',
 });
 
 test('tree overlapping', getNestedCategories, {
-    scope: "Decendants",
+    scope: 'Decendants',
     ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
 });
 
 test('ancestors', getNestedCategories, {
-    scope: "Ancestors",
+    scope: 'Ancestors',
     ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
 });
 
@@ -324,7 +370,7 @@ test('update category ordering', async (t) => {
         ...t.context.loggedInReqBase,
         json: {
             index: 0,
-        }
+        },
     });
 
     t.deepEqual(updateResp.statusCode, 204);
@@ -332,7 +378,7 @@ test('update category ordering', async (t) => {
     let categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
 
     // ignore updated at (but make sure it exists, and is a string)
-    categories.body.categories.forEach(it => {
+    categories.body.categories.forEach((it) => {
         t.deepEqual(typeof (it.updated_at), 'string');
         delete it.updated_at;
     });
@@ -343,7 +389,7 @@ test('update category ordering', async (t) => {
         ...t.context.loggedInReqBase,
         json: {
             index: 2,
-        }
+        },
     });
 
     t.deepEqual(revertResp.statusCode, 204);
@@ -351,13 +397,13 @@ test('update category ordering', async (t) => {
     categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
 
     // ignore updated at (but make sure it exists, and is a string)
-    categories.body.categories.forEach(it => {
+    categories.body.categories.forEach((it) => {
         t.deepEqual(typeof (it.updated_at), 'string');
         delete it.updated_at;
     });
 
     t.snapshot(categories.body);
-})
+});
 
 test('GET metadata', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.FIXTURES_DIR);
@@ -446,7 +492,7 @@ test.todo('DELETE image');
 test.todo('PATCH image/raw (upload image)');
 
 // todo: test builder
-test('update image - empty', async t => {
+test('update image - empty', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
@@ -456,13 +502,13 @@ test('update image - empty', async t => {
     t.snapshot(resp.body.metadata);
 });
 
-test('update image - is_premium', async t => {
+test('update image - is_premium', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { is_premium: true } }));
 
     const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
-    const metadata = resp.body.metadata;
+    const { metadata } = resp.body;
 
     // can't snapshot update timestamps for obvious reasons.
     t.deepEqual(typeof (metadata.updated_at), 'string');
@@ -471,13 +517,13 @@ test('update image - is_premium', async t => {
     t.snapshot(metadata);
 });
 
-test('update image - two styles', async t => {
+test('update image - two styles', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await t.notThrowsAsync(got.patch('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', { ...t.context.loggedInReqBase, json: { styles: ['6389eaa0-de76-11ea-b7ab-0399bcf84df2', '6389ff7c-de76-11ea-b7ab-9b5661dd4f70'] } }));
 
     const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
-    const metadata = resp.body.metadata;
+    const { metadata } = resp.body;
 
     // can't snapshot update timestamps for obvious reasons.
     // t.deepEqual(typeof (metadata.updated_at), 'string');

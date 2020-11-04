@@ -29,27 +29,6 @@ use core::{
 };
 use crate::utils::firebase::*;
 use super::super::data::*;
-pub struct RegisterConfirmEmail {
-    pub step: Rc<Mutable<Step>>,
-    pub data: Rc<RefCell<RegisterData>>,
-}
-
-impl RegisterConfirmEmail {
-    pub fn new(step:Rc<Mutable<Step>>, data: Rc<RefCell<RegisterData>>) -> Rc<Self> {
-        let _self = Rc::new(Self { 
-            data,
-            step
-        });
-
-
-        _self
-    }
-    
-    pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::register_sent_email(), { })
-    }
-
-}
 
 pub struct RegisterFinal {
     pub step: Rc<Mutable<Step>>,

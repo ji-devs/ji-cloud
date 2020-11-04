@@ -2,6 +2,7 @@ pub(crate) mod category;
 pub(crate) mod image;
 pub(crate) mod jig;
 pub(crate) mod meta;
+pub(crate) mod module;
 pub(crate) mod user;
 
 use config::DB_POOL_CONNECTIONS;

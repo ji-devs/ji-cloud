@@ -1,19 +1,27 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import emailConfirmation from "@templates/user/email-confirmation.html";
-import emailChange from "@templates/user/email-change.html";
-import forgotPassword from "@templates/user/forgot-password.html";
+
+import {appendId, toggleClassesId, setTextId, setValueId, setAttributeId} from "@utils/dom";
+import gotEmailConfirmation from "@templates/user/misc/got-email-confirmation.html";
+import sendEmailConfirmation from "@templates/user/misc/send-email-confirmation.html";
+import forgotPassword from "@templates/user/misc/forgot-password.html";
 
 export default {
   title: 'User/Misc',
 }
 
-export const EmailConfirmation = () => {
-    const page = tmpl(emailConfirmation);
+export const SendEmailConfirmationNotification = () => {
+    const page = tmpl(sendEmailConfirmation);
+
+    toggleClassesId(page, "resend-email", ["hidden"], true);
     return page;
 }
-
-export const EmailChange = () => {
-    const page = tmpl(emailChange);
+export const SendEmailConfirmationDone = () => {
+    const page = tmpl(sendEmailConfirmation);
+    toggleClassesId(page, "sent-notification", ["hidden"], true);
+    return page;
+}
+export const GotEmailConfirmation = () => {
+    const page = tmpl(gotEmailConfirmation);
     return page;
 }
 

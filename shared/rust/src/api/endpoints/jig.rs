@@ -1,7 +1,14 @@
-use crate::{api::Method, domain::jig::{CreateRequest, CreateResponse, GetResponse, UpdateRequest}, error::{
+use crate::{
+    api::Method,
+    domain::{
+        jig::{CreateRequest, GetResponse, JigId, UpdateRequest},
+        CreateResponse,
+    },
+    error::{
         jig::{CreateError, UpdateError},
         DeleteError, GetError,
-    }};
+    },
+};
 
 use super::ApiEndpoint;
 
@@ -19,7 +26,7 @@ impl ApiEndpoint for Get {
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = CreateRequest;
-    type Res = CreateResponse;
+    type Res = CreateResponse<JigId>;
     type Err = CreateError;
     const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Post;

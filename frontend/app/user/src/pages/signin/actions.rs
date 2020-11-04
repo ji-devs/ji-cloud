@@ -4,7 +4,7 @@ use shared::{
     error::user::NoSuchUserError,
 };
 use core::{
-    routes::{Route, UserRoute},
+    routes::*,
     fetch::api_with_token,
     storage,
 };
@@ -19,10 +19,14 @@ use futures::future::ready;
 //temp
 use futures::future::poll_fn;
 use futures::task::{Context, Poll};
+
+pub type FirebaseId = String;
+
 #[derive(Debug, Clone)]
 pub enum SigninStatus {
     Busy,
-    NoSuchUser,
+    NoSuchFirebaseUser,
+    NoSuchDbUser(FirebaseUserInfo),
     BadPassword,
     UnknownFirebase,
     Technical,
@@ -31,17 +35,23 @@ pub enum SigninStatus {
     ConfirmEmail
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum SigninKind {
+    Google,
+    Email
+}
+
 impl SigninStatus {
     pub fn to_string(&self) -> String {
         match self {
             Self::Busy => "logging in...",
-            Self::NoSuchUser => "no such user!",
+            Self::NoSuchFirebaseUser => "no such user!",
             Self::BadPassword => "wrong password!",
-            Self::Technical => "technical error!",
             Self::UnknownFirebase => "firebase error!",
             Self::PasswordResetSent => "password reset link sent!",
             Self::InvalidEmail => "invalid email",
-            Self::ConfirmEmail => "need to confirm your email!"
+            Self::ConfirmEmail => "need to confirm your email!",
+            _ => "technical error!"
         }.to_string()
     }
 
@@ -49,11 +59,16 @@ impl SigninStatus {
         match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
             Ok(err) => {
                 let code:&str = err.code.as_ref();
+                log::info!("{}", code);
                 let status = match code {
                     "auth/wrong-password" => Self::BadPassword,
-                    "auth/user-not-found" => Self::NoSuchUser,
+                    "auth/user-not-found" => Self::NoSuchFirebaseUser,
                     "auth/invalid-email" => Self::InvalidEmail,
-                    "internal/confirm-email" => Self::ConfirmEmail,
+                    "internal/confirm-email" => {
+                        let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+                        dominator::routing::go_to_url(&route);
+                        Self::ConfirmEmail
+                    },
                     _ => {
                         log::warn!("firebase error: {}", code);
                         Self::UnknownFirebase
@@ -72,7 +87,7 @@ impl SigninStatus {
 pub fn do_success(page:&SigninPage, csrf:String) {
     storage::save_csrf_token(&csrf);
 
-    let route:String = Route::User(UserRoute::Profile).into();
+    let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
     dominator::routing::go_to_url(&route);
 
     ///generally speaking this kind of thing isn't necessary
@@ -87,35 +102,60 @@ pub fn do_success(page:&SigninPage, csrf:String) {
 
 pub async fn signin_google() -> Result<String, Option<SigninStatus>> {
     let token_promise = unsafe { firebase_signin_google() };
-    signin_firebase(token_promise, true).await
+    signin(token_promise, SigninKind::Google).await
 }
 
 pub async fn signin_email(email:&str, password: &str) -> Result<String, Option<SigninStatus>> {
     let token_promise = unsafe { firebase_signin_email(&email, &password) };
-    signin_firebase(token_promise, false).await
+    signin(token_promise, SigninKind::Email).await
 }
 
-async fn signin_firebase(token_promise:js_sys::Promise, error_is_cancel:bool) -> Result<String, Option<SigninStatus>> {
+async fn signin(token_promise:js_sys::Promise, kind:SigninKind) -> Result<String, Option<SigninStatus>> {
+    match signin_firebase(token_promise, kind).await {
+        Ok(user) => {
+            signin_api(user).await
+        },
+        Err(err) => Err(err)
+    }
+}
+
+async fn signin_firebase(token_promise:js_sys::Promise, kind:SigninKind) -> Result<FirebaseUserInfo, Option<SigninStatus>> {
     match JsFuture::from(token_promise).await {
-        Ok(token) => {
-            let token = token.as_string().unwrap_throw();
-            let resp:Result<SigninSuccess, NoSuchUserError> = 
-                api_with_token::< _, _, ()>(&Signin::PATH, &token, Signin::METHOD, None).await;
-            
-            match resp {
-                Ok(data) => Ok(data.csrf), 
-                Err(_) => Err(Some(SigninStatus::NoSuchUser))
-            }
+        Ok(user) => {
+            Ok(
+                match kind {
+                    SigninKind::Email => FirebaseUserInfo::Email(serde_wasm_bindgen::from_value(user).unwrap_throw()),
+                    SigninKind::Google => FirebaseUserInfo::Google(serde_wasm_bindgen::from_value(user).unwrap_throw()),
+                }
+            )
         },
         Err(err) => {
-            if error_is_cancel {
-                Err(None)
+            let err_status = SigninStatus::from_firebase_err(err);
+            //always return errors for email method
+            //if google, only if the error is ConfirmEmail
+            if kind == SigninKind::Email {
+                Err(Some(err_status))
             } else {
-                Err(Some(SigninStatus::from_firebase_err(err)))
+                match err_status {
+                    SigninStatus::ConfirmEmail => Err(Some(err_status)),
+                    _ => Err(None)
+                }
             }
         }
     }
 }
+
+async fn signin_api(user:FirebaseUserInfo) -> Result<String, Option<SigninStatus>> {
+
+    let resp:Result<SigninSuccess, NoSuchUserError> = 
+        api_with_token::< _, _, ()>(&Signin::PATH, &user.token(), Signin::METHOD, None).await;
+    
+    match resp {
+        Ok(data) => Ok(data.csrf), 
+        Err(_) => Err(Some(SigninStatus::NoSuchDbUser(user)))
+    }
+}
+
 
 
 pub async fn forgot_password(email:&str) -> Result<(), SigninStatus> {
