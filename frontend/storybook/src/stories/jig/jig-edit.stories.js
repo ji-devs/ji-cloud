@@ -60,7 +60,7 @@ function makeModule(idx) {
     setTextId(module, "subtitle", `Subtitle ${idx+1}`);
 
     if(idx == 1) {
-        setAttributeId(module, "img", "src", `${MEDIA_UI}/icn-module-poster2.png`);
+        setAttributeId(module, "img", "src", `${MEDIA_UI}/Icn_Activity_Poster_124.svg`);
     }
     return module;
 }

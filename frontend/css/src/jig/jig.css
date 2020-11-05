@@ -178,3 +178,9 @@ select {
   background-color: #EDF7FF !important;
   border: dashed 2px #5590fc;
 }
+
+.module-icon{transition: all .2s ease-in-out;}
+
+.module-icon:hover{
+transform: scale(1.1);
+}
