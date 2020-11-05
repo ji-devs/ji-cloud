@@ -171,6 +171,7 @@ module.exports = {
         160: '160px',
         177: '177px',
         185: '185px',
+        208: '208px',
         216: '216px',
         262: '262px',
         293: '293px',
@@ -251,7 +252,7 @@ module.exports = {
       spacing:{
         18:'18px',
       },
-    
+
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
         'poster': `url('${MEDIA_UI}/Icn_Module_Poster.svg')`

@@ -2,10 +2,10 @@
 {% import "_common/input/input-macros.html" as Input %}
 
 <div class="flex bg-jibackgroundBlue  h-full min-h-screen">
-  <div class="sidebar w-72 bg-white h-auto min-h-screen  shadow-sm flex flex-col items-center">
+  <div class="sidebar w-72 bg-white h-auto min-h-screen flex-shrink-0 shadow-sm flex flex-col items-center">
     <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8 ml-auto mr-auto">
     <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
-    <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
+    <img src="{{MEDIA_UI}}/JIG_illustration_Small@2x.png" alt="" class="mb-4">
     <div class="h-160 bg-jibackgroundGrey border-l-8 border-jibuttonBlue w-full pt-4 pl-2">
       <h1 class="text-jibuttonBlue font-bold">01</h1>
     </div>
@@ -13,7 +13,7 @@
       <h1 class="text-jibuttonBlue font-bold">02</h1>
     </div>
   </div>
-  <div class="bg-white ml-6 min-w-516 ">
+  <div class="bg-white ml-10 w-516 flex-shrink-0">
     <div class="flex p-8">
       <div class="">
         <p>Select</p>
@@ -62,8 +62,8 @@
         {{ ButtonMacros::bluejig(label="Record", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
       </div>
       <!-- This div displayed when finished recording -->
-      <div class="flex mt-6 items-center">
-        <p class="w-1/3 text-jibuttonBlue">Clear</p>
+      <div class="flex mt-6 items-center justify-center playbutton relative">
+
         {{ ButtonMacros::bluejig(label="Play", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
 
       </div>
@@ -105,10 +105,10 @@
       <h1 class="text-jititleorange text-4xl font-light mb-4">Create a Cover Page</h1>
       <p class="font-light text-lg">Introduce your topic</p>
       <p class="font-light text-lg">Use the blue panel for selecting layouts, themes, and adding content</p>
-      <div class="w-1212 h-681 bg-white shadow-xl mt-4 rounded-sm pt-16:9 mb-4">
+      <div class="w-1212 h-681 bg-white shadow-xl mt-4 rounded-sm mb-4 jig-preview">
 
       </div>
-      <div class="flex justify-end w-full">
+      <div class="flex justify-end w-full pr-6">
         {{ ButtonMacros::orange(label="Done", dataId="next") }}
       </div>
 
