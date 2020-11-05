@@ -36,6 +36,8 @@ impl TryFrom<i16> for UserScope {
             1 => Ok(Self::Admin),
             2 => Ok(Self::ManageCategory),
             3 => Ok(Self::ManageImage),
+            4 => Ok(Self::ManageJig),
+            5 => Ok(Self::ManageModule),
             _ => Err(()),
         }
     }
