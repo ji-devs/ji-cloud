@@ -17,6 +17,7 @@ const EDIT_MENU_SECTION:&'static str = "@templates/jig/edit/menu.html";
 const EDIT_DELETE_POPUP:&'static str = "@templates/jig/edit/delete-popup.html";
 const EDIT_MODULE_LEFT:&'static str = "@templates/jig/edit/sidebar-module-left.html";
 const EDIT_MODULE_RIGHT:&'static str = "@templates/jig/edit/sidebar-module-right.html";
+const EDIT_MODULE_DRAG_SLOT:&'static str = "@templates/jig/edit/sidebar-module-drag-slot.html";
 const EDIT_MODULE_SELECTION:&'static str = "@templates/jig/edit/module-selection.html";
 
 pub fn gallery() -> HtmlElement {
@@ -39,6 +40,9 @@ pub fn edit_module_left() -> HtmlElement {
 }
 pub fn edit_module_right() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_RIGHT))
+}
+pub fn edit_module_drag_slot() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_DRAG_SLOT))
 }
 pub fn edit_module_selection() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(EDIT_MODULE_SELECTION))
@@ -66,6 +70,7 @@ impl Templates {
             (EDIT_DELETE_POPUP, get_template_str(include_str!("../../../../.template_output/jig/edit/delete-popup.html"))),
             (EDIT_MODULE_LEFT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-left.html"))),
             (EDIT_MODULE_RIGHT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-right.html"))),
+            (EDIT_MODULE_DRAG_SLOT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-drag-slot.html"))),
             (EDIT_MODULE_SELECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/module-selection.html"))),
         ]);
 
