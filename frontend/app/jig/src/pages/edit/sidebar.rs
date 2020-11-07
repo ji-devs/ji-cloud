@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
-use web_sys::{HtmlElement, Element, HtmlInputElement};
+use web_sys::{HtmlElement, Element, HtmlImageElement, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
@@ -27,7 +27,8 @@ use shared::domain::{
     image::ImageKind,
     jig::ModuleKind,
 };
-
+use super::scrolling::*;
+use super::dragging::*;
 use super::data::*;
 #[derive(Clone, Copy, Debug)]
 enum HorizontalDirection {
@@ -42,9 +43,10 @@ pub struct Sidebar {
     pub ending: Mutable<Option<Id>>,
     pub modules: Rc<MutableVec<Module>>,
     pub menu_index: Mutable<Option<usize>>, //which menu is currently open
-    pub drag_index: RefCell<Option<usize>>, //target of current drag
-    //pub drag_index: Mutable<Option<usize>>, //target of current drag
-    //pub drop_index: Mutable<Option<usize>>, //target of current drag
+    pub drag_index: Mutable<Option<usize>>, //target of current drag
+    pub scrolling: Scrolling,
+    pub dragging: RefCell<Dragging>,
+    pub element: RefCell<Option<Element>>,
 }
 
 impl Sidebar {
@@ -56,7 +58,10 @@ impl Sidebar {
             ending: Mutable::new(jig.ending),
             modules: Rc::new(MutableVec::new_with_values(jig.modules)),
             menu_index: Mutable::new(None),
-            drag_index: RefCell::new(None),
+            drag_index: Mutable::new(None),
+            scrolling: Scrolling::new(),
+            dragging: RefCell::new(Dragging::new()),
+            element: RefCell::new(None),
         });
 
         _self
@@ -64,6 +69,12 @@ impl Sidebar {
 
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::edit_sidebar_section(), {
+            .future(_self.drag_index.signal().for_each(clone!(_self => move |index| {
+                if index.is_none() {
+                    _self.scrolling.stop();
+                }
+                ready(())
+            })))
             .with_data_id!("title" => HtmlInputElement, {
                 .with_node!(input => {
                     .event(clone!(_self => move |evt:events::Input| {
@@ -91,21 +102,62 @@ impl Sidebar {
                         })
                 )
             })
+
+            .with_data_id!("hover-module", {
+                .visible_signal(_self.dragging.borrow().active_signal())
+                .style_signal("top", _self.dragging.borrow().top_style_signal())
+                .style_signal("left", _self.dragging.borrow().left_style_signal())
+                .with_data_id!("hover-module-img", {
+                    .property_signal("src", {
+                        _self.dragging.borrow().module_signal().map(|module| {
+                            match module{
+                                Some(module) => module.kind.get_thumbnail(),
+                                None => "".to_string()
+                            }
+                        })
+                    })
+                })
+            })
+
+            .after_inserted(clone!(_self => move |elem| {
+                *_self.element.borrow_mut() = Some(elem.unchecked_into());
+            }))
+
+            .global_event(clone!(_self => move |evt:events::MouseMove| {
+                _self.dragging.borrow_mut().on_move(evt.x(), evt.y());
+                    
+                /*
+                if _self.scrolling.is_active() {
+                    _self.scrolling.start(evt.mouse_y());
+                }
+                */
+            }))
+
+            .global_event(clone!(_self => move |evt:events::MouseUp| {
+                _self.dragging.borrow_mut().stop_drag();
+                //_self.dragging.on_finish(evt.x(), evt.y());
+                /*
+                if _self.scrolling.is_active() {
+                    _self.scrolling.start(evt.mouse_y());
+                }
+                */
+
+            }))
         })
     }
 
     //Converts the modules into the renderable list
     //
     //It does this
-    //By removing the module at the drag_index
-    //And setting the space at the drop_index to a None
+    //By removing the module at the src_index
+    //Setting the space at dest_index
     //
     fn renderable_modules(_self: Rc<Self>) -> impl SignalVec<Item = Rc<ModuleDom>> {
         
         _self.modules
             .signal_vec_cloned()
             .enumerate()
-            .map_signal(move |(index, module)| {
+            .map_signal(clone!(_self => move |(index, module)| {
                 index.signal().map(clone!(_self => move |index| {
                     let direction = {
                         if let Some(index) = index {
@@ -118,15 +170,15 @@ impl Sidebar {
                             HorizontalDirection::Right
                         }
                     };
-
                     Rc::new(ModuleDom { 
-                        module: module.clone(), 
-                        direction, 
-                        index: index.unwrap_or(0),
-                        sidebar: _self.clone(),
+                            module: module.clone(), 
+                            direction, 
+                            index: index.unwrap_or(0),
+                            sidebar: _self.clone(),
+                            img_size: RefCell::new(None)
                     })
                 }))
-            })
+            }))
     }
 }
 
@@ -134,11 +186,14 @@ struct ModuleDom {
     pub module: Module,
     pub direction: HorizontalDirection,
     pub index: usize,
-    pub sidebar: Rc<Sidebar>
+    pub sidebar: Rc<Sidebar>,
+    pub img_size: RefCell<Option<(f64, f64)>>,
 }
 
 impl ModuleDom {
-    fn render(_self: Rc<Self>) -> Dom {
+
+    fn render(_self:Rc<Self>) -> Dom {
+        let dragging = &mut *_self.sidebar.dragging.borrow_mut();
         let elem = {
             match _self.direction {
                 HorizontalDirection::Right => templates::edit_module_right(),
@@ -146,109 +201,102 @@ impl ModuleDom {
             }
         };
         elem!(elem, {
-            .with_data_id!("add-btn", {
-                .event(clone!(_self => move |evt:events::Click| {
-                    add_empty_module(_self.sidebar.clone(), _self.index+1);
-                }))
-            })
-            .with_data_id!("menu", {
-                .child_signal(_self.sidebar.menu_index.signal_ref(clone!(_self => move |menu_index| {
-                    menu_index.and_then(|menu_index| {
-                        if menu_index == _self.index {
-                            Some(MenuDom::render(Rc::new(MenuDom {
-                                module_id: _self.module.id.clone(),
-                                module_kind: _self.module.kind.clone(),
-                                index: _self.index,
-                                sidebar: _self.sidebar.clone()
-                            })))
+            .with_node!(div => {
+                .visible_signal(clone!(_self => map_ref! {
+                    let src_index = dragging.src_index_signal(),
+                    let dest_index = dragging.dest_index_signal()
+                    => move {
+                        if *src_index == Some(_self.index) && *dest_index != Some(_self.index) 
+                        {
+                            false
                         } else {
-                            None
+                            true
                         }
+                    }
+                }))
+
+                .with_data_id!("add-btn", {
+                    .event(clone!(_self => move |evt:events::Click| {
+                        add_empty_module(_self.sidebar.clone(), _self.index+1);
+                    }))
+                })
+                .with_data_id!("menu", {
+                    .child_signal(_self.sidebar.menu_index.signal_ref(clone!(_self => move |menu_index| {
+                        menu_index.and_then(|menu_index| {
+                            if menu_index == _self.index {
+                                Some(MenuDom::render(Rc::new(MenuDom {
+                                    module_id: _self.module.id.clone(),
+                                    module_kind: _self.module.kind.clone(),
+                                    index: _self.index,
+                                    sidebar: _self.sidebar.clone()
+                                })))
+                            } else {
+                                None
+                            }
+                        })
+                    })))
+                })
+                .with_data_id!("menu-btn", {
+                    .event(clone!(_self => move |evt:events::Click| {
+                        _self.sidebar.menu_index.set(Some(_self.index));
+                    }))
+                })
+                .with_data_id!("img" => HtmlImageElement, {
+                    .with_node!(elem => {
+                        .property("src", _self.module.kind.get_thumbnail())
+                        //TODO - change to Load Event
+                        .after_inserted(clone!(_self => move |_| {
+                            *_self.img_size.borrow_mut() = Some((160.0, 160.0));
+                        }))
                     })
-                })))
-            })
-            .with_data_id!("menu-btn", {
-                .event(clone!(_self => move |evt:events::Click| {
-                    _self.sidebar.menu_index.set(Some(_self.index));
+                })
+                .event(clone!(_self => move |evt:events::MouseDown| {
+                    match (_self.img_size.borrow().as_ref(), _self.sidebar.element.borrow().as_ref()) {
+                        (Some(img_size), Some(parent_elem)) => {
+                            let modules:Vec<Element> = parent_elem.select_vec(&data_id("module-container"));
+                            _self.sidebar.dragging.borrow().start_drag(
+                                _self.index, 
+                                evt.x(), evt.y(), 
+                                img_size.0, img_size.1,
+                                _self.module.clone(), 
+                                modules,
+                            );
+                        }
+                        _ => {}
+                    }
+                }))
+                .event_preventable(clone!(_self => move |evt:events::DragOver| {
+                    if let Some(data_transfer) = evt.data_transfer() {
+                        if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
+                            if _self.module.kind.is_none() {
+                                evt.prevent_default();
+                            } 
+                        }                     }
+
+                }))
+
+
+                .event(clone!(_self => move |evt:events::Drop| {
+                    _self.sidebar.drag_index.set(None);
+
+                    if let Some(data_transfer) = evt.data_transfer() {
+                        let module_kind:Option<ModuleKind> = 
+                            data_transfer.get_data("module_kind")
+                                .ok()
+                                .and_then(|data| module_kind_from_str(&data));
+
+                        if let Some(kind) = module_kind {
+                            assign_module_kind(_self.sidebar.clone(), _self.index, _self.module.id.clone(), kind);
+
+                        }
+                    }
                 }))
             })
-            .with_data_id!("img", {
-                .property("src", {
-
-                    let media_url = unsafe {
-                        SETTINGS.get_unchecked().remote_target.media_ui_url()
-                    };
-                    let icon_path = match &_self.module.kind {
-                        //TODO - get icon
-                        Some(kind) => {
-                            match kind {
-                                ModuleKind::Poster => "icn-module-poster2.png",
-                                ModuleKind::MemoryGame => "module-memory-game.svg",
-                                _ => {
-                                    panic!("don't have the icon for that module kind!");
-                                }
-                            }
-                        },
-                        None => "JIG_Gear@2x.png"
-                    };
-
-                    format!("{}/{}", media_url, icon_path)
-                })
-            })
-            .event_preventable(clone!(_self => move |evt:events::DragOver| {
-                let mut is_drag_target = false;
-                if let Some(data_transfer) = evt.data_transfer() {
-                    if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                        if _self.module.kind.is_none() {
-                            is_drag_target = true;
-                        } 
-                    } else if data_transfer.types().index_of(&JsValue::from_str("module_order"), 0) != -1 {
-
-                        let src_index = { *_self.sidebar.drag_index.borrow() };
-
-                        if let Some(src_index) = src_index { 
-                            is_drag_target = true;
-                            let dest_index = _self.index;
-
-                            if src_index != dest_index {
-                                *_self.sidebar.drag_index.borrow_mut() = Some(dest_index);
-                                swap_module_index(_self.sidebar.clone(), src_index, dest_index);
-                            }
-                        }
-                    }
-                }
-
-                if is_drag_target {
-                    evt.prevent_default();
-                }
-            }))
-
-            .event(clone!(_self => move |evt:events::DragStart| {
-                if let Some(data_transfer) = evt.data_transfer() {
-                    *_self.sidebar.drag_index.borrow_mut() = (Some(_self.index));
-                    data_transfer.set_data("module_order", &_self.index.to_string());
-                    data_transfer.set_drop_effect("move");
-                } else {
-                    log::error!("no data transfer - use a real computer!!!");
-                }
-            }))
-
-            .event(clone!(_self => move |evt:events::Drop| {
-                if let Some(data_transfer) = evt.data_transfer() {
-                    let module_kind:Option<ModuleKind> = 
-                        data_transfer.get_data("module_kind")
-                            .ok()
-                            .and_then(|data| module_kind_from_str(&data));
-
-                    if let Some(kind) = module_kind {
-                        assign_module_kind(_self.sidebar.clone(), _self.index, _self.module.id.clone(), kind);
-
-                    }
-                }
-            }))
         })
     }
 }
+
+
 
 struct MenuDom {
     pub module_id: Id,
