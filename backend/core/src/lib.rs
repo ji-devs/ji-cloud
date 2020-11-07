@@ -13,3 +13,6 @@ pub mod http;
 
 /// Keeps track of settings.
 pub mod settings;
+
+/// sentry integration
+pub mod sentry;

@@ -135,4 +135,12 @@ impl RemoteTarget {
             Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCU1HygSZgK4L3qPdRmrV-dTnS1GBBiqyE&libraries=places"
         }
     }
+
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::Local => "local",
+            Self::Sandbox => "sandbox",
+            Self::Release => "release",
+        }
+    }
 }
