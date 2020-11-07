@@ -37,3 +37,6 @@ pub mod algolia {
 }
 
 pub const JWT_SECRET: &str = "JWT_SECRET";
+
+pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
+pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
