@@ -57,21 +57,32 @@
       </div>
     </div>
     <div class="h-935 w-full bg-white rounded-md mt-6 flex p-6">
-      <div class="w-306 border-r border-jiheadergrey flex justify-center">
-        <h2 class="text-2xl">My pairs</h2>
+      <div class="w-306 border-r border-jiheadergrey ">
+        <h2 class="text-2xl flex justify-center">My pairs</h2>
+        <div class="memory-pair relative">
+          <div class="h-89 w-89">
+
+          </div>
+          <div class="">
+
+          </div>
+
+        </div>
       </div>
       <div class="flex flex-col items-center w-full">
         <h2 class="text-2xl">Find the matching pairs</h2>
-        <div class="grid grid-cols-7 gap-4 mt-6 ml-4">
+        <div class="grid grid-cols-7 gap-4 mt-6 ml-8 mr-6">
+          <!-- When card is clicked add class flip-card-clicked -->
+          <!-- When matched add class memory-matched -->
           <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
+            <div class="card-front memory-matched  bg-jimemorycardgreen rounded-lg">
 
             </div>
-            <div class="card-back bg-black rounded-lg">
+            <div class="card-back memory-matched  bg-black rounded-lg">
 
             </div>
           </div>
-          <div class="w-160 h-160  flip-card">
+          <div class="w-160 h-160  flip-card flip-card-clicked">
             <div class="card-front bg-jimemorycardgreen rounded-lg">
 
             </div>

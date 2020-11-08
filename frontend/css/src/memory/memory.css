@@ -73,6 +73,7 @@
   z-index: 1000;
   width: 100px;
   height: 100px;
+  transition: transform 0.2s linear;
 }
 .flip-card .card-front,
 .flip-card .card-back {
@@ -100,7 +101,7 @@
   transform: rotateY(-180deg);
   z-index: 800;
 }
-.flip-card:hover .card-front {
+.flip-card-clicked .card-front {
   -moz-transform: rotateY(180deg);
   -ms-transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
@@ -109,7 +110,7 @@
   -webkit-transform: perspective(300) rotateY(180deg);
   transform: perspective(300) rotateY(180deg);
 }
-.flip-card:hover .card-back {
+.flip-card-clicked .card-back {
   z-index: 950;
   -moz-transform: rotateY(0deg);
   -ms-transform: rotateY(0deg);
@@ -118,4 +119,12 @@
   -moz-transform: perspective(300) rotateY(0deg);
   -webkit-transform: perspective(300) rotateY(0deg);
   transform: perspective(300) rotateY(0deg);
+}
+
+.flip-card:hover{
+  transform: scale(1.02);
+}
+
+.memory-matched {
+  border: solid 3px #5590fc;
 }
