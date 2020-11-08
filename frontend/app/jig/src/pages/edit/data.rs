@@ -1,5 +1,34 @@
 pub type Id = String;
 use shared::domain::jig::ModuleKind;
+use core::settings::SETTINGS;
+
+pub trait ModuleKindExt {
+    fn get_thumbnail(self) -> String;
+}
+
+impl ModuleKindExt for Option<ModuleKind> {
+    fn get_thumbnail(self) -> String {
+
+        let media_url = unsafe {
+            SETTINGS.get_unchecked().remote_target.media_ui_url()
+        };
+        let icon_path = {
+            match self {
+                None => "JIG_Gear@2x.png",
+                Some(kind) => {
+                    match kind {
+                        ModuleKind::Poster => "icn-module-poster2.png",
+                        ModuleKind::MemoryGame => "module-memory-game.svg",
+                        _ => {
+                            panic!("don't have the icon for that module kind!");
+                        }
+                    }
+                }
+            }
+        };
+        format!("{}/{}", media_url, icon_path)
+    }
+}
 
 //Probably going to move to shared or core
 //
