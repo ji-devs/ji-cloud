@@ -134,7 +134,9 @@ impl Sidebar {
             }))
 
             .global_event(clone!(_self => move |evt:events::MouseUp| {
-                _self.dragging.borrow_mut().stop_drag();
+                if let Some((src_index, dest_index)) = _self.dragging.borrow_mut().stop_drag() {
+                    move_module_index(_self.clone(), src_index, dest_index);
+                }
                 //_self.dragging.on_finish(evt.x(), evt.y());
                 /*
                 if _self.scrolling.is_active() {
@@ -202,19 +204,6 @@ impl ModuleDom {
         };
         elem!(elem, {
             .with_node!(div => {
-                .visible_signal(clone!(_self => map_ref! {
-                    let src_index = dragging.src_index_signal(),
-                    let dest_index = dragging.dest_index_signal()
-                    => move {
-                        if *src_index == Some(_self.index) && *dest_index != Some(_self.index) 
-                        {
-                            false
-                        } else {
-                            true
-                        }
-                    }
-                }))
-
                 .with_data_id!("add-btn", {
                     .event(clone!(_self => move |evt:events::Click| {
                         add_empty_module(_self.sidebar.clone(), _self.index+1);
@@ -243,10 +232,20 @@ impl ModuleDom {
                 })
                 .with_data_id!("img" => HtmlImageElement, {
                     .with_node!(elem => {
-                        .property("src", _self.module.kind.get_thumbnail())
+                        .property_signal("src", clone!(_self => 
+                            dragging
+                                .kind_at(_self.index)
+                                .map(clone!(_self => move |kind| {
+                                    match kind {
+                                        Some(kind) => kind.get_thumbnail(),
+                                        None => _self.module.kind.get_thumbnail()
+                                    }
+                                }))
+                        ))
+
                         //TODO - change to Load Event
                         .after_inserted(clone!(_self => move |_| {
-                            *_self.img_size.borrow_mut() = Some((160.0, 160.0));
+                            *_self.img_size.borrow_mut() = Some((101.0, 101.0));
                         }))
                     })
                 })
@@ -254,12 +253,16 @@ impl ModuleDom {
                     match (_self.img_size.borrow().as_ref(), _self.sidebar.element.borrow().as_ref()) {
                         (Some(img_size), Some(parent_elem)) => {
                             let modules:Vec<Element> = parent_elem.select_vec(&data_id("module-container"));
+                            let module_kinds:Vec<Module> = _self.sidebar.modules.lock_ref().to_vec();
+                            let module_kinds:Vec<Option<ModuleKind>> = module_kinds.into_iter().map(|m| m.kind).collect(); 
+
                             _self.sidebar.dragging.borrow().start_drag(
                                 _self.index, 
                                 evt.x(), evt.y(), 
                                 img_size.0, img_size.1,
                                 _self.module.clone(), 
                                 modules,
+                                module_kinds,
                             );
                         }
                         _ => {}
@@ -340,14 +343,14 @@ impl MenuDom {
             .with_data_id!("move-up", {
                 .apply_if(_self.index == 0, |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
-                    swap_module_index(_self.sidebar.clone(), _self.index, _self.index-1);
+                    move_module_index(_self.sidebar.clone(), _self.index, _self.index-1);
                     _self.sidebar.menu_index.set(None);
                 }))
             })
             .with_data_id!("move-down", {
                 .apply_if(_self.index == _self.sidebar.modules.lock_ref().len()-1, |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
-                    swap_module_index(_self.sidebar.clone(), _self.index, _self.index+1);
+                    move_module_index(_self.sidebar.clone(), _self.index, _self.index+1);
                     _self.sidebar.menu_index.set(None);
                 }))
             })
@@ -407,9 +410,9 @@ fn delete_module(sidebar:Rc<Sidebar>, index:usize, id:Id) {
     sidebar.menu_index.set(None);
 }
 
-fn swap_module_index(sidebar:Rc<Sidebar>, src_index: usize, dest_index:usize) {
+fn move_module_index(sidebar:Rc<Sidebar>, src_index: usize, dest_index:usize) {
 
     log::warn!("TODO - BACKEND - swap module index!"); 
     let mut modules = sidebar.modules.lock_mut();
-    modules.swap(src_index, dest_index);
+    modules.move_from_to(src_index, dest_index);
 }

@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use futures_signals::{
     map_ref,map_mut,
-    signal::{Mutable, MutableSignal, SignalExt, Signal, always},
+    signal::{Mutable, MutableSignal, SignalExt, Signal, always, Map},
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
@@ -13,7 +13,7 @@ use std::marker::Unpin;
 use std::future::Future;
 use std::task::{Context, Poll};
 use super::data::*;
-
+use shared::domain::jig::ModuleKind;
 const MOVE_THRESHHOLD:i32 = 3;
 
 
@@ -51,17 +51,20 @@ pub struct DragWait {
     pub mouse: DragPoint,
     pub accum: DragPoint,
     pub module: Module,
-    pub module_elements: Vec<Element> 
+    pub module_elements: Vec<Element>,
+    pub module_kinds: Vec<Option<ModuleKind>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DragActive {
     pub src_index: usize, 
-    pub dest_index: Mutable<usize>, 
+    pub curr_index: Mutable<usize>, 
+    pub src_size: DragSize,
     pub pos: Mutable<DragPoint>,
     pub mouse: DragPoint,
     pub module: Module,
-    pub module_elements: Vec<Element> 
+    pub module_elements: Vec<Element>,
+    pub reorder_kinds: Vec<Option<ModuleKind>>, //temp struct for reordering
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -248,15 +251,7 @@ impl Dragging {
             }
         })
     }
-    pub fn src_index_signal(&self) -> impl Signal<Item = Option<usize>> {
-        self.state.signal_ref(move |state| {
-            match state {
-                DragState::None | DragState::Waiting(_) => None,
-                DragState::Active(active) => Some(active.src_index), 
-            }
-        })
-    }
-    pub fn dest_index_signal(&self) -> impl Signal<Item = Option<usize>> {
+    pub fn curr_index_signal(&self) -> impl Signal<Item = Option<usize>> {
         self.state.signal_ref(move |state| {
             match state {
                 DragState::None | DragState::Waiting(_) => {
@@ -264,7 +259,7 @@ impl Dragging {
                 }, 
 
                 DragState::Active(state) => {
-                    IndexSignal::new(Some(state.dest_index.signal()))
+                    IndexSignal::new(Some(state.curr_index.signal()))
                 }
             }
         })
@@ -296,13 +291,38 @@ impl Dragging {
         .flatten()
     }
 
+    pub fn reorder_kinds_signal(&self) -> impl Signal<Item = Option<Vec<Option<ModuleKind>>>> {
+        self.state.signal_ref(move |state| {
+            match state {
+                DragState::None | DragState::Waiting(_) => None,
+                DragState::Active(active) => Some(active.reorder_kinds.clone()), 
+            }
+        })
+    }
+
+    pub fn kind_at(&self, index:usize) -> impl Signal<Item = Option<Option<ModuleKind>>> {
+        map_ref! {
+            let dest_index = self.curr_index_signal(),
+            let reorder_kinds = self.reorder_kinds_signal()
+                => move {
+                    match (reorder_kinds, *dest_index) {
+                        (Some(kinds), Some(_)) => {
+                            Some(kinds[index])
+                        },
+                        _ => None
+                    }
+                }
+        }
+    }
+
     pub fn start_drag(
         &self, 
         src_index: usize, 
         mouse_x: i32, mouse_y: i32, 
         src_width: f64, src_height: f64, 
         module: Module,
-        module_elements: Vec<Element> 
+        module_elements: Vec<Element> ,
+        module_kinds: Vec<Option<ModuleKind>>
     ) {
         self.state.set(DragState::Waiting(DragWait {
             src_index,
@@ -310,12 +330,21 @@ impl Dragging {
             mouse: DragPoint::new(mouse_x, mouse_y),
             accum: DragPoint::new(0, 0),
             module,
-            module_elements
+            module_elements,
+            module_kinds,
         }))
     }
 
-    pub fn stop_drag(&self) {
-        self.state.set(DragState::None);
+    pub fn stop_drag(&self) -> Option<(usize, usize)> {
+        let mut state = &mut *self.state.lock_mut();
+        let result = match state { 
+            DragState::None | DragState::Waiting(_) => None,
+            DragState::Active(active) => Some((active.src_index, active.curr_index.get()))
+        };
+
+        *state = DragState::None;
+
+        result
     }
 
     pub fn on_move(&mut self, x:i32, y:i32) {
@@ -328,19 +357,21 @@ impl Dragging {
                 wait.accum += diff;
                 if wait.accum.x > MOVE_THRESHHOLD || wait.accum.y > MOVE_THRESHHOLD {
 
-                    let offset = wait.src_size / DragSize::new(2.0, 2.0);
+                    let src_half_size = wait.src_size / DragSize::new(2.0, 2.0);
                     let pos = DragPoint::new(
-                        curr_mouse.x - offset.width as i32, 
-                        curr_mouse.y - offset.height as i32
+                        curr_mouse.x - src_half_size.width as i32, 
+                        curr_mouse.y - src_half_size.height as i32
                     );
 
                     *state = DragState::Active(DragActive {
                         src_index: wait.src_index,
-                        dest_index: Mutable::new(wait.src_index),
+                        curr_index: Mutable::new(wait.src_index),
+                        src_size: wait.src_size,
                         pos: Mutable::new(pos),
                         mouse: curr_mouse,
                         module: wait.module.clone(),
-                        module_elements: wait.module_elements.clone()
+                        module_elements: wait.module_elements.clone(),
+                        reorder_kinds: wait.module_kinds.clone()
                     });
                 }
             },
@@ -348,7 +379,30 @@ impl Dragging {
             DragState::Active(active) => {
                 let diff = active.mouse - curr_mouse;
                 active.mouse = curr_mouse;
-                active.pos.replace_with(|pos| DragPoint::new(pos.x - diff.x, pos.y - diff.y));
+                let mut pos = active.pos.lock_mut();
+                let mut curr_index = active.curr_index.lock_mut();
+                *pos = DragPoint::new(pos.x - diff.x, pos.y - diff.y);
+
+                let pos_top = pos.y;
+                let pos_bottom = pos.y + (active.src_size.height as i32); 
+
+                for (idx, element) in active.module_elements.iter().enumerate() {
+                    if idx == *curr_index {
+                        continue;
+                    }
+                    let bounds = element.get_bounding_client_rect();
+
+                    let bounds_top = (bounds.y()) as i32;
+                    let bounds_bottom = (bounds.y() + bounds.height()) as i32;
+
+                    if pos_top > bounds_top && pos_bottom < bounds_bottom {
+                        let kind = active.reorder_kinds.remove(*curr_index);
+                        active.reorder_kinds.insert(idx, kind);
+                        *curr_index = idx;
+                        break;
+                    }
+                }
+
             },
 
             DragState::None => {},
