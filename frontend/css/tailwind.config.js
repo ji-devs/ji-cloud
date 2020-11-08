@@ -190,6 +190,10 @@ module.exports = {
         935: '935px'
 
       },
+      rotate:{
+        10: '10deg',
+      },
+
       backgroundPosition:{
         'right-center':"265px center"
       },
@@ -256,6 +260,9 @@ module.exports = {
       },
       spacing:{
         18:'18px',
+      },
+      boxShadow:{
+        'memorycard': '0 3px 3px 0 rgba(0, 0, 0, 0.06)'
       },
 
       backgroundImage: theme => ({

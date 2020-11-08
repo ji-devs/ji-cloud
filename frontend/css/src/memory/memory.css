@@ -128,3 +128,8 @@
 .memory-matched {
   border: solid 3px #5590fc;
 }
+
+.memory-pair-right{
+  top:0;
+
+}
