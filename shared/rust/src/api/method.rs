@@ -15,6 +15,9 @@ pub enum Method {
 
     /// http `POST`, used to create resources.
     Post,
+
+    /// http `PUT`, used to replace resources.
+    Put,
 }
 
 #[cfg(feature = "backend")]
@@ -28,6 +31,7 @@ impl Method {
             Self::Get => web::get(),
             Self::Patch => web::patch(),
             Self::Post => web::post(),
+            Self::Put => web::put(),
         }
     }
 }
@@ -42,6 +46,7 @@ impl Method {
             Self::Get => "GET",
             Self::Patch => "PATCH",
             Self::Post => "POST",
+            Self::Put => "PUT",
         }
     }
 }
