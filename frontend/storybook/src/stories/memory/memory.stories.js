@@ -7,10 +7,13 @@ import worderror from "@templates/memory/memory-error.html";
 import memorysteptwo from "@templates/memory/memory-step-two.html";
 import memorystepthree from "@templates/memory/memory-step-three.html";
 import memorystepfour from "@templates/memory/memory-step-four.html";
+import memorysuccess from "@templates/memory/memory-success.html";
+import memorysummary from "@templates/memory/memory-summary.html";
+
 
 
 export default {
-  title: 'Games/memory',
+  title: 'Games/Memory',
 }
 
 export const Memory = () =>
@@ -35,6 +38,15 @@ export const MemoryStepThree = () =>
 
 export const MemoryStepFour = () =>
     tmpl(memorystepfour, {
+
+});
+
+export const MemorySuccess = () =>
+    tmpl(memorysuccess, {
+
+});
+export const MemorySummary = () =>
+    tmpl(memorysummary, {
 
 });
 
