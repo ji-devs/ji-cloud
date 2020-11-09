@@ -50,11 +50,13 @@
           </div>
           <p class="text-jibuttonBlue">Preview</p>
         </div>
-        <h1 class="text-jititleorange text-4xl font-light mb-4 ml-20">Preview Mode</h1>
+        <div class="">
+          <h1 class="text-jititleorange text-4xl font-light mb-4 ml-20">Preview Mode</h1>
+          <p class="ml-20">This is how your students will see the game, You can go back to previous steps and edit</p>
+        </div>
+
       </div>
-      <div class="mt-3">
-        {{ ButtonMacros::orange(label="Next", dataId="next") }}
-      </div>
+
     </div>
     <div class="h-935 w-full bg-white rounded-md mt-6 flex p-6">
       <div class="w-306 border-r border-jiheadergrey ">
@@ -96,92 +98,11 @@
 
         </div>
       </div>
-      <div class="flex flex-col items-center w-full">
-        <h2 class="text-2xl">Find the matching pairs</h2>
-        <div class="grid grid-cols-7 gap-4 mt-6 ml-8 mr-6">
-          <!-- When card is clicked add class flip-card-clicked -->
-          <!-- When matched add class memory-matched -->
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front memory-matched  bg-jimemorycardgreen rounded-lg">
+      <div class="flex flex-col items-center justify-center w-full">
+        <h1 class="text-jititleorange text-4xl font-light mb-10">Good Job!</h1>
 
-            </div>
-            <div class="card-back memory-matched  bg-black rounded-lg">
+        {{ ButtonMacros::orange(label="Next", dataId="next") }}
 
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card flip-card-clicked">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-          <div class="w-160 h-160  flip-card">
-            <div class="card-front bg-jimemorycardgreen rounded-lg">
-
-            </div>
-            <div class="card-back bg-black rounded-lg">
-
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>

@@ -101,6 +101,7 @@ module.exports = {
         112: '112px',
         117: '117px',
         124: '124px',
+        128: '128px',
         132: '132px',
         136: '136px',
         139: '139px',
@@ -169,6 +170,7 @@ module.exports = {
         96: '96px',
         114: '114px',
         124: '124px',
+        128: '128px',
         136: '136px',
         140: '140px',
         146: '146px',
@@ -180,8 +182,10 @@ module.exports = {
         262: '262px',
         293: '293px',
         362: '362px',
+        365: '365px',
         383: '383px',
         387: '387px',
+        521: '521px',
         537: '537px',
         581: '581px',
         668: '668px',
@@ -213,6 +217,7 @@ module.exports = {
         16: '16px',
         20: '20px',
         24: '24px',
+        32: '32px',
         36: '36px',
       },
       inset: {
@@ -262,7 +267,8 @@ module.exports = {
         18:'18px',
       },
       boxShadow:{
-        'memorycard': '0 3px 3px 0 rgba(0, 0, 0, 0.06)'
+        'memorycard': '0 3px 3px 0 rgba(0, 0, 0, 0.06)',
+        'memorypreview': '0 3px 6px 0 rgba(0, 0, 0, 0.16)'
       },
 
       backgroundImage: theme => ({
