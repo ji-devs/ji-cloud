@@ -40,8 +40,8 @@ impl ModuleSelect {
             .with_data_id!("poster", {
                 .event(drag_callback("poster".to_string()))
             })
-            .with_data_id!("memory_game", {
-                .event(drag_callback("memory_game".to_string()))
+            .with_data_id!("memory-game", {
+                .event(drag_callback("memory-game".to_string()))
             })
         })
     }

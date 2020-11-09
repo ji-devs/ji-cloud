@@ -126,6 +126,13 @@ pub fn module_kind_to_str(kind:ModuleKind) -> &'static str {
     }
 }
 
+pub fn module_kind_to_label(kind:ModuleKind) -> &'static str {
+    match kind {
+        ModuleKind::Poster => "Poster",
+        ModuleKind::DesignPage => "Design",
+        ModuleKind::MemoryGame => "Memory Game",
+    }
+}
 impl From<Route> for String {
     fn from(route:Route) -> Self {
         match route {

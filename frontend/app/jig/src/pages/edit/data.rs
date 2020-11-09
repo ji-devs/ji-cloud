@@ -71,7 +71,7 @@ impl Jig {
             title: "hello world".to_string(),
             cover: None,
             ending: None,
-            modules: vec!["3", "4", "5", "6"]
+            modules: vec!["3", "4", "5", "6", "7", "8", "9", "10"]
                 .into_iter()
                 .map(|x| Module {
                     id: x.to_string(),

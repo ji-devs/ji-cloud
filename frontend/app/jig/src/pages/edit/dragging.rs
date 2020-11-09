@@ -234,6 +234,13 @@ impl Signal for IndexSignal {
 }
 
 impl Dragging {
+    pub fn active(&self) -> bool { 
+        match *self.state.lock_ref() {
+            DragState::None | DragState::Waiting(_) => false,
+            _ => true
+        }
+    }
+
     pub fn active_signal(&self) -> impl Signal<Item = bool> {
         self.state.signal_ref(move |state| {
             match state {

@@ -17,7 +17,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    routes::{Route, JigRoute, ModuleRoute, module_kind_from_str, module_kind_to_str},
+    routes::{Route, JigRoute, ModuleRoute, module_kind_from_str, module_kind_to_str, module_kind_to_label},
     settings::SETTINGS,
 
 };
@@ -47,6 +47,7 @@ pub struct Sidebar {
     pub scrolling: Scrolling,
     pub dragging: RefCell<Dragging>,
     pub element: RefCell<Option<Element>>,
+    pub scrollable_elem: RefCell<Option<HtmlElement>>,
 }
 
 impl Sidebar {
@@ -62,6 +63,7 @@ impl Sidebar {
             scrolling: Scrolling::new(),
             dragging: RefCell::new(Dragging::new()),
             element: RefCell::new(None),
+            scrollable_elem: RefCell::new(None),
         });
 
         _self
@@ -125,26 +127,31 @@ impl Sidebar {
 
             .global_event(clone!(_self => move |evt:events::MouseMove| {
                 _self.dragging.borrow_mut().on_move(evt.x(), evt.y());
+                if _self.dragging.borrow().active() {
+                    if let Some(elem) = _self.scrollable_elem.borrow().as_ref() {
+                        let rect = elem.get_bounding_client_rect();
+                        _self.scrolling.start(evt.y(), rect.y(), rect.height());
+                    }
                     
-                /*
-                if _self.scrolling.is_active() {
-                    _self.scrolling.start(evt.mouse_y());
                 }
-                */
             }))
 
             .global_event(clone!(_self => move |evt:events::MouseUp| {
                 if let Some((src_index, dest_index)) = _self.dragging.borrow_mut().stop_drag() {
                     move_module_index(_self.clone(), src_index, dest_index);
                 }
-                //_self.dragging.on_finish(evt.x(), evt.y());
-                /*
-                if _self.scrolling.is_active() {
-                    _self.scrolling.start(evt.mouse_y());
-                }
-                */
+
+                _self.scrolling.stop();
 
             }))
+
+            .with_data_id!("scrollable-area", {
+                .scroll_top_signal(_self.scrolling.scroll_top_signal())
+                .after_inserted(clone!(_self => move |elem| {
+                    *_self.scrollable_elem.borrow_mut() = Some(elem);
+                }))
+            })
+
         })
     }
 
@@ -204,6 +211,15 @@ impl ModuleDom {
         };
         elem!(elem, {
             .with_node!(div => {
+                .with_data_id!("title", {
+                    .text(&format!("{}", _self.index+1))
+                })
+                .with_data_id!("subtitle", {
+                    .text(match _self.module.kind {
+                        None => "",
+                        Some(kind) => module_kind_to_label(kind)
+                    })
+                })
                 .with_data_id!("add-btn", {
                     .event(clone!(_self => move |evt:events::Click| {
                         add_empty_module(_self.sidebar.clone(), _self.index+1);
@@ -283,14 +299,10 @@ impl ModuleDom {
                     _self.sidebar.drag_index.set(None);
 
                     if let Some(data_transfer) = evt.data_transfer() {
-                        let module_kind:Option<ModuleKind> = 
-                            data_transfer.get_data("module_kind")
-                                .ok()
-                                .and_then(|data| module_kind_from_str(&data));
-
-                        if let Some(kind) = module_kind {
+                        if let Some(module_kind) = data_transfer.get_data("module_kind").ok() { 
+                            let kind = module_kind_from_str(&module_kind).unwrap_throw();
                             assign_module_kind(_self.sidebar.clone(), _self.index, _self.module.id.clone(), kind);
-
+                            
                         }
                     }
                 }))
