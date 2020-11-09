@@ -18,11 +18,28 @@ pub enum S3ImageKind {
 }
 
 impl S3ImageKind {
-    const fn as_str(&self) -> &'static str {
+    const fn as_str(self) -> &'static str {
         match self {
             Self::Original => "original",
             Self::Resized => "resized",
             Self::Thumbnail => "thumbnail",
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum S3LibraryKind {
+    Global,
+    User,
+    Web,
+}
+
+impl S3LibraryKind {
+    const fn as_str(self) -> &'static str {
+        match self {
+            Self::Global => "image",
+            Self::User => "image-user",
+            Self::Web => "image-web",
         }
     }
 }
@@ -35,13 +52,13 @@ pub struct S3Client {
     client: Option<rusoto_s3::S3Client>,
 }
 
-fn image_id_to_key(kind: S3ImageKind, ImageId(id): ImageId) -> String {
-    let id = id.to_hyphenated();
-    match kind {
-        S3ImageKind::Original => format!("image/raw/{}", id),
-        S3ImageKind::Resized => format!("image/resized/{}", id),
-        S3ImageKind::Thumbnail => format!("image/thumbnail/{}", id),
-    }
+fn image_id_to_key(library: S3LibraryKind, kind: S3ImageKind, ImageId(id): ImageId) -> String {
+    format!(
+        "{}/{}/{}",
+        library.as_str(),
+        kind.as_str(),
+        id.to_hyphenated()
+    )
 }
 
 impl S3Client {
@@ -93,23 +110,25 @@ impl S3Client {
             None => return Ok(()),
         };
 
+        let id_to_key = |kind| image_id_to_key(S3LibraryKind::Global, kind, image);
+
         let original = client.put_object(PutObjectRequest {
             bucket: self.bucket.clone(),
-            key: image_id_to_key(S3ImageKind::Original, image),
+            key: id_to_key(S3ImageKind::Original),
             body: Some(original.into()),
             ..PutObjectRequest::default()
         });
 
         let resized = client.put_object(PutObjectRequest {
             bucket: self.bucket.clone(),
-            key: image_id_to_key(S3ImageKind::Resized, image),
+            key: id_to_key(S3ImageKind::Resized),
             body: Some(resized.into()),
             ..PutObjectRequest::default()
         });
 
         let thumbnail = client.put_object(PutObjectRequest {
             bucket: self.bucket.clone(),
-            key: image_id_to_key(S3ImageKind::Thumbnail, image),
+            key: id_to_key(S3ImageKind::Thumbnail),
             body: Some(thumbnail.into()),
             ..PutObjectRequest::default()
         });
@@ -121,12 +140,13 @@ impl S3Client {
 
     pub fn presigned_image_get_url(
         &self,
+        library: S3LibraryKind,
         kind: S3ImageKind,
         image: ImageId,
     ) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
             bucket: self.bucket.clone(),
-            key: image_id_to_key(kind, image),
+            key: image_id_to_key(library, kind, image),
             ..GetObjectRequest::default()
         }
         .get_presigned_url(
@@ -138,8 +158,8 @@ impl S3Client {
         Ok(url.parse()?)
     }
 
-    pub async fn delete_image(&self, kind: S3ImageKind, image: ImageId) {
-        if let Err(err) = self.try_delete_image(kind, image).await {
+    pub async fn delete_image(&self, library: S3LibraryKind, kind: S3ImageKind, image: ImageId) {
+        if let Err(err) = self.try_delete_image(library, kind, image).await {
             log::warn!(
                 "failed to delete image with id {} ({}) from s3: {}",
                 image.0.to_hyphenated(),
@@ -150,11 +170,16 @@ impl S3Client {
     }
 
     // note: does nothing if image doesn't exist, or if the client is disabled.
-    pub async fn try_delete_image(&self, kind: S3ImageKind, image: ImageId) -> anyhow::Result<()> {
+    pub async fn try_delete_image(
+        &self,
+        library: S3LibraryKind,
+        kind: S3ImageKind,
+        image: ImageId,
+    ) -> anyhow::Result<()> {
         if let Some(client) = self.client.as_ref() {
             client
                 .delete_object(DeleteObjectRequest {
-                    key: image_id_to_key(kind, image),
+                    key: image_id_to_key(library, kind, image),
                     bucket: self.bucket.clone(),
                     ..DeleteObjectRequest::default()
                 })
