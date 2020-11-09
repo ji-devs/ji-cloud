@@ -5,6 +5,7 @@ use crate::{
     extractor::ScopeManageImage,
     extractor::WrapAuthClaimsNoDb,
     image_ops::generate_images,
+    s3::S3LibraryKind,
     s3::{S3Client, S3ImageKind},
 };
 use actix_web::{
@@ -180,8 +181,12 @@ async fn get_one(
 
     Ok(Json(GetResponse {
         metadata,
-        url: s3.presigned_image_get_url(S3ImageKind::Resized, id)?,
-        thumbnail_url: s3.presigned_image_get_url(S3ImageKind::Thumbnail, id)?,
+        url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
+        thumbnail_url: s3.presigned_image_get_url(
+            S3LibraryKind::Global,
+            S3ImageKind::Thumbnail,
+            id,
+        )?,
     }))
 }
 
@@ -214,8 +219,16 @@ async fn get(
         .err_into::<SearchError>()
         .and_then(|metadata: Image| async {
             Ok(GetResponse {
-                url: s3.presigned_image_get_url(S3ImageKind::Resized, metadata.id)?,
-                thumbnail_url: s3.presigned_image_get_url(S3ImageKind::Thumbnail, metadata.id)?,
+                url: s3.presigned_image_get_url(
+                    S3LibraryKind::Global,
+                    S3ImageKind::Resized,
+                    metadata.id,
+                )?,
+                thumbnail_url: s3.presigned_image_get_url(
+                    S3LibraryKind::Global,
+                    S3ImageKind::Thumbnail,
+                    metadata.id,
+                )?,
                 metadata,
             })
         })
@@ -286,10 +299,11 @@ async fn delete(
         .await
         .map_err(check_conflict_image_delete)?;
 
+    let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
-        s3.delete_image(S3ImageKind::Original, image),
-        s3.delete_image(S3ImageKind::Resized, image),
-        s3.delete_image(S3ImageKind::Thumbnail, image),
+        delete_image(S3ImageKind::Original),
+        delete_image(S3ImageKind::Resized),
+        delete_image(S3ImageKind::Thumbnail),
         algolia.delete_image(image),
     )
     .await;
