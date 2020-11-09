@@ -180,6 +180,7 @@ impl Sidebar {
                         }
                     };
                     Rc::new(ModuleDom { 
+                            jig_id: _self.id.clone(),
                             module: module.clone(), 
                             direction, 
                             index: index.unwrap_or(0),
@@ -192,6 +193,7 @@ impl Sidebar {
 }
 
 struct ModuleDom {
+    pub jig_id: Id,
     pub module: Module,
     pub direction: HorizontalDirection,
     pub index: usize,
@@ -230,6 +232,7 @@ impl ModuleDom {
                         menu_index.and_then(|menu_index| {
                             if menu_index == _self.index {
                                 Some(MenuDom::render(Rc::new(MenuDom {
+                                    jig_id: _self.jig_id.clone(),
                                     module_id: _self.module.id.clone(),
                                     module_kind: _self.module.kind.clone(),
                                     index: _self.index,
@@ -314,6 +317,7 @@ impl ModuleDom {
 
 
 struct MenuDom {
+    pub jig_id: Id,
     pub module_id: Id,
     pub module_kind: Option<ModuleKind>,
     pub index: usize,
@@ -326,9 +330,10 @@ impl MenuDom {
             .with_data_id!("edit", {
                 .apply_if(_self.module_kind.is_none(), |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
+                    let jig_id = _self.jig_id.clone();
                     let module_id = _self.module_id.clone();
                     let module_kind = _self.module_kind.clone().unwrap_throw();
-                    let route:String = Route::Module(ModuleRoute::Edit(module_kind, module_id)).into();
+                    let route:String = Route::Module(ModuleRoute::Edit(module_kind, jig_id, module_id)).into();
                     dominator::routing::go_to_url(&route);
                 }))
             })
