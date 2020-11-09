@@ -9,6 +9,7 @@ pub fn get(local_insecure: bool) -> actix_cors::Cors {
             Method::POST,
             Method::PATCH,
             Method::DELETE,
+            Method::PUT,
             Method::OPTIONS,
         ])
         .allowed_headers(&[
