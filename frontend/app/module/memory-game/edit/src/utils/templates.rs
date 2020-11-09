@@ -31,7 +31,7 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODE_PAGE, get_template_str(include_str!("../../../../../../.template_output/memory/memory-creator.html"))),
+            (MODE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/memory-creator.html"))),
         ]);
 
         Self { cache }

@@ -1,19 +1,19 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import memorycreator from "@templates/memory/memory-creator.html";
-import memorystepone from "@templates/memory/memory-step-one.html";
-import addword from "@templates/memory/add-word-tooltip.html";
-import worderror from "@templates/memory/memory-error.html";
-import memorysteptwo from "@templates/memory/memory-step-two.html";
-import memorystepthree from "@templates/memory/memory-step-three.html";
-import memorystepfour from "@templates/memory/memory-step-four.html";
-import memorysuccess from "@templates/memory/memory-success.html";
-import memorysummary from "@templates/memory/memory-summary.html";
+import memorycreator from "@templates/module/memory-game/edit/memory-creator.html";
+import memorystepone from "@templates/module/memory-game/edit/memory-step-one.html";
+import addword from "@templates/module/memory-game/edit/add-word-tooltip.html";
+import worderror from "@templates/module/memory-game/edit/memory-error.html";
+import memorysteptwo from "@templates/module/memory-game/edit/memory-step-two.html";
+import memorystepthree from "@templates/module/memory-game/edit/memory-step-three.html";
+import memorystepfour from "@templates/module/memory-game/edit/memory-step-four.html";
+import memorysuccess from "@templates/module/memory-game/edit/memory-success.html";
+import memorysummary from "@templates/module/memory-game/edit/memory-summary.html";
 
 
 
 export default {
-  title: 'Games/Memory',
+  title: 'Modules/Memory-Game/Edit',
 }
 
 export const Memory = () =>
