@@ -10,10 +10,10 @@ thread_local! {
 }
 
 
-const MODE_PAGE:&'static str = "mode-page";
+const MODE_CHOOSE_PAGE:&'static str = "mode-choose-page";
 
-pub fn mode_page() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_PAGE))
+pub fn mode_choose_page() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
 }
 
 pub struct Templates {
@@ -31,7 +31,7 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/memory-creator.html"))),
+            (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/mode-choose-page.html"))),
         ]);
 
         Self { cache }

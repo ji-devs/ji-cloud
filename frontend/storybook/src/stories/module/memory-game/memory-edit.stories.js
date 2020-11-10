@@ -1,6 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import memorycreator from "@templates/module/memory-game/edit/memory-creator.html";
+import modeChoosePage from "@templates/module/memory-game/edit/mode-choose-page.html";
 import memorystepone from "@templates/module/memory-game/edit/memory-step-one.html";
 import addword from "@templates/module/memory-game/edit/add-word-tooltip.html";
 import worderror from "@templates/module/memory-game/edit/memory-error.html";
@@ -16,11 +16,12 @@ export default {
   title: 'Modules/Memory-Game/Edit',
 }
 
-export const Memory = () =>
-    tmpl(memorycreator, {
+export const ChooseMode = () =>
+    tmpl(modeChoosePage, {
 
 });
 
+/*
 export const MemoryStepOne = () =>
     tmpl(memorystepone, {
 
@@ -69,3 +70,4 @@ export const WordError = () =>  {
 
     return pageContainer;
 }
+*/

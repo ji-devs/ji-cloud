@@ -14,10 +14,10 @@ use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 
-pub struct ModePage {
+pub struct ModeChoosePage {
 }
 
-impl ModePage {
+impl ModeChoosePage {
     pub fn new() -> Rc<Self> {
         let _self = Rc::new(Self { 
         });
@@ -26,6 +26,6 @@ impl ModePage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::mode_page(), { })
+        elem!(templates::mode_choose_page(), { })
     }
 }
