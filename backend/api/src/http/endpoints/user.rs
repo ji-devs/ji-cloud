@@ -40,7 +40,7 @@ async fn user_lookup(
     .await
     .map_err(InternalServerError::from)?
     .map(Json)
-    .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
+    .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
 async fn handle_signin_credentials(
@@ -98,7 +98,7 @@ async fn handle_get_profile(
         .await
         .map_err(|_| HttpResponse::InternalServerError())?
         .map(Json)
-        .ok_or(HttpResponse::NotFound().json(NoSuchUserError {}).into())
+        .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
 async fn handle_authorize(
