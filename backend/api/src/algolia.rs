@@ -89,7 +89,7 @@ limit 100
         .try_collect()
         .await?;
 
-        if requests.len() == 0 {
+        if requests.is_empty() {
             return Ok(());
         }
 
