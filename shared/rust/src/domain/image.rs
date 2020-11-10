@@ -24,9 +24,6 @@ pub mod user {
     pub struct ListResponse {
         /// the images returned.
         pub images: Vec<GetResponse>,
-
-        /// The number of pages found.
-        pub pages: u32,
     }
 
     /// Response for getting a single image.

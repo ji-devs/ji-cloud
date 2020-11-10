@@ -358,6 +358,18 @@
       ]
     }
   },
+  "2968c111bb7c6cd6a2974b52a5b80e4cf7fd4264cc519edcd68b2b6779a4ca2b": {
+    "query": "delete from user_image_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "2a38d6204b4e0dc27a944c0af4c85f89a1dd12fd6507e136b70430422ff4a066": {
     "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        location,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
     "describe": {
@@ -614,6 +626,26 @@
       "nullable": []
     }
   },
+  "579ce9012c9391b99eac4ac15eb804a3fd8fe7bb8b7665bb74f9128a03653e36": {
+    "query": "select exists(select 1 from user_image_library where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "query": "delete from image_metadata where id = $1",
     "describe": {
@@ -640,6 +672,24 @@
         "Left": [
           "Int2"
         ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "60b0832812a09b331d67eded7a6e1a0d323d66443c0a06b7b7ef2628e9cd1ad2": {
+    "query": "select id as \"id: ImageId\" from user_image_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
       },
       "nullable": [
         false
@@ -815,6 +865,26 @@
         false,
         false,
         true
+      ]
+    }
+  },
+  "80e114ec0b610550438d73280239678e249985eb19134c9917b39b34ead292c6": {
+    "query": "select id as \"id: ImageId\" from user_image_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -1155,6 +1225,24 @@
         true,
         null,
         null
+      ]
+    }
+  },
+  "e53665c81494eec03a5148d47f3a8e68b49071f7e69717c95e91dee992efa6bf": {
+    "query": "\ninsert into user_image_library default values\nreturning id as \"id: ImageId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
       ]
     }
   },
