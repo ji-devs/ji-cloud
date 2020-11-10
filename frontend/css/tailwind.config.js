@@ -71,6 +71,7 @@ module.exports = {
         jimemorypinkborder: '#e36486',
         jimemorygreenlight: '#eafaf0',
         jimemorycardgreen: '#7fd29c',
+        jibackgroundyellow: '#fff8d1',
 
       },
 
@@ -84,6 +85,7 @@ module.exports = {
         sans: 'Roboto',
       },
       width: {
+        1: '1px',
         2: '2px',
         10: '10px',
         30: '30px',
@@ -177,6 +179,7 @@ module.exports = {
         160: '160px',
         177: '177px',
         185: '185px',
+        192: '192px',
         208: '208px',
         216: '216px',
         262: '262px',
