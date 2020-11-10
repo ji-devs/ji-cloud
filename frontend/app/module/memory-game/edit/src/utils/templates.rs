@@ -12,8 +12,36 @@ thread_local! {
 
 const MODE_CHOOSE_PAGE:&'static str = "mode-choose-page";
 
+const LIST_ITEM:&'static str = "list-item";
+const CARD:&'static str = "card";
+
+const DUPLICATE_STEP_1_PAGE:&'static str = "duplicate-step-1-page";
+const DUPLICATE_STEP_1_TOOLTIP:&'static str = "duplicate-step-1-tooltip";
+const DUPLICATE_STEP_1_ERROR:&'static str = "duplicate-step-1-error";
+
 pub fn mode_choose_page() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
+}
+
+pub fn list_item() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(LIST_ITEM))
+}
+
+pub fn card() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD))
+}
+
+pub mod duplicate {
+    use super::*;
+    pub fn step_1_page() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_PAGE))
+    }
+    pub fn step_1_tooltip() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_TOOLTIP))
+    }
+    pub fn step_1_error() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_ERROR))
+    }
 }
 
 pub struct Templates {
@@ -31,7 +59,12 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/mode-choose-page.html"))),
+            (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/start-mode-choose.html"))),
+            (LIST_ITEM, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-list-item.html"))),
+            (CARD, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-card.html"))),
+            (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1.html"))),
+            (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-tooltip.html"))),
+            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-error.html")))
         ]);
 
         Self { cache }

@@ -8,6 +8,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 mod utils;
 mod router;
 mod pages;
+mod data;
+mod debug;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

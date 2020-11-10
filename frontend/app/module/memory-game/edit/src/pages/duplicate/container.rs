@@ -13,19 +13,34 @@ use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
+use super::step_1::Step1Page;
+use crate::data::*;
+use crate::debug;
 
-pub struct ModeChoosePage {
+pub struct DuplicatePage {
+    pub step: Mutable<Step>
 }
 
-impl ModeChoosePage {
+impl DuplicatePage {
     pub fn new() -> Rc<Self> {
         let _self = Rc::new(Self { 
+            step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
         });
 
         _self
     }
     
+    fn dom_signal(_self:Rc<Self>) -> impl Signal<Item = Option<Dom>> {
+        _self.step.signal_ref(clone!(_self => move |step| {
+            match step {
+                Step::One => Some(Step1Page::render(Step1Page::new())),
+                _ => None,
+            }
+
+        }))
+    }
+    
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::mode_choose_page(), { })
+        html!("div", { .child_signal(Self::dom_signal(_self.clone())) } )
     }
 }

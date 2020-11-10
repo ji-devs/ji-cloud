@@ -1,14 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import modeChoosePage from "@templates/module/memory-game/edit/mode-choose-page.html";
-import memorystepone from "@templates/module/memory-game/edit/memory-step-one.html";
-import addword from "@templates/module/memory-game/edit/add-word-tooltip.html";
-import worderror from "@templates/module/memory-game/edit/memory-error.html";
-import memorysteptwo from "@templates/module/memory-game/edit/memory-step-two.html";
-import memorystepthree from "@templates/module/memory-game/edit/memory-step-three.html";
-import memorystepfour from "@templates/module/memory-game/edit/memory-step-four.html";
-import memorysuccess from "@templates/module/memory-game/edit/memory-success.html";
-import memorysummary from "@templates/module/memory-game/edit/memory-summary.html";
+import modeChoosePage from "@templates/module/memory-game/edit/start-mode-choose.html";
 
 
 
@@ -22,10 +14,14 @@ export const ChooseMode = () =>
 });
 
 /*
-export const MemoryStepOne = () =>
-    tmpl(memorystepone, {
+TO MIGRATE:
 
-});
+import worderror from "@templates/module/memory-game/edit/memory-error.html";
+import memorysteptwo from "@templates/module/memory-game/edit/memory-step-two.html";
+import memorystepthree from "@templates/module/memory-game/edit/memory-step-three.html";
+import memorystepfour from "@templates/module/memory-game/edit/memory-step-four.html";
+import memorysuccess from "@templates/module/memory-game/edit/memory-success.html";
+import memorysummary from "@templates/module/memory-game/edit/memory-summary.html";
 
 export const MemoryStepTwo = () =>
     tmpl(memorysteptwo, {

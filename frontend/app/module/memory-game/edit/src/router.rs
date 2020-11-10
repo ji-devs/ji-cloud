@@ -8,9 +8,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::{
-    mode::ModeChoosePage,
-};
+use crate::pages::container::ContainerPage;
 
 pub struct Router {
 }
@@ -33,7 +31,7 @@ impl Router {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(ModeChoosePage::render(ModeChoosePage::new())),
+                                    ModuleKind::MemoryGame => Some(ContainerPage::render(ContainerPage::new())),
                                     _ => None
                                 }
                             }
