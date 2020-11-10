@@ -1,0 +1,19 @@
+{% macro jig_sidebar() %}
+  <div class=" sidebar w-72 bg-white h-auto min-h-screen shadow-sm flex flex-col items-center">
+    <img src="{{MEDIA_UI}}/LogoIcon.svg" alt="" class="my-8">
+    <img src="{{MEDIA_UI}}/icn-chevron-jig.svg" alt="" class="self-end">
+    <img src="{{MEDIA_UI}}/jig-cover.svg" alt="" class="mb-4">
+    <div data-id="modules"></div>
+  </div>
+{% endmacro jig_sidebar %}
+
+
+{% macro jig_sidebar_module(selected) %}
+  {% if selected %}
+  <div class="h-160 bg-jibackgroundGrey border-l-8 border-jibuttonBlue w-full pt-4 pl-2">
+  {% else %}
+  <div class="h-160  w-full pt-4 pl-2 border-jidarkgrey border-b pl-4">
+  {% endif %}
+      <h1 data-id="label" class="text-jibuttonBlue font-bold">02</h1>
+  </div>
+{% endmacro jig_sidebar %}

@@ -17,7 +17,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use core::{
-    routes::{Route, JigRoute, ModuleRoute, module_kind_from_str, module_kind_to_str},
+    routes::{Route, JigRoute, ModuleRoute, module_kind_from_str, module_kind_to_str, module_kind_to_label},
     settings::SETTINGS,
 
 };
@@ -47,6 +47,7 @@ pub struct Sidebar {
     pub scrolling: Scrolling,
     pub dragging: RefCell<Dragging>,
     pub element: RefCell<Option<Element>>,
+    pub scrollable_elem: RefCell<Option<HtmlElement>>,
 }
 
 impl Sidebar {
@@ -62,6 +63,7 @@ impl Sidebar {
             scrolling: Scrolling::new(),
             dragging: RefCell::new(Dragging::new()),
             element: RefCell::new(None),
+            scrollable_elem: RefCell::new(None),
         });
 
         _self
@@ -125,24 +127,31 @@ impl Sidebar {
 
             .global_event(clone!(_self => move |evt:events::MouseMove| {
                 _self.dragging.borrow_mut().on_move(evt.x(), evt.y());
+                if _self.dragging.borrow().active() {
+                    if let Some(elem) = _self.scrollable_elem.borrow().as_ref() {
+                        let rect = elem.get_bounding_client_rect();
+                        _self.scrolling.start(evt.y(), rect.y(), rect.height());
+                    }
                     
-                /*
-                if _self.scrolling.is_active() {
-                    _self.scrolling.start(evt.mouse_y());
                 }
-                */
             }))
 
             .global_event(clone!(_self => move |evt:events::MouseUp| {
-                _self.dragging.borrow_mut().stop_drag();
-                //_self.dragging.on_finish(evt.x(), evt.y());
-                /*
-                if _self.scrolling.is_active() {
-                    _self.scrolling.start(evt.mouse_y());
+                if let Some((src_index, dest_index)) = _self.dragging.borrow_mut().stop_drag() {
+                    move_module_index(_self.clone(), src_index, dest_index);
                 }
-                */
+
+                _self.scrolling.stop();
 
             }))
+
+            .with_data_id!("scrollable-area", {
+                .scroll_top_signal(_self.scrolling.scroll_top_signal())
+                .after_inserted(clone!(_self => move |elem| {
+                    *_self.scrollable_elem.borrow_mut() = Some(elem);
+                }))
+            })
+
         })
     }
 
@@ -171,6 +180,7 @@ impl Sidebar {
                         }
                     };
                     Rc::new(ModuleDom { 
+                            jig_id: _self.id.clone(),
                             module: module.clone(), 
                             direction, 
                             index: index.unwrap_or(0),
@@ -183,6 +193,7 @@ impl Sidebar {
 }
 
 struct ModuleDom {
+    pub jig_id: Id,
     pub module: Module,
     pub direction: HorizontalDirection,
     pub index: usize,
@@ -202,19 +213,15 @@ impl ModuleDom {
         };
         elem!(elem, {
             .with_node!(div => {
-                .visible_signal(clone!(_self => map_ref! {
-                    let src_index = dragging.src_index_signal(),
-                    let dest_index = dragging.dest_index_signal()
-                    => move {
-                        if *src_index == Some(_self.index) && *dest_index != Some(_self.index) 
-                        {
-                            false
-                        } else {
-                            true
-                        }
-                    }
-                }))
-
+                .with_data_id!("title", {
+                    .text(&format!("{}", _self.index+1))
+                })
+                .with_data_id!("subtitle", {
+                    .text(match _self.module.kind {
+                        None => "",
+                        Some(kind) => module_kind_to_label(kind)
+                    })
+                })
                 .with_data_id!("add-btn", {
                     .event(clone!(_self => move |evt:events::Click| {
                         add_empty_module(_self.sidebar.clone(), _self.index+1);
@@ -225,6 +232,7 @@ impl ModuleDom {
                         menu_index.and_then(|menu_index| {
                             if menu_index == _self.index {
                                 Some(MenuDom::render(Rc::new(MenuDom {
+                                    jig_id: _self.jig_id.clone(),
                                     module_id: _self.module.id.clone(),
                                     module_kind: _self.module.kind.clone(),
                                     index: _self.index,
@@ -243,10 +251,20 @@ impl ModuleDom {
                 })
                 .with_data_id!("img" => HtmlImageElement, {
                     .with_node!(elem => {
-                        .property("src", _self.module.kind.get_thumbnail())
+                        .property_signal("src", clone!(_self => 
+                            dragging
+                                .kind_at(_self.index)
+                                .map(clone!(_self => move |kind| {
+                                    match kind {
+                                        Some(kind) => kind.get_thumbnail(),
+                                        None => _self.module.kind.get_thumbnail()
+                                    }
+                                }))
+                        ))
+
                         //TODO - change to Load Event
                         .after_inserted(clone!(_self => move |_| {
-                            *_self.img_size.borrow_mut() = Some((160.0, 160.0));
+                            *_self.img_size.borrow_mut() = Some((101.0, 101.0));
                         }))
                     })
                 })
@@ -254,12 +272,16 @@ impl ModuleDom {
                     match (_self.img_size.borrow().as_ref(), _self.sidebar.element.borrow().as_ref()) {
                         (Some(img_size), Some(parent_elem)) => {
                             let modules:Vec<Element> = parent_elem.select_vec(&data_id("module-container"));
+                            let module_kinds:Vec<Module> = _self.sidebar.modules.lock_ref().to_vec();
+                            let module_kinds:Vec<Option<ModuleKind>> = module_kinds.into_iter().map(|m| m.kind).collect(); 
+
                             _self.sidebar.dragging.borrow().start_drag(
                                 _self.index, 
                                 evt.x(), evt.y(), 
                                 img_size.0, img_size.1,
                                 _self.module.clone(), 
                                 modules,
+                                module_kinds,
                             );
                         }
                         _ => {}
@@ -280,14 +302,10 @@ impl ModuleDom {
                     _self.sidebar.drag_index.set(None);
 
                     if let Some(data_transfer) = evt.data_transfer() {
-                        let module_kind:Option<ModuleKind> = 
-                            data_transfer.get_data("module_kind")
-                                .ok()
-                                .and_then(|data| module_kind_from_str(&data));
-
-                        if let Some(kind) = module_kind {
+                        if let Some(module_kind) = data_transfer.get_data("module_kind").ok() { 
+                            let kind = module_kind_from_str(&module_kind).unwrap_throw();
                             assign_module_kind(_self.sidebar.clone(), _self.index, _self.module.id.clone(), kind);
-
+                            
                         }
                     }
                 }))
@@ -299,6 +317,7 @@ impl ModuleDom {
 
 
 struct MenuDom {
+    pub jig_id: Id,
     pub module_id: Id,
     pub module_kind: Option<ModuleKind>,
     pub index: usize,
@@ -311,9 +330,10 @@ impl MenuDom {
             .with_data_id!("edit", {
                 .apply_if(_self.module_kind.is_none(), |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
+                    let jig_id = _self.jig_id.clone();
                     let module_id = _self.module_id.clone();
                     let module_kind = _self.module_kind.clone().unwrap_throw();
-                    let route:String = Route::Module(ModuleRoute::Edit(module_kind, module_id)).into();
+                    let route:String = Route::Module(ModuleRoute::Edit(module_kind, jig_id, module_id)).into();
                     dominator::routing::go_to_url(&route);
                 }))
             })
@@ -340,14 +360,14 @@ impl MenuDom {
             .with_data_id!("move-up", {
                 .apply_if(_self.index == 0, |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
-                    swap_module_index(_self.sidebar.clone(), _self.index, _self.index-1);
+                    move_module_index(_self.sidebar.clone(), _self.index, _self.index-1);
                     _self.sidebar.menu_index.set(None);
                 }))
             })
             .with_data_id!("move-down", {
                 .apply_if(_self.index == _self.sidebar.modules.lock_ref().len()-1, |dom| dom.class("hidden"))
                 .event(clone!(_self => move |evt:events::Click| {
-                    swap_module_index(_self.sidebar.clone(), _self.index, _self.index+1);
+                    move_module_index(_self.sidebar.clone(), _self.index, _self.index+1);
                     _self.sidebar.menu_index.set(None);
                 }))
             })
@@ -407,9 +427,9 @@ fn delete_module(sidebar:Rc<Sidebar>, index:usize, id:Id) {
     sidebar.menu_index.set(None);
 }
 
-fn swap_module_index(sidebar:Rc<Sidebar>, src_index: usize, dest_index:usize) {
+fn move_module_index(sidebar:Rc<Sidebar>, src_index: usize, dest_index:usize) {
 
     log::warn!("TODO - BACKEND - swap module index!"); 
     let mut modules = sidebar.modules.lock_mut();
-    modules.swap(src_index, dest_index);
+    modules.move_from_to(src_index, dest_index);
 }

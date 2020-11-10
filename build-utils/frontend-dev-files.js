@@ -12,6 +12,7 @@ switch(SPA) {
 	case "user":
 	case "admin":
 	case "jig":
+	case "module/memory-game/edit":
 		break;
 	default: {
 		console.error("supply valid APP (and note the space) for frontend-dev-files -- [APP]");

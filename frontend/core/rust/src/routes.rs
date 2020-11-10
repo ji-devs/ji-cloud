@@ -55,7 +55,8 @@ pub enum JigPlayMode {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ModuleRoute {
-    Edit(ModuleKind, Id),
+    Edit(ModuleKind, Id, Id),
+    Play(ModuleKind, Id, Id),
 }
 
 //Just for serializing across local routes
@@ -101,7 +102,8 @@ impl Route {
             ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
             ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
             ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
-            ["module", "edit", kind, id] => Self::Module(ModuleRoute::Edit(module_kind_from_str(kind).expect_throw("unknown module kind!"), id.to_string())),
+            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
+            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
@@ -126,6 +128,13 @@ pub fn module_kind_to_str(kind:ModuleKind) -> &'static str {
     }
 }
 
+pub fn module_kind_to_label(kind:ModuleKind) -> &'static str {
+    match kind {
+        ModuleKind::Poster => "Poster",
+        ModuleKind::DesignPage => "Design",
+        ModuleKind::MemoryGame => "Memory Game",
+    }
+}
 impl From<Route> for String {
     fn from(route:Route) -> Self {
         match route {
@@ -169,7 +178,8 @@ impl From<Route> for String {
             },
             Route::Module(route) => {
                 match route {
-                    ModuleRoute::Edit(kind, id) => format!("/module/edit/{}/{}", module_kind_to_str(kind), id),
+                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", module_kind_to_str(kind), jig_id, module_id),
+                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", module_kind_to_str(kind), jig_id, module_id),
                 }
             },
             Route::NotFound => "/404".to_string(),
