@@ -1,9 +1,8 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, getChildId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, appendValueLineId, getChildId, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
 import step1Tooltip from "@templates/module/memory-game/edit/duplicate/step-1-tooltip.html";
 import step1Error from "@templates/module/memory-game/edit/duplicate/step-1-error.html";
-import listItemTmpl from "@templates/module/memory-game/edit/_common/memory-list-item.html";
 import cardTmpl from "@templates/module/memory-game/edit/_common/memory-card.html";
 
 export default {
@@ -18,6 +17,12 @@ export const Step1 = () => {
     return page;
 }
 
+export const Step1_Input = () => {
+    const page = tmpl(step1Page, {
+    });
+    appendMock(page, true);
+    return page;
+}
 export const Step1_Tooltip= () => {
     const page = tmpl(step1Page, { });
 
@@ -34,12 +39,20 @@ export const Step1_Error = () => {
     appendMock(page);
     return page;
 }
-function appendMock(page) {
+function appendMock(page, isInput) {
+
+    toggleClassesId(page, "list-items-input", ["hidden"], !isInput);
+    toggleClassesId(page, "list-items-data", ["hidden"], isInput);
+
+    setTextId(page, "list-items-data", "");
+
     mockWords.forEach(word => {
       //create text item
-      const listItem = tmpl(listItemTmpl);
-      setTextId(listItem, "label", word);
-      appendId(page, "list-items", listItem);
+      if(isInput) {
+        appendValueLineId(page, "list-items-input", word);
+      } else {
+        appendTextLineId(page, "list-items-data", word);
+      }
 
       //create cards
       const card = tmpl(cardTmpl);

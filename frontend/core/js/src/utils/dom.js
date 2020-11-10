@@ -34,9 +34,30 @@ export function setTextId(element, id, text) {
     return element;
 }
 
+export function appendTextId(element, id, text) {
+    const container = getChildId(element, id);
+    container.textContent += text;
+    return element;
+}
+export function appendTextLineId(element, id, text) {
+    const container = getChildId(element, id);
+    container.textContent += text + '\n';
+    return element;
+}
 export function setValueId(element, id, text) {
     const container = getChildId(element, id);
     container.value = text;
+    return element;
+}
+
+export function appendValueLineId(element, id, text) {
+    const container = getChildId(element, id);
+    container.value += text + '\n';
+    return element;
+}
+export function appendValueId(element, id, text) {
+    const container = getChildId(element, id);
+    container.value += text;
     return element;
 }
 
