@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt},
+    signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
@@ -13,24 +13,94 @@ use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use crate::utils::lines;
 use std::fmt::Write;
-
+use crate::data::*;
+use itertools::Itertools;
 pub struct Step1Page {
-    pub words:MutableVec<String>,
-    pub editing_text_content: Mutable<Option<String>>
+    state: Rc<DuplicateState>,
+    
 }
 
 impl Step1Page {
-    pub fn new() -> Rc<Self> {
+    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            words: MutableVec::new_with_values(vec!["hello".to_string(), "world".to_string()]), //MutableVec::new(),
-            editing_text_content: Mutable::new(None)
+            state
         });
 
         _self
     }
-   
+ 
+    fn cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
+        _self.state.cards
+            .signal_vec_cloned()
+            .enumerate()
+            .map(clone!(_self => move |(index, card)| {
+                elem!(templates::card(), {
+                    .with_data_id!("number", {
+                        .text_signal(index.signal().map(|index| {
+                            format!("{}", index.unwrap_or(0)+1)
+                        }))
+                    })
+                    .with_data_id!("card-1", {
+                        .with_data_id!("label" => HtmlTextAreaElement, {
+                            .with_node!(elem => {
+                                .event(clone!(_self,card => move |evt:events::Input| {
+                                    let text = elem.value();
+                                    card.text.set_neq(text);
+                                }))
+                            })
+                            .property_signal("value", card.text.signal_cloned())
+                        })
+                    })
+                    .with_data_id!("card-2", {
+                        .with_data_id!("label" => HtmlTextAreaElement, {
+                            .with_node!(elem => {
+                                .event(clone!(_self,card => move |evt:events::Input| {
+                                    let text = elem.value();
+                                    card.text.set_neq(text);
+                                }))
+                            })
+                            .property_signal("value", card.text.signal_cloned())
+                        })
+                    })
+                })
+            }))
+    }
+
+    fn text_input_signal(&self) -> impl Signal<Item = String> {
+        self.state.cards
+            .signal_vec_cloned()
+            .map_signal(|card| card.text.signal_cloned())
+            .to_signal_map(|texts| {
+                texts.iter().join("\n")
+            })
+    }
+
+    pub fn render(_self: Rc<Self>) -> Dom {
+        elem!(templates::duplicate::step_1_page(), { 
+            .with_data_id!("list-items" => HtmlTextAreaElement, {
+                .with_node!(elem => {
+                    .event(clone!(_self => move |evt:events::Input| {
+                        let text = elem.value();
+                        let mut cards:Vec<Card> = text.lines()
+                            .map(|word| word.to_string().into())
+                            .collect();
+
+                        if(text.ends_with('\n')) {
+                            cards.push("".to_string().into());
+                        }
+                        _self.state.cards.lock_mut().replace_cloned(cards);
+                    }))
+                    .property_signal("value", _self.text_input_signal())
+                })
+            })
+
+            .with_data_id!("cards", {
+                .children_signal_vec(Self::cards_dom_signal(_self))
+            })
+        })
+    }
+    /*
     pub fn editing_text_signal(&self) -> impl Signal<Item = bool> {
         self.editing_text_content.signal_ref(|x| x.is_some())
     }
@@ -87,4 +157,7 @@ impl Step1Page {
             })
         })
     }
+    */
 }
+
+

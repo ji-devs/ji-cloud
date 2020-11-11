@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, appendValueLineId, getChildId, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, appendValueLineId, getChildId, setValueId, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
 import step1Tooltip from "@templates/module/memory-game/edit/duplicate/step-1-tooltip.html";
 import step1Error from "@templates/module/memory-game/edit/duplicate/step-1-error.html";
@@ -41,25 +41,18 @@ export const Step1_Error = () => {
 }
 function appendMock(page, isInput) {
 
-    toggleClassesId(page, "list-items-input", ["hidden"], !isInput);
-    toggleClassesId(page, "list-items-data", ["hidden"], isInput);
-
-    setTextId(page, "list-items-data", "");
+    setTextId(page, "list-items", "");
 
     mockWords.forEach(word => {
       //create text item
-      if(isInput) {
-        appendValueLineId(page, "list-items-input", word);
-      } else {
-        appendTextLineId(page, "list-items-data", word);
-      }
+      appendValueLineId(page, "list-items", word);
 
       //create cards
       const card = tmpl(cardTmpl);
       const side1 = getChildId(card, "card-1");
-      setTextId(side1, "label", word);
+      setValueId(side1, "label", word);
       const side2 = getChildId(card, "card-2");
-      setTextId(side2, "label", word);
+      setValueId(side2, "label", word);
 
       appendId(page, "cards", card);
     })
