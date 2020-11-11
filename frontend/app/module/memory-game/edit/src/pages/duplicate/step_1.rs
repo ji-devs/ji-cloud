@@ -33,6 +33,8 @@ impl Step1Page {
     fn cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
         _self.state.cards
             .signal_vec_cloned()
+            //this allows us to hide the visuals of empty cards, but it gets weird
+            //.filter_signal_cloned(|card| card.text.signal_ref(|text| !text.is_empty()))
             .enumerate()
             .map(clone!(_self => move |(index, card)| {
                 elem!(templates::card(), {
