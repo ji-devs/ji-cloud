@@ -157,12 +157,15 @@
   top: 50%;
   right: 100%;
   margin-top: -5px;
-  border-width: 5px;
+  border-width: 15px;
   border-style: solid;
 
 
 }
 
+.memory-added-image::after{
+  border-color: transparent #ffdede transparent transparent;
+}
 
 
 .memory-added-image::before{
@@ -171,16 +174,15 @@
   top: 50%;
   right: 100%;
   margin-top: -6px;
-  border-width: 6px;
+  border-width: 16px;
   border-style: solid;
 
 
 }
 
-.memory-added-image::before{
-  border-color: transparent #42cc7a transparent transparent;
-}
+/* THEMES */
 
-.memory-added-image::after {
-    border-color: transparent #f0fcf5 transparent transparent;
+ .orange-theme{
+  background-color: #ffa500;
+
 }
