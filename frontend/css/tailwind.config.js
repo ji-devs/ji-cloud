@@ -269,6 +269,7 @@ module.exports = {
         '25p': '25%',
         50: '50px',
         100: '100px',
+        
       },
       cursor:{
         grab: 'grab'
