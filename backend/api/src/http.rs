@@ -22,13 +22,30 @@ fn log_ise<B: MessageBody, T>(
 where
     T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
+    let uri: serde_json::Value = req.uri().to_string().into();
+    let method: serde_json::Value = req.method().to_string().into();
+
     let fut = srv.call(req);
     async {
-        let res = fut.await?;
-
+        let mut res = fut.await?;
         if res.status() == 500 {
-            if let Some(err) = res.response().extensions().get::<anyhow::Error>() {
+            let resp: &mut actix_http::Response<_> = res.response_mut();
+
+            if let Some(err) = resp.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);
+                sentry::add_breadcrumb(sentry::Breadcrumb {
+                    ty: "http".to_owned(),
+                    category: Some("request".into()),
+                    data: {
+                        let mut map = sentry::protocol::Map::new();
+                        map.insert("url".to_owned(), uri);
+                        map.insert("method".to_owned(), method);
+                        map
+                    },
+                    ..Default::default()
+                });
+
+                sentry::integrations::anyhow::capture_anyhow(&err);
             }
         }
 
@@ -63,6 +80,7 @@ pub async fn run(
             .configure(endpoints::meta::configure)
             .configure(endpoints::jig::configure)
             .configure(endpoints::module::configure)
+            .configure(endpoints::admin::configure)
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

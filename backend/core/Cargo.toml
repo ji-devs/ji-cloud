@@ -25,3 +25,8 @@ log = "0.4.11"
 
 [features]
 db = ["sqlx"]
+
+
+[dependencies.sentry]
+version = "0.20.1"
+features = ["anyhow", "backtrace", "contexts", "panic", "transport"]

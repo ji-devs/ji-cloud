@@ -8,7 +8,7 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (runtime_settings, jwk_verifier, s3, algolia, db_pool) = {
+    let (runtime_settings, jwk_verifier, s3, algolia, db_pool, _guard) = {
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
@@ -30,7 +30,9 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
-        (runtime_settings, jwk_verifier, s3, algolia, db_pool)
+        let guard = core::sentry::init(&settings.sentry_api_key().await?, remote_target)?;
+
+        (runtime_settings, jwk_verifier, s3, algolia, db_pool, guard)
     };
 
     // todo: find a better place for this...

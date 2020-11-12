@@ -1,0 +1,30 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+
+<div class="flex bg-jibackgroundBlue h-full min-w-full w-auto min-h-screen">
+
+  {% include "module/memory-game/edit/duplicate/step-2-sidebar.html" %}
+
+  <div class=" flex flex-col w-full">
+    <div class="flex justify-center items-center mt-4 self-end mr-4">
+
+      {% include "module/_common/edit/top-control-widget.html" %}
+
+
+      <div class="ml-12">
+        <img src="{{MEDIA_UI}}/Creator@2x.png" alt="">
+      </div>
+    </div>
+    <div class="pl-8 -mt-16">
+      <h1 class="text-jititleorange text-4xl font-light mb-4">Create a Cover Page</h1>
+      <p class="font-light text-lg">Create a Memory Game</p>
+      <p class="font-light text-lg">Add your content on the left panel</p>
+      <div class="max-w-1212 h-681 bg-jimemorybackground mt-4 rounded-sm mb-4 border border-jimemoryborder jig-preview px-12 py-6 overflow-y-auto">
+        <div data-id="cards" class="memory grid cards grid-cols-3 gap-4 "> </div>
+      </div>
+      <div class="flex justify-end w-full pr-6">
+        {{ ButtonMacros::orange(label="Done", dataId="next") }}
+      </div>
+    </div>
+  </div>
+</div>

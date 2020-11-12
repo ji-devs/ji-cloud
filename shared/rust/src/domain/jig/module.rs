@@ -1,5 +1,7 @@
 //! Types for jig Modules.
 
+use std::str::FromStr;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -24,6 +26,31 @@ pub enum ModuleKind {
 
     /// The module represents the first / last page of a jig.
     DesignPage = 2,
+}
+
+impl ModuleKind {
+    /// Converts `self` to a string
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Poster => "poster",
+            Self::MemoryGame => "memory-game",
+            Self::DesignPage => "design-page",
+        }
+    }
+}
+
+impl FromStr for ModuleKind {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let res = match s {
+            "poster" => Self::Poster,
+            "memory-game" => Self::MemoryGame,
+            "design-page" => Self::DesignPage,
+            _ => anyhow::bail!("Invalid ModuleKind: {}", s),
+        };
+
+        Ok(res)
+    }
 }
 
 /// Minimal information about a module.

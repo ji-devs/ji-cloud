@@ -40,6 +40,7 @@ tokio = { version = "0.2", features = ["rt-threaded"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
 image = "0.23.10"
+actix-http = "2.1.0"
 
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
@@ -53,3 +54,7 @@ features = ["db"]
 
 [features]
 default = ["listenfd", "core/listenfd"]
+
+[dependencies.sentry]
+version = "0.20.1"
+features = ["anyhow", "backtrace", "contexts", "panic", "transport"]

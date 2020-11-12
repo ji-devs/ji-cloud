@@ -18,22 +18,22 @@ use crate::data::*;
 use crate::debug;
 
 pub struct DuplicatePage {
-    pub step: Mutable<Step>
+    pub state: Rc<DuplicateState>
 }
 
 impl DuplicatePage {
-    pub fn new() -> Rc<Self> {
+    pub fn new(state: Rc<DuplicateState>) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
+            state
         });
 
         _self
     }
-    
+
     fn dom_signal(_self:Rc<Self>) -> impl Signal<Item = Option<Dom>> {
-        _self.step.signal_ref(clone!(_self => move |step| {
+        _self.state.step.signal_ref(clone!(_self => move |step| {
             match step {
-                Step::One => Some(Step1Page::render(Step1Page::new())),
+                Step::One => Some(Step1Page::render(Step1Page::new(_self.state.clone()))),
                 _ => None,
             }
 

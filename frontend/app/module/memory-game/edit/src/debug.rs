@@ -1,17 +1,25 @@
 use crate::data::*;
 use cfg_if::cfg_if;
+use futures_signals::{
+    map_ref,
+    signal::{Mutable, SignalExt, Signal},
+    signal_vec::{MutableVec, SignalVecExt},
+    CancelableFutureHandle, 
+};
+
+use std::cell::RefCell;
+use std::rc::Rc;
+use crate::data::raw::*;
 
 #[derive(Default)]
 pub struct DebugSettings {
-    pub game_mode:Option<Option<GameMode>>,
-    pub step:Option<Step>
+    pub state:Option<GameStateRaw>,
 }
 
 impl DebugSettings {
     pub fn local() -> Self {
         Self {
-            game_mode: Some(Some(GameMode::Duplicate)),
-            step: None,
+            state: Some(GameStateRaw::debug())
         }
     }
 }

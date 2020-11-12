@@ -7,11 +7,12 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-cors = "0.3.0-alpha.1"
-actix-files = "0.3.0-beta.1"
+actix-cors = "0.5.1"
+actix-files = "0.4.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
-actix-web = "3.0.0-beta.1"
+actix-web = "3.0.0"
+actix-http = "2.1.0"
 anyhow = "1.0.32"
 askama = "0.10.3"
 config = {path = "../../config/rust"}
@@ -24,6 +25,13 @@ log = "0.4"
 simplelog = "0.8"
 tokio = { version = "0.2" }
 openssl = { version = "0.10", features = ["vendored"] }
+serde_json = "1.0.59"
 
 [features]
 default = ["listenfd", "core/listenfd"]
+
+
+[dependencies.sentry]
+version = "0.20.1"
+default-features = false
+features = ["anyhow", "backtrace", "contexts", "panic", "transport"]

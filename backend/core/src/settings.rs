@@ -241,6 +241,16 @@ impl SettingsManager {
         })
     }
 
+    /// Load the key required for initializing sentry (for the api)
+    pub async fn sentry_api_key(&self) -> anyhow::Result<String> {
+        self.get_secret(keys::SENTRY_DSN_API).await
+    }
+
+    /// Load the key required for initializing sentry (for pages)
+    pub async fn sentry_pages_key(&self) -> anyhow::Result<String> {
+        self.get_secret(keys::SENTRY_DSN_PAGES).await
+    }
+
     /// Load the settings for JWKs.
     pub async fn jwk_settings(&self) -> anyhow::Result<JwkSettings> {
         let issuer = format!("{}/{}", config::JWK_ISSUER_URL, &self.project_id);

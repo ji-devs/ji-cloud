@@ -177,4 +177,30 @@ impl<T: Into<actix_web::Error>> From<UpdateError<T>> for actix_web::Error {
     }
 }
 
-from_anyhow![GetError, DeleteError, CreateError, UpdateError];
+#[non_exhaustive]
+#[derive(Serialize, Deserialize)]
+/// A common error type
+pub enum CommonError {
+    /// A Resource was not found.
+    NotFound,
+
+    /// User has insufficient permissions to perform an action on the Resource.
+    Forbidden,
+
+    /// An internal server error occurred.
+    #[serde(skip)]
+    InternalServerError(anyhow::Error),
+}
+
+#[cfg(feature = "backend")]
+impl From<CommonError> for actix_web::Error {
+    fn from(e: CommonError) -> actix_web::Error {
+        match e {
+            CommonError::InternalServerError(e) => anyhow_to_ise(e),
+            CommonError::NotFound => actix_web::HttpResponse::NotFound().into(),
+            CommonError::Forbidden => actix_web::HttpResponse::Forbidden().into(),
+        }
+    }
+}
+
+from_anyhow![GetError, DeleteError, CreateError, UpdateError, CommonError];

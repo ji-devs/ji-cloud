@@ -1,8 +1,6 @@
 {% import "module/memory-game/_common/memory-macros.html" as MemoryMacros %}
 <div class="relative flex flex-col items-center">
     <div class="flex mb-4">
-        {{ MemoryMacros::edit_card(dataId="left", side="left") }}
-        {{ MemoryMacros::edit_card(dataId="right", side="right") }}
+        {{ MemoryMacros::play_card()}}
     </div>
-    <p data-id="number"></p>
 </div>
