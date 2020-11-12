@@ -43,8 +43,8 @@ impl Step1Page {
                             format!("{}", index.unwrap_or(0)+1)
                         }))
                     })
-                    .with_data_id!("card-1", {
-                        .with_data_id!("label" => HtmlTextAreaElement, {
+                    .with_data_id!("left", {
+                        .with_data_id!("text-contents" => HtmlTextAreaElement, {
                             .with_node!(elem => {
                                 .event(clone!(_self,card => move |evt:events::Input| {
                                     let text = elem.value();
@@ -54,8 +54,8 @@ impl Step1Page {
                             .property_signal("value", card.text.signal_cloned())
                         })
                     })
-                    .with_data_id!("card-2", {
-                        .with_data_id!("label" => HtmlTextAreaElement, {
+                    .with_data_id!("right", {
+                        .with_data_id!("text-contents" => HtmlTextAreaElement, {
                             .with_node!(elem => {
                                 .event(clone!(_self,card => move |evt:events::Input| {
                                     let text = elem.value();
