@@ -2,11 +2,13 @@ import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
 import step2Page from "@templates/module/memory-game/edit/duplicate/step-2.html";
+import step4Page from "@templates/module/memory-game/edit/duplicate/step-4.html";
 import step2ThemeItemSelected from "@templates/module/memory-game/edit/duplicate/step-2-theme-item-selected.html";
 import step2ThemeItemDeselected from "@templates/module/memory-game/edit/duplicate/step-2-theme-item-deselected.html";
 import step1Tooltip from "@templates/module/memory-game/edit/duplicate/step-1-tooltip.html";
 import step1Error from "@templates/module/memory-game/edit/duplicate/step-1-error.html";
-import cardTmpl from "@templates/module/memory-game/edit/_common/memory-card.html";
+import cardEditTmpl from "@templates/module/memory-game/edit/_common/memory-card.html";
+import cardPlayTmpl from "@templates/module/memory-game/play/memory-card.html";
 
 export default {
   title: 'Modules/Memory-Game/Edit/Duplicate',
@@ -53,10 +55,13 @@ export const Step2 = () => mockStep2(tmpl(step2Page), 0);
 export const Step2_Theme_1 = () => mockStep2(tmpl(step2Page), 1);
 export const Step2_Theme_2 = () => mockStep2(tmpl(step2Page), 2);
 
+export const Step4 = () => mockStep4(tmpl(step4Page), 0, false);
+export const Step4_Theme_1 = () => mockStep4(tmpl(step4Page), 1, false);
+export const Step4_Theme_1_Flipped = () => mockStep4(tmpl(step4Page), 1, true);
 //Helpers
 
 function mockStep1(_page) {
-    const page = appendMockCards(_page);
+    const page = appendMockCardsEdit(_page);
     setTextId(page, "list-items", "");
 
     mockWords.forEach(word => {
@@ -67,13 +72,15 @@ function mockStep1(_page) {
 }
 
 function mockStep2(_page, selectedThemeIndex) {
-    const page = appendMockCards(_page);
+    const page = appendMockCardsEdit(_page);
 
     mockThemes.forEach(({content, label, id}, idx) => {
         const item = idx === selectedThemeIndex ? tmpl(step2ThemeItemSelected) : tmpl(step2ThemeItemDeselected);
+        const left = getChildId(item, "left");
+        setTextId(left, "text-contents", content);
+        const right = getChildId(item, "right");
+        setTextId(right, "text-contents", content);
 
-        setTextId(item, "content-left", content);
-        setTextId(item, "content-right", content);
         setTextId(item, "label", label);
 
         toggleClasses(item, [`memory-theme-${id}`], true);
@@ -88,15 +95,37 @@ function mockStep2(_page, selectedThemeIndex) {
     return page;
 }
 
-function appendMockCards(page) {
-    mockWords.forEach(word => {
-      const card = tmpl(cardTmpl);
-      const side1 = getChildId(card, "card-1");
-      setValueId(side1, "label", word);
-      const side2 = getChildId(card, "card-2");
-      setValueId(side2, "label", word);
+function mockStep4(_page, selectedThemeIndex, isFlipped) {
+    const page = appendMockCardsPlay(_page, isFlipped);
+    if(selectedThemeIndex) {
+        const {id} = mockThemes[selectedThemeIndex];
+        toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
+    }
+    return page;
+}
 
-      appendId(page, "cards", card);
+function appendMockCardsEdit(page) {
+    mockWords.forEach(word => {
+        const card = tmpl(cardEditTmpl);
+        const left = getChildId(card, "left");
+        setValueId(left, "text-contents", word);
+        const right = getChildId(card, "right");
+        setValueId(right, "text-contents", word);
+
+        appendId(page, "cards", card);
+    });
+
+    return page;
+}
+function appendMockCardsPlay(page, isFlipped) {
+    mockWords.forEach(word => {
+        const card = tmpl(cardPlayTmpl);
+        setTextId(card, "text-contents", word);
+        appendId(page, "cards", card);
+
+        if(isFlipped) {
+            toggleClassesId(card, "flip", [`flip-card-clicked`], true);
+        }
     });
 
     return page;
