@@ -87,6 +87,8 @@ function mockStep1(_page) {
     mockWords.forEach(word => {
       appendValueLineId(page, "list-items", word);
     });
+    const {id} = mockThemes[0];
+    toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
 
     return page;
 }
