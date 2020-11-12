@@ -58,7 +58,9 @@ export const Step1_Error = () => {
 export const Step2 = () => mockStep2(tmpl(step2Page), 0);
 
 export const Step2_Theme_1 = () => mockStep2(tmpl(step2Page), 1);
+export const Step2_Theme_1_FlipSecond = () => mockStep2(tmpl(step2Page), 1, true);
 export const Step2_Theme_2 = () => mockStep2(tmpl(step2Page), 2);
+export const Step2_Theme_2_FlipSecond = () => mockStep2(tmpl(step2Page), 2, true);
 
 //export const Step4 = () => mockStep4(tmpl(step4Page), 0, false);
 const makeStep4 = nCards => () =>  mockStep4(tmpl(step4Page), 0, false, nCards);
@@ -89,27 +91,23 @@ function mockStep1(_page) {
     return page;
 }
 
-function mockStep2(_page, selectedThemeIndex) {
-    const page = appendMockCardsEdit(_page);
+function mockStep2(_page, selectedThemeIndex, flipSecond) {
+    const page = appendMockCardsEdit(_page, flipSecond);
 
     mockThemes.forEach(({content, label, id}, idx) => {
         const item = idx === selectedThemeIndex ? tmpl(step2ThemeItemSelected) : tmpl(step2ThemeItemDeselected);
         const left = getChildId(item, "left");
         setTextId(left, "text-contents", content);
-        const right = getChildId(item, "right");
-        setTextId(right, "text-contents", content);
 
         setTextId(item, "label", label);
 
         toggleClasses(item, [`memory-theme-${id}`], true);
-
+        
         appendId(page, "theme-items", item);
     });
 
-    if(selectedThemeIndex) {
-        const {id} = mockThemes[selectedThemeIndex];
-        toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
-    }
+    const {id} = mockThemes[selectedThemeIndex];
+    toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
     return page;
 }
 
@@ -122,14 +120,17 @@ function mockStep4(_page, selectedThemeIndex, isFlipped, nCards) {
     return page;
 }
 
-function appendMockCardsEdit(page) {
+function appendMockCardsEdit(page, flipSecond) {
     mockWords.forEach(word => {
         const card = tmpl(cardEditTmpl);
         const left = getChildId(card, "left");
         setValueId(left, "text-contents", word);
         const right = getChildId(card, "right");
         setValueId(right, "text-contents", word);
-
+        
+        if(flipSecond) {
+            toggleClasses(right, [`flip-card-clicked`], true);
+        }
         appendId(page, "cards", card);
     });
 

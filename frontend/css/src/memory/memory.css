@@ -1,20 +1,21 @@
-.card-left {
-
+/*
+  Left and Right are independent of Front and Back
+  See the Themes below for front/back styling
+*/
+.edit-card-left {
   z-index:10;
 }
 
-.card-right {
+.edit-card-right {
   margin-top:10px;
   margin-left: -10px;
 }
 
-.preview-left{
+.sidebar-card-left {
   margin-top: 10px;
   z-index: 10;
   margin-right: -60px
 }
-
-
 
 .memory-add-word, .memory-error {
 
@@ -75,8 +76,8 @@
   height: 100px;
   transition: transform 0.2s linear;
 }
-.flip-card .card-front,
-.flip-card .card-back {
+.flip-card .play-card-front,
+.flip-card .play-card-back {
   -moz-backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -89,19 +90,19 @@
   position: absolute;
   width: 100%;
 }
-.flip-card .card-front {
+.flip-card .play-card-front {
   -moz-transform: perspective(300) rotateY(0);
   -webkit-transform: perspective(300) rotateY(0);
   transform: perspective(300) rotateY(0);
   z-index: 900;
 }
-.flip-card .card-back {
+.flip-card .play-card-back {
   -moz-transform: rotateY(-180deg);
   -webkit-transform: rotateY(-180deg);
   transform: rotateY(-180deg);
   z-index: 800;
 }
-.flip-card-clicked .card-front {
+.flip-card-clicked .play-card-front {
   -moz-transform: rotateY(180deg);
   -ms-transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
@@ -110,7 +111,7 @@
   -webkit-transform: perspective(300) rotateY(180deg);
   transform: perspective(300) rotateY(180deg);
 }
-.flip-card-clicked .card-back {
+.flip-card-clicked .play-card-back {
   z-index: 950;
   -moz-transform: rotateY(0deg);
   -ms-transform: rotateY(0deg);
@@ -139,50 +140,62 @@
 }
 
 /* MEMORY CARD THEMES
-    card-left and card-right are for edit mode where we see both side-by-side
-    card-front and card-back are for play mode
-    preview-left and preview-right are for the step 2 (design) of edit mode
+    edit-card-front and edit-card-back are for edit mode
+    sidebar-card-front and sidebar-card-back are for the sidebar
+    play-card-front and play-card-back are for play mode
 */
 
+/* Theme: Basic */
+.memory-theme-basic .edit-card-front, .memory-theme-basic .sidebar-card-front,
+.memory-theme-basic .play-card-front {
+  background: white;
+}
+.memory-theme-basic .edit-card-back, .memory-theme-basic .sidebar-card-back,
+.memory-theme-basic .play-card-back {
+  background: white;
+}
+.memory-theme-basic .text-contents {
+}
 
-
-.memory-theme-foo .card-left, .memory-theme-foo .preview-left,
-.memory-theme-foo .card-front {
+/* Theme: Foo */
+.memory-theme-foo .edit-card-front, .memory-theme-foo .sidebar-card-front,
+.memory-theme-foo .play-card-front {
   background: rgb(34,193,195);
   background: linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%);
+}
+.memory-theme-foo .edit-card-back, .memory-theme-foo .sidebar-card-back,
+.memory-theme-foo .play-card-back {
+  background: rgb(238,174,202);
+  background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
 }
 .memory-theme-foo .text-contents {
   font-family: Caveat;
 }
 
-.memory-theme-foo .card-right, .memory-theme-foo .preview-right,
-.memory-theme-foo .card-back {
-  background: rgb(238,174,202);
-  background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
-}
-
-.memory-theme-bar .card-left, .memory-theme-bar .preview-left,
-.memory-theme-bar .card-front {
+/* Theme: Bar */
+.memory-theme-bar .edit-card-front, .memory-theme-bar .sidebar-card-front,
+.memory-theme-bar .play-card-front {
   background: rgb(63,94,251);
   background: radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
 }
-
-.memory-theme-bar .card-right, .memory-theme-bar .preview-right,
-.memory-theme-bar .card-back {
+.memory-theme-bar .edit-card-back, .memory-theme-bar .sidebar-card-back,
+.memory-theme-bar .play-card-back {
   background: rgb(2,0,36);
   background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+}
+.memory-theme-bar .text-contents {
 }
 
 /*  ORANGE THEME */
 
-.memory-theme-orange .card-left, .memory-theme-orange .preview-left,
-.memory-theme-orange .card-front{
+.memory-theme-orange .edit-card-front, .memory-theme-orange .sidebar-card-front,
+.memory-theme-orange .play-card-front{
   background-color: white;
   border: solid 5px #fd6220;
 }
 
-.memory-theme-orange .card-right, .memory-theme-orange .preview-right,
-.memory-theme-orange .card-back {
+.memory-theme-orange .edit-card-back, .memory-theme-orange .sidebar-card-back,
+.memory-theme-orange .play-card-back {
   background-image: url('{{MEDIA_UI}}/Theme_MemoryGame_01_Brush_Back@2x.png');
   background-size: cover;
 }

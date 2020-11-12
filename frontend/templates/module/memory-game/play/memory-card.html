@@ -1,6 +1,7 @@
-{% import "module/memory-game/_common/memory-macros.html" as MemoryMacros %}
+{% import "module/memory-game/play/macros/play-macros.html" as PlayMacros %}
+
 <div class="relative flex flex-col items-center">
     <div class="flex mb-4">
-        {{ MemoryMacros::play_card()}}
+        {{ PlayMacros::card()}}
     </div>
 </div>

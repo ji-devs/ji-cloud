@@ -1,0 +1,17 @@
+{% macro card(side) %}
+
+  <div data-id="{{ side }}" class="h-160 w-160 flip-card edit-card-{{ side }}">
+
+    <div class="play-card-front flex rounded-lg shadow-lg">
+      <textarea data-id="text-contents" class="w-full h-full font-medium text-4xl flex items-center text-center text-contents outline-none resize-none  bg-transparent focus:outline-none"></textarea>
+    </div>
+    <div class="play-card-back rounded-lg">
+    </div>
+  </div>
+{% endmacro card %}
+
+{% macro card_old(side) %}
+  <div data-id="{{ side }}" class="h-160 w-160 bg-white flex rounded-lg shadow-lg  card-{{ side }}">
+    <textarea data-id="text-contents" class="font-medium text-4xl flex items-center text-center text-contents outline-none resize-none  bg-transparent focus:outline-none"></textarea>
+  </div>
+{% endmacro card_old %}
