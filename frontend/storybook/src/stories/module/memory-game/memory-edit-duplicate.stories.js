@@ -32,6 +32,11 @@ const mockThemes = [
         content: "שמש",
         id: "bar",
         label: "Bar",
+    },
+    {
+      content: 'Word',
+      id: 'orange',
+      label: 'Orange',
     }
 ];
 
