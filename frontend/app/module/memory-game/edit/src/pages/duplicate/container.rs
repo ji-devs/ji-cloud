@@ -8,7 +8,7 @@ use futures_signals::{
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
+use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
@@ -17,6 +17,8 @@ use super::step_1::Step1Page;
 use super::step_2::Step2Page;
 use crate::data::*;
 use crate::debug;
+
+
 
 pub struct DuplicatePage {
     pub state: Rc<DuplicateState>
@@ -43,6 +45,8 @@ impl DuplicatePage {
     }
     
     pub fn render(_self: Rc<Self>) -> Dom {
-        html!("div", { .child_signal(Self::dom_signal(_self.clone())) } )
+        html!("div", { 
+            .child_signal(Self::dom_signal(_self.clone())) 
+        } )
     }
 }

@@ -9,7 +9,7 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id, dynamic_class_signal, spawn_future, AsyncLoader};
 use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
@@ -98,6 +98,9 @@ impl Step1Page {
             })
 
             .with_data_id!("cards", {
+                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
+                    Some(format!("memory-theme-{}", id))
+                }))
                 .children_signal_vec(Self::cards_dom_signal(_self.clone()))
             })
             .with_data_id!("next", {

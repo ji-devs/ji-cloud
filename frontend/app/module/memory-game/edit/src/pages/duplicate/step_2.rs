@@ -10,7 +10,7 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id, spawn_future, dynamic_class_signal, AsyncLoader};
 use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
@@ -62,11 +62,6 @@ impl ThemeOption {
                                         .text_signal(_self.text_signal())
                                     })
                                 })
-                                .with_data_id!("right", {
-                                    .with_data_id!("text-contents", {
-                                        .text_signal(_self.text_signal())
-                                    })
-                                })
                                 .with_data_id!("label", {
                                     .text(_self.theme.label)
                                 })
@@ -103,7 +98,7 @@ pub struct CardDom {
     pub card: Card,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Side {
     Left,
     Right
@@ -120,57 +115,51 @@ impl CardDom {
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::card(), {
-            //TODO - https://github.com/Pauan/rust-dominator/issues/44 
-            /*
-            .dynamic_class_signal(_self.state.theme_id.signal_ref(|id| {
-                format!("memory-theme-{}", id)
-            }))
-            */
-            .with_node!(element => {
-                .future({
-                    let mut old = None;
-                    _self.state.theme_id
-                        .signal_cloned()
-                        .for_each(move |theme_id| {
-                            if let Some(old) = old.as_deref() {
-                                element.class_list().remove_1(old).unwrap();
-                            }
-
-                            let name = format!("memory-theme-{}", theme_id);
-                            element.class_list().add_1(&name).unwrap();
-                            old = Some(name);
-
-                            ready(())
-                        })
-                })
-            })
             .with_data_id!("number", {
                 .text_signal(_self.index.signal().map(|index| {
                     format!("{}", index.unwrap_or(0)+1)
                 }))
             })
+            //TODO - macro to make hover stuff DRY
             .with_data_id!("left", {
+
+                .class_signal("flip-card-clicked", _self.is_hover.signal().map(|hover| hover == Some(Side::Left)))
+                .with_node!(element => {
+                    .event(clone!(_self => move |evt:events::MouseEnter| {
+                        _self.is_hover.set(Some(Side::Left));
+                    }))
+                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
+                        if let Some(target) = evt.target() {
+                            if target == element.clone().unchecked_into() {
+                                _self.is_hover.set(None);
+                            } else {
+                                evt.prevent_default();
+                            }
+                        }
+                    }))
+                })
                 .with_data_id!("text-contents" => HtmlTextAreaElement, {
                     .property_signal("value", _self.card.text.signal_cloned())
                 })
             })
             .with_data_id!("right", {
+                .class_signal("flip-card-clicked", _self.is_hover.signal().map(|hover| hover == Some(Side::Right)))
+                .with_node!(element => {
+                    .event(clone!(_self => move |evt:events::MouseEnter| {
+                        _self.is_hover.set(Some(Side::Right));
+                    }))
+                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
+                        if let Some(target) = evt.target() {
+                            if target == element.clone().unchecked_into() {
+                                _self.is_hover.set(None);
+                            } else {
+                                evt.prevent_default();
+                            }
+                        }
+                    }))
+                })
                 .with_data_id!("text-contents" => HtmlTextAreaElement, {
                     .property_signal("value", _self.card.text.signal_cloned())
-                    .with_node!(element => {
-                        .event(clone!(_self => move |evt:events::MouseEnter| {
-                            _self.is_hover.set(Some(Side::Right));
-                        }))
-                        .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
-                            if let Some(target) = evt.target() {
-                                if target == element.clone().unchecked_into() {
-                                    _self.is_hover.set(None);
-                                } else {
-                                    evt.prevent_default();
-                                }
-                            }
-                        }))
-                    })
                 })
             })
         })
@@ -217,6 +206,9 @@ impl Step2Page {
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::duplicate::step_2_page(), { 
             .with_data_id!("cards", {
+                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
+                    Some(format!("memory-theme-{}", id))
+                }))
                 .children_signal_vec(Self::cards_dom_signal(_self.clone()))
             })
             .with_data_id!("theme-items", {

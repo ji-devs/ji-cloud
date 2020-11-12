@@ -84,7 +84,7 @@ impl DuplicateStateRaw {
                     CardRaw::new(text.to_string())
                 })
                 .collect(),
-            theme_id: config::THEME_OPTIONS[1].id.to_string(), 
+            theme_id: config::THEME_OPTIONS[config::DEBUG_THEME_INDEX].id.to_string(), 
         }
     }
 }
