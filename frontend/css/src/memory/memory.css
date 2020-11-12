@@ -77,7 +77,10 @@
   transition: transform 0.2s linear;
 }
 .flip-card .play-card-front,
-.flip-card .play-card-back {
+.flip-card .play-card-back,
+.flip-card .edit-card-front,
+.flip-card .edit-card-back
+{
   -moz-backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -90,19 +93,22 @@
   position: absolute;
   width: 100%;
 }
-.flip-card .play-card-front {
+.flip-card .play-card-front,
+.flip-card .edit-card-front {
   -moz-transform: perspective(300) rotateY(0);
   -webkit-transform: perspective(300) rotateY(0);
   transform: perspective(300) rotateY(0);
   z-index: 900;
 }
-.flip-card .play-card-back {
+.flip-card .play-card-back,
+.flip-card .edit-card-back {
   -moz-transform: rotateY(-180deg);
   -webkit-transform: rotateY(-180deg);
   transform: rotateY(-180deg);
   z-index: 800;
 }
-.flip-card-clicked .play-card-front {
+.flip-card-clicked .play-card-front,
+.flip-card-clicked .edit-card-front {
   -moz-transform: rotateY(180deg);
   -ms-transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
@@ -111,7 +117,8 @@
   -webkit-transform: perspective(300) rotateY(180deg);
   transform: perspective(300) rotateY(180deg);
 }
-.flip-card-clicked .play-card-back {
+.flip-card-clicked .play-card-back,
+.flip-card-clicked .edit-card-back {
   z-index: 950;
   -moz-transform: rotateY(0deg);
   -ms-transform: rotateY(0deg);
