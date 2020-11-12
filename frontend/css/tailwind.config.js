@@ -72,6 +72,8 @@ module.exports = {
         jimemorygreenlight: '#eafaf0',
         jimemorycardgreen: '#7fd29c',
         jibackgroundyellow: '#fff8d1',
+        jimemoryborderblue: '#6ea4fc',
+        jigreentooltipbackground: '#f0fcf5',
 
       },
 
@@ -114,6 +116,7 @@ module.exports = {
         186: '186px',
         190: '190px',
         200: '200px',
+        212: '212px',
         217: '217px',
         236: '236px',
         240: '240px',
@@ -245,6 +248,8 @@ module.exports = {
         115: '115px',
         '-120': '-120px',
         160: '160px',
+        240: '240px',
+        500: '500px',
 
       },
       borderWidth: {
