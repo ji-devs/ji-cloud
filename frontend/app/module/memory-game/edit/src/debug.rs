@@ -27,7 +27,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::local()
+            DebugSettings::default()
         }
     } else {
         pub fn settings() -> DebugSettings {

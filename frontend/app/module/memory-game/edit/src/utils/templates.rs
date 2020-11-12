@@ -12,7 +12,8 @@ thread_local! {
 
 const MODE_CHOOSE_PAGE:&'static str = "mode-choose-page";
 
-const CARD:&'static str = "card";
+const CARD_EDIT_TEXT:&'static str = "card-edit-text";
+const CARD_EDIT_PREVIEW:&'static str = "card-edit-preview";
 
 const DUPLICATE_STEP_1_PAGE:&'static str = "duplicate-step-1-page";
 const DUPLICATE_STEP_1_TOOLTIP:&'static str = "duplicate-step-1-tooltip";
@@ -27,8 +28,11 @@ pub fn mode_choose_page() -> HtmlElement {
 }
 
 
-pub fn card() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD))
+pub fn card_edit_text() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_EDIT_TEXT))
+}
+pub fn card_edit_preview() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_EDIT_PREVIEW))
 }
 
 pub mod duplicate {
@@ -72,7 +76,8 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
             (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/start-mode-choose.html"))),
-            (CARD, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-card.html"))),
+            (CARD_EDIT_TEXT, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-card-text.html"))),
+            (CARD_EDIT_PREVIEW, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-card-preview.html"))),
             (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1.html"))),
             (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-tooltip.html"))),
             (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-error.html"))),

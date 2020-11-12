@@ -114,7 +114,7 @@ impl CardDom {
         })
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
-        elem!(templates::card(), {
+        elem!(templates::card_edit_preview(), {
             .with_data_id!("number", {
                 .text_signal(_self.index.signal().map(|index| {
                     format!("{}", index.unwrap_or(0)+1)
@@ -138,8 +138,8 @@ impl CardDom {
                         }
                     }))
                 })
-                .with_data_id!("text-contents" => HtmlTextAreaElement, {
-                    .property_signal("value", _self.card.text.signal_cloned())
+                .with_data_id!("text-contents", {
+                    .text_signal(_self.card.text.signal_cloned())
                 })
             })
             .with_data_id!("right", {
@@ -158,8 +158,8 @@ impl CardDom {
                         }
                     }))
                 })
-                .with_data_id!("text-contents" => HtmlTextAreaElement, {
-                    .property_signal("value", _self.card.text.signal_cloned())
+                .with_data_id!("text-contents", {
+                    .text_signal(_self.card.text.signal_cloned())
                 })
             })
         })
@@ -205,6 +205,11 @@ impl Step2Page {
 
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::duplicate::step_2_page(), { 
+            .with_data_id!("top-step-1", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.state.step.set(Step::One);
+                }))
+            })
             .with_data_id!("cards", {
                 .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
                     Some(format!("memory-theme-{}", id))
