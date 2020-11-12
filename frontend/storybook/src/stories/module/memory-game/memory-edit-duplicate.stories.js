@@ -13,6 +13,8 @@ export default {
 }
 
 const mockWords = ["שמש", "world", "שְׁמָע֕וּנִי", "blah blah blah"];
+
+//Note - the `id` here must match the `memory-theme-[ID]` in memory.css
 const mockThemes = [
     {
         content: "שמש",
