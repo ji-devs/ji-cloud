@@ -8,18 +8,18 @@
         <div class="flex mb-4">
 
             <div data-id="left" class="h-136 w-136 bg-white rounded-lg shadow-lg flex items-center justify-center preview-left">
-                <p data-id="text-contents" class="font-medium text-4xl text-contents"></p>
+                <p data-id="text-contents" class="font-medium text-4xl text-contents pointer-none select-none"></p>
             </div>
             <div data-id="right" class="h-136 w-136 bg-white rounded-lg shadow-lg   flex items-center justify-center preview-right">
-                <p data-id="text-contents" class="font-medium text-4xl text-contents"></p>
+                <p data-id="text-contents" class="font-medium text-4xl text-contents pointer-none select-none"></p>
             </div>
 
         </div>
 
         {% if selected %}
-        <p data-id="label" class="text-white">
+        <p data-id="label" class="text-white pointer-none select-none">
         {% else %}
-        <p data-id="label" class="text-black">
+        <p data-id="label" class="text-black pointer-none select-none">
         {% endif %}
         </p>
         </div>

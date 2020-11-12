@@ -18,6 +18,10 @@ const DUPLICATE_STEP_1_PAGE:&'static str = "duplicate-step-1-page";
 const DUPLICATE_STEP_1_TOOLTIP:&'static str = "duplicate-step-1-tooltip";
 const DUPLICATE_STEP_1_ERROR:&'static str = "duplicate-step-1-error";
 
+const DUPLICATE_STEP_2_PAGE:&'static str = "duplicate-step-2-page";
+const DUPLICATE_STEP_2_THEME_ITEM_SELECTED:&'static str = "duplicate-step-2-theme-item-selected";
+const DUPLICATE_STEP_2_THEME_ITEM_DESELECTED:&'static str = "duplicate-step-2-theme-item-deselected";
+
 pub fn mode_choose_page() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
 }
@@ -38,6 +42,18 @@ pub mod duplicate {
     pub fn step_1_error() -> HtmlElement {
         TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_ERROR))
     }
+    pub fn step_2_page() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_2_PAGE))
+    }
+
+    pub fn step_2_theme_item(selected:bool) -> HtmlElement {
+        if selected {
+            TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_2_THEME_ITEM_SELECTED))
+        } else {
+            TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_2_THEME_ITEM_DESELECTED))
+        }
+    }
+
 }
 
 pub struct Templates {
@@ -59,7 +75,10 @@ impl Templates {
             (CARD, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/_common/memory-card.html"))),
             (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1.html"))),
             (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-tooltip.html"))),
-            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-error.html")))
+            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-1-error.html"))),
+            (DUPLICATE_STEP_2_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2.html"))),
+            (DUPLICATE_STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2-theme-item-selected.html"))),
+            (DUPLICATE_STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2-theme-item-deselected.html"))),
         ]);
 
         Self { cache }

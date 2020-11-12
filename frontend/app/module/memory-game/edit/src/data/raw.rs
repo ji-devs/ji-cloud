@@ -6,7 +6,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-
+use crate::config;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -59,41 +59,32 @@ impl CardRaw {
 pub struct DuplicateStateRaw {
     pub step: StepRaw,
     pub cards: Vec<CardRaw>,
+    pub theme_id: String,
 }
 
 impl DuplicateStateRaw {
     pub fn default() -> Self {
         Self {
             step: StepRaw::One,
-            cards: vec![
-                "שמש",
-                "ירח",
-                "כוכב",
-                "Sun",
-                "Moon",
-                "Star",
-            ].into_iter()
+            cards: config::INITIAL_CARD_TEXTS
+                .iter()
                 .map(|text| {
                     CardRaw::new(text.to_string())
                 })
-                .collect()
+                .collect(),
+            theme_id: config::THEME_OPTIONS[0].id.to_string(), 
         }
     }
     pub fn debug() -> Self {
         Self {
-            step: StepRaw::One,
-            cards: vec![
-                "שמש",
-                "ירח",
-                "כוכב",
-                "Sun",
-                "Moon",
-                "Star",
-            ].into_iter()
+            step: config::DEBUG_STEP, 
+            cards: config::INITIAL_CARD_TEXTS
+                .iter()
                 .map(|text| {
                     CardRaw::new(text.to_string())
                 })
-                .collect()
+                .collect(),
+            theme_id: config::THEME_OPTIONS[1].id.to_string(), 
         }
     }
 }

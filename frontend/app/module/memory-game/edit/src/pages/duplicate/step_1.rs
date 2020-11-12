@@ -98,68 +98,15 @@ impl Step1Page {
             })
 
             .with_data_id!("cards", {
-                .children_signal_vec(Self::cards_dom_signal(_self))
+                .children_signal_vec(Self::cards_dom_signal(_self.clone()))
             })
-        })
-    }
-    /*
-    pub fn editing_text_signal(&self) -> impl Signal<Item = bool> {
-        self.editing_text_content.signal_ref(|x| x.is_some())
-    }
-
-    pub fn words_signal(&self) -> impl Signal<Item = String> {
-        self.words
-            .signal_vec_cloned()
-            .to_signal_map(|words| {
-                let mut blob = String::new();
-                for word in words.iter() {
-                    writeln!(&mut blob, "{}", word).unwrap_throw();
-                }
-                blob
-            })
-    }
-
-    pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::duplicate::step_1_page(), { 
-            .with_data_id!("list-items", {
-                .event(clone!(_self => move |evt:events::DoubleClick| {
-                    if _self.editing_text_content.lock_ref().is_none() {
-                        let words = _self.words.lock_ref();     
-                        let mut blob = String::new();
-                        for word in words.iter() {
-                            writeln!(&mut blob, "{}", word).unwrap_throw();
-                        }
-                        _self.editing_text_content.set(Some(blob));
-                    }
+            .with_data_id!("next", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.state.step.set(Step::Two);
                 }))
             })
-            .with_data_id!("list-items-data", {
-                .visible_signal(_self.editing_text_signal().map(|x| !x)) 
-                .text_signal(_self.words_signal())
-            })
-            .with_data_id!("list-items-input" => HtmlTextAreaElement, {
-                .visible_signal(_self.editing_text_signal())
-                .focused_signal(_self.editing_text_signal())
-                .with_node!(elem => {
-                    .event(clone!(_self => move |evt:events::Input| {
-                        let text = elem.value();
-                        let words = lines::split_to_words(text);
-                        _self.words.lock_mut().replace_cloned(words);
-                    }))
-                    .event(clone!(_self => move |evt:events::Blur| {
-                        _self.editing_text_content.set(None);
-                    }))
-                    .property_signal("value", _self.editing_text_content.signal_ref(|x| {
-                        match x {
-                            None => "".to_string(),
-                            Some(text) => text.to_string(),
-                        }
-                    }))
-                })
-            })
         })
     }
-    */
 }
 
 

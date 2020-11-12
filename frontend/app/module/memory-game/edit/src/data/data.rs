@@ -87,10 +87,17 @@ impl From<CardRaw> for Card {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct Theme {
+    pub id: &'static str,
+    pub label: &'static str,
+}
+
 #[derive(Debug)]
 pub struct DuplicateState {
     pub step: Mutable<Step>,
     pub cards: MutableVec<Card>,
+    pub theme_id: Mutable<String>,
 }
 
 impl From<DuplicateStateRaw> for DuplicateState {
@@ -103,6 +110,7 @@ impl From<DuplicateStateRaw> for DuplicateState {
         Self {
             step: Mutable::new(raw.step.into()),
             cards: MutableVec::new_with_values(cards),
+            theme_id: Mutable::new(raw.theme_id)
         }
     }
 }

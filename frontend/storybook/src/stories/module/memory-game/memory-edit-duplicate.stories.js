@@ -55,9 +55,22 @@ export const Step2 = () => mockStep2(tmpl(step2Page), 0);
 export const Step2_Theme_1 = () => mockStep2(tmpl(step2Page), 1);
 export const Step2_Theme_2 = () => mockStep2(tmpl(step2Page), 2);
 
-export const Step4 = () => mockStep4(tmpl(step4Page), 0, false);
-export const Step4_Theme_1 = () => mockStep4(tmpl(step4Page), 1, false);
-export const Step4_Theme_1_Flipped = () => mockStep4(tmpl(step4Page), 1, true);
+//export const Step4 = () => mockStep4(tmpl(step4Page), 0, false);
+const makeStep4 = nCards => () =>  mockStep4(tmpl(step4Page), 0, false, nCards);
+export const Step4_8Cards = makeStep4(8); 
+export const Step4_10Cards = makeStep4(10); 
+export const Step4_12Cards = makeStep4(12); 
+export const Step4_14Cards = makeStep4(14); 
+export const Step4_16Cards = makeStep4(16); 
+export const Step4_18Cards = makeStep4(18); 
+export const Step4_20Cards = makeStep4(20); 
+export const Step4_22Cards = makeStep4(22); 
+export const Step4_24Cards = makeStep4(24); 
+export const Step4_26Cards = makeStep4(26); 
+export const Step4_28Cards = makeStep4(28); 
+
+export const Step4_Theme_1 = () => mockStep4(tmpl(step4Page), 1, false, 12);
+export const Step4_Theme_1_Flipped = () => mockStep4(tmpl(step4Page), 1, true, 12);
 //Helpers
 
 function mockStep1(_page) {
@@ -95,8 +108,8 @@ function mockStep2(_page, selectedThemeIndex) {
     return page;
 }
 
-function mockStep4(_page, selectedThemeIndex, isFlipped) {
-    const page = appendMockCardsPlay(_page, isFlipped);
+function mockStep4(_page, selectedThemeIndex, isFlipped, nCards) {
+    const page = appendMockCardsPlay(_page, isFlipped, nCards);
     if(selectedThemeIndex) {
         const {id} = mockThemes[selectedThemeIndex];
         toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
@@ -117,8 +130,9 @@ function appendMockCardsEdit(page) {
 
     return page;
 }
-function appendMockCardsPlay(page, isFlipped) {
-    mockWords.forEach(word => {
+function appendMockCardsPlay(page, isFlipped, nCards) {
+    for(let i = 0; i < nCards; i++) {
+        const word = mockWords[0];
         const card = tmpl(cardPlayTmpl);
         setTextId(card, "text-contents", word);
         appendId(page, "cards", card);
@@ -126,7 +140,7 @@ function appendMockCardsPlay(page, isFlipped) {
         if(isFlipped) {
             toggleClassesId(card, "flip", [`flip-card-clicked`], true);
         }
-    });
+    }
 
     return page;
 }
