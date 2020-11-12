@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, appendValueLineId, getChildId, setValueId, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
 import step2Page from "@templates/module/memory-game/edit/duplicate/step-2.html";
 import step2ThemeItemSelected from "@templates/module/memory-game/edit/duplicate/step-2-theme-item-selected.html";
@@ -21,13 +21,13 @@ const mockThemes = [
     },
     {
         content: "שמש",
-        id: "basic",
-        label: "Basic",
+        id: "foo",
+        label: "Foo",
     },
     {
         content: "שמש",
-        id: "basic",
-        label: "Basic",
+        id: "bar",
+        label: "Bar",
     }
 ];
 
@@ -46,15 +46,10 @@ export const Step1_Error = () => {
     return page;
 }
 
-export const Step2 = () => mockStep2(tmpl(step2Page));
-/*
-export const Step2 = () => {
-    const page = tmpl(step2Page, {
-    });
-    appendMock(page);
-    return page;
-}
-*/
+export const Step2 = () => mockStep2(tmpl(step2Page), 0);
+
+export const Step2_Theme_1 = () => mockStep2(tmpl(step2Page), 1);
+export const Step2_Theme_2 = () => mockStep2(tmpl(step2Page), 2);
 
 //Helpers
 
@@ -66,22 +61,28 @@ function mockStep1(_page) {
       appendValueLineId(page, "list-items", word);
     });
 
-    return page; 
+    return page;
 }
 
-function mockStep2(_page) {
+function mockStep2(_page, selectedThemeIndex) {
     const page = appendMockCards(_page);
 
     mockThemes.forEach(({content, label, id}, idx) => {
-        const item = idx === 0 ? tmpl(step2ThemeItemSelected) : tmpl(step2ThemeItemDeselected);
+        const item = idx === selectedThemeIndex ? tmpl(step2ThemeItemSelected) : tmpl(step2ThemeItemDeselected);
 
         setTextId(item, "content-left", content);
         setTextId(item, "content-right", content);
         setTextId(item, "label", label);
 
-        appendId(page, "theme-items", item);
+        toggleClasses(item, [`memory-theme-${id}`], true);
 
+        appendId(page, "theme-items", item);
     });
+
+    if(selectedThemeIndex) {
+        const {id} = mockThemes[selectedThemeIndex];
+        toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
+    }
     return page;
 }
 
