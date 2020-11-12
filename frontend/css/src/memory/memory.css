@@ -138,14 +138,13 @@
   fill: #c1d8f8;
 }
 
-/* MEMORY CARD THEMES 
+/* MEMORY CARD THEMES
     card-left and card-right are for edit mode where we see both side-by-side
     card-front and card-back are for play mode
     preview-left and preview-right are for the step 2 (design) of edit mode
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Caveat&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
+
 
 .memory-theme-foo .card-left, .memory-theme-foo .preview-left,
 .memory-theme-foo .card-front {
@@ -173,8 +172,23 @@
   background: rgb(2,0,36);
   background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
 }
-.memory-theme-bar .text-contents {
-  color: orange; 
+
+/*  ORANGE THEME */
+
+.memory-theme-orange .card-left, .memory-theme-orange .preview-left,
+.memory-theme-orange .card-front{
+  background-color: white;
+  border: solid 5px #fd6220;
+}
+
+.memory-theme-orange .card-right, .memory-theme-orange .preview-right,
+.memory-theme-orange .card-back {
+  background-image: url('{{MEDIA_UI}}/Theme_MemoryGame_01_Brush_Back@2x.png');
+  background-size: cover;
+}
+
+.memory-theme-orange .text-contents {
+  font-family: 'Caveat', cursive;
 }
 
 /* --END MEMORY CARD THEMES -- */
@@ -200,6 +214,14 @@
 
 }
 
+.memory-added-image::before{
+  border-color: transparent  #42cc7a transparent transparent;
+}
+
+
+.memory-added-image::after{
+  border-color: transparent  #f0fcf5 transparent transparent;
+}
 
 
 .memory-added-image::before{
@@ -212,12 +234,4 @@
   border-style: solid;
 
 
-}
-
-.memory-added-image::before{
-  border-color: transparent #42cc7a transparent transparent;
-}
-
-.memory-added-image::after {
-    border-color: transparent #f0fcf5 transparent transparent;
 }
