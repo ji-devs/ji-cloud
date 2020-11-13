@@ -11,8 +11,8 @@
   </div>
 {% endmacro top_step %}
 
-{% macro top_steps(selected) %}
-  <div class="flex justify-between items-center p-4 border-b border-jidarkgrey">
+{% macro top_steps(selected, noborder=false) %}
+  <div class="flex justify-between items-center p-4 {% if noborder != true %} border-b border-jidarkgrey {% endif %}">
     {{ self::top_step(selected=selected, expected=1, label="Content") }}
     <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
     {{ self::top_step(selected=selected, expected=2, label="Design") }}

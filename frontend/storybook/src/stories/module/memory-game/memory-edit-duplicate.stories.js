@@ -1,5 +1,7 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {mockWords, mockThemes} from "./memory-common";
+
 import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
 import step2Page from "@templates/module/memory-game/edit/duplicate/step-2.html";
 import step4Page from "@templates/module/memory-game/edit/duplicate/step-4.html";
@@ -14,32 +16,6 @@ import cardPlayTmpl from "@templates/module/memory-game/play/memory-card.html";
 export default {
   title: 'Modules/Memory-Game/Edit/Duplicate',
 }
-
-const mockWords = ["שמש", "world", "שְׁמָע֕וּנִי", "blah blah blah"];
-
-//Note - the `id` here must match the `memory-theme-[ID]` in memory.css
-const mockThemes = [
-    {
-        content: "שמש",
-        id: "basic",
-        label: "Basic",
-    },
-    {
-        content: "שמש",
-        id: "foo",
-        label: "Foo",
-    },
-    {
-        content: "שמש",
-        id: "bar",
-        label: "Bar",
-    },
-    {
-      content: 'Word',
-      id: 'orange',
-      label: 'Orange',
-    }
-];
 
 
 export const Step1 = () => mockStep1(tmpl(step1Page));
@@ -63,26 +39,17 @@ export const Step2_Theme_1_FlipSecond = () => mockStep2(tmpl(step2Page), 1, true
 export const Step2_Theme_2 = () => mockStep2(tmpl(step2Page), 2);
 export const Step2_Theme_2_FlipSecond = () => mockStep2(tmpl(step2Page), 2, true);
 
-//export const Step4 = () => mockStep4(tmpl(step4Page), 0, false);
-const makeStep4 = nCards => () =>  mockStep4(tmpl(step4Page), 0, false, nCards);
-export const Step4_8Cards = makeStep4(8); 
-export const Step4_10Cards = makeStep4(10); 
-export const Step4_12Cards = makeStep4(12); 
-export const Step4_14Cards = makeStep4(14); 
-export const Step4_16Cards = makeStep4(16); 
-export const Step4_18Cards = makeStep4(18); 
-export const Step4_20Cards = makeStep4(20); 
-export const Step4_22Cards = makeStep4(22); 
-export const Step4_24Cards = makeStep4(24); 
-export const Step4_26Cards = makeStep4(26); 
-export const Step4_28Cards = makeStep4(28); 
+export const Step4 = () => {
+    const page = tmpl(step4Page);
+    const iframe = getChildId(page, "jig-module-iframe");
+    iframe.srcdoc = "<html><body><h1>Player here!</h1></body></html>";
 
-export const Step4_Theme_1 = () => mockStep4(tmpl(step4Page), 1, false, 12);
-export const Step4_Theme_1_Flipped = () => mockStep4(tmpl(step4Page), 1, true, 12);
+    return page;
+}
 //Helpers
 
 function mockStep1(_page) {
-    const page = appendMockCardsEdit(_page, {flipSecond: false, textInput: true});
+    const page = appendMockCards(_page, {flipSecond: false, textInput: true});
     setTextId(page, "list-items", "");
 
     mockWords.forEach(word => {
@@ -95,7 +62,7 @@ function mockStep1(_page) {
 }
 
 function mockStep2(_page, selectedThemeIndex, flipSecond) {
-    const page = appendMockCardsEdit(_page, {flipSecond, textInput: false});
+    const page = appendMockCards(_page, {flipSecond, textInput: false});
 
     mockThemes.forEach(({content, label, id}, idx) => {
         const item = idx === selectedThemeIndex ? tmpl(step2ThemeItemSelected) : tmpl(step2ThemeItemDeselected);
@@ -114,16 +81,7 @@ function mockStep2(_page, selectedThemeIndex, flipSecond) {
     return page;
 }
 
-function mockStep4(_page, selectedThemeIndex, isFlipped, nCards) {
-    const page = appendMockCardsPlay(_page, {isFlipped, nCards});
-    if(selectedThemeIndex) {
-        const {id} = mockThemes[selectedThemeIndex];
-        toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
-    }
-    return page;
-}
-
-function appendMockCardsEdit(page, {flipSecond, textInput}) {
+function appendMockCards(page, {flipSecond, textInput}) {
     mockWords.forEach(word => {
         const card = tmpl(textInput ? cardEditTextTmpl : cardEditPreviewTmpl);
         const left = getChildId(card, "left");

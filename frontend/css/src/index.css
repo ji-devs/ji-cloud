@@ -7,6 +7,7 @@
 @import "admin/search";
 @import "jig/jig";
 @import "memory/memory";
+@import "temp/temp-module";
 
 
 @import "tailwindcss/utilities";
