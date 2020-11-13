@@ -105,17 +105,3 @@ function appendMockCards(page, {flipSecond, textInput}) {
 
     return page;
 }
-function appendMockCardsPlay(page, {isFlipped, nCards}) {
-    for(let i = 0; i < nCards; i++) {
-        const word = mockWords[0];
-        const card = tmpl(cardPlayTmpl);
-        setTextId(card, "text-contents", word);
-        appendId(page, "cards", card);
-
-        if(isFlipped) {
-            toggleClassesId(card, "flip", [`flip-card-clicked`], true);
-        }
-    }
-
-    return page;
-}
