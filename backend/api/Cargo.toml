@@ -9,7 +9,8 @@ edition = "2018"
 default-run = "ji-cloud-api"
 
 [dependencies]
-actix-cors = "0.3.0"
+actix-cors = "0.5.0"
+actix-http = "2.1.0"
 actix-rt = "1.0.0"
 actix-service = "1.0.5"
 actix-web = "3.0.0"
@@ -20,12 +21,14 @@ chrono-tz = "0.5.3"
 config = {path = "../../config/rust"}
 dotenv = "0.15"
 futures = "0.3.5"
+image = "0.23.10"
 jsonwebtoken = "7.2"
 listenfd = {version = "0.3", optional = true }
 log = "0.4"
 openssl = { version = "0.10", features = ["vendored"] }
 percent-encoding = "2.1.0"
-pin-project = "0.4.23"
+pin-project = "1.0.1"
+# pin-project = "0.4.23"
 rand = "0.7"
 reqwest = { version = "0.10", features = ["json"] }
 rusoto_core = "0.45.0"
@@ -39,13 +42,11 @@ time = "0.2.16"
 tokio = { version = "0.2", features = ["rt-threaded"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
-image = "0.23.10"
-actix-http = "2.1.0"
 
 [dependencies.sqlx]
-version = "0.4.0-beta.1"
+version = "0.4.0"
 default-features = false
-features = [ "runtime-tokio", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
+features = [ "runtime-tokio-native-tls", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
 
 [dependencies.core]
 path = "../core"
@@ -56,5 +57,5 @@ features = ["db"]
 default = ["listenfd", "core/listenfd"]
 
 [dependencies.sentry]
-version = "0.20.1"
+version = "0.21.0"
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
