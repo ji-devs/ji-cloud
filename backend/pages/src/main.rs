@@ -15,7 +15,12 @@ async fn main() -> anyhow::Result<()> {
     let (_guard, settings) = {
         let settings = SettingsManager::new(remote_target).await?;
 
-        let guard = core::sentry::init(&settings.sentry_pages_key().await?, remote_target)?;
+        let guard = settings
+            .sentry_pages_key()
+            .await
+            .ok()
+            .map(|dsn| core::sentry::init(&dsn, remote_target))
+            .transpose()?;
 
         (guard, settings.runtime_settings().await?)
     };

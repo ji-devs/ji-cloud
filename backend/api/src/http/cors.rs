@@ -2,7 +2,7 @@ use actix_web::http::{header, Method};
 use config::CORS_ORIGINS;
 
 pub fn get(local_insecure: bool) -> actix_cors::Cors {
-    let mut cors = actix_cors::Cors::new()
+    let mut cors = actix_cors::Cors::default()
         .supports_credentials()
         .allowed_methods(&[
             Method::GET,
