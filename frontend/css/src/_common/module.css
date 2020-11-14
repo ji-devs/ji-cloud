@@ -1,0 +1,17 @@
+/* See https://codepen.io/dakom/pen/WNxYrQM */
+
+.module-container {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    width: var(--width);
+    height: var(--height);
+}
+
+.module-content {
+    position: absolute;
+    top: var(--content-y);
+    left: var(--content-x);
+    width: var(--content-width);
+    height: var(--content-height);
+}
