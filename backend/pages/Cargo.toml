@@ -30,6 +30,10 @@ serde_json = "1.0.59"
 [features]
 default = ["listenfd", "core/listenfd"]
 
+[dependencies.serde]
+version = "1.0.117"
+features = ["derive"]
+
 
 [dependencies.sentry]
 version = "0.20.1"
