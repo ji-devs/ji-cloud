@@ -2,6 +2,7 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 
+require('dotenv').config({path: "../../../../../.env"});
 export default {
     input: {
         index: "./Cargo.toml",
@@ -17,15 +18,15 @@ export default {
             serverPath: "/js/",
             debug: true,
             watchPatterns: [
-				"src/**", 
-				"js/**", 
-				"../../.template_output/**", 
-				"../../css/dist/**",
-				"../../core/rust/src/**", 
-				"../../../shared/rust/src/**", 
-				"../../../config/rust/src/**", 
-				"../../../config/js/dist/**"
-			],
+                "src/**", 
+                "js/**", 
+                "../../../../css/dist/**", 
+                "../../../../.template_output/**", 
+                "../../../../core/rust/src/**", 
+                "../../../../../shared/rust/src/**", 
+                "../../../../../config/rust/src/**", 
+                "../../../../../config/js/dist/**"
+            ],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
@@ -34,6 +35,7 @@ export default {
             contentBase: "dist",
             open: true,
             historyApiFallback: true,
+            port: process.env["LOCAL_CDN_FRONTEND_IFRAME_PORT"]
         }),
 
         livereload("dist"),

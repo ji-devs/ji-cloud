@@ -37,7 +37,7 @@ pub enum RightSection {
 
 
 impl EditPage {
-    pub fn new(id:String) -> Rc<Self> {
+    pub fn new(jig_id:String, module_id:Option<String>) -> Rc<Self> {
         let _self = Rc::new(Self { 
             right_section: Mutable::new(RightSection::ModuleSelect),
             jig: Mutable::new(None)
@@ -46,7 +46,7 @@ impl EditPage {
         let _self_clone = _self.clone();
 
         spawn_local(async move {
-            let jig = Jig::mock(id).await;
+            let jig = Jig::mock(jig_id).await;
             _self.jig.set(Some(jig));
         });
 

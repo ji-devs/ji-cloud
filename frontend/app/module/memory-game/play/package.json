@@ -9,25 +9,25 @@
     "start": "npm run _devfiles && npm run _templates-prebuild-watch && npm-run-all -p _mediaserver _watch _templates-watch _css-watch",
     "start:nomedia": "npm run _devfiles && npm run _watch",
     "clean": "rimraf ./dist",
-    "_css-watch": "cd ../../css && npm run watch",
     "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
-    "_mediaserver": "cd ../../../build-utils && npm run local-media-server",
-    "_devfiles": "cd ../../../build-utils && npm run frontend-dev-files -- user",
-    "_templates-build:sandbox": "cd ../../../build-utils/templates && cargo run -- --remote-target sandbox",
-    "_templates-build:release": "cd ../../../build-utils/templates && cargo run -- --remote-target release",
-    "_templates-prebuild-watch": "rimraf ../../.template_output && cd ../../../build-utils/templates && cargo run -- --remote-target local",
-    "_templates-watch": "cd ../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/user -x \"run -- --remote-target local"
+    "_css-watch": "cd ../../../../css && npm run watch",
+    "_mediaserver": "cd ../../../../../build-utils && npm run local-media-server",
+    "_devfiles": "cd ../../../../../build-utils && npm run frontend-dev-files -- module/memory-game/play",
+    "_templates-build:sandbox": "cd ../../../../../build-utils/templates && cargo run -- --remote-target sandbox",
+    "_templates-build:release": "cd ../../../../../build-utils/templates && cargo run -- --remote-target release",
+    "_templates-prebuild-watch": "rimraf ../../../../.template_output && cd ../../../../../build-utils/templates && cargo run -- --remote-target local",
+    "_templates-watch": "cd ../../../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/jig -x \"run -- --remote-target local"
   },
   "dependencies": {
     "@wasm-tool/rollup-plugin-rust": "^1.0.5",
     "cross-env": "^7.0.2",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
-    "rollup": "^2.31.0"
+    "rollup": "^2.33.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
     "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-serve": "^1.0.4"
+    "rollup-plugin-serve": "^1.1.0"
   }
 }

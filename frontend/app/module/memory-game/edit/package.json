@@ -6,9 +6,11 @@
   "scripts": {
     "build:release": "npm run clean && npm run _templates-build:release && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
     "build:sandbox": "npm run clean && npm run _templates-build:sandbox && cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js",
-    "start": "npm run _devfiles && npm run _templates-prebuild-watch && npm-run-all -p _mediaserver _watch _templates-watch",
+    "start": "npm run _devfiles && npm run _templates-prebuild-watch && npm-run-all -p _mediaserver _watch _templates-watch _css-watch",
+    "start:nomedia": "npm run _devfiles && npm run _watch",
     "clean": "rimraf ./dist",
     "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
+    "_css-watch": "cd ../../../../css && npm run watch",
     "_mediaserver": "cd ../../../../../build-utils && npm run local-media-server",
     "_devfiles": "cd ../../../../../build-utils && npm run frontend-dev-files -- module/memory-game/edit",
     "_templates-build:sandbox": "cd ../../../../../build-utils/templates && cargo run -- --remote-target sandbox",
@@ -24,6 +26,7 @@
     "rollup": "^2.31.0"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-serve": "^1.0.4"
   }

@@ -2,7 +2,7 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 
-require('dotenv').config({path: "../../../.env"});
+require('dotenv').config({path: "../../../../.env"});
 
 export default {
     input: {
@@ -18,7 +18,16 @@ export default {
         rust({
             serverPath: "/js/",
             debug: true,
-            watchPatterns: ["src/**", "js/**", "../../.template_output/**", "../../core/rust/src/**", "../../../shared/rust/src/**", "../../../config/rust/src/**", "../../../config/js/dist/**"],
+            watchPatterns: [
+				"src/**", 
+				"js/**", 
+				"../../.template_output/**", 
+				"../../css/dist/**",
+				"../../core/rust/src/**", 
+				"../../../shared/rust/src/**", 
+				"../../../config/rust/src/**", 
+				"../../../config/js/dist/**"
+			],
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),

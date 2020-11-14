@@ -32,20 +32,10 @@ impl Router {
                     Route::Jig(route) => {
                         match route {
                             JigRoute::Gallery => Some(GalleryPage::render(GalleryPage::new())),
-                            JigRoute::Edit(id) => Some(EditPage::render(EditPage::new(id))),
+                            JigRoute::Edit(jig_id, module_id) => Some(EditPage::render(EditPage::new(jig_id, module_id))),
                             _ => None
                         }
                     },
-                    /*
-                    Route::Admin(route) => {
-                        match route {
-                            AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
-                            AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
-                            AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
-                            AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Search))),
-                        }
-                    }
-                    */
                     _ => None
                 }
             })

@@ -2,6 +2,7 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 
+require('dotenv').config({path: "../../../../../.env"});
 export default {
     input: {
         index: "./Cargo.toml",
@@ -34,6 +35,7 @@ export default {
             contentBase: "dist",
             open: true,
             historyApiFallback: true,
+            port: process.env["LOCAL_CDN_FRONTEND_MAIN_PORT"]
         }),
 
         livereload("dist"),

@@ -63,15 +63,15 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (GALLERY_PAGE, get_template_str(include_str!("../../../../.template_output/jig/gallery/jig-creator-one.html"))),
-            (EDIT_PAGE, get_template_str(include_str!("../../../../.template_output/jig/edit/edit-page.html"))),
-            (EDIT_SIDEBAR_SECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar.html"))),
-            (EDIT_MENU_SECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/menu.html"))),
-            (EDIT_DELETE_POPUP, get_template_str(include_str!("../../../../.template_output/jig/edit/delete-popup.html"))),
-            (EDIT_MODULE_LEFT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-left.html"))),
-            (EDIT_MODULE_RIGHT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-right.html"))),
-            (EDIT_MODULE_DRAG_SLOT, get_template_str(include_str!("../../../../.template_output/jig/edit/sidebar-module-drag-slot.html"))),
-            (EDIT_MODULE_SELECTION, get_template_str(include_str!("../../../../.template_output/jig/edit/module-selection.html"))),
+            (GALLERY_PAGE, get_template_str(include_str!("../../../../../.template_output/jig/gallery/jig-creator-one.html"))),
+            (EDIT_PAGE, get_template_str(include_str!("../../../../../.template_output/jig/edit/edit-page.html"))),
+            (EDIT_SIDEBAR_SECTION, get_template_str(include_str!("../../../../../.template_output/jig/edit/sidebar.html"))),
+            (EDIT_MENU_SECTION, get_template_str(include_str!("../../../../../.template_output/jig/edit/menu.html"))),
+            (EDIT_DELETE_POPUP, get_template_str(include_str!("../../../../../.template_output/jig/edit/delete-popup.html"))),
+            (EDIT_MODULE_LEFT, get_template_str(include_str!("../../../../../.template_output/jig/edit/sidebar-module-left.html"))),
+            (EDIT_MODULE_RIGHT, get_template_str(include_str!("../../../../../.template_output/jig/edit/sidebar-module-right.html"))),
+            (EDIT_MODULE_DRAG_SLOT, get_template_str(include_str!("../../../../../.template_output/jig/edit/sidebar-module-drag-slot.html"))),
+            (EDIT_MODULE_SELECTION, get_template_str(include_str!("../../../../../.template_output/jig/edit/module-selection.html"))),
         ]);
 
         Self { cache }
