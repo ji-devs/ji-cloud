@@ -18,6 +18,10 @@ export function startResizerOnElement(element) {
     //dirty trick to wait till next paint
     requestAnimationFrame(() => {
         function resizeFit() {
+            if(!element || !element.clientWidth || !element.clientHeight) {
+                cancelResizer();
+                return;
+            }
             const targetRatio = STAGE_WIDTH / STAGE_HEIGHT;
             let width = element.clientWidth;
             let height = element.clientHeight;
