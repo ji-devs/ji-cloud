@@ -9,12 +9,12 @@
     "start": "npm run _devfiles && npm run _templates-prebuild-watch && npm-run-all -p _mediaserver _watch _templates-watch",
     "clean": "rimraf ./dist",
     "_watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
-    "_mediaserver": "cd ../../../../../build-utils && npm run local-media-server",
-    "_devfiles": "cd ../../../../../build-utils && npm run frontend-dev-files -- module/memory-game/edit",
-    "_templates-build:sandbox": "cd ../../../../../build-utils/templates && cargo run -- --remote-target sandbox",
-    "_templates-build:release": "cd ../../../../../build-utils/templates && cargo run -- --remote-target release",
-    "_templates-prebuild-watch": "rimraf ../../../../.template_output && cd ../../../../../build-utils/templates && cargo run -- --remote-target local",
-    "_templates-watch": "cd ../../../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/jig -x \"run -- --remote-target local"
+    "_mediaserver": "cd ../../../build-utils && npm run local-media-server",
+    "_devfiles": "cd ../../../build-utils && npm run frontend-dev-files -- jig",
+    "_templates-build:sandbox": "cd ../../../build-utils/templates && cargo run -- --remote-target sandbox",
+    "_templates-build:release": "cd ../../../build-utils/templates && cargo run -- --remote-target release",
+    "_templates-prebuild-watch": "rimraf ../../.template_output && cd ../../../build-utils/templates && cargo run -- --remote-target local",
+    "_templates-watch": "cd ../../../build-utils/templates && cargo watch -w ../../frontend/templates/_common -w ../../frontend/templates/jig -x \"run -- --remote-target local"
   },
   "dependencies": {
     "@wasm-tool/rollup-plugin-rust": "^1.0.5",

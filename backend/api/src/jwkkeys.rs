@@ -174,7 +174,7 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 
                 Err(e) => {
                     log::error!("Error in jwk key-fetch task: {}", e);
-                    tokio::time::delay_for(Duration::from_secs(5)).await;
+                    tokio::time::delay_for(Duration::from_secs(5).into()).await;
                 }
             };
         }

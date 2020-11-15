@@ -12,42 +12,6 @@ use sqlx::postgres::PgRow;
 use url::Url;
 use uuid::Uuid;
 
-/// Types for user image library.
-pub mod user {
-    use serde::{Deserialize, Serialize};
-    use url::Url;
-
-    use super::ImageId;
-
-    /// Response for listing.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct ListResponse {
-        /// the images returned.
-        pub images: Vec<GetResponse>,
-    }
-
-    /// Response for getting a single image.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct GetResponse {
-        /// The image metadata.
-        pub metadata: UserImage,
-
-        /// A url that can be used to retrieve the image.
-        pub url: Url,
-
-        /// A url that can be used to retrieve a thumbnail of the image.
-        pub thumbnail_url: Url,
-    }
-
-    /// Over the wire representation of an image's metadata.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct UserImage {
-        /// The image's ID.
-        pub id: ImageId,
-        // more fields to be added
-    }
-}
-
 /// Represents different kinds of images (which affects how the size is stored in the db)
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

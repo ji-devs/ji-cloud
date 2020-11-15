@@ -1,17 +1,22 @@
 use crate::{
     algolia::AlgoliaClient,
-    db::{self, nul_if_empty},
-    extractor::{AuthUserWithScope, ScopeManageImage, WrapAuthClaimsNoDb},
+    db,
+    extractor::AuthUserWithScope,
+    extractor::ScopeManageImage,
+    extractor::WrapAuthClaimsNoDb,
     image_ops::generate_images,
-    s3::{S3Client, S3ImageKind, S3LibraryKind},
+    s3::S3LibraryKind,
+    s3::{S3Client, S3ImageKind},
 };
 use actix_web::{
-    http::{self, StatusCode},
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
+    http,
+    web::{self, Bytes, Data, Json, Path, Query, ServiceConfig},
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
+use db::nul_if_empty;
 use futures::TryStreamExt;
+use http::StatusCode;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -25,153 +30,7 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
-
-pub mod user {
-    use crate::{
-        db,
-        extractor::WrapAuthClaimsNoDb,
-        image_ops::generate_images,
-        s3::{S3Client, S3ImageKind, S3LibraryKind},
-    };
-    use actix_web::{
-        http,
-        web::{Bytes, Data, Json, Path},
-        HttpResponse,
-    };
-    use futures::TryStreamExt;
-    use shared::{
-        api::{endpoints, ApiEndpoint},
-        domain::{
-            image::{
-                user::{GetResponse, ListResponse, UserImage},
-                ImageId, ImageKind,
-            },
-            CreateResponse,
-        },
-        error::{image::UploadError, GetError},
-    };
-    use sqlx::PgPool;
-
-    pub(super) async fn create(
-        db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
-    ) -> Result<
-        (
-            Json<<endpoints::image::user::Create as ApiEndpoint>::Res>,
-            http::StatusCode,
-        ),
-        <endpoints::image::user::Create as ApiEndpoint>::Err,
-    > {
-        let id = db::image::user::create(db.as_ref()).await?;
-        Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
-    }
-
-    pub(super) async fn upload(
-        db: Data<PgPool>,
-        s3: Data<S3Client>,
-        _claims: WrapAuthClaimsNoDb,
-        Path(id): Path<ImageId>,
-        bytes: Bytes,
-    ) -> Result<HttpResponse, <endpoints::image::Upload as ApiEndpoint>::Err> {
-        if !db::image::user::exists(db.as_ref(), id).await? {
-            return Err(shared::error::image::UploadError::NotFound);
-        }
-
-        let kind = ImageKind::Sticker;
-
-        let res: Result<_, UploadError> = tokio::task::spawn_blocking(move || {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| UploadError::InvalidImage)?;
-            Ok(generate_images(original, kind)?)
-        })
-        .await?;
-
-        let (original, resized, thumbnail) = res?;
-        s3.upload_images(S3LibraryKind::User, id, original, resized, thumbnail)
-            .await?;
-
-        Ok(HttpResponse::NoContent().into())
-    }
-
-    pub(super) async fn delete(
-        db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
-        req: Path<ImageId>,
-        s3: Data<S3Client>,
-    ) -> Result<HttpResponse, <endpoints::image::Delete as ApiEndpoint>::Err> {
-        let image = req.into_inner();
-        db::image::user::delete(&db, image)
-            .await
-            .map_err(super::check_conflict_delete)?;
-
-        let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
-        let ((), (), ()) = futures::future::join3(
-            delete_image(S3ImageKind::Original),
-            delete_image(S3ImageKind::Resized),
-            delete_image(S3ImageKind::Thumbnail),
-        )
-        .await;
-
-        Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
-    }
-
-    pub(super) async fn get(
-        db: Data<PgPool>,
-        s3: Data<S3Client>,
-        _claims: WrapAuthClaimsNoDb,
-        req: Path<ImageId>,
-    ) -> Result<
-        Json<<endpoints::image::user::Get as ApiEndpoint>::Res>,
-        <endpoints::image::user::Get as ApiEndpoint>::Err,
-    > {
-        let metadata = db::image::user::get(&db, req.into_inner())
-            .await?
-            .ok_or(GetError::NotFound)?;
-
-        let id = metadata.id;
-
-        Ok(Json(GetResponse {
-            metadata,
-            url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
-            thumbnail_url: s3.presigned_image_get_url(
-                S3LibraryKind::Global,
-                S3ImageKind::Thumbnail,
-                id,
-            )?,
-        }))
-    }
-
-    pub(super) async fn list(
-        db: Data<PgPool>,
-        s3: Data<S3Client>,
-        _claims: WrapAuthClaimsNoDb,
-    ) -> Result<
-        Json<<endpoints::image::user::List as ApiEndpoint>::Res>,
-        <endpoints::image::user::List as ApiEndpoint>::Err,
-    > {
-        let images: Vec<_> = db::image::user::list(db.as_ref())
-            .err_into::<GetError>()
-            .and_then(|metadata: UserImage| async {
-                Ok(GetResponse {
-                    url: s3.presigned_image_get_url(
-                        S3LibraryKind::Global,
-                        S3ImageKind::Resized,
-                        metadata.id,
-                    )?,
-                    thumbnail_url: s3.presigned_image_get_url(
-                        S3LibraryKind::Global,
-                        S3ImageKind::Thumbnail,
-                        metadata.id,
-                    )?,
-                    metadata,
-                })
-            })
-            .try_collect()
-            .await?;
-
-        Ok(Json(ListResponse { images }))
-    }
-}
+use web::PayloadConfig;
 
 // attempts to grab a uuid out of a string in the shape:
 // Key (<key>)=(<uuid>)<postfix>
@@ -300,8 +159,7 @@ async fn upload(
     .await?;
 
     let (original, resized, thumbnail) = res?;
-    s3.upload_images(S3LibraryKind::Global, id, original, resized, thumbnail)
-        .await?;
+    s3.upload_images(id, original, resized, thumbnail).await?;
 
     Ok(HttpResponse::NoContent().into())
 }
@@ -420,7 +278,7 @@ async fn update(
     Ok(HttpResponse::NoContent().into())
 }
 
-fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
+fn check_conflict_image_delete(err: sqlx::Error) -> DeleteError {
     match err {
         sqlx::Error::Database(e) if e.downcast_ref::<PgDatabaseError>().constraint().is_some() => {
             DeleteError::Conflict
@@ -439,7 +297,7 @@ async fn delete(
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
-        .map_err(check_conflict_delete)?;
+        .map_err(check_conflict_image_delete)?;
 
     let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
@@ -473,25 +331,5 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         image::Delete::PATH,
         image::Delete::METHOD.route().to(delete),
-    )
-    .route(
-        image::user::Create::PATH,
-        image::user::Create::METHOD.route().to(self::user::create),
-    )
-    .route(
-        image::user::Upload::PATH,
-        image::user::Upload::METHOD.route().to(self::user::upload),
-    )
-    .route(
-        image::user::Delete::PATH,
-        image::user::Delete::METHOD.route().to(self::user::delete),
-    )
-    .route(
-        image::user::Get::PATH,
-        image::user::Get::METHOD.route().to(self::user::get),
-    )
-    .route(
-        image::user::List::PATH,
-        image::user::List::METHOD.route().to(self::user::list),
     );
 }

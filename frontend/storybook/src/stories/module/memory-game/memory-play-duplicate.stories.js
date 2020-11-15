@@ -1,16 +1,14 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
-import {startResizerOnElement} from "@utils/resize";
 import {mockWords, mockThemes} from "./memory-common";
-import modulePage from "@templates/module/_common/module-page.html";
-import playerTmpl from "@templates/module/memory-game/play/player.html";
+import playerPage from "@templates/module/memory-game/play/player-page.html";
 import cardPlayTmpl from "@templates/module/memory-game/play/memory-card.html";
 
 export default {
   title: 'Modules/Memory-Game/Play/Duplicate',
 }
 
-const makePlayer = nCards => () =>  mockPlayer(0, false, nCards);
+const makePlayer = nCards => () =>  mockPlayer(tmpl(playerPage), 0, false, nCards);
 export const Play_8_Cards= makePlayer(8); 
 export const Play_10_Cards = makePlayer(10); 
 export const Play_12_Cards = makePlayer(12); 
@@ -23,19 +21,16 @@ export const Play_24_Cards = makePlayer(24);
 export const Play_26_Cards = makePlayer(26); 
 export const Play_28_Cards = makePlayer(28); 
 
-export const Player_Theme_1 = () => mockPlayer(1, false, 12);
-export const Player_Theme_1_Flipped = () => mockPlayer(1, true, 12);
+export const Player_Theme_1 = () => mockPlayer(tmpl(playerPage), 1, false, 12);
+export const Player_Theme_1_Flipped = () => mockPlayer(tmpl(playerPage), 1, true, 12);
 //Helpers
 
-function mockPlayer(selectedThemeIndex, isFlipped, nCards) {
-    const _page = appendId(tmpl(modulePage), "module-content", tmpl(playerTmpl));
+function mockPlayer(_page, selectedThemeIndex, isFlipped, nCards) {
     const page = appendMockCards(_page, {isFlipped, nCards});
     if(selectedThemeIndex) {
         const {id} = mockThemes[selectedThemeIndex];
         toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
     }
-
-    startResizerOnElement(getChildId(page, "module-page"));
 
     return page;
 }

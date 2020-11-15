@@ -199,7 +199,7 @@ set parent_id = $1,
 where id = $2
 returning index
 "#,
-                parent_id,
+                parent_id.map(|it| it),
                 id
             )
             .fetch_one(&mut txn)

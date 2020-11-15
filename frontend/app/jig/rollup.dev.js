@@ -19,8 +19,8 @@ export default {
             watchPatterns: [
 				"src/**", 
 				"js/**", 
-				"../../css/dist/**", 
 				"../../.template_output/**", 
+				"../../css/dist/**",
 				"../../core/rust/src/**", 
 				"../../../shared/rust/src/**", 
 				"../../../config/rust/src/**", 

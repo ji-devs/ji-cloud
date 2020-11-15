@@ -11,16 +11,19 @@ const SPA = process.argv[2];
 switch(SPA) {
 	case "user":
 	case "admin":
-	case "jig/edit":
-	case "jig/play":
+	case "jig":
 	case "module/memory-game/edit":
-	case "module/memory-game/play":
 		break;
 	default: {
 		console.error("supply valid APP (and note the space) for frontend-dev-files -- [APP]");
 		process.exit(1);
 	}
 }
+
+//CSS
+execSync(`npm run _bundle-prod`, {cwd: path.resolve(`../frontend/css`)});
+fs.copy(path.resolve(`../frontend/css/dist/styles.min.css`), path.resolve(`../frontend/app/${SPA}/dist/css/styles.min.css`))
+  .catch(err => console.error(err));
 
 //HTML
 const src = path.resolve("../frontend/core/devfiles/index.html")

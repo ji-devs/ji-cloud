@@ -17,7 +17,7 @@ pub fn get_claims(token_string: &str, key: DecodingKey) -> Result<AuthClaims, Er
 
     jsonwebtoken::decode::<AuthClaims>(&token_string, &key, &validation)
         .map(|decoded| decoded.claims)
-        .map_err(Error::Jwt)
+        .map_err(|err| Error::Jwt(err))
 }
 
 pub fn check_no_db(

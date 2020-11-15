@@ -100,7 +100,6 @@ impl S3Client {
 
     pub async fn upload_images(
         &self,
-        library: S3LibraryKind,
         image: ImageId,
         original: Vec<u8>,
         resized: Vec<u8>,
@@ -111,7 +110,7 @@ impl S3Client {
             None => return Ok(()),
         };
 
-        let id_to_key = |kind| image_id_to_key(library, kind, image);
+        let id_to_key = |kind| image_id_to_key(S3LibraryKind::Global, kind, image);
 
         let original = client.put_object(PutObjectRequest {
             bucket: self.bucket.clone(),
