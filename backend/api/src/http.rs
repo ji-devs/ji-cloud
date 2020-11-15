@@ -16,22 +16,22 @@ use sqlx::postgres::PgPool;
 use std::sync::Arc;
 
 fn log_ise<B: MessageBody, T>(
-    req: ServiceRequest,
+    request: ServiceRequest,
     srv: &mut T,
 ) -> impl Future<Output = actix_web::Result<T::Response>>
 where
     T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
-    let uri: serde_json::Value = req.uri().to_string().into();
-    let method: serde_json::Value = req.method().to_string().into();
+    let uri: serde_json::Value = request.uri().to_string().into();
+    let method: serde_json::Value = request.method().to_string().into();
 
-    let fut = srv.call(req);
+    let future = srv.call(request);
     async {
-        let mut res = fut.await?;
-        if res.status() == 500 {
-            let resp: &mut actix_http::Response<_> = res.response_mut();
+        let mut result = future.await?;
+        if result.status() == 500 {
+            let response: &mut actix_http::Response<_> = result.response_mut();
 
-            if let Some(err) = resp.extensions_mut().remove::<anyhow::Error>() {
+            if let Some(err) = response.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);
                 sentry::add_breadcrumb(sentry::Breadcrumb {
                     ty: "http".to_owned(),
@@ -49,7 +49,7 @@ where
             }
         }
 
-        Ok(res)
+        Ok(result)
     }
 }
 

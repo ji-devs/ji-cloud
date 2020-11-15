@@ -1,0 +1,67 @@
+name: Memory-Game - Play - Release
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - 'config/**'
+    - 'shared/**'
+    - 'frontend/core/**'
+    - 'frontend/templates/_common/**'
+    - 'frontend/templates/module/memory-game/play/**'
+    - 'frontend/app/module/memory-game/play/**'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env
+        run: echo ::set-env name=workspace::$GITHUB_WORKSPACE
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/memory-game/play]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: make nightly the default
+        run: rustup default nightly
+
+      - name: install node
+        uses: actions/setup-node@v1
+
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/app/module/memory-game/play"
+
+      - name: build 
+        run: npm run build:release
+        working-directory: "./frontend/app/module/memory-game/play"
+        env:
+          LOCAL_CDN_FRONTEND_DIR: ${{ env.workspace }}/frontend
+      
+      - name: install google cloud sdk
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '295.0.0'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -r frontend/app/module/memory-game/play/dist/js gs://ji-cloud-frontend-origin-eu-001/module/memory-game/play/js
+        
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()

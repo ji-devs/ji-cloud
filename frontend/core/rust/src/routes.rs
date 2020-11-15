@@ -43,8 +43,8 @@ pub enum AdminRoute {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum JigRoute {
     Gallery,
-    Edit(Id),
-    Play(Id, JigPlayMode),
+    Edit(Id, Option<Id>),
+    Play(Id, Option<Id>) 
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -99,9 +99,10 @@ impl Route {
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-edit", id] => Self::Admin(AdminRoute::ImageEdit(id.to_string())),
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
-            ["jig", "edit", id] => Self::Jig(JigRoute::Edit(id.to_string())),
-            ["jig", "play", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Audience)),
-            ["jig", "play-producer", id] => Self::Jig(JigRoute::Play(id.to_string(), JigPlayMode::Producer)),
+            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), None)),
+            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
+            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), None)),
+            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["no-auth"] => Self::NoAuth,
@@ -167,11 +168,18 @@ impl From<Route> for String {
             Route::Jig(route) => {
                 match route {
                     JigRoute::Gallery => "/jig/gallery".to_string(),
-                    JigRoute::Edit(id) => format!("/jig/edit/{}", id),
-                    JigRoute::Play(id, mode) => {
-                        match mode {
-                            JigPlayMode::Audience => format!("/jig/play/{}", id),
-                            JigPlayMode::Producer => format!("/jig/play-producer/{}", id),
+                    JigRoute::Edit(jig_id, module_id) => {
+                        if let Some(module_id) = module_id {
+                            format!("/jig/edit/{}/{}", jig_id, module_id)
+                        } else {
+                            format!("/jig/edit/{}", jig_id)
+                        }
+                    }
+                    JigRoute::Play(jig_id, module_id) => {
+                        if let Some(module_id) = module_id {
+                            format!("/jig/play/{}/{}", jig_id, module_id)
+                        } else {
+                            format!("/jig/play/{}", jig_id)
                         }
                     }
                 }

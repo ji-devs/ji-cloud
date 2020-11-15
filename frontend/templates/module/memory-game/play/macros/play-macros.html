@@ -1,6 +1,9 @@
 {% macro card() %}
-{# RUNTIME: add flip-card-clicked #}
-<div data-id="flip" class="w-160 h-160 flip-card">
+{# 
+  RUNTIME: add flip-card-clicked 
+  NOTE: Size is overriden to 16rem... see module-page.html and module.css 
+#}
+<div data-id="flip" class="flip-card" style="width: 16rem; height: 16rem;">
   <div class="play-card-front memory-matched  bg-jimemorycardgreen rounded-lg">
     <p data-id="text-contents" class="font-medium text-4xl text-center text-contents"></p>
   </div>

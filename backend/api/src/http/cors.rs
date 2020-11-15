@@ -9,6 +9,7 @@ pub fn get(local_insecure: bool) -> actix_cors::Cors {
             Method::POST,
             Method::PATCH,
             Method::DELETE,
+            Method::PUT,
             Method::OPTIONS,
         ])
         .allowed_headers(&[
@@ -18,7 +19,7 @@ pub fn get(local_insecure: bool) -> actix_cors::Cors {
         ]);
 
     if !local_insecure {
-        for origin in CORS_ORIGINS.iter() {
+        for origin in &CORS_ORIGINS {
             cors = cors.allowed_origin(origin);
         }
     }
