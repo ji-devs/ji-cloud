@@ -269,7 +269,7 @@ module.exports = {
         '25p': '25%',
         50: '50px',
         100: '100px',
-        
+
       },
       cursor:{
         grab: 'grab'
@@ -280,6 +280,9 @@ module.exports = {
       boxShadow:{
         'memorycard': '0 3px 3px 0 rgba(0, 0, 0, 0.06)',
         'memorypreview': '0 3px 6px 0 rgba(0, 0, 0, 0.16)'
+      },
+      zIndex: {
+        '2000' : 2000
       },
 
       backgroundImage: theme => ({
