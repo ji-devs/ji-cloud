@@ -23,6 +23,7 @@ const DUPLICATE_STEP_2_PAGE:&'static str = "duplicate-step-2-page";
 const DUPLICATE_STEP_2_THEME_ITEM_SELECTED:&'static str = "duplicate-step-2-theme-item-selected";
 const DUPLICATE_STEP_2_THEME_ITEM_DESELECTED:&'static str = "duplicate-step-2-theme-item-deselected";
 
+const DUPLICATE_STEP_4_PAGE:&'static str = "duplicate-step-4-page";
 pub fn mode_choose_page() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
 }
@@ -48,6 +49,9 @@ pub mod duplicate {
     }
     pub fn step_2_page() -> HtmlElement {
         TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_2_PAGE))
+    }
+    pub fn step_4_page() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_4_PAGE))
     }
 
     pub fn step_2_theme_item(selected:bool) -> HtmlElement {
@@ -84,6 +88,7 @@ impl Templates {
             (DUPLICATE_STEP_2_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2.html"))),
             (DUPLICATE_STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2-theme-item-selected.html"))),
             (DUPLICATE_STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-2-theme-item-deselected.html"))),
+            (DUPLICATE_STEP_4_PAGE, get_template_str(include_str!("../../../../../../.template_output/module/memory-game/edit/duplicate/step-4.html"))),
         ]);
 
         Self { cache }

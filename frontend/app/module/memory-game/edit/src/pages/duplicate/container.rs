@@ -15,6 +15,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use super::step_1::Step1Page;
 use super::step_2::Step2Page;
+use super::step_4::Step4Page;
 use crate::data::*;
 use crate::debug;
 
@@ -38,6 +39,7 @@ impl DuplicatePage {
             match step {
                 Step::One => Some(Step1Page::render(Step1Page::new(_self.state.clone()))),
                 Step::Two => Some(Step2Page::render(Step2Page::new(_self.state.clone()))),
+                Step::Four => Some(Step4Page::render(Step4Page::new(_self.state.clone()))),
                 _ => None,
             }
 
