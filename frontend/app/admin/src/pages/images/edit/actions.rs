@@ -75,7 +75,7 @@ pub async fn publish( id:String) -> Result<(), UpdateError>
         publish_at: Some(Some(Publish::now())),
     };
     let res:Result<<UpdateMetadata as ApiEndpoint>::Res, <UpdateMetadata as ApiEndpoint>::Err>
-        = api_with_auth(&path, UpdateMetadata::METHOD, Some(data)).await;
+        = api_with_auth_empty(&path, UpdateMetadata::METHOD, Some(data)).await;
 
     res
         .map(|_| ())
