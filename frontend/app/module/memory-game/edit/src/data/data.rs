@@ -12,6 +12,11 @@ use super::raw::*;
 use itertools::Itertools;
 use std::fmt::Write;
 
+pub trait ModeStateExt {
+    type MutableContainer;
+    fn into_mutable(self, step:usize, jig_id: String, module_id: String) -> Self::MutableContainer;
+}
+
 pub struct GameState {
     pub jig_id: String,
     pub module_id: String,
@@ -31,7 +36,7 @@ impl GameState {
         }
     }
 
-    pub fn set_from_loaded(&self, raw:GameStateRaw) {
+    pub fn set_from_loaded(&self, step: usize, raw:GameStateRaw) {
         if self.mode.get().is_some() {
             panic!("setting the game state from loaded only works on first-load!");
         }
@@ -42,7 +47,7 @@ impl GameState {
         let mode_state:Option<ModeState> = {
             raw.mode_state.map(|raw_mode_state| match raw_mode_state {
                 ModeStateRaw::Duplicate(raw_state) => {
-                    ModeState::Duplicate(Rc::new(raw_state.into_mutable(self.jig_id.clone(), self.module_id.clone())))
+                    ModeState::Duplicate(Rc::new(raw_state.into_mutable(step, self.jig_id.clone(), self.module_id.clone())))
                 }
             })
         };
@@ -55,23 +60,14 @@ impl GameState {
         //this *will* trigger re-renders of everything from the top-level
         self.mode.set(Some(mode));
     }
+}
 
-    pub fn to_raw(&self) -> GameStateRaw {
-        let mode = self.mode.get();
-        let mode = mode.expect_throw("can't convert to raw while loading");
-
-        match mode {
-            None => GameStateRaw { mode: None, mode_state: None },
-            Some(_) => {
-                let mode_state = self.mode_state.borrow();
-                let mode_state = mode_state.as_ref().expect_throw("need mode state to convert to raw");
-                match mode_state {
-                    _ => unimplemented!("todo!")
-                }
-            }
+impl From<&DuplicateState> for GameStateRaw {
+    fn from(state:&DuplicateState) -> Self {
+        Self {
+            mode: Some(GameModeRaw::Duplicate),
+            mode_state: Some(ModeStateRaw::Duplicate(state.into()))
         }
-
-
     }
 }
 
@@ -106,12 +102,12 @@ impl From<CardRaw> for Card {
         Self {text: Mutable::new(card.text) }
     }
 }
-
-#[derive(Clone, Debug)]
-pub struct Theme {
-    pub id: &'static str,
-    pub label: &'static str,
+impl From<&Card> for CardRaw {
+    fn from(card:&Card) -> Self {
+        Self {text: card.text.get_cloned() }
+    }
 }
+
 
 #[derive(Debug)]
 pub struct DuplicateState {
@@ -121,9 +117,19 @@ pub struct DuplicateState {
     pub cards: MutableVec<Card>,
     pub theme_id: Mutable<String>,
 }
+impl From<&DuplicateState> for DuplicateStateRaw {
+    fn from(state:&DuplicateState) -> Self {
+        Self {
+            cards: state.cards.lock_ref().iter().map(|card| card.into()).collect(),
+            theme_id: state.theme_id.get_cloned(),
+        }
+    }
+}
 
-impl DuplicateStateRaw {
-    pub fn into_mutable(self, jig_id: String, module_id: String) -> DuplicateState {
+impl ModeStateExt for DuplicateStateRaw {
+    type MutableContainer = DuplicateState;
+
+    fn into_mutable(self, step: usize, jig_id: String, module_id: String) -> DuplicateState {
         let cards:Vec<Card> = self.cards
             .into_iter()
             .map(|raw_card| raw_card.into())
@@ -132,7 +138,7 @@ impl DuplicateStateRaw {
         DuplicateState {
             jig_id,
             module_id,
-            step: Mutable::new(self.step.into()),
+            step: Mutable::new(step.into()),
             cards: MutableVec::new_with_values(cards),
             theme_id: Mutable::new(self.theme_id)
         }
@@ -147,13 +153,14 @@ pub enum Step {
     Four
 }
 
-impl From<StepRaw> for Step {
-    fn from(step:StepRaw) -> Self {
+impl From<usize> for Step {
+    fn from(step:usize) -> Self {
         match step {
-            StepRaw::One => Self::One,
-            StepRaw::Two => Self::Two,
-            StepRaw::Three => Self::Three,
-            StepRaw::Four => Self::Four,
+            1 => Self::One,
+            2 => Self::Two,
+            3 => Self::Three,
+            4 => Self::Four,
+            _ => panic!("unallowed step!") 
         }
     }
 }

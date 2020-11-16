@@ -1,14 +1,6 @@
 use serde::{Serialize, Deserialize};
-use super::*;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt},
-    CancelableFutureHandle, 
-};
 use crate::config;
-use std::cell::RefCell;
-use std::rc::Rc;
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GameStateRaw {
@@ -18,6 +10,7 @@ pub struct GameStateRaw {
 
 impl GameStateRaw {
     pub async fn load() -> Self {
+
         Self {
             mode: None, 
             mode_state: None 
@@ -28,6 +21,16 @@ impl GameStateRaw {
         Self {
             mode: Some(GameModeRaw::Duplicate),
             mode_state: Some(ModeStateRaw::Duplicate(DuplicateStateRaw::debug())),
+        }
+    }
+
+}
+
+impl From<DuplicateStateRaw> for GameStateRaw {
+    fn from(state:DuplicateStateRaw) -> Self {
+        Self {
+            mode: Some(GameModeRaw::Duplicate),
+            mode_state: Some(ModeStateRaw::Duplicate(state))
         }
     }
 }
@@ -57,7 +60,6 @@ impl CardRaw {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DuplicateStateRaw {
-    pub step: StepRaw,
     pub cards: Vec<CardRaw>,
     pub theme_id: String,
 }
@@ -65,7 +67,6 @@ pub struct DuplicateStateRaw {
 impl DuplicateStateRaw {
     pub fn default() -> Self {
         Self {
-            step: StepRaw::One,
             cards: config::INITIAL_CARD_TEXTS
                 .iter()
                 .map(|text| {
@@ -77,7 +78,6 @@ impl DuplicateStateRaw {
     }
     pub fn debug() -> Self {
         Self {
-            step: config::DEBUG_STEP, 
             cards: config::INITIAL_CARD_TEXTS
                 .iter()
                 .map(|text| {
@@ -88,12 +88,3 @@ impl DuplicateStateRaw {
         }
     }
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum StepRaw {
-    One,
-    Two,
-    Three,
-    Four
-}
-

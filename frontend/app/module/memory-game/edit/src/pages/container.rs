@@ -35,13 +35,15 @@ impl ContainerPage {
 
         _self_clone.loader.load(async move {
 
+            let step = debug::settings().step.unwrap_or(1);
+
             if let Some(raw_state) = debug::settings().state {
-                _self.state.set_from_loaded(raw_state);
+                _self.state.set_from_loaded(step, raw_state);
             } else {
                 //TODO - LOAD GAME STATE FROM BACKEND
                 log::info!("loading...");
                 let raw_state:GameStateRaw = GameStateRaw::load().await;
-                _self.state.set_from_loaded(raw_state);
+                _self.state.set_from_loaded(step, raw_state);
             }
         });
     
@@ -63,7 +65,7 @@ impl ContainerPage {
                                     GameMode::Duplicate => {
                                         let mode_state:DuplicateState = 
                                             DuplicateStateRaw::default()
-                                                .into_mutable(_self.state.jig_id.clone(), _self.state.module_id.clone());
+                                                .into_mutable(1, _self.state.jig_id.clone(), _self.state.module_id.clone());
                                         *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(mode_state)));
                                     }
                                 }

@@ -15,7 +15,7 @@ use crate::utils::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
-use crate::data::*;
+use crate::data::{*, raw::*};
 use itertools::Itertools;
 use crate::config;
 use core::settings::SETTINGS;
@@ -48,8 +48,9 @@ impl Step4Page {
             .spa_iframe(&route)
         };
 
-        url
+        format!("{}?iframe_data=true", url)
     }
+
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::duplicate::step_4_page(), { 
             .with_data_id!("top-step-1", {
@@ -69,7 +70,8 @@ impl Step4Page {
 
                         if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                             //Iframe is ready and sent us a message, let's send one back!
-                            let msg = IframeInit::new("hello"); 
+                            let data:GameStateRaw = (&*_self.state).into();
+                            let msg:IframeInit<GameStateRaw> = IframeInit::new(data); 
                             let window = elem.content_window().unwrap_throw();
                             window.post_message(&msg.into(), &_self.iframe_url());
                         } else {

@@ -4,7 +4,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-
+use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
@@ -12,7 +12,14 @@ use super::raw::*;
 use itertools::Itertools;
 use std::fmt::Write;
 
+pub trait ModeStateExt {
+    type MutableContainer;
+    fn into_mutable(self, jig_id: String, module_id: String) -> Self::MutableContainer;
+}
+
 pub struct GameState {
+    pub jig_id: String,
+    pub module_id: String,
     //outer option is for "loading", inner option is for "no module chosen"
     pub mode: Mutable<Option<Option<GameMode>>>, 
     pub mode_state: Rc<RefCell<Option<ModeState>>>,
@@ -20,8 +27,10 @@ pub struct GameState {
 
 
 impl GameState {
-    pub fn new() -> Self {
+    pub fn new(jig_id:String, module_id: String) -> Self {
         Self {
+            jig_id,
+            module_id,
             mode: Mutable::new(None),
             mode_state: Rc::new(RefCell::new(None))
         }
@@ -38,7 +47,7 @@ impl GameState {
         let mode_state:Option<ModeState> = {
             raw.mode_state.map(|raw_mode_state| match raw_mode_state {
                 ModeStateRaw::Duplicate(raw_state) => {
-                    ModeState::Duplicate(Rc::new(raw_state.into()))
+                    ModeState::Duplicate(Rc::new(raw_state.into_mutable(self.jig_id.clone(), self.module_id.clone())))
                 }
             })
         };
@@ -50,8 +59,6 @@ impl GameState {
         //wrapped in a Some because None here means "loading"
         //this *will* trigger re-renders of everything from the top-level
         self.mode.set(Some(mode));
-        
-
     }
 }
 
@@ -87,49 +94,29 @@ impl From<CardRaw> for Card {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Theme {
-    pub id: &'static str,
-    pub label: &'static str,
-}
 
 #[derive(Debug)]
 pub struct DuplicateState {
-    pub step: Mutable<Step>,
+    pub jig_id: String,
+    pub module_id: String,
     pub cards: MutableVec<Card>,
     pub theme_id: Mutable<String>,
 }
 
-impl From<DuplicateStateRaw> for DuplicateState {
-    fn from(raw:DuplicateStateRaw) -> Self {
-        let cards:Vec<Card> = raw.cards
+impl ModeStateExt for DuplicateStateRaw {
+    type MutableContainer = DuplicateState;
+
+    fn into_mutable(self, jig_id: String, module_id: String) -> DuplicateState {
+        let cards:Vec<Card> = self.cards
             .into_iter()
             .map(|raw_card| raw_card.into())
             .collect();
 
-        Self {
-            step: Mutable::new(raw.step.into()),
+        DuplicateState {
+            jig_id,
+            module_id,
             cards: MutableVec::new_with_values(cards),
-            theme_id: Mutable::new(raw.theme_id)
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum Step {
-    One,
-    Two,
-    Three,
-    Four
-}
-
-impl From<StepRaw> for Step {
-    fn from(step:StepRaw) -> Self {
-        match step {
-            StepRaw::One => Self::One,
-            StepRaw::Two => Self::Two,
-            StepRaw::Three => Self::Three,
-            StepRaw::Four => Self::Four,
+            theme_id: Mutable::new(self.theme_id)
         }
     }
 }

@@ -18,20 +18,23 @@ impl Router {
         Self { }
     }
 
-    fn signal() -> impl Signal<Item = Route> {
+    fn signal() -> impl Signal<Item = (Route, Url)> {
         dominator::routing::url()
-            .signal_ref(|url| Route::from_url(&url))
+            .signal_ref(|url| (
+                Route::from_url(&url),
+                Url::new(&url).unwrap_throw()
+            ))
     }
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal()
-            .map(|route| {
+            .map(|(route, url)| {
                 match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Play(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(PlayerPage::render(PlayerPage::new())),
+                                    ModuleKind::MemoryGame => Some(PlayerPage::render(PlayerPage::new(url, jig_id, module_id))),
                                     _ => None
                                 }
                             }

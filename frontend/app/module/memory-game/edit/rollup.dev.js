@@ -19,6 +19,7 @@ export default {
             debug: true,
             watchPatterns: [
                 "src/**", 
+                "../_common/src/**", 
                 "js/**", 
                 "../../../../css/dist/**", 
                 "../../../../.template_output/**", 
