@@ -18,6 +18,7 @@ pub struct GameStateRaw {
 
 impl GameStateRaw {
     pub async fn load() -> Self {
+
         Self {
             mode: None, 
             mode_state: None 
@@ -28,6 +29,16 @@ impl GameStateRaw {
         Self {
             mode: Some(GameModeRaw::Duplicate),
             mode_state: Some(ModeStateRaw::Duplicate(DuplicateStateRaw::debug())),
+        }
+    }
+
+}
+
+impl From<DuplicateStateRaw> for GameStateRaw {
+    fn from(state:DuplicateStateRaw) -> Self {
+        Self {
+            mode: Some(GameModeRaw::Duplicate),
+            mode_state: Some(ModeStateRaw::Duplicate(state))
         }
     }
 }

@@ -24,9 +24,9 @@ pub struct ContainerPage {
 }
 
 impl ContainerPage {
-    pub fn new() -> Rc<Self> {
+    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
         let _self_clone = Rc::new(Self { 
-            state:  GameState::new(),
+            state:  GameState::new(jig_id, module_id),
             loader: AsyncLoader::new(),
             //game_mode: Mutable::new(debug::settings().game_mode.unwrap_or(None)),
         });
@@ -55,14 +55,15 @@ impl ContainerPage {
                 //This level of none means we're still loading the state
                 None => None,
                 Some(mode) => {
-                    log::info!("{:?}", mode);
                     match mode {
                         //This level of none means we've loaded but it's initial screen
                         None => {
                             Some(ModeChoosePage::render(ModeChoosePage::new(clone!(_self => move |mode| {
                                 match mode {
                                     GameMode::Duplicate => {
-                                        let mode_state:DuplicateState = DuplicateStateRaw::default().into(); 
+                                        let mode_state:DuplicateState = 
+                                            DuplicateStateRaw::default()
+                                                .into_mutable(_self.state.jig_id.clone(), _self.state.module_id.clone());
                                         *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(mode_state)));
                                     }
                                 }

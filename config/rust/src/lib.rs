@@ -97,7 +97,16 @@ impl RemoteTarget {
 
     pub const fn frontend_url(&self) -> &'static str {
         match self {
-            Self::Local | Self::Sandbox => "https://frontend.sandbox.jicloud.org",
+            Self::Local => "http://localhost:4104",
+            Self::Sandbox => "https://frontend.sandbox.jicloud.org",
+            Self::Release => "https://frontend.jicloud.org",
+        }
+    }
+
+    pub const fn frontend_url_iframe(&self) -> &'static str {
+        match self {
+            Self::Local => "http://localhost:4105",
+            Self::Sandbox => "https://frontend.sandbox.jicloud.org",
             Self::Release => "https://frontend.jicloud.org",
         }
     }
@@ -112,6 +121,11 @@ impl RemoteTarget {
 
     pub fn spa_url(&self, app: &str, path: &str) -> String {
         format!("{}/{}/{}", self.frontend_url(), app, path)
+    }
+
+    //route_path is the full path, i.e. what comes from Route::into on the frontend
+    pub fn spa_iframe(&self, route_path:&str) -> String {
+        format!("{}{}", self.frontend_url_iframe(), route_path)
     }
 
     pub const fn host(&self) -> Option<&'static str> {

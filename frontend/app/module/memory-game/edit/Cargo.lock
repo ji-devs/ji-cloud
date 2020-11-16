@@ -233,14 +233,19 @@ dependencies = [
 
 [[package]]
 name = "dominator_helpers"
-version = "0.3.7"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d828b35a53d0d14421031cd1b9a70ac4e9cc82dae39646822d909aa39d9445eb"
+checksum = "1633085497b6dd6d6f2a1ee909ad693ad1a5e5925a1efb530c08be7b0ff9766e"
 dependencies = [
  "discard",
+ "dominator",
  "futures",
  "futures-signals",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -815,9 +820,9 @@ dependencies = [
 
 [[package]]
 name = "simple-html-template"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea6f93f1f12d3bac7536ff880e37107995005d5fcdb6e8845d083725263e91ed"
+checksum = "619f4412d7c5f180fc1526a9e26da6658879923f427c2fafcd36a8f9cf7516ec"
 dependencies = [
  "cfg-if 0.1.10",
  "wasm-bindgen",

@@ -31,7 +31,7 @@ impl Router {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(ContainerPage::render(ContainerPage::new())),
+                                    ModuleKind::MemoryGame => Some(ContainerPage::render(ContainerPage::new(jig_id, module_id))),
                                     _ => None
                                 }
                             }
