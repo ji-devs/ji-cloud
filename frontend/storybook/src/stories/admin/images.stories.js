@@ -144,7 +144,7 @@ export const Search = () => {
     setValueId(searchContainer, "page", "9");
 
     [
-      ["red-sea-book.png", "Red Sea"],
+      ["challah.jpg", "Red Sea"],
       ["red-sea-book.png", "Red Sea"]
     ].forEach(([filename, label], idx) => {
       const id = idx;
