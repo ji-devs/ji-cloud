@@ -21,5 +21,10 @@ export const mockThemes = [
       content: 'Word',
       id: 'orange',
       label: 'Orange',
+    },
+    {
+      content: 'Dad',
+      id: 'chalk',
+      label: 'Chalk',
     }
 ];
