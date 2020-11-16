@@ -284,6 +284,9 @@ module.exports = {
       zIndex: {
         '2000' : 2000
       },
+      gap: {
+       '24px': '24px'
+      },
 
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",

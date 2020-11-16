@@ -276,3 +276,14 @@
 
 
 }
+
+.img-thumbnail{
+  transition: transform .2s;
+  cursor: -webkit-grabbing; cursor: grabbing;
+}
+
+.img-thumbnail:hover{
+  z-index: 10;
+transform: scale(3.6);
+transform-origin:top left;
+}
