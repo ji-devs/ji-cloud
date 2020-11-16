@@ -22,7 +22,7 @@ const hasWasmExtension = hasExtension("wasm");
 const getMetadata = filename => {
 
     //these don't get dynamic filenames and do require immediate changes in the browser
-    //they are still cached on the fastly side
+    //they are still cached on the fastly edge 
     const noBrowserCache = ["html", "css", "js"].some(ext => hasExtension(ext) (filename));
 
     if(noBrowserCache) {
