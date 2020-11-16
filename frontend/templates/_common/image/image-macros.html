@@ -1,17 +1,17 @@
 {% macro gridItemColored(src, label, colorClass, dataId="") %}
-<div>
+<div class="h-180 relative">
   <img src="{{src}}" alt="">
-  <div class="flex items-center justify-center relative w-274">
+  <div class="flex items-center justify-center max-w-274 w-full absolute bottom-0">
     <div class="rounded-full h-3 w-3 flex items-center justify-center {{colorClass}} absolute left-0 ml-2"></div>
-    <p>{{label}}</p>
+    <p class="overflow-hidden truncate pl-25 pr-25">{{label}}</p>
   </div>
 </div>
 {% endmacro gridItemColored %}
 
 {% macro gridItem(src, label, dataId="") %}
-<div class="w-274 h-208">
+<div class="w-274 h-208 relative">
   <img src="{{src}}" alt="">
-  <div class="flex items-center justify-center relative w-274">
+  <div class="flex items-center justify-center  w-274 absolute bottom-0">
     <p>{{label}}</p>
   </div>
 </div>

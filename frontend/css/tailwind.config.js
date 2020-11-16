@@ -82,6 +82,18 @@ module.exports = {
         18: '18px',
 
       },
+      fontSize: {
+        xs: '12px',
+        sm: '14px',
+        base: '16px',
+        lg: '18px',
+        xl: '20px',
+        '2xl': '24px',
+        '3xl': '30px',
+        '4xl': '36px',
+        '5xl': '48px',
+        '6xl': '64px',
+},
       fontFamily: {
         poppins: 'Poppins',
         sans: 'Roboto',
@@ -152,6 +164,7 @@ module.exports = {
 
       },
       maxWidth: {
+        190: '190px',
         236: '236px',
         480: '480px',
 
@@ -182,10 +195,12 @@ module.exports = {
         146: '146px',
         160: '160px',
         177: '177px',
+        180: '180px',
         185: '185px',
         192: '192px',
         208: '208px',
         216: '216px',
+        220: '220px',
         262: '262px',
         293: '293px',
         312: '312px',
@@ -258,6 +273,7 @@ module.exports = {
         3: '3px'
       },
       padding:{
+        25: '25px',
         60:'60px',
         80: '80px',
         255: '255px',
