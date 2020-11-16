@@ -212,6 +212,24 @@
   font-family: 'Caveat', cursive;
 }
 
+/* Chalkboard */
+
+.memory-theme-chalk .edit-card-front, .memory-theme-chalk .sidebar-card-front,
+.memory-theme-chalk .play-card-front{
+  background-color: white;
+  border: solid 3px #8dbbfd;
+}
+
+.memory-theme-chalk .edit-card-back, .memory-theme-chalk .sidebar-card-back,
+.memory-theme-chalk .play-card-back {
+  background-image: url('{{MEDIA_UI}}/Theme_MemoryGame_02_CHalkboard_Back@2x.png');
+  background-size: cover;
+}
+
+.memory-theme-chalk .text-contents {
+  font-family: 'Caveat', cursive;
+}
+
 /* --END MEMORY CARD THEMES -- */
 .memory-added-image{
 
