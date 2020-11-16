@@ -274,3 +274,19 @@
 
 
 }
+
+.memory-grid-1{
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.memory-grid-2{
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.memory-grid-3{
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.memory-grid-4{
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
