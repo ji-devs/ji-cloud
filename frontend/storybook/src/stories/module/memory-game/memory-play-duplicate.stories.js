@@ -2,9 +2,9 @@ import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {startResizerOnElement} from "@utils/resize";
 import {mockWords, mockThemes} from "./memory-common";
-import modulePage from "@templates/module/_common/module-page.html";
-import playerTmpl from "@templates/module/memory-game/play/player.html";
-import cardPlayTmpl from "@templates/module/memory-game/play/memory-card.html";
+import modulePage from "@templates/_common/module/module-page.html";
+import playerTmpl from "@templates/module/memory/play/player.html";
+import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
 
 export default {
   title: 'Modules/Memory-Game/Play/Duplicate',

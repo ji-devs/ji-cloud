@@ -1,8 +1,8 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import memoryimagesone from "@templates/module/memory-game/edit/images/memory-images-one.html";
-import memoryimagestwo from "@templates/module/memory-game/edit/images/memory-images-two.html";
-import addedimage from "@templates/module/memory-game/edit/images/added-image-tooltip.html";
+import memoryimagesone from "@templates/module/memory/edit/images/memory-images-one.html";
+import memoryimagestwo from "@templates/module/memory/edit/images/memory-images-two.html";
+import addedimage from "@templates/module/memory/edit/images/added-image-tooltip.html";
 
 
 

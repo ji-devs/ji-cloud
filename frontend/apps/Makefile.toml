@@ -1,0 +1,327 @@
+###################
+## Config        ##
+###################
+
+[config]
+skip_core_tasks = true
+default_to_workspace = false
+
+[env]
+DOCKER_BUILDKIT = "1"
+CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true
+
+env_files = ["../../.env"]
+
+[tasks.dev-port-main]
+script_runner = "@duckscript"
+script = '''
+set_env APP_PORT 4104 
+'''
+
+[tasks.dev-port-iframe]
+script_runner = "@duckscript"
+script = '''
+set_env APP_PORT 4105 
+'''
+
+###################
+## APPLICATIONS  ##
+###################
+
+# USER
+[tasks.user-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task dev-main
+'''
+# USER
+[tasks.user-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task dev-main-nomedia
+'''
+
+[tasks.user-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task sandbox 
+'''
+
+[tasks.user-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task release 
+'''
+
+# ADMIN 
+[tasks.admin-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME admin
+cm_run_task dev-main
+'''
+
+[tasks.admin-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME admin
+cm_run_task dev-main-nomedia
+'''
+
+[tasks.admin-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME admin 
+cm_run_task sandbox 
+'''
+
+[tasks.admin-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME admin 
+cm_run_task release 
+'''
+
+# MODULE - MEMORY
+[tasks.module-memory-edit-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/edit" 
+cm_run_task dev-main
+'''
+
+[tasks.module-memory-edit-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/edit" 
+cm_run_task dev-main-nomedia
+'''
+
+[tasks.module-memory-edit-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/edit" 
+cm_run_task sandbox 
+'''
+
+[tasks.module-memory-edit-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/edit" 
+cm_run_task release 
+'''
+
+
+[tasks.module-memory-play-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/play" 
+cm_run_task dev-iframe
+'''
+
+[tasks.module-memory-play-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/play" 
+cm_run_task dev-iframe-nomedia
+'''
+
+[tasks.module-memory-play-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/play" 
+cm_run_task sandbox 
+'''
+
+[tasks.module-memory-play-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "module/memory/play" 
+cm_run_task release 
+'''
+
+
+# JIG - SHELL 
+[tasks.jig-edit-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task dev-main
+'''
+
+[tasks.jig-edit-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task dev-main-nomedia
+'''
+
+[tasks.jig-edit-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task sandbox 
+'''
+
+[tasks.jig-edit-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task release 
+'''
+
+
+[tasks.jig-play-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task dev-iframe
+'''
+
+[tasks.jig-play-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task dev-iframe-nomedia
+'''
+
+[tasks.jig-play-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task sandbox 
+'''
+
+[tasks.jig-play-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task release 
+'''
+
+
+#######################
+## COMMON            ##
+#######################
+[tasks.clean-templates]
+script_runner = "@duckscript"
+script = '''
+rm -rf ../.template_output
+'''
+
+#######################
+## BUILD - SANDBOX ##
+#######################
+[tasks.sandbox]
+run_task = {name = [
+    "clean-templates",
+    "sandbox-build-templates",
+    "sandbox-build-app",
+]}
+
+[tasks.sandbox-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "sandbox"]
+cwd = "../build-utils/templates-builder"
+
+
+[tasks.sandbox-build-app]
+script_runner = "@shell"
+script = ["npm run build:sandbox"]
+
+#######################
+## BUILD - RELEASE   ##
+#######################
+[tasks.release]
+run_task = {name = [
+    "clean-templates",
+    "release-build-templates",
+    "release-build-app",
+]}
+
+[tasks.release-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "release"]
+cwd = "../build-utils/templates-builder"
+
+
+[tasks.release-build-app]
+script_runner = "@shell"
+script = ["npm run build:release"]
+
+###################
+## DEV ##
+###################
+[tasks.dev-main]
+run_task = {name = [
+    "clean-templates",
+    "dev-port-main",
+    "dev-build-templates",
+    "dev-prep-files",
+    "dev-start",
+]}
+
+[tasks.dev-iframe]
+run_task = {name = [
+    "clean-templates",
+    "dev-port-iframe",
+    "dev-build-templates",
+    "dev-prep-files",
+    "dev-start",
+]}
+
+[tasks.dev-main-nomedia]
+run_task = {name = [
+    "dev-port-main",
+    "dev-prep-files",
+    "dev-watch-app",
+]}
+
+[tasks.dev-iframe-nomedia]
+run_task = {name = [
+    "dev-port-iframe",
+    "dev-prep-files",
+    "dev-watch-app",
+]}
+
+[tasks.dev-prep-files]
+script_runner = "@shell"
+script = ["npm run dev-files"]
+cwd = "../build-utils"
+
+[tasks.dev-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "local"]
+cwd = "../build-utils/templates-builder"
+
+[tasks.dev-start]
+run_task = { name = [
+    "dev-start-mediaserver",
+    "dev-watch-css",
+    "dev-watch-templates",
+    "dev-watch-app",
+], fork = true, parallel = true }
+
+[tasks.dev-start-mediaserver]
+script_runner = "@shell"
+script = ["npm run local-media-server"]
+cwd = "../build-utils"
+
+[tasks.dev-watch-css]
+script_runner = "@shell"
+script = ["npm run watch"]
+cwd = "../css"
+
+[tasks.dev-watch-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "local"]
+cwd = "../build-utils/templates-builder"
+watch = { watch = ["../templates"] }
+
+[tasks.dev-watch-app]
+script_runner = "@shell"
+script = ["npm run build:watch"]

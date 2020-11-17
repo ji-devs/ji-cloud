@@ -9,7 +9,7 @@
             "rootPathPrefix": "@templates"
           },
           {
-            "rootPathSuffix": "../core/js/src/utils",
+            "rootPathSuffix": "./src/utils",
             "rootPathPrefix": "@utils"
           }
         ]
