@@ -41,9 +41,9 @@ jobs:
         run: npm run bundle
         working-directory: "./frontend/css"
 
-      - name: install core js deps
+      - name: install build utils deps
         run: npm install
-        working-directory: "./frontend/core/js"
+        working-directory: "./frontend/build-utils"
         
       - name: install npm deps
         run: npm install
