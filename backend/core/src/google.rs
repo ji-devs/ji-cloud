@@ -1,6 +1,7 @@
 use crate::env::req_env;
 use anyhow::{anyhow, Context};
 use futures_util::future::TryFutureExt;
+use reqwest::StatusCode;
 use serde::Deserialize;
 use yup_oauth2::{AccessToken, ServiceAccountAuthenticator, ServiceAccountKey};
 
@@ -76,25 +77,56 @@ pub(crate) async fn get_google_token_from_metaserver() -> anyhow::Result<String>
     Ok(token_response.access_token)
 }
 
-/// Gets `secret_name` from GCS via the given `token` and `project_id`
-pub async fn get_secret(
+/// Gets `secret_name` from GCS via the given `token` and `project_id`, returning `None` if the secret doesn't exist.
+/// # Errors:
+/// If the request fails
+/// If the request's response is invalid
+/// If the bytes of the response data are not valid UTF-8
+pub(crate) async fn get_optional_secret(
     token: &str,
     project_id: &str,
     secret_name: &str,
-) -> anyhow::Result<String> {
-    let path = format!("https://secretmanager.googleapis.com/v1beta1/projects/{}/secrets/{}/versions/latest:access", project_id, secret_name);
+) -> anyhow::Result<Option<String>> {
+    let path = format!(
+        "https://secretmanager.googleapis.com/v1/projects/{}/secrets/{}/versions/latest:access",
+        project_id, secret_name
+    );
 
     let request = reqwest::Client::new()
         .get(&path)
         .header("Authorization", &format!("Bearer {}", token));
 
-    let response: GoogleSecretResponse = request
+    let response = request
         .send()
-        .and_then(reqwest::Response::json)
         .await
-        .with_context(|| anyhow!("couldn't get secret: {}", secret_name))?;
+        .with_context(|| anyhow!("request to get secret failed"))?;
+
+    if response.status() == StatusCode::NOT_FOUND {
+        return Ok(None);
+    }
+
+    let response: GoogleSecretResponse = response
+        .json()
+        .await
+        .with_context(|| anyhow!("failed to decode response for secret"))?;
 
     let bytes: Vec<u8> = base64::decode(response.payload.data)?;
 
-    Ok(String::from_utf8(bytes)?)
+    Ok(Some(String::from_utf8(bytes)?))
+}
+
+/// Gets `secret_name` from GCS via the given `token` and `project_id`
+/// # Errors
+/// If the request fails
+/// If the request's response is invalid
+/// If the bytes of the response data are not valid UTF-8
+/// If the secret doesn't exist.
+pub async fn get_secret(
+    token: &str,
+    project_id: &str,
+    secret_name: &str,
+) -> anyhow::Result<String> {
+    get_optional_secret(token, project_id, secret_name)
+        .await?
+        .ok_or_else(|| anyhow!("secret `{}` not present", secret_name))
 }

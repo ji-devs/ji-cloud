@@ -1,4 +1,3 @@
-mod auth;
 mod cors;
 mod endpoints;
 

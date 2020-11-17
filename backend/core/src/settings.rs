@@ -1,13 +1,17 @@
+use anyhow::Context;
 #[cfg(feature = "db")]
 use sqlx::postgres::PgConnectOptions;
 
 use crate::{
     env::{env_bool, keys, req_env},
-    google::{get_access_token_and_project_id, get_secret},
+    google::{get_access_token_and_project_id, get_optional_secret},
 };
 use config::RemoteTarget;
 use jsonwebtoken::{DecodingKey, EncodingKey};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    env::VarError,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 /// Reads a `RemoteTarget` from the arguments passed to the command.
 pub fn read_remote_target() -> anyhow::Result<RemoteTarget> {
@@ -152,10 +156,25 @@ pub struct SettingsManager {
 
 impl SettingsManager {
     async fn get_secret(&self, secret: &str) -> anyhow::Result<String> {
+        self.get_optional_secret(secret)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("secret `{}` not present", secret))
+    }
+
+    async fn get_optional_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
         log::debug!("Getting secret `{}`", secret);
         match &self.token {
-            Some(token) => get_secret(token, &self.project_id, secret).await,
-            None => req_env(secret),
+            // todo: this
+            Some(token) => get_optional_secret(token, &self.project_id, secret)
+                .await
+                .with_context(|| anyhow::anyhow!("failed to get secret `{}`", secret)),
+            None => match std::env::var(secret) {
+                Ok(secret) => Ok(Some(secret)),
+                Err(VarError::NotPresent) => Ok(None),
+                Err(VarError::NotUnicode(_)) => {
+                    Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
+                }
+            },
         }
     }
 
@@ -166,24 +185,19 @@ impl SettingsManager {
         primary_key: &str,
         backup_key: &str,
     ) -> anyhow::Result<String> {
-        let err = match self.get_secret(primary_key).await {
-            Ok(secret) => return Ok(secret),
-            Err(e) => e,
-        };
-
-        match self.get_secret(backup_key).await {
-            Ok(secret) => {
-                log::warn!(
-                    "Rename key `{}` to `{}` (loaded from backup var)",
-                    backup_key,
-                    primary_key,
-                );
-                Ok(secret)
-            }
-
-            // todo: don't discard the second error!
-            Err(_) => Err(err),
+        if let Some(secret) = self.get_optional_secret(primary_key).await? {
+            return Ok(secret);
         }
+
+        let secret = self.get_secret(backup_key).await?;
+
+        log::warn!(
+            "Rename key `{}` to `{}` (loaded from backup var)",
+            backup_key,
+            primary_key,
+        );
+
+        Ok(secret)
     }
 
     /// Create a new instance of `Self`
@@ -242,13 +256,17 @@ impl SettingsManager {
     }
 
     /// Load the key required for initializing sentry (for the api)
-    pub async fn sentry_api_key(&self) -> anyhow::Result<String> {
-        self.get_secret(keys::SENTRY_DSN_API).await
+    pub async fn sentry_api_key(&self) -> anyhow::Result<Option<String>> {
+        self.get_optional_secret(keys::SENTRY_DSN_API)
+            .await
+            .map(|it| it.filter(|it| !it.is_empty()))
     }
 
     /// Load the key required for initializing sentry (for pages)
-    pub async fn sentry_pages_key(&self) -> anyhow::Result<String> {
-        self.get_secret(keys::SENTRY_DSN_PAGES).await
+    pub async fn sentry_pages_key(&self) -> anyhow::Result<Option<String>> {
+        self.get_optional_secret(keys::SENTRY_DSN_PAGES)
+            .await
+            .map(|it| it.filter(|it| !it.is_empty()))
     }
 
     /// Load the settings for JWKs.

@@ -4,7 +4,7 @@ use shared::{
     domain::category::{Category, CategoryId},
     error::{category::UpdateError, DeleteError},
 };
-use sqlx::Executor;
+use sqlx::{Done as _, Executor, PgPool};
 use uuid::Uuid;
 
 pub async fn get_top_level(db: &sqlx::PgPool) -> anyhow::Result<Vec<Category>> {
@@ -121,7 +121,7 @@ returning index, id"#,
 
 /// checks if moving the category with `id` to have `new_parent` as it's parent would create a cycle
 ///
-/// A cycle is where there's a category where it is it's own descendant.
+/// A cycle is where there's a category that is it's own descendant.
 async fn would_cycle(
     txn: &mut sqlx::PgConnection,
     id: Uuid,
@@ -148,14 +148,30 @@ select c.parent_id from category c inner join cte on cte.parent_id = c.id
     .map(|res| res.would_cycle)
 }
 
-pub async fn update(
+enum UpdateLoopError {
+    UpdateError(UpdateError),
+    Sqlx(sqlx::Error),
+}
+
+impl From<sqlx::Error> for UpdateLoopError {
+    fn from(err: sqlx::Error) -> Self {
+        UpdateLoopError::Sqlx(err)
+    }
+}
+
+impl From<UpdateError> for UpdateLoopError {
+    fn from(err: UpdateError) -> Self {
+        UpdateLoopError::UpdateError(err)
+    }
+}
+
+async fn update_slow(
     db: &sqlx::PgPool,
-    CategoryId(id): CategoryId,
-    parent_id: Option<Option<CategoryId>>,
+    id: Uuid,
+    new_parent: Option<Option<Uuid>>,
     name: Option<&str>,
     index: Option<i16>,
-) -> Result<(), UpdateError> {
-    let current_parent = parent_id.map(|id| id.map(|it| it.0));
+) -> Result<(), UpdateLoopError> {
     let mut txn = db.begin().await?;
 
     txn.execute("set transaction isolation level repeatable read")
@@ -178,14 +194,14 @@ select parent_id, index from category where id = $1
     }
 
     let mut current_index = category_info.index;
-    if let Some(parent_id) = current_parent {
+    if let Some(parent_id) = new_parent {
         if parent_id != category_info.parent_id {
             // check that the new parent isn't a descendant (to avoid cycles)
             if let Some(new_parent) = parent_id {
                 let would_cycle = would_cycle(&mut txn, id, new_parent).await?;
 
                 if would_cycle {
-                    return Err(UpdateError::Cycle);
+                    return Err(UpdateError::Cycle.into());
                 }
             }
 
@@ -202,8 +218,9 @@ returning index
                 parent_id,
                 id
             )
-            .fetch_one(&mut txn)
-            .await?;
+            .fetch_optional(&mut txn)
+            .await?
+            .ok_or(UpdateError::ParentCategoryNotFound)?;
 
             current_index = res.index;
 
@@ -212,7 +229,7 @@ returning index
     }
 
     if let Some(new_index) = index {
-        let current_parent = current_parent.unwrap_or(category_info.parent_id);
+        let current_parent = new_parent.unwrap_or(category_info.parent_id);
         if new_index < current_index {
             sqlx::query!(
                 r#"
@@ -254,6 +271,58 @@ where id = $2
     Ok(())
 }
 
+pub async fn update(
+    db: &sqlx::PgPool,
+    CategoryId(id): CategoryId,
+    parent_id: Option<Option<CategoryId>>,
+    name: Option<&str>,
+    index: Option<i16>,
+) -> Result<(), UpdateError> {
+    // fast track for if we're only updating the `name`:
+    // the reasoning is due to an observation:
+    // * we have to have retry logic for anything that involves transactions here (which updating the parent id and index _requires_)
+    // * This is a single query, which can execute faster than opening a transaction and doing all the other stuff does.
+    if parent_id.is_none() && index.is_none() {
+        if let Some(name) = name {
+            let rows_updated = sqlx::query!(
+                "update category set name = $1, updated_at = now() where id = $2",
+                name,
+                id
+            )
+            .execute(db)
+            .await?
+            .rows_affected();
+
+            match rows_updated {
+                0 => return Err(UpdateError::CategoryNotFound),
+                1 => {}
+                _ => unreachable!(),
+            }
+        }
+
+        // Regardless of if the name is updated,
+        // we know that neither parent_id nor index are going to be updated,
+        // so we can just return here.
+        return Ok(());
+    }
+
+    // note: at this point, at least one of `parent_id` or `index` are not null,
+    // however, we don't know if we will end up updating either (they could be the same)
+
+    let new_parent = parent_id.map(|id| id.map(|it| it.0));
+    loop {
+        match update_slow(db, id, new_parent, name, index).await {
+            Ok(()) => return Ok(()),
+            Err(UpdateLoopError::UpdateError(e)) => return Err(e),
+            Err(UpdateLoopError::Sqlx(sqlx::Error::Database(e)))
+                if e.code().as_deref() == Some("40001") => {}
+            Err(UpdateLoopError::Sqlx(e)) => {
+                return Err(UpdateError::InternalServerError(e.into()))
+            }
+        }
+    }
+}
+
 async fn backshift(
     txn: &mut sqlx::PgConnection,
     parent_id: Option<Uuid>,
@@ -275,24 +344,34 @@ where index > $1 and index <= $2 is not false and parent_id is not distinct from
     .map(drop)
 }
 
-pub async fn delete(db: &sqlx::PgPool, id: CategoryId) -> Result<(), DeleteError> {
-    let mut txn = db.begin().await?;
+pub async fn delete(db: &PgPool, id: CategoryId) -> Result<(), DeleteError> {
+    async fn inner(db: &PgPool, id: CategoryId) -> sqlx::Result<()> {
+        let mut txn = db.begin().await?;
 
-    txn.execute("set transaction isolation level repeatable read")
+        txn.execute("set transaction isolation level repeatable read")
+            .await?;
+
+        let res = sqlx::query!(
+            "delete from category where id = $1 returning index, parent_id",
+            id.0
+        )
+        .fetch_optional(&mut txn)
         .await?;
 
-    let res = sqlx::query!(
-        "delete from category where id = $1 returning index, parent_id",
-        id.0
-    )
-    .fetch_optional(&mut txn)
-    .await?;
+        if let Some(res) = res {
+            backshift(&mut txn, res.parent_id, res.index, None).await?;
+        }
 
-    if let Some(res) = res {
-        backshift(&mut txn, res.parent_id, res.index, None).await?;
+        txn.commit().await?;
+
+        Ok(())
     }
 
-    txn.commit().await?;
-
-    Ok(())
+    loop {
+        match inner(db, id).await {
+            Ok(()) => return Ok(()),
+            Err(sqlx::Error::Database(e)) if e.code().as_deref() == Some("40001") => {}
+            Err(e) => return Err(e.into()),
+        }
+    }
 }
