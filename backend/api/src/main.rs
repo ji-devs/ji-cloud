@@ -30,7 +30,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
-        let guard = core::sentry::init(&settings.sentry_api_key().await?, remote_target)?;
+        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         (runtime_settings, jwk_verifier, s3, algolia, db_pool, guard)
     };

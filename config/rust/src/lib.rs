@@ -124,7 +124,7 @@ impl RemoteTarget {
     }
 
     //route_path is the full path, i.e. what comes from Route::into on the frontend
-    pub fn spa_iframe(&self, route_path:&str) -> String {
+    pub fn spa_iframe(&self, route_path: &str) -> String {
         format!("{}{}", self.frontend_url_iframe(), route_path)
     }
 

@@ -545,6 +545,19 @@
       "nullable": []
     }
   },
+  "33b3def525f80ae097847489feda1bcb7cc23f2b24ae237dbb93e17802d5fb74": {
+    "query": "update category set name = $1, updated_at = now() where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
     "query": "select id from \"user\" where firebase_id = $1",
     "describe": {
