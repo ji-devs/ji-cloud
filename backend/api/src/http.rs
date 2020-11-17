@@ -71,7 +71,7 @@ pub async fn run(
             .app_data(jwk_verifier.clone())
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
-            .wrap(cors::get(local_insecure).finish())
+            .wrap(cors::get(local_insecure))
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)

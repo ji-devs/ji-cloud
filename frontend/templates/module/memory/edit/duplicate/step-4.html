@@ -1,0 +1,20 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "_common/modals/modal-macros.html" as ModalMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+{% import "module/memory/edit/_common/macros/sidebar-macros.html" as SidebarMacros %}
+<div class="flex flex-col bg-jibackgroundBlue h-screen">
+    <div class="flex">
+        <div class="w-516">
+            {{ SidebarMacros::top_steps(selected=4, noborder=true) }}
+        </div>
+
+        <div class="ml-auto mt-3 mr-3">
+            {{ ButtonMacros::orange(label="Done", dataId="next") }}
+        </div>
+    </div>
+    <div class="bg-white ml-20 mr-20 mb-20 h-full rounded shadow-lg ">
+        <div data-id="jig-module-container" class="temp-jig-module-container">
+            <iframe data-id="jig-module-iframe" class="w-full h-full"></iframe>
+        </div>
+    </div>
+</div>

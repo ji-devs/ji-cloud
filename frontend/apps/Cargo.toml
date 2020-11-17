@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "crates/core",
+    "crates/entry/user",
+    "crates/entry/admin",
+    "crates/entry/module/memory/_common",
+    "crates/entry/module/memory/edit",
+    "crates/entry/module/memory/play",
+    "crates/entry/jig/edit",
+    "crates/entry/jig/play",
+]

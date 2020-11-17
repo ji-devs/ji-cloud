@@ -275,6 +275,9 @@
 
 }
 
+
+
+
 .memory-grid-1{
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -283,10 +286,49 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-.memory-grid-3{
+.memory-grid-3, .memory-grid-7{
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.memory-grid-4{
+.memory-grid-4, .memory-grid-8{
   grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.memory-grid-5{
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+
+}
+
+.memory-grid-5 .memory-card-full:nth-last-child(2), .memory-grid-6 .memory-card-full:nth-last-child(3), .memory-grid-8 .memory-card-full:nth-last-child(5){
+  grid-area: 4 / 2 / 5 / 3;
+}
+
+.memory-grid-5 .memory-card-full:nth-last-child(1), .memory-grid-8 .memory-card-full:nth-last-child(4){
+  grid-area: 4 / 3 / 5 / 4; ;
+}
+
+.memory-grid-6 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+
+.memory-grid-6 .memory-card-full:nth-last-child(2), .memory-grid-7 .memory-card-full:nth-last-child(3){
+  grid-area: 4 / 3 / 5 / 4;
+}
+
+
+.memory-grid-7 .memory-card-full:nth-last-child(4) {
+  grid-area: 4 / 2 / 5 / 3;
+}
+
+.memory-grid-7 .memory-card-full:nth-last-child(2), .memory-grid-8 .memory-card-full:nth-last-child(3), .memory-grid-6 .memory-card-full:nth-last-child(1) {
+  grid-area: 4 / 4 / 5 / 5;
+}
+.memory-grid-7 .memory-card-full:nth-last-child(1), .memory-grid-8 .memory-card-full:nth-last-child(2) {
+  grid-area: 4 / 5 / 5 / 6;
+}
+
+.memory-grid-8 .memory-card-full:nth-last-child(1){
+  grid-area: 4 / 6 / 5 / 7;
 }

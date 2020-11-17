@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "author": "David Komer <david.komer@gmail.com>",
+  "name": "app",
+  "version": "0.1.0",
+  "scripts": {
+    "build:watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
+    "build:release": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
+    "build:sandbox": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js"
+  },
+  "dependencies": {
+    "@wasm-tool/rollup-plugin-rust": "^1.0.5",
+    "cross-env": "^7.0.2",
+    "rollup": "^2.33.2"
+  },
+  "devDependencies": {
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-serve": "^1.1.0"
+  }
+}

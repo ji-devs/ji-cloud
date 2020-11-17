@@ -2,16 +2,16 @@ import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {mockWords, mockThemes} from "./memory-common";
 
-import step1Page from "@templates/module/memory-game/edit/duplicate/step-1.html";
-import step2Page from "@templates/module/memory-game/edit/duplicate/step-2.html";
-import step4Page from "@templates/module/memory-game/edit/duplicate/step-4.html";
-import step2ThemeItemSelected from "@templates/module/memory-game/edit/duplicate/step-2-theme-item-selected.html";
-import step2ThemeItemDeselected from "@templates/module/memory-game/edit/duplicate/step-2-theme-item-deselected.html";
-import step1Tooltip from "@templates/module/memory-game/edit/duplicate/step-1-tooltip.html";
-import step1Error from "@templates/module/memory-game/edit/duplicate/step-1-error.html";
-import cardEditTextTmpl from "@templates/module/memory-game/edit/_common/memory-card-text.html";
-import cardEditPreviewTmpl from "@templates/module/memory-game/edit/_common/memory-card-preview.html";
-import cardPlayTmpl from "@templates/module/memory-game/play/memory-card.html";
+import step1Page from "@templates/module/memory/edit/duplicate/step-1.html";
+import step2Page from "@templates/module/memory/edit/duplicate/step-2.html";
+import step4Page from "@templates/module/memory/edit/duplicate/step-4.html";
+import step2ThemeItemSelected from "@templates/module/memory/edit/duplicate/step-2-theme-item-selected.html";
+import step2ThemeItemDeselected from "@templates/module/memory/edit/duplicate/step-2-theme-item-deselected.html";
+import step1Tooltip from "@templates/module/memory/edit/duplicate/step-1-tooltip.html";
+import step1Error from "@templates/module/memory/edit/duplicate/step-1-error.html";
+import cardEditTextTmpl from "@templates/module/memory/edit/_common/memory-card-text.html";
+import cardEditPreviewTmpl from "@templates/module/memory/edit/_common/memory-card-preview.html";
+import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
 
 export default {
   title: 'Modules/Memory-Game/Edit/Duplicate',

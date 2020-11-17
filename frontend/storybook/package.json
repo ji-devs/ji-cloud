@@ -12,12 +12,12 @@
     "clean": "rimraf ./dist",
     "_css-build-remote": "cd ../css && npm run bundle-remote-storybook",
     "_css-watch": "cd ../css && npm run watch",
-    "_media-server": "cd ../../build-utils && npm run local-media-server",
+    "_media-server": "cd ../build-utils && npm run local-media-server",
     "_storybook-watch": "start-storybook -p 6006 -s ./dist",
-    "_templates-build:sandbox": "cd ../../build-utils/templates && cargo run -- --remote-target sandbox --demo",
-    "_templates-build:release": "cd ../../build-utils/templates && cargo run -- --remote-target release --demo",
-    "_templates-prebuild-watch": "rimraf ../.template_output && cd ../../build-utils/templates && cargo run -- --remote-target local --demo",
-    "_templates-watch": "cd ../../build-utils/templates && cargo watch -w ../../frontend/templates -w ../../frontend/storybook/demo-templates -x \"run -- --remote-target local --demo\""
+    "_templates-build:sandbox": "cd ../build-utils/templates-builder && cargo run -- --remote-target sandbox --demo",
+    "_templates-build:release": "cd ../build-utils/templates-builder && cargo run -- --remote-target release --demo",
+    "_templates-prebuild-watch": "rimraf ../.template_output && cd ../build-utils/templates-builder && cargo run -- --remote-target local --demo",
+    "_templates-watch": "cd ../build-utils/templates-builder && cargo watch -w ../../templates -w ../../storybook/demo-templates -x \"run -- --remote-target local --demo\""
   },
   "author": "",
   "license": "ISC",
