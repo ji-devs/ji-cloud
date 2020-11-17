@@ -1,25 +1,33 @@
 {% macro top_step(selected, expected, label) %}
-<div data-id="top-step-{{ expected }}" class="flex flex-col items-center cursor-pointer">
+<div data-id="top-step-{{ expected }}" class="flex flex-col items-center cursor-pointer w-84">
+
   {% if selected==expected %}
   <div class="rounded-full h-48 w-48 bg-jibuttonBlue flex items-center justify-center text-white">
+    <p class="text-white">{{ expected }}</p>
     {% else %}
     <div class="rounded-full h-48 w-48 bg-white border border-jigrey flex items-center justify-center">
-      {% endif %}
       <p>{{ expected }}</p>
+      {% endif %}
     </div>
-    <p {% if selected==true %} class="text-jibuttonBlue" {% endif %}>{{ label }}</p>
+
+    <p {% if selected==true %} class="text-jibuttonBlue " {% endif %}>{{ label }}</p>
+
   </div>
   {% endmacro top_step %}
 
   {% macro top_steps(selected, noborder=false) %}
-  <div class="flex justify-between items-center p-4 text-sm {% if noborder != true %} border-b border-jidarkgrey {% endif %}">
-    {{ self::top_step(selected=selected, expected=1, label="Content") }}
-    <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
-    {{ self::top_step(selected=selected, expected=2, label="Design") }}
-    <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
-    {{ self::top_step(selected=selected, expected=3, label="Instructions") }}
-    <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
-    {{ self::top_step(selected=selected, expected=4, label="Preview") }}
+  <div class=" {% if noborder != true %} border-b border-jidarkgrey {% endif %}">
+    <div class="flex justify-between items-center px-4 text-sm pt-8 pb-4">
+
+
+      {{ self::top_step(selected=selected, expected=1, label="Content") }}
+      <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
+      {{ self::top_step(selected=selected, expected=2, label="Design") }}
+      <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
+      {{ self::top_step(selected=selected, expected=3, label="Instructions") }}
+      <div class="w-41 h-1 bg-jigrey -mt-15"> </div>
+      {{ self::top_step(selected=selected, expected=4, label="Preview") }}
+    </div>
   </div>
   {% endmacro top_steps %}
 
