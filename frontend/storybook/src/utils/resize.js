@@ -1,10 +1,8 @@
 /* See https://codepen.io/dakom/pen/WNxYrQM */
 /* This is slightly adapted to work on a containing element instead of window */
 
-const STAGE_WIDTH = 1920;
-const STAGE_HEIGHT = 1080;
-const STAGE_PADDING_Y_PERC = 0.05; // in percentage, to offset the stage area a bit
-const STAGE_PADDING_X_PERC = 0.05;
+
+import {STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING_X_PERC, STAGE_PADDING_Y_PERC} from "../../../../config/js/src/lib";
 
 let cancelListener = null;
 
