@@ -10,4 +10,4 @@ pub mod firebase;
 pub mod iframe;
 pub mod components;
 pub mod templates;
-
+pub mod resize;

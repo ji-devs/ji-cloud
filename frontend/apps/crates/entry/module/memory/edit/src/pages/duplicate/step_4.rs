@@ -63,7 +63,7 @@ impl Step4Page {
                     _self.state.step.set(Step::Two);
                 }))
             })
-            .with_data_id!("jig-module-iframe" => HtmlIFrameElement, {
+            .with_data_id!("module-iframe" => HtmlIFrameElement, {
                 .property("src", &_self.iframe_url())
                 .with_node!(elem => {
                     .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {

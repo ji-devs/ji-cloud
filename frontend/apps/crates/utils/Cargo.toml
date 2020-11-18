@@ -37,9 +37,12 @@ web-sys = { version = "0.3.45", features = [
     'RequestMode',
     'Headers',
     'Window',
+    'Document',
+    'Element',
     'Location',
     'Storage',
     'UrlSearchParams',
+    'CssStyleDeclaration'
 ] }
 awsm_web = { version = "0.6.3", features = ["loaders", "serde_iso"] }
 anyhow = "1.0.33"

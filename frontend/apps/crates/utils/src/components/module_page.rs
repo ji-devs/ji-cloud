@@ -1,3 +1,12 @@
+/* There are a few fundamental concepts going on here...
+ * 1. The serialized data does _not_ need to be Clone.
+ *    rather, it's passed completely to the child
+ *    and then the child is free to split it up for Mutable/etc.
+ *    (here it is held and taken from an Option)
+ * 2. The loader will be skipped if the url has ?iframe_data=true
+ *    in this case, iframe communication is setup and the parent
+ *    is expected to post a message with the data (via IframeInit)
+ */
 use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
@@ -14,7 +23,10 @@ use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, A
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use serde::de::DeserializeOwned;
-use crate::iframe::*;
+use crate::{
+    iframe::*,
+    resize::*,
+};
 use std::future::Future;
 use async_trait::async_trait;
 
@@ -67,18 +79,34 @@ where
         _self_clone
     }
 
-    
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::module_page(), {
             .with_data_id!("module-page", {
-                .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
-                    if ready {
-                        let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
-                        Some(ModuleRenderer::render(_self.renderer.clone(),data))
-                    } else {
-                        None
-                    }
-                })))
+                .with_data_id!("module-content", {
+                    .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
+                        if ready {
+                            let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
+                            Some(ModuleRenderer::render(_self.renderer.clone(),data))
+                        } else {
+                            None
+                        }
+                    })))
+                })
+
+                .with_node!(elem => {
+                    .global_event(clone!(_self => move |evt:events::Resize| {
+                        ModuleBounds::set(
+                            elem.client_width() as f64, 
+                            elem.client_height() as f64
+                        );
+                    }))
+                })
+                .after_inserted(clone!(_self => move |elem| {
+                    ModuleBounds::set(
+                        elem.client_width() as f64, 
+                        elem.client_height() as f64
+                    );
+                }))
             })
 
             .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {

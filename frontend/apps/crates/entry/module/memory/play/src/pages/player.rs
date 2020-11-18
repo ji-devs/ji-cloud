@@ -85,6 +85,9 @@ impl DuplicatePlayer {
     pub fn render(_self:Rc<DuplicatePlayer>) -> Dom {
         elem!(templates::player(), { 
             .with_data_id!("cards", {
+                .dynamic_class_signal!(_self.state.grid_number_signal().map(|id| {
+                    Some(format!("memory-grid-{}", id))
+                }))
                 .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
                     Some(format!("memory-theme-{}", id))
                 }))

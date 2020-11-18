@@ -15,6 +15,16 @@ pub const INITIAL_CARD_TEXTS:&[&'static str] = &[
     "Star",
 ];
 
+pub const DEBUG_PLAY_CARD_TEXTS:&[&'static str] = &[
+    "שמש",
+    "ירח",
+    "כוכב",
+    "blah",
+    "foo",
+    "Sun",
+    "Moon",
+    "Star",
+];
 pub const THEME_OPTIONS: &[Theme] = &[
     Theme {
         id: "basic",
