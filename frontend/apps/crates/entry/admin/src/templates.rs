@@ -2,7 +2,7 @@ use simple_html_template::{TemplateCache, html_map};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 use std::fmt;
 
 thread_local! {
@@ -156,29 +156,29 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (CATEGORIES, get_template_str(include_str!("../../../../../../.template_output/admin/categories/categories-page.html"))),
-            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-main-selected.html"))),
-            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-main-deselected.html"))),
-            (CATEGORY_SUB, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-sub.html"))),
-            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-label-display.html"))),
-            (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-label-input.html"))),
-            (CATEGORY_MENU, get_template_str(include_str!("../../../../../../.template_output/admin/categories/category-menu.html"))),
-            (IMAGES_PAGE, get_template_str(include_str!("../../../../../../.template_output/admin/images/images-page.html"))),
-            (IMAGE_ADD, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-add.html"))),
-            (IMAGE_EDIT, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit.html"))),
-            (IMAGE_EDIT_META, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-meta.html"))),
-            (IMAGE_EDIT_CATEGORIES, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories.html"))),
-            (IMAGE_EDIT_CATEGORIES_CHILD, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-child.html"))),
-            (IMAGE_EDIT_CATEGORIES_CHILD_END, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-child-end.html"))),
-            (IMAGE_EDIT_CATEGORIES_PARENT, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-parent.html"))),
-            (IMAGE_EDIT_CATEGORIES_PARENT_END, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-parent-end.html"))),
-            (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-sum-child.html"))),
-            (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-categories-sum-parent.html"))),
-            (IMAGE_EDIT_OVERVIEW, get_template_str(include_str!("../../../../../../.template_output/admin/images/image-edit-overview.html"))),
-            (IMAGES_SEARCH, get_template_str(include_str!("../../../../../../.template_output/admin/images/images-search.html"))),
-            (IMAGE_GRID_ITEM_RED, get_template_str(include_str!("../../../../../../.template_output/_common/image/image-grid-item-red.html"))),
-            (IMAGE_GRID_ITEM_GREEN, get_template_str(include_str!("../../../../../../.template_output/_common/image/image-grid-item-green.html"))),
-            (CHECKBOX, get_template_str(include_str!("../../../../../../.template_output/_common/input/checkbox.html"))),
+            (CATEGORIES, get_template_str(include_str!("../../../../../.template_output/admin/categories/categories-page.html"))),
+            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-main-selected.html"))),
+            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-main-deselected.html"))),
+            (CATEGORY_SUB, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-sub.html"))),
+            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-label-display.html"))),
+            (CATEGORY_LABEL_INPUT, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-label-input.html"))),
+            (CATEGORY_MENU, get_template_str(include_str!("../../../../../.template_output/admin/categories/category-menu.html"))),
+            (IMAGES_PAGE, get_template_str(include_str!("../../../../../.template_output/admin/images/images-page.html"))),
+            (IMAGE_ADD, get_template_str(include_str!("../../../../../.template_output/admin/images/image-add.html"))),
+            (IMAGE_EDIT, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit.html"))),
+            (IMAGE_EDIT_META, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-meta.html"))),
+            (IMAGE_EDIT_CATEGORIES, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories.html"))),
+            (IMAGE_EDIT_CATEGORIES_CHILD, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-child.html"))),
+            (IMAGE_EDIT_CATEGORIES_CHILD_END, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-child-end.html"))),
+            (IMAGE_EDIT_CATEGORIES_PARENT, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-parent.html"))),
+            (IMAGE_EDIT_CATEGORIES_PARENT_END, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-parent-end.html"))),
+            (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-sum-child.html"))),
+            (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-categories-sum-parent.html"))),
+            (IMAGE_EDIT_OVERVIEW, get_template_str(include_str!("../../../../../.template_output/admin/images/image-edit-overview.html"))),
+            (IMAGES_SEARCH, get_template_str(include_str!("../../../../../.template_output/admin/images/images-search.html"))),
+            (IMAGE_GRID_ITEM_RED, get_template_str(include_str!("../../../../../.template_output/_common/image/image-grid-item-red.html"))),
+            (IMAGE_GRID_ITEM_GREEN, get_template_str(include_str!("../../../../../.template_output/_common/image/image-grid-item-green.html"))),
+            (CHECKBOX, get_template_str(include_str!("../../../../../.template_output/_common/input/checkbox.html"))),
         ]);
 
         Self { cache }

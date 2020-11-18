@@ -9,13 +9,13 @@ use futures_signals::{
 use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use awsm_web::dom::*;
 use super::actions;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::routes::{Route, UserRoute};
+use utils::routes::{Route, UserRoute};
 use shared::domain::user::UserProfile;
 
 pub struct ProfilePage {

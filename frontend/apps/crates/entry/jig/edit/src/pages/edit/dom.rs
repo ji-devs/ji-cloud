@@ -11,12 +11,12 @@ use futures_signals::{
 use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::routes::{Route, AdminRoute};
+use utils::routes::{Route, AdminRoute};
 use shared::domain::{
     user::UserProfile,
     category::Category,

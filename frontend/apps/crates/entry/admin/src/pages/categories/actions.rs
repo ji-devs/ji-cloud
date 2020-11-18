@@ -1,5 +1,5 @@
 use std::convert::TryInto;
-use core::{
+use utils::{
     routes::{Route, UserRoute},
     fetch::{api_with_auth, api_with_auth_empty},
     storage,

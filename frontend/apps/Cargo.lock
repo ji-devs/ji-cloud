@@ -23,7 +23,6 @@ dependencies = [
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.3.7",
@@ -40,6 +39,7 @@ dependencies = [
  "shared",
  "simple-html-template",
  "url",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -56,7 +56,6 @@ dependencies = [
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.3.7",
@@ -72,6 +71,7 @@ dependencies = [
  "shared",
  "simple-html-template",
  "url",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -88,7 +88,6 @@ dependencies = [
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.3.7",
@@ -105,6 +104,7 @@ dependencies = [
  "shared",
  "simple-html-template",
  "url",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -129,7 +129,6 @@ dependencies = [
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.4.2",
@@ -146,6 +145,7 @@ dependencies = [
  "shared",
  "simple-html-template",
  "url",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -159,11 +159,11 @@ name = "app-memory-play"
 version = "0.1.0"
 dependencies = [
  "app-memory-common",
+ "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.4.2",
@@ -180,6 +180,7 @@ dependencies = [
  "shared",
  "simple-html-template",
  "url",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -198,7 +199,6 @@ dependencies = [
  "chrono-tz",
  "config",
  "console_error_panic_hook",
- "core",
  "discard",
  "dominator",
  "dominator_helpers 0.3.7",
@@ -214,12 +214,24 @@ dependencies = [
  "serde_json",
  "shared",
  "simple-html-template",
+ "utils",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
  "wee_alloc",
+]
+
+[[package]]
+name = "async-trait"
+version = "0.1.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b246867b8b3b6ae56035f1eb1ed557c1d8eae97f0d53696138a50fa0e3a3b8c0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -348,31 +360,6 @@ name = "const_fn"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c478836e029dcef17fb47c89023448c64f781a046e0300e257ad8225ae59afab"
-
-[[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "awsm_web",
- "cfg-if 1.0.0",
- "config",
- "js-sys",
- "log",
- "once_cell",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "serde_qs",
- "serde_repr",
- "shared",
- "strum",
- "strum_macros",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
 
 [[package]]
 name = "csv"
@@ -1340,6 +1327,36 @@ dependencies = [
  "matches",
  "percent-encoding",
  "serde",
+]
+
+[[package]]
+name = "utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "dominator",
+ "dominator_helpers 0.4.2",
+ "futures-signals",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "serde_qs",
+ "serde_repr",
+ "shared",
+ "simple-html-template",
+ "strum",
+ "strum_macros",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

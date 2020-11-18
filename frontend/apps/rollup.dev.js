@@ -12,7 +12,7 @@ if(!APP_NAME) {
 const path = require('path');
 
 const watchPatterns = [
-    `./crates/core/src/**`,
+    `./crates/utils/src/**`,
     `./crates/entry/${APP_NAME}/src/**`,
     `./crates/entry/${APP_NAME}/js/**`,
     "../../.template_output/**", 

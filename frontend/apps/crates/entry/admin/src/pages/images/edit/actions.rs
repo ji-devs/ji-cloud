@@ -3,7 +3,7 @@ use shared::{
     domain::{image::*, meta::*, category::*, Publish},
     error::{image::*,self}
 };
-use core::{
+use utils::{
     fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
 };
 use uuid::Uuid;

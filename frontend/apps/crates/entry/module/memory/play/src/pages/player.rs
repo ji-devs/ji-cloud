@@ -11,118 +11,67 @@ use futures_signals::{
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
 use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use core::iframe::*;
+use utils::{
+    iframe::*,
+    components::module_page::*,
+};
 use crate::{debug, data::{*, raw::*}};
+use std::future::Future;
+use async_trait::async_trait;
+use std::{
+    pin,
+    future,
+    marker
+};
 
 pub struct PlayerPage {
     state: GameState,
-    iframe_data: bool,
-    loader: AsyncLoader
 }
 
 impl PlayerPage {
-    pub fn new(url:Url, jig_id: String, module_id: String) -> Rc<Self> {
-
-        let params = url.search_params();
-
-        let iframe_data = {
-            match params.get("iframe_data") {
-                None => false,
-                Some(value) => {
-                    if value == "true" {
-                        true
-                    } else {
-                        false
-                    }
-                }
-            }
-        };
-
+    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
         let state = GameState::new(jig_id, module_id);
-
-        let _self = Rc::new(Self { 
-            state, 
-            loader: AsyncLoader::new(),
-            iframe_data
-        });
-
-        let _self_clone = _self.clone();
-        _self_clone.loader.load(async move {
-            if !iframe_data {
-                if let Some(raw_state) = debug::settings().state {
-                    _self.state.set_from_loaded(raw_state);
-                } else {
-                    //TODO - LOAD GAME STATE FROM BACKEND
-                    log::info!("loading...");
-                    let raw_state:GameStateRaw = GameStateRaw::load().await;
-                    _self.state.set_from_loaded(raw_state);
-                }
-            }         
-        });
-        
-        _self_clone
-    }
-
-    fn ready(&self) -> impl Signal<Item = bool> {
-        self.state.mode.signal_ref(|mode| {
-            match mode {
-                None => false,
-                Some(mode) => mode.is_some()
-            }
-        })
-    }
-
-    
-    pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::module_page(), {
-            .with_data_id!("module-page", {
-                .child_signal(_self.ready().map(clone!(_self => move |ready| {
-                    if ready {
-                        Some(Self::render_player(_self.clone()))
-                    } else {
-                        None
-                    }
-                })))
-            })
-
-            .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
-
-                if let Ok(msg) = evt.try_serde_data::<IframeInit<GameStateRaw>>() {
-                    if !_self.iframe_data {
-                        log::warn!("weird... shouldn't have gotten iframe data!");
-                    }
-                    _self.state.set_from_loaded(msg.data.unwrap_throw());
-                } else {
-                    log::info!("hmmm got other iframe message...");
-                }
-            }))
-            .after_inserted(clone!(_self => move |elem| {
-                if _self.iframe_data {
-                    //On mount - send an empty IframeInit message to let the parent know we're ready
-                    let target = web_sys::window().unwrap_throw().parent().unwrap_throw().unwrap_throw();
-                    let msg = core::iframe::IframeInit::empty();
-
-                    target.post_message(&msg.into(), "*");
-                }
-            }))
-        })
-    }
-
-    fn render_player(_self: Rc<Self>) -> Dom {
-        match _self.state.mode_state.borrow().as_ref() {
-            None => panic!("can't render player without state!"),
-            Some(mode) => match mode {
-                ModeState::Duplicate(state) => {
-                    DuplicatePlayer::render(DuplicatePlayer::new(state.clone()))
-                },
-                _ => unimplemented!("todo - other modes!")
-            }
-        }
+        Rc::new(Self { state })
     }
 }
+
+//Use the ModuleRenderer component by way of a trait
+#[async_trait(?Send)]
+impl ModuleRenderer for PlayerPage {
+    type Data = GameStateRaw;
+
+    async fn load(_self:Rc<Self>) -> GameStateRaw { 
+        if let Some(raw_state) = debug::settings().state {
+            raw_state
+        } else {
+            log::info!("loading...");
+            GameStateRaw::load().await
+        }
+    }
+
+    fn render(_self: Rc<Self>, data: GameStateRaw) -> Dom {
+        _self.state.set_from_loaded(data);
+        html!("div", {
+            .child_signal(_self.state.mode.signal_ref(clone!(_self => move |mode| {
+                mode.map(clone!(_self => move |_| {
+                    match _self.state.mode_state.borrow().as_ref() {
+                        None => panic!("can't render player without state!"),
+                        Some(mode) => match mode {
+                            ModeState::Duplicate(state) => {
+                                DuplicatePlayer::render(DuplicatePlayer::new(state.clone()))
+                            },
+                            _ => unimplemented!("todo - other modes!")
+                        }
+                    }
+                }))
+            })))
+        })
+    }
+}
+
 
 pub struct DuplicatePlayer {
     state: Rc<DuplicateState>,

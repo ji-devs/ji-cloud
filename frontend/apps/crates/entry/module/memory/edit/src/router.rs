@@ -1,4 +1,4 @@
-use core::routes::{Route, ModuleRoute};
+use utils::routes::{Route, ModuleRoute};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;

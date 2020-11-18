@@ -9,16 +9,16 @@ use futures_signals::{
 use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::{
+use utils::{
     routes::{Route, UserRoute},
     storage,
 };
-use crate::utils::firebase::*;
+use crate::firebase::*;
 use super::super::data::*;
 
 pub struct RegisterStart {
@@ -238,7 +238,7 @@ use shared::{
     error::{auth::RegisterError, user::NoSuchUserError},
 };
 
-use core::{
+use utils::{
     fetch::api_no_auth,
 };
 pub async fn firebase_id_exists(firebase_id:String) -> bool {

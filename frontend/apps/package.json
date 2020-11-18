@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "scripts": {
     "build:watch": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.dev.js --watch",
+	"build:watch:backtrace": "cross-env RUSTUP_TOOLCHAIN=nightly RUSTFLAGS=\"-Z macro-backtrace\" rollup --config rollup.dev.js --watch",
     "build:release": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.release.js",
     "build:sandbox": "cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.sandbox.js"
   },

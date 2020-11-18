@@ -3,14 +3,14 @@ use shared::{
     domain::auth::SigninSuccess,
     error::user::NoSuchUserError,
 };
-use core::{
+use utils::{
     routes::*,
     fetch::api_with_token,
     storage,
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use crate::utils::firebase::*;
+use crate::firebase::*;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;

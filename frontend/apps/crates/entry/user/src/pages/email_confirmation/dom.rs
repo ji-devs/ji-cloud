@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal},
@@ -10,14 +10,14 @@ use futures_signals::{
 use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::{templates, firebase::*};
+use crate::{templates, firebase::*};
 use awsm_web::{
     dom::*,
 };
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::routes::*;
+use utils::routes::*;
 use shared::domain::user::UserProfile;
 use gloo_timers::future::TimeoutFuture;
 

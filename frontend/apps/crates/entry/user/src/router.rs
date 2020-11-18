@@ -1,4 +1,4 @@
-use core::routes::*;
+use utils::routes::*;
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;

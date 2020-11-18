@@ -5,7 +5,9 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod utils;
+mod firebase;
+mod google_maps;
+mod templates;
 mod router;
 mod pages;
 
@@ -22,11 +24,11 @@ mod header;
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    let settings = core::settings::init();
+    let settings = utils::settings::init();
 
 
 
-    let promise = unsafe { utils::firebase::init_firebase(settings.firebase_dev) };
+    let promise = unsafe { firebase::init_firebase(settings.firebase_dev) };
 
     match JsFuture::from(promise).await {
         Ok(_) => {

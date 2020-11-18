@@ -2,7 +2,7 @@ use simple_html_template::{TemplateCache, html_map};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 use std::fmt;
 
 thread_local! {
@@ -79,16 +79,16 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/start-mode-choose.html"))),
-            (CARD_EDIT_TEXT, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/_common/memory-card-text.html"))),
-            (CARD_EDIT_PREVIEW, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/_common/memory-card-preview.html"))),
-            (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-1.html"))),
-            (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-1-tooltip.html"))),
-            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-1-error.html"))),
-            (DUPLICATE_STEP_2_PAGE, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-2.html"))),
-            (DUPLICATE_STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-2-theme-item-selected.html"))),
-            (DUPLICATE_STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-2-theme-item-deselected.html"))),
-            (DUPLICATE_STEP_4_PAGE, get_template_str(include_str!("../../../../../../../../.template_output/module/memory/edit/duplicate/step-4.html"))),
+            (MODE_CHOOSE_PAGE, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/start-mode-choose.html"))),
+            (CARD_EDIT_TEXT, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/_common/memory-card-text.html"))),
+            (CARD_EDIT_PREVIEW, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/_common/memory-card-preview.html"))),
+            (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-1.html"))),
+            (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-1-tooltip.html"))),
+            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-1-error.html"))),
+            (DUPLICATE_STEP_2_PAGE, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-2.html"))),
+            (DUPLICATE_STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-2-theme-item-selected.html"))),
+            (DUPLICATE_STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-2-theme-item-deselected.html"))),
+            (DUPLICATE_STEP_4_PAGE, get_template_str(include_str!("../../../../../../../.template_output/module/memory/edit/duplicate/step-4.html"))),
         ]);
 
         Self { cache }

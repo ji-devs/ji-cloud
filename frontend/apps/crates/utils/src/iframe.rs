@@ -35,3 +35,20 @@ impl <T: DeserializeOwned> From<JsValue> for IframeInit<T> {
         serde_wasm_bindgen::from_value(msg).unwrap_throw()
     }
 }
+
+pub fn should_get_iframe_data() -> bool { 
+    let url:String = dominator::routing::url().get_cloned();
+    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_throw();
+    let params = url.search_params();
+
+    match params.get("iframe_data") {
+        None => false,
+        Some(value) => {
+            if value == "true" {
+                true
+            } else {
+                false
+            }
+        }
+    }
+}
