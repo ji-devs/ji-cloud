@@ -41,7 +41,7 @@ export const Step2_Theme_2_FlipSecond = () => mockStep2(tmpl(step2Page), 2, true
 
 export const Step4 = () => {
     const page = tmpl(step4Page);
-    const iframe = getChildId(page, "jig-module-iframe");
+    const iframe = getChildId(page, "module-iframe");
     iframe.srcdoc = "<html><body><h1>Player here!</h1></body></html>";
 
     return page;
