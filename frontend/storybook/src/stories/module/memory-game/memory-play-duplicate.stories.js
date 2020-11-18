@@ -23,8 +23,8 @@ export const Play_24_Cards = makePlayer(24, 3);
 export const Play_26_Cards = makePlayer(26, 8);
 export const Play_28_Cards = makePlayer(28, 4);
 
-export const Player_Theme_1 = () => mockPlayer(1, false, 12);
-export const Player_Theme_1_Flipped = () => mockPlayer(1, true, 12);
+export const Player_Theme_1 = () => mockPlayer(1, false, 12, 1);
+export const Player_Theme_1_Flipped = () => mockPlayer(1, true, 12, 1);
 //Helpers
 
 function mockPlayer(selectedThemeIndex, isFlipped, nCards, nGrid) {
