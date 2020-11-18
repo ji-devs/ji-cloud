@@ -1,6 +1,6 @@
 pub type Id = String;
 use shared::domain::jig::ModuleKind;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 
 pub trait ModuleKindExt {
     fn get_thumbnail(self) -> String;

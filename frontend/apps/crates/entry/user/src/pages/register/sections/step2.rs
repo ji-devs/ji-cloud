@@ -17,19 +17,19 @@ use futures_signals::{
 use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
 use dominator::{Dom, html, events, clone, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::{
+use utils::{
     routes::{Route, UserRoute},
     fetch::api_with_token,
     storage,
 };
-use crate::utils::firebase::*;
+use crate::firebase::*;
 use super::super::data::*;
-use crate::utils::google_maps::*;
+use crate::google_maps::*;
 
 pub struct RegisterStep2 {
     pub tos: RefCell<Option<HtmlInputElement>>,

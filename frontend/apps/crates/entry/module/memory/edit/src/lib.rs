@@ -5,7 +5,7 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod utils;
+mod templates;
 mod router;
 mod pages;
 mod data;
@@ -26,7 +26,7 @@ mod header;
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
-    let settings = core::settings::init();
+    let settings = utils::settings::init();
     //init dom stuff
 
     let router = router::Router::new();

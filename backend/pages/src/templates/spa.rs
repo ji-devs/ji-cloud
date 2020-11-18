@@ -1,21 +1,46 @@
-use actix_web::{error::ErrorInternalServerError, web::Data, HttpResponse};
+use actix_web::{
+    error::ErrorInternalServerError,
+    web::{Data, Path},
+    HttpResponse,
+};
 use core::settings::RuntimeSettings;
+use std::borrow::Cow;
 
 use askama::Template;
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Debug, Clone, PartialEq, Copy, Eq, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum ModulePageKind {
+    Edit,
+    Play,
+}
+
+impl ModulePageKind {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Edit => "edit",
+            Self::Play => "play",
+        }
+    }
+}
+
+#[derive(Eq, PartialEq, Clone)]
 pub enum SpaPage {
     User,
     Admin,
     Jig,
+    Module(String, ModulePageKind),
 }
 
 impl SpaPage {
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(&self) -> Cow<'static, str> {
         match self {
-            Self::User => "user",
-            Self::Admin => "admin",
-            Self::Jig => "jig",
+            Self::User => Cow::Borrowed("user"),
+            Self::Admin => Cow::Borrowed("admin"),
+            Self::Jig => Cow::Borrowed("jig"),
+            Self::Module(kind, page_kind) => {
+                Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
+            }
         }
     }
 }
@@ -40,7 +65,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
     let info = SpaPageInfo {
         app_js: settings
             .remote_target()
-            .spa_url(spa.as_str(), "js/index.js"),
+            .spa_url(&*spa.as_str(), "js/index.js"),
         app_css: settings.remote_target().css_url(true),
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
@@ -62,4 +87,16 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
 
 pub async fn jig_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Jig)
+}
+
+pub async fn module_template(
+    settings: Data<RuntimeSettings>,
+    Path((module_kind, page_kind, _jig_id, _module_id)): Path<(
+        String,
+        ModulePageKind,
+        String,
+        String,
+    )>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Module(module_kind, page_kind))
 }

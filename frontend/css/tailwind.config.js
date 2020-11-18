@@ -77,23 +77,37 @@ module.exports = {
 
       },
 
+      /*  the r- prefixes are used for rem
+          and intended for inside our scaled module areas
+          the forumula is that it's pixels / 10
+          so 123px becomes 12.3rem
+      */
       fontSize: {
         14:'14px',
+        'r-14': '1.4rem',
         18: '18px',
-
-      },
-      fontSize: {
+        'r-18': '1.8rem',
         xs: '12px',
+        'r-xs': '1.2rem',
         sm: '14px',
+        'r-sm': '1.4rem',
         base: '16px',
+        'r-base': '1.6rem',
         lg: '18px',
+        'r-lg': '1.8rem',
         xl: '20px',
+        'r-xl': '2.0rem',
         '2xl': '24px',
+        'r-2xl': '2.4rem',
         '3xl': '30px',
+        'r-3xl': '3.0rem',
         '4xl': '36px',
+        'r-4xl': '3.6rem',
         '5xl': '48px',
+        'r-5xl': '4.8rem',
         '6xl': '64px',
-},
+        'r-6xl': '6.4rem',
+      },
       fontFamily: {
         poppins: 'Poppins',
         sans: 'Roboto',
@@ -115,6 +129,7 @@ module.exports = {
         89: '89px',
         96: '96px',
         102: '102px',
+        110: '110px',
         112: '112px',
         117: '117px',
         124: '124px',
@@ -133,6 +148,7 @@ module.exports = {
         217: '217px',
         236: '236px',
         240: '240px',
+        254: '254px',
         259: '259px',
         270: '270px',
         272: '272px',
@@ -188,6 +204,7 @@ module.exports = {
         83.5: '83.5px',
         89: '89px',
         96: '96px',
+        110: '110px',
         114: '114px',
         124: '124px',
         128: '128px',

@@ -103,6 +103,29 @@ pub struct DuplicateState {
     pub theme_id: Mutable<String>,
 }
 
+impl DuplicateState {
+    pub fn grid_number_signal(&self) -> impl Signal<Item = usize> {
+        self.cards
+            .signal_vec_cloned()
+            .len()
+            .map(|n_cards| {
+                match n_cards {
+                    8 => 1,
+                    10 => 2,
+                    12 => 1,
+                    14 => 5,
+                    16 => 1,
+                    18 => 6,
+                    20 => 2,
+                    22 => 7,
+                    24 => 3,
+                    26 => 8,
+                    28 => 4,
+                    _ => panic!("no known grid number for {} cards!", n_cards)
+                }
+            })
+    }
+}
 impl ModeStateExt for DuplicateStateRaw {
     type MutableContainer = DuplicateState;
 

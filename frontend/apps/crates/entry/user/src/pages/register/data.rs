@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use core::firebase::*;
+use utils::firebase::*;
 
 pub type Token = String;
 pub type Email = String;

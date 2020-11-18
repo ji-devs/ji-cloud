@@ -1,3 +1,9 @@
+
+export const STAGE_WIDTH = 1920;
+export const STAGE_HEIGHT = 1080;
+export const STAGE_PADDING_Y_PERC = 0.05; // in percentage, to offset the stage area a bit
+export const STAGE_PADDING_X_PERC = 0.05;
+
 export const BUCKET_FRONTEND_RELEASE = "ji-cloud-frontend-origin-eu-001";
 export const BUCKET_FRONTEND_SANDBOX = "ji-cloud-sandbox-frontend-origin-eu-001";
 export const BUCKET_UPLOADS_RELEASE = "ji-cloud-uploads-origin-eu-001";

@@ -78,7 +78,7 @@ impl DuplicateStateRaw {
     }
     pub fn debug() -> Self {
         Self {
-            cards: config::INITIAL_CARD_TEXTS
+            cards: config::DEBUG_PLAY_CARD_TEXTS
                 .iter()
                 .map(|text| {
                     CardRaw::new(text.to_string())

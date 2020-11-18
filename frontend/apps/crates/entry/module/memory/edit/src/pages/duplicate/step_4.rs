@@ -11,16 +11,16 @@ use futures_signals::{
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlIFrameElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, spawn_future, dynamic_class_signal, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
 use crate::data::{*, raw::*};
 use itertools::Itertools;
 use crate::config;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 use shared::domain::jig::ModuleKind;
-use core::{
+use utils::{
     iframe::*,
     routes::{Route, ModuleRoute}
 };
@@ -63,7 +63,7 @@ impl Step4Page {
                     _self.state.step.set(Step::Two);
                 }))
             })
-            .with_data_id!("jig-module-iframe" => HtmlIFrameElement, {
+            .with_data_id!("module-iframe" => HtmlIFrameElement, {
                 .property("src", &_self.iframe_url())
                 .with_node!(elem => {
                     .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {

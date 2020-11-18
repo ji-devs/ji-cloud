@@ -1,4 +1,4 @@
-use core::routes::{Route, ModuleRoute};
+use utils::routes::{Route, ModuleRoute};
 use shared::domain::jig::ModuleKind;
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
@@ -9,6 +9,7 @@ use futures_signals::{
 };
 use dominator::{Dom, html};
 use crate::pages::PlayerPage;
+use utils::components::module_page::ModulePage;
 
 pub struct Router {
 }
@@ -18,23 +19,24 @@ impl Router {
         Self { }
     }
 
-    fn signal() -> impl Signal<Item = (Route, Url)> {
+    fn signal() -> impl Signal<Item = Route> {
         dominator::routing::url()
-            .signal_ref(|url| (
-                Route::from_url(&url),
-                Url::new(&url).unwrap_throw()
-            ))
+            .signal_ref(|url|  Route::from_url(&url))
     }
 
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal()
-            .map(|(route, url)| {
+            .map(|route| {
                 match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Play(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(PlayerPage::render(PlayerPage::new(url, jig_id, module_id))),
+                                    ModuleKind::MemoryGame => Some(
+                                        ModulePage::render(ModulePage::new(
+                                            PlayerPage::new(jig_id, module_id)
+                                        ))
+                                    ),
                                     _ => None
                                 }
                             }

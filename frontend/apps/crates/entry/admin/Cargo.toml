@@ -17,7 +17,7 @@ crate-type = ["cdylib"]
 [dependencies]
 # Common deps
 
-core = {path = "../../core"}
+utils = {path = "../../utils"}
 shared = {path = "../../../../../shared/rust"}
 config = {path = "../../../../../config/rust"}
 wasm-logger = { version = "0.2.0", optional = true }
@@ -70,8 +70,8 @@ gloo = "0.2.1"
 
 [features]
 default = ["wee_alloc"]
-release = ["core/release"]
-sandbox = ["core/sandbox"]
+release = ["utils/release"]
+sandbox = ["utils/sandbox"]
 ts_test = []
 quiet = []
-local = ["wasm-logger", "console_error_panic_hook", "core/local"]
+local = ["wasm-logger", "console_error_panic_hook", "utils/local"]

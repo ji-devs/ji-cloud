@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
-use core::settings::Settings;
+use utils::settings::Settings;
 use serde::{Serialize, Deserialize};
 use web_sys::HtmlInputElement;
 

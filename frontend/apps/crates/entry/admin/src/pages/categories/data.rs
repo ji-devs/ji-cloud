@@ -1,6 +1,6 @@
 use shared::domain::category::*;
 use std::convert::TryInto;
-use core::{
+use utils::{
     routes::{Route, UserRoute},
     storage,
 };

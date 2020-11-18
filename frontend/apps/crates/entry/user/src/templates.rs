@@ -1,7 +1,7 @@
 use simple_html_template::{TemplateCache, html_map};
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
-use core::settings::SETTINGS;
+use utils::settings::SETTINGS;
 use std::fmt;
 
 //pub static TEMPLATES:OnceCell<Templates> = OnceCell::new();
@@ -83,19 +83,19 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (SIGNIN, get_template_str(include_str!("../../../../../../.template_output/user/signin/signin.html"))),
-            (REGISTER_START, get_template_str(include_str!("../../../../../../.template_output/user/register/register-start.html"))),
-            (REGISTER_STEP1, get_template_str(include_str!("../../../../../../.template_output/user/register/register-1.html"))),
-            (REGISTER_STEP2, get_template_str(include_str!("../../../../../../.template_output/user/register/register-2.html"))),
-            (REGISTER_STEP3, get_template_str(include_str!("../../../../../../.template_output/user/register/register-3.html"))),
-            (REGISTER_FINAL, get_template_str(include_str!("../../../../../../.template_output/user/register/register-final.html"))),
-            (PROFILE, get_template_str(include_str!("../../../../../../.template_output/user/profile/profile.html"))),
-            (PROFILE_EMAIL_CHANGE, get_template_str(include_str!("../../../../../../.template_output/user/profile/email-change.html"))),
-            (SEND_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../../.template_output/user/misc/send-email-confirmation.html"))),
-            (GOT_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../../.template_output/user/misc/got-email-confirmation.html"))),
-            (FORGOT_PASSWORD, get_template_str(include_str!("../../../../../../.template_output/user/misc/forgot-password.html"))),
+            (SIGNIN, get_template_str(include_str!("../../../../../.template_output/user/signin/signin.html"))),
+            (REGISTER_START, get_template_str(include_str!("../../../../../.template_output/user/register/register-start.html"))),
+            (REGISTER_STEP1, get_template_str(include_str!("../../../../../.template_output/user/register/register-1.html"))),
+            (REGISTER_STEP2, get_template_str(include_str!("../../../../../.template_output/user/register/register-2.html"))),
+            (REGISTER_STEP3, get_template_str(include_str!("../../../../../.template_output/user/register/register-3.html"))),
+            (REGISTER_FINAL, get_template_str(include_str!("../../../../../.template_output/user/register/register-final.html"))),
+            (PROFILE, get_template_str(include_str!("../../../../../.template_output/user/profile/profile.html"))),
+            (PROFILE_EMAIL_CHANGE, get_template_str(include_str!("../../../../../.template_output/user/profile/email-change.html"))),
+            (SEND_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../.template_output/user/misc/send-email-confirmation.html"))),
+            (GOT_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../.template_output/user/misc/got-email-confirmation.html"))),
+            (FORGOT_PASSWORD, get_template_str(include_str!("../../../../../.template_output/user/misc/forgot-password.html"))),
 
-            (CHECKBOX, get_template_str(include_str!("../../../../../../.template_output/_common/input/checkbox.html"))),
+            (CHECKBOX, get_template_str(include_str!("../../../../../.template_output/_common/input/checkbox.html"))),
         ]);
 
         Self { cache }

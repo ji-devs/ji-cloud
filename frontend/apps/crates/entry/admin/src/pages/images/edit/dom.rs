@@ -11,12 +11,12 @@ use futures_signals::{
 use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
-use crate::utils::templates;
+use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use core::{
+use utils::{
     routes::{Route, AdminRoute},
     path::upload_image_url
 };
@@ -66,7 +66,7 @@ struct SaveInfo {
 impl ImageEdit{
     pub fn new(id:String) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            //core
+            //utils
             id: Mutable::new(id.clone()),
             //UI
             error_message: Mutable::new(None),

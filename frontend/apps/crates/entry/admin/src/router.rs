@@ -1,4 +1,4 @@
-use core::routes::{Route, AdminRoute};
+use utils::routes::{Route, AdminRoute};
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;

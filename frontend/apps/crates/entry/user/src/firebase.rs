@@ -1,8 +1,8 @@
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
-use core::settings::Settings;
+use utils::settings::Settings;
 use serde::{Serialize, Deserialize};
-pub use core::firebase::*;
+pub use utils::firebase::*;
 
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {

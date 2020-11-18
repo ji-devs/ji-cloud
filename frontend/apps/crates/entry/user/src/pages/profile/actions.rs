@@ -6,7 +6,7 @@ use shared::{
         user::NoSuchUserError
     }
 };
-use core::{
+use utils::{
     routes::{Route, UserRoute},
     fetch::api_with_auth,
     storage,
@@ -14,7 +14,7 @@ use core::{
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use crate::utils::firebase::firebase_register_google;
+use crate::firebase::firebase_register_google;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use dominator::clone;
 use std::rc::Rc;

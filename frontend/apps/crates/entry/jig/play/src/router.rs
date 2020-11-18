@@ -1,4 +1,4 @@
-use core::routes::{Route, JigRoute, JigPlayMode};
+use utils::routes::{Route, JigRoute, JigPlayMode};
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
