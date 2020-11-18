@@ -12,16 +12,16 @@
 }
 
 .sidebar-card-left {
-  margin-top: 10px;
+  margin-top: -10px;
   z-index: 10;
-  margin-right: -60px
+  margin-right: -20px
 }
 
 
 .memory-add-word, .memory-error {
 
   text-align: center;
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 5px 0;
   z-index: 1;
   top: -5px;
@@ -204,7 +204,7 @@
 
 .memory-theme-orange .edit-card-back, .memory-theme-orange .sidebar-card-back,
 .memory-theme-orange .play-card-back {
-  background-image: url('{{MEDIA_UI}}/Theme_MemoryGame_01_Brush_Back@2x.png');
+  background-image: url('{{MEDIA_UI}}/Theme_Brush_Back@2x.png');
   background-size: cover;
 }
 
@@ -222,7 +222,7 @@
 
 .memory-theme-chalk .edit-card-back, .memory-theme-chalk .sidebar-card-back,
 .memory-theme-chalk .play-card-back {
-  background-image: url('{{MEDIA_UI}}/Theme_MemoryGame_02_CHalkboard_Back@2x.png');
+  background-image: url('{{MEDIA_UI}}/Theme_Doodles_Back@2x.png');
   background-size: cover;
 }
 
@@ -300,35 +300,11 @@
 
 }
 
-.memory-grid-5 .memory-card-full:nth-last-child(2), .memory-grid-6 .memory-card-full:nth-last-child(3), .memory-grid-8 .memory-card-full:nth-last-child(5){
-  grid-area: 4 / 2 / 5 / 3;
-}
-
-.memory-grid-5 .memory-card-full:nth-last-child(1), .memory-grid-8 .memory-card-full:nth-last-child(4){
-  grid-area: 4 / 3 / 5 / 4; ;
-}
 
 .memory-grid-6 {
   grid-template-columns: repeat(5, 1fr);
 }
 
-
-.memory-grid-6 .memory-card-full:nth-last-child(2), .memory-grid-7 .memory-card-full:nth-last-child(3){
-  grid-area: 4 / 3 / 5 / 4;
-}
-
-
-.memory-grid-7 .memory-card-full:nth-last-child(4) {
-  grid-area: 4 / 2 / 5 / 3;
-}
-
-.memory-grid-7 .memory-card-full:nth-last-child(2), .memory-grid-8 .memory-card-full:nth-last-child(3), .memory-grid-6 .memory-card-full:nth-last-child(1) {
-  grid-area: 4 / 4 / 5 / 5;
-}
-.memory-grid-7 .memory-card-full:nth-last-child(1), .memory-grid-8 .memory-card-full:nth-last-child(2) {
-  grid-area: 4 / 5 / 5 / 6;
-}
-
-.memory-grid-8 .memory-card-full:nth-last-child(1){
-  grid-area: 4 / 6 / 5 / 7;
+.memory-grid-6 .memory-card-full:nth-last-child(3), .memory-grid-5 .memory-card-full:nth-last-child(2), .memory-grid-7 .memory-card-full:nth-last-child(4), .memory-grid-8 .memory-card-full:nth-last-child(5) {
+  grid-column-start: 2;
 }
