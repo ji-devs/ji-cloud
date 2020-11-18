@@ -105,6 +105,11 @@ impl Step1Page {
             })
             .with_data_id!("next", {
                 .event(clone!(_self => move |evt:events::Click| {
+                    let len = _self.state.cards.lock_ref().len();
+
+                    if len < 3 {
+                        //TODO - show error
+                    }
                     _self.state.step.set(Step::Two);
                 }))
             })

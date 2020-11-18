@@ -46,7 +46,7 @@ pub enum ModeStateRaw {
     Duplicate(DuplicateStateRaw)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CardRaw {
     pub text: String,
 }

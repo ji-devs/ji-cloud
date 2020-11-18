@@ -96,15 +96,15 @@ where
                 .with_node!(elem => {
                     .global_event(clone!(_self => move |evt:events::Resize| {
                         ModuleBounds::set(
-                            elem.client_width() as f64, 
-                            elem.client_height() as f64
+                            elem.client_width(),
+                            elem.client_height()
                         );
                     }))
                 })
                 .after_inserted(clone!(_self => move |elem| {
                     ModuleBounds::set(
-                        elem.client_width() as f64, 
-                        elem.client_height() as f64
+                        elem.client_width(), 
+                        elem.client_height()
                     );
                 }))
             })

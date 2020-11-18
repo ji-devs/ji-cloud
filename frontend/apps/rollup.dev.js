@@ -16,11 +16,11 @@ const watchPatterns = [
     `./crates/utils/src/**`,
     `./crates/entry/${APP_NAME}/src/**`,
     `./crates/entry/${APP_NAME}/js/**`,
-    "../../.template_output/**", 
-    "../../css/dist/**", 
-    "../../../shared/rust/src/**", 
-    "../../../config/rust/src/**", 
-    "../../../config/js/dist/**"
+    "../.template_output/**", 
+    "../css/dist/**", 
+    "../../shared/rust/src/**", 
+    "../../config/rust/src/**", 
+    "../../config/js/dist/**"
 ].map(x => path.resolve(x));
 
 export default {

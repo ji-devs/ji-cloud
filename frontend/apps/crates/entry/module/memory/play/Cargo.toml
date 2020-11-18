@@ -16,7 +16,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # Common deps
-
+rand = { version = "0.7.3", features = ["wasm-bindgen"] }
+gloo-timers = { version = "^0.2", features = ["futures"]}
 app-memory-common = {path = "../_common"}
 utils = {path = "../../../../utils"}
 shared = {path = "../../../../../../../shared/rust"}
@@ -51,7 +52,7 @@ web-sys = { version = "0.3.45", features = [
     'MouseEvent',
     'FileList',
     'File',
-    'DomRect'
+    'DomRect',
 ] }
 wasm-bindgen-futures = "0.4.18"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }

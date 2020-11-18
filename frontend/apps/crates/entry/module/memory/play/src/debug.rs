@@ -14,12 +14,20 @@ use crate::data::raw::*;
 #[derive(Default)]
 pub struct DebugSettings {
     pub state:Option<GameStateRaw>,
+    pub shuffle: bool,
 }
 
 impl DebugSettings {
     pub fn local() -> Self {
         Self {
-            state: Some(GameStateRaw::debug())
+            state: Some(GameStateRaw::debug()),
+            shuffle: false,
+        }
+    }
+    pub fn live() -> Self {
+        Self {
+            state: None, 
+            shuffle: true,
         }
     }
 }
@@ -31,7 +39,7 @@ cfg_if! {
         }
     } else {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            DebugSettings::live()
         }
     }
 }

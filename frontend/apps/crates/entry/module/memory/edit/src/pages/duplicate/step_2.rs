@@ -221,7 +221,7 @@ impl Step2Page {
             })
             .with_data_id!("next", {
                 .event(clone!(_self => move |evt:events::Click| {
-                    _self.state.step.set(Step::Three);
+                    _self.state.step.set(Step::Four);
                 }))
             })
         })
