@@ -8,7 +8,10 @@ use uuid::Uuid;
 pub async fn get_style(db: &PgPool) -> sqlx::Result<Vec<Style>> {
     sqlx::query_as!(
         Style,
-        r#"select id as "id: StyleId", display_name, created_at, updated_at from style"#
+        r#"
+            select id as "id: StyleId", display_name, created_at, updated_at from style
+            order by index
+        "#
     )
     .fetch_all(db)
     .await
@@ -17,7 +20,10 @@ pub async fn get_style(db: &PgPool) -> sqlx::Result<Vec<Style>> {
 pub async fn get_age_ranges(db: &PgPool) -> sqlx::Result<Vec<AgeRange>> {
     sqlx::query_as!(
         AgeRange,
-        r#"select id as "id: AgeRangeId", display_name, created_at, updated_at from age_range"#
+        r#"
+            select id as "id: AgeRangeId", display_name, created_at, updated_at from age_range
+            order by index
+        "#
     )
     .fetch_all(db)
     .await
@@ -26,7 +32,10 @@ pub async fn get_age_ranges(db: &PgPool) -> sqlx::Result<Vec<AgeRange>> {
 pub async fn get_affiliations(db: &PgPool) -> sqlx::Result<Vec<Affiliation>> {
     sqlx::query_as!(
         Affiliation,
-        r#"select id as "id: AffiliationId", display_name, created_at, updated_at from affiliation"#
+        r#"
+            select id as "id: AffiliationId", display_name, created_at, updated_at from affiliation
+            order by index
+        "#
     )
     .fetch_all(db)
     .await
@@ -35,7 +44,10 @@ pub async fn get_affiliations(db: &PgPool) -> sqlx::Result<Vec<Affiliation>> {
 pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
     sqlx::query_as!(
         Subject,
-        r#"select subject_id as "id: SubjectId", display_name, created_at, updated_at from subject"#
+        r#"
+            select subject_id as "id: SubjectId", display_name, created_at, updated_at from subject
+            order by index
+        "#
     )
     .fetch_all(db)
     .await

@@ -2,24 +2,30 @@ create table style
 (
     id           uuid primary key     default uuid_generate_v1mc(),
     display_name text        not null,
+    "index"      int2        not null check("index" >= 0),
     created_at   timestamptz not null default now(),
-    updated_at   timestamptz
+    updated_at   timestamptz,
+    unique (index)
 );
 
 create table age_range
 (
     id           uuid primary key     default uuid_generate_v1mc(),
     display_name text        not null,
+    "index"      int2        not null check("index" >= 0),
     created_at   timestamptz not null default now(),
-    updated_at   timestamptz
+    updated_at   timestamptz,
+    unique (index)
 );
 
 create table affiliation
 (
     id           uuid primary key     default uuid_generate_v1mc(),
     display_name text        not null,
+    "index"      int2        not null check("index" >= 0),
     created_at   timestamptz not null default now(),
-    updated_at   timestamptz
+    updated_at   timestamptz,
+    unique (index)
 );
 
 create table image_metadata
