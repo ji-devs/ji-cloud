@@ -1,1 +1,1 @@
-import "../../css/dist/styles.css";
+import "../../css/dist/styles.storybook.css";
