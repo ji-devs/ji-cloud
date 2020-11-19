@@ -17,7 +17,13 @@ const watchPatterns = [
     `./crates/entry/${APP_NAME}/src/**`,
     `./crates/entry/${APP_NAME}/js/**`,
     "../.template_output/**", 
-    "../css/dist/**", 
+    //technically this happens _after_ the html rebuild
+    //and should therefore be watched instead of .template_output
+    //but that slows down responding to html changes
+    //and responding to _both_ would refresh twice
+    //so just reload after a bit if changing css in order to see it
+    //TODO - make it an env thing and params to Makefile.toml
+    //"../css/dist/**", 
     "../../shared/rust/src/**", 
     "../../config/rust/src/**", 
     "../../config/js/dist/**"
