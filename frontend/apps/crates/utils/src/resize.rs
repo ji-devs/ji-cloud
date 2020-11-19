@@ -1,3 +1,6 @@
+/* See https://codepen.io/dakom/pen/WNxYrQM */
+/* This is slightly adapted to work on a containing element instead of window */
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CssStyleDeclaration, HtmlElement, Element};
