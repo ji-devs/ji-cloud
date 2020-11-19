@@ -9,7 +9,7 @@
     "// not working from cargo make - watch": "postcss -w src/index.css --env production -o dist/styles.min.css",
     "bundle:all": "npm-run-all -p bundle bundle:debug",
     "bundle": "postcss src/index.css --env production -o dist/styles.min.css",
-    "bundle:debug": "postcss src/index.css --env development -o dist/styles.css"
+    "bundle:debug": "postcss src/index.css --env development -o dist/styles.debug.css"
   },
   "author": "",
   "license": "ISC",
