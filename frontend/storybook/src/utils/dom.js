@@ -13,17 +13,19 @@ export function prependId(parentElement, id, child) {
 }
 export function toggleClassesId(parentElement, id, classNames, flag) {
     const container = getChildId(parentElement, id);
-    toggleClasses(container, classNames, flag);
+    const c = Array.isArray(classNames) ? classNames : [classNames];
+    toggleClasses(container, c, flag);
     return parentElement;
 }
 
 export function toggleClasses(element, classNames, flag) {
     const classList = element.classList;
 
+    const c = Array.isArray(classNames) ? classNames : [classNames];
     if(flag) {
-        classList.add(...classNames);
+        classList.add(...c);
     } else {
-        classList.remove(...classNames);
+        classList.remove(...c);
     }
     return element;
 }
@@ -67,8 +69,13 @@ export function setAttributeId(element, id, attr, value) {
     return element;
 }
 
-export function getChildId(element, id) {
-    return element.querySelector(dataId(id));
+export function getChildId(element, id, supressError) {
+    let child = element.querySelector(dataId(id));
+    if(!supressError && !child) {
+        console.error(`could not get child id for ${id}`);
+    }
+
+    return child;
 }
 
 export function dataId(id) {

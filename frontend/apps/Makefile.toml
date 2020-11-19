@@ -311,9 +311,16 @@ script_runner = "@shell"
 script = ["npm run local-media-server"]
 cwd = "../build-utils"
 
+# not working for some reason
+# so redefining it below
+# [tasks.dev-watch-css]
+# script_runner = "@shell"
+# script = ["npm run watch:app"]
+# cwd = "../css"
+
 [tasks.dev-watch-css]
-script_runner = "@shell"
-script = ["npm run watch"]
+command = "watchexec"
+args = ["-w", "src", "-w", "../.template_output", "npm run bundle:prod"]
 cwd = "../css"
 
 [tasks.dev-watch-templates]

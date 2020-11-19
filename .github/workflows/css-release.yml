@@ -28,13 +28,15 @@ jobs:
 
       - name: install node
         uses: actions/setup-node@v1
+        with:
+          node-version: '12'
 
       - name: install npm deps
         run: npm install
         working-directory: "./frontend/css"
 
       - name: bundle 
-        run: npm run bundle
+        run: npm run bundle:all
         working-directory: "./frontend/css"
 
       - name: install google cloud sdk

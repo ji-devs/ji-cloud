@@ -32,13 +32,11 @@ jobs:
 
       - name: install node
         uses: actions/setup-node@v1
+        with:
+          node-version: '12'
 
       - name: install css deps
         run: npm install
-        working-directory: "./frontend/css"
-
-      - name: css bundle 
-        run: npm run bundle
         working-directory: "./frontend/css"
 
       - name: install build utils deps

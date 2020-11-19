@@ -81,7 +81,7 @@ where
 
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::module_page(), {
-            .with_data_id!("module-page", {
+            .with_data_id!("module-outer", {
                 .with_data_id!("module-content", {
                     .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
                         if ready {
