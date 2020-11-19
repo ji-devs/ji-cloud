@@ -16,6 +16,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alef&display=swap');
+
+@font-face {
+    font-family: 'dana_yad_alefalefalefnormal';
+    src: url('{{MEDIA_UI}}/dana/danayadalefalefalef-normal-webfont.woff2') format('woff2'),
+         url('{{MEDIA_UI}}/dana/danayadalefalefalef-normal-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+
 
 body {
   padding:0 !important

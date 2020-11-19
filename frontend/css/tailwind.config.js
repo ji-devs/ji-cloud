@@ -322,6 +322,9 @@ module.exports = {
       gap: {
       '24px': '24px'
      },
+     minHeight:{
+       32: '32px'
+     },
 
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
