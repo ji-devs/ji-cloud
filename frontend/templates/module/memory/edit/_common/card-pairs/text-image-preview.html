@@ -1,0 +1,8 @@
+{% import "module/memory/edit/_common/card-pairs/macros.html" as CardPair %}
+<div class="relative flex flex-col items-center">
+    <div class="flex mb-4">
+        {{ CardPair::text(side="left", editable=false) }}
+        {{ CardPair::image(side="right") }}
+    </div>
+    <p data-id="number"></p>
+</div>

@@ -1,0 +1,30 @@
+{% import "module/memory/edit/words-and-images/macros.html" as WordsAndImagesMacros %}
+<div data-id="text-widget">
+
+  {{ WordsAndImagesMacros::sidebar_mode_buttons(mode="text") }}
+
+  <div class="px-4 ">
+    <div class="flex justify-between items-center pt-4">
+      <p class="">Text Settings</p>
+      <p data-id="clear-list" class="text-jibuttonBlue cursor-pointer">Clear list</p>
+    </div>
+
+    <div>
+      <div class="flex mt-4">
+        <div class="w-full h-64 rounded-lg bg-jilogingrey flex items-center px-4  justify-between mr-2">
+          <p>Hebrew Keyboard</p>
+          <img src="{{MEDIA_UI}}/icn-keyboard.svg" alt="">
+        </div>
+
+        <div class="w-full h-64 rounded-lg bg-jilogingrey flex items-center px-4  justify-between">
+          <p>Sefaria</p>
+          <img src="{{MEDIA_UI}}/icn-sefaria.svg" alt="">
+        </div>
+      </div>
+
+
+    </div>
+
+    {% include "module/memory/edit/_common/sidebar/text-area.html" %}
+  </div>
+</div>
