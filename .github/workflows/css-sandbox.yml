@@ -34,7 +34,7 @@ jobs:
         working-directory: "./frontend/css"
 
       - name: bundle 
-        run: npm run bundle
+        run: npm run bundle:all
         working-directory: "./frontend/css"
 
       - name: install google cloud sdk

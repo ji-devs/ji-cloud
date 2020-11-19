@@ -67,8 +67,13 @@ export function setAttributeId(element, id, attr, value) {
     return element;
 }
 
-export function getChildId(element, id) {
-    return element.querySelector(dataId(id));
+export function getChildId(element, id, supressError) {
+    let child = element.querySelector(dataId(id));
+    if(!supressError && !child) {
+        console.error(`could not get child id for ${id}`);
+    }
+
+    return child;
 }
 
 export function dataId(id) {
