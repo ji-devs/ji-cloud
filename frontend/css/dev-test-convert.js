@@ -1,67 +1,64 @@
-const {getMediaUrl_UI} = require("../../config/js");
-const isDev = process.env["NODE_ENV"] === "development";
-const MEDIA_UI = getMediaUrl_UI(isDev);
-console.log(`compiling tailwind...`);
+const PREFIX = "ji-";
 
-/*  
-    the ji- prefixes are used for rem
-    and intended for inside our scaled module areas
-    the forumula is that it's pixels / 10
-    so 123px becomes 12.3rem
-
-    parseTheme will automatically add these for each px value
-*/
-
-function parseTheme(theme) {
-    const PREFIX = "ji-";
+const theme = getTheme();
 
 
-    function parse(obj) {
-        const keys = Object.keys(obj);
+parse(theme);
+console.log("report:");
+report(theme);
 
-        keys.forEach(key => {
-            const value = obj[key];
-            if(typeof value === "object") {
-                parse(value);
-            } else if(typeof value === "string") {
-                if(value.indexOf("px") !== -1) {
-                    const newValue = value
-                        .split(" ")
-                        .map(word => {
+function parse(obj) {
+    const keys = Object.keys(obj);
 
-                            const idx = word.lastIndexOf("px");
-                            if(idx !== -1 && idx === word.length - 2) {
-                                const nStr= word.substring(0, idx);
-                                const nPx = parseFloat(nStr);
-                                if(isNaN(nPx)) {
-                                    console.error(`CAN'T CONVERT PX TO REM: key: [${key}] word: [${word}] full value: [${value}]`);
-                                    process.exit(1);
-                                } else {
-                                    const nRem = nPx / 10;
-                                    return `${nRem}rem`;
-                                }
+    keys.forEach(key => {
+        const value = obj[key];
+        if(typeof value === "object") {
+            parse(value);
+        } else if(typeof value === "string") {
+            if(value.indexOf("px") !== -1) {
+                const newValue = value
+                    .split(" ")
+                    .map(word => {
+
+                        const idx = word.lastIndexOf("px");
+                        if(idx !== -1 && idx === word.length - 2) {
+                            const nStr= word.substring(0, idx);
+                            const nPx = parseFloat(nStr);
+                            if(isNaN(nPx)) {
+                                console.error(`CAN'T CONVERT PX TO REM: key: [${key}] word: [${word}] full value: [${value}]`);
+                                process.exit(1);
+                            } else {
+                                const nRem = nPx / 10;
+                                return `${nRem}rem`;
                             }
-                            return word;
-                        })
-                        .join(" ");
-                    
-                    const newKey = PREFIX + key;
-                    obj[newKey] = newValue;
-                }
-
+                        }
+                        return word;
+                    })
+                    .join(" ");
+                
+                const newKey = PREFIX + key;
+                obj[newKey] = newValue;
             }
-        });
-    }
 
-    parse(theme);
-
-    return theme;
+        }
+    });
 }
-module.exports = {
-  purge: [
-    '../templates/**/*.html',
-  ],
-  theme: parseTheme({
+
+function report(obj) {
+    const keys = Object.keys(obj);
+
+    keys.forEach(key => {
+        const value = obj[key];
+        if(key.indexOf("ji-") != -1) {
+            console.log(key, value);
+        }
+        if(typeof value === "object") {
+            report(value);
+        }
+    });
+}
+
+function getTheme() { return {
     extend: {
       colors: {
         jiblueLight: '#83aef7',
@@ -130,19 +127,36 @@ module.exports = {
 
       },
 
+      /*  the r- prefixes are used for rem
+          and intended for inside our scaled module areas
+          the forumula is that it's pixels / 10
+          so 123px becomes 12.3rem
+      */
       fontSize: {
         14:'14px',
+        'r-14': '1.4rem',
         18: '18px',
+        'r-18': '1.8rem',
         xs: '12px',
+        'r-xs': '1.2rem',
         sm: '14px',
+        'r-sm': '1.4rem',
         base: '16px',
+        'r-base': '1.6rem',
         lg: '18px',
+        'r-lg': '1.8rem',
         xl: '20px',
+        'r-xl': '2.0rem',
         '2xl': '24px',
+        'r-2xl': '2.4rem',
         '3xl': '30px',
+        'r-3xl': '3.0rem',
         '4xl': '36px',
+        'r-4xl': '3.6rem',
         '5xl': '48px',
+        'r-5xl': '4.8rem',
         '6xl': '64px',
+        'r-6xl': '6.4rem',
       },
       fontFamily: {
         poppins: 'Poppins',
@@ -358,9 +372,6 @@ module.exports = {
       gap: {
       '24px': '24px'
      },
-     minHeight:{
-       32: '32px'
-     },
 
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
@@ -368,11 +379,5 @@ module.exports = {
 
         })
     },
-  }),
-  variants: {
-    backgroundColor: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
-    border: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
-    transitionProperty: ['responsive', 'motion-safe', 'motion-reduce'],
-  },
-  plugins: [],
+  }
 }

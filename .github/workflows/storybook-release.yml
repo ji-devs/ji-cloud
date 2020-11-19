@@ -32,6 +32,8 @@ jobs:
 
       - name: install node
         uses: actions/setup-node@v1
+        with:
+          node-version: '12'
 
       - name: install css deps
         run: npm install

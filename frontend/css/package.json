@@ -4,12 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch:storybook": "postcss -w src/index.css --env production -o dist/styles.storybook.css",
+    "watch:storybook": "watchexec -w src/index.css -w ../.template_output -- postcss src/index.css --env production -o dist/styles.storybook.css",
     "bundle:storybook": "postcss src/index.css --env production -o dist/styles.storybook.css",
-    "// not working from cargo make - watch": "postcss -w src/index.css --env production -o dist/styles.min.css",
-    "bundle:all": "npm-run-all -p bundle bundle:debug",
-    "bundle": "postcss src/index.css --env production -o dist/styles.min.css",
-    "bundle:debug": "postcss src/index.css --env development -o dist/styles.css"
+    "bundle:all": "npm-run-all -p bundle:prod bundle:debug",
+    "bundle:prod": "postcss src/index.css --env production -o dist/styles.min.css",
+    "bundle:debug": "postcss src/index.css --env development -o dist/styles.debug.css"
   },
   "author": "",
   "license": "ISC",

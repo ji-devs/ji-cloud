@@ -28,6 +28,8 @@ jobs:
 
       - name: install node
         uses: actions/setup-node@v1
+        with:
+          node-version: '12'
 
       - name: install npm deps
         run: npm install
