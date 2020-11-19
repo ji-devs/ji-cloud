@@ -19,6 +19,7 @@ pub mod jig;
 pub mod meta;
 mod ser;
 pub mod user;
+pub mod audio;
 
 use chrono::Utc;
 use ser::{csv_encode_uuids, deserialize_optional_field, from_csv};
