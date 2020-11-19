@@ -1,6 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
-import {startResizerOnElement} from "@utils/resize";
 import {mockWords, mockThemes, nCardsToGrid} from "./memory-common";
 import modulePage from "@templates/_common/module/module-page.html";
 import playerTmpl from "@templates/module/memory/play/player.html";
@@ -34,13 +33,11 @@ function mockPlayer(selectedThemeIndex, isFlipped, nCards) {
     const page = appendMockCards(_page, {isFlipped, nCards});
     if(selectedThemeIndex) {
         const {id} = mockThemes[selectedThemeIndex];
-        toggleClassesId(page, "cards", [`memory-theme-${id}`], true);
+        toggleClasses(page, [`memory-theme-${id}`], true);
     }
     if(nGrid) {
-        toggleClassesId(page, "cards", [`memory-grid-${nGrid}`], true);
+        toggleClassesId(page, "game-cards", [`memory-grid-${nGrid}`], true);
     }
-
-    startResizerOnElement(getChildId(page, "module-page"));
 
     return page;
 }
@@ -50,7 +47,7 @@ function appendMockCards(page, {isFlipped, nCards}) {
         const word = mockWords[0];
         const card = tmpl(cardPlayTmpl);
         setTextId(card, "text-contents", word);
-        appendId(page, "cards", card);
+        appendId(page, "game-cards", card);
 
         if(isFlipped) {
             toggleClassesId(card, "flip", [`flip-card-clicked`], true);
