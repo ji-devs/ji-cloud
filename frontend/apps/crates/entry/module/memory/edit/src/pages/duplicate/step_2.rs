@@ -53,7 +53,7 @@ impl ThemeOption {
                     let selected = _self.theme.id == theme_id;
                     Some(
                     
-                        elem!(templates::duplicate::step_2_theme_item(selected), {
+                        elem!(templates::step_2_theme_item(selected), {
 
                             .with_node!(element => {
                                 .class(&format!("memory-theme-{}", _self.theme.id))
@@ -114,7 +114,7 @@ impl CardDom {
         })
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
-        elem!(templates::card_edit_preview(), {
+        elem!(templates::card_pair_text_text_preview(), {
             .with_data_id!("number", {
                 .text_signal(_self.index.signal().map(|index| {
                     format!("{}", index.unwrap_or(0)+1)

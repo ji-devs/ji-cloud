@@ -10,12 +10,12 @@ use askama::Template;
 
 #[derive(Debug, Clone, PartialEq, Copy, Eq, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub enum ModulePageKind {
+pub enum ModuleJigPageKind {
     Edit,
     Play,
 }
 
-impl ModulePageKind {
+impl ModuleJigPageKind {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Edit => "edit",
@@ -28,8 +28,8 @@ impl ModulePageKind {
 pub enum SpaPage {
     User,
     Admin,
-    Jig,
-    Module(String, ModulePageKind),
+    Jig(ModuleJigPageKind),
+    Module(String, ModuleJigPageKind),
 }
 
 impl SpaPage {
@@ -37,7 +37,7 @@ impl SpaPage {
         match self {
             Self::User => Cow::Borrowed("user"),
             Self::Admin => Cow::Borrowed("admin"),
-            Self::Jig => Cow::Borrowed("jig"),
+            Self::Jig(page_kind) => Cow::Owned(format!("jig/{}", page_kind.as_str())),
             Self::Module(kind, page_kind) => {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
             }
@@ -85,15 +85,25 @@ pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Resul
     spa_template(&settings, SpaPage::Admin)
 }
 
-pub async fn jig_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Jig)
+pub async fn jig_template(
+    settings: Data<RuntimeSettings>,
+    Path((page_kind, _jig_id)): Path<(ModuleJigPageKind, String)>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Jig(page_kind))
+}
+
+pub async fn jig_template_with_module(
+    settings: Data<RuntimeSettings>,
+    Path((page_kind, _jig_id, _module_id)): Path<(ModuleJigPageKind, String, String)>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Jig(page_kind))
 }
 
 pub async fn module_template(
     settings: Data<RuntimeSettings>,
     Path((module_kind, page_kind, _jig_id, _module_id)): Path<(
         String,
-        ModulePageKind,
+        ModuleJigPageKind,
         String,
         String,
     )>,
