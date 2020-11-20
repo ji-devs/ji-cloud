@@ -9,7 +9,8 @@ pub mod user {
             },
             CreateResponse,
         },
-        error::{image::UploadError, CreateError, DeleteError, GetError},
+        error::CreateError,
+        error::{audio::UploadError, DeleteError, GetError},
     };
 
     /// List audio files.

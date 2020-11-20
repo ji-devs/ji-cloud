@@ -1,3 +1,5 @@
+//! Types for audio files.
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,8 +13,8 @@ pub mod user {
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
     pub struct ListResponse {
-        /// the audio file returned.
-        pub audio: Vec<GetResponse>,
+        /// the audio files returned.
+        pub audio_files: Vec<GetResponse>,
     }
 
     /// Response for getting a single audio file.
