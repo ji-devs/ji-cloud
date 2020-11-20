@@ -37,7 +37,7 @@ impl Step1Page {
             //.filter_signal_cloned(|card| card.text.signal_ref(|text| !text.is_empty()))
             .enumerate()
             .map(clone!(_self => move |(index, card)| {
-                elem!(templates::card_edit_text(), {
+                elem!(templates::card_pair_text_text_edit(), {
                     .with_data_id!("number", {
                         .text_signal(index.signal().map(|index| {
                             format!("{}", index.unwrap_or(0)+1)
