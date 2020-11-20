@@ -34,21 +34,19 @@ impl GameState {
             mode_state: Rc::new(RefCell::new(None))
         }
     }
-
     pub fn set_from_loaded(&self, raw:GameStateRaw) {
         if self.mode.get().is_some() {
             panic!("setting the game state from loaded only works on first-load!");
         }
 
-        let mode:Option<GameMode> = 
-            raw.mode.map(|raw_mode| raw_mode.into());
-
-        let mode_state:Option<ModeState> = {
-            raw.mode_state.map(|raw_mode_state| match raw_mode_state {
-                ModeStateRaw::Duplicate(raw_state) => {
-                    ModeState::Duplicate(Rc::new(DuplicateState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state)))
-                }
-            })
+        let (mode, mode_state) = match raw {
+            GameStateRaw::Duplicate(raw_state) => {
+                (
+                    Some(GameMode::Duplicate),
+                    Some(ModeState::Duplicate(Rc::new(DuplicateState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state))))
+                )
+            },
+            _ => (None, None)
         };
 
         //Note that this will *not* trigger re-renders of the inner mode pages
@@ -57,6 +55,7 @@ impl GameState {
         *self.mode_state.borrow_mut() = mode_state;
         //wrapped in a Some because None here means "loading"
         //this *will* trigger re-renders of everything from the top-level
+        //an inner none means "loaded but no mode"
         self.mode.set(Some(mode));
     }
 }
@@ -66,13 +65,6 @@ pub enum GameMode {
     Duplicate
 }
 
-impl From<GameModeRaw> for GameMode {
-    fn from(mode:GameModeRaw) -> Self {
-        match mode {
-            GameModeRaw::Duplicate => Self::Duplicate
-        }
-    }
-}
 #[derive(Debug)]
 pub enum ModeState {
     Duplicate(Rc<DuplicateState>)
