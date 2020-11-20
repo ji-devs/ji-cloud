@@ -37,7 +37,7 @@ impl <F: Fn(GameMode) + 'static> ModeChoosePage<F> {
             })
             .with_data_id!("btn-words-and-images", {
                 .event(clone!(_self => move |evt:events::Click| {
-                    //log::info!("words-and-images clicked!");
+                    (_self.on_change)(GameMode::WordsAndImages);
                 }))
             })
             .with_data_id!("btn-begins-with", {

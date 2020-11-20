@@ -75,11 +75,11 @@ impl ModuleRenderer for PlayerPage {
 
 
 pub struct DuplicatePlayer {
-    state: Rc<DuplicateState>,
+    state: Rc<BaseGameState>,
 }
 
 impl DuplicatePlayer {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
         Rc::new(Self { state })
     }
 
@@ -137,13 +137,13 @@ impl DuplicatePlayer {
 }
 
 pub struct GameCardDom {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
     pub card: GameCard,
 }
 
 impl GameCardDom {
-    pub fn new(state:Rc<DuplicateState>, card: GameCard) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, card: GameCard) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -196,13 +196,13 @@ impl GameCardDom {
 
 
 pub struct HoverCardDom {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub card: HoverCard,
     pub animation: MutableAnimation
 }
 
 impl HoverCardDom {
-    pub fn new(state:Rc<DuplicateState>, card: HoverCard) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, card: HoverCard) -> Rc<Self> {
         let animation = MutableAnimation::new(3000.0);
         animation.animate_to(Percentage::new(1.0));
 
@@ -244,12 +244,12 @@ impl HoverCardDom {
 
 
 pub struct FoundCardDom {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub card: FoundCard,
 }
 
 impl FoundCardDom {
-    pub fn new(state:Rc<DuplicateState>, card: FoundCard) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, card: FoundCard) -> Rc<Self> {
         Rc::new(Self {
             state,
             card 

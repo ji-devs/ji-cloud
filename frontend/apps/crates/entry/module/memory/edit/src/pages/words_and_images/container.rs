@@ -14,18 +14,16 @@ use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use super::step_1::Step1Page;
-use super::step_2::Step2Page;
-use super::step_4::Step4Page;
 use crate::data::*;
 use crate::debug;
 
 
 
-pub struct DuplicatePage {
+pub struct WordsAndImagesPage {
     pub state: Rc<BaseGameState>
 }
 
-impl DuplicatePage {
+impl WordsAndImagesPage {
     pub fn new(state: Rc<BaseGameState>) -> Rc<Self> {
         let _self = Rc::new(Self { 
             state
@@ -38,8 +36,6 @@ impl DuplicatePage {
         _self.state.step.signal_ref(clone!(_self => move |step| {
             match step {
                 Step::One => Some(Step1Page::render(Step1Page::new(_self.state.clone()))),
-                Step::Two => Some(Step2Page::render(Step2Page::new(_self.state.clone()))),
-                Step::Four => Some(Step4Page::render(Step4Page::new(_self.state.clone()))),
                 _ => None,
             }
 

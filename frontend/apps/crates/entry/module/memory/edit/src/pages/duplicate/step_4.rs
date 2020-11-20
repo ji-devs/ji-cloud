@@ -26,11 +26,11 @@ use utils::{
 };
 
 pub struct Step4Page {
-    state: Rc<DuplicateState>,
+    state: Rc<BaseGameState>,
 }
 
 impl Step4Page {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
 
         let _self = Rc::new(Self { 
             state,
@@ -70,7 +70,7 @@ impl Step4Page {
 
                         if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                             //Iframe is ready and sent us a message, let's send one back!
-                            let data:GameStateRaw = (&*_self.state).into();
+                            let data:GameStateRaw = GameStateRaw::Duplicate((&*_self.state).to_raw());
                             let msg:IframeInit<GameStateRaw> = IframeInit::new(data); 
                             let window = elem.content_window().unwrap_throw();
                             window.post_message(&msg.into(), &_self.iframe_url());

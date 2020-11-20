@@ -17,12 +17,11 @@ use std::fmt::Write;
 use crate::data::*;
 use itertools::Itertools;
 pub struct Step1Page {
-    state: Rc<DuplicateState>,
-    
+    state: Rc<BaseGameState>,
 }
 
 impl Step1Page {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
         let _self = Rc::new(Self { 
             state
         });

@@ -43,7 +43,7 @@ impl GameState {
             GameStateRaw::Duplicate(raw_state) => {
                 (
                     Some(GameMode::Duplicate),
-                    Some(ModeState::Duplicate(Rc::new(DuplicateState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state))))
+                    Some(ModeState::Duplicate(Rc::new(BaseGameState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state))))
                 )
             },
             _ => (None, None)
@@ -67,7 +67,7 @@ pub enum GameMode {
 
 #[derive(Debug)]
 pub enum ModeState {
-    Duplicate(Rc<DuplicateState>)
+    Duplicate(Rc<BaseGameState>)
 }
 
 #[derive(Clone, Debug)]
@@ -129,7 +129,7 @@ impl Card {
 }
 
 #[derive(Debug)]
-pub struct DuplicateState {
+pub struct BaseGameState {
     pub jig_id: String,
     pub module_id: String,
     pub pair_lookup: Vec<usize>,
@@ -153,7 +153,7 @@ enum Side {
     Left
 }
 
-impl DuplicateState {
+impl BaseGameState {
     pub fn make_hover_card(&self, flip_card:FlipCard, side: Side) -> HoverCard {
         let card = &self.all_cards[flip_card.id];
 
@@ -177,7 +177,7 @@ impl DuplicateState {
         }
     }
 
-    pub fn from_raw(jig_id: String, module_id: String, raw:DuplicateStateRaw) -> Self {
+    pub fn from_raw(jig_id: String, module_id: String, raw:BaseGameStateRaw) -> Self {
         let n_cards = raw.cards.len() * 2;
         let mut all_cards:Vec<Card> = Vec::with_capacity(n_cards);
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 

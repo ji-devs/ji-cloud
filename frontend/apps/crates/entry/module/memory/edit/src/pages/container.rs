@@ -16,6 +16,7 @@ use futures::future::ready;
 use crate::data::{*, raw::*};
 use super::mode_choose::ModeChoosePage;
 use super::duplicate::container::DuplicatePage;
+use super::words_and_images::container::WordsAndImagesPage;
 use crate::debug;
 
 pub struct ContainerPage {
@@ -61,12 +62,14 @@ impl ContainerPage {
                         //This level of none means we've loaded but it's initial screen
                         None => {
                             Some(ModeChoosePage::render(ModeChoosePage::new(clone!(_self => move |mode| {
+                                let base_state = BaseGameState::from_raw(1, BaseGameStateRaw::default(), _self.state.jig_id.clone(), _self.state.module_id.clone());
+
                                 match mode {
                                     GameMode::Duplicate => {
-                                        let mode_state:DuplicateState = 
-                                            DuplicateStateRaw::default()
-                                                .into_mutable(1, _self.state.jig_id.clone(), _self.state.module_id.clone());
-                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(mode_state)));
+                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(base_state)));
+                                    }
+                                    GameMode::WordsAndImages => {
+                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::WordsAndImages(Rc::new(base_state)));
                                     }
                                 }
 
@@ -79,6 +82,9 @@ impl ContainerPage {
                             match mode_state {
                                 ModeState::Duplicate(mode_state) => {
                                     Some(DuplicatePage::render(DuplicatePage::new(mode_state.clone())))
+                                },
+                                ModeState::WordsAndImages(mode_state) => {
+                                    Some(WordsAndImagesPage::render(WordsAndImagesPage::new(mode_state.clone())))
                                 }
                                 _ => None
                             }

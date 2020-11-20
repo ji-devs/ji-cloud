@@ -5,7 +5,8 @@ use crate::config;
 #[derive(Serialize, Deserialize, Debug)]
 pub enum GameStateRaw {
     None,
-    Duplicate(DuplicateStateRaw)
+    Duplicate(BaseGameStateRaw),
+    WordsAndImages(BaseGameStateRaw)
 }
 
 impl GameStateRaw {
@@ -14,7 +15,7 @@ impl GameStateRaw {
     }
 
     pub fn debug() -> Self {
-        Self::Duplicate(DuplicateStateRaw::debug())
+        Self::Duplicate(BaseGameStateRaw::debug())
     }
 
 }
@@ -32,12 +33,12 @@ impl CardRaw {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct DuplicateStateRaw {
+pub struct BaseGameStateRaw {
     pub cards: Vec<CardRaw>,
     pub theme_id: String,
 }
 
-impl DuplicateStateRaw {
+impl BaseGameStateRaw {
     pub fn default() -> Self {
         Self {
             cards: config::INITIAL_CARD_TEXTS

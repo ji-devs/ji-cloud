@@ -12,11 +12,6 @@ use super::raw::*;
 use itertools::Itertools;
 use std::fmt::Write;
 
-pub trait ModeStateExt {
-    type MutableContainer;
-    fn into_mutable(self, step:usize, jig_id: String, module_id: String) -> Self::MutableContainer;
-}
-
 pub struct GameState {
     pub jig_id: String,
     pub module_id: String,
@@ -45,10 +40,11 @@ impl GameState {
             GameStateRaw::Duplicate(raw_state) => {
                 (
                     Some(GameMode::Duplicate),
-                    Some(ModeState::Duplicate(Rc::new(raw_state.into_mutable(step, self.jig_id.clone(), self.module_id.clone()))))
+                    Some(ModeState::Duplicate(Rc::new(BaseGameState::from_raw(step, raw_state, self.jig_id.clone(), self.module_id.clone()))))
                 )
             },
-            _ => (None, None)
+            GameStateRaw::None => (None, None),
+            _ => unimplemented!("no way to load {:?}", raw) 
         };
 
         //Note that this will *not* trigger re-renders of the inner mode pages
@@ -62,20 +58,16 @@ impl GameState {
     }
 }
 
-impl From<&DuplicateState> for GameStateRaw {
-    fn from(state:&DuplicateState) -> Self {
-        GameStateRaw::Duplicate(state.into())
-    }
-}
-
 #[derive(Clone, Copy, Debug)]
 pub enum GameMode {
-    Duplicate
+    Duplicate,
+    WordsAndImages,
 }
 
 #[derive(Debug)]
 pub enum ModeState {
-    Duplicate(Rc<DuplicateState>)
+    Duplicate(Rc<BaseGameState>),
+    WordsAndImages(Rc<BaseGameState>)
 }
 
 #[derive(Clone, Debug)]
@@ -100,37 +92,34 @@ impl From<&Card> for CardRaw {
 
 
 #[derive(Debug)]
-pub struct DuplicateState {
+pub struct BaseGameState {
     pub jig_id: String,
     pub module_id: String,
     pub step: Mutable<Step>,
     pub cards: MutableVec<Card>,
     pub theme_id: Mutable<String>,
 }
-impl From<&DuplicateState> for DuplicateStateRaw {
-    fn from(state:&DuplicateState) -> Self {
-        Self {
-            cards: state.cards.lock_ref().iter().map(|card| card.into()).collect(),
-            theme_id: state.theme_id.get_cloned(),
+
+impl BaseGameState {
+    pub fn to_raw(&self) -> BaseGameStateRaw {
+        BaseGameStateRaw {
+            cards: self.cards.lock_ref().iter().map(|card| card.into()).collect(),
+            theme_id: self.theme_id.get_cloned(),
         }
     }
-}
 
-impl ModeStateExt for DuplicateStateRaw {
-    type MutableContainer = DuplicateState;
-
-    fn into_mutable(self, step: usize, jig_id: String, module_id: String) -> DuplicateState {
-        let cards:Vec<Card> = self.cards
+    pub fn from_raw(step: usize, raw: BaseGameStateRaw, jig_id: String, module_id: String) -> Self {
+        let cards:Vec<Card> = raw.cards
             .into_iter()
             .map(|raw_card| raw_card.into())
             .collect();
 
-        DuplicateState {
+        Self {
             jig_id,
             module_id,
             step: Mutable::new(step.into()),
             cards: MutableVec::new_with_values(cards),
-            theme_id: Mutable::new(self.theme_id)
+            theme_id: Mutable::new(raw.theme_id)
         }
     }
 }

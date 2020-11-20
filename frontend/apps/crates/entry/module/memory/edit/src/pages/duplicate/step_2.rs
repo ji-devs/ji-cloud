@@ -20,13 +20,13 @@ use itertools::Itertools;
 use crate::config;
 
 pub struct ThemeOption {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
     pub theme: Theme,
 }
 
 impl ThemeOption {
-    pub fn new(state:Rc<DuplicateState>, theme: Theme) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, theme: Theme) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -92,7 +92,7 @@ impl ThemeOption {
 
 
 pub struct CardDom {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub index: ReadOnlyMutable<Option<usize>>,
     pub is_hover:Mutable<Option<Side>>,
     pub card: Card,
@@ -105,7 +105,7 @@ pub enum Side {
 }
 
 impl CardDom {
-    pub fn new(state:Rc<DuplicateState>, index:ReadOnlyMutable<Option<usize>>, card: Card) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, index:ReadOnlyMutable<Option<usize>>, card: Card) -> Rc<Self> {
         Rc::new(Self {
             state,
             index,
@@ -167,11 +167,11 @@ impl CardDom {
 }
 
 pub struct Step2Page {
-    state: Rc<DuplicateState>,
+    state: Rc<BaseGameState>,
 }
 
 impl Step2Page {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
 
         let preview_theme_id = Mutable::new(state.theme_id.get_cloned());
         let _self = Rc::new(Self { 
