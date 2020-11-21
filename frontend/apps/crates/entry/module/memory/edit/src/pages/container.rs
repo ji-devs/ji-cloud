@@ -20,14 +20,14 @@ use super::words_and_images::container::WordsAndImagesPage;
 use crate::debug;
 
 pub struct ContainerPage {
-    pub state: GameState,
+    pub game_state: GameState,
     pub loader: AsyncLoader,
 }
 
 impl ContainerPage {
     pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
         let _self_clone = Rc::new(Self { 
-            state:  GameState::new(jig_id, module_id),
+            game_state:  GameState::new(jig_id, module_id),
             loader: AsyncLoader::new(),
             //game_mode: Mutable::new(debug::settings().game_mode.unwrap_or(None)),
         });
@@ -39,12 +39,12 @@ impl ContainerPage {
             let step = debug::settings().step.unwrap_or(1);
 
             if let Some(raw_state) = debug::settings().state {
-                _self.state.set_from_loaded(step, raw_state);
+                _self.game_state.set_from_loaded(step, raw_state);
             } else {
                 //TODO - LOAD GAME STATE FROM BACKEND
                 log::info!("loading...");
                 let raw_state:GameStateRaw = GameStateRaw::load().await;
-                _self.state.set_from_loaded(step, raw_state);
+                _self.game_state.set_from_loaded(step, raw_state);
             }
         });
     
@@ -53,7 +53,7 @@ impl ContainerPage {
     }
     
     fn dom_signal(_self:Rc<Self>) -> impl Signal<Item = Option<Dom>> {
-        _self.state.mode.signal_ref(clone!(_self => move |mode| {
+        _self.game_state.mode.signal_ref(clone!(_self => move |mode| {
             match mode {
                 //This level of none means we're still loading the state
                 None => None,
@@ -62,30 +62,28 @@ impl ContainerPage {
                         //This level of none means we've loaded but it's initial screen
                         None => {
                             Some(ModeChoosePage::render(ModeChoosePage::new(clone!(_self => move |mode| {
-                                let base_state = BaseGameState::from_raw(1, BaseGameStateRaw::default(), _self.state.jig_id.clone(), _self.state.module_id.clone());
 
-                                match mode {
-                                    GameMode::Duplicate => {
-                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(base_state)));
-                                    }
-                                    GameMode::WordsAndImages => {
-                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::WordsAndImages(Rc::new(base_state)));
-                                    }
-                                }
+                                *_self.game_state.state.borrow_mut() = Some(
+                                    BaseGameState::from_raw(
+                                        1, 
+                                        BaseGameStateRaw::default(), 
+                                        _self.game_state.jig_id.clone(), 
+                                        _self.game_state.module_id.clone()
+                                    )
+                                );
 
-                                _self.state.mode.set(Some(Some(mode)));
+                                _self.game_state.mode.set(Some(Some(mode)));
                             }))))
                         },
                         Some(mode) => {
-                            let mode_state:&Option<ModeState> = &_self.state.mode_state.borrow_mut();
-                            let mode_state:&ModeState = &mode_state.as_ref().expect_throw("mode without mode_state is a bug!!");
-                            match mode_state {
-                                ModeState::Duplicate(mode_state) => {
-                                    Some(DuplicatePage::render(DuplicatePage::new(mode_state.clone())))
+                            let state:Rc<BaseGameState> = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
+                            match mode {
+                                GameMode::Duplicate => {
+                                    Some(DuplicatePage::render(DuplicatePage::new(state)))
                                 },
-                                ModeState::WordsAndImages(mode_state) => {
-                                    Some(WordsAndImagesPage::render(WordsAndImagesPage::new(mode_state.clone())))
-                                }
+                                GameMode::WordsAndImages => {
+                                    Some(WordsAndImagesPage::render(WordsAndImagesPage::new(state)))
+                                },
                                 _ => None
                             }
                         }

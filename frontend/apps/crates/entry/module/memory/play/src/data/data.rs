@@ -21,7 +21,7 @@ pub struct GameState {
     pub module_id: String,
     //outer option is for "loading", inner option is for "no module chosen"
     pub mode: Mutable<Option<Option<GameMode>>>, 
-    pub mode_state: Rc<RefCell<Option<ModeState>>>,
+    pub state: Rc<RefCell<Option<BaseGameState>>>,
 }
 
 
@@ -31,7 +31,7 @@ impl GameState {
             jig_id,
             module_id,
             mode: Mutable::new(None),
-            mode_state: Rc::new(RefCell::new(None))
+            state: Rc::new(RefCell::new(None))
         }
     }
     pub fn set_from_loaded(&self, raw:GameStateRaw) {
@@ -39,11 +39,11 @@ impl GameState {
             panic!("setting the game state from loaded only works on first-load!");
         }
 
-        let (mode, mode_state) = match raw {
+        let (mode, state) = match raw {
             GameStateRaw::Duplicate(raw_state) => {
                 (
                     Some(GameMode::Duplicate),
-                    Some(ModeState::Duplicate(Rc::new(BaseGameState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state))))
+                    Some(BaseGameState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state))
                 )
             },
             _ => (None, None)
@@ -52,7 +52,7 @@ impl GameState {
         //Note that this will *not* trigger re-renders of the inner mode pages
         //Using set_from_loaded for runtime changes is therefore very inefficient!
         //It's only meant for first-time loading
-        *self.mode_state.borrow_mut() = mode_state;
+        *self.state.borrow_mut() = state;
         //wrapped in a Some because None here means "loading"
         //this *will* trigger re-renders of everything from the top-level
         //an inner none means "loaded but no mode"
@@ -63,11 +63,6 @@ impl GameState {
 #[derive(Clone, Copy, Debug)]
 pub enum GameMode {
     Duplicate
-}
-
-#[derive(Debug)]
-pub enum ModeState {
-    Duplicate(Rc<BaseGameState>)
 }
 
 #[derive(Clone, Debug)]

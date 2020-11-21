@@ -15,7 +15,7 @@ impl GameStateRaw {
     }
 
     pub fn debug() -> Self {
-        Self::Duplicate(BaseGameStateRaw::debug())
+        Self::WordsAndImages(BaseGameStateRaw::debug())
     }
 
 }

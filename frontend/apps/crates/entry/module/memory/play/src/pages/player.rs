@@ -30,13 +30,13 @@ use std::{
 };
 use dominator::animation::{easing, Percentage, MutableAnimation, AnimatedMapBroadcaster};
 pub struct PlayerPage {
-    state: GameState,
+    game_state: GameState,
 }
 
 impl PlayerPage {
     pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        let state = GameState::new(jig_id, module_id);
-        Rc::new(Self { state })
+        let game_state = GameState::new(jig_id, module_id);
+        Rc::new(Self { game_state })
     }
 }
 
@@ -55,18 +55,21 @@ impl ModuleRenderer for PlayerPage {
     }
 
     fn render(_self: Rc<Self>, data: GameStateRaw) -> Dom {
-        _self.state.set_from_loaded(data);
+        _self.game_state.set_from_loaded(data);
         html!("div", {
-            .child_signal(_self.state.mode.signal_ref(clone!(_self => move |mode| {
-                mode.map(clone!(_self => move |_| {
-                    match _self.state.mode_state.borrow().as_ref() {
-                        None => panic!("can't render player without state!"),
-                        Some(mode) => match mode {
-                            ModeState::Duplicate(state) => {
-                                DuplicatePlayer::render(DuplicatePlayer::new(state.clone()))
+            .child_signal(_self.game_state.mode.signal_ref(clone!(_self => move |mode| {
+                mode.map(clone!(_self => move |mode| {
+                    if let Some(mode) = mode {
+                        let state = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
+
+                        match mode { 
+                            GameMode::Duplicate => {
+                                DuplicatePlayer::render(DuplicatePlayer::new(state))
                             },
                             _ => unimplemented!("todo - other modes!")
                         }
+                    } else {
+                        panic!("no game mode!");
                     }
                 }))
             })))
