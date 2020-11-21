@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
-    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal},
+    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
     CancelableFutureHandle, 
 };
@@ -17,6 +17,7 @@ use futures::future::ready;
 use utils::{
     iframe::*,
     components::module_page::*,
+    signals::StyleSignal,
 };
 use gloo_timers::future::TimeoutFuture;
 use crate::{debug, data::{*, raw::*}};
@@ -100,36 +101,12 @@ impl DuplicatePlayer {
                 .class(format!("memory-grid-{}", _self.state.grid_number()))
                 .children_signal_vec(Self::game_cards_dom_signal(_self.clone()))
             })
-            .with_data_id!("hover-cards", {
-                .children_signal_vec(Self::hover_cards_dom_signal(_self.clone()))
-            })
-
-            .with_data_id!("found-cards", {
-                .children_signal_vec(Self::found_cards_dom_signal(_self.clone()))
-            })
         })
     }
 
-    fn found_cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
-        _self.state.found_cards
-            .signal_vec_cloned()
-            .map(clone!(_self => move |card| {
-                FoundCardDom::render(FoundCardDom::new(_self.state.clone(), card))
-            }))
-    }
-
-    fn hover_cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
-        _self.state.hover_cards
-            .signal_vec_cloned()
-            .map(clone!(_self => move |card| {
-                HoverCardDom::render(HoverCardDom::new(_self.state.clone(), card))
-            }))
-    }
     fn game_cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
         _self.state.game_cards
             .signal_vec_cloned()
-            //this allows us to hide the visuals of empty cards, but it gets weird
-            //.filter_signal_cloned(|card| card.text.signal_ref(|text| !text.is_empty()))
             .map(clone!(_self => move |(card)| {
                 GameCardDom::render(GameCardDom::new(_self.state.clone(), card))
             }))
@@ -140,40 +117,105 @@ pub struct GameCardDom {
     pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
     pub card: GameCard,
+    pub transition: Mutable<Option<CardTransition>>
 }
 
+pub struct CardTransition {
+    pub animation: MutableAnimation,
+    pub dest_x: f64,
+    pub dest_y: f64,
+}
+
+impl CardTransition {
+    pub fn new(element:&HtmlElement) -> Self {
+
+        let animation = MutableAnimation::new(3000.0);
+        animation.animate_to(Percentage::new(1.0));
+
+        let (origin_x, origin_y) = utils::resize::ModuleBounds::get_element_pos_rem(element);
+
+        let dest_x = 0.0 - origin_x;
+        let dest_y = 0.0 - origin_y;
+        Self {
+            animation,
+            dest_x,
+            dest_y
+        }
+    }
+    fn transform_signal(&self) -> impl Signal<Item = String> {
+        let dest_x = self.dest_x; 
+        let dest_y = self.dest_y; 
+
+        self.animation.signal()
+            .map(move |t| easing::in_out(t, easing::cubic))
+            .map(move |t| (
+                t.range_inclusive(0.0, dest_x),
+                t.range_inclusive(0.0, dest_y)
+            ))
+            .map(|(x, y)| {
+                format!("translate({}rem, {}rem)", x, y)
+            })
+    }
+}
 impl GameCardDom {
     pub fn new(state:Rc<BaseGameState>, card: GameCard) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
-            card 
+            card ,
+            transition: Mutable::new(None),
         })
     }
 
     fn is_showing(&self) -> impl Signal<Item = bool> {
         let my_id = self.card.id;
 
-        self.state.flip_state.signal_cloned().map(move |flip_state| {
-            match flip_state {
-                FlipState::None => false,
-                FlipState::One(flip_card) => flip_card.id == my_id,
-                FlipState::Two((flip_card_1, flip_card_2)) => {
-                    flip_card_1.id == my_id || flip_card_2.id == my_id
+        map_ref! {
+            let flip_state = self.state.flip_state.signal_cloned(),
+            let found = self.card.found.signal()
+            => move {
+                if *found {
+                    true
+                } else {
+                    match flip_state {
+                        FlipState::None => false,
+                        FlipState::One(id) => *id == my_id,
+                        FlipState::Two((id_1, id_2)) => {
+                            *id_1 == my_id || *id_2 == my_id
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    fn transform_signal(&self) -> impl Signal<Item = String> {
+        self.transition.signal_ref(|transition| {
+            StyleSignal::new(
+                "none".to_string(),
+                transition.as_ref().map(|t| t.transform_signal())
+            )
         })
+        .flatten()
     }
 
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::card(), {
-            //maybe something better than opacity... gotta take up grid space though
-            .class_signal("opacity-0", _self.card.found.signal())
+            .with_node!(element => {
+                .future(_self.card.found.signal().for_each(clone!(_self,element => move |found| {
+                    if found {
+                        _self.transition.set(Some(CardTransition::new(&element)));
+                    }
+                    async {}
+                })))
+            })
+
+            .event(clone!(_self => move |evt:events::Click| {
+                _self.state.card_click(_self.card.id);
+            }))
+            .style_signal("transform", _self.transform_signal())
             .class_signal("flip-card-clicked", _self.is_showing().map(|x| !x))
             .with_node!(element => {
-                .event(clone!(_self, element => move |evt:events::Click| {
-                    _self.state.card_click(_self.card.id, element.clone());
-                }))
                 .event(clone!(_self => move |evt:events::MouseEnter| {
                     _self.is_hover.set(true);
                 }))
@@ -187,79 +229,6 @@ impl GameCardDom {
                     }
                 }))
             })
-            .with_data_id!("text-contents", {
-                .text(&_self.card.text)
-            })
-        })
-    }
-}
-
-
-pub struct HoverCardDom {
-    pub state: Rc<BaseGameState>,
-    pub card: HoverCard,
-    pub animation: MutableAnimation
-}
-
-impl HoverCardDom {
-    pub fn new(state:Rc<BaseGameState>, card: HoverCard) -> Rc<Self> {
-        let animation = MutableAnimation::new(3000.0);
-        animation.animate_to(Percentage::new(1.0));
-
-        //animation.play();
-
-        Rc::new(Self {
-            state,
-            card,
-            animation
-        })
-    }
-
-    pub fn render(_self: Rc<Self>) -> Dom { 
-        let origin_x:f64 = _self.card.origin_x;
-        let origin_y:f64 = _self.card.origin_y;
-        let dest_x:f64 = _self.card.dest_x;
-        let dest_y:f64 = _self.card.dest_y;
-
-        elem!(templates::hover_card(), {
-            .future(clone!(_self => async move {
-                _self.animation
-                    .signal()
-                    .wait_for(Percentage::new(1.0))
-                    .await;
-                _self.state.move_animation_finished(&_self.card);
-            }))
-            .style_signal("top", _self.animation.signal()
-                .map(move |t| easing::in_out(t, easing::cubic))
-                .map(move |t| Some(format!("{}rem", t.range_inclusive(origin_y, dest_y)))))
-            .style_signal("left", _self.animation.signal()
-                .map(move |t| easing::in_out(t, easing::cubic))
-                .map(move |t| Some(format!("{}rem", t.range_inclusive(origin_x, dest_x)))))
-            .with_data_id!("text-contents", {
-                .text(&_self.card.text)
-            })
-        })
-    }
-}
-
-
-pub struct FoundCardDom {
-    pub state: Rc<BaseGameState>,
-    pub card: FoundCard,
-}
-
-impl FoundCardDom {
-    pub fn new(state:Rc<BaseGameState>, card: FoundCard) -> Rc<Self> {
-        Rc::new(Self {
-            state,
-            card 
-        })
-    }
-
-    pub fn render(_self: Rc<Self>) -> Dom { 
-        elem!(templates::hover_card(), {
-            .style("top", format!("{}rem", _self.card.y))
-            .style("left", format!("{}rem", _self.card.x))
             .with_data_id!("text-contents", {
                 .text(&_self.card.text)
             })

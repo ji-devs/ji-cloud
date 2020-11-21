@@ -83,42 +83,6 @@ pub struct GameCard {
     pub found: Mutable<bool>
 }
 
-#[derive(Debug, Clone)]
-pub struct FlipCard {
-    pub id: usize,
-    pub element: HtmlElement
-}
-
-#[derive(Clone, Debug)]
-pub struct HoverCard {
-    pub text: String,
-    pub id: usize,
-    pub origin_x: f64,
-    pub origin_y: f64,
-    pub dest_x: f64,
-    pub dest_y: f64,
-}
-
-#[derive(Debug, Clone)]
-pub struct FoundCard {
-    pub id: usize,
-    pub x: f64,
-    pub y: f64,
-    pub text: String
-}
-
-impl FoundCard {
-    pub fn new(card:&HoverCard) -> Self {
-        Self {
-            id: card.id,
-            x: card.dest_x,
-            y: card.dest_y,
-            text: card.text.to_string()
-        }
-    }
-}
-
-
 impl Card {
     pub fn new(card:CardRaw, id: usize) -> Self {
         Self {
@@ -135,8 +99,6 @@ pub struct BaseGameState {
     pub pair_lookup: Vec<usize>,
     pub all_cards: Vec<Card>,
     pub game_cards: MutableVec<GameCard>,
-    pub found_cards: MutableVec<FoundCard>,
-    pub hover_cards: MutableVec<HoverCard>,
     pub theme_id: String,
     pub flip_state: Mutable<FlipState>,
 }
@@ -144,8 +106,8 @@ pub struct BaseGameState {
 #[derive(Debug, Clone)]
 pub enum FlipState {
     None,
-    One(FlipCard),
-    Two((FlipCard, FlipCard)),
+    One(usize),
+    Two((usize, usize)),
 }
 #[derive(Debug, PartialEq)]
 enum Side {
@@ -154,29 +116,6 @@ enum Side {
 }
 
 impl BaseGameState {
-    pub fn make_hover_card(&self, flip_card:FlipCard, side: Side) -> HoverCard {
-        let card = &self.all_cards[flip_card.id];
-
-        let (origin_x, origin_y) = utils::resize::ModuleBounds::get_element_pos_rem(&flip_card.element.unchecked_into());
-      
-        let mut len = self.found_cards.lock_ref().len();
-        len += self.hover_cards.lock_ref().len();
-        let dest_y = (len as f64) * 10.0;
-        let dest_x = match side {
-            Side::Right => 10.0,
-            Side::Left => 0.0
-        };
-
-        HoverCard {
-            text: card.text.clone(),
-            id: card.id,
-            origin_x,
-            origin_y,
-            dest_x,
-            dest_y,
-        }
-    }
-
     pub fn from_raw(jig_id: String, module_id: String, raw:BaseGameStateRaw) -> Self {
         let n_cards = raw.cards.len() * 2;
         let mut all_cards:Vec<Card> = Vec::with_capacity(n_cards);
@@ -200,8 +139,6 @@ impl BaseGameState {
             pair_lookup,
             all_cards,
             game_cards: MutableVec::new(),
-            found_cards: MutableVec::new(),
-            hover_cards: MutableVec::new(),
             theme_id: raw.theme_id,
             flip_state: Mutable::new(FlipState::None), 
         };
@@ -211,16 +148,9 @@ impl BaseGameState {
         state
     }
 
-    pub async fn evaluate(&self, card_1: FlipCard, card_2: FlipCard) {
-        let id_1 = card_1.id;
-        let id_2 = card_2.id;
+    pub async fn evaluate(&self, id_1: usize, id_2: usize) {
 
         if self.pair_lookup[id_1] == id_2 {
-            let hover_card_1 = self.make_hover_card(card_1, Side::Left);
-            let hover_card_2 = self.make_hover_card(card_2, Side::Right);
-            let mut hover_cards = self.hover_cards.lock_mut();
-            hover_cards.push_cloned(hover_card_1);
-            hover_cards.push_cloned(hover_card_2);
             let game_cards = self.game_cards.lock_ref();
             if let Some(card) = game_cards.iter().find(|c| c.id == id_1) {
                 card.found.set(true);
@@ -228,11 +158,6 @@ impl BaseGameState {
             if let Some(card) = game_cards.iter().find(|c| c.id == id_2) {
                 card.found.set(true);
             }
-            /* removing upsets the grid...
-            self.game_cards.lock_mut().retain(|card| {
-                card.id != id_1 && card.id != id_2
-            });
-            */
         } else {
             TimeoutFuture::new(2_000).await;
         }
@@ -256,25 +181,18 @@ impl BaseGameState {
         }
     }
 
-    pub fn card_click(&self, id: usize, element:HtmlElement) {
+    pub fn card_click(&self, id: usize) {
         let flip_state = &mut *self.flip_state.lock_mut();
 
-        let flip_card = FlipCard { id, element};
-
         match flip_state {
-            FlipState::None => *flip_state = FlipState::One(flip_card),
+            FlipState::None => *flip_state = FlipState::One(id),
             FlipState::One(other) => {
-                if other.id != flip_card.id {
-                    *flip_state = FlipState::Two((flip_card, other.clone()))
+                if *other != id {
+                    *flip_state = FlipState::Two((id, *other))
                 }
             },
             _ => {}
         }
-    }
-
-    pub fn move_animation_finished(&self, card:&HoverCard) {
-        self.hover_cards.lock_mut().retain(|c| c.id != card.id);
-        self.found_cards.lock_mut().push_cloned(FoundCard::new(&card));
     }
 
     pub fn init_new_game(&self) {
@@ -290,8 +208,6 @@ impl BaseGameState {
             cards.shuffle(&mut rng);
         }
         self.game_cards.lock_mut().replace_cloned(cards);
-        self.found_cards.lock_mut().clear();
-        self.hover_cards.lock_mut().clear();
     }
 }
 
