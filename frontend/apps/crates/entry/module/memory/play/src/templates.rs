@@ -12,7 +12,6 @@ thread_local! {
 const MODULE_PAGE:&'static str = "module-page";
 const PLAYER:&'static str = "player";
 const CARD:&'static str = "card";
-const HOVER_CARD:&'static str = "hover-card";
 
 pub fn module_page_str() -> String {
     TEMPLATES.with(|t| t.cache.render_plain(MODULE_PAGE).to_string())
@@ -30,9 +29,6 @@ pub fn card() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(CARD))
 }
 
-pub fn hover_card() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(HOVER_CARD))
-}
 pub struct Templates {
     pub cache: TemplateCache<'static>
 }
@@ -51,7 +47,6 @@ impl Templates {
             (MODULE_PAGE, get_template_str(include_str!("../../../../../../../.template_output/_common/module/module-page.html"))),
             (PLAYER, get_template_str(include_str!("../../../../../../../.template_output/module/memory/play/player.html"))),
             (CARD, get_template_str(include_str!("../../../../../../../.template_output/module/memory/play/memory-card.html"))),
-            (HOVER_CARD, get_template_str(include_str!("../../../../../../../.template_output/module/memory/play/hover-card.html"))),
         ]);
 
         Self { cache }

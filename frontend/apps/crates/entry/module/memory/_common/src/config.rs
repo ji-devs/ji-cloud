@@ -1,6 +1,5 @@
 use crate::data::{*, raw::*};
 
-pub const DEBUG_STEP:usize = 4;
 pub const DEBUG_THEME_INDEX:usize = 0;
 
 pub const THEME_EXAMPLE_TEXT_1:&'static str = "שמש";

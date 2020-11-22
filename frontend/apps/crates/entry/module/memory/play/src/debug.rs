@@ -21,7 +21,7 @@ impl DebugSettings {
     pub fn local() -> Self {
         Self {
             state: Some(GameStateRaw::debug()),
-            shuffle: true,
+            shuffle: false,
         }
     }
     pub fn live() -> Self {

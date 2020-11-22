@@ -5,7 +5,7 @@ import modeChoosePage from "@templates/module/memory/edit/start-mode-choose.html
 
 
 export default {
-  title: 'Modules/Memory-Game/Edit',
+  title: 'Modules/Memory-Game/Edit/Landing',
 }
 
 export const ChooseMode = () =>

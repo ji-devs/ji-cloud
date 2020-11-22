@@ -12,17 +12,12 @@ use super::raw::*;
 use itertools::Itertools;
 use std::fmt::Write;
 
-pub trait ModeStateExt {
-    type MutableContainer;
-    fn into_mutable(self, step:usize, jig_id: String, module_id: String) -> Self::MutableContainer;
-}
-
 pub struct GameState {
     pub jig_id: String,
     pub module_id: String,
     //outer option is for "loading", inner option is for "no module chosen"
     pub mode: Mutable<Option<Option<GameMode>>>, 
-    pub mode_state: Rc<RefCell<Option<ModeState>>>,
+    pub state: Rc<RefCell<Option<BaseGameState>>>,
 }
 
 
@@ -32,7 +27,7 @@ impl GameState {
             jig_id,
             module_id,
             mode: Mutable::new(None),
-            mode_state: Rc::new(RefCell::new(None))
+            state: Rc::new(RefCell::new(None))
         }
     }
 
@@ -41,51 +36,38 @@ impl GameState {
             panic!("setting the game state from loaded only works on first-load!");
         }
 
-        let mode:Option<GameMode> = 
-            raw.mode.map(|raw_mode| raw_mode.into());
-
-        let mode_state:Option<ModeState> = {
-            raw.mode_state.map(|raw_mode_state| match raw_mode_state {
-                ModeStateRaw::Duplicate(raw_state) => {
-                    ModeState::Duplicate(Rc::new(raw_state.into_mutable(step, self.jig_id.clone(), self.module_id.clone())))
-                }
-            })
+        let (mode, state) = match raw {
+            GameStateRaw::Duplicate(raw_state) => {
+                (
+                    Some(GameMode::Duplicate),
+                    Some(BaseGameState::from_raw(step, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                )
+            },
+            GameStateRaw::WordsAndImages(raw_state) => {
+                (
+                    Some(GameMode::WordsAndImages),
+                    Some(BaseGameState::from_raw(step, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                )
+            },
+            GameStateRaw::None => (None, None),
+            _ => unimplemented!("no way to load {:?}", raw) 
         };
 
         //Note that this will *not* trigger re-renders of the inner mode pages
         //Using set_from_loaded for runtime changes is therefore very inefficient!
         //It's only meant for first-time loading
-        *self.mode_state.borrow_mut() = mode_state;
+        *self.state.borrow_mut() = state;
         //wrapped in a Some because None here means "loading"
         //this *will* trigger re-renders of everything from the top-level
+        //an inner none means "loaded but no mode"
         self.mode.set(Some(mode));
-    }
-}
-
-impl From<&DuplicateState> for GameStateRaw {
-    fn from(state:&DuplicateState) -> Self {
-        Self {
-            mode: Some(GameModeRaw::Duplicate),
-            mode_state: Some(ModeStateRaw::Duplicate(state.into()))
-        }
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum GameMode {
-    Duplicate
-}
-
-impl From<GameModeRaw> for GameMode {
-    fn from(mode:GameModeRaw) -> Self {
-        match mode {
-            GameModeRaw::Duplicate => Self::Duplicate
-        }
-    }
-}
-#[derive(Debug)]
-pub enum ModeState {
-    Duplicate(Rc<DuplicateState>)
+    Duplicate,
+    WordsAndImages,
 }
 
 #[derive(Clone, Debug)]
@@ -110,37 +92,34 @@ impl From<&Card> for CardRaw {
 
 
 #[derive(Debug)]
-pub struct DuplicateState {
+pub struct BaseGameState {
     pub jig_id: String,
     pub module_id: String,
     pub step: Mutable<Step>,
     pub cards: MutableVec<Card>,
     pub theme_id: Mutable<String>,
 }
-impl From<&DuplicateState> for DuplicateStateRaw {
-    fn from(state:&DuplicateState) -> Self {
-        Self {
-            cards: state.cards.lock_ref().iter().map(|card| card.into()).collect(),
-            theme_id: state.theme_id.get_cloned(),
+
+impl BaseGameState {
+    pub fn to_raw(&self) -> BaseGameStateRaw {
+        BaseGameStateRaw {
+            cards: self.cards.lock_ref().iter().map(|card| card.into()).collect(),
+            theme_id: self.theme_id.get_cloned(),
         }
     }
-}
 
-impl ModeStateExt for DuplicateStateRaw {
-    type MutableContainer = DuplicateState;
-
-    fn into_mutable(self, step: usize, jig_id: String, module_id: String) -> DuplicateState {
-        let cards:Vec<Card> = self.cards
+    pub fn from_raw(step: usize, raw: BaseGameStateRaw, jig_id: String, module_id: String) -> Self {
+        let cards:Vec<Card> = raw.cards
             .into_iter()
             .map(|raw_card| raw_card.into())
             .collect();
 
-        DuplicateState {
+        Self {
             jig_id,
             module_id,
             step: Mutable::new(step.into()),
             cards: MutableVec::new_with_values(cards),
-            theme_id: Mutable::new(self.theme_id)
+            theme_id: Mutable::new(raw.theme_id)
         }
     }
 }

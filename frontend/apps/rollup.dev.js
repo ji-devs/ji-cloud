@@ -22,6 +22,7 @@ const watchPatterns = [
     //but that slows down responding to html changes
     //and responding to _both_ would refresh twice
     //so just reload after a bit if changing css in order to see it
+    //(usually css changes are done at the storybook phase, so this is a rare need)
     //TODO - make it an env thing and params to Makefile.toml
     //"../css/dist/**", 
     "../../shared/rust/src/**", 

@@ -20,13 +20,13 @@ use itertools::Itertools;
 use crate::config;
 
 pub struct ThemeOption {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
     pub theme: Theme,
 }
 
 impl ThemeOption {
-    pub fn new(state:Rc<DuplicateState>, theme: Theme) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, theme: Theme) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -53,7 +53,7 @@ impl ThemeOption {
                     let selected = _self.theme.id == theme_id;
                     Some(
                     
-                        elem!(templates::duplicate::step_2_theme_item(selected), {
+                        elem!(templates::step_2_theme_item(selected), {
 
                             .with_node!(element => {
                                 .class(&format!("memory-theme-{}", _self.theme.id))
@@ -92,7 +92,7 @@ impl ThemeOption {
 
 
 pub struct CardDom {
-    pub state: Rc<DuplicateState>,
+    pub state: Rc<BaseGameState>,
     pub index: ReadOnlyMutable<Option<usize>>,
     pub is_hover:Mutable<Option<Side>>,
     pub card: Card,
@@ -105,7 +105,7 @@ pub enum Side {
 }
 
 impl CardDom {
-    pub fn new(state:Rc<DuplicateState>, index:ReadOnlyMutable<Option<usize>>, card: Card) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>, index:ReadOnlyMutable<Option<usize>>, card: Card) -> Rc<Self> {
         Rc::new(Self {
             state,
             index,
@@ -114,7 +114,7 @@ impl CardDom {
         })
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
-        elem!(templates::card_edit_preview(), {
+        elem!(templates::card_pair_text_text_preview(), {
             .with_data_id!("number", {
                 .text_signal(_self.index.signal().map(|index| {
                     format!("{}", index.unwrap_or(0)+1)
@@ -167,11 +167,11 @@ impl CardDom {
 }
 
 pub struct Step2Page {
-    state: Rc<DuplicateState>,
+    state: Rc<BaseGameState>,
 }
 
 impl Step2Page {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
 
         let preview_theme_id = Mutable::new(state.theme_id.get_cloned());
         let _self = Rc::new(Self { 

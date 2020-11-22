@@ -1,4 +1,5 @@
-{% import "module/memory/edit/_common/macros/sidebar-macros.html" as SidebarMacros %}
+{% import "module/memory/edit/_common/sidebar/macros.html" as SidebarMacros %}
+
 <div class="bg-white ml-10 w-516 flex-shrink-0 relative">
   {{ SidebarMacros::top_steps(selected=1) }}
 
@@ -23,8 +24,8 @@
 
 
     </div>
-    <textarea data-id="list-items" class="h-612 w-full border-dashed border-2 text-2xl border-jibuttonBlue bg-jicreatorblue rounded-16 mt-4 flex flex-col items-center p-4 whitespace-pre text-center resize-none focus:outline-none">
-      </textarea>
+
+    {% include "module/memory/edit/_common/sidebar/text-area.html" %}
     <p class="mt-4 mb-10 flex justify-center text-base">Up to 14 words</p>
 
   </div>

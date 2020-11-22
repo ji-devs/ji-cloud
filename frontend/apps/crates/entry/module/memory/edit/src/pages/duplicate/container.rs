@@ -22,11 +22,11 @@ use crate::debug;
 
 
 pub struct DuplicatePage {
-    pub state: Rc<DuplicateState>
+    pub state: Rc<BaseGameState>
 }
 
 impl DuplicatePage {
-    pub fn new(state: Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state: Rc<BaseGameState>) -> Rc<Self> {
         let _self = Rc::new(Self { 
             state
         });

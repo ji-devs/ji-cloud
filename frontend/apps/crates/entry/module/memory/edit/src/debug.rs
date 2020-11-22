@@ -21,7 +21,7 @@ impl DebugSettings {
     pub fn local() -> Self {
         Self {
             state: Some(GameStateRaw::debug()),
-            step: Some(crate::config::DEBUG_STEP),
+            step: Some(1),
         }
     }
 }
@@ -29,7 +29,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            DebugSettings::local()
         }
     } else {
         pub fn settings() -> DebugSettings {

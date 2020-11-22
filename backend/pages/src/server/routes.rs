@@ -12,8 +12,14 @@ pub fn configure(config: &mut ServiceConfig) {
         .route("/user", web::get().to(spa::user_template))
         .route("/admin.*", web::get().to(spa::admin_template))
         .route("/admin", web::get().to(spa::admin_template))
-        .route("/jig.*", web::get().to(spa::jig_template))
-        .route("/jig", web::get().to(spa::jig_template))
+        .route(
+            "/jig/{page_kind}/{jig_id}",
+            web::get().to(spa::jig_template),
+        )
+        .route(
+            "/jig/{page_kind}/{jig_id}/{module_id}",
+            web::get().to(spa::jig_template_with_module),
+        )
         .route(
             "/module/{kind}/{page_kind}/{jig_id}/{module_id}",
             web::get().to(spa::module_template),
