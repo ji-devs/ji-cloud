@@ -52,7 +52,7 @@ cfg_if! {
         }
     } else {
         pub fn settings() -> DebugSettings {
-            Self {
+            DebugSettings {
                 state: None, 
                 step: None, 
                 content_mode: ContentMode::Text,
