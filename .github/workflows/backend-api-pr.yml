@@ -96,7 +96,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             backend/api/target
-          key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+          key: ${{ runner.os }}-test-rs-${{ hashFiles('backend/api/Cargo.lock') }}
 
       - uses: actions/cache@v2
         with:
