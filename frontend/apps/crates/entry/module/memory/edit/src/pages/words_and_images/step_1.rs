@@ -74,7 +74,16 @@ impl Step1Page {
         self.search_results
             .signal_vec_cloned()
             .map(|item| {
+                let id = item.id;
                 elem!(templates::words_and_images::step_1_thumbnail(&item.src), {
+                    .event(move |evt:events::DragStart| {
+                        if let Some(data_transfer) = evt.data_transfer() {
+                            data_transfer.set_data("card_image", &id);
+                            data_transfer.set_drop_effect("all");
+                        } else {
+                            log::error!("no data transfer - use a real computer!!!");
+                        }
+                    })
                 })
             })
     }
@@ -82,7 +91,16 @@ impl Step1Page {
         elem!(templates::words_and_images::step_1_page(), { 
             .apply(|dom| apply_steps_nav(dom, _self.state.clone()))
             .apply(|dom| apply_edit_cards(dom, _self.state.clone()))
-
+            .with_data_id!("images-text-btn", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.content_mode.set(ContentMode::Text);
+                }))
+            })
+            .with_data_id!("text-images-btn", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.content_mode.set(ContentMode::Images);
+                }))
+            })
             .with_data_id!("images-widget", {
                 .class_signal("hidden", _self.content_mode.signal().map(|content_mode| {
                     if content_mode == ContentMode::Text {

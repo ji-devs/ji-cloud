@@ -16,6 +16,15 @@ use futures::future::ready;
 use crate::data::*;
 use crate::config;
 use crate::templates;
+use shared::{
+    api::endpoints::{ApiEndpoint, self},
+    domain,
+    error,
+};
+use utils::{
+    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
+};
+use uuid::Uuid;
 
 pub fn apply_edit_cards(dom:DomBuilder<HtmlElement>, state: Rc<BaseGameState>) -> DomBuilder<HtmlElement> {
     apply_methods!(dom, {
@@ -37,6 +46,25 @@ pub fn apply_preview_cards(dom:DomBuilder<HtmlElement>, state: Rc<BaseGameState>
             .children_signal_vec(BaseGameState::cards_preview_dom_signal(state.clone()))
         })
     })
+}
+
+fn image_url_signal(id:Mutable<Option<String>>) -> impl Signal<Item = String> {
+    id.signal_cloned().map_future(|id| {
+        async move {
+            if let Some(id) = id {
+                let path = endpoints::image::Get::PATH.replace("{id}",&id);
+                match api_with_auth::<domain::image::GetResponse, shared::error::GetError, ()>(&path, endpoints::image::Get::METHOD, None).await {
+                    Err(_) => None, 
+                    Ok(res) => Some(res.url.to_string())
+                }
+            } else {
+                None
+            }
+
+        }
+    })
+    .map(|x| x.flatten().unwrap_or("".to_string()))
+
 }
 pub struct CardPairEditDom {
     pub state: Rc<BaseGameState>,
@@ -72,6 +100,13 @@ impl CardPairEditDom {
                         Card::Text(text) => {
                             apply_methods!(dom, {
                                 .with_data_id!("text-contents" => HtmlTextAreaElement, {
+
+                                    .event_preventable(clone!(_self => move |evt:events::DragEnter| {
+                                        evt.prevent_default();
+                                    }))
+                                    .event_preventable(clone!(_self => move |evt:events::DragOver| {
+                                        evt.prevent_default();
+                                    }))
                                     .text_signal(text.signal_cloned())
                                     .with_node!(elem => {
                                         .event(clone!(_self, text => move |evt:events::Input| {
@@ -107,15 +142,30 @@ impl CardPairEditDom {
                                 })
                             })
                         },
-                        Card::Image(src) => {
+                        Card::Image(id) => {
                             apply_methods!(dom, {
                                 .with_data_id!("image", {
-                                    .class_signal("hidden", src.signal_ref(|x| x.is_none()))
-                                    .property_signal("src", src.signal_cloned())
+                                    .class_signal("hidden", id.signal_ref(|x| x.is_none()))
+                                    .property_signal("src", image_url_signal(id.clone())) 
                                 })
                                 .with_data_id!("image-waiting", {
-                                    .class_signal("hidden", src.signal_ref(|x| x.is_some()))
+                                    .class_signal("hidden", id.signal_ref(|x| x.is_some()))
                                 })
+                                .event_preventable(clone!(_self => move |evt:events::DragOver| {
+                                    if let Some(data_transfer) = evt.data_transfer() {
+                                        if data_transfer.types().index_of(&JsValue::from_str("card_image"), 0) != -1 {
+                                            evt.prevent_default();
+                                        }
+                                    }
+                                }))
+
+                                .event(clone!(_self, id => move |evt:events::Drop| {
+                                    if let Some(data_transfer) = evt.data_transfer() {
+                                        if let Some(img_id) = data_transfer.get_data("card_image").ok() {
+                                            id.set_neq(Some(img_id));
+                                        }
+                                    }
+                                }))
                             })
                         },
                         _ => unimplemented!("don't know how to render audio!")
@@ -193,15 +243,15 @@ impl CardPairPreviewDom {
                                 })
                             })
                         },
-                        Card::Image(src) => {
+                        Card::Image(id) => {
 
                             apply_methods!(dom, {
                                 .with_data_id!("image", {
-                                    .class_signal("hidden", src.signal_ref(|x| x.is_none()))
-                                    .property_signal("src", src.signal_cloned())
+                                    .class_signal("hidden", id.signal_ref(|x| x.is_none()))
+                                    .property_signal("src", image_url_signal(id.clone())) 
                                 })
                                 .with_data_id!("image-waiting", {
-                                    .class_signal("hidden", src.signal_ref(|x| x.is_some()))
+                                    .class_signal("hidden", id.signal_ref(|x| x.is_some()))
                                 })
                             })
                         },

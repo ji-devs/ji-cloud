@@ -89,8 +89,8 @@ impl Card {
         Self {
             media: match card {
                 raw::Card::Text(text) => Media::Text(text.to_string()),
-                raw::Card::Image(text) => Media::Image(text.to_string()),
-                raw::Card::Audio(text) => Media::Audio(text.to_string()),
+                raw::Card::Image(src) => Media::Image(src.clone()),
+                raw::Card::Audio(src) => Media::Audio(src.clone()),
             },
             id,
             other_id,
@@ -99,11 +99,13 @@ impl Card {
     }
 }
 
+type Id = String;
+
 #[derive(Clone, Debug)]
 pub enum Media {
     Text(String),
-    Image(String),
-    Audio(String),
+    Image(Option<Id>),
+    Audio(Option<Id>),
 }
 
 #[derive(Debug)]

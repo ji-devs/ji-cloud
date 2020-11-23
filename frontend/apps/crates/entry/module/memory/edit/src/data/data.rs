@@ -85,22 +85,25 @@ pub enum GameMode {
     WordsAndImages,
 }
 
+type Id = String;
+
 #[derive(Clone, Debug)]
 pub enum Card {
     Text(Mutable<String>),
-    Image(Mutable<Option<String>>),
-    Audio(Mutable<Option<String>>),
+    Image(Mutable<Option<Id>>),
+    Audio(Mutable<Option<Id>>),
 }
+
 
 impl Card {
     pub fn new_text(text:String) -> Self {
         Self::Text(Mutable::new(text))
     }
-    pub fn new_image(src:Option<String>) -> Self {
-        Self::Image(Mutable::new(src))
+    pub fn new_image(id:Option<Id>) -> Self {
+        Self::Image(Mutable::new(id))
     }
-    pub fn new_audio(src:Option<String>) -> Self {
-        Self::Audio(Mutable::new(src))
+    pub fn new_audio(id:Option<Id>) -> Self {
+        Self::Audio(Mutable::new(id))
     }
 
     pub fn set_text(&self, text:String) {
@@ -109,15 +112,15 @@ impl Card {
             _ => panic!("not a text card!")
         }
     }
-    pub fn set_img(&self, src:Option<String>) {
+    pub fn set_img(&self, id:Option<Id>) {
         match self {
-            Self::Image(m) => m.set_neq(src),
+            Self::Image(m) => m.set_neq(id),
             _ => panic!("not an image card!")
         }
     }
-    pub fn set_audio(&self, src:Option<String>) {
+    pub fn set_audio(&self, id:Option<Id>) {
         match self {
-            Self::Audio(m) => m.set_neq(src),
+            Self::Audio(m) => m.set_neq(id),
             _ => panic!("not an audio card!")
         }
     }
@@ -127,8 +130,8 @@ impl From<raw::Card> for Card {
     fn from(card:raw::Card) -> Self {
         match card {
             raw::Card::Text(text) => Card::new_text(text),
-            raw::Card::Image(src) => Card::new_image(src),
-            raw::Card::Audio(src) => Card::new_audio(src),
+            raw::Card::Image(id) => Card::new_image(id),
+            raw::Card::Audio(id) => Card::new_audio(id),
         }
     }
 }
@@ -137,8 +140,8 @@ impl From<&Card> for raw::Card {
     fn from(card:&Card) -> Self {
         match card {
             Card::Text(text) => raw::Card::Text(text.get_cloned()),
-            Card::Image(src) => raw::Card::Image(src.get_cloned()),
-            Card::Audio(src) => raw::Card::Audio(src.get_cloned())
+            Card::Image(id) => raw::Card::Image(id.get_cloned()),
+            Card::Audio(id) => raw::Card::Audio(id.get_cloned())
         }
     }
 }

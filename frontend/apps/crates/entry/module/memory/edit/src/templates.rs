@@ -90,7 +90,7 @@ pub mod duplicate {
 pub mod words_and_images {
     use super::*;
     pub fn step_1_thumbnail(src:&str) -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem(WORDS_AND_IMAGES_STEP_1_PAGE, 
+        TEMPLATES.with(|t| t.cache.render_elem(WORDS_AND_IMAGES_STEP_1_THUMBNAIL, 
             &html_map!(
                 "src" => src
             )

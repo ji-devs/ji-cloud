@@ -241,10 +241,11 @@ impl CardDom {
                             })
                         })
                     },
-                    Media::Image(src) => {
+                    Media::Image(id) => {
                         apply_methods!(dom, {
                             .with_data_id!("image", {
-                                .property("src", src)
+                                //TODO - load image src
+                                .property("src", id.as_ref())
                             })
                         })
                     },
@@ -254,3 +255,24 @@ impl CardDom {
         })
     }
 }
+
+/*
+fn image_url_signal(id:Mutable<Option<String>>) -> impl Signal<Item = String> {
+    id.signal_cloned().map_future(|id| {
+        async move {
+            if let Some(id) = id {
+                let path = endpoints::image::Get::PATH.replace("{id}",&id);
+                match api_with_auth::<domain::image::GetResponse, shared::error::GetError, ()>(&path, endpoints::image::Get::METHOD, None).await {
+                    Err(_) => None, 
+                    Ok(res) => Some(res.url.to_string())
+                }
+            } else {
+                None
+            }
+
+        }
+    })
+    .map(|x| x.flatten().unwrap_or("".to_string()))
+
+}
+*/
