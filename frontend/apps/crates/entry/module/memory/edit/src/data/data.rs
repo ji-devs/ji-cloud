@@ -1,9 +1,10 @@
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt},
+    signal::{Mutable, ReadOnlyMutable,  SignalExt, Signal},
+    signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
+use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -11,11 +12,17 @@ use crate::debug;
 use super::raw;
 use itertools::Itertools;
 use std::fmt::Write;
+use crate::pages::all_modes::card_dom::*;
 
 #[derive(Clone, Debug)]
 pub struct Theme {
     pub id: &'static str,
     pub label: &'static str,
+}
+#[derive(Clone, Copy, PartialEq)]
+pub enum ContentMode {
+    Text,
+    Images
 }
 
 pub struct GameState {
@@ -81,21 +88,47 @@ pub enum GameMode {
 #[derive(Clone, Debug)]
 pub enum Card {
     Text(Mutable<String>),
-    Image(Mutable<String>),
-    Audio(Mutable<String>),
+    Image(Mutable<Option<String>>),
+    Audio(Mutable<Option<String>>),
 }
 
-impl From<String> for Card {
-    fn from(text:String) -> Self {
-        Card::Text(Mutable::new(text))
+impl Card {
+    pub fn new_text(text:String) -> Self {
+        Self::Text(Mutable::new(text))
+    }
+    pub fn new_image(src:Option<String>) -> Self {
+        Self::Image(Mutable::new(src))
+    }
+    pub fn new_audio(src:Option<String>) -> Self {
+        Self::Audio(Mutable::new(src))
+    }
+
+    pub fn set_text(&self, text:String) {
+        match self {
+            Self::Text(m) => m.set_neq(text),
+            _ => panic!("not a text card!")
+        }
+    }
+    pub fn set_img(&self, src:Option<String>) {
+        match self {
+            Self::Image(m) => m.set_neq(src),
+            _ => panic!("not an image card!")
+        }
+    }
+    pub fn set_audio(&self, src:Option<String>) {
+        match self {
+            Self::Audio(m) => m.set_neq(src),
+            _ => panic!("not an audio card!")
+        }
     }
 }
+
 impl From<raw::Card> for Card {
     fn from(card:raw::Card) -> Self {
         match card {
-            raw::Card::Text(text) => Card::Text(Mutable::new(text)),
-            raw::Card::Image(src) => Card::Image(Mutable::new(src)),
-            raw::Card::Audio(src) => Card::Audio(Mutable::new(src))
+            raw::Card::Text(text) => Card::new_text(text),
+            raw::Card::Image(src) => Card::new_image(src),
+            raw::Card::Audio(src) => Card::new_audio(src),
         }
     }
 }
@@ -113,15 +146,46 @@ impl From<&Card> for raw::Card {
 
 #[derive(Debug)]
 pub struct BaseGameState {
+    pub mode: GameMode,
     pub jig_id: String,
     pub module_id: String,
     pub step: Mutable<Step>,
     pub pairs: MutableVec<(Card, Card)>,
     pub theme_id: Mutable<String>,
-    pub edit_text_list: MutableVec<Mutable<String>>
+    pub edit_text_list: MutableVec<String>
 }
 
 impl BaseGameState {
+
+    pub fn cards_preview_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
+        _self.pairs
+            .signal_vec_cloned()
+            .enumerate()
+            .map(clone!(_self => move |(index, (card_1, card_2))| {
+                CardPairPreviewDom::render(CardPairPreviewDom::new(_self.clone(), index, card_1, card_2))
+            }))
+    }
+
+    pub fn cards_edit_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
+        _self.pairs
+            .signal_vec_cloned()
+            .enumerate()
+            .map(clone!(_self => move |(index, (card_1, card_2))| {
+                CardPairEditDom::render(CardPairEditDom::new(_self.clone(), index, card_1, card_2))
+            }))
+    }
+    pub fn words_signal(&self) -> impl Signal<Item = Vec<String>> {
+        self.edit_text_list
+            .signal_vec_cloned()
+            .to_signal_cloned()
+    }
+
+    pub fn text_input_signal(&self) -> impl Signal<Item = String> {
+        self.edit_text_list
+            .signal_vec_cloned()
+            .to_signal_map(|x| x.join("\n"))
+    }
+
     pub fn to_raw(&self) -> raw::BaseGameState {
         raw::BaseGameState {
             pairs: self.pairs.lock_ref()
@@ -135,27 +199,34 @@ impl BaseGameState {
     }
 
     pub fn from_raw(step: usize, mode: GameMode, raw_game_state: raw::BaseGameState, jig_id: String, module_id: String) -> Self {
+
+        #[derive(Clone, Copy, PartialEq)]
+        enum CardNumber {
+            One,
+            Two
+        }
         let mut pairs:Vec<(Card, Card)> = Vec::new();
-        let mut edit_text_list:Vec<Mutable<String>> = Vec::new();
+        let mut edit_text_list:Vec<String> = Vec::new();
         
-        let mut derive_edit_data = |card:&raw::Card| {
+        let mut derive_edit_data = |card:&raw::Card, num:CardNumber| {
             match card {
                 raw::Card::Text(text) => {
-                    edit_text_list.push(Mutable::new(text.to_string()));
+                    if num == CardNumber::One || mode != GameMode::Duplicate {
+                        edit_text_list.push(text.to_string());
+                    }
                 },
                 _ => {}
             }
         };
 
         for (card_1, card_2) in raw_game_state.pairs.into_iter() {
-            derive_edit_data(&card_1);
-            if mode != GameMode::Duplicate {
-                derive_edit_data(&card_2);
-            }
+            derive_edit_data(&card_1, CardNumber::One);
+            derive_edit_data(&card_2, CardNumber::Two);
             pairs.push((card_1.into(), card_2.into()));
         }
 
         Self {
+            mode,
             jig_id,
             module_id,
             step: Mutable::new(step.into()),

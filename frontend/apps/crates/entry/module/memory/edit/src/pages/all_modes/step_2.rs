@@ -18,8 +18,10 @@ use std::fmt::Write;
 use crate::data::*;
 use itertools::Itertools;
 use crate::config;
-use crate::pages::all_modes::steps_nav::apply_steps_nav;
-
+use crate::pages::all_modes::{
+    steps_nav::apply_steps_nav,
+    card_dom::apply_preview_cards,
+};
 pub struct Step2Page {
     state: Rc<BaseGameState>,
 }
@@ -35,14 +37,6 @@ impl Step2Page {
         _self
     }
 
-    fn cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
-        _self.state.pairs
-            .signal_vec_cloned()
-            .enumerate()
-            .map(clone!(_self => move |(index, (card_1, card_2))| {
-                CardPairDom::render(CardPairDom::new(_self.state.clone(), index, card_1, card_2))
-            }))
-    }
 
     fn theme_options_dom(_self: Rc<Self>) -> impl Iterator<Item = Dom> {
         config::THEME_OPTIONS
@@ -62,12 +56,7 @@ impl Step2Page {
         };
         elem!(el, { 
             .apply(|dom| apply_steps_nav(dom, _self.state.clone()))
-            .with_data_id!("cards", {
-                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
-                    Some(format!("memory-theme-{}", id))
-                }))
-                .children_signal_vec(Self::cards_dom_signal(_self.clone()))
-            })
+            .apply(|dom| apply_preview_cards(dom, _self.state.clone()))
             .with_data_id!("theme-items", {
                 .children(Self::theme_options_dom(_self.clone()))
             })
@@ -149,89 +138,6 @@ impl ThemeOption {
         })
     }
 }
-
-
-pub struct CardPairDom {
-    pub state: Rc<BaseGameState>,
-    pub index: ReadOnlyMutable<Option<usize>>,
-    pub is_hover:Mutable<Option<Side>>,
-    pub card_1: Card,
-    pub card_2: Card,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum Side {
-    Left,
-    Right
-}
-
-impl CardPairDom {
-    pub fn new(state:Rc<BaseGameState>, index:ReadOnlyMutable<Option<usize>>, card_1: Card, card_2: Card) -> Rc<Self> {
-        Rc::new(Self {
-            state,
-            index,
-            is_hover: Mutable::new(None),
-            card_1,
-            card_2
-        })
-    }
-
-    fn render_side(_self: Rc<Self>, dom:DomBuilder<HtmlElement>, side:Side) -> DomBuilder<HtmlElement> {
-        let side_name:&'static str = if side == Side::Left { "left" } else { "right" };
-        let card = if side == Side::Left { &_self.card_1 } else { &_self.card_2 };
-
-        apply_methods!(dom, {
-            .with_data_id!(side_name, {
-                .class_signal("flip-card-clicked", _self.is_hover.signal().map(move |hover| hover == Some(side)))
-                .with_node!(element => {
-                    .event(clone!(_self => move |evt:events::MouseEnter| {
-                        _self.is_hover.set(Some(side));
-                    }))
-                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
-                        if let Some(target) = evt.target() {
-                            if target == element.clone().unchecked_into() {
-                                _self.is_hover.set(None);
-                            } else {
-                                evt.prevent_default();
-                            }
-                        }
-                    }))
-                })
-                .apply(|dom| {
-                    match card {
-                        Card::Text(text) => {
-                            apply_methods!(dom, {
-                                .with_data_id!("text-contents", {
-                                    .text_signal(text.signal_cloned())
-                                })
-                            })
-                        },
-                        Card::Image(src) => {
-                            apply_methods!(dom, {
-                                .with_data_id!("image", {
-                                    .property_signal("src", src.signal_cloned())
-                                })
-                            })
-                        },
-                        _ => unimplemented!("don't know how to render audio!")
-                    }
-                })
-            })
-        })
-    }
-    pub fn render(_self: Rc<Self>) -> Dom { 
-        elem!(templates::card_pair_text_text_preview(), {
-            .with_data_id!("number", {
-                .text_signal(_self.index.signal().map(|index| {
-                    format!("{}", index.unwrap_or(0)+1)
-                }))
-            })
-            .apply(|dom| Self::render_side(_self.clone(), dom, Side::Left))
-            .apply(|dom| Self::render_side(_self.clone(), dom, Side::Right))
-        })
-    }
-}
-
 
 
 

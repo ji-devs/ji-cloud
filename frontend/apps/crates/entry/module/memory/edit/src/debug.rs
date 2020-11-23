@@ -13,26 +13,14 @@ use crate::data::*;
 use crate::config::BaseGameStateExt;
 
 
-pub const DEBUG_STEP:usize = 2;
+pub const DEBUG_STEP:usize = 1;
 pub const DEBUG_THEME_INDEX:usize = 0;
 
-pub const DEBUG_PLAY_CARD_TEXTS:&[&'static str] = &[
-    "שמש",
-    "ירח",
-    "כוכב",
-    "blah",
-    "foo",
-    "Sun",
-    "Moon",
-    "Star",
-];
-
-
-
-#[derive(Default)]
 pub struct DebugSettings {
     pub state:Option<raw::GameState>,
     pub step:Option<usize>,
+    //just used for words and images, but whatever
+    pub content_mode: ContentMode,
 }
 
 impl DebugSettings {
@@ -42,6 +30,7 @@ impl DebugSettings {
                 raw::BaseGameState::default_words_and_images()
             )),
             step: Some(DEBUG_STEP),
+            content_mode: ContentMode::Images,
         }
     }
 
@@ -51,6 +40,7 @@ impl DebugSettings {
                 raw::BaseGameState::default_duplicate()
             )),
             step: Some(DEBUG_STEP),
+            content_mode: ContentMode::Text,
         }
     }
 }
@@ -62,7 +52,11 @@ cfg_if! {
         }
     } else {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            Self {
+                state: None, 
+                step: None, 
+                content_mode: ContentMode::Text,
+            }
         }
     }
 }

@@ -50,6 +50,15 @@ pub trait BaseGameStateExt {
     }
     fn default_words_and_images() -> raw::BaseGameState {
         raw::BaseGameState {
+            pairs: INITIAL_CARD_TEXTS
+                .iter()
+                .map(|text| {
+                    (
+                        raw::Card::Text(text.to_string()),
+                        raw::Card::Image(None)
+                    )
+                })
+                .collect(),
             ..Self::base_default()
         }
     }
