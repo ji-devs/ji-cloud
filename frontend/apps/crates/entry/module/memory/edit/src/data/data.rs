@@ -8,9 +8,15 @@ use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
-use super::raw::*;
+use super::raw;
 use itertools::Itertools;
 use std::fmt::Write;
+
+#[derive(Clone, Debug)]
+pub struct Theme {
+    pub id: &'static str,
+    pub label: &'static str,
+}
 
 pub struct GameState {
     pub jig_id: String,
@@ -31,26 +37,28 @@ impl GameState {
         }
     }
 
-    pub fn set_from_loaded(&self, step: usize, raw:GameStateRaw) {
+    pub fn set_from_loaded(&self, step: usize, raw_game_state:raw::GameState) {
         if self.mode.get().is_some() {
             panic!("setting the game state from loaded only works on first-load!");
         }
 
-        let (mode, state) = match raw {
-            GameStateRaw::Duplicate(raw_state) => {
+        let (mode, state) = match raw_game_state {
+            raw::GameState::Duplicate(raw_state) => {
+                let mode = GameMode::Duplicate;
                 (
-                    Some(GameMode::Duplicate),
-                    Some(BaseGameState::from_raw(step, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                    Some(mode),
+                    Some(BaseGameState::from_raw(step, mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
                 )
             },
-            GameStateRaw::WordsAndImages(raw_state) => {
+            raw::GameState::WordsAndImages(raw_state) => {
+                let mode = GameMode::WordsAndImages;
                 (
-                    Some(GameMode::WordsAndImages),
-                    Some(BaseGameState::from_raw(step, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                    Some(mode),
+                    Some(BaseGameState::from_raw(step, mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
                 )
             },
-            GameStateRaw::None => (None, None),
-            _ => unimplemented!("no way to load {:?}", raw) 
+            raw::GameState::None => (None, None),
+            _ => unimplemented!("no way to load {:?}", raw_game_state) 
         };
 
         //Note that this will *not* trigger re-renders of the inner mode pages
@@ -64,29 +72,41 @@ impl GameState {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GameMode {
     Duplicate,
     WordsAndImages,
 }
 
 #[derive(Clone, Debug)]
-pub struct Card {
-    pub text: Mutable<String>,
+pub enum Card {
+    Text(Mutable<String>),
+    Image(Mutable<String>),
+    Audio(Mutable<String>),
 }
+
 impl From<String> for Card {
     fn from(text:String) -> Self {
-        Self {text: Mutable::new(text) }
+        Card::Text(Mutable::new(text))
     }
 }
-impl From<CardRaw> for Card {
-    fn from(card:CardRaw) -> Self {
-        Self {text: Mutable::new(card.text) }
+impl From<raw::Card> for Card {
+    fn from(card:raw::Card) -> Self {
+        match card {
+            raw::Card::Text(text) => Card::Text(Mutable::new(text)),
+            raw::Card::Image(src) => Card::Image(Mutable::new(src)),
+            raw::Card::Audio(src) => Card::Audio(Mutable::new(src))
+        }
     }
 }
-impl From<&Card> for CardRaw {
+
+impl From<&Card> for raw::Card {
     fn from(card:&Card) -> Self {
-        Self {text: card.text.get_cloned() }
+        match card {
+            Card::Text(text) => raw::Card::Text(text.get_cloned()),
+            Card::Image(src) => raw::Card::Image(src.get_cloned()),
+            Card::Audio(src) => raw::Card::Audio(src.get_cloned())
+        }
     }
 }
 
@@ -96,30 +116,52 @@ pub struct BaseGameState {
     pub jig_id: String,
     pub module_id: String,
     pub step: Mutable<Step>,
-    pub cards: MutableVec<Card>,
+    pub pairs: MutableVec<(Card, Card)>,
     pub theme_id: Mutable<String>,
+    pub edit_text_list: MutableVec<Mutable<String>>
 }
 
 impl BaseGameState {
-    pub fn to_raw(&self) -> BaseGameStateRaw {
-        BaseGameStateRaw {
-            cards: self.cards.lock_ref().iter().map(|card| card.into()).collect(),
+    pub fn to_raw(&self) -> raw::BaseGameState {
+        raw::BaseGameState {
+            pairs: self.pairs.lock_ref()
+                .iter()
+                .map(|(card_1, card_2)| 
+                    (card_1.into(), card_2.into())
+                )
+                .collect(),
             theme_id: self.theme_id.get_cloned(),
         }
     }
 
-    pub fn from_raw(step: usize, raw: BaseGameStateRaw, jig_id: String, module_id: String) -> Self {
-        let cards:Vec<Card> = raw.cards
-            .into_iter()
-            .map(|raw_card| raw_card.into())
-            .collect();
+    pub fn from_raw(step: usize, mode: GameMode, raw_game_state: raw::BaseGameState, jig_id: String, module_id: String) -> Self {
+        let mut pairs:Vec<(Card, Card)> = Vec::new();
+        let mut edit_text_list:Vec<Mutable<String>> = Vec::new();
+        
+        let mut derive_edit_data = |card:&raw::Card| {
+            match card {
+                raw::Card::Text(text) => {
+                    edit_text_list.push(Mutable::new(text.to_string()));
+                },
+                _ => {}
+            }
+        };
+
+        for (card_1, card_2) in raw_game_state.pairs.into_iter() {
+            derive_edit_data(&card_1);
+            if mode != GameMode::Duplicate {
+                derive_edit_data(&card_2);
+            }
+            pairs.push((card_1.into(), card_2.into()));
+        }
 
         Self {
             jig_id,
             module_id,
             step: Mutable::new(step.into()),
-            cards: MutableVec::new_with_values(cards),
-            theme_id: Mutable::new(raw.theme_id)
+            pairs: MutableVec::new_with_values(pairs),
+            theme_id: Mutable::new(raw_game_state.theme_id),
+            edit_text_list: MutableVec::new_with_values(edit_text_list),
         }
     }
 }

@@ -9,25 +9,51 @@ use futures_signals::{
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::raw::*;
+use crate::data::*; 
+
+
+pub const DEBUG_STEP:usize = 2;
+pub const DEBUG_THEME_INDEX:usize = 0;
+
+pub const DEBUG_PLAY_CARD_TEXTS:&[&'static str] = &[
+    "שמש",
+    "ירח",
+    "כוכב",
+    "blah",
+    "foo",
+    "Sun",
+    "Moon",
+    "Star",
+];
+
+
 
 #[derive(Default)]
 pub struct DebugSettings {
-    pub state:Option<GameStateRaw>,
+    pub state:Option<raw::GameState>,
+    pub step:Option<usize>,
     pub shuffle: bool,
 }
 
 impl DebugSettings {
     pub fn local() -> Self {
         Self {
-            state: Some(GameStateRaw::debug()),
+            state: Some(raw::GameState::Duplicate(
+                raw::BaseGameState {               
+                    pairs: DEBUG_PLAY_CARD_TEXTS 
+                        .iter()
+                        .map(|text| {
+                            (
+                                raw::Card::Text(text.to_string()),
+                                raw::Card::Text(text.to_string())
+                            )
+                        })
+                        .collect(),
+                    theme_id: "basic".to_string(),
+                },
+            )),
+            step: Some(DEBUG_STEP),
             shuffle: false,
-        }
-    }
-    pub fn live() -> Self {
-        Self {
-            state: None, 
-            shuffle: true,
         }
     }
 }
@@ -39,7 +65,7 @@ cfg_if! {
         }
     } else {
         pub fn settings() -> DebugSettings {
-            DebugSettings::live()
+            DebugSettings::default()
         }
     }
 }

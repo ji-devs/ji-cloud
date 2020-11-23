@@ -20,7 +20,7 @@ use utils::{
     signals::StyleSignal,
 };
 use gloo_timers::future::TimeoutFuture;
-use crate::{debug, data::{*, raw::*}};
+use crate::{debug, data::*};
 use std::future::Future;
 use async_trait::async_trait;
 use std::{
@@ -43,18 +43,18 @@ impl PlayerPage {
 //Use the ModuleRenderer component by way of a trait
 #[async_trait(?Send)]
 impl ModuleRenderer for PlayerPage {
-    type Data = GameStateRaw;
+    type Data = raw::GameState;
 
-    async fn load(_self:Rc<Self>) -> GameStateRaw { 
+    async fn load(_self:Rc<Self>) -> raw::GameState { 
         if let Some(raw_state) = debug::settings().state {
             raw_state
         } else {
             log::info!("loading...");
-            GameStateRaw::load().await
+            raw::GameState::load(_self.game_state.jig_id.clone(), _self.game_state.module_id.clone()).await
         }
     }
 
-    fn render(_self: Rc<Self>, data: GameStateRaw) -> Dom {
+    fn render(_self: Rc<Self>, data: raw::GameState) -> Dom {
         _self.game_state.set_from_loaded(data);
         html!("div", {
             .child_signal(_self.game_state.mode.signal_ref(clone!(_self => move |mode| {
@@ -111,15 +111,15 @@ impl DuplicatePlayer {
         _self.state.game_cards
             .signal_vec_cloned()
             .map(clone!(_self => move |(card)| {
-                GameCardDom::render(GameCardDom::new(_self.state.clone(), card))
+                CardDom::render(CardDom::new(_self.state.clone(), card))
             }))
     }
 }
 
-pub struct GameCardDom {
+pub struct CardDom {
     pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
-    pub card: GameCard,
+    pub card: Card,
     pub transition: Mutable<Option<CardTransition>>
 }
 
@@ -160,8 +160,8 @@ impl CardTransition {
             })
     }
 }
-impl GameCardDom {
-    pub fn new(state:Rc<BaseGameState>, card: GameCard) -> Rc<Self> {
+impl CardDom {
+    pub fn new(state:Rc<BaseGameState>, card: Card) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -232,8 +232,24 @@ impl GameCardDom {
                     }
                 }))
             })
-            .with_data_id!("text-contents", {
-                .text(&_self.card.text)
+            .apply(|dom| {
+                match &_self.card.media {
+                    Media::Text(text) => {
+                        apply_methods!(dom, {
+                            .with_data_id!("text-contents", {
+                                .text(text)
+                            })
+                        })
+                    },
+                    Media::Image(src) => {
+                        apply_methods!(dom, {
+                            .with_data_id!("image", {
+                                .property("src", src)
+                            })
+                        })
+                    },
+                    _ => unimplemented!("don't know how to render media type!")
+                }
             })
         })
     }

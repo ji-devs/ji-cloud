@@ -18,7 +18,67 @@ use std::fmt::Write;
 use crate::data::*;
 use itertools::Itertools;
 use crate::config;
+use crate::pages::all_modes::steps_nav::apply_steps_nav;
 
+pub struct Step2Page {
+    state: Rc<BaseGameState>,
+}
+
+impl Step2Page {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
+
+        let preview_theme_id = Mutable::new(state.theme_id.get_cloned());
+        let _self = Rc::new(Self { 
+            state,
+        });
+
+        _self
+    }
+
+    fn cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
+        _self.state.pairs
+            .signal_vec_cloned()
+            .enumerate()
+            .map(clone!(_self => move |(index, (card_1, card_2))| {
+                CardPairDom::render(CardPairDom::new(_self.state.clone(), index, card_1, card_2))
+            }))
+    }
+
+    fn theme_options_dom(_self: Rc<Self>) -> impl Iterator<Item = Dom> {
+        config::THEME_OPTIONS
+            .iter()
+            .map(clone!(_self => move |theme| {
+                ThemeOption::render(ThemeOption::new(
+                    _self.state.clone(), 
+                    theme.clone()
+                ))
+            }))
+    }
+
+    pub fn render(_self: Rc<Self>, mode:GameMode) -> Dom {
+        let el = match mode {
+            GameMode::Duplicate => templates::duplicate::step_2_page(),
+            GameMode::WordsAndImages => templates::words_and_images::step_2_page(),
+        };
+        elem!(el, { 
+            .apply(|dom| apply_steps_nav(dom, _self.state.clone()))
+            .with_data_id!("cards", {
+                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
+                    Some(format!("memory-theme-{}", id))
+                }))
+                .children_signal_vec(Self::cards_dom_signal(_self.clone()))
+            })
+            .with_data_id!("theme-items", {
+                .children(Self::theme_options_dom(_self.clone()))
+            })
+            .with_data_id!("next", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.state.step.set(Step::Four);
+                }))
+            })
+        })
+    }
+}
 pub struct ThemeOption {
     pub state: Rc<BaseGameState>,
     pub is_hover:Mutable<bool>,
@@ -91,11 +151,12 @@ impl ThemeOption {
 }
 
 
-pub struct CardDom {
+pub struct CardPairDom {
     pub state: Rc<BaseGameState>,
     pub index: ReadOnlyMutable<Option<usize>>,
     pub is_hover:Mutable<Option<Side>>,
-    pub card: Card,
+    pub card_1: Card,
+    pub card_2: Card,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -104,13 +165,58 @@ pub enum Side {
     Right
 }
 
-impl CardDom {
-    pub fn new(state:Rc<BaseGameState>, index:ReadOnlyMutable<Option<usize>>, card: Card) -> Rc<Self> {
+impl CardPairDom {
+    pub fn new(state:Rc<BaseGameState>, index:ReadOnlyMutable<Option<usize>>, card_1: Card, card_2: Card) -> Rc<Self> {
         Rc::new(Self {
             state,
             index,
             is_hover: Mutable::new(None),
-            card 
+            card_1,
+            card_2
+        })
+    }
+
+    fn render_side(_self: Rc<Self>, dom:DomBuilder<HtmlElement>, side:Side) -> DomBuilder<HtmlElement> {
+        let side_name:&'static str = if side == Side::Left { "left" } else { "right" };
+        let card = if side == Side::Left { &_self.card_1 } else { &_self.card_2 };
+
+        apply_methods!(dom, {
+            .with_data_id!(side_name, {
+                .class_signal("flip-card-clicked", _self.is_hover.signal().map(move |hover| hover == Some(side)))
+                .with_node!(element => {
+                    .event(clone!(_self => move |evt:events::MouseEnter| {
+                        _self.is_hover.set(Some(side));
+                    }))
+                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
+                        if let Some(target) = evt.target() {
+                            if target == element.clone().unchecked_into() {
+                                _self.is_hover.set(None);
+                            } else {
+                                evt.prevent_default();
+                            }
+                        }
+                    }))
+                })
+                .apply(|dom| {
+                    match card {
+                        Card::Text(text) => {
+                            apply_methods!(dom, {
+                                .with_data_id!("text-contents", {
+                                    .text_signal(text.signal_cloned())
+                                })
+                            })
+                        },
+                        Card::Image(src) => {
+                            apply_methods!(dom, {
+                                .with_data_id!("image", {
+                                    .property_signal("src", src.signal_cloned())
+                                })
+                            })
+                        },
+                        _ => unimplemented!("don't know how to render audio!")
+                    }
+                })
+            })
         })
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
@@ -120,112 +226,13 @@ impl CardDom {
                     format!("{}", index.unwrap_or(0)+1)
                 }))
             })
-            //TODO - macro to make hover stuff DRY
-            .with_data_id!("left", {
-
-                .class_signal("flip-card-clicked", _self.is_hover.signal().map(|hover| hover == Some(Side::Left)))
-                .with_node!(element => {
-                    .event(clone!(_self => move |evt:events::MouseEnter| {
-                        _self.is_hover.set(Some(Side::Left));
-                    }))
-                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
-                        if let Some(target) = evt.target() {
-                            if target == element.clone().unchecked_into() {
-                                _self.is_hover.set(None);
-                            } else {
-                                evt.prevent_default();
-                            }
-                        }
-                    }))
-                })
-                .with_data_id!("text-contents", {
-                    .text_signal(_self.card.text.signal_cloned())
-                })
-            })
-            .with_data_id!("right", {
-                .class_signal("flip-card-clicked", _self.is_hover.signal().map(|hover| hover == Some(Side::Right)))
-                .with_node!(element => {
-                    .event(clone!(_self => move |evt:events::MouseEnter| {
-                        _self.is_hover.set(Some(Side::Right));
-                    }))
-                    .event_preventable(clone!(_self => move |evt:events::MouseLeave| {
-                        if let Some(target) = evt.target() {
-                            if target == element.clone().unchecked_into() {
-                                _self.is_hover.set(None);
-                            } else {
-                                evt.prevent_default();
-                            }
-                        }
-                    }))
-                })
-                .with_data_id!("text-contents", {
-                    .text_signal(_self.card.text.signal_cloned())
-                })
-            })
+            .apply(|dom| Self::render_side(_self.clone(), dom, Side::Left))
+            .apply(|dom| Self::render_side(_self.clone(), dom, Side::Right))
         })
     }
 }
 
-pub struct Step2Page {
-    state: Rc<BaseGameState>,
-}
 
-impl Step2Page {
-    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
 
-        let preview_theme_id = Mutable::new(state.theme_id.get_cloned());
-        let _self = Rc::new(Self { 
-            state,
-        });
-
-        _self
-    }
-
-    fn cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
-        _self.state.cards
-            .signal_vec_cloned()
-            //this allows us to hide the visuals of empty cards, but it gets weird
-            //.filter_signal_cloned(|card| card.text.signal_ref(|text| !text.is_empty()))
-            .enumerate()
-            .map(clone!(_self => move |(index, card)| {
-                CardDom::render(CardDom::new(_self.state.clone(), index, card))
-            }))
-    }
-
-    fn theme_options_dom(_self: Rc<Self>) -> impl Iterator<Item = Dom> {
-        config::THEME_OPTIONS
-            .iter()
-            .map(clone!(_self => move |theme| {
-                ThemeOption::render(ThemeOption::new(
-                    _self.state.clone(), 
-                    theme.clone()
-                ))
-            }))
-    }
-
-    pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::duplicate::step_2_page(), { 
-            .with_data_id!("top-step-1", {
-                .event(clone!(_self => move |evt:events::Click| {
-                    _self.state.step.set(Step::One);
-                }))
-            })
-            .with_data_id!("cards", {
-                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
-                    Some(format!("memory-theme-{}", id))
-                }))
-                .children_signal_vec(Self::cards_dom_signal(_self.clone()))
-            })
-            .with_data_id!("theme-items", {
-                .children(Self::theme_options_dom(_self.clone()))
-            })
-            .with_data_id!("next", {
-                .event(clone!(_self => move |evt:events::Click| {
-                    _self.state.step.set(Step::Four);
-                }))
-            })
-        })
-    }
-}
 
 
