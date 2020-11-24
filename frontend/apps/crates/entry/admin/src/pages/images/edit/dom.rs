@@ -72,7 +72,7 @@ impl ImageEdit{
             error_message: Mutable::new(None),
             publish_message: Mutable::new(None),
             refs: RefCell::new(None),
-            section: Mutable::new(Section::Meta),
+            section: Mutable::new(Section::Categories),
             category_expansions: RefCell::new(HashMap::new()),
             //Load/Save
             init: Mutable::new(None),
@@ -553,6 +553,22 @@ impl ImageEdit{
     }
     fn render_section_categories(_self: Rc<Self>, init:&Init) -> Dom {
         elem!(templates::image_edit_categories(), {
+            .with_data_id!("categories-expand", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.category_expansions
+                        .borrow()
+                        .values()
+                        .for_each(|x| x.set(true));
+                }))
+            })
+            .with_data_id!("categories-collapse", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.category_expansions
+                        .borrow()
+                        .values()
+                        .for_each(|x| x.set(false));
+                }))
+            })
             .with_data_id!("select-list", {
                 .children(init.categories.iter().map(clone!(_self => move |cat| {
                     Self::render_category_select(_self.clone(), cat.clone())

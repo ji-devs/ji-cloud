@@ -7,9 +7,13 @@
       <div class="flex mb-2">
         <div class="w-full">
           <div class="flex justify-between pb-3">
-            <div class="flex items-center">
+            <div class="grid grid-cols-2 w-full">
               <p class="text-jibuttonBlue font-medium">Categories</p>
-              {{ Input::searchbox(dataId="#", label="Image search") }}
+              <div class="flex justify-self-end">
+                  <div data-id="categories-expand" class="text-jibuttonBlue cursor-pointer">Expand All</div>
+                  <div class="ml-4 mr-4">/</div>
+                  <div data-id="categories-collapse" class="text-jibuttonBlue cursor-pointer">Collapse All</div>
+              </div>
             </div>
 
           </div>
