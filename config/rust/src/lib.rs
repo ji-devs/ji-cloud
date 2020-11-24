@@ -116,7 +116,6 @@ impl RemoteTarget {
         }
     }
 
-
     pub fn css_url(&self, minified: bool) -> String {
         if minified {
             format!("{}/_css/styles.min.css", self.frontend_url())

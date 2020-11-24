@@ -42,6 +42,7 @@ time = "0.2.16"
 tokio = { version = "0.2", features = ["rt-threaded"] }
 url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
+mp3-metadata = "0.3.3"
 
 [dependencies.sqlx]
 version = "0.4.0"

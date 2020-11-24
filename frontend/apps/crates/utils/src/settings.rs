@@ -2,6 +2,9 @@ use once_cell::sync::OnceCell;
 use std::fmt;
 use cfg_if::cfg_if;
 use config::RemoteTarget;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use shared::domain::auth::JWT_COOKIE_NAME;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -13,7 +16,7 @@ pub struct Settings {
 
 cfg_if! {
     if #[cfg(feature = "local")] {
-        pub fn init() -> Settings { 
+        pub fn init() -> Settings {
             _init(RemoteTarget::Local)
         }
     } else if #[cfg(feature = "sandbox")] {
@@ -32,6 +35,17 @@ cfg_if! {
     } 
 }
 
+//These will only be set in the local index.html created via dev-files
+//However they are only called in local mode, so it's fine
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_name = FRONTEND_DEV_AUTH)]
+    fn frontend_dev_auth() -> bool;
+    #[wasm_bindgen(js_name = FRONTEND_DEV_TOKEN)]
+    fn frontend_dev_token() -> String;
+    #[wasm_bindgen(js_name = FRONTEND_DEV_CSRF)]
+    fn frontend_dev_csrf() -> String;
+}
 
 fn _init(remote_target:RemoteTarget) -> Settings {
     let settings = match remote_target {
@@ -39,6 +53,22 @@ fn _init(remote_target:RemoteTarget) -> Settings {
         RemoteTarget::Sandbox => Settings::new_sandbox(),
         RemoteTarget::Release => Settings::new_release(),
     };
+
+    if remote_target == RemoteTarget::Local {
+        unsafe {
+            if frontend_dev_auth() {
+                let csrf = frontend_dev_csrf();
+                let token = frontend_dev_token();
+                super::storage::save_csrf_token(&csrf);
+                web_sys::window()
+                    .unwrap_throw()
+                    .document()
+                    .unwrap_throw()
+                    .unchecked_into::<web_sys::HtmlDocument>()
+                    .set_cookie(&format!("{}={}; PATH=/", JWT_COOKIE_NAME, token));
+            }
+        }
+    }
     SETTINGS.set(settings.clone()).expect("couldn't set settings!");
 
     settings
