@@ -1,3 +1,4 @@
+pub(crate) mod audio;
 pub(crate) mod category;
 pub(crate) mod image;
 pub(crate) mod jig;
