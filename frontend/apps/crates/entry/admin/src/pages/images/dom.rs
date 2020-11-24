@@ -16,7 +16,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use utils::routes::{Route, UserRoute};
+use utils::routes::{Route, UserRoute, ImageSearchQuery};
 use shared::domain::{
     user::UserProfile,
     category::Category
@@ -28,8 +28,8 @@ use super::search::ImageSearch;
 #[derive(Clone, Debug)]
 pub enum PageMode {
     Add,
-    Edit(String),
-    Search 
+    Edit(String, Option<ImageSearchQuery>),
+    Search(Option<ImageSearchQuery>)
 }
 
 pub struct ImagesPage {
@@ -51,8 +51,8 @@ impl ImagesPage {
                 .child_signal(_self.page_mode.signal_cloned().map(clone!(_self => move |page_mode| {
                     match page_mode {
                         PageMode::Add => Some(ImageAdd::render(ImageAdd::new())),
-                        PageMode::Edit(id) => Some(ImageEdit::render(ImageEdit::new(id))),
-                        PageMode::Search => Some(ImageSearch::render(ImageSearch::new())),
+                        PageMode::Edit(id, query) => Some(ImageEdit::render(ImageEdit::new(id, query))),
+                        PageMode::Search(query) => Some(ImageSearch::render(ImageSearch::new(query))),
                     }
                 })))
             })

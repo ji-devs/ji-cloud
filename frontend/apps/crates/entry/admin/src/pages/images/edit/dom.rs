@@ -17,7 +17,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use utils::{
-    routes::{Route, AdminRoute},
+    routes::{Route, AdminRoute, ImageSearchQuery},
     path::upload_image_url
 };
 use shared::error::image::UpdateError;
@@ -43,7 +43,8 @@ pub struct ImageEdit {
     save_loader: AsyncLoader,
     publish_loader: AsyncLoader,
     category_expansions: RefCell<HashMap<Id, Mutable<bool>>>,
-    selected_categories: Mutable<HashSet<Id>> 
+    selected_categories: Mutable<HashSet<Id>>,
+    from_search: Option<ImageSearchQuery>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -64,7 +65,7 @@ struct SaveInfo {
     pub categories: Vec<Id>,
 }
 impl ImageEdit{
-    pub fn new(id:String) -> Rc<Self> {
+    pub fn new(id:String, from_search: Option<ImageSearchQuery>) -> Rc<Self> {
         //TODO - determine from route
         let start_section = Section::Meta;
         let _self = Rc::new(Self { 
@@ -85,6 +86,7 @@ impl ImageEdit{
             age_ranges: RefCell::new(HashSet::new()),
             affiliations: RefCell::new(HashSet::new()),
             selected_categories: Mutable::new(HashSet::new()),
+            from_search
         });
 
         let _self_clone = _self.clone();
@@ -262,6 +264,16 @@ impl ImageEdit{
             .child_signal(_self.init.signal_cloned().map(clone!(_self => move |init| {
                 init.map(|init:Init| {
                     elem!(templates::image_edit(), { 
+                        .with_data_id!("back-to-search", {
+                            .apply_if(_self.from_search.is_none(), |dom| {
+                                dom.class("hidden")
+                            })
+                            .event(clone!(_self => move |evt:events::Click| {
+                                let route = Route::Admin(AdminRoute::ImageSearch(_self.from_search.clone()));
+                                let route = String::from(route);
+                                dominator::routing::go_to_url(&route);
+                            }))
+                        })
                         .with_data_id!("img", {
                             .property_signal("src", _self.id.signal_cloned().map_future(|id| {
                                 async move {
@@ -278,7 +290,7 @@ impl ImageEdit{
                                             _self.error_message.set(Some("Couldn't delete image".to_string()))
                                         },
                                         Ok(_) => {
-                                            let route:String = Route::Admin(AdminRoute::Images).into();
+                                            let route:String = Route::Admin(AdminRoute::ImageSearch( _self.from_search.clone())).into();
                                             dominator::routing::go_to_url(&route);
                                         }
                                     }

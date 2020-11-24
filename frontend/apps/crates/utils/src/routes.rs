@@ -36,10 +36,11 @@ pub enum ProfileSection {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AdminRoute {
     Categories,
-    Images,
+    ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageEdit(Id),
+    ImageEdit(Id, Option<ImageSearchQuery>),
 }
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum JigRoute {
@@ -62,8 +63,15 @@ pub enum ModuleRoute {
 
 //Just for serializing across local routes
 #[derive(Serialize, Deserialize)]
-struct FirebaseUserQuery {
-    pub user: String  //json-encoded FirebaseUserInfo
+struct JsonQuery {
+    pub data: String  //json-encoded data as-needed
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ImageSearchQuery {
+    pub query: String,
+    pub page: u32,
+    pub filter_index: u32
 }
 
 impl Route {
@@ -79,6 +87,7 @@ impl Route {
         let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
         let paths = paths.as_slice();
         let params = url.search_params();
+        let json_query = params.get("data");
 
         match paths {
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
@@ -86,7 +95,7 @@ impl Route {
             ["user", "signin"] => Self::User(UserRoute::Signin),
             ["user", "register"] => Self::User(UserRoute::Register),
             ["user", "continue-registration"] => {
-                if let Some(user) = params.get("user") {
+                if let Some(user) = json_query {
                     let user:FirebaseUserInfo = serde_json::from_str(&user).unwrap_throw();
                     Self::User(UserRoute::ContinueRegistration(user))
                 } else {
@@ -96,9 +105,23 @@ impl Route {
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
             ["user", "got-email-confirmation"] => Self::User(UserRoute::GotEmailConfirmation),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
-            ["admin", "images"] => Self::Admin(AdminRoute::Images),
+            ["admin", "image-search"] => {
+                if let Some(search) = json_query {
+                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    Self::Admin(AdminRoute::ImageSearch(Some(search)))
+                } else {
+                    Self::Admin(AdminRoute::ImageSearch(None))
+                }
+            },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
-            ["admin", "image-edit", id] => Self::Admin(AdminRoute::ImageEdit(id.to_string())),
+            ["admin", "image-edit", id] => {
+                if let Some(search) = json_query {
+                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), Some(search)))
+                } else {
+                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), None))
+                }
+            },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), None)),
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
@@ -130,8 +153,8 @@ impl From<Route> for String {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
                     UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
                     UserRoute::ContinueRegistration(user) => {
-                        let user = serde_json::to_string(&user).unwrap_throw();
-                        let query = FirebaseUserQuery { user };
+                        let data = serde_json::to_string(&user).unwrap_throw();
+                        let query = JsonQuery { data };
                         let query = serde_qs::to_string(&query).unwrap_throw();
                         format!("/user/continue-registration?{}", query) 
                     }
@@ -144,9 +167,29 @@ impl From<Route> for String {
             Route::Admin(route) => {
                 match route {
                     AdminRoute::Categories => "/admin/categories".to_string(),
-                    AdminRoute::Images => "/admin/images".to_string(),
+                    AdminRoute::ImageSearch(search) => {
+                        match search {
+                            None => "/admin/image-search".to_string(),
+                            Some(search) => {
+                                let data = serde_json::to_string(&search).unwrap_throw();
+                                let query = JsonQuery { data };
+                                let query = serde_qs::to_string(&query).unwrap_throw();
+                                format!("/admin/image-search?{}", query)
+                            }
+                        }
+                    }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
-                    AdminRoute::ImageEdit(id) => format!("/admin/image-edit/{}", id),
+                    AdminRoute::ImageEdit(id, search) => {
+                        match search {
+                            None => format!("/admin/image-edit/{}", id),
+                            Some(search) => {
+                                let data = serde_json::to_string(&search).unwrap_throw();
+                                let query = JsonQuery { data };
+                                let query = serde_qs::to_string(&query).unwrap_throw();
+                                format!("/admin/image-edit/{}?{}", id, query)
+                            }
+                        }
+                    }
                 }
             },
             Route::Jig(route) => {

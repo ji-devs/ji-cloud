@@ -43,11 +43,9 @@ impl ContainerPage
         R: Signal<Item=Route> + 'static,
 
     {
-        let make_link = |_self: Rc<Self>, label:&'static str, curr_route:Route, target_route:Route| {
-            let same_route:bool = curr_route == target_route;
-
+        let make_link = |_self: Rc<Self>, label:&'static str, target_route:Route, route_matches: bool| {
             elem!(templates::sidebar_link( label, &String::from(target_route), false), {
-                .apply_if(same_route, |dom| {
+                .apply_if(route_matches, |dom| {
                     dom.class("text-white")
                 })
             })
@@ -55,10 +53,24 @@ impl ContainerPage
 
         route_signal
             .map(clone!(_self => move |route| {
+
+                let (is_new_image, is_image_search, is_categories) = {
+                    match route {
+                       Route::Admin(route) => {
+                           match route {
+                               AdminRoute::ImageAdd => (true, false, false),
+                               AdminRoute::ImageSearch(_) => (false, true, false),
+                               AdminRoute::Categories => (false, false, true),
+                               _ => (false, false, false)
+                           }
+                       },
+                       _ => (false, false, false)
+                    }
+                };
                 vec![
-                    make_link(_self.clone(), "New Image", route.clone(), Route::Admin(AdminRoute::ImageAdd)),
-                    make_link(_self.clone(), "Images", route.clone(), Route::Admin(AdminRoute::Images)),
-                    make_link(_self.clone(), "Categories", route.clone(), Route::Admin(AdminRoute::Categories))
+                    make_link(_self.clone(), "New Image", Route::Admin(AdminRoute::ImageAdd), is_new_image),
+                    make_link(_self.clone(), "Search Images", Route::Admin(AdminRoute::ImageSearch(None)), is_image_search), 
+                    make_link(_self.clone(), "Categories", Route::Admin(AdminRoute::Categories), is_categories), 
                     //make_link(_self.clone(), "JIGs", Route::Admin(AdminRoute::Images))
                 ]
             }))
