@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
-    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always},
+    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always, self},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
     CancelableFutureHandle, 
 };
@@ -29,6 +29,16 @@ use std::{
     marker
 };
 use dominator::animation::{easing, Percentage, MutableAnimation, AnimatedMapBroadcaster};
+use shared::{
+    api::endpoints::{ApiEndpoint, self},
+    domain,
+    error,
+};
+use utils::{
+    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
+};
+
+use uuid::Uuid;
 pub struct PlayerPage {
     game_state: GameState,
 }
@@ -127,36 +137,48 @@ pub struct CardTransition {
     pub animation: MutableAnimation,
     pub dest_x: f64,
     pub dest_y: f64,
+    pub dest_rot: f64, 
+    pub side: Side,
 }
 
 impl CardTransition {
-    pub fn new(element:&HtmlElement) -> Self {
+    pub fn new(element:&HtmlElement, found_index: usize, side:Side) -> Self {
 
         let animation = MutableAnimation::new(3000.0);
         animation.animate_to(Percentage::new(1.0));
 
         let (origin_x, origin_y) = utils::resize::ModuleBounds::get_element_pos_rem(element);
+        let mut dest_x = if side == Side::Left { 0.0 } else { 10.0 };
+        dest_x -= origin_x;
 
-        let dest_x = 0.0 - origin_x;
-        let dest_y = 0.0 - origin_y;
+        let start_y = 5.0;
+        let line_offset = 20.0;
+        let mut dest_y = start_y + (found_index as f64 * line_offset);
+        dest_y -= origin_y;
+
+        let dest_rot:f64 = if side == Side::Right { -20.0 } else { 0.0 };
         Self {
             animation,
             dest_x,
-            dest_y
+            dest_y,
+            dest_rot,
+            side,
         }
     }
+
     fn transform_signal(&self) -> impl Signal<Item = String> {
         let dest_x = self.dest_x; 
         let dest_y = self.dest_y; 
-
+        let dest_rot = self.dest_rot;
         self.animation.signal()
             .map(move |t| easing::in_out(t, easing::cubic))
             .map(move |t| (
                 t.range_inclusive(0.0, dest_x),
-                t.range_inclusive(0.0, dest_y)
+                t.range_inclusive(0.0, dest_y),
+                t.range_inclusive(0.0, dest_rot),
             ))
-            .map(|(x, y)| {
-                format!("translate({}rem, {}rem)", x, y)
+            .map(move |(x, y, rot)| {
+                format!("translate({}rem, {}rem) rotateZ({}deg)", x, y, rot)
             })
     }
 }
@@ -177,7 +199,7 @@ impl CardDom {
             let flip_state = self.state.flip_state.signal_cloned(),
             let found = self.card.found.signal()
             => move {
-                if *found {
+                if found.is_some() {
                     true
                 } else {
                     match flip_state {
@@ -201,21 +223,38 @@ impl CardDom {
         })
         .flatten()
     }
+    fn depth_signal(&self, side: Side) -> impl Signal<Item = &'static str> {
+
+        self.transition.signal_ref(clone!(side => move |t| {
+            match t {
+                None => "0",
+                Some(_) => {
+                    if side == Side::Left {
+                        "10"
+                    } else {
+                        "9"
+                    }
+                }
+            }
+        }))
+    }
 
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::card(), {
             .with_node!(element => {
                 .future(_self.card.found.signal().for_each(clone!(_self,element => move |found| {
-                    if found {
-                        _self.transition.set(Some(CardTransition::new(&element)));
+                    if let Some(found_index) = found {
+                        _self.transition.set(Some(CardTransition::new(&element, found_index, _self.card.side)));
                     }
                     async {}
                 })))
             })
 
+
             .event(clone!(_self => move |evt:events::Click| {
                 _self.state.card_click(_self.card.id);
             }))
+            .style_signal("z-index", _self.depth_signal(_self.card.side))
             .style_signal("transform", _self.transform_signal())
             .class_signal("flip-card-clicked", _self.is_showing().map(|x| !x))
             .with_node!(element => {
@@ -239,13 +278,18 @@ impl CardDom {
                             .with_data_id!("text-contents", {
                                 .text(text)
                             })
+                            .with_data_id!("image", {
+                                .class("hidden")
+                            })
                         })
                     },
                     Media::Image(id) => {
                         apply_methods!(dom, {
                             .with_data_id!("image", {
-                                //TODO - load image src
-                                .property("src", id.as_ref())
+                                .property_signal("src", image_url_signal(id.clone()))
+                            })
+                            .with_data_id!("text-contents", {
+                                .class("hidden")
                             })
                         })
                     },
@@ -256,23 +300,22 @@ impl CardDom {
     }
 }
 
-/*
-fn image_url_signal(id:Mutable<Option<String>>) -> impl Signal<Item = String> {
-    id.signal_cloned().map_future(|id| {
-        async move {
-            if let Some(id) = id {
+fn image_url_signal(id:Option<String>) -> impl Signal<Item = String> {
+    log::info!("{:?}", id);
+    signal::from_future(async move {
+        match id {
+            None => None,
+            Some(id) => {
                 let path = endpoints::image::Get::PATH.replace("{id}",&id);
+                log::info!("{}", path);
+
                 match api_with_auth::<domain::image::GetResponse, shared::error::GetError, ()>(&path, endpoints::image::Get::METHOD, None).await {
                     Err(_) => None, 
                     Ok(res) => Some(res.url.to_string())
                 }
-            } else {
-                None
             }
-
         }
     })
     .map(|x| x.flatten().unwrap_or("".to_string()))
 
 }
-*/

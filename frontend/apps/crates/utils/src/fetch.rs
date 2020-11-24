@@ -104,7 +104,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().unwrap();
+    let csrf = load_csrf_token().expect_throw("no CSRF / not logged in!");
 
     let (url, data) = api_get_query(endpoint, method, data);
 

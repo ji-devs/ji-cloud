@@ -24,6 +24,13 @@ pub struct DebugSettings {
 }
 
 impl DebugSettings {
+    pub fn default() -> DebugSettings {
+        DebugSettings {
+            state: None, 
+            step: None, 
+            content_mode: ContentMode::Text,
+        }
+    }
     pub fn words_and_images() -> Self {
         Self {
             state: Some(raw::GameState::WordsAndImages(
@@ -48,15 +55,11 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::words_and_images()
+            DebugSettings::default()
         }
     } else {
         pub fn settings() -> DebugSettings {
-            DebugSettings {
-                state: None, 
-                step: None, 
-                content_mode: ContentMode::Text,
-            }
+            DebugSettings::default()
         }
     }
 }

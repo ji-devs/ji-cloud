@@ -76,16 +76,25 @@ pub enum GameMode {
     WordsAndImages,
 }
 
+pub type FoundIndex = usize;
+
 #[derive(Clone, Debug)]
 pub struct Card {
     pub media: Media,
     pub id: usize,
     pub other_id: usize,
-    pub found: Mutable<bool>
+    pub side: Side,
+    pub found: Mutable<Option<FoundIndex>>
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Side {
+    Left,
+    Right
 }
 
 impl Card {
-    pub fn new(card:&raw::Card, id: usize, other_id:usize) -> Self {
+    pub fn new(card:&raw::Card, id: usize, other_id:usize, side:Side) -> Self {
         Self {
             media: match card {
                 raw::Card::Text(text) => Media::Text(text.to_string()),
@@ -94,7 +103,8 @@ impl Card {
             },
             id,
             other_id,
-            found: Mutable::new(false),
+            found: Mutable::new(None),
+            side,
         }
     }
 }
@@ -117,6 +127,7 @@ pub struct BaseGameState {
     pub game_cards: MutableVec<Card>,
     pub theme_id: String,
     pub flip_state: Mutable<FlipState>,
+    pub found_pairs: RefCell<Vec<(usize, usize)>>, 
 }
 
 #[derive(Debug, Clone)]
@@ -124,11 +135,6 @@ pub enum FlipState {
     None,
     One(usize),
     Two((usize, usize)),
-}
-#[derive(Debug, PartialEq)]
-enum Side {
-    Right,
-    Left
 }
 
 fn make_game_cards(pairs:&[(raw::Card, raw::Card)]) -> Vec<Card> {
@@ -141,8 +147,8 @@ fn make_game_cards(pairs:&[(raw::Card, raw::Card)]) -> Vec<Card> {
         let id_2 = index + 1;
         index = id_2 + 1;
 
-        cards.push(Card::new(card_1, id_1, id_2));
-        cards.push(Card::new(card_2, id_2, id_1));
+        cards.push(Card::new(card_1, id_1, id_2, Side::Left));
+        cards.push(Card::new(card_2, id_2, id_1, Side::Right));
     }
 
     cards
@@ -172,6 +178,7 @@ impl BaseGameState {
             game_cards: MutableVec::new_with_values(cards),
             theme_id: raw_game_state.theme_id,
             flip_state: Mutable::new(FlipState::None), 
+            found_pairs: RefCell::new(Vec::new()),
         };
 
         state
@@ -181,11 +188,14 @@ impl BaseGameState {
 
         if self.pair_lookup[id_1] == id_2 {
             let game_cards = self.game_cards.lock_ref();
+            let mut found_pairs = self.found_pairs.borrow_mut();
+            let found_pairs_index = found_pairs.len();
+            found_pairs.push((id_1, id_2));
             if let Some(card) = game_cards.iter().find(|c| c.id == id_1) {
-                card.found.set(true);
+                card.found.set(Some(found_pairs_index));
             }
             if let Some(card) = game_cards.iter().find(|c| c.id == id_2) {
-                card.found.set(true);
+                card.found.set(Some(found_pairs_index));
             }
         } else {
             TimeoutFuture::new(2_000).await;

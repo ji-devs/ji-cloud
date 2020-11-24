@@ -26,7 +26,7 @@ pub const DEBUG_PLAY_CARD_TEXTS:&[&'static str] = &[
     "Star",
 ];
 
-
+pub const DEBUG_IMAGE_ID:&'static str ="6468777e-2008-11eb-a943-331f3eea16f5";
 
 #[derive(Default)]
 pub struct DebugSettings {
@@ -42,10 +42,17 @@ impl DebugSettings {
                 raw::BaseGameState {               
                     pairs: DEBUG_PLAY_CARD_TEXTS 
                         .iter()
-                        .map(|text| {
+                        .enumerate()
+                        .map(|(index, text)| {
                             (
                                 raw::Card::Text(text.to_string()),
-                                raw::Card::Text(text.to_string())
+                                if index == 0 {
+                                    raw::Card::Image(Some(DEBUG_IMAGE_ID.to_string()))
+                                } else if index == 1 {
+                                    raw::Card::Image(None)
+                                } else {
+                                    raw::Card::Text(text.to_string())
+                                }
                             )
                         })
                         .collect(),
