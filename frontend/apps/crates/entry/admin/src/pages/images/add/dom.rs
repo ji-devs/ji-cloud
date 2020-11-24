@@ -57,7 +57,7 @@ impl ImageAdd{
                     if let Some(file) = file {
                         spawn_local(async move {
                             let id = actions::create_image(file, get_image_kind()).await.unwrap_throw();
-                            let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
+                            let route:String = Route::Admin(AdminRoute::ImageEdit(id, None)).into();
                             dominator::routing::go_to_url(&route);
                         });
                     }

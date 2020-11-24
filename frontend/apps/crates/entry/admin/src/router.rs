@@ -34,8 +34,8 @@ impl Router {
                             match route {
                                 AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
                                 AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
-                                AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
-                                AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Search))),
+                                AdminRoute::ImageEdit(id, query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id, query)))),
+                                AdminRoute::ImageSearch(query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Search(query)))),
                             }
                         }
                         _ => None
