@@ -9,19 +9,45 @@ use futures_signals::{
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::raw::*;
+use crate::data::*; 
+use crate::config::BaseGameStateExt;
 
-#[derive(Default)]
+
+pub const DEBUG_STEP:usize = 1;
+pub const DEBUG_THEME_INDEX:usize = 0;
+
 pub struct DebugSettings {
-    pub state:Option<GameStateRaw>,
+    pub state:Option<raw::GameState>,
     pub step:Option<usize>,
+    //just used for words and images, but whatever
+    pub content_mode: ContentMode,
 }
 
 impl DebugSettings {
-    pub fn local() -> Self {
+    pub fn default() -> DebugSettings {
+        DebugSettings {
+            state: None, 
+            step: None, 
+            content_mode: ContentMode::Text,
+        }
+    }
+    pub fn words_and_images() -> Self {
         Self {
-            state: Some(GameStateRaw::debug()),
-            step: Some(crate::config::DEBUG_STEP),
+            state: Some(raw::GameState::WordsAndImages(
+                raw::BaseGameState::default_words_and_images()
+            )),
+            step: Some(DEBUG_STEP),
+            content_mode: ContentMode::Images,
+        }
+    }
+
+    pub fn duplicate() -> Self {
+        Self {
+            state: Some(raw::GameState::Duplicate(
+                raw::BaseGameState::default_duplicate()
+            )),
+            step: Some(DEBUG_STEP),
+            content_mode: ContentMode::Text,
         }
     }
 }

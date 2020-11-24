@@ -58,52 +58,67 @@ jobs:
             --no-default-features
 
   # work in progress: currently yarn doesn't work right
-  # test:
-  #   name: Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - run: sudo apt update
-  #     - run: sudo apt install postgresql-10 postgresql-contrib-10
+  test:
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: password
+          # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --tmpfs /var/lib/postgresql/data
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     # - uses: actions-rs/toolchain@v1
-  #     #   with:
-  #     #     profile: minimal
-  #     #     toolchain: stable
-  #     #     override: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
 
-  #     - uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #           ~/.cargo/registry
-  #           ~/.cargo/git
-  #           backend/api/target
-  #         key: ${{ runner.os }}-check-${{ hashFiles('backend/api/Cargo.lock') }}
+      - uses: actions/setup-node@v1
 
-  #     - uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #          'backend/api/integration-testing/node_modules'
-  #          '~/.cache/yarn'
-  #          '~/.yarn'
-  #         key: ${{ runner.os }}-test-js-${{ hashFiles('backend/api/integration-testing/yarn.lock') }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/api/target
+          key: ${{ runner.os }}-test-rs-${{ hashFiles('backend/api/Cargo.lock') }}
 
-  #     - run: find backend/api/integration-testing/ -exec chown postgres:postgres {} ";"
-  #     - run: mkdir ~/.yarn && find ~/.yarn -exec chown postgres:postgres {} ";"
-  #     - run: touch ~/.yarnrc && chown postgres:postgres ~/.yarnrc
-  #     - run: sudo -u postgres yarn install --frozen-lockfile --global-folder /tmp/yarn/global --cache-folder /tmp/yarn/cache
-  #       working-directory: 'backend/api/integration-testing'
+      - uses: actions/cache@v2
+        with:
+          path: |
+           'backend/api/integration-testing/node_modules'
+           '~/.cache/yarn'
+           '~/.yarn'
+          key: ${{ runner.os }}-test-js-${{ hashFiles('backend/api/integration-testing/yarn.lock') }}
+        
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: >
+            --manifest-path backend/api/Cargo.toml
+            --no-default-features
+      
+      - run: yarn install --frozen-lockfile
+        working-directory: 'backend/api/integration-testing'
 
-  #     # - uses: borales/actions-yarn@v2.0.0
-  #     #   working-directory: 'backend/api/integration-testing'
-  #     #   with:
-  #     #     cmd: install
+      - run: yarn test:ava -v -T 5m
+        working-directory: 'backend/api/integration-testing'
+        env: 
+          DATABASE_URL: postgres://postgres:password@localhost
 
-  #     - run: sudo -u postgres env PGHOST=localhost PGUSER=postgres PATH="/usr/lib/postgresql/10/bin:$PATH" yarn --global-folder /tmp/yarn/global --cache-folder /tmp/yarn/cache test:ava
-  #       working-directory: 'backend/api/integration-testing' 
-
-  #     # - uses: borales/actions-yarn@v2.0.0
-  #     #   working-directory: 'backend/api/integration-testing'
-  #     #   with:
-  #     #     cmd: test:ava
 

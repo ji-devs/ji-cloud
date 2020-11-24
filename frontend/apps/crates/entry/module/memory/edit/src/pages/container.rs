@@ -13,20 +13,20 @@ use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use crate::data::{*, raw::*};
+use crate::data::*;
+use crate::config::BaseGameStateExt;
 use super::mode_choose::ModeChoosePage;
-use super::duplicate::container::DuplicatePage;
 use crate::debug;
 
 pub struct ContainerPage {
-    pub state: GameState,
+    pub game_state: GameState,
     pub loader: AsyncLoader,
 }
 
 impl ContainerPage {
     pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
         let _self_clone = Rc::new(Self { 
-            state:  GameState::new(jig_id, module_id),
+            game_state:  GameState::new(jig_id, module_id),
             loader: AsyncLoader::new(),
             //game_mode: Mutable::new(debug::settings().game_mode.unwrap_or(None)),
         });
@@ -35,61 +35,94 @@ impl ContainerPage {
 
         _self_clone.loader.load(async move {
 
-            let step = debug::settings().step.unwrap_or(1);
-
-            if let Some(raw_state) = debug::settings().state {
-                _self.state.set_from_loaded(step, raw_state);
+            if let Some(raw_game_state) = debug::settings().state {
+                _self.game_state.set_from_loaded(debug::settings().step.unwrap_or(1), raw_game_state);
             } else {
                 //TODO - LOAD GAME STATE FROM BACKEND
                 log::info!("loading...");
-                let raw_state:GameStateRaw = GameStateRaw::load().await;
-                _self.state.set_from_loaded(step, raw_state);
+                let raw_state = raw::GameState::load(_self.game_state.jig_id.clone(), _self.game_state.module_id.clone()).await;
+                _self.game_state.set_from_loaded(1, raw_state);
             }
         });
     
 
         _self_clone
     }
-    
-    fn dom_signal(_self:Rc<Self>) -> impl Signal<Item = Option<Dom>> {
-        _self.state.mode.signal_ref(clone!(_self => move |mode| {
-            match mode {
-                //This level of none means we're still loading the state
-                None => None,
-                Some(mode) => {
+    pub fn render(_self: Rc<Self>) -> Dom {
+        html!("div", { 
+            .child_signal(
+                _self.game_state.mode.signal_ref(clone!(_self => move |mode| {
                     match mode {
-                        //This level of none means we've loaded but it's initial screen
-                        None => {
-                            Some(ModeChoosePage::render(ModeChoosePage::new(clone!(_self => move |mode| {
-                                match mode {
-                                    GameMode::Duplicate => {
-                                        let mode_state:DuplicateState = 
-                                            DuplicateStateRaw::default()
-                                                .into_mutable(1, _self.state.jig_id.clone(), _self.state.module_id.clone());
-                                        *_self.state.mode_state.borrow_mut() = Some(ModeState::Duplicate(Rc::new(mode_state)));
-                                    }
-                                }
-
-                                _self.state.mode.set(Some(Some(mode)));
-                            }))))
-                        },
+                        //This level of none means we're still loading the state
+                        None => None,
                         Some(mode) => {
-                            let mode_state:&Option<ModeState> = &_self.state.mode_state.borrow_mut();
-                            let mode_state:&ModeState = &mode_state.as_ref().expect_throw("mode without mode_state is a bug!!");
-                            match mode_state {
-                                ModeState::Duplicate(mode_state) => {
-                                    Some(DuplicatePage::render(DuplicatePage::new(mode_state.clone())))
-                                }
-                                _ => None
+                            match mode {
+                                //This level of none means we've loaded but it's initial screen
+                                None => Some(Self::render_choose(_self.clone())),
+                                Some(mode) => Some(Self::render_mode(_self.clone(), *mode)),
                             }
                         }
                     }
+                }))
+            )
+        })
+    }
+
+    fn render_mode(_self:Rc<Self>, mode: GameMode) -> Dom {
+
+        let state:Rc<BaseGameState> = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
+
+        html!("div", { 
+            .child_signal(state.clone().step.signal().map(move |step| {
+                match step {
+                    Step::One => {
+                        match mode {
+                            GameMode::Duplicate => {
+                                Some(super::duplicate::Step1Page::render(
+                                    super::duplicate::Step1Page::new(state.clone())
+                                ))
+                            },
+                            GameMode::WordsAndImages => {
+                                Some(super::words_and_images::Step1Page::render(
+                                    super::words_and_images::Step1Page::new(state.clone())
+                                ))
+                            },
+                            _ => None
+                        }
+                    },
+                    Step::Two => Some(super::all_modes::step_2::Step2Page::render(
+                            super::all_modes::step_2::Step2Page::new(state.clone()), mode)
+                    ),
+                    Step::Four => Some(super::all_modes::step_4::Step4Page::render(
+                            super::all_modes::step_4::Step4Page::new(state.clone()), mode)
+                    ),
+                    _ => None
                 }
-            }
-        }))
+            }))
+        })
+    }
+    fn render_choose(_self:Rc<Self>) -> Dom {
+        ModeChoosePage::render(ModeChoosePage::new(clone!(_self => move |mode| {
+
+            *_self.game_state.state.borrow_mut() = Some(
+                BaseGameState::from_raw(
+                    1,
+                    mode,
+                    match mode {
+                        GameMode::Duplicate => {
+                            raw::BaseGameState::default_duplicate()
+                        },
+                        GameMode::WordsAndImages => {
+                            raw::BaseGameState::default_words_and_images()
+                        }
+                    },
+                    _self.game_state.jig_id.clone(), 
+                    _self.game_state.module_id.clone()
+                )
+            );
+
+            _self.game_state.mode.set(Some(Some(mode)));
+        })))
     }
     
-    pub fn render(_self: Rc<Self>) -> Dom {
-        html!("div", { .child_signal(Self::dom_signal(_self.clone())) } )
-    }
 }

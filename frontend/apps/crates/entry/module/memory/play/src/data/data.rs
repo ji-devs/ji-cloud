@@ -9,7 +9,7 @@ use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
-use super::raw::*;
+use super::raw;
 use itertools::Itertools;
 use std::fmt::Write;
 use rand::prelude::*;
@@ -21,7 +21,7 @@ pub struct GameState {
     pub module_id: String,
     //outer option is for "loading", inner option is for "no module chosen"
     pub mode: Mutable<Option<Option<GameMode>>>, 
-    pub mode_state: Rc<RefCell<Option<ModeState>>>,
+    pub state: Rc<RefCell<Option<BaseGameState>>>,
 }
 
 
@@ -31,216 +31,172 @@ impl GameState {
             jig_id,
             module_id,
             mode: Mutable::new(None),
-            mode_state: Rc::new(RefCell::new(None))
+            state: Rc::new(RefCell::new(None))
         }
     }
 
-    pub fn set_from_loaded(&self, raw:GameStateRaw) {
+    pub fn set_from_loaded(&self, raw_game_state:raw::GameState) {
         if self.mode.get().is_some() {
             panic!("setting the game state from loaded only works on first-load!");
         }
 
-        let mode:Option<GameMode> = 
-            raw.mode.map(|raw_mode| raw_mode.into());
-
-        let mode_state:Option<ModeState> = {
-            raw.mode_state.map(|raw_mode_state| match raw_mode_state {
-                ModeStateRaw::Duplicate(raw_state) => {
-                    ModeState::Duplicate(Rc::new(DuplicateState::from_raw(self.jig_id.clone(), self.module_id.clone(), raw_state)))
-                }
-            })
+        let (mode, state) = match raw_game_state {
+            raw::GameState::Duplicate(raw_state) => {
+                let mode = GameMode::Duplicate;
+                (
+                    Some(mode),
+                    Some(BaseGameState::from_raw(mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                )
+            },
+            raw::GameState::WordsAndImages(raw_state) => {
+                let mode = GameMode::WordsAndImages;
+                (
+                    Some(mode),
+                    Some(BaseGameState::from_raw(mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
+                )
+            },
+            raw::GameState::None => (None, None),
+            _ => unimplemented!("no way to load {:?}", raw_game_state) 
         };
 
         //Note that this will *not* trigger re-renders of the inner mode pages
         //Using set_from_loaded for runtime changes is therefore very inefficient!
         //It's only meant for first-time loading
-        *self.mode_state.borrow_mut() = mode_state;
+        *self.state.borrow_mut() = state;
         //wrapped in a Some because None here means "loading"
         //this *will* trigger re-renders of everything from the top-level
+        //an inner none means "loaded but no mode"
         self.mode.set(Some(mode));
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum GameMode {
-    Duplicate
+    Duplicate,
+    WordsAndImages,
 }
 
-impl From<GameModeRaw> for GameMode {
-    fn from(mode:GameModeRaw) -> Self {
-        match mode {
-            GameModeRaw::Duplicate => Self::Duplicate
-        }
-    }
-}
-#[derive(Debug)]
-pub enum ModeState {
-    Duplicate(Rc<DuplicateState>)
-}
+pub type FoundIndex = usize;
 
 #[derive(Clone, Debug)]
 pub struct Card {
-    pub text: String,
-    pub id: usize, 
-}
-
-#[derive(Clone, Debug)]
-pub struct GameCard {
-    pub text: String,
-    pub id: usize, 
-    pub found: Mutable<bool>
-}
-
-#[derive(Debug, Clone)]
-pub struct FlipCard {
+    pub media: Media,
     pub id: usize,
-    pub element: HtmlElement
+    pub other_id: usize,
+    pub side: Side,
+    pub found: Mutable<Option<FoundIndex>>
 }
 
-#[derive(Clone, Debug)]
-pub struct HoverCard {
-    pub text: String,
-    pub id: usize,
-    pub origin_x: f64,
-    pub origin_y: f64,
-    pub dest_x: f64,
-    pub dest_y: f64,
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Side {
+    Left,
+    Right
 }
-
-#[derive(Debug, Clone)]
-pub struct FoundCard {
-    pub id: usize,
-    pub x: f64,
-    pub y: f64,
-    pub text: String
-}
-
-impl FoundCard {
-    pub fn new(card:&HoverCard) -> Self {
-        Self {
-            id: card.id,
-            x: card.dest_x,
-            y: card.dest_y,
-            text: card.text.to_string()
-        }
-    }
-}
-
 
 impl Card {
-    pub fn new(card:CardRaw, id: usize) -> Self {
+    pub fn new(card:&raw::Card, id: usize, other_id:usize, side:Side) -> Self {
         Self {
-            text: card.text,
+            media: match card {
+                raw::Card::Text(text) => Media::Text(text.to_string()),
+                raw::Card::Image(src) => Media::Image(src.clone()),
+                raw::Card::Audio(src) => Media::Audio(src.clone()),
+            },
             id,
+            other_id,
+            found: Mutable::new(None),
+            side,
         }
     }
+}
+
+type Id = String;
+
+#[derive(Clone, Debug)]
+pub enum Media {
+    Text(String),
+    Image(Option<Id>),
+    Audio(Option<Id>),
 }
 
 #[derive(Debug)]
-pub struct DuplicateState {
+pub struct BaseGameState {
     pub jig_id: String,
     pub module_id: String,
     pub pair_lookup: Vec<usize>,
-    pub all_cards: Vec<Card>,
-    pub game_cards: MutableVec<GameCard>,
-    pub found_cards: MutableVec<FoundCard>,
-    pub hover_cards: MutableVec<HoverCard>,
+    pub original_pairs: Vec<(raw::Card, raw::Card)>,
+    pub game_cards: MutableVec<Card>,
     pub theme_id: String,
     pub flip_state: Mutable<FlipState>,
+    pub found_pairs: RefCell<Vec<(usize, usize)>>, 
 }
 
 #[derive(Debug, Clone)]
 pub enum FlipState {
     None,
-    One(FlipCard),
-    Two((FlipCard, FlipCard)),
-}
-#[derive(Debug, PartialEq)]
-enum Side {
-    Right,
-    Left
+    One(usize),
+    Two((usize, usize)),
 }
 
-impl DuplicateState {
-    pub fn make_hover_card(&self, flip_card:FlipCard, side: Side) -> HoverCard {
-        let card = &self.all_cards[flip_card.id];
+fn make_game_cards(pairs:&[(raw::Card, raw::Card)]) -> Vec<Card> {
+    let n_cards = pairs.len() * 2;
+    let mut cards:Vec<Card> = Vec::with_capacity(n_cards);
+    let mut index:usize = 0;
 
-        let (origin_x, origin_y) = utils::resize::ModuleBounds::get_element_pos_rem(&flip_card.element.unchecked_into());
-      
-        let mut len = self.found_cards.lock_ref().len();
-        len += self.hover_cards.lock_ref().len();
-        let dest_y = (len as f64) * 10.0;
-        let dest_x = match side {
-            Side::Right => 10.0,
-            Side::Left => 0.0
-        };
+    for (card_1, card_2) in pairs.iter() {
+        let id_1 = index; 
+        let id_2 = index + 1;
+        index = id_2 + 1;
 
-        HoverCard {
-            text: card.text.clone(),
-            id: card.id,
-            origin_x,
-            origin_y,
-            dest_x,
-            dest_y,
-        }
+        cards.push(Card::new(card_1, id_1, id_2, Side::Left));
+        cards.push(Card::new(card_2, id_2, id_1, Side::Right));
     }
 
-    pub fn from_raw(jig_id: String, module_id: String, raw:DuplicateStateRaw) -> Self {
-        let n_cards = raw.cards.len() * 2;
-        let mut all_cards:Vec<Card> = Vec::with_capacity(n_cards);
+    cards
+}
+
+impl BaseGameState {
+    pub fn from_raw(mode: GameMode, raw_game_state: raw::BaseGameState, jig_id: String, module_id: String) -> Self {
+        let n_cards = raw_game_state.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
-        let mut index:usize = 0;
+        let mut cards = make_game_cards(&raw_game_state.pairs);
 
-        for raw_card in raw.cards.into_iter() {
-            let id_1 = index; 
-            let id_2 = index + 1;
-            index = id_2 + 1;
+        for card in cards.iter() {
+            pair_lookup[card.id] = card.other_id;
+        }
 
-            all_cards.push(Card::new(raw_card.clone(), id_1));
-            all_cards.push(Card::new(raw_card, id_2));
-            pair_lookup[id_1] = id_2;
-            pair_lookup[id_2] = id_1;
+        let mut rng = thread_rng();
+
+        if debug::settings().shuffle {
+            cards.shuffle(&mut rng);
         }
 
         let state = Self {
             jig_id,
             module_id,
             pair_lookup,
-            all_cards,
-            game_cards: MutableVec::new(),
-            found_cards: MutableVec::new(),
-            hover_cards: MutableVec::new(),
-            theme_id: raw.theme_id,
+            original_pairs: raw_game_state.pairs,
+            game_cards: MutableVec::new_with_values(cards),
+            theme_id: raw_game_state.theme_id,
             flip_state: Mutable::new(FlipState::None), 
+            found_pairs: RefCell::new(Vec::new()),
         };
-
-        state.init_new_game();
 
         state
     }
 
-    pub async fn evaluate(&self, card_1: FlipCard, card_2: FlipCard) {
-        let id_1 = card_1.id;
-        let id_2 = card_2.id;
+    pub async fn evaluate(&self, id_1: usize, id_2: usize) {
 
         if self.pair_lookup[id_1] == id_2 {
-            let hover_card_1 = self.make_hover_card(card_1, Side::Left);
-            let hover_card_2 = self.make_hover_card(card_2, Side::Right);
-            let mut hover_cards = self.hover_cards.lock_mut();
-            hover_cards.push_cloned(hover_card_1);
-            hover_cards.push_cloned(hover_card_2);
             let game_cards = self.game_cards.lock_ref();
+            let mut found_pairs = self.found_pairs.borrow_mut();
+            let found_pairs_index = found_pairs.len();
+            found_pairs.push((id_1, id_2));
             if let Some(card) = game_cards.iter().find(|c| c.id == id_1) {
-                card.found.set(true);
+                card.found.set(Some(found_pairs_index));
             }
             if let Some(card) = game_cards.iter().find(|c| c.id == id_2) {
-                card.found.set(true);
+                card.found.set(Some(found_pairs_index));
             }
-            /* removing upsets the grid...
-            self.game_cards.lock_mut().retain(|card| {
-                card.id != id_1 && card.id != id_2
-            });
-            */
         } else {
             TimeoutFuture::new(2_000).await;
         }
@@ -264,42 +220,18 @@ impl DuplicateState {
         }
     }
 
-    pub fn card_click(&self, id: usize, element:HtmlElement) {
+    pub fn card_click(&self, id: usize) {
         let flip_state = &mut *self.flip_state.lock_mut();
 
-        let flip_card = FlipCard { id, element};
-
         match flip_state {
-            FlipState::None => *flip_state = FlipState::One(flip_card),
+            FlipState::None => *flip_state = FlipState::One(id),
             FlipState::One(other) => {
-                if other.id != flip_card.id {
-                    *flip_state = FlipState::Two((flip_card, other.clone()))
+                if *other != id {
+                    *flip_state = FlipState::Two((id, *other))
                 }
             },
             _ => {}
         }
-    }
-
-    pub fn move_animation_finished(&self, card:&HoverCard) {
-        self.hover_cards.lock_mut().retain(|c| c.id != card.id);
-        self.found_cards.lock_mut().push_cloned(FoundCard::new(&card));
-    }
-
-    pub fn init_new_game(&self) {
-        let mut rng = thread_rng();
-        let mut cards:Vec<GameCard> = self.all_cards.iter().map(|card| {
-            GameCard {
-                id: card.id,
-                text: card.text.to_string(),
-                found: Mutable::new(false)
-            }
-        }).collect();
-        if debug::settings().shuffle {
-            cards.shuffle(&mut rng);
-        }
-        self.game_cards.lock_mut().replace_cloned(cards);
-        self.found_cards.lock_mut().clear();
-        self.hover_cards.lock_mut().clear();
     }
 }
 

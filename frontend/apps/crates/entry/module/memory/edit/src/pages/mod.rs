@@ -1,4 +1,6 @@
 pub mod container;
-pub(super) mod mode_choose;
-pub(super) mod duplicate;
+pub mod all_modes;
+pub mod mode_choose;
+pub mod duplicate;
+pub mod words_and_images;
 

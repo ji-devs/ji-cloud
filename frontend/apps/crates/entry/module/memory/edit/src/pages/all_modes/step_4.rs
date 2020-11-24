@@ -15,7 +15,7 @@ use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
-use crate::data::{*, raw::*};
+use crate::data::*;
 use itertools::Itertools;
 use crate::config;
 use utils::settings::SETTINGS;
@@ -26,11 +26,11 @@ use utils::{
 };
 
 pub struct Step4Page {
-    state: Rc<DuplicateState>,
+    state: Rc<BaseGameState>,
 }
 
 impl Step4Page {
-    pub fn new(state:Rc<DuplicateState>) -> Rc<Self> {
+    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
 
         let _self = Rc::new(Self { 
             state,
@@ -51,8 +51,14 @@ impl Step4Page {
         format!("{}?iframe_data=true", url)
     }
 
-    pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::duplicate::step_4_page(), { 
+    pub fn render(_self: Rc<Self>, mode: GameMode) -> Dom {
+
+        let el = match mode {
+            GameMode::Duplicate => templates::duplicate::step_4_page(),
+            GameMode::WordsAndImages => templates::words_and_images::step_4_page(),
+        };
+
+        elem!(el, { 
             .with_data_id!("top-step-1", {
                 .event(clone!(_self => move |evt:events::Click| {
                     _self.state.step.set(Step::One);
@@ -70,8 +76,8 @@ impl Step4Page {
 
                         if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                             //Iframe is ready and sent us a message, let's send one back!
-                            let data:GameStateRaw = (&*_self.state).into();
-                            let msg:IframeInit<GameStateRaw> = IframeInit::new(data); 
+                            let data = raw::GameState::Duplicate((&*_self.state).to_raw());
+                            let msg:IframeInit<raw::GameState> = IframeInit::new(data); 
                             let window = elem.content_window().unwrap_throw();
                             window.post_message(&msg.into(), &_self.iframe_url());
                         } else {

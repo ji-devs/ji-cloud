@@ -11,8 +11,10 @@ pub fn get(local_insecure: bool) -> actix_cors::Cors {
             header::HeaderName::from_static("x-csrf"),
         ]);
 
-    if !local_insecure {
-        for origin in CORS_ORIGINS.iter() {
+    if local_insecure {
+        cors = cors.allow_any_origin();
+    } else {
+        for origin in &CORS_ORIGINS {
             cors = cors.allowed_origin(origin);
         }
     }
