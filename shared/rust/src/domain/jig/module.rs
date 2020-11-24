@@ -33,7 +33,7 @@ impl ModuleKind {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Poster => "poster",
-            Self::MemoryGame => "memory-game",
+            Self::MemoryGame => "memory",
             Self::DesignPage => "design-page",
         }
     }
@@ -44,7 +44,7 @@ impl FromStr for ModuleKind {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let res = match s {
             "poster" => Self::Poster,
-            "memory-game" => Self::MemoryGame,
+            "memory" => Self::MemoryGame,
             "design-page" => Self::DesignPage,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };

@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 use shared::domain::jig::ModuleKind;
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
+use std::str::FromStr;
 
 pub type Id = String;
 
@@ -103,29 +104,12 @@ impl Route {
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
             ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), None)),
             ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
-            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
-            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(module_kind_from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
+            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
+            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
         }
-    }
-}
-
-pub fn module_kind_from_str(kind:&str) -> Option<ModuleKind> {
-    match kind {
-        "poster" => Some(ModuleKind::Poster),
-        "design-page" => Some(ModuleKind::DesignPage),
-        "memory-game" => Some(ModuleKind::MemoryGame),
-        _ => None
-    }
-}
-
-pub fn module_kind_to_str(kind:ModuleKind) -> &'static str {
-    match kind {
-        ModuleKind::Poster => "poster",
-        ModuleKind::DesignPage => "design-page",
-        ModuleKind::MemoryGame => "memory-game",
     }
 }
 
@@ -186,8 +170,8 @@ impl From<Route> for String {
             },
             Route::Module(route) => {
                 match route {
-                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", module_kind_to_str(kind), jig_id, module_id),
-                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", module_kind_to_str(kind), jig_id, module_id),
+                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", kind.as_str(), jig_id, module_id),
+                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", kind.as_str(), jig_id, module_id),
                 }
             },
             Route::NotFound => "/404".to_string(),
