@@ -18,16 +18,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Alef&display=swap');
 
-@font-face {
-    font-family: 'gveret_levin_alefalefalefRg';
-    src: url('{{MEDIA_UI}}/gveretlevinalefalefalef-regular-webfont.woff2') format('woff2'),
-         url('{{MEDIA_UI}}/gveretlevinalefalefalef-regular-webfont.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-
-}
-
-
 
 body {
   padding:0 !important

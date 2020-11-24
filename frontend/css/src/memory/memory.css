@@ -4,11 +4,13 @@
 */
 .edit-card-left {
   z-index:10;
+
 }
 
 .edit-card-right {
   margin-top:10px;
   margin-left: -10px;
+
 }
 
 .sidebar-card-left {
@@ -93,6 +95,7 @@
   height: 100%;
   position: absolute;
   width: 100%;
+
 }
 .flip-card .play-card-front,
 .flip-card .edit-card-front {

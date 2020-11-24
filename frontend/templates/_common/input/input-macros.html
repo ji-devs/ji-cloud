@@ -56,11 +56,14 @@
 
 
 {% macro checkbox(label,required=false, inputDataId="", class="") %}
-<label>
-  <input class="ml-2 mr-1" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
-  <span class="text-sm">
-    {{label}}
-  </span>
+<label class="flex items-baseline">
+  <input class="ml-2 mr-1 inline-block" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
+  <span class="text-sm inline-block">
 
+    {{label}}
+
+
+  </span>
 </label>
+
 {% endmacro checkbox %}

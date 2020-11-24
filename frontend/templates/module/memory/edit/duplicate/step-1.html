@@ -6,7 +6,7 @@
   {% include "module/memory/edit/duplicate/step-1-sidebar.html" %}
 
   <div class=" flex flex-col w-full">
-    <div class="flex justify-center items-center mt-4 self-end mr-4">
+    <div class="flex justify-center items-center mt-4 self-end mr-24">
 
       {% include "_common/module/edit/top-control-preview.html" %}
 
@@ -22,7 +22,7 @@
       <div class="max-w-1212 h-681 bg-jimemorybackground mt-4 rounded-sm mb-4 border border-jimemoryborder jig-preview px-12 py-6 overflow-y-auto">
         <div data-id="cards" class="memory grid grid-cols-3 gap-4 "> </div>
       </div>
-      <div class="flex justify-end w-full pr-6">
+      <div class="flex justify-end w-full pr-24">
         {{ ButtonMacros::orange(label="Done", dataId="next") }}
       </div>
     </div>

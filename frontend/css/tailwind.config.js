@@ -3,7 +3,7 @@ const isDev = process.env["NODE_ENV"] === "development";
 const MEDIA_UI = getMediaUrl_UI(isDev);
 console.log(`compiling tailwind...`);
 
-/*  
+/*
     the ji- prefixes are used for rem
     and intended for inside our scaled module areas
     the forumula is that it's pixels / 10
@@ -44,7 +44,7 @@ function parseTheme(theme) {
                             return word;
                         })
                         .join(" ");
-                    
+
                     const newKey = PREFIX + key;
                     obj[newKey] = newValue;
                 }
@@ -77,6 +77,7 @@ module.exports = {
         jibackgroundGrey:'#f8f9fd',
         jigreyinputborder:'#d3d3d3;',
         jierrorred: '#e36486',
+        jierrordarkred: '#ed464e',
         jiyellowbackground: '#fdf5d0',
         jiyellowstar:'#fccd63',
         jigreyicon: '#d6d8de',
@@ -127,6 +128,7 @@ module.exports = {
         jibackgroundyellow: '#fff8d1',
         jimemoryborderblue: '#6ea4fc',
         jigreentooltipbackground: '#f0fcf5',
+        jibluehover:'#d6e6fd',
 
       },
 
@@ -211,6 +213,7 @@ module.exports = {
         992: '992px',
         1212: '1212px',
         1666:'1666px',
+        1688: '1688px',
         '50p': '50%',
         '1/7': '14.28%'
 
@@ -248,6 +251,7 @@ module.exports = {
         140: '140px',
         146: '146px',
         160: '160px',
+        167:'167px',
         177: '177px',
         180: '180px',
         185: '185px',
@@ -258,6 +262,7 @@ module.exports = {
         262: '262px',
         293: '293px',
         312: '312px',
+        344: '344px',
         362: '362px',
         365: '365px',
         383: '383px',
@@ -269,7 +274,8 @@ module.exports = {
         668: '668px',
         681: '681px',
         696: '696px',
-        935: '935px'
+        896: '896px',
+        935: '935px',
 
       },
       rotate:{
@@ -292,6 +298,8 @@ module.exports = {
         1212: '1212px'
       },
       borderRadius: {
+        10: '10px',
+        14: '14px',
         16: '16px',
         20: '20px',
         24: '24px',
@@ -331,6 +339,7 @@ module.exports = {
         25: '25px',
         60:'60px',
         80: '80px',
+        180: '180px',
         255: '255px',
         '16:9': '56.25%'
       },
@@ -356,7 +365,8 @@ module.exports = {
         '2000' : 2000
       },
       gap: {
-      '24px': '24px'
+      '24px': '24px',
+      '48px': '48px',
      },
      minHeight:{
        32: '32px'

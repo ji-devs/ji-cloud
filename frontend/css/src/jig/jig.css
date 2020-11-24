@@ -191,3 +191,62 @@ select {
 .module-icon:hover{
 transform: scale(1.1);
 }
+
+
+.publish-error{
+  border: solid 1px #f00813;
+background-color: #fff4f4 !important;
+
+}
+
+.publish-error select{
+  background-color: #fff4f4 !important;
+
+}
+
+
+
+
+
+
+.publish-error-message .publish-error-tooltip {
+  visibility: visible;
+  width: 295px;
+  height: 69px;
+  background-color: #fff4f4;
+  color: #ed464e;
+  text-align: center;
+  border-radius: 12px;
+  padding: 18px 16px;
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: -80%;
+  border: solid 1px #f00813;
+  box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, 0.16);
+
+
+}
+
+.publish-error-message .publish-error-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #fff4f4 transparent;
+
+}
+
+.publish-error-message .publish-error-tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent #f00813 transparent;
+}

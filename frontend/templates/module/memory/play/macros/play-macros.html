@@ -1,13 +1,13 @@
 {% macro card() %}
-{# 
-  RUNTIME: add flip-card-clicked 
-  NOTE: Size is overriden to 16rem... see module-page.html and module.css 
+{#
+  RUNTIME: add flip-card-clicked
+  NOTE: Size is overriden to 16rem... see module-page.html and module.css
 #}
 <div data-id="flip" class="flip-card" style="width: 16rem; height: 16rem;">
-  <div class="play-card-front memory-matched  bg-jimemorycardgreen rounded-lg">
+  <div class="play-card-front memory-matched  bg-jimemorycardgreen rounded-16">
     <p data-id="text-contents" class="font-medium text-ji-4xl text-center text-contents"></p>
   </div>
-  <div class="play-card-back memory-matched  bg-black rounded-lg">
+  <div class="play-card-back memory-matched  bg-black rounded-16">
   </div>
 </div>
 {% endmacro card %}
@@ -15,7 +15,7 @@
 
 {% macro hover_card() %}
 <div class="flip-card" style="width: 16rem; height: 16rem;">
-  <div class="play-card-front memory-matched  bg-jimemorycardgreen rounded-lg">
+  <div class="play-card-front memory-matched  bg-jimemorycardgreen rounded-16">
     <p data-id="text-contents" class="font-medium text-ji-4xl text-center text-contents"></p>
   </div>
 </div>
