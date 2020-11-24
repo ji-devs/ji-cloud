@@ -175,7 +175,7 @@ impl ImageSearch {
                 .unwrap_throw()
                 .set_value(&format!("{}", next_page));
 
-            Self::do_search(_self);
+            Self::do_search(_self, true);
         }
     }
 
@@ -187,7 +187,7 @@ impl ImageSearch {
         }
     }
 
-    pub fn do_search(_self: Rc<Self>) {
+    pub fn do_search(_self: Rc<Self>, sanitize_page:bool) {
 
         _self.state.set(SearchState::Loading);
         _self.error.set(None);
@@ -206,11 +206,10 @@ impl ImageSearch {
         }
         *_self.prev_query.borrow_mut() = Some(query.clone());
 
-        let page = _self.get_sanitized_input_page() - 1;
-
-        let is_published = {
-            let is_published = _self.is_published.borrow();
-            *is_published
+        let mut page = if sanitize_page {
+            _self.get_sanitized_input_page()
+        } else {
+            _self.get_raw_input_page()
         };
 
         *_self.serialized_query.borrow_mut() = Some(ImageSearchQuery {
@@ -218,6 +217,14 @@ impl ImageSearch {
             page,
             filter_index: _self.get_filter_index()
         });
+
+        page -= 1;
+
+        let is_published = {
+            let is_published = _self.is_published.borrow();
+            *is_published
+        };
+
 
         _self.query.set(query.clone());
 
@@ -277,12 +284,13 @@ impl ImageSearch {
             .with_data_id!("page" => HtmlInputElement, {
                 .apply_if(_self.initial_serialized_query.borrow().is_some(), |dom| {
                     dom.property("value", _self.initial_serialized_query.borrow().as_ref().map(|x| {
+                        log::info!("{}", x.page);
                         format!("{}", x.page)
                     }))
                 })
                 .with_node!(input => {
                     .event(clone!(_self => move |evt:events::Change| {
-                        Self::do_search(_self.clone());
+                        Self::do_search(_self.clone(), true);
                     }))
                 })
                 .after_inserted(clone!(_self => move |elem| {
@@ -303,7 +311,7 @@ impl ImageSearch {
                         2 => Some(false),
                         _ => panic!("unsupported filter!"),
                     };
-                    Self::do_search(_self.clone());
+                    Self::do_search(_self.clone(), true);
                 }))
                 .after_inserted(clone!(_self => move |elem| {
                     *_self.filter_input.borrow_mut() = Some(elem.unchecked_into()); 
@@ -325,7 +333,7 @@ impl ImageSearch {
             })
             .with_data_id!("search-btn", {
                 .event(clone!(_self => move |evt:events::Click| {
-                    Self::do_search(_self.clone());
+                    Self::do_search(_self.clone(), true);
                 }))
             })
             .with_data_id!("query", {
@@ -336,7 +344,7 @@ impl ImageSearch {
                 })
                 .event(clone!(_self => move |evt:events::KeyDown| {
                     if evt.key() == "Enter" {
-                        Self::do_search(_self.clone());
+                        Self::do_search(_self.clone(), true);
                     } 
                 }))
                 .after_inserted(clone!(_self => move |elem| {
@@ -344,7 +352,7 @@ impl ImageSearch {
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {
-                Self::do_search(_self);
+                Self::do_search(_self, false);
             }))
         })
 
