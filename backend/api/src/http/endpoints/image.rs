@@ -3,7 +3,7 @@ use crate::{
     db::{self, nul_if_empty},
     extractor::{AuthUserWithScope, ScopeManageImage, WrapAuthClaimsNoDb},
     image_ops::generate_images,
-    s3::{S3Client, S3ImageKind, S3LibraryKind},
+    s3::{S3Client, S3LibraryKind, S3MediaVariant},
 };
 use actix_web::{
     http::{self, StatusCode},
@@ -31,7 +31,7 @@ pub mod user {
         db,
         extractor::WrapAuthClaimsNoDb,
         image_ops::generate_images,
-        s3::{S3Client, S3ImageKind, S3LibraryKind},
+        s3::{S3Client, S3LibraryKind, S3MediaVariant},
     };
     use actix_web::{
         http,
@@ -106,9 +106,9 @@ pub mod user {
 
         let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
         let ((), (), ()) = futures::future::join3(
-            delete_image(S3ImageKind::Original),
-            delete_image(S3ImageKind::Resized),
-            delete_image(S3ImageKind::Thumbnail),
+            delete_image(S3MediaVariant::Original),
+            delete_image(S3MediaVariant::Resized),
+            delete_image(S3MediaVariant::Thumbnail),
         )
         .await;
 
@@ -132,10 +132,10 @@ pub mod user {
 
         Ok(Json(GetResponse {
             metadata,
-            url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
-            thumbnail_url: s3.presigned_image_get_url(
+            url: s3.image_presigned_get_url(S3LibraryKind::Global, S3MediaVariant::Resized, id)?,
+            thumbnail_url: s3.image_presigned_get_url(
                 S3LibraryKind::Global,
-                S3ImageKind::Thumbnail,
+                S3MediaVariant::Thumbnail,
                 id,
             )?,
         }))
@@ -153,14 +153,14 @@ pub mod user {
             .err_into::<GetError>()
             .and_then(|metadata: UserImage| async {
                 Ok(GetResponse {
-                    url: s3.presigned_image_get_url(
+                    url: s3.image_presigned_get_url(
                         S3LibraryKind::Global,
-                        S3ImageKind::Resized,
+                        S3MediaVariant::Resized,
                         metadata.id,
                     )?,
-                    thumbnail_url: s3.presigned_image_get_url(
+                    thumbnail_url: s3.image_presigned_get_url(
                         S3LibraryKind::Global,
-                        S3ImageKind::Thumbnail,
+                        S3MediaVariant::Thumbnail,
                         metadata.id,
                     )?,
                     metadata,
@@ -323,10 +323,10 @@ async fn get_one(
 
     Ok(Json(GetResponse {
         metadata,
-        url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
-        thumbnail_url: s3.presigned_image_get_url(
+        url: s3.image_presigned_get_url(S3LibraryKind::Global, S3MediaVariant::Resized, id)?,
+        thumbnail_url: s3.image_presigned_get_url(
             S3LibraryKind::Global,
-            S3ImageKind::Thumbnail,
+            S3MediaVariant::Thumbnail,
             id,
         )?,
     }))
@@ -361,14 +361,14 @@ async fn get(
         .err_into::<SearchError>()
         .and_then(|metadata: Image| async {
             Ok(GetResponse {
-                url: s3.presigned_image_get_url(
+                url: s3.image_presigned_get_url(
                     S3LibraryKind::Global,
-                    S3ImageKind::Resized,
+                    S3MediaVariant::Resized,
                     metadata.id,
                 )?,
-                thumbnail_url: s3.presigned_image_get_url(
+                thumbnail_url: s3.image_presigned_get_url(
                     S3LibraryKind::Global,
-                    S3ImageKind::Thumbnail,
+                    S3MediaVariant::Thumbnail,
                     metadata.id,
                 )?,
                 metadata,
@@ -435,7 +435,7 @@ async fn delete(
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
-) -> Result<HttpResponse, <endpoints::image::Delete as ApiEndpoint>::Err> {
+) -> Result<HttpResponse, <endpoints::image::user::Delete as ApiEndpoint>::Err> {
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
@@ -443,9 +443,9 @@ async fn delete(
 
     let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
-        delete_image(S3ImageKind::Original),
-        delete_image(S3ImageKind::Resized),
-        delete_image(S3ImageKind::Thumbnail),
+        delete_image(S3MediaVariant::Original),
+        delete_image(S3MediaVariant::Resized),
+        delete_image(S3MediaVariant::Thumbnail),
         algolia.delete_image(image),
     )
     .await;

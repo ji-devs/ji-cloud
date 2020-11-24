@@ -132,6 +132,26 @@
       "nullable": []
     }
   },
+  "0aa96f75b64d577ba8fe2d07d824fe07c5036c135e9a5fb97eb1a7bc96910726": {
+    "query": "select exists(select 1 from user_audio_library where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
     "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
     "describe": {
@@ -162,6 +182,24 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
+    "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -659,6 +697,18 @@
       ]
     }
   },
+  "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
+    "query": "delete from user_audio_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "query": "delete from image_metadata where id = $1",
     "describe": {
@@ -845,6 +895,24 @@
       ]
     }
   },
+  "72e3aca05740c8e1615e5e90644ce5edcf661280ab2b72b5f6af4932618ce5ab": {
+    "query": "\ninsert into user_audio_library default values\nreturning id as \"id: AudioId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
     "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
     "describe": {
@@ -888,6 +956,26 @@
         {
           "ordinal": 0,
           "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
+    "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
           "type_info": "Uuid"
         }
       ],
