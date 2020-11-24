@@ -45,6 +45,7 @@ pub struct ImageEdit {
     category_expansions: RefCell<HashMap<Id, Mutable<bool>>>,
     selected_categories: Mutable<HashSet<Id>>,
     from_search: Option<ImageSearchQuery>,
+    redirect_timeout: RefCell<Option<Timeout>>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -66,8 +67,8 @@ struct SaveInfo {
 }
 impl ImageEdit{
     pub fn new(id:String, from_search: Option<ImageSearchQuery>) -> Rc<Self> {
-        //TODO - determine from route
-        let start_section = Section::Meta;
+        let start_section = if from_search.is_some() { Section::Overview } else { Section::Meta };
+
         let _self = Rc::new(Self { 
             //utils
             id: Mutable::new(id.clone()),
@@ -86,7 +87,8 @@ impl ImageEdit{
             age_ranges: RefCell::new(HashSet::new()),
             affiliations: RefCell::new(HashSet::new()),
             selected_categories: Mutable::new(HashSet::new()),
-            from_search
+            from_search,
+            redirect_timeout: RefCell::new(None),
         });
 
         let _self_clone = _self.clone();
@@ -251,10 +253,14 @@ impl ImageEdit{
                 _self.error_message.set(Some(msg));
             } else {
                 _self.publish_message.set(Some("Done!".to_string()));
-                Timeout::new(3_000, clone!(_self => move || {
-                    _self.publish_message.set(None);
-                }))
-                .forget();
+                *_self.redirect_timeout.borrow_mut() = Some(
+                    Timeout::new(3_000, clone!(_self => move || {
+                        _self.publish_message.set(None);
+                        let route = Route::Admin(AdminRoute::ImageSearch(_self.from_search.clone()));
+                        let route = String::from(route);
+                        dominator::routing::go_to_url(&route);
+                    }))
+                );
             }
         });
     }
