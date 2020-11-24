@@ -4,6 +4,7 @@ use cfg_if::cfg_if;
 use config::RemoteTarget;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use shared::domain::auth::JWT_COOKIE_NAME;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -64,7 +65,7 @@ fn _init(remote_target:RemoteTarget) -> Settings {
                     .document()
                     .unwrap_throw()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("X-JWT={}; PATH=/", token));
+                    .set_cookie(&format!("{}={}; PATH=/", JWT_COOKIE_NAME, token));
             }
         }
     }

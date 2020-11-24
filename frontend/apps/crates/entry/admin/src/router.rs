@@ -8,6 +8,7 @@ use futures_signals::{
 };
 use dominator::{Dom, html};
 use crate::pages::{
+    container::ContainerPage,
     categories::CategoriesPage,
     images::{ImagesPage, PageMode},
 };
@@ -20,29 +21,32 @@ impl Router {
         Self { }
     }
 
-    fn signal() -> impl Signal<Item = Route> {
+    fn route_signal() -> impl Signal<Item = Route> {
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
     }
 
-    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
-        Self::signal()
-            .map(|route| {
-                match route {
-                    Route::Admin(route) => {
-                        match route {
-                            AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
-                            AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
-                            AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
-                            AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Search))),
+    fn signal_dom() -> impl Signal<Item = Option<Dom>> {
+            Self::route_signal()
+                .map(|route| {
+                    match route {
+                        Route::Admin(route) => {
+                            match route {
+                                AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
+                                AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
+                                AdminRoute::ImageEdit(id) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id)))),
+                                AdminRoute::Images => Some(ImagesPage::render(ImagesPage::new(PageMode::Search))),
+                            }
                         }
+                        _ => None
                     }
-                    _ => None
-                }
-            })
+                })
     }
-    
+
     pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
+        ContainerPage::render(ContainerPage::new(),
+            Self::signal_dom(),
+            Self::route_signal()
+        )
     }
 }
