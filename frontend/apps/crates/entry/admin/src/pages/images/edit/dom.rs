@@ -65,6 +65,8 @@ struct SaveInfo {
 }
 impl ImageEdit{
     pub fn new(id:String) -> Rc<Self> {
+        //TODO - determine from route
+        let start_section = Section::Meta;
         let _self = Rc::new(Self { 
             //utils
             id: Mutable::new(id.clone()),
@@ -72,7 +74,7 @@ impl ImageEdit{
             error_message: Mutable::new(None),
             publish_message: Mutable::new(None),
             refs: RefCell::new(None),
-            section: Mutable::new(Section::Categories),
+            section: Mutable::new(start_section),
             category_expansions: RefCell::new(HashMap::new()),
             //Load/Save
             init: Mutable::new(None),

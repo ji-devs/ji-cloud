@@ -17,19 +17,21 @@
           <div class="flex">
             <p>We found <span data-id="n-results" class="text-jibuttonBlue"></span> images for <span data-id="query-display"></span></p>
           </div>
-          <div class="flex ml-auto mr-auto">
+          <div data-id="pages-nav" class="flex ml-auto mr-auto">
             <div class="flex">
-              <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="transform rotate-180 arrow">
-              <p class="mr-2">
-                Back
-              </p>
+              <div data-id="back-btn" class="cursor-pointer flex">
+                <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="transform rotate-180 arrow">
+                <p class="mr-2">
+                  Back
+                </p>
+              </div>
               <div class="flex mx-6">Page
-                  <input data-id="page" value="0" type="number" class="h-6 w-6 bg-jibackgroundBlue text-center flex justify-center items-center mx-1 border border-jinumberblue text-jibuttonBlue focus:outline-none">
+                  <input data-id="page" value="1" type="number" class="h-6 w-6 bg-jibackgroundBlue text-center flex justify-center items-center mx-1 border border-jinumberblue text-jibuttonBlue focus:outline-none">
 
                 of
                 <span data-id="pages" class="mx-1"></span>
               </div>
-              <div class="flex">
+              <div data-id="next-btn" class="flex cursor-pointer">
                 <p>Next</p>
                 <img src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="" class="arrow">
               </div>
