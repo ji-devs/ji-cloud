@@ -71,7 +71,19 @@ impl ImageSearch {
         _self
     }
   
-    pub fn get_input_page(&self) -> u32 {
+    fn get_raw_input_page(&self) -> u32 {
+        self.page_input
+            .borrow()
+            .as_ref()
+            .map(|input| {
+                let page:String = input.value();
+                page.parse::<u32>().ok()
+            })
+            .flatten()
+            .unwrap_or(1)
+    }
+
+    fn get_sanitized_input_page(&self) -> u32 {
         let input = self.page_input.borrow();
         let max_page = self.max_page.get();
 
@@ -85,6 +97,8 @@ impl ImageSearch {
 
         let (page_num, set_input_value) = match page {
             Some(value) => {
+                log::info!("value: {}, max: {}", value, max_page);
+
                 if value < 1 {
                     (1, true) 
                 } else if value > max_page {
@@ -109,7 +123,8 @@ impl ImageSearch {
     }
 
     fn change_page(_self: Rc<Self>, delta:PageDelta) {
-        let page = _self.get_input_page();
+        let page = _self.get_raw_input_page();
+
         let next_page = match delta {
             PageDelta::Back => {
                 if page > 1 {
@@ -151,7 +166,8 @@ impl ImageSearch {
         };
 
         if let Some(prev_query) = _self.prev_query.borrow().as_ref() {
-            if prev_query == &query {
+            if prev_query != &query {
+                log::info!("query is changed, reset to page 1");
                 _self.page_input
                     .borrow_mut()
                     .as_ref()
@@ -161,7 +177,7 @@ impl ImageSearch {
         }
         *_self.prev_query.borrow_mut() = Some(query.clone());
 
-        let page = _self.get_input_page() - 1;
+        let page = _self.get_sanitized_input_page() - 1;
 
         let is_published = {
             let is_published = _self.is_published.borrow();
@@ -263,10 +279,8 @@ impl ImageSearch {
                 .class_signal("hidden", _self.state.signal().map(|state| state != SearchState::Loading))
             })
             .with_data_id!("search-btn", {
-                .event(clone!(_self => move |evt:events::KeyDown| {
-                    if evt.key() == "Enter" {
-                        Self::do_search(_self.clone());
-                    } 
+                .event(clone!(_self => move |evt:events::Click| {
+                    Self::do_search(_self.clone());
                 }))
             })
             .with_data_id!("query", {
@@ -280,36 +294,5 @@ impl ImageSearch {
                 }))
             })
         })
-        /*
-        elem!(templates::image_add(), {
-            .with_data_id!("add-btn", {
-                .event(clone!(_self => move |_evt:events::Click| {
-                    if let Some(file_input) = _self.file_input.borrow().as_ref() {
-                        file_input.click();
-                    }
-                }))
-            })
-            .with_data_id!("file", {
-                .event(clone!(_self => move |_evt:events::Change| {
-                    let file =
-                        _self.file_input.borrow().as_ref()
-                            .and_then(|input| input.files())
-                            .and_then(|files| files.get(0));
-
-                    if let Some(file) = file {
-                        spawn_local(async move {
-                            let id = actions::create_image(file).await.unwrap_throw();
-                            let route:String = Route::Admin(AdminRoute::ImageEdit(id)).into();
-                            dominator::routing::go_to_url(&route);
-                        });
-                    }
-                }))
-
-            })
-            .after_inserted(clone!(_self => move |elem| {
-                *_self.file_input.borrow_mut() = Some(elem.select(&data_id("file")));
-            }))
-        })
-        */
     }
 }
