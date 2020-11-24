@@ -14,11 +14,11 @@ macro_rules! from_anyhow {
     };
 }
 
+pub mod audio;
 pub mod auth;
 pub mod category;
 pub mod image;
 pub mod jig;
-
 /// Stand-in for the `!` (`Never`) type, while waiting for it to be stablized.
 #[derive(Serialize, Deserialize)]
 pub enum Infallible {}

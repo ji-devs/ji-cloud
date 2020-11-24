@@ -42,3 +42,6 @@ pub mod module;
 
 /// Administrative endpoints.
 pub mod admin;
+
+/// Audio endpoints
+pub mod audio;
