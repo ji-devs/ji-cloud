@@ -8,7 +8,7 @@ _secret-keys
 wasm-pack.log
 yarn-*.log
 .template_output
-minio.exe
+*.exe
 firebase-debug.log
 .idea
 build-utils/image-upload/report.csv
