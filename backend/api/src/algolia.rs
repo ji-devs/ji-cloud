@@ -7,6 +7,7 @@ use algolia::{
     response::SearchResponse,
     Client as Inner,
 };
+use anyhow::Context;
 use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::{future::BoxFuture, TryStreamExt};
@@ -18,7 +19,6 @@ use sqlx::PgPool;
 use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
-
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
@@ -257,8 +257,13 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
 
         let migrations_to_run = &ALGOLIA_INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
-        for (_, updater) in migrations_to_run {
-            updater(inner, &self.index).await?;
+        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
+            updater(inner, &self.index).await.with_context(|| {
+                anyhow::anyhow!(
+                    "error while running algolia updater #{}",
+                    idx + (algolia_version as usize) + 1
+                )
+            })?;
         }
 
         // currently this can only be "no resync" or "complete resync" but eventually
