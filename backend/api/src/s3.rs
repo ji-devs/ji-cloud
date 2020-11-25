@@ -8,73 +8,15 @@ use rusoto_s3::{
     util::{PreSignedRequest as _, PreSignedRequestOption},
     DeleteObjectRequest, GetObjectRequest, PutObjectRequest, S3,
 };
-use shared::domain::{audio::AudioId, image::ImageId};
+use shared::{
+    domain::{audio::AudioId, image::ImageId},
+    media::{
+        audio_id_to_key, id_with_kind_to_key, image_id_to_key, MediaKind, MediaLibraryKind,
+        MediaVariant,
+    },
+};
 use url::Url;
 use uuid::Uuid;
-
-#[derive(Debug, Clone, Copy)]
-enum MediaKind {
-    Audio,
-    Image,
-}
-
-impl MediaKind {
-    fn to_str(self) -> &'static str {
-        match self {
-            Self::Audio => "audio",
-            Self::Image => "image",
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum S3MediaVariant {
-    Original,
-    Resized,
-    Thumbnail,
-}
-
-impl S3MediaVariant {
-    const fn to_str(self) -> &'static str {
-        match self {
-            Self::Original => "original",
-            Self::Resized => "resized",
-            Self::Thumbnail => "thumbnail",
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum S3LibraryKind {
-    Global,
-    User,
-    Web,
-}
-
-impl S3LibraryKind {
-    const fn image_prefix(self) -> &'static str {
-        match self {
-            Self::Global => "image",
-            Self::User => "image-user",
-            Self::Web => "image-web",
-        }
-    }
-
-    const fn audio_prefix(self) -> &'static str {
-        match self {
-            Self::Global => "audio/global",
-            Self::User => "audio/user",
-            Self::Web => "audio/web",
-        }
-    }
-
-    const fn prefix(self, media_kind: MediaKind) -> &'static str {
-        match media_kind {
-            MediaKind::Audio => self.audio_prefix(),
-            MediaKind::Image => self.image_prefix(),
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct S3Client {
@@ -82,10 +24,6 @@ pub struct S3Client {
     region: Region,
     bucket: String,
     client: Option<rusoto_s3::S3Client>,
-}
-
-fn id_to_key(prefix: &str, variant: S3MediaVariant, id: Uuid) -> String {
-    format!("{}/{}/{}", prefix, variant.to_str(), id.to_hyphenated())
 }
 
 impl S3Client {
@@ -127,7 +65,7 @@ impl S3Client {
 
     pub async fn upload_images(
         &self,
-        library: S3LibraryKind,
+        library: MediaLibraryKind,
         image: ImageId,
         original: Vec<u8>,
         resized: Vec<u8>,
@@ -138,28 +76,17 @@ impl S3Client {
             None => return Ok(()),
         };
 
-        let id_to_key = |kind| id_to_key(library.image_prefix(), kind, image.0);
-
-        let original = client.put_object(PutObjectRequest {
+        let make_req = |kind, body: Vec<u8>| PutObjectRequest {
             bucket: self.bucket.clone(),
-            key: id_to_key(S3MediaVariant::Original),
-            body: Some(original.into()),
+            key: image_id_to_key(library, kind, image),
+            body: Some(body.into()),
+            content_type: Some("image/png".to_owned()),
             ..PutObjectRequest::default()
-        });
+        };
 
-        let resized = client.put_object(PutObjectRequest {
-            bucket: self.bucket.clone(),
-            key: id_to_key(S3MediaVariant::Resized),
-            body: Some(resized.into()),
-            ..PutObjectRequest::default()
-        });
-
-        let thumbnail = client.put_object(PutObjectRequest {
-            bucket: self.bucket.clone(),
-            key: id_to_key(S3MediaVariant::Thumbnail),
-            body: Some(thumbnail.into()),
-            ..PutObjectRequest::default()
-        });
+        let original = client.put_object(make_req(MediaVariant::Original, original));
+        let resized = client.put_object(make_req(MediaVariant::Resized, resized));
+        let thumbnail = client.put_object(make_req(MediaVariant::Thumbnail, thumbnail));
 
         futures::future::try_join3(original, resized, thumbnail).await?;
 
@@ -168,13 +95,13 @@ impl S3Client {
 
     pub fn image_presigned_get_url(
         &self,
-        library: S3LibraryKind,
-        kind: S3MediaVariant,
+        library: MediaLibraryKind,
+        kind: MediaVariant,
         image: ImageId,
     ) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
             bucket: self.bucket.clone(),
-            key: id_to_key(library.image_prefix(), kind, image.0),
+            key: image_id_to_key(library, kind, image),
             ..GetObjectRequest::default()
         }
         .get_presigned_url(
@@ -188,13 +115,13 @@ impl S3Client {
 
     async fn delete_media(
         &self,
-        library: S3LibraryKind,
-        variant: S3MediaVariant,
+        library: MediaLibraryKind,
+        variant: MediaVariant,
         id: Uuid,
         media_kind: MediaKind,
     ) {
         if let Err(err) = self
-            .try_delete(id_to_key(library.prefix(media_kind), variant, id))
+            .try_delete(id_with_kind_to_key(library, variant, id, media_kind))
             .await
         {
             log::warn!(
@@ -215,7 +142,7 @@ impl S3Client {
                             map.insert("kind".to_owned(), media_kind.to_str().into());
                             map.insert(
                                 "key".to_owned(),
-                                id_to_key(library.prefix(media_kind), variant, id).into(),
+                                id_with_kind_to_key(library, variant, id, media_kind).into(),
                             );
                             map
                         },
@@ -246,8 +173,8 @@ impl S3Client {
 
     pub async fn delete_image(
         &self,
-        library: S3LibraryKind,
-        variant: S3MediaVariant,
+        library: MediaLibraryKind,
+        variant: MediaVariant,
         image: ImageId,
     ) {
         self.delete_media(library, variant, image.0, MediaKind::Image)
@@ -256,7 +183,7 @@ impl S3Client {
 
     pub async fn upload_audio(
         &self,
-        library: S3LibraryKind,
+        library: MediaLibraryKind,
         audio: AudioId,
         original: Vec<u8>,
     ) -> anyhow::Result<()> {
@@ -265,12 +192,12 @@ impl S3Client {
             None => return Ok(()),
         };
 
-        let id_to_key = |kind| id_to_key(library.audio_prefix(), kind, audio.0);
+        let id_to_key = |kind| audio_id_to_key(library, kind, audio);
 
         client
             .put_object(PutObjectRequest {
                 bucket: self.bucket.clone(),
-                key: id_to_key(S3MediaVariant::Original),
+                key: id_to_key(MediaVariant::Original),
                 body: Some(original.into()),
                 content_type: Some("audio/mp3".to_owned()),
                 ..PutObjectRequest::default()
@@ -282,13 +209,13 @@ impl S3Client {
 
     pub fn audio_presigned_get_url(
         &self,
-        library: S3LibraryKind,
-        kind: S3MediaVariant,
+        library: MediaLibraryKind,
+        kind: MediaVariant,
         audio: AudioId,
     ) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
             bucket: self.bucket.clone(),
-            key: id_to_key(library.audio_prefix(), kind, audio.0),
+            key: audio_id_to_key(library, kind, audio),
             ..GetObjectRequest::default()
         }
         .get_presigned_url(
@@ -302,8 +229,8 @@ impl S3Client {
 
     pub async fn delete_audio(
         &self,
-        library: S3LibraryKind,
-        variant: S3MediaVariant,
+        library: MediaLibraryKind,
+        variant: MediaVariant,
         audio: AudioId,
     ) {
         self.delete_media(library, variant, audio.0, MediaKind::Audio)

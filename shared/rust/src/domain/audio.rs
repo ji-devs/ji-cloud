@@ -6,7 +6,6 @@ use uuid::Uuid;
 /// Types for user audio library.
 pub mod user {
     use serde::{Deserialize, Serialize};
-    use url::Url;
 
     use super::AudioId;
 
@@ -22,9 +21,6 @@ pub mod user {
     pub struct GetResponse {
         /// The audio file's metadata.
         pub metadata: UserAudio,
-
-        /// A url that can be used to retrieve the audio file.
-        pub url: Url,
     }
 
     /// Over the wire representation of an audio file's metadata.

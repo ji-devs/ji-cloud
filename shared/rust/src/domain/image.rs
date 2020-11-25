@@ -9,13 +9,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
-use url::Url;
+
 use uuid::Uuid;
 
 /// Types for user image library.
 pub mod user {
     use serde::{Deserialize, Serialize};
-    use url::Url;
 
     use super::ImageId;
 
@@ -31,12 +30,6 @@ pub mod user {
     pub struct GetResponse {
         /// The image metadata.
         pub metadata: UserImage,
-
-        /// A url that can be used to retrieve the image.
-        pub url: Url,
-
-        /// A url that can be used to retrieve a thumbnail of the image.
-        pub thumbnail_url: Url,
     }
 
     /// Over the wire representation of an image's metadata.
@@ -227,12 +220,6 @@ pub struct SearchResponse {
 pub struct GetResponse {
     /// The image metadata.
     pub metadata: Image,
-
-    /// A url that can be used to retrieve the image.
-    pub url: Url,
-
-    /// A url that can be used to retrieve a thumbnail of the image.
-    pub thumbnail_url: Url,
 }
 
 /// Over the wire representation of an image's metadata.

@@ -15,11 +15,7 @@ fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
 }
 
 pub mod user {
-    use crate::{
-        db,
-        extractor::WrapAuthClaimsNoDb,
-        s3::{S3Client, S3LibraryKind, S3MediaVariant},
-    };
+    use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
     use actix_web::{
         http,
         web::{Bytes, Data, Json, Path},
@@ -36,6 +32,8 @@ pub mod user {
             CreateResponse,
         },
         error::{audio::UploadError, GetError},
+        media::MediaLibraryKind,
+        media::MediaVariant,
     };
     use sqlx::PgPool;
 
@@ -74,7 +72,7 @@ pub mod user {
             .unwrap()?
         };
 
-        s3.upload_audio(S3LibraryKind::User, id, bytes.to_vec())
+        s3.upload_audio(MediaLibraryKind::User, id, bytes.to_vec())
             .await?;
 
         Ok(HttpResponse::NoContent().into())
@@ -91,7 +89,7 @@ pub mod user {
             .await
             .map_err(super::check_conflict_delete)?;
 
-        s3.delete_audio(S3LibraryKind::Global, S3MediaVariant::Original, audio)
+        s3.delete_audio(MediaLibraryKind::Global, MediaVariant::Original, audio)
             .await;
 
         Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
@@ -99,7 +97,6 @@ pub mod user {
 
     pub(super) async fn get(
         db: Data<PgPool>,
-        s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<AudioId>,
     ) -> Result<
@@ -110,17 +107,11 @@ pub mod user {
             .await?
             .ok_or(GetError::NotFound)?;
 
-        let id = metadata.id;
-
-        Ok(Json(GetResponse {
-            metadata,
-            url: s3.audio_presigned_get_url(S3LibraryKind::Global, S3MediaVariant::Resized, id)?,
-        }))
+        Ok(Json(GetResponse { metadata }))
     }
 
     pub(super) async fn list(
         db: Data<PgPool>,
-        s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
         Json<<endpoints::audio::user::List as ApiEndpoint>::Res>,
@@ -128,16 +119,7 @@ pub mod user {
     > {
         let audio_files: Vec<_> = db::audio::user::list(db.as_ref())
             .err_into::<GetError>()
-            .and_then(|metadata: UserAudio| async {
-                Ok(GetResponse {
-                    url: s3.audio_presigned_get_url(
-                        S3LibraryKind::Global,
-                        S3MediaVariant::Resized,
-                        metadata.id,
-                    )?,
-                    metadata,
-                })
-            })
+            .and_then(|metadata: UserAudio| async { Ok(GetResponse { metadata }) })
             .try_collect()
             .await?;
 
