@@ -90,7 +90,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.3.7",
+ "dominator_helpers 0.4.3",
  "futures",
  "futures-signals",
  "gloo",
@@ -131,7 +131,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.4.2",
+ "dominator_helpers 0.4.3",
  "futures",
  "futures-signals",
  "gloo",
@@ -166,7 +166,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.4.2",
+ "dominator_helpers 0.4.3",
  "futures",
  "futures-signals",
  "gloo",
@@ -429,9 +429,9 @@ dependencies = [
 
 [[package]]
 name = "dominator_helpers"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1633085497b6dd6d6f2a1ee909ad693ad1a5e5925a1efb530c08be7b0ff9766e"
+checksum = "3d47882016ebc22875a3945bc1b4a5ee6fdcb6a4c6897e4992b2a324a75badbe"
 dependencies = [
  "discard",
  "dominator",
@@ -528,14 +528,15 @@ dependencies = [
 
 [[package]]
 name = "futures-signals"
-version = "0.3.15"
+version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc25a8a9a6d6ff91068ca03a3d0526dbee38708faaf850825a1647969dc1dead"
+checksum = "7dc75fb8ba2f32753728cbfce10c1bbf343569861ed9b63e1c01a78947bfd931"
 dependencies = [
  "discard",
  "futures-channel",
  "futures-core",
  "futures-util",
+ "pin-project",
  "serde",
 ]
 
@@ -809,18 +810,18 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "pin-project"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee41d838744f60d959d7074e3afb6b35c7456d0f61cad38a24e35e6553f73841"
+checksum = "9ccc2237c2c489783abd8c4c80e5450fc0e98644555b1364da68cc29aa151ca7"
 dependencies = [
  "pin-project-internal",
 ]
 
 [[package]]
 name = "pin-project-internal"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81a4ffa594b66bff340084d4081df649a7dc049ac8d7fc458d8e628bfbbb2f86"
+checksum = "f8e8d2bf0b23038a4424865103a4df472855692821aab4e4f5c3312d461d9e5f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1341,7 +1342,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "config",
  "dominator",
- "dominator_helpers 0.4.2",
+ "dominator_helpers 0.4.3",
  "futures-signals",
  "js-sys",
  "log",
