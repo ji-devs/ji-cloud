@@ -213,6 +213,9 @@ pub struct SearchResponse {
 
     /// The number of pages found.
     pub pages: u32,
+
+    /// The total number of images found
+    pub total_image_count: u64,
 }
 
 /// Response for getting a single image.
