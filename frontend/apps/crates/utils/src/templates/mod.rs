@@ -29,7 +29,7 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODULE_PAGE, get_template_str(include_str!("../../../../../.template_output/_common/module/module-page.html"))),
+            (MODULE_PAGE, get_template_str(include_str!("../../../../../.template_output/module/_common/module-page.html"))),
         ]);
 
         Self { cache }

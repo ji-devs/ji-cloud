@@ -1,7 +1,7 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {mockWords, mockThemes, nCardsToGrid} from "../common/mock-data";
-import modulePage from "@templates/_common/module/module-page.html";
+import modulePage from "@templates/module/_common/module-player-iframe.html";
 import playerTmpl from "@templates/module/memory/play/player.html";
 import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
 
