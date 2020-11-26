@@ -1,3 +1,4 @@
+//TODO - read from env to get local/dev port settings and minio bucket name
 use time::Duration;
 
 pub const STAGE_WIDTH: f64 = 1920.0;
@@ -78,9 +79,9 @@ impl RemoteTarget {
         }
     }
 
-    pub const fn upload_url(&self) -> &'static str {
+    pub const fn uploads_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:9000",
+            Self::Local => "http://localhost:9000/test-bucket",
             Self::Sandbox => "https://uploads.sandbox.jicloud.org",
             Self::Release => "https://uploads.jicloud.org",
         }

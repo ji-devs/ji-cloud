@@ -1,26 +1,25 @@
 use super::settings::SETTINGS;
 use config::MEDIA_UI_PATH;
+use shared::{
+    media::{image_id_to_key,MediaLibraryKind, MediaVariant},
+    domain::image::ImageId
+};
+use wasm_bindgen::prelude::*;
 
 pub fn ui<T: AsRef<str>>(path:T) -> String {
     media_url(&format!("{}/{}", MEDIA_UI_PATH, path.as_ref()))
 }
 
-pub fn media_url(path:&str) -> String {
+pub fn library_image(library_kind: MediaLibraryKind, variant: MediaVariant, id:&str) -> String {
+    let id = uuid::Uuid::parse_str(id).unwrap_throw();
+    let path = image_id_to_key(library_kind, variant, ImageId(id));
+
+    uploads_url(&path)
+}
+
+fn uploads_url(path:&str) -> String {
+    format!("{}/{}", SETTINGS.get().unwrap().remote_target.uploads_url(), path)
+}
+fn media_url(path:&str) -> String {
     format!("{}/{}", SETTINGS.get().unwrap().remote_target.media_url(), path)
 }
-
-// moved to fetch in order to force consolidation at the compiler level
-/*
-pub fn api_url(path:&str) -> String {
-    format!("{}{}", SETTINGS.get().unwrap().remote_target.api_url(), path)
-}
-*/
-
-pub fn upload_url(path:&str) -> String {
-    format!("{}/{}", SETTINGS.get().unwrap().remote_target.upload_url(), path)
-}
-
-pub fn upload_image_url(path:&str) -> String {
-    format!("{}/image/{}", SETTINGS.get().unwrap().remote_target.upload_url(), path)
-}
-
