@@ -1,0 +1,30 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+
+<div class="flex bg-jibackgroundBlue w-full h-screen">
+    <aside data-id="sidebar" class="bg-white w-516 flex-shrink-0"> </aside>
+
+    <div class="module-edit-grid pl-6 pr-8">
+        <header class="mt-4">
+            {% include "module/poster/edit/top-widget.html" %}
+            <div class="-mt-12">
+                <h1 class="text-jititleorange text-4xl font-light mb-4">${title}</h1>
+                <p class="font-light text-lg">${subtitle}</p>
+            </div>
+        </header>
+
+        <main data-id="module-outer" class="w-full h-full bg-white mt-4 rounded-sm mb-4">
+            <div data-id="module-container" class="module-container">
+                <div data-id="module-content" class="module-content">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/SNice.svg/1024px-SNice.svg.png"
+                        style="margin-top: 10rem; margin-left: 10rem; width: 20rem; height: 20rem;"
+                    />
+                    <div style="font-size: 20rem">Hello World!</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="flex justify-end w-full mt-10 mb-6">
+            {{ ButtonMacros::orange(label="Done", dataId="next") }}
+        </footer>
+    </div>
+</div>

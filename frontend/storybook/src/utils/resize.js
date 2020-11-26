@@ -17,8 +17,9 @@ export function cancelResizer() {
 export function startResizerOnElement(element) {
     function resizeFit() {
         const targetRatio = STAGE_WIDTH / STAGE_HEIGHT;
-        let width = element.clientWidth;
-        let height = element.clientHeight;
+        const bounds = element.getBoundingClientRect();
+        let width = bounds.width;
+        let height = bounds.height;
         const windowRatio = width / height;
 
         if (windowRatio > targetRatio ) {
@@ -27,8 +28,8 @@ export function startResizerOnElement(element) {
             height = width / targetRatio;
         }
 
-        const x = (element.clientWidth - width) / 2;
-        const y = (element.clientHeight - height) / 2;
+        const x = bounds.x + ((bounds.width - width) / 2);
+        const y = bounds.y + ((bounds.height - height) / 2);
         const scale = width / STAGE_WIDTH;
 
         //document.documentElement.style.setProperty('font-size', `calc(62.5% * ${scale})`);
@@ -48,7 +49,7 @@ export function startResizerOnElement(element) {
 
     cancelResizer();
 
-    if(!element || !element.clientWidth || !element.clientHeight) {
+    if(!element || !element.getBoundingClientRect().width || !element.getBoundingClientRect().height) {
         return;
     }
     console.log("creating resizer");
