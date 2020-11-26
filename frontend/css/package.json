@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch:storybook": "watchexec -w src/index.css -w ../.template_output -- postcss src/index.css --env production -o dist/styles.storybook.css",
+    "watch:storybook": "watchexec -w ./src -w ../.template_output -- postcss src/index.css --env production -o dist/styles.storybook.css",
     "bundle:storybook": "postcss src/index.css --env production -o dist/styles.storybook.css",
     "bundle:all": "npm-run-all -p bundle:prod bundle:debug",
     "bundle:prod": "postcss src/index.css --env production -o dist/styles.min.css",
