@@ -34,9 +34,14 @@
           </div>
         </div>
 
-        {{ PublishInput::publishselect(label="Age")}}
+
         {{ PublishInput::publishselect(label="Teaching Goal")}}
-        {{ PublishInput::publishselect(label="Categories")}}
+        <div class="relative">
+          {{ PublishInput::publishselect(label="Categories")}}
+          <div class="" data-id="publish-category-dropdown"></div>
+
+        </div>
+        <div class="" data-id="publish-categories"></div>
       </div>
       <div class="w-296">
         <div class="mb-12">

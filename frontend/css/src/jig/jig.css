@@ -250,3 +250,7 @@ background-color: #fff4f4 !important;
   border-style: solid;
   border-color: transparent transparent #f00813 transparent;
 }
+
+.publish-subcategory img{visibility:hidden}
+
+.publish-subcategory-chosen img{visibility: visible;}
