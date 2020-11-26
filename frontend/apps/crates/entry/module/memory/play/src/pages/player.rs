@@ -17,7 +17,7 @@ use futures::future::ready;
 use utils::{
     iframe::*,
     components::module_page::*,
-    signals::StyleSignal,
+    signals::DefaultStringSignal,
 };
 use gloo_timers::future::TimeoutFuture;
 use crate::{debug, data::*};
@@ -33,10 +33,10 @@ use shared::{
     api::endpoints::{ApiEndpoint, self},
     domain,
     error,
+    media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-use utils::{
-    fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
-};
+use utils::settings::SETTINGS;
+
 
 use uuid::Uuid;
 pub struct PlayerPage {
@@ -216,7 +216,7 @@ impl CardDom {
 
     fn transform_signal(&self) -> impl Signal<Item = String> {
         self.transition.signal_ref(|transition| {
-            StyleSignal::new(
+            DefaultStringSignal::new(
                 "none".to_string(),
                 transition.as_ref().map(|t| t.transform_signal())
             )
@@ -286,7 +286,10 @@ impl CardDom {
                     Media::Image(id) => {
                         apply_methods!(dom, {
                             .with_data_id!("image", {
-                                .property_signal("src", image_url_signal(id.clone()))
+                                .property("src", {
+                                    id.as_ref().map(|id| utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Resized, id)) 
+                                        .unwrap_or("".to_string())
+                                })
                             })
                             .with_data_id!("text-contents", {
                                 .class("hidden")
@@ -298,24 +301,4 @@ impl CardDom {
             })
         })
     }
-}
-
-fn image_url_signal(id:Option<String>) -> impl Signal<Item = String> {
-    log::info!("{:?}", id);
-    signal::from_future(async move {
-        match id {
-            None => None,
-            Some(id) => {
-                let path = endpoints::image::Get::PATH.replace("{id}",&id);
-                log::info!("{}", path);
-
-                match api_with_auth::<domain::image::GetResponse, shared::error::GetError, ()>(&path, endpoints::image::Get::METHOD, None).await {
-                    Err(_) => None, 
-                    Ok(res) => Some(res.url.to_string())
-                }
-            }
-        }
-    })
-    .map(|x| x.flatten().unwrap_or("".to_string()))
-
 }

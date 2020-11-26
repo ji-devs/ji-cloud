@@ -1,18 +1,18 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId} from "@utils/dom";
-import jignavigation from "@templates/jig/design/jig-navigation.html";
-import jigcoverone from "@templates/jig/design/jig-cover1.html";
-import jigaddimage from "@templates/jig/design/cover-add-image.html";
-import jigaddtext from "@templates/jig/design/add-text.html";
-import jigrecord from "@templates/jig/design/cover-record.html";
-import jigaudio from "@templates/jig/design/cover-audio.html";
-import colorpicker from "@templates/jig/design/cover-colorpicker.html";
-import addcolor from "@templates/jig/design/cover-addcolor.html";
-import jigaddbackground from "@templates/jig/design/cover-addbackground.html";
+import jignavigation from "@templates/module/poster/old-temp-ref/jig-navigation.html";
+import jigcoverone from "@templates/module/poster/old-temp-ref/jig-cover1.html";
+import jigaddimage from "@templates/module/poster/old-temp-ref/cover-add-image.html";
+import jigaddtext from "@templates/module/poster/old-temp-ref/add-text.html";
+import jigrecord from "@templates/module/poster/old-temp-ref/cover-record.html";
+import jigaudio from "@templates/module/poster/old-temp-ref/cover-audio.html";
+import colorpicker from "@templates/module/poster/old-temp-ref/cover-colorpicker.html";
+import addcolor from "@templates/module/poster/old-temp-ref/cover-addcolor.html";
+import jigaddbackground from "@templates/module/poster/old-temp-ref/cover-addbackground.html";
 
 
 export default {
-  title: 'JIG/Design',
+  title: 'Modules/Poster/Old Temp Ref',
 }
 
 export const JigNavigation = () =>

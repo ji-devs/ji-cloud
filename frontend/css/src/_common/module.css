@@ -15,3 +15,26 @@
     width: var(--content-width);
     height: var(--content-height);
 }
+
+
+.module-edit-grid {
+  display: grid;
+  /* header (size of contents)
+     main (remaining height)
+     footer (size of contents)
+  */
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  width: 100vw;
+  height: 100vh;
+}
+
+.module-edit-grid > header {
+  grid-area: 1 / 1;
+}
+.module-edit-grid > main {
+  grid-area: 2 / 1;
+}
+.module-edit-grid > footer {
+  grid-area: 3 / 1;
+}

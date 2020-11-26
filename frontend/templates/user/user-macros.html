@@ -12,7 +12,7 @@
 <!--When active add class focus-->
 <div class="bg-jilogingrey h-64 {{width}} relative rounded-lg px-4 py-2 mb-4">
   <input type="password" data-id="{{inputDataId}}" class="outline-none {{inputwidth}} bg-jilogingrey absolute bottom-0 mb-2 px-4 mr-px left-0">
-  <img src="{{MEDIA_UI}}/icn-show-idle.svg" alt="" class="absolute bottom-10 right-10">
+  <img data-id="reveal-pw" src="{{MEDIA_UI}}/icn-show-idle.svg" alt="" class="absolute bottom-10 right-10 cursor-pointer">
   <label class="absolute left-0 ml-4 text-jibuttonBlue">{{label}}</label>
 </div>
 {% endmacro user_pw %}

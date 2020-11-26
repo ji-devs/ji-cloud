@@ -20,6 +20,7 @@ use utils::routes::{Route, UserRoute};
 pub struct SigninPage {
     pub status: Mutable<Option<SigninStatus>>,
     pub refs: RefCell<Option<SigninPageRefs>>,
+    reveal_pw: Mutable<bool>,
     pub loader: AsyncLoader
 }
 
@@ -36,6 +37,7 @@ impl SigninPage {
 
         let _self = Rc::new(Self { 
             status: Mutable::new(None),
+            reveal_pw: Mutable::new(false),
             loader: AsyncLoader::new(),
             refs: RefCell::new(None),
         });
@@ -125,6 +127,17 @@ impl SigninPage {
                         .as_ref()
                         .map(|status| status.to_string())
                         .unwrap_or("".to_string())
+                }))
+            })
+
+            .with_data_id!("password", {
+                .property_signal("type", _self.reveal_pw.signal().map(|reveal| {
+                    if reveal { "text" } else { "password" }
+                }))
+            })
+            .with_data_id!("reveal-pw", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.reveal_pw.replace_with(|x| !*x);
                 }))
             })
             .after_inserted(clone!(_self => move |elem| {

@@ -26,6 +26,7 @@ pub struct RegisterStart {
     pub status: Mutable<Option<RegisterStatus>>,
     pub step: Rc<Mutable<Step>>,
     pub data: Rc<RefCell<RegisterData>>,
+    reveal_pw: Mutable<bool>,
     pub loader: AsyncLoader
 }
 
@@ -35,6 +36,7 @@ impl RegisterStart {
             refs: RefCell::new(None),
             status: Mutable::new(None),
             loader: AsyncLoader::new(),
+            reveal_pw: Mutable::new(false),
             data,
             step,
         });
@@ -45,6 +47,17 @@ impl RegisterStart {
     
     pub fn render(_self: Rc<Self>) -> Dom {
         elem!(templates::register_start(), {
+
+            .with_data_id!("password", {
+                .property_signal("type", _self.reveal_pw.signal().map(|reveal| {
+                    if reveal { "text" } else { "password" }
+                }))
+            })
+            .with_data_id!("reveal-pw", {
+                .event(clone!(_self => move |evt:events::Click| {
+                    _self.reveal_pw.replace_with(|x| !*x);
+                }))
+            })
             .with_data_id!("signin-link", {
                 .event(clone!(_self => move |_evt:events::Click| {
 
@@ -109,6 +122,7 @@ impl RegisterStart {
                     }
                 }))
             })
+
             .after_inserted(clone!(_self => move |elem| {
                 _self.stash_refs(elem);
                 //Self::set_debug_data(_self);
@@ -131,7 +145,7 @@ impl RegisterPageRefs {
     pub fn new(parent:&HtmlElement) -> Self {
         Self {
             email: parent.select(&data_id("email")),
-            pw: parent.select(&data_id("pw")),
+            pw: parent.select(&data_id("password")),
         }
     }
 
