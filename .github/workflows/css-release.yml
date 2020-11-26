@@ -58,7 +58,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud (tailwind)
-        run: gsutil rsync ./frontend/css/styles.min.css gs://ji-cloud-frontend-origin-eu-001/_css/styles.min.css
+        run: gsutil cp ./frontend/css/styles.min.css gs://ji-cloud-frontend-origin-eu-001/_css/
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
