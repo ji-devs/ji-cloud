@@ -37,6 +37,8 @@ const DUPLICATE_STEP_4_PAGE:&'static str = "duplicate-step-4-page";
 // words and images mode
 const WORDS_AND_IMAGES_STEP_1_PAGE:&'static str = "words-and-images-step-1-page";
 const WORDS_AND_IMAGES_STEP_2_PAGE:&'static str = "words-and-images-step-2-page";
+const WORDS_AND_IMAGES_STEP_4_PAGE:&'static str = "words-and-images-step-4-page";
+const WORDS_AND_IMAGES_STEP_1_THUMBNAIL:&'static str = "words-and-images-step-1-thumbnail";
 
 pub fn mode_choose_page() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
@@ -87,11 +89,21 @@ pub mod duplicate {
 
 pub mod words_and_images {
     use super::*;
+    pub fn step_1_thumbnail(src:&str) -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem(WORDS_AND_IMAGES_STEP_1_THUMBNAIL, 
+            &html_map!(
+                "src" => src
+            )
+        ).unwrap_throw())
+    }
     pub fn step_1_page() -> HtmlElement {
         TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_1_PAGE))
     }
     pub fn step_2_page() -> HtmlElement {
         TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_2_PAGE))
+    }
+    pub fn step_4_page() -> HtmlElement {
+        TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_4_PAGE))
     }
 
 }
@@ -154,8 +166,14 @@ impl Templates {
             (WORDS_AND_IMAGES_STEP_1_PAGE, get_template_str(include_str!(
                 template_path!("module/memory/edit/words-and-images/step-1/step-1.html")
             ))),
+            (WORDS_AND_IMAGES_STEP_1_THUMBNAIL, get_template_str(include_str!(
+                template_path!("module/memory/edit/words-and-images/step-1/sidebar/image-thumbnail.html")
+            ))),
             (WORDS_AND_IMAGES_STEP_2_PAGE, get_template_str(include_str!(
                 template_path!("module/memory/edit/words-and-images/step-2.html")
+            ))),
+            (WORDS_AND_IMAGES_STEP_4_PAGE, get_template_str(include_str!(
+                template_path!("module/memory/edit/words-and-images/step-4.html")
             ))),
         ]);
 

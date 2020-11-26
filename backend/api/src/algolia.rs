@@ -1,9 +1,13 @@
 use algolia::{
     filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
+    model::attribute::Attribute,
+    model::attribute::SearchableAttributes,
+    request::SetSettings,
     request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
     Client as Inner,
 };
+use anyhow::Context;
 use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::{future::BoxFuture, TryStreamExt};
@@ -15,7 +19,6 @@ use sqlx::PgPool;
 use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
-
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
@@ -24,6 +27,7 @@ struct BatchImage<'a> {
     age_ranges: &'a [Uuid],
     affiliations: &'a [Uuid],
     categories: &'a [Uuid],
+    category_names: &'a [String],
 }
 
 pub struct Updater {
@@ -63,7 +67,8 @@ select
     array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
     array((select style_id from image_style where image_id = image_metadata.id)) as "styles!",
     array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
-    array((select category_id from image_category where image_id = image_metadata.id)) as "categories!"
+    array((select category_id from image_category where image_id = image_metadata.id)) as "categories!",
+    array((select name from category inner join image_category on category_id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!"
 from image_metadata
 where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
 limit 100
@@ -78,6 +83,7 @@ limit 100
                 age_ranges: &row.age_ranges,
                 affiliations: &row.affiliations,
                 categories: &row.categories,
+                category_names: &row.category_names
             })
             .expect("failed to serialize BatchImage to json")
             {
@@ -130,6 +136,7 @@ pub struct Image<'a> {
     pub age_ranges: &'a [AgeRangeId],
     pub affiliations: &'a [AffiliationId],
     pub categories: &'a [CategoryId],
+    pub category_names: &'a [String],
 }
 
 #[derive(Serialize, Default, Debug)]
@@ -146,6 +153,8 @@ pub struct ImageUpdate<'a> {
     pub affiliations: Option<&'a [AffiliationId]>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub categories: Option<&'a [CategoryId]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category_names: Option<&'a [String]>,
 }
 
 #[derive(Clone)]
@@ -187,10 +196,36 @@ fn algolia_bad_batch_object<'a>(
     })
 }
 
+fn algolia_set_searchable_fields<'a>(
+    client: &'a Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    Box::pin(async move {
+        client
+            .set_settings(
+                index,
+                &SetSettings {
+                    searchable_attributes: Some(
+                        SearchableAttributes::build()
+                            .single(Attribute("name".to_owned()))
+                            .single(Attribute("description".to_owned()))
+                            .single(Attribute("category_names".to_owned()))
+                            .finish(),
+                    ),
+                },
+            )
+            .await?;
+        Ok(())
+    })
+}
+
 const ALGOLIA_INDEXING_MIGRATIONS: &'static [(
     ResyncKind,
     for<'a> fn(&'a Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
-)] = &[(ResyncKind::Complete, algolia_bad_batch_object)];
+)] = &[
+    (ResyncKind::Complete, algolia_bad_batch_object),
+    (ResyncKind::Complete, algolia_set_searchable_fields),
+];
 
 const ALGOLIA_INDEXING_VERSION: i16 = ALGOLIA_INDEXING_MIGRATIONS.len() as i16;
 
@@ -222,8 +257,13 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
 
         let migrations_to_run = &ALGOLIA_INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
-        for (_, updater) in migrations_to_run {
-            updater(inner, &self.index).await?;
+        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
+            updater(inner, &self.index).await.with_context(|| {
+                anyhow::anyhow!(
+                    "error while running algolia updater #{}",
+                    idx + (algolia_version as usize) + 1
+                )
+            })?;
         }
 
         // currently this can only be "no resync" or "complete resync" but eventually

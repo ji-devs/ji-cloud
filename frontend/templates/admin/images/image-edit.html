@@ -1,4 +1,3 @@
-{% import "_common/sidebar/sidebar-macros.html" as Sidebar %}
 {% import "_common/input/input-macros.html" as Input %}
 {% import "_common/buttons/button-macros.html" as ButtonMacros %}
 {% import "admin/categories/categories-macros.html" as Categories %}
@@ -21,7 +20,7 @@
           <p>Image was published</p>
         </div>
       </div>
-      {{ Input::searchbox(dataId="#", label="Search Image") }}
+      <div data-id="back-to-search" class="cursor-pointer">Back to Search Results</div>
     </div>
     <div class="bordersolid border-b-2 w-full border-grey-400 mb-6"></div>
     <div class="flex relative">

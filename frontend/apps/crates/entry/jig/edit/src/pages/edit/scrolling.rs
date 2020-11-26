@@ -89,7 +89,6 @@ impl Scrolling {
     }
 
     pub fn stop(&self) {
-        log::info!("stopping...");
         self.on_timestamp_diff.set(None);
     }
 }

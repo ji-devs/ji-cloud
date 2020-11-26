@@ -43,6 +43,20 @@ set_env APP_NAME user
 cm_run_task dev-main-nomedia
 '''
 
+[tasks.user-dev-iframe]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task dev-iframe
+
+'''
+[tasks.user-dev-iframe-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME user 
+cm_run_task dev-iframe-nomedia
+'''
+
 [tasks.user-sandbox]
 script_runner = "@duckscript"
 script = '''

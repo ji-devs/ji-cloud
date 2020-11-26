@@ -1,5 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClassesId, setTextId} from "@utils/dom";
+import {withContainer} from "./admin-common";
 import categoriesPage from "@templates/admin/categories/categories-page.html";
 import categoryMainSelected from "@templates/admin/categories/category-main-selected.html";
 import categoryMainDeselected from "@templates/admin/categories/category-main-deselected.html";
@@ -12,19 +13,21 @@ export default {
   title: 'Admin/Categories',
 }
 
+const withCategoryPage = (page) => withContainer({page, sidebarId: "categories"});
+
 export const SingleItem = () => {
     const page = tmpl(categoriesPage, {});
     
     appendId(page, "list", setLabel(tmpl(categoryMainDeselected), "deselected")); 
     appendId(page, "list", setLabel(tmpl(categoryMainSelected), "selected")); 
-    return page;
+    return withCategoryPage(page);
 }
 
 export const MultiItem = () => {
     const page = tmpl(categoriesPage, {});
     appendId(page, "list", createTree(false));
     appendId(page, "list", createTree(true));
-    return page;
+    return withCategoryPage(page);
 }
 
 export const WithMenu = () => {
@@ -36,7 +39,7 @@ export const WithMenu = () => {
     appendId(element, "menu-container", menu);
     appendId(page, "list", element); 
 
-    return page;
+    return withCategoryPage(page);
 }
 
 function setLabel(parentElement, label) {

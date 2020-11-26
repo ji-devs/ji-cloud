@@ -12,3 +12,5 @@ pub mod components;
 pub mod templates;
 pub mod resize;
 pub mod signals;
+pub mod math;
+pub mod drag;

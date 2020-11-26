@@ -76,6 +76,7 @@ pub async fn run(
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
             .configure(endpoints::image::configure)
+            .configure(endpoints::audio::configure)
             .configure(endpoints::meta::configure)
             .configure(endpoints::jig::configure)
             .configure(endpoints::module::configure)

@@ -1,3 +1,4 @@
+use anyhow::Context;
 use core::settings::{self, SettingsManager};
 use ji_cloud_api::{algolia, db, http, jwkkeys, logger, s3};
 use std::thread;
@@ -36,7 +37,10 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // todo: find a better place for this...
-    algolia.migrate(&db_pool).await?;
+    algolia
+        .migrate(&db_pool)
+        .await
+        .context("Algolia migration failed")?;
 
     let algolia_syncer = algolia::Updater {
         db: db_pool.clone(),
@@ -49,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
 
     log::info!("app started!");
 
-    handle.join().unwrap()?;
+    handle.join().unwrap().context("http server died")?;
 
     Ok(())
 }

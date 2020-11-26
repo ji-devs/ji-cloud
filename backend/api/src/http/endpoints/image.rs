@@ -3,7 +3,7 @@ use crate::{
     db::{self, nul_if_empty},
     extractor::{AuthUserWithScope, ScopeManageImage, WrapAuthClaimsNoDb},
     image_ops::generate_images,
-    s3::{S3Client, S3ImageKind, S3LibraryKind},
+    s3::S3Client,
 };
 use actix_web::{
     http::{self, StatusCode},
@@ -22,17 +22,14 @@ use shared::{
         image::{CreateError, SearchError, UpdateError, UploadError},
         DeleteError, GetError,
     },
+    media::MediaLibraryKind,
+    media::MediaVariant,
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
 pub mod user {
-    use crate::{
-        db,
-        extractor::WrapAuthClaimsNoDb,
-        image_ops::generate_images,
-        s3::{S3Client, S3ImageKind, S3LibraryKind},
-    };
+    use crate::{db, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3::S3Client};
     use actix_web::{
         http,
         web::{Bytes, Data, Json, Path},
@@ -49,6 +46,8 @@ pub mod user {
             CreateResponse,
         },
         error::{image::UploadError, GetError},
+        media::MediaLibraryKind,
+        media::MediaVariant,
     };
     use sqlx::PgPool;
 
@@ -87,7 +86,7 @@ pub mod user {
         .await?;
 
         let (original, resized, thumbnail) = res?;
-        s3.upload_images(S3LibraryKind::User, id, original, resized, thumbnail)
+        s3.upload_images(MediaLibraryKind::User, id, original, resized, thumbnail)
             .await?;
 
         Ok(HttpResponse::NoContent().into())
@@ -104,11 +103,11 @@ pub mod user {
             .await
             .map_err(super::check_conflict_delete)?;
 
-        let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
+        let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
         let ((), (), ()) = futures::future::join3(
-            delete_image(S3ImageKind::Original),
-            delete_image(S3ImageKind::Resized),
-            delete_image(S3ImageKind::Thumbnail),
+            delete_image(MediaVariant::Original),
+            delete_image(MediaVariant::Resized),
+            delete_image(MediaVariant::Thumbnail),
         )
         .await;
 
@@ -117,7 +116,6 @@ pub mod user {
 
     pub(super) async fn get(
         db: Data<PgPool>,
-        s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<ImageId>,
     ) -> Result<
@@ -128,22 +126,11 @@ pub mod user {
             .await?
             .ok_or(GetError::NotFound)?;
 
-        let id = metadata.id;
-
-        Ok(Json(GetResponse {
-            metadata,
-            url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
-            thumbnail_url: s3.presigned_image_get_url(
-                S3LibraryKind::Global,
-                S3ImageKind::Thumbnail,
-                id,
-            )?,
-        }))
+        Ok(Json(GetResponse { metadata }))
     }
 
     pub(super) async fn list(
         db: Data<PgPool>,
-        s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
         Json<<endpoints::image::user::List as ApiEndpoint>::Res>,
@@ -151,21 +138,7 @@ pub mod user {
     > {
         let images: Vec<_> = db::image::user::list(db.as_ref())
             .err_into::<GetError>()
-            .and_then(|metadata: UserImage| async {
-                Ok(GetResponse {
-                    url: s3.presigned_image_get_url(
-                        S3LibraryKind::Global,
-                        S3ImageKind::Resized,
-                        metadata.id,
-                    )?,
-                    thumbnail_url: s3.presigned_image_get_url(
-                        S3LibraryKind::Global,
-                        S3ImageKind::Thumbnail,
-                        metadata.id,
-                    )?,
-                    metadata,
-                })
-            })
+            .and_then(|metadata: UserImage| async { Ok(GetResponse { metadata }) })
             .try_collect()
             .await?;
 
@@ -300,7 +273,7 @@ async fn upload(
     .await?;
 
     let (original, resized, thumbnail) = res?;
-    s3.upload_images(S3LibraryKind::Global, id, original, resized, thumbnail)
+    s3.upload_images(MediaLibraryKind::Global, id, original, resized, thumbnail)
         .await?;
 
     Ok(HttpResponse::NoContent().into())
@@ -308,7 +281,6 @@ async fn upload(
 
 async fn get_one(
     db: Data<PgPool>,
-    s3: Data<S3Client>,
     _claims: WrapAuthClaimsNoDb,
     req: Path<ImageId>,
 ) -> Result<
@@ -319,22 +291,11 @@ async fn get_one(
         .await?
         .ok_or(GetError::NotFound)?;
 
-    let id = metadata.id;
-
-    Ok(Json(GetResponse {
-        metadata,
-        url: s3.presigned_image_get_url(S3LibraryKind::Global, S3ImageKind::Resized, id)?,
-        thumbnail_url: s3.presigned_image_get_url(
-            S3LibraryKind::Global,
-            S3ImageKind::Thumbnail,
-            id,
-        )?,
-    }))
+    Ok(Json(GetResponse { metadata }))
 }
 
 async fn get(
     db: Data<PgPool>,
-    s3: Data<S3Client>,
     algolia: Data<AlgoliaClient>,
     _claims: WrapAuthClaimsNoDb,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
@@ -359,21 +320,7 @@ async fn get(
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<SearchError>()
-        .and_then(|metadata: Image| async {
-            Ok(GetResponse {
-                url: s3.presigned_image_get_url(
-                    S3LibraryKind::Global,
-                    S3ImageKind::Resized,
-                    metadata.id,
-                )?,
-                thumbnail_url: s3.presigned_image_get_url(
-                    S3LibraryKind::Global,
-                    S3ImageKind::Thumbnail,
-                    metadata.id,
-                )?,
-                metadata,
-            })
-        })
+        .and_then(|metadata: Image| async { Ok(GetResponse { metadata }) })
         .try_collect()
         .await?;
 
@@ -435,17 +382,17 @@ async fn delete(
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
-) -> Result<HttpResponse, <endpoints::image::Delete as ApiEndpoint>::Err> {
+) -> Result<HttpResponse, <endpoints::image::user::Delete as ApiEndpoint>::Err> {
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
         .map_err(check_conflict_delete)?;
 
-    let delete_image = |kind| s3.delete_image(S3LibraryKind::Global, kind, image);
+    let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
-        delete_image(S3ImageKind::Original),
-        delete_image(S3ImageKind::Resized),
-        delete_image(S3ImageKind::Thumbnail),
+        delete_image(MediaVariant::Original),
+        delete_image(MediaVariant::Resized),
+        delete_image(MediaVariant::Thumbnail),
         algolia.delete_image(image),
     )
     .await;

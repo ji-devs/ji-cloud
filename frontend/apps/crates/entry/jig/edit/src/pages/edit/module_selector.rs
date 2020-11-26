@@ -21,6 +21,7 @@ use shared::domain::{
     user::UserProfile,
     category::Category,
     image::ImageKind,
+    jig::ModuleKind,
 };
 
 use super::data::*;
@@ -38,19 +39,19 @@ impl ModuleSelect {
     pub fn render(_self: Rc<Self>) -> Dom { 
         elem!(templates::edit_module_selection(), {
             .with_data_id!("poster", {
-                .event(drag_callback("poster".to_string()))
+                .event(drag_callback(ModuleKind::Poster))
             })
             .with_data_id!("memory-game", {
-                .event(drag_callback("memory-game".to_string()))
+                .event(drag_callback(ModuleKind::MemoryGame))
             })
         })
     }
 }
 
-fn drag_callback(name:String) -> impl Fn(events::DragStart) {
+fn drag_callback(kind:ModuleKind) -> impl Fn(events::DragStart) {
     move |evt:events::DragStart| {
         if let Some(data_transfer) = evt.data_transfer() {
-            data_transfer.set_data("module_kind", &name);
+            data_transfer.set_data("module_kind", &kind.as_str());
             data_transfer.set_drop_effect("all");
         } else {
             log::error!("no data transfer - use a real computer!!!");

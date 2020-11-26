@@ -29,7 +29,9 @@ impl BasicImage {
     }
 }
 
-pub async fn search_images(query:String, page: Option<u32>, is_published: Option<bool>) -> Result<(Vec<BasicImage>, u32), ()> {
+pub type NumPages = u32;
+
+pub async fn search_images(query:String, page: Option<u32>, is_published: Option<bool>) -> Result<(Vec<BasicImage>, NumPages), ()> {
     _search_images_api(query, page, is_published).await
         .map_err(|err:SearchError| { 
             ()

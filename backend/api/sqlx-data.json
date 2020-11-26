@@ -36,62 +36,6 @@
       ]
     }
   },
-  "03ee2b51096d52ea9e5042b9b0c863a0da386b861c80f7dc81f658ae5405c230": {
-    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -132,6 +76,26 @@
       "nullable": []
     }
   },
+  "0aa96f75b64d577ba8fe2d07d824fe07c5036c135e9a5fb97eb1a7bc96910726": {
+    "query": "select exists(select 1 from user_audio_library where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
     "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
     "describe": {
@@ -162,6 +126,24 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
+    "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -659,6 +641,18 @@
       ]
     }
   },
+  "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
+    "query": "delete from user_audio_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "query": "delete from image_metadata where id = $1",
     "describe": {
@@ -845,6 +839,86 @@
       ]
     }
   },
+  "72e3aca05740c8e1615e5e90644ce5edcf661280ab2b72b5f6af4932618ce5ab": {
+    "query": "\ninsert into user_audio_library default values\nreturning id as \"id: AudioId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "745a74a7aa20700f0679d3457bba7b29333a87afbdf81aa732f5d5c9a3cda65a": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\",\n    array((select name from category inner join image_category on category_id = image_category.category_id where image_category.image_id = image_metadata.id)) as \"category_names!\"\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
     "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
     "describe": {
@@ -888,6 +962,26 @@
         {
           "ordinal": 0,
           "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
+    "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
           "type_info": "Uuid"
         }
       ],

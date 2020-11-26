@@ -10,8 +10,7 @@ mod router;
 mod pages;
 mod data;
 mod debug;
-
-pub use app_memory_common::config;
+mod config;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

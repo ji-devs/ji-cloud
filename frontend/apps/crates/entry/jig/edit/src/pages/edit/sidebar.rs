@@ -17,10 +17,11 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use utils::{
-    routes::{Route, JigRoute, ModuleRoute, module_kind_from_str, module_kind_to_str, module_kind_to_label},
+    routes::{Route, JigRoute, ModuleRoute, module_kind_to_label},
     settings::SETTINGS,
 
 };
+use std::str::FromStr;
 use shared::domain::{
     user::UserProfile,
     category::Category,
@@ -28,7 +29,7 @@ use shared::domain::{
     jig::ModuleKind,
 };
 use super::scrolling::*;
-use super::dragging::*;
+use super::reorder_dragging::*;
 use super::data::*;
 #[derive(Clone, Copy, Debug)]
 enum HorizontalDirection {
@@ -45,7 +46,7 @@ pub struct Sidebar {
     pub menu_index: Mutable<Option<usize>>, //which menu is currently open
     pub drag_index: Mutable<Option<usize>>, //target of current drag
     pub scrolling: Scrolling,
-    pub dragging: RefCell<Dragging>,
+    pub reorder_drag: RefCell<ReorderDrag>,
     pub element: RefCell<Option<Element>>,
     pub scrollable_elem: RefCell<Option<HtmlElement>>,
 }
@@ -61,7 +62,7 @@ impl Sidebar {
             menu_index: Mutable::new(None),
             drag_index: Mutable::new(None),
             scrolling: Scrolling::new(),
-            dragging: RefCell::new(Dragging::new()),
+            reorder_drag: RefCell::new(ReorderDrag::new()),
             element: RefCell::new(None),
             scrollable_elem: RefCell::new(None),
         });
@@ -106,18 +107,18 @@ impl Sidebar {
             })
 
             .with_data_id!("hover-module", {
-                .visible_signal(_self.dragging.borrow().active_signal())
-                .style_signal("top", _self.dragging.borrow().top_style_signal())
-                .style_signal("left", _self.dragging.borrow().left_style_signal())
+                /*
+                .future(_self.reorder_drag.borrow().src_signal().for_each(|x| {
+                    log::info!("{}", x);
+                    async {}
+                }))
+                */
+                .visible_signal(_self.reorder_drag.borrow().active_signal())
+                .style_signal("transform", _self.reorder_drag.borrow().transform_signal())
+                //.style_signal("top", _self.dragging.borrow().top_style_signal())
+                //.style_signal("left", _self.dragging.borrow().left_style_signal())
                 .with_data_id!("hover-module-img", {
-                    .property_signal("src", {
-                        _self.dragging.borrow().module_signal().map(|module| {
-                            match module{
-                                Some(module) => module.kind.get_thumbnail(),
-                                None => "".to_string()
-                            }
-                        })
-                    })
+                    .property_signal("src", _self.reorder_drag.borrow().hover_src_signal())
                 })
             })
 
@@ -126,18 +127,16 @@ impl Sidebar {
             }))
 
             .global_event(clone!(_self => move |evt:events::MouseMove| {
-                _self.dragging.borrow_mut().on_move(evt.x(), evt.y());
-                if _self.dragging.borrow().active() {
+                if _self.reorder_drag.borrow_mut().on_move(evt.x(), evt.y()).is_some() {
                     if let Some(elem) = _self.scrollable_elem.borrow().as_ref() {
                         let rect = elem.get_bounding_client_rect();
                         _self.scrolling.start(evt.y(), rect.y(), rect.height());
                     }
-                    
                 }
             }))
 
             .global_event(clone!(_self => move |evt:events::MouseUp| {
-                if let Some((src_index, dest_index)) = _self.dragging.borrow_mut().stop_drag() {
+                if let Some((src_index, dest_index)) = _self.reorder_drag.borrow_mut().stop() {
                     move_module_index(_self.clone(), src_index, dest_index);
                 }
 
@@ -204,7 +203,8 @@ struct ModuleDom {
 impl ModuleDom {
 
     fn render(_self:Rc<Self>) -> Dom {
-        let dragging = &mut *_self.sidebar.dragging.borrow_mut();
+        //log::info!("{:?}", _self.module.kind);
+
         let elem = {
             match _self.direction {
                 HorizontalDirection::Right => templates::edit_module_right(),
@@ -217,10 +217,16 @@ impl ModuleDom {
                     .text(&format!("{}", _self.index+1))
                 })
                 .with_data_id!("subtitle", {
-                    .text(match _self.module.kind {
-                        None => "",
-                        Some(kind) => module_kind_to_label(kind)
-                    })
+                    .text_signal(
+                        _self.sidebar.reorder_drag
+                            .borrow()
+                            .target_kind_signal(_self.module.kind, _self.index)
+                            .map(|kind| 
+                                 kind
+                                    .map(|kind| module_kind_to_label(kind))
+                                    .unwrap_or("")
+                            )
+                    )
                 })
                 .with_data_id!("add-btn", {
                     .event(clone!(_self => move |evt:events::Click| {
@@ -250,21 +256,17 @@ impl ModuleDom {
                     }))
                 })
                 .with_data_id!("img" => HtmlImageElement, {
-                    .with_node!(elem => {
-                        .property_signal("src", clone!(_self => 
-                            dragging
-                                .kind_at(_self.index)
-                                .map(clone!(_self => move |kind| {
-                                    match kind {
-                                        Some(kind) => kind.get_thumbnail(),
-                                        None => _self.module.kind.get_thumbnail()
-                                    }
-                                }))
-                        ))
-
-                        //TODO - change to Load Event
-                        .after_inserted(clone!(_self => move |_| {
-                            *_self.img_size.borrow_mut() = Some((101.0, 101.0));
+                    .with_node!(img => {
+                        .property_signal("src", 
+                            _self.sidebar.reorder_drag
+                                .borrow()
+                                .target_kind_signal(_self.module.kind, _self.index)
+                                .map(|kind| kind.get_thumbnail())
+                        )
+                        .event(clone!(_self => move |evt:dominator_helpers::events::Load| {
+                            let width = img.natural_width();
+                            let height = img.natural_height();
+                            *_self.img_size.borrow_mut() = Some((width as f64, height as f64));
                         }))
                     })
                 })
@@ -275,7 +277,7 @@ impl ModuleDom {
                             let module_kinds:Vec<Module> = _self.sidebar.modules.lock_ref().to_vec();
                             let module_kinds:Vec<Option<ModuleKind>> = module_kinds.into_iter().map(|m| m.kind).collect(); 
 
-                            _self.sidebar.dragging.borrow().start_drag(
+                            _self.sidebar.reorder_drag.borrow_mut().start(
                                 _self.index, 
                                 evt.x(), evt.y(), 
                                 img_size.0, img_size.1,
@@ -303,7 +305,7 @@ impl ModuleDom {
 
                     if let Some(data_transfer) = evt.data_transfer() {
                         if let Some(module_kind) = data_transfer.get_data("module_kind").ok() { 
-                            let kind = module_kind_from_str(&module_kind).unwrap_throw();
+                            let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_throw();
                             assign_module_kind(_self.sidebar.clone(), _self.index, _self.module.id.clone(), kind);
                             
                         }
@@ -429,7 +431,7 @@ fn delete_module(sidebar:Rc<Sidebar>, index:usize, id:Id) {
 
 fn move_module_index(sidebar:Rc<Sidebar>, src_index: usize, dest_index:usize) {
 
-    log::warn!("TODO - BACKEND - swap module index!"); 
+    log::warn!("TODO - BACKEND - swap module index from {} to {}!", src_index, dest_index); 
     let mut modules = sidebar.modules.lock_mut();
     modules.move_from_to(src_index, dest_index);
 }

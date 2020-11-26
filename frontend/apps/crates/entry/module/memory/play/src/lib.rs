@@ -11,8 +11,6 @@ mod pages;
 mod data;
 mod debug;
 
-pub use app_memory_common::config;
-
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;

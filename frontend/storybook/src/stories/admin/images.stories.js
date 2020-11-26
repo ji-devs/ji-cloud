@@ -2,6 +2,7 @@ import {renderTemplate as tmpl, renderDivText} from "@utils/template";
 import {appendId, toggleClassesId, setTextId, setValueId, setAttributeId} from "@utils/dom";
 import {MEDIA_UI} from "@utils/path";
 import checkbox from "@templates/_common/input/checkbox.html";
+import {withContainer} from "./admin-common";
 import imagesPage from "@templates/admin/images/images-page.html";
 import imageAdd from "@templates/admin/images/image-add.html";
 import imageEdit from "@templates/admin/images/image-edit.html";
@@ -25,6 +26,7 @@ export default {
   title: 'Admin/Images',
 }
 
+const withImagesPage = (page) => withContainer({page, sidebarId: "images"});
 export const Add = () =>  {
     const pageContainer = tmpl(imagesPage);
 
@@ -32,7 +34,7 @@ export const Add = () =>  {
 
     appendId(pageContainer, "page-contents", pageContents);
 
-    return pageContainer;
+    return withImagesPage(pageContainer);
 }
 export const Edit = () =>  {
     const pageContainer = tmpl(imagesPage);
@@ -49,7 +51,7 @@ export const Edit = () =>  {
 
     appendId(pageContainer, "page-contents", pageContents);
 
-    return pageContainer;
+    return withImagesPage(pageContainer);
 }
 export const Categories = () =>  {
     const pageContainer = tmpl(imagesPage);
@@ -91,7 +93,7 @@ export const Categories = () =>  {
 
     appendId(pageContainer, "page-contents", pageContents);
 
-    return pageContainer;
+    return withImagesPage(pageContainer);
 }
 export const Overview = () => {
     const pageContainer = tmpl(imagesPage);
@@ -133,7 +135,7 @@ export const Overview = () => {
 
     appendId(pageContainer, "page-contents", pageContents);
 
-    return pageContainer;
+    return withImagesPage(pageContainer);
 };
 
 export const Search = () => {
@@ -158,7 +160,7 @@ export const Search = () => {
 
     appendId(pageContainer, "page-contents", pageContents);
 
-    return pageContainer;
+    return withImagesPage(pageContainer);
 }
 /*
 export const WithMenu = () => {

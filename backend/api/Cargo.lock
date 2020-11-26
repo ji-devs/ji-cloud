@@ -318,7 +318,7 @@ dependencies = [
 [[package]]
 name = "algolia"
 version = "0.1.0"
-source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=d1285842e01ddb15b82c8c72e3e1d3a4e2d19074#d1285842e01ddb15b82c8c72e3e1d3a4e2d19074"
+source = "git+https://gitlab.com/izik1/algolia-rs.git?rev=6d8f03f887423eedc0ad61be2e6c5d80cac158c9#6d8f03f887423eedc0ad61be2e6c5d80cac158c9"
 dependencies = [
  "chrono",
  "rand",
@@ -1448,6 +1448,7 @@ dependencies = [
  "jsonwebtoken",
  "listenfd",
  "log",
+ "mp3-metadata",
  "openssl",
  "percent-encoding",
  "pin-project 1.0.1",
@@ -1727,6 +1728,12 @@ dependencies = [
  "socket2",
  "winapi 0.3.9",
 ]
+
+[[package]]
+name = "mp3-metadata"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb969bc3573726b0bf60238d5d70f1aa6cc0f9e87f8db3e047b8309317319699"
 
 [[package]]
 name = "native-tls"

@@ -35,6 +35,29 @@ const fixtures = {
     image: '5_image.sql',
 };
 
+const DB_NAMES = new Set();
+
+function createDbName(length) {
+    length = length || 16;
+
+    const generateDbName = () => {
+        let name = '';
+        while (name.length < length) {
+            name += Math.random().toString(36).replace(/[^a-z]+/g, '');
+            name = name.slice(0, length);
+        }
+        return name;
+    };
+
+    let name = '';
+
+    do {
+        name = generateDbName();
+    } while (DB_NAMES.has(name));
+
+    return name;
+}
+
 function hookServerStarted(server) {
     return new Promise((resolve) => {
         server.stdout.on('data', (data) => {
@@ -71,22 +94,30 @@ async function login() {
 test.before(async (t) => {
     t.context.parentDir = path.resolve(process.cwd(), '..');
     t.context.BIN_FILE = process.env.BIN_FILE || '../target/debug/ji-cloud-api';
-    t.context.PG_TMP = process.env.PG_TMP || '../../script/ephemeralpg/pg_tmp.sh';
     t.context.FIXTURES_DIR = process.env.FIXTURES_DIR || path.resolve(t.context.parentDir, 'fixtures');
+    t.context.isNative = process.env.USE_PG_TMP || false;
+    if (t.context.isNative) {
+        t.context.PG_TMP = process.env.PG_TMP || '../../script/ephemeralpg/pg_tmp.sh';
+        t.context.baseDbUrl = await spawnAsync(t.context.PG_TMP, { encoding: 'utf8' }).then((it) => it.stdout);
+        t.context.getDbUrl = (name) => t.context.baseDbUrl.replace('test', name);
+    } else {
+        t.context.baseDbUrl = process.env.DATABASE_URL;
+        t.context.getDbUrl = (name) => `${t.context.baseDbUrl}/${name}`;
+    }
 });
 
 test.beforeEach(async (t) => {
     let port = getPort();
+    t.context.dbName = createDbName();
+    t.context.dbUrl = t.context.getDbUrl(t.context.dbName);
 
-    const dbUrl = await spawnAsync(t.context.PG_TMP, { encoding: 'utf8' }).then((it) => it.stdout);
+    await spawnAsync('/usr/bin/psql', [t.context.baseDbUrl, '-U', 'postgres', '-c', `create database "${t.context.dbName}"`], { encoding: 'utf8', env: { PGPASSWORD: 'password' } });
 
     port = await port;
 
-    t.context.dbUrl = dbUrl;
-
     const env = {
         LOCAL_API_PORT: port,
-        DATABASE_URL: dbUrl,
+        DATABASE_URL: t.context.dbUrl,
         PGUSER: 'postgres',
         JWT_SECRET: 'abc123',
         LOCAL_PAGES_PORT: 0,
