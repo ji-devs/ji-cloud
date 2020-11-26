@@ -1,1 +1,2 @@
-import "../../css/dist/styles.storybook.css";
+import "../../css/tailwind/dist/tailwind.storybook.css";
+import "../../css/plain/dist/plain.storybook.css";

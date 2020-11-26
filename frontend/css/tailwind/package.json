@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch:storybook": "watchexec -w ./src -w ../.template_output -- postcss src/index.css --env production -o dist/styles.storybook.css",
-    "bundle:storybook": "postcss src/index.css --env production -o dist/styles.storybook.css",
+    "watch:storybook": "watchexec -w ./src -w ../../.template_output -- postcss src/index.css --env production -o dist/tailwind.storybook.css",
+    "bundle:storybook": "postcss src/index.css --env production -o dist/tailwind.storybook.css",
     "bundle:all": "npm-run-all -p bundle:prod bundle:debug",
-    "bundle:prod": "postcss src/index.css --env production -o dist/styles.min.css",
-    "bundle:debug": "postcss src/index.css --env development -o dist/styles.debug.css"
+    "bundle:prod": "postcss src/index.css --env production -o dist/tailwind.min.css",
+    "bundle:debug": "postcss src/index.css --env development -o dist/tailwind.debug.css"
   },
   "author": "",
   "license": "ISC",

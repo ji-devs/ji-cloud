@@ -1,4 +1,4 @@
-const {getMediaUrl_UI} = require("../../config/js");
+const {getMediaUrl_UI} = require("../../../config/js");
 const isDev = process.env["NODE_ENV"] === "development";
 const MEDIA_UI = getMediaUrl_UI(isDev);
 console.log(`compiling tailwind...`);
@@ -57,9 +57,18 @@ function parseTheme(theme) {
 
     return theme;
 }
+
+function getSpacing() {
+  const ret = {};
+  for(let i = 0; i < 100; i += .5) {
+    ret[`${i}`] = `${(i / 4) * 16}px`;
+  }
+
+  return ret;
+}
 module.exports = {
   purge: [
-    '../templates/**/*.html',
+    '../../templates/**/*.html',
   ],
   theme: parseTheme({
     extend: {
@@ -345,9 +354,7 @@ module.exports = {
       cursor:{
         grab: 'grab'
       },
-      spacing:{
-        18:'18px',
-      },
+      spacing: getSpacing(),
       boxShadow:{
         'memorycard': '0 3px 3px 0 rgba(0, 0, 0, 0.06)',
         'memorypreview': '0 3px 6px 0 rgba(0, 0, 0, 0.16)'

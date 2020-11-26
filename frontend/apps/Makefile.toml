@@ -315,7 +315,8 @@ cwd = "../build-utils/templates-builder"
 [tasks.dev-start]
 run_task = { name = [
     "dev-start-mediaserver",
-    "dev-watch-css",
+    "dev-watch-css-tailwind",
+    "dev-watch-css-plain",
     "dev-watch-templates",
     "dev-watch-app",
 ], fork = true, parallel = true }
@@ -325,17 +326,18 @@ script_runner = "@shell"
 script = ["npm run local-media-server"]
 cwd = "../build-utils"
 
-# not working for some reason
+# running watch from npm is not working for some reason
 # so redefining it below
-# [tasks.dev-watch-css]
-# script_runner = "@shell"
-# script = ["npm run watch:app"]
-# cwd = "../css"
 
-[tasks.dev-watch-css]
+[tasks.dev-watch-css-plain]
 command = "watchexec"
-args = ["-w", "src", "-w", "../.template_output", "npm run bundle:prod"]
-cwd = "../css"
+args = ["-w", "src", "npm run bundle:prod"]
+cwd = "../css/plain"
+
+[tasks.dev-watch-css-tailwind]
+command = "watchexec"
+args = ["-w", "src", "-w", "../../.template_output", "npm run bundle:prod"]
+cwd = "../css/tailwind"
 
 [tasks.dev-watch-templates]
 command = "cargo"

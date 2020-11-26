@@ -1,4 +1,4 @@
-const {getMediaUrl_UI} = require("../../config/js");
+const {getMediaUrl_UI} = require("../../../config/js");
 
 const isDev = process.env["NODE_ENV"] === "development";
 
@@ -7,8 +7,8 @@ const MEDIA_UI = getMediaUrl_UI(isDev);
 const plugins = [
     require('postcss-import'),
     require('postcss-url')({ url: ({url}) => url.replace("{{MEDIA_UI}}", MEDIA_UI), }),
-    require('tailwindcss')('./tailwind.config.js'),
     require('autoprefixer'),
+    require('@csstools/postcss-sass')
 ];
 
 if(!isDev) {
