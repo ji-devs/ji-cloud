@@ -15,7 +15,18 @@ static CONTAINER_HEIGHT: AtomicI32 = AtomicI32::new(0);
 pub struct ModuleBounds { }
 
 impl ModuleBounds {
-    pub fn set(container_width: i32, container_height:i32) {
+    pub fn set_elem(elem:&Element) {
+        let bounds = elem.get_bounding_client_rect();
+        let width = bounds.width() as i32;
+        let height = bounds.height() as i32;
+        let x = bounds.x() as i32;
+        let y = bounds.y() as i32;
+
+        log::info!("{} {} {} {}", width, height, x, y);
+        //TODO - stash bounds x/y and use in pos x/y
+        Self::set_direct(width, height);
+    }
+    pub fn set_direct(container_width: i32, container_height:i32) {
         CONTAINER_WIDTH.store(container_width, Ordering::SeqCst);
         CONTAINER_HEIGHT.store(container_height, Ordering::SeqCst);
         Self::apply_css();

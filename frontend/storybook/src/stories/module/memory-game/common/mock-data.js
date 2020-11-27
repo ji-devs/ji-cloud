@@ -42,6 +42,6 @@ export const nCardsToGrid = (nCards) => {
     case 24: return 3;
     case 26: return 8;
     case 28: return 4;
-    default: return -1;
+    default: throw new Exception(`unknown grid for ${nCards} cards`);
   }
 };

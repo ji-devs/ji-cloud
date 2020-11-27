@@ -1,12 +1,12 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
-import {mockWords, mockThemes, nCardsToGrid} from "../common/mock-data";
-import modulePage from "@templates/module/_common/module-player-iframe.html";
+import {ModulePlayPage} from "@components/module";
+import {mockWords, mockThemes, nCardsToGrid} from "./common/mock-data";
 import playerTmpl from "@templates/module/memory/play/player.html";
 import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
 
 export default {
-  title: 'Modules/Memory-Game/Play/Duplicate',
+  title: 'Modules/Memory-Game/Play'
 }
 
 const makePlayer = (nCards) => () =>  mockPlayer(0, false, nCards);
@@ -29,30 +29,29 @@ export const Player_Theme_1_Flipped = () => mockPlayer(1, true, 12);
 function mockPlayer(selectedThemeIndex, isFlipped, nCards) {
     const nGrid = nCardsToGrid(nCards);
 
-    const _page = appendId(tmpl(modulePage), "module-content", tmpl(playerTmpl));
-    const page = appendMockCards(_page, {isFlipped, nCards});
+    const main = tmpl(playerTmpl);
+
+    appendMockCards(main, {isFlipped, nCards});
     if(selectedThemeIndex) {
         const {id} = mockThemes[selectedThemeIndex];
-        toggleClasses(page, [`memory-theme-${id}`], true);
+        toggleClasses(main, [`memory-theme-${id}`], true);
     }
-    if(nGrid) {
-        toggleClassesId(page, "game-cards", [`memory-grid-${nGrid}`], true);
-    }
+    toggleClassesId(main, "game-cards", [`memory-grid-${nGrid}`], true);
 
-    return page;
+    return ModulePlayPage({main}).page;
 }
 
-function appendMockCards(page, {isFlipped, nCards}) {
+function appendMockCards(main, {isFlipped, nCards}) {
     for(let i = 0; i < nCards; i++) {
         const word = mockWords[0];
         const card = tmpl(cardPlayTmpl);
         setTextId(card, "text-contents", word);
-        appendId(page, "game-cards", card);
-
+        appendId(main, "game-cards", card);
+        toggleClassesId(card, "image", ["hidden"], true);
         if(isFlipped) {
             toggleClassesId(card, "flip", [`flip-card-clicked`], true);
         }
     }
 
-    return page;
+    return main;
 }

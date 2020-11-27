@@ -15,42 +15,46 @@ export default {
 }
 
 export const EditPage = () => {
-    const page = tmpl(editPage, { });
-    const sidebar = tmpl(sidebarSection, {});
+    const {page, sidebar} = basePage(); 
+    appendId(page, "sidebar", sidebar);
     const moduleSelection = tmpl(ModuleSelection, {});
 
     const modules = Array(4).fill(0).map((_, idx) => makeModule(idx));
 
-    appendId(page, "sidebar", sidebar);
     appendId(page, "right-area", moduleSelection);
-
-    modules.forEach(module => appendId(sidebar, "modules", module));
 
     return page;
 }
 export const Menu = () =>  {
-    const page = tmpl(editPage, { });
-    const sidebar = tmpl(sidebarSection, {});
+    const {page, sidebar} = basePage(); 
     const menu = tmpl(menuSection, {});
 
-    const modules = Array(4).fill(0).map((_, idx) => makeModule(idx));
-
-    appendId(page, "sidebar", sidebar);
-    modules.forEach(module => appendId(sidebar, "modules", module));
     appendId(sidebar, "menu", menu);
 
     return page;
 }
 
 export const JigDelete = () =>  {
-    const page = tmpl(editPage, { });
-    const sidebar = tmpl(sidebarSection, {});
+    const {page} = basePage(); 
     const deleteEl = tmpl(deletePopup, {});
 
-    appendId(page, "sidebar", sidebar);
     appendId(page, "delete-popup", deleteEl);
 
     return page;
+}
+
+function basePage() {
+    const page = tmpl(editPage, { });
+    const sidebar = tmpl(sidebarSection, {});
+    appendId(page, "sidebar", sidebar);
+
+    Array(4).fill(0).map((_, idx) => makeModule(idx))
+        .forEach(module => {
+            appendId(sidebar, "modules", module);
+        });
+
+    toggleClassesId(page, "hover-module", ["hidden"], true);
+    return {page, sidebar};
 }
 
 function makeModule(idx) {

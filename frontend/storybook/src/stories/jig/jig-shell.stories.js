@@ -1,20 +1,34 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, toggleClasses, getChildId, toggleClassesId, setTextId} from "@utils/dom";
+import {ModuleEditPlainPage, ModuleEditResizePage, ModulePlayPage} from "@components/module";
 import editPage from "@templates/jig/shell/edit-page.html";
 import playPage from "@templates/jig/shell/play-page.html";
-import moduleEditPagePlain from "@templates/module/_common/module-edit-page-plain.html";
-import moduleEditPageResize from "@templates/module/_common/module-edit-page-resize.html";
-import modulePlayPage from "@templates/module/_common/module-play-page.html";
 import editSidebarModule from "@templates/jig/shell/edit-sidebar-module.html";
+
 
 export default {
   title: 'Jig/Shell',
 }
 
-export const EditPlain = () => {
-    const jigPage = appendModules(tmpl(editPage));
-    const modulePage = tmpl(moduleEditPagePlain);
+export const EditShell = () => {
+    const page = appendModules(tmpl(editPage));
 
+    const iframe = getChildId(page, "iframe");
+    iframe.srcdoc = "<html><body><h1>Module Editor Here!</h1></body></html>";
+
+    return page;
+}
+
+export const PlayShell = () => {
+    const page = appendModules(tmpl(playPage));
+
+    const iframe = getChildId(page, "iframe");
+    iframe.srcdoc = "<html><body><h1>Module Player Here!</h1></body></html>";
+
+    return page;
+}
+
+export const ModuleEditPlain = () => {
     const sidebar = tmpl(`<div style="background-color: yellow;" class="h-full text-center">Module Sidebar</div>`);
     const header = tmpl(`<div style="background-color: red; color: white;" class="text-center">Header</div>`);
     const main = tmpl(`
@@ -26,18 +40,10 @@ export const EditPlain = () => {
     `);
     const footer = tmpl(`<div style="background-color: blue; color: white;" class="text-center">Footer</div>`);
 
-    appendId(modulePage, "sidebar", sidebar);
-    appendId(modulePage, "header", header);
-    appendId(modulePage, "main", main);
-    appendId(modulePage, "footer", footer);
-
-    appendId(jigPage, "module", modulePage);
-    return jigPage;
+    return ModuleEditPlainPage({sidebar, header, main, footer}).page;
 }
 
-export const EditResize = () => {
-    const jigPage = appendModules(tmpl(editPage));
-    const modulePage = tmpl(moduleEditPageResize);
+export const ModuleEditResize = () => {
 
     const sidebar = tmpl(`<div style="background-color: yellow;" class="h-full text-center">Module Sidebar</div>`);
     const header = tmpl(`<div style="background-color: red; color: white;" class="text-center">Header</div>`);
@@ -50,17 +56,9 @@ export const EditResize = () => {
     `);
     const footer = tmpl(`<div style="background-color: blue; color: white;" class="text-center">Footer</div>`);
 
-    appendId(modulePage, "sidebar", sidebar);
-    appendId(modulePage, "header", header);
-    appendId(modulePage, "main", main);
-    appendId(modulePage, "footer", footer);
-
-    appendId(jigPage, "module", modulePage);
-    return jigPage;
+    return ModuleEditResizePage({sidebar, header, main, footer}).page;
 }
-export const Play = () => {
-    const jigPage = appendModules(tmpl(playPage));
-    const modulePage = tmpl(modulePlayPage);
+export const ModulePlay = () => {
     const main = tmpl(`
         <div style="background-color: green;" class="h-full flex flex-col justify-between">
         <div></div>
@@ -68,11 +66,10 @@ export const Play = () => {
         <div></div>
         </div>
     `);
-    appendId(modulePage, "main", main);
-    appendId(jigPage, "module", modulePage);
 
-    return jigPage;
+    return ModulePlayPage({main}).page;
 }
+
 
 function appendModules(page) {
 
