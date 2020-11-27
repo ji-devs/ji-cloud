@@ -1,15 +1,15 @@
-name: Memory - Edit - Sandbox
+name: Module - Memory - Play - Release
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
     - 'shared/**'
     - 'frontend/apps/crates/core/**'
     - 'frontend/templates/_common/**'
     - 'frontend/templates/module/memory/**'
-    - 'frontend/apps/crates/entry/module/memory/edit/**'
+    - 'frontend/apps/crates/entry/module/memory/play/**'
 
 jobs:
   bundle:
@@ -21,7 +21,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/memory/edit - app]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/memory/play - app]\")"
         id: extract_label
 
       - name: Notify slack
@@ -61,7 +61,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make module-memory-edit-sandbox
+        run: cargo make module-memory-play-release 
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
@@ -70,10 +70,10 @@ jobs:
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/module/memory/edit/js gs://ji-cloud-sandbox-frontend-origin-eu-001/module/memory/edit/js
+        run: gsutil -m rsync -d -r frontend/apps/dist/module/memory/play/js gs://ji-cloud-frontend-origin-eu-001/module/memory/play/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
