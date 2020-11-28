@@ -1,6 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
-import {ModuleEditResizePage} from "@components/module";
+import {modulePage, ModulePageKind} from "@components/module";
 import sidebarTmpl from "@templates/module/poster/edit/sidebar/sidebar.html";
 import headerTmpl from "@templates/module/poster/edit/header.html";
 import footerTmpl from "@templates/module/poster/edit/footer.html";
@@ -15,15 +15,20 @@ export default {
 
 
 export const Layout = () => {
-    const {page, header, sidebar} = posterPage();
+    const sidebar = makeSidebar(tmpl(layoutSidebar));
 
-    sidebar.append(tmpl(layoutSidebar));
+    return posterPage({sidebar});
 
-    return page;
 }
 
-function posterPage() {
+function makeSidebar(child:Element) {
     const sidebar = tmpl(sidebarTmpl);
+    sidebar.append(child);
+
+    return sidebar
+}
+
+function posterPage({sidebar}:{sidebar: Element}) {
     const header = tmpl(headerTmpl, {
         title: "Create a Cover Page",
         subtitle: "Introduce your topic<br/>Use the blue panel for selecting layouts, themes, and adding content"
@@ -31,5 +36,11 @@ function posterPage() {
     const footer = tmpl(footerTmpl);
     const main = tmpl(mainTmpl);
 
-    return ModuleEditResizePage({sidebar, header, main, footer});
+    return modulePage({
+        kind: ModulePageKind.EditPlain,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
 }

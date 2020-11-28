@@ -1,6 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClasses, getChildId, toggleClassesId, setTextId} from "@utils/dom";
-import {ModuleEditPlainPage, ModuleEditResizePage, ModulePlayPage} from "@components/module";
+import {appendId, toggleClasses, getChildId, toggleClassesId, setTextId, setIframeContentsId} from "@utils/dom";
+import {modulePage, ModulePageKind} from "@components/module";
 import editPage from "@templates/jig/shell/edit-page.html";
 import playPage from "@templates/jig/shell/play-page.html";
 import editSidebarModule from "@templates/jig/shell/edit-sidebar-module.html";
@@ -13,8 +13,8 @@ export default {
 export const EditShell = () => {
     const page = appendModules(tmpl(editPage));
 
-    const iframe = getChildId(page, "iframe");
-    iframe.srcdoc = "<html><body><h1>Module Editor Here!</h1></body></html>";
+
+    setIframeContentsId(page, "iframe", "<html><body><h1>Module Editor Here!</h1></body></html>");
 
     return page;
 }
@@ -22,8 +22,7 @@ export const EditShell = () => {
 export const PlayShell = () => {
     const page = appendModules(tmpl(playPage));
 
-    const iframe = getChildId(page, "iframe");
-    iframe.srcdoc = "<html><body><h1>Module Player Here!</h1></body></html>";
+    setIframeContentsId(page, "iframe", "<html><body><h1>Module Player Here!</h1></body></html>");
 
     return page;
 }
@@ -40,7 +39,13 @@ export const ModuleEditPlain = () => {
     `);
     const footer = tmpl(`<div style="background-color: blue; color: white;" class="text-center">Footer</div>`);
 
-    return ModuleEditPlainPage({sidebar, header, main, footer}).page;
+    return modulePage({
+        kind: ModulePageKind.EditPlain,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
 }
 
 export const ModuleEditResize = () => {
@@ -56,7 +61,13 @@ export const ModuleEditResize = () => {
     `);
     const footer = tmpl(`<div style="background-color: blue; color: white;" class="text-center">Footer</div>`);
 
-    return ModuleEditResizePage({sidebar, header, main, footer}).page;
+    return modulePage({
+        kind: ModulePageKind.EditResize,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
 }
 export const ModulePlay = () => {
     const main = tmpl(`
@@ -67,7 +78,10 @@ export const ModulePlay = () => {
         </div>
     `);
 
-    return ModulePlayPage({main}).page;
+    return modulePage({
+        kind: ModulePageKind.Play,
+        main,
+    })
 }
 
 

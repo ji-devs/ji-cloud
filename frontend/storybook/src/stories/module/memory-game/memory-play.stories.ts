@@ -1,6 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
-import {ModulePlayPage} from "@components/module";
+import {modulePage, ModulePageKind} from "@components/module";
 import {mockWords, mockThemes, nCardsToGrid} from "./common/mock-data";
 import playerTmpl from "@templates/module/memory/play/player.html";
 import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
@@ -38,7 +38,10 @@ function mockPlayer(selectedThemeIndex, isFlipped, nCards) {
     }
     toggleClassesId(main, "game-cards", [`memory-grid-${nGrid}`], true);
 
-    return ModulePlayPage({main}).page;
+    return modulePage({
+        kind: ModulePageKind.Play,
+        main
+    })
 }
 
 function appendMockCards(main, {isFlipped, nCards}) {

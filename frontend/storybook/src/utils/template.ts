@@ -1,9 +1,9 @@
-export function renderTemplate(template, data) {
+export function renderTemplate(template, data?: any) {
     const fragment = renderTemplateFragment(template, data);
     return fragment.firstElementChild;
 }
 
-export function renderTemplateFragment(template, data) {
+export function renderTemplateFragment(template, data?: any) {
     const str = renderTemplateString(template, data);
     const el = document.createElement("template");
     el.innerHTML = str;
@@ -27,7 +27,7 @@ export function renderTemplateString(template, data) {
 //See: https://stackoverflow.com/a/47358102
 const regex = /\${[^{]+}/g;
 
-export function interpolate(template, variables, fallback) {
+export function interpolate(template, variables, fallback?:any) {
     return template.replace(regex, (match) => {
         const path = match.slice(2, -1).trim();
         return getObjPath(path, variables, fallback);
