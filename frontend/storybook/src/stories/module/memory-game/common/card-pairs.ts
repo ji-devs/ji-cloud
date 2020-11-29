@@ -7,7 +7,12 @@ import cardPairTextImageEdit from "@templates/module/memory/edit/_common/card-pa
 import cardPairTextImagePreview from "@templates/module/memory/edit/_common/card-pairs/text-image-preview.html";
 import cardPlayTmpl from "@templates/module/memory/play/memory-card.html";
 
-export function appendCardPairsTextText(page, {flipSecond, isEdit, themeIndex}) {
+interface TextTextPairOptions {
+    flipSecond: boolean,
+    isEdit: boolean,
+    themeIndex: number
+}
+export function appendCardPairsTextText(page:Element, {flipSecond, isEdit, themeIndex}:TextTextPairOptions) {
     mockWords.forEach(word => {
         const card = tmpl(isEdit ? cardPairTextTextEdit : cardPairTextTextPreview);
         const left = getChildId(card, "left");
@@ -37,7 +42,12 @@ export function appendCardPairsTextText(page, {flipSecond, isEdit, themeIndex}) 
 }
 
 
-export function appendCardPairsTextImage(page, {flipSecond, isTextEdit, themeIndex}) {
+interface TextImagePairOptions {
+    flipSecond: boolean,
+    isTextEdit: boolean,
+    themeIndex: number
+}
+export function appendCardPairsTextImage(page:Element, {flipSecond, isTextEdit, themeIndex}:TextImagePairOptions):Element {
     mockWords.forEach(word => {
         const card = tmpl(isTextEdit ? cardPairTextImageEdit: cardPairTextImagePreview);
         const left = getChildId(card, "left");
