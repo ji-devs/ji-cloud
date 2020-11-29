@@ -1,0 +1,14 @@
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+
+<div class="memory-error w-288 h-362 bg-jimemorypink p-4 -top-185 absolute z-2000 border border-jimemorypinkborder flex flex-col items-center justify-center">
+  <img data-id="btn-close-top" src="{{MEDIA_UI}}/icn-x-close.svg" alt="" class="self-end cursor-pointer">
+  <img src="{{MEDIA_UI}}/Illustration_Alert@2x.png" alt="">
+  <p class="text-left mt-4 text-base">Are you sure you would like to delete the pair?</p>
+  <div class="flex justify-between w-full mt-6">
+    {{ ButtonMacros::sidebarbutton(label="Keep Pair", dataId="next", hover="") }}
+    {{ ButtonMacros::pink(label="Delete Pair", dataId="next", hover="") }}
+  </div>
+
+
+
+</div>

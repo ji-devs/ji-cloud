@@ -8,6 +8,8 @@ import step2Page from "@templates/module/memory/edit/duplicate/step-2.html";
 import step4Page from "@templates/module/memory/edit/duplicate/step-4.html";
 import step1Tooltip from "@templates/module/memory/edit/duplicate/step-1-tooltip.html";
 import step1Error from "@templates/module/memory/edit/duplicate/step-1-error.html";
+import step1deletepair from "@templates/module/memory/edit/duplicate/step-1-memorypair-tooltip.html";
+
 import { appendStep2Sidebar } from "../common/step-2";
 
 export default {
@@ -29,6 +31,12 @@ export const Step1_Error = () => {
     return page;
 }
 
+export const Deletepair = () => {
+    const page = mockStep1(tmpl(step1Page));
+    appendId(page, "memory-pair-tooltip", tmpl(step1deletepair));
+    return page;
+}
+
 export const Step2 = () => mockStep2(tmpl(step2Page), 0);
 
 export const Step2_Theme_1 = () => mockStep2(tmpl(step2Page), 1);
@@ -46,8 +54,8 @@ export const Step4 = () => {
 
 function mockStep1(_page) {
     const page = appendCardPairsTextText(_page, {
-        flipSecond: false, 
-        isEdit: true, 
+        flipSecond: false,
+        isEdit: true,
         themeIndex: 0
     });
     setTextId(page, "list-items", "");
@@ -61,7 +69,7 @@ function mockStep1(_page) {
 
 function mockStep2(_page, themeIndex, flipSecond?:boolean) {
     const page = appendCardPairsTextText(_page, {
-        flipSecond, 
+        flipSecond,
         isEdit: false,
         themeIndex
     });

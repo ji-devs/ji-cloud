@@ -131,6 +131,7 @@ module.exports = {
         jimemoryborder: '#c1d8f8',
         jimemorycardborder: '#2565d5',
         jimemorypink: '#ffdede',
+        jimemorypinkbutton: '#ea5a80',
         jimemorypinkborder: '#e36486',
         jimemorygreenlight: '#eafaf0',
         jimemorycardgreen: '#7fd29c',
@@ -340,6 +341,7 @@ module.exports = {
         115: '115px',
         '-120': '-120px',
         160: '160px',
+        '-185':'-185px',
         240: '240px',
         '-296': '-296px',
         500: '500px',
@@ -362,6 +364,7 @@ module.exports = {
         '25p': '25%',
         50: '50px',
         100: '100px',
+        138: '138px',
 
       },
       cursor:{

@@ -312,3 +312,11 @@
 .memory-grid-6 .memory-card-full:nth-last-child(3), .memory-grid-5 .memory-card-full:nth-last-child(2), .memory-grid-7 .memory-card-full:nth-last-child(4), .memory-grid-8 .memory-card-full:nth-last-child(5) {
   grid-column-start: 2;
 }
+
+
+.memory-pair-delete{
+  display: block;
+}
+.memory-pair:hover .memory-pair-delete{
+  display: block;
+}
