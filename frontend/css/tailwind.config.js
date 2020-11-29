@@ -149,6 +149,8 @@ module.exports = {
       fontFamily: {
         poppins: 'Poppins',
         sans: 'Roboto',
+        heebo: 'Heebo',
+
       },
       width: {
         1: '1px',

@@ -20,7 +20,10 @@
       <p class="font-light text-lg">Create a Memory Game</p>
       <p class="font-light text-lg">Add your content on the left panel</p>
       <div class="max-w-1212 h-681 bg-jimemorybackground mt-4 rounded-sm mb-4 border border-jimemoryborder jig-preview px-12 py-6 overflow-y-auto">
+        <!-- WHEN THERE ARE WORDS DISPLAY THIS -->
         <div data-id="cards" class="memory grid grid-cols-3 gap-4 "> </div>
+        <!-- WHEN NO WORDS ADDED -->
+        <p class="flex justify-center items-center text-2xl font-heebo text-jigrey">No Preview yet</p>
       </div>
       <div class="flex justify-end w-full pr-24">
         {{ ButtonMacros::orange(label="Done", dataId="next") }}
