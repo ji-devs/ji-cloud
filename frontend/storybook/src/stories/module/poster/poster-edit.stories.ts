@@ -8,7 +8,8 @@ import footerTmpl from "@templates/module/poster/edit/footer.html";
 import mainTmpl from "@templates/module/poster/edit/main.html";
 import layoutSidebar from "@templates/module/poster/edit/sidebar/layout.html";
 import layoutSidebarItem from "@templates/module/poster/edit/sidebar/layout-item.html";
-
+import imagesSidebar from "@templates/module/poster/edit/sidebar/images.html";
+import imagesSidebarItem from "@templates/module/poster/edit/sidebar/images-item.html";
 
 export default {
   title: 'Modules/Poster/Edit',
@@ -28,6 +29,16 @@ export const Layout = () => {
 
 }
 
+export const Images = () => {
+    const sidebar = makeSidebar(tmpl(imagesSidebar));
+
+    toggleClassesId(sidebar, "recent", "hidden", true);
+
+    //TODO - add images 
+    
+    return posterPage({sidebar});
+
+}
 function makeSidebar(child:Element) {
     const sidebar = tmpl(sidebarTmpl);
     sidebar.append(child);

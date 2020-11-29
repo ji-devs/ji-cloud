@@ -1,6 +1,6 @@
 {% macro toolbar(mode) %}
 
-    {% set image_active = "" %}
+    {% set images_active = "" %}
     {% set text_active = "" %}
     {% set bg_color_active = "" %}
     {% set intro_sound_active = "" %}
@@ -8,15 +8,15 @@
 
     {% if mode=="text" %}
         {% set text_active = "-active" %}
-    {% elif mode=="image" %}
-        {% set image_active = "-active" %}
+    {% elif mode=="images" %}
+        {% set images_active = "-active" %}
     {% endif %}
 
     <div class="border-t border-b border-jidarkgrey py-4">
       <div class="flex items-center pl-8">
         <p class="mr-5">Add</p>
         <img src="{{MEDIA_UI}}/icn-text-jig{{ text_active }}.svg" alt="" class="ml-2">
-        <img src="{{MEDIA_UI}}/icn-image-jig{{ image_active }}.svg" alt="" class="ml-2">
+        <img src="{{MEDIA_UI}}/icn-image-jig{{ images_active }}.svg" alt="" class="ml-2">
         <img src="{{MEDIA_UI}}/icn-background-color-jig{{ bg_color_active }}.svg" alt="" class="ml-2">
         <img src="{{MEDIA_UI}}/icn-record-jig{{ intro_sound_active}}.svg" alt="" class="ml-2">
         <img src="{{MEDIA_UI}}/icn-sound-f-ile-jig{{ sound_active}}.svg" alt="" class="ml-2">
