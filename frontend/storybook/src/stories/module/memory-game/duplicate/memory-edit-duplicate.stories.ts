@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId, setIframeContentsId} from "@utils/dom";
 import {mockWords, mockThemes} from "../common/mock-data";
 import {appendCardPairsTextText} from "../common/card-pairs";
 
@@ -38,8 +38,7 @@ export const Step2_Theme_2_FlipSecond = () => mockStep2(tmpl(step2Page), 2, true
 
 export const Step4 = () => {
     const page = tmpl(step4Page);
-    const iframe = getChildId(page, "module-iframe");
-    iframe.srcdoc = "<html><body><h1>Player here!</h1></body></html>";
+    setIframeContentsId(page, "module-iframe", "<html><body><h1>Player here!</h1></body></html>");
 
     return page;
 }
@@ -60,7 +59,7 @@ function mockStep1(_page) {
     return page;
 }
 
-function mockStep2(_page, themeIndex, flipSecond) {
+function mockStep2(_page, themeIndex, flipSecond?:boolean) {
     const page = appendCardPairsTextText(_page, {
         flipSecond, 
         isEdit: false,
