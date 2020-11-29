@@ -1,6 +1,7 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
+import {mockThemes} from "./common/mock-data";
 import sidebarTmpl from "@templates/module/poster/edit/sidebar/sidebar.html";
 import headerTmpl from "@templates/module/poster/edit/header.html";
 import footerTmpl from "@templates/module/poster/edit/footer.html";
@@ -16,7 +17,13 @@ export default {
 
 export const Layout = () => {
     const sidebar = makeSidebar(tmpl(layoutSidebar));
-
+    mockThemes.forEach(({id, label, thumbnail}) => {
+        const item = tmpl(layoutSidebarItem, {
+            id, label, thumbnail
+        });
+        appendId(sidebar, "items", item);
+    });
+    
     return posterPage({sidebar});
 
 }
@@ -37,7 +44,7 @@ function posterPage({sidebar}:{sidebar: Element}) {
     const main = tmpl(mainTmpl);
 
     return modulePage({
-        kind: ModulePageKind.EditPlain,
+        kind: ModulePageKind.EditResize,
         sidebar,
         header,
         main,
