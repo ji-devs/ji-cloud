@@ -42,13 +42,28 @@
 </div>
 {% endmacro description %}
 
+{% macro descriptionlong(label,inputDataId="") %}
+<div class="mb-4">
+  <label for="name" class="pl-2">
+    <span class="text-jibuttonBlue">{{label}}</span>
+    <div class="flex items-center  py">
+      <textarea data-id="{{inputDataId}}" rows="10" id="autoresizing" class="resize-none appearance-none bg-transparent border-b border-jiborderGrey w-full text-gray-700 mr-3 py-1 pl-2 min-h-32 h-auto  leading-tight focus:outline-none"
+        contenteditable="true" type="text" placeholder="Jane Doe" aria-label="Full name"></textarea>
+    </div>
+  </label>
+</div>
+{% endmacro description %}
+
 
 {% macro checkbox(label,required=false, inputDataId="", class="") %}
-<label>
-  <input class="ml-2 mr-1" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
-  <span class="text-sm">
-    {{label}}
-  </span>
+<label class="flex items-baseline">
+  <input class="ml-2 mr-1 inline-block" data-id="{{inputDataId}}" type="checkbox" class="{{class}}" {% if required %} required {% endif %}>
+  <span class="text-sm inline-block">
 
+    {{label}}
+
+
+  </span>
 </label>
+
 {% endmacro checkbox %}

@@ -4,11 +4,13 @@
 */
 .edit-card-left {
   z-index:10;
+
 }
 
 .edit-card-right {
   margin-top:10px;
   margin-left: -10px;
+
 }
 
 .sidebar-card-left {
@@ -93,6 +95,7 @@
   height: 100%;
   position: absolute;
   width: 100%;
+
 }
 .flip-card .play-card-front,
 .flip-card .edit-card-front {
@@ -177,7 +180,8 @@
   background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
 }
 .memory-theme-foo .text-contents {
-  font-family: Caveat;
+    font-family: 'gveret_levin_alefalefalefRg';
+
 }
 
 /* Theme: Bar */
@@ -227,7 +231,7 @@
 }
 
 .memory-theme-chalk .text-contents {
-  font-family: 'Caveat', cursive;
+  font-family: 'Alef', sans-serif;
 }
 
 /* --END MEMORY CARD THEMES -- */
@@ -307,4 +311,12 @@
 
 .memory-grid-6 .memory-card-full:nth-last-child(3), .memory-grid-5 .memory-card-full:nth-last-child(2), .memory-grid-7 .memory-card-full:nth-last-child(4), .memory-grid-8 .memory-card-full:nth-last-child(5) {
   grid-column-start: 2;
+}
+
+
+.memory-pair-delete{
+  display: block;
+}
+.memory-pair:hover .memory-pair-delete{
+  display: block;
 }
