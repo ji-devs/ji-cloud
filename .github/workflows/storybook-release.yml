@@ -35,9 +35,13 @@ jobs:
         with:
           node-version: '12'
 
-      - name: install css deps
+      - name: install npm deps (tailwind)
         run: npm install
-        working-directory: "./frontend/css"
+        working-directory: "./frontend/css/tailwind"
+
+      - name: install npm deps (plain)
+        run: npm install
+        working-directory: "./frontend/css/plain"
 
       - name: install build utils deps
         run: npm install

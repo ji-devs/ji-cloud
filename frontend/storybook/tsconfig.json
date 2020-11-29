@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+            "@templates/*": ["../.template_output/*"],
+            "@utils/*": ["./src/utils/*"],
+            "@components/*": ["./src/components/*"]
+        },
+        "lib": [
+            "es6",
+            "dom"
+        ]
+    },
+}

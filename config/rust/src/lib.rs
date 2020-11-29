@@ -1,9 +1,10 @@
+//TODO - read from env to get local/dev port settings and minio bucket name
 use time::Duration;
 
 pub const STAGE_WIDTH: f64 = 1920.0;
 pub const STAGE_HEIGHT: f64 = 1080.0;
-pub const STAGE_PADDING_Y_PERC: f64 = 0.05; // in percentage, to offset the stage area a bit
-pub const STAGE_PADDING_X_PERC: f64 = 0.05;
+pub const STAGE_PADDING_Y_PERC: f64 = 0.00; // in percentage, to offset the stage area a bit
+pub const STAGE_PADDING_X_PERC: f64 = 0.00;
 pub const STAGE_RATIO: f64 = STAGE_WIDTH / STAGE_HEIGHT;
 
 pub const MEDIA_UI_PATH: &str = "ui";
@@ -78,9 +79,9 @@ impl RemoteTarget {
         }
     }
 
-    pub const fn upload_url(&self) -> &'static str {
+    pub const fn uploads_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:9000",
+            Self::Local => "http://localhost:9000/test-bucket",
             Self::Sandbox => "https://uploads.sandbox.jicloud.org",
             Self::Release => "https://uploads.jicloud.org",
         }

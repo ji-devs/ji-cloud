@@ -1,7 +1,8 @@
 use shared::{
     api::endpoints::{ApiEndpoint, image::*},
     domain::image::*,
-    error::image::*
+    error::image::*,
+    media::{MediaLibraryKind, MediaVariant}
 };
 use utils::{
     fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
@@ -20,9 +21,12 @@ pub struct BasicImage {
 }
 impl BasicImage {
     pub fn new(resp:GetResponse) -> Self {
+
+        let id = resp.metadata.id.0.to_string();
+        let src = utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Thumbnail, &id);
         Self {
-            id: resp.metadata.id.0.to_string(),
-            src: resp.thumbnail_url.to_string(),
+            id,
+            src,
             is_published: resp.metadata.publish_at.is_some(),
             text: resp.metadata.name
         }

@@ -15,6 +15,8 @@ const ALLOWED_APP_NAMES = [
 	"jig/play",
 	"module/memory/edit",
 	"module/memory/play",
+	"module/poster/edit",
+	"module/poster/play",
 ]
 
 if(FRONTEND_DEV_AUTH) {

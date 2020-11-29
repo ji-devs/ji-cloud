@@ -20,6 +20,7 @@ use shared::{
     api::endpoints::{ApiEndpoint, self},
     domain,
     error,
+    media::{MediaLibraryKind, MediaVariant},
 };
 use utils::{
     fetch::{api_with_auth, api_with_auth_empty, api_upload_file}
@@ -49,21 +50,13 @@ pub fn apply_preview_cards(dom:DomBuilder<HtmlElement>, state: Rc<BaseGameState>
 }
 
 fn image_url_signal(id:Mutable<Option<String>>) -> impl Signal<Item = String> {
-    id.signal_cloned().map_future(|id| {
-        async move {
-            if let Some(id) = id {
-                let path = endpoints::image::Get::PATH.replace("{id}",&id);
-                match api_with_auth::<domain::image::GetResponse, shared::error::GetError, ()>(&path, endpoints::image::Get::METHOD, None).await {
-                    Err(_) => None, 
-                    Ok(res) => Some(res.url.to_string())
-                }
-            } else {
-                None
-            }
-
-        }
-    })
-    .map(|x| x.flatten().unwrap_or("".to_string()))
+    id.signal_cloned()
+        .map(|id| {
+            id.map(|id| {
+                utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Resized, &id)
+            })
+            .unwrap_or("".to_string())
+        })
 
 }
 pub struct CardPairEditDom {

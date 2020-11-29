@@ -192,6 +192,85 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-poster-common"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "app-poster-edit"
+version = "0.1.0"
+dependencies = [
+ "app-poster-common",
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers 0.4.3",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-poster-play"
+version = "0.1.0"
+dependencies = [
+ "app-poster-common",
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers 0.4.3",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "rand",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-user"
 version = "0.1.0"
 dependencies = [

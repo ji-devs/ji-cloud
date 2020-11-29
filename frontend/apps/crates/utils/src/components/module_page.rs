@@ -9,6 +9,7 @@
  */
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::borrow::Borrow;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use futures_signals::{
@@ -35,7 +36,43 @@ pub trait ModuleRenderer {
     type Data: DeserializeOwned;
 
     async fn load(_self:Rc<Self>) -> Self::Data;
-    fn render(_self: Rc<Self>, data: Self::Data) -> Dom;
+    fn render(_self: Rc<Self>, data: Self::Data) -> ModuleRenderOutput;
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum ModulePageKind {
+    EditPlain,
+    EditResize,
+    Play
+}
+
+impl ModulePageKind {
+    pub fn is_resize(&self) -> bool {
+        match self {
+            Self::EditResize | Self::Play => true,
+            Self::EditPlain => false
+        }
+    }
+}
+
+pub struct ModuleRenderOutput {
+    pub kind: ModulePageKind,
+    pub sidebar: Option<Dom>,
+    pub header: Option<Dom>,
+    pub main: Option<Dom>,
+    pub footer: Option<Dom>,
+}
+
+impl ModuleRenderOutput {
+    pub fn new_player(dom:Dom) -> Self {
+        Self {
+            kind: ModulePageKind::Play,
+            sidebar: None,
+            header: None,
+            footer: None,
+            main: Some(dom)
+        }
+    }
 }
 
 pub struct ModulePage<T, R> 
@@ -80,34 +117,17 @@ where
     }
 
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::module_page(), {
-            .with_data_id!("module-outer", {
-                .with_data_id!("module-content", {
-                    .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
-                        if ready {
-                            let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
-                            Some(ModuleRenderer::render(_self.renderer.clone(),data))
-                        } else {
-                            None
-                        }
-                    })))
-                })
-
-                .with_node!(elem => {
-                    .global_event(clone!(_self => move |evt:events::Resize| {
-                        ModuleBounds::set(
-                            elem.client_width(),
-                            elem.client_height()
-                        );
-                    }))
-                })
-                .after_inserted(clone!(_self => move |elem| {
-                    ModuleBounds::set(
-                        elem.client_width(), 
-                        elem.client_height()
-                    );
-                }))
-            })
+        html!("div", {
+            .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
+                if ready {
+                    let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
+                    let output:ModuleRenderOutput = ModuleRenderer::render(_self.renderer.clone(),data);
+        
+                    Some(Self::render_sections(output))
+                } else {
+                    None
+                }
+            })))
 
             .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
 
@@ -130,6 +150,61 @@ where
                     target.post_message(&msg.into(), "*");
                 }
             }))
+        })
+    }
+
+    fn render_sections(output:ModuleRenderOutput) -> Dom {
+        let ModuleRenderOutput {mut kind, mut header, mut sidebar, mut main, mut footer}  = output;
+       
+        log::info!("should resize: {}", kind.is_resize());
+
+        elem!(templates::module_page(kind), {
+            .apply_if(main.is_some(), |dom| {
+                apply_methods!(dom, {
+                    .with_data_id!("main", {
+                        .child(main.take().unwrap_throw())
+                    })
+                })
+            })
+            .apply_if(sidebar.is_some(), |dom| {
+                apply_methods!(dom, {
+                    .with_data_id!("sidebar", {
+                        .child(sidebar.take().unwrap_throw())
+                    })
+                })
+            })
+            .apply_if(header.is_some(), |dom| {
+                apply_methods!(dom, {
+                    .with_data_id!("header", {
+                        .child(header.take().unwrap_throw())
+                    })
+                })
+            })
+            .apply_if(footer.is_some(), |dom| {
+                apply_methods!(dom, {
+                    .with_data_id!("footer", {
+                        .child(footer.take().unwrap_throw())
+                    })
+                })
+            })
+            .apply_if(kind.is_resize(), |dom| {
+                apply_methods!(dom, {
+                    .with_data_id!("module-outer", {
+                        .with_data_id!("module-content", {
+                        })
+
+                        .with_node!(elem => {
+                            .global_event(move |evt:events::Resize| {
+                                ModuleBounds::set_elem(&elem);
+                            })
+                        })
+                        .after_inserted(|elem| {
+                            ModuleBounds::set_elem(&elem);
+                        })
+                    })
+                })
+            })
+
         })
     }
 

@@ -18,12 +18,14 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use utils::{
     routes::{Route, AdminRoute, ImageSearchQuery},
-    path::upload_image_url
 };
-use shared::error::image::UpdateError;
-use shared::domain::{
-    user::UserProfile,
-    category::Category,
+use shared::{
+    error::image::UpdateError,
+    domain::{
+        user::UserProfile,
+        category::Category,
+    },
+    media::{MediaLibraryKind, MediaVariant}
 };
 use super::actions::{self, Init, Id, EditCategory, EditCategoryMode};
 use std::collections::{HashSet, HashMap};
@@ -281,11 +283,8 @@ impl ImageEdit{
                             }))
                         })
                         .with_data_id!("img", {
-                            .property_signal("src", _self.id.signal_cloned().map_future(|id| {
-                                async move {
-                                    let url = actions::get_image_url(&id).await.unwrap_throw();
-                                    url
-                                }
+                            .property_signal("src", _self.id.signal_cloned().map(|id| {
+                                utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Thumbnail, &id)
                             }))
                         })
                         .with_data_id!("delete", {
@@ -317,11 +316,8 @@ impl ImageEdit{
                         .with_data_id!("published", {
                             .class_signal("hidden", _self.publish_message.signal_ref(|msg| msg.is_none()))
                             .with_data_id!("publish-img", {
-                                .property_signal("src", _self.id.signal_cloned().map_future(|id| {
-                                    async move {
-                                        let url = actions::get_image_url(&id).await.unwrap_throw();
-                                        url
-                                    }
+                                .property_signal("src", _self.id.signal_cloned().map(|id| {
+                                    utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Thumbnail, &id)
                                 }))
                             })
                         })

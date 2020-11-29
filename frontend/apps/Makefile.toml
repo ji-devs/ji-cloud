@@ -100,6 +100,68 @@ set_env APP_NAME admin
 cm_run_task release 
 '''
 
+# JIG - SHELL 
+[tasks.jig-edit-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task dev-main
+'''
+
+[tasks.jig-edit-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task dev-main-nomedia
+'''
+
+[tasks.jig-edit-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task sandbox 
+'''
+
+[tasks.jig-edit-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/edit" 
+cm_run_task release 
+'''
+
+
+[tasks.jig-play-dev]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task dev-iframe
+'''
+
+[tasks.jig-play-dev-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task dev-iframe-nomedia
+'''
+
+[tasks.jig-play-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task sandbox 
+'''
+
+[tasks.jig-play-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "jig/play" 
+cm_run_task release 
+'''
+
+#######################
+## MODULES           ##
+#######################
+
 # MODULE - MEMORY
 [tasks.module-memory-edit-dev]
 script_runner = "@duckscript"
@@ -158,64 +220,51 @@ set_env APP_NAME "module/memory/play"
 cm_run_task release 
 '''
 
-
-# JIG - SHELL 
-[tasks.jig-edit-dev]
+# MODULE - POSTER 
+[tasks.module-poster-edit-dev]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/edit" 
+set_env APP_NAME "module/poster/edit" 
 cm_run_task dev-main
 '''
 
-[tasks.jig-edit-dev-nomedia]
+[tasks.module-poster-edit-dev-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/edit" 
+set_env APP_NAME "module/poster/edit" 
 cm_run_task dev-main-nomedia
 '''
 
-[tasks.jig-edit-sandbox]
+[tasks.module-poster-edit-sandbox]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/edit" 
+set_env APP_NAME "module/poster/edit" 
 cm_run_task sandbox 
 '''
 
-[tasks.jig-edit-release]
+[tasks.module-poster-edit-release]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/edit" 
+set_env APP_NAME "module/poster/edit" 
 cm_run_task release 
 '''
 
 
-[tasks.jig-play-dev]
+[tasks.module-poster-play-dev]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/play" 
+set_env APP_NAME "module/poster/play" 
 cm_run_task dev-iframe
 '''
 
-[tasks.jig-play-dev-nomedia]
+[tasks.module-poster-play-dev-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "jig/play" 
+set_env APP_NAME "module/poster/play" 
 cm_run_task dev-iframe-nomedia
 '''
 
-[tasks.jig-play-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task sandbox 
-'''
 
-[tasks.jig-play-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task release 
-'''
 
 
 #######################
@@ -315,7 +364,8 @@ cwd = "../build-utils/templates-builder"
 [tasks.dev-start]
 run_task = { name = [
     "dev-start-mediaserver",
-    "dev-watch-css",
+    "dev-watch-css-tailwind",
+    "dev-watch-css-plain",
     "dev-watch-templates",
     "dev-watch-app",
 ], fork = true, parallel = true }
@@ -325,17 +375,18 @@ script_runner = "@shell"
 script = ["npm run local-media-server"]
 cwd = "../build-utils"
 
-# not working for some reason
+# running watch from npm is not working for some reason
 # so redefining it below
-# [tasks.dev-watch-css]
-# script_runner = "@shell"
-# script = ["npm run watch:app"]
-# cwd = "../css"
 
-[tasks.dev-watch-css]
+[tasks.dev-watch-css-plain]
 command = "watchexec"
-args = ["-w", "src", "-w", "../.template_output", "npm run bundle:prod"]
-cwd = "../css"
+args = ["-w", "src", "npm run bundle:prod"]
+cwd = "../css/plain"
+
+[tasks.dev-watch-css-tailwind]
+command = "watchexec"
+args = ["-w", "src", "-w", "../../.template_output", "npm run bundle:prod"]
+cwd = "../css/tailwind"
 
 [tasks.dev-watch-templates]
 command = "cargo"

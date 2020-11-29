@@ -267,16 +267,6 @@ impl EditCategory {
         }
     }
 }
-pub async fn get_image_url(id:&str) -> Result<String, ()> {
-    _get_image(id).await
-        .map_err(|err| {
-            //log::error!("{:?}", err);
-            ()
-        })
-        .map(|res| {
-            res.thumbnail_url.to_string()
-        })
-}
 
 async fn _get_image(id:&str) -> Result < <Get as ApiEndpoint>::Res, <Get as ApiEndpoint>::Err> {
 
