@@ -12,7 +12,14 @@ use crate::debug;
 use super::raw;
 use itertools::Itertools;
 use std::fmt::Write;
-use utils::settings::SETTINGS;
+use utils::{
+    settings::SETTINGS,
+    components::image::{
+        search::ImageSearchWidgetDebug, 
+        transform::TransformImage,
+        data::*
+    }
+};
 
 
 pub struct State {
@@ -25,20 +32,30 @@ pub struct State {
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Tool {
     Layout,
-    Images
+    Text,
+    Images,
+    BgColor,
+    IntroSound,
+    Sound
 }
 
 pub struct Poster {
+    pub images: MutableVec<Rc<TransformImage>>
 }
 
 impl Poster {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            images: MutableVec::new()
+        }
     }
 
     pub fn set_from_raw(&self, raw_poster:raw::Poster) {
     }
 
+    pub fn add_image(&self, img:BasicImage) {
+        self.images.lock_mut().push_cloned(Rc::new(TransformImage::new(img)));
+    }
 }
 
 impl State {

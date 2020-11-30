@@ -1,2 +1,2 @@
 pub mod module_page;
-pub mod image_search;
+pub mod image;

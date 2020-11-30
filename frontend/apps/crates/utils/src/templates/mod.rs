@@ -6,7 +6,7 @@ use crate::settings::SETTINGS;
 use std::fmt;
 use crate::components::{
     module_page::ModulePageKind,
-    image_search::LibraryImage,
+    image::data::*,
 };
 
 thread_local! {
@@ -24,6 +24,8 @@ const MODULE_PLAY_PAGE:&'static str = "module-play-page";
 const IMAGE_SEARCH_WIDGET:&'static str = "image-search-widget";
 const IMAGE_SEARCH_RESULT_THUMBNAIL:&'static str = "image-search-recent-thumbnail";
 const IMAGE_SEARCH_RECENT_THUMBNAIL:&'static str = "image-search-result-thumbnail";
+
+const IMAGE_TRANSFORM:&'static str = "image-transform";
 
 pub fn module_page(kind:ModulePageKind) -> HtmlElement {
     match kind {
@@ -43,15 +45,23 @@ pub fn image_search_widget() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_SEARCH_WIDGET))
 }
 
-pub fn image_search_result_thumbnail(img:&LibraryImage) -> HtmlElement {
+pub fn image_search_result_thumbnail(img:&BasicImage) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RESULT_THUMBNAIL, &html_map!{
+        "name" => &img.name,
         "src" => &img.thumbnail_src(),
     }).unwrap_throw())
 }
 
-pub fn image_search_recent_thumbnail(img:&LibraryImage) -> HtmlElement {
+pub fn image_search_recent_thumbnail(img:&BasicImage) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RECENT_THUMBNAIL, &html_map!{
         "src" => &img.thumbnail_src(),
+    }).unwrap_throw())
+}
+
+pub fn image_transform(img:&BasicImage) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_TRANSFORM, &html_map!{
+        "name" => &img.name,
+        "src" => &img.full_src(),
     }).unwrap_throw())
 }
 
@@ -93,6 +103,9 @@ impl Templates {
             ))),
             (IMAGE_SEARCH_RECENT_THUMBNAIL, get_template_str(include_str!(
                 template_path!("_common/widgets/image-search/recent-thumbnail.html")
+            ))),
+            (IMAGE_TRANSFORM, get_template_str(include_str!(
+                template_path!("_common/image/image-transform.html")
             ))),
         ]);
 

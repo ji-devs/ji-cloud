@@ -156,7 +156,6 @@ where
     fn render_sections(output:ModuleRenderOutput) -> Dom {
         let ModuleRenderOutput {mut kind, mut header, mut sidebar, mut main, mut footer}  = output;
        
-        log::info!("should resize: {}", kind.is_resize());
 
         elem!(templates::module_page(kind), {
             .apply_if(main.is_some(), |dom| {

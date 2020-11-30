@@ -30,46 +30,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
 use itertools::Itertools;
-
-#[derive(Clone, Debug)]
-pub struct LibraryImage {
-    pub id: String,
-    pub raw_id: ImageId,
-    pub name: String,
-    pub library_kind: MediaLibraryKind,
-}
-
-impl LibraryImage {
-    pub fn from_string(id: String, name: String, library_kind: MediaLibraryKind) -> Self {
-
-        let raw_id = uuid::Uuid::parse_str(&id).unwrap_throw();
-        let raw_id = ImageId(raw_id);
-
-        Self {
-            id,
-            raw_id,
-            name,
-            library_kind
-        }
-    }
-
-    fn from_response(resp:GetResponse, library_kind:MediaLibraryKind) -> Self {
-        let raw_id = resp.metadata.id;
-
-        let id = raw_id.0.to_string();
-
-        Self {
-            id,
-            name: resp.metadata.name,
-            raw_id,
-            library_kind,
-        }
-    }
-
-    pub fn thumbnail_src(&self) -> String {
-        path::library_image_id(self.library_kind, MediaVariant::Thumbnail, self.raw_id)
-    }
-}
+use super::data::BasicImage;
 
 pub trait SearchQueryExt {
     fn simple(q:String, is_published: Option<bool>) -> SearchQuery {
@@ -88,39 +49,61 @@ pub trait SearchQueryExt {
 
 impl SearchQueryExt for SearchQuery {}
 
-pub struct ImageSearchWidget {
-    results: MutableVec<LibraryImage>,
+pub struct ImageSearchWidget <F>
+where F: FnMut(BasicImage)
+{
+    results: MutableVec<BasicImage>,
     loader: AsyncLoader,
-    is_published: Option<bool>
+    is_published: Option<bool>,
+    on_select: Option<RefCell<F>>,
 }
 
-impl ImageSearchWidget {
-    pub fn new() -> Rc<Self> {
+pub struct ImageSearchWidgetDebug {
+    pub results:Option<Vec<BasicImage>>, 
+    pub is_published: Option<Option<bool>>
+}
 
-        let _self = Rc::new(Self { 
-            results: MutableVec::new(),
-            loader: AsyncLoader::new(),
-            is_published: Some(true)
-        });
+const DEBUG_STICKER_ID:&'static str = "b0f20a28-2e9b-11eb-9af8-176e032a6567";
 
-        _self
+impl ImageSearchWidgetDebug {
+    pub fn new() -> Self {
+        Self {
+            //results: None,
+            is_published: Some(None),
+
+            results: Some(vec![
+                BasicImage::from_string(
+                    DEBUG_STICKER_ID.to_string(),
+                    "bar".to_string(),
+                    MediaLibraryKind::Global
+                )
+            ]),
+        }
     }
- 
-    pub fn new_debug(init_results:Option<Vec<LibraryImage>>, is_published: Option<Option<bool>>) -> Rc<Self> {
-        let is_published = match is_published {
-            None => Some(true),
-            Some(is_published) => is_published
-        };
+}
+
+impl <F> ImageSearchWidget<F> 
+where F: FnMut(BasicImage) + 'static
+{
+    pub fn new(debug:Option<ImageSearchWidgetDebug>, on_select: Option<F>) -> Rc<Self> {
 
         let results = MutableVec::new();
-        if let Some(init) = init_results {
-            results.lock_mut().replace_cloned(init);
-        }
+        let mut is_published = Some(true);
+
+        if let Some(debug) = debug {
+            if let Some(x) = debug.is_published {
+                is_published = x;
+            }
+            if let Some(x) = debug.results {
+                results.lock_mut().replace_cloned(x);
+            }
+        };
 
         let _self = Rc::new(Self { 
             results,
             loader: AsyncLoader::new(),
             is_published,
+            on_select: on_select.map(|x| RefCell::new(x))
         });
 
         _self
@@ -139,12 +122,17 @@ impl ImageSearchWidget {
         });
     }
 
-    fn search_results_dom_signal(&self) -> impl SignalVec<Item = Dom> {
-        self.results
+    fn search_results_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
+        _self.results
             .signal_vec_cloned()
-            .map(|item| {
+            .map(move |item| {
                 let id = item.id.to_string();
                 elem!(templates::image_search_result_thumbnail(&item), {
+                    .event(clone!(_self, item => move |evt:events::Click| {
+                        if let Some(cb) = _self.on_select.as_ref() {
+                            (cb.borrow_mut())(item.clone());
+                        }
+                    }))
                     .event(move |evt:events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             data_transfer.set_data("search-image-result", &id);
@@ -169,7 +157,7 @@ impl ImageSearchWidget {
                     })
                 })
                 .with_data_id!("items", {
-                    .children_signal_vec(_self.search_results_dom_signal())
+                    .children_signal_vec(Self::search_results_dom_signal(_self.clone()))
                 })
             })
         })
@@ -178,16 +166,28 @@ impl ImageSearchWidget {
 
 
 
-async fn search_images(query: SearchQuery) -> Result<(Vec<LibraryImage>, u32), ()> {
+async fn search_images(query: SearchQuery) -> Result<(Vec<BasicImage>, u32), ()> {
     api_with_auth::<SearchResponse, SearchError, _>(Search::PATH, Search::METHOD, Some(query)).await
         .map_err(|err:SearchError| { 
             ()
         })
         .map(|res| {
             let SearchResponse { images, pages } = res;
-            let images:Vec<LibraryImage> = images
+            let images:Vec<BasicImage> = images
                 .into_iter()
-                .map(|res| LibraryImage::from_response(res, MediaLibraryKind::Global))
+                .map(|resp| {
+                    let library_kind = MediaLibraryKind::Global;
+                    let raw_id = resp.metadata.id;
+
+                    let id = raw_id.0.to_string();
+
+                    BasicImage {
+                        id,
+                        name: resp.metadata.name,
+                        raw_id,
+                        library_kind,
+                    }
+                })
                 .collect();
 
             (images, pages)
