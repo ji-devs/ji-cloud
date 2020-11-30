@@ -1,0 +1,41 @@
+{% import "module/poster/edit/sidebar/macros.html" as SidebarMacros %}
+{% import "_common/input/input-macros.html" as Input %}
+<div class="scroll-v-container">
+    {{ SidebarMacros::toolbar(mode="images") }}
+
+    <div class="px-8 scroll-contents">
+        <div data-id="recent">
+            <div class="flex justify-between pt-4 py-1">
+                <p class="">Recent</p>
+                <p class="text-jibuttonBlue">Show All</p>
+            </div>
+            <div data-id="items" class="grid grid-cols-4 mb-2">
+            </div>
+            <div class="h-1 w-full bg-jidarkgrey "></div>
+        </div>
+        <div data-id="search">
+            <div class="flex justify-between py-4 ">
+                <p class="">Search Image</p>
+                <p class="text-jibuttonBlue">Upload your own</p>
+            </div>
+            <div class="flex justify-end pr-2 pb-2">
+                {{ Input::checkbox(label="JI Stickers", required=true, inputDataId="tos", class="px-4") }}
+                <div class="w-10">
+
+                </div>
+                {{ Input::checkbox(label="Web", required=true, inputDataId="tos", class="px-4") }}
+
+            </div>
+            <div class="-ml-2">
+                {{ Input::jigsearchboxfull(label="Search", required=true, inputDataId="tos", class="") }}
+
+            </div>
+            <div class="mt-2 mb-4">
+                {{ Input::checkbox(label="Show only backgrounds", required=true, inputDataId="tos", class="") }}
+
+            </div>
+            <div data-id="items" class="grid grid-cols-4 grid-container">
+            </div>
+        </div>
+    </div>
+</div>
