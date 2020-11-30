@@ -5,6 +5,8 @@ import {appendCardPairsTextText} from "./common/card-pairs";
 import {modulePage, ModulePageKind} from "@components/module";
 import sidebarEmpty from "@templates/module/memory/edit/edit-new/duplicate/step1-sidebar-empty.html";
 import sidebarWords from "@templates/module/memory/edit/edit-new/duplicate/step1-sidebar-words.html";
+import sidebarImageWords from "@templates/module/memory/edit/edit-new/images/step1-sidebar-text.html";
+import sidebarImageEmpty from "@templates/module/memory/edit/edit-new/images/step1-sidebar-empty.html";
 
 import headerPlain from "@templates/module/memory/edit/edit-new/header-plain.html";
 
@@ -45,6 +47,40 @@ export const Duplicate_Step_1_Words = () => {
   mockWords.forEach(word => {
     appendValueLineId(sidebar, "list-items", word);
   });
+    return modulePage({
+        kind: ModulePageKind.EditPlain,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
+}
+
+export const Images_Step_1_Words = () => {
+  const sidebar = tmpl(sidebarImageWords);
+  const main = tmpl(mainEmpty);
+  const header = tmpl(headerPlain);
+  const footer = tmpl(footerPlain);
+
+  mockWords.forEach(word => {
+    appendValueLineId(sidebar, "list-items", word);
+  });
+    return modulePage({
+        kind: ModulePageKind.EditPlain,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
+}
+
+export const Images_Step_1_Empty = () => {
+  const sidebar = tmpl(sidebarImageEmpty);
+  const main = tmpl(mainEmpty);
+  const header = tmpl(headerPlain);
+  const footer = tmpl(footerPlain);
+
+
     return modulePage({
         kind: ModulePageKind.EditPlain,
         sidebar,
