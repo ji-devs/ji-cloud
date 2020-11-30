@@ -305,7 +305,7 @@ async fn get(
 > {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
-    let (ids, pages) = algolia
+    let (ids, pages, total_hits) = algolia
         .search_image(
             &query.q,
             query.page,
@@ -324,7 +324,11 @@ async fn get(
         .try_collect()
         .await?;
 
-    Ok(Json(SearchResponse { images, pages }))
+    Ok(Json(SearchResponse {
+        images,
+        pages,
+        total_image_count: total_hits,
+    }))
 }
 
 async fn update(
