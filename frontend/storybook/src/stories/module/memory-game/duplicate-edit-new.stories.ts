@@ -3,48 +3,54 @@ import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appe
 import {mockWords, mockThemes} from "./common/mock-data";
 import {appendCardPairsTextText} from "./common/card-pairs";
 import {modulePage, ModulePageKind} from "@components/module";
-import sidebarEmpty from "@templates/module/memory/edit/duplicate/step1-sidebar-empty.html";
-import sidebarWords from "@templates/module/memory/edit/duplicate/step1-sidebar-words.html";
+import sidebarEmpty from "@templates/module/memory/edit/edit-new/duplicate/step1-sidebar-empty.html";
+import sidebarWords from "@templates/module/memory/edit/edit-new/duplicate/step1-sidebar-words.html";
 
-import headerTmpl from "@templates/module/memory/edit/temp/temp-header.html";
+import headerPlain from "@templates/module/memory/edit/edit-new/header-plain.html";
+
 import mainTmpl from "@templates/module/memory/edit/temp/temp-main.html";
-import footerTmpl from "@templates/module/memory/edit/temp/temp-footer.html";
+import mainEmpty from "@templates/module/memory/edit/edit-new/main-empty.html";
+import mainWords from "@templates/module/memory/edit/edit-new/duplicate/main-cards-words.html";
+
+import footerPlain from "@templates/module/memory/edit/edit-new/footer-plain.html";
 
 export default {
   title: 'Modules/Memory-Game/Edit/DuplicateNew',
 }
 
 export const Duplicate_Step_1_Empty = () => {
+  const main = tmpl(mainWords);
+  const header = tmpl(headerPlain);
+  const footer = tmpl(footerPlain);
     return modulePage({
         kind: ModulePageKind.EditPlain,
         sidebar: tmpl(sidebarEmpty),
-        header: makeHeader(),
+        header,
         main: makeMain({
             pairKind: "text-text",
             flipSecond: false,
             isEdit: true,
             themeIndex: 1
         }),
-        footer: makeFooter(),
+        footer,
     })
 }
 
 export const Duplicate_Step_1_Words = () => {
   const sidebar = tmpl(sidebarWords);
+  const main = tmpl(mainEmpty);
+  const header = tmpl(headerPlain);
+  const footer = tmpl(footerPlain);
+
   mockWords.forEach(word => {
     appendValueLineId(sidebar, "list-items", word);
   });
     return modulePage({
         kind: ModulePageKind.EditPlain,
         sidebar,
-        header: makeHeader(),
-        main: makeMain({
-            pairKind: "text-text",
-            flipSecond: false,
-            isEdit: true,
-            themeIndex: 1
-        }),
-        footer: makeFooter(),
+        header,
+        main,
+        footer,
     })
 }
 
@@ -63,7 +69,7 @@ interface MainOptions {
 }
 
 function makeMain({pairKind, flipSecond, isEdit, themeIndex}:MainOptions):Element {
-    const el = tmpl(mainTmpl);
+    const el = tmpl(mainWords);
 
     if(pairKind == "text-text") {
         appendCardPairsTextText(el, {flipSecond, isEdit, themeIndex });

@@ -286,6 +286,7 @@ module.exports = {
         668: '668px',
         681: '681px',
         696: '696px',
+        796: '796px',
         896: '896px',
         935: '935px',
 
@@ -386,6 +387,7 @@ module.exports = {
        32: '32px'
      },
 
+
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",
         'poster': `url('${MEDIA_UI}/Icn_Module_Poster.svg')`
@@ -397,6 +399,8 @@ module.exports = {
     backgroundColor: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
     border: ['responsive', 'hover', 'focus', 'active', 'group-hover'],
     transitionProperty: ['responsive', 'motion-safe', 'motion-reduce'],
+    borderWidth: ['hover', 'focus'],
+    borderStyle: ['hover'],
   },
   plugins: [],
 }
