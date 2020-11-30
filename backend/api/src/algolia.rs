@@ -339,10 +339,10 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
-    ) -> anyhow::Result<(Vec<Uuid>, u32)> {
+    ) -> anyhow::Result<(Vec<Uuid>, u32, u64)> {
         let compare_time = Utc::now().timestamp_nanos();
 
-        let client = with_client!(self.inner; (vec![], 0));
+        let client = with_client!(self.inner; (vec![], 0, 0));
 
         let mut filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -382,6 +382,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
             .await?;
 
         let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
 
         let results = results
             .hits
@@ -389,7 +390,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
             .map(|hit| hit.object_id.parse())
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok((results, pages))
+        Ok((results, pages, total_hits))
     }
 
     pub async fn delete_image(&self, id: ImageId) {
