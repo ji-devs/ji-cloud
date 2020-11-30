@@ -21,6 +21,7 @@ const FOOTER:&'static str = "footer";
 const MAIN:&'static str = "main";
 const SIDEBAR_LAYOUT:&'static str = "sidebar-layout";
 const SIDEBAR_LAYOUT_ITEM:&'static str = "sidebar-layout-item";
+const SIDEBAR_IMAGES:&'static str = "sidebar-images";
 
 pub fn sidebar() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(SIDEBAR))
@@ -41,9 +42,18 @@ pub fn main() -> HtmlElement {
 pub fn sidebar_layout() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(SIDEBAR_LAYOUT))
 }
-pub fn sidebar_layout_item() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(SIDEBAR_LAYOUT_ITEM))
+pub fn sidebar_layout_item(label:&str, src: &str) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(SIDEBAR_LAYOUT_ITEM, &html_map!{
+        "label" => label,
+        "src" => src,
+    }).unwrap_throw())
 }
+
+pub fn sidebar_images() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(SIDEBAR_IMAGES))
+}
+
+
 pub struct Templates {
     pub cache: TemplateCache<'static>
 }
@@ -77,6 +87,9 @@ impl Templates {
             ))),
             (SIDEBAR_LAYOUT_ITEM, get_template_str(include_str!(
                 template_path!("module/poster/edit/sidebar/layout-item.html")
+            ))),
+            (SIDEBAR_IMAGES, get_template_str(include_str!(
+                template_path!("module/poster/edit/sidebar/images.html")
             ))),
 
 

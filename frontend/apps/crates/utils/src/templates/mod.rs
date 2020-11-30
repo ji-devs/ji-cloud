@@ -4,7 +4,10 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use crate::settings::SETTINGS;
 use std::fmt;
-use crate::components::module_page::ModulePageKind;
+use crate::components::{
+    module_page::ModulePageKind,
+    image_search::LibraryImage,
+};
 
 thread_local! {
     pub static TEMPLATES: Templates = Templates::new(); 
@@ -18,6 +21,10 @@ const MODULE_EDIT_PAGE_PLAIN:&'static str = "module-edit-page-plain";
 const MODULE_EDIT_PAGE_RESIZE:&'static str = "module-edit-page-resize";
 const MODULE_PLAY_PAGE:&'static str = "module-play-page";
 
+const IMAGE_SEARCH_WIDGET:&'static str = "image-search-widget";
+const IMAGE_SEARCH_RESULT_THUMBNAIL:&'static str = "image-search-recent-thumbnail";
+const IMAGE_SEARCH_RECENT_THUMBNAIL:&'static str = "image-search-result-thumbnail";
+
 pub fn module_page(kind:ModulePageKind) -> HtmlElement {
     match kind {
         ModulePageKind::EditPlain => {
@@ -30,6 +37,22 @@ pub fn module_page(kind:ModulePageKind) -> HtmlElement {
             TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PLAY_PAGE))
         }
     }
+}
+
+pub fn image_search_widget() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_SEARCH_WIDGET))
+}
+
+pub fn image_search_result_thumbnail(img:&LibraryImage) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RESULT_THUMBNAIL, &html_map!{
+        "src" => &img.thumbnail_src(),
+    }).unwrap_throw())
+}
+
+pub fn image_search_recent_thumbnail(img:&LibraryImage) -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RECENT_THUMBNAIL, &html_map!{
+        "src" => &img.thumbnail_src(),
+    }).unwrap_throw())
 }
 
 pub struct Templates {
@@ -61,6 +84,15 @@ impl Templates {
             ))),
             (MODULE_PLAY_PAGE, get_template_str(include_str!(
                 template_path!("module/_common/module-play-page.html")
+            ))),
+            (IMAGE_SEARCH_WIDGET, get_template_str(include_str!(
+                template_path!("_common/widgets/image-search/widget.html")
+            ))),
+            (IMAGE_SEARCH_RESULT_THUMBNAIL, get_template_str(include_str!(
+                template_path!("_common/widgets/image-search/result-thumbnail.html")
+            ))),
+            (IMAGE_SEARCH_RECENT_THUMBNAIL, get_template_str(include_str!(
+                template_path!("_common/widgets/image-search/recent-thumbnail.html")
             ))),
         ]);
 
