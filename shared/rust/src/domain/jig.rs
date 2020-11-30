@@ -2,7 +2,7 @@
 
 pub mod module;
 
-use super::Publish;
+use super::{meta::ContentTypeId, Publish};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -41,6 +41,11 @@ pub struct CreateRequest {
     #[serde(default)]
     pub modules: Vec<ModuleId>,
 
+    /// The types of content this JIG contains.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub content_types: Vec<ContentTypeId>,
+
     /// When the JIG should be considered published (if at all).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -64,6 +69,9 @@ pub struct Jig {
 
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,
+
+    /// The types of content this JIG contains.
+    pub content_types: Vec<ContentTypeId>,
 
     /// The ID of the JIG's original creator (`None` if unknown).
     pub creator_id: Option<Uuid>,
@@ -104,6 +112,11 @@ pub struct UpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub modules: Option<Vec<ModuleId>>,
+
+    /// The types of content this JIG contains.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub content_types: Option<Vec<ContentTypeId>>,
 
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]

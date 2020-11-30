@@ -13,12 +13,14 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, Intern
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
     let subjects = db::meta::get_subjects(&db).await?;
+    let content_types = db::meta::get_content_types(&db).await?;
 
     Ok(Json(GetResponse {
         styles,
         affiliations,
         age_ranges,
         subjects,
+        content_types,
     }))
 }
 

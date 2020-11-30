@@ -40,7 +40,16 @@ pub struct AffiliationId(pub Uuid);
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 pub struct SubjectId(pub Uuid);
 
-into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId);
+/// Wrapper type around [`Uuid`], represents the ID of a [`ContentType`].
+///
+/// [`Uuid`]: ../../uuid/struct.Uuid.html
+/// [`Subject`]: struct.Subject.html
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+pub struct ContentTypeId(pub Uuid);
+
+into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId, ContentTypeId);
 
 /// Represents a style.
 #[derive(Serialize, Deserialize, Debug)]
@@ -106,6 +115,22 @@ pub struct Subject {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// Represents a content-type.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ContentType {
+    /// The id of the content-type.
+    pub id: ContentTypeId,
+
+    /// The content-type's name.
+    pub display_name: String,
+
+    /// When the content-type was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the content-type was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
 /// Response for fetching all metadata.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetResponse {
@@ -120,6 +145,9 @@ pub struct GetResponse {
 
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
+
+    /// All content types
+    pub content_types: Vec<ContentType>,
 }
 
 /// Metadata kinds.
@@ -149,4 +177,9 @@ pub enum MetaKind {
     ///
     /// [`Subject`]: struct.Subject.html
     Subject,
+
+    /// [`ContentType`]
+    ///
+    /// [`ContentType`]: struct.ContentType.html
+    ContentType,
 }
