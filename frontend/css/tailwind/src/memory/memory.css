@@ -315,7 +315,7 @@
 
 
 .memory-pair-delete{
-  display: block;
+  display: none;
 }
 .memory-pair:hover .memory-pair-delete{
   display: block;

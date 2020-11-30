@@ -51,3 +51,14 @@
 
 </button>
 {% endmacro pink %}
+
+{% macro whiteadd(label, dataId="") %}
+<!-- When inactive bg-jigrey -->
+<button data-id="{{dataId}}" class="bg-white text-jibuttonBlue border border-jibuttonBlue rounded-20 px-3 py-1 font-poppins font-normal  focus:outline-none active:outline-none">
+  <div class="flex justify-center items-center  text-jibuttonBlue">
+    <img src="{{MEDIA_UI}}/icn-plus.svg" alt="">
+    {{label}}
+  </div>
+
+</button>
+{% endmacro whiteadd %}
