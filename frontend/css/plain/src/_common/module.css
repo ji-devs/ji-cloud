@@ -27,31 +27,34 @@
   grid-template-rows: auto 1fr auto;
   height: 100%;
   width: 100%;
-}
 
-#module-grid > aside {
-  grid-area: sidebar; 
+  > aside {
+    grid-area: sidebar; 
 
-  .sidebar-contents {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    height: 100%;
-
-    .sidebar-scroll {
+    .scroll-v-container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       height: 100%;
-      overflow-y: auto;
+
+      .scroll-contents {
+        height: 100%;
+        overflow-y: auto;
+      }
     }
+  }
+
+  > header {
+    grid-area: header; 
+  }
+
+  > main {
+    grid-area: main; 
+  }
+  
+  > footer {
+    grid-area: footer; 
   }
 }
 
 
-#module-grid > header {
-  grid-area: header; 
-}
-#module-grid > main {
-  grid-area: main; 
-}
-#module-grid > footer {
-  grid-area: footer; 
-}

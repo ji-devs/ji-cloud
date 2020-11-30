@@ -1,7 +1,8 @@
 import {renderTemplate as tmpl} from "@utils/template";
+import {mediaUi} from "@utils/path";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
-import {mockThemes} from "./common/mock-data";
+import {mockThemes, mockImageThumbnail} from "./common/mock-data";
 import sidebarTmpl from "@templates/module/poster/edit/sidebar/sidebar.html";
 import headerTmpl from "@templates/module/poster/edit/header.html";
 import footerTmpl from "@templates/module/poster/edit/footer.html";
@@ -34,8 +35,16 @@ export const Images = () => {
 
     toggleClassesId(sidebar, "recent", "hidden", true);
 
-    //TODO - add images 
-    
+    const search = getChildId(sidebar, "search");
+
+    Array(10).fill(0).forEach((_, idx) => {
+        const img = tmpl(imagesSidebarItem, {
+            src: mediaUi(mockImageThumbnail)
+        });
+
+        appendId(search, "items", img);
+    });
+
     return posterPage({sidebar});
 
 }

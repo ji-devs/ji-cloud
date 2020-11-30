@@ -1,9 +1,9 @@
 {% import "module/poster/edit/sidebar/macros.html" as SidebarMacros %}
 {% import "_common/input/input-macros.html" as Input %}
-<div class="sidebar-contents">
+<div class="scroll-v-container">
     {{ SidebarMacros::toolbar(mode="images") }}
 
-    <div class="px-8 sidebar-scroll">
+    <div class="px-8 scroll-contents">
         <div data-id="recent">
             <div class="flex justify-between pt-4 py-1">
                 <p class="">Recent</p>
