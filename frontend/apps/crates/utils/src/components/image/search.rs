@@ -30,7 +30,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
 use itertools::Itertools;
-use super::data::BasicImage;
+use super::data::*;
 
 pub trait SearchQueryExt {
     fn simple(q:String, is_published: Option<bool>) -> SearchQuery {
@@ -50,16 +50,16 @@ pub trait SearchQueryExt {
 impl SearchQueryExt for SearchQuery {}
 
 pub struct ImageSearchWidget <F>
-where F: FnMut(BasicImage)
+where F: FnMut(MetaImage)
 {
-    results: MutableVec<BasicImage>,
+    results: MutableVec<MetaImage>,
     loader: AsyncLoader,
     is_published: Option<bool>,
     on_select: Option<RefCell<F>>,
 }
 
 pub struct ImageSearchWidgetDebug {
-    pub results:Option<Vec<BasicImage>>, 
+    pub results:Option<Vec<MetaImage>>, 
     pub is_published: Option<Option<bool>>
 }
 
@@ -72,9 +72,9 @@ impl ImageSearchWidgetDebug {
             is_published: Some(None),
 
             results: Some(vec![
-                BasicImage::from_string(
-                    DEBUG_STICKER_ID.to_string(),
-                    "bar".to_string(),
+                MetaImage::new_debug(
+                    DEBUG_STICKER_ID,
+                    "bar",
                     MediaLibraryKind::Global
                 )
             ]),
@@ -83,7 +83,7 @@ impl ImageSearchWidgetDebug {
 }
 
 impl <F> ImageSearchWidget<F> 
-where F: FnMut(BasicImage) + 'static
+where F: FnMut(MetaImage) + 'static
 {
     pub fn new(debug:Option<ImageSearchWidgetDebug>, on_select: Option<F>) -> Rc<Self> {
 
@@ -112,7 +112,7 @@ where F: FnMut(BasicImage) + 'static
     fn search(_self: Rc<Self>, query:SearchQuery) {
         _self.clone().loader.load(async move {
             match search_images(query).await {
-                Ok((results, pages)) => {
+                Ok((results, pages, total_count)) => {
                     _self.results.lock_mut().replace_cloned(results);
                 },
                 Err(_) => {
@@ -126,7 +126,7 @@ where F: FnMut(BasicImage) + 'static
         _self.results
             .signal_vec_cloned()
             .map(move |item| {
-                let id = item.id.to_string();
+                let id = item.id_str().to_string();
                 elem!(templates::image_search_result_thumbnail(&item), {
                     .event(clone!(_self, item => move |evt:events::Click| {
                         if let Some(cb) = _self.on_select.as_ref() {
@@ -165,31 +165,24 @@ where F: FnMut(BasicImage) + 'static
 }
 
 
+pub type PageCount = u32;
+pub type TotalCount = u64;
 
-async fn search_images(query: SearchQuery) -> Result<(Vec<BasicImage>, u32), ()> {
+pub async fn search_images(query: SearchQuery) -> Result<(Vec<MetaImage>, PageCount, TotalCount), ()> {
     api_with_auth::<SearchResponse, SearchError, _>(Search::PATH, Search::METHOD, Some(query)).await
         .map_err(|err:SearchError| { 
             ()
         })
         .map(|res| {
-            let SearchResponse { images, pages } = res;
-            let images:Vec<BasicImage> = images
+            let SearchResponse { images, pages, total_image_count } = res;
+            let images:Vec<MetaImage> = images
                 .into_iter()
                 .map(|resp| {
-                    let library_kind = MediaLibraryKind::Global;
-                    let raw_id = resp.metadata.id;
-
-                    let id = raw_id.0.to_string();
-
-                    BasicImage {
-                        id,
-                        name: resp.metadata.name,
-                        raw_id,
-                        library_kind,
-                    }
+                    let image:MetaImage = (resp.metadata, MediaLibraryKind::Global).into();
+                    image
                 })
                 .collect();
 
-            (images, pages)
+            (images, pages, total_image_count)
         })
 }

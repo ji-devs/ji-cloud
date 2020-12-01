@@ -45,22 +45,21 @@ pub fn image_search_widget() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(IMAGE_SEARCH_WIDGET))
 }
 
-pub fn image_search_result_thumbnail(img:&BasicImage) -> HtmlElement {
+pub fn image_search_result_thumbnail(img:&MetaImage) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RESULT_THUMBNAIL, &html_map!{
-        "name" => &img.name,
+        "name" => &img.meta.name,
         "src" => &img.thumbnail_src(),
     }).unwrap_throw())
 }
 
-pub fn image_search_recent_thumbnail(img:&BasicImage) -> HtmlElement {
+pub fn image_search_recent_thumbnail(img:&MetaImage) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(IMAGE_SEARCH_RECENT_THUMBNAIL, &html_map!{
         "src" => &img.thumbnail_src(),
     }).unwrap_throw())
 }
 
-pub fn image_transform(img:&BasicImage) -> HtmlElement {
+pub fn image_transform(img:&SimpleImage) -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem(IMAGE_TRANSFORM, &html_map!{
-        "name" => &img.name,
         "src" => &img.full_src(),
     }).unwrap_throw())
 }

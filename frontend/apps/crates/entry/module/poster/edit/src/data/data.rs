@@ -53,7 +53,7 @@ impl Poster {
     pub fn set_from_raw(&self, raw_poster:raw::Poster) {
     }
 
-    pub fn add_image(&self, img:BasicImage) {
+    pub fn add_image(&self, img:SimpleImage) {
         self.images.lock_mut().push_cloned(Rc::new(TransformImage::new(img)));
     }
 }

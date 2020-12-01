@@ -30,17 +30,17 @@ use futures::future::ready;
 use std::fmt::Write;
 use itertools::Itertools;
 use crate::math::{RectF64, PointF64};
-use super::data::BasicImage;
+use super::data::*;
 use crate::drag::*;
 
 pub struct TransformImage {
-    img: BasicImage,
+    img: SimpleImage,
     size: Mutable<Option<RectF64>>,
     drag: RefCell<BasicDrag>,
 }
 
 impl TransformImage { 
-    pub fn new(img: BasicImage) -> Self {
+    pub fn new(img: SimpleImage) -> Self {
         Self { 
             img ,
             size: Mutable::new(None),

@@ -1,13 +1,16 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
-use shared::domain::jig::ModuleKind;
+use shared::domain::{
+    jig::ModuleKind,
+    image::SearchQuery
+};
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
 
 pub type Id = String;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum Route {
     NotFound,
     NoAuth,
@@ -17,7 +20,7 @@ pub enum Route {
     Module(ModuleRoute),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum UserRoute {
     Profile(ProfileSection),
     ContinueRegistration(FirebaseUserInfo),
@@ -27,35 +30,35 @@ pub enum UserRoute {
     GotEmailConfirmation,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum ProfileSection {
     Landing,
     ChangeEmail
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum AdminRoute {
     Categories,
-    ImageSearch(Option<ImageSearchQuery>),
+    ImageSearch(Option<SearchQuery>),
     ImageAdd,
-    ImageEdit(Id, Option<ImageSearchQuery>),
+    ImageEdit(Id, Option<SearchQuery>),
 }
 
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
     Edit(Id, Option<Id>),
     Play(Id, Option<Id>) 
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum JigPlayMode {
     Producer,
     Audience 
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum ModuleRoute {
     Edit(ModuleKind, Id, Id),
     Play(ModuleKind, Id, Id),
@@ -65,13 +68,6 @@ pub enum ModuleRoute {
 #[derive(Serialize, Deserialize)]
 struct JsonQuery {
     pub data: String  //json-encoded data as-needed
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct ImageSearchQuery {
-    pub query: String,
-    pub page: u32,
-    pub filter_index: u32
 }
 
 impl Route {
@@ -107,7 +103,7 @@ impl Route {
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    let search:SearchQuery = serde_json::from_str(&search).unwrap_throw();
                     Self::Admin(AdminRoute::ImageSearch(Some(search)))
                 } else {
                     Self::Admin(AdminRoute::ImageSearch(None))
@@ -116,7 +112,7 @@ impl Route {
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-edit", id] => {
                 if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    let search:SearchQuery = serde_json::from_str(&search).unwrap_throw();
                     Self::Admin(AdminRoute::ImageEdit(id.to_string(), Some(search)))
                 } else {
                     Self::Admin(AdminRoute::ImageEdit(id.to_string(), None))

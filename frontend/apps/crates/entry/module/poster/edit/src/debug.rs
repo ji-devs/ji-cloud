@@ -13,7 +13,7 @@ use std::rc::Rc;
 use crate::data::*; 
 use utils::components::image::{
     search::ImageSearchWidgetDebug, 
-    data::BasicImage
+    data::*
 };
 
 pub const DEBUG_STEP:usize = 1;
