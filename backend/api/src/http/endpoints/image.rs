@@ -297,13 +297,13 @@ async fn get_one(
 async fn get(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    _claims: WrapAuthClaimsNoDb,
+    // _claims: WrapAuthClaimsNoDb,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
 ) -> Result<
     Json<<endpoints::image::Search as ApiEndpoint>::Res>,
     <endpoints::image::Search as ApiEndpoint>::Err,
 > {
-    let query = query.map_or_else(Default::default, Query::into_inner);
+    let query = dbg!(query.map_or_else(Default::default, Query::into_inner));
 
     let (ids, pages, total_hits) = algolia
         .search_image(
