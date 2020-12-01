@@ -1,15 +1,30 @@
 {% import "module/memory/edit/_common/sidebar/macros.html" as SidebarMacros %}
 {% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "user/user-macros.html" as User %}
 
 <div class="bg-white ml-10 w-516 flex-shrink-0 relative scroll-v-container">
 
-  {{ SidebarMacros::top_steps(selected=2) }}
+  {{ SidebarMacros::top_steps(selected=3) }}
 
 
-  <div class="px-4">
-    <div class="flex justify-between items-center pt-4">
-      <p class="text-base px-4">Step 3 Here :)</p>
+  <div class="px-4 ">
+    <div class="flex items-center pt-4 mb-4">
+      <p class="">Game Instructions</p>
+      <p class="text-jibuttonBlue ml-4">Skip</p>
     </div>
+    <p class="mb-2 text-jibuttonBlue">Add written instructions</p>
+    <input type="text" class="h-64 w-full outline-none bg-jilogingrey px-4 mb-4 rounded-md" placeholder="Find matching pair">
+    <p class="mb-4">Record general introduction</p>
+    <div class="bg-jilogingrey flex items-center justify-center h-293 rounded-lg ">
+      <!-- when finished recording image should change to group-12539.svg -->
+      <img src="{{MEDIA_UI}}/group-12398.svg" alt="" class="">
+
+    </div>
+    <div class="flex justify-center mt-4">
+      {{ ButtonMacros::bluejig(label="Record", dataId="next", hover="bg-jiblueDark transition duration-300 ease-in-out") }}
+
+    </div>
+
   </div>
 
 </div>
