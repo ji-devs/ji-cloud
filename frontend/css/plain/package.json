@@ -1,0 +1,25 @@
+{
+  "name": "css",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch:storybook": "watchexec -w ./src -w -- postcss src/index.css --env development -o dist/plain.storybook.css",
+    "bundle:storybook": "postcss src/index.css --env production -o dist/plain.storybook.css",
+    "bundle:all": "npm-run-all -p bundle:prod bundle:debug",
+    "bundle:prod": "postcss src/index.css --env production -o dist/plain.min.css",
+    "bundle:debug": "postcss src/index.css --env development -o dist/plain.debug.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@csstools/postcss-sass": "^4.0.0",
+    "autoprefixer": "^10.0.2",
+    "cssnano": "^4.1.10",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.1.10",
+    "postcss-cli": "^8.3.0",
+    "postcss-import": "^13.0.0",
+    "postcss-url": "^10.1.0"
+  }
+}

@@ -23,6 +23,16 @@
 </button>
 {% endmacro bluejig %}
 
+{% macro sidebarbutton(label, dataId="", hover) %}
+<!-- When active bg-jibuttonBlue  -->
+<button data-id="{{dataId}}" class="bg-jigrey text-white rounded-8 px-4 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
+  <div class="flex justify-center items-center text-white">
+    {{label}}
+  </div>
+
+</button>
+{% endmacro sidebarbutton %}
+
 {% macro green(label, dataId="") %}
 <button data-id="{{dataId}}" class="bg-jibuttongreen text-white font-normal min-w-112 py-2 px-4 rounded-lg">
   <div class="flex">
@@ -31,3 +41,23 @@
   </div>
 </button>
 {% endmacro green %}
+
+{% macro pink(label, dataId="", hover) %}
+<!-- When inactive bg-jigrey -->
+<button data-id="{{dataId}}" class="bg-jimemorypinkbutton text-white text-base rounded-8 px-4 py-1 font-poppins font-normal hover:{{hover}} focus:outline-none active:outline-none">
+  <div class="flex justify-center items-center text-white">
+    {{label}}
+  </div>
+
+</button>
+{% endmacro pink %}
+
+{% macro whiteadd(label, dataId="") %}
+<button data-id="{{dataId}}" class="bg-white text-jibuttonBlue border border-jibuttonBlue rounded-20 px-3 py-1 font-poppins font-normal  focus:outline-none active:outline-none">
+  <div class="flex justify-center items-center  text-jibuttonBlue">
+    <img src="{{MEDIA_UI}}/icn-plus.svg" alt="">
+    {{label}}
+  </div>
+
+</button>
+{% endmacro whiteadd %}

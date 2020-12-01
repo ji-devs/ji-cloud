@@ -16,6 +16,7 @@ const watchPatterns = [
     `./crates/utils/src/**`,
     `./crates/entry/${APP_NAME}/src/**`,
     `./crates/entry/${APP_NAME}/js/**`,
+	"../css/plain/dist/**", 
     "../.template_output/**", 
     //technically this happens _after_ the html rebuild
     //and should therefore be watched instead of .template_output
@@ -24,7 +25,7 @@ const watchPatterns = [
     //so just reload after a bit if changing css in order to see it
     //(usually css changes are done at the storybook phase, so this is a rare need)
     //TODO - make it an env thing and params to Makefile.toml
-    //"../css/dist/**", 
+    //"../css/tailwind/dist/**", 
     "../../shared/rust/src/**", 
     "../../config/rust/src/**", 
     "../../config/js/dist/**"

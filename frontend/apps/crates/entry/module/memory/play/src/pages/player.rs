@@ -18,6 +18,7 @@ use utils::{
     iframe::*,
     components::module_page::*,
     signals::DefaultStringSignal,
+    settings::SETTINGS,
 };
 use gloo_timers::future::TimeoutFuture;
 use crate::{debug, data::*};
@@ -35,7 +36,6 @@ use shared::{
     error,
     media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-use utils::settings::SETTINGS;
 
 
 use uuid::Uuid;
@@ -64,26 +64,28 @@ impl ModuleRenderer for PlayerPage {
         }
     }
 
-    fn render(_self: Rc<Self>, data: raw::GameState) -> Dom {
+    fn render(_self: Rc<Self>, data: raw::GameState) -> ModuleRenderOutput {
         _self.game_state.set_from_loaded(data);
-        html!("div", {
-            .child_signal(_self.game_state.mode.signal_ref(clone!(_self => move |mode| {
-                mode.map(clone!(_self => move |mode| {
-                    if let Some(mode) = mode {
-                        let state = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
+        ModuleRenderOutput::new_player( 
+            html!("div", {
+                .child_signal(_self.game_state.mode.signal_ref(clone!(_self => move |mode| {
+                    mode.map(clone!(_self => move |mode| {
+                        if let Some(mode) = mode {
+                            let state = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
 
-                        match mode { 
-                            GameMode::Duplicate => {
-                                DuplicatePlayer::render(DuplicatePlayer::new(state))
-                            },
-                            _ => unimplemented!("todo - other modes!")
+                            match mode { 
+                                GameMode::Duplicate => {
+                                    DuplicatePlayer::render(DuplicatePlayer::new(state))
+                                },
+                                _ => unimplemented!("todo - other modes!")
+                            }
+                        } else {
+                            panic!("no game mode!");
                         }
-                    } else {
-                        panic!("no game mode!");
-                    }
-                }))
-            })))
-        })
+                    }))
+                })))
+            })
+        )
     }
 }
 

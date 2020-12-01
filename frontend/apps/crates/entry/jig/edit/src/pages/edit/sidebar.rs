@@ -273,7 +273,7 @@ impl ModuleDom {
                 .event(clone!(_self => move |evt:events::MouseDown| {
                     match (_self.img_size.borrow().as_ref(), _self.sidebar.element.borrow().as_ref()) {
                         (Some(img_size), Some(parent_elem)) => {
-                            let modules:Vec<Element> = parent_elem.select_vec(&data_id("module-container"));
+                            let modules:Vec<Element> = parent_elem.select_vec(&data_id("list-item-container"));
                             let module_kinds:Vec<Module> = _self.sidebar.modules.lock_ref().to_vec();
                             let module_kinds:Vec<Option<ModuleKind>> = module_kinds.into_iter().map(|m| m.kind).collect(); 
 

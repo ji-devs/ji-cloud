@@ -40,7 +40,7 @@ function startCdnMedia() {
 
 function startCdnCss() {
 	const port = parseInt(process.env.LOCAL_CDN_CSS_PORT);
-	const localPath = path.resolve(`../css/dist`);
+	const localPath = path.resolve(`../css`);
 
 	const app = express();
 

@@ -11,6 +11,10 @@
           {
             "rootPathSuffix": "./src/utils",
             "rootPathPrefix": "@utils"
+          },
+          {
+            "rootPathSuffix": "./src/components",
+            "rootPathPrefix": "@components"
           }
         ]
       }

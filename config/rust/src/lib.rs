@@ -3,8 +3,8 @@ use time::Duration;
 
 pub const STAGE_WIDTH: f64 = 1920.0;
 pub const STAGE_HEIGHT: f64 = 1080.0;
-pub const STAGE_PADDING_Y_PERC: f64 = 0.05; // in percentage, to offset the stage area a bit
-pub const STAGE_PADDING_X_PERC: f64 = 0.05;
+pub const STAGE_PADDING_Y_PERC: f64 = 0.00; // in percentage, to offset the stage area a bit
+pub const STAGE_PADDING_X_PERC: f64 = 0.00;
 pub const STAGE_RATIO: f64 = STAGE_WIDTH / STAGE_HEIGHT;
 
 pub const MEDIA_UI_PATH: &str = "ui";

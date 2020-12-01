@@ -5,24 +5,32 @@
 
   {% include "module/memory/edit/duplicate/step-1-sidebar.html" %}
 
-  <div class=" flex flex-col w-full">
-    <div class="flex justify-center items-center mt-4 self-end mr-4">
+  <div class=" flex flex-col w-full max-w-1212">
+    <div class="flex justify-center items-center mt-4 self-end">
 
-      {% include "_common/module/edit/top-control-preview.html" %}
+      {% include "module/_common/edit/top-control-preview.html" %}
 
 
       <div class="ml-12">
         <img src="{{MEDIA_UI}}/Creator@2x.png" alt="">
       </div>
     </div>
-    <div class="pl-8 -mt-16">
+    <div class="ml-10 -mt-16 ">
       <h1 class="text-jititleorange text-4xl font-light mb-4">Create a Cover Page</h1>
       <p class="font-light text-lg">Create a Memory Game</p>
       <p class="font-light text-lg">Add your content on the left panel</p>
-      <div class="max-w-1212 h-681 bg-jimemorybackground mt-4 rounded-sm mb-4 border border-jimemoryborder jig-preview px-12 py-6 overflow-y-auto">
-        <div data-id="cards" class="memory grid grid-cols-3 gap-4 "> </div>
+      <div class="flex justify-end">
+        {{ ButtonMacros::whiteadd(label="Add pair", dataId="next") }}
+
       </div>
-      <div class="flex justify-end w-full pr-6">
+      <div class="h-681  bg-jimemorybackground mt-4 rounded-sm mb-4 border border-jimemoryborder jig-preview px-12 py-6 overflow-y-auto">
+
+        <!-- WHEN THERE ARE WORDS DISPLAY THIS -->
+        <div data-id="cards" class="memory grid grid-cols-3 gap-4 "> </div>
+        <!-- WHEN NO WORDS ADDED -->
+        <p class="flex justify-center items-center text-2xl font-heebo text-jigrey">No Preview yet</p>
+      </div>
+      <div class="flex justify-end w-full">
         {{ ButtonMacros::orange(label="Done", dataId="next") }}
       </div>
     </div>

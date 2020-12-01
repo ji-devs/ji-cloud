@@ -9,17 +9,9 @@ thread_local! {
     pub static TEMPLATES: Templates = Templates::new(); 
 }
 
-const MODULE_PAGE:&'static str = "module-page";
 const PLAYER:&'static str = "player";
 const CARD:&'static str = "card";
 
-pub fn module_page_str() -> String {
-    TEMPLATES.with(|t| t.cache.render_plain(MODULE_PAGE).to_string())
-}
-
-pub fn module_page() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PAGE))
-}
 pub fn player() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(PLAYER))
 }
@@ -44,7 +36,6 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (MODULE_PAGE, get_template_str(include_str!("../../../../../../../.template_output/_common/module/module-page.html"))),
             (PLAYER, get_template_str(include_str!("../../../../../../../.template_output/module/memory/play/player.html"))),
             (CARD, get_template_str(include_str!("../../../../../../../.template_output/module/memory/play/memory-card.html"))),
         ]);

@@ -13,6 +13,7 @@ firebase-debug.log
 .idea
 build-utils/image-upload/report.csv
 debug.log
+*.code-workspace
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat

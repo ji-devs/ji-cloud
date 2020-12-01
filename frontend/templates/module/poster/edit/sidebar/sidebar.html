@@ -1,0 +1,17 @@
+{% import "module/poster/edit/sidebar/macros.html" as Sidebar %}
+
+<aside data-id="sidebar" class="bg-white w-516 h-screen">
+    
+    <div data-id="toolbar" class="border-t border-b border-jidarkgrey py-4">
+      <div class="flex items-center pl-8">
+        <p class="mr-5">Add</p>
+        {{ Sidebar::toolbar_item(id="text", icon="icn-text-jig") }}
+        {{ Sidebar::toolbar_item(id="images", icon="icn-image-jig") }}
+        {{ Sidebar::toolbar_item(id="bg-color", icon="icn-background-color-jig") }}
+        {{ Sidebar::toolbar_item(id="intro-sound", icon="icn-record-jig") }}
+        {{ Sidebar::toolbar_item(id="sound", icon="icn-sound-f-ile-jig") }}
+      </div>
+    </div>
+
+    <div data-id="tool"></div>
+</aside>

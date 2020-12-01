@@ -31,12 +31,24 @@ jobs:
         with:
           node-version: '12'
 
-      - name: install npm deps
+      - name: install npm deps (tailwind)
         run: npm install
-        working-directory: "./frontend/css"
+        working-directory: "./frontend/css/tailwind"
 
-      - name: bundle 
+      - name: bundle (tailwind)
         run: npm run bundle:all
+        working-directory: "./frontend/css/tailwind"
+
+      - name: install npm deps (plain)
+        run: npm install
+        working-directory: "./frontend/css/plain"
+
+      - name: bundle (plain)
+        run: npm run bundle:all
+        working-directory: "./frontend/css/plain"
+
+      - name: concat css 
+        run: cat ./tailwind/dist/tailwind.min.css ./plain/dist/plain.min.css > ./styles.min.css
         working-directory: "./frontend/css"
 
       - name: install google cloud sdk
@@ -45,8 +57,8 @@ jobs:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
-      - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/css/dist gs://ji-cloud-frontend-origin-eu-001/_css
+      - name: deploy to google cloud (tailwind)
+        run: gsutil cp ./frontend/css/styles.min.css gs://ji-cloud-frontend-origin-eu-001/_css/
 
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
