@@ -1,7 +1,7 @@
 use algolia::{
     filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
     model::attribute::Attribute,
-    model::attribute::SearchableAttributes,
+    model::attribute::{FacetAttribute, SearchableAttributes},
     request::SetSettings,
     request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
@@ -29,6 +29,8 @@ struct BatchImage<'a> {
     affiliations: &'a [Uuid],
     categories: &'a [Uuid],
     category_names: &'a [String],
+    publish_at: Option<i64>,
+    is_premium: bool,
 }
 
 pub struct Updater {
@@ -69,7 +71,9 @@ select
     array((select style_id from image_style where image_id = image_metadata.id)) as "styles!",
     array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
     array((select category_id from image_category where image_id = image_metadata.id)) as "categories!",
-    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!"
+    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!",
+    publish_at,
+    is_premium
 from image_metadata
 where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
 limit 100
@@ -84,7 +88,9 @@ limit 100
                 age_ranges: &row.age_ranges,
                 affiliations: &row.affiliations,
                 categories: &row.categories,
-                category_names: &row.category_names
+                category_names: &row.category_names,
+                publish_at: row.publish_at.map(|t| t.timestamp_nanos()),
+                is_premium: row.is_premium,
             })
             .expect("failed to serialize BatchImage to json")
             {
@@ -126,36 +132,6 @@ macro_rules! with_client {
     }};
 
     ($client:expr) => { with_client!($client; ()) };
-}
-
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct Image<'a> {
-    pub name: &'a str,
-    pub description: &'a str,
-    pub styles: &'a [StyleId],
-    pub age_ranges: &'a [AgeRangeId],
-    pub affiliations: &'a [AffiliationId],
-    pub categories: &'a [CategoryId],
-    pub category_names: &'a [String],
-}
-
-#[derive(Serialize, Default, Debug)]
-pub struct ImageUpdate<'a> {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<&'a str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<&'a str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub styles: Option<&'a [StyleId]>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub age_ranges: Option<&'a [AgeRangeId]>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub affiliations: Option<&'a [AffiliationId]>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub categories: Option<&'a [CategoryId]>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub category_names: Option<&'a [String]>,
 }
 
 #[derive(Clone)]
@@ -201,21 +177,41 @@ fn algolia_set_searchable_fields<'a>(
     client: &'a Inner,
     index: &'a str,
 ) -> BoxFuture<'a, anyhow::Result<()>> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("description".to_owned()))
+                .single(Attribute("category_names".to_owned()))
+                .finish(),
+        ),
+        attributes_for_faceting: None,
+    };
+
     Box::pin(async move {
-        client
-            .set_settings(
-                index,
-                &SetSettings {
-                    searchable_attributes: Some(
-                        SearchableAttributes::build()
-                            .single(Attribute("name".to_owned()))
-                            .single(Attribute("description".to_owned()))
-                            .single(Attribute("category_names".to_owned()))
-                            .finish(),
-                    ),
-                },
-            )
-            .await?;
+        client.set_settings(index, &settings).await?;
+        Ok(())
+    })
+}
+
+fn algolia_set_attributes_for_faceting<'a>(
+    client: &'a Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    let settings = SetSettings {
+        searchable_attributes: None,
+        attributes_for_faceting: Some(vec![
+            FacetAttribute::filter_only(Attribute("publish_at".to_owned())),
+            FacetAttribute::filter_only(Attribute("is_premium".to_owned())),
+            FacetAttribute::filter_only(Attribute("styles".to_owned())),
+            FacetAttribute::filter_only(Attribute("age_ranges".to_owned())),
+            FacetAttribute::filter_only(Attribute("affiliations".to_owned())),
+            FacetAttribute::filter_only(Attribute("categories".to_owned())),
+        ]),
+    };
+
+    Box::pin(async move {
+        client.set_settings(index, &settings).await?;
         Ok(())
     })
 }
@@ -229,6 +225,7 @@ const ALGOLIA_INDEXING_MIGRATIONS: &'static [(
     (ResyncKind::Complete, |_, _| {
         Box::pin(futures::future::ok(()))
     }),
+    (ResyncKind::Complete, algolia_set_attributes_for_faceting),
 ];
 
 const ALGOLIA_INDEXING_VERSION: i16 = ALGOLIA_INDEXING_MIGRATIONS.len() as i16;
@@ -352,7 +349,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
 
         if let Some(is_published) = is_published {
             filters.filters.push(Box::new(CommonFilter {
-                filter: CmpFilter::new("publishAt".to_owned(), FilterOperator::Le, compare_time),
+                filter: CmpFilter::new("publish_at".to_owned(), FilterOperator::Le, compare_time),
                 invert: !is_published,
             }))
         }
@@ -360,7 +357,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
         if let Some(is_premium) = is_premium {
             filters.filters.push(Box::new(CommonFilter {
                 filter: BooleanFilter {
-                    facet_name: "isPremium".to_owned(),
+                    facet_name: "is_premium".to_owned(),
                     value: is_premium,
                 },
                 invert: false,
@@ -368,7 +365,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
         }
 
         filters_for_ids(&mut filters.filters, "styles", styles);
-        filters_for_ids(&mut filters.filters, "ageRanges", age_ranges);
+        filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
 

@@ -36,6 +36,80 @@
       ]
     }
   },
+  "065a5d7eb1e3687b7994982e7e9c1bd9b0bf7ce1c4e0cd9bf210c633c337b622": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\",\n    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as \"category_names!\",\n    publish_at,\n    is_premium\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true,
+        false
+      ]
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -335,68 +409,6 @@
         false,
         false,
         true,
-        null,
-        null
-      ]
-    }
-  },
-  "293c239dd722d85900890bf6fd47bc3e93577d1380258e7f042778078f7c39cc": {
-    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\",\n    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as \"category_names!\"\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
         null,
         null
       ]
