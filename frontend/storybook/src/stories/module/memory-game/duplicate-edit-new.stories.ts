@@ -11,6 +11,7 @@ import sidebarWords from "@templates/module/memory/edit/edit-new/duplicate/step1
 import sidebarImageWords from "@templates/module/memory/edit/edit-new/images/step1-sidebar-text.html";
 import sidebarImageEmpty from "@templates/module/memory/edit/edit-new/images/step1-sidebar-empty.html";
 import sidebarImageImages from "@templates/module/memory/edit/edit-new/images/step1-sidebar-images.html";
+import sidebarChooseThemes from "@templates/module/memory/edit/edit-new/step2-sidebar.html";
 
 import headerPlain from "@templates/module/memory/edit/edit-new/header-plain.html";
 import headerAddpair from "@templates/module/memory/edit/edit-new/header-addpair.html";
@@ -21,6 +22,8 @@ import mainWords from "@templates/module/memory/edit/edit-new/duplicate/main-car
 import mainImages from "@templates/module/memory/edit/edit-new/images/main-cards.html";
 
 import footerPlain from "@templates/module/memory/edit/edit-new/footer-plain.html";
+
+
 
 export default {
   title: 'Modules/Memory-Game/Edit/DuplicateNew',
@@ -115,6 +118,22 @@ export const Images_Step_1_Images = () => {
         main,
         footer,
     })
+}
+
+export const Images_Step_2_Themes = () => {
+  const sidebar = tmpl(sidebarChooseThemes);
+  const main = tmpl(mainEmpty);
+  const header = tmpl(headerPlain);
+  const footer = tmpl(footerPlain);
+
+    return modulePage({
+        kind: ModulePageKind.EditPlain,
+        sidebar,
+        header,
+        main,
+        footer,
+    })
+
 }
 
 function makeHeader():Element {
