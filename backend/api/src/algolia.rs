@@ -19,6 +19,7 @@ use sqlx::PgPool;
 use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
+
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
@@ -68,7 +69,7 @@ select
     array((select style_id from image_style where image_id = image_metadata.id)) as "styles!",
     array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
     array((select category_id from image_category where image_id = image_metadata.id)) as "categories!",
-    array((select name from category inner join image_category on category_id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!"
+    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!"
 from image_metadata
 where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
 limit 100
@@ -225,6 +226,9 @@ const ALGOLIA_INDEXING_MIGRATIONS: &'static [(
 )] = &[
     (ResyncKind::Complete, algolia_bad_batch_object),
     (ResyncKind::Complete, algolia_set_searchable_fields),
+    (ResyncKind::Complete, |_, _| {
+        Box::pin(futures::future::ok(()))
+    }),
 ];
 
 const ALGOLIA_INDEXING_VERSION: i16 = ALGOLIA_INDEXING_MIGRATIONS.len() as i16;
