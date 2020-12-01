@@ -71,10 +71,17 @@ struct JsonQuery {
 }
 
 impl Route {
+    //TODO - is this really used? I think we use dominator go_to_url instead?
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_throw().location();
         let s:String = self.into();
         location.set_href(&s).unwrap_throw();
+    }
+
+    pub fn replace_state(self) {
+        let history = web_sys::window().unwrap_throw().history().unwrap_throw();
+        let url:String = self.into();
+        history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
     }
 
     pub fn from_url(url:&str) -> Self {

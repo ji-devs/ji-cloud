@@ -229,6 +229,9 @@ impl ImageSearchDom {
 
         *_self.serialized_query.borrow_mut() = Some(query.clone());
 
+        let route = Route::Admin(AdminRoute::ImageSearch(Some(query.clone())));
+        route.replace_state();
+
         _self.clone().loader.load(async move {
             let results = search_images(query).await; 
             match results {
