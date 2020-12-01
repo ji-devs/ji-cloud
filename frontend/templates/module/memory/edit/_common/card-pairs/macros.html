@@ -5,7 +5,7 @@
   <div class="edit-card-front flex rounded-16 hover:bg-jicreatorblue hover:border hover:border-dashed  hover:border-jimemoryborderblue">
 
     {% if editable==true %}
-    <textarea data-id="text-contents" class="overflow-hidden w-full h-full font-medium text-4xl flex items-center text-center text-contents outline-none resize-none  bg-transparent focus:outline-none"></textarea>
+    <textarea data-id="text-contents" class="mt-33p overflow-hidden w-full h-full font-medium text-4xl flex items-center text-center text-contents outline-none resize-none  bg-transparent focus:outline-none"></textarea>
     {% else %}
     <p data-id="text-contents" class="font-medium text-4xl text-center text-contents pointer-none select-none"></p>
     {% endif %}
@@ -20,7 +20,7 @@
 
 <div data-id="{{ side }}" class="h-160 w-160 flip-card edit-card-{{ side }} overflow-hidden">
 
-  <div class="edit-card-front flex rounded-16">
+  <div class="edit-card-front flex rounded-16 hover:bg-jicreatorblue hover:border hover:border-dashed  hover:border-jimemoryborderblue">
     <div data-id="image-waiting" class="flex items-center justify-center h-146 w-146">
       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
         <g id="Group_12095" data-name="Group 12095" transform="translate(0 0.356)">

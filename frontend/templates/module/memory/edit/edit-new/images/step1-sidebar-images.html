@@ -1,0 +1,28 @@
+{% import "module/memory/edit/_common/sidebar/macros.html" as SidebarMacros %}
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "module/memory/edit/words-and-images/macros.html" as WordsAndImagesMacros %}
+
+
+<div class="bg-white ml-10 w-516 flex-shrink-0 relative scroll-v-container">
+
+  {{ SidebarMacros::top_steps(selected=1) }}
+  {{ WordsAndImagesMacros::sidebar_mode_buttons(mode="text") }}
+
+
+
+
+  <div>
+    <div class="flex justify-between pt-4 py-1 px-10">
+      <p class="">Recent</p>
+      <p class="text-jibuttonBlue">Show All</p>
+    </div>
+    <div data-id="list" class="grid grid-cols-4 gap-24px mb-2"> </div>
+    <div class="h-1 w-full bg-jidarkgrey "></div>
+
+  </div>
+  <div data-id="image-search"></div>
+  <div class="" data-id="tooltip"> </div>
+  <div class="" data-id="error">
+  </div>
+</div>
+</div>
