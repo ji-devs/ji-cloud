@@ -36,7 +36,7 @@ pub struct ImageSearchDom {
     query_input:RefCell<Option<HtmlInputElement>>,
     page_input:RefCell<Option<HtmlInputElement>>,
     is_published_input:RefCell<Option<HtmlSelectElement>>,
-    query_text: Mutable<String>,
+    query_text_display: Mutable<String>,
     state: Mutable<SearchState>,
     max_page: Mutable<u32>,
     total_count: Mutable<u64>,
@@ -65,7 +65,7 @@ impl ImageSearchDom {
             query_input: RefCell::new(None),
             page_input: RefCell::new(None),
             is_published_input: RefCell::new(None),
-            query_text: Mutable::new("".to_string()),
+            query_text_display: Mutable::new("".to_string()),
             error: Mutable::new(None),
             state: Mutable::new(SearchState::None),
             max_page: Mutable::new(0),
@@ -181,20 +181,19 @@ impl ImageSearchDom {
         }
     }
 
-    fn get_query_text(&self) -> String {
-        let query = self.query_input.borrow();
-        match query.as_ref() {
-            Some(input) => input.value(),
-            None => "".to_string()
-        }
-    }
-
     pub fn do_search(_self: Rc<Self>, sanitize_page:bool) {
 
         _self.state.set(SearchState::Loading);
         _self.error.set(None);
 
-        let query_text = _self.get_query_text();
+        let query_text = {
+
+            let input = _self.query_input.borrow();
+            match input.as_ref() {
+                Some(input) => input.value(),
+                None => "".to_string()
+            }
+        };
 
         if let Some(prev_query_text) = _self.prev_query_text.borrow().as_ref() {
             if prev_query_text != &query_text {
@@ -206,6 +205,7 @@ impl ImageSearchDom {
                     .set_value(&format!("{}", 1));
             }
         }
+        *_self.query_text_display.lock_mut() = query_text.clone();
         *_self.prev_query_text.borrow_mut() = Some(query_text.clone());
 
         let mut page = if sanitize_page {
@@ -247,8 +247,11 @@ impl ImageSearchDom {
         elem!(templates::images_search(), {
             .with_data_id!("results", {
                 .class_signal("hidden", _self.state.signal().map(|state| state != SearchState::Results))
+                .with_data_id!("n-results", {
+                    .text_signal(_self.total_count.signal().map(|count| format!("{}", count)))
+                })
                 .with_data_id!("query-display", {
-                    .text_signal(_self.query_text.signal_cloned())
+                    .text_signal(_self.query_text_display.signal_cloned())
                 })
                 .with_data_id!("grid", {
                     .children_signal_vec(_self.results.signal_vec_cloned().map(clone!(_self => move |img| {
