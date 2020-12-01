@@ -1,5 +1,5 @@
 
-export const mockWords = ["שמש", "world", "שְׁמָע֕וּנִי", "blah blah blah"];
+export const mockWords = ["שמש", "Sun", "יָרֵחַ", "Moon", "כּוֹכָב", "Star"];
 
 export const mockThemes = [
     {
