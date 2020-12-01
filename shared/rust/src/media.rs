@@ -1,11 +1,11 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
 use uuid::Uuid;
-
+use serde::{Serialize, Deserialize};
 use crate::domain::{audio::AudioId, image::ImageId};
 
 /// Media Kinds
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum MediaKind {
     /// Media is audio
     Audio,
@@ -49,7 +49,7 @@ impl MediaVariant {
 }
 
 /// Media Libraries
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum MediaLibraryKind {
     /// The default / global library
     Global,

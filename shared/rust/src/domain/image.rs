@@ -156,7 +156,7 @@ pub struct UpdateRequest {
 }
 
 /// Search for images via the given query string.
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct SearchQuery {
     /// The query string.
     pub q: String,
@@ -226,7 +226,7 @@ pub struct GetResponse {
 }
 
 /// Over the wire representation of an image's metadata.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Image {
     /// The image's ID.
     pub id: ImageId,
