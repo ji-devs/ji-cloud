@@ -16,29 +16,34 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
-use utils::routes::{Route, AdminRoute, ImageSearchQuery};
+use utils::{
+    routes::{Route, AdminRoute},
+    components::image::{
+        data::*,
+        search::search_images,
+    }
+};
+
 use shared::domain::{
     user::UserProfile,
     category::Category,
-    image::GetResponse,
+    image::{SearchQuery, GetResponse},
 };
 
-use super::actions::*;
 
-pub struct ImageSearch {
-    prev_query:RefCell<Option<String>>,
+pub struct ImageSearchDom {
+    prev_query_text:RefCell<Option<String>>,
     query_input:RefCell<Option<HtmlInputElement>>,
     page_input:RefCell<Option<HtmlInputElement>>,
-    filter_input:RefCell<Option<HtmlSelectElement>>,
-    is_published:RefCell<Option<bool>>,
-    query: Mutable<String>,
+    is_published_input:RefCell<Option<HtmlSelectElement>>,
+    query_text: Mutable<String>,
     state: Mutable<SearchState>,
     max_page: Mutable<u32>,
+    total_count: Mutable<u64>,
     error: Mutable<Option<String>>,
-    results: MutableVec<BasicImage>,
+    results: MutableVec<MetaImage>,
     loader: AsyncLoader,
-    serialized_query: RefCell<Option<ImageSearchQuery>>,
-    initial_serialized_query: RefCell<Option<ImageSearchQuery>>,
+    serialized_query: RefCell<Option<SearchQuery>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -53,30 +58,29 @@ enum PageDelta {
     Next
 }
 
-impl ImageSearch {
-    pub fn new(initial_query:Option<ImageSearchQuery>) -> Rc<Self> {
+impl ImageSearchDom {
+    pub fn new(initial_query:Option<SearchQuery>) -> Rc<Self> {
         let _self = Rc::new(Self { 
-            prev_query: RefCell::new(None),
+            prev_query_text: RefCell::new(None),
             query_input: RefCell::new(None),
             page_input: RefCell::new(None),
-            filter_input: RefCell::new(None),
-            is_published: RefCell::new(None),
-            query: Mutable::new("".to_string()),
+            is_published_input: RefCell::new(None),
+            query_text: Mutable::new("".to_string()),
             error: Mutable::new(None),
             state: Mutable::new(SearchState::None),
             max_page: Mutable::new(0),
+            total_count: Mutable::new(0),
             results: MutableVec::new(),
             loader: AsyncLoader::new(),
-            serialized_query: RefCell::new(None),
-            initial_serialized_query: RefCell::new(initial_query),
+            serialized_query: RefCell::new(initial_query),
         });
 
 
         _self
     }
 
-    fn get_filter_index(&self) -> u32 {
-        let filter = self.filter_input
+    fn get_is_published(&self) -> Option<bool> {
+        let value = self.is_published_input
             .borrow()
             .as_ref()
             .map(|input| {
@@ -86,16 +90,14 @@ impl ImageSearch {
             .flatten()
             .unwrap_or(0);
 
-        if filter > 2 {
-            0
-        } else {
-            filter
+        match value {
+            0 => None,
+            1 => Some(true),
+            2 => Some(false),
+            _ => panic!("unknown publish filter!")
         }
     }
 
-    fn get_serialized_query(&self) -> Option<ImageSearchQuery> {
-        self.serialized_query.borrow().clone()
-    }
 
     fn get_raw_input_page(&self) -> u32 {
         self.page_input
@@ -179,7 +181,7 @@ impl ImageSearch {
         }
     }
 
-    fn get_query_string(&self) -> String {
+    fn get_query_text(&self) -> String {
         let query = self.query_input.borrow();
         match query.as_ref() {
             Some(input) => input.value(),
@@ -192,10 +194,10 @@ impl ImageSearch {
         _self.state.set(SearchState::Loading);
         _self.error.set(None);
 
-        let query = _self.get_query_string();
+        let query_text = _self.get_query_text();
 
-        if let Some(prev_query) = _self.prev_query.borrow().as_ref() {
-            if prev_query != &query {
+        if let Some(prev_query_text) = _self.prev_query_text.borrow().as_ref() {
+            if prev_query_text != &query_text {
                 log::info!("query is changed, reset to page 1");
                 _self.page_input
                     .borrow_mut()
@@ -204,7 +206,7 @@ impl ImageSearch {
                     .set_value(&format!("{}", 1));
             }
         }
-        *_self.prev_query.borrow_mut() = Some(query.clone());
+        *_self.prev_query_text.borrow_mut() = Some(query_text.clone());
 
         let mut page = if sanitize_page {
             _self.get_sanitized_input_page()
@@ -212,28 +214,28 @@ impl ImageSearch {
             _self.get_raw_input_page()
         };
 
-        *_self.serialized_query.borrow_mut() = Some(ImageSearchQuery {
-            query: query.clone(),
-            page,
-            filter_index: _self.get_filter_index()
-        });
-
         page -= 1;
 
-        let is_published = {
-            let is_published = _self.is_published.borrow();
-            *is_published
+        let query = SearchQuery {
+            q: query_text,
+            page: Some(page),
+            styles: Vec::new(),
+            age_ranges: Vec::new(),
+            affiliations: Vec::new(),
+            categories: Vec::new(),
+            is_premium: None,
+            is_published: _self.get_is_published()
         };
 
-
-        _self.query.set(query.clone());
+        *_self.serialized_query.borrow_mut() = Some(query.clone());
 
         _self.clone().loader.load(async move {
-            let results = search_images(query, Some(page), is_published).await; 
+            let results = search_images(query).await; 
             match results {
-                Ok((images, max_page)) => {
+                Ok((images, max_page, total_count)) => {
                     _self.results.lock_mut().replace_cloned(images);
                     *_self.max_page.lock_mut() = max_page;
+                    *_self.total_count.lock_mut() = total_count;
                 },
                 Err(_) => _self.error.set(Some("got an error!".to_string())),
             }
@@ -246,17 +248,17 @@ impl ImageSearch {
             .with_data_id!("results", {
                 .class_signal("hidden", _self.state.signal().map(|state| state != SearchState::Results))
                 .with_data_id!("query-display", {
-                    .text_signal(_self.query.signal_cloned())
+                    .text_signal(_self.query_text.signal_cloned())
                 })
                 .with_data_id!("grid", {
                     .children_signal_vec(_self.results.signal_vec_cloned().map(clone!(_self => move |img| {
-                        let el = if img.is_published {
-                            templates::image_grid_item_green(&img.src, &img.text)
+                        let el = if img.is_published() {
+                            templates::image_grid_item_green(&img.thumbnail_src(), &img.meta.name)
                         } else {
-                            templates::image_grid_item_red(&img.src, &img.text)
+                            templates::image_grid_item_red(&img.thumbnail_src(), &img.meta.name)
                         };
 
-                        let route:String = Route::Admin(AdminRoute::ImageEdit(img.id, _self.get_serialized_query())).into();
+                        let route:String = Route::Admin(AdminRoute::ImageEdit(img.id_string(), _self.serialized_query.borrow().clone())).into();
                         html!("a", {
                             .property("href", route)
                             .child(elem!(el, {}))
@@ -282,10 +284,11 @@ impl ImageSearch {
             })
 
             .with_data_id!("page" => HtmlInputElement, {
-                .apply_if(_self.initial_serialized_query.borrow().is_some(), |dom| {
-                    dom.property("value", _self.initial_serialized_query.borrow().as_ref().map(|x| {
-                        log::info!("{}", x.page);
-                        format!("{}", x.page)
+                .apply_if(_self.serialized_query.borrow().is_some(), |dom| {
+                    dom.property("value", _self.serialized_query.borrow().as_ref().map(|query| {
+                        query.page
+                            .map(|page| format!("{}", page+1))
+                            .unwrap_or("1".to_string())
                     }))
                 })
                 .with_node!(input => {
@@ -298,23 +301,20 @@ impl ImageSearch {
                 }))
             })
 
-            .with_data_id!("filter" => HtmlSelectElement, {
-                .apply_if(_self.initial_serialized_query.borrow().is_some(), |dom| {
-                    dom.property("value", _self.initial_serialized_query.borrow().as_ref().map(|x| {
-                        format!("{}", x.filter_index)
+            .with_data_id!("publish-filter" => HtmlSelectElement, {
+                .apply_if(_self.serialized_query.borrow().is_some(), |dom| {
+                    dom.property("value", _self.serialized_query.borrow().as_ref().map(|query| {
+                        match query.is_published {
+                            None => "0",
+                            Some(flag) => if flag { "1" } else { "2" }
+                        }
                     }))
                 })
                 .event(clone!(_self => move |evt:events::Change| {
-                    *_self.is_published.borrow_mut() = match _self.get_filter_index() { 
-                        0 => None,
-                        1 => Some(true),
-                        2 => Some(false),
-                        _ => panic!("unsupported filter!"),
-                    };
                     Self::do_search(_self.clone(), true);
                 }))
                 .after_inserted(clone!(_self => move |elem| {
-                    *_self.filter_input.borrow_mut() = Some(elem.unchecked_into()); 
+                    *_self.is_published_input.borrow_mut() = Some(elem.unchecked_into()); 
                 }))
             })
 
@@ -337,9 +337,9 @@ impl ImageSearch {
                 }))
             })
             .with_data_id!("query", {
-                .apply_if(_self.initial_serialized_query.borrow().is_some(), |dom| {
-                    dom.property("value", _self.initial_serialized_query.borrow().as_ref().map(|x| {
-                        x.query.to_string()
+                .apply_if(_self.serialized_query.borrow().is_some(), |dom| {
+                    dom.property("value", _self.serialized_query.borrow().as_ref().map(|query| {
+                        query.q.to_string()
                     }))
                 })
                 .event(clone!(_self => move |evt:events::KeyDown| {

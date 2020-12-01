@@ -2,15 +2,14 @@ import {renderTemplate as tmpl} from "@utils/template";
 import {mediaUi} from "@utils/path";
 import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
-import {mockThemes, mockImageThumbnail} from "./common/mock-data";
+import {mockLayouts} from "./common/mock-data";
 import sidebarTmpl from "@templates/module/poster/edit/sidebar/sidebar.html";
 import headerTmpl from "@templates/module/poster/edit/header.html";
 import footerTmpl from "@templates/module/poster/edit/footer.html";
 import mainTmpl from "@templates/module/poster/edit/main.html";
 import layoutSidebar from "@templates/module/poster/edit/sidebar/layout.html";
 import layoutSidebarItem from "@templates/module/poster/edit/sidebar/layout-item.html";
-import imagesSidebar from "@templates/module/poster/edit/sidebar/images.html";
-import imagesSidebarItem from "@templates/module/poster/edit/sidebar/images-item.html";
+import {SearchWidget} from "@components/image-search";
 
 export default {
   title: 'Modules/Poster/Edit',
@@ -19,9 +18,10 @@ export default {
 
 export const Layout = () => {
     const sidebar = makeSidebar(tmpl(layoutSidebar));
-    mockThemes.forEach(({id, label, thumbnail}) => {
+    mockLayouts.forEach(({id, label, thumbnail}) => {
         const item = tmpl(layoutSidebarItem, {
-            id, label, thumbnail
+            label, 
+            src: mediaUi(thumbnail)
         });
         appendId(sidebar, "items", item);
     });
@@ -31,20 +31,12 @@ export const Layout = () => {
 }
 
 export const Images = () => {
-    const sidebar = makeSidebar(tmpl(imagesSidebar));
+    const sidebar = makeSidebar(SearchWidget({showRecent: false}));
+    return posterPage({sidebar});
 
-    toggleClassesId(sidebar, "recent", "hidden", true);
-
-    const search = getChildId(sidebar, "search");
-
-    Array(10).fill(0).forEach((_, idx) => {
-        const img = tmpl(imagesSidebarItem, {
-            src: mediaUi(mockImageThumbnail)
-        });
-
-        appendId(search, "items", img);
-    });
-
+}
+export const Images_Recent = () => {
+    const sidebar = makeSidebar(SearchWidget({showRecent: true}));
     return posterPage({sidebar});
 
 }

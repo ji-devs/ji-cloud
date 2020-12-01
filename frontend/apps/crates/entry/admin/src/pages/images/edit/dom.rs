@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-use web_sys::{HtmlElement, Element, HtmlInputElement};
+use web_sys::{HtmlElement, Element, HtmlTextAreaElement, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
 use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::templates;
@@ -17,13 +17,15 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use discard::DiscardOnDrop;
 use utils::{
-    routes::{Route, AdminRoute, ImageSearchQuery},
+    routes::{Route, AdminRoute},
+    components::image::data::*,
 };
 use shared::{
     error::image::UpdateError,
     domain::{
         user::UserProfile,
         category::Category,
+        image::SearchQuery,
     },
     media::{MediaLibraryKind, MediaVariant}
 };
@@ -33,7 +35,7 @@ use gloo::timers::callback::Timeout;
 
 
 pub struct ImageEdit {
-    id: Mutable<String>,
+    image: Mutable<SimpleImage>,
     error_message: Mutable<Option<String>>,
     publish_message: Mutable<Option<String>>,
     refs:RefCell<Option<ImageEditRefs>>,
@@ -46,7 +48,7 @@ pub struct ImageEdit {
     publish_loader: AsyncLoader,
     category_expansions: RefCell<HashMap<Id, Mutable<bool>>>,
     selected_categories: Mutable<HashSet<Id>>,
-    from_search: Option<ImageSearchQuery>,
+    from_search: Option<SearchQuery>,
     redirect_timeout: RefCell<Option<Timeout>>,
 }
 
@@ -67,13 +69,18 @@ struct SaveInfo {
     pub affiliations: Vec<Id>,
     pub categories: Vec<Id>,
 }
+
+fn make_img(id:&str) -> SimpleImage {
+    (id, MediaLibraryKind::Global).into()
+}
+
 impl ImageEdit{
-    pub fn new(id:String, from_search: Option<ImageSearchQuery>) -> Rc<Self> {
+    pub fn new(id:String, from_search: Option<SearchQuery>) -> Rc<Self> {
         let start_section = if from_search.is_some() { Section::Overview } else { Section::Meta };
 
         let _self = Rc::new(Self { 
             //utils
-            id: Mutable::new(id.clone()),
+            image: Mutable::new(make_img(&id)),
             //UI
             error_message: Mutable::new(None),
             publish_message: Mutable::new(None),
@@ -146,7 +153,7 @@ impl ImageEdit{
             .borrow()
             .as_ref()
             .map(|refs| {
-                let id = _self.id.get_cloned();
+                let id = _self.image.get_cloned().id_string();
                 let is_premium = refs.is_premium();
                 let name = refs.name();
                 let description = refs.description();
@@ -238,7 +245,7 @@ impl ImageEdit{
     fn publish(_self: Rc<Self>) {
         let _self_clone = _self.clone();
 
-        let id = _self.id.get_cloned();
+        let id = _self.image.get_cloned().id_string();
         _self_clone.publish_loader.load(async move {
             _self.error_message.set(None);
 
@@ -283,14 +290,14 @@ impl ImageEdit{
                             }))
                         })
                         .with_data_id!("img", {
-                            .property_signal("src", _self.id.signal_cloned().map(|id| {
-                                utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Thumbnail, &id)
+                            .property_signal("src", _self.image.signal_cloned().map(|image| {
+                                image.thumbnail_src()
                             }))
                         })
                         .with_data_id!("delete", {
                             .event(clone!(_self => move |_evt:events::Click| {
                                 spawn_local(clone!(_self => async move {
-                                    match actions::delete(_self.id.get_cloned()).await {
+                                    match actions::delete(_self.image.get_cloned().id_string()).await {
                                         Err(_) => {
                                             _self.error_message.set(Some("Couldn't delete image".to_string()))
                                         },
@@ -316,8 +323,8 @@ impl ImageEdit{
                         .with_data_id!("published", {
                             .class_signal("hidden", _self.publish_message.signal_ref(|msg| msg.is_none()))
                             .with_data_id!("publish-img", {
-                                .property_signal("src", _self.id.signal_cloned().map(|id| {
-                                    utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Thumbnail, &id)
+                                .property_signal("src", _self.image.signal_cloned().map(|image| {
+                                    image.thumbnail_src()
                                 }))
                             })
                         })
@@ -380,13 +387,13 @@ impl ImageEdit{
                                 if let Some(file) = file {
                                     let _self = _self.clone();
                                     spawn_local(async move {
-                                        match actions::replace_url(&_self.id.get_cloned(), file).await {
+                                        match actions::replace_url(&_self.image.get_cloned().id_str(), file).await {
                                             Err(_) => {
                                                 _self.error_message.set(Some("Couldn't upload image".to_string()))
                                             },
                                             Ok(_) => {
                                                 //to trigger the src change
-                                                _self.id.replace_with(|id| id.to_string());
+                                                _self.image.replace_with(|img| img.clone());
                                             }
                                         }
                                     });
@@ -698,17 +705,18 @@ fn is_checked(possible:&[(Id, String)], item_list:&[Id], id:&Id) -> bool {
 struct ImageEditRefs {
     is_premium_elem: HtmlInputElement,
     name_elem: HtmlInputElement,
-    description_elem: HtmlInputElement,
+    description_elem: HtmlTextAreaElement,
     file_input:HtmlInputElement
 }
 
 impl ImageEditRefs {
+
     fn new(elem:HtmlElement) -> Self {
         Self {
-            is_premium_elem: elem.select(&data_id("premium")),
-            name_elem: elem.select(&data_id("name")),
-            description_elem: elem.select(&data_id("description")),
-            file_input: elem.select(&data_id("file")),
+            is_premium_elem: elem.try_select(&data_id("premium")).expect_throw("can't get premium element"),
+            name_elem: elem.try_select(&data_id("name")).expect_throw("can't get name element"),
+            description_elem: elem.try_select(&data_id("description")).expect_throw("can't get description element"),
+            file_input: elem.try_select(&data_id("file")).expect_throw("can't get file element"),
         }
     }
 

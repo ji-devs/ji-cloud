@@ -22,9 +22,9 @@ config = {path = "../../../../../../config/rust"}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-wasm-bindgen = { version = "0.2.68", features = ["nightly"] }
-js-sys = "0.3.45"
-web-sys = { version = "0.3.45", features = [
+wasm-bindgen = { version = "0.2.69", features = ["nightly"] }
+js-sys = "0.3.46"
+web-sys = { version = "0.3.46", features = [
     'Url',
     'Request',
     'RequestInit',
@@ -50,7 +50,7 @@ web-sys = { version = "0.3.45", features = [
     'File',
     'DomRect'
 ] }
-wasm-bindgen-futures = "0.4.18"
+wasm-bindgen-futures = "0.4.19"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.14"
@@ -62,7 +62,7 @@ serde_json = "1.0.59"
 futures = "0.3.8"
 log = "0.4.11"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.6.5", features = ["dom"] }
+awsm_web = { version = "0.6.6", features = ["dom"] }
 discard = "1.0.4"
 uuid = { version = "0.8.1", features = ["serde", "wasm-bindgen"] }
 url = "2.2.0"

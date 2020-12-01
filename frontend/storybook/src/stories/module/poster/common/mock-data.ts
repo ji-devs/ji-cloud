@@ -1,12 +1,10 @@
-interface Theme {
+interface Layout {
     id: string,
     label: string,
     thumbnail: string
 }
 
-export const mockImageThumbnail:string = `sticker-4991-2018-08-17-full.png`;
-
-export const mockThemes:Theme[] = [
+export const mockLayouts:Layout[] = [
     {
         id: "bg-color",
         label: "Background Color",
