@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClasses, getChildId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, getChildId, } from "@utils/dom";
 import moduleEditPagePlain from "@templates/module/_common/module-edit-page-plain.html";
 import moduleEditPageResize from "@templates/module/_common/module-edit-page-resize.html";
 import modulePlayPage from "@templates/module/_common/module-play-page.html";

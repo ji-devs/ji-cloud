@@ -1,8 +1,7 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {mediaUi} from "@utils/path";
-import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId, appendValueLineId, getChildId, setValueId, addClasses, appendTextLineId, addClassesId, setTextId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
-import {mockImageThumbnail} from "./mock-data";
+import {mockThumbnail} from "@mock/images";
 import widgetTmpl from "@templates/_common/widgets/image-search/widget.html";
 import resultThumbnailTmpl from "@templates/_common/widgets/image-search/result-thumbnail.html";
 import recentThumbnailTmpl from "@templates/_common/widgets/image-search/recent-thumbnail.html";
@@ -18,15 +17,15 @@ export const SearchWidget = ({showRecent, showSelectedResult}:SearchWidgetOption
     const search = getChildId(widget, "search");
 
     if(!showRecent) {
-        toggleClassesId(widget, "recent", "hidden", true);
+        addClassesId(widget, "recent", "hidden");
     } else {
         Array(4).fill(0).forEach((_, idx) => {
             const img = tmpl(recentThumbnailTmpl, {
-                src: mediaUi(mockImageThumbnail)
+                src: mockThumbnail
             });
 
             if(idx == 1) {
-                toggleClasses(img, "jig-image-selected", true);
+                addClasses(img, "jig-image-selected");
             }
 
             appendId(recent, "items", img);
@@ -36,13 +35,13 @@ export const SearchWidget = ({showRecent, showSelectedResult}:SearchWidgetOption
 
     Array(10).fill(0).forEach((_, idx) => {
         const img = tmpl(resultThumbnailTmpl, {
-            src: mediaUi(mockImageThumbnail)
+            src: mockThumbnail
         });
 
         if(idx == 1 && showSelectedResult) {
-            toggleClasses(img, ["row-span-3", "col-span-3"], true);
+            addClasses(img, ["row-span-3", "col-span-3"]);
         } else {
-            toggleClasses(img, ["max-w-83.5", "max-h-83.5"], true);
+            addClasses(img, ["max-w-83.5", "max-h-83.5"]);
         }
         appendId(search, "items", img);
     });

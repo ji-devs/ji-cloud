@@ -1,0 +1,40 @@
+{% macro text(side, editable) %}
+
+<div data-id="{{ side }}" class="h-160 w-160 flip-card edit-card-{{ side }} overflow-hidden">
+
+  <div class="edit-card-front flex rounded-16 hover:bg-jicreatorblue hover:border hover:border-dashed  hover:border-jimemoryborderblue">
+
+    {% if editable==true %}
+    <textarea data-id="text-contents" class="mt-33p overflow-hidden w-full h-full font-medium text-4xl flex items-center text-center text-contents outline-none resize-none  bg-transparent focus:outline-none"></textarea>
+    {% else %}
+    <p data-id="text-contents" class="font-medium text-4xl text-center text-contents pointer-none select-none"></p>
+    {% endif %}
+  </div>
+  <div class="edit-card-back rounded-16">
+  </div>
+</div>
+{% endmacro text %}
+
+
+{% macro image(side) %}
+
+<div data-id="{{ side }}" class="h-160 w-160 flip-card edit-card-{{ side }} overflow-hidden">
+
+  <div class="edit-card-front flex rounded-16 hover:bg-jicreatorblue hover:border hover:border-dashed  hover:border-jimemoryborderblue">
+    <div data-id="image-container" class="flex items-center justify-center h-146 w-146">
+      <div data-id="image-waiting">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+          <g id="Group_12095" data-name="Group 12095" transform="translate(0 0.356)">
+            <rect id="Rectangle_1802" data-name="Rectangle 1802" width="64" height="64" rx="4" transform="translate(0 -0.356)" fill="#dee1eb" class="memory-card-image" />
+            <path id="Union_18" data-name="Union 18" d="M1.051,21A1,1,0,0,1,.283,19.36L11.225,6.244a1,1,0,0,1,1.536,0l4.29,5.142L26.318.356a1,1,0,0,1,1.532,0l15.962,19A1,1,0,0,1,43.046,21H1.051Z" transform="translate(9.951 33.643)" fill="#fff" />
+            <circle id="Ellipse_411" data-name="Ellipse 411" cx="8" cy="8" r="8" transform="translate(38 7.643)" fill="#fff" />
+          </g>
+        </svg>
+      </div>
+      <img data-id="image" />
+    </div>
+  </div>
+  <div class="edit-card-back rounded-16">
+  </div>
+</div>
+{% endmacro image %}

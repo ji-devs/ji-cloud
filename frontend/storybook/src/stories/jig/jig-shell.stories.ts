@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClasses, getChildId, toggleClassesId, setTextId, setIframeContentsId} from "@utils/dom";
+import {appendId, addClasses, getChildId,setTextId, setIframeContentsId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
 import editPage from "@templates/jig/shell/edit-page.html";
 import playPage from "@templates/jig/shell/play-page.html";
@@ -92,9 +92,9 @@ function appendModules(page) {
     Array(4).fill(0).map((_, idx) => {
         const module = tmpl(editSidebarModule);
         if(idx === 1) {
-            toggleClasses(module, ["bg-jibackgroundGrey", "border-l-8", "border-jibuttonBlue"], true);
+            addClasses(module, ["bg-jibackgroundGrey", "border-l-8", "border-jibuttonBlue"]);
         } else {
-            toggleClasses(module, ["border-jidarkgrey", "border-b"], true);
+            addClasses(module, ["border-jidarkgrey", "border-b"]);
         }
         setTextId(module, "label", `${('0' + (idx+1)).slice(-2)}`);
 

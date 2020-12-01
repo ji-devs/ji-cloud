@@ -1,0 +1,10 @@
+{% import "module/memory/edit/_common/main/card-pairs/macros.html" as CardPair %}
+<div class="relative flex flex-col items-center rounded-16 hover:bg-jimemoryborder memory-pair">
+  <div class="flex mb-4 p-6">
+    <img src="{{MEDIA_UI}}/icn-delete-32.svg" alt="" class="-top-10 -right-10 absolute memory-pair-delete">
+    {{ CardPair::text(side="left", editable=true) }}
+    {{ CardPair::text(side="right", editable=true) }}
+  </div>
+  <p data-id="number"></p>
+  <div data-id="memory-pair-tooltip"></div>
+</div>

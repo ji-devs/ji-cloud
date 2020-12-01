@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl, renderDivText} from "@utils/template";
-import {appendId, toggleClassesId, setTextId, setValueId, setAttributeId} from "@utils/dom";
+import {appendId, addClassesId, setTextId, setValueId, setAttributeId} from "@utils/dom";
 import {MEDIA_UI} from "@utils/path";
 import checkbox from "@templates/_common/input/checkbox.html";
 import {withContainer} from "./admin-common";
@@ -63,10 +63,10 @@ export const Categories = () =>  {
     const cat1 = tmpl(imageEditCategoriesParentEnd, {name: "English"});
 
     const cat2 = tmpl(imageEditCategoriesParent, {name: "Hebrew"});
-    toggleClassesId(cat2, "arrow", ["transform","rotate-90","-m-1"], true);
+    addClassesId(cat2, "arrow", ["transform","rotate-90","-m-1"]);
 
     const cat2Child1 = tmpl(imageEditCategoriesChild, {name: "Vocabulary"});
-    toggleClassesId(cat2Child1, "arrow", ["transform","rotate-90","-m-1"], true);
+    addClassesId(cat2Child1, "arrow", ["transform","rotate-90","-m-1"]);
     const cat2Child1Child = tmpl(imageEditCategoriesChildEnd, {name: "Blah"});
     const cat2Child2 = tmpl(imageEditCategoriesChildEnd, {name: "Parsha"});
     const cat2Child3 = tmpl(imageEditCategoriesChild, {name: "Shapes"});

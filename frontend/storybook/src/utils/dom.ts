@@ -12,25 +12,45 @@ export function prependId(parentElement:Element, id:string, child:Element) {
     container.prepend(child);
     return parentElement;
 }
-export function toggleClassesId(parentElement:Element, id:string, classNames:string[] | string, flag:boolean) {
-    const container = getChildId(parentElement, id);
-    const c = Array.isArray(classNames) ? classNames : [classNames];
-    toggleClasses(container, c, flag);
+
+export function setSrc(element:Element, src:string) {
+    element.setAttribute("src", src);
+    return element;
+}
+export function setSrcId(parentElement:Element, id:string, src:string) {
+    setAttributeId(parentElement, id, "src", src);
     return parentElement;
 }
 
-export function toggleClasses(element:Element, classNames:string[] | string, flag:boolean) {
+export function addClassesId(parentElement:Element, id:string, classNames:string[] | string) {
+    const container = getChildId(parentElement, id);
+    const c = Array.isArray(classNames) ? classNames : [classNames];
+    addClasses(container, c);
+    return parentElement;
+}
+
+export function addClasses(element:Element, classNames:string[] | string) {
     const classList = element.classList;
 
     const c = Array.isArray(classNames) ? classNames : [classNames];
-    if(flag) {
-        classList.add(...c);
-    } else {
-        classList.remove(...c);
-    }
+    classList.add(...c);
     return element;
 }
 
+export function removeClassesId(parentElement:Element, id:string, classNames:string[] | string) {
+    const container = getChildId(parentElement, id);
+    const c = Array.isArray(classNames) ? classNames : [classNames];
+    removeClasses(container, c);
+    return parentElement;
+}
+
+export function removeClasses(element:Element, classNames:string[] | string) {
+    const classList = element.classList;
+
+    const c = Array.isArray(classNames) ? classNames : [classNames];
+    classList.remove(...c);
+    return element;
+}
 export function setTextId(element:Element, id:string, text:string) {
     const container = getChildId(element, id);
     (container as any).innerText = text;

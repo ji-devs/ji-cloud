@@ -1,0 +1,17 @@
+{% macro mode_buttons(mode) %}
+
+{% if mode=="text" %}
+{% set text_active = "-active" %}
+{% set image_active = "" %}
+{% elif mode=="images" %}
+{% set text_active = "" %}
+{% set image_active = "-active" %}
+{% endif %}
+<div class="border-t border-b border-jidarkgrey py-4">
+  <div class="flex items-center pl-8 mx-2">
+    <p class="mr-5">Add</p>
+    <img data-id="{{ mode }}-text-btn" src="{{MEDIA_UI}}/icn-text-jig{{ text_active }}.svg" alt="" class="ml-2 cursor-pointer">
+    <img data-id="{{ mode }}-images-btn" src="{{MEDIA_UI}}/icn-image-jig{{ image_active}}.svg" alt="" class="ml-2 cursor-pointer">
+  </div>
+</div>
+{% endmacro mode_buttons %}
