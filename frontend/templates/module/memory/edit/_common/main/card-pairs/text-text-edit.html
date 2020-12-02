@@ -1,7 +1,7 @@
 {% import "module/memory/edit/_common/main/card-pairs/macros.html" as CardPair %}
 <div class="relative flex flex-col items-center ">
-  <div class="flex mb-4 p-6 rounded-16 hover:bg-jimemoryborder memory-pair w-344">
-    <img src="{{MEDIA_UI}}/icn-delete-32.svg" alt="" class="-top-10 -right-10 absolute memory-pair-delete">
+  <div class="flex mb-4 p-6 rounded-16 hover:bg-jimemoryborder memory-pair">
+    <img data-id="delete" src="{{MEDIA_UI}}/icn-delete-32.svg" alt="" class="-top-10 -right-10 absolute memory-pair-delete cursor-pointer">
     {{ CardPair::text(side="left", editable=true) }}
     {{ CardPair::text(side="right", editable=true) }}
   </div>

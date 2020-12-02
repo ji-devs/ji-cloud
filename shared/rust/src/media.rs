@@ -1,8 +1,8 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use uuid::Uuid;
-use serde::{Serialize, Deserialize};
 use crate::domain::{audio::AudioId, image::ImageId};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]

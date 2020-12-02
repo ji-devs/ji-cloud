@@ -88,7 +88,9 @@ where F: FnMut(MetaImage) + 'static
     pub fn new(debug:Option<ImageSearchWidgetDebug>, on_select: Option<F>) -> Rc<Self> {
 
         let results = MutableVec::new();
-        let mut is_published = Some(true);
+        //TODO - change to this when ticket is fixed:
+        //let mut is_published = Some(true);
+        let mut is_published = None; 
 
         if let Some(debug) = debug {
             if let Some(x) = debug.is_published {
@@ -135,7 +137,7 @@ where F: FnMut(MetaImage) + 'static
                     }))
                     .event(move |evt:events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
-                            data_transfer.set_data("search-image-result", &id);
+                            data_transfer.set_data(SEARCH_THUMBNAIL_DATA_TRANSFER, &id);
                             data_transfer.set_drop_effect("all");
                         } else {
                             log::error!("no data transfer - use a real computer!!!");

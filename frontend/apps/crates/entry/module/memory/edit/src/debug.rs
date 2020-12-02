@@ -10,44 +10,48 @@ use futures_signals::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::data::*; 
-use crate::config::BaseGameStateExt;
-
-
-pub const DEBUG_STEP:usize = 1;
-pub const DEBUG_THEME_INDEX:usize = 0;
+use utils::components::image::{
+    search::ImageSearchWidgetDebug, 
+    data::*
+};
 
 pub struct DebugSettings {
-    pub state:Option<raw::GameState>,
-    pub step:Option<usize>,
+    pub data:Option<raw::GameData>,
+    pub step:Option<Step>,
     //just used for words and images, but whatever
     pub content_mode: ContentMode,
+    pub image_search: Option<ImageSearchWidgetDebug>,
 }
 
 impl DebugSettings {
     pub fn default() -> DebugSettings {
         DebugSettings {
-            state: None, 
+            data: None, 
             step: None, 
-            content_mode: ContentMode::Text,
+            content_mode: ContentMode::TextInit,
+            image_search: None,
         }
     }
-    pub fn words_and_images() -> Self {
-        Self {
-            state: Some(raw::GameState::WordsAndImages(
-                raw::BaseGameState::default_words_and_images()
+    pub fn duplicate() -> DebugSettings {
+        DebugSettings {
+            data: Some(raw::GameData::duplicate_debug(
+                crate::config::get_init_words_iter(),
+                crate::config::get_themes_cloned()[0].id.clone()
             )),
-            step: Some(DEBUG_STEP),
-            content_mode: ContentMode::Images,
+            step: Some(Step::Two), 
+            content_mode: ContentMode::TextInit,
+            image_search: None,
         }
     }
-
-    pub fn duplicate() -> Self {
-        Self {
-            state: Some(raw::GameState::Duplicate(
-                raw::BaseGameState::default_duplicate()
+    pub fn words_and_images() -> DebugSettings {
+        DebugSettings {
+            data: Some(raw::GameData::words_and_images_debug(
+                crate::config::get_init_words_iter(),
+                crate::config::get_themes_cloned()[0].id.clone()
             )),
-            step: Some(DEBUG_STEP),
-            content_mode: ContentMode::Text,
+            step: None, 
+            content_mode: ContentMode::TextInit,
+            image_search: None,
         }
     }
 }
@@ -55,7 +59,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            DebugSettings::words_and_images()
         }
     } else {
         pub fn settings() -> DebugSettings {

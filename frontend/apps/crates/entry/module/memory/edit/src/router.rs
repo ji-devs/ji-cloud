@@ -8,7 +8,8 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::container::ContainerPage;
+use utils::components::module_page::*;
+use crate::pages::index::IndexPage;
 
 pub struct Router {
 }
@@ -22,7 +23,6 @@ impl Router {
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
     }
-
     fn dom_signal() -> impl Signal<Item = Option<Dom>> {
         Self::signal()
             .map(|route| {
@@ -31,7 +31,11 @@ impl Router {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(ContainerPage::render(ContainerPage::new(jig_id, module_id))),
+                                    ModuleKind::MemoryGame => Some(
+                                        ModulePage::render(ModulePage::new(
+                                            IndexPage::new(jig_id, module_id)
+                                        ))
+                                    ),
                                     _ => None
                                 }
                             }
@@ -44,6 +48,6 @@ impl Router {
     }
     
     pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
+        html!("div", { .child_signal(Self::dom_signal()) } )
     }
 }
