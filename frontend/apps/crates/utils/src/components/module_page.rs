@@ -157,12 +157,13 @@ where
 
 impl <T, R> ModulePage <T, R> 
 where
-    T: DeserializeOwned + 'static,
+    T: DeserializeOwned + std::fmt::Debug + 'static,
     R: ModuleRenderer<Data = T> + 'static,
 {
     pub fn new(renderer:Rc<R>) -> Rc<Self> {
 
         let wait_iframe_data = should_get_iframe_data();
+
 
         let _self = Rc::new(Self { 
             renderer, 
@@ -203,10 +204,12 @@ where
 
                 if let Ok(msg) = evt.try_serde_data::<IframeInit<T>>() {
                     if !_self.wait_iframe_data {
-                        log::warn!("weird... shouldn't have gotten iframe data!");
+                        //log::warn!("weird... shouldn't have gotten iframe data!");
+                        //log::warn!("{:?}", msg);
+                    } else {
+                        *_self.loaded_data.borrow_mut() = Some(msg.data.unwrap_throw());
+                        _self.has_loaded_data.set(true);
                     }
-                    *_self.loaded_data.borrow_mut() = Some(msg.data.unwrap_throw());
-                    _self.has_loaded_data.set(true);
                 } else {
                     log::info!("hmmm got other iframe message...");
                 }

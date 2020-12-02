@@ -10,6 +10,7 @@ mod router;
 mod pages;
 mod data;
 mod debug;
+mod config;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -25,6 +26,7 @@ mod header;
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
+    crate::config::init();
     //init dom stuff
 
     let router = router::Router::new();

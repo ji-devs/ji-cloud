@@ -4,6 +4,8 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
+use utils::components::image::data::*;
+use shared::media::{image_id_to_key, MediaLibraryKind, MediaVariant};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use std::cell::RefCell;
@@ -16,112 +18,10 @@ use rand::prelude::*;
 use gloo_timers::future::TimeoutFuture;
 use web_sys::HtmlElement;
 
-pub struct GameState {
+pub struct State {
     pub jig_id: String,
     pub module_id: String,
-    //outer option is for "loading", inner option is for "no module chosen"
-    pub mode: Mutable<Option<Option<GameMode>>>, 
-    pub state: Rc<RefCell<Option<BaseGameState>>>,
-}
-
-
-impl GameState {
-    pub fn new(jig_id:String, module_id: String) -> Self {
-        Self {
-            jig_id,
-            module_id,
-            mode: Mutable::new(None),
-            state: Rc::new(RefCell::new(None))
-        }
-    }
-
-    pub fn set_from_loaded(&self, raw_game_state:raw::GameState) {
-        if self.mode.get().is_some() {
-            panic!("setting the game state from loaded only works on first-load!");
-        }
-
-        let (mode, state) = match raw_game_state {
-            raw::GameState::Duplicate(raw_state) => {
-                let mode = GameMode::Duplicate;
-                (
-                    Some(mode),
-                    Some(BaseGameState::from_raw(mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
-                )
-            },
-            raw::GameState::WordsAndImages(raw_state) => {
-                let mode = GameMode::WordsAndImages;
-                (
-                    Some(mode),
-                    Some(BaseGameState::from_raw(mode, raw_state, self.jig_id.clone(), self.module_id.clone()))
-                )
-            },
-            raw::GameState::None => (None, None),
-            _ => unimplemented!("no way to load {:?}", raw_game_state) 
-        };
-
-        //Note that this will *not* trigger re-renders of the inner mode pages
-        //Using set_from_loaded for runtime changes is therefore very inefficient!
-        //It's only meant for first-time loading
-        *self.state.borrow_mut() = state;
-        //wrapped in a Some because None here means "loading"
-        //this *will* trigger re-renders of everything from the top-level
-        //an inner none means "loaded but no mode"
-        self.mode.set(Some(mode));
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum GameMode {
-    Duplicate,
-    WordsAndImages,
-}
-
-pub type FoundIndex = usize;
-
-#[derive(Clone, Debug)]
-pub struct Card {
-    pub media: Media,
-    pub id: usize,
-    pub other_id: usize,
-    pub side: Side,
-    pub found: Mutable<Option<FoundIndex>>
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Side {
-    Left,
-    Right
-}
-
-impl Card {
-    pub fn new(card:&raw::Card, id: usize, other_id:usize, side:Side) -> Self {
-        Self {
-            media: match card {
-                raw::Card::Text(text) => Media::Text(text.to_string()),
-                raw::Card::Image(src) => Media::Image(src.clone()),
-                raw::Card::Audio(src) => Media::Audio(src.clone()),
-            },
-            id,
-            other_id,
-            found: Mutable::new(None),
-            side,
-        }
-    }
-}
-
-type Id = String;
-
-#[derive(Clone, Debug)]
-pub enum Media {
-    Text(String),
-    Image(Option<Id>),
-    Audio(Option<Id>),
-}
-
-#[derive(Debug)]
-pub struct BaseGameState {
-    pub jig_id: String,
-    pub module_id: String,
+    pub mode: GameMode,
     pub pair_lookup: Vec<usize>,
     pub original_pairs: Vec<(raw::Card, raw::Card)>,
     pub game_cards: MutableVec<Card>,
@@ -130,35 +30,14 @@ pub struct BaseGameState {
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
 }
 
-#[derive(Debug, Clone)]
-pub enum FlipState {
-    None,
-    One(usize),
-    Two((usize, usize)),
-}
+impl State {
+    pub fn new(jig_id:String, module_id: String, raw_data:raw::GameData) -> Rc<Self> {
 
-fn make_game_cards(pairs:&[(raw::Card, raw::Card)]) -> Vec<Card> {
-    let n_cards = pairs.len() * 2;
-    let mut cards:Vec<Card> = Vec::with_capacity(n_cards);
-    let mut index:usize = 0;
+        let mode:GameMode = raw_data.mode.into();
 
-    for (card_1, card_2) in pairs.iter() {
-        let id_1 = index; 
-        let id_2 = index + 1;
-        index = id_2 + 1;
-
-        cards.push(Card::new(card_1, id_1, id_2, Side::Left));
-        cards.push(Card::new(card_2, id_2, id_1, Side::Right));
-    }
-
-    cards
-}
-
-impl BaseGameState {
-    pub fn from_raw(mode: GameMode, raw_game_state: raw::BaseGameState, jig_id: String, module_id: String) -> Self {
-        let n_cards = raw_game_state.pairs.len() * 2;
+        let n_cards = raw_data.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
-        let mut cards = make_game_cards(&raw_game_state.pairs);
+        let mut cards = make_game_cards(&raw_data.pairs);
 
         for card in cards.iter() {
             pair_lookup[card.id] = card.other_id;
@@ -170,18 +49,18 @@ impl BaseGameState {
             cards.shuffle(&mut rng);
         }
 
-        let state = Self {
+        Rc::new(Self {
             jig_id,
             module_id,
+            mode,
             pair_lookup,
-            original_pairs: raw_game_state.pairs,
+            original_pairs: raw_data.pairs,
             game_cards: MutableVec::new_with_values(cards),
-            theme_id: raw_game_state.theme_id,
+            theme_id: raw_data.theme_id,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
-        };
+        })
 
-        state
     }
 
     pub async fn evaluate(&self, id_1: usize, id_2: usize) {
@@ -233,5 +112,97 @@ impl BaseGameState {
             _ => {}
         }
     }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum GameMode {
+    Duplicate,
+    WordsAndImages
+}
+
+impl From<raw::Mode> for GameMode {
+    fn from(raw_mode:raw::Mode) -> Self {
+        match raw_mode {
+            raw::Mode::Duplicate => Self::Duplicate,
+            raw::Mode::WordsAndImages => Self::WordsAndImages,
+        }
+    }
+}
+
+impl From<GameMode> for raw::Mode {
+    fn from(game_mode:GameMode) -> raw::Mode {
+        match game_mode {
+            GameMode::Duplicate => raw::Mode::Duplicate,
+            GameMode::WordsAndImages => raw::Mode::WordsAndImages,
+        }
+    }
+}
+
+pub type FoundIndex = usize;
+
+#[derive(Clone, Debug)]
+pub struct Card {
+    pub media: Media,
+    pub id: usize,
+    pub other_id: usize,
+    pub side: Side,
+    pub found: Mutable<Option<FoundIndex>>
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Side {
+    Left,
+    Right
+}
+
+impl Card {
+    pub fn new(card:&raw::Card, id: usize, other_id:usize, side:Side) -> Self {
+        Self {
+            media: match card {
+                raw::Card::Text(text) => Media::Text(text.to_string()),
+                raw::Card::Image(id) => Media::Image(id.as_ref().map(|id| {
+                    SimpleImage::from((id.to_string(), MediaLibraryKind::Global))
+                })),
+                raw::Card::Audio(src) => Media::Audio(src.clone()),
+            },
+            id,
+            other_id,
+            found: Mutable::new(None),
+            side,
+        }
+    }
+}
+
+type Id = String;
+
+#[derive(Clone, Debug)]
+pub enum Media {
+    Text(String),
+    Image(Option<SimpleImage>),
+    Audio(Option<Id>),
+}
+
+#[derive(Debug, Clone)]
+pub enum FlipState {
+    None,
+    One(usize),
+    Two((usize, usize)),
+}
+
+fn make_game_cards(pairs:&[(raw::Card, raw::Card)]) -> Vec<Card> {
+    let n_cards = pairs.len() * 2;
+    let mut cards:Vec<Card> = Vec::with_capacity(n_cards);
+    let mut index:usize = 0;
+
+    for (card_1, card_2) in pairs.iter() {
+        let id_1 = index; 
+        let id_2 = index + 1;
+        index = id_2 + 1;
+
+        cards.push(Card::new(card_1, id_1, id_2, Side::Left));
+        cards.push(Card::new(card_2, id_2, id_1, Side::Right));
+    }
+
+    cards
 }
 

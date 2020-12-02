@@ -28,13 +28,13 @@ use super::{
     header::Header,
 };
 pub struct IndexPage {
-    pub state: Rc<State>,
+    pub jig_id: String,
+    pub module_id: String,
 }
 
 impl IndexPage {
     pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        let state = Rc::new(State::new(jig_id, module_id));
-        Rc::new(Self { state })
+        Rc::new(Self { jig_id, module_id})
     }
 }
 
@@ -46,13 +46,14 @@ impl ModuleRenderer for IndexPage {
         if let Some(raw_data) = debug::settings().data {
             Some(raw_data)
         } else {
-            raw::GameData::load(_self.state.jig_id.clone(), _self.state.module_id.clone()).await
+            raw::GameData::load(_self.jig_id.clone(), _self.module_id.clone()).await
+                .ok()
         }
     }
 
     fn render(_self: Rc<Self>, data: Option<raw::GameData>) -> ModuleRenderOutput {
-        _self.state.set_from_raw(data);
-        ModuleRenderOutput::new_empty(Some(render_loaded(_self.state.clone())))
+        let state = State::new(_self.jig_id.clone(), _self.module_id.clone(), data);
+        ModuleRenderOutput::new_empty(Some(render_loaded(state)))
     }
 }
 

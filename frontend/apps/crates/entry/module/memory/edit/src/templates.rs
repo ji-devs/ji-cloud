@@ -18,6 +18,7 @@ macro_rules! template_path {
 const CHOOSE_MODE_PAGE:&'static str = "start-mode-choose";
 
 const HEADER_EMPTY:&'static str = "_common/header/empty";
+const HEADER_PREVIEW:&'static str = "_common/header/preview";
 const HEADER_ADD_PAIR:&'static str = "_common/header/add-pair";
 
 const MAIN_EMPTY:&'static str = "_common/main/empty";
@@ -50,6 +51,9 @@ pub fn choose_mode_page() -> HtmlElement {
 
 pub fn header_empty() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(HEADER_EMPTY))
+}
+pub fn header_preview() -> HtmlElement {
+    TEMPLATES.with(|t| t.cache.render_elem_plain(HEADER_PREVIEW))
 }
 pub fn header_add_pair() -> HtmlElement {
     TEMPLATES.with(|t| t.cache.render_elem_plain(HEADER_ADD_PAIR))
@@ -145,6 +149,7 @@ impl Templates {
 
             (CHOOSE_MODE_PAGE, get_template_str(include_str!(template_path!("module/memory/edit/start-mode-choose.html")))),
             (HEADER_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/empty.html")))),
+            (HEADER_PREVIEW, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/preview.html")))),
             (HEADER_ADD_PAIR, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/add-pair.html")))),
             (MAIN_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/empty.html")))),
             (MAIN_IFRAME, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/iframe.html")))),

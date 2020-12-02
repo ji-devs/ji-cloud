@@ -25,6 +25,12 @@ pub struct Header {
     game_mode: GameMode,
 }
 
+#[derive(Clone, PartialEq, Debug)]
+enum HeaderMode {
+    AddCards,
+    Empty,
+    Preview
+}
 impl Header {
     pub fn new(state: Rc<State>, game_mode:GameMode) -> Rc<Self> {
         Rc::new(Self { 
@@ -33,20 +39,59 @@ impl Header {
         })
     }
 
+    fn header_mode_signal(&self) -> impl Signal<Item = HeaderMode> {
+        map_ref! {
+            let step = self.state.step.signal(),
+            let cards_edit = self.state.cards_edit_signal()
+            => {
+                let step = *step;
+                let cards_edit = *cards_edit;
+                
+                if step == Step::Four {
+                    HeaderMode::Preview
+                } else if cards_edit {
+                    HeaderMode::AddCards
+                } else {
+                    HeaderMode::Empty
+                }
+            }
+        }
+    }
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
-            .child_signal(_self.state.cards_edit_signal().map(clone!(_self => move |header_add| Some(
-                if header_add {
-                    Self::render_add(_self.clone())
-                } else {
-                    elem!(templates::header_empty(), { })
+            .child_signal(_self.header_mode_signal().map(clone!(_self => move |header_mode| Some(
+                match header_mode {
+                    HeaderMode::AddCards => Self::render_add(_self.clone()),
+                    HeaderMode::Preview => Self::render_preview(_self.clone()),
+                    HeaderMode::Empty => Self::render_empty(_self.clone()),
                 }
             ))))
+        })
+    }
+    fn render_preview(_self: Rc<Self>) -> Dom {
+        let state = _self.state.clone();
+        elem!(templates::header_preview(), {
+            .apply(|dom| apply_steps_nav(dom, _self.state.clone()))
+        })
+    }
+    fn render_empty(_self: Rc<Self>) -> Dom {
+        let state = _self.state.clone();
+        elem!(templates::header_empty(), {
+            .with_data_id!("btn-preview", {
+                .event(clone!(state => move |evt:events::Click| {
+                    state.step.set(Step::Four);
+                }))
+            })
         })
     }
     fn render_add(_self: Rc<Self>) -> Dom {
         let state = _self.state.clone();
         elem!(templates::header_add_pair(), {
+            .with_data_id!("btn-preview", {
+                .event(clone!(state => move |evt:events::Click| {
+                    state.step.set(Step::Four);
+                }))
+            })
             .with_data_id!("add-btn", {
                 .event(clone!(state => move |evt:events::Click| {
                     let game_mode = state.game_mode.get_cloned();

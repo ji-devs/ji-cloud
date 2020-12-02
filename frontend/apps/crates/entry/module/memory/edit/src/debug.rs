@@ -49,7 +49,7 @@ impl DebugSettings {
                 crate::config::get_init_words_iter(),
                 crate::config::get_themes_cloned()[0].id.clone()
             )),
-            step: None, 
+            step: Some(Step::Four), 
             content_mode: ContentMode::TextInit,
             image_search: None,
         }

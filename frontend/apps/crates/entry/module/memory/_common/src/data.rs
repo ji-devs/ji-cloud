@@ -14,9 +14,9 @@ pub enum Mode {
 }
 
 impl GameData {
-    pub async fn load(jig_id:String, module_id:String) -> Option<Self> {
+    pub async fn load(jig_id:String, module_id:String) -> Result<Self, ()> {
         //TODO - load
-        None
+        Err(())
     }
 
     pub fn duplicate_debug<I, S>(words:I, theme_id: String) -> Self 

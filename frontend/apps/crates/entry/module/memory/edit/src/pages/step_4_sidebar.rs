@@ -34,6 +34,6 @@ impl Step4Sidebar {
     }
 
     pub fn render(_self: Rc<Self>) -> Dom {
-        html!("h1", { .text("step 4") })
+        html!("div", {})
     }
 }

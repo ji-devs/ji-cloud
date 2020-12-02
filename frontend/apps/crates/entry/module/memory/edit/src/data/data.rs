@@ -81,36 +81,38 @@ pub enum CardMode {
 }
 
 impl State {
-    pub fn new(jig_id:String, module_id: String) -> Self {
-        Self {
+    pub fn new(jig_id:String, module_id: String, raw_data:Option<raw::GameData>) -> Rc<Self> {
+
+        let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
+
+        let (pairs, theme_id) = {
+            if let Some(raw_data) = raw_data {
+                let pairs:Vec<(Card, Card)> = raw_data.pairs
+                    .iter()
+                    .map(|(left, right)| {
+                        (left.clone().into(), right.clone().into())
+                    })
+                    .collect();
+
+                (pairs, raw_data.theme_id)
+            } else {
+                (
+                    Vec::new(),
+                    crate::config::get_themes_cloned()[0].id.clone()
+                )
+            }
+        };
+
+        Rc::new(Self {
             jig_id,
             module_id,
-            game_mode: Mutable::new(None),
-            pairs: MutableVec::new(),
+            game_mode: Mutable::new(game_mode),
+            pairs: MutableVec::new_with_values(pairs),
             step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
-            theme_id: Mutable::new(crate::config::get_themes_cloned()[0].id.clone()),
+            theme_id: Mutable::new(theme_id),
             first_text: RefCell::new(true),
             content_mode: Mutable::new(debug::settings().content_mode)
-        }
-    }
-
-    pub fn set_from_raw(&self, raw_data:Option<raw::GameData>) {
-        self.game_mode.set(raw_data.as_ref().map(|data| data.mode.clone().into()));
-
-        if let Some(raw_data) = raw_data {
-            let pairs:Vec<(Card, Card)> = raw_data
-                .pairs
-                .iter()
-                .map(|(left, right)| {
-                    (left.clone().into(), right.clone().into())
-                })
-                .collect();
-            self.pairs.lock_mut().replace_cloned(pairs);
-
-            self.theme_id.set(raw_data.theme_id);
-        } else {
-            self.pairs.lock_mut().clear();
-        }
+        })
     }
 
     pub fn to_raw(&self) -> raw::GameData {

@@ -33,8 +33,19 @@ impl Footer {
         })
     }
 
-    pub fn render(_self: Rc<Self>) -> Dom {
 
+    pub fn render(_self: Rc<Self>) -> Dom {
+        html!("div", {
+            .child_signal(_self.state.step.signal().map(clone!(_self => move |step|
+                match step {
+                    Step::Four => None,
+                    _ => Some(Self::render_default(_self.clone()))
+                }
+            )))
+        })
+    }
+
+    pub fn render_default(_self: Rc<Self>) -> Dom {
         elem!(templates::footer_default(), {
             .with_data_id!("next", {
                 .event(clone!(_self => move |evt:events::Click| {
