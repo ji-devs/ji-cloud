@@ -2,6 +2,14 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 
+pub const TRANISITION_DURATION:f64 = 3000.0;
+pub const DEST_X_LEFT:f64 = 5.0;
+pub const DEST_Y_START:f64 = 10.0;
+pub const DEST_LINE_OFFSET:f64 = 20.0;
+pub const DEST_ROT_LEFT:f64 = 0.0;
+pub const DEST_X_RIGHT:f64 = 15.0;
+pub const DEST_ROT_RIGHT:f64 = -20.0;
+
 macro_rules! config_path {
     ($e:tt) => { 
         concat!("../../../../../../../config/", $e)

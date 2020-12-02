@@ -1,6 +1,8 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 
+pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IframeInit<T> {
     pub data: Option<T>
@@ -41,7 +43,7 @@ pub fn should_get_iframe_data() -> bool {
     let url:web_sys::Url = web_sys::Url::new(&url).unwrap_throw();
     let params = url.search_params();
 
-    match params.get("iframe_data") {
+    match params.get(IFRAME_DATA_PARAM) {
         None => false,
         Some(value) => {
             if value == "true" {

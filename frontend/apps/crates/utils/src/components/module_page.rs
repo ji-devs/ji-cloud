@@ -100,13 +100,14 @@ pub enum ModulePageKind {
     Empty,
     EditPlain,
     EditResize,
-    Play
+    PlayIframe,
+    PlayIframePreview,
 }
 
 impl ModulePageKind {
     pub fn is_resize(&self) -> bool {
         match self {
-            Self::EditResize | Self::Play => true,
+            Self::EditResize | Self::PlayIframe | Self::PlayIframePreview => true,
             Self::EditPlain | Self::Empty => false
         }
     }
@@ -123,15 +124,23 @@ pub struct ModuleRenderOutput {
 
 
 impl ModuleRenderOutput {
-    pub fn new_player(dom:Dom) -> Self {
+    pub fn new_player_iframe(dom:Dom) -> Self {
+
+        let kind = if should_get_iframe_data() {
+            ModulePageKind::PlayIframePreview
+        } else {
+            ModulePageKind::PlayIframe
+        };
+
         Self {
-            kind: ModulePageKind::Play,
+            kind,
             sidebar: None,
             header: None,
             footer: None,
             main: Some(dom)
         }
     }
+
     pub fn new_empty(main: Option<Dom>) -> Self {
         Self {
             kind: ModulePageKind::Empty,

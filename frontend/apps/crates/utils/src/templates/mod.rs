@@ -20,7 +20,8 @@ import modulePlayPage from "@templates/module/_common/module-play-page.html";
 const MODULE_PAGE_EMPTY:&'static str = "module-page-empty";
 const MODULE_EDIT_PAGE_PLAIN:&'static str = "module-edit-page-plain";
 const MODULE_EDIT_PAGE_RESIZE:&'static str = "module-edit-page-resize";
-const MODULE_PLAY_PAGE:&'static str = "module-play-page";
+const MODULE_PLAY_IFRAME:&'static str = "module-play-iframe";
+const MODULE_PLAY_IFRAME_PREVIEW:&'static str = "module-play-iframe-preview";
 
 const IMAGE_SEARCH_WIDGET:&'static str = "image-search-widget";
 const IMAGE_SEARCH_RESULT_THUMBNAIL:&'static str = "image-search-recent-thumbnail";
@@ -39,8 +40,11 @@ pub fn module_page(kind:ModulePageKind) -> HtmlElement {
         ModulePageKind::EditResize => {
             TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_EDIT_PAGE_RESIZE))
         },
-        ModulePageKind::Play => {
-            TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PLAY_PAGE))
+        ModulePageKind::PlayIframe => {
+            TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PLAY_IFRAME))
+        },
+        ModulePageKind::PlayIframePreview => {
+            TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PLAY_IFRAME_PREVIEW))
         }
     }
 }
@@ -98,8 +102,11 @@ impl Templates {
             (MODULE_EDIT_PAGE_RESIZE, get_template_str(include_str!(
                 template_path!("module/_common/module-edit-page-resize.html")
             ))),
-            (MODULE_PLAY_PAGE, get_template_str(include_str!(
-                template_path!("module/_common/module-play-page.html")
+            (MODULE_PLAY_IFRAME, get_template_str(include_str!(
+                template_path!("module/_common/module-play-iframe.html")
+            ))),
+            (MODULE_PLAY_IFRAME_PREVIEW, get_template_str(include_str!(
+                template_path!("module/_common/module-play-iframe-preview.html")
             ))),
             (IMAGE_SEARCH_WIDGET, get_template_str(include_str!(
                 template_path!("_common/widgets/image-search/widget.html")
