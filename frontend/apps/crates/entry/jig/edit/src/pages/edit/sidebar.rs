@@ -335,8 +335,8 @@ impl MenuDom {
                     let jig_id = _self.jig_id.clone();
                     let module_id = _self.module_id.clone();
                     let module_kind = _self.module_kind.clone().unwrap_throw();
-                    let route:String = Route::Module(ModuleRoute::Edit(module_kind, jig_id, module_id)).into();
-                    dominator::routing::go_to_url(&route);
+                    let route = Route::Module(ModuleRoute::Edit(module_kind, jig_id, module_id));
+                    route.redirect();
                 }))
             })
             .with_data_id!("duplicate", {

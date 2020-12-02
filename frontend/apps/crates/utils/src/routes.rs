@@ -71,7 +71,6 @@ struct JsonQuery {
 }
 
 impl Route {
-    //TODO - is this really used? I think we use dominator go_to_url instead?
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_throw().location();
         let s:String = self.into();
