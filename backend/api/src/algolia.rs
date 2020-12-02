@@ -48,8 +48,13 @@ impl Updater {
             loop {
                 let iteration_start = Instant::now();
 
-                if let Err(e) = self.update_images().await {
-                    log::error!("update images task failed {} (retrying after pause)", e);
+                if let Err(e) = self
+                    .update_images()
+                    .await
+                    .context("update images task errored")
+                {
+                    log::error!("{:?}", e);
+                    sentry::integrations::anyhow::capture_anyhow(&e);
                 }
 
                 tokio::time::delay_until((iteration_start + Duration::from_secs(5)).into()).await;
@@ -106,8 +111,12 @@ limit 100
             return Ok(());
         }
 
+        log::debug!("Updating a batch of {} image(s)", requests.len());
+
         let request = algolia::request::BatchWriteRequests { requests };
         let ids = self.algolia_client.batch_images(request).await?;
+
+        log::debug!("Updated a batch of {} image(s)", ids.len());
 
         sqlx::query!(
             "update image_metadata set last_synced_at = $1 where id = any($2)",

@@ -297,7 +297,7 @@ async fn get_one(
 async fn get(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
-    // _claims: WrapAuthClaimsNoDb,
+    _claims: WrapAuthClaimsNoDb,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
 ) -> Result<
     Json<<endpoints::image::Search as ApiEndpoint>::Res>,
