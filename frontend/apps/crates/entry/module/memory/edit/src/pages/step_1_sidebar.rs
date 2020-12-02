@@ -40,6 +40,8 @@ impl Step1Sidebar {
 
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
+            .class("w-full")
+            .class("h-full")
             .child_signal(_self.state.content_mode.signal().map(clone!(_self => move |content_mode| Some(
                 Self::render_child(_self.clone(), content_mode)
             ))))

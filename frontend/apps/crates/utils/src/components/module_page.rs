@@ -186,6 +186,8 @@ where
 
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
+            .class("w-full")
+            .class("h-full")
             .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
                 if ready {
                     let data = _self.loaded_data.borrow_mut().take().unwrap_throw();

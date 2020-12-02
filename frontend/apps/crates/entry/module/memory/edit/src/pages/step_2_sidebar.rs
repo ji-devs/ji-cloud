@@ -76,6 +76,8 @@ impl ThemeDom {
     }
     pub fn render(_self: Rc<Self>) -> Dom { 
         html!("div", {
+            .class("w-full")
+            .class("h-full")
             .child_signal(_self.state.theme_id
                 .signal_cloned()
                 .map(clone!(_self => move |theme_id| { 

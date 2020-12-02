@@ -66,7 +66,8 @@ impl Main {
     }
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
-
+            .class("w-full")
+            .class("h-full")
             .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
                 Some(format!("memory-theme-{}", id))
             }))

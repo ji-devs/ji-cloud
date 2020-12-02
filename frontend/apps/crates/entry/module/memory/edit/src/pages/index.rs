@@ -58,6 +58,8 @@ impl ModuleRenderer for IndexPage {
 
 fn render_loaded(state: Rc<State>) -> Dom {
     html!("div", {
+            .class("w-full")
+            .class("h-full")
         .child_signal(state.game_mode.signal().map(clone!(state => move |mode| {
             match mode {
                 None => Some(choose_mode::render(state.clone())),
@@ -93,6 +95,8 @@ impl ModePage {
 
     fn render_sidebar(_self: Rc<Self>) -> Dom {
         html!("div", {
+            .class("w-full")
+            .class("h-full")
             .child_signal(_self.state.step.signal().map(clone!(_self => move |step| Some(
                 match step {
                     Step::One => {
