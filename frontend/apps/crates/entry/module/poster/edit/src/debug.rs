@@ -48,7 +48,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::images()
+            DebugSettings::default()
         }
     } else {
         pub fn settings() -> DebugSettings {

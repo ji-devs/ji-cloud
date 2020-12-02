@@ -17,7 +17,7 @@ use crate::data::*;
 use crate::debug;
 use utils::components::module_page::*;
 use async_trait::async_trait;
-use super::{sidebar, main::MainDom};
+use super::{sidebar, main::MainDom, header, footer};
 
 pub struct EditorPage {
     pub state: Rc<State>,
@@ -47,19 +47,10 @@ impl ModuleRenderer for EditorPage {
         ModuleRenderOutput {
             kind: ModulePageKind::EditResize,
             sidebar: Some(sidebar::render(_self.state.clone())),
-            header: Some(Self::render_header(_self.state.clone())),
+            header: Some(header::render(_self.state.clone())),
             main: Some(MainDom::render(MainDom::new(_self.state.clone()))),
-            footer: Some(Self::render_footer(_self.state.clone())),
+            footer: Some(footer::render(_self.state.clone())),
         }
     }
 
-}
-
-impl EditorPage {
-    fn render_header(state:Rc<State>) -> Dom {
-        elem!(templates::header("Create a Cover Page", "Introduce your topic<br/>Use the blue panel for selecting layouts, themes, and adding content"), {})
-    }
-    fn render_footer(state:Rc<State>) -> Dom {
-        elem!(templates::footer(), {})
-    }
 }

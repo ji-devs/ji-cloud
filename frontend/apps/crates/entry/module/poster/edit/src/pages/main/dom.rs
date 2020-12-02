@@ -16,6 +16,8 @@ use futures::future::ready;
 use crate::data::*;
 use crate::config::LAYOUT_OPTIONS;
 use utils::components::image::transform::TransformImage;
+use utils::components::image::data::*;
+use shared::media::{image_id_to_key, MediaLibraryKind, MediaVariant};
 
 pub struct MainDom {
     pub state: Rc<State>,
@@ -37,6 +39,22 @@ impl MainDom {
         let state = _self.state.clone();
 
         elem!(templates::main(), {
+            .event_preventable(|evt:events::DragOver| {
+                if let Some(data_transfer) = evt.data_transfer() {
+                    if data_transfer.types().index_of(&JsValue::from_str(SEARCH_THUMBNAIL_DATA_TRANSFER), 0) != -1 {
+                        evt.prevent_default();
+                    }
+                }
+            })
+
+            .event(clone!(state => move |evt:events::Drop| {
+                if let Some(data_transfer) = evt.data_transfer() {
+                    if let Some(img_id) = data_transfer.get_data(SEARCH_THUMBNAIL_DATA_TRANSFER).ok() {
+                        state.poster.add_image(SimpleImage::from((img_id, MediaLibraryKind::Global)));
+                        //card_data.set_neq(Some(img_id));
+                    }
+                }
+            }))
             .children_signal_vec(Self::children_signal(_self))
         })
     }

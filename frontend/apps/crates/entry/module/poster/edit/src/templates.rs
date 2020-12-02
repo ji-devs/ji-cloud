@@ -1,4 +1,4 @@
-use simple_html_template::{TemplateCache, html_map};
+use simple_html_template::{TemplateCache, html_map, hash_map};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
@@ -28,7 +28,8 @@ pub fn sidebar() -> HtmlElement {
 }
 
 pub fn header(title:&str, subtitle:&str) -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem(HEADER, &html_map!(
+    //This is unsafe - because currently subtitle uses raw html, need to preserve it
+    TEMPLATES.with(|t| t.cache.render_elem(HEADER, &hash_map!(
         "title" => title,
         "subtitle" => subtitle
     )).unwrap_throw())
