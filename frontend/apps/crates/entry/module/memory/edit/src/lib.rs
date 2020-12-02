@@ -26,6 +26,7 @@ mod header;
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
+    config::init();
     //init dom stuff
 
     let router = router::Router::new();

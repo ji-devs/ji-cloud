@@ -10,6 +10,7 @@ on:
     - 'frontend/templates/_common/**'
     - 'frontend/templates/module/memory/**'
     - 'frontend/apps/crates/entry/module/memory/play/**'
+    - 'frontend/apps/config/module/memory/**'
 
 jobs:
   bundle:

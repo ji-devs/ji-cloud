@@ -1,0 +1,48 @@
+{% import "module/memory/edit/_common/sidebar/macros.html" as SidebarMacros %}
+{% import "_common/buttons/button-macros.html" as ButtonMacros %}
+{% import "module/memory/edit/words-and-images/sidebar/macros.html" as WordsAndImagesSbMacros %}
+
+
+<div class="bg-white ml-10 w-516 flex-shrink-0 relative scroll-v-container h-screen">
+
+  {{ SidebarMacros::top_steps(selected=1) }}
+  {{ WordsAndImagesSbMacros::mode_buttons(mode="text") }}
+
+  <div class="px-10 flex flex-col h-full">
+    <div class="flex-shrink-0">
+
+
+      <div class="flex justify-between text-base items-center pt-4">
+        <p class="">Add Your Words</p>
+        <p data-id="clear-list" class="text-jibuttonBlue cursor-pointer">Clear list</p>
+      </div>
+
+
+      <div class="flex mt-4 ">
+        <div class="w-full h-64 rounded-lg bg-jilogingrey flex items-center px-4  justify-between mr-6">
+          <p class="text-base">Hebrew Keyboard</p>
+          <img src="{{MEDIA_UI}}/icn-keyboard.svg" alt="">
+        </div>
+
+        <div class="w-full h-64 rounded-lg bg-jilogingrey flex items-center px-4  justify-between">
+          <p class="text-base">Sefaria</p>
+          <img src="{{MEDIA_UI}}/icn-sefaria.svg" alt="">
+        </div>
+      </div>
+    </div>
+
+    {% include "module/memory/edit/_common/sidebar/text-area.html" %}
+
+    <div class="flex-shrink-0">
+      <div class="flex justify-end mt-2">
+        {{ ButtonMacros::sidebarbutton(label="Done", dataId="done-btn", hover="") }}
+      </div>
+
+      <p class="mt-4 mb-10 flex justify-center text-base">Up to 14 words</p>
+    </div>
+
+  </div>
+  <div class="" data-id="tooltip"> </div>
+  <div class="" data-id="error">
+  </div>
+</div>

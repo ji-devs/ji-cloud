@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import jignavigation from "@templates/module/poster/old-temp-ref/jig-navigation.html";
 import jigcoverone from "@templates/module/poster/old-temp-ref/jig-cover1.html";
 import jigaddimage from "@templates/module/poster/old-temp-ref/cover-add-image.html";

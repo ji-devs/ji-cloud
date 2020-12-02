@@ -1,7 +1,10 @@
 use std::borrow::Cow;
 
 use chrono::{DateTime, Utc};
-use shared::domain::jig::{Jig, JigId, LiteModule, ModuleId, ModuleKind};
+use shared::domain::{
+    jig::{Jig, JigId, LiteModule, ModuleId, ModuleKind},
+    meta::ContentTypeId,
+};
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -9,7 +12,7 @@ use uuid::Uuid;
 async fn module_of_kind(
     conn: &mut PgConnection,
     kind: Option<ModuleKind>,
-) -> anyhow::Result<ModuleId> {
+) -> sqlx::Result<ModuleId> {
     sqlx::query!(
         r#"
 insert into module (kind)
@@ -29,10 +32,11 @@ pub async fn create(
     display_name: Option<&str>,
     cover_id: Option<ModuleId>,
     module_ids: &[ModuleId],
+    content_types: &[ContentTypeId],
     ending_id: Option<ModuleId>,
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
-) -> anyhow::Result<JigId> {
+) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
     let cover_id = match cover_id {
@@ -65,6 +69,8 @@ returning id
     )
     .fetch_one(&mut transaction)
     .await?;
+
+    super::recycle_metadata(&mut transaction, "jig", jig.id, content_types).await?;
 
     // todo: batch
     for (idx, module_id) in module_ids.iter().enumerate() {
@@ -101,7 +107,8 @@ select id                                             as "id: JigId",
              from jig_module
                       inner join module on module_id = module.id
              where jig_id = $1
-             order by "index")                        as "modules!: Vec<(ModuleId, Option<ModuleKind>)>"
+             order by "index")                        as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+        array(select row(content_type_id) from jig_content_type where jig_id = $1) as "content_types!: Vec<(ContentTypeId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -122,6 +129,7 @@ where id = $1"#,
         modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
             id, kind
         }).collect(),
+        content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
@@ -138,8 +146,9 @@ pub async fn update(
     cover_id: Option<ModuleId>,
     modules: Option<&[ModuleId]>,
     ending_id: Option<ModuleId>,
+    content_types: Option<&[ContentTypeId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
-) -> anyhow::Result<bool> {
+) -> sqlx::Result<bool> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
         r#"select exists(select 1 from jig where id = $1) as "exists!""#,
@@ -186,6 +195,7 @@ where id = $1
     )
     .execute(&mut transaction)
     .await?;
+
     if let Some(module_ids) = modules {
         sqlx::query!("delete from jig_module where jig_id = $1", id.0)
             .execute(&mut transaction)
@@ -202,6 +212,11 @@ where id = $1
             .await?;
         }
     }
+
+    if let Some(content_types) = content_types {
+        super::recycle_metadata(&mut transaction, "jig", id.0, content_types).await?;
+    }
+
     transaction.commit().await?;
 
     Ok(true)

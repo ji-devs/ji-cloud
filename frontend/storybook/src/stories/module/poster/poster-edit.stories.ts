@@ -1,6 +1,6 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {mediaUi} from "@utils/path";
-import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
 import {mockLayouts} from "./common/mock-data";
 import sidebarTmpl from "@templates/module/poster/edit/sidebar/sidebar.html";

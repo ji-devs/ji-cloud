@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, getChildId, toggleClasses, toggleClassesId} from "@utils/dom";
+import {appendId, getChildId, addClasses, addClassesId} from "@utils/dom";
 import containerTmpl from "@templates/admin/container.html";
 import sidebarLinkTmpl from "@templates/admin/sidebar-link.html";
 import sidebarLinkLockedTmpl from "@templates/admin/sidebar-link-locked.html";
@@ -20,7 +20,7 @@ export const withContainer = ({page, sidebarId}) => {
             : tmpl(sidebarLinkTmpl, {label, href: "#"});
 
         if(link.sidebarId == sidebarId) {
-            toggleClasses(linkElem, "text-white", true);
+            addClasses(linkElem, "text-white");
         }
         appendId(sidebar, "links", linkElem);
 

@@ -1,0 +1,21 @@
+{% import "module/memory/edit/_common/sidebar/macros.html" as SidebarMacros %}
+{% import "module/memory/edit/words-and-images/sidebar/macros.html" as WordsAndImagesSbMacros %}
+
+
+<div class="bg-white ml-10 w-516 flex-shrink-0 relative scroll-v-container">
+
+  {{ SidebarMacros::top_steps(selected=1) }}
+
+  {{ WordsAndImagesSbMacros::mode_buttons(mode="text") }}
+
+  <div class="px-10 mt-50">
+    <div class="flex flex-col justify-between text-base items-center pt-4">
+      <p class="font-heebo text-2xl mb-1">Edit your words on the cards</p>
+      <p data-id="clear-btn" class="text-jibuttonBlue cursor-pointer">Clear list</p>
+    </div>
+
+  </div>
+  <div class="" data-id="tooltip"> </div>
+  <div class="" data-id="error">
+  </div>
+</div>

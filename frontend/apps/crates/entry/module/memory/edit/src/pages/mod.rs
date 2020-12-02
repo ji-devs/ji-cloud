@@ -1,6 +1,10 @@
-pub mod container;
-pub mod all_modes;
-pub mod mode_choose;
-pub mod duplicate;
-pub mod words_and_images;
-
+pub mod index;
+pub mod choose_mode;
+pub mod main;
+pub mod step_1_sidebar;
+pub mod step_2_sidebar;
+pub mod step_3_sidebar;
+pub mod step_4_sidebar;
+pub mod footer;
+pub mod steps_nav;
+pub mod header;

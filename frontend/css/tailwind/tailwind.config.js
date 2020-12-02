@@ -210,6 +210,7 @@ module.exports = {
         312: '312px',
         320: '320px',
         325: '325px',
+        344: '344px',
         360: '360px',
         389: '389px',
         393: '393px',
@@ -283,6 +284,7 @@ module.exports = {
         537: '537px',
         581: '581px',
         612: '612px',
+        650: '650px',
         668: '668px',
         681: '681px',
         696: '696px',
@@ -363,6 +365,7 @@ module.exports = {
         '-10': '-10px',
         '-15': '-15px',
         '25p': '25%',
+        '33p': '33%',
         50: '50px',
         100: '100px',
         138: '138px',
@@ -386,7 +389,6 @@ module.exports = {
      minHeight:{
        32: '32px'
      },
-
 
       backgroundImage: theme => ({
         'shapes': "url('https://i.ibb.co/g9N7MLy/shapes-1.png')",

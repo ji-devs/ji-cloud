@@ -4,7 +4,9 @@
         "paths": {
             "@templates/*": ["../.template_output/*"],
             "@utils/*": ["./src/utils/*"],
-            "@components/*": ["./src/components/*"]
+            "@components/*": ["./src/components/*"],
+            "@mock/*": ["./src/mock/*"],
+            "@frontend-config/*": ["../config/*"]
         },
         "lib": [
             "es6",

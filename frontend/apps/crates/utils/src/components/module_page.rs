@@ -31,6 +31,35 @@ use crate::{
 use std::future::Future;
 use async_trait::async_trait;
 
+/// TODO - can we do this? It compiles so far..
+/// Maybe ModulePageSignal instead of overhauling what's there
+/// public interfaces can just be thin wrappers over an enum that holds one or the other?
+#[async_trait(?Send)]
+pub trait ModuleRendererSignal {
+    type Data: DeserializeOwned;
+
+    async fn load(_self:Rc<Self>) -> Self::Data;
+    fn render<S,H,M,F>(_self: Rc<Self>, data: Self::Data) -> ModuleRenderOutputSignal<S, H, M, F>
+    where
+        S: Signal<Item = Option<Dom>>,
+        H: Signal<Item = Option<Dom>>,
+        M: Signal<Item = Option<Dom>>,
+        F: Signal<Item = Option<Dom>>;
+}
+pub struct ModuleRenderOutputSignal<S, H, M, F> 
+where
+    S: Signal<Item = Option<Dom>>,
+    H: Signal<Item = Option<Dom>>,
+    M: Signal<Item = Option<Dom>>,
+    F: Signal<Item = Option<Dom>>,
+{
+    pub kind: ModulePageKind,
+    pub sidebar: S,
+    pub header: H, 
+    pub main: M, 
+    pub footer: F 
+}
+////
 #[async_trait(?Send)]
 pub trait ModuleRenderer {
     type Data: DeserializeOwned;
@@ -39,8 +68,36 @@ pub trait ModuleRenderer {
     fn render(_self: Rc<Self>, data: Self::Data) -> ModuleRenderOutput;
 }
 
+pub struct StaticModuleRenderer { 
+    output: RefCell<Option<ModuleRenderOutput>>
+}
+
+impl StaticModuleRenderer {
+   pub fn new(output: ModuleRenderOutput) -> Rc<Self> {
+       Rc::new(Self {output: RefCell::new(Some(output))})
+   }
+
+   pub fn stub() -> Rc<Self> {
+       Self::new(ModuleRenderOutput::new_empty(None))
+   }
+}
+
+#[async_trait(?Send)]
+impl ModuleRenderer for StaticModuleRenderer {
+    type Data = ();
+
+    async fn load(_self:Rc<Self>) { 
+    }
+
+    fn render(_self: Rc<Self>, data: ()) -> ModuleRenderOutput {
+        _self.output.borrow_mut().take().unwrap_throw()
+    }
+}
+
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ModulePageKind {
+    Empty,
     EditPlain,
     EditResize,
     Play
@@ -50,7 +107,7 @@ impl ModulePageKind {
     pub fn is_resize(&self) -> bool {
         match self {
             Self::EditResize | Self::Play => true,
-            Self::EditPlain => false
+            Self::EditPlain | Self::Empty => false
         }
     }
 }
@@ -63,6 +120,8 @@ pub struct ModuleRenderOutput {
     pub footer: Option<Dom>,
 }
 
+
+
 impl ModuleRenderOutput {
     pub fn new_player(dom:Dom) -> Self {
         Self {
@@ -71,6 +130,15 @@ impl ModuleRenderOutput {
             header: None,
             footer: None,
             main: Some(dom)
+        }
+    }
+    pub fn new_empty(main: Option<Dom>) -> Self {
+        Self {
+            kind: ModulePageKind::Empty,
+            sidebar: None,
+            header: None,
+            footer: None,
+            main 
         }
     }
 }
@@ -89,12 +157,13 @@ where
 
 impl <T, R> ModulePage <T, R> 
 where
-    T: DeserializeOwned + 'static,
+    T: DeserializeOwned + std::fmt::Debug + 'static,
     R: ModuleRenderer<Data = T> + 'static,
 {
     pub fn new(renderer:Rc<R>) -> Rc<Self> {
 
         let wait_iframe_data = should_get_iframe_data();
+
 
         let _self = Rc::new(Self { 
             renderer, 
@@ -118,6 +187,8 @@ where
 
     pub fn render(_self: Rc<Self>) -> Dom {
         html!("div", {
+            .class("w-full")
+            .class("h-full")
             .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
                 if ready {
                     let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
@@ -133,10 +204,12 @@ where
 
                 if let Ok(msg) = evt.try_serde_data::<IframeInit<T>>() {
                     if !_self.wait_iframe_data {
-                        log::warn!("weird... shouldn't have gotten iframe data!");
+                        //log::warn!("weird... shouldn't have gotten iframe data!");
+                        //log::warn!("{:?}", msg);
+                    } else {
+                        *_self.loaded_data.borrow_mut() = Some(msg.data.unwrap_throw());
+                        _self.has_loaded_data.set(true);
                     }
-                    *_self.loaded_data.borrow_mut() = Some(msg.data.unwrap_throw());
-                    _self.has_loaded_data.set(true);
                 } else {
                     log::info!("hmmm got other iframe message...");
                 }
@@ -155,8 +228,7 @@ where
 
     fn render_sections(output:ModuleRenderOutput) -> Dom {
         let ModuleRenderOutput {mut kind, mut header, mut sidebar, mut main, mut footer}  = output;
-       
-
+      
         elem!(templates::module_page(kind), {
             .apply_if(main.is_some(), |dom| {
                 apply_methods!(dom, {
@@ -206,5 +278,4 @@ where
 
         })
     }
-
 }

@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import jigpublishone from "@templates/jig/publish/publish-one.html";
 import jigpublishtooltip from "@templates/jig/publish/publish-error-tooltip.html";
 import jiglanguagedropdown from "@templates/jig/publish/publish-language-dropdown.html";

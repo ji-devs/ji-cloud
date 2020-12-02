@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, appendValueLineId, getChildId, setValueId, toggleClasses, appendTextLineId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import components from "@templates/_demo/components.html";
 import sidebar from "@templates/_demo/sidebar.html";
 import {SearchWidget} from "@components/image-search";

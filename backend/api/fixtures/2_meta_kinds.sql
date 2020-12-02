@@ -17,3 +17,8 @@ insert into subject (subject_id, display_name, created_at)
 values ('5eac0740-f224-11ea-9b22-cf2ee94195fe', 'Subject A', '2020-09-08T15:41:55.203383-07'),
        ('5eac07b8-f224-11ea-9b22-db3bdfab8258', 'Subject B', '2020-09-08T15:41:55.203383-07'),
        ('5eac081c-f224-11ea-9b22-cbb8b4f00518', 'Subject C', '2020-09-08T15:41:55.203383-07');
+
+insert into "content_type" (content_type_id, display_name, created_at)
+values ('533898ea-3367-11eb-a473-8f2df3b13671', 'A', '2020-11-30 23:54:39.198381+00'),
+       ('533899b2-3367-11eb-a473-ef2577a4de84', 'B', '2020-11-30 23:54:39.198381+00'),
+       ('53389a20-3367-11eb-a473-bbdc8773362a', 'C', '2020-11-30 23:54:39.198381+00');

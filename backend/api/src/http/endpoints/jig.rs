@@ -9,14 +9,39 @@ use shared::{
         jig::{CreateRequest, GetResponse, JigId},
         CreateResponse,
     },
-    error::{jig::UpdateError, GetError},
+    error::{
+        jig::{CreateError, CreateErrorExt, UpdateError, UpdateErrorExt},
+        GetError,
+    },
 };
 use sqlx::PgPool;
 
 use crate::{
-    db,
+    db::{self, meta::MetaWrapperError},
     extractor::{AuthUserWithScope, ScopeManageJig, WrapAuthClaimsNoDb},
 };
+
+impl From<MetaWrapperError> for CreateError {
+    fn from(e: MetaWrapperError) -> Self {
+        match e {
+            MetaWrapperError::Sqlx(e) => CreateError::InternalServerError(e.into()),
+            MetaWrapperError::MissingMetadata { id, kind } => {
+                CreateError::Extra(CreateErrorExt::NonExistantMetadata { id, kind })
+            }
+        }
+    }
+}
+
+impl From<MetaWrapperError> for UpdateError {
+    fn from(e: MetaWrapperError) -> Self {
+        match e {
+            MetaWrapperError::Sqlx(e) => UpdateError::InternalServerError(e.into()),
+            MetaWrapperError::MissingMetadata { id, kind } => {
+                UpdateError::Extra(UpdateErrorExt::NonExistantMetadata { id, kind })
+            }
+        }
+    }
+}
 
 async fn create(
     db: Data<PgPool>,
@@ -25,16 +50,19 @@ async fn create(
 ) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, <jig::Create as ApiEndpoint>::Err> {
     let req = req.map_or_else(CreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.id;
+
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
         req.cover,
         &req.modules,
+        &req.content_types,
         req.ending,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
     )
-    .await?;
+    .await
+    .map_err(db::meta::handle_metadata_err)?;
 
     Ok(Json(CreateResponse { id }))
 }
@@ -64,9 +92,11 @@ async fn update(
         req.cover,
         req.modules.as_deref(),
         req.ending,
+        req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
-    .await?;
+    .await
+    .map_err(db::meta::handle_metadata_err)?;
 
     if !exists {
         return Err(UpdateError::NotFound);

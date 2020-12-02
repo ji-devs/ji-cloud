@@ -34,72 +34,52 @@ use shared::{
     api::endpoints::{ApiEndpoint, self},
     domain,
     error,
-    media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-
+use utils::components::image::data::*;
 
 use uuid::Uuid;
 pub struct PlayerPage {
-    game_state: GameState,
+    jig_id: String,
+    module_id: String,
 }
 
 impl PlayerPage {
     pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        let game_state = GameState::new(jig_id, module_id);
-        Rc::new(Self { game_state })
+        Rc::new(Self { jig_id, module_id})
     }
 }
 
 //Use the ModuleRenderer component by way of a trait
 #[async_trait(?Send)]
 impl ModuleRenderer for PlayerPage {
-    type Data = raw::GameState;
+    type Data = raw::GameData;
 
-    async fn load(_self:Rc<Self>) -> raw::GameState { 
-        if let Some(raw_state) = debug::settings().state {
-            raw_state
+    async fn load(_self:Rc<Self>) -> raw::GameData { 
+        if let Some(raw_data) = debug::settings().data {
+            raw_data
         } else {
             log::info!("loading...");
-            raw::GameState::load(_self.game_state.jig_id.clone(), _self.game_state.module_id.clone()).await
+            raw::GameData::load(_self.jig_id.clone(), _self.module_id.clone()).await.unwrap_throw()
         }
     }
 
-    fn render(_self: Rc<Self>, data: raw::GameState) -> ModuleRenderOutput {
-        _self.game_state.set_from_loaded(data);
-        ModuleRenderOutput::new_player( 
-            html!("div", {
-                .child_signal(_self.game_state.mode.signal_ref(clone!(_self => move |mode| {
-                    mode.map(clone!(_self => move |mode| {
-                        if let Some(mode) = mode {
-                            let state = Rc::new(_self.game_state.state.borrow_mut().take().unwrap_throw());
-
-                            match mode { 
-                                GameMode::Duplicate => {
-                                    DuplicatePlayer::render(DuplicatePlayer::new(state))
-                                },
-                                _ => unimplemented!("todo - other modes!")
-                            }
-                        } else {
-                            panic!("no game mode!");
-                        }
-                    }))
-                })))
-            })
-        )
+    fn render(_self: Rc<Self>, data: raw::GameData) -> ModuleRenderOutput {
+        let state = State::new(_self.jig_id.clone(), _self.module_id.clone(), data);
+        ModuleRenderOutput::new_player(Player::render(Player::new(state)))
     }
 }
 
 
-pub struct DuplicatePlayer {
-    state: Rc<BaseGameState>,
+pub struct Player {
+    state: Rc<State>,
 }
 
-impl DuplicatePlayer {
-    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
+impl Player {
+    pub fn new(state:Rc<State>) -> Rc<Self> {
         Rc::new(Self { state })
     }
 
-    pub fn render(_self:Rc<DuplicatePlayer>) -> Dom {
+    pub fn render(_self:Rc<Self>) -> Dom {
         elem!(templates::player(), {
             .class(format!("memory-theme-{}", _self.state.theme_id))
             .future(_self.state.flip_state.signal_cloned().for_each(clone!(_self => move |flip_state| {
@@ -129,7 +109,7 @@ impl DuplicatePlayer {
 }
 
 pub struct CardDom {
-    pub state: Rc<BaseGameState>,
+    pub state: Rc<State>,
     pub is_hover:Mutable<bool>,
     pub card: Card,
     pub transition: Mutable<Option<CardTransition>>
@@ -185,7 +165,7 @@ impl CardTransition {
     }
 }
 impl CardDom {
-    pub fn new(state:Rc<BaseGameState>, card: Card) -> Rc<Self> {
+    pub fn new(state:Rc<State>, card: Card) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -285,11 +265,11 @@ impl CardDom {
                             })
                         })
                     },
-                    Media::Image(id) => {
+                    Media::Image(image) => {
                         apply_methods!(dom, {
                             .with_data_id!("image", {
                                 .property("src", {
-                                    id.as_ref().map(|id| utils::path::library_image(MediaLibraryKind::Global, MediaVariant::Resized, id)) 
+                                    image.as_ref().map(|img| img.full_src())
                                         .unwrap_or("".to_string())
                                 })
                             })

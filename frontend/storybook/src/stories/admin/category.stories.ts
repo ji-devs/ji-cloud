@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId, setTextId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import {withContainer} from "./admin-common";
 import categoriesPage from "@templates/admin/categories/categories-page.html";
 import categoryMainSelected from "@templates/admin/categories/category-main-selected.html";
@@ -45,7 +45,7 @@ export const WithMenu = () => {
 function setLabel(parentElement, label) {
 
     const element = tmpl(categoryLabelDisplay);
-    element.innerText = label;
+    (element as any).innerText = label;
 
     return appendId(parentElement, "label", element);
 }

@@ -1,5 +1,5 @@
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId, setAttributeId, setTextId} from "@utils/dom";
+import {appendId, addClassesId, setAttributeId, setTextId} from "@utils/dom";
 import {MEDIA_UI} from "@utils/path";
 //these are the Add templates
 import editPage from "@templates/jig/edit/edit-page.html";
@@ -53,7 +53,7 @@ function basePage() {
             appendId(sidebar, "modules", module);
         });
 
-    toggleClassesId(page, "hover-module", ["hidden"], true);
+    addClassesId(page, "hover-module", ["hidden"]);
     return {page, sidebar};
 }
 

@@ -15,6 +15,14 @@
           {
             "rootPathSuffix": "./src/components",
             "rootPathPrefix": "@components"
+          },
+          {
+            "rootPathSuffix": "./src/mock",
+            "rootPathPrefix": "@mock"
+          },
+          {
+            "rootPathSuffix": "../config",
+            "rootPathPrefix": "@frontend-config"
           }
         ]
       }

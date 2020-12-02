@@ -17,6 +17,7 @@ import moduleEditPagePlain from "@templates/module/_common/module-edit-page-plai
 import moduleEditPageResize from "@templates/module/_common/module-edit-page-resize.html";
 import modulePlayPage from "@templates/module/_common/module-play-page.html";
 */
+const MODULE_PAGE_EMPTY:&'static str = "module-page-empty";
 const MODULE_EDIT_PAGE_PLAIN:&'static str = "module-edit-page-plain";
 const MODULE_EDIT_PAGE_RESIZE:&'static str = "module-edit-page-resize";
 const MODULE_PLAY_PAGE:&'static str = "module-play-page";
@@ -29,6 +30,9 @@ const IMAGE_TRANSFORM:&'static str = "image-transform";
 
 pub fn module_page(kind:ModulePageKind) -> HtmlElement {
     match kind {
+        ModulePageKind::Empty => {
+            TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_PAGE_EMPTY))
+        },
         ModulePageKind::EditPlain => {
             TEMPLATES.with(|t| t.cache.render_elem_plain(MODULE_EDIT_PAGE_PLAIN))
         },
@@ -85,6 +89,9 @@ macro_rules! template_path {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
+            (MODULE_PAGE_EMPTY, get_template_str(include_str!(
+                template_path!("module/_common/module-page-empty.html")
+            ))),
             (MODULE_EDIT_PAGE_PLAIN, get_template_str(include_str!(
                 template_path!("module/_common/module-edit-page-plain.html")
             ))),

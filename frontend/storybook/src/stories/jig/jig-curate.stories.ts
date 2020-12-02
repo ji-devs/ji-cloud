@@ -1,6 +1,6 @@
 
 import {renderTemplate as tmpl} from "@utils/template";
-import {appendId, toggleClassesId} from "@utils/dom";
+import {appendId} from "@utils/dom";
 import jigtable from "@templates/jig/curate/jig-table.html";
 import jigtooltip from "@templates/jig/curate/jig-copyemail.html";
 import jigprivacy from "@templates/jig/curate/jig-privacy.html";
