@@ -5,16 +5,7 @@
       "id": "basic",
       "label": "Basic"
     },
-    {
-      "content": "שמש",
-      "id": "foo",
-      "label": "Foo"
-    },
-    {
-      "content": "שמש",
-      "id": "bar",
-      "label": "Bar"
-    },
+
     {
       "content": "Word",
       "id": "orange",
