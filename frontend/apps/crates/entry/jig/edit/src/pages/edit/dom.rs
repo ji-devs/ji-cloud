@@ -46,7 +46,7 @@ impl EditPage {
         let _self_clone = _self.clone();
 
         spawn_local(async move {
-            let jig = Jig::mock(jig_id).await;
+            let jig = Jig::load(jig_id).await;
             _self.jig.set(Some(jig));
         });
 

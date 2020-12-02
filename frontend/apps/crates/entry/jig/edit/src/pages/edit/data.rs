@@ -1,6 +1,7 @@
 pub type Id = String;
 use shared::domain::jig::ModuleKind;
 use utils::settings::SETTINGS;
+use cfg_if::cfg_if;
 
 pub trait ModuleKindExt {
     fn get_thumbnail(self) -> String;
@@ -49,22 +50,18 @@ pub struct Module {
 }
 
 impl Jig {
-    pub async fn load(id:Id) -> Self {
-        //TODO - really load it from backend
-        Self {
-            id,
-            title: "".to_string(),
-            cover: None,
-            ending: None,
-            modules: vec![
-                Module {
-                    id: "foo".to_string(),
-                    kind: None
-                }
-            ],
+    cfg_if! {
+        if #[cfg(feature = "local")] {
+            pub async fn load(id:Id) -> Self {
+                Self::load_real(id).await
+            }
+        } else {
+            pub async fn load(id:Id) -> Self {
+                Self::load_real(id).await
+            }
         }
     }
-    pub async fn mock(id:Id) -> Self {
+    async fn load_mock(id:Id) -> Self {
         //TODO - really load it from backend
         Self {
             id,
@@ -87,4 +84,21 @@ impl Jig {
                 .collect()
         }
     }
+    async fn load_real(id:Id) -> Self {
+        //TODO - really load it from backend
+        Self {
+            id,
+            title: "".to_string(),
+            cover: None,
+            ending: None,
+            modules: vec![
+                Module {
+                    id: "foo".to_string(),
+                    kind: None
+                }
+            ],
+        }
+    }
 }
+
+
