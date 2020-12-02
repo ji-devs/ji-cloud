@@ -12,7 +12,7 @@
       <div class="flex">
         {{ User::user_input(label="First name*",width="w-297",inputwidth="w-296", inputDataId="given-name") }}
         <div class="spacer w-30"></div>
-        {{ User::user_input(label="Family name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
+        {{ User::user_input(label="Last name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
       </div>
 
       {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="user-name") }}
@@ -21,7 +21,7 @@
         {{ ButtonMacros::orange(label="Next", dataId="next") }}
       </div>
 
-      <p class="text-jibuttonBlue mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer">Login</span></p>
+      <p class="mt-4">Already have an account? <span data-id="login-link" class="cursor-pointer text-jibuttonBlue">Login</span></p>
 
     </div>
   </div>
