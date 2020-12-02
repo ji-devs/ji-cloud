@@ -1,8 +1,10 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, getChildId, } from "@utils/dom";
-import moduleEditPagePlain from "@templates/module/_common/module-edit-page-plain.html";
-import moduleEditPageResize from "@templates/module/_common/module-edit-page-resize.html";
-import modulePlayPage from "@templates/module/_common/module-play-page.html";
+import moduleEditPlain from "@templates/module/_common/module-edit-page-plain.html";
+import moduleEditResize from "@templates/module/_common/module-edit-page-resize.html";
+import moduleEmpty from "@templates/module/_common/module-page-empty.html";
+import modulePlayIframe from "@templates/module/_common/module-play-iframe.html";
+import modulePlayIframePreview from "@templates/module/_common/module-play-iframe-preview.html";
 
 export interface ModulePage {
     kind: ModulePageKind
@@ -13,9 +15,11 @@ export interface ModulePage {
 }
 
 export enum ModulePageKind {
-    EditResize,
+    Empty,
     EditPlain,
-    Play,
+    EditResize,
+    PlayIframe,
+    PlayIframePreview,
 }
 
 export interface ModulePageSections {
@@ -24,9 +28,11 @@ export interface ModulePageSections {
 //sections are sidebar, header, main, and footer. They're all optional
 
 export const modulePage = ({kind, sidebar, header, main, footer}:ModulePage) => {
-    const html = kind == ModulePageKind.EditPlain ? moduleEditPagePlain
-        : kind == ModulePageKind.EditResize ? moduleEditPageResize
-        : kind == ModulePageKind.Play ? modulePlayPage
+    const html = kind == ModulePageKind.EditPlain ? moduleEditPlain
+        : kind == ModulePageKind.EditResize ? moduleEditResize
+        : kind == ModulePageKind.PlayIframe ? modulePlayIframe
+        : kind == ModulePageKind.PlayIframePreview ? modulePlayIframePreview
+        : kind == ModulePageKind.Empty ? moduleEmpty
         : null; 
 
     if(!html) {

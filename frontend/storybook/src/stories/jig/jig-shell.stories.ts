@@ -1,25 +1,24 @@
 import {renderTemplate as tmpl} from "@utils/template";
 import {appendId, addClasses, getChildId,setTextId, setIframeContentsId} from "@utils/dom";
 import {modulePage, ModulePageKind} from "@components/module";
+import editSidebarModule from "@templates/jig/shell/edit-sidebar-module.html";
 import editPage from "@templates/jig/shell/edit-page.html";
 import playPage from "@templates/jig/shell/play-page.html";
-import editSidebarModule from "@templates/jig/shell/edit-sidebar-module.html";
 
 
 export default {
   title: 'Jig/Shell',
 }
 
-export const EditShell = () => {
+export const Edit = () => {
     const page = appendModules(tmpl(editPage));
-
 
     setIframeContentsId(page, "iframe", "<html><body><h1>Module Editor Here!</h1></body></html>");
 
     return page;
 }
 
-export const PlayShell = () => {
+export const Play = () => {
     const page = appendModules(tmpl(playPage));
 
     setIframeContentsId(page, "iframe", "<html><body><h1>Module Player Here!</h1></body></html>");
@@ -69,7 +68,7 @@ export const ModuleEditResize = () => {
         footer,
     })
 }
-export const ModulePlay = () => {
+export const ModulePlayIframe = () => {
     const main = tmpl(`
         <div style="background-color: green;" class="h-full flex flex-col justify-between">
         <div></div>
@@ -79,11 +78,25 @@ export const ModulePlay = () => {
     `);
 
     return modulePage({
-        kind: ModulePageKind.Play,
+        kind: ModulePageKind.PlayIframe,
         main,
     })
 }
 
+export const ModulePlayIframePreview = () => {
+    const main = tmpl(`
+        <div style="background-color: green;" class="h-full flex flex-col justify-between">
+        <div></div>
+        <div style="color: white; font-size: 18rem" class="w-full text-center">Main</div>
+        <div></div>
+        </div>
+    `);
+
+    return modulePage({
+        kind: ModulePageKind.PlayIframePreview,
+        main,
+    })
+}
 
 function appendModules(page) {
 
