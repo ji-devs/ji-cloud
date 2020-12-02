@@ -53,7 +53,9 @@ async fn main() -> anyhow::Result<()> {
 
     log::info!("app started!");
 
-    handle.join().unwrap().context("http server died")?;
+    tokio::task::block_in_place(|| handle.join())
+        .unwrap()
+        .context("http server died")?;
 
     Ok(())
 }

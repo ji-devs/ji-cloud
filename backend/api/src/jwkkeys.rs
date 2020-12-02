@@ -1,5 +1,5 @@
 use crate::extractor::FirebaseId;
-use anyhow::{anyhow, bail};
+use anyhow::{anyhow, bail, Context};
 use jsonwebtoken as jwt;
 use jwt::{Algorithm, DecodingKey, TokenData, Validation};
 use reqwest::{header, Response};
@@ -163,7 +163,10 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
         loop {
             log::trace!("Getting keys for jwk");
 
-            match fetch_keys_for_config().await {
+            match fetch_keys_for_config()
+                .await
+                .context("Error in jwk key-fetch task")
+            {
                 Ok(keys) => {
                     let refresh_at = keys.expiration_time;
 
@@ -173,7 +176,8 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
                 }
 
                 Err(e) => {
-                    log::error!("Error in jwk key-fetch task: {}", e);
+                    log::error!("{:?}", e);
+                    sentry::integrations::anyhow::capture_anyhow(&e);
                     tokio::time::delay_for(Duration::from_secs(5)).await;
                 }
             };
