@@ -65,7 +65,7 @@ impl ModuleRenderer for PlayerPage {
 
     fn render(_self: Rc<Self>, data: raw::GameData) -> ModuleRenderOutput {
         let state = State::new(_self.jig_id.clone(), _self.module_id.clone(), data);
-        ModuleRenderOutput::new_player(Player::render(Player::new(state)))
+        ModuleRenderOutput::new_player_iframe(Player::render(Player::new(state)))
     }
 }
 
@@ -126,19 +126,32 @@ pub struct CardTransition {
 impl CardTransition {
     pub fn new(element:&HtmlElement, found_index: usize, side:Side) -> Self {
 
-        let animation = MutableAnimation::new(3000.0);
+        let animation = MutableAnimation::new(crate::config::TRANISITION_DURATION);
         animation.animate_to(Percentage::new(1.0));
 
         let (origin_x, origin_y) = utils::resize::ModuleBounds::get_element_pos_rem(element);
-        let mut dest_x = if side == Side::Left { 0.0 } else { 10.0 };
+        let mut dest_x = 
+            if side == Side::Left { 
+                crate::config::DEST_X_LEFT 
+            } else { 
+                crate::config::DEST_X_RIGHT 
+            };
+
         dest_x -= origin_x;
 
-        let start_y = 5.0;
-        let line_offset = 20.0;
+        let start_y = crate::config::DEST_Y_START;
+        let line_offset = crate::config::DEST_LINE_OFFSET;
+
         let mut dest_y = start_y + (found_index as f64 * line_offset);
         dest_y -= origin_y;
 
-        let dest_rot:f64 = if side == Side::Right { -20.0 } else { 0.0 };
+        let dest_rot:f64 = 
+            if side == Side::Right { 
+                crate::config::DEST_X_RIGHT 
+            } else { 
+                crate::config::DEST_ROT_LEFT
+            };
+
         Self {
             animation,
             dest_x,
