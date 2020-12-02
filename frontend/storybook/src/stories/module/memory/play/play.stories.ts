@@ -41,8 +41,8 @@ function mockPlayer(selectedThemeIndex, isFlipped, nCards) {
     addClassesId(main, "game-cards", [`memory-grid-${nGrid}`]);
 
     return modulePage({
-        kind: ModulePageKind.Play,
-        main
+        kind: ModulePageKind.PlayIframe,
+        main,
     })
 }
 
