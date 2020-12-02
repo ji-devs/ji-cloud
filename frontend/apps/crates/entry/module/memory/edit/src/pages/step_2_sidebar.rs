@@ -1,81 +1,61 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, ReadOnlyMutable,  SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
+    signal::{Mutable, SignalExt, Signal, ReadOnlyMutable},
+    signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
-use dominator_helpers::{elem, with_data_id, spawn_future, dynamic_class_signal, AsyncLoader};
+use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
+use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use std::fmt::Write;
 use crate::data::*;
-use itertools::Itertools;
-use crate::config;
-use crate::pages::all_modes::{
-    steps_nav::apply_steps_nav,
-    card_dom::apply_preview_cards,
-};
-pub struct Step2Page {
-    state: Rc<BaseGameState>,
+use crate::debug;
+use utils::components::module_page::*;
+use async_trait::async_trait;
+use super::steps_nav::apply_steps_nav;
+use wasm_bindgen::JsCast;
+
+pub struct Step2Sidebar {
+    state: Rc<State>, 
+    game_mode: GameMode,
 }
 
-impl Step2Page {
-    pub fn new(state:Rc<BaseGameState>) -> Rc<Self> {
-
-        let preview_theme_id = Mutable::new(state.theme_id.get_cloned());
-        let _self = Rc::new(Self { 
-            state,
-        });
-
-        _self
+impl Step2Sidebar {
+    pub fn new(state: Rc<State>, game_mode:GameMode) -> Rc<Self> {
+        Rc::new(Self { 
+            state, 
+            game_mode,
+        })
     }
 
-
-    fn theme_options_dom(_self: Rc<Self>) -> impl Iterator<Item = Dom> {
-        config::THEME_OPTIONS
-            .iter()
-            .map(clone!(_self => move |theme| {
-                ThemeOption::render(ThemeOption::new(
-                    _self.state.clone(), 
-                    theme.clone()
-                ))
-            }))
-    }
-
-    pub fn render(_self: Rc<Self>, mode:GameMode) -> Dom {
-        let el = match mode {
-            GameMode::Duplicate => templates::duplicate::step_2_page(),
-            GameMode::WordsAndImages => templates::words_and_images::step_2_page(),
-        };
-        elem!(el, { 
+    pub fn render(_self: Rc<Self>) -> Dom {
+        elem!(templates::sidebar_step_2(), {
             .apply(|dom| apply_steps_nav(dom, _self.state.clone()))
-            .apply(|dom| apply_preview_cards(dom, _self.state.clone()))
             .with_data_id!("theme-items", {
-                .children(Self::theme_options_dom(_self.clone()))
-            })
-            .with_data_id!("next", {
-                .event(clone!(_self => move |evt:events::Click| {
-                    _self.state.step.set(Step::Four);
-                }))
+                .children(crate::config::get_themes_iter()
+                          .map(clone!(_self => move |theme| {
+                              ThemeDom::render(ThemeDom::new(_self.state.clone(), theme.clone()))
+                          }))
+                          .collect::<Vec<Dom>>()
+                )
             })
         })
     }
 }
-pub struct ThemeOption {
-    pub state: Rc<BaseGameState>,
+
+pub struct ThemeDom {
+    pub state: Rc<State>,
     pub is_hover:Mutable<bool>,
     pub theme: Theme,
 }
 
-impl ThemeOption {
-    pub fn new(state:Rc<BaseGameState>, theme: Theme) -> Rc<Self> {
+impl ThemeDom {
+    pub fn new(state:Rc<State>, theme: Theme) -> Rc<Self> {
         Rc::new(Self {
             state,
             is_hover: Mutable::new(false),
@@ -88,9 +68,9 @@ impl ThemeOption {
             .signal()
             .map(|hover| {
                 if hover {
-                    config::THEME_EXAMPLE_TEXT_2
+                    crate::config::THEME_EXAMPLE_TEXT_2
                 } else {
-                    config::THEME_EXAMPLE_TEXT_1
+                    crate::config::THEME_EXAMPLE_TEXT_1
                 }
             })
     }
@@ -112,7 +92,7 @@ impl ThemeOption {
                                     })
                                 })
                                 .with_data_id!("label", {
-                                    .text(_self.theme.label)
+                                    .text(&_self.theme.label)
                                 })
 
                                 .event(clone!(_self => move |evt:events::Click| {
@@ -138,7 +118,3 @@ impl ThemeOption {
         })
     }
 }
-
-
-
-

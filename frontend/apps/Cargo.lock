@@ -125,6 +125,7 @@ name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
  "app-memory-common",
+ "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
  "config",
@@ -139,6 +140,7 @@ dependencies = [
  "itertools",
  "js-sys",
  "log",
+ "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

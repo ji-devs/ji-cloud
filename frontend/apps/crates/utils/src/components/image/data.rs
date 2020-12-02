@@ -6,6 +6,8 @@ use shared::{
 use crate::math::RectF64;
 use serde::{Serialize, Deserialize};
 
+pub const SEARCH_THUMBNAIL_DATA_TRANSFER:&'static str = "search-thumbnail";
+
 pub trait ImageExt {
     //Just need to implement these
     fn id(&self) -> &ImageId;
