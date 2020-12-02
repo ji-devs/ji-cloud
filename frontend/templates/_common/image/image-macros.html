@@ -1,7 +1,10 @@
 {% macro gridItemColored(src, label, colorClass, dataId="") %}
-<div class="h-180 relative">
-  <img src="{{src}}" alt="">
-  <div class="flex items-center justify-center max-w-274 w-full absolute bottom-0">
+<div class="relative">
+  <div class="w-256">
+    <img src="{{src}}" alt="" class="h-190 w-full object-contain">
+  </div>
+
+  <div class="flex items-center justify-center max-w-274 w-full absolute -bottom-20">
     <div class="rounded-full h-3 w-3 flex items-center justify-center {{colorClass}} absolute left-0 ml-2"></div>
     <p class="overflow-hidden truncate pl-25 pr-25">{{label}}</p>
   </div>
