@@ -5,6 +5,7 @@ import { makeMainPairs } from "./_utils/main";
 import headerEmpty from "@templates/module/memory/edit/_common/header/empty.html";
 import footerDefault from "@templates/module/memory/edit/_common/footer/default.html";
 import iframeTmpl from "@templates/module/memory/edit/_common/main/iframe.html";
+import preview from "@templates/module/memory/edit/_common/header/preview.html";
 
 export default {
   title: 'Modules/Memory/Edit/All Steps/Step 4',
@@ -20,16 +21,16 @@ function makeStep({}:Options) {
   const pairKind = "text-image";
 
   const main = tmpl(iframeTmpl);
-  
+
   setIframeContents(main, "<h1>Player here!</h1>");
 
-  const header = tmpl(headerEmpty);
+  const header = tmpl(preview);
   const footer = tmpl(footerDefault);
 
   return modulePage({
     kind: ModulePageKind.EditPlain,
     header,
     main,
-    footer,
+    
   })
 }
