@@ -29,7 +29,7 @@ pub enum UserScope {
 }
 
 impl TryFrom<i16> for UserScope {
-    type Error = ();
+    type Error = anyhow::Error;
 
     fn try_from(i: i16) -> Result<Self, Self::Error> {
         match i {
@@ -38,7 +38,7 @@ impl TryFrom<i16> for UserScope {
             3 => Ok(Self::ManageImage),
             4 => Ok(Self::ManageJig),
             5 => Ok(Self::ManageModule),
-            _ => Err(()),
+            _ => anyhow::bail!("Scope {} is invalid"),
         }
     }
 }

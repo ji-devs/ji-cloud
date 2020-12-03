@@ -10,6 +10,7 @@ async fn main() -> anyhow::Result<()> {
     logger::init()?;
 
     let (runtime_settings, jwk_verifier, s3, algolia, db_pool, _guard) = {
+        log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;

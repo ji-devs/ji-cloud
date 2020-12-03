@@ -83,8 +83,7 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
             .scopes
             .into_iter()
             .map(UserScope::try_from)
-            .collect::<Result<Vec<_>, ()>>()
-            .map_err(|_| anyhow::anyhow!("invalid scope"))?,
+            .collect::<Result<Vec<_>, _>>()?,
         created_at: row.created_at,
         updated_at: row.updated_at,
         organization: row.organization,
