@@ -42,23 +42,7 @@ use async_trait::async_trait;
 use std::pin::Pin;
 use std::marker::Unpin;
 use std::task::{Context, Poll};
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum ModulePageKind {
-    Empty,
-    EditPlain,
-    EditResize,
-    PlayIframe,
-    PlayIframePreview,
-}
-
-impl ModulePageKind {
-    pub fn is_resize(&self) -> bool {
-        match self {
-            Self::EditResize | Self::PlayIframe | Self::PlayIframePreview => true,
-            Self::EditPlain | Self::Empty => false
-        }
-    }
-}
+use super::module_page::ModulePageKind;
 
 pub trait ModuleRenderer<Data> {
     fn new(data:Data) -> Self;
