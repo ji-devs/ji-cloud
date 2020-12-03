@@ -1,20 +1,26 @@
 /* There are a few fundamental concepts going on here...
  * 1. The serialized data does _not_ need to be Clone.
- *    rather, it's passed completely to the child
- *    and then the child is free to split it up for Mutable/etc.
+ *    rather, it's passed completely to the renderer
+ *    and then the renderer is free to split it up for Mutable/etc.
  *    (here it is held and taken from an Option)
  * 2. The loader will be skipped if the url has ?iframe_data=true
  *    in this case, iframe communication is setup and the parent
  *    is expected to post a message with the data (via IframeInit)
+ * 3. The core mechanism is build around ModuleRenderer, however
+ *    Boxing and pinning can be a bit annoying, so StaticModuleRenderer
+ *    is provided as a helper in cases where the top-level containers don't change. 
+ *    It does not prevent dynamic dispatch, however
+ *    (in fact there's a small performance overhead since it creates a new signal)
  */
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::borrow::Borrow;
+use std::marker::PhantomData;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
-    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal},
+    signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
     CancelableFutureHandle, 
 };
@@ -30,70 +36,9 @@ use crate::{
 };
 use std::future::Future;
 use async_trait::async_trait;
-
-/// TODO - can we do this? It compiles so far..
-/// Maybe ModulePageSignal instead of overhauling what's there
-/// public interfaces can just be thin wrappers over an enum that holds one or the other?
-#[async_trait(?Send)]
-pub trait ModuleRendererSignal {
-    type Data: DeserializeOwned;
-
-    async fn load(_self:Rc<Self>) -> Self::Data;
-    fn render<S,H,M,F>(_self: Rc<Self>, data: Self::Data) -> ModuleRenderOutputSignal<S, H, M, F>
-    where
-        S: Signal<Item = Option<Dom>>,
-        H: Signal<Item = Option<Dom>>,
-        M: Signal<Item = Option<Dom>>,
-        F: Signal<Item = Option<Dom>>;
-}
-pub struct ModuleRenderOutputSignal<S, H, M, F> 
-where
-    S: Signal<Item = Option<Dom>>,
-    H: Signal<Item = Option<Dom>>,
-    M: Signal<Item = Option<Dom>>,
-    F: Signal<Item = Option<Dom>>,
-{
-    pub kind: ModulePageKind,
-    pub sidebar: S,
-    pub header: H, 
-    pub main: M, 
-    pub footer: F 
-}
-////
-#[async_trait(?Send)]
-pub trait ModuleRenderer {
-    type Data: DeserializeOwned;
-
-    async fn load(_self:Rc<Self>) -> Self::Data;
-    fn render(_self: Rc<Self>, data: Self::Data) -> ModuleRenderOutput;
-}
-
-pub struct StaticModuleRenderer { 
-    output: RefCell<Option<ModuleRenderOutput>>
-}
-
-impl StaticModuleRenderer {
-   pub fn new(output: ModuleRenderOutput) -> Rc<Self> {
-       Rc::new(Self {output: RefCell::new(Some(output))})
-   }
-
-   pub fn stub() -> Rc<Self> {
-       Self::new(ModuleRenderOutput::new_empty(None))
-   }
-}
-
-#[async_trait(?Send)]
-impl ModuleRenderer for StaticModuleRenderer {
-    type Data = ();
-
-    async fn load(_self:Rc<Self>) { 
-    }
-
-    fn render(_self: Rc<Self>, data: ()) -> ModuleRenderOutput {
-        _self.output.borrow_mut().take().unwrap_throw()
-    }
-}
-
+use std::pin::Pin;
+use std::marker::Unpin;
+use std::task::{Context, Poll};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ModulePageKind {
@@ -113,178 +58,264 @@ impl ModulePageKind {
     }
 }
 
-pub struct ModuleRenderOutput {
-    pub kind: ModulePageKind,
-    pub sidebar: Option<Dom>,
-    pub header: Option<Dom>,
-    pub main: Option<Dom>,
-    pub footer: Option<Dom>,
+pub trait ModuleRenderer<Data> {
+    fn new(data:Data) -> Self;
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>>;
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
 }
 
+pub trait StaticModuleRenderer<Data> {
+    fn new(data:Data) -> Self;
+    fn page_kind(_self: Rc<Self>) -> ModulePageKind; 
+    fn sidebar(_self: Rc<Self>) -> Option<Dom>; 
+    fn header(_self: Rc<Self>) -> Option<Dom>; 
+    fn main(_self: Rc<Self>) -> Option<Dom>; 
+    fn footer(_self: Rc<Self>) -> Option<Dom>; 
+}
 
-
-impl ModuleRenderOutput {
-    pub fn new_player_iframe(dom:Dom) -> Self {
-
-        let kind = if should_get_iframe_data() {
-            ModulePageKind::PlayIframePreview
-        } else {
-            ModulePageKind::PlayIframe
-        };
-
-        Self {
-            kind,
-            sidebar: None,
-            header: None,
-            footer: None,
-            main: Some(dom)
-        }
+impl <Data, T: StaticModuleRenderer<Data>> ModuleRenderer<Data> for T {
+    fn new(data:Data) -> Self {
+        T::new(data)
     }
-
-    pub fn new_empty(main: Option<Dom>) -> Self {
-        Self {
-            kind: ModulePageKind::Empty,
-            sidebar: None,
-            header: None,
-            footer: None,
-            main 
-        }
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>> {
+        Box::pin(always(T::page_kind(_self)))
+    }
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::sidebar(_self)))
+    }
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::header(_self)))
+    }
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::main(_self)))
+    }
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::footer(_self)))
     }
 }
 
-pub struct ModulePage<T, R> 
+pub struct ModulePage<Renderer, Data> 
 where
-    T: DeserializeOwned,
-    R: ModuleRenderer<Data = T>,
+    Renderer: ModuleRenderer<Data>,
+    Data: DeserializeOwned,
 {
-    renderer: Rc<R>,
-    loaded_data: RefCell<Option<T>>, 
+    module_renderer: RefCell<Option<Rc<Renderer>>>,
     has_loaded_data: Mutable<bool>, 
     wait_iframe_data: bool,
     loader: AsyncLoader,
+    phantom: PhantomData<Data>
 }
 
-impl <T, R> ModulePage <T, R> 
+impl <Renderer, Data> ModulePage <Renderer, Data> 
 where
-    T: DeserializeOwned + std::fmt::Debug + 'static,
-    R: ModuleRenderer<Data = T> + 'static,
+    Renderer: ModuleRenderer<Data> + 'static,
+    Data: DeserializeOwned + 'static,
 {
-    pub fn new(renderer:Rc<R>) -> Rc<Self> {
+    pub fn render<Loader, F>(load: Loader) -> Dom 
+        where Loader: FnOnce() -> F + 'static,
+              F: Future<Output = Data>
+    {
+        html!("div", {
+              .class("w-full")
+              .class("h-full")
+              .child_signal(Self::dom_signal(Self::init(load)))
+        })
+    }
+
+    fn init<Loader, F>(load: Loader) -> Rc<Self> 
+        where Loader: FnOnce() -> F + 'static,
+              F: Future<Output = Data>
+    {
 
         let wait_iframe_data = should_get_iframe_data();
 
-
         let _self = Rc::new(Self { 
-            renderer, 
-            loaded_data: RefCell::new(None),
+            module_renderer: RefCell::new(None),
             has_loaded_data: Mutable::new(false), 
             loader: AsyncLoader::new(),
             wait_iframe_data,
+            phantom: PhantomData
         });
 
         let _self_clone = _self.clone();
-        _self_clone.loader.load(async move {
-            if !wait_iframe_data {
-                let data:T = ModuleRenderer::load(_self.renderer.clone()).await;
-                *_self.loaded_data.borrow_mut() = Some(data);
-                _self.has_loaded_data.set(true);
-            }
-        });
+
+        if !wait_iframe_data {
+            _self_clone.loader.load(async move {
+                let data = load().await; 
+                Self::stash(_self, data);
+            });
+        }
         
         _self_clone
     }
 
-    pub fn render(_self: Rc<Self>) -> Dom {
-        html!("div", {
-            .class("w-full")
-            .class("h-full")
-            .child_signal(_self.has_loaded_data.signal().map(clone!(_self => move |ready| {
-                if ready {
-                    let data = _self.loaded_data.borrow_mut().take().unwrap_throw();
-                    let output:ModuleRenderOutput = ModuleRenderer::render(_self.renderer.clone(),data);
-        
-                    Some(Self::render_sections(output))
-                } else {
-                    None
-                }
-            })))
-
-            .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
-
-                if let Ok(msg) = evt.try_serde_data::<IframeInit<T>>() {
-                    if !_self.wait_iframe_data {
-                        //log::warn!("weird... shouldn't have gotten iframe data!");
-                        //log::warn!("{:?}", msg);
-                    } else {
-                        *_self.loaded_data.borrow_mut() = Some(msg.data.unwrap_throw());
-                        _self.has_loaded_data.set(true);
-                    }
-                } else {
-                    log::info!("hmmm got other iframe message...");
-                }
-            }))
-            .after_inserted(clone!(_self => move |elem| {
-                if _self.wait_iframe_data {
-                    //On mount - send an empty IframeInit message to let the parent know we're ready
-                    let target = web_sys::window().unwrap_throw().parent().unwrap_throw().unwrap_throw();
-                    let msg = IframeInit::empty();
-
-                    target.post_message(&msg.into(), "*");
-                }
-            }))
-        })
+    fn stash(_self: Rc<Self>, data:Data) {
+        *_self.module_renderer.borrow_mut() = Some(Rc::new(Renderer::new(data)));
+        _self.has_loaded_data.set(true);
     }
 
-    fn render_sections(output:ModuleRenderOutput) -> Dom {
-        let ModuleRenderOutput {mut kind, mut header, mut sidebar, mut main, mut footer}  = output;
-      
-        elem!(templates::module_page(kind), {
-            .apply_if(main.is_some(), |dom| {
-                apply_methods!(dom, {
-                    .with_data_id!("main", {
-                        .child(main.take().unwrap_throw())
-                    })
-                })
-            })
-            .apply_if(sidebar.is_some(), |dom| {
-                apply_methods!(dom, {
-                    .with_data_id!("sidebar", {
-                        .child(sidebar.take().unwrap_throw())
-                    })
-                })
-            })
-            .apply_if(header.is_some(), |dom| {
-                apply_methods!(dom, {
-                    .with_data_id!("header", {
-                        .child(header.take().unwrap_throw())
-                    })
-                })
-            })
-            .apply_if(footer.is_some(), |dom| {
-                apply_methods!(dom, {
-                    .with_data_id!("footer", {
-                        .child(footer.take().unwrap_throw())
-                    })
-                })
-            })
-            .apply_if(kind.is_resize(), |dom| {
-                apply_methods!(dom, {
-                    .with_data_id!("module-outer", {
-                        .with_data_id!("module-content", {
-                        })
+    fn dom_signal(_self: Rc<Self>) -> impl Signal<Item = Option<Dom>> {
 
-                        .with_node!(elem => {
-                            .global_event(move |evt:events::Resize| {
-                                ModuleBounds::set_elem(&elem);
-                            })
-                        })
-                        .after_inserted(|elem| {
-                            ModuleBounds::set_elem(&elem);
-                        })
-                    })
-                })
-            })
+        _self.has_loaded_data.signal().map(clone!(_self => move |has_loaded| {
+            if !has_loaded {
+                None
+            } else {
+                let renderer = _self.module_renderer.borrow();
+                let renderer = renderer.as_ref().unwrap_throw();
 
-        })
+                Some(
+                    html!("div", {
+                        .class("w-full")
+                        .class("h-full")
+                        .child_signal(Renderer::page_kind_signal(renderer.clone())
+                            .map(clone!(_self, renderer => move |page_kind| {Some(
+                                elem!(templates::module_page(page_kind), {
+                                    .with_data_id!("sidebar", { .child_signal( 
+                                        Renderer::sidebar_signal(renderer.clone())
+                                    )})
+                                    .with_data_id!("header", { .child_signal( 
+                                        Renderer::header_signal(renderer.clone())
+                                    )})
+                                    .with_data_id!("main", { .child_signal( 
+                                        Renderer::main_signal(renderer.clone())
+                                    )})
+                                    .with_data_id!("footer", { .child_signal( 
+                                        Renderer::footer_signal(renderer.clone())
+                                    )})
+                                    .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
+
+                                        if let Ok(msg) = evt.try_serde_data::<IframeInit<Data>>() {
+                                            if !_self.wait_iframe_data {
+                                                //log::warn!("weird... shouldn't have gotten iframe data!");
+                                                //log::warn!("{:?}", msg);
+                                            } else {
+                                                Self::stash(_self.clone(), msg.data.unwrap_throw());
+                                            }
+                                        } else {
+                                            log::info!("hmmm got other iframe message...");
+                                        }
+                                    }))
+                                    .after_inserted(clone!(_self => move |elem| {
+                                        if _self.wait_iframe_data {
+                                            //On mount - send an empty IframeInit message to let the parent know we're ready
+                                            let target = web_sys::window().unwrap_throw().parent().unwrap_throw().unwrap_throw();
+                                            let msg = IframeInit::empty();
+
+                                            target.post_message(&msg.into(), "*");
+                                        }
+                                    }))
+
+                                    .apply_if(page_kind.is_resize(), |dom| {
+                                        apply_methods!(dom, {
+                                            .with_data_id!("module-outer", {
+                                                .with_data_id!("module-content", {
+                                                })
+
+                                                .with_node!(elem => {
+                                                    .global_event(move |evt:events::Resize| {
+                                                        ModuleBounds::set_elem(&elem);
+                                                    })
+                                                })
+                                                .after_inserted(|elem| {
+                                                    ModuleBounds::set_elem(&elem);
+                                                })
+                                            })
+                                        })
+                                    })
+                                })
+                            )}))
+                        )
+                    })
+                )
+            }
+        }))
     }
 }
+
+
+//////////// EXAMPLE
+
+/*struct ExampleRenderer { 
+    pub data: Mutable<bool>,
+}
+
+impl ModuleRenderer<bool> for ExampleRenderer {
+    fn new(data:bool) -> Self {
+        Self { 
+            data: Mutable::new(data) 
+        }
+    }
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>> { 
+        Box::pin(always(ModulePageKind::EditPlain))
+    }
+
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
+    }
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
+    }
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(
+            _self.data.signal()
+                .map(|x| {
+                    if x {
+                        Some(html!("h1", { .text ("it works!") } ))
+                    } else {
+                        None
+                    }
+                })
+        )
+    }
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
+    }
+}
+struct ExampleStaticRenderer { 
+    pub data: bool,
+}
+
+impl StaticModuleRenderer<bool> for ExampleStaticRenderer {
+    fn new(data:bool) -> Self {
+        Self { 
+            data
+        }
+    }
+    fn page_kind(_self: Rc<Self>) -> ModulePageKind { 
+        ModulePageKind::EditPlain
+    }
+
+    fn sidebar(_self: Rc<Self>) -> Option<Dom> {
+        None
+    }
+    fn header(_self: Rc<Self>) -> Option<Dom> {
+        None
+    }
+    fn main(_self: Rc<Self>) -> Option<Dom> {
+        Some(html!("h1", { .text ("it works!") } ))
+    }
+    fn footer(_self: Rc<Self>) -> Option<Dom> {
+        Some(html!("h1", { .text ("it works!") } ))
+    }
+}
+
+
+pub fn render_signals() -> Dom {
+
+    let hello = Rc::new("hello".to_string());
+
+    ModulePage::<ExampleRenderer, _>::render(clone!(hello => move || async move {
+        if *hello == "hello" { true } else {false}
+    }))
+}
+
+pub fn render_static() -> Dom {
+    let hello = Rc::new("hello".to_string());
+
+    ModulePage::<ExampleStaticRenderer, _>::render(clone!(hello => move || async move {
+        if *hello == "hello" { true } else {false}
+    }))
+}*/
