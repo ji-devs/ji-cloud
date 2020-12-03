@@ -1041,6 +1041,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
+name = "scratch"
+version = "0.1.0"
+dependencies = [
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "semver"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

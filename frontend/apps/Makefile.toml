@@ -24,6 +24,17 @@ script = '''
 set_env APP_PORT 4105 
 '''
 
+##########################
+## SCRATCH APPLICATIONS ##
+##########################
+
+[tasks.scratch-001]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "scratch/001" 
+cm_run_task dev-main
+'''
+
 ###################
 ## APPLICATIONS  ##
 ###################

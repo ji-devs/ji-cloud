@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/utils",
+	"crates/entry/scratch/001",
     "crates/entry/user",
     "crates/entry/admin",
     "crates/entry/jig/edit",
