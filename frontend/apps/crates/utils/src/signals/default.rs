@@ -10,11 +10,9 @@ use std::future::Future;
 use std::task::{Context, Poll};
 use crate::math::*;
 
-//
-//
-
-//All these Default*Signals could probably be simplified with macros since it's the same pattern
-//everywhere
+// TODO - simplify with macros and implement more!
+// When GAT's arrive we can probably change to just DefaultCloneSignal / DefaultCopySignal
+// And then with specializaion maybe just DefaultSignal :)
 
 
 // String

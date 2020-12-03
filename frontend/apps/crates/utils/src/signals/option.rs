@@ -11,6 +11,8 @@ use std::task::{Context, Poll};
 use crate::math::*;
 
 // TODO - simplify with macros and implement more!
+// When GAT's arrive we can probably change to just OptionCloneSignal / OptionCopySignal
+// And then with specializaion maybe just OptionSignal :)
 
 // i32 
 pub struct OptionI32Signal <S> 
