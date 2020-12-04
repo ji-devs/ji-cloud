@@ -1,4 +1,3 @@
-
 /* There are a few fundamental concepts going on here...
  * 1. The serialized data does _not_ need to be Clone.
  *    rather, it's passed completely to the renderer
@@ -7,11 +6,12 @@
  * 2. The loader will be skipped if the url has ?iframe_data=true
  *    in this case, iframe communication is setup and the parent
  *    is expected to post a message with the data (via IframeInit)
- * 3. The core mechanism is build around ModuleRenderer/signals, however
- *    sometimes the top-level elements are static, so StaticModuleRenderer
- *    is provided as a helper. It's not a performance saver though
+ * 3. The core mechanism is build around ModuleRenderer, however
+ *    Boxing and pinning can be a bit annoying, so StaticModuleRenderer
+ *    is provided as a helper in cases where the top-level containers don't change. 
+ *    It does not prevent dynamic dispatch, however
+ *    (in fact there's a small performance overhead since it creates a new signal)
  */
-
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::borrow::Borrow;
@@ -58,26 +58,17 @@ impl ModulePageKind {
     }
 }
 
-pub trait ModuleRenderer {
-    type Data;
-    type PageKindSignal: Signal<Item = ModulePageKind>;
-    type SidebarSignal: Signal<Item = Option<Dom>>;
-    type HeaderSignal: Signal<Item = Option<Dom>>;
-    type MainSignal: Signal<Item = Option<Dom>>;
-    type FooterSignal: Signal<Item = Option<Dom>>;
-
-    fn new(data:Self::Data) -> Self;
-    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal; 
-    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal; 
-    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal; 
-    fn main_signal(_self: Rc<Self>) -> Self::MainSignal; 
-    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal; 
+pub trait ModuleRenderer<Data> {
+    fn new(data:Data) -> Self;
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>>;
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>>;
 }
 
-pub trait StaticModuleRenderer {
-    type Data;
-
-    fn new(data:Self::Data) -> Self;
+pub trait StaticModuleRenderer<Data> {
+    fn new(data:Data) -> Self;
     fn page_kind(_self: Rc<Self>) -> ModulePageKind; 
     fn sidebar(_self: Rc<Self>) -> Option<Dom>; 
     fn header(_self: Rc<Self>) -> Option<Dom>; 
@@ -85,53 +76,44 @@ pub trait StaticModuleRenderer {
     fn footer(_self: Rc<Self>) -> Option<Dom>; 
 }
 
-impl <D, T: StaticModuleRenderer<Data = D>> ModuleRenderer for T {
-    type Data = D;
-
-    type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type SidebarSignal = impl Signal<Item = Option<Dom>>;
-    type HeaderSignal = impl Signal<Item = Option<Dom>>;
-    type MainSignal = impl Signal<Item = Option<Dom>>;
-    type FooterSignal = impl Signal<Item = Option<Dom>>;
-    
-    fn new(data:Self::Data) -> Self {
+impl <Data, T: StaticModuleRenderer<Data>> ModuleRenderer<Data> for T {
+    fn new(data:Data) -> Self {
         T::new(data)
     }
-
-    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal { 
-        always(T::page_kind(_self))
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>> {
+        Box::pin(always(T::page_kind(_self)))
     }
-    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
-        always(T::sidebar(_self))
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::sidebar(_self)))
     }
-    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
-        always(T::header(_self))
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::header(_self)))
     }
-    fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
-        always(T::main(_self))
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::main(_self)))
     }
-    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
-        always(T::footer(_self))
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> {
+        Box::pin(always(T::footer(_self)))
     }
 }
 
 pub struct ModulePage<Renderer, Data> 
 where
-    Renderer: ModuleRenderer<Data = Data>,
+    Renderer: ModuleRenderer<Data>,
     Data: DeserializeOwned,
 {
     module_renderer: RefCell<Option<Rc<Renderer>>>,
     has_loaded_data: Mutable<bool>, 
     wait_iframe_data: bool,
     loader: AsyncLoader,
+    phantom: PhantomData<Data>
 }
 
 impl <Renderer, Data> ModulePage <Renderer, Data> 
 where
-    Renderer: ModuleRenderer<Data = Data> + 'static,
+    Renderer: ModuleRenderer<Data> + 'static,
     Data: DeserializeOwned + 'static,
 {
-
     pub fn render<Loader, F>(load: Loader) -> Dom 
         where Loader: FnOnce() -> F + 'static,
               F: Future<Output = Data>
@@ -155,6 +137,7 @@ where
             has_loaded_data: Mutable::new(false), 
             loader: AsyncLoader::new(),
             wait_iframe_data,
+            phantom: PhantomData
         });
 
         let _self_clone = _self.clone();
@@ -252,96 +235,87 @@ where
     }
 }
 
+
 //////////// EXAMPLE
-/*
-mod example {
-    use super::*;
-    struct ExampleRenderer { 
-        pub data: Mutable<bool>,
-    }
 
-    impl ModuleRenderer for ExampleRenderer {
-        type Data = bool;
-        type PageKindSignal = impl Signal<Item = ModulePageKind>;
-        type SidebarSignal = impl Signal<Item = Option<Dom>>;
-        type HeaderSignal = impl Signal<Item = Option<Dom>>;
-        type MainSignal = impl Signal<Item = Option<Dom>>;
-        type FooterSignal = impl Signal<Item = Option<Dom>>;
+/*struct ExampleRenderer { 
+    pub data: Mutable<bool>,
+}
 
-        fn new(data:bool) -> Self {
-            Self { 
-                data: Mutable::new(data) 
-            }
-        }
-        fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
-            always(ModulePageKind::EditPlain)
-        }
-
-        fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
-            always(None)
-        }
-        fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
-            always(None)
-        }
-        fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
-                _self.data.signal()
-                    .map(|x| {
-                        if x {
-                            Some(html!("h1", { .text ("it works!") } ))
-                        } else {
-                            None
-                        }
-                    })
-        }
-        fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
-            always(None)
+impl ModuleRenderer<bool> for ExampleRenderer {
+    fn new(data:bool) -> Self {
+        Self { 
+            data: Mutable::new(data) 
         }
     }
-    struct ExampleStaticRenderer { 
-        pub data: bool,
+    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>> { 
+        Box::pin(always(ModulePageKind::EditPlain))
     }
 
-    impl StaticModuleRenderer for ExampleStaticRenderer {
-        type Data = bool;
-
-        fn new(data:bool) -> Self {
-            Self { 
-                data
-            }
-        }
-        fn page_kind(_self: Rc<Self>) -> ModulePageKind { 
-            ModulePageKind::EditPlain
-        }
-
-        fn sidebar(_self: Rc<Self>) -> Option<Dom> {
-            None
-        }
-        fn header(_self: Rc<Self>) -> Option<Dom> {
-            None
-        }
-        fn main(_self: Rc<Self>) -> Option<Dom> {
-            Some(html!("h1", { .text ("it works!") } ))
-        }
-        fn footer(_self: Rc<Self>) -> Option<Dom> {
-            Some(html!("h1", { .text ("it works!") } ))
-        }
+    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
     }
-
-    pub fn render_signals() -> Dom {
-
-        let hello = Rc::new("hello".to_string());
-
-        ModulePage::<ExampleRenderer, _>::render(clone!(hello => move || async move {
-            if *hello == "hello" { true } else {false}
-        }))
+    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
     }
-
-    pub fn render_static() -> Dom {
-        let hello = Rc::new("hello".to_string());
-
-        ModulePage::<ExampleStaticRenderer, _>::render(clone!(hello => move || async move {
-            if *hello == "hello" { true } else {false}
-        }))
+    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(
+            _self.data.signal()
+                .map(|x| {
+                    if x {
+                        Some(html!("h1", { .text ("it works!") } ))
+                    } else {
+                        None
+                    }
+                })
+        )
+    }
+    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
+        Box::pin(always(None))
     }
 }
-*/
+struct ExampleStaticRenderer { 
+    pub data: bool,
+}
+
+impl StaticModuleRenderer<bool> for ExampleStaticRenderer {
+    fn new(data:bool) -> Self {
+        Self { 
+            data
+        }
+    }
+    fn page_kind(_self: Rc<Self>) -> ModulePageKind { 
+        ModulePageKind::EditPlain
+    }
+
+    fn sidebar(_self: Rc<Self>) -> Option<Dom> {
+        None
+    }
+    fn header(_self: Rc<Self>) -> Option<Dom> {
+        None
+    }
+    fn main(_self: Rc<Self>) -> Option<Dom> {
+        Some(html!("h1", { .text ("it works!") } ))
+    }
+    fn footer(_self: Rc<Self>) -> Option<Dom> {
+        Some(html!("h1", { .text ("it works!") } ))
+    }
+}
+
+
+pub fn render_signals() -> Dom {
+
+    let hello = Rc::new("hello".to_string());
+
+    ModulePage::<ExampleRenderer, _>::render(clone!(hello => move || async move {
+        if *hello == "hello" { true } else {false}
+    }))
+}
+
+pub fn render_static() -> Dom {
+    let hello = Rc::new("hello".to_string());
+
+    ModulePage::<ExampleStaticRenderer, _>::render(clone!(hello => move || async move {
+        if *hello == "hello" { true } else {false}
+    }))
+}*/

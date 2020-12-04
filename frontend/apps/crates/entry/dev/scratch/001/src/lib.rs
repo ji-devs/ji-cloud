@@ -1,3 +1,4 @@
+#![feature(type_alias_impl_trait)]
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
@@ -18,7 +19,7 @@ pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
 
-    dominator::append_dom(&dominator::body(), page::render_signals());
+    dominator::append_dom(&dominator::body(), page::render_static());
 }
 
 

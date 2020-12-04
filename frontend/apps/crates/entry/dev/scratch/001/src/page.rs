@@ -23,43 +23,51 @@ struct ExampleRenderer {
     pub data: Mutable<bool>,
 }
 
-impl ModuleRenderer<bool> for ExampleRenderer {
+impl ModuleRenderer for ExampleRenderer {
+    type Data = bool;
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type SidebarSignal = impl Signal<Item = Option<Dom>>;
+    type HeaderSignal = impl Signal<Item = Option<Dom>>;
+    type MainSignal = impl Signal<Item = Option<Dom>>;
+    type FooterSignal = impl Signal<Item = Option<Dom>>;
+
     fn new(data:bool) -> Self {
         Self { 
             data: Mutable::new(data) 
         }
     }
-    fn page_kind_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = ModulePageKind>>> { 
-        Box::pin(always(ModulePageKind::EditPlain))
+    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
+        always(ModulePageKind::EditPlain)
     }
 
-    fn sidebar_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
-        Box::pin(always(None))
+    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
+        always(None)
     }
-    fn header_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
-        Box::pin(always(Some(html!("h1", { .text ("main header works!") } ))))
+    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
+        always(Some(html!("h1", { .text ("header from signal!") } )))
     }
-    fn main_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
-        Box::pin(
+
+    fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
             _self.data.signal()
                 .map(|x| {
                     if x {
-                        Some(html!("h1", { .text ("main signal works!") } ))
+                        Some(html!("h1", { .text ("main from signal!") } ))
                     } else {
                         None
                     }
                 })
-        )
     }
-    fn footer_signal(_self: Rc<Self>) -> Pin<Box<dyn Signal<Item = Option<Dom>>>> { 
-        Box::pin(always(None))
+    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
+        always(None)
     }
 }
 struct ExampleStaticRenderer { 
     pub data: bool,
 }
 
-impl StaticModuleRenderer<bool> for ExampleStaticRenderer {
+impl StaticModuleRenderer for ExampleStaticRenderer {
+    type Data = bool;
+
     fn new(data:bool) -> Self {
         Self { 
             data
@@ -73,16 +81,15 @@ impl StaticModuleRenderer<bool> for ExampleStaticRenderer {
         None
     }
     fn header(_self: Rc<Self>) -> Option<Dom> {
-        Some(html!("h1", { .text ("static header works!") } ))
+        Some(html!("h1", { .text ("header from static!") } ))
     }
     fn main(_self: Rc<Self>) -> Option<Dom> {
-        Some(html!("h1", { .text ("static main works!") } ))
+        Some(html!("h1", { .text ("main from static!") } ))
     }
     fn footer(_self: Rc<Self>) -> Option<Dom> {
         None
     }
 }
-
 
 pub fn render_signals() -> Dom {
 
@@ -104,3 +111,4 @@ pub fn render_static() -> Dom {
 pub fn render() -> Dom {
     html!("div", {.text("hello")})
 }
+
