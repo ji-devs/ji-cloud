@@ -4,7 +4,7 @@ use shared::{
     error::image::*,
     media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-use crate::{
+use utils::{
     fetch::{api_with_auth, api_with_auth_empty, api_upload_file},
     path
 };
@@ -25,7 +25,7 @@ use futures_signals::{
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, dynamic_class_signal, spawn_future, AsyncLoader};
-use crate::templates;
+use super::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
@@ -129,7 +129,7 @@ where F: FnMut(MetaImage) + 'static
             .signal_vec_cloned()
             .map(move |item| {
                 let id = item.id_str().to_string();
-                elem!(templates::image_search_result_thumbnail(&item), {
+                elem!(templates::search_result_thumbnail(&item), {
                     .event(clone!(_self, item => move |evt:events::Click| {
                         if let Some(cb) = _self.on_select.as_ref() {
                             (cb.borrow_mut())(item.clone());
@@ -147,7 +147,7 @@ where F: FnMut(MetaImage) + 'static
             })
     }
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::image_search_widget(), { 
+        elem!(templates::search_widget(), { 
             .with_data_id!("search", {
                 .with_data_id!("query" => HtmlInputElement, {
                     .with_node!(input => {

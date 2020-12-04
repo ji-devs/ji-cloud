@@ -13,9 +13,9 @@ const path = require('path');
 
 const watchPatterns = [
     `./crates/entry/**/_common/**`,
-    `./crates/utils/src/**`,
-    `./crates/entry/${APP_NAME}/src/**`,
-    `./crates/entry/${APP_NAME}/js/**`,
+    `./crates/utils/**`,
+	`./crates/components/**`,
+    `./crates/entry/${APP_NAME}/**`,
     "../css/plain/dist/**", 
     "../.template_output/**", 
     //technically this happens _after_ the html rebuild

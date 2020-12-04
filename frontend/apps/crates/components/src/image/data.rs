@@ -3,7 +3,7 @@ use shared::{
     domain::image::{SearchQuery, SearchResponse, ImageId, GetResponse, Image},
     media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-use crate::math::RectF64;
+use utils::math::RectF64;
 use serde::{Serialize, Deserialize};
 
 pub const SEARCH_THUMBNAIL_DATA_TRANSFER:&'static str = "search-thumbnail";
@@ -19,11 +19,11 @@ pub trait ImageExt {
         self.id_str().to_string()
     }
     fn thumbnail_src(&self) -> String {
-        crate::path::library_image_id(*self.library_kind(), MediaVariant::Thumbnail, *self.id())
+        utils::path::library_image_id(*self.library_kind(), MediaVariant::Thumbnail, *self.id())
     }
 
     fn full_src(&self) -> String {
-        crate::path::library_image_id(*self.library_kind(), MediaVariant::Resized, *self.id())
+        utils::path::library_image_id(*self.library_kind(), MediaVariant::Resized, *self.id())
     }
 }
 

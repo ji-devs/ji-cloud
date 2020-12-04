@@ -15,7 +15,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::templates;
-use utils::components::module_page::*;
+use components::module::page::*;
 use std::pin::Pin;
 
 

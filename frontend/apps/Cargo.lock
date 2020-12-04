@@ -425,6 +425,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "components"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "chrono",
+ "config",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "serde_qs",
+ "serde_repr",
+ "shared",
+ "simple-html-template",
+ "strum",
+ "strum_macros",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "config"
 version = "0.1.0"
 dependencies = [
@@ -1044,8 +1080,10 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 name = "scratch"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
+ "components",
  "config",
  "console_error_panic_hook",
  "discard",
@@ -1058,6 +1096,7 @@ dependencies = [
  "itertools",
  "js-sys",
  "log",
+ "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

@@ -27,10 +27,10 @@ use futures_signals::{
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
 use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
-use crate::templates;
+use super::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use serde::de::DeserializeOwned;
-use crate::{
+use utils::{
     iframe::*,
     resize::*,
 };
@@ -172,7 +172,7 @@ where
                         .class("h-full")
                         .child_signal(Renderer::page_kind_signal(renderer.clone())
                             .map(clone!(_self, renderer => move |page_kind| {Some(
-                                elem!(templates::module_page(page_kind), {
+                                elem!(templates::page(page_kind), {
                                     .with_data_id!("sidebar", { .child_signal( 
                                         Renderer::sidebar_signal(renderer.clone())
                                     )})
