@@ -1077,7 +1077,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
-name = "scratch"
+name = "scratch-001"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -1211,6 +1211,42 @@ dependencies = [
  "serde_json",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "showcase-001"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "components",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
 ]
 
 [[package]]

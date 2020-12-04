@@ -36,6 +36,52 @@ cm_run_task local-main
 '''
 
 ###################
+## SHOWCASE      ##
+###################
+
+# 001 
+[tasks.showcase-001-local]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task local-main
+'''
+[tasks.showcase-001-local-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task local-main-nomedia
+'''
+
+[tasks.showcase-001-local-iframe]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task local-iframe
+
+'''
+[tasks.showcase-001-local-iframe-nomedia]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task local-iframe-nomedia
+'''
+
+[tasks.showcase-001-sandbox]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task sandbox 
+'''
+
+[tasks.showcase-001-release]
+script_runner = "@duckscript"
+script = '''
+set_env APP_NAME "dev/showcase/001" 
+cm_run_task release 
+'''
+
+###################
 ## APPLICATIONS  ##
 ###################
 
@@ -46,7 +92,6 @@ script = '''
 set_env APP_NAME user 
 cm_run_task local-main
 '''
-# USER
 [tasks.user-local-nomedia]
 script_runner = "@duckscript"
 script = '''

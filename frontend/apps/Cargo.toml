@@ -3,6 +3,7 @@ members = [
     "crates/utils",
 	"crates/components",
 	"crates/entry/dev/scratch/001",
+	"crates/entry/dev/showcase/001",
     "crates/entry/user",
     "crates/entry/admin",
     "crates/entry/jig/edit",

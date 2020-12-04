@@ -18,6 +18,7 @@ const ALLOWED_APP_NAMES = [
 	"module/poster/edit",
 	"module/poster/play",
 	"dev/scratch/001",
+	"dev/showcase/001",
 ]
 
 if(FRONTEND_DEV_AUTH) {

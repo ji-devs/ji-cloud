@@ -1,5 +1,5 @@
 [package]
-name = "scratch-001"
+name = "showcase-001"
 version = "0.1.0"
 description = "App"
 authors = ["David Komer <david.komer@gmail.com>"]
