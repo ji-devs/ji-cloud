@@ -50,12 +50,12 @@ async fn handle_signin_credentials(
 ) -> actix_web::Result<HttpResponse> {
     let user_id = db::user::firebase_to_id(&db, &user.id)
         .await
-        .map_err(|_| HttpResponse::InternalServerError())?
+        .map_err(InternalServerError::from)?
         .ok_or_else(|| HttpResponse::UnprocessableEntity().json(NoSuchUserError {}))?;
 
     let (csrf, cookie) =
         reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())
-            .map_err(|_| HttpResponse::InternalServerError())?;
+            .map_err(InternalServerError::from)?;
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
@@ -96,7 +96,7 @@ async fn handle_get_profile(
 
     db::user::profile(db.as_ref(), claims.0.id)
         .await
-        .map_err(|_| HttpResponse::InternalServerError())?
+        .map_err(InternalServerError::from)?
         .map(Json)
         .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
@@ -111,7 +111,7 @@ async fn handle_authorize(
     };
 
     let jwt = jwt::encode(&jwt::Header::default(), &claims, &settings.jwt_encoding_key)
-        .map_err(|_| HttpResponse::InternalServerError())?;
+        .map_err(InternalServerError::from)?;
 
     Ok(Json(SingleSignOnSuccess { jwt }))
 }
