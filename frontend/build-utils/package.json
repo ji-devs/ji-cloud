@@ -3,7 +3,7 @@
   "description": "Ji Cloud Build Utils",
   "scripts": {
     "local-media-server": "node ./src/local-media-server.js",
-    "dev-files": "node ./src/dev-files.js",
+    "local-dev-files": "node ./src/local-dev-files.js",
     "cors": "npm-run-all -p _cors:frontend _cors:uploads _cors:media",
     "_cors:frontend": "npm run _cors:frontend-release && npm run _cors:frontend-sandbox",
     "_cors:frontend-release": "node ./src/cors.js --frontend-release --set",
