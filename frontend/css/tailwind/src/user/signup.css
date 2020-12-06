@@ -60,5 +60,13 @@
 
 .secure {
   width: 75%;
-  background-color:#42cc7a; 
+  background-color:#42cc7a;
+}
+
+.error-message{
+ font-size: 14px;
+ color: #f00813;
+ margin-top:-10px;
+ margin-left:5px;
+ margin-bottom:10px;
 }

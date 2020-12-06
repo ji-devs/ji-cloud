@@ -19,15 +19,17 @@
         <hr class="w-112 ml-5">
 
       </div>
-      <div data-id="status-message"></div>
-      {{ User::user_input(label="Email",width="w-297",inputwidth="w-296", inputDataId="email") }}
-      {{ User::user_pw(label="Password",width="w-297", inputwidth="w-296", inputDataId="password") }}
 
+      {{ User::user_input(label="Email",width="w-297",inputwidth="w-296", inputDataId="email", placeholder="Username" )}}
+      <div data-id="email-error" class="error-message"></div>
+      {{ User::user_pw(label="Password",width="w-297", inputwidth="w-296", inputDataId="password") }}
+      <div data-id="password-error" class="error-message"></div>
 
 
       <div data-id="forgot-password" class="text-right text-jibuttonBlue mb-12 cursor-pointer">Forgot your Password?</div>
 
       {{ ButtonMacros::orange(label="Submit", dataId="email-signin") }}
+      <div data-id="status-message" class="error-message"></div>
       <p class="  mt-6">Don't have an account yet? <span data-id="register-link" class="cursor-pointer text-jibuttonBlue">Register</span></p>
     </div>
   </div>

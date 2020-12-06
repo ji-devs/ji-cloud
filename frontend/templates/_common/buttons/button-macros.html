@@ -34,7 +34,7 @@
 {% endmacro sidebarbutton %}
 
 {% macro green(label, dataId="") %}
-<button data-id="{{dataId}}" class="bg-jibuttongreen text-white font-normal min-w-112 py-2 px-4 rounded-lg">
+<button data-id="{{dataId}}" class="bg-jibuttongreen text-white font-normal min-w-112 py-2 px-4 rounded-lg focus:outline-none">
   <div class="flex">
     <img src="{{MEDIA_UI}}/icon-sent.svg" alt="" class="mr-2">
     {{label}}
