@@ -63,6 +63,32 @@ fn set_attributes_for_faceting<'a>(
     })
 }
 
+fn set_searchable_fields_v2<'a>(
+    client: &'a super::Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("description".to_owned()))
+                .multi(vec![
+                    Attribute("category_names".to_owned()),
+                    Attribute("style_names".to_owned()),
+                    Attribute("age_range_names".to_owned()),
+                    Attribute("affiliation_names".to_owned()),
+                ])
+                .finish(),
+        ),
+        attributes_for_faceting: None,
+    };
+
+    Box::pin(async move {
+        client.set_settings(index, &settings).await?;
+        Ok(())
+    })
+}
+
 pub const INDEXING_MIGRATIONS: &'static [(
     ResyncKind,
     for<'a> fn(&'a super::Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
@@ -73,6 +99,7 @@ pub const INDEXING_MIGRATIONS: &'static [(
         Box::pin(futures::future::ok(()))
     }),
     (ResyncKind::Complete, set_attributes_for_faceting),
+    (ResyncKind::Complete, set_searchable_fields_v2),
 ];
 
 pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;
