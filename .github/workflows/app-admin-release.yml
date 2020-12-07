@@ -61,7 +61,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make admin-release 
+        run: cargo make release "admin"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend

@@ -1,3 +1,18 @@
+# Run like: cargo make [entry task] [app name]
+
+# Allowed app names:
+# dev/scratch/001
+# dev/showcase/001
+# dev/showcase/001
+# user
+# admin
+# jig/edit
+# jig/play
+# module/memory/edit
+# module/memory/play
+# module/poster/edit
+# module/poster/play
+
 ###################
 ## Config        ##
 ###################
@@ -25,303 +40,50 @@ set_env APP_PORT 4105
 '''
 
 ##########################
-## SCRATCH APPLICATIONS ##
+## ENTRY                ##
 ##########################
 
-[tasks.scratch-001]
+[tasks.sandbox]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/scratch/001" 
-cm_run_task local-main
+set_env APP_NAME ${1} 
+cm_run_task build-sandbox
 '''
 
-###################
-## SHOWCASE      ##
-###################
-
-# 001 
-[tasks.showcase-001-local]
+[tasks.release]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task local-main
+set_env APP_NAME ${1} 
+cm_run_task build-release
 '''
-[tasks.showcase-001-local-nomedia]
+
+[tasks.local-main]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task local-main-nomedia
+set_env APP_NAME ${1} 
+cm_run_task build-local-main
 '''
 
-[tasks.showcase-001-local-iframe]
+[tasks.local-iframe]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task local-iframe
-
+set_env APP_NAME ${1} 
+cm_run_task build-local-iframe
 '''
-[tasks.showcase-001-local-iframe-nomedia]
+
+[tasks.local-main-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task local-iframe-nomedia
+set_env APP_NAME ${1} 
+cm_run_task build-local-main-nomedia
 '''
 
-[tasks.showcase-001-sandbox]
+[tasks.local-iframe-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task sandbox 
+set_env APP_NAME ${1} 
+cm_run_task build-local-iframe-nomedia
 '''
-
-[tasks.showcase-001-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "dev/showcase/001" 
-cm_run_task release 
-'''
-
-###################
-## APPLICATIONS  ##
-###################
-
-# USER
-[tasks.user-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task local-main
-'''
-[tasks.user-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task local-main-nomedia
-'''
-
-[tasks.user-local-iframe]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task local-iframe
-
-'''
-[tasks.user-local-iframe-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task local-iframe-nomedia
-'''
-
-[tasks.user-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task sandbox 
-'''
-
-[tasks.user-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME user 
-cm_run_task release 
-'''
-
-# ADMIN 
-[tasks.admin-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin
-cm_run_task local-main
-'''
-
-[tasks.admin-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin
-cm_run_task local-main-nomedia
-'''
-
-[tasks.admin-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin 
-cm_run_task sandbox 
-'''
-
-[tasks.admin-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin 
-cm_run_task release 
-'''
-
-# JIG - SHELL 
-[tasks.jig-edit-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task local-main
-'''
-
-[tasks.jig-edit-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task local-main-nomedia
-'''
-
-[tasks.jig-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.jig-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.jig-play-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task local-iframe
-'''
-
-[tasks.jig-play-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task local-iframe-nomedia
-'''
-
-[tasks.jig-play-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task sandbox 
-'''
-
-[tasks.jig-play-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task release 
-'''
-
-#######################
-## MODULES           ##
-#######################
-
-# MODULE - MEMORY
-[tasks.module-memory-edit-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task local-main
-'''
-
-[tasks.module-memory-edit-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task local-main-nomedia
-'''
-
-[tasks.module-memory-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-memory-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.module-memory-play-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task local-iframe
-'''
-
-[tasks.module-memory-play-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task local-iframe-nomedia
-'''
-
-[tasks.module-memory-play-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-memory-play-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task release 
-'''
-
-# MODULE - POSTER 
-[tasks.module-poster-edit-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task local-main
-'''
-
-[tasks.module-poster-edit-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task local-main-nomedia
-'''
-
-[tasks.module-poster-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-poster-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.module-poster-play-local]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/play" 
-cm_run_task local-iframe
-'''
-
-[tasks.module-poster-play-local-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/play" 
-cm_run_task local-iframe-nomedia
-'''
-
-
-
 
 #######################
 ## COMMON            ##
@@ -335,7 +97,7 @@ rm -rf ../.template_output
 #######################
 ## BUILD - SANDBOX ##
 #######################
-[tasks.sandbox]
+[tasks.build-sandbox]
 run_task = {name = [
     "clean-templates",
     "sandbox-build-templates",
@@ -355,7 +117,7 @@ script = ["npm run build:sandbox"]
 #######################
 ## BUILD - RELEASE   ##
 #######################
-[tasks.release]
+[tasks.build-release]
 run_task = {name = [
     "clean-templates",
     "release-build-templates",
@@ -375,7 +137,7 @@ script = ["npm run build:release"]
 ###################
 ## local ##
 ###################
-[tasks.local-main]
+[tasks.build-local-main]
 run_task = {name = [
     "clean-templates",
     "local-port-main",
@@ -384,7 +146,7 @@ run_task = {name = [
     "local-start",
 ]}
 
-[tasks.local-iframe]
+[tasks.build-local-iframe]
 run_task = {name = [
     "clean-templates",
     "local-port-iframe",
@@ -393,14 +155,14 @@ run_task = {name = [
     "local-start",
 ]}
 
-[tasks.local-main-nomedia]
+[tasks.build-local-main-nomedia]
 run_task = {name = [
     "local-port-main",
     "local-prep-files",
     "local-watch-app",
 ]}
 
-[tasks.local-iframe-nomedia]
+[tasks.bild-local-iframe-nomedia]
 run_task = {name = [
     "local-port-iframe",
     "local-prep-files",

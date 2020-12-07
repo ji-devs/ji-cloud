@@ -61,7 +61,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make admin-sandbox
+        run: cargo make sandbox "admin"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
