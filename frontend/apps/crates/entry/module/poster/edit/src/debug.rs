@@ -11,7 +11,7 @@ use shared::media::MediaLibraryKind;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::data::*; 
-use utils::components::image::{
+use components::image::{
     search::ImageSearchWidgetDebug, 
     data::*
 };

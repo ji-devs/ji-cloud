@@ -63,26 +63,18 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (GALLERY_PAGE, get_template_str(include_str!("../../../../../../.template_output/jig/gallery/jig-creator-one.html"))),
-            (EDIT_PAGE, get_template_str(include_str!("../../../../../../.template_output/jig/edit/edit-page.html"))),
-            (EDIT_SIDEBAR_SECTION, get_template_str(include_str!("../../../../../../.template_output/jig/edit/sidebar.html"))),
-            (EDIT_MENU_SECTION, get_template_str(include_str!("../../../../../../.template_output/jig/edit/menu.html"))),
-            (EDIT_DELETE_POPUP, get_template_str(include_str!("../../../../../../.template_output/jig/edit/delete-popup.html"))),
-            (EDIT_MODULE_LEFT, get_template_str(include_str!("../../../../../../.template_output/jig/edit/sidebar-module-left.html"))),
-            (EDIT_MODULE_RIGHT, get_template_str(include_str!("../../../../../../.template_output/jig/edit/sidebar-module-right.html"))),
-            (EDIT_MODULE_DRAG_SLOT, get_template_str(include_str!("../../../../../../.template_output/jig/edit/sidebar-module-drag-slot.html"))),
-            (EDIT_MODULE_SELECTION, get_template_str(include_str!("../../../../../../.template_output/jig/edit/module-selection.html"))),
+            (GALLERY_PAGE, include_str!("../../../../../../.template_output/jig/gallery/jig-creator-one.html")),
+            (EDIT_PAGE, include_str!("../../../../../../.template_output/jig/edit/edit-page.html")),
+            (EDIT_SIDEBAR_SECTION, include_str!("../../../../../../.template_output/jig/edit/sidebar.html")),
+            (EDIT_MENU_SECTION, include_str!("../../../../../../.template_output/jig/edit/menu.html")),
+            (EDIT_DELETE_POPUP, include_str!("../../../../../../.template_output/jig/edit/delete-popup.html")),
+            (EDIT_MODULE_LEFT, include_str!("../../../../../../.template_output/jig/edit/sidebar-module-left.html")),
+            (EDIT_MODULE_RIGHT, include_str!("../../../../../../.template_output/jig/edit/sidebar-module-right.html")),
+            (EDIT_MODULE_DRAG_SLOT, include_str!("../../../../../../.template_output/jig/edit/sidebar-module-drag-slot.html")),
+            (EDIT_MODULE_SELECTION, include_str!("../../../../../../.template_output/jig/edit/module-selection.html")),
         ]);
 
         Self { cache }
     }
 
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
 }

@@ -237,6 +237,7 @@ where
                                                     })
                                                 })
                                                 .after_inserted(|elem| {
+                                                    log::info!("has set bounds...");
                                                     ModuleBounds::set_elem(&elem);
                                                 })
                                             })

@@ -3,54 +3,69 @@ use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal},
+    signal::{Mutable, SignalExt, Signal, always},
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::data::*;
 use crate::debug;
-use utils::components::module_page::*;
-use async_trait::async_trait;
+use components::module::page::*;
 use super::{sidebar, main::MainDom, header, footer};
 
-pub struct EditorPage {
-    pub state: Rc<State>,
-}
 
-impl EditorPage {
-    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        let state = Rc::new(State::new(jig_id, module_id));
-        Rc::new(Self { state })
-    }
-}
+type LoadedData = (String, String, raw::Poster);
 
-#[async_trait(?Send)]
-impl ModuleRenderer for EditorPage {
-    type Data = raw::Poster;
-
-    async fn load(_self:Rc<Self>) -> raw::Poster { 
-        if let Some(raw_poster) = debug::settings().poster {
-            raw_poster
+pub fn render(jig_id: String, module_id: String) -> Dom {
+    ModulePage::<EditorRenderer, _>::render(move || async move {
+        if let Some(raw_data) = debug::settings().poster {
+            (jig_id, module_id, raw_data)
         } else {
-            raw::Poster::load(_self.state.jig_id.clone(), _self.state.module_id.clone()).await
+            let raw_data = raw::Poster::load(jig_id.clone(), module_id.clone()).await;
+            (jig_id, module_id, raw_data)
+        }
+    })
+}
+
+struct EditorRenderer {
+    pub state: Rc<State>
+}
+
+impl ModuleRenderer for EditorRenderer {
+    type Data = LoadedData;
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type SidebarSignal = impl Signal<Item = Option<Dom>>;
+    type HeaderSignal = impl Signal<Item = Option<Dom>>;
+    type MainSignal = impl Signal<Item = Option<Dom>>;
+    type FooterSignal = impl Signal<Item = Option<Dom>>;
+
+    fn new((jig_id, module_id, raw_data):LoadedData) -> Self {
+        Self { 
+            state: State::new(jig_id, module_id, raw_data)
         }
     }
 
-    fn render(_self: Rc<Self>, data: raw::Poster) -> ModuleRenderOutput {
-        _self.state.set_from_loaded(data);
-        ModuleRenderOutput {
-            kind: ModulePageKind::EditResize,
-            sidebar: Some(sidebar::render(_self.state.clone())),
-            header: Some(header::render(_self.state.clone())),
-            main: Some(MainDom::render(MainDom::new(_self.state.clone()))),
-            footer: Some(footer::render(_self.state.clone())),
-        }
+
+    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
+        always(ModulePageKind::EditResize)
     }
 
+    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal {
+        always(Some(sidebar::render(_self.state.clone())))
+    }
+    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal {
+        always(Some(header::render(_self.state.clone())))
+    }
+    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal {
+        always(Some(footer::render(_self.state.clone())))
+    }
+    fn main_signal(_self: Rc<Self>) -> Self::MainSignal {
+
+        always(Some(MainDom::render(MainDom::new(_self.state.clone()))))
+    }
 }

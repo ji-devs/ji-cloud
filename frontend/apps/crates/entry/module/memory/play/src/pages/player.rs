@@ -10,14 +10,12 @@ use futures_signals::{
 };
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, signals::DefaultSignal};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use utils::{
     iframe::*,
-    components::module_page::*,
-    signals::DefaultStringSignal,
     settings::SETTINGS,
 };
 use gloo_timers::future::TimeoutFuture;
@@ -35,52 +33,63 @@ use shared::{
     domain,
     error,
 };
-use utils::components::image::data::*;
+use components::{
+    image::data::*,
+    module::page::*
+};
 
 use uuid::Uuid;
-pub struct PlayerPage {
-    jig_id: String,
-    module_id: String,
-}
 
-impl PlayerPage {
-    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        Rc::new(Self { jig_id, module_id})
-    }
-}
 
-//Use the ModuleRenderer component by way of a trait
-#[async_trait(?Send)]
-impl ModuleRenderer for PlayerPage {
-    type Data = raw::GameData;
+type LoadedData = (String, String, raw::GameData);
 
-    async fn load(_self:Rc<Self>) -> raw::GameData { 
+pub fn render(jig_id: String, module_id: String) -> Dom {
+    ModulePage::<PlayerRenderer, _>::render(move || async move {
         if let Some(raw_data) = debug::settings().data {
-            raw_data
+            (jig_id, module_id, raw_data)
         } else {
-            log::info!("loading...");
-            raw::GameData::load(_self.jig_id.clone(), _self.module_id.clone()).await.unwrap_throw()
+            let raw_data = raw::GameData::load(jig_id.clone(), module_id.clone()).await.unwrap_throw();
+            (jig_id, module_id, raw_data)
+        }
+    })
+}
+
+
+struct PlayerRenderer {
+    pub state: Rc<State>
+}
+
+impl ModuleRenderer for PlayerRenderer {
+    type Data = LoadedData;
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type SidebarSignal = impl Signal<Item = Option<Dom>>;
+    type HeaderSignal = impl Signal<Item = Option<Dom>>;
+    type MainSignal = impl Signal<Item = Option<Dom>>;
+    type FooterSignal = impl Signal<Item = Option<Dom>>;
+
+    fn new((jig_id, module_id, raw_data):LoadedData) -> Self {
+        Self { 
+            state: State::new(jig_id, module_id, raw_data)
         }
     }
 
-    fn render(_self: Rc<Self>, data: raw::GameData) -> ModuleRenderOutput {
-        let state = State::new(_self.jig_id.clone(), _self.module_id.clone(), data);
-        ModuleRenderOutput::new_player_iframe(Player::render(Player::new(state)))
-    }
-}
 
-
-pub struct Player {
-    state: Rc<State>,
-}
-
-impl Player {
-    pub fn new(state:Rc<State>) -> Rc<Self> {
-        Rc::new(Self { state })
+    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
+        always(ModulePageKind::PlayIframe)
     }
 
-    pub fn render(_self:Rc<Self>) -> Dom {
-        elem!(templates::player(), {
+    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
+        always(None)
+    }
+    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
+        always(None)
+    }
+    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
+        always(None)
+    }
+
+    fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
+        always(Some(elem!(templates::player(), {
             .class(format!("memory-theme-{}", _self.state.theme_id))
             .future(_self.state.flip_state.signal_cloned().for_each(clone!(_self => move |flip_state| {
                 clone!(_self => async move {
@@ -96,9 +105,12 @@ impl Player {
                 .class(format!("memory-grid-{}", _self.state.grid_number()))
                 .children_signal_vec(Self::game_cards_dom_signal(_self.clone()))
             })
-        })
+        })))
     }
 
+}
+
+impl PlayerRenderer {
     fn game_cards_dom_signal(_self: Rc<Self>) -> impl SignalVec<Item = Dom> {
         _self.state.game_cards
             .signal_vec_cloned()
@@ -211,7 +223,7 @@ impl CardDom {
 
     fn transform_signal(&self) -> impl Signal<Item = String> {
         self.transition.signal_ref(|transition| {
-            DefaultStringSignal::new(
+            DefaultSignal::new(
                 "none".to_string(),
                 transition.as_ref().map(|t| t.transform_signal())
             )

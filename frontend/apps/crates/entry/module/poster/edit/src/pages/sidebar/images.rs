@@ -9,13 +9,13 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::data::*;
 use crate::config::LAYOUT_OPTIONS;
-use utils::components::image::{
+use components::image::{
     data::*,
     search::*
 };

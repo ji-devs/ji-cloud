@@ -9,6 +9,5 @@ pub mod path;
 pub mod firebase;
 pub mod iframe;
 pub mod resize;
-pub mod signals;
 pub mod math;
 pub mod drag;

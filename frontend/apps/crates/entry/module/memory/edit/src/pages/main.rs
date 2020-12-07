@@ -9,17 +9,16 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlIFrameElement,HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem,dynamic_class_signal ,with_data_id};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::data::*;
 use crate::debug;
-use utils::components::module_page::*;
+use components::image::data::*;
 use async_trait::async_trait;
 use super::choose_mode;
 use wasm_bindgen::JsCast;
-use utils::components::image::data::*;
 use shared::media::{image_id_to_key, MediaLibraryKind, MediaVariant};
 pub struct Main {
     state: Rc<State>, 
@@ -39,7 +38,20 @@ enum MainMode {
     Iframe
 }
 impl Main {
-    pub fn new(state: Rc<State>, game_mode:GameMode) -> Rc<Self> {
+
+    pub fn render(state: Rc<State>, game_mode:GameMode) -> impl Signal<Item = Dom> {
+        let _self = Self::new(state, game_mode);
+
+        _self.main_mode_signal().map(clone!(_self => move |main_mode| {
+            match main_mode {
+                MainMode::EmptyCards => elem!(templates::main_empty(), {}),
+                MainMode::Pairs => Self::render_pairs(_self.clone()),
+                MainMode::Iframe => Self::render_iframe(_self.clone()),
+            }
+        }))
+    }
+
+    fn new(state: Rc<State>, game_mode:GameMode) -> Rc<Self> {
         Rc::new(Self { 
             state, 
             game_mode,
@@ -64,27 +76,7 @@ impl Main {
             }
         }
     }
-    pub fn render(_self: Rc<Self>) -> Dom {
-        html!("div", {
-            .class("w-full")
-            .class("h-full")
-            .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
-                Some(format!("memory-theme-{}", id))
-            }))
-            .child_signal(_self.main_mode_signal().map(clone!(_self => move |main_mode| {
-                log::info!("{:?}", main_mode);
 
-                Some(
-                    match main_mode {
-                        MainMode::EmptyCards => elem!(templates::main_empty(), {}),
-                        MainMode::Pairs => Self::render_pairs(_self.clone()),
-                        MainMode::Iframe => Self::render_iframe(_self.clone()),
-                    }
-                )
-            })))
-        })
-
-    }
     fn iframe_url(&self) -> String {
         let route:String = Route::Module(ModuleRoute::Play(ModuleKind::MemoryGame, self.state.jig_id.clone(), self.state.module_id.clone())).into();
 
@@ -124,6 +116,9 @@ impl Main {
         let state = _self.state.clone();
         elem!(templates::main_pairs(), {
             .with_data_id!("cards", {
+                .dynamic_class_signal!(_self.state.theme_id.signal_ref(|id| {
+                    Some(format!("memory-theme-{}", id))
+                }))
                 .children_signal_vec(
                     state.pairs
                         .signal_vec_cloned()

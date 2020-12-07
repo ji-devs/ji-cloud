@@ -14,11 +14,11 @@ use itertools::Itertools;
 use std::fmt::Write;
 use utils::{
     settings::SETTINGS,
-    components::image::{
-        search::ImageSearchWidgetDebug, 
-        transform::TransformImage,
-        data::*
-    }
+};
+use components::image::{
+    search::ImageSearchWidgetDebug, 
+    transform::TransformImage,
+    data::*
 };
 
 
@@ -50,26 +50,19 @@ impl Poster {
         }
     }
 
-    pub fn set_from_raw(&self, raw_poster:raw::Poster) {
-    }
-
     pub fn add_image(&self, img:SimpleImage) {
         self.images.lock_mut().push_cloned(Rc::new(TransformImage::new(img)));
     }
 }
 
 impl State {
-    pub fn new(jig_id:String, module_id: String) -> Self {
-        Self {
+    pub fn new(jig_id:String, module_id: String, raw_poster:raw::Poster) -> Rc<Self> {
+        Rc::new(Self {
             jig_id,
             module_id,
             poster: Rc::new(Poster::new()),
             tool: Mutable::new(debug::settings().tool)
-        }
-    }
-
-    pub fn set_from_loaded(&self, raw_poster:raw::Poster) {
-        self.poster.set_from_raw(raw_poster);
+        })
     }
 }
 

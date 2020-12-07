@@ -83,30 +83,22 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (SIGNIN, get_template_str(include_str!("../../../../../.template_output/user/signin/signin.html"))),
-            (REGISTER_START, get_template_str(include_str!("../../../../../.template_output/user/register/register-start.html"))),
-            (REGISTER_STEP1, get_template_str(include_str!("../../../../../.template_output/user/register/register-1.html"))),
-            (REGISTER_STEP2, get_template_str(include_str!("../../../../../.template_output/user/register/register-2.html"))),
-            (REGISTER_STEP3, get_template_str(include_str!("../../../../../.template_output/user/register/register-3.html"))),
-            (REGISTER_FINAL, get_template_str(include_str!("../../../../../.template_output/user/register/register-final.html"))),
-            (PROFILE, get_template_str(include_str!("../../../../../.template_output/user/profile/profile.html"))),
-            (PROFILE_EMAIL_CHANGE, get_template_str(include_str!("../../../../../.template_output/user/profile/email-change.html"))),
-            (SEND_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../.template_output/user/misc/send-email-confirmation.html"))),
-            (GOT_EMAIL_CONFIRMATION, get_template_str(include_str!("../../../../../.template_output/user/misc/got-email-confirmation.html"))),
-            (FORGOT_PASSWORD, get_template_str(include_str!("../../../../../.template_output/user/misc/forgot-password.html"))),
+            (SIGNIN, include_str!("../../../../../.template_output/user/signin/signin.html")),
+            (REGISTER_START, include_str!("../../../../../.template_output/user/register/register-start.html")),
+            (REGISTER_STEP1, include_str!("../../../../../.template_output/user/register/register-1.html")),
+            (REGISTER_STEP2, include_str!("../../../../../.template_output/user/register/register-2.html")),
+            (REGISTER_STEP3, include_str!("../../../../../.template_output/user/register/register-3.html")),
+            (REGISTER_FINAL, include_str!("../../../../../.template_output/user/register/register-final.html")),
+            (PROFILE, include_str!("../../../../../.template_output/user/profile/profile.html")),
+            (PROFILE_EMAIL_CHANGE, include_str!("../../../../../.template_output/user/profile/email-change.html")),
+            (SEND_EMAIL_CONFIRMATION, include_str!("../../../../../.template_output/user/misc/send-email-confirmation.html")),
+            (GOT_EMAIL_CONFIRMATION, include_str!("../../../../../.template_output/user/misc/got-email-confirmation.html")),
+            (FORGOT_PASSWORD, include_str!("../../../../../.template_output/user/misc/forgot-password.html")),
 
-            (CHECKBOX, get_template_str(include_str!("../../../../../.template_output/_common/input/checkbox.html"))),
+            (CHECKBOX, include_str!("../../../../../.template_output/_common/input/checkbox.html")),
         ]);
 
         Self { cache }
     }
 
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
 }

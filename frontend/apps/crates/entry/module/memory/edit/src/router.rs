@@ -8,8 +8,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use utils::components::module_page::*;
-use crate::pages::index::IndexPage;
+use crate::pages::index;
 
 pub struct Router {
 }
@@ -31,11 +30,7 @@ impl Router {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::MemoryGame => Some(
-                                        ModulePage::render(ModulePage::new(
-                                            IndexPage::new(jig_id, module_id)
-                                        ))
-                                    ),
+                                    ModuleKind::MemoryGame => Some(index::render(jig_id, module_id)),
                                     _ => None
                                 }
                             }

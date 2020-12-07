@@ -19,7 +19,7 @@ pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
 
-    dominator::append_dom(&dominator::body(), page::render_static());
+    dominator::append_dom(&dominator::body(), page::Page::render());
 }
 
 

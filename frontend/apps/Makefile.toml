@@ -1,8 +1,9 @@
 # Run like: cargo make [entry task] [app name]
 
+# TODO - cull in Duckscript: https://github.com/sagiegurari/duckscript/blob/master/docs/sdk.md#stdcollectionsarraycontains
+
 # Allowed app names:
 # dev/scratch/001
-# dev/showcase/001
 # dev/showcase/001
 # user
 # admin

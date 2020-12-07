@@ -52,32 +52,24 @@ pub fn page(kind:ModulePageKind) -> HtmlElement {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (PAGE_EMPTY, get_template_str(include_str!(
+            (PAGE_EMPTY, include_str!(
                 template_path!("module/_common/module-page-empty.html")
-            ))),
-            (EDIT_PAGE_PLAIN, get_template_str(include_str!(
+            )),
+            (EDIT_PAGE_PLAIN, include_str!(
                 template_path!("module/_common/module-edit-page-plain.html")
-            ))),
-            (EDIT_PAGE_RESIZE, get_template_str(include_str!(
+            )),
+            (EDIT_PAGE_RESIZE, include_str!(
                 template_path!("module/_common/module-edit-page-resize.html")
-            ))),
-            (PLAY_IFRAME, get_template_str(include_str!(
+            )),
+            (PLAY_IFRAME, include_str!(
                 template_path!("module/_common/module-play-iframe.html")
-            ))),
-            (PLAY_IFRAME_PREVIEW, get_template_str(include_str!(
+            )),
+            (PLAY_IFRAME_PREVIEW, include_str!(
                 template_path!("module/_common/module-play-iframe-preview.html")
-            ))),
+            )),
         ]);
 
         Self { cache }
     }
 
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
 }

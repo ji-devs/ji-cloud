@@ -8,7 +8,7 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, HtmlInputElement};
 use dominator::{Dom, html, events, clone};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id, futures::AsyncLoader};
 use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};

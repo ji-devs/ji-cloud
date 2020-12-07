@@ -9,19 +9,18 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::data::*;
 use crate::debug;
-use utils::components::module_page::*;
-use async_trait::async_trait;
-use super::steps_nav::apply_steps_nav;
-use utils::components::image::{
+use components::image::{
     data::*,
     search::*
 };
+
+use super::steps_nav::apply_steps_nav;
 
 pub struct Step1Sidebar {
     state: Rc<State>, 

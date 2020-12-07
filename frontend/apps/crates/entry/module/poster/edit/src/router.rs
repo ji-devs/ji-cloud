@@ -8,8 +8,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::editor::EditorPage;
-use utils::components::module_page::ModulePage;
+use crate::pages::editor;
 pub struct Router {
 }
 
@@ -31,11 +30,7 @@ impl Router {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::Poster => Some(
-                                        ModulePage::render(ModulePage::new(
-                                            EditorPage::new(jig_id, module_id)
-                                        ))
-                                    ),
+                                    ModuleKind::Poster => Some(editor::render(jig_id, module_id)),
                                     _ => None
                                 }
                             }

@@ -3,20 +3,24 @@ use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal},
+    signal::{Mutable, SignalExt, Signal, always},
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
 use web_sys::{HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader, dynamic_class_signal};
+use dominator_helpers::{
+    elem, 
+    with_data_id, 
+    dynamic_class_signal,
+    signals::{OptionSignal, EitherSignal}
+};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use crate::data::*;
 use crate::debug;
-use utils::components::module_page::*;
-use async_trait::async_trait;
+use components::module::page::*;
 use super::{
     choose_mode,
     main::Main, 
@@ -27,94 +31,111 @@ use super::{
     footer::Footer,
     header::Header,
 };
-pub struct IndexPage {
-    pub jig_id: String,
-    pub module_id: String,
-}
 
-impl IndexPage {
-    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        Rc::new(Self { jig_id, module_id})
-    }
-}
+type LoadedData = (String, String, Option<raw::GameData>);
 
-#[async_trait(?Send)]
-impl ModuleRenderer for IndexPage {
-    type Data = Option<raw::GameData>;
-
-    async fn load(_self:Rc<Self>) -> Option<raw::GameData> { 
+pub fn render(jig_id: String, module_id: String) -> Dom {
+    ModulePage::<IndexPageRenderer, _>::render(move || async move {
         if let Some(raw_data) = debug::settings().data {
-            Some(raw_data)
+            (jig_id, module_id, Some(raw_data))
         } else {
-            raw::GameData::load(_self.jig_id.clone(), _self.module_id.clone()).await
-                .ok()
+            let raw_data = raw::GameData::load(jig_id.clone(), module_id.clone()).await.ok();
+            (jig_id, module_id, raw_data)
         }
-    }
-
-    fn render(_self: Rc<Self>, data: Option<raw::GameData>) -> ModuleRenderOutput {
-        let state = State::new(_self.jig_id.clone(), _self.module_id.clone(), data);
-        ModuleRenderOutput::new_empty(Some(render_loaded(state)))
-    }
-}
-
-fn render_loaded(state: Rc<State>) -> Dom {
-    html!("div", {
-            .class("w-full")
-            .class("h-full")
-        .child_signal(state.game_mode.signal().map(clone!(state => move |mode| {
-            match mode {
-                None => Some(choose_mode::render(state.clone())),
-                Some(mode) => Some(ModulePage::render(ModulePage::new(StaticModuleRenderer::new(
-                    ModePage::render(ModePage::new(state.clone(), mode))
-                ))))
-            }
-        })))
     })
 }
 
-pub struct ModePage {
-    pub state: Rc<State>,
-    pub mode: GameMode
+struct IndexPageRenderer {
+    pub state: Rc<State>
 }
 
-impl ModePage {
-    pub fn new(state:Rc<State>, mode: GameMode) -> Rc<Self> {
-        Rc::new(Self { 
-            state,
-            mode,
+impl ModuleRenderer for IndexPageRenderer {
+    type Data = LoadedData;
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type SidebarSignal = impl Signal<Item = Option<Dom>>;
+    type HeaderSignal = impl Signal<Item = Option<Dom>>;
+    type MainSignal = impl Signal<Item = Option<Dom>>;
+    type FooterSignal = impl Signal<Item = Option<Dom>>;
+
+    fn new((jig_id, module_id, raw_data):LoadedData) -> Self {
+        Self { 
+            state: State::new(jig_id, module_id, raw_data)
+        }
+    }
+    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
+        _self.state.game_mode.signal().map(|mode| {
+            match mode {
+                None => ModulePageKind::Empty,
+                Some(_) => ModulePageKind::EditPlain
+            }
         })
     }
-    pub fn render(_self: Rc<Self>) -> ModuleRenderOutput {
-        ModuleRenderOutput {
-            kind: ModulePageKind::EditPlain,
-            sidebar: Some(Self::render_sidebar(_self.clone())),
-            main: Some(Main::render(Main::new(_self.state.clone(), _self.mode))),
-            footer: Some(Footer::render(Footer::new(_self.state.clone(), _self.mode))),
-            header: Some(Header::render(Header::new(_self.state.clone(), _self.mode))),
+
+    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
+        let state = _self.state.clone();
+        map_ref!{
+            let game_mode = _self.state.game_mode.signal(),
+            let step = _self.state.step.signal()
+            => move {
+                game_mode.map(|game_mode| {
+                    log::info!("{:?}", step);
+
+                    match step {
+                        Step::One => {
+                            Step1Sidebar::render(Step1Sidebar::new(state.clone(), game_mode))
+                        },
+                        Step::Two => {
+                            Step2Sidebar::render(Step2Sidebar::new(state.clone(), game_mode))
+                        },
+                        Step::Three => {
+                            Step3Sidebar::render(Step3Sidebar::new(state.clone(), game_mode))
+                        },
+                        Step::Four => {
+                            Step4Sidebar::render(Step4Sidebar::new(state.clone(), game_mode))
+                        },
+                    }
+                })
+            }
         }
     }
 
-    fn render_sidebar(_self: Rc<Self>) -> Dom {
-        html!("div", {
-            .class("w-full")
-            .class("h-full")
-            .child_signal(_self.state.step.signal().map(clone!(_self => move |step| Some(
-                match step {
-                    Step::One => {
-                        Step1Sidebar::render(Step1Sidebar::new(_self.state.clone(), _self.mode))
-                    },
-                    Step::Two => {
-                        Step2Sidebar::render(Step2Sidebar::new(_self.state.clone(), _self.mode))
-                    },
-                    Step::Three => {
-                        Step3Sidebar::render(Step3Sidebar::new(_self.state.clone(), _self.mode))
-                    },
-                    Step::Four => {
-                        Step4Sidebar::render(Step4Sidebar::new(_self.state.clone(), _self.mode))
-                    },
-                }
-            ))))
-        })
+    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
+        _self.state.game_mode.signal().map(clone!(_self => move |game_mode| {
+            OptionSignal::new(game_mode.map(|game_mode| {
+                Header::render(_self.state.clone(), game_mode)
+            }))
+        }))
+        .flatten()
     }
 
+    fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
+        use std::pin::Pin;
+
+        _self.state.game_mode.signal()
+            .map(clone!(_self => move |game_mode| {
+                let state = _self.state.clone();
+                
+                match game_mode {
+                    None => EitherSignal::Left(always(Some(
+                            choose_mode::render(state.clone())
+                        ))),
+                    Some(game_mode) => 
+                        EitherSignal::Right(
+                            Main::render(state.clone(), game_mode)
+                                .map(|main| Some(main))
+                        )
+                }
+            }))
+            .flatten()
+    }
+    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
+
+        _self.state.game_mode.signal().map(clone!(_self => move |game_mode| {
+            OptionSignal::new(game_mode.map(|game_mode| {
+                Footer::render(_self.state.clone(), game_mode)
+            }))
+            .map(|x| x.flatten())
+        }))
+        .flatten()
+    }
 }

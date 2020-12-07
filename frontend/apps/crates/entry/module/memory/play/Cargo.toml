@@ -20,6 +20,7 @@ rand = { version = "0.7.3", features = ["wasm-bindgen"] }
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 app-memory-common = {path = "../_common"}
 utils = {path = "../../../../utils"}
+components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}
 config = {path = "../../../../../../../config/rust"}
 async-trait = "0.1.42"
@@ -60,10 +61,10 @@ simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.14"
 futures-signals = "0.3.16"
-dominator_helpers = "0.4.3"
-serde = { version = "1.0.117", features = ["derive"] }
+dominator_helpers = "0.5.0"
+serde = { version = "1.0.118", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
-serde_json = "1.0.59"
+serde_json = "1.0.60"
 futures = "0.3.8"
 log = "0.4.11"
 cfg-if = "1.0.0"
