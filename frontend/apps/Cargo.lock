@@ -332,9 +332,9 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "awsm_web"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da6a1c577757a9bd40275a4ce590e04d3bd8aa77c7530b1460bd0a67559e2771"
+checksum = "4968bd11351d225a062fbffefb3ab4a280aa1346a42bcd6e2c08382ed88158f0"
 dependencies = [
  "discard",
  "futures",

@@ -60,7 +60,7 @@ serde_json = "1.0.60"
 futures = "0.3.8"
 log = "0.4.11"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.6.6", features = ["dom", "loaders"] }
+awsm_web = { version = "0.6.7", features = ["dom", "loaders"] }
 discard = "1.0.4"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 

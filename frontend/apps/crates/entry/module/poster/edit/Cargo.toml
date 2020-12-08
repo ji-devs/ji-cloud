@@ -66,7 +66,7 @@ serde_json = "1.0.60"
 futures = "0.3.8"
 log = "0.4.11"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.6.6", features = ["dom"] }
+awsm_web = { version = "0.6.7", features = ["dom"] }
 discard = "1.0.4"
 uuid = { version = "0.8.1", features = ["serde", "wasm-bindgen"] }
 url = "2.2.0"

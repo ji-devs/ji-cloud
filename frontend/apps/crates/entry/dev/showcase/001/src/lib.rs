@@ -6,8 +6,8 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod templates;
-mod page;
+mod pages;
+mod router;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -18,8 +18,7 @@ use web_sys::{window, Element};
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
-
-    dominator::append_dom(&dominator::body(), page::render_signals());
+    dominator::append_dom(&dominator::body(), router::render());
 }
 
 

@@ -157,3 +157,5 @@ impl ModuleBounds {
         style.set_property("--content-height", &format!("{}px", Self::content_height()));
     }
 }
+
+

@@ -31,6 +31,9 @@ addons.getChannel().on(STORY_RENDERED, (story) => {
     observer.observe(footer);
   }
 
+	//Note - not observing size changes on main
+	//Main is ultimately what's scaled :)
+
 
   lastCancel = cancelObserver;
 });

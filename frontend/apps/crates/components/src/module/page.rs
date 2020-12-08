@@ -34,6 +34,7 @@ use utils::{
     iframe::*,
     resize::*,
 };
+use awsm_web::dom::resize::*;
 use std::future::Future;
 use async_trait::async_trait;
 use std::pin::Pin;
@@ -124,6 +125,8 @@ where
     has_loaded_data: Mutable<bool>, 
     wait_iframe_data: bool,
     loader: AsyncLoader,
+    resize_observer: RefCell<Option<ResizeObserver>>,
+    resize_container: RefCell<Option<HtmlElement>>
 }
 
 impl <Renderer, Data> ModulePage <Renderer, Data> 
@@ -155,7 +158,16 @@ where
             has_loaded_data: Mutable::new(false), 
             loader: AsyncLoader::new(),
             wait_iframe_data,
+            resize_observer: RefCell::new(None),
+            resize_container: RefCell::new(None),
         });
+
+        let _self_clone = _self.clone();
+
+        let mut resize_observer = _self_clone.resize_observer.borrow_mut();
+        *resize_observer = Some(ResizeObserver::new(clone!(_self => move || {
+            Self::resize(_self.clone());
+        })));
 
         let _self_clone = _self.clone();
 
@@ -174,6 +186,11 @@ where
         _self.has_loaded_data.set(true);
     }
 
+    fn resize(_self: Rc<Self>) {
+        if let Some(container) = _self.resize_container.borrow().as_ref() {
+            ModuleBounds::set_elem(&container);
+        }
+    }
     fn dom_signal(_self: Rc<Self>) -> impl Signal<Item = Option<Dom>> {
 
         _self.has_loaded_data.signal().map(clone!(_self => move |has_loaded| {
@@ -182,7 +199,6 @@ where
             } else {
                 let renderer = _self.module_renderer.borrow();
                 let renderer = renderer.as_ref().unwrap_throw();
-
                 Some(
                     html!("div", {
                         .class("w-full")
@@ -190,20 +206,65 @@ where
                         .child_signal(Renderer::page_kind_signal(renderer.clone())
                             .map(clone!(_self, renderer => move |page_kind| {Some(
                                 elem!(templates::page(page_kind), {
-                                    .with_data_id!("sidebar", { .child_signal( 
-                                        Renderer::sidebar_signal(renderer.clone())
-                                    )})
-                                    .with_data_id!("header", { .child_signal( 
-                                        Renderer::header_signal(renderer.clone())
-                                    )})
-                                    .with_data_id!("main", { .child_signal( 
-                                        Renderer::main_signal(renderer.clone())
-                                    )})
-                                    .with_data_id!("footer", { .child_signal( 
-                                        Renderer::footer_signal(renderer.clone())
-                                    )})
-                                    .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
+                                    .with_data_id!("main", { 
+                                        .child_signal( 
+                                            Renderer::main_signal(renderer.clone())
+                                        )
+                                        //Note - not observing size changes on main
+                                        //Main is ultimately what's scaled :)
+                                    })
+                                    //Each of these sections sets up for observing for resize
+                                    //and also renders the signal defined by the renderer trait
+                                    .with_data_id!("sidebar", { 
+                                        .child_signal( 
+                                            Renderer::sidebar_signal(renderer.clone())
+                                        )
+                                        .after_inserted(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.observe(&elem);
+                                            }
+                                        }))
+                                        .after_removed(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.unobserve(&elem);
+                                            }
+                                        }))
+                                        
+                                    })
+                                    .with_data_id!("header", { 
+                                        .child_signal( 
+                                            Renderer::header_signal(renderer.clone())
+                                        )
 
+                                        .after_inserted(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.observe(&elem);
+                                            }
+                                        }))
+                                        .after_removed(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.unobserve(&elem);
+                                            }
+                                        }))
+                                    })
+                                    .with_data_id!("footer", { 
+                                        .child_signal( 
+                                            Renderer::footer_signal(renderer.clone())
+                                        )
+
+                                        .after_inserted(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.observe(&elem);
+                                            }
+                                        }))
+                                        .after_removed(clone!(_self => move |elem| {
+                                            if let Some(resize_observer) = _self.resize_observer.borrow().as_ref() {
+                                                resize_observer.unobserve(&elem);
+                                            }
+                                        }))
+                                    })
+                                    .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
+                                        //Get iframe data if we're supposed to
                                         if let Ok(msg) = evt.try_serde_data::<IframeInit<Data>>() {
                                             if !_self.wait_iframe_data {
                                                 //log::warn!("weird... shouldn't have gotten iframe data!");
@@ -228,21 +289,29 @@ where
                                     .apply_if(page_kind.is_resize(), |dom| {
                                         apply_methods!(dom, {
                                             .with_data_id!("module-outer", {
-                                                .with_data_id!("module-content", {
-                                                })
-
-                                                .with_node!(elem => {
-                                                    .global_event(move |evt:events::Resize| {
-                                                        ModuleBounds::set_elem(&elem);
-                                                    })
-                                                })
-                                                .after_inserted(|elem| {
-                                                    log::info!("has set bounds...");
-                                                    ModuleBounds::set_elem(&elem);
-                                                })
+                                                //Stash the container if it exists 
+                                                .after_inserted(clone!(_self => move |elem| {
+                                                    let mut resize_container = _self.resize_container.borrow_mut();
+                                                    *resize_container = Some(elem);
+                                                }))
+                                                //Clean it up when unmounted
+                                                .after_removed(clone!(_self => move |elem| {
+                                                    let mut resize_container = _self.resize_container.borrow_mut();
+                                                    *resize_container = None; 
+                                                }))
                                             })
                                         })
                                     })
+
+                                    // Window resize
+                                    .global_event(clone!(_self => move |evt:events::Resize| {
+                                        Self::resize(_self.clone());
+                                    }))
+
+                                    // First call
+                                    .after_inserted(clone!(_self => move |elem| {
+                                        Self::resize(_self.clone());
+                                    }))
                                 })
                             )}))
                         )

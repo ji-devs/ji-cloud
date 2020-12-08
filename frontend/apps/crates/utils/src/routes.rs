@@ -18,6 +18,7 @@ pub enum Route {
     Admin(AdminRoute),
     Jig(JigRoute),
     Module(ModuleRoute),
+	Dev(DevRoute),
 }
 
 #[derive(Debug, Clone)]
@@ -64,6 +65,11 @@ pub enum ModuleRoute {
     Play(ModuleKind, Id, Id),
 }
 
+#[derive(Debug, Clone)]
+pub enum DevRoute {
+    Showcase(Id, Id),
+}
+
 //Just for serializing across local routes
 #[derive(Serialize, Deserialize)]
 struct JsonQuery {
@@ -92,6 +98,7 @@ impl Route {
         let json_query = params.get("data");
 
         match paths {
+			["dev", "showcase", id, page] => Self::Dev(DevRoute::Showcase(id.to_string(), page.to_string())),
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "signin"] => Self::User(UserRoute::Signin),
@@ -149,7 +156,11 @@ impl From<Route> for String {
     fn from(route:Route) -> Self {
         match route {
             Route::NoAuth => "/no-auth".to_string(),
-
+			Route::Dev(route) => {
+                match route {
+                    DevRoute::Showcase(id, page) => format!("/dev/showcase/{}/{}", id, page)
+				}
+			},
             Route::User(route) => {
                 match route {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
