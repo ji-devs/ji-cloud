@@ -72,24 +72,35 @@ impl Updater {
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             r#"
-select 
-    id,
+select id,
     name,
     description,
     array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
-    array((select name from affiliation inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id where image_affiliation.image_id = image_metadata.id)) as "affiliation_names!",
-    array((select style_id from image_style where image_id = image_metadata.id)) as "styles!",
-    array((select name from style inner join image_style on style.id = image_style.style_id where image_style.image_id = image_metadata.id)) as "style_names!",
-    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
-    array((select name from age_range inner join image_age_range on age_range.id = image_age_range.age_range_id where image_age_range.image_id = image_metadata.id)) as "age_range_names!",
-    array((select category_id from image_category where image_id = image_metadata.id)) as "categories!",
-    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!",
+    array((select affiliation.display_name
+           from affiliation
+                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id
+           where image_affiliation.image_id = image_metadata.id))                            as "affiliation_names!",
+    array((select style_id from image_style where image_id = image_metadata.id))             as "styles!",
+    array((select style.display_name
+           from style
+                    inner join image_style on style.id = image_style.style_id
+           where image_style.image_id = image_metadata.id))                                  as "style_names!",
+    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as "age_ranges!",
+    array((select age_range.display_name
+           from age_range
+                    inner join image_age_range on age_range.id = image_age_range.age_range_id
+           where image_age_range.image_id = image_metadata.id))                              as "age_range_names!",
+    array((select category_id from image_category where image_id = image_metadata.id))       as "categories!",
+    array((select name
+           from category
+                    inner join image_category on category.id = image_category.category_id
+           where image_category.image_id = image_metadata.id))                               as "category_names!",
     publish_at,
     is_premium
-from image_metadata
-where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
-limit 100
-"#, &sync_time
+ from image_metadata
+ where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
+ limit 100;
+     "#, &sync_time
         )
         .fetch(&self.db)
         .map_ok(|row| algolia::request::BatchWriteRequest::UpdateObject {
@@ -249,13 +260,15 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
             .batch(&self.index, &batch)
             .await?;
 
-        let ids: Result<_, _> = resp
+        let ids: Result<Vec<_>, _> = resp
             .object_ids
             .into_iter()
             .map(|id| Uuid::parse_str(&id))
             .collect();
 
-        Ok(ids?)
+        eprintln!("{:?}", ids.as_ref().ok().map(|it| it.len()));
+
+        Ok(dbg!(ids?))
     }
 
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
