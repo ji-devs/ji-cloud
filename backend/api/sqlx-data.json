@@ -1,38 +1,132 @@
 {
   "db": "PostgreSQL",
-  "0352a39223a9bb7c9d4c66cc673a8324a3e56ea9c6fdc1b87f2dcb8233499eb3": {
-    "query": "select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range",
+  "03ee2b51096d52ea9e5042b9b0c863a0da386b861c80f7dc81f658ae5405c230": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\"\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: AgeRangeId",
+          "name": "id",
           "type_info": "Uuid"
         },
         {
           "ordinal": 1,
-          "name": "display_name",
+          "name": "name",
           "type_info": "Text"
         },
         {
           "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
+          "name": "description",
+          "type_info": "Text"
         },
         {
           "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Timestamptz"
+        ]
       },
       "nullable": [
         false,
         false,
         false,
-        true
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "065a5d7eb1e3687b7994982e7e9c1bd9b0bf7ce1c4e0cd9bf210c633c337b622": {
+    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\",\n    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as \"category_names!\",\n    publish_at,\n    is_premium\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true,
+        false
       ]
     }
   },
@@ -645,6 +739,42 @@
       ]
     }
   },
+  "4368428bff6e48dc83f1dca76d15bd4606f4fcf4c011fbe826b322635f7a798e": {
+    "query": "\n            select id as \"id: StyleId\", display_name, created_at, updated_at from style\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: StyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "46fccf7d3c9f71b3c15e06ef08705676557e4a47ab331baed7f1754804e0eaf6": {
     "query": "\ninsert into jig_module (jig_id, \"index\", module_id)\nvalues ($1, $2, $3)",
     "describe": {
@@ -772,42 +902,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
-    "query": "select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: AffiliationId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
       ]
     }
   },
@@ -962,42 +1056,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
-    "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: SubjectId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
       ]
     }
   },
@@ -1191,6 +1249,80 @@
       "nullable": []
     }
   },
+  "b190ecb81821a1fdd8e475f05cfeb181c207ecb91f15d7daaf7fd664c51a1d86": {
+    "query": "\nselect id                                             as \"id: JigId\",\n       display_name,\n       cover_id                                       as \"cover_id: ModuleId\",\n       (select kind from module where id = cover_id)  as \"cover_kind: ModuleKind\",\n       ending_id                                      as \"ending_id: ModuleId\",\n       (select kind from module where id = ending_id) as \"ending_kind: ModuleKind\",\n       creator_id,\n       author_id,\n       publish_at,\n       array(select row (module_id, kind)\n             from jig_module\n                      inner join module on module_id = module.id\n             where jig_id = $1\n             order by \"index\")                        as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\"\nfrom jig\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "cover_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "cover_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "ending_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "ending_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 6,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 7,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 8,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        null,
+        false,
+        null,
+        true,
+        true,
+        true,
+        null
+      ]
+    }
+  },
   "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
     "query": "update \"settings\" set algolia_index_version = $1",
     "describe": {
@@ -1243,42 +1375,6 @@
         {
           "ordinal": 0,
           "name": "id: AgeRangeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
-  "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {
-    "query": "select id as \"id: StyleId\", display_name, created_at, updated_at from style",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: StyleId",
           "type_info": "Uuid"
         },
         {

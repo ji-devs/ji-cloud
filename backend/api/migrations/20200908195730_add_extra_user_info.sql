@@ -21,10 +21,8 @@ create table "subject"
 (
     subject_id   uuid primary key not null default uuid_generate_v1mc(),
     display_name text             not null,
-    "index"      int2        not null check("index" >= 0),
     created_at   timestamptz      not null,
-    updated_at   timestamptz,
-    unique (index)
+    updated_at   timestamptz
 );
 
 create table user_subject
