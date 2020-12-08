@@ -1,8 +1,5 @@
 use algolia::{
     filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
-    model::attribute::Attribute,
-    model::attribute::{FacetAttribute, SearchableAttributes},
-    request::SetSettings,
     request::{BatchWriteRequests, SearchQuery},
     response::SearchResponse,
     Client as Inner,
@@ -10,7 +7,7 @@ use algolia::{
 use anyhow::Context;
 use chrono::Utc;
 use core::settings::AlgoliaSettings;
-use futures::{future::BoxFuture, TryStreamExt};
+use futures::TryStreamExt;
 use serde::Serialize;
 use shared::domain::{
     category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
@@ -20,13 +17,20 @@ use std::{convert::TryInto, time::Duration, time::Instant};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+use migration::ResyncKind;
+
+mod migration;
+
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
     description: &'a str,
     styles: &'a [Uuid],
+    style_names: &'a [String],
     age_ranges: &'a [Uuid],
+    age_range_names: &'a [String],
     affiliations: &'a [Uuid],
+    affiliation_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
     publish_at: Option<i64>,
@@ -73,8 +77,11 @@ select
     name,
     description,
     array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
+    array((select name from affiliation inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id where image_affiliation.image_id = image_metadata.id)) as "affiliation_names!",
     array((select style_id from image_style where image_id = image_metadata.id)) as "styles!",
+    array((select name from style inner join image_style on style.id = image_style.style_id where image_style.image_id = image_metadata.id)) as "style_names!",
     array((select age_range_id from image_age_range where image_id = image_metadata.id)) as "age_ranges!",
+    array((select name from age_range inner join image_age_range on age_range.id = image_age_range.age_range_id where image_age_range.image_id = image_metadata.id)) as "age_range_names!",
     array((select category_id from image_category where image_id = image_metadata.id)) as "categories!",
     array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as "category_names!",
     publish_at,
@@ -90,8 +97,11 @@ limit 100
                 name: &row.name,
                 description: &row.description,
                 styles: &row.styles,
+                style_names: &row.style_names,
                 age_ranges: &row.age_ranges,
+                age_range_names: &row.age_range_names,
                 affiliations: &row.affiliations,
+                affiliation_names: &row.affiliation_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
                 publish_at: row.publish_at.map(|t| t.timestamp_nanos()),
@@ -166,79 +176,6 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-enum ResyncKind {
-    None,
-    Complete,
-}
-
-fn algolia_bad_batch_object<'a>(
-    client: &'a Inner,
-    index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
-    Box::pin(async move {
-        client.delete_object(index, "batch").await?;
-        Ok(())
-    })
-}
-
-fn algolia_set_searchable_fields<'a>(
-    client: &'a Inner,
-    index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
-    let settings = SetSettings {
-        searchable_attributes: Some(
-            SearchableAttributes::build()
-                .single(Attribute("name".to_owned()))
-                .single(Attribute("description".to_owned()))
-                .single(Attribute("category_names".to_owned()))
-                .finish(),
-        ),
-        attributes_for_faceting: None,
-    };
-
-    Box::pin(async move {
-        client.set_settings(index, &settings).await?;
-        Ok(())
-    })
-}
-
-fn algolia_set_attributes_for_faceting<'a>(
-    client: &'a Inner,
-    index: &'a str,
-) -> BoxFuture<'a, anyhow::Result<()>> {
-    let settings = SetSettings {
-        searchable_attributes: None,
-        attributes_for_faceting: Some(vec![
-            FacetAttribute::filter_only(Attribute("publish_at".to_owned())),
-            FacetAttribute::filter_only(Attribute("is_premium".to_owned())),
-            FacetAttribute::filter_only(Attribute("styles".to_owned())),
-            FacetAttribute::filter_only(Attribute("age_ranges".to_owned())),
-            FacetAttribute::filter_only(Attribute("affiliations".to_owned())),
-            FacetAttribute::filter_only(Attribute("categories".to_owned())),
-        ]),
-    };
-
-    Box::pin(async move {
-        client.set_settings(index, &settings).await?;
-        Ok(())
-    })
-}
-
-const ALGOLIA_INDEXING_MIGRATIONS: &'static [(
-    ResyncKind,
-    for<'a> fn(&'a Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
-)] = &[
-    (ResyncKind::Complete, algolia_bad_batch_object),
-    (ResyncKind::Complete, algolia_set_searchable_fields),
-    (ResyncKind::Complete, |_, _| {
-        Box::pin(futures::future::ok(()))
-    }),
-    (ResyncKind::Complete, algolia_set_attributes_for_faceting),
-];
-
-const ALGOLIA_INDEXING_VERSION: i16 = ALGOLIA_INDEXING_MIGRATIONS.len() as i16;
-
 impl AlgoliaClient {
     pub async fn migrate(&self, pool: &PgPool) -> anyhow::Result<()> {
         // We can't exactly access algolia if we don't have a client.
@@ -261,11 +198,11 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
         .ok_or_else(|| anyhow::anyhow!("algolia index mismatch (error is to avoid messing up algolia indexes by using already existing dbs, unfortunately no checking can be done to ensure that it works the other way around.)"))?
         .algolia_index_version;
 
-        if algolia_version == ALGOLIA_INDEXING_VERSION {
+        if algolia_version == migration::INDEX_VERSION {
             return Ok(());
         }
 
-        let migrations_to_run = &ALGOLIA_INDEXING_MIGRATIONS[(algolia_version as usize)..];
+        let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
         for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
             updater(inner, &self.index).await.with_context(|| {
@@ -297,7 +234,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
 
         sqlx::query!(
             r#"update "settings" set algolia_index_version = $1"#,
-            ALGOLIA_INDEXING_VERSION
+            migration::INDEX_VERSION
         )
         .execute(&mut txn)
         .await?;
