@@ -56,7 +56,10 @@ pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
 pub async fn get_content_types(db: &PgPool) -> sqlx::Result<Vec<ContentType>> {
     sqlx::query_as!(
         ContentType,
-        r#"select content_type_id as "id: ContentTypeId", display_name, created_at, updated_at from "content_type""#
+        r#"
+            select content_type_id as "id: ContentTypeId", display_name, created_at, updated_at from "content_type"
+            order by index
+        "#
     )
     .fetch_all(db)
     .await
