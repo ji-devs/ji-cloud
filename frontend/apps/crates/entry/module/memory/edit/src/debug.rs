@@ -10,7 +10,7 @@ use futures_signals::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::data::*; 
-use utils::components::image::{
+use components::image::{
     search::ImageSearchWidgetDebug, 
     data::*
 };
@@ -38,7 +38,7 @@ impl DebugSettings {
                 crate::config::get_init_words_iter(),
                 crate::config::get_themes_cloned()[0].id.clone()
             )),
-            step: Some(Step::Two), 
+            step: Some(Step::One), 
             content_mode: ContentMode::TextInit,
             image_search: None,
         }
@@ -59,7 +59,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::words_and_images()
+            DebugSettings::default()
         }
     } else {
         pub fn settings() -> DebugSettings {

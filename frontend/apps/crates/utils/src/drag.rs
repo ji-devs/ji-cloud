@@ -13,10 +13,7 @@ use std::marker::Unpin;
 use std::future::Future;
 use std::task::{Context, Poll};
 use shared::domain::jig::ModuleKind;
-use crate::{
-    signals::*,
-    math::*,
-};
+use crate::math::*;
 
 const MOVE_THRESHHOLD:i32 = 3;
 

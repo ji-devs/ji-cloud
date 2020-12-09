@@ -12,11 +12,11 @@ if(!APP_NAME) {
 const path = require('path');
 
 const watchPatterns = [
-	`./crates/entry/**/_common/**`,
-    `./crates/utils/src/**`,
-    `./crates/entry/${APP_NAME}/src/**`,
-    `./crates/entry/${APP_NAME}/js/**`,
-	"../css/plain/dist/**", 
+    `./crates/entry/**/_common/**`,
+    `./crates/utils/**`,
+	`./crates/components/**`,
+    `./crates/entry/${APP_NAME}/**`,
+    "../css/plain/dist/**", 
     "../.template_output/**", 
     //technically this happens _after_ the html rebuild
     //and should therefore be watched instead of .template_output

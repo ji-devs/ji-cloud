@@ -10,7 +10,7 @@ use futures_signals::{
 };
 use web_sys::{HtmlElement, Element, HtmlTextAreaElement, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem, with_data_id, futures::{spawn_future, AsyncLoader}};
 use crate::templates;
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
@@ -18,8 +18,8 @@ use futures::future::ready;
 use discard::DiscardOnDrop;
 use utils::{
     routes::{Route, AdminRoute},
-    components::image::data::*,
 };
+use components::image::data::*;
 use shared::{
     error::image::UpdateError,
     domain::{

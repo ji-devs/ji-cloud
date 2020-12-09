@@ -31,18 +31,10 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (PLAYER, get_template_str(include_str!("../../../../../../../.template_output/module/poster/play/player.html"))),
+            (PLAYER, include_str!("../../../../../../../.template_output/module/poster/play/player.html")),
         ]);
 
         Self { cache }
     }
 
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks poster - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
 }

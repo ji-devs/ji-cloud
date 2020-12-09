@@ -131,14 +131,6 @@ pub fn main_pair(pair_type:PairType, is_edit:bool) -> HtmlElement {
         }
     }
 }
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
-}
 pub struct Templates {
     pub cache: TemplateCache<'static>
 }
@@ -147,174 +139,33 @@ impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
 
-            (CHOOSE_MODE_PAGE, get_template_str(include_str!(template_path!("module/memory/edit/start-mode-choose.html")))),
-            (HEADER_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/empty.html")))),
-            (HEADER_PREVIEW, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/preview.html")))),
-            (HEADER_ADD_PAIR, get_template_str(include_str!(template_path!("module/memory/edit/_common/header/add-pair.html")))),
-            (MAIN_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/empty.html")))),
-            (MAIN_IFRAME, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/iframe.html")))),
-            (MAIN_PAIRS, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/pairs.html")))),
-            (MAIN_CARD_PAIR_TEXT_TEXT_EDIT, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-text-edit.html")))),
-            (MAIN_CARD_PAIR_TEXT_TEXT_PREVIEW, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-text-preview.html")))),
-            (MAIN_CARD_PAIR_TEXT_IMAGE_EDIT, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-image-edit.html")))),
-            (MAIN_CARD_PAIR_TEXT_IMAGE_PREVIEW, get_template_str(include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-image-preview.html")))),
+            (CHOOSE_MODE_PAGE, include_str!(template_path!("module/memory/edit/start-mode-choose.html"))),
+            (HEADER_EMPTY, include_str!(template_path!("module/memory/edit/_common/header/empty.html"))),
+            (HEADER_PREVIEW, include_str!(template_path!("module/memory/edit/_common/header/preview.html"))),
+            (HEADER_ADD_PAIR, include_str!(template_path!("module/memory/edit/_common/header/add-pair.html"))),
+            (MAIN_EMPTY, include_str!(template_path!("module/memory/edit/_common/main/empty.html"))),
+            (MAIN_IFRAME, include_str!(template_path!("module/memory/edit/_common/main/iframe.html"))),
+            (MAIN_PAIRS, include_str!(template_path!("module/memory/edit/_common/main/pairs.html"))),
+            (MAIN_CARD_PAIR_TEXT_TEXT_EDIT, include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-text-edit.html"))),
+            (MAIN_CARD_PAIR_TEXT_TEXT_PREVIEW, include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-text-preview.html"))),
+            (MAIN_CARD_PAIR_TEXT_IMAGE_EDIT, include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-image-edit.html"))),
+            (MAIN_CARD_PAIR_TEXT_IMAGE_PREVIEW, include_str!(template_path!("module/memory/edit/_common/main/card-pairs/text-image-preview.html"))),
 
-            (FOOTER_DEFAULT, get_template_str(include_str!(template_path!("module/memory/edit/_common/footer/default.html")))),
+            (FOOTER_DEFAULT, include_str!(template_path!("module/memory/edit/_common/footer/default.html"))),
 
-            (DUPLICATE_SIDEBAR_STEP_1_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/duplicate/sidebar/step1-empty.html")))),
-            (DUPLICATE_SIDEBAR_STEP_1_WORDS, get_template_str(include_str!(template_path!("module/memory/edit/duplicate/sidebar/step1-words.html")))),
+            (DUPLICATE_SIDEBAR_STEP_1_EMPTY, include_str!(template_path!("module/memory/edit/duplicate/sidebar/step1-empty.html"))),
+            (DUPLICATE_SIDEBAR_STEP_1_WORDS, include_str!(template_path!("module/memory/edit/duplicate/sidebar/step1-words.html"))),
             
-            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_EMPTY, get_template_str(include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-empty.html")))),
-            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_WORDS, get_template_str(include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-words.html")))),
-            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_IMAGES, get_template_str(include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-images.html")))),
-            (STEP_2_SIDEBAR, get_template_str(include_str!(template_path!("module/memory/edit/_common/sidebar/step2.html")))),
-            (STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!(template_path!("module/memory/edit/_common/sidebar/step2-theme-item-selected.html")))),
-            (STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!(template_path!("module/memory/edit/_common/sidebar/step2-theme-item-deselected.html")))),
+            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_EMPTY, include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-empty.html"))),
+            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_WORDS, include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-words.html"))),
+            (WORDS_AND_IMAGES_SIDEBAR_STEP_1_IMAGES, include_str!(template_path!("module/memory/edit/words-and-images/sidebar/step1-images.html"))),
+            (STEP_2_SIDEBAR, include_str!(template_path!("module/memory/edit/_common/sidebar/step2.html"))),
+            (STEP_2_THEME_ITEM_SELECTED, include_str!(template_path!("module/memory/edit/_common/sidebar/step2-theme-item-selected.html"))),
+            (STEP_2_THEME_ITEM_DESELECTED, include_str!(template_path!("module/memory/edit/_common/sidebar/step2-theme-item-deselected.html"))),
 
-            (STEP_3_SIDEBAR, get_template_str(include_str!(template_path!("module/memory/edit/_common/sidebar/step3.html")))),
+            (STEP_3_SIDEBAR, include_str!(template_path!("module/memory/edit/_common/sidebar/step3.html"))),
         ]);
 
         Self { cache }
     }
 }
-/*
-pub fn mode_choose_page() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(MODE_CHOOSE_PAGE))
-}
-
-
-pub fn card_pair_text_text_edit() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_PAIR_TEXT_TEXT_EDIT))
-}
-pub fn card_pair_text_text_preview() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_PAIR_TEXT_TEXT_PREVIEW))
-}
-pub fn card_pair_text_image_edit() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_PAIR_TEXT_IMAGE_EDIT))
-}
-
-pub fn card_pair_text_image_preview() -> HtmlElement {
-    TEMPLATES.with(|t| t.cache.render_elem_plain(CARD_PAIR_TEXT_IMAGE_PREVIEW))
-}
-
-pub fn step_2_theme_item(selected:bool) -> HtmlElement {
-    if selected {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(STEP_2_THEME_ITEM_SELECTED))
-    } else {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(STEP_2_THEME_ITEM_DESELECTED))
-    }
-}
-pub mod duplicate {
-    use super::*;
-    pub fn step_1_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_PAGE))
-    }
-    pub fn step_1_tooltip() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_TOOLTIP))
-    }
-    pub fn step_1_error() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_1_ERROR))
-    }
-    pub fn step_2_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_2_PAGE))
-    }
-    pub fn step_4_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(DUPLICATE_STEP_4_PAGE))
-    }
-
-
-}
-
-pub mod words_and_images {
-    use super::*;
-    pub fn step_1_thumbnail(src:&str) -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem(WORDS_AND_IMAGES_STEP_1_THUMBNAIL, 
-            &html_map!(
-                "src" => src
-            )
-        ).unwrap_throw())
-    }
-    pub fn step_1_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_1_PAGE))
-    }
-    pub fn step_2_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_2_PAGE))
-    }
-    pub fn step_4_page() -> HtmlElement {
-        TEMPLATES.with(|t| t.cache.render_elem_plain(WORDS_AND_IMAGES_STEP_4_PAGE))
-    }
-
-}
-
-impl fmt::Debug for Templates {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        
-        f.debug_list()
-            .entries(self.cache.templates.keys())
-         .finish()
-    }
-}
-impl Templates {
-    pub fn new() -> Self {
-        let cache = TemplateCache::new(&vec![
-            (MODE_CHOOSE_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/start-mode-choose.html")
-            ))),
-
-
-            (CARD_PAIR_TEXT_TEXT_EDIT, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/card-pairs/text-text-edit.html")
-            ))),
-            (CARD_PAIR_TEXT_TEXT_PREVIEW, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/card-pairs/text-text-preview.html")
-            ))),
-            (CARD_PAIR_TEXT_IMAGE_EDIT, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/card-pairs/text-image-edit.html")
-            ))),
-            (CARD_PAIR_TEXT_IMAGE_PREVIEW, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/card-pairs/text-image-preview.html")
-            ))),
-
-            (STEP_2_THEME_ITEM_SELECTED, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/sidebar/step-2-theme-item-selected.html")
-            ))),
-            (STEP_2_THEME_ITEM_DESELECTED, get_template_str(include_str!(
-                template_path!("module/memory/edit/_common/sidebar/step-2-theme-item-deselected.html")
-            ))),
-
-            (DUPLICATE_STEP_1_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/duplicate/step-1.html")
-            ))),
-            (DUPLICATE_STEP_1_TOOLTIP, get_template_str(include_str!(
-                template_path!("module/memory/edit/duplicate/step-1-tooltip.html")
-            ))),
-            (DUPLICATE_STEP_1_ERROR, get_template_str(include_str!(
-                template_path!("module/memory/edit/duplicate/step-1-error.html")
-            ))),
-            (DUPLICATE_STEP_2_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/duplicate/step-2.html")
-            ))),
-            (DUPLICATE_STEP_4_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/duplicate/step-4.html")
-            ))),
-
-            (WORDS_AND_IMAGES_STEP_1_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/words-and-images/step-1/step-1.html")
-            ))),
-            (WORDS_AND_IMAGES_STEP_1_THUMBNAIL, get_template_str(include_str!(
-                template_path!("module/memory/edit/words-and-images/step-1/sidebar/image-thumbnail.html")
-            ))),
-            (WORDS_AND_IMAGES_STEP_2_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/words-and-images/step-2.html")
-            ))),
-            (WORDS_AND_IMAGES_STEP_4_PAGE, get_template_str(include_str!(
-                template_path!("module/memory/edit/words-and-images/step-4.html")
-            ))),
-        ]);
-
-        Self { cache }
-    }
-
-}
-
-*/

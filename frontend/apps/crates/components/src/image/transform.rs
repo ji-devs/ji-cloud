@@ -4,10 +4,13 @@ use shared::{
     error::image::*,
     media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
-use crate::{
+use utils::{
     fetch::{api_with_auth, api_with_auth_empty, api_upload_file},
-    path
+    path,
+    math::{RectF64, PointF64},
+    drag::*,
 };
+
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use url::Url;
@@ -24,14 +27,12 @@ use futures_signals::{
 use web_sys::{HtmlElement, HtmlImageElement, Element, HtmlInputElement, HtmlTextAreaElement};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use dominator_helpers::{elem, with_data_id, dynamic_class_signal, spawn_future, AsyncLoader};
-use crate::templates;
+use super::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use std::fmt::Write;
 use itertools::Itertools;
-use crate::math::{RectF64, PointF64};
 use super::data::*;
-use crate::drag::*;
 
 pub struct TransformImage {
     img: SimpleImage,
@@ -66,7 +67,7 @@ impl TransformImage {
     }
 
     pub fn render(_self: Rc<Self>) -> Dom {
-        elem!(templates::image_transform(&_self.img), {
+        elem!(templates::transform(&_self.img), {
             .style_signal("width", _self.width_signal())
             .style_signal("height", _self.height_signal())
             .style_signal("transform", _self.drag.borrow().transform_signal())

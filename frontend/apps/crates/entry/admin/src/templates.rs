@@ -184,43 +184,35 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (CONTAINER, get_template_str(include_str!(template_path!("admin/container.html")))),
-            (SIDEBAR_LINK, get_template_str(include_str!(template_path!("admin/sidebar-link.html")))),
-            (SIDEBAR_LINK_LOCKED, get_template_str(include_str!(template_path!("admin/sidebar-link-locked.html")))),
-            (CATEGORIES, get_template_str(include_str!(template_path!("admin/categories/categories-page.html")))),
-            (CATEGORY_MAIN_SELECTED, get_template_str(include_str!(template_path!("admin/categories/category-main-selected.html")))),
-            (CATEGORY_MAIN_DESELECTED, get_template_str(include_str!(template_path!("admin/categories/category-main-deselected.html")))),
-            (CATEGORY_SUB, get_template_str(include_str!(template_path!("admin/categories/category-sub.html")))),
-            (CATEGORY_LABEL_DISPLAY, get_template_str(include_str!(template_path!("admin/categories/category-label-display.html")))),
-            (CATEGORY_LABEL_INPUT, get_template_str(include_str!(template_path!("admin/categories/category-label-input.html")))),
-            (CATEGORY_MENU, get_template_str(include_str!(template_path!("admin/categories/category-menu.html")))),
-            (IMAGES_PAGE, get_template_str(include_str!(template_path!("admin/images/images-page.html")))),
-            (IMAGE_ADD, get_template_str(include_str!(template_path!("admin/images/image-add.html")))),
-            (IMAGE_EDIT, get_template_str(include_str!(template_path!("admin/images/image-edit.html")))),
-            (IMAGE_EDIT_META, get_template_str(include_str!(template_path!("admin/images/image-edit-meta.html")))),
-            (IMAGE_EDIT_CATEGORIES, get_template_str(include_str!(template_path!("admin/images/image-edit-categories.html")))),
-            (IMAGE_EDIT_CATEGORIES_CHILD, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-child.html")))),
-            (IMAGE_EDIT_CATEGORIES_CHILD_END, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-child-end.html")))),
-            (IMAGE_EDIT_CATEGORIES_PARENT, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-parent.html")))),
-            (IMAGE_EDIT_CATEGORIES_PARENT_END, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-parent-end.html")))),
-            (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-sum-child.html")))),
-            (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, get_template_str(include_str!(template_path!("admin/images/image-edit-categories-sum-parent.html")))),
-            (IMAGE_EDIT_OVERVIEW, get_template_str(include_str!(template_path!("admin/images/image-edit-overview.html")))),
-            (IMAGES_SEARCH, get_template_str(include_str!(template_path!("admin/images/images-search.html")))),
-            (IMAGE_GRID_ITEM_RED, get_template_str(include_str!(template_path!("_common/image/image-grid-item-red.html")))),
-            (IMAGE_GRID_ITEM_GREEN, get_template_str(include_str!(template_path!("_common/image/image-grid-item-green.html")))),
-            (CHECKBOX, get_template_str(include_str!(template_path!("_common/input/checkbox.html")))),
+            (CONTAINER, include_str!(template_path!("admin/container.html"))),
+            (SIDEBAR_LINK, include_str!(template_path!("admin/sidebar-link.html"))),
+            (SIDEBAR_LINK_LOCKED, include_str!(template_path!("admin/sidebar-link-locked.html"))),
+            (CATEGORIES, include_str!(template_path!("admin/categories/categories-page.html"))),
+            (CATEGORY_MAIN_SELECTED, include_str!(template_path!("admin/categories/category-main-selected.html"))),
+            (CATEGORY_MAIN_DESELECTED, include_str!(template_path!("admin/categories/category-main-deselected.html"))),
+            (CATEGORY_SUB, include_str!(template_path!("admin/categories/category-sub.html"))),
+            (CATEGORY_LABEL_DISPLAY, include_str!(template_path!("admin/categories/category-label-display.html"))),
+            (CATEGORY_LABEL_INPUT, include_str!(template_path!("admin/categories/category-label-input.html"))),
+            (CATEGORY_MENU, include_str!(template_path!("admin/categories/category-menu.html"))),
+            (IMAGES_PAGE, include_str!(template_path!("admin/images/images-page.html"))),
+            (IMAGE_ADD, include_str!(template_path!("admin/images/image-add.html"))),
+            (IMAGE_EDIT, include_str!(template_path!("admin/images/image-edit.html"))),
+            (IMAGE_EDIT_META, include_str!(template_path!("admin/images/image-edit-meta.html"))),
+            (IMAGE_EDIT_CATEGORIES, include_str!(template_path!("admin/images/image-edit-categories.html"))),
+            (IMAGE_EDIT_CATEGORIES_CHILD, include_str!(template_path!("admin/images/image-edit-categories-child.html"))),
+            (IMAGE_EDIT_CATEGORIES_CHILD_END, include_str!(template_path!("admin/images/image-edit-categories-child-end.html"))),
+            (IMAGE_EDIT_CATEGORIES_PARENT, include_str!(template_path!("admin/images/image-edit-categories-parent.html"))),
+            (IMAGE_EDIT_CATEGORIES_PARENT_END, include_str!(template_path!("admin/images/image-edit-categories-parent-end.html"))),
+            (IMAGE_EDIT_CATEGORIES_SUMMARY_CHILD, include_str!(template_path!("admin/images/image-edit-categories-sum-child.html"))),
+            (IMAGE_EDIT_CATEGORIES_SUMMARY_PARENT, include_str!(template_path!("admin/images/image-edit-categories-sum-parent.html"))),
+            (IMAGE_EDIT_OVERVIEW, include_str!(template_path!("admin/images/image-edit-overview.html"))),
+            (IMAGES_SEARCH, include_str!(template_path!("admin/images/images-search.html"))),
+            (IMAGE_GRID_ITEM_RED, include_str!(template_path!("_common/image/image-grid-item-red.html"))),
+            (IMAGE_GRID_ITEM_GREEN, include_str!(template_path!("_common/image/image-grid-item-green.html"))),
+            (CHECKBOX, include_str!(template_path!("_common/input/checkbox.html"))),
         ]);
 
         Self { cache }
     }
 
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
-    }
 }

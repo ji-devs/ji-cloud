@@ -4,7 +4,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-use utils::components::image::data::*;
+use components::image::data::*;
 use shared::media::{image_id_to_key, MediaLibraryKind, MediaVariant};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;

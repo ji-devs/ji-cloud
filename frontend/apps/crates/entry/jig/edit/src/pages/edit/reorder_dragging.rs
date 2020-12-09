@@ -15,7 +15,6 @@ use std::task::{Context, Poll};
 use super::data::*;
 use shared::domain::jig::ModuleKind;
 use utils::{
-    signals::*,
     math::*,
     drag::*,
 };

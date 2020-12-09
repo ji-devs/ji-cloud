@@ -1,3 +1,19 @@
+# Run like: cargo make [entry task] [app name]
+
+# TODO - cull in Duckscript: https://github.com/sagiegurari/duckscript/blob/master/docs/sdk.md#stdcollectionsarraycontains
+
+# Allowed app names:
+# dev/scratch/001
+# dev/showcase/001
+# user
+# admin
+# jig/edit
+# jig/play
+# module/memory/edit
+# module/memory/play
+# module/poster/edit
+# module/poster/play
+
 ###################
 ## Config        ##
 ###################
@@ -12,260 +28,63 @@ CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true
 
 env_files = ["../../.env"]
 
-[tasks.dev-port-main]
+[tasks.local-port-main]
 script_runner = "@duckscript"
 script = '''
 set_env APP_PORT 4104 
 '''
 
-[tasks.dev-port-iframe]
+[tasks.local-port-iframe]
 script_runner = "@duckscript"
 script = '''
 set_env APP_PORT 4105 
 '''
 
-###################
-## APPLICATIONS  ##
-###################
+##########################
+## ENTRY                ##
+##########################
 
-# USER
-[tasks.user-dev]
+[tasks.sandbox]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task dev-main
+set_env APP_NAME ${1} 
+cm_run_task build-sandbox
 '''
-# USER
-[tasks.user-dev-nomedia]
+
+[tasks.release]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task dev-main-nomedia
+set_env APP_NAME ${1} 
+cm_run_task build-release
 '''
 
-[tasks.user-dev-iframe]
+[tasks.local-main]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task dev-iframe
-
+set_env APP_NAME ${1} 
+cm_run_task build-local-main
 '''
-[tasks.user-dev-iframe-nomedia]
+
+[tasks.local-iframe]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task dev-iframe-nomedia
+set_env APP_NAME ${1} 
+cm_run_task build-local-iframe
 '''
 
-[tasks.user-sandbox]
+[tasks.local-main-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task sandbox 
+set_env APP_NAME ${1} 
+cm_run_task build-local-main-nomedia
 '''
 
-[tasks.user-release]
+[tasks.local-iframe-nomedia]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME user 
-cm_run_task release 
+set_env APP_NAME ${1} 
+cm_run_task build-local-iframe-nomedia
 '''
-
-# ADMIN 
-[tasks.admin-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin
-cm_run_task dev-main
-'''
-
-[tasks.admin-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin
-cm_run_task dev-main-nomedia
-'''
-
-[tasks.admin-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin 
-cm_run_task sandbox 
-'''
-
-[tasks.admin-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME admin 
-cm_run_task release 
-'''
-
-# JIG - SHELL 
-[tasks.jig-edit-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task dev-main
-'''
-
-[tasks.jig-edit-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task dev-main-nomedia
-'''
-
-[tasks.jig-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.jig-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.jig-play-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task dev-iframe
-'''
-
-[tasks.jig-play-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task dev-iframe-nomedia
-'''
-
-[tasks.jig-play-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task sandbox 
-'''
-
-[tasks.jig-play-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "jig/play" 
-cm_run_task release 
-'''
-
-#######################
-## MODULES           ##
-#######################
-
-# MODULE - MEMORY
-[tasks.module-memory-edit-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task dev-main
-'''
-
-[tasks.module-memory-edit-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task dev-main-nomedia
-'''
-
-[tasks.module-memory-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-memory-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.module-memory-play-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task dev-iframe
-'''
-
-[tasks.module-memory-play-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task dev-iframe-nomedia
-'''
-
-[tasks.module-memory-play-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-memory-play-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/memory/play" 
-cm_run_task release 
-'''
-
-# MODULE - POSTER 
-[tasks.module-poster-edit-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task dev-main
-'''
-
-[tasks.module-poster-edit-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task dev-main-nomedia
-'''
-
-[tasks.module-poster-edit-sandbox]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task sandbox 
-'''
-
-[tasks.module-poster-edit-release]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/edit" 
-cm_run_task release 
-'''
-
-
-[tasks.module-poster-play-dev]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/play" 
-cm_run_task dev-iframe
-'''
-
-[tasks.module-poster-play-dev-nomedia]
-script_runner = "@duckscript"
-script = '''
-set_env APP_NAME "module/poster/play" 
-cm_run_task dev-iframe-nomedia
-'''
-
-
-
 
 #######################
 ## COMMON            ##
@@ -279,7 +98,7 @@ rm -rf ../.template_output
 #######################
 ## BUILD - SANDBOX ##
 #######################
-[tasks.sandbox]
+[tasks.build-sandbox]
 run_task = {name = [
     "clean-templates",
     "sandbox-build-templates",
@@ -299,7 +118,7 @@ script = ["npm run build:sandbox"]
 #######################
 ## BUILD - RELEASE   ##
 #######################
-[tasks.release]
+[tasks.build-release]
 run_task = {name = [
     "clean-templates",
     "release-build-templates",
@@ -317,60 +136,60 @@ script_runner = "@shell"
 script = ["npm run build:release"]
 
 ###################
-## DEV ##
+## local ##
 ###################
-[tasks.dev-main]
+[tasks.build-local-main]
 run_task = {name = [
     "clean-templates",
-    "dev-port-main",
-    "dev-build-templates",
-    "dev-prep-files",
-    "dev-start",
+    "local-port-main",
+    "local-build-templates",
+    "local-prep-files",
+    "local-start",
 ]}
 
-[tasks.dev-iframe]
+[tasks.build-local-iframe]
 run_task = {name = [
     "clean-templates",
-    "dev-port-iframe",
-    "dev-build-templates",
-    "dev-prep-files",
-    "dev-start",
+    "local-port-iframe",
+    "local-build-templates",
+    "local-prep-files",
+    "local-start",
 ]}
 
-[tasks.dev-main-nomedia]
+[tasks.build-local-main-nomedia]
 run_task = {name = [
-    "dev-port-main",
-    "dev-prep-files",
-    "dev-watch-app",
+    "local-port-main",
+    "local-prep-files",
+    "local-watch-app",
 ]}
 
-[tasks.dev-iframe-nomedia]
+[tasks.bild-local-iframe-nomedia]
 run_task = {name = [
-    "dev-port-iframe",
-    "dev-prep-files",
-    "dev-watch-app",
+    "local-port-iframe",
+    "local-prep-files",
+    "local-watch-app",
 ]}
 
-[tasks.dev-prep-files]
+[tasks.local-prep-files]
 script_runner = "@shell"
-script = ["npm run dev-files"]
+script = ["npm run local-dev-files"]
 cwd = "../build-utils"
 
-[tasks.dev-build-templates]
+[tasks.local-build-templates]
 command = "cargo"
 args = ["run", "--", "--remote-target", "local"]
 cwd = "../build-utils/templates-builder"
 
-[tasks.dev-start]
+[tasks.local-start]
 run_task = { name = [
-    "dev-start-mediaserver",
-    "dev-watch-css-tailwind",
-    "dev-watch-css-plain",
-    "dev-watch-templates",
-    "dev-watch-app",
+    "local-start-mediaserver",
+    "local-watch-css-tailwind",
+    "local-watch-css-plain",
+    "local-watch-templates",
+    "local-watch-app",
 ], fork = true, parallel = true }
 
-[tasks.dev-start-mediaserver]
+[tasks.local-start-mediaserver]
 script_runner = "@shell"
 script = ["npm run local-media-server"]
 cwd = "../build-utils"
@@ -378,22 +197,22 @@ cwd = "../build-utils"
 # running watch from npm is not working for some reason
 # so redefining it below
 
-[tasks.dev-watch-css-plain]
+[tasks.local-watch-css-plain]
 command = "watchexec"
 args = ["-w", "src", "npm run bundle:prod"]
 cwd = "../css/plain"
 
-[tasks.dev-watch-css-tailwind]
+[tasks.local-watch-css-tailwind]
 command = "watchexec"
 args = ["-w", "src", "-w", "../../.template_output", "npm run bundle:prod"]
 cwd = "../css/tailwind"
 
-[tasks.dev-watch-templates]
+[tasks.local-watch-templates]
 command = "cargo"
 args = ["run", "--", "--remote-target", "local"]
 cwd = "../build-utils/templates-builder"
 watch = { watch = ["../templates"] }
 
-[tasks.dev-watch-app]
+[tasks.local-watch-app]
 script_runner = "@shell"
 script = ["npm run build:watch"]

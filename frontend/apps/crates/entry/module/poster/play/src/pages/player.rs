@@ -10,14 +10,12 @@ use futures_signals::{
 };
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
+use dominator_helpers::{elem,dynamic_class_signal ,with_data_id};
 use crate::templates;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use utils::{
     iframe::*,
-    components::module_page::*,
-    signals::DefaultStringSignal,
     settings::SETTINGS,
 };
 use gloo_timers::future::TimeoutFuture;
@@ -37,54 +35,63 @@ use shared::{
     media::{image_id_to_key, MediaLibraryKind, MediaVariant},
 };
 
-
 use uuid::Uuid;
-pub struct PlayerPage {
-    game_state: Rc<GameState>,
-}
+use components::{
+    image::data::*,
+    module::page::*
+};
 
-impl PlayerPage {
-    pub fn new(jig_id: String, module_id: String) -> Rc<Self> {
-        let game_state = Rc::new(GameState::new(jig_id, module_id));
-        Rc::new(Self { game_state })
-    }
-}
+type LoadedData = (String, String, raw::Poster);
 
-//Use the ModuleRenderer component by way of a trait
-#[async_trait(?Send)]
-impl ModuleRenderer for PlayerPage {
-    type Data = raw::Poster;
-
-    async fn load(_self:Rc<Self>) -> raw::Poster { 
-        if let Some(raw_poster) = debug::settings().poster {
-            raw_poster
+pub fn render(jig_id: String, module_id: String) -> Dom {
+    ModulePage::<PlayerRenderer, _>::render(move || async move {
+        if let Some(raw_data) = debug::settings().poster {
+            (jig_id, module_id, raw_data)
         } else {
-            log::info!("loading...");
-            raw::Poster::load(_self.game_state.jig_id.clone(), _self.game_state.module_id.clone()).await
+            let raw_data = raw::Poster::load(jig_id.clone(), module_id.clone()).await;
+            (jig_id, module_id, raw_data)
+        }
+    })
+}
+
+
+
+struct PlayerRenderer {
+    pub state: Rc<State>
+}
+
+impl ModuleRenderer for PlayerRenderer {
+    type Data = LoadedData;
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type SidebarSignal = impl Signal<Item = Option<Dom>>;
+    type HeaderSignal = impl Signal<Item = Option<Dom>>;
+    type MainSignal = impl Signal<Item = Option<Dom>>;
+    type FooterSignal = impl Signal<Item = Option<Dom>>;
+
+    fn new((jig_id, module_id, raw_data):LoadedData) -> Self {
+        Self { 
+            state: State::new(jig_id, module_id, raw_data)
         }
     }
 
-    fn render(_self: Rc<Self>, data: raw::Poster) -> ModuleRenderOutput {
-        _self.game_state.set_from_loaded(data);
-        ModuleRenderOutput::new_player( 
-            html!("div", { 
-                .child_signal(
-                    _self.game_state.loaded.signal().map(clone!(_self => move |loaded| {
-                        match loaded {
-                            false => None,
-                            true => Some(Self::render_loaded(_self.game_state.clone()))
-                        }
-                    }))
-                )
-            })
-        )
+
+    fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
+        always(ModulePageKind::PlayIframe)
+    }
+
+    fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
+        always(None)
+    }
+    fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
+        always(None)
+    }
+    fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
+        always(None)
+    }
+
+    fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
+
+        always(Some(html!("h1", { .text("hello world") })))
     }
 
 }
-
-impl PlayerPage {
-    fn render_loaded(game_state:Rc<GameState>) -> Dom {
-        html!("h1", { .text("hello world") })
-    }
-}
-

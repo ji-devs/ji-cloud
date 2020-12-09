@@ -71,40 +71,29 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (SIDEBAR, get_template_str(include_str!(
+            (SIDEBAR, include_str!(
                 template_path!("module/poster/edit/sidebar/sidebar.html")
-            ))),
-            (HEADER, get_template_str(include_str!(
+            )),
+            (HEADER, include_str!(
                 template_path!("module/poster/edit/header.html")
-            ))),
-            (FOOTER, get_template_str(include_str!(
+            )),
+            (FOOTER, include_str!(
                 template_path!("module/poster/edit/footer.html")
-            ))),
-            (MAIN, get_template_str(include_str!(
+            )),
+            (MAIN, include_str!(
                 template_path!("module/poster/edit/main.html")
-            ))),
-            (SIDEBAR_LAYOUT, get_template_str(include_str!(
+            )),
+            (SIDEBAR_LAYOUT, include_str!(
                 template_path!("module/poster/edit/sidebar/layout.html")
-            ))),
-            (SIDEBAR_LAYOUT_ITEM, get_template_str(include_str!(
+            )),
+            (SIDEBAR_LAYOUT_ITEM, include_str!(
                 template_path!("module/poster/edit/sidebar/layout-item.html")
-            ))),
-            (SIDEBAR_IMAGES, get_template_str(include_str!(
+            )),
+            (SIDEBAR_IMAGES, include_str!(
                 template_path!("module/poster/edit/sidebar/images.html")
-            ))),
-
-
+            )),
         ]);
 
         Self { cache }
-    }
-
-}
-
-//replace {{MEDIA_UI}} in the template string
-//this leaks memory - which is okay since templates exist for the lifetime of the app
-fn get_template_str(s:&'static str) -> &'static str {
-    unsafe {
-        Box::leak(SETTINGS.get_unchecked().remote_target.replace_media_ui(s).into_boxed_str())
     }
 }
