@@ -89,17 +89,20 @@ fn set_searchable_fields_v2<'a>(
     })
 }
 
+fn empty<'a>(_client: &'a super::Inner, _index: &'a str) -> BoxFuture<'a, anyhow::Result<()>> {
+    Box::pin(futures::future::ok(()))
+}
+
 pub const INDEXING_MIGRATIONS: &'static [(
     ResyncKind,
     for<'a> fn(&'a super::Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
 )] = &[
     (ResyncKind::Complete, bad_batch_object),
     (ResyncKind::Complete, set_searchable_fields_v1),
-    (ResyncKind::Complete, |_, _| {
-        Box::pin(futures::future::ok(()))
-    }),
+    (ResyncKind::Complete, empty),
     (ResyncKind::Complete, set_attributes_for_faceting),
     (ResyncKind::Complete, set_searchable_fields_v2),
+    (ResyncKind::Complete, empty),
 ];
 
 pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;
