@@ -14,8 +14,12 @@
           <p class="text-lg mb-8 w-480">Tell us more about yourself so that we can tailor
             the content according to your specific needs</p>
           <div class="flex">
+            <div class="">
+              <div class="spacer w-30"></div>
+              {{ User::user_input(label="Location*",width="w-297",inputwidth="w-296", inputDataId="location", placeholder="Add your location") }}
+              <div data-id="required-field" class="error-message"></div>
+            </div>
 
-            {{ User::user_input(label="Location*",width="w-297",inputwidth="w-296", inputDataId="location") }}
           </div>
 
 

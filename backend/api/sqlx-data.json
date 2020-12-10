@@ -1,41 +1,5 @@
 {
   "db": "PostgreSQL",
-  "0352a39223a9bb7c9d4c66cc673a8324a3e56ea9c6fdc1b87f2dcb8233499eb3": {
-    "query": "select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: AgeRangeId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -515,6 +479,42 @@
       "nullable": []
     }
   },
+  "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
+    "query": "\n            select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AffiliationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "32bc8fe3fd1a0c9b4de8b504337d29e7f300a1b0a299ba593458ed8f145f321f": {
     "query": "delete from jig where id = $1",
     "describe": {
@@ -573,13 +573,13 @@
       "nullable": []
     }
   },
-  "3a85015fd281bcc9d504b2aae1f4e2c87c1317bbbe2138555db93ea44c9dfe17": {
-    "query": "select content_type_id as \"id: ContentTypeId\", display_name, created_at, updated_at from \"content_type\"",
+  "4368428bff6e48dc83f1dca76d15bd4606f4fcf4c011fbe826b322635f7a798e": {
+    "query": "\n            select id as \"id: StyleId\", display_name, created_at, updated_at from style\n            order by index\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: ContentTypeId",
+          "name": "id: StyleId",
           "type_info": "Uuid"
         },
         {
@@ -739,13 +739,13 @@
       ]
     }
   },
-  "623992fdf30ce59e4917c9f6638a7b08dcb0141a48c88032a8b76e602d77ca63": {
-    "query": "select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation",
+  "616a6c1ac7056a7fdcd18cbeb36fda1cb58e79eeb809358b1bf77987b186d3c6": {
+    "query": "\n            select content_type_id as \"id: ContentTypeId\", display_name, created_at, updated_at from \"content_type\"\n            order by index\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: AffiliationId",
+          "name": "id: ContentTypeId",
           "type_info": "Uuid"
         },
         {
@@ -809,6 +809,42 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
+    "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: SubjectId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
@@ -893,42 +929,6 @@
       ]
     }
   },
-  "7b49ee2d19cf63926c689aa8d83ddf3fe323f9f5847618badb91c79c73c3d792": {
-    "query": "select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: SubjectId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "80e114ec0b610550438d73280239678e249985eb19134c9917b39b34ead292c6": {
     "query": "select id as \"id: ImageId\" from user_image_library where id = $1",
     "describe": {
@@ -995,8 +995,8 @@
       ]
     }
   },
-  "9991b885b754b63902caa9894d6e65a780ff6f9270ac3f71899564b9a9502b94": {
-    "query": "\nselect \n    id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select name from affiliation inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id where image_affiliation.image_id = image_metadata.id)) as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id)) as \"styles!\",\n    array((select name from style inner join image_style on style.id = image_style.style_id where image_style.image_id = image_metadata.id)) as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id)) as \"age_ranges!\",\n    array((select name from age_range inner join image_age_range on age_range.id = image_age_range.age_range_id where image_age_range.image_id = image_metadata.id)) as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id)) as \"categories!\",\n    array((select name from category inner join image_category on category.id = image_category.category_id where image_category.image_id = image_metadata.id)) as \"category_names!\",\n    publish_at,\n    is_premium\nfrom image_metadata\nwhere last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\nlimit 100\n",
+  "9666f0d8851a8bd23cdf541a3a99af9590a458915e00001de434ea91d767d5b9": {
+    "query": "\nselect id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n    array((select style.display_name\n           from style\n                    inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    publish_at,\n    is_premium\n from image_metadata\n where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\n limit 100;\n     ",
     "describe": {
       "columns": [
         {
@@ -1164,13 +1164,13 @@
       "nullable": []
     }
   },
-  "be59835e1d5e12c886bcb449ed6877588ec6e5a8bcc90cd3b5b531885b169b34": {
-    "query": "select id as \"id: StyleId\", display_name, created_at, updated_at from style",
+  "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
+    "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: StyleId",
+          "name": "id: AgeRangeId",
           "type_info": "Uuid"
         },
         {

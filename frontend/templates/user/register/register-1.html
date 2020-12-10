@@ -8,14 +8,25 @@
   <div class="px-80 py-60">
     <h1 class="text-jititleorange text-5xl font-light mb-8">Register - Step 1</h1>
     <div class="">
-      <div data-id="status-message"></div>
+      <div data-id="status-message" class="error-message"></div>
       <div class="flex">
-        {{ User::user_input(label="First name*",width="w-297",inputwidth="w-296", inputDataId="given-name") }}
-        <div class="spacer w-30"></div>
-        {{ User::user_input(label="Last name*",width="w-297",inputwidth="w-296", inputDataId="family-name") }}
+        <div class="">
+          {{ User::user_input(label="First name*",width="w-297",inputwidth="w-296", inputDataId="given-name", placeholder="First name") }}
+          <div data-id="required-field" class="error-message"></div>
+        </div>
+
+        <div class="">
+          <div class="spacer w-30"></div>
+          {{ User::user_input(label="Last name*",width="w-297",inputwidth="w-296", inputDataId="family-name", placeholder="Last name" )}}
+          <div data-id="required-field" class="error-message"></div>
+        </div>
+
+
       </div>
 
-      {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="user-name") }}
+      {{ User::user_input(label="Create a username*",width="w-full",inputwidth="w-full", inputDataId="user-name", placeholder="Create a username" )}}
+      <div data-id="required-field" class="error-message"></div>
+
       {{ Input::checkbox(label="I am over 18", inputDataId="over-18", required=true, class="px-2") }}
       <div class="mt-2">
         {{ ButtonMacros::orange(label="Next", dataId="next") }}
