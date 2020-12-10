@@ -33,6 +33,7 @@ const fixtures = {
     categoryOrdering: '3_category_ordering.sql',
     categoryNesting: '4_category_nesting.sql',
     image: '5_image.sql',
+    userNoPerms: '6_user_no_perms.sql',
 };
 
 const DB_NAMES = new Set();
@@ -561,4 +562,116 @@ test('update image - two styles', async (t) => {
     delete metadata.updated_at;
 
     t.snapshot(metadata);
+});
+
+async function authFail(t, data) {
+    await runFixtures([fixtures.userNoPerms], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    const response = await got(data.route, {
+        ...t.context.loggedInReqBase,
+        prefixUrl: 'http://0.0.0.0/',
+        ...data.body,
+        throwHttpErrors: false,
+    });
+
+    t.deepEqual(response.statusCode, 403);
+}
+
+authFail.title = (providedTitle = 'authfail', data) => {
+    let actionName;
+
+    switch (data.body.method) {
+        case 'PATCH': actionName = 'update'; break;
+        case 'DELETE': actionName = 'delete'; break;
+        case 'POST': actionName = 'create'; break;
+        default: actionName = '?';
+    }
+
+    return `${providedTitle} - ${data.kind} - ${actionName}`;
+};
+
+test(authFail, {
+    kind: 'category',
+    route: 'v1/category',
+    body: {
+        method: 'POST',
+        json: {
+            name: ''
+        },
+    }
+});
+
+test(authFail, {
+    kind: 'category',
+    route: 'v1/category/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'category',
+    route: 'v1/category/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'DELETE',
+    }
+});
+
+test(authFail, {
+    kind: 'image',
+    route: 'v1/image',
+    body: {
+        method: 'POST',
+        json: {
+            name: 'test',
+            description: 'testest',
+            is_premium: false,
+            publish_at: null,
+            styles: [],
+            age_ranges: [],
+            affiliations: [],
+            categories: [],
+            kind: 'Canvas',
+        },
+    }
+});
+
+test(authFail, {
+    kind: 'image',
+    route: 'v1/image/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'image',
+    route: 'v1/image/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'DELETE',
+    }
+});
+
+test(authFail, {
+    kind: 'jig',
+    route: 'v1/jig',
+    body: {
+        method: 'POST',
+    }
+});
+
+test(authFail, {
+    kind: 'jig',
+    route: 'v1/jig/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'jig',
+    route: 'v1/jig/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'DELETE',
+    }
 });
