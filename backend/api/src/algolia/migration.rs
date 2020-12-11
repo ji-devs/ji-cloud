@@ -103,6 +103,7 @@ pub const INDEXING_MIGRATIONS: &'static [(
     (ResyncKind::Complete, set_attributes_for_faceting),
     (ResyncKind::Complete, set_searchable_fields_v2),
     (ResyncKind::Complete, empty),
+    (ResyncKind::Complete, empty),
 ];
 
 pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;
