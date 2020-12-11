@@ -887,6 +887,26 @@
       "nullable": []
     }
   },
+  "6dcc3e22fd2bb64cec50f447237de2968384af1de326d4b26b8816611f2cc2e5": {
+    "query": "select algolia_index_version != $1 as \"outdated!\" from settings",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "outdated!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
     "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
     "describe": {
