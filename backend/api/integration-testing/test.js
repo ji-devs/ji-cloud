@@ -518,9 +518,22 @@ test(createImageError, { kind: 'affiliations', kindName: 'Affiliation', id: '638
 test(createImageError, { kind: 'age_ranges', kindName: 'AgeRange', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
 test(createImageError, { kind: 'categories', kindName: 'Category', id: '6389eaa0-de76-11ea-b7ab-0399bcf84df2' });
 
-test.todo('GET image');
+test('GET image', async (t) => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    const resp = await got.get('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase);
+
+    t.snapshot(resp.body.metadata);
+});
+
 test.todo('GET images');
-test.todo('DELETE image');
+
+test('DELETE image', async (t) => {
+    await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    await t.notThrowsAsync(got.delete('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase));
+});
+
 test.todo('PATCH image/raw (upload image)');
 
 // todo: test builder
@@ -564,23 +577,49 @@ test('update image - two styles', async (t) => {
     t.snapshot(metadata);
 });
 
+// 500s, but for some reason diagnosis is being difficult 
+test.skip('create jig - default', async (t) => {
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    const category = await got.post('http://0.0.0.0/v1/jig', {
+        ...t.context.loggedInReqBase,
+    });
+
+    t.deepEqual(typeof (category.body.id), 'string');
+});
+
+test.todo("create jig - params");
+test.todo("delete jig");
+test.todo("get jig");
+test.todo("update jig");
+
 async function authFail(t, data) {
     await runFixtures([fixtures.userNoPerms], t.context.dbUrl, t.context.FIXTURES_DIR);
 
+    let base = t.context.loggedInReqBase;
+    if (data.body.method === 'GET') {
+        base = { ...base, headers: {} };
+    }
+
     const response = await got(data.route, {
-        ...t.context.loggedInReqBase,
+        ...base,
         prefixUrl: 'http://0.0.0.0/',
         ...data.body,
         throwHttpErrors: false,
     });
 
-    t.deepEqual(response.statusCode, 403);
+    if (data.body.method === 'GET') {
+        t.deepEqual(response.statusCode, 401);
+    } else {
+        t.deepEqual(response.statusCode, 403);
+    }
 }
 
 authFail.title = (providedTitle = 'authfail', data) => {
     let actionName;
 
     switch (data.body.method) {
+        case 'GET': actionName = 'get'; break;
         case 'PATCH': actionName = 'update'; break;
         case 'DELETE': actionName = 'delete'; break;
         case 'POST': actionName = 'create'; break;
@@ -606,6 +645,14 @@ test(authFail, {
     route: 'v1/category/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'category',
+    route: 'v1/category?ids=00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'GET',
     }
 });
 
@@ -648,6 +695,14 @@ test(authFail, {
     kind: 'image',
     route: 'v1/image/00000000-0000-0000-0000-000000000000',
     body: {
+        method: 'GET',
+    }
+});
+
+test(authFail, {
+    kind: 'image',
+    route: 'v1/image/00000000-0000-0000-0000-000000000000',
+    body: {
         method: 'DELETE',
     }
 });
@@ -671,6 +726,47 @@ test(authFail, {
 test(authFail, {
     kind: 'jig',
     route: 'v1/jig/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'GET',
+    }
+});
+
+
+test(authFail, {
+    kind: 'jig',
+    route: 'v1/jig/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'DELETE',
+    }
+});
+
+test(authFail, {
+    kind: 'module',
+    route: 'v1/module',
+    body: {
+        method: 'POST',
+    }
+});
+
+test(authFail, {
+    kind: 'module',
+    route: 'v1/module/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'module',
+    route: 'v1/module/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'GET',
+    }
+});
+
+test(authFail, {
+    kind: 'module',
+    route: 'v1/module/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
     }
