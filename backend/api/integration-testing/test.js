@@ -577,6 +577,22 @@ test('update image - two styles', async (t) => {
     t.snapshot(metadata);
 });
 
+// 500s, but for some reason diagnosis is being difficult 
+test.skip('create jig - default', async (t) => {
+    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
+
+    const category = await got.post('http://0.0.0.0/v1/jig', {
+        ...t.context.loggedInReqBase,
+    });
+
+    t.deepEqual(typeof (category.body.id), 'string');
+});
+
+test.todo("create jig - params");
+test.todo("delete jig");
+test.todo("get jig");
+test.todo("update jig");
+
 async function authFail(t, data) {
     await runFixtures([fixtures.userNoPerms], t.context.dbUrl, t.context.FIXTURES_DIR);
 
