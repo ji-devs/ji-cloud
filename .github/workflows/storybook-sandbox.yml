@@ -42,7 +42,7 @@ jobs:
         working-directory: "./frontend/storybook"
 
       - name: build 
-        run: npm run storybook:build-sandbox
+        run: npm run storybook:build
         working-directory: "./frontend/storybook"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
