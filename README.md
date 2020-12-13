@@ -3,7 +3,7 @@
 * Live site: https://jicloud.org & https://sandbox.jicloud.org
 * Storybook: https://storybook.jicloud.org & https://storybook.sandbox.jicloud.org
 * Shared Crate Docs: https://docs.jicloud.org/crate/shared & https://docs.sandbox.jicloud.org/crate/shared
-* Dev Book: https://docs.jicloud.org/book & https://docs.sandbox.jicloud.org/book
+* Dev Book: https://docs.sandbox.jicloud.org/book
 
 # Build Status
 
