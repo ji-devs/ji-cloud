@@ -217,7 +217,7 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 
 async fn create(
     db: Data<PgPool>,
-    // _claims: AuthUserWithScope<ScopeManageImage>,
+    _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
 ) -> Result<
     (
