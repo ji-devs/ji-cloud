@@ -1,4 +1,4 @@
-# Frontend Developer's Pipeline
+# Frontend Developer's Pipeline (TODO - UPDATE/DEPRECATE
 
 ## STEP 1: HTML/CSS
 

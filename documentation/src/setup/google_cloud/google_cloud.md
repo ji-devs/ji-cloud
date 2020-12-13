@@ -2,12 +2,19 @@
 
 # Secrets
 
-The runtime secrets are accessed via Gooogle Secret Manager. They are:
+The runtime secrets are accessed via Gooogle Secret Manager. 
+Some of these are also in local .env
 
   * DB_PASS: the database password
   * INTER_SERVER: a random string to authenticate inter-server communication
   * JWT_SECRET: a random string used to sign JWT tokens
   * SANITY_TEST: not really necessary, just to make it easier to test that things are working correctly
+  * ALGOLIA_KEY: algolia key
+  * ALGOLIA_PROJECT_ID: algolia project id
+  * GOOGLE_S3_ACCESS_KEY: the access key for accessing cloud storage like s3
+  * GOOGLE_S3_ACCESS_SECRET: the access secret for accessing cloud storage like s3
+  * SENTRY_DSN_API: Sentry API 
+  * SENTRY_DSN_PAGES: Sentry Pages
 
 ### Backend - Cloud Run
 

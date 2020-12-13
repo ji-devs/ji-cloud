@@ -49,10 +49,10 @@ const destPath = path.resolve(`${destDir}/index.html`);
 
 fs.ensureDirSync(path.resolve(destDir));
 fs.readFile(srcPath, 'utf-8')
-    .then(html => html.replace("{{APP_NAME}}", APP_NAME))
-    .then(html => html.replace("{{FRONTEND_DEV_AUTH}}", FRONTEND_DEV_AUTH))
-    .then(html => html.replace("{{FRONTEND_DEV_TOKEN}}", FRONTEND_DEV_TOKEN))
-    .then(html => html.replace("{{FRONTEND_DEV_CSRF}}", FRONTEND_DEV_CSRF))
+    .then(html => html.replace(/{{APP_NAME}}/g, APP_NAME))
+    .then(html => html.replace(/{{FRONTEND_DEV_AUTH}}/g, FRONTEND_DEV_AUTH))
+    .then(html => html.replace(/{{FRONTEND_DEV_TOKEN}}/g, FRONTEND_DEV_TOKEN))
+    .then(html => html.replace(/{{FRONTEND_DEV_CSRF}}/g, FRONTEND_DEV_CSRF))
     .then(html => fs.writeFile(destPath, html))
     .catch(err => console.error(err));
 

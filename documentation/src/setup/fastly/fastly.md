@@ -16,6 +16,17 @@ if (req.url ~ "\/$") {
 }
 ```
 
+Though we're not using that at the moment (pushing to firebase for docs and storybook).
+
+We are using this VCL in order to cache things for 1 year, and then we purge things more aggressively as needed:
+
+```
+set beresp.ttl = 1y;
+if (beresp.status >= 200 && beresp.status < 300) {
+  set beresp.cacheable = true;
+}
+```
+
 See Fastly documentation for more details
 
 # Purging

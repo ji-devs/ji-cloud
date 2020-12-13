@@ -1,18 +1,27 @@
 # Start projects in dev mode
 
-Pure rust projects (backend, utils, etc.)
+Inside the `frontend/apps` folder:
 
 ```
-cargo make dev
+cargo make [target] [app] 
 ```
 
+Where `target` is one of:
+* `local-main`
+* `local-iframe` (will use a different port)
+* `local-main-nomedia` (will not start the local media server)
+* `local-iframe-nomedia` (different port and will not start the local media server)
+
+`app` is the name of the SPA (`user`, `jig/edit`, `module/memory/edit`, etc.)
+
+There are a few apps setup for scratch and showcase that are good for like a whiteboard on the dev side
+
+# Storybook
 Frontend wasm and storybook:
 ```
 npm start
 ```
 
-All other JS projects like api_js and cloud functions:
+or
 
-```
-npm run dev
-```
+`npm run start:nomedia` (will not start the local media server)

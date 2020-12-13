@@ -8,9 +8,9 @@
 
 - [One-time Setup](./setup/setup.md)
   - [Requirements](./setup/requirements/requirements.md)
-  - [Config](./setup/config/config.md)
+  - [.env](./setup/config/dot_env.md)
   - [Google Cloud](./setup/google_cloud/google_cloud.md)
-  - [secret keys](./setup/secret-keys/secret_keys.md)
+  - [local secrets](./setup/local-secrets/secret_keys.md)
   - [CI/CD](./setup/ci-cd/ci_cd.md)
   - [Database](./setup/database/database.md)
   - [Fastly](./setup/fastly/fastly.md)

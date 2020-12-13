@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./.ts-output",
+    "paths": {
+        "@utils/*": ["../ts-utils/*"],
+        "@frontend-config/*": ["../config/*"],
+        "@elements/*": ["./src/*"],
+        "@bundles/*": ["./src/_bundles/*"]
+    },
+    "target": "es2017",
+    "module": "es2015",
+    "lib": ["es2017", "dom", "dom.iterable"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts", "src/_bundles/**/*.ts"],
+  "exclude": []
+}

@@ -17,10 +17,10 @@ Single Signin is accomplished by:
 
 In more detail, the flow is like this (assuming user has already signed in on the main auth site):
 
-1. Client makes a GET request to the main auth server's endpoint, e.g. `/user/get-signin-jwt`
+1. Client makes a GET request to the main auth server's endpoint
 2. Main Auth Server validates the cookie (and _only_ the cookie)
 3. Main Auth Server generates and responds with a new Signin JWT (without a CSRF token)
-4. Client passes this JWT along to Secondary Auth Server's login endpoint, e.g. `/user/signin-with-jwt`
+4. Client passes this JWT along to Secondary Auth Server's login endpoint
 5. Secondary Auth Server validates the JWT (via a validation request to Main Auth Server)
 6. Secondary Auth Server follows the same signin flow as the Main Auth Server
 

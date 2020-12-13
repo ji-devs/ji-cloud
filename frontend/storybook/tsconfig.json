@@ -2,15 +2,18 @@
     "compilerOptions": {
         "baseUrl": "./",
         "paths": {
-            "@templates/*": ["../.template_output/*"],
-            "@utils/*": ["./src/utils/*"],
-            "@components/*": ["./src/components/*"],
+            "@utils/*": ["../ts-utils/*"],
+            "@frontend-config/*": ["../config/*"],
+            "@elements/*": ["../elements/src/*"],
             "@mock/*": ["./src/mock/*"],
-            "@frontend-config/*": ["../config/*"]
+            "@templates/*": ["../.template_output/*"],
+            "@components/*": ["./src/components/*"]
         },
+
         "lib": [
-            "es6",
-            "dom"
-        ]
+            "es2017", 
+            "dom", 
+            "dom.iterable"
+        ],
     },
 }

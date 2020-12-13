@@ -1,3 +1,5 @@
+### This might be out of date... start with just npm install and cargo install as needed then refer here if you get stuck.
+
 cargo install:
   * systemfd
   * watchexec

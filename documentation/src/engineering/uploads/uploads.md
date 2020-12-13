@@ -1,3 +1,1 @@
-1. Api service gets signed url for Upload Bucket
-2. Passes this signed url to client
-3. Client uploads directly
+Uploads are gated by the backend for auth and media transcoding

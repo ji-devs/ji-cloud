@@ -1,8 +1,8 @@
 
 import addons from '@storybook/addons';
 import { STORY_RENDERED } from '@storybook/core-events';
-import {startResizer} from "../src/utils/resize";
-import {getChildId} from "../src/utils/dom";
+import {startResizer} from "../../ts-utils/resize";
+import {getChildId} from "../../ts-utils/dom";
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
@@ -17,9 +17,9 @@ addons.getChannel().on(STORY_RENDERED, (story) => {
   const container = getChildId(document, "module-outer", true);
   const [observer, cancelObserver] = startResizer(container);
 
-  const sidebar = getChildId(document, "sidebar");
-  const header = getChildId(document, "header");
-  const footer = getChildId(document, "footer");
+  const sidebar = getChildId(document, "sidebar", true);
+  const header = getChildId(document, "header", true);
+  const footer = getChildId(document, "footer", true);
 
   if(sidebar) {
     observer.observe(sidebar);

@@ -18,65 +18,54 @@ use components::module::page::*;
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
 
-pub struct Page { 
-    pub toggle: Mutable<bool>,
-}
-
-fn template_signal<S: Signal<Item = Dom> + 'static>(child: S) -> Dom {
-
-    let template:HtmlTemplateElement = web_sys::window()
-        .unwrap_throw()
-        .document()
-        .unwrap_throw()
-        .create_element("template")
-        .unwrap_throw()
-        .unchecked_into();
-
-    DomBuilder::new(template)
-        .child_signal(child.map(|x| Some(x)))
-        .into_dom()
-        //.into_dom_template()
-
-}
-
-/*
-impl DomBuilder<HtmlTemplateElement> {
-    #[inline]
-    fn into_dom_template(self) -> Dom {
-        let frag:DocumentFragment = template.content();
-        let el:HtmlElement = frag.first_child().unwrap().unchecked_into();
-
-        Dom {
-            element: el.into(),
-            callbacks: self.callbacks,
-        }
-    }
-}
-*/
+pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        Self::_render(Self::new())
+        render_steps() 
     }
+}
 
-    fn new() -> Rc<Self> {
-        Rc::new(Self {toggle: Mutable::new(false) } )
+struct State {
+    pub current_step: Mutable<u32>
+}
+
+impl State {
+    pub fn new (initial_step:u32) -> Rc<Self> {
+        Rc::new(Self {
+            current_step: Mutable::new(initial_step)
+        })
     }
+}
 
+pub fn render_steps() -> Dom {
+    let state = State::new(1);
 
-    fn _render(_self:Rc<Self>) -> Dom {
-        template_signal(Self::child_dom(_self))
-    }
+    html!("steps-nav", {
+        .property("steps", 4)
+        .children(vec![
+            render_button(1, "This", state.clone()),
+            render_button(2, "Is", state.clone()),
+            render_button(3, "A", state.clone()),
+            render_button(4, "Test", state.clone()),
+        ])
+    })
+}
 
-    fn child_dom(_self:Rc<Self>) -> impl Signal<Item = Dom> {
-        _self.toggle.signal().map(clone!(_self => move |flag| {
-                html!("button", {
-                    .text(if flag { "true" } else { "false" })
-                    .event(clone!(_self => move |evt:events::Click| {
-                        let mut toggle = _self.toggle.lock_mut();
-                        *toggle = !*toggle;
-                    }))
-                })
+fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
+    html!("circle-button", {
+        .property("text", format!("{}", step))
+        .property("label", label)
+        .property("slot", format!("btn-{}", step))
+        .property_signal("active", state.current_step.signal().map(move |current_step| {
+            if current_step == step {
+                true
+            } else {
+                false
+            }
         }))
-    }
+        .event(clone!(step, state => move |evt:events::Click| {
+            state.current_step.set(step);
+        }))
+    })
 }

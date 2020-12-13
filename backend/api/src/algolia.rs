@@ -52,13 +52,22 @@ impl Updater {
             loop {
                 let iteration_start = Instant::now();
 
-                if let Err(e) = self
+                let res = self
                     .update_images()
                     .await
-                    .context("update images task errored")
-                {
-                    log::error!("{:?}", e);
-                    sentry::integrations::anyhow::capture_anyhow(&e);
+                    .context("update images task errored");
+
+                match res {
+                    Ok(true) => {}
+                    Ok(false) => {
+                        log::info!("exiting algolia indexing task (out of date)");
+                        return;
+                    }
+
+                    Err(e) => {
+                        log::error!("{:?}", e);
+                        sentry::integrations::anyhow::capture_anyhow(&e);
+                    }
                 }
 
                 tokio::time::delay_until((iteration_start + Duration::from_secs(5)).into()).await;
@@ -66,7 +75,21 @@ impl Updater {
         })
     }
 
-    async fn update_images(&self) -> anyhow::Result<()> {
+    async fn update_images(&self) -> anyhow::Result<bool> {
+        let mut txn = self.db.begin().await?;
+
+        let is_outdated = sqlx::query!(
+            r#"select algolia_index_version != $1 as "outdated!" from settings"#,
+            migration::INDEX_VERSION
+        )
+        .fetch_one(&mut txn)
+        .await?
+        .outdated;
+
+        if is_outdated {
+            return Ok(false);
+        }
+
         let sync_time = Utc::now();
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
@@ -102,7 +125,7 @@ select id,
  limit 100;
      "#, &sync_time
         )
-        .fetch(&self.db)
+        .fetch(&mut txn)
         .map_ok(|row| algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchImage {
                 name: &row.name,
@@ -129,7 +152,7 @@ select id,
         .await?;
 
         if requests.is_empty() {
-            return Ok(());
+            return Ok(true);
         }
 
         log::debug!("Updating a batch of {} image(s)", requests.len());
@@ -144,10 +167,10 @@ select id,
             sync_time,
             &ids
         )
-        .execute(&self.db)
+        .execute(&mut txn)
         .await?;
 
-        Ok(())
+        Ok(true)
     }
 }
 
