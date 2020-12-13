@@ -6,7 +6,7 @@ export default {
 
 export const StepsNav = () => {
     return `
-        <steps-nav steps="4">
+        <steps-nav steps="3">
           <circle-button slot="btn-1" text="1" label="Inactive"></circle-button>
           <circle-button slot="btn-2" text="2" label="Active" active></circle-button>
           <circle-button slot="btn-3" text="3" label="Disabled" disabled></circle-button>
