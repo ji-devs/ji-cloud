@@ -6,8 +6,6 @@ on:
     paths:
     - 'config/**'
     - 'frontend/core/js/**'
-    - 'frontend/css/**'
-    - 'frontend/templates/**'
     - 'frontend/storybook/**'
 
 jobs:
@@ -34,14 +32,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12'
-
-      - name: install npm deps (tailwind)
-        run: npm install
-        working-directory: "./frontend/css/tailwind"
-
-      - name: install npm deps (plain)
-        run: npm install
-        working-directory: "./frontend/css/plain"
 
       - name: install build utils deps
         run: npm install

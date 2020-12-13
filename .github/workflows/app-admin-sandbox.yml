@@ -7,8 +7,6 @@ on:
     - 'config/**'
     - 'shared/**'
     - 'frontend/apps/crates/core/**'
-    - 'frontend/templates/_common/**'
-    - 'frontend/templates/admin/**'
     - 'frontend/apps/crates/entry/admin/**'
 
 jobs:

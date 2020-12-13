@@ -2,9 +2,8 @@ const path = require('path');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
 module.exports = {
   "stories": [
-    "../src/index.@(js|jsx|ts|tsx)",
-    "../src/**/*.stories.mdx",
-    "../src/**/*.stories.@(js|jsx|ts|tsx)"
+    "../src/**/*.mdx",
+    "../src/components/*.@(js|jsx|ts|tsx)"
   ],
   "addons": [
     "@storybook/addon-links",
@@ -12,8 +11,8 @@ module.exports = {
       name: '@storybook/addon-essentials',
       options: {
         backgrounds: false,
-        actions: false,
-        controls: false
+        actions: true,
+        controls: true 
       }
     }
   ],

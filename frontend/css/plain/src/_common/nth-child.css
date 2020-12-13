@@ -1,7 +1,0 @@
-.first-hidden > :first-child {
-    display: none;
-}
-
-.second-hidden > :nth-child(2) {
-    display: none;
-}

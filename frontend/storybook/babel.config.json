@@ -17,16 +17,8 @@
             "rootPathPrefix": "@elements"
           },
           {
-            "rootPathSuffix": "./src/mock",
-            "rootPathPrefix": "@mock"
-          },
-          {
-            "rootPathSuffix": "../.template_output",
-            "rootPathPrefix": "@templates"
-          },
-          {
-            "rootPathSuffix": "./src/components",
-            "rootPathPrefix": "@components"
+            "rootPathSuffix": "./src",
+            "rootPathPrefix": "~"
           }
         ]
       }

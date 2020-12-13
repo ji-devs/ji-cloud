@@ -1,6 +1,6 @@
 import "@elements/buttons/circle-button";
 export default {
-  title: 'Components / Circle Button',
+  title: 'Circle Button',
 }
 
 export const CircleButtonActive = () => {

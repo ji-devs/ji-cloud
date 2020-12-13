@@ -5,9 +5,7 @@
             "@utils/*": ["../ts-utils/*"],
             "@frontend-config/*": ["../config/*"],
             "@elements/*": ["../elements/src/*"],
-            "@mock/*": ["./src/mock/*"],
-            "@templates/*": ["../.template_output/*"],
-            "@components/*": ["./src/components/*"]
+            "~/*": ["./src/*"]
         },
 
         "lib": [

@@ -63,10 +63,6 @@ export class _ extends LitElement {
 
   // Define the element's template
   render() {
-
-    console.log(css`red`);
-    console.log(colorValues.blue);
-
     const { active, disabled, text, label} = this;
 
     const circleClasses = classMap({ 
