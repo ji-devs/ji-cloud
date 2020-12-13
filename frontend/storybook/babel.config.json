@@ -5,24 +5,28 @@
       {
         "paths": [
           {
-            "rootPathSuffix": "../.template_output",
-            "rootPathPrefix": "@templates"
-          },
-          {
-            "rootPathSuffix": "./src/utils",
+            "rootPathSuffix": "../ts-utils",
             "rootPathPrefix": "@utils"
           },
           {
-            "rootPathSuffix": "./src/components",
-            "rootPathPrefix": "@components"
+            "rootPathSuffix": "../config",
+            "rootPathPrefix": "@frontend-config"
+          },
+          {
+            "rootPathSuffix": "../elements/src",
+            "rootPathPrefix": "@elements"
           },
           {
             "rootPathSuffix": "./src/mock",
             "rootPathPrefix": "@mock"
           },
           {
-            "rootPathSuffix": "../config",
-            "rootPathPrefix": "@frontend-config"
+            "rootPathSuffix": "../.template_output",
+            "rootPathPrefix": "@templates"
+          },
+          {
+            "rootPathSuffix": "./src/components",
+            "rootPathPrefix": "@components"
           }
         ]
       }

@@ -10,8 +10,8 @@ if(!process.env.LOCAL_CDN_MEDIA_PORT || process.env.LOCAL_CDN_MEDIA_PORT === "")
     process.exit(1);
 }
 
-if(!process.env.LOCAL_CDN_CSS_PORT || process.env.LOCAL_CDN_CSS_PORT === "") {
-    console.log("Local Media server: set [LOCAL_CDN_CSS_PORT] in .env");
+if(!process.env.LOCAL_CDN_ELEMENTS_PORT || process.env.LOCAL_ELEMENTS_ELEMENTS_PORT === "") {
+    console.log("Local Media server: set [LOCAL_CDN_ELEMENTS_PORT] in .env");
     process.exit(1);
 }
 
@@ -22,7 +22,7 @@ const cors = require('cors');
 const serveIndex = require('serve-index');
 
 startCdnMedia();
-startCdnCss();
+startCdnElements();
 
 function startCdnMedia() {
 	const port = parseInt(process.env.LOCAL_CDN_MEDIA_PORT);
@@ -38,9 +38,9 @@ function startCdnMedia() {
 	app.listen(port, () => console.log(`Local CDN for Media Started on port ${port}, serving ${localPath}!`))
 }
 
-function startCdnCss() {
-	const port = parseInt(process.env.LOCAL_CDN_CSS_PORT);
-	const localPath = path.resolve(`../css`);
+function startCdnElements() {
+	const port = parseInt(process.env.LOCAL_CDN_ELEMENTS_PORT);
+	const localPath = path.resolve(`../elements/dist`);
 
 	const app = express();
 
@@ -49,5 +49,5 @@ function startCdnCss() {
 	app.use(express.static(localPath, {cacheControl: false}), serveIndex(localPath, {'icons': true}));
 
 
-	app.listen(port, () => console.log(`Local CDN for CSS Started on port ${port}, serving ${localPath}!`))
+	app.listen(port, () => console.log(`Local CDN for Elements started on port ${port}, serving ${localPath}!`))
 }

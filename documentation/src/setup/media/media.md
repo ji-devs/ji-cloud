@@ -1,10 +1,8 @@
-# Media
+# Media VM
 
 Media is synced via Dropbox, in order to allow graphics, audio, and other media artists to contribute their work without going through git.
 
-The local dev configuration happens like everything else in [config](../config/config.md)
-
-In order to have media updates automatically propogate all the way up to the CDN, a bit of manual setup work needs to be done first:
+In order to have media updates automatically propogate all the way up to the CDN, a VM with a cron task needs to be setup:
 
 1. Locally install [rclone](https://rclone.org/). Not on the server, but on a dev machine
 2. Use it to create the authenticated dropbox remote

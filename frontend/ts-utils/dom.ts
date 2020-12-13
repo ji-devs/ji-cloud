@@ -1,3 +1,10 @@
+export function makeElement(html:string):any {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return (template.content.cloneNode(true) as any).firstElementChild;
+}
+
+
 //these tend to return the element they are operating on
 //in order to allow a fluent/builder sort of pattern
 //Everything is just typed to element for now... can get more specific later

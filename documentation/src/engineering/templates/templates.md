@@ -1,4 +1,4 @@
-# Frontend Templates
+# Frontend Templates (TODO - DEPRECATE)
 
 The template system is based on a two-step process:
 

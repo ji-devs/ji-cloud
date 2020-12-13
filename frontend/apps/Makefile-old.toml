@@ -87,18 +87,29 @@ cm_run_task build-local-iframe-nomedia
 '''
 
 #######################
+## COMMON            ##
+#######################
+[tasks.clean-templates]
+script_runner = "@duckscript"
+script = '''
+rm -rf ../.template_output
+'''
+
+#######################
 ## BUILD - SANDBOX ##
 #######################
 [tasks.build-sandbox]
 run_task = {name = [
-    "sandbox-build-elements",
+    "clean-templates",
+    "sandbox-build-templates",
     "sandbox-build-app",
 ]}
 
-[tasks.sandbox-build-elements]
-script_runner = "@shell"
-script = ["npm run build:sandbox"]
-cwd = "../elements"
+[tasks.sandbox-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "sandbox"]
+cwd = "../build-utils/templates-builder"
+
 
 [tasks.sandbox-build-app]
 script_runner = "@shell"
@@ -109,14 +120,16 @@ script = ["npm run build:sandbox"]
 #######################
 [tasks.build-release]
 run_task = {name = [
-    "release-build-elements",
+    "clean-templates",
+    "release-build-templates",
     "release-build-app",
 ]}
 
-[tasks.release-build-elements]
-script_runner = "@shell"
-script = ["npm run build:release"]
-cwd = "../elements"
+[tasks.release-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "release"]
+cwd = "../build-utils/templates-builder"
+
 
 [tasks.release-build-app]
 script_runner = "@shell"
@@ -127,23 +140,24 @@ script = ["npm run build:release"]
 ###################
 [tasks.build-local-main]
 run_task = {name = [
-    "local-build-elements",
+    "clean-templates",
     "local-port-main",
+    "local-build-templates",
     "local-prep-files",
     "local-start",
 ]}
 
 [tasks.build-local-iframe]
 run_task = {name = [
-    "local-build-elements",
+    "clean-templates",
     "local-port-iframe",
+    "local-build-templates",
     "local-prep-files",
     "local-start",
 ]}
 
 [tasks.build-local-main-nomedia]
 run_task = {name = [
-    "local-build-elements",
     "local-port-main",
     "local-prep-files",
     "local-watch-app",
@@ -151,7 +165,6 @@ run_task = {name = [
 
 [tasks.bild-local-iframe-nomedia]
 run_task = {name = [
-    "local-build-elements",
     "local-port-iframe",
     "local-prep-files",
     "local-watch-app",
@@ -162,15 +175,17 @@ script_runner = "@shell"
 script = ["npm run local-dev-files"]
 cwd = "../build-utils"
 
-[tasks.local-build-elements]
-script_runner = "@shell"
-script = ["npm run build:local"]
-cwd = "../elements"
+[tasks.local-build-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "local"]
+cwd = "../build-utils/templates-builder"
 
 [tasks.local-start]
 run_task = { name = [
     "local-start-mediaserver",
-    "local-watch-elements",
+    "local-watch-css-tailwind",
+    "local-watch-css-plain",
+    "local-watch-templates",
     "local-watch-app",
 ], fork = true, parallel = true }
 
@@ -179,10 +194,24 @@ script_runner = "@shell"
 script = ["npm run local-media-server"]
 cwd = "../build-utils"
 
-[tasks.local-watch-elements]
-script_runner = "@shell"
-script = ["npm run watch"]
-cwd = "../elements"
+# running watch from npm is not working for some reason
+# so redefining it below
+
+[tasks.local-watch-css-plain]
+command = "watchexec"
+args = ["-w", "src", "npm run bundle:prod"]
+cwd = "../css/plain"
+
+[tasks.local-watch-css-tailwind]
+command = "watchexec"
+args = ["-w", "src", "-w", "../../.template_output", "npm run bundle:prod"]
+cwd = "../css/tailwind"
+
+[tasks.local-watch-templates]
+command = "cargo"
+args = ["run", "--", "--remote-target", "local"]
+cwd = "../build-utils/templates-builder"
+watch = { watch = ["../templates"] }
 
 [tasks.local-watch-app]
 script_runner = "@shell"

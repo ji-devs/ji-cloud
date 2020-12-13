@@ -1,6 +1,7 @@
 node_modules
 dist
 target
+.ts-output
 documentation/output
 .env
 .firebase
