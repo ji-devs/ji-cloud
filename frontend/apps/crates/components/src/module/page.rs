@@ -26,8 +26,7 @@ use futures_signals::{
 };
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, spawn_future, AsyncLoader};
-use super::templates;
+use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, futures::{spawn_future, AsyncLoader}, signals::OptionSignal};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use serde::de::DeserializeOwned;
 use utils::{
@@ -55,6 +54,15 @@ impl ModulePageKind {
         match self {
             Self::EditResize | Self::PlayIframe | Self::PlayIframePreview => true,
             Self::EditPlain | Self::Empty => false
+        }
+    }
+    pub fn element_name(&self) -> &str {
+        match self {
+            Self::EditResize => "module-page-resize",
+            Self::PlayIframe => "module-page-iframe",
+            Self::PlayIframePreview => "module-page-iframe-preview",
+            Self::EditPlain => "module-edit-plain",
+            Self::Empty => "module-empty"
         }
     }
 }
@@ -140,8 +148,8 @@ where
               F: Future<Output = Data>
     {
         html!("div", {
-              .class("w-full")
-              .class("h-full")
+              .style("width", "100%")
+              .style("height", "100%")
               .child_signal(Self::dom_signal(Self::init(load)))
         })
     }
@@ -191,6 +199,7 @@ where
             ModuleBounds::set_elem(&container);
         }
     }
+
     fn dom_signal(_self: Rc<Self>) -> impl Signal<Item = Option<Dom>> {
 
         _self.has_loaded_data.signal().map(clone!(_self => move |has_loaded| {
@@ -201,18 +210,15 @@ where
                 let renderer = renderer.as_ref().unwrap_throw();
                 Some(
                     html!("div", {
-                        .class("w-full")
-                        .class("h-full")
+                        .style("width", "100%")
+                        .style("height", "100%")
                         .child_signal(Renderer::page_kind_signal(renderer.clone())
                             .map(clone!(_self, renderer => move |page_kind| {Some(
-                                elem!(templates::page(page_kind), {
-                                    .with_data_id!("main", { 
-                                        .child_signal( 
-                                            Renderer::main_signal(renderer.clone())
-                                        )
-                                        //Note - not observing size changes on main
-                                        //Main is ultimately what's scaled :)
-                                    })
+                                html!(page_kind.element_name(), {
+
+                                    //Note - not observing size changes on main
+                                    //Main is ultimately what's scaled :)
+                                    .child_slot_signal("main", Renderer::main_signal(renderer.clone()))
                                     //Each of these sections sets up for observing for resize
                                     //and also renders the signal defined by the renderer trait
                                     .with_data_id!("sidebar", { 
