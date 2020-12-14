@@ -6,8 +6,6 @@ on:
     paths:
     - 'config/**'
     - 'frontend/core/js/**'
-    - 'frontend/css/**'
-    - 'frontend/templates/**'
     - 'frontend/storybook/**'
 
 jobs:
@@ -35,14 +33,6 @@ jobs:
         with:
           node-version: '12'
 
-      - name: install npm deps (tailwind)
-        run: npm install
-        working-directory: "./frontend/css/tailwind"
-
-      - name: install npm deps (plain)
-        run: npm install
-        working-directory: "./frontend/css/plain"
-
       - name: install build utils deps
         run: npm install
         working-directory: "./frontend/build-utils"
@@ -52,7 +42,7 @@ jobs:
         working-directory: "./frontend/storybook"
 
       - name: build 
-        run: npm run storybook:build-sandbox
+        run: npm run storybook:build
         working-directory: "./frontend/storybook"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend

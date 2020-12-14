@@ -1,7 +1,0 @@
-{# use either first-hidden or second-hidden #}
-{% macro toolbar_item(id, icon) %}
-    <div data-id="{{ id }}">
-        <img src="{{MEDIA_UI}}/{{ icon }}.svg" alt="" class="ml-2 cursor-pointer"></img>
-        <img src="{{MEDIA_UI}}/{{ icon }}-active.svg" alt="" class="ml-2 cursor-pointer"></img>
-    </div>
-{% endmacro toolbar_item %}
