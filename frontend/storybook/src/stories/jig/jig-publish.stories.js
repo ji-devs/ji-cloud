@@ -6,6 +6,7 @@ import jiglanguagedropdown from "@templates/jig/publish/publish-language-dropdow
 import jigpublishage from "@templates/jig/publish/publish-age.html";
 import jigpublishcategorydropdown from "@templates/jig/publish/publish-categories-dropdown.html";
 import jigpublishcategories from "@templates/jig/publish/publish-selected-category.html";
+import jigsuccessone from "@templates/jig/publish/publish-success-one.html";
 
 
 
@@ -16,6 +17,11 @@ export default {
 
 export const JigPublishOne = () =>
     tmpl(jigpublishone, {
+
+});
+
+export const JigSuccessOne = () =>
+    tmpl(jigsuccessone, {
 
 });
 
