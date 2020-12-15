@@ -1,8 +1,9 @@
-use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::HttpResponse;
 use chrono::{DateTime, Utc};
+use paperclip::actix::{
+    api_v2_operation,
+    web::{self, Data, Json, ServiceConfig},
+};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
@@ -43,6 +44,7 @@ impl From<MetaWrapperError> for UpdateError {
     }
 }
 
+#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     auth: AuthUserWithScope<ScopeManageJig>,
@@ -67,6 +69,7 @@ async fn create(
     Ok(Json(CreateResponse { id }))
 }
 
+#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
@@ -77,6 +80,7 @@ async fn delete(
     Ok(HttpResponse::NoContent().into())
 }
 
+#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
@@ -105,6 +109,7 @@ async fn update(
     Ok(HttpResponse::NoContent().into())
 }
 
+#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,

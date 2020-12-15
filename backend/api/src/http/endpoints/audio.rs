@@ -1,4 +1,4 @@
-use actix_web::web::ServiceConfig;
+use paperclip::actix::web::ServiceConfig;
 use shared::{
     api::{endpoints::audio, ApiEndpoint},
     error::DeleteError,
@@ -16,12 +16,13 @@ fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
 
 pub mod user {
     use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
-    use actix_web::{
-        http,
-        web::{Bytes, Data, Json, Path},
-        HttpResponse,
-    };
+    use actix_web::{http, HttpResponse};
     use futures::TryStreamExt;
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Bytes, Data, Json, Path},
+        CreatedJson,
+    };
     use shared::{
         api::{endpoints, ApiEndpoint},
         domain::{
@@ -37,20 +38,19 @@ pub mod user {
     };
     use sqlx::PgPool;
 
+    #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
-        (
-            Json<<endpoints::audio::user::Create as ApiEndpoint>::Res>,
-            http::StatusCode,
-        ),
+        CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>,
         <endpoints::audio::user::Create as ApiEndpoint>::Err,
     > {
         let id = db::audio::user::create(db.as_ref()).await?;
-        Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+        Ok(CreatedJson(CreateResponse { id }))
     }
 
+    #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
         s3: Data<S3Client>,
@@ -78,6 +78,7 @@ pub mod user {
         Ok(HttpResponse::NoContent().into())
     }
 
+    #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -95,6 +96,7 @@ pub mod user {
         Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
     }
 
+    #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -110,6 +112,7 @@ pub mod user {
         Ok(Json(GetResponse { metadata }))
     }
 
+    #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,

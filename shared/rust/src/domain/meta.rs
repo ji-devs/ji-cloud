@@ -4,55 +4,49 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Wrapper type around [`Uuid`], represents the ID of a [`Style`].
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-/// [`Style`]: struct.Style.html
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
+
+/// Wrapper type around [`Uuid`], represents [`Style::id`].
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct StyleId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents the ID of a [`AgeRange`].
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-/// [`AgeRange`]: struct.AgeRange.html
+/// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRangeId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents the ID of a [`Affiliation`].
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-/// [`Affiliation`]: struct.Affiliation.html
+/// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AffiliationId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents the ID of a [`Subject`].
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-/// [`Subject`]: struct.Subject.html
+/// Wrapper type around [`Uuid`], represents [`Subject::id`].
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SubjectId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents the ID of a [`ContentType`].
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
-/// [`Subject`]: struct.Subject.html
+/// Wrapper type around [`Uuid`], represents [`ContentType::id`].
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ContentTypeId(pub Uuid);
 
 into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId, ContentTypeId);
 
 /// Represents a style.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Style {
     /// The id of the style.
     pub id: StyleId,
@@ -69,6 +63,7 @@ pub struct Style {
 
 /// Represents a age range.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRange {
     /// The id of the age range.
     pub id: AgeRangeId,
@@ -85,6 +80,7 @@ pub struct AgeRange {
 
 /// Represents an affiliation.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Affiliation {
     /// The id of the affiliation.
     pub id: AffiliationId,
@@ -101,6 +97,7 @@ pub struct Affiliation {
 
 /// Represents a subject.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Subject {
     /// The id of the subject.
     pub id: SubjectId,
@@ -117,6 +114,7 @@ pub struct Subject {
 
 /// Represents a content-type.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ContentType {
     /// The id of the content-type.
     pub id: ContentTypeId,
@@ -133,6 +131,7 @@ pub struct ContentType {
 
 /// Response for fetching all metadata.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GetResponse {
     /// All styles the server has.
     pub styles: Vec<Style>,
@@ -152,34 +151,23 @@ pub struct GetResponse {
 
 /// Metadata kinds.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum MetaKind {
     /// [`Affiliation`]
-    ///
-    /// [`Affiliation`]: struct.Affiliation.html
     Affiliation,
 
     /// [`Style`]
-    ///
-    /// [`Style`]: struct.Style.html
     Style,
 
     /// [`AgeRange`]
-    ///
-    /// [`AgeRange`]: struct.AgeRange.html
     AgeRange,
 
-    /// [`Category`]
-    ///
-    /// [`Category`]: struct.Category.html
+    /// [`Category`](super::category::Category)
     Category,
 
     /// [`Subject`]
-    ///
-    /// [`Subject`]: struct.Subject.html
     Subject,
 
     /// [`ContentType`]
-    ///
-    /// [`ContentType`]: struct.ContentType.html
     ContentType,
 }

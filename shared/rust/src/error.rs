@@ -1,6 +1,9 @@
 //! Home of the error types.
 
-/// Generates a `From` impl to convert from `Into<anyhow::Error>` to an enum
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
+
+/// Generates a [`From`](std::from::From) impl to convert from [`Into<anyhow::Error>`] to an enum
 /// with a `InternalServerError(anyhow::Error)` variant.
 macro_rules! from_anyhow {
     ( $( $t:ty ),+ $(,)? ) => {
@@ -41,8 +44,6 @@ pub mod user {
 use serde::{Deserialize, Serialize};
 
 /// Converts from an [`anyhow::Error`] to a http `InternalServerError`.
-///
-/// [`anyhow::Error`]: ../../anyhow/struct.Error.html
 #[cfg(feature = "backend")]
 fn anyhow_to_ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = actix_web::HttpResponse::InternalServerError();
@@ -52,6 +53,7 @@ fn anyhow_to_ise(e: anyhow::Error) -> actix_web::Error {
 }
 
 /// Represents an error from the backend.
+#[cfg_attr(feature = "backend", api_v2_errors)]
 pub struct InternalServerError(pub anyhow::Error);
 
 impl<T: Into<anyhow::Error>> From<T> for InternalServerError {
@@ -67,8 +69,9 @@ impl From<InternalServerError> for actix_web::Error {
     }
 }
 
-/// Error occurred while getting a single resource.
+/// Error occurred while getting a single resource.a
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum GetError {
     /// The resource does not exist.
@@ -94,6 +97,7 @@ impl From<GetError> for actix_web::Error {
 }
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while deleting a resource.
 pub enum DeleteError {
@@ -121,6 +125,7 @@ impl From<DeleteError> for actix_web::Error {
 
 // fixme: (if this breaking change is ever possible): Use a `CommonError` type
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating a Resource.
 pub enum CreateError<T = Infallible> {
@@ -148,6 +153,7 @@ impl<T: Into<actix_web::Error>> From<CreateError<T>> for actix_web::Error {
 
 // fixme: (if this breaking change is ever possible): Use a `CommonError` type
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating a Resource.
 pub enum UpdateError<T = Infallible> {
@@ -178,6 +184,7 @@ impl<T: Into<actix_web::Error>> From<UpdateError<T>> for actix_web::Error {
 }
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// A common error type
 pub enum CommonError {

@@ -1,9 +1,10 @@
 use crate::{
     db, extractor::AuthUserWithScope, extractor::ScopeManageCategory, extractor::WrapAuthClaimsNoDb,
 };
-use actix_web::{
+use actix_web::HttpResponse;
+use paperclip::actix::{
+    api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
-    HttpResponse,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::domain::category::{
@@ -12,6 +13,7 @@ use shared::domain::category::{
 };
 use sqlx::PgPool;
 
+#[api_v2_operation]
 async fn get_categories(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
@@ -37,6 +39,7 @@ async fn get_categories(
     Ok(Json(CategoryResponse { categories }))
 }
 
+#[api_v2_operation]
 async fn create_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
@@ -52,6 +55,7 @@ async fn create_category(
     Ok(Json(NewCategoryResponse { id, index }))
 }
 
+#[api_v2_operation]
 async fn update_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
@@ -76,6 +80,7 @@ async fn update_category(
     Ok(HttpResponse::NoContent().into())
 }
 
+#[api_v2_operation]
 async fn delete_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,

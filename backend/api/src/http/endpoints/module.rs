@@ -1,7 +1,5 @@
-use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::HttpResponse;
+use paperclip::actix::{NoContent, api_v2_operation, web::{self, Data, Json, ServiceConfig}};
 use shared::{
     api::{endpoints::module, ApiEndpoint},
     domain::{
@@ -17,6 +15,7 @@ use crate::{
     extractor::{AuthUserWithScope, ScopeManageModule, WrapAuthClaimsNoDb},
 };
 
+#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _auth: AuthUserWithScope<ScopeManageModule>,
@@ -28,16 +27,18 @@ async fn create(
     Ok(Json(CreateResponse { id }))
 }
 
+#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageModule>,
     path: web::Path<ModuleId>,
-) -> Result<HttpResponse, <module::Delete as ApiEndpoint>::Err> {
+) -> Result<NoContent, <module::Delete as ApiEndpoint>::Err> {
     db::module::delete(&*db, path.into_inner()).await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
+#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageModule>,
@@ -54,6 +55,7 @@ async fn update(
     Ok(HttpResponse::NoContent().into())
 }
 
+#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,

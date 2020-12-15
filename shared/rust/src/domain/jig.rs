@@ -4,6 +4,8 @@ pub mod module;
 
 use super::{meta::ContentTypeId, Publish};
 use chrono::{DateTime, Utc};
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -11,15 +13,15 @@ use uuid::Uuid;
 pub use module::{LiteModule, ModuleId, ModuleKind};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
-///
-/// [`Uuid`]: ../../uuid/struct.Uuid.html
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigId(pub Uuid);
 
 /// Request to create a new JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -54,6 +56,7 @@ pub struct CreateRequest {
 
 /// The over-the-wire representation of a JIG.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Jig {
     /// The ID of the JIG.
     pub id: JigId,
@@ -73,7 +76,7 @@ pub struct Jig {
     /// The types of content this JIG contains.
     pub content_types: Vec<ContentTypeId>,
 
-    /// The ID of the JIG's original creator (`None` if unknown).
+    /// The ID of the JIG's original creator ([`None`] if unknown).
     pub creator_id: Option<Uuid>,
 
     /// The current author
@@ -85,6 +88,7 @@ pub struct Jig {
 
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GetResponse {
     /// The requested JIG.
     pub jig: Jig,
@@ -92,6 +96,8 @@ pub struct GetResponse {
 
 /// Request for updating a JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UpdateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]

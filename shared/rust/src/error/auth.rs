@@ -4,9 +4,12 @@
 use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 use serde::{Deserialize, Serialize};
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Represents an error with Registration.
 pub enum RegisterError {
@@ -39,6 +42,7 @@ impl From<RegisterError> for actix_web::Error {
 }
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Represents an error with when authorizing a firebase token.
 pub enum FirebaseError {

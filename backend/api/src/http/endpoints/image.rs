@@ -5,13 +5,14 @@ use crate::{
     image_ops::generate_images,
     s3::S3Client,
 };
-use actix_web::{
-    http::{self, StatusCode},
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::{http::StatusCode, HttpResponse};
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
+use paperclip::actix::{
+    api_v2_operation,
+    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
+    CreatedJson,
+};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -30,11 +31,13 @@ use uuid::Uuid;
 
 pub mod user {
     use crate::{db, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3::S3Client};
-    use actix_web::{
-        http,
+    use paperclip::actix::{
+        api_v2_operation,
         web::{Bytes, Data, Json, Path},
-        HttpResponse,
+        CreatedJson,
     };
+
+    use actix_web::{http, HttpResponse};
     use futures::TryStreamExt;
     use shared::{
         api::{endpoints, ApiEndpoint},
@@ -51,20 +54,19 @@ pub mod user {
     };
     use sqlx::PgPool;
 
+    #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
-        (
-            Json<<endpoints::image::user::Create as ApiEndpoint>::Res>,
-            http::StatusCode,
-        ),
+        CreatedJson<<endpoints::image::user::Create as ApiEndpoint>::Res>,
         <endpoints::image::user::Create as ApiEndpoint>::Err,
     > {
         let id = db::image::user::create(db.as_ref()).await?;
-        Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+        Ok(CreatedJson(CreateResponse { id }))
     }
 
+    #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
         s3: Data<S3Client>,
@@ -92,6 +94,7 @@ pub mod user {
         Ok(HttpResponse::NoContent().into())
     }
 
+    #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -114,6 +117,7 @@ pub mod user {
         Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
     }
 
+    #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -129,6 +133,7 @@ pub mod user {
         Ok(Json(GetResponse { metadata }))
     }
 
+    #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -215,15 +220,13 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
     }
 }
 
+#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
 ) -> Result<
-    (
-        Json<<endpoints::image::Create as ApiEndpoint>::Res>,
-        http::StatusCode,
-    ),
+    CreatedJson<<endpoints::image::Create as ApiEndpoint>::Res>,
     <endpoints::image::Create as ApiEndpoint>::Err,
 > {
     let req = req.into_inner();
@@ -252,9 +255,10 @@ async fn create(
 
     txn.commit().await?;
 
-    Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
+#[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
     s3: Data<S3Client>,
@@ -279,6 +283,7 @@ async fn upload(
     Ok(HttpResponse::NoContent().into())
 }
 
+#[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
@@ -294,6 +299,7 @@ async fn get_one(
     Ok(Json(GetResponse { metadata }))
 }
 
+#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
@@ -331,6 +337,7 @@ async fn get(
     }))
 }
 
+#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageImage>,
@@ -380,6 +387,7 @@ fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
     }
 }
 
+#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,

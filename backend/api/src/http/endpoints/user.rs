@@ -2,12 +2,13 @@ use crate::db::{self, user::register};
 use crate::extractor::{
     reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
-use actix_web::{
-    web::{Data, Json, Query, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::HttpResponse;
 use core::settings::RuntimeSettings;
 use jsonwebtoken as jwt;
+use paperclip::actix::{
+    api_v2_operation,
+    web::{Data, Json, Query, ServiceConfig},
+};
 use shared::{
     api::endpoints::{
         user::{Profile, Register, Signin, SingleSignOn, UserLookup},
@@ -21,6 +22,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
+#[api_v2_operation]
 async fn user_lookup(
     db: Data<PgPool>,
     query: Query<UserLookupQuery>,
@@ -43,6 +45,7 @@ async fn user_lookup(
     .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
+#[api_v2_operation]
 async fn handle_signin_credentials(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
@@ -71,6 +74,7 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterErro
     Ok(())
 }
 
+#[api_v2_operation]
 async fn handle_register(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
@@ -88,6 +92,7 @@ async fn handle_register(
         .json(RegisterSuccess::Signin(csrf)))
 }
 
+#[api_v2_operation]
 async fn handle_get_profile(
     db: Data<PgPool>,
     claims: WrapAuthClaimsNoDb,
@@ -101,6 +106,7 @@ async fn handle_get_profile(
         .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
+#[api_v2_operation]
 async fn handle_authorize(
     settings: Data<RuntimeSettings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,

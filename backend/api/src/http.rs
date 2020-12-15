@@ -10,6 +10,7 @@ use core::{
     settings::RuntimeSettings,
 };
 use futures::Future;
+use paperclip::actix::OpenApiExt;
 use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
@@ -72,6 +73,7 @@ pub async fn run(
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
+            .wrap_api()
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
@@ -81,6 +83,8 @@ pub async fn run(
             .configure(endpoints::jig::configure)
             .configure(endpoints::module::configure)
             .configure(endpoints::admin::configure)
+            .with_json_spec_at("/v1/api/spec")
+            .build()
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via

@@ -5,9 +5,12 @@ use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 
-// fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
+// fixme: if breaking changes can ever be made, replace with [`crate::error::CreateError`]
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating a category.
 pub enum CreateError {
@@ -33,8 +36,9 @@ impl From<CreateError> for actix_web::Error {
     }
 }
 
-// fixme: if breaking changes can ever be made, replace with `crate::error::UpdateError`
+// fixme: if breaking changes can ever be made, replace with [`crate::error::UpdateError`]
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating a category.
 pub enum UpdateError {

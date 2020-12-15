@@ -5,8 +5,11 @@ use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while uploading an audio file.
 pub enum UploadError {

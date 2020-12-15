@@ -1,5 +1,5 @@
 #[cfg(feature = "backend")]
-use actix_web::{web, Route};
+use paperclip::actix::web::{self, Route};
 
 /// Represents a http method.
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -22,9 +22,7 @@ pub enum Method {
 
 #[cfg(feature = "backend")]
 impl Method {
-    /// Gets a [`actix_web::Route`] based off of `Self`.
-    ///
-    /// [`actix_web::Route`]: ../../../actix_web/struct.Route.html
+    /// Gets a [`Route`](Route) based off of `Self`.
     pub fn route(self) -> Route {
         match self {
             Self::Delete => web::delete(),
@@ -37,9 +35,7 @@ impl Method {
 }
 
 impl Method {
-    /// Represents `Self` as a [`str`].
-    ///
-    /// [`str`]: https://doc.rust-lang.org/stable/std/primitive.str.html
+    /// Represents `Self` as a [`str`](str).
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Delete => "DELETE",

@@ -6,20 +6,24 @@ use super::{
     Publish,
 };
 use chrono::{DateTime, Utc};
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
-
 use uuid::Uuid;
 
 /// Types for user image library.
 pub mod user {
+    #[cfg(feature = "backend")]
+    use paperclip::actix::Apiv2Schema;
     use serde::{Deserialize, Serialize};
 
     use super::ImageId;
 
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct ListResponse {
         /// the images returned.
         pub images: Vec<GetResponse>,
@@ -27,6 +31,7 @@ pub mod user {
 
     /// Response for getting a single image.
     #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct GetResponse {
         /// The image metadata.
         pub metadata: UserImage,
@@ -34,6 +39,7 @@ pub mod user {
 
     /// Over the wire representation of an image's metadata.
     #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct UserImage {
         /// The image's ID.
         pub id: ImageId,
@@ -44,6 +50,7 @@ pub mod user {
 /// Represents different kinds of images (which affects how the size is stored in the db)
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 pub enum ImageKind {
     /// The image is a canvas (background) image
@@ -72,11 +79,13 @@ impl ImageKind {
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageId(pub Uuid);
 
 // todo: # errors doc section
 /// Request to create a new image.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CreateRequest {
     /// The name of the image.
     pub name: String,
@@ -110,6 +119,7 @@ pub struct CreateRequest {
 
 // todo: # errors doc section.
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to update an image.
 ///
 /// All fields are optional, any field that is [`None`] will not be updated.
@@ -157,6 +167,7 @@ pub struct UpdateRequest {
 
 /// Search for images via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SearchQuery {
     /// The query string.
     pub q: String,
@@ -207,6 +218,7 @@ pub struct SearchQuery {
 
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SearchResponse {
     /// the images returned.
     pub images: Vec<GetResponse>,
@@ -220,6 +232,7 @@ pub struct SearchResponse {
 
 /// Response for getting a single image.
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct GetResponse {
     /// The image metadata.
     pub metadata: Image,
@@ -227,6 +240,7 @@ pub struct GetResponse {
 
 /// Over the wire representation of an image's metadata.
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Image {
     /// The image's ID.
     pub id: ImageId,

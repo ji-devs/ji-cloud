@@ -5,10 +5,13 @@ use super::anyhow_to_ise;
 use crate::domain::meta::MetaKind;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while searching for images.
 pub enum SearchError {
@@ -33,6 +36,7 @@ impl From<SearchError> for actix_web::Error {
 
 // fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating an image.
 pub enum CreateError {
@@ -66,6 +70,7 @@ impl From<CreateError> for actix_web::Error {
 }
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while uploading an image.
 pub enum UploadError {
@@ -97,6 +102,7 @@ impl From<UploadError> for actix_web::Error {
 }
 
 #[non_exhaustive]
+#[cfg_attr(feature = "backend", api_v2_errors)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating an image.
 pub enum UpdateError {
