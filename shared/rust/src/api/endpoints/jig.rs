@@ -1,7 +1,7 @@
 use crate::{
     api::Method,
     domain::{
-        jig::{JigCreateRequest, JigResponse, JigId, JigUpdateRequest},
+        jig::{JigCreateRequest, JigId, JigResponse, JigUpdateRequest},
         CreateResponse,
     },
     error::{

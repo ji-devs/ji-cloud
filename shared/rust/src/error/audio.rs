@@ -4,9 +4,9 @@
 use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use paperclip::actix::api_v2_errors;
+use serde::{Deserialize, Serialize};
 
 #[non_exhaustive]
 #[cfg_attr(feature = "backend", api_v2_errors)]

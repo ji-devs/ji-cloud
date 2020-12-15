@@ -2,7 +2,8 @@ use super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::image::{
-        ImageCreateRequest, CreateResponse, ImageResponse, ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest,
+        CreateResponse, ImageCreateRequest, ImageResponse, ImageSearchQuery, ImageSearchResponse,
+        ImageUpdateRequest,
     },
     error::{
         image::{CreateError, SearchError, UpdateError, UploadError},
@@ -16,7 +17,7 @@ pub mod user {
         api::{ApiEndpoint, Method},
         domain::{
             image::{
-                user::{UserImageResponse, UserImageListResponse},
+                user::{UserImageListResponse, UserImageResponse},
                 ImageId,
             },
             CreateResponse,

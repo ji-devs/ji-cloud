@@ -4,7 +4,7 @@ pub mod user {
         api::{ApiEndpoint, Method},
         domain::{
             audio::{
-                user::{UserAudioResponse, UserAudioListResponse},
+                user::{UserAudioListResponse, UserAudioResponse},
                 AudioId,
             },
             CreateResponse,
