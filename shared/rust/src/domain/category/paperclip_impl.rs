@@ -10,7 +10,7 @@ use paperclip::v2::{
 
 impl Apiv2Schema for Category {
     const NAME: Option<&'static str> = Some("Category");
-    const DESCRIPTION: &'static str = "Over-the-wire representation of a category";
+    const DESCRIPTION: &'static str = "Over-the-wire representation of a category. NOTE: there's a optional `children` category array, it's currently missing from this schema.";
 
     fn raw_schema() -> DefaultSchemaRaw {
         let mut schema = DefaultSchemaRaw {
