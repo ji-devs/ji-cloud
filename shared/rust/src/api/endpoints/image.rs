@@ -2,7 +2,7 @@ use super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::image::{
-        CreateRequest, CreateResponse, GetResponse, SearchQuery, SearchResponse, UpdateRequest,
+        ImageCreateRequest, CreateResponse, ImageResponse, ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest,
     },
     error::{
         image::{CreateError, SearchError, UpdateError, UploadError},
@@ -16,7 +16,7 @@ pub mod user {
         api::{ApiEndpoint, Method},
         domain::{
             image::{
-                user::{GetResponse, ListResponse},
+                user::{UserImageResponse, UserImageListResponse},
                 ImageId,
             },
             CreateResponse,
@@ -28,7 +28,7 @@ pub mod user {
     pub struct List;
     impl ApiEndpoint for List {
         type Req = ();
-        type Res = ListResponse;
+        type Res = UserImageListResponse;
         type Err = GetError;
         const PATH: &'static str = "/v1/user/me/image";
         const METHOD: Method = Method::Get;
@@ -39,7 +39,7 @@ pub mod user {
     pub struct Get;
     impl ApiEndpoint for Get {
         type Req = ();
-        type Res = GetResponse;
+        type Res = UserImageResponse;
         type Err = GetError;
         const PATH: &'static str = "/v1/user/me/image/{id}";
         const METHOD: Method = Method::Get;
@@ -81,7 +81,7 @@ pub mod user {
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
-    type Res = GetResponse;
+    type Res = ImageResponse;
     type Err = GetError;
     const PATH: &'static str = "/v1/image/{id}";
     const METHOD: Method = Method::Get;
@@ -90,8 +90,8 @@ impl ApiEndpoint for Get {
 /// Search for images.
 pub struct Search;
 impl ApiEndpoint for Search {
-    type Req = SearchQuery;
-    type Res = SearchResponse;
+    type Req = ImageSearchQuery;
+    type Res = ImageSearchResponse;
     type Err = SearchError;
     const PATH: &'static str = "/v1/image";
     const METHOD: Method = Method::Get;
@@ -100,7 +100,7 @@ impl ApiEndpoint for Search {
 /// Create an image.
 pub struct Create;
 impl ApiEndpoint for Create {
-    type Req = CreateRequest;
+    type Req = ImageCreateRequest;
     type Res = CreateResponse;
     type Err = CreateError;
     const PATH: &'static str = "/v1/image";
@@ -122,7 +122,7 @@ impl ApiEndpoint for Upload {
 /// Update an image's metadata.
 pub struct UpdateMetadata;
 impl ApiEndpoint for UpdateMetadata {
-    type Req = UpdateRequest;
+    type Req = ImageUpdateRequest;
     type Res = ();
     type Err = UpdateError;
     const PATH: &'static str = "/v1/image/{id}";

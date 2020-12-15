@@ -132,7 +132,7 @@ pub struct ContentType {
 /// Response for fetching all metadata.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct GetResponse {
+pub struct MetadataResponse {
     /// All styles the server has.
     pub styles: Vec<Style>,
 

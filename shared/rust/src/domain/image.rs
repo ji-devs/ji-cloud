@@ -24,15 +24,15 @@ pub mod user {
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
     #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ListResponse {
+    pub struct UserImageListResponse {
         /// the images returned.
-        pub images: Vec<GetResponse>,
+        pub images: Vec<UserImageResponse>,
     }
 
     /// Response for getting a single image.
     #[derive(Serialize, Deserialize, Debug)]
     #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct GetResponse {
+    pub struct UserImageResponse {
         /// The image metadata.
         pub metadata: UserImage,
     }
@@ -86,7 +86,7 @@ pub struct ImageId(pub Uuid);
 /// Request to create a new image.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CreateRequest {
+pub struct ImageCreateRequest {
     /// The name of the image.
     pub name: String,
 
@@ -123,7 +123,7 @@ pub struct CreateRequest {
 /// Request to update an image.
 ///
 /// All fields are optional, any field that is [`None`] will not be updated.
-pub struct UpdateRequest {
+pub struct ImageUpdateRequest {
     /// If `Some` change the image's name to this name.
     #[serde(default)]
     pub name: Option<String>,
@@ -168,7 +168,7 @@ pub struct UpdateRequest {
 /// Search for images via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct SearchQuery {
+pub struct ImageSearchQuery {
     /// The query string.
     pub q: String,
 
@@ -219,9 +219,9 @@ pub struct SearchQuery {
 /// Response for successful search.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct SearchResponse {
+pub struct ImageSearchResponse {
     /// the images returned.
-    pub images: Vec<GetResponse>,
+    pub images: Vec<ImageResponse>,
 
     /// The number of pages found.
     pub pages: u32,
@@ -233,7 +233,7 @@ pub struct SearchResponse {
 /// Response for getting a single image.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct GetResponse {
+pub struct ImageResponse {
     /// The image metadata.
     pub metadata: Image,
 }

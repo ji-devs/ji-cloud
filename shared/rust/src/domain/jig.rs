@@ -22,7 +22,7 @@ pub struct JigId(pub Uuid);
 /// Request to create a new JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CreateRequest {
+pub struct JigCreateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -89,7 +89,7 @@ pub struct Jig {
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct GetResponse {
+pub struct JigResponse {
     /// The requested JIG.
     pub jig: Jig,
 }
@@ -97,8 +97,7 @@ pub struct GetResponse {
 /// Request for updating a JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
-pub struct UpdateRequest {
+pub struct JigUpdateRequest {
     /// The JIG's name.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]

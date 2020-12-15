@@ -18,6 +18,7 @@ use crate::{
     extractor::{reply_signin_auth, AuthUserWithScope, ScopeAdmin},
 };
 
+/// Impersonate another user
 #[api_v2_operation]
 async fn impersonate(
     _auth: AuthUserWithScope<ScopeAdmin>,

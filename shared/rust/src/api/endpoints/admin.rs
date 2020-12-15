@@ -1,7 +1,7 @@
 use super::ApiEndpoint;
 use crate::{api::Method, domain::auth::SigninSuccess, error::CommonError};
 
-/// Impersonate a another user.
+/// Impersonate another user.
 pub struct Impersonate;
 impl ApiEndpoint for Impersonate {
     type Req = ();

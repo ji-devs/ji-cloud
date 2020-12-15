@@ -5,12 +5,13 @@ use paperclip::actix::{
 };
 use shared::{
     api::{endpoints::meta::Get, ApiEndpoint},
-    domain::meta::GetResponse,
+    domain::meta::MetadataResponse,
     error::InternalServerError,
 };
 use sqlx::PgPool;
 
 // TODO: Should have cache headers
+/// Get a list of all available metadata of all kinds (sans categories)
 #[api_v2_operation]
 async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, InternalServerError> {
     let styles = db::meta::get_style(&db).await?;
@@ -19,7 +20,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, Intern
     let subjects = db::meta::get_subjects(&db).await?;
     let content_types = db::meta::get_content_types(&db).await?;
 
-    Ok(Json(GetResponse {
+    Ok(Json(MetadataResponse {
         styles,
         affiliations,
         age_ranges,

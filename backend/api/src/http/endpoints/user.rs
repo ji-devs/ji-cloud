@@ -22,6 +22,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
+/// Lookup a user.
 #[api_v2_operation]
 async fn user_lookup(
     db: Data<PgPool>,
@@ -45,6 +46,7 @@ async fn user_lookup(
     .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
+/// Login with a user.
 #[api_v2_operation]
 async fn handle_signin_credentials(
     settings: Data<RuntimeSettings>,
@@ -74,6 +76,7 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterErro
     Ok(())
 }
 
+/// Register a new user.
 #[api_v2_operation]
 async fn handle_register(
     settings: Data<RuntimeSettings>,
@@ -92,6 +95,7 @@ async fn handle_register(
         .json(RegisterSuccess::Signin(csrf)))
 }
 
+/// Get a user by their profile.
 #[api_v2_operation]
 async fn handle_get_profile(
     db: Data<PgPool>,
@@ -106,6 +110,7 @@ async fn handle_get_profile(
         .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
 }
 
+/// Sign in as a user via SSO.
 #[api_v2_operation]
 async fn handle_authorize(
     settings: Data<RuntimeSettings>,

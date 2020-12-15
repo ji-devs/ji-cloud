@@ -82,7 +82,7 @@ pub struct Module {
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CreateRequest {
+pub struct ModuleCreateRequest {
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 
@@ -93,7 +93,7 @@ pub struct CreateRequest {
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct GetResponse {
+pub struct ModuleResponse {
     /// The module we found
     pub module: Module,
 }
@@ -102,7 +102,7 @@ pub struct GetResponse {
 /// note: fields here cannot be nulled out (`None` means "don't change").
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct UpdateRequest {
+pub struct ModuleUpdateRequest {
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 

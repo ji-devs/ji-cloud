@@ -4,8 +4,8 @@ use uuid::Uuid;
 use super::{Category, CategoryId};
 
 use paperclip::v2::{
-    models::{DataType, DataTypeFormat, DefaultSchemaRaw},
-    schema::{Apiv2Schema, TypedData},
+    models::{DataType, DefaultSchemaRaw},
+    schema::Apiv2Schema,
 };
 
 impl Apiv2Schema for Category {

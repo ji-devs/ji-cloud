@@ -1,10 +1,10 @@
 use crate::{
     db, extractor::AuthUserWithScope, extractor::ScopeManageCategory, extractor::WrapAuthClaimsNoDb,
 };
-use actix_web::HttpResponse;
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
+    NoContent,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::domain::category::{
@@ -13,6 +13,7 @@ use shared::domain::category::{
 };
 use sqlx::PgPool;
 
+/// Get a tree of categories.
 #[api_v2_operation]
 async fn get_categories(
     db: Data<PgPool>,
@@ -39,6 +40,7 @@ async fn get_categories(
     Ok(Json(CategoryResponse { categories }))
 }
 
+/// Create a category.
 #[api_v2_operation]
 async fn create_category(
     db: Data<PgPool>,
@@ -55,13 +57,14 @@ async fn create_category(
     Ok(Json(NewCategoryResponse { id, index }))
 }
 
+/// Update a category.
 #[api_v2_operation]
 async fn update_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<HttpResponse, <category::Update as ApiEndpoint>::Err> {
+) -> actix_web::Result<NoContent, <category::Update as ApiEndpoint>::Err> {
     let UpdateCategoryRequest {
         name,
         parent_id,
@@ -77,18 +80,19 @@ async fn update_category(
     )
     .await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
+/// Delete a category.
 #[api_v2_operation]
 async fn delete_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<HttpResponse, <category::Delete as ApiEndpoint>::Err> {
+) -> actix_web::Result<NoContent, <category::Delete as ApiEndpoint>::Err> {
     db::category::delete(&db, path.into_inner()).await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

@@ -35,6 +35,7 @@ fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
+    alias = "firebaseApiKey",
     in = "header",
     name = "Authorization",
     description = "Use format 'Bearer TOKEN'"
@@ -220,6 +221,7 @@ impl Scope for ScopeAdmin {
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
+    alias = "scopedApiKey",
     in = "header",
     name = "Authorization",
     description = "Use format 'Bearer TOKEN'"

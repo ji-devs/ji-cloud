@@ -17,15 +17,15 @@ pub mod user {
     /// Response for listing.
     #[derive(Serialize, Deserialize, Debug)]
     #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ListResponse {
+    pub struct UserAudioListResponse {
         /// the audio files returned.
-        pub audio_files: Vec<GetResponse>,
+        pub audio_files: Vec<UserAudioResponse>,
     }
 
     /// Response for getting a single audio file.
     #[derive(Serialize, Deserialize, Debug)]
     #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct GetResponse {
+    pub struct UserAudioResponse {
         /// The audio file's metadata.
         pub metadata: UserAudio,
     }

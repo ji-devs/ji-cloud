@@ -1,9 +1,12 @@
-use actix_web::HttpResponse;
-use paperclip::actix::{NoContent, api_v2_operation, web::{self, Data, Json, ServiceConfig}};
+use paperclip::actix::{
+    api_v2_operation,
+    web::{self, Data, Json, ServiceConfig},
+    NoContent,
+};
 use shared::{
     api::{endpoints::module, ApiEndpoint},
     domain::{
-        jig::module::{CreateRequest, GetResponse, ModuleId},
+        jig::module::{ModuleCreateRequest, ModuleId, ModuleResponse},
         CreateResponse,
     },
     error::{GetError, UpdateError},
@@ -15,18 +18,20 @@ use crate::{
     extractor::{AuthUserWithScope, ScopeManageModule, WrapAuthClaimsNoDb},
 };
 
+/// Create a new module.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _auth: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<module::Create as ApiEndpoint>::Res>, <module::Create as ApiEndpoint>::Err> {
-    let req = req.map_or_else(CreateRequest::default, Json::into_inner);
+    let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
     let id = db::module::create(&*db, req.kind, req.body.as_ref()).await?;
 
     Ok(Json(CreateResponse { id }))
 }
 
+/// Delete a module.
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
@@ -38,13 +43,14 @@ async fn delete(
     Ok(NoContent)
 }
 
+/// Update a module.
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<ModuleId>,
-) -> Result<HttpResponse, <module::Update as ApiEndpoint>::Err> {
+) -> Result<NoContent, <module::Update as ApiEndpoint>::Err> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::module::update(&*db, path.into_inner(), req.kind, req.body.as_ref()).await?;
 
@@ -52,9 +58,10 @@ async fn update(
         return Err(UpdateError::NotFound);
     }
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
+/// Get a module.
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
@@ -65,7 +72,7 @@ async fn get(
         .await?
         .ok_or(GetError::NotFound)?;
 
-    Ok(Json(GetResponse { module }))
+    Ok(Json(ModuleResponse { module }))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
