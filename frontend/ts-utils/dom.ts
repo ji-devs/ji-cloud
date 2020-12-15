@@ -1,3 +1,17 @@
+export function withSlot(slot:string, html:string):string {
+    const getInsertPos = ():number => {
+        for(let i = 1; i < html.length; i++) {
+            if(!isNaN(html[i] as any)) {
+                return i;
+            }
+        }
+    }
+    const splitPos = getInsertPos(); 
+    const part_1 = html.substr(0, splitPos);
+    const part_2 = html.substr(splitPos);
+    return `${part_1} slot="${slot}" ${part_2}`;
+}
+
 export function makeElement(html:string):any {
     const template = document.createElement("template");
     template.innerHTML = html;

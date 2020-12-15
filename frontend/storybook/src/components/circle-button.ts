@@ -3,15 +3,13 @@ export default {
   title: 'Circle Button',
 }
 
-export const CircleButtonActive = () => {
-    return `<circle-button text="1" label="Active" active />`
+export const CircleButton = ({text, label, active, disabled}) => {
+    return `<circle-button text="${text}" label="${label}" ${active && "active"} ${disabled && "disabled"}/>`
 }
 
-export const CircleButtonInactive = () => {
-    return `<circle-button text="1" label="Inactive" />`
+CircleButton.args = {
+    text: "1",
+    label: "Label",
+    active: true,
+    disabled: false,
 }
-
-export const CircleButtonDisabled = () => {
-    return `<circle-button text="1" label="Disabled (TODO)" disabled />`
-}
-

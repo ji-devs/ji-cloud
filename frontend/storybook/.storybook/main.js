@@ -3,7 +3,7 @@ const LiveReloadPlugin = require('webpack-livereload-plugin');
 module.exports = {
   "stories": [
     "../src/**/*.mdx",
-    "../src/components/*.@(js|jsx|ts|tsx)"
+    "../src/components/**/*.@(js|jsx|ts|tsx)"
   ],
   "addons": [
     "@storybook/addon-links",

@@ -3,6 +3,7 @@
 [Welcome](./welcome/welcome.md)
 
 # Frontend 
+  - [Pipeline](./frontend/pipeline.md)
   - [Elements and Components](./frontend/elements-and-components.md)
     - [Overview](./frontend/elements-and-components/overview.md)
     - [Implementation](./frontend/elements-and-components/implementation.md)

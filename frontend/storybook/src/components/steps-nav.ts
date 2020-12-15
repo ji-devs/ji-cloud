@@ -1,24 +1,32 @@
 import "@elements/buttons/circle-button";
 import "@elements/nav/steps-nav";
+import {arrayCount} from "@utils/array";
 export default {
   title: 'Steps Nav',
 }
 
-export const StepsNav = () => {
+export const StepsNav = ({nSteps}) => {
     return `
-        <steps-nav steps="3">
-          <circle-button slot="btn-1" text="1" label="Inactive"></circle-button>
-          <circle-button slot="btn-2" text="2" label="Active" active></circle-button>
-          <circle-button slot="btn-3" text="3" label="Disabled" disabled></circle-button>
+        <steps-nav steps="${nSteps}">
+          ${arrayCount(nSteps)
+            .map(x => `<circle-button slot="btn-${x}" text="${x}" label="Step ${x}"></circle-button>`)
+          }
         </steps-nav>
     `
 }
 
-
-export const StepsNavContained = () => {
+export const StepsNavContained = ({nSteps, width}) => {
     return `
-      <div style="width: 500px">
-        ${StepsNav()}
+      <div style="width: ${width}px">
+        ${StepsNav({nSteps})}
       </div>
     `
+}
+
+StepsNav.args = {
+  nSteps: 3
+}
+StepsNavContained.args = {
+  nSteps: 3,
+  width: 500
 }

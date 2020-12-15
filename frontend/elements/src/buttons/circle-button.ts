@@ -3,7 +3,7 @@ import { classMap } from 'lit-html/directives/class-map';
 import {colorStyles, colorValues} from "@elements/_styles/colors";
 
 @customElement('circle-button')
-export class _ extends LitElement {
+export class CircleButton extends LitElement {
 
   static get styles() {
     return [colorStyles, css`

@@ -11,9 +11,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.34"
+version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf8dcb5b4bbaa28653b647d8c77bd4ed40183b48882e130c1f1ffb73de069fd7"
+checksum = "2c0df63cb2955042487fad3aefd2c6e3ae7389ac5dc1beb28921de0b69f779d4"
 
 [[package]]
 name = "app"
@@ -25,7 +25,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -59,7 +59,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -91,7 +91,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -134,7 +134,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -171,7 +171,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -217,7 +217,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -253,7 +253,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -291,7 +291,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo-timers",
@@ -441,7 +441,7 @@ dependencies = [
  "chrono",
  "config",
  "dominator",
- "dominator_helpers 0.4.3",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "htmlescape",
@@ -512,12 +512,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "data-encoding"
-version = "2.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "993a608597367c6377b258c25d7120740f00ed23a2252b729b1932dd7866f908"
-
-[[package]]
 name = "discard"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -536,23 +530,6 @@ dependencies = [
  "js-sys",
  "lazy_static",
  "pin-project",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "dominator_helpers"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d47882016ebc22875a3945bc1b4a5ee6fdcb6a4c6897e4992b2a324a75badbe"
-dependencies = [
- "discard",
- "dominator",
- "futures",
- "futures-signals",
- "serde",
- "serde-wasm-bindgen",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1111,7 +1088,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -1195,11 +1172,10 @@ dependencies = [
 
 [[package]]
 name = "serde_qs"
-version = "0.7.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9408a61dabe404c76cec504ec510f7d92f41dc0a9362a0db8ab73d141cfbf93f"
+checksum = "0010b5c91a2b37b51b91dc29a20553b6384fef574bb4cf3c0fc5a04c3bab7e47"
 dependencies = [
- "data-encoding",
  "percent-encoding",
  "serde",
  "thiserror",
@@ -1248,7 +1224,7 @@ dependencies = [
  "console_error_panic_hook",
  "discard",
  "dominator",
- "dominator_helpers 0.5.0",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "gloo",
@@ -1546,7 +1522,7 @@ dependencies = [
  "chrono",
  "config",
  "dominator",
- "dominator_helpers 0.4.3",
+ "dominator_helpers",
  "futures",
  "futures-signals",
  "htmlescape",
