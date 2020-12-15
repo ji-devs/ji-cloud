@@ -53,7 +53,7 @@ fn anyhow_to_ise(e: anyhow::Error) -> actix_web::Error {
 }
 
 /// Represents an error from the backend.
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(feature = "backend", api_v2_errors(code = 500))]
 pub struct InternalServerError(pub anyhow::Error);
 
 impl<T: Into<anyhow::Error>> From<T> for InternalServerError {
@@ -71,7 +71,10 @@ impl From<InternalServerError> for actix_web::Error {
 
 /// Error occurred while getting a single resource.a
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(code = 401, code = 403, code = 404, code = 500)
+)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum GetError {
     /// The resource does not exist.
@@ -97,7 +100,10 @@ impl From<GetError> for actix_web::Error {
 }
 
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(code = 401, code = 403, code = 404, code = 409, code = 500)
+)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while deleting a resource.
 pub enum DeleteError {
@@ -184,7 +190,10 @@ impl<T: Into<actix_web::Error>> From<UpdateError<T>> for actix_web::Error {
 }
 
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(code = 401, code = 403, code = 404, code = 500)
+)]
 #[derive(Serialize, Deserialize)]
 /// A common error type
 pub enum CommonError {

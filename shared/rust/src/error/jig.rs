@@ -12,7 +12,13 @@ pub type UpdateError = super::UpdateError<UpdateErrorExt>;
 
 /// Extension Error for [`CreateError`]
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", paperclip::actix::api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    paperclip::actix::api_v2_errors(
+        code = 420,
+        description = "Unprocessable Entity: Metadata associated with this operation could not be found"
+    )
+)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum CreateErrorExt {
     /// Metadata associated with this operation could not be found.

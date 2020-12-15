@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(feature = "backend", api_v2_errors(code = 401, code = 403, code = 500))]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while searching for images.
 pub enum SearchError {
@@ -36,7 +36,16 @@ impl From<SearchError> for actix_web::Error {
 
 // fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(
+        code = 401,
+        code = 403,
+        code = 420,
+        description = "Unprocessable Entity: A given item of metadata doesn't exist.",
+        code = 500
+    )
+)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating an image.
 pub enum CreateError {
@@ -70,7 +79,17 @@ impl From<CreateError> for actix_web::Error {
 }
 
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(
+        code = 401,
+        code = 403,
+        code = 404,
+        code = 420,
+        description = "Unprocessable Entity: Invalid Image",
+        code = 500
+    )
+)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while uploading an image.
 pub enum UploadError {
@@ -102,7 +121,15 @@ impl From<UploadError> for actix_web::Error {
 }
 
 #[non_exhaustive]
-#[cfg_attr(feature = "backend", api_v2_errors)]
+#[cfg_attr(feature = "backend", api_v2_errors(
+    code = 401,
+    code = 403,
+    code = 404,
+    description = "Not Found: The image does not exist."
+    code = 420,
+    description = "Unprocessable Entity: A given item of metadata doesn't exist.",
+    code = 500
+))]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating an image.
 pub enum UpdateError {
