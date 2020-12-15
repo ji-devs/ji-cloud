@@ -4,7 +4,7 @@ pub mod user {
         api::{ApiEndpoint, Method},
         domain::{
             audio::{
-                user::{GetResponse, ListResponse},
+                user::{UserAudioListResponse, UserAudioResponse},
                 AudioId,
             },
             CreateResponse,
@@ -17,7 +17,7 @@ pub mod user {
     pub struct List;
     impl ApiEndpoint for List {
         type Req = ();
-        type Res = ListResponse;
+        type Res = UserAudioListResponse;
         type Err = GetError;
         const PATH: &'static str = "/v1/user/me/audio";
         const METHOD: Method = Method::Get;
@@ -27,7 +27,7 @@ pub mod user {
     pub struct Get;
     impl ApiEndpoint for Get {
         type Req = ();
-        type Res = GetResponse;
+        type Res = UserAudioResponse;
         type Err = GetError;
         const PATH: &'static str = "/v1/user/me/audio/{id}";
         const METHOD: Method = Method::Get;

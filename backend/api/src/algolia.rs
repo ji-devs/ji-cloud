@@ -289,9 +289,7 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
             .map(|id| Uuid::parse_str(&id))
             .collect();
 
-        eprintln!("{:?}", ids.as_ref().ok().map(|it| it.len()));
-
-        Ok(dbg!(ids?))
+        Ok(ids?)
     }
 
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {

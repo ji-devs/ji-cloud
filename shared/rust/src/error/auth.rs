@@ -4,9 +4,22 @@
 use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 use serde::{Deserialize, Serialize};
 
 #[non_exhaustive]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(
+        code = 420,
+        description = "UnprocessableEntity: No username was provided OR "
+        "Another user with the provided email already exists OR "
+        "Another user with the provided firebase-id already exists OR "
+        "Another user with the provided username already exists",
+        code = 500,
+    )
+)]
 #[derive(Serialize, Deserialize)]
 /// Represents an error with Registration.
 pub enum RegisterError {
@@ -16,7 +29,7 @@ pub enum RegisterError {
     /// Another user with the provided email already exists.
     TakenEmail,
 
-    /// Another user with the provided firebase-id already exis.ts
+    /// Another user with the provided firebase-id already exists.
     TakenId,
 
     /// Another user with the provided username already exists.
@@ -39,6 +52,8 @@ impl From<RegisterError> for actix_web::Error {
 }
 
 #[non_exhaustive]
+// todo: fill in descriptions for 401
+#[cfg_attr(feature = "backend", api_v2_errors(code = 401, code = 500,))]
 #[derive(Serialize, Deserialize)]
 /// Represents an error with when authorizing a firebase token.
 pub enum FirebaseError {

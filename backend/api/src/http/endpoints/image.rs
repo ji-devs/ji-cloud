@@ -5,17 +5,19 @@ use crate::{
     image_ops::generate_images,
     s3::S3Client,
 };
-use actix_web::{
-    http::{self, StatusCode},
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
-    HttpResponse,
-};
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
+use paperclip::actix::{
+    api_v2_operation,
+    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
+    CreatedJson, NoContent,
+};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
-        image::{CreateResponse, GetResponse, Image, ImageId, SearchResponse, UpdateRequest},
+        image::{
+            CreateResponse, Image, ImageId, ImageResponse, ImageSearchResponse, ImageUpdateRequest,
+        },
         meta::MetaKind,
     },
     error::{
@@ -30,17 +32,18 @@ use uuid::Uuid;
 
 pub mod user {
     use crate::{db, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3::S3Client};
-    use actix_web::{
-        http,
+    use paperclip::actix::{
+        api_v2_operation,
         web::{Bytes, Data, Json, Path},
-        HttpResponse,
+        CreatedJson, NoContent,
     };
+
     use futures::TryStreamExt;
     use shared::{
         api::{endpoints, ApiEndpoint},
         domain::{
             image::{
-                user::{GetResponse, ListResponse, UserImage},
+                user::{UserImage, UserImageListResponse, UserImageResponse},
                 ImageId, ImageKind,
             },
             CreateResponse,
@@ -51,27 +54,28 @@ pub mod user {
     };
     use sqlx::PgPool;
 
+    /// Create a image in the user's image library.
+    #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
-        (
-            Json<<endpoints::image::user::Create as ApiEndpoint>::Res>,
-            http::StatusCode,
-        ),
+        CreatedJson<<endpoints::image::user::Create as ApiEndpoint>::Res>,
         <endpoints::image::user::Create as ApiEndpoint>::Err,
     > {
         let id = db::image::user::create(db.as_ref()).await?;
-        Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+        Ok(CreatedJson(CreateResponse { id }))
     }
 
+    /// Upload an image to the user's image library.
+    #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
         s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
         Path(id): Path<ImageId>,
         bytes: Bytes,
-    ) -> Result<HttpResponse, <endpoints::image::Upload as ApiEndpoint>::Err> {
+    ) -> Result<NoContent, <endpoints::image::Upload as ApiEndpoint>::Err> {
         if !db::image::user::exists(db.as_ref(), id).await? {
             return Err(shared::error::image::UploadError::NotFound);
         }
@@ -89,15 +93,17 @@ pub mod user {
         s3.upload_images(MediaLibraryKind::User, id, original, resized, thumbnail)
             .await?;
 
-        Ok(HttpResponse::NoContent().into())
+        Ok(NoContent)
     }
 
+    /// Delete an image from the user's image library.
+    #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<ImageId>,
         s3: Data<S3Client>,
-    ) -> Result<HttpResponse, <endpoints::image::Delete as ApiEndpoint>::Err> {
+    ) -> Result<NoContent, <endpoints::image::Delete as ApiEndpoint>::Err> {
         let image = req.into_inner();
         db::image::user::delete(&db, image)
             .await
@@ -111,9 +117,11 @@ pub mod user {
         )
         .await;
 
-        Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
+        Ok(NoContent)
     }
 
+    /// Get an image from the user's image library.
+    #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -126,9 +134,11 @@ pub mod user {
             .await?
             .ok_or(GetError::NotFound)?;
 
-        Ok(Json(GetResponse { metadata }))
+        Ok(Json(UserImageResponse { metadata }))
     }
 
+    /// List images from the user's image library.
+    #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -138,11 +148,11 @@ pub mod user {
     > {
         let images: Vec<_> = db::image::user::list(db.as_ref())
             .err_into::<GetError>()
-            .and_then(|metadata: UserImage| async { Ok(GetResponse { metadata }) })
+            .and_then(|metadata: UserImage| async { Ok(UserImageResponse { metadata }) })
             .try_collect()
             .await?;
 
-        Ok(Json(ListResponse { images }))
+        Ok(Json(UserImageListResponse { images }))
     }
 }
 
@@ -215,15 +225,14 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
     }
 }
 
+/// Create an image in the global image library.
+#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
 ) -> Result<
-    (
-        Json<<endpoints::image::Create as ApiEndpoint>::Res>,
-        http::StatusCode,
-    ),
+    CreatedJson<<endpoints::image::Create as ApiEndpoint>::Res>,
     <endpoints::image::Create as ApiEndpoint>::Err,
 > {
     let req = req.into_inner();
@@ -252,16 +261,18 @@ async fn create(
 
     txn.commit().await?;
 
-    Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
+/// Upload an image to the global image library.
+#[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
     s3: Data<S3Client>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
     bytes: Bytes,
-) -> Result<HttpResponse, <endpoints::image::Upload as ApiEndpoint>::Err> {
+) -> Result<NoContent, <endpoints::image::Upload as ApiEndpoint>::Err> {
     let kind = db::image::get_image_kind(db.as_ref(), id)
         .await?
         .ok_or(UploadError::NotFound)?;
@@ -276,9 +287,11 @@ async fn upload(
     s3.upload_images(MediaLibraryKind::Global, id, original, resized, thumbnail)
         .await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
+/// Get an image from the global image library.
+#[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
@@ -291,9 +304,11 @@ async fn get_one(
         .await?
         .ok_or(GetError::NotFound)?;
 
-    Ok(Json(GetResponse { metadata }))
+    Ok(Json(ImageResponse { metadata }))
 }
 
+/// Search for images in the global image library.
+#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
@@ -320,24 +335,26 @@ async fn get(
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<SearchError>()
-        .and_then(|metadata: Image| async { Ok(GetResponse { metadata }) })
+        .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;
 
-    Ok(Json(SearchResponse {
+    Ok(Json(ImageSearchResponse {
         images,
         pages,
         total_image_count: total_hits,
     }))
 }
 
+/// Update an image in the global image library.
+#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
-) -> Result<HttpResponse, <endpoints::image::UpdateMetadata as ApiEndpoint>::Err> {
-    let req = req.map_or_else(UpdateRequest::default, Json::into_inner);
+) -> Result<NoContent, <endpoints::image::UpdateMetadata as ApiEndpoint>::Err> {
+    let req = req.map_or_else(ImageUpdateRequest::default, Json::into_inner);
     let id = id.into_inner();
     let mut txn = db.begin().await?;
 
@@ -368,7 +385,7 @@ async fn update(
 
     txn.commit().await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
 fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
@@ -380,13 +397,15 @@ fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
     }
 }
 
+/// Delete an image from the global image library.
+#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     algolia: Data<AlgoliaClient>,
     _claims: AuthUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
     s3: Data<S3Client>,
-) -> Result<HttpResponse, <endpoints::image::user::Delete as ApiEndpoint>::Err> {
+) -> Result<NoContent, <endpoints::image::user::Delete as ApiEndpoint>::Err> {
     let image = req.into_inner();
     db::image::delete(&db, image)
         .await
@@ -401,7 +420,7 @@ async fn delete(
     )
     .await;
 
-    Ok(HttpResponse::new(StatusCode::NO_CONTENT))
+    Ok(NoContent)
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

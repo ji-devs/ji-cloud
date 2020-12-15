@@ -4,10 +4,22 @@
 use super::anyhow_to_ise;
 #[cfg(feature = "backend")]
 use actix_web::HttpResponse;
+#[cfg(feature = "backend")]
+use paperclip::actix::api_v2_errors;
 use serde::{Deserialize, Serialize};
 
-// fixme: if breaking changes can ever be made, replace with `crate::error::CreateError`
+// fixme: if breaking changes can ever be made, replace with [`crate::error::CreateError`]
 #[non_exhaustive]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(
+        code = 401,
+        code = 403,
+        code = 404,
+        description = "Not Found: Parent category not found",
+        code = 500
+    )
+)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while creating a category.
 pub enum CreateError {
@@ -33,8 +45,20 @@ impl From<CreateError> for actix_web::Error {
     }
 }
 
-// fixme: if breaking changes can ever be made, replace with `crate::error::UpdateError`
+// fixme: if breaking changes can ever be made, replace with [`crate::error::UpdateError`]
 #[non_exhaustive]
+#[cfg_attr(
+    feature = "backend",
+    api_v2_errors(
+        code = 401,
+        code = 403,
+        code = 404,
+        description = "Not Found: Parent category not found OR The category doesn't exist",
+        code = 420,
+        description = "Unprocessable Entity: Cycle OR OutOfRange"
+        code = 500
+    )
+)]
 #[derive(Serialize, Deserialize)]
 /// Error occurred while updating a category.
 pub enum UpdateError {

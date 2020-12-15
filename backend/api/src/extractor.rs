@@ -14,6 +14,7 @@ use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
 use jsonwebtoken as jwt;
 use jwt::EncodingKey;
+use paperclip::actix::{Apiv2Schema, Apiv2Security};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use shared::domain::{
@@ -31,6 +32,14 @@ fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
     Some(FirebaseId(user_id))
 }
 
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    alias = "firebaseApiKey",
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
 pub struct FirebaseUser {
     pub id: FirebaseId,
 }
@@ -123,6 +132,13 @@ fn csrf_header(headers: &HeaderMap) -> Option<&str> {
     headers.get(CSRF_HEADER_NAME)?.to_str().ok()
 }
 
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
 #[repr(transparent)]
 pub struct WrapAuthClaimsNoDb(pub AuthClaims);
 
@@ -157,6 +173,7 @@ pub trait Scope {
     fn scope() -> UserScope;
 }
 
+#[derive(Apiv2Schema)]
 pub(crate) struct ScopeManageCategory;
 
 impl Scope for ScopeManageCategory {
@@ -165,6 +182,7 @@ impl Scope for ScopeManageCategory {
     }
 }
 
+#[derive(Apiv2Schema)]
 pub(crate) struct ScopeManageImage;
 
 impl Scope for ScopeManageImage {
@@ -173,6 +191,7 @@ impl Scope for ScopeManageImage {
     }
 }
 
+#[derive(Apiv2Schema)]
 pub(crate) struct ScopeManageJig;
 
 impl Scope for ScopeManageJig {
@@ -181,6 +200,7 @@ impl Scope for ScopeManageJig {
     }
 }
 
+#[derive(Apiv2Schema)]
 pub(crate) struct ScopeManageModule;
 
 impl Scope for ScopeManageModule {
@@ -189,6 +209,7 @@ impl Scope for ScopeManageModule {
     }
 }
 
+#[derive(Apiv2Schema)]
 pub(crate) struct ScopeAdmin;
 
 impl Scope for ScopeAdmin {
@@ -197,6 +218,14 @@ impl Scope for ScopeAdmin {
     }
 }
 
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    alias = "scopedApiKey",
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
 #[repr(transparent)]
 pub struct AuthUserWithScope<S: Scope> {
     pub claims: AuthClaims,
@@ -257,6 +286,13 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
     }
 }
 
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
 #[repr(transparent)]
 pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
 
