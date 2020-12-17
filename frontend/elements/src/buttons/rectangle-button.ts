@@ -45,6 +45,16 @@ export class _ extends LitElement {
       button:focus{
           outline:none;
       }
+      .bold {
+        font-weight: bold;
+      }
+      .green{
+        background-color: #71cf92;
+        color:#ffffff;
+      }
+      .green:hover{
+        background-color: #46ba6f;
+      }
     `];
   }
 
@@ -54,13 +64,15 @@ export class _ extends LitElement {
   label: string = "";
   @property()
   color: string = "";
+  @property()
+  color: string = "";
 
   render() {
 
-    const {size, label, color} = this;
+    const {size, label, color, fontweight} = this;
 
     return html`
-      <button type="button" name="button" class="${size} ${color}" >
+      <button type="button" name="button" class="${size} ${color} ${fontweight}" >
       ${label}
     </button>
   `;

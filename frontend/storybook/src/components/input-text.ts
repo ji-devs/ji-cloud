@@ -6,7 +6,7 @@ export default {
 }
 
 export const InputTextIdle = () => {
-    return `<input-text label="Title">
+    return `<input-text label="Title" helpertext="Minimum 8 digits, Must include a number" error="Wrong Password">
  
     </input-text>`
 }
