@@ -4,6 +4,7 @@
         "paths": {
             "@utils/*": ["../ts-utils/*"],
             "@frontend-config/*": ["../config/*"],
+            "@project-config/*": ["../../config/typescript/src/lib"],
             "@elements/*": ["../elements/src/*"],
             "~/*": ["./src/*"]
         },

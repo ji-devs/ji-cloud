@@ -1,6 +1,8 @@
 //! Types for authorization.
 
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -12,6 +14,7 @@ pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
 // todo: do we even need this?
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Response for a successful signin.
 pub struct SigninSuccess {
     /// The csrf of the signin.
@@ -19,6 +22,7 @@ pub struct SigninSuccess {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Response for a successful SSO.
 pub struct SingleSignOnSuccess {
     /// The jwt token to be sent as authorization for future requests.
@@ -26,6 +30,7 @@ pub struct SingleSignOnSuccess {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Response for a successful registration.
 pub enum RegisterSuccess {
     // fixme: what does this even do?
@@ -37,6 +42,8 @@ pub enum RegisterSuccess {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
 /// Request to be sent when registering a new user.
 pub struct RegisterRequest {
     /// The user's username.
@@ -99,6 +106,7 @@ pub struct RegisterRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The claims that are used as part of the user's jwt.
 pub struct AuthClaims {
     // fixme: use `sub` (short for subject, it's a standard jwt claim.)

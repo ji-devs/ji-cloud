@@ -13,6 +13,10 @@
             "rootPathPrefix": "@frontend-config"
           },
           {
+            "rootPathSuffix": "../../config/typescript/src/lib",
+            "rootPathPrefix": "@project-config"
+          },
+          {
             "rootPathSuffix": "../elements/src",
             "rootPathPrefix": "@elements"
           },

@@ -1,8 +1,9 @@
 use core::settings::RuntimeSettings;
 
-use actix_web::{
+use actix_web::HttpResponse;
+use paperclip::actix::{
+    api_v2_operation,
     web::{Data, Path, ServiceConfig},
-    HttpResponse,
 };
 use shared::{
     api::{endpoints::admin, ApiEndpoint},
@@ -17,6 +18,8 @@ use crate::{
     extractor::{reply_signin_auth, AuthUserWithScope, ScopeAdmin},
 };
 
+/// Impersonate another user
+#[api_v2_operation]
 async fn impersonate(
     _auth: AuthUserWithScope<ScopeAdmin>,
     settings: Data<RuntimeSettings>,

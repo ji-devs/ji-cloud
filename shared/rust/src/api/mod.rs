@@ -5,7 +5,7 @@ pub mod endpoints;
 
 /// http Method.
 ///
-/// [_see `Method`_](enum.Method.html)
+/// _see [`Method`](Method)_
 pub mod method;
 
 #[allow(missing_docs)]

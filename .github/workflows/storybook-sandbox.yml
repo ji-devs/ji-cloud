@@ -7,6 +7,7 @@ on:
     - 'config/**'
     - 'frontend/core/js/**'
     - 'frontend/storybook/**'
+    - 'frontend/elements/**'
 
 jobs:
   bundle:
@@ -37,6 +38,14 @@ jobs:
         run: npm install
         working-directory: "./frontend/build-utils"
         
+      - name: install element deps
+        run: npm install
+        working-directory: "./frontend/elements"
+
+      - name: test elements 
+        run: npm run test 
+        working-directory: "./frontend/elements"
+
       - name: install npm deps
         run: npm install
         working-directory: "./frontend/storybook"

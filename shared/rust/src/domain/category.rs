@@ -1,8 +1,13 @@
 //! Types for categories.
 
 use chrono::{DateTime, Utc};
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+#[cfg(feature = "backend")]
+mod paperclip_impl;
 
 /// Wrapper type around [`Uuid`], represents the ID of a category.
 ///
@@ -10,11 +15,13 @@ use uuid::Uuid;
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct CategoryId(pub Uuid);
 
 into_uuid!(CategoryId);
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The response returned when a request for categories is successful.
 pub struct CategoryResponse {
     /// The categories returned.
@@ -49,6 +56,7 @@ pub struct Category {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// When getting a tree of categories, which direction should the categories be followed?
 pub enum CategoryTreeScope {
     /// Follow the parents up to the root.
@@ -59,15 +67,13 @@ pub enum CategoryTreeScope {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to create a category.
 pub struct CreateCategoryRequest {
     /// The name of the new category.
     pub name: String,
 
-    /// The [`id`] of the parent [`Category`] to attatch it to.
-    ///
-    /// [`id`]: struct.Category.html#structfield.id
-    /// [`Category`]: struct.Category.html
+    /// The [`id`](Category::id) of the parent [`Category`](Category) to attatch it to.
     pub parent_id: Option<CategoryId>,
 }
 
@@ -119,6 +125,7 @@ pub struct GetCategoryRequest {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Response returned when a new category is created.
 pub struct NewCategoryResponse {
     /// The offset visual offset into the parent category.
@@ -129,34 +136,30 @@ pub struct NewCategoryResponse {
 }
 
 #[derive(Serialize, Deserialize, Default, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Request to update a category.
 ///
 /// All fields are optional, any field that is [`None`] will not be updated.
 ///
 /// # Errors
-/// [`CategoryUpdateError::OutOfRange`] if the given index is past the end of the parent.
-///
-/// [`None`]: https://doc.rust-lang.org/stable/std/option/enum.Option.html#variant.None
-/// [`CategoryUpdateError::OutOfRange`]: ../../error/category/enum.CategoryUpdateError.html#variant.OutOfRange
+/// [`UpdateError::OutOfRange`](crate::error::category::UpdateError::OutOfRange) if the given index is past the end of the parent.
 pub struct UpdateCategoryRequest {
-    /// If `Some` change the category's name to this name
+    /// If [`Some`] change the category's name to this name
     pub name: Option<String>,
 
-    /// If `Some`, change the parent to the given `Option<CategoryId>`.
+    /// If [`Some`], change the parent to the given `Option<CategoryId>`.
     ///
-    /// Specifically, if `None`, don't update.
-    /// If `Some(None)`, set the parent to `None`.
+    /// Specifically, if [`None`], don't update.
+    /// If `Some(None)`, set the parent to [`None`].
     /// Otherwise set it to the given [`CategoryId`].
-    ///
-    /// [`CategoryId`]: struct.CategoryId.html
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub parent_id: Option<Option<CategoryId>>,
 
-    /// If `Some` move to _before_ the category with the given index (ie, 0 moves to the start).
+    /// If [`Some`] move to _before_ the category with the given index (ie, 0 moves to the start).
     ///
     /// # interactions
-    /// If `index` `None` and `parent_id` is `Some` it will append to the end of the new parent.
+    /// If `index` is [`None`], and [`parent_id`](UpdateCategoryRequest::parent_id) is [`Some`] it will append to the end of the new parent.
     pub index: Option<u16>,
 }

@@ -2,13 +2,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./.ts-output",
-    "paths": {
-        "@utils/*": ["../ts-utils/*"],
-        "@frontend-config/*": ["../config/*"],
-        "@project-config": ["../../config/typescript/src/lib"],
-        "@elements/*": ["./src/*"],
-        "@bundles/*": ["./src/_bundles/*"]
-    },
     "target": "es2017",
     "module": "es2015",
     "lib": ["es2017", "dom", "dom.iterable"],

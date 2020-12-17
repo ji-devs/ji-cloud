@@ -1,12 +1,14 @@
-use actix_web::{
-    web::{self, Data, Json, ServiceConfig},
-    HttpResponse,
-};
+use actix_web::HttpResponse;
 use chrono::{DateTime, Utc};
+use paperclip::actix::{
+    api_v2_operation,
+    web::{self, Data, Json, ServiceConfig},
+    NoContent,
+};
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
-        jig::{CreateRequest, GetResponse, JigId},
+        jig::{JigCreateRequest, JigId, JigResponse},
         CreateResponse,
     },
     error::{
@@ -43,12 +45,14 @@ impl From<MetaWrapperError> for UpdateError {
     }
 }
 
+/// Create a jig.
+#[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
     auth: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, <jig::Create as ApiEndpoint>::Err> {
-    let req = req.map_or_else(CreateRequest::default, Json::into_inner);
+    let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.id;
 
     let id = db::jig::create(
@@ -67,6 +71,8 @@ async fn create(
     Ok(Json(CreateResponse { id }))
 }
 
+/// Delete a jig.
+#[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
@@ -77,12 +83,14 @@ async fn delete(
     Ok(HttpResponse::NoContent().into())
 }
 
+/// Update a jig.
+#[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<HttpResponse, <jig::Update as ApiEndpoint>::Err> {
+) -> Result<NoContent, <jig::Update as ApiEndpoint>::Err> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::jig::update(
         &*db,
@@ -102,9 +110,11 @@ async fn update(
         return Err(UpdateError::NotFound);
     }
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
+/// Get a jig.
+#[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
@@ -114,7 +124,7 @@ async fn get(
         .await?
         .ok_or(GetError::NotFound)?;
 
-    Ok(Json(GetResponse { jig }))
+    Ok(Json(JigResponse { jig }))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

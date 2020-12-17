@@ -1,4 +1,4 @@
-const {getMediaUrl_UI} = require("../../config/js/src/lib");
+import {getMediaUrl_UI} from "@project-config";
 
 const isDev = process.env["NODE_ENV"] === "development";
 

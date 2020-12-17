@@ -8,6 +8,11 @@ skip_core_tasks = true
 [env]
 DOCKER_BUILDKIT = "1"
 
+[tasks.typescript-config-build]
+script_runner = "@shell"
+script = "npm install && npm run build"
+cwd = "./config/typescript"
+
 ###################
 ## Gcloud        ##
 ###################
@@ -113,11 +118,12 @@ script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-s
 ###################
 [tasks.copy-config-fastly-purge]
 script_runner = "@shell"
-script = ["cp -R ./config/js/ ./backend/fastly-purge/config/"]
+script = ["cp -R ./config/typescript/ ./backend/fastly-purge/config/"]
 
 #------Release-----------#
 [tasks.release-fastly-purge]
 run_task = [{name = [
+	"typescript-config-build",
 	"copy-config-fastly-purge",
     "deploy-release-fastly-purge-frontend",
     "deploy-release-fastly-purge-uploads",
@@ -142,6 +148,7 @@ script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resou
 
 [tasks.sandbox-fastly-purge]
 run_task = [{name = [
+	"typescript-config-build",
 	"copy-config-fastly-purge",
     "deploy-sandbox-fastly-purge-frontend",
     "deploy-sandbox-fastly-purge-uploads",

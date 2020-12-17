@@ -1,6 +1,6 @@
 /* See https://codepen.io/dakom/pen/WNxYrQM */
 
-import { STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING_X_PERC, STAGE_PADDING_Y_PERC } from "../../config/js/src/lib";
+import { STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING_X_PERC, STAGE_PADDING_Y_PERC } from "@project-config";
 
 export type OnResize = (info:ResizeInfo) => any;
 

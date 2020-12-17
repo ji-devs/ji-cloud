@@ -14,7 +14,7 @@ pub fn get(local_insecure: bool) -> actix_cors::Cors {
     if local_insecure {
         cors = cors.allow_any_origin();
     } else {
-        for origin in &CORS_ORIGINS {
+        for origin in CORS_ORIGINS {
             cors = cors.allowed_origin(origin);
         }
     }

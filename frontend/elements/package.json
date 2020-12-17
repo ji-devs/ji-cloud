@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:release": "npm run build:tsc && rollup --config rollup.release.js",
-    "build:sandbox": "npm run build:tsc && rollup --config rollup.sandbox.js",
-    "build:local": "npm run build:tsc && rollup --config rollup.local.js",
+    "test": "npm run build:tsc && jest",
+    "test:watch": "npm-run-all -p watch:tsc watch:jest",
+    "build:release": "npm run test && rollup --config rollup.release.js",
+    "build:sandbox": "npm run test && rollup --config rollup.sandbox.js",
+    "build:local": "npm run test && rollup --config rollup.local.js",
     "build:tsc": "npm run clean && tsc",
     "watch": "npm-run-all -p watch:tsc watch:rollup",
     "watch:tsc": "tsc --watch",
+    "watch:jest": "jest --watchAll",
     "watch:rollup": "rollup --config rollup.local.js --watch",
     "clean": "rimraf ./.ts-output && rimraf ./dist"
   },
@@ -22,6 +25,8 @@
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.1",
     "@rollup/plugin-node-resolve": "^11.0.0",
+    "@types/jest": "^26.0.19",
+    "jest": "^26.6.3",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "rollup": "^2.34.2",
