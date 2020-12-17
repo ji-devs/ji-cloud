@@ -8,3 +8,8 @@ export const CheckedDropdown = () => {
 `
 }
 
+export const SelectedDropdown = () => {
+    return `<selected-dropdown label="Title"/>
+`
+}
+
