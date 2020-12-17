@@ -1,11 +1,6 @@
 ---
 name: Component Breakdown
-about: Zeplin -> Code
+about: Zeplin -> HTML/CSS/JS
 title: ''
-labels: frontend - storybook / templates, frontend - rust
-assignees: NaomiLea, dakom
-
----
-
-- [ ] html/css
-- [ ] rust
+labels: frontend - components and elements
+assignees: NaomiLea
