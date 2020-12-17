@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map';
 
 @customElement('input-text')
 export class _ extends LitElement {
@@ -13,7 +14,7 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
-   .helpertext{
+   .instruction{
      display:none;
      margin-left: 8px;
    }
@@ -50,7 +51,9 @@ export class _ extends LitElement {
     margin-top:4px;
     font-weight: 500;
     padding-left:8px;
+    display:block;
    }
+   p{display:none;}
    
   
     `];
@@ -58,14 +61,25 @@ export class _ extends LitElement {
 
   @property()
   label: string = "";
+
+  @property()
+  instruction: boolean = false;
+
   @property()
   helpertext: string = "";
+
   @property()
-  error: string = "";
+  error: boolean = false;
 
   render() {
 
-    const {label, helpertext, error} = this;
+    const {label, helpertext, error, instruction} = this;
+
+    const classes = classMap({ 
+      instruction,
+      error,
+    });
+
 
     return html`
     
@@ -73,8 +87,8 @@ export class _ extends LitElement {
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
     </div>
-    <p class="helpertext">${helpertext}</p>
-    <p class="error">${error}</p>
+    <p class="">${helpertext}</p>
+    <p class="">${error}</p>
      
   `;
   }

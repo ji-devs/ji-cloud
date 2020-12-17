@@ -1,8 +1,11 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
+import {BaseButton} from "@elements/_styles/buttons";
+
+
 
 @customElement('rectangle-button')
-export class _ extends LitElement {
+export class _ extends BaseButton {
 
   static get styles() {
     return [css`
@@ -55,24 +58,39 @@ export class _ extends LitElement {
       .green:hover{
         background-color: #46ba6f;
       }
+  
+    
     `];
   }
 
   @property()
   size: string = "";
+
   @property()
   label: string = "";
+
   @property()
-  color: string = "";
-  @property()
-  color: string = "";
+  color: "red" | "blue" | "" = "";
+
+  @property({type: Boolean})
+  bold:boolean = false; 
+
+  @property({type: Boolean})
+  italic:boolean = false; 
 
   render() {
 
-    const {size, label, color, fontweight} = this;
+    const {size, label, color, bold, italic} = this;
+
+    const classes = classMap({ 
+      [size]: true,
+      [color]: true,
+      bold: bold,
+      italic: italic,
+    });
 
     return html`
-      <button type="button" name="button" class="${size} ${color} ${fontweight}" >
+      <button type="button" name="button" class="${classes}" >
       ${label}
     </button>
   `;

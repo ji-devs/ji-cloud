@@ -33,10 +33,10 @@ label: string = "";
   render() {
     const {label} = this;
     return html`
-<main>
-<img src="${MEDIA_UI}/group-13809.svg"/>
-<div class="banner">${label}</div>
-</main>
+    <main>
+        <img src="${MEDIA_UI}/group-13809.svg"/>
+        <div class="banner">${label}</div>
+    </main>
   `;
   }
 }
