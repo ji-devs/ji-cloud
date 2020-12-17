@@ -19,7 +19,12 @@ pub const JWK_URL: &str =
 pub const MAX_SIGNIN_COOKIE: &str = "1209600";
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 pub const COOKIE_DOMAIN: &str = "jicloud.org";
-pub const CORS_ORIGINS: [&str; 2] = ["https://jicloud.org", "https://sandbox.jicloud.org"];
+pub const CORS_ORIGINS: &[&str] = &[
+    "https://jicloud.org",
+    "https://sandbox.jicloud.org",
+    "https://api.jicloud.org",
+    "https://api.sandbox.jicloud.org",
+];
 pub const DB_POOL_CONNECTIONS: u32 = 5;
 
 pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10; // 10 MB
