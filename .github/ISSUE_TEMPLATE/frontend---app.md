@@ -2,7 +2,7 @@
 name: Frontend - App
 about: Logic/state/flow on the frontend
 title: ''
-labels: frontend - rust
+labels: frontend - app dev
 assignees: dakom
 
 ---
