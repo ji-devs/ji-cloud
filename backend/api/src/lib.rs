@@ -1,6 +1,7 @@
 pub mod algolia;
 pub mod db;
 mod domain;
+mod error;
 mod extractor;
 pub mod http;
 mod image_ops;

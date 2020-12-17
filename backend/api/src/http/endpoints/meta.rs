@@ -1,4 +1,4 @@
-use crate::db;
+use crate::{db, error::ServerError};
 use paperclip::actix::{
     api_v2_operation,
     web::{Data, Json, ServiceConfig},
@@ -6,14 +6,13 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::meta::Get, ApiEndpoint},
     domain::meta::MetadataResponse,
-    error::InternalServerError,
 };
 use sqlx::PgPool;
 
 // TODO: Should have cache headers
 /// Get a list of all available metadata of all kinds (sans categories)
 #[api_v2_operation]
-async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, InternalServerError> {
+async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, ServerError> {
     let styles = db::meta::get_style(&db).await?;
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;

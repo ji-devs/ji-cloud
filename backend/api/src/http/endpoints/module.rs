@@ -9,12 +9,12 @@ use shared::{
         jig::module::{ModuleCreateRequest, ModuleId, ModuleResponse},
         CreateResponse,
     },
-    error::{GetError, UpdateError},
 };
 use sqlx::PgPool;
 
 use crate::{
     db,
+    error::{DeleteError, NotFoundError, ServerError},
     extractor::{AuthUserWithScope, ScopeManageModule, WrapAuthClaimsNoDb},
 };
 
@@ -24,7 +24,7 @@ async fn create(
     db: Data<PgPool>,
     _auth: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<module::Create as ApiEndpoint>::Res>, <module::Create as ApiEndpoint>::Err> {
+) -> Result<Json<<module::Create as ApiEndpoint>::Res>, ServerError> {
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
     let id = db::module::create(&*db, req.kind, req.body.as_ref()).await?;
 
@@ -37,7 +37,7 @@ async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageModule>,
     path: web::Path<ModuleId>,
-) -> Result<NoContent, <module::Delete as ApiEndpoint>::Err> {
+) -> Result<NoContent, DeleteError> {
     db::module::delete(&*db, path.into_inner()).await?;
 
     Ok(NoContent)
@@ -50,12 +50,12 @@ async fn update(
     _claims: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<ModuleId>,
-) -> Result<NoContent, <module::Update as ApiEndpoint>::Err> {
+) -> Result<NoContent, NotFoundError> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::module::update(&*db, path.into_inner(), req.kind, req.body.as_ref()).await?;
 
     if !exists {
-        return Err(UpdateError::NotFound);
+        return Err(NotFoundError::ResourceNotFound);
     }
 
     Ok(NoContent)
@@ -67,10 +67,10 @@ async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     path: web::Path<ModuleId>,
-) -> Result<Json<<module::Get as ApiEndpoint>::Res>, <module::Get as ApiEndpoint>::Err> {
+) -> Result<Json<<module::Get as ApiEndpoint>::Res>, NotFoundError> {
     let module = db::module::get(&db, path.into_inner())
         .await?
-        .ok_or(GetError::NotFound)?;
+        .ok_or(NotFoundError::ResourceNotFound)?;
 
     Ok(Json(ModuleResponse { module }))
 }

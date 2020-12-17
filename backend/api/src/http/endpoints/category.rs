@@ -1,8 +1,12 @@
 use crate::{
-    db, extractor::AuthUserWithScope, extractor::ScopeManageCategory, extractor::WrapAuthClaimsNoDb,
+    db,
+    error::{BasicError, CategoryUpdateError, DeleteError, ServerError},
+    extractor::AuthUserWithScope,
+    extractor::ScopeManageCategory,
+    extractor::WrapAuthClaimsNoDb,
 };
 use paperclip::actix::{
-    api_v2_operation,
+    api_v2_errors, api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
     NoContent,
 };
@@ -13,14 +17,45 @@ use shared::domain::category::{
 };
 use sqlx::PgPool;
 
+#[api_v2_errors(
+    code = 400,
+    code = 401,
+    code = 403,
+    code = 404,
+    description = "Not Found: Parent Category Not Found",
+    code = 500
+)]
+pub enum CreateError {
+    ParentCategoryNotFound,
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for CreateError {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for CreateError {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ParentCategoryNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Parent Category Not Found".to_owned(),
+            )
+            .into(),
+            Self::InternalServerError(e) => crate::error::ise(e),
+        }
+    }
+}
+
 /// Get a tree of categories.
 #[api_v2_operation]
 async fn get_categories(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Option<Query<<category::Get as ApiEndpoint>::Req>>,
-) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, <category::Get as ApiEndpoint>::Err>
-{
+) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, ServerError> {
     let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
 
     let categories = match req.scope {
@@ -46,10 +81,7 @@ async fn create_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Json<<category::Create as ApiEndpoint>::Req>,
-) -> actix_web::Result<
-    Json<<category::Create as ApiEndpoint>::Res>,
-    <category::Create as ApiEndpoint>::Err,
-> {
+) -> actix_web::Result<Json<<category::Create as ApiEndpoint>::Res>, CreateError> {
     let CreateCategoryRequest { name, parent_id } = req.into_inner();
 
     let (id, index) = db::category::create(&db, &name, parent_id).await?;
@@ -64,7 +96,7 @@ async fn update_category(
     _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<NoContent, <category::Update as ApiEndpoint>::Err> {
+) -> actix_web::Result<NoContent, CategoryUpdateError> {
     let UpdateCategoryRequest {
         name,
         parent_id,
@@ -89,7 +121,7 @@ async fn delete_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<NoContent, <category::Delete as ApiEndpoint>::Err> {
+) -> actix_web::Result<NoContent, DeleteError> {
     db::category::delete(&db, path.into_inner()).await?;
 
     Ok(NoContent)

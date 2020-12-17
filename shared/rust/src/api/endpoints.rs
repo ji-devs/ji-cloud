@@ -12,7 +12,7 @@ pub trait ApiEndpoint {
     /// The response type for this endpoint.
     type Res: DeserializeOwned + Serialize;
 
-    /// The error type for this endpoint.
+    /// The (inner) error type for this endpoint.
     type Err: DeserializeOwned + Serialize;
 
     /// The path to the endpoint.

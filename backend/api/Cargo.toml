@@ -44,6 +44,7 @@ url = { version = "2.1.1", features = ["serde"] }
 uuid = "0.8.1"
 mp3-metadata = "0.3.3"
 paperclip = { version = "0.5", features = ["actix", "uuid", "chrono"] }
+http = "0.2.2"
 
 [dependencies.sqlx]
 version = "0.4.0"
