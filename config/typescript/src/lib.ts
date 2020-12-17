@@ -21,12 +21,12 @@ export const URL_STORYBOOK_SANDBOX = "https://storybook.sandbox.jicloud.org";
 export const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
 export const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
-const getMediaUrl = isDev => 
+const getMediaUrl = (isDev:boolean):string => 
 	isDev
         ? `http://localhost:4102`
         : URL_MEDIA;
 
 
-export const getMediaUrl_UI = isDev =>
+export const getMediaUrl_UI = (isDev:boolean):string =>
 	`${getMediaUrl(isDev)}/ui`;
 

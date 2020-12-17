@@ -46,6 +46,7 @@ export function createConfig(target) {
                 entries: {
                     "@utils": path.resolve(projectRootDir, "./.ts-output/ts-utils"),
                     "@frontend-config": path.resolve(projectRootDir, "../config"),
+                    "@project-config": path.resolve(projectRootDir, "../../config/typescript/src/lib"),
                     "@elements": path.resolve(projectRootDir, "./.ts-output/elements/src"),
                     "@bundles": path.resolve(projectRootDir, "./.ts-output/elements/src/_bundles")
                 }
