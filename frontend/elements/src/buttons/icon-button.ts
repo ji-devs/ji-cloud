@@ -1,7 +1,8 @@
+import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
-@customElement('rectangle-button')
+@customElement('icon-button')
 export class _ extends LitElement {
 
   static get styles() {
@@ -55,6 +56,10 @@ export class _ extends LitElement {
       .green:hover{
         background-color: #46ba6f;
       }
+      .bolder{
+          font-weight:600;
+      }
+    
     `];
   }
 
@@ -65,7 +70,7 @@ export class _ extends LitElement {
   @property()
   color: string = "";
   @property()
-  color: string = "";
+  fontweight: string = "";
 
   render() {
 
@@ -73,6 +78,7 @@ export class _ extends LitElement {
 
     return html`
       <button type="button" name="button" class="${size} ${color} ${fontweight}" >
+      
       ${label}
     </button>
   `;

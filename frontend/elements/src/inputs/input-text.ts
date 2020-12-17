@@ -13,6 +13,10 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
+   .helpertext{
+     display:none;
+     margin-left: 8px;
+   }
    input{
     outline:none;
     border:none;
@@ -31,6 +35,22 @@ export class _ extends LitElement {
     border: solid 2px #5590fc;
    }
    input{ font-size:16px;}
+   .helpertext{
+     font-size: 14px;
+     color: #5590fc;
+     margin-top:4px;
+     font-weight: 500;
+   }
+   active .helpertext{
+    display:block;
+   }
+   .error{
+    font-size: 14px;
+    color: #f00813;
+    margin-top:4px;
+    font-weight: 500;
+    padding-left:8px;
+   }
    
   
     `];
@@ -40,10 +60,12 @@ export class _ extends LitElement {
   label: string = "";
   @property()
   helpertext: string = "";
+  @property()
+  error: string = "";
 
   render() {
 
-    const {label, helpertext} = this;
+    const {label, helpertext, error} = this;
 
     return html`
     
@@ -51,8 +73,8 @@ export class _ extends LitElement {
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
     </div>
-    <p>${helpertext}</p>
-     
+    <p class="helpertext">${helpertext}</p>
+    <p class="error">${error}</p>
      
   `;
   }
