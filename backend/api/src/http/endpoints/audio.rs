@@ -1,4 +1,4 @@
-use actix_web::web::ServiceConfig;
+use paperclip::actix::web::ServiceConfig;
 use shared::{
     api::{endpoints::audio, ApiEndpoint},
     error::DeleteError,
@@ -16,17 +16,17 @@ fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
 
 pub mod user {
     use crate::{db, extractor::WrapAuthClaimsNoDb, s3::S3Client};
-    use actix_web::{
-        http,
-        web::{Bytes, Data, Json, Path},
-        HttpResponse,
-    };
     use futures::TryStreamExt;
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Bytes, Data, Json, Path},
+        CreatedJson, NoContent,
+    };
     use shared::{
         api::{endpoints, ApiEndpoint},
         domain::{
             audio::{
-                user::{GetResponse, ListResponse, UserAudio},
+                user::{UserAudio, UserAudioListResponse, UserAudioResponse},
                 AudioId,
             },
             CreateResponse,
@@ -37,27 +37,28 @@ pub mod user {
     };
     use sqlx::PgPool;
 
+    /// Create a audio file in the user's audio library.
+    #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
     ) -> Result<
-        (
-            Json<<endpoints::audio::user::Create as ApiEndpoint>::Res>,
-            http::StatusCode,
-        ),
+        CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>,
         <endpoints::audio::user::Create as ApiEndpoint>::Err,
     > {
         let id = db::audio::user::create(db.as_ref()).await?;
-        Ok((Json(CreateResponse { id }), http::StatusCode::CREATED))
+        Ok(CreatedJson(CreateResponse { id }))
     }
 
+    /// upload a audio file to the user's audio library.
+    #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
         s3: Data<S3Client>,
         _claims: WrapAuthClaimsNoDb,
         Path(id): Path<AudioId>,
         bytes: Bytes,
-    ) -> Result<HttpResponse, <endpoints::audio::user::Upload as ApiEndpoint>::Err> {
+    ) -> Result<NoContent, <endpoints::audio::user::Upload as ApiEndpoint>::Err> {
         if !db::audio::user::exists(db.as_ref(), id).await? {
             return Err(shared::error::audio::UploadError::NotFound);
         }
@@ -75,15 +76,17 @@ pub mod user {
         s3.upload_audio(MediaLibraryKind::User, id, bytes.to_vec())
             .await?;
 
-        Ok(HttpResponse::NoContent().into())
+        Ok(NoContent)
     }
 
+    /// Delete a audio file from the user's audio library.
+    #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<AudioId>,
         s3: Data<S3Client>,
-    ) -> Result<HttpResponse, <endpoints::audio::user::Delete as ApiEndpoint>::Err> {
+    ) -> Result<NoContent, <endpoints::audio::user::Delete as ApiEndpoint>::Err> {
         let audio = req.into_inner();
         db::audio::user::delete(&db, audio)
             .await
@@ -92,9 +95,11 @@ pub mod user {
         s3.delete_audio(MediaLibraryKind::Global, MediaVariant::Original, audio)
             .await;
 
-        Ok(HttpResponse::new(http::StatusCode::NO_CONTENT))
+        Ok(NoContent)
     }
 
+    /// Get a audio file from the user's audio library.
+    #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -107,9 +112,11 @@ pub mod user {
             .await?
             .ok_or(GetError::NotFound)?;
 
-        Ok(Json(GetResponse { metadata }))
+        Ok(Json(UserAudioResponse { metadata }))
     }
 
+    /// List audio files from the user's audio library.
+    #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
@@ -119,11 +126,11 @@ pub mod user {
     > {
         let audio_files: Vec<_> = db::audio::user::list(db.as_ref())
             .err_into::<GetError>()
-            .and_then(|metadata: UserAudio| async { Ok(GetResponse { metadata }) })
+            .and_then(|metadata: UserAudio| async { Ok(UserAudioResponse { metadata }) })
             .try_collect()
             .await?;
 
-        Ok(Json(ListResponse { audio_files }))
+        Ok(Json(UserAudioListResponse { audio_files }))
     }
 }
 

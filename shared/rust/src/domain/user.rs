@@ -5,12 +5,16 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
 
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
+
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 
 /// Represents a user's permissions.
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[non_exhaustive]
 #[repr(i16)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum UserScope {
     /// The user has access to everything(?)
     Admin = 1,
@@ -47,6 +51,7 @@ impl TryFrom<i16> for UserScope {
 /// no filters will return that the user does not exist.
 /// multiple filters will act as a logical `OR` of them (multiple choices will return an arbitrary user).
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserLookupQuery {
     /// The user ID we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -63,6 +68,7 @@ pub struct UserLookupQuery {
 
 /// Publically accessable information about a user.
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct OtherUser {
     /// The user's id.
     pub id: Uuid,
@@ -70,6 +76,8 @@ pub struct OtherUser {
 
 /// A user's profile.
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserProfile {
     /// The user's id.
     pub id: Uuid,

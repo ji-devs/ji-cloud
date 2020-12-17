@@ -4,12 +4,14 @@ mod endpoints;
 use crate::{algolia::AlgoliaClient, jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
+use actix_web::HttpResponse;
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
 use futures::Future;
+use paperclip::actix::OpenApiExt;
 use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
@@ -72,6 +74,8 @@ pub async fn run(
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
+            .service(get_spec)
+            .wrap_api()
             .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
@@ -81,6 +85,8 @@ pub async fn run(
             .configure(endpoints::jig::configure)
             .configure(endpoints::module::configure)
             .configure(endpoints::admin::configure)
+            .with_json_spec_at("/spec.json")
+            .build()
     });
 
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
@@ -95,4 +101,11 @@ pub async fn run(
     server.run().await.unwrap();
 
     Ok(())
+}
+
+#[actix_web::get("/spec")]
+async fn get_spec() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(include_str!("../static/spec-explorer.html"))
 }
