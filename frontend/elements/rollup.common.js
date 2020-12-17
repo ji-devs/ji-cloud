@@ -21,7 +21,7 @@ export function createConfig(target) {
     const { APP_NAME } = process.env;
     const bundleName = (APP_NAME == null) ? "kitchen-sink" : APP_NAME;
 
-    const input = `./.ts-output/elements/src/_bundles/${bundleName}/imports.js`;
+    const input = `./.ts-output/frontend/elements/src/_bundles/${bundleName}/imports.js`;
     const file = `./dist/${bundleName}/custom-elements.js`;
     console.info(`BUNDLING ${bundleName} for ${target}`);
 
@@ -44,11 +44,11 @@ export function createConfig(target) {
         plugins: [
             alias({
                 entries: {
-                    "@utils": path.resolve(projectRootDir, "./.ts-output/ts-utils"),
+                    "@utils": path.resolve(projectRootDir, "./.ts-output/frontend/ts-utils"),
                     "@frontend-config": path.resolve(projectRootDir, "../config"),
-                    "@project-config": path.resolve(projectRootDir, "../../config/typescript/src/lib"),
-                    "@elements": path.resolve(projectRootDir, "./.ts-output/elements/src"),
-                    "@bundles": path.resolve(projectRootDir, "./.ts-output/elements/src/_bundles")
+                    "@project-config": path.resolve(projectRootDir, "./.ts-output/config/typescript/src/lib"),
+                    "@elements": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src"),
+                    "@bundles": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src/_bundles")
                 }
             }),
             resolve(),

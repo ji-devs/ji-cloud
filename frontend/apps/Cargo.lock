@@ -440,6 +440,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "chrono",
  "config",
+ "discard",
  "dominator",
  "dominator_helpers",
  "futures",

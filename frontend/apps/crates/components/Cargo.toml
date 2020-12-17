@@ -30,6 +30,7 @@ uuid = { version = "0.8.1", features = ["serde", "wasm-bindgen"] }
 url = "2.2.0"
 serde_qs = "0.8.1"
 dominator = "0.5.14"
+discard = "1.0.4"
 futures-signals = "0.3.16"
 dominator_helpers = "0.5.0"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
