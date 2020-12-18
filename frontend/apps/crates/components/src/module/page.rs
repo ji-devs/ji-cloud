@@ -1,9 +1,6 @@
 
 /* There are a few fundamental concepts going on here...
- * 1. The serialized data does _not_ need to be Clone.
- *    rather, it's passed completely to the renderer
- *    and then the renderer is free to split it up for Mutable/etc.
- *    (here it is held and taken from an Option)
+ * 1. The serialized RawData is passed to the trait in order to get a State object 
  * 2. The loader will be skipped if the url has ?iframe_data=true
  *    in this case, iframe communication is setup and the parent
  *    is expected to post a message with the data (via IframeInit)
@@ -85,7 +82,10 @@ pub trait ModuleRenderer <RawData, State> {
     type HeaderSignal: Signal<Item = Option<Dom>>;
     type MainSignal: Signal<Item = Option<Dom>>;
     type FooterSignal: Signal<Item = Option<Dom>>;
+    type FutureState: Future<Output = Option<State>>;
 
+    
+    fn load_state() -> Self::FutureState; 
     fn derive_state(data: RawData) -> State; 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal; 
     fn sidebar_signal(state: Rc<State>, kind: ModulePageKind) -> Self::SidebarSignal; 
@@ -95,7 +95,9 @@ pub trait ModuleRenderer <RawData, State> {
 }
 
 pub trait StaticModuleRenderer <RawData, State> {
+    type FutureState: Future<Output = Option<State>>;
 
+    fn load_state() -> Self::FutureState; 
     fn derive_state(state: RawData) -> State; 
     fn page_kind(state: Rc<State>) -> ModulePageKind; 
     fn sidebar(state: Rc<State>, kind: ModulePageKind) -> Option<Dom>; 
@@ -110,7 +112,12 @@ impl <RawData, State, T: StaticModuleRenderer<RawData, State>> ModuleRenderer<Ra
     type HeaderSignal = impl Signal<Item = Option<Dom>>;
     type MainSignal = impl Signal<Item = Option<Dom>>;
     type FooterSignal = impl Signal<Item = Option<Dom>>;
+    type FutureState = impl Future<Output = Option<State>>;
     
+    fn load_state() -> Self::FutureState { 
+        T::load_state()
+    }
+
     fn derive_state(raw_data: RawData) -> State { 
         T::derive_state(raw_data)
     }
@@ -150,9 +157,7 @@ where
     State: 'static,
 {
 
-    pub fn render<Loader, F>(load: Loader) -> Rc<Self> 
-        where Loader: FnOnce() -> F + 'static,
-              F: Future<Output = RawData>
+    pub fn render() -> Rc<Self> 
     {
 
         let wait_iframe_data = should_get_iframe_data();
@@ -168,8 +173,9 @@ where
 
         if !wait_iframe_data {
             _self_clone.loader.load(async move {
-                let data = load().await; 
-                Self::render_data(_self, data);
+                if let Some(state) = Renderer::load_state().await {
+                    Self::render_data(_self, Rc::new(state));
+                }
             });
         } else {
             Self::render_iframe_wait(_self);
@@ -185,6 +191,8 @@ where
     }
 
     fn render_iframe_wait(_self: Rc<Self>) {
+        //This div is just a placeholder to get messages
+        //It'll be replaced when the iframe data arrives
         let dom = html!("div", {
             .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
                 //Get iframe data if we're supposed to
@@ -193,7 +201,9 @@ where
                         //log::warn!("weird... shouldn't have gotten iframe data!");
                         //log::warn!("{:?}", msg);
                     } else {
-                        Self::render_data(_self.clone(), msg.data.unwrap_throw());
+                        let raw_data = msg.data.unwrap_throw();
+                        let state = Rc::new(Renderer::derive_state(raw_data));
+                        Self::render_data(_self.clone(), state);
                     }
                 } else {
                     log::info!("hmmm got other iframe message...");
@@ -212,12 +222,11 @@ where
         Self::switch_body(dom); 
     }
 
-    fn render_data(_self: Rc<Self>, raw_data:RawData) {
-        let state = Rc::new(Renderer::derive_state(raw_data));
+    fn render_data(_self: Rc<Self>, state: Rc<State>) {
 
         _self.switcher.load(
             Renderer::page_kind_signal(state.clone())
-                .for_each(clone!(_self, state => move |page_kind| {
+                .for_each(clone!(state => move |page_kind| {
                     let dom = html!(page_kind.element_name(), {
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                             dom.property("scrollable", true)

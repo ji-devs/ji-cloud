@@ -17,13 +17,13 @@ use futures::future::ready;
 use super::templates;
 use components::module::page::*;
 use std::pin::Pin;
+use std::future::Future;
 
 const INITIAL_MODE:ModulePageKind = ModulePageKind::GridResize;
 pub type Page = Rc<ModulePage<PageRenderer, RawData, State>>;
 
 pub fn render() -> Page {
-    ModulePage::<PageRenderer, RawData, State>::render(|| async {
-    })
+    ModulePage::<PageRenderer, RawData, State>::render()
 }
 
 pub type RawData = ();
@@ -48,7 +48,13 @@ impl ModuleRenderer<RawData, State> for PageRenderer {
     type HeaderSignal = impl Signal<Item = Option<Dom>>;
     type MainSignal = impl Signal<Item = Option<Dom>>;
     type FooterSignal = impl Signal<Item = Option<Dom>>;
+    type FutureState = impl Future<Output = Option<State>>;
 
+    fn load_state() -> Self::FutureState{ 
+        async {
+            Some(Self::derive_state(()))
+        }
+    }
     fn derive_state(data:RawData) -> State { 
         State::new(data)
     }
