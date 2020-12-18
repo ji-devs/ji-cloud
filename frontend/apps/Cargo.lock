@@ -538,9 +538,9 @@ dependencies = [
 
 [[package]]
 name = "dominator_helpers"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7cda4d4791ecb712a9ae629d47805cc271101862448b05f16fccbb2a5d25bec"
+checksum = "a01acec285d453a6650616a7424ddaa28bfcebd0f0d96427cf4506afff64983e"
 dependencies = [
  "discard",
  "dominator",
@@ -1173,9 +1173,9 @@ dependencies = [
 
 [[package]]
 name = "serde_qs"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0010b5c91a2b37b51b91dc29a20553b6384fef574bb4cf3c0fc5a04c3bab7e47"
+checksum = "e5cb0f0564a84554436c4ceff5c896308d4e09d0eb4bd0215b8f698f88084601"
 dependencies = [
  "percent-encoding",
  "serde",

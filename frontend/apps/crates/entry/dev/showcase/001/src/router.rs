@@ -8,14 +8,14 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html, clone};
-use crate::pages::resize::{self, ResizePage};
+use crate::pages::dom;
 use discard::DiscardOnDrop;
 use components::module::page::*;
 use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
 
 pub struct Router {
     loader: AsyncLoader,
-    page: RefCell<Option<ResizePage>>
+    page: RefCell<Option<dom::Page>>
 }
 impl Router {
     pub fn render() {
@@ -29,7 +29,7 @@ impl Router {
             dominator::routing::url()
                 .signal_ref(|url| Route::from_url(&url))
                 .for_each(clone!(_self => move |route| {
-                    *_self.page.borrow_mut() = Some(resize::render());
+                    *_self.page.borrow_mut() = Some(dom::render());
                     async {}
                 }))
         );

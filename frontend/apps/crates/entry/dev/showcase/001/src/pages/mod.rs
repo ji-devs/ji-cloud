@@ -1,2 +1,2 @@
-pub mod resize;
+pub mod dom;
 pub(super) mod templates;

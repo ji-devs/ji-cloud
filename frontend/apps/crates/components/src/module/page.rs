@@ -26,9 +26,9 @@ use futures_signals::{
 };
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
 use dominator::{DomBuilder, Dom, html, events, with_node, clone, apply_methods};
-use dominator_helpers::{elem,dynamic_class_signal ,with_data_id, futures::{spawn_future, AsyncLoader}, signals::OptionSignal};
+use dominator_helpers::{make_custom_event_serde,dynamic_class_signal ,with_data_id, futures::{spawn_future, AsyncLoader}, signals::OptionSignal};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use serde::de::DeserializeOwned;
+use serde::{Deserialize, de::DeserializeOwned};
 use utils::{
     iframe::*,
     resize::*,
@@ -39,34 +39,42 @@ use async_trait::async_trait;
 use std::pin::Pin;
 use std::marker::Unpin;
 use std::task::{Context, Poll};
-
 use discard::DiscardOnDrop;
-/*
-*/
+
+
+
+make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ModulePageKind {
     Empty,
-    EditPlain,
-    EditResize,
-    PlayIframe,
-    PlayIframePreview,
+    GridPlain,
+    GridResize,
+    GridResizeScrollable,
+    Iframe,
 }
 
 impl ModulePageKind {
     pub fn is_resize(&self) -> bool {
         match self {
-            Self::EditResize | Self::PlayIframe | Self::PlayIframePreview => true,
-            Self::EditPlain | Self::Empty => false
+            Self::GridResize | Self::GridResizeScrollable | Self::Iframe => true,
+            _ => false, 
         }
     }
+    pub fn add_scrollable_attribute(&self) -> bool {
+        match self {
+            Self::GridResizeScrollable => true,
+            _ => false
+        }
+    }
+
     pub fn element_name(&self) -> &str {
         match self {
-            Self::EditResize => "module-page-resize",
-            Self::PlayIframe => "module-page-iframe",
-            Self::PlayIframePreview => "module-page-iframe-preview",
-            Self::EditPlain => "module-edit-plain",
-            Self::Empty => "module-empty"
+            Self::GridResize => "module-page-grid-resize",
+            Self::GridResizeScrollable => "module-page-grid-resize",
+            Self::GridPlain => "module-page-grid-plain",
+            Self::Iframe => "module-page-iframe",
+            Self::Empty => "div"
         }
     }
 }
@@ -210,127 +218,46 @@ where
         _self.switcher.load(
             Renderer::page_kind_signal(state.clone())
                 .for_each(clone!(_self, state => move |page_kind| {
-                    log::info!("hmmmm");
                     let dom = html!(page_kind.element_name(), {
-
-                        //Note - not observing size changes on main
-                        //Main is ultimately what's scaled :)
-                        //.child_slot_signal("main", Renderer::main_signal(renderer.clone()))
-                        //Each of these sections sets up for observing for resize
-                        //and also renders the signal defined by the renderer trait
-                        //
-                        //
-                        .child_signal( 
-                            Renderer::sidebar_signal(state.clone(), page_kind)
-                                .map(|dom| {
-                                    dom.map(|dom| {
-                                        //HRMF
-                                        dom
-                                            //.property("slot", "sidebar")
-                                    })
-                                })
-                        )
+                        .apply_if(page_kind.add_scrollable_attribute(), |dom| {
+                            dom.property("scrollable", true)
+                        })
+                        .event(|event:ModuleResizeEvent| {
+                            //in utils / global static
+                            set_resize_info(event.data());
+                        })
+                       
+                        //TODO - get rid of nesting
+                        //See: https://github.com/Pauan/rust-dominator/issues/45
+                        .child(html!("div", {
+                            .style("width", "100%")
+                            .style("height", "100%")
+                            .attribute("slot", "sidebar")
+                            .child_signal(Renderer::sidebar_signal(state.clone(), page_kind))
+                        }))
+                        .child(html!("div", {
+                            .style("width", "100%")
+                            .style("height", "100%")
+                            .attribute("slot", "header")
+                            .child_signal(Renderer::header_signal(state.clone(), page_kind))
+                        }))
+                        .child(html!("div", {
+                            .style("width", "100%")
+                            .style("height", "100%")
+                            .attribute("slot", "main")
+                            .child_signal(Renderer::main_signal(state.clone(), page_kind))
+                        }))
+                        .child(html!("div", {
+                            .style("width", "100%")
+                            .style("height", "100%")
+                            .attribute("slot", "footer")
+                            .child_signal(Renderer::footer_signal(state.clone(), page_kind))
+                        }))
                     });
 
                     Self::switch_body(dom); 
                     async {}
                 }))
         );
-
-        log::info!("rendered data...");
     }
 }
-
-//////////// EXAMPLE
-/*
-mod example {
-    use super::*;
-    struct ExampleRenderer { 
-        pub data: Mutable<bool>,
-    }
-
-    impl ModuleRenderer for ExampleRenderer {
-        type Data = bool;
-        type PageKindSignal = impl Signal<Item = ModulePageKind>;
-        type SidebarSignal = impl Signal<Item = Option<Dom>>;
-        type HeaderSignal = impl Signal<Item = Option<Dom>>;
-        type MainSignal = impl Signal<Item = Option<Dom>>;
-        type FooterSignal = impl Signal<Item = Option<Dom>>;
-
-        fn new(data:bool) -> Self {
-            Self { 
-                data: Mutable::new(data) 
-            }
-        }
-        fn page_kind_signal(_self: Rc<Self>) -> Self::PageKindSignal {
-            always(ModulePageKind::EditPlain)
-        }
-
-        fn sidebar_signal(_self: Rc<Self>) -> Self::SidebarSignal { 
-            always(None)
-        }
-        fn header_signal(_self: Rc<Self>) -> Self::HeaderSignal { 
-            always(None)
-        }
-        fn main_signal(_self: Rc<Self>) -> Self::MainSignal { 
-                _self.data.signal()
-                    .map(|x| {
-                        if x {
-                            Some(html!("h1", { .text ("it works!") } ))
-                        } else {
-                            None
-                        }
-                    })
-        }
-        fn footer_signal(_self: Rc<Self>) -> Self::FooterSignal { 
-            always(None)
-        }
-    }
-    struct ExampleStaticRenderer { 
-        pub data: bool,
-    }
-
-    impl StaticModuleRenderer for ExampleStaticRenderer {
-        type Data = bool;
-
-        fn new(data:bool) -> Self {
-            Self { 
-                data
-            }
-        }
-        fn page_kind(_self: Rc<Self>) -> ModulePageKind { 
-            ModulePageKind::EditPlain
-        }
-
-        fn sidebar(_self: Rc<Self>) -> Option<Dom> {
-            None
-        }
-        fn header(_self: Rc<Self>) -> Option<Dom> {
-            None
-        }
-        fn main(_self: Rc<Self>) -> Option<Dom> {
-            Some(html!("h1", { .text ("it works!") } ))
-        }
-        fn footer(_self: Rc<Self>) -> Option<Dom> {
-            Some(html!("h1", { .text ("it works!") } ))
-        }
-    }
-
-    pub fn render_signals() -> Dom {
-
-        let hello = Rc::new("hello".to_string());
-
-        ModulePage::<ExampleRenderer, _>::render(clone!(hello => move || async move {
-            if *hello == "hello" { true } else {false}
-        }))
-    }
-
-    pub fn render_static() -> Dom {
-        let hello = Rc::new("hello".to_string());
-
-        ModulePage::<ExampleStaticRenderer, _>::render(clone!(hello => move || async move {
-            if *hello == "hello" { true } else {false}
-        }))
-    }
-}
-*/

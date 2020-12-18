@@ -18,11 +18,11 @@ use super::templates;
 use components::module::page::*;
 use std::pin::Pin;
 
-const INITIAL_MODE:ModulePageKind = ModulePageKind::EditResize;
-pub type ResizePage = Rc<ModulePage<ResizeRenderer, RawData, State>>;
+const INITIAL_MODE:ModulePageKind = ModulePageKind::GridResize;
+pub type Page = Rc<ModulePage<PageRenderer, RawData, State>>;
 
-pub fn render() -> ResizePage {
-    ModulePage::<ResizeRenderer, RawData, State>::render(|| async {
+pub fn render() -> Page {
+    ModulePage::<PageRenderer, RawData, State>::render(|| async {
     })
 }
 
@@ -39,10 +39,10 @@ impl State {
     }
 }
 
-pub struct ResizeRenderer { 
+pub struct PageRenderer { 
 }
 
-impl ModuleRenderer<RawData, State> for ResizeRenderer {
+impl ModuleRenderer<RawData, State> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
     type SidebarSignal = impl Signal<Item = Option<Dom>>;
     type HeaderSignal = impl Signal<Item = Option<Dom>>;
@@ -58,10 +58,46 @@ impl ModuleRenderer<RawData, State> for ResizeRenderer {
     }
 
     fn sidebar_signal(state: Rc<State>, kind:ModulePageKind) -> Self::SidebarSignal {
-        state.kind.signal().map(|kind| {
+        state.kind.signal().map(move |kind| {
 
             templates::sidebar(kind).map(|el| {
-                elem!(el, {})
+                elem!(el, {
+                    .child(html!("div", {
+                        .style("display", "flex")
+                        .children(vec![
+                            html!("button", {
+                                .text("empty")
+                                .event(clone!(state => move |evt:events::Click| {
+                                    state.kind.set(ModulePageKind::Empty);
+                                }))
+                            }),
+                            html!("button", {
+                                .text("edit-plain")
+                                .event(clone!(state => move |evt:events::Click| {
+                                    state.kind.set(ModulePageKind::GridPlain);
+                                }))
+                            }),
+                            html!("button", {
+                                .text("edit-resize")
+                                .event(clone!(state => move |evt:events::Click| {
+                                    state.kind.set(ModulePageKind::GridResize);
+                                }))
+                            }),
+                            html!("button", {
+                                .text("edit-resize-scrollable")
+                                .event(clone!(state => move |evt:events::Click| {
+                                    state.kind.set(ModulePageKind::GridResizeScrollable);
+                                }))
+                            }),
+                            html!("button", {
+                                .text("iframe")
+                                .event(clone!(state => move |evt:events::Click| {
+                                    state.kind.set(ModulePageKind::Iframe);
+                                }))
+                            }),
+                        ])
+                    }))
+                })
             })
         })
     }

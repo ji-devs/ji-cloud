@@ -3,14 +3,13 @@
   <head>
     <meta charset="UTF-8">
     <title>Ji Cloud</title>
-	<!-- real deployment uses  https://frontend.sandbox.jicloud.org/{{APP_NAME}}/css/* -->
+	<link rel="stylesheet" href="https://media.jicloud.org/ui/css/head.css"></link>
 	<script>
         FRONTEND_DEV_AUTH = () => {{FRONTEND_DEV_AUTH}};
 		    FRONTEND_DEV_TOKEN = () => "{{FRONTEND_DEV_TOKEN}}";
         FRONTEND_DEV_CSRF = () => "{{FRONTEND_DEV_CSRF}}";
     </script>
-   
-        <script src="http://localhost:4103/{{APP_NAME}}/custom-elements.js" type="module"></script>
+	<script src="http://localhost:4103/{{APP_NAME}}/custom-elements.js" type="module"></script>
   </head>
   <body>
 	<!-- These includes are only needed for specific routes -->
