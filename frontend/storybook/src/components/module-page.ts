@@ -60,13 +60,15 @@ const makeArgs = (mainFontSize:string) => ({
   header: `<div style="background-color: red; color: white; text-align: center;"><textarea>Header</textarea></div>`,
   main: `<div style="background-color: green; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
           <div></div>
-          <div style="color: white; font-size: ${mainFontSize}; width: 100%; text-align: center;"><textarea>Main</textarea></div>
+          <div style="color: white; font-size: ${mainFontSize}; width: 100%; text-align: center;">
+            <textarea style="font-size: ${mainFontSize}">Main</textarea>
+          </div>
           <div></div>
         </div>`,
   footer: `<div style="background-color: blue; color: white; text-align: center;"><textarea>Footer</textarea></div>`
 });
 
-const resizeArgs = makeArgs(`18rem`);
+const resizeArgs = makeArgs(`10rem`);
 const plainArgs = makeArgs(`initial`);
 
 GridResize.args = resizeArgs; 
