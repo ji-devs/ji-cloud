@@ -3,7 +3,7 @@ import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 import minifyHTML from 'rollup-plugin-minify-html-literals';
 import alias from '@rollup/plugin-alias';
-
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
 const path = require('path');
 
 const filesizeConfig = {
@@ -42,6 +42,11 @@ export function createConfig(target) {
         //external: ['lit-html', 'lit-element'],
 
         plugins: [
+
+            injectProcessEnv({ 
+                NODE_ENV: target === "local" ? 'development' : 'production',
+                DEPLOY_TARGET: target,
+            }),
             alias({
                 entries: {
                     "@utils": path.resolve(projectRootDir, "./.ts-output/frontend/ts-utils"),
