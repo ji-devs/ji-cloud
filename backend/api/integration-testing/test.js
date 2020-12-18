@@ -497,10 +497,8 @@ async function createImageError(t, args) {
 
     t.deepEqual(error.response.statusCode, 422);
 
-    const { NonExistantMetadata } = error.response.body;
-
-    t.deepEqual(NonExistantMetadata.id, args.id);
-    t.deepEqual(NonExistantMetadata.kind, args.kindName);
+    t.deepEqual(error.response.body.id, args.id);
+    t.deepEqual(error.response.body.kind, args.kindName);
 }
 
 createImageError.title = (providedTitle = 'create image error', args) => `${providedTitle} (${args.kindName})`;

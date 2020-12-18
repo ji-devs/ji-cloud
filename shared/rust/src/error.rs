@@ -1,33 +1,10 @@
 //! Home of the error types.
 
-/// Generates a [`From`](std::from::From) impl to convert from [`Into<anyhow::Error>`] to an enum
-/// with a `InternalServerError(anyhow::Error)` variant.
-macro_rules! from_anyhow {
-    ( $( $t:ty ),+ $(,)? ) => {
-        $(
-            impl<T: Into<anyhow::Error>> From<T> for $t {
-                fn from(e: T) -> Self {
-                    Self::InternalServerError(e.into())
-                }
-            }
-        )+
-    };
-}
-
 pub mod auth;
 
 use serde::{Deserialize, Serialize};
 
 use crate::domain::meta::MetaKind;
-
-/// Converts from an [`anyhow::Error`] to a http `InternalServerError`.
-#[cfg(feature = "backend")]
-fn anyhow_to_ise(e: anyhow::Error) -> actix_web::Error {
-    let mut resp = actix_web::HttpResponse::InternalServerError();
-    // put the contents of the error into an extension to avoid the client seeing what the error is, and so that the log picks it up.
-    resp.extensions_mut().insert(e);
-    resp.into()
-}
 
 /// Represents an error returned by the api.
 #[derive(Serialize, Deserialize, Debug)]
@@ -37,6 +14,8 @@ pub struct ApiError<T> {
     pub code: http::StatusCode,
 
     /// A message describing the error.
+    ///
+    /// Note: This message is for human readability and is explicitly *not* stable, do not use this message to figure out what error was returned.
     pub message: String,
 
     /// Any optional additional information.
