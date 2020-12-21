@@ -56,12 +56,15 @@ jobs:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
           
-      - name: build and deploy
+      - name: build
         run: cargo make sandbox "dev/showcase/001"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
         
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -r frontend/apps/dist/dev/showcase/001/js gs://ji-cloud-sandbox-frontend-origin-eu-001/dev/showcase/001/js
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:

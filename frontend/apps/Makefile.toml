@@ -50,15 +50,13 @@ script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
 cm_run_task build-sandbox
-cm_run_task deploy-sandbox
 '''
 
 [tasks.release]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-release
-cm_run_task deploy-release
+cm_run_task build-releasee
 '''
 
 [tasks.local-main]
@@ -228,23 +226,3 @@ cwd = "../../config/typescript"
 script_runner = "@shell"
 script = ["npm run build"]
 cwd = "../../config/typescript"
-
-############
-## DEPLOY ## 
-############
-
-[tasks.deploy-sandbox]
-script_runner = "@duckscript"
-script = '''
-app_name = get_env APP_NAME
-gsutil -m rsync -d -r frontend/apps/dist/${app_name}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${app_name}/js
-'''
-cwd = "../.."
-
-[tasks.deploy-release]
-script_runner = "@duckscript"
-script = '''
-app_name = get_env APP_NAME
-gsutil -m rsync -d -r frontend/apps/dist/${app_name}/js gs://ji-cloud-frontend-origin-eu-001/${app_name}/js
-'''
-cwd = "../.."
