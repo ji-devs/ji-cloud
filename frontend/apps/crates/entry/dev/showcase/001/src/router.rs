@@ -19,7 +19,7 @@ pub struct Router {
 }
 
 enum PageKind {
-    Grid(module_grid::dom::Page) // dev/showcase/001/grid
+    Grid(module_grid::dom::Page) //visit dev/showcase/001/grid
 }
 
 impl Router {
