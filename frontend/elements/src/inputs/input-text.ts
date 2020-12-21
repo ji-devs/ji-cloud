@@ -63,6 +63,9 @@ export class _ extends LitElement {
   label: string = "";
 
   @property()
+  errormessage: string = "";
+
+  @property()
   instruction: boolean = false;
 
   @property()
@@ -73,11 +76,14 @@ export class _ extends LitElement {
 
   render() {
 
-    const {label, helpertext, error, instruction} = this;
+    const {label, helpertext, error, instruction, errormessage} = this;
 
-    const classes = classMap({ 
-      instruction,
+    const errorClasses = classMap({ 
       error,
+    });
+
+    const instructionClasses = classMap({ 
+      instruction,
     });
 
 
@@ -87,8 +93,8 @@ export class _ extends LitElement {
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
     </div>
-    <p class="">${helpertext}</p>
-    <p class="">${error}</p>
+    <p class="${instructionClasses}">${helpertext}</p>
+    <p class="${errorClasses}">${errormessage}</p>
      
   `;
   }
