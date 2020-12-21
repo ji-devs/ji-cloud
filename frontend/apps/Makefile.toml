@@ -237,12 +237,14 @@ cwd = "../../config/typescript"
 script_runner = "@duckscript"
 script = '''
 app_name = get_env APP_NAME
-gsutil -m rsync -d -r dist/${app_name}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${app_name}/js
+gsutil -m rsync -d -r frontend/apps/dist/${app_name}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${app_name}/js
 '''
+cwd = "../.."
 
 [tasks.deploy-release]
 script_runner = "@duckscript"
 script = '''
 app_name = get_env APP_NAME
-gsutil -m rsync -d -r dist/${app_name}/js gs://ji-cloud-frontend-origin-eu-001/${app_name}/js
+gsutil -m rsync -d -r frontend/apps/dist/${app_name}/js gs://ji-cloud-frontend-origin-eu-001/${app_name}/js
 '''
+cwd = "../.."
