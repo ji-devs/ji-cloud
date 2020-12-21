@@ -44,11 +44,13 @@ set_env APP_PORT 4105
 ## ENTRY                ##
 ##########################
 
+
 [tasks.sandbox]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
 cm_run_task build-sandbox
+cm_run_task deploy-sandbox
 '''
 
 [tasks.release]
@@ -56,6 +58,7 @@ script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
 cm_run_task build-release
+cm_run_task deploy-release
 '''
 
 [tasks.local-main]
@@ -91,6 +94,7 @@ cm_run_task build-local-iframe-nomedia
 #######################
 [tasks.build-sandbox]
 run_task = {name = [
+    "ci-deps",
     "sandbox-build-elements",
     "sandbox-build-app",
 ]}
@@ -109,6 +113,7 @@ script = ["npm run build:sandbox"]
 #######################
 [tasks.build-release]
 run_task = {name = [
+    "ci-deps",
     "release-build-elements",
     "release-build-app",
 ]}
@@ -187,3 +192,57 @@ cwd = "../elements"
 [tasks.local-watch-app]
 script_runner = "@shell"
 script = ["npm run build:watch"]
+
+########################
+## BUILD - CI DEPS    ##
+########################
+[tasks.ci-deps]
+run_task = {name = [
+    "npm-install-app",
+    "npm-install-build-utils",
+    "npm-install-elements",
+    "npm-install-config",
+    "ts-config-build"
+]}
+
+[tasks.npm-install-app]
+script_runner = "@shell"
+script = ["npm install"]
+
+[tasks.npm-install-build-utils]
+script_runner = "@shell"
+script = ["npm install"]
+cwd = "../build-utils"
+
+[tasks.npm-install-elements]
+script_runner = "@shell"
+script = ["npm install"]
+cwd = "../elements"
+
+[tasks.npm-install-config]
+script_runner = "@shell"
+script = ["npm install"]
+cwd = "../../config/typescript"
+
+[tasks.ts-config-build]
+script_runner = "@shell"
+script = ["npm run build"]
+cwd = "../../config/typescript"
+
+############
+## DEPLOY ## 
+############
+
+[tasks.deploy-sandbox]
+script_runner = "@duckscript"
+script = '''
+app_name = get_env APP_NAME
+gsutil -m rsync -d -r dist/${app_name}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/${app_name}/js
+'''
+
+[tasks.deploy-release]
+script_runner = "@duckscript"
+script = '''
+app_name = get_env APP_NAME
+gsutil -m rsync -d -r dist/${app_name}/js gs://ji-cloud-frontend-origin-eu-001/${app_name}/js
+'''
