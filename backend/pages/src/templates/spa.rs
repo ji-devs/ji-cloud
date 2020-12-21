@@ -30,6 +30,7 @@ pub enum SpaPage {
     Admin,
     Jig(ModuleJigPageKind),
     Module(String, ModuleJigPageKind),
+    Dev(String),
 }
 
 impl SpaPage {
@@ -41,6 +42,7 @@ impl SpaPage {
             Self::Module(kind, page_kind) => {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
             }
+            Self::Dev(path) => Cow::Owned(format!("dev/{}", path)),
         }
     }
 }
@@ -109,4 +111,11 @@ pub async fn module_template(
     )>,
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Module(module_kind, page_kind))
+}
+
+pub async fn dev_template(
+    settings: Data<RuntimeSettings>,
+    Path(path): Path<String>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Dev(path))
 }
