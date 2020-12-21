@@ -259,22 +259,22 @@ where
                         })
                         .children_signal_vec(
                             Renderer::children_signal(state.clone(), page_kind)
-                            .map(|module_dom| {
-                                match module_dom {
-                                    ModuleDom::Sidebar(factory) => factory(|dom| {
-                                        dom.attribute("slot", "sidebar")
-                                    }),
-                                    ModuleDom::Header(factory) => factory(|dom| {
-                                        dom.attribute("slot", "header")
-                                    }),
-                                    ModuleDom::Main(factory) => factory(|dom| {
-                                        dom.attribute("slot", "main")
-                                    }),
-                                    ModuleDom::Footer(factory) => factory(|dom| {
-                                        dom.attribute("slot", "footer")
-                                    }),
-                                }
-                            })
+                                .map(|module_dom| {
+                                    match module_dom {
+                                        ModuleDom::Sidebar(factory) => factory(|dom| {
+                                            dom.attribute("slot", "sidebar")
+                                        }),
+                                        ModuleDom::Header(factory) => factory(|dom| {
+                                            dom.attribute("slot", "header")
+                                        }),
+                                        ModuleDom::Main(factory) => factory(|dom| {
+                                            dom.attribute("slot", "main")
+                                        }),
+                                        ModuleDom::Footer(factory) => factory(|dom| {
+                                            dom.attribute("slot", "footer")
+                                        }),
+                                    }
+                                })
                         )
                     });
 
