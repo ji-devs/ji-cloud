@@ -1,4 +1,3 @@
-use actix_web::HttpResponse;
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
@@ -11,39 +10,14 @@ use shared::{
         jig::{JigCreateRequest, JigId, JigResponse},
         CreateResponse,
     },
-    error::{
-        jig::{CreateError, CreateErrorExt, UpdateError, UpdateErrorExt},
-        GetError,
-    },
 };
 use sqlx::PgPool;
 
 use crate::{
-    db::{self, meta::MetaWrapperError},
+    db,
+    error::{CreateWithMetadataError, DeleteError, NotFoundError, UpdateWithMetadataError},
     extractor::{AuthUserWithScope, ScopeManageJig, WrapAuthClaimsNoDb},
 };
-
-impl From<MetaWrapperError> for CreateError {
-    fn from(e: MetaWrapperError) -> Self {
-        match e {
-            MetaWrapperError::Sqlx(e) => CreateError::InternalServerError(e.into()),
-            MetaWrapperError::MissingMetadata { id, kind } => {
-                CreateError::Extra(CreateErrorExt::NonExistantMetadata { id, kind })
-            }
-        }
-    }
-}
-
-impl From<MetaWrapperError> for UpdateError {
-    fn from(e: MetaWrapperError) -> Self {
-        match e {
-            MetaWrapperError::Sqlx(e) => UpdateError::InternalServerError(e.into()),
-            MetaWrapperError::MissingMetadata { id, kind } => {
-                UpdateError::Extra(UpdateErrorExt::NonExistantMetadata { id, kind })
-            }
-        }
-    }
-}
 
 /// Create a jig.
 #[api_v2_operation]
@@ -51,7 +25,7 @@ async fn create(
     db: Data<PgPool>,
     auth: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, <jig::Create as ApiEndpoint>::Err> {
+) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, CreateWithMetadataError> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.id;
 
@@ -77,10 +51,10 @@ async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
     path: web::Path<JigId>,
-) -> Result<HttpResponse, <jig::Delete as ApiEndpoint>::Err> {
+) -> Result<NoContent, DeleteError> {
     db::jig::delete(&*db, path.into_inner()).await?;
 
-    Ok(HttpResponse::NoContent().into())
+    Ok(NoContent)
 }
 
 /// Update a jig.
@@ -90,7 +64,7 @@ async fn update(
     _claims: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, <jig::Update as ApiEndpoint>::Err> {
+) -> Result<NoContent, UpdateWithMetadataError> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::jig::update(
         &*db,
@@ -107,7 +81,7 @@ async fn update(
     .map_err(db::meta::handle_metadata_err)?;
 
     if !exists {
-        return Err(UpdateError::NotFound);
+        return Err(UpdateWithMetadataError::ResourceNotFound);
     }
 
     Ok(NoContent)
@@ -119,10 +93,10 @@ async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     path: web::Path<JigId>,
-) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, <jig::Get as ApiEndpoint>::Err> {
+) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, NotFoundError> {
     let jig = db::jig::get(&db, path.into_inner())
         .await?
-        .ok_or(GetError::NotFound)?;
+        .ok_or(NotFoundError::ResourceNotFound)?;
 
     Ok(Json(JigResponse { jig }))
 }
