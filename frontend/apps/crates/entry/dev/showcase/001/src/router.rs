@@ -8,15 +8,20 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html, clone};
-use crate::pages::dom;
+use crate::pages::module_grid;
 use discard::DiscardOnDrop;
 use components::module::page::*;
 use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
 
 pub struct Router {
     loader: AsyncLoader,
-    page: RefCell<Option<dom::Page>>
+    page: RefCell<Option<PageKind>>
 }
+
+enum PageKind {
+    Grid(module_grid::dom::Page) // dev/showcase/001/grid
+}
+
 impl Router {
     pub fn render() {
 
@@ -29,12 +34,27 @@ impl Router {
             dominator::routing::url()
                 .signal_ref(|url| Route::from_url(&url))
                 .for_each(clone!(_self => move |route| {
-                    *_self.page.borrow_mut() = Some(dom::render());
+                    *_self.page.borrow_mut() =
+                        page_str(route)
+                            .and_then(|page| match page.as_ref() {
+                                "grid" => Some(PageKind::Grid(module_grid::dom::render())),
+                                _ => None
+                            });
+
                     async {}
                 }))
         );
+    }
+}
 
-        //No need to leak because _self is held in the router signal
-                
+fn page_str(route:Route) -> Option<String> {
+    match route {
+        Route::Dev(route) => match route {
+            DevRoute::Showcase(_, page) => {
+                Some(page)
+            },
+            _ => None
+        },
+        _ => None
     }
 }

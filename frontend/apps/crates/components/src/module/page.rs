@@ -98,7 +98,7 @@ impl ModulePageKind {
 pub trait ModuleRenderer <RawData, State> {
     type PageKindSignal: Signal<Item = ModulePageKind>;
     type FutureState: Future<Output = Option<State>>;
-    type ChildrenSignal: SignalVec<Item = Dom>;
+    type ChildrenSignal: SignalVec<Item = ModuleDom>;
     
     fn load_state() -> Self::FutureState;
 
@@ -106,8 +106,18 @@ pub trait ModuleRenderer <RawData, State> {
 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal;
 
-    // The children should set the slot attribute as needed
     fn children_signal(state: Rc<State>, kind: ModulePageKind) -> Self::ChildrenSignal;
+}
+
+pub type DomFactory = Box<dyn FnOnce(HtmlMixinPtr) -> Dom>;
+
+pub type HtmlMixinPtr = fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>;
+
+pub enum ModuleDom {
+    Sidebar(DomFactory),
+    Header(DomFactory),
+    Main(DomFactory),
+    Footer(DomFactory),
 }
 
 /*
@@ -125,13 +135,13 @@ pub trait StaticModuleRenderer <RawData, State> {
     fn page_kind(state: Rc<State>) -> ModulePageKind;
 
     // The children should set the slot attribute as needed
-    fn children(state: Rc<State>, kind: ModulePageKind) -> Vec<Dom>;
+    fn children(state: Rc<State>, kind: ModulePageKind) -> Vec<ModuleDom>;
 }
 
 impl <RawData, State, T: StaticModuleRenderer<RawData, State>> ModuleRenderer<RawData, State> for T {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
     type FutureState = impl Future<Output = Option<State>>;
-    type ChildrenSignal = impl SignalVec<Item = Dom>;
+    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
 
     fn load_state() -> Self::FutureState { 
         T::load_state()
@@ -247,7 +257,25 @@ where
                             //in utils / global static
                             set_resize_info(event.data());
                         })
-                        .children_signal_vec(Renderer::children_signal(state.clone(), page_kind))
+                        .children_signal_vec(
+                            Renderer::children_signal(state.clone(), page_kind)
+                            .map(|module_dom| {
+                                match module_dom {
+                                    ModuleDom::Sidebar(factory) => factory(|dom| {
+                                        dom.attribute("slot", "sidebar")
+                                    }),
+                                    ModuleDom::Header(factory) => factory(|dom| {
+                                        dom.attribute("slot", "header")
+                                    }),
+                                    ModuleDom::Main(factory) => factory(|dom| {
+                                        dom.attribute("slot", "main")
+                                    }),
+                                    ModuleDom::Footer(factory) => factory(|dom| {
+                                        dom.attribute("slot", "footer")
+                                    }),
+                                }
+                            })
+                        )
                     });
 
                     Self::switch_body(dom); 

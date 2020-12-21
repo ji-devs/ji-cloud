@@ -12,7 +12,7 @@ thread_local! {
 
 macro_rules! template_path {
     ($e:tt) => { 
-        concat!("../../html/", $e)
+        concat!("../../../html/module-grid/", $e)
     } 
 }
 

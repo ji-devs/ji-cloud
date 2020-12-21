@@ -1,2 +1,1 @@
-pub mod dom;
-pub(super) mod templates;
+pub mod module_grid;
