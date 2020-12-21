@@ -57,7 +57,11 @@ jobs:
       - name: install npm deps (build-utils)
         run: npm ci 
         working-directory: "./frontend/build-utils"
-
+        
+      - name: install element deps
+        run: npm install
+        working-directory: "./frontend/elements"
+        
       - name: build 
         run: cargo make sandbox "dev/showcase/001"
         working-directory: "./frontend/apps"
