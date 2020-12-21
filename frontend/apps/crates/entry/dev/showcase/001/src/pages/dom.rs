@@ -20,6 +20,7 @@ use std::pin::Pin;
 use std::future::Future;
 
 const INITIAL_MODE:ModulePageKind = ModulePageKind::GridResize;
+
 pub type Page = Rc<ModulePage<PageRenderer, RawData, State>>;
 
 pub fn render() -> Page {
@@ -44,11 +45,8 @@ pub struct PageRenderer {
 
 impl ModuleRenderer<RawData, State> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type SidebarSignal = impl Signal<Item = Option<Dom>>;
-    type HeaderSignal = impl Signal<Item = Option<Dom>>;
-    type MainSignal = impl Signal<Item = Option<Dom>>;
-    type FooterSignal = impl Signal<Item = Option<Dom>>;
     type FutureState = impl Future<Output = Option<State>>;
+    type ChildrenSignal = impl SignalVec<Item = Dom>;
 
     fn load_state() -> Self::FutureState{ 
         async {
@@ -63,69 +61,89 @@ impl ModuleRenderer<RawData, State> for PageRenderer {
         state.kind.signal()
     }
 
-    fn sidebar_signal(state: Rc<State>, kind:ModulePageKind) -> Self::SidebarSignal {
-        state.kind.signal().map(move |kind| {
+    fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
+        state.kind
+            .signal()
+            .map(clone!(state => move |kind| {
+                vec![
+                    Self::sidebar(state.clone(), kind),
+                    Self::header(state.clone(), kind),
+                    Self::main(state.clone(), kind),
+                    Self::footer(state.clone(), kind),
+                ]
+                .into_iter()
+                .filter(|x| x.is_some())
+                .map(|x| x.unwrap_throw())
+                .collect()
+            }))
+            .to_signal_vec()
+    }
+}
 
-            templates::sidebar(kind).map(|el| {
-                elem!(el, {
-                    .child(html!("div", {
-                        .style("display", "flex")
-                        .children(vec![
-                            html!("button", {
-                                .text("empty")
-                                .event(clone!(state => move |evt:events::Click| {
-                                    state.kind.set(ModulePageKind::Empty);
-                                }))
-                            }),
-                            html!("button", {
-                                .text("edit-plain")
-                                .event(clone!(state => move |evt:events::Click| {
-                                    state.kind.set(ModulePageKind::GridPlain);
-                                }))
-                            }),
-                            html!("button", {
-                                .text("edit-resize")
-                                .event(clone!(state => move |evt:events::Click| {
-                                    state.kind.set(ModulePageKind::GridResize);
-                                }))
-                            }),
-                            html!("button", {
-                                .text("edit-resize-scrollable")
-                                .event(clone!(state => move |evt:events::Click| {
-                                    state.kind.set(ModulePageKind::GridResizeScrollable);
-                                }))
-                            }),
-                            html!("button", {
-                                .text("iframe")
-                                .event(clone!(state => move |evt:events::Click| {
-                                    state.kind.set(ModulePageKind::Iframe);
-                                }))
-                            }),
-                        ])
-                    }))
-                })
-            })
-        })
-    }
-    fn header_signal(state: Rc<State>, kind: ModulePageKind) -> Self::HeaderSignal { 
-        state.kind.signal().map(|kind| {
-            templates::header(kind).map(|el| {
-                elem!(el, {})
+impl PageRenderer {
+    fn sidebar(state: Rc<State>, kind:ModulePageKind) -> Option<Dom> {
+        templates::sidebar(kind).map(|el| {
+            elem!(el, {
+                .attribute("slot", "sidebar")
+                .child(html!("div", {
+                    .style("display", "flex")
+                    .children(vec![
+                        html!("button", {
+                            .text("empty")
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.kind.set(ModulePageKind::Empty);
+                            }))
+                        }),
+                        html!("button", {
+                            .text("edit-plain")
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.kind.set(ModulePageKind::GridPlain);
+                            }))
+                        }),
+                        html!("button", {
+                            .text("edit-resize")
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.kind.set(ModulePageKind::GridResize);
+                            }))
+                        }),
+                        html!("button", {
+                            .text("edit-resize-scrollable")
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.kind.set(ModulePageKind::GridResizeScrollable);
+                            }))
+                        }),
+                        html!("button", {
+                            .text("iframe")
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.kind.set(ModulePageKind::Iframe);
+                            }))
+                        }),
+                    ])
+                }))
             })
         })
     }
 
-    fn main_signal(state: Rc<State>, kind: ModulePageKind) -> Self::MainSignal { 
-        state.kind.signal().map(|kind| {
-            templates::main(kind).map(|el| {
-                elem!(el, {})
+    fn header(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
+        templates::header(kind).map(|el| {
+            elem!(el, {
+                .attribute("slot", "header")
             })
         })
     }
-    fn footer_signal(state: Rc<State>, kind: ModulePageKind) -> Self::FooterSignal { 
-        state.kind.signal().map(|kind| {
-            templates::footer(kind).map(|el| {
-                elem!(el, {})
+
+    fn main(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
+        templates::main(kind).map(|el| {
+            elem!(el, {
+                .attribute("slot", "main")
+            })
+        })
+    }
+
+    fn footer(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
+        templates::footer(kind).map(|el| {
+            elem!(el, {
+                .attribute("slot", "footer")
             })
         })
     }
