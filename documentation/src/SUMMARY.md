@@ -7,6 +7,8 @@
   - [Elements and Components](./frontend/elements-and-components.md)
     - [Overview](./frontend/elements-and-components/overview.md)
     - [Implementation](./frontend/elements-and-components/implementation.md)
+    - [Guideline - Elements](./frontend/elements-and-components/guideline-elements.md)
+    - [Guideline - Components](./frontend/elements-and-components/guideline-components.md)
 
 # Infrastructure
   - [Project Management](./infrastructure/project-management/project-management.md)
