@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo TODO: add tests",
     "start": "npm-run-all -p _media-server start:nomedia",
-    "start:nomedia": "start-storybook -p 6006 -s ./dist",
-    "storybook:build": "npm run clean && build-storybook -o ./dist/storybook-build",
+    "start:nomedia": "cross-env STORYBOOK_DEPLOY_TARGET=local start-storybook -p 6006 -s ./dist",
+    "storybook:build:sandbox": "cross-env STORYBOOK_DEPLOY_TARGET=sandbox build-storybook -o ./dist/storybook-build",
+    "storybook:build:release": "cross-env STORYBOOK_DEPLOY_TARGET=release build-storybook -o ./dist/storybook-build",
     "clean": "rimraf ./dist && mkdirp ./dist",
     "_media-server": "cd ../build-utils && npm run local-media-server"
   },
@@ -22,6 +23,7 @@
     "@storybook/html": "^6.1.11",
     "babel-loader": "^8.2.2",
     "babel-plugin-root-import": "^6.6.0",
+    "cross-env": "^7.0.3",
     "mkdirp": "^1.0.4",
     "npm-run-all": "^4.1.5",
     "react-is": "^17.0.1",

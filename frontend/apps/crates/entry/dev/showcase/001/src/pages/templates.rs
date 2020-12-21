@@ -16,20 +16,20 @@ macro_rules! template_path {
     } 
 }
 
-const EDIT_PLAIN_HEADER:&'static str = "edit-plain-header";
-const EDIT_RESIZE_HEADER:&'static str = "edit-resize-header";
-const EDIT_PLAIN_FOOTER:&'static str = "edit-plain-footer";
-const EDIT_RESIZE_FOOTER:&'static str = "edit-resize-footer";
-const EDIT_PLAIN_SIDEBAR:&'static str = "edit-plain-sidebar";
-const EDIT_RESIZE_SIDEBAR:&'static str = "edit-resize-sidebar";
-const EDIT_PLAIN_MAIN:&'static str = "edit-plain-main";
-const EDIT_RESIZE_MAIN:&'static str = "edit-resize-main";
+const GRID_PLAIN_HEADER:&'static str = "grid-plain-header";
+const GRID_RESIZE_HEADER:&'static str = "grid-resize-header";
+const GRID_PLAIN_FOOTER:&'static str = "grid-plain-footer";
+const GRID_RESIZE_FOOTER:&'static str = "grid-resize-footer";
+const GRID_PLAIN_SIDEBAR:&'static str = "grid-plain-sidebar";
+const GRID_RESIZE_SIDEBAR:&'static str = "grid-resize-sidebar";
+const GRID_PLAIN_MAIN:&'static str = "grid-plain-main";
+const GRID_RESIZE_MAIN:&'static str = "grid-resize-main";
 const IFRAME_MAIN:&'static str = "iframe-main";
 
 pub fn header(kind:ModulePageKind) -> Option<HtmlElement> {
     let id = match kind {
-        ModulePageKind::EditPlain => Some(EDIT_PLAIN_HEADER),
-        ModulePageKind::EditResize => Some(EDIT_RESIZE_HEADER),
+        ModulePageKind::GridPlain | ModulePageKind::Empty => Some(GRID_PLAIN_HEADER),
+        ModulePageKind::GridResize | ModulePageKind::GridResizeScrollable => Some(GRID_RESIZE_HEADER),
         _ => None 
     };
 
@@ -39,8 +39,8 @@ pub fn header(kind:ModulePageKind) -> Option<HtmlElement> {
 }
 pub fn footer(kind:ModulePageKind) -> Option<HtmlElement> {
     let id = match kind {
-        ModulePageKind::EditPlain => Some(EDIT_PLAIN_FOOTER),
-        ModulePageKind::EditResize => Some(EDIT_RESIZE_FOOTER),
+        ModulePageKind::GridPlain  | ModulePageKind::Empty => Some(GRID_PLAIN_FOOTER),
+        ModulePageKind::GridResize | ModulePageKind::GridResizeScrollable => Some(GRID_RESIZE_FOOTER),
         _ => None 
     };
 
@@ -50,8 +50,8 @@ pub fn footer(kind:ModulePageKind) -> Option<HtmlElement> {
 }
 pub fn sidebar(kind:ModulePageKind) -> Option<HtmlElement> {
     let id = match kind {
-        ModulePageKind::EditPlain => Some(EDIT_PLAIN_SIDEBAR),
-        ModulePageKind::EditResize => Some(EDIT_RESIZE_SIDEBAR),
+        ModulePageKind::GridPlain  | ModulePageKind::Empty => Some(GRID_PLAIN_SIDEBAR),
+        ModulePageKind::GridResize | ModulePageKind::GridResizeScrollable => Some(GRID_RESIZE_SIDEBAR),
         _ => None 
     };
 
@@ -62,10 +62,9 @@ pub fn sidebar(kind:ModulePageKind) -> Option<HtmlElement> {
 
 pub fn main(kind:ModulePageKind) -> Option<HtmlElement> {
     let id = match kind {
-        ModulePageKind::EditPlain => Some(EDIT_PLAIN_MAIN),
-        ModulePageKind::EditResize => Some(EDIT_RESIZE_MAIN),
-        ModulePageKind::PlayIframe => Some(IFRAME_MAIN),
-        ModulePageKind::PlayIframePreview => Some(IFRAME_MAIN),
+        ModulePageKind::GridPlain  | ModulePageKind::Empty => Some(GRID_PLAIN_MAIN),
+        ModulePageKind::GridResize | ModulePageKind::GridResizeScrollable => Some(GRID_RESIZE_MAIN),
+        ModulePageKind::Iframe => Some(IFRAME_MAIN),
         _ => None 
     };
 
@@ -89,14 +88,14 @@ impl fmt::Debug for Templates {
 impl Templates {
     pub fn new() -> Self {
         let cache = TemplateCache::new(&vec![
-            (EDIT_PLAIN_HEADER, include_str!(template_path!("edit-plain/header.html"))),
-            (EDIT_RESIZE_HEADER, include_str!(template_path!("edit-resize/header.html"))),
-            (EDIT_PLAIN_FOOTER, include_str!(template_path!("edit-plain/footer.html"))),
-            (EDIT_RESIZE_FOOTER, include_str!(template_path!("edit-resize/footer.html"))),
-            (EDIT_PLAIN_SIDEBAR, include_str!(template_path!("edit-plain/sidebar.html"))),
-            (EDIT_RESIZE_SIDEBAR, include_str!(template_path!("edit-resize/sidebar.html"))),
-            (EDIT_PLAIN_MAIN, include_str!(template_path!("edit-plain/main.html"))),
-            (EDIT_RESIZE_MAIN, include_str!(template_path!("edit-resize/main.html"))),
+            (GRID_PLAIN_HEADER, include_str!(template_path!("grid-plain/header.html"))),
+            (GRID_RESIZE_HEADER, include_str!(template_path!("grid-resize/header.html"))),
+            (GRID_PLAIN_FOOTER, include_str!(template_path!("grid-plain/footer.html"))),
+            (GRID_RESIZE_FOOTER, include_str!(template_path!("grid-resize/footer.html"))),
+            (GRID_PLAIN_SIDEBAR, include_str!(template_path!("grid-plain/sidebar.html"))),
+            (GRID_RESIZE_SIDEBAR, include_str!(template_path!("grid-resize/sidebar.html"))),
+            (GRID_PLAIN_MAIN, include_str!(template_path!("grid-plain/main.html"))),
+            (GRID_RESIZE_MAIN, include_str!(template_path!("grid-resize/main.html"))),
             (IFRAME_MAIN, include_str!(template_path!("iframe/main.html"))),
         ]);
 

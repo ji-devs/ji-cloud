@@ -21,12 +21,25 @@ export const URL_STORYBOOK_SANDBOX = "https://storybook.sandbox.jicloud.org";
 export const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
 export const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
-const getMediaUrl = (isDev:boolean):string => 
-	isDev
-        ? `http://localhost:4102`
-        : URL_MEDIA;
 
 
-export const getMediaUrl_UI = (isDev:boolean):string =>
-	`${getMediaUrl(isDev)}/ui`;
+export const getMediaUrl_UI = (isDev:boolean):string => {
+
+        const getMediaUrl = (isDev:boolean):string => 
+                isDev
+                ? `http://localhost:4102`
+                : URL_MEDIA;
+
+        return `${getMediaUrl(isDev)}/ui`;
+}
+
+
+export const getMediaUrl_UPLOADS = (deployTarget: string | undefined):string => {
+        switch(deployTarget) {
+                case "local": return "http://localhost:9000/test-bucket";
+                case "sandbox": return URL_UPLOADS_SANDBOX;
+                case "release": return URL_UPLOADS_RELEASE;
+                default: return "";
+        }
+}
 

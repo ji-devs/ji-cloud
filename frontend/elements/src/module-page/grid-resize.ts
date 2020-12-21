@@ -1,18 +1,20 @@
-import { LitElement, html, css, customElement, property} from 'lit-element';
-import {nothing} from "lit-html";
-import {BgBlue} from "@elements/_styles/bg";
-import {startResizer, setResizeOnStyle, setResizeOnDocumentRoot} from "@utils/resize";
+import { LitElement, html, css, customElement, property } from 'lit-element';
+import { nothing } from "lit-html";
+import { BgBlue } from "@elements/_styles/bg";
+import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
 
 @customElement('module-page-grid-resize')
 export class _ extends BgBlue {
-  private cancelResize:(() => any) | null = null;
+    private cancelResize: (() => any) | null = null;
 
-  static get styles() {
-    return [...super.styles, css`
+    static get styles() {
+        return [...super.styles, css`
         :host {
             width: 100vw;
             height: 100vh;
             display: block;
+            padding: 0;
+            margin: 0;
         }
 
         #outer {
@@ -82,60 +84,67 @@ export class _ extends BgBlue {
             z-index: 1;
         }
     `];
-  }
+    }
 
-  @property({type: Boolean})
-  scrollable:boolean = false;
+    @property({ type: Boolean })
+    scrollable: boolean = false;
 
-  firstUpdated() {
-      const shadowRoot = this.shadowRoot as ShadowRoot;
+    firstUpdated() {
+        const shadowRoot = this.shadowRoot as ShadowRoot;
 
-      const sidebar = shadowRoot.querySelector("aside") as HTMLElement;
-      const header = shadowRoot.querySelector("header") as HTMLElement;
-      const footer = shadowRoot.querySelector("footer") as HTMLElement;
+        const sidebar = shadowRoot.querySelector("aside") as HTMLElement;
+        const header = shadowRoot.querySelector("header") as HTMLElement;
+        const footer = shadowRoot.querySelector("footer") as HTMLElement;
 
-      const [_, cancelResize] = startResizer({
-          observeTargets: [sidebar, header, footer],
-          adjustBounds: (bounds:DOMRect) => {
-              const sidebarBounds = sidebar.getBoundingClientRect();
-              const headerBounds = header.getBoundingClientRect();
-              const footerBounds = footer.getBoundingClientRect();
-              return new DOMRect(
-                sidebarBounds.width,
-                headerBounds.height,
-                bounds.width - sidebarBounds.width,
-                bounds.height - (headerBounds.height + footerBounds.height)
-              );
-          }
-      }, (info) => {
-          setResizeOnDocumentRoot(info);
-      });
+        const [_, cancelResize] = startResizer({
+            observeTargets: [sidebar, header, footer],
+            adjustBounds: (bounds: DOMRect) => {
+                const sidebarBounds = sidebar.getBoundingClientRect();
+                const headerBounds = header.getBoundingClientRect();
+                const footerBounds = footer.getBoundingClientRect();
+                return new DOMRect(
+                    sidebarBounds.width,
+                    headerBounds.height,
+                    bounds.width - sidebarBounds.width,
+                    bounds.height - (headerBounds.height + footerBounds.height)
+                );
+            }
+        }, (info) => {
+            setResizeOnDocumentRoot(info);
+            this.dispatchEvent(new CustomEvent('module-resize', {
+                detail: info
+            }));
+        });
 
-      this.cancelResize = cancelResize;
-  }
+        this.cancelResize = cancelResize;
+    }
 
-  disconnectedCallback() {
-      if(this.cancelResize) {
-          this.cancelResize();
-      }
+    disconnectedCallback() {
+        if (this.cancelResize) {
+            this.cancelResize();
+        }
 
-      this.cancelResize = null;
-  }
+        this.cancelResize = null;
+    }
 
-  // Define the element's template
-  render() {
-      const {scrollable} = this;
+    // Define the element's template
+    render() {
+        const { scrollable } = this;
 
-      const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
+        const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
 
-    return html`
+        return html`
         <div id="grid">
-
-            <aside><slot name="sidebar"></slot></aside>
-            
-            <header><slot name="header"></slot></header>
-
-            <main> 
+        
+            <aside>
+                <slot name="sidebar"></slot>
+            </aside>
+        
+            <header>
+                <slot name="header"></slot>
+            </header>
+        
+            <main>
                 <div id="outer">
                     <div id="container">
                         <div id="content" class="${scrollStyle}">
@@ -144,9 +153,11 @@ export class _ extends BgBlue {
                     </div>
                 </div>
             </main>
-
-            <footer><slot name="footer"></slot></footer>
+        
+            <footer>
+                <slot name="footer"></slot>
+            </footer>
         </div>
     `;
-  }
+    }
 }

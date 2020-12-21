@@ -18,7 +18,7 @@ use web_sys::{window, Element};
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
-    dominator::append_dom(&dominator::body(), router::render());
+    router::Router::render();
 }
 
 

@@ -2,7 +2,7 @@ use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
     jig::ModuleKind,
-    image::SearchQuery
+    image::ImageSearchQuery
 };
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
@@ -40,9 +40,9 @@ pub enum ProfileSection {
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
     Categories,
-    ImageSearch(Option<SearchQuery>),
+    ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageEdit(Id, Option<SearchQuery>),
+    ImageEdit(Id, Option<ImageSearchQuery>),
 }
 
 
@@ -116,7 +116,7 @@ impl Route {
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
-                    let search:SearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
                     Self::Admin(AdminRoute::ImageSearch(Some(search)))
                 } else {
                     Self::Admin(AdminRoute::ImageSearch(None))
@@ -125,7 +125,7 @@ impl Route {
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-edit", id] => {
                 if let Some(search) = json_query {
-                    let search:SearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
                     Self::Admin(AdminRoute::ImageEdit(id.to_string(), Some(search)))
                 } else {
                     Self::Admin(AdminRoute::ImageEdit(id.to_string(), None))

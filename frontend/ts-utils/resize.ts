@@ -40,6 +40,18 @@ export const setResizeOnStyle = (style: CSSStyleDeclaration, info:ResizeInfo) =>
     style.setProperty('--content-height', `${contentHeight}px`);
 }
 
+const sizeEqual = (s1:ResizeInfo, s2:ResizeInfo):boolean => {
+    return s1.scale === s2.scale
+        && s1.x === s2.x
+        && s1.y === s2.y
+        && s1.width === s2.width
+        && s1.height === s2.height
+        && s1.contentX === s2.contentX
+        && s1.contentY === s2.contentY
+        && s1.contentWidth === s2.contentWidth
+        && s1.contentHeight === s2.contentHeight
+}
+
 type CancelFn = () => any;
 type ResizeObserver = any;
 type ReturnTuple = [ResizeObserver, CancelFn];
@@ -52,6 +64,18 @@ export interface Options {
 }
 
 export function startResizer({container, ignoreWindow, observeTargets, adjustBounds}:Options, onResize: OnResize):ReturnTuple {
+    let lastInfo:ResizeInfo = {
+        scale: 0,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        contentX: 0,
+        contentY: 0,
+        contentWidth: 0,
+        contentHeight: 0,
+    }
+
     const resize = () => {
         const containerBounds = container 
             ? container.getBoundingClientRect() 
@@ -80,7 +104,7 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
         const y = bounds.y + ((bounds.height - height) / 2);
         const scale = width / STAGE_WIDTH;
 
-        onResize({
+        const info = {
             scale,
             x,
             y,
@@ -90,7 +114,12 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             contentY: (STAGE_PADDING_Y_PERC / 2) * height,
             contentWidth: width - (STAGE_PADDING_X_PERC * width),
             contentHeight: height - (STAGE_PADDING_Y_PERC * height)
-        })
+        };
+
+        if(!sizeEqual(info, lastInfo)) {
+            onResize(info);
+            lastInfo = info;
+        }
     }
 
     // @ts-ignore

@@ -1,40 +1,40 @@
 use utils::routes::{Route, DevRoute};
 use std::rc::Rc;
+use std::cell::RefCell;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
 use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use dominator::{Dom, html};
-use crate::pages::resize;
+use dominator::{Dom, html, clone};
+use crate::pages::dom;
+use discard::DiscardOnDrop;
+use components::module::page::*;
+use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
 
-pub fn render() -> Dom {
-    html!("div", {
-        .child_signal(signal_dom())
-    })
+pub struct Router {
+    loader: AsyncLoader,
+    page: RefCell<Option<dom::Page>>
 }
+impl Router {
+    pub fn render() {
 
-fn route_signal() -> impl Signal<Item = Route> {
-    dominator::routing::url()
-        .signal_ref(|url| Route::from_url(&url))
-}
+        let _self = Rc::new(Self {
+            loader: AsyncLoader::new(),
+            page: RefCell::new(None)
+        });
 
-fn signal_dom() -> impl Signal<Item = Option<Dom>> {
-        route_signal()
-            .map(|route| {
-                match route {
-                    Route::Dev(route) => {
-                        match route {
-                            DevRoute::Showcase(id, page)=> {
-                                match page.as_ref() {
-                                    "resize" => Some(resize::render()),
-                                    _ => None
-                                }
-                            }
-                        }
-                    }
-                    _ => None
-                }
-            })
+        _self.clone().loader.load(
+            dominator::routing::url()
+                .signal_ref(|url| Route::from_url(&url))
+                .for_each(clone!(_self => move |route| {
+                    *_self.page.borrow_mut() = Some(dom::render());
+                    async {}
+                }))
+        );
+
+        //No need to leak because _self is held in the router signal
+                
+    }
 }
