@@ -1,7 +1,7 @@
 mod cors;
 mod endpoints;
 
-use crate::{algolia::AlgoliaClient, jwkkeys::JwkVerifier, s3};
+use crate::{algolia::AlgoliaClient, error::BasicError, jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use actix_web::HttpResponse;
@@ -75,8 +75,19 @@ pub async fn run(
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
             .service(get_spec)
+            .app_data(
+                actix_web::web::JsonConfig::default()
+                    .limit(JSON_BODY_LIMIT as usize)
+                    .error_handler(|_, _| bad_request_handler()),
+            )
+            .app_data(
+                actix_web::web::QueryConfig::default().error_handler(|_, _| bad_request_handler()),
+            )
+            .app_data(
+                actix_web::web::PathConfig::default().error_handler(|_, _| bad_request_handler()),
+            )
+            .default_service(actix_web::web::to(default_route))
             .wrap_api()
-            .app_data(actix_web::web::JsonConfig::default().limit(JSON_BODY_LIMIT as usize))
             .configure(endpoints::user::configure)
             .configure(endpoints::category::configure)
             .configure(endpoints::image::configure)
@@ -108,4 +119,15 @@ async fn get_spec() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html")
         .body(include_str!("../static/spec-explorer.html"))
+}
+
+fn default_route() -> HttpResponse {
+    HttpResponse::NotFound().json(BasicError::with_message(
+        http::StatusCode::NOT_FOUND,
+        "Route not found".to_owned(),
+    ))
+}
+
+fn bad_request_handler() -> actix_web::Error {
+    BasicError::new(http::StatusCode::BAD_REQUEST).into()
 }

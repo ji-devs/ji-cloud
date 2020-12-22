@@ -8,13 +8,12 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::admin, ApiEndpoint},
     domain::auth::SigninSuccess,
-    error::CommonError,
 };
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    db,
+    db, error,
     extractor::{reply_signin_auth, AuthUserWithScope, ScopeAdmin},
 };
 
@@ -25,13 +24,13 @@ async fn impersonate(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: Path<Uuid>,
-) -> actix_web::Result<HttpResponse, CommonError> {
+) -> actix_web::Result<HttpResponse, error::UserNotFound> {
     let user_id = user.into_inner();
 
     let exists = db::user::exists(&db, user_id).await?;
 
     if !exists {
-        return Err(CommonError::NotFound);
+        return Err(error::UserNotFound::UserNotFound);
     }
 
     let (csrf, cookie) =

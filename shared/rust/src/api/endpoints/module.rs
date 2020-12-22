@@ -7,7 +7,7 @@ use crate::{
         },
         CreateResponse,
     },
-    error::{CreateError, DeleteError, GetError, UpdateError},
+    error::EmptyError,
 };
 
 use super::ApiEndpoint;
@@ -17,7 +17,7 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = ModuleResponse;
-    type Err = GetError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Get;
 }
@@ -27,7 +27,7 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ModuleCreateRequest;
     type Res = CreateResponse<ModuleId>;
-    type Err = CreateError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/module";
     const METHOD: Method = Method::Post;
 }
@@ -37,17 +37,17 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = ModuleUpdateRequest;
     type Res = ();
-    type Err = UpdateError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Patch;
 }
 
-/// Delete a Moduule.
+/// Delete a Module.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
-    type Err = DeleteError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/module/{id}";
     const METHOD: Method = Method::Delete;
 }

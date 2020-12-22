@@ -1,9 +1,9 @@
-use crate::domain::{build_tree, RawCategory};
-use futures::TryStreamExt;
-use shared::{
-    domain::category::{Category, CategoryId},
-    error::{category::UpdateError, DeleteError},
+use crate::{
+    domain::{build_tree, RawCategory},
+    error::{CategoryUpdateError, DeleteError},
 };
+use futures::TryStreamExt;
+use shared::domain::category::{Category, CategoryId};
 use sqlx::{Done as _, Executor, PgPool};
 use uuid::Uuid;
 
@@ -149,7 +149,7 @@ select c.parent_id from category c inner join cte on cte.parent_id = c.id
 }
 
 enum UpdateLoopError {
-    UpdateError(UpdateError),
+    UpdateError(CategoryUpdateError),
     Sqlx(sqlx::Error),
 }
 
@@ -159,8 +159,8 @@ impl From<sqlx::Error> for UpdateLoopError {
     }
 }
 
-impl From<UpdateError> for UpdateLoopError {
-    fn from(err: UpdateError) -> Self {
+impl From<CategoryUpdateError> for UpdateLoopError {
+    fn from(err: CategoryUpdateError) -> Self {
         UpdateLoopError::UpdateError(err)
     }
 }
@@ -185,7 +185,7 @@ select parent_id, index from category where id = $1
     )
     .fetch_optional(&mut txn)
     .await?
-    .ok_or(UpdateError::CategoryNotFound)?;
+    .ok_or(CategoryUpdateError::CategoryNotFound)?;
 
     if let Some(name) = name {
         sqlx::query!("update category set name = $1 where id = $2", name, id)
@@ -201,7 +201,7 @@ select parent_id, index from category where id = $1
                 let would_cycle = would_cycle(&mut txn, id, new_parent).await?;
 
                 if would_cycle {
-                    return Err(UpdateError::Cycle.into());
+                    return Err(CategoryUpdateError::Cycle.into());
                 }
             }
 
@@ -220,7 +220,7 @@ returning index
             )
             .fetch_optional(&mut txn)
             .await?
-            .ok_or(UpdateError::ParentCategoryNotFound)?;
+            .ok_or(CategoryUpdateError::ParentCategoryNotFound)?;
 
             current_index = res.index;
 
@@ -277,7 +277,7 @@ pub async fn update(
     parent_id: Option<Option<CategoryId>>,
     name: Option<&str>,
     index: Option<i16>,
-) -> Result<(), UpdateError> {
+) -> Result<(), CategoryUpdateError> {
     // fast track for if we're only updating the `name`:
     // the reasoning is due to an observation:
     // * we have to have retry logic for anything that involves transactions here (which updating the parent id and index _requires_)
@@ -294,7 +294,7 @@ pub async fn update(
             .rows_affected();
 
             match rows_updated {
-                0 => return Err(UpdateError::CategoryNotFound),
+                0 => return Err(CategoryUpdateError::CategoryNotFound),
                 1 => {}
                 _ => unreachable!(),
             }
@@ -317,7 +317,7 @@ pub async fn update(
             Err(UpdateLoopError::Sqlx(sqlx::Error::Database(e)))
                 if e.code().as_deref() == Some("40001") => {}
             Err(UpdateLoopError::Sqlx(e)) => {
-                return Err(UpdateError::InternalServerError(e.into()))
+                return Err(CategoryUpdateError::InternalServerError(e.into()))
             }
         }
     }

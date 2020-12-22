@@ -9,8 +9,7 @@ pub mod user {
             },
             CreateResponse,
         },
-        error::CreateError,
-        error::{audio::UploadError, DeleteError, GetError},
+        error::EmptyError,
     };
 
     /// List audio files.
@@ -18,7 +17,7 @@ pub mod user {
     impl ApiEndpoint for List {
         type Req = ();
         type Res = UserAudioListResponse;
-        type Err = GetError;
+        type Err = EmptyError;
         const PATH: &'static str = "/v1/user/me/audio";
         const METHOD: Method = Method::Get;
     }
@@ -28,7 +27,7 @@ pub mod user {
     impl ApiEndpoint for Get {
         type Req = ();
         type Res = UserAudioResponse;
-        type Err = GetError;
+        type Err = EmptyError;
         const PATH: &'static str = "/v1/user/me/audio/{id}";
         const METHOD: Method = Method::Get;
     }
@@ -37,7 +36,7 @@ pub mod user {
     impl ApiEndpoint for Create {
         type Req = ();
         type Res = CreateResponse<AudioId>;
-        type Err = CreateError;
+        type Err = EmptyError;
         const PATH: &'static str = "/v1/user/me/audio";
         const METHOD: Method = Method::Post;
     }
@@ -49,7 +48,7 @@ pub mod user {
         // raw bytes
         type Req = ();
         type Res = ();
-        type Err = UploadError;
+        type Err = EmptyError;
         const PATH: &'static str = "/v1/user/me/audio/{id}/raw";
         const METHOD: Method = Method::Put;
     }
@@ -59,7 +58,7 @@ pub mod user {
     impl ApiEndpoint for Delete {
         type Req = ();
         type Res = ();
-        type Err = DeleteError;
+        type Err = EmptyError;
         const PATH: &'static str = "/v1/user/me/audio/{id}";
         const METHOD: Method = Method::Delete;
     }
