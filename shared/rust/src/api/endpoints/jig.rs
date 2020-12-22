@@ -4,10 +4,7 @@ use crate::{
         jig::{JigCreateRequest, JigId, JigResponse, JigUpdateRequest},
         CreateResponse,
     },
-    error::{
-        jig::{CreateError, UpdateError},
-        DeleteError, GetError,
-    },
+    error::{EmptyError, MetadataNotFound},
 };
 
 use super::ApiEndpoint;
@@ -17,7 +14,7 @@ pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
     type Res = JigResponse;
-    type Err = GetError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Get;
 }
@@ -27,7 +24,7 @@ pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigCreateRequest;
     type Res = CreateResponse<JigId>;
-    type Err = CreateError;
+    type Err = MetadataNotFound;
     const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Post;
 }
@@ -37,7 +34,7 @@ pub struct Update;
 impl ApiEndpoint for Update {
     type Req = JigUpdateRequest;
     type Res = ();
-    type Err = UpdateError;
+    type Err = MetadataNotFound;
     const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Patch;
 }
@@ -47,7 +44,7 @@ pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
-    type Err = DeleteError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Delete;
 }

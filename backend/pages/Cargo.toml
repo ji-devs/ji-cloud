@@ -24,7 +24,6 @@ listenfd = {version = "0.3", optional = true }
 log = "0.4"
 simplelog = "0.8"
 tokio = { version = "0.2" }
-openssl = { version = "0.10", features = ["vendored"] }
 serde_json = "1.0.59"
 
 [features]
@@ -39,3 +38,7 @@ features = ["derive"]
 version = "0.20.1"
 default-features = false
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
+
+# we use native-tls but this ensures we have a stable version of OpenSSL on *nix
+[target.'cfg(unix)'.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }

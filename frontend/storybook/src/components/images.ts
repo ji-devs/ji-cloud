@@ -29,7 +29,7 @@ JiImage.argTypes = {
   lib: {
     control: {
       type: 'inline-radio',
-      options: ["global", "web", "user"]
+      options: ["global", "web", "user", "mock"]
     }
   },
   size: {

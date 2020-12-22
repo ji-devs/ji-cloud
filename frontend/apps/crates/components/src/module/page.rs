@@ -1,12 +1,31 @@
 
 /* There are a few fundamental concepts going on here...
- * 1. The serialized RawData is passed to the trait in order to get a State object 
- * 2. The loader will be skipped if the url has ?iframe_data=true
- *    in this case, iframe communication is setup and the parent
- *    is expected to post a message with the data (via IframeInit)
- * 3. The core mechanism is build around ModuleRenderer/signals, however
- *    sometimes the top-level elements are static, so StaticModuleRenderer
- *    is provided as a helper. It's not a performance saver though
+  1. The serialized RawData is passed to the trait in order to get a State object 
+  2. The loader will be skipped if the url has ?iframe_data=true
+     in this case, iframe communication is setup and the parent
+     is expected to post a message with the data (via IframeInit)
+     and then the state is derived via derive_state()
+  3. The whole mechanism assumes that this is the top-level page - it replaces body contents
+     completely
+  4. The resize mechanism is dealt with in a custom element, which dispatches a custom event (this
+     is just because it's easier to see in Storybook that way)
+    
+  For a page to render, it must provide something that satisfies the ModuleRenderer trait
+ 
+  Then it can merely call: 
+  ```
+    ModulePage::<MyPageRenderer, MyRawData, MyState>::render()
+  ```
+    
+   and it will not need to worry about any of the top-level page things such as:
+    * differentiating between loaded data and iframe data
+    * dealing with page resizing
+
+   it _sortof_ needs to worry about rendering to different grid areas - solving that in the trait
+   turned out to be way too verbose/tricky and didn't help much
+
+   To target a grid area, simply set `.attribute("slot", gridname)` where gridname is 
+   one of "sidebar", "header", "main" or "footer"
  */
 
 use std::rc::Rc;
@@ -78,42 +97,52 @@ impl ModulePageKind {
 
 pub trait ModuleRenderer <RawData, State> {
     type PageKindSignal: Signal<Item = ModulePageKind>;
-    type SidebarSignal: Signal<Item = Option<Dom>>;
-    type HeaderSignal: Signal<Item = Option<Dom>>;
-    type MainSignal: Signal<Item = Option<Dom>>;
-    type FooterSignal: Signal<Item = Option<Dom>>;
     type FutureState: Future<Output = Option<State>>;
-
+    type ChildrenSignal: SignalVec<Item = ModuleDom>;
     
-    fn load_state() -> Self::FutureState; 
-    fn derive_state(data: RawData) -> State; 
-    fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal; 
-    fn sidebar_signal(state: Rc<State>, kind: ModulePageKind) -> Self::SidebarSignal; 
-    fn header_signal(state: Rc<State>, kind: ModulePageKind) -> Self::HeaderSignal; 
-    fn main_signal(state: Rc<State>, kind: ModulePageKind) -> Self::MainSignal; 
-    fn footer_signal(state: Rc<State>, kind: ModulePageKind) -> Self::FooterSignal; 
+    fn load_state() -> Self::FutureState;
+
+    fn derive_state(data: RawData) -> State;
+
+    fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal;
+
+    fn children_signal(state: Rc<State>, kind: ModulePageKind) -> Self::ChildrenSignal;
 }
 
+pub type DomFactory = Box<dyn FnOnce(HtmlMixinPtr) -> Dom>;
+
+pub type HtmlMixinPtr = fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>;
+
+pub enum ModuleDom {
+    Sidebar(DomFactory),
+    Header(DomFactory),
+    Main(DomFactory),
+    Footer(DomFactory),
+}
+
+/*
+ * The core mechanism is build around ModuleRenderer/signals.
+ * Sometimes, however, the top-level elements are static, so StaticModuleRenderer
+ * is provided as a helper. It's not a performance saver though
+ */
 pub trait StaticModuleRenderer <RawData, State> {
     type FutureState: Future<Output = Option<State>>;
 
-    fn load_state() -> Self::FutureState; 
-    fn derive_state(state: RawData) -> State; 
-    fn page_kind(state: Rc<State>) -> ModulePageKind; 
-    fn sidebar(state: Rc<State>, kind: ModulePageKind) -> Option<Dom>; 
-    fn header(state: Rc<State>, kind: ModulePageKind) -> Option<Dom>;
-    fn main(state: Rc<State>, kind: ModulePageKind) -> Option<Dom>; 
-    fn footer(state: Rc<State>, kind: ModulePageKind) -> Option<Dom>; 
+    fn load_state() -> Self::FutureState;
+
+    fn derive_state(state: RawData) -> State;
+
+    fn page_kind(state: Rc<State>) -> ModulePageKind;
+
+    // The children should set the slot attribute as needed
+    fn children(state: Rc<State>, kind: ModulePageKind) -> Vec<ModuleDom>;
 }
 
 impl <RawData, State, T: StaticModuleRenderer<RawData, State>> ModuleRenderer<RawData, State> for T {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type SidebarSignal = impl Signal<Item = Option<Dom>>;
-    type HeaderSignal = impl Signal<Item = Option<Dom>>;
-    type MainSignal = impl Signal<Item = Option<Dom>>;
-    type FooterSignal = impl Signal<Item = Option<Dom>>;
     type FutureState = impl Future<Output = Option<State>>;
-    
+    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
+
     fn load_state() -> Self::FutureState { 
         T::load_state()
     }
@@ -125,20 +154,13 @@ impl <RawData, State, T: StaticModuleRenderer<RawData, State>> ModuleRenderer<Ra
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal { 
         always(T::page_kind(state))
     }
-    fn sidebar_signal(state: Rc<State>, kind: ModulePageKind) -> Self::SidebarSignal { 
-        always(T::sidebar(state, kind))
-    }
-    fn header_signal(state: Rc<State>, kind: ModulePageKind) -> Self::HeaderSignal { 
-        always(T::header(state, kind))
-    }
-    fn main_signal(state: Rc<State>, kind: ModulePageKind) -> Self::MainSignal { 
-        always(T::main(state, kind))
-    }
-    fn footer_signal(state: Rc<State>, kind: ModulePageKind) -> Self::FooterSignal { 
-        always(T::footer(state, kind))
+
+    fn children_signal(state: Rc<State>, kind: ModulePageKind) -> Self::ChildrenSignal {
+        always(T::children(state, kind)).to_signal_vec()
     }
 }
 
+// The page renderer
 pub struct ModulePage<Renderer, RawData, State> 
 where
     Renderer: ModuleRenderer<RawData, State>,
@@ -235,33 +257,25 @@ where
                             //in utils / global static
                             set_resize_info(event.data());
                         })
-                       
-                        //TODO - get rid of nesting
-                        //See: https://github.com/Pauan/rust-dominator/issues/45
-                        .child(html!("div", {
-                            .style("width", "100%")
-                            .style("height", "100%")
-                            .attribute("slot", "sidebar")
-                            .child_signal(Renderer::sidebar_signal(state.clone(), page_kind))
-                        }))
-                        .child(html!("div", {
-                            .style("width", "100%")
-                            .style("height", "100%")
-                            .attribute("slot", "header")
-                            .child_signal(Renderer::header_signal(state.clone(), page_kind))
-                        }))
-                        .child(html!("div", {
-                            .style("width", "100%")
-                            .style("height", "100%")
-                            .attribute("slot", "main")
-                            .child_signal(Renderer::main_signal(state.clone(), page_kind))
-                        }))
-                        .child(html!("div", {
-                            .style("width", "100%")
-                            .style("height", "100%")
-                            .attribute("slot", "footer")
-                            .child_signal(Renderer::footer_signal(state.clone(), page_kind))
-                        }))
+                        .children_signal_vec(
+                            Renderer::children_signal(state.clone(), page_kind)
+                                .map(|module_dom| {
+                                    match module_dom {
+                                        ModuleDom::Sidebar(factory) => factory(|dom| {
+                                            dom.attribute("slot", "sidebar")
+                                        }),
+                                        ModuleDom::Header(factory) => factory(|dom| {
+                                            dom.attribute("slot", "header")
+                                        }),
+                                        ModuleDom::Main(factory) => factory(|dom| {
+                                            dom.attribute("slot", "main")
+                                        }),
+                                        ModuleDom::Footer(factory) => factory(|dom| {
+                                            dom.attribute("slot", "footer")
+                                        }),
+                                    }
+                                })
+                        )
                     });
 
                     Self::switch_body(dom); 

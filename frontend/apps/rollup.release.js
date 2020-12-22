@@ -1,5 +1,5 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
-const {URL_FRONTEND_RELEASE} = require("../../config/js");
+const {URL_FRONTEND_RELEASE} = require("../../config/typescript");
 
 let {APP_NAME} = process.env;
 

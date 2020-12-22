@@ -6,7 +6,7 @@ use crate::{
         auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
         user::{OtherUser, UserLookupQuery, UserProfile},
     },
-    error::{auth::RegisterError, user::NoSuchUserError},
+    error::{auth::RegisterError, EmptyError},
 };
 
 /// Sign in.
@@ -14,7 +14,7 @@ pub struct Signin;
 impl ApiEndpoint for Signin {
     type Req = ();
     type Res = SigninSuccess;
-    type Err = NoSuchUserError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/login";
     const METHOD: Method = Method::Post;
 }
@@ -24,7 +24,7 @@ pub struct SingleSignOn;
 impl ApiEndpoint for SingleSignOn {
     type Req = ();
     type Res = SingleSignOnSuccess;
-    type Err = ();
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/authorize";
     const METHOD: Method = Method::Post;
 }
@@ -44,7 +44,7 @@ pub struct Profile;
 impl ApiEndpoint for Profile {
     type Req = ();
     type Res = UserProfile;
-    type Err = NoSuchUserError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/user/me/profile";
     const METHOD: Method = Method::Get;
 }
@@ -54,7 +54,7 @@ pub struct UserLookup;
 impl ApiEndpoint for UserLookup {
     type Req = UserLookupQuery;
     type Res = OtherUser;
-    type Err = NoSuchUserError;
+    type Err = EmptyError;
     const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Get;
 }

@@ -1,6 +1,12 @@
-use crate::db::{self, user::register};
-use crate::extractor::{
-    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+use crate::{
+    db::{self, user::register},
+    error::{self, ServerError},
+};
+use crate::{
+    error::RegisterError,
+    extractor::{
+        reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
+    },
 };
 use actix_web::HttpResponse;
 use core::settings::RuntimeSettings;
@@ -18,7 +24,7 @@ use shared::{
         auth::{AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
         user::UserLookupQuery,
     },
-    error::{auth::RegisterError, user::NoSuchUserError, InternalServerError},
+    error::auth::RegisterErrorKind,
 };
 use sqlx::PgPool;
 
@@ -27,11 +33,11 @@ use sqlx::PgPool;
 async fn user_lookup(
     db: Data<PgPool>,
     query: Query<UserLookupQuery>,
-) -> actix_web::Result<Json<<UserLookup as ApiEndpoint>::Res>> {
+) -> Result<Json<<UserLookup as ApiEndpoint>::Res>, error::UserNotFound> {
     let query = query.into_inner();
 
     if query.id.is_none() && query.firebase_id.is_none() && query.name.is_none() {
-        return Err(HttpResponse::NotFound().json(NoSuchUserError {}).into());
+        return Err(error::UserNotFound::UserNotFound);
     }
 
     db::user::lookup(
@@ -40,10 +46,9 @@ async fn user_lookup(
         query.firebase_id.as_deref(),
         query.name.as_deref(),
     )
-    .await
-    .map_err(InternalServerError::from)?
+    .await?
     .map(Json)
-    .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
+    .ok_or(error::UserNotFound::UserNotFound)
 }
 
 /// Login with a user.
@@ -52,15 +57,13 @@ async fn handle_signin_credentials(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: FirebaseUser,
-) -> actix_web::Result<HttpResponse> {
+) -> Result<HttpResponse, error::UserNotFound> {
     let user_id = db::user::firebase_to_id(&db, &user.id)
-        .await
-        .map_err(InternalServerError::from)?
-        .ok_or_else(|| HttpResponse::UnprocessableEntity().json(NoSuchUserError {}))?;
+        .await?
+        .ok_or(error::UserNotFound::UserNotFound)?;
 
     let (csrf, cookie) =
-        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())
-            .map_err(InternalServerError::from)?;
+        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())?;
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
@@ -70,7 +73,9 @@ async fn handle_signin_credentials(
 async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterError> {
     // todo: decide if we should check for an _empty_ email?
     if req.username.is_empty() {
-        return Err(RegisterError::EmptyDisplayName);
+        return Err(RegisterError::RegisterError(
+            RegisterErrorKind::EmptyDisplayName,
+        ));
     }
 
     Ok(())
@@ -100,14 +105,13 @@ async fn handle_register(
 async fn handle_get_profile(
     db: Data<PgPool>,
     claims: WrapAuthClaimsNoDb,
-) -> actix_web::Result<Json<<Profile as ApiEndpoint>::Res>> {
+) -> Result<Json<<Profile as ApiEndpoint>::Res>, error::UserNotFound> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
     db::user::profile(db.as_ref(), claims.0.id)
-        .await
-        .map_err(InternalServerError::from)?
+        .await?
         .map(Json)
-        .ok_or_else(|| HttpResponse::NotFound().json(NoSuchUserError {}).into())
+        .ok_or(error::UserNotFound::UserNotFound)
 }
 
 /// Sign in as a user via SSO.
@@ -115,14 +119,13 @@ async fn handle_get_profile(
 async fn handle_authorize(
     settings: Data<RuntimeSettings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,
-) -> actix_web::Result<Json<<SingleSignOn as ApiEndpoint>::Res>> {
+) -> Result<Json<<SingleSignOn as ApiEndpoint>::Res>, ServerError> {
     let claims = AuthClaims {
         id: auth.0.id,
         csrf: None,
     };
 
-    let jwt = jwt::encode(&jwt::Header::default(), &claims, &settings.jwt_encoding_key)
-        .map_err(InternalServerError::from)?;
+    let jwt = jwt::encode(&jwt::Header::default(), &claims, &settings.jwt_encoding_key)?;
 
     Ok(Json(SingleSignOnSuccess { jwt }))
 }

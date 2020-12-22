@@ -1,4 +1,5 @@
 use crate::{
+    error::BasicError,
     jwkkeys::{self, JwkVerifier},
     jwt::{check_no_csrf, check_no_db},
     more_futures::ReadyOrNot,
@@ -7,11 +8,12 @@ use actix_web::{
     cookie::{Cookie, CookieBuilder, SameSite},
     http::{header, HeaderMap, HeaderValue},
     web::Data,
-    FromRequest, HttpMessage, HttpResponse,
+    FromRequest, HttpMessage,
 };
 use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
+use http::StatusCode;
 use jsonwebtoken as jwt;
 use jwt::EncodingKey;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
@@ -21,7 +23,6 @@ use shared::domain::{
     auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
     user::UserScope,
 };
-use shared::error::auth::FirebaseError;
 use sqlx::postgres::PgPool;
 use std::{marker::PhantomData, sync::Arc};
 use uuid::Uuid;
@@ -61,32 +62,8 @@ fn bearer_token(headers: &HeaderMap) -> Option<&str> {
         .map(|(_, token)| token)
 }
 
-pub struct AuthError;
-
-impl From<AuthError> for actix_web::Error {
-    fn from(_other: AuthError) -> Self {
-        HttpResponse::Unauthorized().into()
-    }
-}
-
-pub enum StatusError {
-    Auth,
-    Forbidden,
-    InternalServerError,
-}
-
-impl From<StatusError> for actix_web::Error {
-    fn from(other: StatusError) -> Self {
-        match other {
-            StatusError::Auth => HttpResponse::Unauthorized().into(),
-            StatusError::Forbidden => HttpResponse::Forbidden().into(),
-            StatusError::InternalServerError => HttpResponse::InternalServerError().into(),
-        }
-    }
-}
-
 impl FromRequest for FirebaseUser {
-    type Error = FirebaseError;
+    type Error = BasicError;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -101,7 +78,20 @@ impl FromRequest for FirebaseUser {
         // this whole dance is to avoid cloning the headers.
         let token = match bearer_token(req.headers()) {
             Some(token) => token.to_owned(),
-            None => return futures::future::err(FirebaseError::MissingBearerToken).into(),
+            None => {
+                return futures::future::err(BasicError::with_message(
+                    StatusCode::UNAUTHORIZED,
+                    "Unauthorized: Missing Bearer Token".to_owned(),
+                ))
+                .into()
+            }
+        };
+
+        let invalid_token = || {
+            BasicError::with_message(
+                StatusCode::UNAUTHORIZED,
+                "Unauthorized: Invalid Token".to_owned(),
+            )
         };
 
         // HACK for testing.
@@ -109,7 +99,7 @@ impl FromRequest for FirebaseUser {
             return futures::future::ready(
                 try_insecure_decode(&token)
                     .map(|id| Self { id })
-                    .ok_or_else(|| FirebaseError::InvalidToken),
+                    .ok_or_else(invalid_token),
             )
             .into();
         }
@@ -119,7 +109,7 @@ impl FromRequest for FirebaseUser {
             let id = jwk_verifier
                 .verify(&token, 3)
                 .await
-                .map_err(|_| FirebaseError::InvalidToken)?;
+                .map_err(|_| invalid_token())?;
 
             Ok(Self { id })
         }
@@ -130,6 +120,30 @@ impl FromRequest for FirebaseUser {
 
 fn csrf_header(headers: &HeaderMap) -> Option<&str> {
     headers.get(CSRF_HEADER_NAME)?.to_str().ok()
+}
+
+fn check_cookie_csrf<'a>(
+    cookie: Option<Cookie<'a>>,
+    csrf: Option<&'a str>,
+) -> Result<(Cookie<'a>, &'a str), BasicError> {
+    match (cookie, csrf) {
+        (Some(cookie), Some(csrf)) => Ok((cookie, csrf)),
+
+        (None, Some(_)) => Err(BasicError::with_message(
+            StatusCode::UNAUTHORIZED,
+            "Unauthorized: missing cookie".to_owned(),
+        )),
+
+        (Some(_), None) => Err(BasicError::with_message(
+            StatusCode::UNAUTHORIZED,
+            "Unauthorized: missing X-CSRF header".to_owned(),
+        )),
+
+        (None, None) => Err(BasicError::with_message(
+            StatusCode::UNAUTHORIZED,
+            "Unauthorized: missing X-CSRF header, missing cookie".to_owned(),
+        )),
+    }
 }
 
 #[derive(Apiv2Security)]
@@ -143,7 +157,7 @@ fn csrf_header(headers: &HeaderMap) -> Option<&str> {
 pub struct WrapAuthClaimsNoDb(pub AuthClaims);
 
 impl FromRequest for WrapAuthClaimsNoDb {
-    type Error = AuthError;
+    type Error = BasicError;
     type Future = future::Ready<Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -154,15 +168,27 @@ impl FromRequest for WrapAuthClaimsNoDb {
         let csrf = csrf_header(req.headers());
         let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
 
-        let (cookie, csrf) = match (cookie, csrf) {
-            (Some(cookie), Some(csrf)) => (cookie, csrf),
-            _ => return future::err(AuthError),
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf) {
+            Ok((cookie, csrf)) => (cookie, csrf),
+            Err(e) => return futures::future::err(e),
         };
 
         future::ready(
             check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
-                .map_err(|_| AuthError)
-                .and_then(|it| it.ok_or(AuthError))
+                .map_err(|_| {
+                    BasicError::with_message(
+                        StatusCode::UNAUTHORIZED,
+                        "Unauthorized: bad JWT".to_owned(),
+                    )
+                })
+                .and_then(|it| {
+                    it.ok_or_else(|| {
+                        BasicError::with_message(
+                            StatusCode::UNAUTHORIZED,
+                            "Unauthorized: CSRF mismatch".to_owned(),
+                        )
+                    })
+                })
                 .map(Self),
         )
     }
@@ -233,7 +259,7 @@ pub struct AuthUserWithScope<S: Scope> {
 }
 
 impl<S: Scope> FromRequest for AuthUserWithScope<S> {
-    type Error = StatusError;
+    type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -246,19 +272,18 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let (cookie, csrf) = match (cookie, csrf) {
-            (Some(cookie), Some(csrf)) => (cookie, csrf),
-            _ => return future::err(StatusError::Auth).into(),
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf) {
+            Ok((cookie, csrf)) => (cookie, csrf),
+            Err(e) => return futures::future::err(e.into()).into(),
         };
-
         // get claims and check csrf
         let claims = check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
-            .map_err(|_| StatusError::Auth)
-            .and_then(|it| it.ok_or(StatusError::Auth));
+            .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))
+            .and_then(|it| it.ok_or(BasicError::new(StatusCode::UNAUTHORIZED)));
 
         let claims = match claims {
             Ok(claims) => claims,
-            Err(e) => return future::err(e).into(),
+            Err(e) => return future::err(e.into()).into(),
         };
 
         async move {
@@ -270,10 +295,12 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
             .fetch_one(&db)
             .await
             .map(|it| it.exists)
-            .map_err(|_| StatusError::InternalServerError)?;
+            .map_err(Into::into)
+            .map_err(crate::error::ise)?;
 
             if !has_scope {
-                return Err(StatusError::Forbidden);
+                // todo: message for which scope is needed
+                return Err(BasicError::new(StatusCode::FORBIDDEN).into());
             }
 
             Ok(Self {
@@ -297,7 +324,7 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
 pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
 
 impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
-    type Error = StatusError;
+    type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
@@ -311,15 +338,15 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
 
         let cookie = match req.cookie(JWT_COOKIE_NAME) {
             Some(token) => token.to_owned(),
-            None => return future::err(StatusError::Auth).into(),
+            None => return future::err(BasicError::new(StatusCode::UNAUTHORIZED).into()).into(),
         };
 
         async move {
             check_no_csrf(&db, &cookie.value(), settings.jwt_decoding_key())
                 .await
-                .map_err(|_| StatusError::InternalServerError)?
+                .map_err(crate::error::ise)?
                 .map(Self)
-                .ok_or(StatusError::Auth)
+                .ok_or(BasicError::new(StatusCode::UNAUTHORIZED).into())
         }
         .boxed()
         .into()

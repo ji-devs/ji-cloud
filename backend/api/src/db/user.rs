@@ -1,14 +1,12 @@
-use crate::extractor::FirebaseId;
+use crate::{error::RegisterError, extractor::FirebaseId};
 use chrono_tz::Tz;
 use shared::{
     domain::{
         auth::RegisterRequest,
-        meta::AffiliationId,
-        meta::AgeRangeId,
-        meta::SubjectId,
+        meta::{AffiliationId, AgeRangeId, SubjectId},
         user::{OtherUser, UserProfile, UserScope},
     },
-    error::auth::RegisterError,
+    error::auth::RegisterErrorKind,
 };
 use sqlx::{postgres::PgDatabaseError, PgConnection};
 use std::{convert::TryFrom, str::FromStr};
@@ -150,21 +148,21 @@ returning id
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_firebase_id_key") =>
         {
-            RegisterError::TakenId
+            RegisterError::RegisterError(RegisterErrorKind::TakenId)
         }
 
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
-            RegisterError::TakenUsername
+            RegisterError::RegisterError(RegisterErrorKind::TakenUsername)
         }
 
         // fixme: This doesn't actually trigger right now because emails aren't marked `unique`
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint() == Some("user_email_key") =>
         {
-            RegisterError::TakenEmail
+            RegisterError::RegisterError(RegisterErrorKind::TakenEmail)
         }
 
         e => e.into(),

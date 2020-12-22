@@ -20,6 +20,7 @@ use std::pin::Pin;
 use std::future::Future;
 
 const INITIAL_MODE:ModulePageKind = ModulePageKind::GridResize;
+
 pub type Page = Rc<ModulePage<PageRenderer, RawData, State>>;
 
 pub fn render() -> Page {
@@ -44,11 +45,8 @@ pub struct PageRenderer {
 
 impl ModuleRenderer<RawData, State> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type SidebarSignal = impl Signal<Item = Option<Dom>>;
-    type HeaderSignal = impl Signal<Item = Option<Dom>>;
-    type MainSignal = impl Signal<Item = Option<Dom>>;
-    type FooterSignal = impl Signal<Item = Option<Dom>>;
     type FutureState = impl Future<Output = Option<State>>;
+    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
 
     fn load_state() -> Self::FutureState{ 
         async {
@@ -63,11 +61,31 @@ impl ModuleRenderer<RawData, State> for PageRenderer {
         state.kind.signal()
     }
 
-    fn sidebar_signal(state: Rc<State>, kind:ModulePageKind) -> Self::SidebarSignal {
-        state.kind.signal().map(move |kind| {
+    fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
+        state.kind
+            .signal()
+            .map(clone!(state => move |kind| {
+                vec![
+                    Self::sidebar(state.clone(), kind),
+                    Self::header(state.clone(), kind),
+                    Self::main(state.clone(), kind),
+                    Self::footer(state.clone(), kind),
+                ]
+                .into_iter()
+                .filter(|x| x.is_some())
+                .map(|x| x.unwrap_throw())
+                .collect()
+            }))
+            .to_signal_vec()
+    }
+}
 
-            templates::sidebar(kind).map(|el| {
+impl PageRenderer {
+    fn sidebar(state: Rc<State>, kind:ModulePageKind) -> Option<ModuleDom> {
+        templates::sidebar(kind).map(move |el| {
+            ModuleDom::Sidebar(Box::new(move |mixin:HtmlMixinPtr| {
                 elem!(el, {
+                    .apply(|dom| mixin(dom))
                     .child(html!("div", {
                         .style("display", "flex")
                         .children(vec![
@@ -104,29 +122,37 @@ impl ModuleRenderer<RawData, State> for PageRenderer {
                         ])
                     }))
                 })
-            })
-        })
-    }
-    fn header_signal(state: Rc<State>, kind: ModulePageKind) -> Self::HeaderSignal { 
-        state.kind.signal().map(|kind| {
-            templates::header(kind).map(|el| {
-                elem!(el, {})
-            })
+            }))
         })
     }
 
-    fn main_signal(state: Rc<State>, kind: ModulePageKind) -> Self::MainSignal { 
-        state.kind.signal().map(|kind| {
-            templates::main(kind).map(|el| {
-                elem!(el, {})
-            })
+    fn header(state: Rc<State>, kind: ModulePageKind) -> Option<ModuleDom> { 
+        templates::header(kind).map(move |el| {
+            ModuleDom::Header(Box::new(move |mixin:HtmlMixinPtr| {
+                elem!(el, {
+                    .apply(|dom| mixin(dom))
+                })
+            }))
         })
     }
-    fn footer_signal(state: Rc<State>, kind: ModulePageKind) -> Self::FooterSignal { 
-        state.kind.signal().map(|kind| {
-            templates::footer(kind).map(|el| {
-                elem!(el, {})
-            })
+
+    fn main(state: Rc<State>, kind: ModulePageKind) -> Option<ModuleDom> { 
+        templates::main(kind).map(move |el| {
+            ModuleDom::Main(Box::new(move |mixin:HtmlMixinPtr| {
+                elem!(el, {
+                    .apply(|dom| mixin(dom))
+                })
+            }))
+        })
+    }
+
+    fn footer(state: Rc<State>, kind: ModulePageKind) -> Option<ModuleDom> { 
+        templates::footer(kind).map(move |el| {
+            ModuleDom::Footer(Box::new(move |mixin:HtmlMixinPtr| {
+                elem!(el, {
+                    .apply(|dom| mixin(dom))
+                })
+            }))
         })
     }
 }
