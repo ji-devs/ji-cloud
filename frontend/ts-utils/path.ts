@@ -9,11 +9,12 @@ export const MEDIA_UPLOADS = getMediaUrl_UPLOADS(deployTarget);
 export const mediaUi = (path:string):string => `${MEDIA_UI}/${path}`;
 const mediaUploads = (path:string):string => `${MEDIA_UPLOADS}/${path}`;
 
-export type MediaLibOptions = "global" | "user" | "web";
+export type MediaLibOptions = "global" | "user" | "web" | "mock";
 export type MediaSizeOptions = "original" | "full" | "thumb";
 
 const imagePrefix = (lib:MediaLibOptions):string => {
     switch(lib) {
+        case "mock": return "mock";
         case "global": return "image";
         case "user": return "image-user";
         case "web": return "image-web";
@@ -40,5 +41,7 @@ export const imageLib = ({lib, size, id}:{lib: MediaLibOptions, size: MediaSizeO
     const prefix = imagePrefix(lib);
     const variant = sizeVariant(size);
 
-    return mediaUploads(`${prefix}/${variant}/${id}`);
+    return lib === "mock" 
+        ? mediaUi(`${prefix}/${variant}/${id}`)
+        : mediaUploads(`${prefix}/${variant}/${id}`);
 }
