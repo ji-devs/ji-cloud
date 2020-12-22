@@ -8,9 +8,10 @@ export default {
 }
 
 export const InputText = ({label,helpertext, error, instruction,errormessage }) => {
-    return `<input-text label="${label}" helpertext="${helpertext}" error="${errormessage} ${instruction && "instruction"} ${error && "error"} >
+    return `<input-text label="${label}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
  
     </input-text>`
+    
 }
 
 export const Checkbox = ({label}) => {
