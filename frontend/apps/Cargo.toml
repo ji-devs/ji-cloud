@@ -2,6 +2,7 @@
 members = [
     "crates/utils",
 	"crates/components",
+    "crates/renderer",
 	"crates/entry/dev/scratch/001",
 	"crates/entry/dev/showcase/001",
     "crates/entry/user",

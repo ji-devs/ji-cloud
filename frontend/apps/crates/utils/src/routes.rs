@@ -67,7 +67,8 @@ pub enum ModuleRoute {
 
 #[derive(Debug, Clone)]
 pub enum DevRoute {
-    Showcase(Id, Id),
+    Showcase(Id, String),
+    Scratch(Id, String),
 }
 
 //Just for serializing across local routes
@@ -89,6 +90,10 @@ impl Route {
         history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
     }
 
+	pub fn to_string(&self) -> String {
+		self.into()
+	}
+	
     pub fn from_url(url:&str) -> Self {
         let url = Url::new(&url).unwrap_throw();
         let paths = url.pathname();
@@ -98,7 +103,14 @@ impl Route {
         let json_query = params.get("data");
 
         match paths {
-			["dev", "showcase", id, page] => Self::Dev(DevRoute::Showcase(id.to_string(), page.to_string())),
+			["dev", "showcase", id] => {
+                let page = params.get("page").unwrap_or_default();
+                Self::Dev(DevRoute::Showcase(id.to_string(), page))
+            }
+			["dev", "scratch", id] => {
+                let page = params.get("page").unwrap_or_default();
+                Self::Dev(DevRoute::Scratch(id.to_string(), page))
+            }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "signin"] => Self::User(UserRoute::Signin),
@@ -152,13 +164,21 @@ pub fn module_kind_to_label(kind:ModuleKind) -> &'static str {
         ModuleKind::MemoryGame => "Memory Game",
     }
 }
+
 impl From<Route> for String {
-    fn from(route:Route) -> Self {
+	fn from(route:Route) -> Self {
+		(&route).into()
+	}
+}
+
+impl From<&Route> for String {
+    fn from(route:&Route) -> Self {
         match route {
             Route::NoAuth => "/no-auth".to_string(),
 			Route::Dev(route) => {
                 match route {
-                    DevRoute::Showcase(id, page) => format!("/dev/showcase/{}/{}", id, page)
+                    DevRoute::Showcase(id, page) => format!("/dev/showcase/{}?page={}", id, page),
+                    DevRoute::Scratch(id, page) => format!("/dev/scratch/{}?page={}", id, page)
 				}
 			},
             Route::User(route) => {

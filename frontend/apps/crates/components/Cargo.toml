@@ -53,6 +53,7 @@ web-sys = { version = "0.3.46", features = [
     'DomRect',
     'HtmlDocument',
     'HtmlImageElement',
+    'HtmlCanvasElement',
     'History',
     'CustomEvent',
 ] }

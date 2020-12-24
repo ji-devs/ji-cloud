@@ -56,7 +56,7 @@ use std::pin::Pin;
 use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
-
+use super::load::StateLoader;
 
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
@@ -95,14 +95,9 @@ impl ModulePageKind {
     }
 }
 
-pub trait ModuleRenderer <RawData, State> {
+pub trait ModuleRenderer <State> {
     type PageKindSignal: Signal<Item = ModulePageKind>;
-    type FutureState: Future<Output = Option<State>>;
     type ChildrenSignal: SignalVec<Item = ModuleDom>;
-    
-    fn load_state() -> Self::FutureState;
-
-    fn derive_state(data: RawData) -> State;
 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal;
 
@@ -120,83 +115,49 @@ pub enum ModuleDom {
     Footer(DomFactory),
 }
 
-/*
- * The core mechanism is build around ModuleRenderer/signals.
- * Sometimes, however, the top-level elements are static, so StaticModuleRenderer
- * is provided as a helper. It's not a performance saver though
- */
-pub trait StaticModuleRenderer <RawData, State> {
-    type FutureState: Future<Output = Option<State>>;
-
-    fn load_state() -> Self::FutureState;
-
-    fn derive_state(state: RawData) -> State;
-
-    fn page_kind(state: Rc<State>) -> ModulePageKind;
-
-    // The children should set the slot attribute as needed
-    fn children(state: Rc<State>, kind: ModulePageKind) -> Vec<ModuleDom>;
-}
-
-impl <RawData, State, T: StaticModuleRenderer<RawData, State>> ModuleRenderer<RawData, State> for T {
-    type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type FutureState = impl Future<Output = Option<State>>;
-    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
-
-    fn load_state() -> Self::FutureState { 
-        T::load_state()
-    }
-
-    fn derive_state(raw_data: RawData) -> State { 
-        T::derive_state(raw_data)
-    }
-
-    fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal { 
-        always(T::page_kind(state))
-    }
-
-    fn children_signal(state: Rc<State>, kind: ModulePageKind) -> Self::ChildrenSignal {
-        always(T::children(state, kind)).to_signal_vec()
-    }
-}
-
 // The page renderer
-pub struct ModulePage<Renderer, RawData, State> 
+pub struct ModulePage<Renderer, Loader, RawData, State> 
 where
-    Renderer: ModuleRenderer<RawData, State>,
+    Renderer: ModuleRenderer<State>,
     RawData: DeserializeOwned,
+    Loader: StateLoader<RawData, State>,
 {
     wait_iframe_data: bool,
-    loader: AsyncLoader,
-    switcher: AsyncLoader, 
-    phantom: PhantomData<(Renderer, RawData, State)>,
+	renderer: Renderer,
+    loader: Loader,
+    async_loader: AsyncLoader,
+    async_switcher: AsyncLoader,
+    phantom: PhantomData<(RawData, State)>
 }
 
-impl <Renderer, RawData, State> ModulePage <Renderer, RawData, State> 
+impl <Renderer, Loader, RawData, State> ModulePage <Renderer, Loader, RawData, State> 
 where
-    Renderer: ModuleRenderer<RawData, State> + 'static,
+    Renderer: ModuleRenderer<State> + 'static,
+    Loader: StateLoader<RawData, State> + 'static,
     RawData: DeserializeOwned + 'static,
     State: 'static,
 {
 
-    pub fn render() -> Rc<Self> 
+    pub fn render(renderer:Renderer, loader: Loader) -> Rc<Self> 
     {
 
         let wait_iframe_data = should_get_iframe_data();
 
         let _self = Rc::new(Self { 
-            loader: AsyncLoader::new(),
-            switcher: AsyncLoader::new(), 
+			renderer,
+            loader,
+            async_loader: AsyncLoader::new(),
+            async_switcher: AsyncLoader::new(), 
             wait_iframe_data,
-            phantom: PhantomData,
+            phantom: PhantomData
         });
 
         let _self_clone = _self.clone();
 
         if !wait_iframe_data {
-            _self_clone.loader.load(async move {
-                if let Some(state) = Renderer::load_state().await {
-                    Self::render_data(_self, Rc::new(state));
+            _self_clone.async_loader.load(async move {
+                if let Some(state) = _self.loader.load_state().await {
+                    Self::render_data(_self, state);
                 }
             });
         } else {
@@ -224,7 +185,7 @@ where
                         //log::warn!("{:?}", msg);
                     } else {
                         let raw_data = msg.data.unwrap_throw();
-                        let state = Rc::new(Renderer::derive_state(raw_data));
+                        let state = _self.loader.derive_state(raw_data);
                         Self::render_data(_self.clone(), state);
                     }
                 } else {
@@ -246,7 +207,7 @@ where
 
     fn render_data(_self: Rc<Self>, state: Rc<State>) {
 
-        _self.switcher.load(
+        _self.async_switcher.load(
             Renderer::page_kind_signal(state.clone())
                 .for_each(clone!(state => move |page_kind| {
                     let dom = html!(page_kind.element_name(), {

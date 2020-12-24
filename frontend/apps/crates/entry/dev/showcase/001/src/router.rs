@@ -1,17 +1,10 @@
-use utils::routes::{Route, DevRoute};
-use std::rc::Rc;
-use std::cell::RefCell;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal}
+use crate::{
+    prelude::*,
+    pages::{module_grid, index, renderer_demo}
 };
-use dominator::{Dom, html, clone};
-use crate::pages::module_grid;
-use discard::DiscardOnDrop;
+
+use utils::routes::{Route, DevRoute};
 use components::module::page::*;
-use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
 
 pub struct Router {
     loader: AsyncLoader,
@@ -19,7 +12,9 @@ pub struct Router {
 }
 
 enum PageKind {
-    Grid(module_grid::dom::Page) //visit dev/showcase/001/grid
+    Index(Rc<index::Page>),
+    Grid(module_grid::dom::Page), //?page=grid
+    Renderer(renderer_demo::page::Page), //?page=renderer
 }
 
 impl Router {
@@ -38,7 +33,8 @@ impl Router {
                         page_str(route)
                             .and_then(|page| match page.as_ref() {
                                 "grid" => Some(PageKind::Grid(module_grid::dom::render())),
-                                _ => None
+                                "renderer" => Some(PageKind::Renderer(renderer_demo::page::Page::render())),
+                                _ => Some(PageKind::Index(index::Page::render()))
                             });
 
                     async {}
