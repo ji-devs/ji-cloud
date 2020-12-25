@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use renderer::Renderer;
+use renderer::prelude::*;
 
 pub struct App {
     state: Rc<State>,

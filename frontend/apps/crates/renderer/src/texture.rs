@@ -4,14 +4,11 @@
     Otherwise the parent would need to keep a mutable ref
     During the lifetime of the fetch
     And that would panic while the renderer is used for other things
-
     It's a good idea to keep the texture's Id around after loading
     Which avoids the inner cache lookup/borrow
 */
-use crate::aliases::*;
-use crate::Renderer;
+use crate::prelude::*;
 use std::cell::RefCell;
-use beach_map::{BeachMap, DefaultVersion};
 use web_sys::HtmlImageElement;
 use std::{collections::HashMap, error::Error};
 use awsm_web::{
