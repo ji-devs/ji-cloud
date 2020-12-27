@@ -1,26 +1,26 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('search-menu')
+@customElement('twocolumn-list')
 export class _ extends LitElement {
   static get styles() {
     return [css`
-   main{
-       
-   }
+        .wrapper{
+            display:flex;
+            
+        }
+    
     `];
   }
 
-  @property()
-  label: string = "";
-
   render() {
 
-    const {label} = this;
+    const {} = this;
 
     return html`
-    <main class="">
-   hello
-    </main>
+    <div class="wrapper">
+       <slot name="left"></slot>
+       <slot name="right"></slot>
+    </div>
   `;
   }
 }

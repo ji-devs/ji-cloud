@@ -1,7 +1,7 @@
 import "@elements/lists/list-hover";
 import {Checkbox} from "~/components/input";
 export default {
-  title: 'Lists/List Hover',
+  title: 'Lists/List',
 }
 
 export const ListHover = ({label}) => {

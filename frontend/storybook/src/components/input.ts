@@ -1,6 +1,8 @@
 import "@elements/inputs/input-text";
 import "@elements/buttons/rectangle-button";
 import "@elements/inputs/input-underlined";
+import "@elements/inputs/textarea-underlined";
+
 import "@elements/inputs/checkbox";
 
 export default {
@@ -26,6 +28,12 @@ export const InputUnderlined = ({label}) => {
   </input-underlined>`
 }
 
+export const TextareaUnderlined = ({label}) => {
+  return `<textarea-underlined label="${label}">
+
+  </textarea-underlined>`
+}
+
 InputText.args = {
  instruction:false,
  errormessage: "Wrong Password",
@@ -41,5 +49,9 @@ Checkbox.args = {
 }
 
 InputUnderlined.args = {
+  label:"First Name"
+}
+
+TextareaUnderlined.args = {
   label:"First Name"
 }

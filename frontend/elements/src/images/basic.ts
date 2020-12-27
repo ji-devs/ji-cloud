@@ -5,8 +5,23 @@ import {mediaUi} from "@utils/path";
 
 @customElement('img-basic')
 export class _ extends LitElement {
+  static get styles() {
+      return [css`
+      img, :host{
+        height:100%;
+        width:100%;
+      }
+
+
+      `];
+    }
+    
+
+
   @property()
   src:string = ""; 
+  
+  createRenderRoot() { return this; }
 
   onLoad(evt:Event) {
     const img = evt.currentTarget as HTMLImageElement;

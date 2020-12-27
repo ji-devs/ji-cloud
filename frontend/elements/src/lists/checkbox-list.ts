@@ -4,25 +4,40 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
   static get styles() {
     return [css`
+    main{
+      padding-left: 8px;
+      padding-right: 80px;
+    }
+    ul{
+      padding-left:0;
+    }
   li{
       margin-bottom:12px;
+  }
+  p{
+    color: #5590fc;
+    font-weight:500;
+    margin-top:0;
   }
     `];
   }
 
   @property()
-  path:string = ""; 
+  label:string = ""; 
+  @property()
+  title:string = ""; 
 
   render() {
 
-    const {path} = this;
+    const {label, title} = this;
 
     return html`
+    <main>
+    <p>${title}</p>
     <ul>
-        <li>
-            <slot name="one"></slot>
-        </li>
+      <slot></slot>    
     </ul>
+    </main>
   `;
   }
 }

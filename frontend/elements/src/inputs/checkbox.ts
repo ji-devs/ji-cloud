@@ -16,6 +16,9 @@ export class _ extends LitElement {
     span{
         margin-left:12px;
     }
+    li{
+      list-style-type: none;
+    }
     `];
   }
 
@@ -29,12 +32,14 @@ export class _ extends LitElement {
     const {label} = this;
 
     return html`
-    <label class="">
-        <input type="checkbox">
-            <span class="">
-            ${label}
-            </span>
-    </label>
+    <li>
+      <label class="">
+          <input type="checkbox"/>
+              <span class="">
+              ${label}
+              </span>
+      </label>
+    </li>
   `;
   }
 }
