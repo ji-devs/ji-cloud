@@ -13,6 +13,8 @@ export class _ extends LitElement {
   @property()
   id:string = "";
 
+  createRenderRoot() { return this; }
+
   render() {
     const { lib, size, id} = this;
 

@@ -8,6 +8,8 @@ export class _ extends LitElement {
   @property()
   path:string = ""; 
 
+  createRenderRoot() { return this; }
+
   render() {
     const { path } = this;
 
