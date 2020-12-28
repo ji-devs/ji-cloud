@@ -141,9 +141,11 @@ The current list of available controls and annotations are here: [https://storyb
 
 ### Slots
 
-There is a pattern where you want a component to render its elements to a particular slot. 
+There is a pattern where you want a component to _optionally_ render its elements to a particular slot. 
 
-In order to make that easier, there's a couple helper functions in `@utils/slot`.
+(if it's not optional, just assign the slot attribute directly)
+
+In order to make this optional assignment easier, there's a couple helper functions in `@utils/slot`.
 
 `injectSlotStr` - will inject a `slotStr` property into the provided object with the html string of `slot="${slot}"`, if the object has a `slot` property.
 
