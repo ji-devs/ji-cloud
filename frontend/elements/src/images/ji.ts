@@ -4,6 +4,8 @@ import "./basic";
 
 @customElement('img-ji')
 export class _ extends LitElement {
+
+
   @property()
   lib:"global" | "user" | "web"= "global"; 
 
@@ -13,13 +15,11 @@ export class _ extends LitElement {
   @property()
   id:string = "";
 
-  createRenderRoot() { return this; }
-
   render() {
     const { lib, size, id} = this;
 
     const src = imageLib({lib, size, id});
 
-    return html`<img-basic src="${src}"></img>`;
+    return html`<img-basic id="img" src="${src}"></img>`;
   }
 }

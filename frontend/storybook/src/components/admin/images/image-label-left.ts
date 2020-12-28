@@ -1,14 +1,13 @@
 import "@elements/admin/images/image-settings";
 import "@elements/admin/images/image-label-left";
 import "@elements/images/basic";
+import "@elements/images/ji";
 import "@elements/inputs/checkbox";
 
 import "@elements/buttons/replace-delete";
 import "@elements/dividers/vertical-full";
+import {MockJiImage} from "~/components/images";
 import {InputUnderlined} from "~/components/input";
-
-
-import {mockJiImage} from "~/mock/images";
 import "@elements/images/ji";
 export default {
   title: 'Admin/Images/Settings',
@@ -27,7 +26,7 @@ export const LeftLabel = (props?:Props) => {
 
     return `
     <imagelabel-left>
-      <img src="http://localhost:4102/ui/mock/thumbnail/thumbnail-image.jpg" slot="image"/>
+      ${MockJiImage({size: "full", slot: "image"})}
       <replace-delete slot="image-actions"></replace-delete>
       <vertical-full slot=divider></vertical-full>
       <input-checkbox label="Premium Image" slot="checkbox"></input-checkbox>
