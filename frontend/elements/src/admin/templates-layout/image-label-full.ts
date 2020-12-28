@@ -21,7 +21,11 @@ export class _ extends LitElement {
     }
     ::slotted([slot=middle]){
         padding-left:40px;
+        margin-right:24px;
     }
+    ::slotted([slot=right]){
+      width:100%;
+  }
    
     `];
   }

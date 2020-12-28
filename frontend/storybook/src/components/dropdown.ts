@@ -18,8 +18,8 @@ export const SelectedDropdown = ({label}) => {
 `
 }
 
-export const TreeDropdown = ({label}) => {
-  return `<tree-dropdown label="Title">
+export const TreeDropdown = ({label, path}) => {
+  return `<tree-dropdown label="${label}" path="${path}">
 
   </tree-dropdown>
 `
@@ -28,4 +28,9 @@ export const TreeDropdown = ({label}) => {
 
 SelectedDropdown.args = {
   label: "Search"
+}
+
+TreeDropdown.args = {
+  label: "Category",
+  path: "/icon-chevron-categories-24-px.svg"
 }

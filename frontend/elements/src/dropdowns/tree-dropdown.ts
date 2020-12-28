@@ -33,7 +33,10 @@ export class _ extends LitElement {
         margin-left:16px;
     }
     img {
-        margin: 0 16px;
+        margin: 0 8px;
+    }
+    .open img{
+        transform: rotate(90deg);
     }
     `];
   }
@@ -53,10 +56,10 @@ open: boolean = false;
 
     return html`
   
-    <div class="main-wrapper open">
+    <div class="main-wrapper ${open}">
         <div class="inside-wrapper">
             <div class="text-wrapper flex py-3">
-                <img class="px-1" src="${path}" alt="">
+                <img-ui class="" path="${path}" alt=""></img-ui>
                 <p>${label}</p>
             </div>
 
