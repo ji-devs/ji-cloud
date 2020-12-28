@@ -27,3 +27,11 @@ export const STREAM_OPTIONS = [
     "Orthodox",
     "Charedi"
 ]
+
+export const SCHOOL_OPTIONS = [
+    "AlEtz Chaiml",
+    "Kerem",
+    "Lauder",
+    "Naima JPS",
+    "Rimon"
+]

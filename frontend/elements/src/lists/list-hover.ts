@@ -6,6 +6,7 @@ export class _ extends LitElement {
     return [css`
     ul{
         padding:0;
+        height:100%;
     }
   li{
       margin-bottom:12px;

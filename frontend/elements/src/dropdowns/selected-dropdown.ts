@@ -1,28 +1,28 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
+
 @customElement('selected-dropdown')
 export class _ extends LitElement {
 
   static get styles() {
     return [css`
 main{
-    width: 122px;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+    width: 272px;
+    height:372px;
+    border-radius: 14px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    border: solid 1px #eaebef;
+    background-color: #f8f9fd;
+    padding:8px 9px;
+
 }
-.banner{
-    display:flex;
-    justify-content:center;
-    align-items: center;
-    font-weight:600;
-    color:#272727;
-    background-color:#d8e7fa;
-    height: 32px;
-    width: 122px;
-    border-radius:0 0 12px 12px;
+::slotted([slot=list]) {
+    height: 284px;
+    overflow:auto;
+}
+slot[name="list"]::slotted(input) {
+    background-color:red !important;
 }
     `];
   }
@@ -31,11 +31,10 @@ main{
 label: string = "";
 
   render() {
-    const {label} = this;
     return html`
     <main>
-        <img src="${MEDIA_UI}/group-13809.svg"/>
-        <div class="banner">${label}</div>
+        <slot name="search"></slot>
+        <slot name="list"></slot>
     </main>
   `;
   }
