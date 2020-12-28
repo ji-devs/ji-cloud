@@ -1,7 +1,5 @@
 import "@elements/admin/images/image-settings";
 import "@elements/admin/images/image-label-left";
-import "@elements/images/basic";
-import "@elements/images/ji";
 import "@elements/inputs/checkbox";
 
 import "@elements/buttons/replace-delete";
@@ -26,7 +24,7 @@ export const LeftLabel = (props?:Props) => {
 
     return `
     <imagelabel-left>
-      ${MockJiImage({size: "full", slot: "image"})}
+      ${MockJiImage({size: "thumb", slot: "image"})}
       <replace-delete slot="image-actions"></replace-delete>
       <vertical-full slot=divider></vertical-full>
       <input-checkbox label="Premium Image" slot="checkbox"></input-checkbox>

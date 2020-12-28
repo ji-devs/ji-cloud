@@ -14,7 +14,7 @@ interface UiArgs {
 }
 
 const DEFAULT_UI_ARGS:UiArgs = {
-  path: `sticker-4991-2018-08-17-full.png`
+  path: `sidebar-logo.png`
 }
 
 export const UiImage = (props?:UiArgs) => {

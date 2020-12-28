@@ -14,6 +14,15 @@ Since these images are ubiquitous, it's recommended to import the component from
 ### Mocks
 
 There is one outlier - where we want to mock an `<img-ji>` without actually pointing to an uploaded image.
-For this, still use `<img-ji>` (so that it's clear for app implementation), but set the `lib` attribute to `mock` and it will internally load the image from the Dropbox/ui/mock folder.
+For this, we still use the `<img-ji>` element (so that it's clear for app implementation), but set the `lib` attribute to `mock` and it will internally load the image from the Dropbox/ui/mock folder.
 
-For the sake of convenience, the `MockJiImage` component in `~/components/images` which only requires specifying a `size` - and it will point to the appropriate `img.png` (it uses png instead of jpg, even if jpg would be appropriate in the real case, since it is just a mock and the intent is to cover _all_ cases, including where it needs transparency)
+As mentioned above, we generally want to use the component instead, and that's via `MockJiImage` (also in `~/components/images`). This only requires specifying a `size` - and it will point to the appropriate `img.png` (it uses png instead of jpg, even if jpg would be appropriate in the real case, since it is just a mock and the intent is to cover _all_ cases, including where it needs transparency)
+
+For example:
+
+```
+import {MockJiImage} from "~/components/images";
+
+//In some component:
+${MockJiImage({size: "full", slot: "image"})}
+```
