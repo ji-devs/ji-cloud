@@ -52,6 +52,12 @@ pub struct RuntimeSettings {
     /// Used to encode jwt tokens.
     pub jwt_encoding_key: EncodingKey,
 
+    /// Used to search for images via the bing image search api
+    ///
+    /// If missing, implies that bing searching is disabled.
+    // todo: move this and make it runtime reloadable somehow (bing suggests rotating keys)
+    pub bing_search_key: Option<String>,
+
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
     /// Used to _decode_ jwt tokens.
@@ -65,6 +71,7 @@ impl RuntimeSettings {
         jwt_encoding_key: EncodingKey,
         jwt_decoding_key: String,
         remote_target: RemoteTarget,
+        bing_search_key: Option<String>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -85,6 +92,7 @@ impl RuntimeSettings {
             jwt_encoding_key,
             jwt_decoding_key,
             remote_target,
+            bing_search_key,
         })
     }
 
@@ -346,8 +354,14 @@ impl SettingsManager {
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
         let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
         let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
+        let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
-        RuntimeSettings::new(jwt_encoding_key, jwt_secret, self.remote_target)
+        RuntimeSettings::new(
+            jwt_encoding_key,
+            jwt_secret,
+            self.remote_target,
+            bing_search_key,
+        )
     }
 }
 
