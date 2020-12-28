@@ -20,10 +20,14 @@ Bad:
 import {MyButton} from "@elements/buttons/my-button";
 ```
 
-### Provide arguments via controls
+### Provide arguments
 
-1. Always use default args and destructure _in_ the component (this allows re-using the component elsewhere)
-2. Assign the default args to the components `args` property
+1. Args should always be well-typed and optional (e.g. `foo(args?:MyArgs)`)
+2. A hardcoded default should be used as a fallback if no args are provided
+3. To implement the fallback, destructure _in_ the component
+4. Assign the default to the components `args` property (this makes it part of Storybook's Controls)
+
+Note that for the sake of jargon, "args" and "props" are used interchangeably, but we tend to use "args" on the outside since that fits with Storybook's lingo, and "props" on the inside since that fits with React/Component lingo.
 
 Example:
 

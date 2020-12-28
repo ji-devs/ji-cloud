@@ -20,7 +20,7 @@ As mentioned above, we generally want to use the component instead, and that's v
 
 For example:
 
-```
+```typescript
 import {MockJiImage} from "~/components/images";
 
 //In some component:
