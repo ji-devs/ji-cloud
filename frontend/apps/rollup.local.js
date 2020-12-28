@@ -15,6 +15,7 @@ const watchPatterns = [
     `./crates/entry/**/_common/**`,
     `./crates/utils/**`,
 	`./crates/components/**`,
+	`./crates/renderer/**`,
     `./crates/entry/${APP_NAME}/**`,
     "../elements/dist/**", 
     "../../shared/rust/src/**", 

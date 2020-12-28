@@ -1,30 +1,15 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen::JsCast;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal, always},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
-    CancelableFutureHandle, 
-};
-use web_sys::{HtmlElement, Element, HtmlInputElement};
-use dominator::{DomBuilder, Dom, html, events, clone, apply_methods};
-use dominator_helpers::{elem, with_data_id,futures::{spawn_future, AsyncLoader}};
-use awsm_web::dom::*;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures::future::ready;
+use crate::prelude::*;
 use super::templates;
-use components::module::page::*;
-use std::pin::Pin;
-use std::future::Future;
 
 const INITIAL_MODE:ModulePageKind = ModulePageKind::GridResize;
 
-pub type Page = Rc<ModulePage<PageRenderer, RawData, State>>;
+pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
 
 pub fn render() -> Page {
-    ModulePage::<PageRenderer, RawData, State>::render()
+    ModulePage::<PageRenderer, PageLoader, RawData, State>::render(
+        PageRenderer{},
+        PageLoader{}
+    )
 }
 
 pub type RawData = ();
@@ -43,19 +28,25 @@ impl State {
 pub struct PageRenderer { 
 }
 
-impl ModuleRenderer<RawData, State> for PageRenderer {
-    type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type FutureState = impl Future<Output = Option<State>>;
-    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
-
-    fn load_state() -> Self::FutureState{ 
-        async {
-            Some(Self::derive_state(()))
+pub struct PageLoader { 
+}
+impl StateLoader<RawData, State> for PageLoader {
+    type FutureState = impl Future<Output = Option<Rc<State>>>;
+    fn load_state(&self) -> Self::FutureState{ 
+        let state = self.derive_state(());
+        async move {
+            Some(state)
         }
     }
-    fn derive_state(data:RawData) -> State { 
-        State::new(data)
+
+    fn derive_state(&self, data:RawData) -> Rc<State> { 
+        Rc::new(State::new(data))
     }
+}
+impl ModuleRenderer<State> for PageRenderer {
+    type PageKindSignal = impl Signal<Item = ModulePageKind>;
+    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
+
 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal {
         state.kind.signal()

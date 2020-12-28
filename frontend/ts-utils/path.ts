@@ -18,6 +18,7 @@ const imagePrefix = (lib:MediaLibOptions):string => {
         case "global": return "image";
         case "user": return "image-user";
         case "web": return "image-web";
+		default: return "";
     }
 }
 
@@ -26,6 +27,7 @@ const audioPrefix = (lib:MediaLibOptions):string => {
         case "global": return "audio/global";
         case "user": return "audio/user";
         case "web": return "audio/web";
+		default: return "";
     }
 }
 
@@ -34,6 +36,7 @@ const sizeVariant = (size:MediaSizeOptions):string => {
         case "original": return "original";
         case "full": return "resized";
         case "thumb": return "thumbnail";
+		default: return "";
     }
 }
 

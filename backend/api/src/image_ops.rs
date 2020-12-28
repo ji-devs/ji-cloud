@@ -1,4 +1,4 @@
-use image::{imageops::FilterType, DynamicImage, ImageOutputFormat};
+use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageOutputFormat};
 use shared::domain::image::ImageKind;
 
 pub fn generate_images(
@@ -6,11 +6,19 @@ pub fn generate_images(
     kind: ImageKind,
 ) -> anyhow::Result<(Vec<u8>, Vec<u8>, Vec<u8>)> {
     let resized = {
-        let mut buffer = Vec::new();
         let (width, height) = kind.size();
-        original
-            .resize(width, height, FilterType::Nearest)
-            .write_to(&mut buffer, ImageOutputFormat::Png)?;
+        let new_image = match kind {
+            ImageKind::Canvas => original.resize_exact(width, height, FilterType::Nearest),
+
+            ImageKind::Sticker if original.width() >= width && original.height() >= height => {
+                original.clone()
+            }
+
+            ImageKind::Sticker => original.resize(width, height, FilterType::Nearest),
+        };
+
+        let mut buffer = Vec::new();
+        new_image.write_to(&mut buffer, ImageOutputFormat::Png)?;
         buffer
     };
 

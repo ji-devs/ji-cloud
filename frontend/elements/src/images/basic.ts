@@ -7,22 +7,24 @@ import {mediaUi} from "@utils/path";
 export class _ extends LitElement {
   static get styles() {
       return [css`
-      img, :host{
-        height:100%;
-        width:100%;
+
+      :host {
+        display: inline-block;
       }
 
+      img {
+        width: 100%;
+        height: 100%;
+      }
 
       `];
-    }
+  }
     
 
 
   @property()
   src:string = ""; 
   
-  createRenderRoot() { return this; }
-
   onLoad(evt:Event) {
     const img = evt.currentTarget as HTMLImageElement;
     const width = img.naturalWidth;

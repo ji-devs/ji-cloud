@@ -9,8 +9,9 @@ use once_cell::sync::Lazy;
 use std::sync::atomic::{Ordering, AtomicI32};
 use serde::Deserialize;
 use std::sync::{Mutex, MutexGuard};
+use futures_signals::signal::Mutable;
 
-static RESIZE_INFO: Lazy<Mutex<ResizeInfo>> = Lazy::new(|| Mutex::new(ResizeInfo::default()));
+static RESIZE_INFO: Lazy<Mutable<ResizeInfo>> = Lazy::new(|| Mutable::new(ResizeInfo::default()));
 // This event data is sent from the custom element
 // And then stashed in a global for when we need it at runtime
 #[derive(Deserialize, Debug, Clone, Default)]
@@ -31,17 +32,9 @@ pub struct ResizeInfo {
 }
 
 pub fn set_resize_info(info:ResizeInfo) {
-    *RESIZE_INFO.lock().unwrap_throw() = info;
+    RESIZE_INFO.set(info);
 }
 
-//To borrow the lock for a bunch of reads
-pub fn lock_resize_info() -> MutexGuard<'static, ResizeInfo> {
-    RESIZE_INFO.lock().unwrap_throw()
-}
-
-pub fn map_resize_info<F, A>(map: F) -> A
-where
-    F: FnOnce(&ResizeInfo) -> A
-{
-    map(&lock_resize_info())
+pub fn get_resize_info() -> Mutable<ResizeInfo> {
+    RESIZE_INFO.clone()
 }
