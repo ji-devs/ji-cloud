@@ -1,0 +1,54 @@
+name: Elements Test PR
+
+on:
+  pull_request:
+    paths:
+    - 'config/**'
+    - 'frontend/elements/**'
+    - 'frontend/config/**'
+    - 'frontend/ts-utils/**'
+  push:
+    branches: 
+    - master
+    - sandbox
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - elements test - 001]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: install element deps
+        run: npm install
+        working-directory: "./frontend/elements"
+
+      - name: test elements 
+        run: npm run test 
+        working-directory: "./frontend/elements"
+          
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
