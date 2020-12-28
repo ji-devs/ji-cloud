@@ -32,22 +32,31 @@ export class _ extends LitElement {
         margin-top: 8px;
         margin-left:16px;
     }
+    img {
+        margin: 0 16px;
+    }
     `];
   }
 
 @property()
 label: string = "";
 
+@property()
+path: string = "";
+
+@property()
+open: boolean = false;
+
   render() {
 
-    const {label} = this;
+    const {label, path, open} = this;
 
     return html`
   
-    <div class="main-wrapper">
+    <div class="main-wrapper open">
         <div class="inside-wrapper">
             <div class="text-wrapper flex py-3">
-                <img data-id="arrow" class="px-1" src="{{MEDIA_UI}}/icon-chevron-categories-24-px.svg" alt="">
+                <img class="px-1" src="${path}" alt="">
                 <p>${label}</p>
             </div>
 
