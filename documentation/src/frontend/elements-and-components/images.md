@@ -5,7 +5,7 @@ There is never a need to use `<img>` directly. We have precisely two storages:
 * `<img-ui>`: corresponds to the Dropbox folder for static ui images
 * `<img-ji>`: corresponds to uploaded images on our server.
 
-Consult the elements for the full list of available properties.
+Consult the elements for the full list of available properties, or better yet - just use the Components everywhere and consult their `Args` interface
 
 ### Components
 
