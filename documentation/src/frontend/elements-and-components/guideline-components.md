@@ -138,3 +138,63 @@ UserPage.argTypes = {
 ```
 
 The current list of available controls and annotations are here: [https://storybook.js.org/docs/react/essentials/controls#annotation](https://storybook.js.org/docs/react/essentials/controls#annotation)
+
+### Slots
+
+There is a pattern where you want a component to render its elements to a particular slot. 
+
+In order to make that easier, there's a couple helper functions in `@utils/slot`.
+
+`injectSlotStr` - will inject a `slotStr` property into the provided object with the html string of `slot="${slot}"`, if the object has a `slot` property.
+
+Example:
+
+```typescript
+
+const props = {
+  name: "hello"
+  slot: "foo"
+}
+
+const {name, slotStr} = injectSlotStr(props);
+return `<div name="${name}" ${slotStr}></name>` // <div name="hello" slot="foo" />
+```
+
+That's helpful when there's exactly one property named `slot` in the props object, but when you have more than one, use `extractSlotStr`:
+
+
+```typescript
+
+const props = {
+  name: "hello"
+  slot1: "foo"
+  slot2: "foo"
+}
+
+const {name} = props;
+const slot1Str = extractSlotStr ("slot1") (props);
+const slot2Str = extractSlotStr ("slot2") (props);
+
+return `<div name="${name}" ${slot1Str}></name>` // <div name="hello" slot="foo" />
+return `<div name="${name}" ${slot2Str}></name>` // <div name="hello" slot="bar" />
+```
+
+`extractSlotStr` is designed to make partial application easier:
+
+```typescript
+
+//imagine we use the name "left" for a lot of slots everywhere
+//this could be added to the general utils module
+const extractSlotLeft = extractSlotStr("left");
+
+//And then used everywhere
+const props = {
+  name: "hello"
+  left: "foo"
+}
+
+const {name} = props;
+const slotStr = extractSlotLeft (props);
+
+return `<div name="${name}" ${slotStr}></name>` // <div name="hello" slot="left" />
+```
