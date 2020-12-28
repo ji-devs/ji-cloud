@@ -147,7 +147,8 @@ There is a pattern where you want a component to _optionally_ render its element
 
 In order to make this optional assignment easier, there's a couple helper functions in `@utils/slot`.
 
-`injectSlotStr` - will inject a `slotStr` property into the provided object with the html string of `slot="${slot}"`, if the object has a `slot` property.
+
+`injectSlotStr` - will inject a `slotStr` property into the provided object with the html string of `slot="${slot}"`, if the object has a `slot` property. If it doesn't, then `slotStr` will be an empty string.
 
 Example:
 
