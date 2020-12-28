@@ -40,7 +40,7 @@ const DEFAULT_ARGS:ButtonArgs = {
   text: "click me"
 }
 
-export const Button = (props:?ButtonArgs) => {
+export const Button = (props?:ButtonArgs) => {
     const {text} = props || DEFAULT_ARGS;
 
     return `<my-button text="${text}" />`
@@ -53,11 +53,11 @@ Button.args = DEFAULT_ARGS;
 If the element itself needs to be changed, but it uses the same basic arguments, re-use them:
 
 ```typescript
-export const CircleButton = (props:?ButtonArgs) => {
+export const CircleButton = (props?:ButtonArgs) => {
     const {text} = props || DEFAULT_ARGS;
     return `<circle-button text="${text}" />`
 }
-export const RectButton = (props:?ButtonArgs) => {
+export const RectButton = (props?:ButtonArgs) => {
     const {text} = props || DEFAULT_ARGS;
     return `<rect-button text="${text}" />`
 }
