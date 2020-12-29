@@ -10,13 +10,9 @@ use rusoto_s3::{
 };
 use shared::{
     domain::{audio::AudioId, image::ImageId},
-    media::{
-        audio_id_to_key, id_with_kind_to_key, image_id_to_key, MediaKind, MediaLibraryKind,
-        MediaVariant,
-    },
+    media::{audio_id_to_key, image_id_to_key, Audio, ImageSize, MediaLibraryKind},
 };
 use url::Url;
-use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct S3Client {
@@ -84,9 +80,9 @@ impl S3Client {
             ..PutObjectRequest::default()
         };
 
-        let original = client.put_object(make_req(MediaVariant::Original, original));
-        let resized = client.put_object(make_req(MediaVariant::Resized, resized));
-        let thumbnail = client.put_object(make_req(MediaVariant::Thumbnail, thumbnail));
+        let original = client.put_object(make_req(ImageSize::Original, original));
+        let resized = client.put_object(make_req(ImageSize::Resized, resized));
+        let thumbnail = client.put_object(make_req(ImageSize::Thumbnail, thumbnail));
 
         futures::future::try_join3(original, resized, thumbnail).await?;
 
@@ -96,7 +92,7 @@ impl S3Client {
     pub fn image_presigned_get_url(
         &self,
         library: MediaLibraryKind,
-        kind: MediaVariant,
+        kind: ImageSize,
         image: ImageId,
     ) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
@@ -113,24 +109,9 @@ impl S3Client {
         Ok(url.parse()?)
     }
 
-    async fn delete_media(
-        &self,
-        library: MediaLibraryKind,
-        variant: MediaVariant,
-        id: Uuid,
-        media_kind: MediaKind,
-    ) {
-        if let Err(err) = self
-            .try_delete(id_with_kind_to_key(library, variant, id, media_kind))
-            .await
-        {
-            log::warn!(
-                "failed to delete {} with id {} ({}) from s3: {}",
-                media_kind.to_str(),
-                id.to_hyphenated(),
-                variant.to_str(),
-                err
-            );
+    async fn delete_media(&self, key: &str) {
+        if let Err(err) = self.try_delete(key.to_string()).await {
+            log::warn!("failed to delete {} from s3: {}", key, err);
 
             sentry::with_scope(
                 |scope| scope.set_level(Some(sentry::Level::Warning)),
@@ -139,11 +120,7 @@ impl S3Client {
                         ty: "info".to_owned(),
                         data: {
                             let mut map = sentry::protocol::Map::new();
-                            map.insert("kind".to_owned(), media_kind.to_str().into());
-                            map.insert(
-                                "key".to_owned(),
-                                id_with_kind_to_key(library, variant, id, media_kind).into(),
-                            );
+                            map.insert("key".to_owned(), key.to_string().into());
                             map
                         },
                         ..Default::default()
@@ -174,10 +151,10 @@ impl S3Client {
     pub async fn delete_image(
         &self,
         library: MediaLibraryKind,
-        variant: MediaVariant,
+        variant: ImageSize,
         image: ImageId,
     ) {
-        self.delete_media(library, variant, image.0, MediaKind::Image)
+        self.delete_media(&image_id_to_key(library, variant, image))
             .await
     }
 
@@ -197,7 +174,7 @@ impl S3Client {
         client
             .put_object(PutObjectRequest {
                 bucket: self.bucket.clone(),
-                key: id_to_key(MediaVariant::Original),
+                key: id_to_key(Audio::Original),
                 body: Some(original.into()),
                 content_type: Some("audio/mp3".to_owned()),
                 ..PutObjectRequest::default()
@@ -210,7 +187,7 @@ impl S3Client {
     pub fn audio_presigned_get_url(
         &self,
         library: MediaLibraryKind,
-        kind: MediaVariant,
+        kind: Audio,
         audio: AudioId,
     ) -> anyhow::Result<Url> {
         let url = GetObjectRequest {
@@ -227,13 +204,8 @@ impl S3Client {
         Ok(url.parse()?)
     }
 
-    pub async fn delete_audio(
-        &self,
-        library: MediaLibraryKind,
-        variant: MediaVariant,
-        audio: AudioId,
-    ) {
-        self.delete_media(library, variant, audio.0, MediaKind::Audio)
+    pub async fn delete_audio(&self, library: MediaLibraryKind, variant: Audio, audio: AudioId) {
+        self.delete_media(&audio_id_to_key(library, variant, audio))
             .await
     }
 }
