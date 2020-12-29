@@ -24,7 +24,7 @@ use shared::{
         },
         meta::MetaKind,
     },
-    media::{MediaLibraryKind, MediaVariant},
+    media::{ImageVariant, MediaLibraryKind},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -53,8 +53,8 @@ pub mod user {
             },
             CreateResponse,
         },
+        media::ImageVariant,
         media::MediaLibraryKind,
-        media::MediaVariant,
     };
     use sqlx::PgPool;
 
@@ -113,9 +113,9 @@ pub mod user {
 
         let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
         let ((), (), ()) = futures::future::join3(
-            delete_image(MediaVariant::Original),
-            delete_image(MediaVariant::Resized),
-            delete_image(MediaVariant::Thumbnail),
+            delete_image(ImageVariant::Original),
+            delete_image(ImageVariant::Resized),
+            delete_image(ImageVariant::Thumbnail),
         )
         .await;
 
@@ -408,9 +408,9 @@ async fn delete(
 
     let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
-        delete_image(MediaVariant::Original),
-        delete_image(MediaVariant::Resized),
-        delete_image(MediaVariant::Thumbnail),
+        delete_image(ImageVariant::Original),
+        delete_image(ImageVariant::Resized),
+        delete_image(ImageVariant::Thumbnail),
         algolia.delete_image(image),
     )
     .await;

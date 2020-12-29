@@ -2,7 +2,6 @@
 
 use crate::domain::{audio::AudioId, image::ImageId};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -24,26 +23,42 @@ impl MediaKind {
     }
 }
 
-/// Media Variants
+/// Image size Variants
 #[derive(Debug, Copy, Clone)]
-pub enum MediaVariant {
-    /// The original media
+pub enum ImageVariant {
+    /// The original image
     Original,
 
-    /// The resized media (for images)
+    /// The resized image
     Resized,
 
-    /// A thumbnail of the media (for images)
+    /// A thumbnail of the image
     Thumbnail,
 }
 
-impl MediaVariant {
+impl ImageVariant {
     /// returns `self` in a string representation.
     pub const fn to_str(self) -> &'static str {
         match self {
             Self::Original => "original",
             Self::Resized => "resized",
             Self::Thumbnail => "thumbnail",
+        }
+    }
+}
+
+/// Audio Variants - for now just one but could add more later
+#[derive(Debug, Copy, Clone)]
+pub enum AudioVariant {
+    /// The original audio
+    Original,
+}
+
+impl AudioVariant {
+    /// returns `self` in a string representation.
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Original => "original",
         }
     }
 }
@@ -77,45 +92,34 @@ impl MediaLibraryKind {
             Self::Web => "audio/web",
         }
     }
-
-    const fn prefix(self, media_kind: MediaKind) -> &'static str {
-        match media_kind {
-            MediaKind::Audio => self.audio_prefix(),
-            MediaKind::Image => self.image_prefix(),
-        }
-    }
-}
-
-fn id_to_key_inner(prefix: &str, variant: MediaVariant, id: Uuid) -> String {
-    format!("{}/{}/{}", prefix, variant.to_str(), id.to_hyphenated())
 }
 
 /// gives the key for a image with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
 pub fn image_id_to_key(
     library_kind: MediaLibraryKind,
-    variant: MediaVariant,
+    variant: ImageVariant,
     id: ImageId,
 ) -> String {
-    id_to_key_inner(library_kind.image_prefix(), variant, id.0)
+    format!(
+        "{}/{}/{}",
+        library_kind.image_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
 }
 
 /// gives the key for a audio-file with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
 pub fn audio_id_to_key(
     library_kind: MediaLibraryKind,
-    variant: MediaVariant,
+    variant: AudioVariant,
     id: AudioId,
 ) -> String {
-    id_to_key_inner(library_kind.audio_prefix(), variant, id.0)
-}
-
-/// Meant primarily for backend usage
-pub fn id_with_kind_to_key(
-    library_kind: MediaLibraryKind,
-    variant: MediaVariant,
-    id: Uuid,
-    media_kind: MediaKind,
-) -> String {
-    id_to_key_inner(library_kind.prefix(media_kind), variant, id)
+    format!(
+        "{}/{}/{}",
+        library_kind.audio_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
 }
