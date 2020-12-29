@@ -25,7 +25,7 @@ impl MediaKind {
 
 /// Image size Variants
 #[derive(Debug, Copy, Clone)]
-pub enum ImageSize {
+pub enum ImageVariant {
     /// The original image
     Original,
 
@@ -36,7 +36,7 @@ pub enum ImageSize {
     Thumbnail,
 }
 
-impl ImageSize {
+impl ImageVariant {
     /// returns `self` in a string representation.
     pub const fn to_str(self) -> &'static str {
         match self {
@@ -49,12 +49,12 @@ impl ImageSize {
 
 /// Audio Variants - for now just one but could add more later
 #[derive(Debug, Copy, Clone)]
-pub enum Audio {
+pub enum AudioVariant {
     /// The original audio
     Original,
 }
 
-impl Audio {
+impl AudioVariant {
     /// returns `self` in a string representation.
     pub const fn to_str(self) -> &'static str {
         match self {
@@ -96,7 +96,11 @@ impl MediaLibraryKind {
 
 /// gives the key for a image with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
-pub fn image_id_to_key(library_kind: MediaLibraryKind, variant: ImageSize, id: ImageId) -> String {
+pub fn image_id_to_key(
+    library_kind: MediaLibraryKind,
+    variant: ImageVariant,
+    id: ImageId,
+) -> String {
     format!(
         "{}/{}/{}",
         library_kind.image_prefix(),
@@ -107,7 +111,11 @@ pub fn image_id_to_key(library_kind: MediaLibraryKind, variant: ImageSize, id: I
 
 /// gives the key for a audio-file with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
-pub fn audio_id_to_key(library_kind: MediaLibraryKind, variant: Audio, id: AudioId) -> String {
+pub fn audio_id_to_key(
+    library_kind: MediaLibraryKind,
+    variant: AudioVariant,
+    id: AudioId,
+) -> String {
     format!(
         "{}/{}/{}",
         library_kind.audio_prefix(),

@@ -35,7 +35,7 @@ pub mod user {
             },
             CreateResponse,
         },
-        media::Audio,
+        media::AudioVariant,
         media::MediaLibraryKind,
     };
     use sqlx::PgPool;
@@ -93,7 +93,7 @@ pub mod user {
             .await
             .map_err(super::check_conflict_delete)?;
 
-        s3.delete_audio(MediaLibraryKind::Global, Audio::Original, audio)
+        s3.delete_audio(MediaLibraryKind::Global, AudioVariant::Original, audio)
             .await;
 
         Ok(NoContent)
