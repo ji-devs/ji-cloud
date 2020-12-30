@@ -1,6 +1,6 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use crate::domain::{audio::AudioId, image::ImageId};
+use crate::domain::{animation::AnimationId, audio::AudioId, image::ImageId};
 use serde::{Deserialize, Serialize};
 
 /// Media Kinds
@@ -11,6 +11,9 @@ pub enum MediaKind {
 
     /// Media is an image
     Image,
+
+    /// Media is an animation
+    Animation,
 }
 
 impl MediaKind {
@@ -19,6 +22,7 @@ impl MediaKind {
         match self {
             Self::Audio => "audio",
             Self::Image => "image",
+            Self::Animation => "animation",
         }
     }
 }
@@ -63,6 +67,25 @@ impl AudioVariant {
     }
 }
 
+/// Animation Variants
+#[derive(Debug, Copy, Clone)]
+pub enum AnimationVariant {
+    /// Gif Animation
+    Gif,
+    /// Spritesheet Animation
+    Spritesheet,
+}
+
+impl AnimationVariant {
+    /// returns `self` in a string representation.
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Gif => "gif",
+            Self::Spritesheet => "spritesheet",
+        }
+    }
+}
+
 /// Media Libraries
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum MediaLibraryKind {
@@ -92,6 +115,14 @@ impl MediaLibraryKind {
             Self::Web => "audio/web",
         }
     }
+
+    const fn animation_prefix(self) -> &'static str {
+        match self {
+            Self::Global => "animation/global",
+            Self::User => "animation/user",
+            Self::Web => "animation/web",
+        }
+    }
 }
 
 /// gives the key for a image with the given parameters
@@ -119,6 +150,21 @@ pub fn audio_id_to_key(
     format!(
         "{}/{}/{}",
         library_kind.audio_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
+}
+
+/// gives the key for an animation with the given parameters
+/// this is *not* a full url, (for CDN it's missing the domain)
+pub fn animation_id_to_key(
+    library_kind: MediaLibraryKind,
+    variant: AnimationVariant,
+    id: AnimationId,
+) -> String {
+    format!(
+        "{}/{}/{}",
+        library_kind.animation_prefix(),
         variant.to_str(),
         id.0.to_hyphenated()
     )
