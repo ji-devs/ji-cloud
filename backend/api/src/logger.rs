@@ -1,8 +1,7 @@
-use log::LevelFilter;
-use simplelog::{Config, TermLogger, TerminalMode};
-
 pub fn init() -> anyhow::Result<()> {
-    TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Mixed)?;
+    env_logger::init_from_env(
+        env_logger::Env::default().default_filter_or("info,sqlx::query=warn"),
+    );
 
     Ok(())
 }

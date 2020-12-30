@@ -8,7 +8,7 @@ mod templates;
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv();
 
-    logger::init_logger()?;
+    logger::init()?;
 
     let remote_target = settings::read_remote_target()?;
 

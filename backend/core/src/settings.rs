@@ -245,12 +245,9 @@ impl SettingsManager {
             None => self.get_secret(keys::s3::BUCKET).await?,
         };
 
-        let access_key_id = self
-            .get_secret_with_backup(keys::s3::ACCESS_KEY_NEW, keys::s3::ACCESS_KEY_OLD)
-            .await?;
-        let secret_access_key = self
-            .get_secret_with_backup(keys::s3::SECRET_OLD, keys::s3::SECRET_NEW)
-            .await?;
+        let access_key_id = self.get_secret(keys::s3::ACCESS_KEY).await?;
+
+        let secret_access_key = self.get_secret(keys::s3::SECRET).await?;
 
         let disable_local = crate::env::env_bool(keys::s3::DISABLE);
 
@@ -321,12 +318,7 @@ impl SettingsManager {
 
     /// Load the settings for Algolia.
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        let application_id = self
-            .get_secret_with_backup(
-                keys::algolia::APPLICATION_ID_NEW,
-                keys::algolia::APPLICATION_ID_OLD,
-            )
-            .await?;
+        let application_id = self.get_secret(keys::algolia::APPLICATION_ID).await?;
 
         let key = self.get_secret(keys::algolia::KEY).await?;
 
