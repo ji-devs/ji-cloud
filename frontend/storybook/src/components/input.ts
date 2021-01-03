@@ -2,7 +2,9 @@ import "@elements/inputs/input-text";
 import "@elements/buttons/rectangle-button";
 import "@elements/inputs/input-underlined";
 import "@elements/inputs/textarea-underlined";
-
+import "@elements/inputs/search";
+import "@elements/inputs/dropdown";
+import "@elements/inputs/title-winput";
 import "@elements/inputs/checkbox";
 
 export default {
@@ -14,6 +16,20 @@ export const InputText = ({label,helpertext, error, instruction,errormessage }) 
  
     </input-text>`
     
+}
+
+export const SearchInput = ({label, path}) => {
+  return `<search-input placeholder="${label}" path="${path}" >
+
+  </search-input>`
+  
+}
+
+export const Dropdown = ({label,helpertext, error, instruction,errormessage, path}) => {
+  return `<dropdown-select label="${label}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+ 
+  </dropdown-select>`
+  
 }
 
 export const Checkbox = ({label}) => {
@@ -32,6 +48,14 @@ export const TextareaUnderlined = ({label}) => {
   return `<textarea-underlined label="${label}">
 
   </textarea-underlined>`
+}
+
+export const TitleWithInput = ({title,label, path}) => {
+  return `<title-winput title="${title}">
+  <search-input placeholder="${label}" path="${path}" slot="input">
+
+  </search-input>
+  </title-winput>`
 }
 
 InputText.args = {
@@ -54,4 +78,24 @@ InputUnderlined.args = {
 
 TextareaUnderlined.args = {
   label:"First Name"
+}
+
+SearchInput.args = {
+  label:"Category Search",
+  path:"search-24-px.svg",
+}
+
+TitleWithInput.args = {
+  label:"Category",
+  path:"search-24-px.svg",
+  title:"Placeholder"
+}
+
+Dropdown.args = {
+  instruction:false,
+ errormessage: "Wrong Password",
+ label: "Title",
+ helpertext: "Minimum 8 digits, Must include a number",
+ error: true,
+ path:"icn-chevron-dropdown-up.svg"
 }

@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
-@customElement('input-text')
+@customElement('dropdown-select')
 export class _ extends LitElement {
 
   static get styles() {
@@ -54,6 +54,12 @@ export class _ extends LitElement {
     display:block;
    }
    p{display:none;}
+   img-ui{
+    position: absolute;
+    top: 33%;
+    right: 20px;
+    transform: rotate(180deg)
+   }
    
   
     `];
@@ -72,11 +78,14 @@ export class _ extends LitElement {
   helpertext: string = "";
 
   @property()
+  path: string = "";
+
+  @property()
   error: boolean = false;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage} = this;
+    const {label, helpertext, error, instruction, errormessage, path} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -92,6 +101,7 @@ export class _ extends LitElement {
     <div class="input-wrapper">
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
+        <img-ui path="${path}"></img-ui>
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
     <p class="${errorClasses}">${errormessage}</p>

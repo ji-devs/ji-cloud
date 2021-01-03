@@ -12,7 +12,7 @@ export class _ extends LitElement {
         border-style:solid;
         border-width: 2px 2px 2px 8px;
         width:848px;
-        height:48px;
+        min-height:48px;
         border-radius:12px;
         
         
@@ -64,9 +64,9 @@ open: boolean = false;
             </div>
 
         </div>
-        <div>
+        <ul>
             <slot name="children"></slot>
-        </div>
+        </ul>
     </div>
 
   `;

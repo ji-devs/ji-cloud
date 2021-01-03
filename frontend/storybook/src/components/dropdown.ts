@@ -1,5 +1,6 @@
 import "@elements/dropdowns/selected-dropdown";
 import "@elements/dropdowns/tree-dropdown";
+import "@elements/dropdowns/tree-dropdown-child";
 
 import {ListHover} from "~/components/lists/school";
 import { InputUnderlined } from "./input";
@@ -20,7 +21,7 @@ export const SelectedDropdown = ({label}) => {
 
 export const TreeDropdown = ({label, path}) => {
   return `<tree-dropdown label="${label}" path="${path}">
-
+    <tree-dropdown-child></tree-dropdown-child>
   </tree-dropdown>
 `
 }
