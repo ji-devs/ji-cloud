@@ -29,6 +29,7 @@ export class _ extends LitElement {
         font-size:16px;
         padding:0 8px;
         width:100%;
+        
     }
     focus{
         outline:none;

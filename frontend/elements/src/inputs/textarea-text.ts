@@ -1,13 +1,16 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
-@customElement('textarea-underlined')
+@customElement('textarea-text')
 export class _ extends LitElement {
 
   static get styles() {
     return [css`
     .wrapper{
-        margin-bottom: 16px
+        margin-bottom: 16px;
+        border-radius: 14px;
+        border: solid 1px #89b3ff;
+        margin-top:40px;
     }
     label{
         padding-left: 8px;
@@ -32,6 +35,10 @@ export class _ extends LitElement {
     }
     focus{
         outline:none;
+        border: solid 2px #5590fc;
+    }
+    wrapper:active{
+        border: solid 2px #5590fc;
     }
     ::placeholder{
         color: #a1a8ad;
@@ -42,46 +49,52 @@ export class _ extends LitElement {
     }
     textarea{
         resize:none;
-        border-bottom:solid 1px #e5e7ef;
         width:100%;
         outline:none;
         background: transparent;
         appearance: none;
-        border-right: none;
-        border-top: none;
-        border-left: none;
         padding-left: 8px;
         font-family: Poppins;
         font-size:16px;
+        border:none;
     }
-   
-  
+
     `];
   }
 
   @property()
   label: string = "";
-  @property()
-  src: string = "";
-  @property()
-  icon: boolean = false;
 
+  @property()
+  errormessage: string = "";
+
+  @property()
+  instruction: boolean = false;
+
+  @property()
+  helpertext: string = "";
+
+  @property()
+  error: boolean = false;
 
   render() {
 
     const {label} = this;
 
+
+
+
     return html`
-    
-    <div class="wrapper">
+       <div class="wrapper">
   <label for="name" class="">
     <span class="text-jibuttonBlue">${label}</span>
     <div class="textarea-wrapper">
       <textarea rows="10"
-        contenteditable="true" type="text" placeholder="Jane Doe" aria-label="Full name"></textarea>
+       type="text" placeholder="Jane Doe" ></textarea>
     </div>
   </label>
 </div>
+   
      
   `;
   }
