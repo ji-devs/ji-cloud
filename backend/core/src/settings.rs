@@ -52,6 +52,12 @@ pub struct RuntimeSettings {
     /// Used to encode jwt tokens.
     pub jwt_encoding_key: EncodingKey,
 
+    /// Used to search for images via the bing image search api
+    ///
+    /// If missing, implies that bing searching is disabled.
+    // todo: move this and make it runtime reloadable somehow (bing suggests rotating keys)
+    pub bing_search_key: Option<String>,
+
     //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
     //Keeping a string is a stop-gap measure for now, not ideal
     /// Used to _decode_ jwt tokens.
@@ -65,6 +71,7 @@ impl RuntimeSettings {
         jwt_encoding_key: EncodingKey,
         jwt_decoding_key: String,
         remote_target: RemoteTarget,
+        bing_search_key: Option<String>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -85,6 +92,7 @@ impl RuntimeSettings {
             jwt_encoding_key,
             jwt_decoding_key,
             remote_target,
+            bing_search_key,
         })
     }
 
@@ -237,12 +245,9 @@ impl SettingsManager {
             None => self.get_secret(keys::s3::BUCKET).await?,
         };
 
-        let access_key_id = self
-            .get_secret_with_backup(keys::s3::ACCESS_KEY_NEW, keys::s3::ACCESS_KEY_OLD)
-            .await?;
-        let secret_access_key = self
-            .get_secret_with_backup(keys::s3::SECRET_OLD, keys::s3::SECRET_NEW)
-            .await?;
+        let access_key_id = self.get_secret(keys::s3::ACCESS_KEY).await?;
+
+        let secret_access_key = self.get_secret(keys::s3::SECRET).await?;
 
         let disable_local = crate::env::env_bool(keys::s3::DISABLE);
 
@@ -313,12 +318,7 @@ impl SettingsManager {
 
     /// Load the settings for Algolia.
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        let application_id = self
-            .get_secret_with_backup(
-                keys::algolia::APPLICATION_ID_NEW,
-                keys::algolia::APPLICATION_ID_OLD,
-            )
-            .await?;
+        let application_id = self.get_secret(keys::algolia::APPLICATION_ID).await?;
 
         let key = self.get_secret(keys::algolia::KEY).await?;
 
@@ -346,8 +346,14 @@ impl SettingsManager {
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
         let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
         let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
+        let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
-        RuntimeSettings::new(jwt_encoding_key, jwt_secret, self.remote_target)
+        RuntimeSettings::new(
+            jwt_encoding_key,
+            jwt_secret,
+            self.remote_target,
+            bing_search_key,
+        )
     }
 }
 

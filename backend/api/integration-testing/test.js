@@ -61,7 +61,7 @@ function createDbName(length) {
 
 function hookServerStarted(server) {
     return new Promise((resolve) => {
-        server.stdout.on('data', (data) => {
+        server.stderr.on('data', (data) => {
             if (data.toString().includes('Starting "actix-web-service-')) {
                 resolve();
             }
@@ -105,6 +105,7 @@ test.before(async (t) => {
         t.context.baseDbUrl = process.env.DATABASE_URL;
         t.context.getDbUrl = (name) => `${t.context.baseDbUrl}/${name}`;
     }
+
 });
 
 test.beforeEach(async (t) => {
@@ -130,13 +131,15 @@ test.beforeEach(async (t) => {
         GOOGLE_S3_ACCESS_SECRET: '',
         DISABLE_GOOGLE_CLOUD: true,
         PROJECT_ID: '',
-        ALGOLIA_APPLICATION_ID: '',
+        ALGOLIA_PROJECT_ID: '',
         ALGOLIA_KEY: '',
         ALGOLIA_LOCAL_DISABLE_CLIENT: true,
+        RUST_LOG: "warning,actix_server::builder=info",
     };
 
     t.context.port = port;
     t.context.server = spawnAsync(t.context.BIN_FILE, { env, encoding: 'utf8' });
+
     t.context.loggedInReqBase = {
         ...await login(),
         port,

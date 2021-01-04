@@ -1,8 +1,7 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use crate::domain::{audio::AudioId, image::ImageId};
+use crate::domain::{animation::AnimationId, audio::AudioId, image::ImageId};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -12,6 +11,9 @@ pub enum MediaKind {
 
     /// Media is an image
     Image,
+
+    /// Media is an animation
+    Animation,
 }
 
 impl MediaKind {
@@ -20,30 +22,66 @@ impl MediaKind {
         match self {
             Self::Audio => "audio",
             Self::Image => "image",
+            Self::Animation => "animation",
         }
     }
 }
 
-/// Media Variants
+/// Image size Variants
 #[derive(Debug, Copy, Clone)]
-pub enum MediaVariant {
-    /// The original media
+pub enum ImageVariant {
+    /// The original image
     Original,
 
-    /// The resized media (for images)
+    /// The resized image
     Resized,
 
-    /// A thumbnail of the media (for images)
+    /// A thumbnail of the image
     Thumbnail,
 }
 
-impl MediaVariant {
+impl ImageVariant {
     /// returns `self` in a string representation.
     pub const fn to_str(self) -> &'static str {
         match self {
             Self::Original => "original",
             Self::Resized => "resized",
             Self::Thumbnail => "thumbnail",
+        }
+    }
+}
+
+/// Audio Variants - for now just one but could add more later
+#[derive(Debug, Copy, Clone)]
+pub enum AudioVariant {
+    /// The original audio
+    Original,
+}
+
+impl AudioVariant {
+    /// returns `self` in a string representation.
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Original => "original",
+        }
+    }
+}
+
+/// Animation Variants
+#[derive(Debug, Copy, Clone)]
+pub enum AnimationVariant {
+    /// Gif Animation
+    Gif,
+    /// Spritesheet Animation
+    Spritesheet,
+}
+
+impl AnimationVariant {
+    /// returns `self` in a string representation.
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Gif => "gif",
+            Self::Spritesheet => "spritesheet",
         }
     }
 }
@@ -78,44 +116,56 @@ impl MediaLibraryKind {
         }
     }
 
-    const fn prefix(self, media_kind: MediaKind) -> &'static str {
-        match media_kind {
-            MediaKind::Audio => self.audio_prefix(),
-            MediaKind::Image => self.image_prefix(),
+    const fn animation_prefix(self) -> &'static str {
+        match self {
+            Self::Global => "animation/global",
+            Self::User => "animation/user",
+            Self::Web => "animation/web",
         }
     }
-}
-
-fn id_to_key_inner(prefix: &str, variant: MediaVariant, id: Uuid) -> String {
-    format!("{}/{}/{}", prefix, variant.to_str(), id.to_hyphenated())
 }
 
 /// gives the key for a image with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
 pub fn image_id_to_key(
     library_kind: MediaLibraryKind,
-    variant: MediaVariant,
+    variant: ImageVariant,
     id: ImageId,
 ) -> String {
-    id_to_key_inner(library_kind.image_prefix(), variant, id.0)
+    format!(
+        "{}/{}/{}",
+        library_kind.image_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
 }
 
 /// gives the key for a audio-file with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
 pub fn audio_id_to_key(
     library_kind: MediaLibraryKind,
-    variant: MediaVariant,
+    variant: AudioVariant,
     id: AudioId,
 ) -> String {
-    id_to_key_inner(library_kind.audio_prefix(), variant, id.0)
+    format!(
+        "{}/{}/{}",
+        library_kind.audio_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
 }
 
-/// Meant primarily for backend usage
-pub fn id_with_kind_to_key(
+/// gives the key for an animation with the given parameters
+/// this is *not* a full url, (for CDN it's missing the domain)
+pub fn animation_id_to_key(
     library_kind: MediaLibraryKind,
-    variant: MediaVariant,
-    id: Uuid,
-    media_kind: MediaKind,
+    variant: AnimationVariant,
+    id: AnimationId,
 ) -> String {
-    id_to_key_inner(library_kind.prefix(media_kind), variant, id)
+    format!(
+        "{}/{}/{}",
+        library_kind.animation_prefix(),
+        variant.to_str(),
+        id.0.to_hyphenated()
+    )
 }

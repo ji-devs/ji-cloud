@@ -9,11 +9,9 @@ pub mod s3 {
 
     pub const BUCKET: &str = "S3_BUCKET";
 
-    pub const ACCESS_KEY_OLD: &str = "S3_ACCESS_KEY_ID";
-    pub const ACCESS_KEY_NEW: &str = "GOOGLE_S3_ACCESS_KEY";
+    pub const ACCESS_KEY: &str = "GOOGLE_S3_ACCESS_KEY";
 
-    pub const SECRET_OLD: &str = "S3_SECRET_ACCESS_KEY";
-    pub const SECRET_NEW: &str = "GOOGLE_S3_ACCESS_SECRET";
+    pub const SECRET: &str = "GOOGLE_S3_ACCESS_SECRET";
 
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
 }
@@ -27,8 +25,7 @@ pub mod db {
 }
 
 pub mod algolia {
-    pub const APPLICATION_ID_OLD: &str = "ALGOLIA_APPLICATION_ID";
-    pub const APPLICATION_ID_NEW: &str = "ALGOLIA_PROJECT_ID";
+    pub const APPLICATION_ID: &str = "ALGOLIA_PROJECT_ID";
 
     pub const IMAGE_INDEX: &str = "ALGOLIA_IMAGE_INDEX";
 
@@ -40,3 +37,5 @@ pub const JWT_SECRET: &str = "JWT_SECRET";
 
 pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
 pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
+
+pub const BING_SEARCH_KEY: &str = "BING_SEARCH_KEY";

@@ -24,7 +24,7 @@ use shared::{
         },
         meta::MetaKind,
     },
-    media::{MediaLibraryKind, MediaVariant},
+    media::{ImageVariant, MediaLibraryKind},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -53,8 +53,8 @@ pub mod user {
             },
             CreateResponse,
         },
+        media::ImageVariant,
         media::MediaLibraryKind,
-        media::MediaVariant,
     };
     use sqlx::PgPool;
 
@@ -113,9 +113,9 @@ pub mod user {
 
         let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
         let ((), (), ()) = futures::future::join3(
-            delete_image(MediaVariant::Original),
-            delete_image(MediaVariant::Resized),
-            delete_image(MediaVariant::Thumbnail),
+            delete_image(ImageVariant::Original),
+            delete_image(ImageVariant::Resized),
+            delete_image(ImageVariant::Thumbnail),
         )
         .await;
 
@@ -149,6 +149,41 @@ pub mod user {
             .await?;
 
         Ok(Json(UserImageListResponse { images }))
+    }
+}
+
+mod web_library {
+    use core::settings::RuntimeSettings;
+
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Data, Json, Query},
+    };
+
+    use shared::{
+        api::{endpoints, ApiEndpoint},
+        domain::image::web::WebImageSearchResponse,
+    };
+
+    use crate::{error::ServerError, extractor::WrapAuthClaimsNoDb};
+
+    /// Search for images in the web image library.
+    #[api_v2_operation]
+    pub async fn search(
+        runtime_settings: Data<RuntimeSettings>,
+        _claims: WrapAuthClaimsNoDb,
+        query: Query<<endpoints::image::web::Search as ApiEndpoint>::Req>,
+    ) -> Result<Json<<endpoints::image::web::Search as ApiEndpoint>::Res>, ServerError> {
+        let query = query.into_inner();
+
+        // todo: handle empty queries (they're invalid in bing)
+
+        let res = match &runtime_settings.bing_search_key {
+            Some(key) => crate::image_search::get_images(&query.q, key).await?,
+            None => WebImageSearchResponse { images: Vec::new() },
+        };
+
+        Ok(Json(res))
     }
 }
 
@@ -373,9 +408,9 @@ async fn delete(
 
     let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(
-        delete_image(MediaVariant::Original),
-        delete_image(MediaVariant::Resized),
-        delete_image(MediaVariant::Thumbnail),
+        delete_image(ImageVariant::Original),
+        delete_image(ImageVariant::Resized),
+        delete_image(ImageVariant::Thumbnail),
         algolia.delete_image(image),
     )
     .await;
@@ -426,5 +461,11 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         image::user::List::PATH,
         image::user::List::METHOD.route().to(self::user::list),
+    )
+    .route(
+        image::web::Search::PATH,
+        image::web::Search::METHOD
+            .route()
+            .to(self::web_library::search),
     );
 }

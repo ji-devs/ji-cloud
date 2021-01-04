@@ -225,8 +225,8 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     // then drop.
     sqlx::query!("delete from image_metadata where id = $1", image.0)
         .execute(&mut conn)
-        .await
-        .map(drop)
+        .await?;
+    conn.commit().await
 }
 
 pub async fn get_image_kind(db: &PgPool, image: ImageId) -> sqlx::Result<Option<ImageKind>> {
