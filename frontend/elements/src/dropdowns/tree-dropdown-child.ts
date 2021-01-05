@@ -16,33 +16,35 @@ export class _ extends LitElement {
     .open img-ui{
         transform: rotate(90deg);
     }
+    ul.closed {
+      display: none;
+    }
     `];
   }
 
 @property()
 label: string = "";
 
-@property()
-path: string = "";
-
-@property()
+@property({type: Boolean})
 open: boolean = false;
 
   render() {
 
-    const {label, path, open} = this;
+    const {label, open} = this;
 
     return html`
   
   <li class="titleoptions open">
-    <div data-id="label"></div>
+    <div data-id="label">${label}</div>
     <div class="absolute border-l border-b border-jiblueLight w-6 h-6 spacer">
     </div>
     <div class="flex mr-2 pl-2 relative">
-      <img-ui data-id="arrow" class="px-1" path="/icon-chevron-categories-24-px.svg" alt="">
-      <p class="font-normal">Hello</p>
+      <img-ui class="px-1" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
+      
     </div>
-
+    <ul class="${open ? 'open' : 'closed'}">
+            <slot></slot>
+        </ul>
   </li>
 
   `;
