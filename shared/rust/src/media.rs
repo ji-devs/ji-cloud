@@ -68,12 +68,15 @@ impl AudioVariant {
 }
 
 /// Animation Variants
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+#[repr(i16)]
 pub enum AnimationVariant {
     /// Gif Animation
-    Gif,
+    Gif = 0,
     /// Spritesheet Animation
-    Spritesheet,
+    Spritesheet = 1,
 }
 
 impl AnimationVariant {

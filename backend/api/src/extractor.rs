@@ -244,6 +244,17 @@ impl Scope for ScopeAdmin {
     }
 }
 
+#[derive(Apiv2Schema)]
+pub(crate) struct ScopeManageAnimation;
+
+impl Scope for ScopeManageAnimation {
+    fn scope() -> UserScope {
+        UserScope::ManageAnimation
+    }
+}
+
+
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,

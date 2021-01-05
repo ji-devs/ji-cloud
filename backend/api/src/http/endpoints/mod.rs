@@ -6,3 +6,4 @@ pub mod jig;
 pub mod meta;
 pub mod module;
 pub mod user;
+pub mod animation;

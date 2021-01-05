@@ -9,8 +9,11 @@ use rusoto_s3::{
     DeleteObjectRequest, GetObjectRequest, PutObjectRequest, S3,
 };
 use shared::{
-    domain::{audio::AudioId, image::ImageId},
-    media::{audio_id_to_key, image_id_to_key, AudioVariant, ImageVariant, MediaLibraryKind},
+    domain::{animation::AnimationId, audio::AudioId, image::ImageId},
+    media::{
+        self, audio_id_to_key, image_id_to_key, AnimationVariant, AudioVariant, ImageVariant,
+        MediaLibraryKind,
+    },
 };
 use url::Url;
 
@@ -184,6 +187,32 @@ impl S3Client {
         Ok(())
     }
 
+    // note for future maintainers:
+    // this is split into 2 functions because they're basically entirely different
+    pub async fn upload_animation_gif(
+        &self,
+        library: MediaLibraryKind,
+        animation: AnimationId,
+        gif: Vec<u8>,
+    ) -> anyhow::Result<()> {
+        let client = match &self.client {
+            Some(client) => client,
+            None => return Ok(()),
+        };
+
+        client
+            .put_object(PutObjectRequest {
+                bucket: self.bucket.clone(),
+                key: media::animation_id_to_key(library, AnimationVariant::Gif, animation),
+                body: Some(gif.into()),
+                content_type: Some("image/gif".to_owned()),
+                ..PutObjectRequest::default()
+            })
+            .await?;
+
+        Ok(())
+    }
+
     pub fn audio_presigned_get_url(
         &self,
         library: MediaLibraryKind,
@@ -204,6 +233,26 @@ impl S3Client {
         Ok(url.parse()?)
     }
 
+    pub fn animation_presigned_get_url(
+        &self,
+        library: MediaLibraryKind,
+        kind: AnimationVariant,
+        animation: AnimationId,
+    ) -> anyhow::Result<Url> {
+        let url = GetObjectRequest {
+            bucket: self.bucket.clone(),
+            key: media::animation_id_to_key(library, kind, animation),
+            ..GetObjectRequest::default()
+        }
+        .get_presigned_url(
+            &self.region,
+            &self.creds,
+            &PreSignedRequestOption::default(),
+        );
+
+        Ok(url.parse()?)
+    }
+
     pub async fn delete_audio(
         &self,
         library: MediaLibraryKind,
@@ -211,6 +260,16 @@ impl S3Client {
         audio: AudioId,
     ) {
         self.delete_media(&audio_id_to_key(library, variant, audio))
+            .await
+    }
+
+    pub async fn delete_animation(
+        &self,
+        library: MediaLibraryKind,
+        variant: AnimationVariant,
+        animation: AnimationId,
+    ) {
+        self.delete_media(&media::animation_id_to_key(library, variant, animation))
             .await
     }
 }

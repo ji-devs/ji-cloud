@@ -1,9 +1,14 @@
 //! Types for animations.
 
+use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::media::AnimationVariant;
+
+use super::Publish;
 
 /// Wrapper type around [`Uuid`], represents the ID of an animation.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -11,5 +16,65 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationId(pub Uuid);
+
+/// Response for getting a single audio file.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationResponse {
+    /// The animation's metadata.
+    pub metadata: AnimationMetadata,
+}
+
+/// Over the wire representation of an animation's metadata.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationMetadata {
+    /// The animation's ID.
+    pub id: AnimationId,
+
+    /// The name of the animation.
+    pub name: String,
+
+    /// The description of the animation.
+    pub description: String,
+
+    /// Is the animation premium?
+    pub is_premium: bool,
+
+    /// When the animation should be considered published (if at all).
+    pub publish_at: Option<DateTime<Utc>>,
+
+    /// What kind of animation this is.
+    pub variant: AnimationVariant,
+
+    /// Should the animation loop?
+    pub is_looping: bool,
+}
+
+// todo: # errors doc section
+/// Request to create a new animation.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationCreateRequest {
+    /// The name of the animation.
+    pub name: String,
+
+    /// The description of the animation.
+    pub description: String,
+
+    /// Is the animation premium?
+    pub is_premium: bool,
+
+    /// When to publish the animation.
+    ///
+    /// If [`Some`] publish the animation according to the `Publish`. Otherwise, don't publish it.
+    pub publish_at: Option<Publish>,
+
+    /// What kind of animation this is.
+    pub variant: AnimationVariant,
+
+    /// Should the animation loop?
+    pub is_looping: bool,
+}
 
 into_uuid![AnimationId];
