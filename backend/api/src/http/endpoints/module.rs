@@ -13,8 +13,7 @@ use shared::{
 use sqlx::PgPool;
 
 use crate::{
-    db,
-    error::{DeleteError, NotFoundError, ServerError},
+    db, error,
     extractor::{AuthUserWithScope, ScopeManageModule, WrapAuthClaimsNoDb},
 };
 
@@ -24,7 +23,7 @@ async fn create(
     db: Data<PgPool>,
     _auth: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<module::Create as ApiEndpoint>::Res>, ServerError> {
+) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Server> {
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
     let id = db::module::create(&*db, req.kind, req.body.as_ref()).await?;
 
@@ -37,7 +36,7 @@ async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageModule>,
     path: web::Path<ModuleId>,
-) -> Result<NoContent, DeleteError> {
+) -> Result<NoContent, error::Delete> {
     db::module::delete(&*db, path.into_inner()).await?;
 
     Ok(NoContent)
@@ -50,12 +49,12 @@ async fn update(
     _claims: AuthUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<ModuleId>,
-) -> Result<NoContent, NotFoundError> {
+) -> Result<NoContent, error::NotFound> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::module::update(&*db, path.into_inner(), req.kind, req.body.as_ref()).await?;
 
     if !exists {
-        return Err(NotFoundError::ResourceNotFound);
+        return Err(error::NotFound::ResourceNotFound);
     }
 
     Ok(NoContent)
@@ -67,15 +66,15 @@ async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     path: web::Path<ModuleId>,
-) -> Result<Json<<module::Get as ApiEndpoint>::Res>, NotFoundError> {
+) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
     let module = db::module::get(&db, path.into_inner())
         .await?
-        .ok_or(NotFoundError::ResourceNotFound)?;
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(ModuleResponse { module }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(module::Get::PATH, module::Get::METHOD.route().to(get))
         .route(
             module::Create::PATH,

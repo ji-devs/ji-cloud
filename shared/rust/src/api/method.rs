@@ -23,6 +23,7 @@ pub enum Method {
 #[cfg(feature = "backend")]
 impl Method {
     /// Gets a [`Route`](Route) based off of `Self`.
+    #[must_use]
     pub fn route(self) -> Route {
         match self {
             Self::Delete => web::delete(),
@@ -36,7 +37,8 @@ impl Method {
 
 impl Method {
     /// Represents `Self` as a [`str`](str).
-    pub fn as_str(self) -> &'static str {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::Delete => "DELETE",
             Self::Get => "GET",

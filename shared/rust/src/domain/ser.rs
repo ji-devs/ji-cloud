@@ -59,14 +59,14 @@ struct CSVVecVisitor<T: DeserializeOwned>(std::marker::PhantomData<T>);
 
 impl<T: DeserializeOwned> Default for CSVVecVisitor<T> {
     fn default() -> Self {
-        CSVVecVisitor(std::marker::PhantomData)
+        Self(std::marker::PhantomData)
     }
 }
 
 impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
     type Value = Vec<T>;
 
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(formatter, "a str")
     }
 

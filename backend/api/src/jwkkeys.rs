@@ -69,8 +69,8 @@ fn get_max_age(response: &Response) -> anyhow::Result<Duration> {
 }
 
 fn parse_max_age_value(cache_control_value: &str) -> anyhow::Result<Duration> {
-    for token in cache_control_value.split(",") {
-        let mut key_value = token.split("=").map(str::trim);
+    for token in cache_control_value.split(',') {
+        let mut key_value = token.split('=').map(str::trim);
         let key = key_value
             .next()
             .expect("str split always gives at least one element");
@@ -103,8 +103,8 @@ pub struct JwkVerifier {
 }
 
 impl JwkVerifier {
-    fn new(issuer: String, audience: String) -> JwkVerifier {
-        JwkVerifier {
+    fn new(issuer: String, audience: String) -> Self {
+        Self {
             key_holder: RwLock::new(JwkKeys {
                 keys: vec![],
                 expiration_time: Instant::now(),
@@ -154,10 +154,11 @@ impl JwkVerifier {
         validation.iss = Some(self.issuer.clone());
 
         let key = DecodingKey::from_rsa_components(&key.n, &key.e);
-        return jwt::decode(token, &key, &validation).map_err(|e| anyhow!(e));
+        jwt::decode(token, &key, &validation).map_err(|e| anyhow!(e))
     }
 }
 
+#[must_use]
 pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
     tokio::spawn(async move {
         loop {
@@ -185,6 +186,7 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
     })
 }
 
+#[must_use]
 pub fn create_verifier(config: core::settings::JwkSettings) -> Arc<JwkVerifier> {
     Arc::new(JwkVerifier::new(config.issuer, config.audience))
 }

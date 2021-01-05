@@ -11,18 +11,17 @@ use shared::{
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::{
-    db,
-    error::DeleteError,
+    db, error,
     extractor::{AuthUserWithScope, ScopeManageAnimation},
-    s3::S3Client,
+    s3,
 };
 
-fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
+fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {
         sqlx::Error::Database(e) if e.downcast_ref::<PgDatabaseError>().constraint().is_some() => {
-            DeleteError::Conflict
+            error::Delete::Conflict
         }
-        _ => DeleteError::InternalServerError(err.into()),
+        _ => error::Delete::InternalServerError(err.into()),
     }
 }
 
@@ -32,8 +31,8 @@ async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageAnimation>,
     req: Path<AnimationId>,
-    s3: Data<S3Client>,
-) -> Result<NoContent, DeleteError> {
+    s3: Data<s3::Client>,
+) -> Result<NoContent, error::Delete> {
     let animation = req.into_inner();
     let variant = db::animation::delete(&db, animation)
         .await
@@ -47,7 +46,7 @@ async fn delete(
     Ok(NoContent)
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg
         // .route(
         //     animation::Create::PATH,

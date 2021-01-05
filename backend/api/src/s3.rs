@@ -18,14 +18,14 @@ use shared::{
 use url::Url;
 
 #[derive(Clone)]
-pub struct S3Client {
+pub struct Client {
     creds: AwsCredentials,
     region: Region,
     bucket: String,
     client: Option<rusoto_s3::S3Client>,
 }
 
-impl S3Client {
+impl Client {
     pub fn new(s3_settings: S3Settings) -> anyhow::Result<Self> {
         let S3Settings {
             endpoint,

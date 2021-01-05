@@ -34,9 +34,9 @@ async fn main() -> anyhow::Result<()> {
 
         let _ = jwkkeys::run_task(jwk_verifier.clone());
 
-        let s3 = s3::S3Client::new(settings.s3_settings().await?)?;
+        let s3 = s3::Client::new(settings.s3_settings().await?)?;
 
-        let algolia = algolia::AlgoliaClient::new(settings.algolia_settings().await?)?;
+        let algolia = crate::algolia::Client::new(settings.algolia_settings().await?)?;
 
         let db_pool = db::get_pool(
             settings

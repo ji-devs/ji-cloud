@@ -13,7 +13,11 @@
 #![warn(clippy::string_lit_as_bytes)]
 #![warn(clippy::use_self)]
 #![warn(clippy::useless_let_if_seq)]
-#![allow(clippy::option_option)]
+#![allow(
+    clippy::option_option,
+    clippy::module_name_repetitions,
+    clippy::default_trait_access
+)]
 
 pub mod api;
 pub mod domain;

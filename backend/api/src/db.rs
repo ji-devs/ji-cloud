@@ -104,7 +104,7 @@ fn generate_metadata_insert(base_table: &str, meta_kind: &str, binds: usize) -> 
     s
 }
 
-pub(crate) fn nul_if_empty<T>(arr: &[T]) -> Option<&[T]> {
+pub(crate) const fn nul_if_empty<T>(arr: &[T]) -> Option<&[T]> {
     if arr.is_empty() {
         None
     } else {

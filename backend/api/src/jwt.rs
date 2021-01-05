@@ -3,20 +3,22 @@ use jsonwebtoken::{self as jwt, DecodingKey};
 use shared::domain::auth::AuthClaims;
 use sqlx::postgres::PgPool;
 
-pub fn get_claims(token_string: &str, key: DecodingKey) -> Result<AuthClaims, jwt::errors::Error> {
+pub fn get_claims(
+    token_string: &str,
+    key: &DecodingKey<'_>,
+) -> Result<AuthClaims, jwt::errors::Error> {
     let validation = jwt::Validation {
         validate_exp: false,
         ..Default::default()
     };
 
-    jsonwebtoken::decode::<AuthClaims>(&token_string, &key, &validation)
-        .map(|decoded| decoded.claims)
+    jsonwebtoken::decode::<AuthClaims>(token_string, key, &validation).map(|decoded| decoded.claims)
 }
 
 pub fn check_no_db(
     token_string: &str,
     csrf: &str,
-    key: DecodingKey,
+    key: &DecodingKey<'_>,
 ) -> Result<Option<AuthClaims>, jwt::errors::Error> {
     let claims = get_claims(token_string, key)?;
     if claims.csrf.as_deref() == Some(csrf) {
@@ -28,7 +30,7 @@ pub fn check_no_db(
 pub async fn check_no_csrf(
     db: &PgPool,
     token_string: &str,
-    key: DecodingKey<'_>,
+    key: &DecodingKey<'_>,
 ) -> anyhow::Result<Option<AuthClaims>> {
     let claims = get_claims(token_string, key)?;
 

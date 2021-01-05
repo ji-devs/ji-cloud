@@ -28,7 +28,7 @@ use std::{marker::PhantomData, sync::Arc};
 use uuid::Uuid;
 
 fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
-    let claims: jwkkeys::Claims = jsonwebtoken::dangerous_insecure_decode(&token).ok()?.claims;
+    let claims: jwkkeys::Claims = jsonwebtoken::dangerous_insecure_decode(token).ok()?.claims;
     let user_id = claims.sub;
     Some(FirebaseId(user_id))
 }
@@ -48,7 +48,7 @@ pub struct FirebaseUser {
 pub struct FirebaseId(pub String);
 
 // stolen from the stdlib and modified (to work on stable)
-fn split_once<'a>(s: &'a str, delimiter: char) -> Option<(&'a str, &'a str)> {
+fn split_once(s: &'_ str, delimiter: char) -> Option<(&'_ str, &'_ str)> {
     let start = s.find(delimiter)?;
     let end = start + delimiter.len_utf8();
     Some((&s[..start], &s[end..]))
@@ -174,7 +174,7 @@ impl FromRequest for WrapAuthClaimsNoDb {
         };
 
         future::ready(
-            check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
+            check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key())
                 .map_err(|_| {
                     BasicError::with_message(
                         StatusCode::UNAUTHORIZED,
@@ -200,7 +200,7 @@ pub trait Scope {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeManageCategory;
+pub struct ScopeManageCategory;
 
 impl Scope for ScopeManageCategory {
     fn scope() -> UserScope {
@@ -209,7 +209,7 @@ impl Scope for ScopeManageCategory {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeManageImage;
+pub struct ScopeManageImage;
 
 impl Scope for ScopeManageImage {
     fn scope() -> UserScope {
@@ -218,7 +218,7 @@ impl Scope for ScopeManageImage {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeManageJig;
+pub struct ScopeManageJig;
 
 impl Scope for ScopeManageJig {
     fn scope() -> UserScope {
@@ -227,7 +227,7 @@ impl Scope for ScopeManageJig {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeManageModule;
+pub struct ScopeManageModule;
 
 impl Scope for ScopeManageModule {
     fn scope() -> UserScope {
@@ -236,7 +236,7 @@ impl Scope for ScopeManageModule {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeAdmin;
+pub struct ScopeAdmin;
 
 impl Scope for ScopeAdmin {
     fn scope() -> UserScope {
@@ -245,15 +245,13 @@ impl Scope for ScopeAdmin {
 }
 
 #[derive(Apiv2Schema)]
-pub(crate) struct ScopeManageAnimation;
+pub struct ScopeManageAnimation;
 
 impl Scope for ScopeManageAnimation {
     fn scope() -> UserScope {
         UserScope::ManageAnimation
     }
 }
-
-
 
 #[derive(Apiv2Security)]
 #[openapi(
@@ -288,9 +286,9 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
             Err(e) => return futures::future::err(e.into()).into(),
         };
         // get claims and check csrf
-        let claims = check_no_db(cookie.value(), csrf, settings.jwt_decoding_key())
+        let claims = check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key())
             .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))
-            .and_then(|it| it.ok_or(BasicError::new(StatusCode::UNAUTHORIZED)));
+            .and_then(|it| it.ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED)));
 
         let claims = match claims {
             Ok(claims) => claims,
@@ -353,11 +351,11 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
         };
 
         async move {
-            check_no_csrf(&db, &cookie.value(), settings.jwt_decoding_key())
+            check_no_csrf(&db, cookie.value(), &settings.jwt_decoding_key())
                 .await
                 .map_err(crate::error::ise)?
                 .map(Self)
-                .ok_or(BasicError::new(StatusCode::UNAUTHORIZED).into())
+                .ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED).into())
         }
         .boxed()
         .into()
