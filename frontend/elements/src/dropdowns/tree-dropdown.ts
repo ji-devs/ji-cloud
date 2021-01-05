@@ -38,6 +38,12 @@ export class _ extends LitElement {
     .open img{
         transform: rotate(90deg);
     }
+    ul.closed {
+        display: none;
+    }
+    p{
+        line-height:0;
+    }
     `];
   }
 
@@ -47,7 +53,7 @@ label: string = "";
 @property()
 path: string = "";
 
-@property()
+@property({type: Boolean})
 open: boolean = false;
 
   render() {
@@ -64,8 +70,8 @@ open: boolean = false;
             </div>
 
         </div>
-        <ul>
-            <slot name="children"></slot>
+        <ul class="${open ? 'open' : 'closed'}">
+            <slot></slot>
         </ul>
     </div>
 

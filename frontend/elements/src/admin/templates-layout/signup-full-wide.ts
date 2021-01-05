@@ -56,7 +56,7 @@ export class _ extends LitElement {
   <div class="content-wrapper">
     <h1>${title}</h1>
     <slot name="subtitle"></slot>
-    <slot name="main>"></slot>
+    <slot name="main"></slot>
     <slot name="submit"></slot>
   </div>
 </div>

@@ -19,7 +19,7 @@ const DEFAULT_PROPS:Props = {
 export const Stream = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
     return `
-        <checkbox-list title="Suitable for age">
+        <checkbox-list title="Content from which streams of Judaism do you want to see?">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}

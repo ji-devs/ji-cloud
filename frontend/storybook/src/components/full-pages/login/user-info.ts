@@ -15,24 +15,21 @@ export default {
 }
 
 interface UserInfoArgs {
-  title:string,
-  options: Array<String>
+
 
   }
 
   const DEFAULT_ARGS:UserInfoArgs = {
-    title:"Which age group are you interested in?",
-    options: AGETWO_OPTIONS
+
   }
 
 export const UserInfo = (props?:UserInfoArgs) => {
 
-    const {options} = props || DEFAULT_ARGS;
 
 
     return `
     <grey-card>
-       <div slot="content"> ${AgeTwo}</div>
+       <div slot="content">${AgeTwo()}</div>
     </grey-card>
     
     `

@@ -18,6 +18,11 @@ export default {
         instruction: boolean,
         error: boolean,
         label:string,
+        dropdownicon:string,
+        language: string,
+        age:string,
+        goal:string,
+        categories:string,
 
      
   
@@ -33,7 +38,13 @@ export default {
         errormessage: "",
         instruction: false,
         error: false,
-        label: "Description"
+        label: "Description",
+        dropdownicon:"icn-chevron-dropdown-up.svg",
+        language: "Language of instructions",
+        age: "Age",
+        goal: "Teaching Goal",
+        categories: "Categories"
+
 
       }
 
@@ -41,7 +52,7 @@ export default {
 
 export const PublishFullOne = (props?:PublishArgs) => {
 
-    const {title, subtitle, path, name, helpertext, errormessage,error, instruction, label } = props || DEFAULT_ARGS;
+ const {title, subtitle, path, dropdownicon, name, helpertext, errormessage,error, instruction, label, language, age, goal, categories } = props || DEFAULT_ARGS;
 
 
     return `
@@ -50,13 +61,13 @@ export const PublishFullOne = (props?:PublishArgs) => {
         <input-text slot="column_two" label="${name}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
         <textarea-text label="${label}" slot="column_two"></textarea-text>
-        <dropdown-select slot="topleft" path="${dropdownicon}" label="${language}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="column_three" path="${dropdownicon}" label="${language}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="topright" path="${dropdownicon}" label="${age}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="column_three" path="${dropdownicon}" label="${age}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="bottomleft" path="${dropdownicon}" label="${goal}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="column_three" path="${dropdownicon}" label="${goal}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="bottomright" path="${dropdownicon}" label="${categories}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="column_three" path="${dropdownicon}" label="${categories}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>    </publish-full>
     
     `

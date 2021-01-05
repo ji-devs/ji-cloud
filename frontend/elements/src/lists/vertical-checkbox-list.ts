@@ -14,7 +14,7 @@ export class _ extends LitElement {
       margin-bottom:12px;
     }
   ::slotted(*){
-     margin-right:24px;
+     margin-right:18px;
 }
  
   p{
