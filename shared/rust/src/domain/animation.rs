@@ -49,6 +49,12 @@ pub struct AnimationMetadata {
 
     /// Should the animation loop?
     pub is_looping: bool,
+
+    /// When the animation was originally created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the animation was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 // todo: # errors doc section

@@ -29,6 +29,9 @@ pub const DB_POOL_CONNECTIONS: u32 = 5;
 
 pub const IMAGE_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 10; // 10 MB
 
+// Animations are reasonably expected to be larger than normal images?
+pub const ANIMATION_BODY_SIZE_LIMIT: usize = 1024 * 1024 * 15; // 15 MB
+
 pub const REMOTE_DB_USER: &str = "postgres";
 pub const REMOTE_DB_NAME: &str = "jicloud";
 pub const SQL_PROXY_PORT: u16 = 6432; //must match the port number in build-utils/package.json where cloud-sql-proxy is launched

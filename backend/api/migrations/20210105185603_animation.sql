@@ -1,7 +1,6 @@
 create table animation
 (
     id          uuid primary key not null default uuid_generate_v1mc(),
-    source      text             not null,
     name        text             not null,
     description text             not null,
     is_premium  bool             not null,
