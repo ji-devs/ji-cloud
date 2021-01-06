@@ -2,7 +2,7 @@ use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageOutputFor
 use shared::domain::image::ImageKind;
 
 pub fn generate_images(
-    original: DynamicImage,
+    original: &DynamicImage,
     kind: ImageKind,
 ) -> anyhow::Result<(Vec<u8>, Vec<u8>, Vec<u8>)> {
     let resized = {

@@ -1,4 +1,4 @@
-use crate::{error::RegisterError, extractor::FirebaseId};
+use crate::{error, extractor::FirebaseId};
 use chrono_tz::Tz;
 use shared::{
     domain::{
@@ -116,7 +116,7 @@ pub async fn register(
     db: &sqlx::PgPool,
     FirebaseId(id): &FirebaseId,
     req: &RegisterRequest,
-) -> Result<Uuid, RegisterError> {
+) -> Result<Uuid, error::Register> {
     let mut txn = db.begin().await?;
 
     let user_id = sqlx::query!(
@@ -148,21 +148,22 @@ returning id
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_firebase_id_key") =>
         {
-            RegisterError::RegisterError(RegisterErrorKind::TakenId)
+            error::Register
+            ::RegisterError(RegisterErrorKind::TakenId)
         }
 
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
-            RegisterError::RegisterError(RegisterErrorKind::TakenUsername)
+            error::Register::RegisterError(RegisterErrorKind::TakenUsername)
         }
 
         // fixme: This doesn't actually trigger right now because emails aren't marked `unique`
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint() == Some("user_email_key") =>
         {
-            RegisterError::RegisterError(RegisterErrorKind::TakenEmail)
+            error::Register::RegisterError(RegisterErrorKind::TakenEmail)
         }
 
         e => e.into(),

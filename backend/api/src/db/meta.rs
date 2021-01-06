@@ -69,11 +69,13 @@ pub async fn get_content_types(db: &PgPool) -> sqlx::Result<Vec<ContentType>> {
 // Key (<key>)=(<uuid>)<postfix>
 fn extract_uuid(s: &str) -> Option<Uuid> {
     // <uuid>)<postfix)
-    let s = s.split("(").nth(2)?;
-    let s = &s[0..s.find(")")?];
+    let s = s.split('(').nth(2)?;
+    let s = &s[0..s.find(')')?];
     s.parse().ok()
 }
 
+// "WrapperError isn't a good description."
+#[allow(clippy::module_name_repetitions)]
 pub enum MetaWrapperError {
     Sqlx(sqlx::Error),
     MissingMetadata { id: Option<Uuid>, kind: MetaKind },

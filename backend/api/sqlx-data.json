@@ -93,6 +93,74 @@
       ]
     }
   },
+  "141a4e59e3d9af6abfbdd772795420d3e86b7766cce534b732dd6ea0b87bf1f4": {
+    "query": "\nselect id as \"id: AnimationId\",\n       name,\n       description,\n       is_premium,\n       publish_at,\n       created_at,\n       updated_at,\n       variant as \"variant: AnimationVariant\",\n       looping as is_looping\nfrom animation\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "is_premium",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 8,
+          "name": "is_looping",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ]
+    }
+  },
   "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
     "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc",
     "describe": {
@@ -969,6 +1037,26 @@
       ]
     }
   },
+  "8120a496e28d2d1bac0a9f9066f74ff88c486f47cd34e327f9abf3b1d86c1e39": {
+    "query": "select variant as \"variant: AnimationVariant\" from animation where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
     "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
     "describe": {
@@ -1354,6 +1442,51 @@
         true,
         null,
         null
+      ]
+    }
+  },
+  "cd784f6c8c4c40d390c47d1ce489ad7acc0a33d40cc21308098e50719ea5c962": {
+    "query": "delete from animation where id = $1 returning variant as \"variant: AnimationVariant\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "cf12ae2072a2ec2886a2484643dae2b5dea7869eda0b0fe3ff4c5ba2cf158592": {
+    "query": "\ninsert into animation (name, description, is_premium, publish_at, variant, looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz",
+          "Int2",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },

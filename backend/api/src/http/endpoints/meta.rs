@@ -1,4 +1,4 @@
-use crate::{db, error::ServerError};
+use crate::{db, error};
 use paperclip::actix::{
     api_v2_operation,
     web::{Data, Json, ServiceConfig},
@@ -12,7 +12,7 @@ use sqlx::PgPool;
 // TODO: Should have cache headers
 /// Get a list of all available metadata of all kinds (sans categories)
 #[api_v2_operation]
-async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, ServerError> {
+async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error::Server> {
     let styles = db::meta::get_style(&db).await?;
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
@@ -28,6 +28,6 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, Server
     }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(Get::PATH, Get::METHOD.route().to(get));
 }

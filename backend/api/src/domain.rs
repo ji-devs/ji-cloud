@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 #[derive(Debug)]
-pub(crate) struct RawCategory {
+pub struct RawCategory {
     pub id: Uuid,
     pub parent_id: Option<Uuid>,
     pub name: String,
@@ -15,7 +15,7 @@ pub(crate) struct RawCategory {
     pub jig_count: i64,
 }
 
-pub(crate) fn build_tree(mut categories: Vec<RawCategory>) -> Vec<Category> {
+pub fn build_tree(mut categories: Vec<RawCategory>) -> Vec<Category> {
     let mut parent_to_id_index: HashMap<Option<Uuid>, Vec<usize>> = HashMap::new();
 
     for (idx, category) in categories.iter().enumerate() {

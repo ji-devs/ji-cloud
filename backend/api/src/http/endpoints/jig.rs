@@ -15,7 +15,7 @@ use sqlx::PgPool;
 
 use crate::{
     db,
-    error::{CreateWithMetadataError, DeleteError, NotFoundError, UpdateWithMetadataError},
+    error::{self, UpdateWithMetadata},
     extractor::{AuthUserWithScope, ScopeManageJig, WrapAuthClaimsNoDb},
 };
 
@@ -25,7 +25,7 @@ async fn create(
     db: Data<PgPool>,
     auth: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, CreateWithMetadataError> {
+) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.id;
 
@@ -51,7 +51,7 @@ async fn delete(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageJig>,
     path: web::Path<JigId>,
-) -> Result<NoContent, DeleteError> {
+) -> Result<NoContent, error::Delete> {
     db::jig::delete(&*db, path.into_inner()).await?;
 
     Ok(NoContent)
@@ -64,7 +64,7 @@ async fn update(
     _claims: AuthUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, UpdateWithMetadataError> {
+) -> Result<NoContent, UpdateWithMetadata> {
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::jig::update(
         &*db,
@@ -81,7 +81,7 @@ async fn update(
     .map_err(db::meta::handle_metadata_err)?;
 
     if !exists {
-        return Err(UpdateWithMetadataError::ResourceNotFound);
+        return Err(UpdateWithMetadata::ResourceNotFound);
     }
 
     Ok(NoContent)
@@ -93,15 +93,15 @@ async fn get(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     path: web::Path<JigId>,
-) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, NotFoundError> {
+) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
     let jig = db::jig::get(&db, path.into_inner())
         .await?
-        .ok_or(NotFoundError::ResourceNotFound)?;
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
     Ok(Json(JigResponse { jig }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
