@@ -17,7 +17,8 @@
   - [Directory Structure](./infrastructure/directory-structure/directory_structure.md)
 
   - [One-time Setup](./infrastructure/setup/setup.md)
-    - [Requirements](./infrastructure/setup/requirements/requirements.md)
+    - [Frontend](./infrastructure/setup/requirements/frontend.md)
+    - [Backend](./infrastructure/setup/requirements/backend.md)
     - [.env](./infrastructure/setup/config/dot_env.md)
     - [Google Cloud](./infrastructure/setup/google_cloud/google_cloud.md)
     - [local secrets](./infrastructure/setup/local-secrets/secret_keys.md)

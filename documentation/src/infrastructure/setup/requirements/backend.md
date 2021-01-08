@@ -1,12 +1,10 @@
-### This might be out of date... start with just npm install and cargo install as needed then refer here if you get stuck.
+### This is totally out of date...
 
 cargo install:
   * systemfd
   * watchexec
   * cargo-make
   * cargo-watch
-
-wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
 openssl:
   1. visit https://slproweb.com/products/Win32OpenSSL.html (yes, the site says win32 but it has win64 msi)
