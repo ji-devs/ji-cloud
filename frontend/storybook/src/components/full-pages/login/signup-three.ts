@@ -4,8 +4,7 @@ import "@elements/password-strength";
 import "@elements/titles/underlined-title";
 import "@elements/titles/subtitle";
 import "@elements/cards/grey-card";
-
-
+import {Stream} from "~/components/lists/stream";
 import "@elements/titles/plain-blue";
 import { UserInfo } from "~/components/full-pages/login/user-info";
 
@@ -40,7 +39,8 @@ export const SignUpThree = (props?:LoginArgs) => {
         
         <sub-title slot="subtitle" title="${subtitle}"></sub-title>
         <sub-title slot="subtitle" title="${subtitletwo}"></sub-title>
-        <div slot="main">${UserInfo}</div>
+        <div slot="main">${UserInfo()}</div>
+        <grey-card slot="main">${Stream()}</grey-card>
 
         <div slot="submit">${RectangleButton()}</div>
 

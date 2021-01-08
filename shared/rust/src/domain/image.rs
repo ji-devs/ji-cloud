@@ -94,10 +94,11 @@ pub enum ImageKind {
 }
 
 impl ImageKind {
-    /// The size of a thumbnail (WxH pixels).
+    /// The size of a thumbnail (Width x Height pixels).
     pub const THUMBNAIL_SIZE: (u32, u32) = (256, 144);
 
     /// Gets the proper size of the image once resized.
+    #[must_use]
     pub const fn size(self) -> (u32, u32) {
         match self {
             // note: these are placeholder values and *not* the actual final values.

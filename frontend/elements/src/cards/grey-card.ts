@@ -24,6 +24,7 @@ label: string = "";
 <div>
     <slot name="title"></slot>
     <slot name="content"></slot>
+    <slot></slot>
 </div>
   `;
   }

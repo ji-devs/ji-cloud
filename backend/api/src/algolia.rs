@@ -39,10 +39,11 @@ struct BatchImage<'a> {
 
 pub struct Updater {
     pub db: PgPool,
-    pub algolia_client: AlgoliaClient,
+    pub algolia_client: Client,
 }
 
 impl Updater {
+    #[must_use]
     pub fn spawn(self) -> JoinHandle<()> {
         tokio::task::spawn(async move {
             if self.algolia_client.inner.is_none() {
@@ -188,7 +189,7 @@ macro_rules! with_client {
 }
 
 #[derive(Clone)]
-pub struct AlgoliaClient {
+pub struct Client {
     inner: Option<Inner>,
     index: String,
 }
@@ -210,7 +211,7 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
-impl AlgoliaClient {
+impl Client {
     pub async fn migrate(&self, pool: &PgPool) -> anyhow::Result<()> {
         // We can't exactly access algolia if we don't have a client.
         let inner = with_client!(self.inner; ());

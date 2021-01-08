@@ -41,7 +41,7 @@ async fn impersonate(
         .json(SigninSuccess { csrf }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         admin::Impersonate::PATH,
         admin::Impersonate::METHOD.route().to(impersonate),

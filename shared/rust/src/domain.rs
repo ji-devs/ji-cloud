@@ -48,7 +48,10 @@ pub enum Publish {
 
 impl Publish {
     /// creates an instance of `Self` that will publish "right now"
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)]
     pub fn now() -> Self {
+        // Duration::new is const unstable
         Self::In(std::time::Duration::new(0, 0))
     }
 }

@@ -93,10 +93,10 @@ fn empty<'a>(_client: &'a super::Inner, _index: &'a str) -> BoxFuture<'a, anyhow
     Box::pin(futures::future::ok(()))
 }
 
-pub const INDEXING_MIGRATIONS: &'static [(
-    ResyncKind,
-    for<'a> fn(&'a super::Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>,
-)] = &[
+pub type MigrateFunction =
+    for<'a> fn(&'a super::Inner, &'a str) -> BoxFuture<'a, anyhow::Result<()>>;
+
+pub const INDEXING_MIGRATIONS: &[(ResyncKind, MigrateFunction)] = &[
     (ResyncKind::Complete, bad_batch_object),
     (ResyncKind::Complete, set_searchable_fields_v1),
     (ResyncKind::Complete, empty),

@@ -5,6 +5,8 @@ use shared::error::{auth::RegisterErrorKind, ApiError, EmptyError, MetadataNotFo
 use crate::db::meta::MetaWrapperError;
 
 /// Represents an error returned by the api.
+// mostly used in this module
+#[allow(clippy::clippy::module_name_repetitions)]
 pub type BasicError = ApiError<EmptyError>;
 
 pub fn ise(e: anyhow::Error) -> actix_web::Error {
@@ -18,18 +20,18 @@ pub fn ise(e: anyhow::Error) -> actix_web::Error {
 
 #[non_exhaustive]
 #[api_v2_errors(code = 401, code = 403, code = 404, code = 500)]
-pub enum DeleteError {
+pub enum Delete {
     Conflict,
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for DeleteError {
+impl<T: Into<anyhow::Error>> From<T> for Delete {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for DeleteError {
+impl Into<actix_web::Error> for Delete {
     fn into(self) -> actix_web::Error {
         match self {
             Self::Conflict => BasicError::new(http::StatusCode::CONFLICT).into(),
@@ -39,15 +41,15 @@ impl Into<actix_web::Error> for DeleteError {
 }
 
 #[api_v2_errors(code = 400, code = 401, code = 403, code = 500)]
-pub struct ServerError(pub anyhow::Error);
+pub struct Server(pub anyhow::Error);
 
-impl<T: Into<anyhow::Error>> From<T> for ServerError {
+impl<T: Into<anyhow::Error>> From<T> for Server {
     fn from(e: T) -> Self {
         Self(e.into())
     }
 }
 
-impl Into<actix_web::Error> for ServerError {
+impl Into<actix_web::Error> for Server {
     fn into(self) -> actix_web::Error {
         crate::error::ise(self.0)
     }
@@ -91,18 +93,18 @@ impl Into<actix_web::Error> for UserNotFound {
     description = "Not Found: Resource Not Found",
     code = 500
 )]
-pub enum NotFoundError {
+pub enum NotFound {
     ResourceNotFound,
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for NotFoundError {
+impl<T: Into<anyhow::Error>> From<T> for NotFound {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for NotFoundError {
+impl Into<actix_web::Error> for NotFound {
     fn into(self) -> actix_web::Error {
         match self {
             Self::ResourceNotFound => BasicError::with_message(
@@ -125,7 +127,7 @@ impl Into<actix_web::Error> for NotFoundError {
     description = "Unprocessable Entity: Cycle OR OutOfRange"
     code = 500
 )]
-pub enum CategoryUpdateError {
+pub enum CategoryUpdate {
     CategoryNotFound,
     ParentCategoryNotFound,
     Cycle,
@@ -133,13 +135,13 @@ pub enum CategoryUpdateError {
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for CategoryUpdateError {
+impl<T: Into<anyhow::Error>> From<T> for CategoryUpdate {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for CategoryUpdateError {
+impl Into<actix_web::Error> for CategoryUpdate {
     fn into(self) -> actix_web::Error {
         match self {
             Self::CategoryNotFound => BasicError::with_message(
@@ -180,19 +182,19 @@ impl Into<actix_web::Error> for CategoryUpdateError {
     code = 420, description = "Unprocessable Entity: Invalid Content"
     code = 500
 )]
-pub enum UploadError {
+pub enum Upload {
     ResourceNotFound,
     InvalidMedia,
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for UploadError {
+impl<T: Into<anyhow::Error>> From<T> for Upload {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for UploadError {
+impl Into<actix_web::Error> for Upload {
     fn into(self) -> actix_web::Error {
         match self {
             Self::ResourceNotFound => BasicError::with_message(
@@ -218,18 +220,18 @@ impl Into<actix_web::Error> for UploadError {
     description = "Unprocessable Entity: Metadata not Found"
     code = 500
 )]
-pub enum CreateWithMetadataError {
+pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
     MissingMetadata(MetadataNotFound),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for CreateWithMetadataError {
+impl<T: Into<anyhow::Error>> From<T> for CreateWithMetadata {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for CreateWithMetadataError {
+impl Into<actix_web::Error> for CreateWithMetadata {
     fn into(self) -> actix_web::Error {
         match self {
             Self::MissingMetadata(data) => ApiError {
@@ -253,19 +255,19 @@ impl Into<actix_web::Error> for CreateWithMetadataError {
     description = "Unprocessable Entity: Metadata not Found"
     code = 500
 )]
-pub enum UpdateWithMetadataError {
+pub enum UpdateWithMetadata {
     ResourceNotFound,
     InternalServerError(anyhow::Error),
     MissingMetadata(MetadataNotFound),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for UpdateWithMetadataError {
+impl<T: Into<anyhow::Error>> From<T> for UpdateWithMetadata {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for UpdateWithMetadataError {
+impl Into<actix_web::Error> for UpdateWithMetadata {
     fn into(self) -> actix_web::Error {
         match self {
             Self::MissingMetadata(data) => ApiError {
@@ -285,7 +287,7 @@ impl Into<actix_web::Error> for UpdateWithMetadataError {
     }
 }
 
-impl From<MetaWrapperError> for CreateWithMetadataError {
+impl From<MetaWrapperError> for CreateWithMetadata {
     fn from(e: MetaWrapperError) -> Self {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
@@ -296,7 +298,7 @@ impl From<MetaWrapperError> for CreateWithMetadataError {
     }
 }
 
-impl From<MetaWrapperError> for UpdateWithMetadataError {
+impl From<MetaWrapperError> for UpdateWithMetadata {
     fn from(e: MetaWrapperError) -> Self {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
@@ -316,18 +318,18 @@ impl From<MetaWrapperError> for UpdateWithMetadataError {
     "Another user with the provided username already exists",
     code = 500
 )]
-pub enum RegisterError {
+pub enum Register {
     RegisterError(RegisterErrorKind),
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for RegisterError {
+impl<T: Into<anyhow::Error>> From<T> for Register {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for RegisterError {
+impl Into<actix_web::Error> for Register {
     fn into(self) -> actix_web::Error {
         match self {
             Self::RegisterError(kind) => {

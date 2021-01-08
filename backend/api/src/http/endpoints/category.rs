@@ -1,6 +1,6 @@
 use crate::{
     db,
-    error::{BasicError, CategoryUpdateError, DeleteError, ServerError},
+    error::{self, BasicError},
     extractor::AuthUserWithScope,
     extractor::ScopeManageCategory,
     extractor::WrapAuthClaimsNoDb,
@@ -55,7 +55,7 @@ async fn get_categories(
     db: Data<PgPool>,
     _claims: WrapAuthClaimsNoDb,
     req: Option<Query<<category::Get as ApiEndpoint>::Req>>,
-) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, ServerError> {
+) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, error::Server> {
     let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
 
     let categories = match req.scope {
@@ -96,7 +96,7 @@ async fn update_category(
     _claims: AuthUserWithScope<ScopeManageCategory>,
     req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<NoContent, CategoryUpdateError> {
+) -> actix_web::Result<NoContent, error::CategoryUpdate> {
     let UpdateCategoryRequest {
         name,
         parent_id,
@@ -121,13 +121,13 @@ async fn delete_category(
     db: Data<PgPool>,
     _claims: AuthUserWithScope<ScopeManageCategory>,
     path: web::Path<CategoryId>,
-) -> actix_web::Result<NoContent, DeleteError> {
+) -> actix_web::Result<NoContent, error::Delete> {
     db::category::delete(&db, path.into_inner()).await?;
 
     Ok(NoContent)
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         category::Get::PATH,
         category::Get::METHOD.route().to(get_categories),

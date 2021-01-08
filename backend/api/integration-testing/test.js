@@ -772,3 +772,45 @@ test(authFail, {
         method: 'DELETE',
     }
 });
+
+
+test(authFail, {
+    kind: 'animation',
+    route: 'v1/animation',
+    body: {
+        method: 'POST',
+        json: {
+            name: 'test',
+            description: 'testest',
+            is_premium: false,
+            is_looping: false,
+            publish_at: null,
+            variant: 'Gif',
+        },
+    }
+});
+
+// route doesn't exist yet.
+test.skip(authFail, {
+    kind: 'animation',
+    route: 'v1/animation/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'PATCH',
+    }
+});
+
+test(authFail, {
+    kind: 'animation',
+    route: 'v1/animation/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'GET',
+    }
+});
+
+test(authFail, {
+    kind: 'animation',
+    route: 'v1/animation/00000000-0000-0000-0000-000000000000',
+    body: {
+        method: 'DELETE',
+    }
+});

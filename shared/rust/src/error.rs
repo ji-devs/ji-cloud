@@ -32,6 +32,7 @@ impl<T: Serialize> From<ApiError<T>> for actix_web::Error {
 
 impl<T: Default> ApiError<T> {
     /// Creates a new error based off the provided status code
+    #[must_use]
     pub fn new(code: http::StatusCode) -> Self {
         Self {
             message: code
@@ -44,6 +45,7 @@ impl<T: Default> ApiError<T> {
     }
 
     /// Creates a new error based off the provided status code and with the provided message.
+    #[must_use]
     pub fn with_message(code: http::StatusCode, message: String) -> Self {
         Self {
             message,
