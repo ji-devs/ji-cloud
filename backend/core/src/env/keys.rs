@@ -31,6 +31,10 @@ pub mod algolia {
 
     pub const KEY: &str = "ALGOLIA_KEY";
     pub const DISABLE: &str = "ALGOLIA_LOCAL_DISABLE_CLIENT";
+
+    /// The key to use for the *frontend* for the algolia client.
+    /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
+    pub const FRONTEND_SEARCH_KEY: &str = "ALGOLIA_FRONTEND_SEARCH_KEY";
 }
 
 pub const JWT_SECRET: &str = "JWT_SECRET";
