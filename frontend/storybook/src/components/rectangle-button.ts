@@ -22,8 +22,8 @@ const DEFAULT_ARGS:ButtonArgs = {
   bold: false,
   italic: false,
   path:"",
-  imglefthidden:false,
-  imgrighthidden:false
+  imglefthidden:true,
+  imgrighthidden:true
 }
 
 export const RectangleButton = (props?:ButtonArgs) => {

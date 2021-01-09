@@ -13,12 +13,7 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
-    color: string,
-    logintitle: string,
-    forgottenPassword: string,
-    passwordtitle:string,
-    noaccount:string,
+   
     helpertext:string,
     errormessage: string,
     instruction: boolean,
@@ -29,36 +24,39 @@ interface LoginArgs {
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Sign up",
-    logintitle: "Email",
-    forgottenPassword: "",
-    passwordtitle: "Create Password",
-    noaccount: "Already have an account?",
+    
     helpertext: "Your password looks good", 
     errormessage: "",
     instruction: false,
     error: false,
-    color: "red",
   }
+
+  const STR_TITLE = "Sign Up";
+  const STR_EMAIL = "Email";
+  const STR_PLCEMAIL = "Type or paste your email";
+  const STR_PASSWORD = "Create Password";
+  const STR_PLCPASSWORD ="********";
+  const STR_ACCOUNT = "Already have an account?";
+  const STR_FORGOTTEN = ""
 
 export const SignUpStart = (props?:LoginArgs) => {
 
-    const {title,color, logintitle, forgottenPassword, passwordtitle, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${title}">
+    <login-full title="${STR_TITLE}">
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
-        <input-text slot="username" label="${logintitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_EMAIL}" placeholder=${STR_PLCEMAIL} helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
         <password-strength slot="passwordstrength"></password-strength>
-        <input-text slot="password" label="${passwordtitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="password" label="${STR_PASSWORD}" placeholder="${STR_PLCPASSWORD}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <plain-blue title="${forgottenPassword}" slot="passwordreminder"></plain-blue>
+        <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>
-        <plain-blue title="${noaccount}" slot="noaccount"></plain-blue>
+        <plain-blue title="${STR_ACCOUNT}" slot="noaccount"></plain-blue>
     </login-full>
     
     `

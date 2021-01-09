@@ -36,7 +36,7 @@ interface LoginArgs {
     
   }
 
-const STR_TITLE = "Sign up - step 1";
+const STR_TITLE = "Sign Up - Step 1";
 const STR_FIRSTNAME = "First name";
 const STR_PLCFIRSTNAME = "Type your first name";
 const STR_LASTNAME = "Last name";

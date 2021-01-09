@@ -9,35 +9,30 @@ export default {
 }
 
 interface LoginArgs {
-    title:string,
-    subtitle:string,
-    subtitletwo:string,
-    title_two:string,
-    title_three:string,
+  
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "We just sent you an email",
-    subtitle:"Open the email and click on the Verification button",
-    subtitletwo: "It might had got to the promotion or spam’s folders",
-    title_two:"I didn’t receive an email, Please send again",
-    title_three:"Change email account"
-
-   
   }
+
+  const STR_TITLE = "We Just Sent You an Email";
+  const STR_SUBTITLE = "Open the email and click on the Verification button";
+  const STR_SUBSUBTITLE = "It may have been filtered into the promotion or spam folders";
+  const STR_SENDAGAIN = "I didn’t receive an email, please send again";
+  const STR_CHANGE = "Change email account";
 
 export const SignUpFour = (props?:LoginArgs) => {
 
-    const {title,subtitle,subtitletwo, title_two, title_three} = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
-    <signup-full-wide title="${title}">
+    <signup-full-wide title="${STR_TITLE}">
         
-        <sub-title slot="subtitle" title="${subtitle}"></sub-title>
-        <sub-title slot="subtitle" title="${subtitletwo}"></sub-title>
-        <plain-blue title="${title_two}" slot="main"></plain-blue>
-        <plain-blue title="${title_three}" slot="main"></plain-blue>
+        <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
+        <sub-title slot="subtitle" title="${STR_SUBSUBTITLE}"></sub-title>
+        <plain-blue title="${STR_SENDAGAIN}" slot="main"></plain-blue>
+        <plain-blue title="${STR_CHANGE}" slot="main"></plain-blue>
         </signup-full-wide>
 
     `

@@ -15,7 +15,7 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
+  
     color: string,
     country: string,
     username: string,
@@ -35,7 +35,7 @@ interface LoginArgs {
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Sign up - step 2",
+   
     country: "Country",
     username: "Preferred language of communication*",
     state: "State",
@@ -54,13 +54,15 @@ interface LoginArgs {
     checkbox_label_two:"I would like to receive educational resources (GDPR legal text….)"
   }
 
+  const STR_TITLE = "Sign Up - Step 2"
+
 export const SignUpTwo = (props?:LoginArgs) => {
 
-    const {title,color,subtitle,dropdownicon,city,school,checkbox_label_two, subtitletwo,checkbox_label, country, username, state, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {subtitle,dropdownicon,city,school,checkbox_label_two, subtitletwo,checkbox_label, country, username, state, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
 
 
     return `
-    <signup-full title="${title}">
+    <signup-full title="${STR_TITLE}">
         
         <sub-title slot="subtitle" title="${subtitle}"></sub-title>
         <sub-title slot="subtitle" title="${subtitletwo}"></sub-title>

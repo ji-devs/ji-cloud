@@ -12,7 +12,7 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
+   
     color: string,
     passwordtitle:string,
     helpertext:string,
@@ -26,7 +26,7 @@ interface LoginArgs {
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Change Email account",
+    
     label: "Email me to the new address",
     passwordtitle: "Email",
     color: "red",
@@ -36,18 +36,22 @@ interface LoginArgs {
     size:"medium"
   }
 
+  const STR_TITLE ="Change Email Account";
+  const STR_SUB = "This is the email that you filled in. You can change it now."
+
 export const LoginChangeEmail = (props?:LoginArgs) => {
 
-    const {title,color, size, passwordtitle,label, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {color, size, passwordtitle,label, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${title}">
+    <login-full title="${STR_TITLE}">
     
-       
+    <plain-black title="${STR_SUB}" slot="sub"></plain-black>
         <input-text slot="username" label="${passwordtitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <div slot="submit">${RectangleButton({label:label, color: color,size: size})}</div>
+        
+        <div slot="submit">${RectangleButton({label:label, color: color,size: size, imgrighthidden:true, imglefthidden:true})}</div>
     </login-full>
     
     `
