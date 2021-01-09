@@ -96,6 +96,7 @@ pub async fn run(
             .configure(endpoints::module::configure)
             .configure(endpoints::admin::configure)
             .configure(endpoints::animation::configure)
+            .configure(endpoints::search::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });

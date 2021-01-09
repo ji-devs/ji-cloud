@@ -55,6 +55,49 @@ impl Into<actix_web::Error> for Server {
     }
 }
 
+pub enum ServiceKind {
+    Algolia,
+    S3,
+}
+
+impl Into<actix_web::Error> for ServiceKind {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::Algolia => BasicError::with_message(
+                http::StatusCode::NOT_IMPLEMENTED,
+                "Algolia service is disabled".to_owned(),
+            )
+            .into(),
+            Self::S3 => BasicError::with_message(
+                http::StatusCode::NOT_IMPLEMENTED,
+                "S3 service is disabled".to_owned(),
+            )
+            .into(),
+        }
+    }
+}
+
+#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+pub enum Service {
+    InternalServerError(anyhow::Error),
+    DisabledService(ServiceKind),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Service {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Service {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::DisabledService(s) => s.into(),
+        }
+    }
+}
+
 #[api_v2_errors(
     code = 401,
     code = 403,
