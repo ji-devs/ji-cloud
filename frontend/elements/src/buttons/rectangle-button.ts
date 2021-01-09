@@ -14,6 +14,8 @@ export class _ extends BaseButton {
         border: none;
         cursor: pointer;
         font-size: 16px;
+        display:flex;
+        align-items:center;
         
       }
       .medium{
@@ -58,6 +60,23 @@ export class _ extends BaseButton {
       .green:hover{
         background-color: #46ba6f;
       }
+      .white{
+        border: solid 1px #fb6c74;
+        color:#fb6c74;
+        background: #ffffff;
+      }
+      .left{
+        margin-right:8px;
+      }
+      .right 
+      {
+        margin-left:8px;
+      }
+      .img-hidden{
+        display:none
+      }
+
+      
   
     
     `];
@@ -70,7 +89,7 @@ export class _ extends BaseButton {
   label: string = "";
 
   @property()
-  color: "red" | "blue" | "" = "";
+  color: "red" | "blue" | "white" | "" = "";
 
   @property({type: Boolean})
   bold:boolean = false; 
@@ -78,9 +97,18 @@ export class _ extends BaseButton {
   @property({type: Boolean})
   italic:boolean = false; 
 
+  @property({type: Boolean})
+  imglefthidden:boolean = false; 
+
+  @property({type: Boolean})
+  imgrighthidden:boolean = false; 
+
+  @property()
+  path: string = "";
+
   render() {
 
-    const {size, label, color, bold, italic} = this;
+    const {size, label, color, bold, italic, imglefthidden, imgrighthidden,path} = this;
 
     const classes = classMap({ 
       [size]: true,
@@ -91,7 +119,9 @@ export class _ extends BaseButton {
 
     return html`
       <button type="button" name="button" class="${classes}" >
+      <img-ui class="${imglefthidden ? 'img-hidden' : ''} left" path="${path}"></img-ui>
       ${label}
+      <img-ui class="${imgrighthidden ? 'img-hidden' : ''} right" path="${path}"></img-ui>
     </button>
   `;
   }

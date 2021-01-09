@@ -6,6 +6,7 @@ import "@elements/titles/plain-blue";
 import "@elements/dividers/or-divider";
 import {GoogleButton} from "~/components/special-buttons";
 import { RectangleButton } from "~/components/rectangle-button";
+import { render } from "lit-html";
 
 
 export default {
@@ -13,56 +14,62 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
     color: string,
-    firstname: string,
-    username: string,
-    lastname:string,
-    noaccount:string,
+    size:string,
     helpertext:string,
     errormessage: string,
     instruction: boolean,
     error: boolean,
-    checkbox_label:string,
-   
-
-  
+    imglefthidden:boolean,
+    path:string,
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Sign up - step 1",
-    firstname: "First name",
-    username: "Create a username",
-    lastname: "Family name",
-    noaccount: "Already have an account?",
     helpertext: "Your password looks good", 
     errormessage: "",
     instruction: false,
     error: false,
     color: "red",
-    checkbox_label:"I am over 18"
+    size: "medium",
+    imglefthidden:true,
+    path:""
+    
   }
+
+const STR_TITLE = "Sign up - step 1";
+const STR_FIRSTNAME = "First name";
+const STR_PLCFIRSTNAME = "Type your first name";
+const STR_LASTNAME = "Last name";
+const STR_PLCLASTNAME = "Type your last name";
+const STR_USERNAME = "Create a User Name*";
+const STR_PLCUSER = "This will be your public name on JI";
+const STR_18 = "I am over 18";
+const STR_ACCOUNT = "Already have an account?";
+const STR_CONTINUE = "Continue";
+const STR_REGISTER = "Register";
+
 
 export const SignUpOne = (props?:LoginArgs) => {
 
-    const {title,color,checkbox_label, firstname, username, lastname, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {color, helpertext,errormessage, instruction, error, size, path,imglefthidden} = props || DEFAULT_ARGS;
 
 
     return `
-    <signup-full title="${title}">
+    <signup-full title="${STR_TITLE}">
         
         
-        <input-text slot="topleft" label="${firstname}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <input-text slot="topright" label="${lastname}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <input-text slot="username" label="${username}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <input-checkbox slot="checkbox" label="${checkbox_label}">
+        <input-checkbox slot="checkbox" label="${STR_18}">
 
   </input-checkbox>
-        <div slot="submit">${RectangleButton()}</div>
-        <plain-blue title="${noaccount}" slot="noaccount"></plain-blue>
+        <div slot="submit">${RectangleButton({imglefthidden:imglefthidden, path:path, color:color, size:size, label:STR_CONTINUE})}</div>
+        <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
+        <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
 
         </signup-full>
 
