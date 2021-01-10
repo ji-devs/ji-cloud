@@ -14,10 +14,7 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
-   .input-wrapper.error{
-    border: solid 1px #f00813;
-    background-color: #fff4f4;
-   }
+
    .instruction{
      display:none;
      margin-left: 8px;
@@ -49,20 +46,17 @@ export class _ extends LitElement {
    active .helpertext{
     display:block;
    }
-   .error{
-    font-size: 14px;
-    color: #f00813;
-    margin-top:4px;
-    font-weight: 500;
-    padding-left:8px;
-    display:block;
-   }
+ 
    p{display:none;}
    img-ui{
     position: absolute;
     top: 33%;
     right: 20px;
     transform: rotate(180deg)
+   }
+   .errorwrapper{
+    border: solid 1px #f00813;
+    background-color: #fff4f4;
    }
    
   
@@ -81,16 +75,15 @@ export class _ extends LitElement {
   @property()
   helpertext: string = "";
 
+
+
   @property()
-  error: boolean = false;
+  errorwrapper: boolean = false;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage} = this;
+    const {label, helpertext, instruction, errormessage, errorwrapper} = this;
 
-    const errorClasses = classMap({ 
-      error,
-    });
 
     const instructionClasses = classMap({ 
       instruction,
@@ -99,13 +92,13 @@ export class _ extends LitElement {
 
     return html`
     
-    <div class="input-wrapper ${errorClasses}">
+    <div class="input-wrapper ${errorwrapper ? "errorwrapper" : ''}">
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
         <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
-    <p class="${errorClasses}">${errormessage}</p>
+    <p class="">${errormessage}</p>
      
   `;
   }

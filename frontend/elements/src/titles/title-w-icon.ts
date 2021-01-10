@@ -37,7 +37,7 @@ export class _ extends LitElement {
     return html`
     <div class="wrapper">
         <img-ui path="${path}"></img-ui>
-        <p class="${uploaded}">${title}</p>
+        <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
         
     </div>
   `;
