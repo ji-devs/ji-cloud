@@ -14,6 +14,10 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
+   .input-wrapper.error {
+    border: solid 1px #f00813;
+    background-color: #fff4f4;
+   }
    .instruction{
      display:none;
      margin-left: 8px;
@@ -72,11 +76,14 @@ export class _ extends LitElement {
   helpertext: string = "";
 
   @property()
+  placeholder: string = "";
+
+  @property()
   error: boolean = false;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage} = this;
+    const {label, helpertext, error, instruction, errormessage, placeholder} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -89,8 +96,8 @@ export class _ extends LitElement {
 
     return html`
     
-    <div class="input-wrapper">
-        <input placeholder="Placeholder" type="text" class="">
+    <div class="input-wrapper ${error ? 'error' : ''}">
+        <input placeholder="${placeholder}" type="text" class="">
         <label class="">${label}</label>
     </div>
     <p class="${instructionClasses}">${helpertext}</p>

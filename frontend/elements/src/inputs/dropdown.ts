@@ -14,6 +14,10 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
+   .input-wrapper.error{
+    border: solid 1px #f00813;
+    background-color: #fff4f4;
+   }
    .instruction{
      display:none;
      margin-left: 8px;
@@ -98,7 +102,7 @@ export class _ extends LitElement {
 
     return html`
     
-    <div class="input-wrapper">
+    <div class="input-wrapper ${errorClasses}">
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
         <img-ui path="${path}"></img-ui>

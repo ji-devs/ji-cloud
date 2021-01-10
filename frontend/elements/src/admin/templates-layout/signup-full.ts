@@ -46,6 +46,14 @@ export class _ extends LitElement {
     ::slotted([slot=submit]){
         margin-top:40px;
     }
+    ::slotted([slot=noaccount]:last-child){
+        margin-left:4px;
+    }
+    .noaccount{
+        display:flex;
+        align-items:center;
+        margin-top:16px;
+    }
     .two-row{
         display:flex;
         
@@ -114,7 +122,9 @@ export class _ extends LitElement {
         <slot name="submit"></slot>
        
       </div>
-      <slot name="noaccount"></slot>
+      <div class="noaccount">
+        <slot name="noaccount"></slot>
+      </div>
   </div>
 </div>
   `;

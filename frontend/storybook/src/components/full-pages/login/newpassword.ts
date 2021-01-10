@@ -12,7 +12,6 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
     color: string,
     passwordtitle:string,
     noaccount:string,
@@ -27,7 +26,7 @@ interface LoginArgs {
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Create a new password",
+    
     label: "Set Password",
     passwordtitle: "Enter new Password",
     noaccount: "You’ll be logged in automatically after this",
@@ -35,16 +34,19 @@ interface LoginArgs {
     helpertext: "",
     errormessage: "",
     instruction: false,
-    size:"medium"
+    size:"medium",
+    error:false,
   }
+
+  const STR_NEWPASSWORD = "Create a New Password"
 
 export const LoginForgotPassword = (props?:LoginArgs) => {
 
-    const {title,color, size, passwordtitle,label, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {color, size, passwordtitle,label, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${title}">
+    <login-full title="${STR_NEWPASSWORD}">
     
        
         <input-text slot="password" label="${passwordtitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >

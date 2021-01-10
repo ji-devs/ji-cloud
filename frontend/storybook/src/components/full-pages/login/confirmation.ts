@@ -14,7 +14,7 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
+    
     subtitle: string,
     subtitle_two: string,
     label: string,
@@ -28,7 +28,7 @@ interface LoginArgs {
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title:"Welcome to JI family",
+    
     subtitle: "You can now create, play, and share your content.",
     subtitle_two:"We are here to help you in whatever you need.",
     label: "Go to JI home",
@@ -38,13 +38,15 @@ interface LoginArgs {
     italic: false,
   }
 
+  const STR_TITLE = "Welcome to JI Family"
+
 export const Confirmation = (props?:LoginArgs) => {
 
-    const {title,subtitle, subtitle_two, label, color, size, bold, italic} = props || DEFAULT_ARGS;
+    const {subtitle, subtitle_two, label, color, size, bold, italic} = props || DEFAULT_ARGS;
 
 
     return `
-    <confirmation-full title="${title}">
+    <confirmation-full title="${STR_TITLE}">
         <sub-title slot="subtitle" title="${subtitle}" slot="subtitle"></sub-title>
         <sub-title slot="subtitle" title="${subtitle_two}" slot="subtitle"></sub-title>
         <div slot="button">${RectangleButton({label:label, color: color,size: size})}</div>       

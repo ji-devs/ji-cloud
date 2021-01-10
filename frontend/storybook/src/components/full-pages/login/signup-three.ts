@@ -16,26 +16,28 @@ export default {
 }
 
 interface LoginArgs {
-    title:string,
+   
     subtitle:string,
     subtitletwo:string,
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Sign up - step 3",
+   
     subtitle:"We want to tailor the content that you find to your interests and needs.",
     subtitletwo: "You can select as many as you like now and edit it later it in your profile page",
 
    
   }
 
+  const STR_TITLE = "Sign Up - Step 3"
+
 export const SignUpThree = (props?:LoginArgs) => {
 
-    const {title,subtitle,subtitletwo} = props || DEFAULT_ARGS;
+    const {subtitle,subtitletwo} = props || DEFAULT_ARGS;
 
 
     return `
-    <signup-full-wide title="${title}">
+    <signup-full-wide title="${STR_TITLE}">
         
         <sub-title slot="subtitle" title="${subtitle}"></sub-title>
         <sub-title slot="subtitle" title="${subtitletwo}"></sub-title>

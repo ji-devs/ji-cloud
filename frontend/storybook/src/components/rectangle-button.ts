@@ -8,7 +8,10 @@ interface ButtonArgs {
   color: string,
   size: string,
   bold: boolean,
-  italic: boolean
+  italic: boolean,
+  path:string,
+  imglefthidden:boolean,
+  imgrighthidden:boolean
 
 }
 
@@ -18,12 +21,15 @@ const DEFAULT_ARGS:ButtonArgs = {
   size: "medium",
   bold: false,
   italic: false,
+  path:"",
+  imglefthidden:true,
+  imgrighthidden:true
 }
 
 export const RectangleButton = (props?:ButtonArgs) => {
 
-  const {label, color, size, bold, italic} = props || DEFAULT_ARGS;
-    return `<rectangle-button label="${label}" color="${color}" size="${size}" ${bold && "bold"} ${italic && 'italic'}/>`
+  const {label, color, size, bold, italic, path, imglefthidden, imgrighthidden} = props || DEFAULT_ARGS;
+    return `<rectangle-button label="${label}" color="${color}" size="${size}" ${bold && "bold"} ${imglefthidden && "imglefthidden"} ${imgrighthidden && "imgrighthidden"} ${italic && 'italic' } path="${path}"/>`
 }
 
 
