@@ -40,12 +40,14 @@ export class _ extends LitElement {
     }
     ::slotted([slot=submit]){
         margin-top:40px;
+        margin-bottom: 24px;
     }
+   
   
     .spacer{
         height:20px;
     }
-    .hidden {
+    .text-hidden {
         display:none;
     }
     .password-wrapper {
@@ -64,11 +66,11 @@ export class _ extends LitElement {
   title:string = ""; 
 
   @property()
-  hidden:boolean = true; 
+  texthidden:boolean = true; 
 
   render() {
 
-    const {title, hidden} = this;
+    const {title, texthidden} = this;
 
     return html`
  <div class="wrapper">
@@ -88,7 +90,7 @@ export class _ extends LitElement {
         <slot name="password">
             
         </slot>
-        <div class="${hidden}">Strong</div>
+        <div class="${texthidden ? 'text-hidden' : ''}">Strong</div>
         </div>
         <slot name="passwordreminder"></slot>
         

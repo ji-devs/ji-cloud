@@ -82,14 +82,11 @@ export class _ extends LitElement {
   helpertext: string = "";
 
   @property()
-  path: string = "";
-
-  @property()
   error: boolean = false;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage, path} = this;
+    const {label, helpertext, error, instruction, errormessage} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -105,7 +102,7 @@ export class _ extends LitElement {
     <div class="input-wrapper ${errorClasses}">
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
-        <img-ui path="${path}"></img-ui>
+        <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
     <p class="${errorClasses}">${errormessage}</p>

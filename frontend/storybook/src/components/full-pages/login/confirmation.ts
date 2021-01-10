@@ -2,6 +2,7 @@ import "@elements/admin/templates-layout/confirmation-full";
 import "@elements/titles/underlined-title";
 import "@elements/titles/plain-black";
 import "@elements/titles/subtitle";
+import "@elements/buttons/confirmation";
 
 import { RectangleButton } from "~/components/rectangle-button";
 import { colorStyles } from "@elements/_styles/colors";

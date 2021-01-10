@@ -12,46 +12,42 @@ export default {
 }
 
 interface LoginArgs {
-   
-    color: string,
-    passwordtitle:string,
     helpertext:string,
     errormessage: string,
     instruction: boolean,
     error: boolean,
-    label: string,
-    size:string
-
-  
+    errorwrapper: boolean;
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    
-    label: "Email me to the new address",
-    passwordtitle: "Email",
-    color: "red",
     helpertext: "",
     errormessage: "",
     instruction: false,
-    size:"medium"
+    error:false,
+    errorwrapper:false,
   }
 
   const STR_TITLE ="Change Email Account";
-  const STR_SUB = "This is the email that you filled in. You can change it now."
+  const STR_SUB = "This is the email that you filled in. You can change it now.";
+  const STR_PASSWORDLABEL = "Email";
+  const STR_BTNLABEL = "Email me to the new address";
+  const STR_RED = "red";
+  const STR_MEDIUM = "medium";
+  const STR_FALSE = "false";
 
 export const LoginChangeEmail = (props?:LoginArgs) => {
 
-    const {color, size, passwordtitle,label, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {helpertext,errormessage, instruction, error, errorwrapper} = props || DEFAULT_ARGS;
 
 
     return `
     <login-full title="${STR_TITLE}">
     
     <plain-black title="${STR_SUB}" slot="sub"></plain-black>
-        <input-text slot="username" label="${passwordtitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_PASSWORDLABEL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"} ${error && "error"} imghidden="${STR_FALSE}">
         </input-text>
         
-        <div slot="submit">${RectangleButton({label:label, color: color,size: size, imgrighthidden:true, imglefthidden:true})}</div>
+        <div slot="submit">${RectangleButton({label:STR_BTNLABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true})}</div>
     </login-full>
     
     `
