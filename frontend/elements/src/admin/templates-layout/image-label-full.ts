@@ -10,13 +10,14 @@ export class _ extends LitElement {
     .wrapper{
         display:flex;
        padding-top:40px;
+       border-bottom: solid 1px #e5e7ef;
      
     }
 
     ::slotted([slot=left]){
       padding-right: 64px;
       border-right:solid 1px #e5e7ef;
-      height: 744px;
+      height: 700px;
       
     }
     ::slotted([slot=middle]){
@@ -26,6 +27,11 @@ export class _ extends LitElement {
     ::slotted([slot=right]){
       width:100%;
   }
+  ::slotted([slot=button]){
+    padding-top: 24px;
+    display:flex;
+    justify-content: flex-end;
+}
    
     `];
   }
@@ -41,7 +47,9 @@ export class _ extends LitElement {
             <slot name="left"></slot>
             <slot name="middle"></slot>
             <slot name="right"></slot>
+
         </div>
+        <slot name="button"></slot>
     </div>  
   `;
   }

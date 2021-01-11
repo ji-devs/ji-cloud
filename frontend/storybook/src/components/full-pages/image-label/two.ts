@@ -9,10 +9,16 @@ import "@elements/cards/blue-card";
 import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
 import { TitleWithInput } from "~/components/input";
 import {mapToString} from "@utils/array";
+import { RectangleButton } from "~/components/rectangle-button";
+
 
 export default {
   title: 'Full Pages/Image Label',
 }
+
+const STR_RED = "red";
+const STR_MEDIUM = "medium";
+const STR_NEXT = "Next"
 
 
 const leafNode = ({label, open, children}:TreeNode) => {
@@ -76,6 +82,9 @@ export const ImageLabelFullTwo = (props?:Props) => {
         ${data.map(rootNodeV2)}
         </blue-card>
       </div>
+      <div slot="button">
+      ${RectangleButton({color:STR_RED,size:STR_MEDIUM,label:STR_NEXT,imgrighthidden:true,bold:false, italic:false,imglefthidden:true, path:""})}
+    </div>
     </imagelabel-full>
     
     `

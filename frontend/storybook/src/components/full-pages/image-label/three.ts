@@ -4,6 +4,8 @@ import {LabelRight} from "~/components/admin/images/image-label-right";
 import "@elements/titles/underlined-title";
 import "@elements/titles/plain-black-list";
 import "@elements/titles/plain-black";
+import { RectangleButton } from "~/components/rectangle-button";
+
 
 export default {
   title: 'Full Pages/Image Label',
@@ -27,7 +29,9 @@ const STR_STREAM = "Suitable for jewish stream";
 const STR_NO = " No religion";
 const STR_REFORM = "Reform/Conservative";
 const STR_ORTHODOX = "Orthodox";
-
+const STR_RED = "red";
+const STR_MEDIUM = "medium";
+const STR_NEXT = "Next"
 
 export const ImageLabelFullThree = ({title}) => {
     return `
@@ -70,6 +74,9 @@ export const ImageLabelFullThree = ({title}) => {
       <blue-card>
         
       </blue-card>
+    </div>
+    <div slot="button">
+    ${RectangleButton({color:STR_RED,size:STR_MEDIUM,label:STR_NEXT,imgrighthidden:true,bold:false, italic:false,imglefthidden:true, path:""})}
     </div>
     </imagelabel-full>
     
