@@ -1,8 +1,9 @@
 /// A sprite is an entity in the scenegraph with the following components:
 /// * Primitive - Geometry::Quad(UnitQuad) 
-/// * Material 
-///     * vertex shader - UnitQuad
-///     * fragment shader - DiffuseTexture 
+/// * Material
+///     Alpha
+///         * vertex shader - UnitQuad
+///         * fragment shader - DiffuseTexture 
 
 use crate::prelude::*;
 use wasm_bindgen::prelude::*;

@@ -6,15 +6,16 @@
 4. Install cargo-make: `cargo install --force cargo-make`
 5. Install cargo-watch: `cargo install --force cargo-watch`
 6. Install watchexec: `cargo install --force watchexec`
-7. [Clone the repo](https://github.com/ji-devs/ji-cloud)
-8. `npm install` in the following folders:
+7. [Fork the repo](https://github.com/ji-devs/ji-cloud)
+8. Clone it into your local folder (using Github Desktop or manually) 
+9. `npm install` in the following folders:
     * `frontend/storybook`
     * `frontend/elements`
     * `frontend/apps`
     * `frontend/build-utils`
     * `config/typescript`
-9. Install Dropbox / accept the invitation to ji-cloud-media  (we might move that over to a separate repo at some point...)
-10. Build the TS config dependencies
+10. Install Dropbox / accept the invitation to ji-cloud-media  (we might move that over to a separate repo at some point...)
+11. Build the TS config dependencies
     * inside `config/typescript`: `npm run build`
 
 After all this is setup, you should be able to `npm start` from `frontend/storybook` and see it working, just without the images.
