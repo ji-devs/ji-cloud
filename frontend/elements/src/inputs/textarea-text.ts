@@ -11,6 +11,8 @@ export class _ extends LitElement {
         border-radius: 14px;
         border: solid 1px #89b3ff;
         margin-top:40px;
+        padding: 8px 16px;
+
     }
     label{
         padding-left: 8px;

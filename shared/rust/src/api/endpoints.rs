@@ -22,6 +22,9 @@ pub trait ApiEndpoint {
     const METHOD: Method;
 }
 
+/// Search endpoints.
+pub mod search;
+
 /// Animation endpoints.
 pub mod animation;
 

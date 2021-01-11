@@ -29,11 +29,13 @@ export const AGETWO_OPTIONS = [
 ]
 
 export const STREAM_OPTIONS = [
-    "All",
-    "No religion",
-    "Reform/Conservative",
-    "Orthodox",
-    "Charedi"
+    "Show me everything",
+    "No religious content",
+    "Reform content",
+    "Conservative content",
+    "Orthodox content",
+    "Charedi content",
+    "Israeli Secular content",
 ]
 
 export const SCHOOL_OPTIONS = [

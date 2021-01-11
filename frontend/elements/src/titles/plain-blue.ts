@@ -6,6 +6,7 @@ export class _ extends LitElement {
     return [css`
     p{
         color: #5590fc;
+        margin-top:0;
         
 
     }

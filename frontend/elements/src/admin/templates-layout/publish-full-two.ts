@@ -1,11 +1,11 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('publish-full')
+@customElement('publish-full-two')
 export class _ extends LitElement {
   static get styles() {
     return [css`
         main{
-            
+           
             background-image:url("http://localhost:4102/ui/Background@2x.jpg");
             background-repeat: no-repeat;
             background-attachment: inherit;
@@ -20,25 +20,22 @@ export class _ extends LitElement {
             height: 802px;
             border-radius: 32px;
             display:flex;
+            align-items:center;
             margin-right:auto;
             margin-left: auto;
-            flex-direction:column;
+           
             
             
         }
         .inside-wrapper{
-            padding:26px 64px;
+            padding:56px 64px;
             width:100%;
-        }
-        .content{
             display:flex;
-            
-           
+            align-items:center;
+            flex-direction:column;
         }
-       .column{
-           width:25%;
-           margin-right:48px;
-       }
+
+   
        h1{
         font-size: 32px;
         font-weight: 900;
@@ -48,32 +45,21 @@ export class _ extends LitElement {
         font-weight: 500;
         color: #4a4a4a;
        }
-       ::slotted([slot="button"]){
-           display:flex;
-           justify-content:center;
-           margin-top:20px;
-       }
-       .button-wrapper{
-           position:relative;
-       }
-       ::slotted([slot="buttoncollection"]){
+       ::slotted([slot="button-collection"]){
         display:flex;
         justify-content:center;
         align-items:center;
+        margin-top:64px;
+        margin-right:32px;
     }
-    ::slotted([slot="column_one"]){
+    ::slotted([slot="button-collection"]:last-child){
+       margin-right:0;
+    }
+    .button-wrapper{
         display:flex;
-        flex-direction:column;
-    
-        align-items:center;
-    }
-    ::slotted([slot="tooltip"]){
-        position:absolute;
-        top:56px;
-        left:40%;
-    
     }
        
+   
     `];
   }
 
@@ -90,22 +76,14 @@ export class _ extends LitElement {
     return html`    
     <main>
         <div class="wrapper">
-            <slot name="animation"></slot>
-            <div class="inside-wrapper">
             
+            <div class="inside-wrapper">
+                <slot name="animation"></slot>
                 <h1>${title}</h1>
                 <p name="subtitle">${subtitle}</p>
-                <div class="content">
-                    <div class="column"><slot name="column_one"></slot></div>
-                    <div class="column"><slot name="column_two"></slot></div>
-                    <div class="column"><slot name="column_three"></slot></div>
-                    <div class="column"><slot name="column_four"></slot></div>
-                </div>
                 <div class="button-wrapper">
-                    <slot name="button"></slot>
-                    <slot name="tooltip"></slot>
+                    <slot name="button-collection"></slot>
                 </div>
-                <slot name="button-collection"></slot>
             </div>
         </div>
     </main>

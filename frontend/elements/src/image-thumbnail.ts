@@ -9,7 +9,7 @@ export class _ extends LitElement {
         width: 296px;
         height: 167px;
         border-radius: 16px;
-        border: solid 1px #f0f1f4;
+        margin-bottom:32px;
     }
    
     `];

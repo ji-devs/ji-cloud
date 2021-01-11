@@ -76,6 +76,7 @@ export class _ extends LitElement {
   </div>
   <div class="content-wrapper">
     <h1>${title}</h1>
+    <slot name="sub"></slot>
     <div class="inside-wrapper">
         <slot name="google"></slot>
         <slot name="divider"></slot>
