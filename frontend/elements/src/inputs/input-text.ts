@@ -1,5 +1,8 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
+import {nothing} from "lit-html";
+
+type Mode = "password" | "text";
 
 @customElement('input-text')
 export class _ extends LitElement {
@@ -69,6 +72,13 @@ export class _ extends LitElement {
     top: 33%;
     right: 12px;
    }
+   .visible{
+     display:block;
+   }
+   .hidepassword{
+     display:block;
+   }
+  
    
   
     `];
@@ -90,7 +100,7 @@ export class _ extends LitElement {
   placeholder: string = "";
 
   @property()
-  path: string = "";
+  mode: Mode = "text";
 
   @property({type: Boolean})
   error: boolean = false;
@@ -100,11 +110,16 @@ export class _ extends LitElement {
 
   @property({type: Boolean})
   imghidden: boolean = false;
+
+  @property({type: Boolean})
+  visiblepassword: boolean = false;
   
+  @property({type: Boolean})
+  hidepassword: boolean = true;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage, placeholder, errorwrapper, path, imghidden} = this;
+    const {label, helpertext, error, instruction, errormessage, mode, placeholder, errorwrapper, imghidden, visiblepassword,hidepassword} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -118,13 +133,33 @@ export class _ extends LitElement {
     return html`
     
     <div class="input-wrapper ${errorwrapper ? 'errorwrapper' : ''}">
-        <input placeholder="${placeholder}" type="text" class="">
+        <input placeholder="${placeholder}" type="${mode}" class="">
         <label class="">${label}</label>
-        <img-ui path="${path}" class="${imghidden ? 'imghidden' : ''}"></img-ui>
+        ${makeImage(this)}
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
     <p class="${errorClasses}">${errormessage}</p>
      
   `;
+  }
+}
+
+interface ImageProps {
+  imghidden: boolean,
+  visiblepassword: boolean,
+  mode: Mode
+}
+function makeImage({visiblepassword, mode}:ImageProps) {
+  
+
+  switch(mode) {
+    case "text": return nothing;
+    case "password": {
+      const path = visiblepassword
+        ? "icn-show-idle.svg"
+        : "icn-hide-idle.svg"
+
+      return html`<img-ui path="${path}"></img-ui>`
+    }
   }
 }
