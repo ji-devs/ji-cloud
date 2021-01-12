@@ -2,7 +2,7 @@ use algolia::{
     filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
-    ApiKey, Client as Inner,
+    ApiKey, AppId, Client as Inner,
 };
 use anyhow::Context;
 use chrono::Utc;
@@ -37,19 +37,32 @@ struct BatchImage<'a> {
     is_premium: bool,
 }
 
-pub struct Updater {
+pub struct Manager {
     pub db: PgPool,
-    pub algolia_client: Client,
+    pub inner: Inner,
+    pub index: String,
 }
 
-impl Updater {
+impl Manager {
+    pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
+        let (app_id, key, index) = match settings {
+            Some(settings) => match (settings.management_key, settings.media_index) {
+                (Some(key), Some(index)) => (settings.application_id, key, index),
+                _ => return Ok(None),
+            },
+            None => return Ok(None),
+        };
+
+        Ok(Some(Self {
+            inner: Inner::new(AppId::new(app_id), ApiKey(key))?,
+            index,
+            db,
+        }))
+    }
+
     #[must_use]
     pub fn spawn(self) -> JoinHandle<()> {
         tokio::task::spawn(async move {
-            if self.algolia_client.inner.is_none() {
-                return;
-            }
-
             loop {
                 let iteration_start = Instant::now();
 
@@ -74,6 +87,81 @@ impl Updater {
                 tokio::time::delay_until((iteration_start + Duration::from_secs(5)).into()).await;
             }
         })
+    }
+
+    pub async fn migrate(&self) -> anyhow::Result<()> {
+        let mut txn = self.db.begin().await?;
+
+        let algolia_version = sqlx::query!(
+            r#"
+with new_row as (
+    insert into "settings" default values on conflict(singleton) do nothing returning algolia_index_version    
+)
+select algolia_index_version as "algolia_index_version!" from new_row
+union
+select algolia_index_version as "algolia_index_version!" from "settings"
+"#,
+        )
+        .fetch_one(&mut txn)
+        .await?
+        .algolia_index_version;
+
+        if algolia_version == migration::INDEX_VERSION {
+            return Ok(());
+        }
+
+        let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
+
+        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
+            updater(&self.inner, &self.index).await.with_context(|| {
+                anyhow::anyhow!(
+                    "error while running algolia updater #{}",
+                    idx + (algolia_version as usize) + 1
+                )
+            })?;
+        }
+
+        // currently this can only be "no resync" or "complete resync" but eventually
+        // we might want to be able to "resync everything that's only had an initial sync" or "everything that has had an update"
+        let resync_mask =
+            migrations_to_run
+                .iter()
+                .fold(ResyncKind::None, |acc, &(curr, _)| match (acc, curr) {
+                    (_, ResyncKind::Complete) | (ResyncKind::Complete, _) => ResyncKind::Complete,
+                    _ => ResyncKind::None,
+                });
+
+        match resync_mask {
+            ResyncKind::Complete => {
+                sqlx::query!("update image_metadata set last_synced_at = null")
+                    .execute(&mut txn)
+                    .await?;
+            }
+            ResyncKind::None => {}
+        }
+
+        sqlx::query!(
+            r#"update "settings" set algolia_index_version = $1"#,
+            migration::INDEX_VERSION
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        Ok(())
+    }
+
+    async fn batch_images(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
     }
 
     async fn update_images(&self) -> anyhow::Result<bool> {
@@ -159,7 +247,7 @@ select id,
         log::debug!("Updating a batch of {} image(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.algolia_client.batch_images(request).await?;
+        let ids = self.batch_images(request).await?;
 
         log::debug!("Updated a batch of {} image(s)", ids.len());
 
@@ -213,97 +301,20 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
 }
 
 impl Client {
-    pub async fn migrate(&self, pool: &PgPool) -> anyhow::Result<()> {
-        // We can't exactly access algolia if we don't have a client.
-        let inner = with_client!(self.inner; ());
-
-        let mut txn = pool.begin().await?;
-
-        let algolia_version = sqlx::query!(
-            r#"
-with new_row as (
-    insert into "settings" (algolia_index_name) values($1) on conflict(singleton) do nothing returning algolia_index_version    
-)
-select algolia_index_version as "algolia_index_version!" from new_row
-union
-select algolia_index_version as "algolia_index_version!" from "settings" where algolia_index_name = $1
-"#, &self.index,
-        )
-        .fetch_optional(&mut txn)
-        .await?
-        .ok_or_else(|| anyhow::anyhow!("algolia index mismatch (error is to avoid messing up algolia indexes by using already existing dbs, unfortunately no checking can be done to ensure that it works the other way around.)"))?
-        .algolia_index_version;
-
-        if algolia_version == migration::INDEX_VERSION {
-            return Ok(());
-        }
-
-        let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
-
-        for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
-            updater(inner, &self.index).await.with_context(|| {
-                anyhow::anyhow!(
-                    "error while running algolia updater #{}",
-                    idx + (algolia_version as usize) + 1
-                )
-            })?;
-        }
-
-        // currently this can only be "no resync" or "complete resync" but eventually
-        // we might want to be able to "resync everything that's only had an initial sync" or "everything that has had an update"
-        let resync_mask =
-            migrations_to_run
-                .iter()
-                .fold(ResyncKind::None, |acc, &(curr, _)| match (acc, curr) {
-                    (_, ResyncKind::Complete) | (ResyncKind::Complete, _) => ResyncKind::Complete,
-                    _ => ResyncKind::None,
-                });
-
-        match resync_mask {
-            ResyncKind::Complete => {
-                sqlx::query!("update image_metadata set last_synced_at = null")
-                    .execute(&mut txn)
-                    .await?;
-            }
-            ResyncKind::None => {}
-        }
-
-        sqlx::query!(
-            r#"update "settings" set algolia_index_version = $1"#,
-            migration::INDEX_VERSION
-        )
-        .execute(&mut txn)
-        .await?;
-
-        txn.commit().await?;
-
-        Ok(())
-    }
-
-    async fn batch_images(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = with_client!(self.inner; vec![])
-            .batch(&self.index, &batch)
-            .await?;
-
-        let ids: Result<Vec<_>, _> = resp
-            .object_ids
-            .into_iter()
-            .map(|id| Uuid::parse_str(&id))
-            .collect();
-
-        Ok(ids?)
-    }
-
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
-            let api_key = ApiKey(settings.key);
-            let search_key = settings.frontend_search_key.map(ApiKey);
+            let frontend_search_parent_key = settings.frontend_search_key.map(ApiKey);
+
+            let (inner, index) = match (settings.backend_search_key, settings.media_index) {
+                (Some(key), Some(index)) => (Some(Inner::new(app_id, ApiKey(key))?), index),
+                _ => (None, String::new()),
+            };
 
             Ok(Self {
-                inner: Some(Inner::new(app_id, api_key)?),
-                index: settings.index,
-                frontend_search_parent_key: search_key,
+                inner,
+                index,
+                frontend_search_parent_key,
             })
         } else {
             Ok(Self {
