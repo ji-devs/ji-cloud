@@ -2,7 +2,7 @@ import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
 
-@customElement('tree-dropdown-child')
+@customElement('tree-inside-child')
 export class _ extends LitElement {
 
   static get styles() {
@@ -16,9 +16,7 @@ export class _ extends LitElement {
     .open img-ui{
         transform: rotate(90deg);
     }
-    ul.closed {
-      display: none;
-    }
+   
     .inside {
       position:absolute;
       border:solid 1px #c4dbff;
@@ -60,12 +58,11 @@ open: boolean = false;
     
     
     <div class="icon-wrapper">
-      <img-ui class="px-1" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
       <div class="inside">
     </div>
     </div>
     <div data-id="label">${label}</div>
-    <ul class="${open ? 'open' : 'closed'}">
+    <ul>
             <slot></slot>
         </ul>
   </li>

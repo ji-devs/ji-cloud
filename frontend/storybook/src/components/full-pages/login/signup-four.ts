@@ -32,6 +32,8 @@ export const SignUpFour = (props?:LoginArgs) => {
         <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUBTITLE}"></sub-title>
         <plain-blue title="${STR_SENDAGAIN}" slot="main"></plain-blue>
+        <confirmation-button slot="main"></confirmation-button>
+
         <plain-blue title="${STR_CHANGE}" slot="main"></plain-blue>
         </signup-full-wide>
 

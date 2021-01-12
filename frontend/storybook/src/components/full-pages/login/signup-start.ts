@@ -18,6 +18,7 @@ interface LoginArgs {
     errormessage: string,
     instruction: boolean,
     error: boolean,
+    imghidden:boolean,
    
 
   
@@ -29,6 +30,7 @@ interface LoginArgs {
     errormessage: "",
     instruction: false,
     error: false,
+    imghidden:true,
   }
 
   const STR_TITLE = "Sign Up";
@@ -37,11 +39,12 @@ interface LoginArgs {
   const STR_PASSWORD = "Create Password";
   const STR_PLCPASSWORD ="********";
   const STR_ACCOUNT = "Already have an account?";
-  const STR_FORGOTTEN = ""
+  const STR_FORGOTTEN = "";
+  const STR_ICON = "icn-show-idle.svg"
 
 export const SignUpStart = (props?:LoginArgs) => {
 
-    const {helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {helpertext,errormessage, instruction, error, imghidden} = props || DEFAULT_ARGS;
 
 
     return `
@@ -49,10 +52,10 @@ export const SignUpStart = (props?:LoginArgs) => {
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
-        <input-text slot="username" label="${STR_EMAIL}" placeholder=${STR_PLCEMAIL} helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_EMAIL}" placeholder=${STR_PLCEMAIL} helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${imghidden && "imghidden"} >
         </input-text>
         <password-strength slot="passwordstrength"></password-strength>
-        <input-text slot="password" label="${STR_PASSWORD}" placeholder="${STR_PLCPASSWORD}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="password" label="${STR_PASSWORD}" placeholder="${STR_PLCPASSWORD}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} path="${STR_ICON}">
         </input-text>
         <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>

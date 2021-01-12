@@ -4,14 +4,21 @@ import { TreeDropdown } from "~/components/dropdown";
 import "@elements/titles/underlined-title";
 import "@elements/titles/plain-blue";
 import "@elements/dropdowns/tree-dropdown-child";
+import "@elements/dropdowns/tree-inside";
 import "@elements/cards/blue-card";
 import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
 import { TitleWithInput } from "~/components/input";
 import {mapToString} from "@utils/array";
+import { RectangleButton } from "~/components/rectangle-button";
+
 
 export default {
   title: 'Full Pages/Image Label',
 }
+
+const STR_RED = "red";
+const STR_MEDIUM = "medium";
+const STR_NEXT = "Next"
 
 
 const leafNode = ({label, open, children}:TreeNode) => {
@@ -26,6 +33,14 @@ const rootNode = ({label, open, children}:TreeNode) => {
     <tree-dropdown label="${label}" ${open ? "open" : ""}>
       ${mapToString (children, leafNode)}
     </tree-dropdown>
+  `;
+}
+
+const rootNodeV2 = ({label, open, children}:TreeNode) => {
+  return `
+    <tree-inside label="${label}" ${open ? "open" : ""}>
+      ${mapToString (children, leafNode)}
+    </tree-inside>
   `;
 }
 
@@ -63,8 +78,13 @@ export const ImageLabelFullTwo = (props?:Props) => {
       </div>
       <div slot="right">
         <plain-blue title="${titletwo}"></plain-blue>
-        <blue-card></blue-card>
+        <blue-card>
+        ${data.map(rootNodeV2)}
+        </blue-card>
       </div>
+      <div slot="button">
+      ${RectangleButton({color:STR_RED,size:STR_MEDIUM,label:STR_NEXT,imgrighthidden:true,bold:false, italic:false,imglefthidden:true, path:""})}
+    </div>
     </imagelabel-full>
     
     `

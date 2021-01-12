@@ -14,8 +14,11 @@ export class _ extends LitElement {
     border-radius:14px;
     padding: 8px 48px 8px 16px;
    }
-   .input-wrapper.error {
+   .errorwrapper {
     border: solid 1px #f00813;
+    background-color: #fff4f4;
+   }
+   .errorwrapper input {
     background-color: #fff4f4;
    }
    .instruction{
@@ -58,6 +61,14 @@ export class _ extends LitElement {
     display:block;
    }
    p{display:none;}
+   .imghidden {
+     display:none;
+   }
+   img-ui{
+    position: absolute;
+    top: 33%;
+    right: 12px;
+   }
    
   
     `];
@@ -79,11 +90,21 @@ export class _ extends LitElement {
   placeholder: string = "";
 
   @property()
+  path: string = "";
+
+  @property({type: Boolean})
   error: boolean = false;
+
+  @property({type: Boolean})
+  errorwrapper: boolean = false;
+
+  @property({type: Boolean})
+  imghidden: boolean = false;
+  
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage, placeholder} = this;
+    const {label, helpertext, error, instruction, errormessage, placeholder, errorwrapper, path, imghidden} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -96,9 +117,10 @@ export class _ extends LitElement {
 
     return html`
     
-    <div class="input-wrapper ${error ? 'error' : ''}">
+    <div class="input-wrapper ${errorwrapper ? 'errorwrapper' : ''}">
         <input placeholder="${placeholder}" type="text" class="">
         <label class="">${label}</label>
+        <img-ui path="${path}" class="${imghidden ? 'imghidden' : ''}"></img-ui>
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
     <p class="${errorClasses}">${errormessage}</p>

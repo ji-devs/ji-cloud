@@ -6,7 +6,8 @@ export class _ extends LitElement {
     return [css`
     .wrapper{
         border-bottom: solid 1px #e5e7ef;
-        width:100%
+        width:100%;
+        position:relative;
     }
         h1{
         font-size: 24px;
@@ -28,6 +29,7 @@ export class _ extends LitElement {
     return html`
     <div class="wrapper">
        <h1>${title}</h1>
+       <slot></slot>
     </div>
   `;
   }

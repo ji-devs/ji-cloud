@@ -6,6 +6,7 @@ import "@elements/inputs/search";
 import "@elements/inputs/dropdown";
 import "@elements/inputs/title-winput";
 import "@elements/inputs/checkbox";
+import "@elements/inputs/add-image";
 
 export default {
   title: 'Input Text',
@@ -25,8 +26,8 @@ export const SearchInput = ({label, path}) => {
   
 }
 
-export const Dropdown = ({label,helpertext, error, instruction,errormessage, path}) => {
-  return `<dropdown-select label="${label}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+export const Dropdown = ({label,helpertext, error, instruction,errormessage, errorwrapper, path, imghidden}) => {
+  return `<dropdown-select label="${label}" helpertext="${helpertext}" error="${errormessage}" ${imghidden  && "imghidden"} ${errorwrapper && "errorwrapper"} ${instruction && "instruction"} ${error && "error"} >
  
   </dropdown-select>`
   
@@ -48,6 +49,12 @@ export const TextareaUnderlined = ({label}) => {
   return `<textarea-underlined label="${label}">
 
   </textarea-underlined>`
+}
+
+export const AddImage = () => {
+  return `<add-image label="">
+
+  </add-image>`
 }
 
 export const TitleWithInput = ({title,label, path}) => {

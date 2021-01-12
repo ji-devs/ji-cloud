@@ -15,73 +15,63 @@ export default {
 }
 
 interface LoginArgs {
-  
-    color: string,
-    country: string,
-    username: string,
-    state:string,
-    noaccount:string,
     helpertext:string,
     errormessage: string,
     instruction: boolean,
     error: boolean,
-    checkbox_label:string,
-    subtitle:string,
-    subtitletwo:string,
-    dropdownicon:string,
-    city:string,
-    school:string,
-    checkbox_label_two: string
+    imghidden:boolean,
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-   
-    country: "Country",
-    username: "Preferred language of communication*",
-    state: "State",
-    noaccount: "Already have an account?",
-    helpertext: "Your password looks good", 
+      helpertext: "Your password looks good", 
     errormessage: "",
     instruction: false,
     error: false,
-    color: "red",
-    checkbox_label:"I have read the terms and conditions (legal text…)",
-    subtitle:"Tell us more about yourself so that we can tailor ",
-    subtitletwo: "the content according to your specific needs",
-    dropdownicon:"icn-chevron-dropdown-up.svg",
-    city: "City",
-    school: "School/Organization*",
-    checkbox_label_two:"I would like to receive educational resources (GDPR legal text….)"
+    imghidden:true
+      
   }
 
-  const STR_TITLE = "Sign Up - Step 2"
+  const STR_TITLE = "Sign Up - Step 2";
+  const STR_ACCOUNT = "Already have an account?";
+  const STR_REGISTER = "Register";
+  const STR_COUNTRY = "Country";
+  const STR_CITY = "City";
+  const STR_SCHOOL = "School/Organization*";
+  const STR_STATE = "State";
+  const STR_SUBTITLE = "Tell us more about yourself so that we can tailor";
+  const STR_SUBSUBTITE =  "the content according to your specific needs";
+  const STR_TERMS = "I have read the terms and conditions (legal text…)";
+  const STR_LANGUAGE = "Preferred language of communication*";
+  const STR_GDPR = "I would like to receive educational resources (GDPR legal text….)";
+  
 
 export const SignUpTwo = (props?:LoginArgs) => {
 
-    const {subtitle,dropdownicon,city,school,checkbox_label_two, subtitletwo,checkbox_label, country, username, state, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {helpertext,errormessage, instruction, error, imghidden} = props || DEFAULT_ARGS;
 
 
     return `
     <signup-full title="${STR_TITLE}">
         
-        <sub-title slot="subtitle" title="${subtitle}"></sub-title>
-        <sub-title slot="subtitle" title="${subtitletwo}"></sub-title>
-        <dropdown-select slot="topleft" path="${dropdownicon}" label="${country}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
+        <sub-title slot="subtitle" title="${STR_SUBSUBTITE}"></sub-title>
+        <dropdown-select slot="topleft" label="${STR_COUNTRY}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="topright" path="${dropdownicon}" label="${state}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="topright"  label="${STR_STATE}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="bottomleft" path="${dropdownicon}" label="${city}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="bottomleft" label="${STR_CITY}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
-        <dropdown-select slot="bottomright" path="${dropdownicon}" label="${school}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="bottomright" label="${STR_SCHOOL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </dropdown-select>
         
-        <input-text slot="username" label="${username}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_LANGUAGE}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${imghidden && "imghidden"} >
         </input-text>
-        <input-checkbox slot="checkbox" label="${checkbox_label}"></input-checkbox>
-        <input-checkbox slot="checkbox" label="${checkbox_label_two}"></input-checkbox>
+        <input-checkbox slot="checkbox" label="${STR_TERMS}"></input-checkbox>
+        <input-checkbox slot="checkbox" label="${STR_GDPR}"></input-checkbox>
 
         <div slot="submit">${RectangleButton()}</div>
-        <plain-blue title="${noaccount}" slot="noaccount"></plain-blue>
+        <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
+        <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
 
         </signup-full>
 

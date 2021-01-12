@@ -67,6 +67,9 @@ export class _ extends LitElement {
     
         align-items:center;
     }
+    ::slotted(*){
+        position:relative;
+    }
     ::slotted([slot="tooltip"]){
         position:absolute;
         top:56px;

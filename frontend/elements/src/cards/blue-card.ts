@@ -11,7 +11,13 @@ export class _ extends LitElement {
         border-radius: 10px;
         background-color: #edf2ff;
         overflow:auto;
+        width:600px;
+        padding:32px 40px;
     }
+    ::slotted([slot=content]:nth-child(even)){
+        margin-bottom: 24px;
+    }
+  
     `];
   }
 

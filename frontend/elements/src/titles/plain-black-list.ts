@@ -1,18 +1,24 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('plain-blue')
+@customElement('plain-black-list')
 export class _ extends LitElement {
   static get styles() {
     return [css`
     p{
-        color: #5590fc;
+        color: #4a4a4a;
         margin-top:0;
-        margin-bottom:0;
         
 
     }
     .bold {
       font-weight:500;
+    }
+    .wrapper {
+        display:flex;
+        flex-direction:column;
+    }
+    p{
+        margin-bottom:0;
     }
     
    
@@ -29,7 +35,9 @@ export class _ extends LitElement {
     const {title, bold} = this;
 
     return html`
-    <p class="${bold ? 'bold' : ''}">${title}</p>
+    <div class="wrapper">
+        <slot></slot>
+    </div>
   `;
   }
 }

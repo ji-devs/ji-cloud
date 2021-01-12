@@ -22,6 +22,7 @@ interface LoginArgs {
     error: boolean,
     imglefthidden:boolean,
     path:string,
+    imghidden:boolean,
   }
 
   const DEFAULT_ARGS:LoginArgs = {
@@ -32,7 +33,8 @@ interface LoginArgs {
     color: "red",
     size: "medium",
     imglefthidden:true,
-    path:""
+    path:"",
+    imghidden:true,
     
   }
 
@@ -51,18 +53,18 @@ const STR_REGISTER = "Register";
 
 export const SignUpOne = (props?:LoginArgs) => {
 
-    const {color, helpertext,errormessage, instruction, error, size, path,imglefthidden} = props || DEFAULT_ARGS;
+    const {color, helpertext,errormessage, instruction, error, size, path,imglefthidden, imghidden} = props || DEFAULT_ARGS;
 
 
     return `
     <signup-full title="${STR_TITLE}">
         
         
-        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"}  ${imghidden && "imghidden"}>
         </input-text>
-        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"}  ${imghidden && "imghidden"}>
         </input-text>
-        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${imghidden && "imghidden"} >
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_18}">
 

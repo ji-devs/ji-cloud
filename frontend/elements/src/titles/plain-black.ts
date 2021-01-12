@@ -7,6 +7,7 @@ export class _ extends LitElement {
     p{
         color: #4a4a4a;
         margin-top:0;
+       
         
 
     }
@@ -28,7 +29,7 @@ export class _ extends LitElement {
     const {title, bold} = this;
 
     return html`
-    <p class="${bold}">${title}</p>
+    <p class="${bold ? 'bold' : ''}">${title}</p>
   `;
   }
 }
