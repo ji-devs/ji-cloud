@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(tag = "media_kind")]
+#[serde(rename_all = "camelCase")]
 pub enum MediaKind {
     /// Media is audio
     Audio,

@@ -512,26 +512,6 @@
       ]
     }
   },
-  "2d3582ab7cfac01ef24e5462ea6dc2dbb379dd99e24236162975bda3702de5b8": {
-    "query": "\nwith new_row as (\n    insert into \"settings\" (algolia_index_name) values($1) on conflict(singleton) do nothing returning algolia_index_version    \n)\nselect algolia_index_version as \"algolia_index_version!\" from new_row\nunion\nselect algolia_index_version as \"algolia_index_version!\" from \"settings\" where algolia_index_name = $1\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "algolia_index_version!",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -996,6 +976,24 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "71ea3b30742734dc675123b8d517e0f7f6147f6865118707aa77333fdae87b38": {
+    "query": "\nwith new_row as (\n    insert into \"settings\" default values on conflict(singleton) do nothing returning algolia_index_version    \n)\nselect algolia_index_version as \"algolia_index_version!\" from new_row\nunion\nselect algolia_index_version as \"algolia_index_version!\" from \"settings\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "algolia_index_version!",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
       ]
     }
   },

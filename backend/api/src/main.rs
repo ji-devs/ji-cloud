@@ -22,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (runtime_settings, jwk_verifier, s3, algolia, db_pool, _guard) = {
+    let (runtime_settings, jwk_verifier, s3, algolia_client, algolia_manager, db_pool, _guard) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
@@ -36,7 +36,9 @@ async fn main() -> anyhow::Result<()> {
 
         let s3 = s3::Client::new(settings.s3_settings().await?)?;
 
-        let algolia = crate::algolia::Client::new(settings.algolia_settings().await?)?;
+        let algolia_settings = settings.algolia_settings().await?;
+
+        let algolia_client = crate::algolia::Client::new(algolia_settings.clone())?;
 
         let db_pool = db::get_pool(
             settings
@@ -45,25 +47,33 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
+        let algolia_manager = crate::algolia::Manager::new(algolia_settings, db_pool.clone())?;
+
         let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
-        (runtime_settings, jwk_verifier, s3, algolia, db_pool, guard)
+        (
+            runtime_settings,
+            jwk_verifier,
+            s3,
+            algolia_client,
+            algolia_manager,
+            db_pool,
+            guard,
+        )
     };
 
     // todo: find a better place for this...
-    algolia
-        .migrate(&db_pool)
-        .await
-        .context("Algolia migration failed")?;
+    if let Some(algolia_manager) = algolia_manager {
+        algolia_manager
+            .migrate()
+            .await
+            .context("Algolia migration failed")?;
 
-    let algolia_syncer = algolia::Updater {
-        db: db_pool.clone(),
-        algolia_client: algolia.clone(),
-    };
+        let _ = algolia_manager.spawn();
+    }
 
-    let _ = algolia_syncer.spawn();
-
-    let handle = thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia));
+    let handle =
+        thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia_client));
 
     log::info!("app started!");
 
