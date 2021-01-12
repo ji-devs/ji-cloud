@@ -9,8 +9,11 @@ use chrono::Utc;
 use core::settings::AlgoliaSettings;
 use futures::TryStreamExt;
 use serde::Serialize;
-use shared::domain::{
-    category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
+use shared::{
+    domain::{
+        category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
+    },
+    media::MediaKind,
 };
 use sqlx::PgPool;
 use std::{convert::TryInto, time::Duration, time::Instant};
@@ -35,6 +38,13 @@ struct BatchImage<'a> {
     category_names: &'a [String],
     publish_at: Option<i64>,
     is_premium: bool,
+}
+
+#[derive(Serialize)]
+#[serde(tag = "media_kind")]
+#[serde(rename_all = "camelCase")]
+enum BatchMedia<'a> {
+    Image(BatchImage<'a>),
 }
 
 pub struct Manager {
@@ -152,7 +162,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         Ok(())
     }
 
-    async fn batch_images(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+    async fn batch_media(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
         let resp = self.inner.batch(&self.index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
@@ -216,7 +226,7 @@ select id,
         )
         .fetch(&mut txn)
         .map_ok(|row| algolia::request::BatchWriteRequest::UpdateObject {
-            body: match serde_json::to_value(&BatchImage {
+            body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
                 name: &row.name,
                 description: &row.description,
                 styles: &row.styles,
@@ -229,7 +239,7 @@ select id,
                 category_names: &row.category_names,
                 publish_at: row.publish_at.map(|t| t.timestamp_nanos()),
                 is_premium: row.is_premium,
-            })
+            }))
             .expect("failed to serialize BatchImage to json")
             {
                 serde_json::Value::Object(map) => map,
@@ -247,7 +257,7 @@ select id,
         log::debug!("Updating a batch of {} image(s)", requests.len());
 
         let request = algolia::request::BatchWriteRequests { requests };
-        let ids = self.batch_images(request).await?;
+        let ids = self.batch_media(request).await?;
 
         log::debug!("Updated a batch of {} image(s)", ids.len());
 
@@ -300,6 +310,16 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
+fn media_filter(kind: MediaKind, invert: bool) -> CommonFilter<FacetFilter> {
+    CommonFilter {
+        filter: FacetFilter {
+            facet_name: "media_kind".to_owned(),
+            value: kind.to_str().to_owned(),
+        },
+        invert,
+    }
+}
+
 impl Client {
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
         if let Some(settings) = settings {
@@ -349,12 +369,14 @@ impl Client {
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
-    ) -> anyhow::Result<(Vec<Uuid>, u32, u64)> {
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let compare_time = Utc::now().timestamp_nanos();
 
-        let client = with_client!(self.inner; (vec![], 0, 0));
+        let client = with_client!(self.inner; None);
 
-        let mut filters = algolia::filter::AndFilter { filters: vec![] };
+        let mut filters = algolia::filter::AndFilter {
+            filters: vec![Box::new(media_filter(MediaKind::Image, false))],
+        };
 
         if let Some(is_published) = is_published {
             filters.filters.push(Box::new(CommonFilter {
@@ -400,7 +422,7 @@ impl Client {
             .map(|hit| hit.object_id.parse())
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok((results, pages, total_hits))
+        Ok(Some((results, pages, total_hits)))
     }
 
     pub async fn delete_image(&self, id: ImageId) {
