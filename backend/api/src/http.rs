@@ -1,7 +1,7 @@
 mod cors;
 mod endpoints;
 
-use crate::{algolia::AlgoliaClient, error::BasicError, jwkkeys::JwkVerifier, s3};
+use crate::{error::BasicError, jwkkeys::JwkVerifier, s3};
 use actix_service::Service;
 use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use actix_web::HttpResponse;
@@ -12,7 +12,6 @@ use core::{
 };
 use futures::Future;
 use paperclip::actix::OpenApiExt;
-use s3::S3Client;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 
@@ -59,8 +58,8 @@ pub async fn run(
     pool: PgPool,
     settings: RuntimeSettings,
     jwk_verifier: Arc<JwkVerifier>,
-    s3: S3Client,
-    algolia: AlgoliaClient,
+    s3: s3::Client,
+    algolia: crate::algolia::Client,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -96,6 +95,8 @@ pub async fn run(
             .configure(endpoints::jig::configure)
             .configure(endpoints::module::configure)
             .configure(endpoints::admin::configure)
+            .configure(endpoints::animation::configure)
+            .configure(endpoints::search::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });

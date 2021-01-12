@@ -153,6 +153,10 @@ pub struct AlgoliaSettings {
     pub key: String,
     /// The index to use for operations on the algolia client.
     pub index: String,
+
+    /// The key to use for the *frontend* for the algolia client.
+    /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
+    pub frontend_search_key: Option<String>,
 }
 
 /// Manages access to settings.
@@ -335,10 +339,22 @@ impl SettingsManager {
             },
         };
 
+        let frontend_search_key = self
+            .get_optional_secret(keys::algolia::FRONTEND_SEARCH_KEY)
+            .await?;
+
+        if frontend_search_key.is_none() {
+            log::warn!(
+                "Missing `{}` key - this will disable routes related to it",
+                keys::algolia::FRONTEND_SEARCH_KEY
+            )
+        }
+
         Ok(Some(AlgoliaSettings {
             application_id,
             key,
             index,
+            frontend_search_key,
         }))
     }
 

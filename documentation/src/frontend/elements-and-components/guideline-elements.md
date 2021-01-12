@@ -68,9 +68,7 @@ See [lit-html docs](https://lit-html.polymer-project.org/guide/writing-templates
 
 ### Don't hardcode data in the render function
 
-For dynamic data, elements must of course accept it as a property and the data is set via the component.
-
-However, even for static data, it should be moved out of the render function and defined as a `const`. For strings, use the `STR_` prefix in order to facilitate string replacement / localization later.
+Static data should be moved out of the render function and defined as a `const`. For strings, use the `STR_` prefix in order to facilitate string replacement / localization later (a similar technique is used in Components).
 
 Example:
 
@@ -84,6 +82,18 @@ export class _ extends LitElement {
     return html`<div>${STR_HOWDY}</div>`;
   }
 }
+```
+
+Note that the next step which is currently unimplemented will be moving those strings into the config folder.
+That will be an easy transition from the above, since it will _not_ require any change in the html,
+and it should be easy to step through all the elements (and components) with the `STR_` prefix to switch over.
+
+Future example:
+
+```typescript
+import {English} from "~/config/strings";
+
+const STR_HOWDY = English.button.howdy;
 ```
 
 ### Global styles - inheritance

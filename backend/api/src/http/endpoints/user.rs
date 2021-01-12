@@ -1,12 +1,9 @@
-use crate::{
-    db::{self, user::register},
-    error::{self, ServerError},
+use crate::extractor::{
+    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
 };
 use crate::{
-    error::RegisterError,
-    extractor::{
-        reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
-    },
+    db::{self, user::register},
+    error,
 };
 use actix_web::HttpResponse;
 use core::settings::RuntimeSettings;
@@ -70,10 +67,10 @@ async fn handle_signin_credentials(
         .json(SigninSuccess { csrf }))
 }
 
-async fn validate_register_req(req: &RegisterRequest) -> Result<(), RegisterError> {
+async fn validate_register_req(req: &RegisterRequest) -> Result<(), error::Register> {
     // todo: decide if we should check for an _empty_ email?
     if req.username.is_empty() {
-        return Err(RegisterError::RegisterError(
+        return Err(error::Register::RegisterError(
             RegisterErrorKind::EmptyDisplayName,
         ));
     }
@@ -88,7 +85,7 @@ async fn handle_register(
     db: Data<PgPool>,
     user: FirebaseUser,
     req: Json<RegisterRequest>,
-) -> actix_web::Result<HttpResponse, RegisterError> {
+) -> actix_web::Result<HttpResponse, error::Register> {
     validate_register_req(&req).await?;
 
     let id = register(db.as_ref(), &user.id, &req).await?;
@@ -119,7 +116,7 @@ async fn handle_get_profile(
 async fn handle_authorize(
     settings: Data<RuntimeSettings>,
     auth: WrapAuthClaimsCookieDbNoCsrf,
-) -> Result<Json<<SingleSignOn as ApiEndpoint>::Res>, ServerError> {
+) -> Result<Json<<SingleSignOn as ApiEndpoint>::Res>, error::Server> {
     let claims = AuthClaims {
         id: auth.0.id,
         csrf: None,
@@ -130,7 +127,7 @@ async fn handle_authorize(
     Ok(Json(SingleSignOnSuccess { jwt }))
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         Profile::PATH,
         Profile::METHOD.route().to(handle_get_profile),

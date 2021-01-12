@@ -2,24 +2,19 @@ use paperclip::actix::web::ServiceConfig;
 use shared::api::{endpoints::audio, ApiEndpoint};
 use sqlx::postgres::PgDatabaseError;
 
-use crate::error::DeleteError;
+use crate::error;
 
-fn check_conflict_delete(err: sqlx::Error) -> DeleteError {
+fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {
         sqlx::Error::Database(e) if e.downcast_ref::<PgDatabaseError>().constraint().is_some() => {
-            DeleteError::Conflict
+            error::Delete::Conflict
         }
-        _ => DeleteError::InternalServerError(err.into()),
+        _ => error::Delete::InternalServerError(err.into()),
     }
 }
 
 pub mod user {
-    use crate::{
-        db,
-        error::{DeleteError, NotFoundError, ServerError, UploadError},
-        extractor::WrapAuthClaimsNoDb,
-        s3::S3Client,
-    };
+    use crate::{db, error, extractor::WrapAuthClaimsNoDb, s3};
     use futures::TryStreamExt;
     use paperclip::actix::{
         api_v2_operation,
@@ -45,7 +40,7 @@ pub mod user {
     pub(super) async fn create(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
-    ) -> Result<CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>, NotFoundError>
+    ) -> Result<CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>, error::NotFound>
     {
         let id = db::audio::user::create(db.as_ref()).await?;
         Ok(CreatedJson(CreateResponse { id }))
@@ -55,20 +50,20 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: Data<S3Client>,
+        s3: Data<s3::Client>,
         _claims: WrapAuthClaimsNoDb,
         Path(id): Path<AudioId>,
         bytes: Bytes,
-    ) -> Result<NoContent, UploadError> {
+    ) -> Result<NoContent, error::Upload> {
         if !db::audio::user::exists(db.as_ref(), id).await? {
-            return Err(UploadError::ResourceNotFound);
+            return Err(error::Upload::ResourceNotFound);
         }
 
         // todo: use the duration
         let _duration = {
             let bytes = bytes.clone();
             tokio::task::spawn_blocking(move || {
-                mp3_metadata::read_from_slice(&bytes).map_err(|_it| UploadError::InvalidMedia)
+                mp3_metadata::read_from_slice(&bytes).map_err(|_it| error::Upload::InvalidMedia)
             })
             .await
             .unwrap()?
@@ -86,8 +81,8 @@ pub mod user {
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<AudioId>,
-        s3: Data<S3Client>,
-    ) -> Result<NoContent, DeleteError> {
+        s3: Data<s3::Client>,
+    ) -> Result<NoContent, error::Delete> {
         let audio = req.into_inner();
         db::audio::user::delete(&db, audio)
             .await
@@ -105,10 +100,10 @@ pub mod user {
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
         req: Path<AudioId>,
-    ) -> Result<Json<<endpoints::audio::user::Get as ApiEndpoint>::Res>, NotFoundError> {
+    ) -> Result<Json<<endpoints::audio::user::Get as ApiEndpoint>::Res>, error::NotFound> {
         let metadata = db::audio::user::get(&db, req.into_inner())
             .await?
-            .ok_or(NotFoundError::ResourceNotFound)?;
+            .ok_or(error::NotFound::ResourceNotFound)?;
 
         Ok(Json(UserAudioResponse { metadata }))
     }
@@ -118,9 +113,9 @@ pub mod user {
     pub(super) async fn list(
         db: Data<PgPool>,
         _claims: WrapAuthClaimsNoDb,
-    ) -> Result<Json<<endpoints::audio::user::List as ApiEndpoint>::Res>, ServerError> {
+    ) -> Result<Json<<endpoints::audio::user::List as ApiEndpoint>::Res>, error::Server> {
         let audio_files: Vec<_> = db::audio::user::list(db.as_ref())
-            .err_into::<ServerError>()
+            .err_into::<error::Server>()
             .and_then(|metadata: UserAudio| async { Ok(UserAudioResponse { metadata }) })
             .try_collect()
             .await?;
@@ -129,7 +124,7 @@ pub mod user {
     }
 }
 
-pub fn configure(cfg: &mut ServiceConfig) {
+pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         audio::user::Create::PATH,
         audio::user::Create::METHOD.route().to(self::user::create),

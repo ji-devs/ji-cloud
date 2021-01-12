@@ -20,12 +20,46 @@ Bad:
 import {MyButton} from "@elements/buttons/my-button";
 ```
 
+### Don't hardcode data in the return function
+
+Static data should be moved out of the return function and defined as a `const`. For strings, use the `STR_` prefix in order to facilitate string replacement / localization later (a similar technique is used in Elements).
+
+Example (not including props for the sake of simplicity):
+
+```typescript
+
+const STR_HOWDY = "hello world";
+
+export const MyStory = () => `<div>${STR_HOWDY}</div>`
+```
+
+Note that the next step which is currently unimplemented will be moving those strings into the config folder.
+That will be an easy transition from the above, since it will _not_ require any change in the html,
+and it should be easy to step through all the components (and elements) with the `STR_` prefix to switch over.
+
+Future example:
+
+```typescript
+import {English} from "~/config/strings";
+
+const STR_HOWDY = English.button.howdy;
+```
+
+### Controls
+
+Generally speaking, use Controls (via the `args` property) to simulate data that changes at runtime. There is no need at all to re-simulate that dynamic data in other contexts.
+
+For example, a standalone button story _should_ have a Control to see how that button behaves with all sorts of text.
+
+Once that button is used in another component where the text is predefined, e.g. "Next", then it should _not_ be controllable and the above technique of static data applies.
+
 ### Provide arguments
 
 1. Args should always be well-typed and optional (e.g. `foo(args?:MyArgs)`)
 2. A hardcoded default should be used as a fallback if no args are provided
 3. To implement the fallback, destructure _in_ the component
 4. Assign the default to the components `args` property (this makes it part of Storybook's Controls)
+5. Enumerations should be expressed as actual enums or unions (not free-for-all strings/numbers) - and should similarly have a control type of radio, dropdown, etc.
 
 Note that for the sake of jargon, "args" and "props" are used interchangeably, but we tend to use "args" on the outside since that fits with Storybook's lingo, and "props" on the inside since that fits with React/Component lingo.
 

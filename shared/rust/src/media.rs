@@ -18,7 +18,8 @@ pub enum MediaKind {
 
 impl MediaKind {
     /// returns `self` in a string representation.
-    pub fn to_str(self) -> &'static str {
+    #[must_use]
+    pub const fn to_str(self) -> &'static str {
         match self {
             Self::Audio => "audio",
             Self::Image => "image",
@@ -42,6 +43,7 @@ pub enum ImageVariant {
 
 impl ImageVariant {
     /// returns `self` in a string representation.
+    #[must_use]
     pub const fn to_str(self) -> &'static str {
         match self {
             Self::Original => "original",
@@ -60,6 +62,7 @@ pub enum AudioVariant {
 
 impl AudioVariant {
     /// returns `self` in a string representation.
+    #[must_use]
     pub const fn to_str(self) -> &'static str {
         match self {
             Self::Original => "original",
@@ -68,16 +71,20 @@ impl AudioVariant {
 }
 
 /// Animation Variants
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+#[repr(i16)]
 pub enum AnimationVariant {
     /// Gif Animation
-    Gif,
+    Gif = 0,
     /// Spritesheet Animation
-    Spritesheet,
+    Spritesheet = 1,
 }
 
 impl AnimationVariant {
     /// returns `self` in a string representation.
+    #[must_use]
     pub const fn to_str(self) -> &'static str {
         match self {
             Self::Gif => "gif",
@@ -127,6 +134,7 @@ impl MediaLibraryKind {
 
 /// gives the key for a image with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
+#[must_use]
 pub fn image_id_to_key(
     library_kind: MediaLibraryKind,
     variant: ImageVariant,
@@ -142,6 +150,7 @@ pub fn image_id_to_key(
 
 /// gives the key for a audio-file with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
+#[must_use]
 pub fn audio_id_to_key(
     library_kind: MediaLibraryKind,
     variant: AudioVariant,
@@ -157,6 +166,7 @@ pub fn audio_id_to_key(
 
 /// gives the key for an animation with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
+#[must_use]
 pub fn animation_id_to_key(
     library_kind: MediaLibraryKind,
     variant: AnimationVariant,

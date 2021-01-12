@@ -1,8 +1,8 @@
 use algolia::{
     filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
-    request::{BatchWriteRequests, SearchQuery},
+    request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
-    Client as Inner,
+    ApiKey, Client as Inner,
 };
 use anyhow::Context;
 use chrono::Utc;
@@ -39,10 +39,11 @@ struct BatchImage<'a> {
 
 pub struct Updater {
     pub db: PgPool,
-    pub algolia_client: AlgoliaClient,
+    pub algolia_client: Client,
 }
 
 impl Updater {
+    #[must_use]
     pub fn spawn(self) -> JoinHandle<()> {
         tokio::task::spawn(async move {
             if self.algolia_client.inner.is_none() {
@@ -188,9 +189,10 @@ macro_rules! with_client {
 }
 
 #[derive(Clone)]
-pub struct AlgoliaClient {
+pub struct Client {
     inner: Option<Inner>,
     index: String,
+    frontend_search_parent_key: Option<ApiKey>,
 }
 
 fn filters_for_ids<T: Into<Uuid> + Copy>(
@@ -210,7 +212,7 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
-impl AlgoliaClient {
+impl Client {
     pub async fn migrate(&self, pool: &PgPool) -> anyhow::Result<()> {
         // We can't exactly access algolia if we don't have a client.
         let inner = with_client!(self.inner; ());
@@ -295,18 +297,34 @@ select algolia_index_version as "algolia_index_version!" from "settings" where a
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
-            let api_key = algolia::ApiKey(settings.key);
+            let api_key = ApiKey(settings.key);
+            let search_key = settings.frontend_search_key.map(ApiKey);
 
             Ok(Self {
                 inner: Some(Inner::new(app_id, api_key)?),
                 index: settings.index,
+                frontend_search_parent_key: search_key,
             })
         } else {
             Ok(Self {
                 inner: None,
                 index: String::new(),
+                frontend_search_parent_key: None,
             })
         }
+    }
+
+    pub fn generate_virtual_key(
+        &self,
+        user_id: Option<Uuid>,
+        ttl: Option<chrono::Duration>,
+    ) -> Option<ApiKey> {
+        self.frontend_search_parent_key.as_ref().map(|it| {
+            it.generate_virtual_key(&VirtualKeyRestrictions {
+                user_token: user_id.map(|u| u.to_string()),
+                valid_until: ttl.map(|ttl| Utc::now() + ttl),
+            })
+        })
     }
 
     // todo: return ImageId (can't because of repr issues in sqlx)
