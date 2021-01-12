@@ -4,31 +4,55 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
   static get styles() {
     return [css`
-  
-  div{
-      height:100px;
-      width:100px;
-      background-color:red;
+  img-ui{
+    width: 246px;
+    height: 236px;
+    object-fit: contain;
+
+  }
+  h2{
+    font-size: 32px;
+    font-weight: 900;
+    color: #fd6b71;
+    margin-top:50px;
+
   }
   p{
-      font-size:30px;
+    font-family: Poppins;
+    line-height: 1.5;
+    color: #383838;
+    margin-top:10px;
+
+  }
+  div{
+    width: 274px;
+margin-left:50px;
+  }
   }
     `];
   }
 
-  @property()
-  label:string = ""; 
 
   @property()
-  text:string = ""; 
+  path:string = ""; 
+  @property()
+  paragraph:string = ""; 
+  @property()
+  title:string = ""; 
+  @property()
+  color:string = ""; 
+ 
 
   render() {
 
-    const {label, text} = this;
+    const {path, paragraph,title,color} = this;
 
     return html`
-        <div>
-            <p>${label} ${text}</p>
+     <div>
+        <img-ui class="img" path="${path}"></img-ui>
+        <h2 class="${color}">${title}</h2>
+        <p>${paragraph}</p>
+        <slot></slot>
         </div>
   `;
   }
