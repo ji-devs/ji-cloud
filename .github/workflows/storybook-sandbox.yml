@@ -1,0 +1,72 @@
+name: Storybook - Sandbox
+
+on:
+  push:
+    branches: [ sandbox ]
+    paths:
+    - 'config/**'
+    - 'frontend/core/js/**'
+    - 'frontend/storybook/**'
+    - 'frontend/elements/**'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - storybook]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: install build utils deps
+        run: npm install
+        working-directory: "./frontend/build-utils"
+        
+      - name: install element deps
+        run: npm install
+        working-directory: "./frontend/elements"
+
+      - name: test elements 
+        run: npm run test 
+        working-directory: "./frontend/elements"
+
+      - name: install npm deps
+        run: npm install
+        working-directory: "./frontend/storybook"
+
+      - name: build 
+        run: npm run storybook:build:sandbox
+        working-directory: "./frontend/storybook"
+        env:
+          LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
+
+      - name: deploy to firebase
+        uses: w9jds/firebase-action@v1.0.1
+        with:
+          args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-storybook
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()

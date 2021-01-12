@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "crates/utils",
+	"crates/components",
+    "crates/renderer",
+	"crates/entry/dev/scratch/001",
+	"crates/entry/dev/showcase/001",
+    "crates/entry/user",
+    "crates/entry/admin",
+    "crates/entry/jig/edit",
+    "crates/entry/jig/play",
+	"crates/entry/module/memory/_common",
+    "crates/entry/module/memory/edit",
+    "crates/entry/module/memory/play",
+	"crates/entry/module/poster/_common",
+    "crates/entry/module/poster/edit",
+    "crates/entry/module/poster/play",
+]

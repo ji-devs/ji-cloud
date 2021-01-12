@@ -1,8 +1,8 @@
 {
   "hosting": [
     {
-      "target": "ji-cloud-developer-storybook",
-      "public": "storybook/dist/storybook-build",
+      "target": "ji-cloud-sandbox-storybook",
+      "public": "frontend/storybook/dist/storybook-build",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -15,9 +15,28 @@
         }
       ]
     },
-	{
-      "target": "ji-cloud-developer-documentation",
-      "public": "documentation/dist",
+    {
+      "target": "ji-cloud-sandbox-docs",
+      "public": "temp-docs",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "book/**",
+          "destination": "/book/index.html"
+        },
+        {
+          "source": "crate/**",
+          "destination": "/crate/shared/index.html"
+        }
+      ]
+    },
+    {
+      "target": "ji-cloud-storybook",
+      "public": "frontend/storybook/dist/storybook-build",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -27,6 +46,25 @@
         {
           "source": "**",
           "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "ji-cloud-docs",
+      "public": "temp-docs",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "book/**",
+          "destination": "/book/index.html"
+        },
+        {
+          "source": "shared/**",
+          "destination": "/shared/index.html"
         }
       ]
     }

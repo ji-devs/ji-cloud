@@ -1,5 +1,6 @@
-use core::settings::SETTINGS;
+use actix_web::web::Data;
+use core::settings::RuntimeSettings;
 
-pub fn epoch_page() -> String {
-    format!("{}", SETTINGS.get().unwrap().epoch.as_millis())
+pub async fn epoch_page(settings: Data<RuntimeSettings>) -> String {
+    format!("{}", settings.epoch.as_millis())
 }

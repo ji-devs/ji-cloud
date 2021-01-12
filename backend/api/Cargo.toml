@@ -1,7 +1,67 @@
-[workspace]
-
-members = [
-    "main",
-    "crates/server",
-    "crates/actions",
+[package]
+name = "ji-cloud-api"
+version = "0.1.0"
+authors = [
+    "dakom <david.komer@gmail.com>",
+    "Chloe Ross <orangesnowfox@gmail.com>" # chloe@launchbadge.com 
 ]
+edition = "2018"
+default-run = "ji-cloud-api"
+
+[dependencies]
+actix-cors = "0.5.0"
+actix-http = "2.1.0"
+actix-rt = "1.0.0"
+actix-service = "1.0.5"
+actix-web = "3.0.0"
+algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "f5ab9b32121f51f0ff8b0a5cef0656ada0f477e4" }
+anyhow = "1.0.32"
+chrono = "0.4.13"
+chrono-tz = "0.5.3"
+config = {path = "../../config/rust"}
+dotenv = "0.15"
+env_logger = "0.8.2"
+futures = "0.3.5"
+http = "0.2.2"
+image = "0.23.10"
+jsonwebtoken = "7.2"
+listenfd = {version = "0.3", optional = true }
+log = "0.4"
+mp3-metadata = "0.3.3"
+paperclip = { version = "0.5", features = ["actix", "uuid", "chrono"] }
+percent-encoding = "2.1.0"
+pin-project = "1.0.1"
+# pin-project = "0.4.23"
+rand = "0.7"
+reqwest = { version = "0.10", features = ["json"] }
+rusoto_core = "0.45.0"
+rusoto_s3 = "0.45.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0"
+serde_json = "1.0"
+shared = {path = "../../shared/rust", features = ["backend"]}
+time = "0.2.16"
+tokio = { version = "0.2", features = ["rt-threaded"] }
+url = { version = "2.1.1", features = ["serde"] }
+uuid = "0.8.1"
+
+[dependencies.sqlx]
+version = "0.4.0"
+default-features = false
+features = [ "runtime-tokio-native-tls", "macros", "postgres", "uuid", "json", "chrono", "offline", "migrate"]
+
+[dependencies.core]
+path = "../core"
+features = ["db"]
+
+
+[features]
+default = ["listenfd", "core/listenfd"]
+
+[dependencies.sentry]
+version = "0.21.0"
+features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
+
+# we use native-tls but this ensures we have a stable version of OpenSSL on *nix
+[target.'cfg(unix)'.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }

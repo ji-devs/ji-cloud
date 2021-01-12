@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="{{ app_css|safe }}">
+    <title>Ji Cloud</title>
+
+    {% if local_dev -%}
+    <script src="/static/js/reload.js"></script>
+    {% endif -%}
+
+    <script src="{{ app_custom_elements_js|safe }}"></script>
+
+    {% if firebase -%}
+    <script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-auth.js"></script>
+    {% endif -%}
+    {% match google_maps_url %}
+    {% when Some with (url) %}
+    <script src="{{ url|safe }}"></script>
+    {% else %}
+    {% endmatch %}
+</head>
+
+<body>
+    <script src="{{ app_js|safe }}"></script>
+</body>
+
+</html>

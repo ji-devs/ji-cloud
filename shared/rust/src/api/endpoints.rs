@@ -1,46 +1,53 @@
+use crate::api::Method;
 use serde::{de::DeserializeOwned, Serialize};
 
+//  add something for path requests?
+//  add something for auth required?
+
+/// Represents a A endpoint that the backend will support, and how to call it.
 pub trait ApiEndpoint {
+    /// The request type for this endpoint.
     type Req: Serialize;
+
+    /// The response type for this endpoint.
     type Res: DeserializeOwned + Serialize;
+
+    /// The (inner) error type for this endpoint.
     type Err: DeserializeOwned + Serialize;
+
+    /// The path to the endpoint.
+    const PATH: &'static str;
+
+    /// The method used to make a request to the endpoint.
+    const METHOD: Method;
 }
 
-pub mod user {
-    use super::ApiEndpoint;
+/// Search endpoints.
+pub mod search;
 
-    use crate::{
-        auth::{
-            RegisterError, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess,
-        },
-        user::{NoSuchUserError, User},
-    };
+/// Animation endpoints.
+pub mod animation;
 
-    pub struct Signin {}
-    impl ApiEndpoint for Signin {
-        type Req = ();
-        type Res = SigninSuccess;
-        type Err = NoSuchUserError;
-    }
+/// Category endpoints.
+pub mod category;
 
-    pub struct SingleSignOn {}
-    impl ApiEndpoint for SingleSignOn {
-        type Req = ();
-        type Res = SingleSignOnSuccess;
-        type Err = ();
-    }
+/// Image endpoints.
+pub mod image;
 
-    pub struct Register {}
-    impl ApiEndpoint for Register {
-        type Req = RegisterRequest;
-        type Res = RegisterSuccess;
-        type Err = RegisterError;
-    }
+/// Meta endpoints.
+pub mod meta;
 
-    pub struct Profile {}
-    impl ApiEndpoint for Profile {
-        type Req = ();
-        type Res = User;
-        type Err = NoSuchUserError;
-    }
-}
+/// User endpoints.
+pub mod user;
+
+/// JIG endpoints.
+pub mod jig;
+
+/// Module endpoints.
+pub mod module;
+
+/// Administrative endpoints.
+pub mod admin;
+
+/// Audio endpoints
+pub mod audio;

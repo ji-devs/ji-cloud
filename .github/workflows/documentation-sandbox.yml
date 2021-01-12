@@ -1,0 +1,65 @@
+name: Documentation - Sandbox
+
+on:
+  push:
+    branches: [ sandbox ]
+    paths:
+    - 'config/**'
+    - 'documentation/**'
+    - 'shared/rust/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+
+    - name: Extract label 
+      shell: bash
+      run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - documentation]\")"
+      id: extract_label
+
+    - name: Notify slack
+      uses: pullreminders/slack-action@master
+      with:
+        args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: 'latest'
+
+    - name: make tmp docs directory
+      run: mkdir ./temp-docs
+
+    - name: build book 
+      run: mdbook build
+      working-directory: ./documentation
+
+    - name: build shared-crate
+      run: cargo doc
+      working-directory: ./shared/rust
+    
+    - name: copy book 
+      run: cp -R documentation/output ./temp-docs/book
+
+    - name: copy shared-crate 
+      run: cp -R shared/rust/target/doc ./temp-docs/crate
+
+    - name: deploy to firebase
+      uses: w9jds/firebase-action@v1.0.1
+      with:
+        args: deploy --project ji-cloud-developer-sandbox --only hosting:ji-cloud-sandbox-docs
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+    - name: Notify slack of all status
+      uses: pullreminders/slack-action@master
+      with:
+        args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      if: always()

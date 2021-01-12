@@ -1,0 +1,31 @@
+{
+  "plugins": [
+    [
+      "babel-plugin-root-import",
+      {
+        "paths": [
+          {
+            "rootPathSuffix": "../ts-utils",
+            "rootPathPrefix": "@utils"
+          },
+          {
+            "rootPathSuffix": "../config",
+            "rootPathPrefix": "@frontend-config"
+          },
+          {
+            "rootPathSuffix": "../../config/typescript/src/lib",
+            "rootPathPrefix": "@project-config"
+          },
+          {
+            "rootPathSuffix": "../elements/src",
+            "rootPathPrefix": "@elements"
+          },
+          {
+            "rootPathSuffix": "./src",
+            "rootPathPrefix": "~"
+          }
+        ]
+      }
+    ]
+  ]
+}

@@ -1,12 +1,20 @@
 node_modules
 dist
 target
+.ts-output
 documentation/output
 .env
 .firebase
 _secret-keys
 wasm-pack.log
 yarn-*.log
+.template_output
+*.exe
+firebase-debug.log
+.idea
+build-utils/image-upload/report.csv
+debug.log
+*.code-workspace
 
 # for now it's safe to ignore all windows scripts since they'd only be local
 *.bat
@@ -46,3 +54,8 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# lock files for rust libraries
+backend/core/Cargo.lock
+shared/rust/Cargo.lock
+config/rust/Cargo.lock

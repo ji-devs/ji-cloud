@@ -1,4 +1,0 @@
-# For this directory, we want to include the build artifact
-# the reason is it's just a convenience to allow our js config
-# to be imported whether through node, browser, etc.
-!dist

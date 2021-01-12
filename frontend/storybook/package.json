@@ -1,0 +1,37 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo TODO: add tests",
+    "start": "npm-run-all -p _media-server start:nomedia",
+    "start:nomedia": "cross-env STORYBOOK_DEPLOY_TARGET=local start-storybook -p 6006 -s ./dist",
+    "storybook:build:sandbox": "cross-env STORYBOOK_DEPLOY_TARGET=sandbox build-storybook -o ./dist/storybook-build",
+    "storybook:build:release": "cross-env STORYBOOK_DEPLOY_TARGET=release build-storybook -o ./dist/storybook-build",
+    "clean": "rimraf ./dist && mkdirp ./dist",
+    "_media-server": "cd ../build-utils && npm run local-media-server"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.10",
+    "@storybook/addon-actions": "^6.1.11",
+    "@storybook/addon-essentials": "^6.1.11",
+    "@storybook/addon-links": "^6.1.11",
+    "@storybook/html": "^6.1.11",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-root-import": "^6.6.0",
+    "cross-env": "^7.0.3",
+    "mkdirp": "^1.0.4",
+    "npm-run-all": "^4.1.5",
+    "react-is": "^17.0.1",
+    "rimraf": "^3.0.2",
+    "webpack-livereload-plugin": "^2.3.0"
+  },
+  "dependencies": {
+    "lit-element": "^2.4.0",
+    "lit-html": "^1.3.0"
+  }
+}

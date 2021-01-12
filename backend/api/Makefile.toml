@@ -1,0 +1,71 @@
+###################
+## Config        ##
+###################
+
+[config]
+skip_core_tasks = true
+default_to_workspace = false
+
+[tasks.fetch]
+command = "cargo"
+args = ["fetch"]
+
+[tasks.build-api-offline]
+command = "cargo"
+args = ["build", "--offline", "--bin", "ji-cloud-api"]
+dependencies = ["fetch", "check-sqlx"]
+
+[tasks.check-sqlx]
+command = "cargo"
+args = ["sqlx", "prepare", "--check", "--", "--lib"]
+
+###################
+## Test          ##
+###################
+
+[tasks.test-cargo]
+command = "cargo"
+args = ["test"]
+dependencies = ["check-sqlx"]
+
+[tasks.test-integration]
+command = "yarn"
+args = ["--cwd", "integration-testing", "test:ava", "--verbose"]
+dependencies = ["build-api-offline"]
+env = { "USE_PG_TMP" = "true" }
+
+[tasks.test]
+run_task = { name = [
+    # we currently don't have any tests ran via cargo, so, save some time.
+    # "test-cargo",
+    "test-integration"
+] }
+
+[tasks.test-watch]
+command = "cargo"
+args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test -- --nocapture"]
+
+###################
+## Dev           ##
+###################
+
+
+[tasks.dev-proxy]
+run_task = { name = [ "google-sql-proxy", "server-local-proxy", ], parallel = true }
+
+[tasks.server-local-proxy]
+command = "systemfd"
+args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../core/src", "-w", ".", "-x", "run -- local sqlproxy"]
+
+[tasks.dev]
+run_task = { name = [ "server-local"] }
+
+[tasks.server-local]
+command = "systemfd"
+args = ["--no-pid", "-s", "http::8080", "--", "cargo", "watch", "-w", "../../config/rust/src", "-w", "../../shared/rust/src", "-w", "../core/src", "-w", ".", "-x", "run -- local"]
+
+# note: this doesn't currently work, because `cloud-sql-proxy` doesn't exist.
+[tasks.google-sql-proxy]
+env = { CARGO_MAKE_SCRIPT_FORCE_PIPE_STDIN = true }
+command = "yarn"
+args = ["--cwd", "./../build-utils", "cloud-sql-proxy"]

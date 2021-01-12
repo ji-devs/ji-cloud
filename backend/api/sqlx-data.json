@@ -1,0 +1,1787 @@
+{
+  "db": "PostgreSQL",
+  "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
+    "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677": {
+    "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "0aa96f75b64d577ba8fe2d07d824fe07c5036c135e9a5fb97eb1a7bc96910726": {
+    "query": "select exists(select 1 from user_audio_library where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
+    "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "UuidArray"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
+    "query": "select exists (select 1 from \"user\" where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "141a4e59e3d9af6abfbdd772795420d3e86b7766cce534b732dd6ea0b87bf1f4": {
+    "query": "\nselect id as \"id: AnimationId\",\n       name,\n       description,\n       is_premium,\n       publish_at,\n       created_at,\n       updated_at,\n       variant as \"variant: AnimationVariant\",\n       looping as is_looping\nfrom animation\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "is_premium",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 7,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 8,
+          "name": "is_looping",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false
+      ]
+    }
+  },
+  "16b8e7596de9c8c57e8a50d4b6788e6d7874603ce815762fae2380223a4ddfc0": {
+    "query": "select id as \"id: AudioId\" from user_audio_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "19cf8c137d4072d2231ba5708f31fbd415f665a338de2473cf1aca4390e46a61": {
+    "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    cover_id  = coalesce($4, cover_id),\n    ending_id  = coalesce($5, ending_id),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::uuid is not null and $4 is distinct from cover_id) or\n       ($5::uuid is not null and $5 is distinct from ending_id))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1b88f0ec5158d04c34ef416bf283ddfc0d383330b242991a77db61e9b5de948c": {
+    "query": "with recursive path(id, index, parent_id) as (\n    select id, ord, null::uuid\n    from category\n             inner join unnest(\n            $1::uuid[]) with ordinality t(id, ord)\n                        using (id)\n    union all\n    select c.id, c.index, p.id\n    from path p\n             inner join category c on (c.parent_id = p.id)\n)\nselect distinct id as \"id!\",\n       path.index::int2 as \"index!\",\n       path.parent_id,\n       name,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\n\nfrom path\n         inner join category using (id);\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index!",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "1b9308d5a11b4d9344f345f35f18a409739ee06dec1af08f409a2138e6f6aae6": {
+    "query": "select id as \"id: ModuleId\", contents as \"body\", kind as \"kind: ModuleKind\" from module where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true
+      ]
+    }
+  },
+  "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
+    "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "28fb8b1e761b9606fe607a8d42a63d459008846a71ddc39d6728d2226fa7224f": {
+    "query": "with recursive links as\n                   (\n                       select id,\n                              parent_id\n                       from category co\n                       where id = any ($1::uuid[])\n                       union all\n                       select co.id,\n                              co.parent_id\n                       from category co\n                                inner join links ct on (ct.parent_id = co.id)\n                   )\n\nselect distinct id,\n       category.parent_id,\n       name,\n       category.index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\n         inner join links using (id);\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "2968c111bb7c6cd6a2974b52a5b80e4cf7fd4264cc519edcd68b2b6779a4ca2b": {
+    "query": "delete from user_image_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "2a38d6204b4e0dc27a944c0af4c85f89a1dd12fd6507e136b70430422ff4a066": {
+    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        location,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "firebase_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "email!",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "given_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "family_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "language",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "locale",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "opt_into_edu_resources",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 9,
+          "name": "over_18",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "timezone",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 11,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 13,
+          "name": "organization",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 14,
+          "name": "location",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 15,
+          "name": "scopes!: Vec<i16>",
+          "type_info": "Int2Array"
+        },
+        {
+          "ordinal": 16,
+          "name": "subjects!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 17,
+          "name": "affiliations!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 18,
+          "name": "age_ranges!: Vec<Uuid>",
+          "type_info": "UuidArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "2d3582ab7cfac01ef24e5462ea6dc2dbb379dd99e24236162975bda3702de5b8": {
+    "query": "\nwith new_row as (\n    insert into \"settings\" (algolia_index_name) values($1) on conflict(singleton) do nothing returning algolia_index_version    \n)\nselect algolia_index_version as \"algolia_index_version!\" from new_row\nunion\nselect algolia_index_version as \"algolia_index_version!\" from \"settings\" where algolia_index_name = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "algolia_index_version!",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
+    "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
+    "query": "\n            select id as \"id: AffiliationId\", display_name, created_at, updated_at from affiliation\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AffiliationId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "32bc8fe3fd1a0c9b4de8b504337d29e7f300a1b0a299ba593458ed8f145f321f": {
+    "query": "delete from jig where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "33b3def525f80ae097847489feda1bcb7cc23f2b24ae237dbb93e17802d5fb74": {
+    "query": "update category set name = $1, updated_at = now() where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
+    "query": "select id from \"user\" where firebase_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
+    "query": "update category set name = $1 where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4368428bff6e48dc83f1dca76d15bd4606f4fcf4c011fbe826b322635f7a798e": {
+    "query": "\n            select id as \"id: StyleId\", display_name, created_at, updated_at from style\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: StyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "46fccf7d3c9f71b3c15e06ef08705676557e4a47ab331baed7f1754804e0eaf6": {
+    "query": "\ninsert into jig_module (jig_id, \"index\", module_id)\nvalues ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "47fb0f5546e32d096bbffdd9ffd5d17be73c08c132620e2a7fae90b87dd954e1": {
+    "query": "select exists(select 1 from jig where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
+    "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "579ce9012c9391b99eac4ac15eb804a3fd8fe7bb8b7665bb74f9128a03653e36": {
+    "query": "select exists(select 1 from user_image_library where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "5842389dd9a03ba291f04a518e3eccc249eb3664c1ecd12b294de7a81d132a59": {
+    "query": "delete from user_audio_library where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
+    "query": "delete from image_metadata where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {
+    "query": "\ninsert into module (kind)\nvalues ($1)\nreturning id as \"id: ModuleId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "60b0832812a09b331d67eded7a6e1a0d323d66443c0a06b7b7ef2628e9cd1ad2": {
+    "query": "select id as \"id: ImageId\" from user_image_library order by created_at desc",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "616a6c1ac7056a7fdcd18cbeb36fda1cb58e79eeb809358b1bf77987b186d3c6": {
+    "query": "\n            select content_type_id as \"id: ContentTypeId\", display_name, created_at, updated_at from \"content_type\"\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ContentTypeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "62a5573f3774ed3c06160100a4a20acd85eee9df7ec45bdc5b55633765ddcbd4": {
+    "query": "\ninsert into jig\n    (display_name, cover_id, ending_id, creator_id, author_id, publish_at)\nvalues ($1, $2, $3, $4, $4, $5)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "636342d58945675c620fb5016f6a32bb94c463f879276812bd5440405dc67cca": {
+    "query": "delete from jig_module where jig_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
+    "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: SubjectId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
+    "query": "delete from category where id = $1 returning index, parent_id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
+    "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "6dcc3e22fd2bb64cec50f447237de2968384af1de326d4b26b8816611f2cc2e5": {
+    "query": "select algolia_index_version != $1 as \"outdated!\" from settings",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "outdated!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
+    "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "72e3aca05740c8e1615e5e90644ce5edcf661280ab2b72b5f6af4932618ce5ab": {
+    "query": "\ninsert into user_audio_library default values\nreturning id as \"id: AudioId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "80e114ec0b610550438d73280239678e249985eb19134c9917b39b34ead292c6": {
+    "query": "select id as \"id: ImageId\" from user_image_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "8120a496e28d2d1bac0a9f9066f74ff88c486f47cd34e327f9abf3b1d86c1e39": {
+    "query": "select variant as \"variant: AnimationVariant\" from animation where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
+    "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AudioId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
+    "query": "\nselect parent_id, index from category where id = $1\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true,
+        false
+      ]
+    }
+  },
+  "9666f0d8851a8bd23cdf541a3a99af9590a458915e00001de434ea91d767d5b9": {
+    "query": "\nselect id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n    array((select style.display_name\n           from style\n                    inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    publish_at,\n    is_premium\n from image_metadata\n where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\n limit 100;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "style_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 12,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true,
+        false
+      ]
+    }
+  },
+  "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
+    "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "a65d6faacf645998fcfcb81b52a3832b543dbd604ad8d4f23cb8a72c20514a09": {
+    "query": "delete from module where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
+    "query": "update \"settings\" set algolia_index_version = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b8c3158be83930526198c18609e10617952b2e57fe7f73c1f5e8b2068baf8f10": {
+    "query": "select kind as \"kind: ImageKind\" from image_metadata where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "b905ebd3fd48e7f0b745d22fbcad52f94b84cb750a6b3bf39b0f6cd2a596742a": {
+    "query": "\nupdate jig\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
+    "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AgeRangeId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac": {
+    "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "c372a34b6b9e1b5ab8cb7488118c6d76b3213c212490d4ff30bed1efdddb68d7": {
+    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind)\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\nreturning true as \"exists!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "c74b0259cc8af2e9853d43ac21be654cdd42c0b154e2c922fc772cc92fe07c08": {
+    "query": "insert into module (kind, contents) values ($1, $2) returning id as \"id: ModuleId\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "cd373895127d95d42cf1b2117e6a9c5c877f4bc50afb2833aa3227c5784a42c0": {
+    "query": "\nselect id                                             as \"id: JigId\",\n       display_name,\n       cover_id                                       as \"cover_id: ModuleId\",\n       (select kind from module where id = cover_id)  as \"cover_kind: ModuleKind\",\n       ending_id                                      as \"ending_id: ModuleId\",\n       (select kind from module where id = ending_id) as \"ending_kind: ModuleKind\",\n       creator_id,\n       author_id,\n       publish_at,\n       array(select row (module_id, kind)\n             from jig_module\n                      inner join module on module_id = module.id\n             where jig_id = $1\n             order by \"index\")                        as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n        array(select row(content_type_id) from jig_content_type where jig_id = $1) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "cover_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "cover_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "ending_id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "ending_kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 6,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 7,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 8,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 9,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        null,
+        false,
+        null,
+        true,
+        true,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "cd784f6c8c4c40d390c47d1ce489ad7acc0a33d40cc21308098e50719ea5c962": {
+    "query": "delete from animation where id = $1 returning variant as \"variant: AnimationVariant\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "variant: AnimationVariant",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "cf12ae2072a2ec2886a2484643dae2b5dea7869eda0b0fe3ff4c5ba2cf158592": {
+    "query": "\ninsert into animation (name, description, is_premium, publish_at, variant, looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Timestamptz",
+          "Int2",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "d3d8991c6bd250cd87a4d5eb211ceec43f77e6e9eaeb75d114c2bd350ac25467": {
+    "query": "select id from \"user\" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "e53665c81494eec03a5148d47f3a8e68b49071f7e69717c95e91dee992efa6bf": {
+    "query": "\ninsert into user_image_library default values\nreturning id as \"id: ImageId\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "e97f7e0f4996d2e1a7c870880fd11e30a2b14f8fbcffcef9be1227afc05b67a7": {
+    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
+    "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "would_cycle!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
+    "query": "update image_metadata set last_synced_at = null",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  },
+  "fa66e89e6b008f41f95a2489415e76fd57f37f08d64ad6c59809033b7b105a66": {
+    "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\n\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: CategoryId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "fbfda7ab377cf2ef86027ab43fbb941df005bc72d14ccdb9d0ecfdbdac73f327": {
+    "query": "\nselect id,\n       parent_id,\n       name,\n       index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "index",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 4,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 6,
+          "name": "image_count!",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "jig_count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        null,
+        null
+      ]
+    }
+  },
+  "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721": {
+    "query": "\nupdate image_metadata\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "fddb73f2c44ea4cd230b443e60390a8b79a3560d28e240d5e1d75e8334087196": {
+    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and scope = $2) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  }
+}
