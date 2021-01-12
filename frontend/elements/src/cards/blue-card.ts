@@ -7,7 +7,7 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
     div{
-        height: 696px;
+        height: 650px;
         border-radius: 10px;
         background-color: #edf2ff;
         overflow:auto;
