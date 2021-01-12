@@ -69,6 +69,12 @@ export class _ extends LitElement {
     top: 33%;
     right: 12px;
    }
+   .visible{
+     display:block;
+   }
+   .hidepassword{
+     display:block;
+   }
    
   
     `];
@@ -100,11 +106,16 @@ export class _ extends LitElement {
 
   @property({type: Boolean})
   imghidden: boolean = false;
+
+  @property({type: Boolean})
+  visiblepassword: boolean = false;
   
+  @property({type: Boolean})
+  hidepassword: boolean = true;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage, placeholder, errorwrapper, path, imghidden} = this;
+    const {label, helpertext, error, instruction, errormessage, placeholder, errorwrapper, path,pathtwo, imghidden, visiblepassword,hidepassword} = this;
 
     const errorClasses = classMap({ 
       error,
@@ -120,7 +131,9 @@ export class _ extends LitElement {
     <div class="input-wrapper ${errorwrapper ? 'errorwrapper' : ''}">
         <input placeholder="${placeholder}" type="text" class="">
         <label class="">${label}</label>
-        <img-ui path="${path}" class="${imghidden ? 'imghidden' : ''}"></img-ui>
+        <img-ui path="${path}" class="${imghidden ? 'imghidden' : ''} ${visiblepassword ? 'visible' : 'imghidden'}"></img-ui>
+        <img-ui path="${pathtwo}" class="${hidepassword ? 'imghidden' : 'hidepassword'}"></img-ui>
+
     </div>
     <p class="${instructionClasses}">${helpertext}</p>
     <p class="${errorClasses}">${errormessage}</p>

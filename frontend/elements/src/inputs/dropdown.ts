@@ -69,7 +69,7 @@ export class _ extends LitElement {
   @property()
   errormessage: string = "";
 
-  @property()
+  @property({type:Boolean})
   instruction: boolean = false;
 
   @property()
@@ -77,7 +77,7 @@ export class _ extends LitElement {
 
 
 
-  @property()
+  @property({type:Boolean})
   errorwrapper: boolean = false;
 
   render() {

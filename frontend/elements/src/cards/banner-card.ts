@@ -11,6 +11,15 @@ export class _ extends LitElement {
         height: 40px;
         box-shadow: 2px 3px 2px 0 rgba(208, 211, 232, 0.5);
     }
+    .green {
+        background-color:#dffada;
+    }
+    .blue{
+        background-color:#e7f0fe
+    }
+    .white{
+        background-color:#ffffff;
+    }
   
     `];
   }
@@ -21,10 +30,15 @@ path: string = "";
 @property()
 label: string = "";
 
+@property()
+color: string = "";
+
   render() {
-    const {path, label} = this;
+    const {path, label, color} = this;
+   
+
     return html`
-<div class="wrapper">
+<div class="wrapper ${color}">
     <span>
         <img-ui path="${path}"></img-ui>
         <p>${label}</p>
