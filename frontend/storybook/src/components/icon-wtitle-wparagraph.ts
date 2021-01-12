@@ -4,12 +4,14 @@ export default {
 }
 
 
-const STR_TITLE ="Rivka";
-const STR_TEXT = "Naomi"
+const STR_PATH ="PinkSmiley.jpg";
+const STR_TITLE = "content"
+const STR_PARAGRAPH = "A huge library of activities for the jewish holidays, Hebrew, culture, Tora and many more"
+
 
 export const IconWTitleWParagraph = () => {
     return `
-        <icon-wtitle-wparagraph label="${STR_TITLE}" text="${STR_TEXT}"></icon-wtitle-wparagraph>
+        <icon-wtitle-wparagraph path="${STR_PATH}" title="${STR_TITLE}" paragraph="${STR_PARAGRAPH}"></icon-wtitle-wparagraph>
     `
 }
 
