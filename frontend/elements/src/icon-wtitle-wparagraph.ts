@@ -27,8 +27,22 @@ export class _ extends LitElement {
     width: 274px;
 margin-left:50px;
   }
+  .pink {
+    color: #fd6b71;
   }
-    `];
+  .darkblue{
+    color: #2040a3;
+  }
+  .green{
+    color: #46ba6f;
+  }
+  .orange{
+    color: #fea559;
+  }
+  .lightblue{
+    color:#6ca1fc;
+  }
+    `]
   }
 
 
@@ -49,11 +63,11 @@ margin-left:50px;
     return html`
      <div>
         <img-ui class="img" path="${path}"></img-ui>
-        <h2>${title}</h2>
+        <h2 class="${color}">${title}</h2>
         <p>${paragraph}</p>
         <slot></slot>
         </div>
-        // style="color:"${color}"
+        
   `;
   }
 }
