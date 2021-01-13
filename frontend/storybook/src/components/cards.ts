@@ -2,7 +2,7 @@ import "@elements/cards/icon-banner-card";
 import "@elements/cards/blue-card";
 
 export default {
-  title: 'Icon Banner Card',
+  title: 'Cards',
 }
 
 export const IconBannerCard = () => {
@@ -10,11 +10,11 @@ export const IconBannerCard = () => {
 }
 
 export const BannerCard = () => {
-  return `<banner-card label="Placeholder" path=""/>`
+  return `<banner-card label="Placeholder" path="" color=""/>`
 }
 
 export const BlueCard = () => {
-  return `<blue-card/>`
+  return `<blue-card color=""/>`
 }
 
 

@@ -5,10 +5,20 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
     .inside-wrapper{
-        display:flex;
+       display:flex;
+     
     }
+   main{
+     
+   }
    
-   
+   #title{
+    font-size: 64px;
+    font-weight: 900;
+    color:#5662a3;
+    text-align: center;
+   }
+ 
     `];
   }
 
@@ -20,7 +30,7 @@ export class _ extends LitElement {
 
     return html`
     <main>
-    <slot name="title"></slot>
+    <slot id="title" name="title"></slot>
     <div class="inside-wrapper">
         <slot name="icon-title-paragraph"></slot>
     </div>
