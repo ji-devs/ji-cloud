@@ -53,7 +53,6 @@ margin-left:50px;
         <p>${paragraph}</p>
         <slot></slot>
         </div>
-        // style="color:"${color}"
   `;
   }
 }
