@@ -2,7 +2,7 @@ import "@elements/cards/icon-banner-card";
 import "@elements/cards/blue-card";
 
 export default {
-  title: 'Icon Banner Card',
+  title: 'Cards',
 }
 
 export const IconBannerCard = () => {

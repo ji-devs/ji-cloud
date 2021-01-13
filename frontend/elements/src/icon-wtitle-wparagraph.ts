@@ -23,9 +23,10 @@ export class _ extends LitElement {
     margin-top:10px;
 
   }
-  div{
+  .wrapper{
     width: 274px;
 margin-left:50px;
+
   }
   .pink {
     color: #fd6b71;
@@ -41,6 +42,12 @@ margin-left:50px;
   }
   .lightblue{
     color:#6ca1fc;
+  }
+
+  .inside{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
   }
     `]
   }
@@ -61,12 +68,14 @@ margin-left:50px;
     const {path, paragraph,title,color} = this;
 
     return html`
-     <div>
+     <div class="wrapper">
         <img-ui class="img" path="${path}"></img-ui>
-        <h2 class="${color}">${title}</h2>
-        <p>${paragraph}</p>
-        <slot></slot>
+        <div class="inside">
+          <h2 class="${color}">${title}</h2>
+          <p>${paragraph}</p>
+          <slot></slot>
         </div>
+      </div>
         
   `;
   }

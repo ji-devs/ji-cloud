@@ -6,7 +6,7 @@ export class _ extends LitElement {
     return [css`
     .inside-wrapper{
        display:flex;
-      
+     
     }
    main{
      
@@ -18,6 +18,7 @@ export class _ extends LitElement {
     color:#5662a3;
     text-align: center;
    }
+ 
     `];
   }
 
