@@ -10,11 +10,11 @@ export const IconBannerCard = () => {
 }
 
 export const BannerCard = () => {
-  return `<banner-card label="Placeholder" path=""/>`
+  return `<banner-card label="Placeholder" path="" color=""/>`
 }
 
 export const BlueCard = () => {
-  return `<blue-card/>`
+  return `<blue-card color=""/>`
 }
 
 
