@@ -7,7 +7,7 @@ export class _ extends LitElement {
     p{
         color: #4a4a4a;
         margin-top:0;
-       
+       margin-bottom:0;
         
 
     }

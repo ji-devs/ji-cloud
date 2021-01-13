@@ -14,7 +14,7 @@ export class _ extends LitElement {
     .side-image{
         width: 480px;
         min-width:300;
-        height: 100vh;
+        min-height: 100vh;
         background-color: #def4ff;
         background-image: url('https://i.ibb.co/g9N7MLy/shapes-1.png');
         background-repeat: no-repeat;
