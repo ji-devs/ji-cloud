@@ -64,6 +64,13 @@ export class _ extends LitElement {
         bottom:20px;
         white-space:nowrap;
     }
+    .account-wrapper{
+        display:flex;
+        align-items:center;
+    }
+    ::slotted([slot=noaccount]:last-child){
+        margin-left:4px;
+    }
    
     `];
   }
@@ -103,7 +110,9 @@ export class _ extends LitElement {
         <slot name="submit"></slot>
        
       </div>
+      <div class="account-wrapper">
       <slot name="noaccount"></slot>
+      </div>
       <slot name="contact"></slot>
   </div>
   

@@ -42,7 +42,7 @@ interface LoginArgs {
   const STR_PLCPASSWORD ="********";
   const STR_ACCOUNT = "Already have an account?";
   const STR_FORGOTTEN = "";
-  const STR_ICON = "icn-show-idle.svg"
+  const STR_REGISTER = "Login"
 
 export const SignUpStart = (props?:LoginArgs) => {
 
@@ -61,7 +61,8 @@ export const SignUpStart = (props?:LoginArgs) => {
         </input-text>
         <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>
-        <plain-blue title="${STR_ACCOUNT}" slot="noaccount"></plain-blue>
+        <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
+        <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
     </login-full>
     
     `
