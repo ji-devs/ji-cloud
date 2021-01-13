@@ -24,12 +24,17 @@ export class _ extends LitElement {
     .content-wrapper{
         padding:80px;
         width:867px;
+        position:relative;
     }
     h1{
         font-size: 32px;
         font-weight: 900;
         color:#5662a3
     }
+    ::slotted([slot=contact]){
+      position:absolute;
+      bottom:20px;
+  }
     
    
    
@@ -58,6 +63,7 @@ export class _ extends LitElement {
     <slot name="subtitle"></slot>
     <slot name="main"></slot>
     <slot name="submit"></slot>
+    <slot name="contact"></slot>
   </div>
 </div>
   `;

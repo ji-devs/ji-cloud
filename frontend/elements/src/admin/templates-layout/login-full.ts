@@ -23,6 +23,7 @@ export class _ extends LitElement {
     }
     .content-wrapper{
         padding:80px;
+        position:relative;
     }
     h1{
         font-size: 32px;
@@ -57,6 +58,11 @@ export class _ extends LitElement {
         position: absolute;
         top: 33%;
         right: -76px;
+    }
+    ::slotted([slot=contact]){
+        position:absolute;
+        bottom:20px;
+        white-space:nowrap;
     }
    
     `];
@@ -98,7 +104,9 @@ export class _ extends LitElement {
        
       </div>
       <slot name="noaccount"></slot>
+      <slot name="contact"></slot>
   </div>
+  
 </div>
   `;
   }

@@ -58,6 +58,9 @@ export class _ extends LitElement {
     border: solid 1px #f00813;
     background-color: #fff4f4;
    }
+   .errorwrapper input{
+    background-color: #fff4f4;
+   }
    
   
     `];

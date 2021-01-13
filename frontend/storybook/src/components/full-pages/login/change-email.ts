@@ -50,7 +50,8 @@ export const LoginChangeEmail = (props?:LoginArgs) => {
         </input-text>
         
         <div slot="submit">${RectangleButton({label:STR_BTNLABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true})}</div>
-    </login-full>
+        <contact-email slot="contact"></contact-email>
+        </login-full>
     
     `
 }

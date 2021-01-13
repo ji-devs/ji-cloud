@@ -1,7 +1,7 @@
 import "@elements/admin/templates-layout/signup-full-wide";
 import "@elements/titles/subtitle";
 import "@elements/titles/plain-blue";
-
+import "@elements/contact";
 
 
 export default {
@@ -35,6 +35,7 @@ export const SignUpFour = (props?:LoginArgs) => {
         <confirmation-button slot="main"></confirmation-button>
 
         <plain-blue title="${STR_CHANGE}" slot="main"></plain-blue>
+        <contact-email slot="contact"></contact-email>
         </signup-full-wide>
 
     `
