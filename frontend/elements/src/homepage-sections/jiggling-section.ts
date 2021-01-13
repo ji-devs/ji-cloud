@@ -6,6 +6,7 @@ export class _ extends LitElement {
     return [css`
     .inside-wrapper{
        display:flex;
+      
     }
    main{
      

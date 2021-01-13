@@ -48,7 +48,7 @@ const STR_PLCUSER = "This will be your public name on JI";
 const STR_18 = "I am over 18";
 const STR_ACCOUNT = "Already have an account?";
 const STR_CONTINUE = "Continue";
-const STR_REGISTER = "Register";
+const STR_REGISTER = "Login";
 
 
 export const SignUpOne = (props?:LoginArgs) => {

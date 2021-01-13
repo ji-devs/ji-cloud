@@ -17,7 +17,7 @@ interface LoginArgs {
     instruction: boolean,
     error: boolean,
     errorwrapper: boolean,
-    mode: "text" | "password",
+    
   }
 
   const DEFAULT_ARGS:LoginArgs = {
@@ -26,7 +26,7 @@ interface LoginArgs {
     instruction: false,
     error:false,
     errorwrapper:false,
-    mode: "password",
+    
   }
 
   const STR_TITLE ="Change Email Account";
@@ -46,21 +46,14 @@ export const LoginChangeEmail = (props?:LoginArgs) => {
     <login-full title="${STR_TITLE}">
     
     <plain-black title="${STR_SUB}" slot="sub"></plain-black>
-        <input-text slot="username" label="${STR_PASSWORDLABEL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"} ${error && "error"} mode="${mode}>
+        <input-text slot="username" label="${STR_PASSWORDLABEL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"} ${error && "error"} mode="text">
         </input-text>
         
         <div slot="submit">${RectangleButton({label:STR_BTNLABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true})}</div>
-    </login-full>
+        <contact-email slot="contact"></contact-email>
+        </login-full>
     
     `
 }
 
 LoginChangeEmail.args = DEFAULT_ARGS;
-LoginChangeEmail.argTypes = {
-  mode: {
-    control: {
-      type: 'inline-radio',
-      options: ["text", "password"]
-    }
-  }
-}

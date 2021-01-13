@@ -14,7 +14,7 @@ export class _ extends LitElement {
     .side-image{
         width: 480px;
         min-width:300;
-        height: 100vh;
+        min-height: 100vh;
         background-color: #def4ff;
         background-image: url('https://i.ibb.co/g9N7MLy/shapes-1.png');
         background-repeat: no-repeat;
@@ -24,12 +24,17 @@ export class _ extends LitElement {
     .content-wrapper{
         padding:80px;
         width:867px;
+        position:relative;
     }
     h1{
         font-size: 32px;
         font-weight: 900;
         color:#5662a3
     }
+    ::slotted([slot=contact]){
+      position:absolute;
+      bottom:20px;
+  }
     
    
    
@@ -58,6 +63,7 @@ export class _ extends LitElement {
     <slot name="subtitle"></slot>
     <slot name="main"></slot>
     <slot name="submit"></slot>
+    <slot name="contact"></slot>
   </div>
 </div>
   `;

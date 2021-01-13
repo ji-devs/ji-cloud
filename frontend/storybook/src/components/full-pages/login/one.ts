@@ -11,51 +11,49 @@ export default {
 }
 
 interface LoginArgs {
-    title: string,
-    color: string,
-    logintitle: string,
-    forgottenPassword: string,
-    passwordtitle:string,
-    noaccount:string,
     helpertext:string,
     errormessage: string,
     instruction: boolean,
     error: boolean,
+    visiblepassword:boolean
    
 
   
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    title: "Login",
-    logintitle: "User Name",
-    forgottenPassword: "Forgot your Password?",
-    passwordtitle: "Password",
-    noaccount: "Don’t have an account yet? ",
     helpertext: "", 
     errormessage: "",
     instruction: false,
     error: false,
-    color: "red",
+    visiblepassword:true,
   }
+
+  const STR_ACCOUNT = "Don't have an account yet?";
+  const STR_REGISTER = "Sign Up";
+  const STR_TITLE = "Login";
+  const STR_PASSWORD = "Password";
+  const STR_FORGOTTEN ="Forgot your Password?";
+  const STR_USERLABEL = "User Name";
 
 export const LoginFullOne = (props?:LoginArgs) => {
 
-    const {title,color, logintitle, forgottenPassword, passwordtitle, noaccount, helpertext,errormessage, instruction, error} = props || DEFAULT_ARGS;
+    const {helpertext,errormessage, instruction, error, visiblepassword} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${title}">
+    <login-full title="${STR_TITLE}">
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
-        <input-text slot="username" label="${logintitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="username" label="${STR_USERLABEL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <input-text slot="password" label="${passwordtitle}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <input-text slot="password" mode="password" ${visiblepassword && "visiblepassword"} label="${STR_PASSWORD}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
         </input-text>
-        <plain-blue title="${forgottenPassword}" slot="passwordreminder"></plain-blue>
+        <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>
-        <plain-blue title="${noaccount}" slot="noaccount"></plain-blue>
+        <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
+        <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
     </login-full>
     
     `
