@@ -39,8 +39,15 @@ const rootNode = ({label, open, children}:TreeNode) => {
 const rootNodeV2 = ({label, open, children}:TreeNode) => {
   return `
     <tree-inside label="${label}" ${open ? "open" : ""}>
-      ${mapToString (children, leafNode)}
+      ${mapToString (children, leafNodeV2)}
     </tree-inside>
+  `;
+}
+const leafNodeV2 = ({label, open, children}:TreeNode) => {
+  return `
+    <tree-dropdown-child label="${label}" ${open ? "open" : ""}>
+    ${mapToString (children, leafNodeV2)}
+    </tree-dropdown-child>
   `;
 }
 
@@ -74,12 +81,14 @@ export const ImageLabelFullTwo = (props?:Props) => {
 
           </search-input>
         </title-winput>
-        ${data.map(rootNode)}
+        ${mapToString(data, rootNode)}
       </div>
       <div slot="right">
         <plain-blue title="${titletwo}"></plain-blue>
         <blue-card>
-        ${data.map(rootNodeV2)}
+        <div slot="content">
+        ${mapToString(data,rootNodeV2)}
+        </div>
         </blue-card>
       </div>
       <div slot="button">

@@ -33,7 +33,7 @@ interface LoginArgs {
 
   const STR_TITLE = "Sign Up - Step 2";
   const STR_ACCOUNT = "Already have an account?";
-  const STR_REGISTER = "Register";
+  const STR_REGISTER = "Login";
   const STR_COUNTRY = "Country";
   const STR_CITY = "City";
   const STR_SCHOOL = "School/Organization*";

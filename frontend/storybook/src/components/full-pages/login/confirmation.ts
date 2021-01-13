@@ -50,7 +50,7 @@ export const Confirmation = (props?:LoginArgs) => {
     <confirmation-full title="${STR_TITLE}">
         <sub-title slot="subtitle" title="${subtitle}" slot="subtitle"></sub-title>
         <sub-title slot="subtitle" title="${subtitle_two}" slot="subtitle"></sub-title>
-        <div slot="button">${RectangleButton({label:label, color: color,size: size})}</div>       
+        <div slot="button">${RectangleButton({label:label, color: color,size: size,imglefthidden:true, imgrighthidden:true,})}</div>       
     </confirmation-full>
     
     `

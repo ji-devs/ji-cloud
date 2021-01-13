@@ -58,6 +58,9 @@ export class _ extends LitElement {
     border: solid 1px #f00813;
     background-color: #fff4f4;
    }
+   .errorwrapper input{
+    background-color: #fff4f4;
+   }
    
   
     `];
@@ -69,7 +72,7 @@ export class _ extends LitElement {
   @property()
   errormessage: string = "";
 
-  @property()
+  @property({type:Boolean})
   instruction: boolean = false;
 
   @property()
@@ -77,7 +80,7 @@ export class _ extends LitElement {
 
 
 
-  @property()
+  @property({type:Boolean})
   errorwrapper: boolean = false;
 
   render() {
