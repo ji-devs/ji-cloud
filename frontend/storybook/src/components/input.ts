@@ -7,17 +7,43 @@ import "@elements/inputs/dropdown";
 import "@elements/inputs/title-winput";
 import "@elements/inputs/checkbox";
 import "@elements/inputs/add-image";
+import {Mode as InputTextMode} from "@elements/inputs/input-text";
 
 export default {
   title: 'Input Text',
 }
 
-export const InputText = ({label,helpertext, error, instruction,errormessage }) => {
-    return `<input-text label="${label}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+interface InputTextProps {
+  mode: InputTextMode;
+  error: string,
+  label:string,
+  helpertext:string,
+  instruction:boolean,
+  errorwrapper:boolean,
+  value:string
+}
+
+const DEFAULT_INPUT_TEXT_ARGS:InputTextProps = {
+  mode: "text",
+  error: "Wrong Password",
+  instruction:false,
+  label: "Title",
+  helpertext: "Minimum 8 digits, Must include a number",
+  errorwrapper:false,
+  value:"hello"
+  
+}
+
+export const InputText = (props?: InputTextProps) => {
+    const {label,helpertext, errorwrapper, instruction, error, mode,value } = props || DEFAULT_INPUT_TEXT_ARGS;
+
+    return `<input-text label="${label}" value="${value}" helpertext="${helpertext}" error="${error}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}  mode="${mode}">
  
     </input-text>`
     
 }
+
+InputText.args = DEFAULT_INPUT_TEXT_ARGS;
 
 export const SearchInput = ({label, path}) => {
   return `<search-input placeholder="${label}" path="${path}" >
@@ -27,7 +53,7 @@ export const SearchInput = ({label, path}) => {
 }
 
 export const Dropdown = ({label,helpertext, error, instruction,errormessage, errorwrapper, path, imghidden}) => {
-  return `<dropdown-select label="${label}" helpertext="${helpertext}" error="${errormessage}" ${imghidden  && "imghidden"} ${errorwrapper && "errorwrapper"} ${instruction && "instruction"} ${error && "error"} >
+  return `<dropdown-select label="${label}" helpertext="${helpertext}" errormessage="${errormessage}" ${imghidden  && "imghidden"} ${errorwrapper && "errorwrapper"} ${instruction && "instruction"} ${error && "error"} >
  
   </dropdown-select>`
   
@@ -65,15 +91,6 @@ export const TitleWithInput = ({title,label, path}) => {
   </title-winput>`
 }
 
-InputText.args = {
- instruction:false,
- errormessage: "Wrong Password",
- label: "Title",
- helpertext: "Minimum 8 digits, Must include a number",
- error: true,
-
-}
-
 Checkbox.args = {
   label:"Placeholder",
 
@@ -105,4 +122,14 @@ Dropdown.args = {
  helpertext: "Minimum 8 digits, Must include a number",
  error: true,
  path:"icn-chevron-dropdown-up.svg"
+}
+
+
+InputText.argTypes = {
+  mode: {
+    control: {
+      type: 'inline-radio',
+      options: ["text", "passwordVisible", "passwordHidden"]
+    }
+  }
 }

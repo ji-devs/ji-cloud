@@ -39,7 +39,7 @@ interface LoginArgs {
     italic: false,
   }
 
-  const STR_TITLE = "Welcome to JI Family"
+  const STR_TITLE = "Welcome to JI Family";
 
 export const Confirmation = (props?:LoginArgs) => {
 

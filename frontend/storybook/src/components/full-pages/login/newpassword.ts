@@ -13,22 +13,18 @@ export default {
 }
 
 interface LoginArgs {
-    helpertext:string,
-    errormessage: string,
     instruction: boolean,
-    error: boolean,
-    mode: "text" | "password",
-    visiblepassword: boolean,
- 
+    error: string,
+    mode: string,
+   
+
   }
 
   const DEFAULT_ARGS:LoginArgs = {
- helpertext: "",
-    errormessage: "",
     instruction: false,
-    error:false,
-    visiblepassword: true,
-    mode: "password",
+    error:"",
+    mode: "passwordHidden"
+    
     
   }
 
@@ -38,18 +34,19 @@ interface LoginArgs {
   const STR_RED = "red";
   const STR_ENTERPASSWORD = "Enter new Password";
   const STR_LOGGEDOUT = "You’ll be logged in automatically after this";
+  const STR_HELP ="8 Characters or longer"
   
 
 export const LoginForgotPassword = (props?:LoginArgs) => {
 
-    const {helpertext,errormessage, instruction, error, visiblepassword, mode} = props || DEFAULT_ARGS;
+    const {instruction, error,mode} = props || DEFAULT_ARGS;
 
 
     return `
     <login-full title="${STR_NEWPASSWORD}">
     
        
-        <input-text slot="password" label="${STR_ENTERPASSWORD}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${visiblepassword && "visiblepassword"} mode="${mode}">
+        <input-text slot="password" label="${STR_ENTERPASSWORD}" helpertext="${STR_HELP}" error="${error}" ${instruction && "instruction"} ${error && "error"}  mode=${mode}>
         </input-text>
         <div slot="submit">${RectangleButton({label:STR_LABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true,})}</div>
         <plain-black title="${STR_LOGGEDOUT}" slot="noaccount"></plain-blue>
@@ -59,11 +56,3 @@ export const LoginForgotPassword = (props?:LoginArgs) => {
 }
 
 LoginForgotPassword.args = DEFAULT_ARGS;
-LoginForgotPassword.argTypes = {
-  mode: {
-    control: {
-      type: 'inline-radio',
-      options: ["text", "password"]
-    }
-  }
-}

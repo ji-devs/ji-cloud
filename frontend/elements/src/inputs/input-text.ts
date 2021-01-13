@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import {nothing} from "lit-html";
 
-type Mode = "password" | "text";
+export type Mode = "passwordVisible" | "passwordHidden" | "text";
 
 @customElement('input-text')
 export class _ extends LitElement {
@@ -24,10 +24,7 @@ export class _ extends LitElement {
    .errorwrapper input {
     background-color: #fff4f4;
    }
-   .instruction{
-     display:none;
-     margin-left: 8px;
-   }
+  
    input{
     outline:none;
     border:none;
@@ -46,12 +43,6 @@ export class _ extends LitElement {
     border: solid 2px #5590fc;
    }
    input{ font-size:16px;}
-   .helpertext{
-     font-size: 14px;
-     color: #5590fc;
-     margin-top:4px;
-     font-weight: 500;
-   }
    active .helpertext{
     display:block;
    }
@@ -63,24 +54,24 @@ export class _ extends LitElement {
     padding-left:8px;
     display:block;
    }
-   p{display:none;}
-   .imghidden {
-     display:none;
+   .instruction{
+    font-size: 14px;
+    color: #4a4a4a;
+    margin-top:4px;
+    font-weight: 500;
+    padding-left:8px;
+    display:block;
    }
+   
    img-ui{
     position: absolute;
     top: 33%;
     right: 12px;
    }
-   .visible{
-     display:block;
+   .texthidden{
+     display:none;
    }
-   .hidepassword{
-     display:block;
-   }
-  
-   
-  
+
     `];
   }
 
@@ -88,9 +79,13 @@ export class _ extends LitElement {
   label: string = "";
 
   @property()
-  errormessage: string = "";
+  value: string = "";
 
+  // will also change the error wrapper internally
   @property()
+  error: string = "";
+
+  @property({type: Boolean})
   instruction: boolean = false;
 
   @property()
@@ -99,67 +94,47 @@ export class _ extends LitElement {
   @property()
   placeholder: string = "";
 
+  // affects both icon display and input type
   @property()
   mode: Mode = "text";
 
-  @property({type: Boolean})
-  error: boolean = false;
-
-  @property({type: Boolean})
-  errorwrapper: boolean = false;
-
-  @property({type: Boolean})
-  imghidden: boolean = false;
-
-  @property({type: Boolean})
-  visiblepassword: boolean = false;
   
-  @property({type: Boolean})
-  hidepassword: boolean = true;
 
   render() {
 
-    const {label, helpertext, error, instruction, errormessage, mode, placeholder, errorwrapper, imghidden, visiblepassword,hidepassword} = this;
+    const {label, helpertext, instruction, mode, placeholder, error, value} = this;
 
-    const errorClasses = classMap({ 
-      error,
-    });
+    const isError:boolean = error !== "";
 
-    const instructionClasses = classMap({ 
-      instruction,
-    });
+    const errorwrapper = isError ? "errorwrapper" : "";
 
+    const inputType = mode === "passwordHidden" ? "password" : "text";
 
     return html`
     
-    <div class="input-wrapper ${errorwrapper ? 'errorwrapper' : ''}">
-        <input placeholder="${placeholder}" type="${mode}" class="">
+    <div class="input-wrapper ${errorwrapper}">
+        <input placeholder="${placeholder}" type="${inputType}" class="" value="${value}">
         <label class="">${label}</label>
-        ${makeImage(this)}
+        ${mode !== "text" ? makeImage(mode) : nothing}
     </div>
-    <p class="${instructionClasses}">${helpertext}</p>
-    <p class="${errorClasses}">${errormessage}</p>
+  
+    <p class="${instruction ? 'instruction' : 'texthidden'}">${helpertext}</p>
+
+    ${
+      isError 
+        ? html`<p class="error">${error}</p>` 
+        : nothing
+    }
      
   `;
   }
 }
 
-interface ImageProps {
-  imghidden: boolean,
-  visiblepassword: boolean,
-  mode: Mode
-}
-function makeImage({visiblepassword, mode}:ImageProps) {
+function makeImage(mode: Mode) {
+  const path = mode === "passwordVisible" ? "icn-hide-idle.svg"
+    : mode === "passwordHidden" ? "icn-show-idle.svg"
+    : "";
   
-
-  switch(mode) {
-    case "text": return nothing;
-    case "password": {
-      const path = visiblepassword
-        ? "icn-show-idle.svg"
-        : "icn-hide-idle.svg"
-
-      return html`<img-ui path="${path}"></img-ui>`
-    }
-  }
+    return html`<img-ui path="${path}"></img-ui>`
+  
 }
