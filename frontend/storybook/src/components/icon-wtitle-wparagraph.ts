@@ -9,8 +9,9 @@ interface ParagraphArgs {
    title:string,
    paragraph: string,
    buttonlabel: string,
-   color:string,
-  
+   colorButton:string,
+   colorTitle:string;
+ 
   }
   
   const DEFAULT_ARGS:ParagraphArgs = {
@@ -18,20 +19,21 @@ interface ParagraphArgs {
     title:"Content",
     paragraph: "A huge library of activities for the jewish holidays, Hebrew, culture, Tora and many more",
     buttonlabel:"See our templates",
-    color: "blue",
+    colorButton: "blue",
+    colorTitle:"#fea559",
+ 
+
   }
 
 
-const STR_BUTTONLABEL = "";
-const STR_BLUE = "blue";
 
 
 export const IconWTitleWParagraph = (props?:ParagraphArgs) => {
 
-    const {path, title, paragraph,buttonlabel, color} = props || DEFAULT_ARGS;
+    const {path, title, paragraph,buttonlabel, colorTitle,colorButton} = props || DEFAULT_ARGS;
     return `
-        <icon-wtitle-wparagraph path="${path}" title="${title}" paragraph="${paragraph}">
-            ${PlainTextButton({label:buttonlabel, color: color, bold:false, size:"", italic:false})} 
+        <icon-wtitle-wparagraph path="${path}" title="${title}" paragraph="${paragraph}" color="${colorTitle}" >
+            ${PlainTextButton({label:buttonlabel, color: colorButton, bold:false, size:" ", italic:false})} 
         </icon-wtitle-wparagraph>
     
     `

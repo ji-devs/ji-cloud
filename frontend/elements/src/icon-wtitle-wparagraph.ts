@@ -13,7 +13,6 @@ export class _ extends LitElement {
   h2{
     font-size: 32px;
     font-weight: 900;
-    color: #fd6b71;
     margin-top:50px;
 
   }
@@ -50,10 +49,11 @@ margin-left:50px;
     return html`
      <div>
         <img-ui class="img" path="${path}"></img-ui>
-        <h2 class="${color}">${title}</h2>
+        <h2>${title}</h2>
         <p>${paragraph}</p>
         <slot></slot>
         </div>
+        // style="color:"${color}"
   `;
   }
 }

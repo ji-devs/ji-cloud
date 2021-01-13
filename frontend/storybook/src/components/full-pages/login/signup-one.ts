@@ -69,7 +69,7 @@ export const SignUpOne = (props?:LoginArgs) => {
         <input-checkbox slot="checkbox" label="${STR_18}">
 
   </input-checkbox>
-        <div slot="submit">${RectangleButton({imglefthidden:imglefthidden, path:path, color:color, size:size, label:STR_CONTINUE})}</div>
+        <div slot="submit">${RectangleButton({imglefthidden:imglefthidden, path:path, color:color, size:size, label:STR_CONTINUE,bold})}</div>
         <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
         <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
 
