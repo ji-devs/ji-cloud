@@ -13,6 +13,10 @@ export class _ extends LitElement {
   .purple{
     color: #5662a3;
   }
+
+  .lightBlue{
+    color:#6ca1fc;
+  }
  
     `];
   }

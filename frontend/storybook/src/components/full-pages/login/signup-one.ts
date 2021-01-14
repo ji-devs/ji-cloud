@@ -15,18 +15,12 @@ export default {
 
 interface LoginArgs {
    
-    errorname: string,
-    errorlast: string,
-    erroruser:string,
-    
+
     
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    errorname: "",
-    errorlast:"",
-    erroruser:"",
-   
+    
     
     
   }
@@ -49,18 +43,18 @@ const STR_RED = "red";
 
 export const SignUpOne = (props?:LoginArgs) => {
 
-    const { errorname,errorlast,erroruser} = props || DEFAULT_ARGS;
+    const { } = props || DEFAULT_ARGS;
 
 
     return `
     <signup-full title="${STR_TITLE}">
         
         
-        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}"  error="${errorname}">
+        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" >
         </input-text>
-        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}"  error="${errorlast}">
+        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" >
         </input-text>
-        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}"  error="${erroruser}">
+        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}"  >
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_18}">
 
