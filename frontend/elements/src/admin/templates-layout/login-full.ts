@@ -90,7 +90,7 @@ export class _ extends LitElement {
   texthidden:boolean = true; 
 
   @property()
-  mode: Mode = "weak";
+  mode: Mode = "none";
 
   render() {
 
