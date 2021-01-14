@@ -1,6 +1,7 @@
 /* See https://codepen.io/dakom/pen/WNxYrQM */
 
 import { STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING_X_PERC, STAGE_PADDING_Y_PERC } from "@project-config";
+import { LEGACY_STAGE_WIDTH, LEGACY_STAGE_HEIGHT, LEGACY_STAGE_PADDING_X_PERC, LEGACY_STAGE_PADDING_Y_PERC } from "@project-config";
 
 export type OnResize = (info:ResizeInfo) => any;
 
@@ -60,10 +61,24 @@ export interface Options {
     container?: Element | null,
     observeTargets?: Array<Element | null | undefined>,
     ignoreWindow?: boolean,
+    isLegacy?: boolean,
     adjustBounds?: (rect:DOMRect) => DOMRect
 }
 
-export function startResizer({container, ignoreWindow, observeTargets, adjustBounds}:Options, onResize: OnResize):ReturnTuple {
+export function startResizer({container, ignoreWindow, observeTargets, adjustBounds, isLegacy}:Options, onResize: OnResize):ReturnTuple {
+    const stage = isLegacy 
+        ? {
+            width: LEGACY_STAGE_WIDTH, 
+            height: LEGACY_STAGE_HEIGHT, 
+            paddingX: LEGACY_STAGE_PADDING_X_PERC, 
+            paddingY: LEGACY_STAGE_PADDING_Y_PERC
+        }
+        : {
+            width: STAGE_WIDTH, 
+            height: STAGE_HEIGHT, 
+            paddingX: STAGE_PADDING_X_PERC, 
+            paddingY: STAGE_PADDING_Y_PERC
+        }
     let lastInfo:ResizeInfo = {
         scale: 0,
         x: 0,
@@ -87,7 +102,7 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
 
         const bounds = adjustBounds ? adjustBounds(containerBounds) : containerBounds;
 
-        const targetRatio = STAGE_WIDTH / STAGE_HEIGHT;
+        const targetRatio = stage.width / stage.height;
 
         let width = bounds.width;
         let height = bounds.height;
@@ -102,7 +117,7 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
 
         const x = bounds.x + ((bounds.width - width) / 2);
         const y = bounds.y + ((bounds.height - height) / 2);
-        const scale = width / STAGE_WIDTH;
+        const scale = width / stage.width;
 
         const info = {
             scale,
@@ -110,10 +125,10 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             y,
             width,
             height,
-            contentX: (STAGE_PADDING_X_PERC / 2) * width,
-            contentY: (STAGE_PADDING_Y_PERC / 2) * height,
-            contentWidth: width - (STAGE_PADDING_X_PERC * width),
-            contentHeight: height - (STAGE_PADDING_Y_PERC * height)
+            contentX: (stage.paddingX / 2) * width,
+            contentY: (stage.paddingY / 2) * height,
+            contentWidth: width - (stage.paddingX * width),
+            contentHeight: height - (stage.paddingY * height)
         };
 
         if(!sizeEqual(info, lastInfo)) {

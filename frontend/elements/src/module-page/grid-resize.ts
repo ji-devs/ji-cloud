@@ -87,6 +87,9 @@ export class _ extends BgBlue {
     }
 
     @property({ type: Boolean })
+    legacy: boolean = false;
+
+    @property({ type: Boolean })
     scrollable: boolean = false;
 
     firstUpdated() {
@@ -108,7 +111,8 @@ export class _ extends BgBlue {
                     bounds.width - sidebarBounds.width,
                     bounds.height - (headerBounds.height + footerBounds.height)
                 );
-            }
+            },
+            isLegacy: this.legacy
         }, (info) => {
             setResizeOnDocumentRoot(info);
             this.dispatchEvent(new CustomEvent('module-resize', {
