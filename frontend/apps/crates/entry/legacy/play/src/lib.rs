@@ -10,6 +10,8 @@ mod router;
 mod shell;
 mod player;
 mod debug;
+mod sidebar;
+mod path;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

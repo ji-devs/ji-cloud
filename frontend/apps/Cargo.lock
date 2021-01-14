@@ -940,6 +940,7 @@ dependencies = [
  "htmlescape",
  "itertools",
  "js-sys",
+ "legacy",
  "log",
  "serde",
  "serde-wasm-bindgen",

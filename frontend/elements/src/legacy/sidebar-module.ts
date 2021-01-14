@@ -21,6 +21,18 @@ export class _ extends LitElement {
             text-align: center;
             width: 100%;
         }
+
+        .img {
+            padding: 5px;
+            width: 312px;
+            height: 234px;
+        }
+
+        .selected {
+            padding: 0;
+            border-radius: 5px;
+            border: yellow 5px solid
+        }
     `];
   }
 
@@ -33,16 +45,19 @@ export class _ extends LitElement {
   @property({type: Number})
   index:number = 0
 
+  @property({type: Boolean})
+  selected:boolean = false;
+
   // Define the element's template
   render() {
-    const {index} = this;
+    const {selected, index} = this;
 
     return html`
       <section>
-        <div>
+        <div class="img ${selected ? "selected" : ""}">
             <slot name="img"></slot>
         </div>
-        <div class="caption">${index}</div>
+        <div class="caption">${index+1}</div>
       </section>
     `;
   }
