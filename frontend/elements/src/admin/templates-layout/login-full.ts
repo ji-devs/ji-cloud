@@ -1,5 +1,10 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+
+
+
+  export type Mode = "weak" | "average" | "strong" | "none";
+
 @customElement('login-full')
 export class _ extends LitElement {
   static get styles() {
@@ -84,9 +89,13 @@ export class _ extends LitElement {
   @property()
   texthidden:boolean = true; 
 
+  @property()
+  mode: Mode = "weak";
+
   render() {
 
-    const {title, texthidden} = this;
+    const {title, mode} = this;
+
 
     return html`
  <div class="wrapper">
@@ -106,7 +115,10 @@ export class _ extends LitElement {
         <slot name="password">
             
         </slot>
-        <div class="${texthidden ? 'text-hidden' : ''}">Strong</div>
+        <div>
+        ${strengthText(mode)}
+        </div>
+
         </div>
         <slot name="passwordreminder"></slot>
         
@@ -123,3 +135,13 @@ export class _ extends LitElement {
   `;
   }
 }
+
+function strengthText(mode: Mode) {
+    const strengthlabel = mode === "weak" ? "Weak"
+      : mode === "average" ? "Average"
+      : mode === "strong" ? "Strong"
+      : "";
+    
+      return html`<p>${strengthlabel}</p>`
+    
+  }

@@ -10,7 +10,7 @@ import {AGETWO_OPTIONS} from "~/mock/meta";
 
 
 export default {
-  title: 'Full Pages/Login',
+  title: 'Lists/User info',
   
 }
 

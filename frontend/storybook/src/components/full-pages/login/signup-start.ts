@@ -6,18 +6,22 @@ import "@elements/titles/plain-blue";
 import "@elements/dividers/or-divider";
 import {GoogleButton} from "~/components/special-buttons";
 import { RectangleButton } from "~/components/rectangle-button";
-
+import { Strength as Strengthbar} from "@elements/password-strength";
+import { Mode } from "@elements/admin/templates-layout/login-full";
 
 export default {
   title: 'Full Pages/Login',
 }
 
 interface LoginArgs {
+  strength: Strengthbar,
+  mode: Mode,
  
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-  
+  strength: 0,
+  mode: "none",
   }
 
   const STR_TITLE = "Sign Up";
@@ -33,17 +37,17 @@ interface LoginArgs {
 
 export const SignUpStart = (props?:LoginArgs) => {
 
-    const {} = props || DEFAULT_ARGS;
+    const {strength, mode} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${STR_TITLE}">
+    <login-full title="${STR_TITLE}" mode="${mode}">
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
         <input-text slot="username" label="${STR_EMAIL}" mode="text" placeholder=${STR_PLCEMAIL}>
         </input-text>
-        <password-strength slot="passwordstrength"></password-strength>
+        <password-strength slot="passwordstrength" strength ="${strength}"></password-strength>
         <input-text slot="password" label="${STR_PASSWORD}" mode="passwordHidden" placeholder="${STR_PLCPASSWORD}">
         </input-text>
         <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
@@ -56,3 +60,17 @@ export const SignUpStart = (props?:LoginArgs) => {
 }
 
 SignUpStart.args = DEFAULT_ARGS;
+SignUpStart.argTypes = {
+  strength: {
+    control: {
+      type: 'inline-radio',
+      options: [1, 2, 3, 0]
+    }
+  },
+  mode: {
+    control: {
+      type: 'inline-radio',
+      options: ["weak", "average", "strong", "none"]
+    }
+  },
+}
