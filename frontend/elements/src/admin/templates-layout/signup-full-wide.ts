@@ -1,6 +1,8 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('signup-full-wide')
+
+
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -35,6 +37,7 @@ export class _ extends LitElement {
       position:absolute;
       bottom:20px;
   }
+ 
     
   ::slotted([slot=subtitle]){
     white-space: nowrap;
@@ -53,6 +56,8 @@ export class _ extends LitElement {
   @property()
   hidden:boolean = true; 
 
+ 
+
   render() {
 
     const {title, hidden, subtitle} = this;
@@ -65,6 +70,8 @@ export class _ extends LitElement {
     <h1>${title}</h1>
     <slot name="subtitle"></slot>
     <slot name="main"></slot>
+    
+    <slot name="confirmation"></slot>
     <slot name="submit"></slot>
     <slot name="contact"></slot>
   </div>

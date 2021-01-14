@@ -1,6 +1,7 @@
 import "@elements/admin/templates-layout/signup-full-wide";
 import "@elements/titles/subtitle";
 import "@elements/titles/plain-blue";
+import "@elements/dividers/spacer-fourty";
 import "@elements/contact";
 
 
@@ -31,8 +32,8 @@ export const SignUpFour = (props?:LoginArgs) => {
         
         <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUBTITLE}"></sub-title>
-        <plain-blue title="${STR_SENDAGAIN}" slot="main"></plain-blue>
-        <confirmation-button slot="main"></confirmation-button>
+        <spacer-fourty slot="confirmation"></spacer-fourty>
+        <confirmation-button slot="confirmation"></confirmation-button>
 
         <plain-blue title="${STR_CHANGE}" slot="main"></plain-blue>
         <contact-email slot="contact"></contact-email>

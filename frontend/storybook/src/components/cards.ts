@@ -1,17 +1,22 @@
 import "@elements/cards/icon-banner-card";
+import "@elements/cards/banner-card";
 import "@elements/cards/blue-card";
-
+import {Color} from "@elements/cards/banner-card";
 export default {
   title: 'Cards',
 }
 
 interface CardArgs {
- color:string,
+ color:Color,
+ icon:string,
+ label:string
 
 }
 
 const DEFAULT_ARGS:CardArgs = {
   color:"blue",
+  icon:"",
+  label:"Anat"
 }
 
 export const IconBannerCard = () => {
@@ -20,8 +25,8 @@ export const IconBannerCard = () => {
 
 export const BannerCard = (props?:CardArgs) => {
 
-  const {color,} = props || DEFAULT_ARGS;
-  return `<banner-card label="Placeholder" path="" color="${color}"/>`
+  const {color,label, icon} = props || DEFAULT_ARGS;
+  return `<banner-card label="${label}" icon="${icon}" color="${color}"/>`
 }
 
 export const BlueCard = () => {
@@ -30,3 +35,11 @@ export const BlueCard = () => {
 
 
 BannerCard.args = DEFAULT_ARGS;
+BannerCard.argTypes = {
+  color: {
+    control: {
+      type: 'inline-radio',
+      options: ["blue", "green", "white"]
+    }
+  }
+}
