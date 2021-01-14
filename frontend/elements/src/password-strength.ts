@@ -1,6 +1,7 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
+
 // <password-strength strength="2" />
 
 export enum Strength {

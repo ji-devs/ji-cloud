@@ -7,7 +7,7 @@ import "@elements/dividers/or-divider";
 import {GoogleButton} from "~/components/special-buttons";
 import { RectangleButton } from "~/components/rectangle-button";
 import { Strength as Strengthbar} from "@elements/password-strength";
-import { Strength as Strengthword} from "@elements/admin/templates-layout/login-full";
+import { Mode } from "@elements/admin/templates-layout/login-full";
 
 export default {
   title: 'Full Pages/Login',
@@ -15,13 +15,13 @@ export default {
 
 interface LoginArgs {
   strength: Strengthbar,
-  strengthword: Strengthword,
+  mode: Mode,
  
   }
 
   const DEFAULT_ARGS:LoginArgs = {
   strength: 0,
-  strengthword: 0,
+  mode: "none",
   }
 
   const STR_TITLE = "Sign Up";
@@ -37,11 +37,11 @@ interface LoginArgs {
 
 export const SignUpStart = (props?:LoginArgs) => {
 
-    const {strength} = props || DEFAULT_ARGS;
+    const {strength, mode} = props || DEFAULT_ARGS;
 
 
     return `
-    <login-full title="${STR_TITLE}">
+    <login-full title="${STR_TITLE}" mode="${mode}">
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
@@ -67,10 +67,10 @@ SignUpStart.argTypes = {
       options: [1, 2, 3, 0]
     }
   },
-  strengthword: {
+  mode: {
     control: {
       type: 'inline-radio',
-      options: [1, 2, 3, 0]
+      options: ["weak", "average", "strong", "none"]
     }
   },
 }
