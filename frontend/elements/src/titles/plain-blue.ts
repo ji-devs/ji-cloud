@@ -8,9 +8,12 @@ export class _ extends LitElement {
         color: #5590fc;
         margin-top:0;
         margin-bottom:0;
+        cursor:pointer;
+        
         
 
     }
+    
     .bold {
       font-weight:500;
     }
