@@ -59,5 +59,5 @@ interface LegacyMedia {
 export const legacyMock = ({jigId, moduleId, path}:LegacyMedia):string => 
     `${MEDIA_BASE}/legacy/examples/${jigId}/slides/${moduleId}/${path}`;
 
-export const legacyMedia = ({jigId, moduleId, path}:LegacyMedia):string => 
+export const legacyMedia = (_props?:LegacyMedia):string => 
     `TODO`

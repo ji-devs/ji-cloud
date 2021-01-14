@@ -14,6 +14,7 @@ export class _ extends LitElement {
         section {
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
 
         .caption {
@@ -34,7 +35,7 @@ export class _ extends LitElement {
 
   // Define the element's template
   render() {
-    const {img, index} = this;
+    const {index} = this;
 
     return html`
       <section>

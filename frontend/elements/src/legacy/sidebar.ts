@@ -16,9 +16,6 @@ export class _ extends LitElement {
             height: 100%;
         }
 
-        .module:hover {
-            cursor: pointer; 
-        }
     `];
   }
 
@@ -42,9 +39,7 @@ export class _ extends LitElement {
 }
 
 const moduleSlot = (index:number, max:number) => html`
-    <div class="module">
-        <slot name="module-${index}"></slot>
-    </div>
+    <slot name="module-${index}"></slot>
     ${index !== max
         ? html`<div class="separator"></div>` 
         : nothing
