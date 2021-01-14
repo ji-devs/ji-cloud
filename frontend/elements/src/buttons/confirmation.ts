@@ -55,12 +55,6 @@ export class _ extends LitElement {
     return html`
 
         ${mode === "confirmation" ? confirmation() : sendagain()}
-   
-      
-
-        
-      
-
   `;
   }
 }

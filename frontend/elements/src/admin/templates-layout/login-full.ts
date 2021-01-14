@@ -1,5 +1,14 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+
+export enum StrengthWord {
+    None, //0
+    Weak, //1
+    Average, //2
+    Strong, //3
+    
+  }
+
 @customElement('login-full')
 export class _ extends LitElement {
   static get styles() {
@@ -48,9 +57,7 @@ export class _ extends LitElement {
     .spacer{
         height:20px;
     }
-    .text-hidden {
-        display:none;
-    }
+   
     .password-wrapper {
         position: relative;
     }
@@ -84,9 +91,17 @@ export class _ extends LitElement {
   @property()
   texthidden:boolean = true; 
 
+  @property({type: Number})
+  strengthword:StrengthWord = StrengthWord.None
+
   render() {
 
-    const {title, texthidden} = this;
+    const {title, texthidden, strengthword} = this;
+
+    const className = strengthword === StrengthWord.Weak ? "Weak"
+    : strengthword === StrengthWord.Average ? "Average"
+    : strengthword === StrengthWord.Strong ? "Strong"
+    : "";
 
     return html`
  <div class="wrapper">
@@ -106,7 +121,7 @@ export class _ extends LitElement {
         <slot name="password">
             
         </slot>
-        <div class="${texthidden ? 'text-hidden' : ''}">Strong</div>
+        <div>${className}</div>
         </div>
         <slot name="passwordreminder"></slot>
         
