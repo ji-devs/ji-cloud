@@ -20,6 +20,11 @@ export class _ extends LitElement {
     }
     li{
       list-style-type: none;
+      border:solid 1px #ffffff;
+      
+      border-radius: 14px;
+      padding:2px 16px 2px 4px;
+      
     }
     .errorwrapper {
       border: solid 1px #f00813;
@@ -31,7 +36,9 @@ export class _ extends LitElement {
      }
      div {
        display:flex;
-       align-items:center
+       align-items:center;
+       height:30px;
+       margin-left: -2px;
     }
     `];
   }
