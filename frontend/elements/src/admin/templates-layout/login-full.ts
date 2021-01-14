@@ -71,6 +71,9 @@ export class _ extends LitElement {
     ::slotted([slot=noaccount]:last-child){
         margin-left:4px;
     }
+    ::slotted([slot=sub]){
+        white-space: nowrap;
+    }
    
     `];
   }

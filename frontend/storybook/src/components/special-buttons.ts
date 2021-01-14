@@ -12,7 +12,7 @@ interface GoogleArgs {
   
   const DEFAULT_ARGS:GoogleArgs = {
     label: "Sign in with Google",
-    path:"/icn-google-button-64.svg"
+    path:"icn-google-button-64.svg"
   }
 
 export const GoogleButton = (props?:GoogleArgs) => {

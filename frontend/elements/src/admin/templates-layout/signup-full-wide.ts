@@ -36,6 +36,9 @@ export class _ extends LitElement {
       bottom:20px;
   }
     
+  ::slotted([slot=subtitle]){
+    white-space: nowrap;
+}
    
    
     `];

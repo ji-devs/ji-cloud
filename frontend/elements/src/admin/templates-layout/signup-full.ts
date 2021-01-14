@@ -43,6 +43,9 @@ export class _ extends LitElement {
     ::slotted([slot=passwordreminder]){
         text-align: end;
     }
+    ::slotted([slot=subtitle]){
+        white-space: nowrap;
+    }
     ::slotted([slot=submit]){
         margin-top:40px;
     }

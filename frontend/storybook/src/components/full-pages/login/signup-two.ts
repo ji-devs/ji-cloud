@@ -15,19 +15,17 @@ export default {
 }
 
 interface LoginArgs {
-    helpertext:string,
     errormessage: string,
-    instruction: boolean,
     error: boolean,
-    imghidden:boolean,
+    errorwrapper:boolean
+   
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-      helpertext: "Your password looks good", 
     errormessage: "",
-    instruction: false,
     error: false,
-    imghidden:true
+    errorwrapper:false
+
       
   }
 
@@ -47,7 +45,7 @@ interface LoginArgs {
 
 export const SignUpTwo = (props?:LoginArgs) => {
 
-    const {helpertext,errormessage, instruction, error, imghidden} = props || DEFAULT_ARGS;
+    const {errormessage, error,errorwrapper } = props || DEFAULT_ARGS;
 
 
     return `
@@ -55,16 +53,16 @@ export const SignUpTwo = (props?:LoginArgs) => {
         
         <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUBTITE}"></sub-title>
-        <dropdown-select slot="topleft" label="${STR_COUNTRY}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="topleft" label="${STR_COUNTRY}"  error="${errormessage}" ${error && "error"} ${errorwrapper && "errorwrapper"}>
         </dropdown-select>
-        <dropdown-select slot="topright"  label="${STR_STATE}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="topright"  label="${STR_STATE}" error="${errormessage}"  ${error && "error"} ${errorwrapper && "errorwrapper"}>
         </dropdown-select>
-        <dropdown-select slot="bottomleft" label="${STR_CITY}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="bottomleft" label="${STR_CITY}" error="${errormessage}"  ${error && "error"} ${errorwrapper && "errorwrapper"}>
         </dropdown-select>
-        <dropdown-select slot="bottomright" label="${STR_SCHOOL}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} >
+        <dropdown-select slot="bottomright" label="${STR_SCHOOL}" error="${errormessage}" ${error && "error"} ${errorwrapper && "errorwrapper"} >
         </dropdown-select>
         
-        <input-text slot="username" label="${STR_LANGUAGE}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${imghidden && "imghidden"} >
+        <input-text slot="username" label="${STR_LANGUAGE}" mode="text" error="${errormessage}">
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_TERMS}"></input-checkbox>
         <input-checkbox slot="checkbox" label="${STR_GDPR}"></input-checkbox>

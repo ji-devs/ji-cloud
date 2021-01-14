@@ -14,27 +14,21 @@ export default {
 }
 
 interface LoginArgs {
-    color: string,
-    size:string,
-    helpertext:string,
-    errormessage: string,
     instruction: boolean,
-    error: boolean,
-    imglefthidden:boolean,
+    errorname: string,
+    errorlast: string,
+    erroruser:string,
     path:string,
-    imghidden:boolean,
+    
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    helpertext: "Your password looks good", 
-    errormessage: "",
     instruction: false,
-    error: false,
-    color: "red",
-    size: "medium",
-    imglefthidden:true,
+    errorname: "",
+    errorlast:"",
+    erroruser:"",
     path:"",
-    imghidden:true,
+    
     
   }
 
@@ -49,27 +43,33 @@ const STR_18 = "I am over 18";
 const STR_ACCOUNT = "Already have an account?";
 const STR_CONTINUE = "Continue";
 const STR_REGISTER = "Login";
+const STR_ARROW = "continue_arrow.svg";
+const STR_HELPNAME ="Test";
+const STR_HELPLASTNAME = "Test";
+const STR_HELPUSER = "Test";
+const STR_MEDIUM = "medium";
+const STR_RED = "red";
 
 
 export const SignUpOne = (props?:LoginArgs) => {
 
-    const {color, helpertext,errormessage, instruction, error, size, path,imglefthidden, imghidden} = props || DEFAULT_ARGS;
+    const {instruction, errorname,errorlast,erroruser} = props || DEFAULT_ARGS;
 
 
     return `
     <signup-full title="${STR_TITLE}">
         
         
-        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"}  ${imghidden && "imghidden"}>
+        <input-text slot="topleft" label="${STR_FIRSTNAME}" placeholder="${STR_PLCFIRSTNAME}" helpertext="${STR_HELPNAME}" error="${errorname}" ${instruction && "instruction"} >
         </input-text>
-        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"}  ${imghidden && "imghidden"}>
+        <input-text slot="topright" label="${STR_LASTNAME}" placeholder="${STR_PLCLASTNAME}" helpertext="${STR_HELPLASTNAME}" error="${errorlast}" ${instruction && "instruction"} >
         </input-text>
-        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}" helpertext="${helpertext}" error="${errormessage}" ${instruction && "instruction"} ${error && "error"} ${imghidden && "imghidden"} >
+        <input-text slot="username" label="${STR_USERNAME}" placeholder="${STR_PLCUSER}" helpertext="${STR_HELPUSER}" error="${erroruser}" ${instruction && "instruction"} >
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_18}">
 
   </input-checkbox>
-        <div slot="submit">${RectangleButton({imglefthidden:imglefthidden, path:path, color:color, size:size, label:STR_CONTINUE,bold})}</div>
+        <div slot="submit">${RectangleButton({path:STR_ARROW, color:STR_RED, size:STR_MEDIUM, label:STR_CONTINUE,bold:false,italic:false,imgrighthidden:false, imglefthidden:true})}</div>
         <plain-black title="${STR_ACCOUNT}" slot="noaccount"></plain-black>
         <plain-blue title="${STR_REGISTER}" slot="noaccount"></plain-blue>
 
