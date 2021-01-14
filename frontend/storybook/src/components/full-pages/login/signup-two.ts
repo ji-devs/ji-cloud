@@ -15,17 +15,11 @@ export default {
 }
 
 interface LoginArgs {
-    errormessage: string,
-    error: boolean,
-    errorwrapper:boolean
-   
+ 
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    errormessage: "",
-    error: false,
-    errorwrapper:false
-
+   
       
   }
 
@@ -45,7 +39,7 @@ interface LoginArgs {
 
 export const SignUpTwo = (props?:LoginArgs) => {
 
-    const {errormessage, error,errorwrapper } = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
@@ -53,16 +47,16 @@ export const SignUpTwo = (props?:LoginArgs) => {
         
         <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUBTITE}"></sub-title>
-        <dropdown-select slot="topleft" label="${STR_COUNTRY}"  error="${errormessage}" ${error && "error"} ${errorwrapper && "errorwrapper"}>
+        <dropdown-select slot="topleft" label="${STR_COUNTRY}"  >
         </dropdown-select>
-        <dropdown-select slot="topright"  label="${STR_STATE}" error="${errormessage}"  ${error && "error"} ${errorwrapper && "errorwrapper"}>
+        <dropdown-select slot="topright"  label="${STR_STATE}" >
         </dropdown-select>
-        <dropdown-select slot="bottomleft" label="${STR_CITY}" error="${errormessage}"  ${error && "error"} ${errorwrapper && "errorwrapper"}>
+        <dropdown-select slot="bottomleft" label="${STR_CITY}">
         </dropdown-select>
-        <dropdown-select slot="bottomright" label="${STR_SCHOOL}" error="${errormessage}" ${error && "error"} ${errorwrapper && "errorwrapper"} >
+        <dropdown-select slot="bottomright" label="${STR_SCHOOL}">
         </dropdown-select>
         
-        <input-text slot="username" label="${STR_LANGUAGE}" mode="text" error="${errormessage}">
+        <input-text slot="username" label="${STR_LANGUAGE}" mode="text">
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_TERMS}"></input-checkbox>
         <input-checkbox slot="checkbox" label="${STR_GDPR}"></input-checkbox>

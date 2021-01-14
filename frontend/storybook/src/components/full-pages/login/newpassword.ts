@@ -13,19 +13,10 @@ export default {
 }
 
 interface LoginArgs {
-    instruction: boolean,
-    error: string,
-   
-   
 
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    instruction: false,
-    error:"",
-    
-    
-    
   }
 
   const STR_NEWPASSWORD = "Create a New Password";
@@ -39,16 +30,16 @@ interface LoginArgs {
 
 export const LoginForgotPassword = (props?:LoginArgs) => {
 
-    const {instruction, error} = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
     <login-full title="${STR_NEWPASSWORD}">
     
        
-        <input-text slot="password" label="${STR_ENTERPASSWORD}" helpertext="${STR_HELP}" error="${error}" ${instruction && "instruction"} ${error && "error"}  mode="passwordHidden">
+        <input-text slot="password" label="${STR_ENTERPASSWORD}" helpertext="${STR_HELP}"  mode="passwordHidden">
         </input-text>
-        <div slot="submit">${RectangleButton({label:STR_LABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true,bold:false, italic:false, path:""})}</div>
+        <div slot="submit">${RectangleButton({label:STR_LABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true,bold:false, italic:false, iconpath:""})}</div>
         <plain-black title="${STR_LOGGEDOUT}" slot="noaccount"></plain-blue>
     </login-full>
     

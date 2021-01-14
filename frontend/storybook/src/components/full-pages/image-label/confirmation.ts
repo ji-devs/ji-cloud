@@ -26,7 +26,7 @@ export const Confirmation = () => {
       <confirmation-popup label="${STR_CONFIRMATION}" path="${STR_IMG}" icon="${STR_ICONCHECK}" slot="title"></confirmation-popup>
       <div slot="left">
         <add-image>
-            ${RectangleButton({color:STR_BLUE,size:STR_MEDIUM,label:STR_UPLOAD,imgrighthidden:true,path:STR_PLUS,bold:false, italic:false,imglefthidden:false})}
+            ${RectangleButton({color:STR_BLUE,size:STR_MEDIUM,label:STR_UPLOAD,imgrighthidden:true,iconpath:STR_PLUS,bold:false, italic:false,imglefthidden:false})}
         </add-image>
       </div>
       

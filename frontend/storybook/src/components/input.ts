@@ -17,29 +17,31 @@ interface InputTextProps {
   mode: InputTextMode;
   error: string,
   label:string,
-  helpertext:string,
-  instruction:boolean,
-  errorwrapper:boolean,
-  value:string
+  help:string,
+  value:string,
+  width:number,
 }
 
 const DEFAULT_INPUT_TEXT_ARGS:InputTextProps = {
   mode: "text",
   error: "Wrong Password",
-  instruction:false,
   label: "Title",
-  helpertext: "Minimum 8 digits, Must include a number",
-  errorwrapper:false,
-  value:"hello"
+  help: "Minimum 8 digits, Must include a number",
+  value:"hello",
+  width:300
   
 }
 
 export const InputText = (props?: InputTextProps) => {
-    const {label,helpertext, errorwrapper, instruction, error, mode,value } = props || DEFAULT_INPUT_TEXT_ARGS;
+    const {label,help, error, mode,value,width } = props || DEFAULT_INPUT_TEXT_ARGS;
 
-    return `<input-text label="${label}" value="${value}" helpertext="${helpertext}" error="${error}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}  mode="${mode}">
+    return `
+    <div style="width:${width}px">
+    <input-text label="${label}" value="${value}" help="${help}" error="${error}"   mode="${mode}">
  
-    </input-text>`
+    </input-text>
+    </div>
+    `
     
 }
 

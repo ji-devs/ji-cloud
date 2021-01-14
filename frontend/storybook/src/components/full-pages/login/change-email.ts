@@ -12,13 +12,11 @@ export default {
 }
 
 interface LoginArgs {
-    error: string,
-    instruction: boolean,
+
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    error: "",
-    instruction: false,
+   
   }
 
   const STR_TITLE ="Change Email Account";
@@ -34,17 +32,17 @@ interface LoginArgs {
 
 export const LoginChangeEmail = (props?:LoginArgs) => {
 
-    const {error, instruction} = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
     <login-full title="${STR_TITLE}">
     
     <plain-black title="${STR_SUB}" slot="sub"></plain-black>
-        <input-text slot="username" label="${STR_PASSWORDLABEL}" helpertext="${STR_HELP}" error="${error}" ${instruction && "instruction"} ${error && "error"} mode="text">
+        <input-text slot="username" label="${STR_PASSWORDLABEL}" helpertext="${STR_HELP}" mode="text">
         </input-text>
         
-        <div slot="submit">${RectangleButton({label:STR_BTNLABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true, bold:false,italic:false,path:""})}</div>
+        <div slot="submit">${RectangleButton({label:STR_BTNLABEL, color: STR_RED,size: STR_MEDIUM, imgrighthidden:true, imglefthidden:true, bold:false,italic:false,iconpath:""})}</div>
         <contact-email slot="contact"></contact-email>
         </login-full>
     

@@ -20,7 +20,7 @@ export const ImageLabelFullOne = ({title}) => {
       <div slot="left">${LeftLabel()}</div>
       <div slot="middle">${LabelRight()}</div>
       <div slot="button">
-        ${RectangleButton({color:STR_RED,size:STR_MEDIUM,label:STR_NEXT,imgrighthidden:true,bold:false, italic:false,imglefthidden:true, path:""})}
+        ${RectangleButton({color:STR_RED,size:STR_MEDIUM,label:STR_NEXT,imgrighthidden:true,bold:false, italic:false,imglefthidden:true, iconpath:""})}
       </div>
 
     </imagelabel-full>

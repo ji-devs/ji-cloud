@@ -41,11 +41,17 @@ export class _ extends LitElement {
    }
    .input-wrapper:active{
     border: solid 2px #5590fc;
+    margin: -1px;
    }
-   input{ font-size:16px;}
-   active .helpertext{
-    display:block;
+   .input-wrapper:focus{
+    border: solid 2px #5590fc;
+    margin: -1px;
    }
+   input{ 
+    font-size:16px;
+    width:100%;
+  }
+  
    .error{
     font-size: 14px;
     color: #f00813;
@@ -60,7 +66,7 @@ export class _ extends LitElement {
     margin-top:4px;
     font-weight: 500;
     padding-left:8px;
-    display:block;
+    
    }
    
    img-ui{
@@ -68,9 +74,7 @@ export class _ extends LitElement {
     top: 33%;
     right: 12px;
    }
-   .texthidden{
-     display:none;
-   }
+
 
     `];
   }
@@ -85,11 +89,8 @@ export class _ extends LitElement {
   @property()
   error: string = "";
 
-  @property({type: Boolean})
-  instruction: boolean = false;
-
   @property()
-  helpertext: string = "";
+  help: string = "";
 
   @property()
   placeholder: string = "";
@@ -102,9 +103,11 @@ export class _ extends LitElement {
 
   render() {
 
-    const {label, helpertext, instruction, mode, placeholder, error, value} = this;
+    const {label, help, mode, placeholder, error,value} = this;
 
     const isError:boolean = error !== "";
+
+    const isHelp:boolean = help !== "";
 
     const errorwrapper = isError ? "errorwrapper" : "";
 
@@ -117,9 +120,14 @@ export class _ extends LitElement {
         <label class="">${label}</label>
         ${mode !== "text" ? makeImage(mode) : nothing}
     </div>
-  
-    <p class="${instruction ? 'instruction' : 'texthidden'}">${helpertext}</p>
 
+
+
+    ${
+      isHelp 
+        ? html`<p class="instruction">${help}</p>` 
+        : nothing
+    }
     ${
       isError 
         ? html`<p class="error">${error}</p>` 

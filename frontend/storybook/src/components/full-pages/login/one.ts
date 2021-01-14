@@ -12,20 +12,13 @@ export default {
 
 interface LoginArgs {
   
-    instruction: boolean,
-    error: string,
-    
-    errortwo:string,
-   
+ 
 
   
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    instruction: false,
-    error: "",
-   
-    errortwo:""
+    
   }
 
   const STR_ACCOUNT = "Don't have an account yet?";
@@ -34,11 +27,11 @@ interface LoginArgs {
   const STR_PASSWORD = "Password";
   const STR_FORGOTTEN ="Forgot your Password?";
   const STR_USERLABEL = "User Name";
-  const STR_HELP ="Test";
+  
 
 export const LoginFullOne = (props?:LoginArgs) => {
 
-    const {errortwo,error, instruction} = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
@@ -46,9 +39,9 @@ export const LoginFullOne = (props?:LoginArgs) => {
         <div slot="google">${GoogleButton()}</div>
         <or-divider slot="divider"></or-divider>
         
-        <input-text slot="username" mode="text" label="${STR_USERLABEL}" helpertext="${STR_HELP}" error="${error}" ${instruction && "instruction"}>
+        <input-text slot="username" mode="text" label="${STR_USERLABEL}" }>
         </input-text>
-        <input-text slot="password" mode="passwordHidden"  label="${STR_PASSWORD}" helpertext="${STR_HELP}" error="${errortwo}" ${instruction && "instruction"}>
+        <input-text slot="password" mode="passwordHidden"  label="${STR_PASSWORD}" >
         </input-text>
         <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>

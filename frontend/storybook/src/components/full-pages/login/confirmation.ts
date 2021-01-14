@@ -40,7 +40,7 @@ export const Confirmation = (props?:LoginArgs) => {
     <confirmation-full title="${STR_TITLE}">
         <sub-title slot="subtitle" title="${STR_SUB}" slot="subtitle"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUB}" slot="subtitle"></sub-title>
-        <div slot="button">${RectangleButton({label:STR_MEDIUM, color: STR_RED,size: STR_MEDIUM,imglefthidden:true, imgrighthidden:true,bold:false, italic:false, path:""})}</div>       
+        <div slot="button">${RectangleButton({label:STR_LABEL, color: STR_RED,size: STR_MEDIUM,imglefthidden:true, imgrighthidden:true,bold:false, italic:false, iconpath:""})}</div>       
     </confirmation-full>
     
     `
