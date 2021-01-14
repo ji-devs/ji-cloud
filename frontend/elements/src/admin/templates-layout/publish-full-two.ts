@@ -51,12 +51,25 @@ export class _ extends LitElement {
         align-items:center;
         margin-top:64px;
         margin-right:32px;
+        z-index:1
+        
+    }
+    ::slotted([slot="dropdown"]){
+        position:absolute;
+        z-index:10;
+       
+        left: 200px;
     }
     ::slotted([slot="button-collection"]:last-child){
        margin-right:0;
     }
     .button-wrapper{
         display:flex;
+        position:relative;
+        
+    }
+    .closed{
+        display:none;
     }
        
    
@@ -69,9 +82,12 @@ export class _ extends LitElement {
   @property()
   subtitle:string = ""; 
 
+  @property({type:Boolean})
+  closed: boolean = false;
+
   render() {
 
-    const {title, subtitle} = this;
+    const {title, subtitle, closed} = this;
 
     return html`    
     <main>
@@ -83,6 +99,7 @@ export class _ extends LitElement {
                 <p name="subtitle">${subtitle}</p>
                 <div class="button-wrapper">
                     <slot name="button-collection"></slot>
+                    <slot name="dropdown" class="${closed ? 'closed' : ''}"></slot>
                 </div>
             </div>
         </div>

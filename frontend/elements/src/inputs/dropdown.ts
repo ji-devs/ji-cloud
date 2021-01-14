@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
-
+import {nothing} from "lit-html";
 @customElement('dropdown-select')
 export class _ extends LitElement {
 
@@ -13,11 +13,6 @@ export class _ extends LitElement {
     border: solid 1px #89b3ff;
     border-radius:14px;
     padding: 8px 48px 8px 16px;
-   }
-
-   .instruction{
-     display:none;
-     margin-left: 8px;
    }
    input{
     outline:none;
@@ -37,17 +32,6 @@ export class _ extends LitElement {
     border: solid 2px #5590fc;
    }
    input{ font-size:16px;}
-   .helpertext{
-     font-size: 14px;
-     color: #5590fc;
-     margin-top:4px;
-     font-weight: 500;
-   }
-   active .helpertext{
-    display:block;
-   }
- 
-   p{display:none;}
    img-ui{
     position: absolute;
     top: 33%;
@@ -60,6 +44,14 @@ export class _ extends LitElement {
    }
    .errorwrapper input{
     background-color: #fff4f4;
+   }
+   .error{
+    font-size: 14px;
+    color: #f00813;
+    margin-top:4px;
+    font-weight: 500;
+    padding-left:8px;
+    display:block;
    }
    
   
@@ -78,6 +70,8 @@ export class _ extends LitElement {
   @property()
   helpertext: string = "";
 
+  @property()
+  error: string = "";
 
 
   @property({type:Boolean})
@@ -85,13 +79,10 @@ export class _ extends LitElement {
 
   render() {
 
-    const {label, helpertext, instruction, errormessage, errorwrapper} = this;
+    const {label, helpertext, instruction, errormessage, error} = this;
+    const isError:boolean = error !== "";
 
-
-    const instructionClasses = classMap({ 
-      instruction,
-    });
-
+    const errorwrapper = isError ? "errorwrapper" : "";
 
     return html`
     
@@ -100,9 +91,12 @@ export class _ extends LitElement {
         <label class="">${label}</label>
         <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
     </div>
-    <p class="${instructionClasses}">${helpertext}</p>
-    <p class="">${errormessage}</p>
-     
+
+     ${
+      isError 
+        ? html`<p class="error">${error}</p>` 
+        : nothing
+    }
   `;
   }
 }

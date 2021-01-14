@@ -17,6 +17,7 @@ export class _ extends BaseButton {
         display:flex;
         align-items:center;
         
+        
       }
       .medium{
           padding: 13.6px 24px 11.4px;
