@@ -35,9 +35,14 @@ export class _ extends LitElement {
         color:#ffffff;
       }
       
+
+
+      
       .blue:hover{
         background: #387af4
       }
+      
+
       
       button:disabled{
         background: #a9b1b5;
