@@ -73,6 +73,7 @@ export class _ extends LitElement {
     position: absolute;
     top: 33%;
     right: 12px;
+    cursor:pointer;
    }
 
 
