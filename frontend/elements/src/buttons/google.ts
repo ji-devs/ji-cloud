@@ -13,6 +13,7 @@ export class _ extends LitElement {
         height:64px;
         width: 296px;
         align-items:center;
+        cursor:pointer;
     }
     span{
         display:flex;

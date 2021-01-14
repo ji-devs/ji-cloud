@@ -30,6 +30,7 @@ export class _ extends LitElement {
    }
    .input-wrapper:active{
     border: solid 2px #5590fc;
+    margin: -1px;
    }
    input{ font-size:16px;}
    img-ui{
