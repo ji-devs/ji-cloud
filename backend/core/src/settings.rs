@@ -146,13 +146,24 @@ pub struct JwkSettings {
 }
 
 /// Settings to initialize a algolia client.
+#[derive(Clone, Debug)]
 pub struct AlgoliaSettings {
     /// The AppID to provide to the algolia client.
     pub application_id: String,
-    /// The key to use for the algolia client.
-    pub key: String,
+
+    /// The key the backend uses for managing- indexing- `MEDIA_INDEX`.
+    /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs and access to `MEDIA_INDEX`.
+    /// If [`None`], indexing will be disabled.
+    pub management_key: Option<String>,
+
+    /// The key that the backend uses for searching `MEDIA_INDEX`.
+    /// Needs the `search` ACL with access to `MEDIA_INDEX`.
+    /// If [`None`], searching will be disabled.
+    pub backend_search_key: Option<String>,
+
     /// The index to use for operations on the algolia client.
-    pub index: String,
+    /// If [`None`], indexing and searching will be disabled.
+    pub media_index: Option<String>,
 
     /// The key to use for the *frontend* for the algolia client.
     /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
@@ -188,6 +199,21 @@ impl SettingsManager {
                 }
             },
         }
+    }
+
+    /// get a secret that may be optional, required, or in between (optional but warn on missing) depending on `self`'s configuration.
+    async fn get_varying_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
+        // currently, the only implemented functionality is "optional but warn on missing"
+        let val = self.get_optional_secret(secret).await?;
+
+        if val.is_none() {
+            log::warn!(
+                "Missing `{}` - related functionality will be disabled.",
+                secret
+            );
+        }
+
+        Ok(val)
     }
 
     // Sometimes unused due to some features not existing sometimes.
@@ -322,38 +348,36 @@ impl SettingsManager {
 
     /// Load the settings for Algolia.
     pub async fn algolia_settings(&self) -> anyhow::Result<Option<AlgoliaSettings>> {
-        let application_id = self.get_secret(keys::algolia::APPLICATION_ID).await?;
-
-        let key = self.get_secret(keys::algolia::KEY).await?;
-
-        let disable_local = env_bool(keys::algolia::DISABLE);
-        if matches!(self.remote_target, RemoteTarget::Local) && disable_local {
-            return Ok(None);
-        }
-
-        let index = match self.remote_target.algolia_image_index() {
-            Some(it) => it.to_owned(),
-            None => match self.get_secret(keys::algolia::IMAGE_INDEX).await {
-                Ok(it) => it,
-                Err(_) => return Ok(None),
-            },
-        };
-
-        let frontend_search_key = self
-            .get_optional_secret(keys::algolia::FRONTEND_SEARCH_KEY)
+        // Don't early return right away, notify of the other missing vars first.
+        let application_id = self
+            .get_varying_secret(keys::algolia::APPLICATION_ID)
             .await?;
 
-        if frontend_search_key.is_none() {
-            log::warn!(
-                "Missing `{}` key - this will disable routes related to it",
-                keys::algolia::FRONTEND_SEARCH_KEY
-            )
-        }
+        let media_index = self.get_varying_secret(keys::algolia::MEDIA_INDEX).await?;
+
+        let management_key = self
+            .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
+            .await?;
+
+        let backend_search_key = self
+            .get_varying_secret(keys::algolia::BACKEND_SEARCH_KEY)
+            .await?;
+
+        let frontend_search_key = self
+            .get_varying_secret(keys::algolia::FRONTEND_SEARCH_KEY)
+            .await?;
+
+        // *now* returning is okay.
+        let application_id = match application_id {
+            Some(id) => id,
+            None => return Ok(None),
+        };
 
         Ok(Some(AlgoliaSettings {
             application_id,
-            key,
-            index,
+            backend_search_key,
+            management_key,
+            media_index,
             frontend_search_key,
         }))
     }

@@ -13,6 +13,7 @@ const ALLOWED_APP_NAMES = [
 	"admin",
 	"jig/edit",
 	"jig/play",
+	"legacy/play",
 	"module/memory/edit",
 	"module/memory/play",
 	"module/poster/edit",

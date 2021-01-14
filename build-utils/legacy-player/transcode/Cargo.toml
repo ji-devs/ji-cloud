@@ -1,0 +1,30 @@
+[package]
+name = "transcode"
+version = "0.1.0"
+authors = ["David Komer <david.komer@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "transcode"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+legacy = { path = "../../../frontend/apps/crates/entry/legacy/_common" }
+scan_fmt = "0.2.5"
+structopt = "^0.3"
+simplelog = "^0.8"
+cfg-if = "^0.1"
+dotenv = "^0.15"
+log = "^0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.46"
+serde_repr = "0.1.6"
+url = "2.1.1"
+reqwest = { version = "0.10.8", features = ["json", "stream"] }
+futures = "0.3.5"
+tokio = { version = "0.2", features = ["full"] }
+tokio-util = {version = "0.3.1", features = ["codec"]}
+config = { path = "../../../config/rust" }
+shared = { path = "../../../shared/rust" }
+csv = "1.1"

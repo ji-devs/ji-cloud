@@ -17,6 +17,7 @@ pub enum Route {
     User(UserRoute),
     Admin(AdminRoute),
     Jig(JigRoute),
+    Legacy(LegacyRoute),
     Module(ModuleRoute),
 	Dev(DevRoute),
 }
@@ -45,6 +46,10 @@ pub enum AdminRoute {
     ImageEdit(Id, Option<ImageSearchQuery>),
 }
 
+#[derive(Debug, Clone)]
+pub enum LegacyRoute {
+    Play(Id, Option<Id>) 
+}
 
 #[derive(Debug, Clone)]
 pub enum JigRoute {
@@ -148,6 +153,8 @@ impl Route {
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
             ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), None)),
             ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
+            ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
+            ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
             ["no-auth"] => Self::NoAuth,
@@ -240,6 +247,17 @@ impl From<&Route> for String {
                             format!("/jig/play/{}/{}", jig_id, module_id)
                         } else {
                             format!("/jig/play/{}", jig_id)
+                        }
+                    }
+                }
+            },
+            Route::Legacy(route) => {
+                match route {
+                    LegacyRoute::Play(jig_id, module_id) => {
+                        if let Some(module_id) = module_id {
+                            format!("/legacy/play/{}/{}", jig_id, module_id)
+                        } else {
+                            format!("/legacy/play/{}", jig_id)
                         }
                     }
                 }

@@ -9,6 +9,8 @@ members = [
     "crates/entry/admin",
     "crates/entry/jig/edit",
     "crates/entry/jig/play",
+	"crates/entry/legacy/_common",
+	"crates/entry/legacy/play",
 	"crates/entry/module/memory/_common",
     "crates/entry/module/memory/edit",
     "crates/entry/module/memory/play",

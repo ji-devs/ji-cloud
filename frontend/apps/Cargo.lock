@@ -22,39 +22,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c0df63cb2955042487fad3aefd2c6e3ae7389ac5dc1beb28921de0b69f779d4"
 
 [[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "awsm_web",
- "cfg-if 1.0.0",
- "config",
- "console_error_panic_hook",
- "discard",
- "dominator",
- "dominator_helpers",
- "futures",
- "futures-signals",
- "gloo",
- "htmlescape",
- "itertools",
- "js-sys",
- "log",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "shared",
- "simple-html-template",
- "url",
- "utils",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "wee_alloc",
-]
-
-[[package]]
 name = "app-admin"
 version = "0.1.0"
 dependencies = [
@@ -885,6 +852,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 
 [[package]]
+name = "jig-play"
+version = "0.1.0"
+dependencies = [
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "js-sys"
 version = "0.3.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -912,6 +912,49 @@ name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+
+[[package]]
+name = "legacy"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "serde_repr",
+]
+
+[[package]]
+name = "legacy-play"
+version = "0.1.0"
+dependencies = [
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "htmlescape",
+ "itertools",
+ "js-sys",
+ "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
 
 [[package]]
 name = "libc"

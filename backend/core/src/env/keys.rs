@@ -25,15 +25,32 @@ pub mod db {
 }
 
 pub mod algolia {
+
+    /// The ID of the algolia application.
+    /// Is optional. If missing, all algolia related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const APPLICATION_ID: &str = "ALGOLIA_PROJECT_ID";
 
-    pub const IMAGE_INDEX: &str = "ALGOLIA_IMAGE_INDEX";
+    /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const MEDIA_INDEX: &str = "ALGOLIA_MEDIA_INDEX";
 
-    pub const KEY: &str = "ALGOLIA_KEY";
-    pub const DISABLE: &str = "ALGOLIA_LOCAL_DISABLE_CLIENT";
+    /// The key the backend uses for managing- indexing- `MEDIA_INDEX`.
+    /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs and access to `MEDIA_INDEX`.
+    /// Is optional. If missing, indexing will be disabled, and a warning will be logged.
+    pub const MANAGEMENT_KEY: &str = "ALGOLIA_MANAGEMENT_KEY";
+
+    /// The key that the backend uses for searching `MEDIA_INDEX`.
+    /// Needs the `search` ACL with access to `MEDIA_INDEX`.
+    /// Is optional. If missing, searching will be disabled, attempting
+    /// to use search related routes will return a "501 - Not Implemented" and a warning will be logged.
+    pub const BACKEND_SEARCH_KEY: &str = "ALGOLIA_BACKEND_SEARCH_KEY";
 
     /// The key to use for the *frontend* for the algolia client.
-    /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
+    /// This key should be ratelimited, and restricted to a specific set of indecies:
+    /// *possibly* `MEDIA_INDEX` and *definitely* any search suggestion indecies related to it.
+    /// Is optional, if not present, routes related to creating search keys for the frontend will return "501 - Not Implemented" and a warning will be logged.
     pub const FRONTEND_SEARCH_KEY: &str = "ALGOLIA_FRONTEND_SEARCH_KEY";
 }
 
