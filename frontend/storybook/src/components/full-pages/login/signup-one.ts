@@ -18,7 +18,7 @@ interface LoginArgs {
     errorname: string,
     errorlast: string,
     erroruser:string,
-    path:string,
+    
     
   }
 
@@ -27,7 +27,7 @@ interface LoginArgs {
     errorname: "",
     errorlast:"",
     erroruser:"",
-    path:"",
+   
     
     
   }

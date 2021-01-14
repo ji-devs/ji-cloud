@@ -16,41 +16,31 @@ export default {
 
 interface LoginArgs {
     
-    subtitle: string,
-    subtitle_two: string,
-    label: string,
-  color: string,
-  size: string,
-  bold: boolean,
-  italic: boolean
-  
-
   
   }
 
   const DEFAULT_ARGS:LoginArgs = {
-    
-    subtitle: "You can now create, play, and share your content.",
-    subtitle_two:"We are here to help you in whatever you need.",
-    label: "Go to JI home",
-    color: "red",
-    size: "medium",
-    bold: false,
-    italic: false,
+
+
   }
 
   const STR_TITLE = "Welcome to JI Family";
+  const STR_SUB ="You can now create, play, and share your content.";
+  const STR_SUBSUB = "We are here to help you in whatever you need.";
+  const STR_LABEL = "Go to JI home";
+  const STR_MEDIUM = "medium";
+  const STR_RED = "red";
 
 export const Confirmation = (props?:LoginArgs) => {
 
-    const {subtitle, subtitle_two, label, color, size, bold, italic} = props || DEFAULT_ARGS;
+    const {} = props || DEFAULT_ARGS;
 
 
     return `
     <confirmation-full title="${STR_TITLE}">
-        <sub-title slot="subtitle" title="${subtitle}" slot="subtitle"></sub-title>
-        <sub-title slot="subtitle" title="${subtitle_two}" slot="subtitle"></sub-title>
-        <div slot="button">${RectangleButton({label:label, color: color,size: size,imglefthidden:true, imgrighthidden:true,})}</div>       
+        <sub-title slot="subtitle" title="${STR_SUB}" slot="subtitle"></sub-title>
+        <sub-title slot="subtitle" title="${STR_SUBSUB}" slot="subtitle"></sub-title>
+        <div slot="button">${RectangleButton({label:STR_MEDIUM, color: STR_RED,size: STR_MEDIUM,imglefthidden:true, imgrighthidden:true,bold:false, italic:false, path:""})}</div>       
     </confirmation-full>
     
     `

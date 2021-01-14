@@ -14,7 +14,7 @@ interface LoginArgs {
   
     instruction: boolean,
     error: string,
-    mode:string,
+    
     errortwo:string,
    
 
@@ -24,7 +24,7 @@ interface LoginArgs {
   const DEFAULT_ARGS:LoginArgs = {
     instruction: false,
     error: "",
-    mode:"passwordHidden",
+   
     errortwo:""
   }
 
@@ -38,7 +38,7 @@ interface LoginArgs {
 
 export const LoginFullOne = (props?:LoginArgs) => {
 
-    const {errortwo,error, instruction, mode} = props || DEFAULT_ARGS;
+    const {errortwo,error, instruction} = props || DEFAULT_ARGS;
 
 
     return `
@@ -48,7 +48,7 @@ export const LoginFullOne = (props?:LoginArgs) => {
         
         <input-text slot="username" mode="text" label="${STR_USERLABEL}" helpertext="${STR_HELP}" error="${error}" ${instruction && "instruction"}>
         </input-text>
-        <input-text slot="password" mode="${mode}"  label="${STR_PASSWORD}" helpertext="${STR_HELP}" error="${errortwo}" ${instruction && "instruction"}>
+        <input-text slot="password" mode="passwordHidden"  label="${STR_PASSWORD}" helpertext="${STR_HELP}" error="${errortwo}" ${instruction && "instruction"}>
         </input-text>
         <plain-blue title="${STR_FORGOTTEN}" slot="passwordreminder"></plain-blue>
         <div slot="submit">${RectangleButton()}</div>
