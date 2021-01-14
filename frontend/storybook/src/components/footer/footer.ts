@@ -3,12 +3,12 @@ import "@elements/homepage-sections/footer-section";
 import "@elements/column-details";
 import "@elements/column-list";
 
-  import {footerjigs} from "~/components/footer-jigs";
-  import {footerhelp} from "~/components/footer-help";
-  import {footerproduct} from "~/components/footer-product";
-  import {footercontactus} from "~/components/footer-contactus";
-  import {footerwhoweare} from "~/components/footer-whoweare";
-  import {footerproductsservices} from "~/components/footer-productsservices";
+  import {footerjigs} from "~/components/footer/footer-jigs";
+  import {footerhelp} from "~/components/footer/footer-help";
+  import {footerproduct} from "~/components/footer/footer-product";
+  import {footercontactus} from "~/components/footer/footer-contactus";
+  import {footerwhoweare} from "~/components/footer/footer-whoweare";
+  import {footerproductsservices} from "~/components/footer/footer-productsservices";
 
 
 export default {

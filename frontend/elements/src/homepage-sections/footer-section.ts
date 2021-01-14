@@ -30,6 +30,7 @@
          <div class="inside-wrapper">
          <slot name="footer-column"></slot>
          </div>
+         <slot name="kidsafe"></slot>
     </main>
   `;
   }

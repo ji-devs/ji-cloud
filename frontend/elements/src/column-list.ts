@@ -7,8 +7,11 @@ export class _ extends LitElement {
     li{
       font-family: Poppins;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 300;
       color:#ffffff;
+     }
+     .bold {
+       font-weight:600;
      }
     `];
   }
@@ -17,13 +20,15 @@ export class _ extends LitElement {
   @property()
   text_line:string = ""; 
 
+  @property({type:Boolean})
+  bold:boolean = false; 
  
 
   render() {
-    const {text_line} = this;
+    const {text_line, bold} = this;
 
     return html`
-     <li>${text_line}</li>
+     <li class=${bold ? "bold" : ''}>${text_line}</li>
   `;
   }
 }

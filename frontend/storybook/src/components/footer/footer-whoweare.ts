@@ -30,7 +30,7 @@ export const footerwhoweare= () => {
 
     return `
     <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" ></column-list>
+    <column-list text_line="${STR_LINE1}" bold=true></column-list>
     <column-list text_line="${STR_LINE2}" ></column-list><br>
     <column-list text_line="${STR_LINE3}" ></column-list>
     <column-list text_line="${STR_LINE4}" ></column-list>
