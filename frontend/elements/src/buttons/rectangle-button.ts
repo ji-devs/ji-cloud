@@ -2,7 +2,8 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import {BaseButton} from "@elements/_styles/buttons";
 
-
+export type Color = "red" | "blue" | "white" | "green";
+export type Size = "small" | "medium" | "large";
 
 @customElement('rectangle-button')
 export class _ extends BaseButton {
@@ -84,13 +85,13 @@ export class _ extends BaseButton {
   }
 
   @property()
-  size: string = "";
+  size: Size = "medium";
 
   @property()
   label: string = "";
 
   @property()
-  color: "red" | "blue" | "white" | "" = "";
+  color: Color = "red";
 
   @property({type: Boolean})
   bold:boolean = false; 
@@ -105,11 +106,11 @@ export class _ extends BaseButton {
   imgrighthidden:boolean = false; 
 
   @property()
-  path: string = "";
+  iconpath: string = "";
 
   render() {
 
-    const {size, label, color, bold, italic, imglefthidden, imgrighthidden,path} = this;
+    const {size, label, color, bold, italic, imglefthidden, imgrighthidden,iconpath} = this;
 
     const classes = classMap({ 
       [size]: true,
@@ -120,9 +121,9 @@ export class _ extends BaseButton {
 
     return html`
       <button type="button" name="button" class="${classes}" >
-      <img-ui class="${imglefthidden ? 'img-hidden' : ''} left" path="${path}"></img-ui>
+      <img-ui class="${imglefthidden ? 'img-hidden' : ''} left" path="${iconpath}"></img-ui>
       ${label}
-      <img-ui class="${imgrighthidden ? 'img-hidden' : ''} right" path="${path}"></img-ui>
+      <img-ui class="${imgrighthidden ? 'img-hidden' : ''} right" path="${iconpath}"></img-ui>
     </button>
   `;
   }

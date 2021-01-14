@@ -84,7 +84,7 @@ export const PublishFullOne = (props?:PublishArgs) => {
         <title-wicon title="${STR_ICONLABEL}" path="${STR_CHECKBOX}" ${uploaded && "uploaded"} slot="column_four"></title-wicon>
         <title-wicon title="${STR_ICONLABELTWO}" path="${STR_ADD}"  slot="column_four"></title-wicon>
 
-        <div slot="button">${RectangleButton({label:STR_BTNLABEL, size:STR_MEDIUM,color:STR_RED,path:"", imglefthidden:true, imgrighthidden:true,bold:false,italic:false,})}</div>
+        <div slot="button">${RectangleButton({label:STR_BTNLABEL, size:STR_MEDIUM,color:STR_RED,iconpath:"", imglefthidden:true, imgrighthidden:true,bold:false,italic:false,})}</div>
         <div slot="tooltip">${TooltipTop()}</div>
         </publish-full>
     

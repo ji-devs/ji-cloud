@@ -54,15 +54,15 @@ export const PublishFullTwo = (props?:PublishArgs) => {
         <placeholder-img slot="animation"></placeholder-img>
         <div slot="button-collection">
         <rectangle-button label="${STR_SHARE}" imgrighthidden=true size="${STR_MEDIUM} color="${STR_WHITE}" path="${STR_ICNSHARE}" imglefthidden=false bold=false italic=false></rectangle-button>
-        ${RectangleButton({label:STR_SHARE, imgrighthidden:true, size:STR_MEDIUM,color:STR_WHITE, path:STR_ICNSHARE, imglefthidden:false, bold:false, italic:false })}
+        ${RectangleButton({label:STR_SHARE, imgrighthidden:true, size:STR_MEDIUM,color:STR_WHITE, iconpath:STR_ICNSHARE, imglefthidden:false, bold:false, italic:false })}
         
         </div>
         <publish-dropdown ${closed && 'closed'} title="${STR_DROPDOWNTITLE}" slot="dropdown">
           <icon-wtext icon="${STR_STUDENT}" text="${STR_SHARESTUDENT}"></icon-wtext>
           <icon-wtext icon="${STR_URLICON}" text="${STR_URL}"></icon-wtext>
         </publish-dropdown>
-        <div slot="button-collection">${RectangleButton({label:STR_CREATE, imgrighthidden:true,size:STR_MEDIUM,color:STR_WHITE, path:STR_ICNCREATE, imglefthidden:false, bold:false, italic:false  })}</div>
-        <div slot="button-collection">${RectangleButton({label:STR_PLAY, imgrighthidden:true,size:STR_MEDIUM,color:STR_WHITE, path:STR_ICNPLAY, imglefthidden:false, bold:false, italic:false  })}
+        <div slot="button-collection">${RectangleButton({label:STR_CREATE, imgrighthidden:true,size:STR_MEDIUM,color:STR_WHITE, iconpath:STR_ICNCREATE, imglefthidden:false, bold:false, italic:false  })}</div>
+        <div slot="button-collection">${RectangleButton({label:STR_PLAY, imgrighthidden:true,size:STR_MEDIUM,color:STR_WHITE, iconpath:STR_ICNPLAY, imglefthidden:false, bold:false, italic:false  })}
     
         </div>
 
