@@ -42,14 +42,15 @@ const STR_LIGHTBLUE = "lightblue";
 
 
 const STR_BLUE = "blue";
+const STR_SIZELARGE = "large";
 
 
 export const JigglingParagraph = () => {
     return `
 
     <jiggling-section>
-
-    <title-section titlecolor="${STR_PURPLE}" title="${STR_TITLE}" slot="title"></title-section>
+  
+    <title-section titlecolor="${STR_PURPLE}" title="${STR_TITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
     
     <div slot="icon-title-paragraph">
         ${IconWTitleWParagraph({path:STR_PATH_PinkSmiley,title:STR_TITLE_PinkSmiley, paragraph:STR_PARAGRAPH_PinkSmiley, buttonlabel:STR_BUTTONLABEL_PinkSmiley, color:STR_PINK,colorButton:STR_BLUE})}
