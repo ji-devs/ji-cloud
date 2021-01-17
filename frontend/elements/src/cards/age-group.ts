@@ -10,7 +10,12 @@ export class _ extends LitElement {
         font-size: 14px;
         font-weight: 500;
         color:#798b96;
+        margin-left:8px;
   
+    }
+    .wrapper{
+        display:flex;
+        align-items:center;
     }
     `];
   }
@@ -28,10 +33,8 @@ label: string = "";
 
     return html`
 <div class="wrapper">
-    
         <img-ui path="${icon}"></img-ui>
         <p>${label}</p>
-    
 </div>
   `;
   }
