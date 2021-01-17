@@ -11,39 +11,27 @@ export class _ extends LitElement {
      object-fit: contain;
   nargin-left:100px;
   }
-  
   .wrapper{
 //     width: 274px;
 // margin-left:50px;
 display:flex;
-
   }
 #stripe{
-
     width:1px;
     height: 20px;
     background-color: #ffffff; 
     opacity: 0.35;
-
 }
-  
     `]
   }
-
-
   @property()
   path_kidsafe:string = ""; 
   @property()
   term:string = ""; 
   @property()
   privacy:string = ""; 
- 
- 
-
   render() {
-
     const {path_kidsafe, term,privacy } = this;
-
     return html`
      <div class="wrapper">
         <img-ui class="img" path="${path_kidsafe}"></img-ui>
@@ -51,7 +39,6 @@ display:flex;
         <div id="stripe"></div>
         <column-list text_line="${privacy}" ></column-list>
       </div>
-        
   `;
   }
 }
