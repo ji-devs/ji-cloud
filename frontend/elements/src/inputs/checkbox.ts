@@ -1,5 +1,7 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import {nothing} from "lit-html";
+
 @customElement('input-checkbox')
 export class _ extends LitElement {
   static get styles() {
@@ -18,6 +20,25 @@ export class _ extends LitElement {
     }
     li{
       list-style-type: none;
+      border:solid 1px #ffffff;
+      
+      border-radius: 14px;
+      padding:2px 16px 2px 4px;
+      
+    }
+    .errorwrapper {
+      border: solid 1px #f00813;
+      background-color: #fff4f4;
+      border-radius: 14px;
+      padding:2px 16px 2px 4px;
+      margin-right: 16px  
+     
+     }
+     div {
+       display:flex;
+       align-items:center;
+       height:30px;
+       margin-left: -2px;
     }
     `];
   }
@@ -27,19 +48,35 @@ export class _ extends LitElement {
   @property()
   label:string = ""; 
 
+  @property()
+  error: string = "";
+
   render() {
 
-    const {label} = this;
+    const {label, error} = this;
+
+    const isError:boolean = error !== "";
+
+    const errorwrapper = isError ? "errorwrapper" : "";
 
     return html`
-    <li>
+    <div >
+    <li class="${errorwrapper}">
       <label class="">
           <input type="checkbox"/>
               <span class="">
               ${label}
               </span>
       </label>
+     
+   
     </li>
+    ${
+      isError 
+        ? html`<p class="error">${error}</p>` 
+        : nothing
+    }
+    </div>
   `;
   }
 }

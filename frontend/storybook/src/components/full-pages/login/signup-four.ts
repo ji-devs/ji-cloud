@@ -1,7 +1,9 @@
 import "@elements/admin/templates-layout/signup-full-wide";
 import "@elements/titles/subtitle";
 import "@elements/titles/plain-blue";
+import "@elements/dividers/spacer-fourty";
 import "@elements/contact";
+import { Mode as ConfirmationMode }  from "@elements/buttons/confirmation";
 
 
 export default {
@@ -9,10 +11,11 @@ export default {
 }
 
 interface LoginArgs {
-  
+    confirmationMode:ConfirmationMode,
   }
 
   const DEFAULT_ARGS:LoginArgs = {
+    confirmationMode:"sendagain"
   }
 
   const STR_TITLE = "We Just Sent You an Email";
@@ -23,7 +26,7 @@ interface LoginArgs {
 
 export const SignUpFour = (props?:LoginArgs) => {
 
-    const {} = props || DEFAULT_ARGS;
+    const {confirmationMode} = props || DEFAULT_ARGS;
 
 
     return `
@@ -31,8 +34,8 @@ export const SignUpFour = (props?:LoginArgs) => {
         
         <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
         <sub-title slot="subtitle" title="${STR_SUBSUBTITLE}"></sub-title>
-        <plain-blue title="${STR_SENDAGAIN}" slot="main"></plain-blue>
-        <confirmation-button slot="main"></confirmation-button>
+        <spacer-fourty slot="confirmation"></spacer-fourty>
+        <confirmation-button slot="confirmation" mode="${confirmationMode}"></confirmation-button>
 
         <plain-blue title="${STR_CHANGE}" slot="main"></plain-blue>
         <contact-email slot="contact"></contact-email>
@@ -42,3 +45,12 @@ export const SignUpFour = (props?:LoginArgs) => {
 }
 
 SignUpFour.args = DEFAULT_ARGS;
+SignUpFour.argTypes = {
+
+  confirmationMode: {
+    control: {
+      type: 'inline-radio',
+      options: ["confirmation", "sendagain"]
+    }
+  }
+}

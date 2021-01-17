@@ -10,31 +10,31 @@ export default {
 
 const STR_PURPLE = "purple";
 const STR_TITLE="Why Ji?";
-const STR_PATH_PinkSmiley="PinkSmileyV3.jpg";
+const STR_PATH_PinkSmiley="Jiggling_Content@2x.png";
 const STR_TITLE_PinkSmiley = "Content";
 const STR_PARAGRAPH_PinkSmiley = "A huge library of activities for the jewish holidays, Hebrew, culture, Tora and many more";
 const STR_BUTTONLABEL_PinkSmiley = "See our templates";
 const STR_PINK = "pink";
 
- const STR_PATH_BlueWheel="BlueWheel.jpg";
+ const STR_PATH_BlueWheel="Jiggling_Creator@2x.png";
 const STR_TITLE_BlueWheel = "Create";
 const STR_PARAGRAPH_BlueWheel = "Create your own activities, Teach your class to create their own games. The most fun way to learn something new.";
 const STR_BUTTONLABEL_BlueWheel = "Try it for free";
 const STR_DARKBLUE = "darkblue";
 
- const STR_PATH_GreenRectangle="PinkSmileyV3.jpg";
+ const STR_PATH_GreenRectangle="Jiggling_Customize@2x.png";
 const STR_TITLE_GreenRectangle = "Customize";
 const STR_PARAGRAPH_GreenRectangle = "Easily, saving time way. Customize our templates for your needs. ";
 const STR_BUTTONLABEL_GreenRectangle = "See our templates";
 const STR_GREEN = "green";
 
- const STR_PATH_YellowSquare="YellowSquare.jpg";
+ const STR_PATH_YellowSquare="Jiggling_Community@2x.png";
 const STR_TITLE_YellowSquare = "Community";
 const STR_PARAGRAPH_YellowSquare = "Meet X users around the world. See who plays now. Meet other teachers."  ;
 const STR_BUTTONLABEL_YellowSquare = "Get inspired";
 const STR_ORANGE = "orange";
  
-const STR_PATH_BlueTriangle="BlueTriangle.jpg";
+const STR_PATH_BlueTriangle="Jiggling_Classroom@2x.png";
 const STR_TITLE_BlueTriangle = "Classroom";
 const STR_PARAGRAPH_BlueTriangle= "track your students journey, manage your lessons, See which activities are more successful.";
 const STR_BUTTONLABEL_BlueTriangle = "Manage your class";

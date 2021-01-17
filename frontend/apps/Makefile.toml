@@ -1,4 +1,5 @@
 # Run like: cargo make [entry task] [app name]
+# e.g. cargo make local-main module/memory/edit
 
 # TODO - cull in Duckscript: https://github.com/sagiegurari/duckscript/blob/master/docs/sdk.md#stdcollectionsarraycontains
 
@@ -9,6 +10,7 @@
 # admin
 # jig/edit
 # jig/play
+# legacy/play
 # module/memory/edit
 # module/memory/play
 # module/poster/edit

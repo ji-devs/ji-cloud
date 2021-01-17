@@ -30,6 +30,7 @@ export class _ extends LitElement {
    }
    .input-wrapper:active{
     border: solid 2px #5590fc;
+    margin: -1px;
    }
    input{ font-size:16px;}
    img-ui{
@@ -52,6 +53,21 @@ export class _ extends LitElement {
     font-weight: 500;
     padding-left:8px;
     display:block;
+   }
+   
+   
+   .open {
+     display:block;
+     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+     width:100%;
+     position:absolute;
+     left:0;
+     top:80px;
+     border-radius:0 0 14px 14px;
+     z-index:-1;
+   }
+   ::slotted([slot=inner-dropdown]){
+      padding:16px;
    }
    
   
@@ -77,9 +93,12 @@ export class _ extends LitElement {
   @property({type:Boolean})
   errorwrapper: boolean = false;
 
+  @property({type:Boolean})
+  open: boolean = false;
+
   render() {
 
-    const {label, helpertext, instruction, errormessage, error} = this;
+    const {label, open, error} = this;
     const isError:boolean = error !== "";
 
     const errorwrapper = isError ? "errorwrapper" : "";
@@ -90,6 +109,10 @@ export class _ extends LitElement {
         <input placeholder="Placeholder" type="text" class="">
         <label class="">${label}</label>
         <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
+        <div class="${open ? "open" : ''}">
+        
+          <slot name="inner-dropdown"></slot>
+        </div>
     </div>
 
      ${

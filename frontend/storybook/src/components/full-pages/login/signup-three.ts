@@ -6,7 +6,7 @@ import "@elements/titles/subtitle";
 import "@elements/cards/grey-card";
 import {Stream} from "~/components/lists/stream";
 import "@elements/titles/plain-blue";
-import { UserInfo } from "~/components/full-pages/login/user-info";
+import { UserInfo } from "~/components/lists/user-info";
 
 import { RectangleButton } from "~/components/rectangle-button";
 

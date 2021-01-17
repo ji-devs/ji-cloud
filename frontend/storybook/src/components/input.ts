@@ -61,8 +61,8 @@ export const Dropdown = ({label,helpertext, error, instruction,errormessage, err
   
 }
 
-export const Checkbox = ({label}) => {
-  return `<input-checkbox label="${label}">
+export const Checkbox = ({label, error}) => {
+  return `<input-checkbox label="${label}" error="${error}" >
 
   </input-checkbox>`
 }
@@ -95,6 +95,7 @@ export const TitleWithInput = ({title,label, path}) => {
 
 Checkbox.args = {
   label:"Placeholder",
+  error:"",
 
 }
 

@@ -4,6 +4,11 @@ export const STAGE_HEIGHT = 1080;
 export const STAGE_PADDING_Y_PERC = 0.0; // in percentage, to offset the stage area a bit
 export const STAGE_PADDING_X_PERC = 0.0;
 
+export const LEGACY_STAGE_WIDTH = 1024;
+export const LEGACY_STAGE_HEIGHT = 768;
+export const LEGACY_STAGE_PADDING_Y_PERC = 0.0; // in percentage, to offset the stage area a bit
+export const LEGACY_STAGE_PADDING_X_PERC = 0.0;
+
 export const BUCKET_FRONTEND_RELEASE = "ji-cloud-frontend-origin-eu-001";
 export const BUCKET_FRONTEND_SANDBOX = "ji-cloud-sandbox-frontend-origin-eu-001";
 export const BUCKET_UPLOADS_RELEASE = "ji-cloud-uploads-origin-eu-001";
@@ -22,14 +27,13 @@ export const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
 export const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
 
-
-export const getMediaUrl_UI = (isDev:boolean):string => {
-
-        const getMediaUrl = (isDev:boolean):string => 
-                isDev
+export const getMediaUrl = (isDev:boolean):string => {
+        return isDev
                 ? `http://localhost:4102`
                 : URL_MEDIA;
+}
 
+export const getMediaUrl_UI = (isDev:boolean):string => {
         return `${getMediaUrl(isDev)}/ui`;
 }
 

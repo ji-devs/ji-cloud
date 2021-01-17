@@ -1,6 +1,6 @@
 use crate::{
     db::{self, meta::MetaWrapperError, nul_if_empty},
-    error,
+    error::{self, ServiceKind},
     extractor::{AuthUserWithScope, ScopeManageImage, WrapAuthClaimsNoDb},
     image_ops::generate_images,
     s3,
@@ -303,7 +303,7 @@ async fn search(
     algolia: Data<crate::algolia::Client>,
     _claims: WrapAuthClaimsNoDb,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
-) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Server> {
+) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
     let query = dbg!(query.map_or_else(Default::default, Query::into_inner));
 
     let (ids, pages, total_hits) = algolia
@@ -317,10 +317,11 @@ async fn search(
             &query.affiliations,
             &query.categories,
         )
-        .await?;
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
-        .err_into::<error::Server>()
+        .err_into::<error::Service>()
         .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;
@@ -396,6 +397,8 @@ async fn delete(
     db::image::delete(&db, image)
         .await
         .map_err(check_conflict_delete)?;
+
+    // todo: 501 when algolia is disabled.
 
     let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
     let ((), (), (), ()) = futures::future::join4(

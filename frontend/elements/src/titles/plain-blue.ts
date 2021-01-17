@@ -9,9 +9,7 @@ export class _ extends LitElement {
         margin-top:0;
         margin-bottom:0;
         cursor:pointer;
-        
-        
-
+      
     }
     
     .bold {
