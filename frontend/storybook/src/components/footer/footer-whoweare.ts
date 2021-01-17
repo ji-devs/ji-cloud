@@ -1,6 +1,6 @@
 import "@elements/column-details";
 import "@elements/column-list";
-import "@elements/buttons/rectangle-button";
+import "@elements/buttons/icon-button";
 
 import {IconButton} from "~/components/icon-button";
 
@@ -30,14 +30,14 @@ export const footerwhoweare= () => {
 
     return `
     <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE2}" slot="list"></column-list><br>
-    <column-list text_line="${STR_LINE3}" slot="list"></column-list>
-    <column-list text_line="${STR_LINE4}" slot="list"></column-list>
-    <column-list text_line="${STR_LINE5}" slot="list"></column-list><br>
-    <column-list text_line="${STR_LINE6}" slot="list"></column-list>
-    <column-list text_line="${STR_LINE7}" slot="list"></column-list>
-<rectangle-button slot="Donate" size="small", label="Donate", color="blue", bold="true" imglefthidden="true" imgrighthidden="true"> </rectangle-button>
+    <column-list text_line="${STR_LINE1}" bold=true></column-list>
+    <column-list text_line="${STR_LINE2}" ></column-list><br>
+    <column-list text_line="${STR_LINE3}" ></column-list>
+    <column-list text_line="${STR_LINE4}" ></column-list>
+    <column-list text_line="${STR_LINE5}" ></column-list><br>
+    <column-list text_line="${STR_LINE6}" ></column-list>
+    <column-list text_line="${STR_LINE7}" ></column-list>
+<icon-button size="large", label="Donate", color="blue", fontweight="bold"> </icon-button>
 
      </column-details>
    
