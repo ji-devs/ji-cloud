@@ -27,6 +27,16 @@ export class _ extends LitElement {
     img-ui {
         margin-right: 8px;
     }
+    p{
+       color: #5590fc;
+       font-weight:400;
+    }
+    .imghidden, .teamhidden{
+        display:none;
+    }
+    .team{
+        font-weight:500
+    }
     `];
   }
 
@@ -37,16 +47,28 @@ icon: string = "";
 label: string = "";
 
 @property()
+team: string = "";
+
+@property({type:Boolean})
+imghidden: boolean = false;
+
+@property({type:Boolean})
+teamhidden: boolean = false;
+
+@property()
 color: Color = "blue";
 
+
+
   render() {
-    const {icon, label, color} = this;
+    const {icon, label, color, imghidden,team, teamhidden} = this;
    
 
     return html`
 <div class="wrapper ${color}">
     
-        <img-ui path="${icon}"></img-ui>
+        <img-ui path="${icon}" class="${imghidden ? 'imghidden' : ''}"></img-ui>
+        <p class="team ${teamhidden ? 'teamhidden' : ''}">${team}</p>
         <p>${label}</p>
     
 </div>
