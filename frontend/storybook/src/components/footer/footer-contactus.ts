@@ -36,6 +36,7 @@ export const footercontactus= () => {
     <column-list text_line="${STR_LINE8}" slot="list" bold=true></column-list>
     <column-list text_line="${STR_LINE9}" slot="list" ></column-list>
  
+    
 
      </column-details>
    

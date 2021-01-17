@@ -24,7 +24,10 @@ const STR_TITLEJi="Jewish Interactive";
 const STR_TITLEAbout="About Us";
 const STR_SIZEMEDIUM="medium";
 const STR_PATHYOUTUBE="Icn_Youtube.png";
-const STR_PATHKIDSAFE="logo-kid-safe.jpg";
+const STR_PATHFACEBOOK="Icn_Youtube.png";
+const STR_PATHINSTAGRAM="Icn_Youtube.png";
+const STR_PATHLINKEDIN="Icn_Youtube.png";
+ const STR_PATHKIDSAFE="logo-kid-safe.jpg";
 const STR_TERMS="Terms & Conditions";
 const STR_PRIVACY="Privacy Policy";
 
@@ -60,7 +63,7 @@ ${footerwhoweare()}
         ${footerproductsservices()}
     </div>
 
-   <social-networks slot="socialnetworks" path_instagram"${STR_PATHYOUTUBE}" path_facebook="${STR_PATHYOUTUBE}"   path_youtube"${STR_PATHYOUTUBE}" path_linkedin"${STR_PATHYOUTUBE}"> </social-networks>
+   <social-networks slot="socialnetworks" path_instagram"${STR_PATHINSTAGRAM}" path_facebook="${STR_PATHFACEBOOK}"   path_youtube"${STR_PATHYOUTUBE}" path_linkedin"${STR_PATHLINKEDIN}"> </social-networks>
 
 <footer-kidsafe slot="kidsafe" path_kidsafe="${STR_PATHKIDSAFE}" term="${STR_TERMS}" privacy="${STR_PRIVACY}" ></footer-kidsafe>
    </footer-section>
