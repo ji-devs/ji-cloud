@@ -8,6 +8,7 @@ export class _ extends LitElement {
     width: 246px;
     height: 236px;
     object-fit: contain;
+   
 
   }
   h2{
