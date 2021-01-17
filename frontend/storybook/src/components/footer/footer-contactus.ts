@@ -26,15 +26,15 @@ export const footercontactus= () => {
 
     return `
     <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" ></column-list>
-    <column-list text_line="${STR_LINE2}" ></column-list>
-    <column-list text_line="${STR_LINE3}" ></column-list>
-    <column-list text_line="${STR_LINE4}" ></column-list>
-    <column-list text_line="${STR_LINE5}" ></column-list>
-    <column-list text_line="${STR_LINE6}" ></column-list>
-    <column-list text_line="${STR_LINE7}" ></column-list>
-    <column-list text_line="${STR_LINE8}" ></column-list>
-    <column-list text_line="${STR_LINE9}" ></column-list>
+    <column-list text_line="${STR_LINE1}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE2}" slot="list" bold=true ></column-list>
+    <column-list text_line="${STR_LINE3}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE4}" bold=true slot="list"></column-list>
+    <column-list text_line="${STR_LINE5}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE6}" bold=true slot="list"></column-list>
+    <column-list text_line="${STR_LINE7}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE8}" slot="list" bold=true></column-list>
+    <column-list text_line="${STR_LINE9}" slot="list" ></column-list>
  
 
      </column-details>
