@@ -13,10 +13,18 @@ export class _ extends LitElement {
   .purple{
     color: #5662a3;
   }
-
+  
   .lightBlue{
-    color:#6ca1fc;
+color:#6ca1fc;
+
   }
+
+  #medium{
+    font-size: 48px;
+    font-weight: 900;
+  }
+
+
  
     `];
   }
@@ -27,14 +35,17 @@ export class _ extends LitElement {
 
   @property()
   titlecolor:string = "";
+
+  @property()
+  size:string = "";
   
  
 
   render() {
-    const {title,titlecolor} = this;
+    const {title,titlecolor,size} = this;
 
     return html`
-        <h1 class="${titlecolor}">${title}</h1> 
+        <h1 class="${titlecolor}" id="${size}">${title}</h1> 
   `;
   }
 }

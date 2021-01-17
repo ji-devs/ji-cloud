@@ -7,8 +7,12 @@ export class _ extends LitElement {
     li{
       font-family: Poppins;
       font-size: 14px;
-      font-weight: 300;
+      font-weight: 200;
       color:#ffffff;
+      list-style-type: none;
+
+    
+
      }
      .bold {
        font-weight:600;
