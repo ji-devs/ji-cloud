@@ -49,6 +49,9 @@ export class _ extends LitElement {
     ::slotted([slot=submit]){
         margin-top:40px;
     }
+    ::slotted([slot=location]){
+        margin-bottom:40px;
+    }
     ::slotted([slot=noaccount]:last-child){
         margin-left:4px;
     }
@@ -111,6 +114,7 @@ export class _ extends LitElement {
             <slot name="bottomleft"></slot>
             <slot name="bottomright"></slot>
         </div>
+        <slot name="location"></slot>
         <slot name="username"></slot>
         <div class="spacer"></div>
         <slot name="passwordstrength"></slot>

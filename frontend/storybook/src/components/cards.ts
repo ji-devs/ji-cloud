@@ -9,14 +9,22 @@ export default {
 interface CardArgs {
  color:Color,
  icon:string,
- label:string
+ label:string,
+ imghidden:boolean,
+ teamhidden:boolean,
+ team:string,
+ 
 
 }
 
 const DEFAULT_ARGS:CardArgs = {
   color:"blue",
   icon:"",
-  label:"Anat"
+  label:"Anat",
+  imghidden: true,
+  teamhidden:true,
+  team:"Ji Team - ",
+  
 }
 
 export const IconBannerCard = () => {
@@ -25,8 +33,8 @@ export const IconBannerCard = () => {
 
 export const BannerCard = (props?:CardArgs) => {
 
-  const {color,label, icon} = props || DEFAULT_ARGS;
-  return `<banner-card label="${label}" icon="${icon}" color="${color}"/>`
+  const {color,label, icon, imghidden, team, teamhidden} = props || DEFAULT_ARGS;
+  return `<banner-card label="${label}" icon="${icon}" color="${color}" ${imghidden && "imghidden"} ${teamhidden && "teamhidden"} team="${team}" />`
 }
 
 export const BlueCard = () => {

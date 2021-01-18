@@ -7,14 +7,26 @@ export default {
   title: 'Lists/Pill',
 }
 
+interface PillArgs {
+label:string,
+negative:boolean
 
 
-export const PillListItem = ({label}) => {
+}
+
+const DEFAULT_ARGS:PillArgs = {
+label:"School",
+negative:false,
+
+}
+
+export const PillListItem = (props?:PillArgs) => {
+
+  const {label, negative} = props || DEFAULT_ARGS;
+
     return `
-       <pill-listitem label=${label}></pill-listitem>
+       <pill-listitem label=${label} ${negative && 'negative'}></pill-listitem>
     `;
 }
 
-PillListItem.args = {
-    label: "School"
-};
+PillListItem.args = DEFAULT_ARGS

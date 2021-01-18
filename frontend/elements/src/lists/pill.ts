@@ -8,14 +8,15 @@ export class _ extends LitElement {
     width: 88px;
     padding: 3px 0;
     border-radius: 12px;
-    border: solid 1px #5590fc;
-    background-color: #c4dbff;
+    border: solid 1px #b0ccf2;
+    background-color: #f3f8fe;
     display:flex;
     justify-content:center;
     align-items:center;
     font-size:14px;
-    margin-top:20px;
     margin-right:8px;
+    height:24px;
+    color:#387af4;
 }
 img-ui{
   position:absolute;
@@ -28,6 +29,12 @@ img-ui{
 .wrapper:hover img-ui{
   display:block;
 }
+.negative{
+  border: solid 1px #6ea3f9;
+  color:#afcbf4;
+  background-color:inherit;
+
+}
     `];
   }
 
@@ -36,15 +43,18 @@ img-ui{
   @property()
   label:string = ""; 
 
+  @property({type:Boolean})
+  negative:boolean = false; 
+
   @property()
   path:string = "icn-delete-tab.svg"; 
 
   render() {
 
-    const {label,path} = this;
+    const {label,path, negative} = this;
 
     return html`
-<div class="wrapper">${label}
+<div class="wrapper ${negative ? 'negative' : ''}">${label}
 <img-ui path="${path}"></img-ui>
 </div>
 

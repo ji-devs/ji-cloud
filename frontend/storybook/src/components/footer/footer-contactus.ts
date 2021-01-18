@@ -1,7 +1,5 @@
 import "@elements/column-details";
 import "@elements/column-list";
- 
-
 export default {
     title: 'Homepage Paragraph',
   }
@@ -25,8 +23,7 @@ const STR_PATHLINKEDIN="Icn_Youtube.png";
 
 
 
-export const footercontactus= () => {
-
+    export const footercontactus= () => {
     return `
     <column-details head_title="${STR_TITLE}">
     <column-list text_line="${STR_LINE1}" slot="list"></column-list>
@@ -44,18 +41,5 @@ export const footercontactus= () => {
     
 
      </column-details>
-   
-    
     `
 }
-
-
-
-
-
-
-
-
-
-
-

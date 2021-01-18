@@ -20,9 +20,9 @@ pub fn library_image_str(library_kind: MediaLibraryKind, variant: ImageVariant, 
     library_image_id(library_kind, variant, ImageId(id))
 }
 
-fn uploads_url(path:&str) -> String {
+pub fn uploads_url(path:&str) -> String {
     format!("{}/{}", SETTINGS.get().unwrap().remote_target.uploads_url(), path)
 }
-fn media_url(path:&str) -> String {
+pub fn media_url(path:&str) -> String {
     format!("{}/{}", SETTINGS.get().unwrap().remote_target.media_url(), path)
 }

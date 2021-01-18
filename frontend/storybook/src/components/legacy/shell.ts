@@ -10,16 +10,18 @@ export default {
 }
 
 interface ShellArgs {
-    nModules: number
+    nModules: number,
+    selected: number,
 }
 
 const DEFAULT_SHELL_ARGS:ShellArgs = {
-    nModules: 3
+    nModules: 3,
+    selected: 0,
 };
 
 export const Shell = (props?:ShellArgs) => {
 
-    const {nModules} = props || DEFAULT_SHELL_ARGS;
+    const {nModules, selected} = props || DEFAULT_SHELL_ARGS;
 
     return `
       <module-page-grid-resize legacy>
@@ -32,8 +34,9 @@ export const Shell = (props?:ShellArgs) => {
                     slot="module-${index}" 
                     index="${index}"
                     jigId="web-stress-test"
-                    moduleId="21f7c750-0623-11ea-beec-3f00dc406aac">
-
+                    moduleId="21f7c750-0623-11ea-beec-3f00dc406aac"
+                    ${index === selected ? "selected": ""}
+                    >
                     <img-legacy
                         slot="img" 
                         jigId="web-stress-test"

@@ -48,6 +48,7 @@ use serde::{Deserialize, de::DeserializeOwned};
 use utils::{
     iframe::*,
     resize::*,
+    events::ModuleResizeEvent,
 };
 use awsm_web::dom::resize::*;
 use std::future::Future;
@@ -59,7 +60,6 @@ use discard::DiscardOnDrop;
 use super::load::StateLoader;
 
 
-make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum ModulePageKind {

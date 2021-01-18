@@ -10,9 +10,6 @@ export class _ extends LitElement {
       font-weight: 200;
       color:#ffffff;
       list-style-type: none;
-
-    
-
      }
      .bold {
        font-weight:600;
@@ -28,11 +25,8 @@ export class _ extends LitElement {
      }
     `];
   }
-
-
   @property()
   text_line:string = ""; 
-
   @property({type:Boolean})
   bold:boolean = false; 
 

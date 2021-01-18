@@ -14,6 +14,17 @@ export class _ extends LitElement {
     .bold {
       font-weight:500;
     }
+    .numberhidden{
+      display:none;
+    }
+    .number{
+      display:block;
+      margin-left:4px;
+     
+    }
+    div{
+      display:flex;
+    }
     
    
     `];
@@ -23,13 +34,20 @@ export class _ extends LitElement {
   title:string = ""; 
   @property({type: Boolean})
   bold:boolean = false; 
+  @property({type: Boolean})
+  number:boolean = false; 
+  @property({type: Number})
+  amount:number = 16; 
 
   render() {
 
-    const {title, bold} = this;
+    const {title, bold, number, amount} = this;
 
     return html`
+    <div>
     <p class="${bold ? 'bold' : ''}">${title}</p>
+    <p class="${number ? 'number' : ''} bold numberhidden">${amount}</p>
+    </div>
   `;
   }
 }

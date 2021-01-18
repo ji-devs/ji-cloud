@@ -16,15 +16,18 @@ use super::src_manifest::{
 use scan_fmt::scan_fmt;
 
 impl SrcManifest {
-    pub fn convert(self) -> (Manifest, Vec<Slide>) {
+    pub fn convert(self) -> (Manifest, Vec<Module>) {
         let src = self.structure;
 
         let background_audio = if src.music_file == "" { None } else { Some(src.music_file) };
-        let n_slides = src.slides.len();
 
         let manifest = Manifest {
             background_audio,
-            n_slides
+            modules: src
+                .slides
+                .iter()
+                .map(|slide| slide.file_path.trim_matches('/').to_string())
+                .collect()
         };
 
 
@@ -44,7 +47,7 @@ impl SrcManifest {
 }
 
 impl SrcSlide {
-    pub fn convert(self) -> Slide {
+    pub fn convert(self) -> Module {
 
         let activities_len = self.activities.len();
         let layers_len = self.layers.len();
@@ -54,7 +57,7 @@ impl SrcSlide {
             panic!("{} is more than one activity and not ask a question?!", self.activities.len());
         }
 
-        let base_path = self.file_path.trim_matches('/').to_string();
+        let id = self.file_path.trim_matches('/').to_string();
         let image_full = strip_path(&self.image_full).to_string();
         let image_thumb = strip_path(&self.image_thumb).to_string();
 
@@ -84,8 +87,8 @@ impl SrcSlide {
 
         let design = convert_design(self.layers);
 
-        Slide {
-            base_path,
+        Module {
+            id,
             image_full,
             image_thumb,
             activity,
