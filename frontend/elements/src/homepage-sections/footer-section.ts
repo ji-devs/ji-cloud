@@ -42,16 +42,12 @@
     margin-top:80px;
   }
 
-  ::slotted([slot=socialnetworks]){
-    margin-left:200px;
-    margin-top:50px;
 
-  }
 
   ::slotted([slot=kidsafe]){
-    margin-left:20px;
-    // margin-top:50px;
-
+    margin-left:100px;
+    margin-bottom:99px;
+ 
   }
 
     `];
@@ -75,7 +71,6 @@
          <slot id="footer-column" name="footer-column"></slot>
          <slot name="button"></slot>
          </div>
-         <slot name="socialnetworks"></slot>
 
          <slot name="kidsafe"></slot>
     </main>

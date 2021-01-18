@@ -4,7 +4,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
     static get styles() {
     return [css`
-    li{
+    .normal li{
       font-family: Poppins;
       font-size: 14px;
       font-weight: 200;
@@ -16,6 +16,15 @@ export class _ extends LitElement {
      }
      .bold {
        font-weight:600;
+       color:#ffffff;
+
+     }
+
+     .medium{
+      font-size: 20px;
+      font-weight: normal;
+      list-style-type: none;
+
      }
     `];
   }
@@ -26,13 +35,17 @@ export class _ extends LitElement {
 
   @property({type:Boolean})
   bold:boolean = false; 
+
+  @property()
+  size:string = ""; 
  
 
   render() {
-    const {text_line, bold} = this;
+    const {text_line, bold,size} = this;
 
     return html`
-     <li class=${bold ? "bold" : ''}>${text_line}</li>
+     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"}" >${text_line}</li>
+    
   `;
   }
 }

@@ -6,12 +6,38 @@ export class _ extends LitElement {
     return [css`
     p{
       
-        font-size: 20px;
-        font-weight: 300;
-        line-height:0.1;
-        margin-bottom:32px;
+     
     }
+.normal{
+  font-size: 20px;
+  font-weight: 300;
+  line-height:0.1;
+  margin-bottom:32px;
+}
 
+.medium{
+  font-family: Poppins;
+  font-size: 32px;
+  font-weight: 300;
+  margin-bottom:0px;
+
+}
+
+.large{
+  font-size: 40px;
+  font-weight: 300;
+
+}
+
+.pink{
+color:#f2777f;
+
+}
+
+.black{
+color:#383838;
+
+}
     
    
     `];
@@ -19,14 +45,20 @@ export class _ extends LitElement {
 
   @property()
   title:string = ""; 
+  @property()
+  size:string = ""; 
+  @property()
+  color:string = ""; 
+  
+  
   
 
   render() {
 
-    const {title, } = this;
+    const {title,size,color} = this;
 
     return html`
-    <p>${title}</p>
+    <p class="${size ? 'large' : 'normal'} ${color ? 'pink' : 'black'}">${title}</p>
   `;
   }
 }
