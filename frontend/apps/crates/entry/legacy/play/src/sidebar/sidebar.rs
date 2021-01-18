@@ -26,7 +26,7 @@ pub struct Sidebar {
 impl Sidebar {
     pub fn render(shell: Rc<Shell>) -> Dom {
         let _self = Rc::new(Self { 
-            closed: Mutable::new(false),
+            closed: Mutable::new(true),
         });
 
 
