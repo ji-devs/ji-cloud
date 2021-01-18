@@ -29,6 +29,11 @@ img-ui{
 .wrapper:hover img-ui{
   display:block;
 }
+.negative{
+  border: solid 1px #6ea3f9;
+  color:#afcbf4;
+
+}
     `];
   }
 
@@ -37,15 +42,18 @@ img-ui{
   @property()
   label:string = ""; 
 
+  @property({type:Boolean})
+  negative:boolean = false; 
+
   @property()
   path:string = "icn-delete-tab.svg"; 
 
   render() {
 
-    const {label,path} = this;
+    const {label,path, negative} = this;
 
     return html`
-<div class="wrapper">${label}
+<div class="wrapper ${negative ? 'negative' : ''}">${label}
 <img-ui path="${path}"></img-ui>
 </div>
 
