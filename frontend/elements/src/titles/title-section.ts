@@ -19,10 +19,28 @@ color:#6ca1fc;
 
   }
 
+  .pink{
+    
+color:#fd7076;
+  }
+
+  .darkblue{
+color:#5662a3;
+
+  }
+
+  .white{
+    color:#ffffff;
+  }
+  
+  
+
+
   #medium{
     font-size: 48px;
     font-weight: 900;
   }
+
 
 
  

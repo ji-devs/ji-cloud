@@ -14,21 +14,40 @@ export class _ extends LitElement {
     background-color:#d8e7fa;
    }
    
-   
+   img-ui{
+margin-top:80px;
+margin-left:48px;
+margin-right:48px;
+   }
+   .fliparrow{
+    transform: scaleX(-1);
+
+   }
+
  
     `];
   }
+  @property()
+  PATH_ARROW:string = ""; 
+
 
 
 
   render() {
 
     const {} = this;
+    const PATH_ARROW="icn-arrow.svg"
+
+
 
     return html`
     <main>
      <div class="inside-wrapper">
+     <img-ui class="img" path="${PATH_ARROW}"></img-ui>
+
         <slot name="icon-title-paragraph"></slot>
+    <img-ui class="fliparrow" path="${PATH_ARROW}"></img-ui>
+
     </div>
     </main>
   `;
