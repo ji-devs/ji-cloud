@@ -8,6 +8,7 @@ import "@elements/dividers/horizontal-full";
 import "@elements/admin/templates-layout/search-card-full";
 import "@elements/cards/age-group";
 import "@elements/dropdowns/card-dropdown";
+import "@elements/lists/pill";
 import {Color} from "@elements/cards/banner-card";
 export default {
   title: 'Search Page',
@@ -78,13 +79,31 @@ export const SearchCard = (props?:CardArgs) => {
 }
 
 
+interface CardBackArgs {
+    negative: boolean
+    
+   
+   }
+   
+   const DEFAULT_BACK_ARGS:CardBackArgs = {
+    negative:true,
+     
+   }
+
+   const STR_HEBREW = "Hebrew letters"
 
 
-export const SearchCardBack = ({}) => {
+
+export const SearchCardBack = (props?:CardBackArgs) => {
+
+    const {negative} = props || DEFAULT_BACK_ARGS;
+
     return `<search-card-full label="Placeholder" color="blue" size="medium" fontweight="" back>
        <plain-white title="${STR_BEREISHIT}" bold="true" slot="title"></plain-white>
        <age-group slot="subtitle" icon="${STR_WORLDICON}" label="${STR_TWOWEEKS}" color="${STR_LIGHTBLUE}"></age-group>
-       <card-dropdown ></card-dropdown>
+       <card-dropdown slot="dropdowns">
+            <pill-listitem label=${STR_HEBREW } ${negative && 'negative'} slot="title"></pill-listitem>
+       </card-dropdown>
 
     </search-card-full>
     `
@@ -92,6 +111,8 @@ export const SearchCardBack = ({}) => {
 
 
 
+
+SearchCardBack.args = DEFAULT_BACK_ARGS;
 SearchCard.args = DEFAULT_ARGS;
 SearchCard.argTypes = {
   color: {
