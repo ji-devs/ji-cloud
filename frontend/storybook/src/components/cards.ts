@@ -13,6 +13,7 @@ interface CardArgs {
  imghidden:boolean,
  teamhidden:boolean,
  team:string,
+ 
 
 }
 
@@ -22,7 +23,8 @@ const DEFAULT_ARGS:CardArgs = {
   label:"Anat",
   imghidden: true,
   teamhidden:true,
-  team:"Ji Team - "
+  team:"Ji Team - ",
+  
 }
 
 export const IconBannerCard = () => {
@@ -32,7 +34,7 @@ export const IconBannerCard = () => {
 export const BannerCard = (props?:CardArgs) => {
 
   const {color,label, icon, imghidden, team, teamhidden} = props || DEFAULT_ARGS;
-  return `<banner-card label="${label}" icon="${icon}" color="${color}" ${imghidden && "imghidden"} ${teamhidden && "teamhidden"} team="${team}"/>`
+  return `<banner-card label="${label}" icon="${icon}" color="${color}" ${imghidden && "imghidden"} ${teamhidden && "teamhidden"} team="${team}" />`
 }
 
 export const BlueCard = () => {

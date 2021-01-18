@@ -26,7 +26,7 @@ const DEFAULT_INPUT_TEXT_ARGS:InputTextProps = {
  checked:true
 }
 
-export const SelectedDropdown = ({label,width,checked}) => {
+export const SelectedDropdown = ({label,width,checked, open}) => {
     return `
     <div style="width:${width}px">
     <dropdown-select ${open && "open"} label="${label}">

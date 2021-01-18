@@ -8,9 +8,24 @@ export class _ extends LitElement {
         width:354px;
         height:384px;
         border-radius:20px;
+        display:none;
+       
+    }
+
+    .front {
         display:flex;
         align-items:center;
         flex-direction:column;
+        width:354px;
+        height:384px;
+    }
+
+    .back{
+        display:flex;
+        background-color:#2565d5;
+        width:354px;
+        height:384px;
+        padding:16px 24px;
     }
         
     ::slotted([slot="title"]){
@@ -46,14 +61,17 @@ export class _ extends LitElement {
     `];
   }
 
+  @property({type:Boolean})
+  front:boolean = false;
+
 
 
   render() {
 
-    const {} = this;
+    const {front} = this;
 
     return html`    
-    <main>
+    <main class="${front ? 'front' : 'back'}">
     <slot name="image"></slot>
     <slot name="title"></slot>
     <div class="subtitle-wrapper">
@@ -64,7 +82,7 @@ export class _ extends LitElement {
         <slot name="language"></slot>
     </div>
     <slot name="banner"></slot>
-        
+    
     </main>
 
   `;
