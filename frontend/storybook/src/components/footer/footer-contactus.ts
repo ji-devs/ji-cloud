@@ -1,7 +1,5 @@
 import "@elements/column-details";
 import "@elements/column-list";
- 
-
 export default {
     title: 'Homepage Paragraph',
   }
@@ -18,38 +16,30 @@ export default {
   const STR_LINE8="  Ji Israel  "
   const STR_LINE9="  Tel: +972 (0) 54-597 9555"  
 
-  
+  const STR_PATHYOUTUBE="Icn_Youtube.png";
+const STR_PATHFACEBOOK="Icn_Youtube.png";
+const STR_PATHINSTAGRAM="Icn_Youtube.png";
+const STR_PATHLINKEDIN="Icn_Youtube.png";
 
 
 
-export const footercontactus= () => {
-
+    export const footercontactus= () => {
     return `
     <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" ></column-list>
-    <column-list text_line="${STR_LINE2}" ></column-list>
-    <column-list text_line="${STR_LINE3}" ></column-list>
-    <column-list text_line="${STR_LINE4}" ></column-list>
-    <column-list text_line="${STR_LINE5}" ></column-list>
-    <column-list text_line="${STR_LINE6}" ></column-list>
-    <column-list text_line="${STR_LINE7}" ></column-list>
-    <column-list text_line="${STR_LINE8}" ></column-list>
-    <column-list text_line="${STR_LINE9}" ></column-list>
+    <column-list text_line="${STR_LINE1}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE2}" slot="list" bold=true ></column-list>
+    <column-list text_line="${STR_LINE3}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE4}" bold=true slot="list"></column-list>
+    <column-list text_line="${STR_LINE5}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE6}" bold=true slot="list"></column-list>
+    <column-list text_line="${STR_LINE7}" slot="list"></column-list>
+    <column-list text_line="${STR_LINE8}" slot="list" bold=true></column-list>
+    <column-list text_line="${STR_LINE9}" slot="list" ></column-list>
  
+    <social-networks slot="socialnetworks" path_instagram"${STR_PATHINSTAGRAM}" path_facebook="${STR_PATHFACEBOOK}"   path_youtube"${STR_PATHYOUTUBE}" path_linkedin"${STR_PATHLINKEDIN}"> </social-networks>
+
+    
 
      </column-details>
-   
-    
     `
 }
-
-
-
-
-
-
-
-
-
-
-

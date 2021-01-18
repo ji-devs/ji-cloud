@@ -20,6 +20,11 @@ pub fn configure(config: &mut ServiceConfig) {
             "/jig/{page_kind}/{jig_id}/{module_id}",
             web::get().to(spa::jig_template_with_module),
         )
+        .route("/legacy/play/{jig_id}", web::get().to(spa::legacy_template))
+        .route(
+            "/legacy/play/{jig_id}/{module_id}",
+            web::get().to(spa::legacy_template_with_module),
+        )
         .route(
             "/module/{kind}/{page_kind}/{jig_id}/{module_id}",
             web::get().to(spa::module_template),

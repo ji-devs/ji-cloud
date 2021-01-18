@@ -1,27 +1,27 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('icon-wtitle-wparagraph')
+@customElement('icon-wparagraph')
 export class _ extends LitElement {
   static get styles() {
     return [css`
   img-ui{
-    width: 246px;
-    height: 236px;
+    width: 142px;
+   height: 142px;
     object-fit: contain;
-   
 
   }
   h2{
-    font-size: 32px;
-    font-weight: 900;
-    margin-top:50px;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: bold;
 
   }
   p{
     font-family: Poppins;
+    font-size: 16px;
     line-height: 1.5;
     color: #383838;
-    margin-top:10px;
+    margin-top:5px;
 
   }
   .wrapper{

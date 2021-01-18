@@ -9,16 +9,31 @@ export class _ extends LitElement {
       font-size: 20px;
       font-weight: 800;   
       color:#ffffff;
+    
     }
    main{
      
    }
    
- 
-
    ul{
     list-style-type: none;
+    margin:0;
+    padding:0;
    }
+
+   ::slotted([slot=Donate]){
+    margin-top:91px;
+ 
+
+  }
+
+  ::slotted([slot=socialnetworks]){
+    margin-top:33px;
+ 
+ 
+  }
+  
+
     `];
   }
 
@@ -37,10 +52,12 @@ export class _ extends LitElement {
     <main>
     <h3>${head_title}</h3>
     <ul>
-    <slot></slot>
+    <slot name="list"></slot>
 
     </ul>
+    <slot name="socialnetworks"></slot>
 
+<slot name="Donate"  ></slot>
     </main>
   `;
   }

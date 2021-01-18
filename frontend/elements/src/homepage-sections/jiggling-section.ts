@@ -9,10 +9,11 @@ export class _ extends LitElement {
      
     }
    main{
+     background-image: url("Strip_Background_Jigglings@2x.jpg");
      
    }
    
-   #title{
+   ::slotted([slot=title]){
     font-size: 64px;
     font-weight: 900;
     color:#5662a3;
@@ -30,7 +31,7 @@ export class _ extends LitElement {
 
     return html`
     <main>
-    <slot id="title" name="title"></slot>
+    <slot   name="title"></slot>
     <div class="inside-wrapper">
         <slot name="icon-title-paragraph"></slot>
     </div>

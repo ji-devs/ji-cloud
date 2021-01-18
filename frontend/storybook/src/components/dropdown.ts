@@ -1,9 +1,11 @@
 import "@elements/dropdowns/selected-dropdown";
 import "@elements/dropdowns/tree-dropdown";
+import "@elements/dropdowns/card-dropdown";
 import "@elements/dropdowns/tree-dropdown-child";
-
+import "@elements/inputs/dropdown";
+import "@elements/lists/list-hover";
 import {ListHover} from "~/components/lists/school";
-import { InputUnderlined } from "./input";
+import { Dropdown, InputUnderlined } from "./input";
 import "@elements/inputs/checkbox";
 
 export default {
@@ -11,11 +13,27 @@ export default {
 }
 
 
-export const SelectedDropdown = ({label}) => {
-    return `<selected-dropdown label="Title">
-    <div slot="search">${InputUnderlined(label)}</div>
-      <div slot="list">${ListHover()}</div>
-    </selected-dropdown>
+interface InputTextProps {
+  open:boolean,
+  label:string,
+  width:number,
+  checked:boolean
+}
+
+const DEFAULT_INPUT_TEXT_ARGS:InputTextProps = {
+ open:true,
+ label:"Language of instructions",
+ width:300,
+ checked:true
+}
+
+export const SelectedDropdown = ({label,width,checked, open}) => {
+    return `
+    <div style="width:${width}px">
+    <dropdown-select ${open && "open"} label="${label}">
+      <list-hover slot="inner-dropdown" ${checked && 'checked'}></list-hover>
+    </dropdown-select>
+    </div>
 `
 }
 
@@ -27,11 +45,30 @@ export const TreeDropdown = ({label, path}) => {
 }
 
 
-SelectedDropdown.args = {
-  label: "Search"
-}
-
+SelectedDropdown.args = DEFAULT_INPUT_TEXT_ARGS;
 TreeDropdown.args = {
   label: "Category",
   path: "/icon-chevron-categories-24-px.svg"
 }
+
+export const CardDropdown = ({label, path, collapsed}) => {
+  return `<card-dropdown label="${label}" path="${path}" ${collapsed && 'collapsed'}>
+    
+  </card-dropdown>
+`
+}
+
+interface CardArgs {
+  
+  label:string,
+  
+  collapsed:boolean
+}
+
+const DEFAULT_INPUT_CARD_ARGS:CardArgs = {
+
+ label:"Language of instructions",
+ collapsed:true
+}
+
+CardDropdown.args = DEFAULT_INPUT_CARD_ARGS;

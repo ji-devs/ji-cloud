@@ -3,7 +3,7 @@ import "@elements/password-strength";
 
 import "@elements/titles/underlined-title";
 import "@elements/titles/subtitle";
-
+import "@elements/dividers/spacer-fourty";
 import "@elements/titles/plain-blue";
 import "@elements/dividers/or-divider";
 import {GoogleButton} from "~/components/special-buttons";
@@ -26,7 +26,7 @@ interface LoginArgs {
   const STR_TITLE = "Sign Up - Step 2";
   const STR_ACCOUNT = "Already have an account?";
   const STR_REGISTER = "Login";
-  const STR_COUNTRY = "Country";
+  const STR_COUNTRY = "Location*";
   const STR_CITY = "City";
   const STR_SCHOOL = "School/Organization*";
   const STR_STATE = "State";
@@ -45,17 +45,10 @@ export const SignUpTwo = (props?:LoginArgs) => {
     return `
     <signup-full title="${STR_TITLE}">
         
-        <sub-title slot="subtitle" title="${STR_SUBTITLE}"></sub-title>
-        <sub-title slot="subtitle" title="${STR_SUBSUBTITE}"></sub-title>
-        <dropdown-select slot="topleft" label="${STR_COUNTRY}"  >
-        </dropdown-select>
-        <dropdown-select slot="topright"  label="${STR_STATE}" >
-        </dropdown-select>
-        <dropdown-select slot="bottomleft" label="${STR_CITY}">
-        </dropdown-select>
-        <dropdown-select slot="bottomright" label="${STR_SCHOOL}">
-        </dropdown-select>
         
+        <input-text slot="location" label="${STR_COUNTRY}" mode="text">
+        </input-text>
+        <spacer-fourty slot="location"></spacer-fourty>
         <input-text slot="username" label="${STR_LANGUAGE}" mode="text">
         </input-text>
         <input-checkbox slot="checkbox" label="${STR_TERMS}"></input-checkbox>
