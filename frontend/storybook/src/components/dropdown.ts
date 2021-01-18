@@ -1,5 +1,6 @@
 import "@elements/dropdowns/selected-dropdown";
 import "@elements/dropdowns/tree-dropdown";
+import "@elements/dropdowns/card-dropdown";
 import "@elements/dropdowns/tree-dropdown-child";
 import "@elements/inputs/dropdown";
 import "@elements/lists/list-hover";
@@ -49,3 +50,25 @@ TreeDropdown.args = {
   label: "Category",
   path: "/icon-chevron-categories-24-px.svg"
 }
+
+export const CardDropdown = ({label, path, collapsed}) => {
+  return `<card-dropdown label="${label}" path="${path}" ${collapsed && 'collapsed'}>
+    
+  </card-dropdown>
+`
+}
+
+interface CardArgs {
+  
+  label:string,
+  
+  collapsed:boolean
+}
+
+const DEFAULT_INPUT_CARD_ARGS:CardArgs = {
+
+ label:"Language of instructions",
+ collapsed:true
+}
+
+CardDropdown.args = DEFAULT_INPUT_CARD_ARGS;

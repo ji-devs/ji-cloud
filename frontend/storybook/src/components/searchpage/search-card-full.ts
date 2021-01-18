@@ -7,6 +7,7 @@ import "@elements/images/search-card-img";
 import "@elements/dividers/horizontal-full";
 import "@elements/admin/templates-layout/search-card-full";
 import "@elements/cards/age-group";
+import "@elements/dropdowns/card-dropdown";
 import {Color} from "@elements/cards/banner-card";
 export default {
   title: 'Search Page',
@@ -83,6 +84,7 @@ export const SearchCardBack = ({}) => {
     return `<search-card-full label="Placeholder" color="blue" size="medium" fontweight="" back>
        <plain-white title="${STR_BEREISHIT}" bold="true" slot="title"></plain-white>
        <age-group slot="subtitle" icon="${STR_WORLDICON}" label="${STR_TWOWEEKS}" color="${STR_LIGHTBLUE}"></age-group>
+       <card-dropdown ></card-dropdown>
 
     </search-card-full>
     `
