@@ -1,6 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('plain-whie')
+@customElement('plain-white')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -8,8 +8,8 @@ export class _ extends LitElement {
         color: #ffffff;
         margin-top:0;
         margin-bottom:0;
+        word-wrap:normal;
         
-      
     }
     
     .bold {

@@ -17,6 +17,12 @@ export class _ extends LitElement {
         display:flex;
         align-items:center;
     }
+    .darkgrey {
+        color:#798b96;
+    }
+    .lightblue{
+        color:#afcbf4;
+    }
     `];
   }
 
@@ -26,15 +32,18 @@ icon: string = "";
 @property()
 label: string = "";
 
+@property()
+color: string = "";
+
 
   render() {
-    const {icon, label} = this;
+    const {icon, label,color} = this;
    
 
     return html`
 <div class="wrapper">
         <img-ui path="${icon}"></img-ui>
-        <p>${label}</p>
+        <p class="${color}">${label}</p>
 </div>
   `;
   }

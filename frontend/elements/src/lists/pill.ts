@@ -8,14 +8,15 @@ export class _ extends LitElement {
     width: 88px;
     padding: 3px 0;
     border-radius: 12px;
-    border: solid 1px #5590fc;
-    background-color: #c4dbff;
+    border: solid 1px #b0ccf2;
+    background-color: #f3f8fe;
     display:flex;
     justify-content:center;
     align-items:center;
     font-size:14px;
-    margin-top:20px;
     margin-right:8px;
+    height:24px;
+    color:#387af4;
 }
 img-ui{
   position:absolute;

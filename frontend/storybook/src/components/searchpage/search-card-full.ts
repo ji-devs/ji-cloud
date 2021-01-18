@@ -51,6 +51,9 @@ const STR_ICON = "";
 const STR_ANAT = "Anat";
 const STR_JI = "JiTeam -";
 const STR_BEREISHIT = "Bereishit Stories, Briat Haolam Story, Adam veChava"
+const STR_LIGHTBLUE = "lightblue";
+const STR_DARKGREY = "darkgrey";
+const STR_TWOWEEKS = "2 weeks ago"
 
 
 
@@ -65,8 +68,8 @@ export const SearchCard = (props?:CardArgs) => {
         <plain-black slot="subtitle" title="${STR_PLAYED}" ${number && "number"} amount="${amount}"></plain-black>
         <horizontal-full slot="subtitle"></horizontal-full>
         <plain-black slot="subtitle" title="${STR_LIKED}" ${number && "number"} amount="${likes}"></plain-black>
-        <age-group slot="age" icon="${STR_AGEICON}" label="${STR_ALL}"></age-group>
-        <age-group slot="language" icon="${STR_WORLDICON}" label="${STR_ENGLISH}"></age-group>
+        <age-group slot="age" icon="${STR_AGEICON}" label="${STR_ALL}" color="${STR_DARKGREY}"></age-group>
+        <age-group slot="language" icon="${STR_WORLDICON}" label="${STR_ENGLISH}" color="${STR_DARKGREY}"></age-group>
         <banner-card slot="banner" icon="${STR_ICON}" label="${STR_ANAT}" team="${STR_JI}" color="${color}" ${imghidden && "imghidden"} ${teamhidden && "teamhidden"} team="${team}"></banner-card>
 
     </search-card-full>
@@ -79,6 +82,7 @@ export const SearchCard = (props?:CardArgs) => {
 export const SearchCardBack = ({}) => {
     return `<search-card-full label="Placeholder" color="blue" size="medium" fontweight="" back>
        <plain-white title="${STR_BEREISHIT}" bold="true" slot="title"></plain-white>
+       <age-group slot="subtitle" icon="${STR_WORLDICON}" label="${STR_TWOWEEKS}" color="${STR_LIGHTBLUE}"></age-group>
 
     </search-card-full>
     `
