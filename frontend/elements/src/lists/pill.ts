@@ -32,6 +32,7 @@ img-ui{
 .negative{
   border: solid 1px #6ea3f9;
   color:#afcbf4;
+  background-color:inherit;
 
 }
     `];

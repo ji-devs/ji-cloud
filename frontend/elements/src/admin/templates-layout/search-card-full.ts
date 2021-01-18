@@ -78,6 +78,7 @@ export class _ extends LitElement {
     <slot name="title"></slot>
     <div class="subtitle-wrapper">
     <slot name="subtitle"></slot>
+    <slot name="dropdowns"></slot>
     </div>
     <div class="age-language">
         <slot name="age"></slot>
