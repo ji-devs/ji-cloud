@@ -68,6 +68,10 @@ export class _ extends LitElement {
    }
    ::slotted([slot=inner-dropdown]){
       padding:16px;
+      display:none;
+   }
+   .open ::slotted([slot=inner-dropdown]){
+     display:block
    }
    
   
