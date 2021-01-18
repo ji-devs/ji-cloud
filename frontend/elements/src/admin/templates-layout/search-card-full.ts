@@ -26,10 +26,12 @@ export class _ extends LitElement {
         width:354px;
         height:384px;
         padding:16px 24px;
+        flex-direction:column;
     }
         
     ::slotted([slot="title"]){
         margin-top:16px;
+        
        
     }
     ::slotted([slot="subtitle"]){
