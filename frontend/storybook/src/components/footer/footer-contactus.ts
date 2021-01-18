@@ -18,7 +18,10 @@ export default {
   const STR_LINE8="  Ji Israel  "
   const STR_LINE9="  Tel: +972 (0) 54-597 9555"  
 
-  
+  const STR_PATHYOUTUBE="Icn_Youtube.png";
+const STR_PATHFACEBOOK="Icn_Youtube.png";
+const STR_PATHINSTAGRAM="Icn_Youtube.png";
+const STR_PATHLINKEDIN="Icn_Youtube.png";
 
 
 
@@ -36,6 +39,8 @@ export const footercontactus= () => {
     <column-list text_line="${STR_LINE8}" slot="list" bold=true></column-list>
     <column-list text_line="${STR_LINE9}" slot="list" ></column-list>
  
+    <social-networks slot="socialnetworks" path_instagram"${STR_PATHINSTAGRAM}" path_facebook="${STR_PATHFACEBOOK}"   path_youtube"${STR_PATHYOUTUBE}" path_linkedin"${STR_PATHLINKEDIN}"> </social-networks>
+
     
 
      </column-details>
