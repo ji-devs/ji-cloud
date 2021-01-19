@@ -19,6 +19,12 @@ background-color:#fed657;
 
 }
 
+.pink{
+  background-color: #fd6b71;
+
+
+}
+
 .small{
   width: 12px;
   height: 12px;
