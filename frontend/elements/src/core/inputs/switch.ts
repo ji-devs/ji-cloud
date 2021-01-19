@@ -75,15 +75,18 @@ export class _ extends LitElement {
   @property()
   label:string = ""; 
 
+  @property({type: Boolean})
+  enabled:boolean = false;
+
   render() {
 
-    const {label} = this;
+    const {label, enabled} = this;
 
     return html`
     <div class="wrapper">
         <p>${label}</p>
         <div class="onoffswitch">
-    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" checked>
+    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" ?checked="${enabled}"></input>
     <label class="onoffswitch-label" for="myonoffswitch">
         <span class="onoffswitch-inner"></span>
         <span class="onoffswitch-switch"></span>
