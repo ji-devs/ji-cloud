@@ -14,14 +14,16 @@ export class _ extends LitElement {
         align-items:center;
     }
     p{
-        color: #5590fc;
         font-weight: 500;
         margin-right:36px;
-
     }
 
     .link {
       cursor: pointer;
+    }
+
+    .blue {
+      color: #5590fc;
     }
     `];
   }
@@ -51,7 +53,10 @@ export class _ extends LitElement {
 
     const {bold, italic, underlined, size, color, p, link} = this;
 
-    const classNames = classMap({link});
+    const classNames = classMap({
+      link,
+      [color]: true 
+    });
 
     return html`
     ${p ? html`<p>`: nothing}
