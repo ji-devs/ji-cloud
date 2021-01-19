@@ -31,6 +31,7 @@ pub enum SpaPage {
     Jig(ModuleJigPageKind),
     Module(String, ModuleJigPageKind),
     Dev(String),
+    LegacyJig,
 }
 
 impl SpaPage {
@@ -43,6 +44,7 @@ impl SpaPage {
                 Cow::Owned(format!("module/{}/{}", kind, page_kind.as_str()))
             }
             Self::Dev(path) => Cow::Owned(format!("dev/{}", path)),
+            Self::LegacyJig => Cow::Borrowed("legacy/play"),
         }
     }
 }
@@ -103,6 +105,20 @@ pub async fn jig_template_with_module(
     Path((page_kind, _jig_id, _module_id)): Path<(ModuleJigPageKind, String, String)>,
 ) -> actix_web::Result<HttpResponse> {
     spa_template(&settings, SpaPage::Jig(page_kind))
+}
+
+pub async fn legacy_template(
+    settings: Data<RuntimeSettings>,
+    Path(_jig_id): Path<String>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::LegacyJig)
+}
+
+pub async fn legacy_template_with_module(
+    settings: Data<RuntimeSettings>,
+    Path((_jig_id, _module_id)): Path<(String, String)>,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::LegacyJig)
 }
 
 pub async fn module_template(

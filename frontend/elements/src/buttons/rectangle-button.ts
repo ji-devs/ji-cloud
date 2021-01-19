@@ -70,6 +70,10 @@ export class _ extends BaseButton {
       .left{
         margin-right:8px;
       }
+      .pink{
+        background-color:#fd6b71;
+        color:#fffde6;
+      }
       .right 
       {
         margin-left:8px;
@@ -77,9 +81,6 @@ export class _ extends BaseButton {
       .img-hidden{
         display:none
       }
-
-      
-  
     
     `];
   }

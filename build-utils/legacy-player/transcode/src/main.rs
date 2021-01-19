@@ -21,7 +21,7 @@ async fn main() {
     let src_json = opts.src_path.join(opts.src_json);
 
     let src_manifest = SrcManifest::load(src_json);
-    let (dest_manifest, dest_slides) = src_manifest.convert();
+    let (dest_manifest, dest_modules) = src_manifest.convert();
 
     let dest_path = opts.src_path.join(opts.dest_dir);
     std::fs::create_dir_all(&dest_path);
@@ -29,9 +29,9 @@ async fn main() {
 
     serde_json::to_writer_pretty(file, &dest_manifest).unwrap();
 
-    for (index, slide) in dest_slides.into_iter().enumerate() {
-        let file = File::create(&dest_path.join(format!("slide-{}.json", index+1))).unwrap();
-        serde_json::to_writer_pretty(file, &slide).unwrap();
+    for (index, module) in dest_modules.into_iter().enumerate() {
+        let file = File::create(&dest_path.join(format!("module-{}.json", index+1))).unwrap();
+        serde_json::to_writer_pretty(file, &module).unwrap();
     }
 
 }

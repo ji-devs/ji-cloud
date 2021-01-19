@@ -9,7 +9,8 @@ export class _ extends LitElement {
     width: 156px;
   height: 54px;
      object-fit: contain;
-  nargin-left:100px;
+   nargin-right:23px;
+
   }
   .wrapper{
 //     width: 274px;
@@ -21,6 +22,9 @@ display:flex;
     height: 20px;
     background-color: #ffffff; 
     opacity: 0.35;
+    margin-left:16px;
+    margin-right:16px;
+
 }
     `]
   }
@@ -36,7 +40,7 @@ display:flex;
      <div class="wrapper">
         <img-ui class="img" path="${path_kidsafe}"></img-ui>
         <column-list text_line="${term}" ></column-list>
-        <div id="stripe"></div>
+        <div class="stripe"></div>
         <column-list text_line="${privacy}" ></column-list>
       </div>
   `;

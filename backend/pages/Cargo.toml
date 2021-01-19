@@ -35,7 +35,7 @@ features = ["derive"]
 
 
 [dependencies.sentry]
-version = "0.20.1"
+version = "0.21.0"
 default-features = false
 features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
 

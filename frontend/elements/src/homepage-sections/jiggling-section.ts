@@ -31,7 +31,7 @@ export class _ extends LitElement {
 
     return html`
     <main>
-    <slot id="title" name="title"></slot>
+    <slot   name="title"></slot>
     <div class="inside-wrapper">
         <slot name="icon-title-paragraph"></slot>
     </div>

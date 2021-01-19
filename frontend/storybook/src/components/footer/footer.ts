@@ -49,7 +49,6 @@ ${footerwhoweare()}
    <div slot="footer-column">
         ${footerproductsservices()}
     </div>
-   <social-networks slot="socialnetworks" path_instagram"${STR_PATHINSTAGRAM}" path_facebook="${STR_PATHFACEBOOK}"   path_youtube"${STR_PATHYOUTUBE}" path_linkedin"${STR_PATHLINKEDIN}"> </social-networks>
 <footer-kidsafe slot="kidsafe" path_kidsafe="${STR_PATHKIDSAFE}" term="${STR_TERMS}" privacy="${STR_PRIVACY}" ></footer-kidsafe>
    </footer-section>
     `

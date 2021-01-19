@@ -22,16 +22,17 @@ export class _ extends LitElement {
    }
 
    ::slotted([slot=Donate]){
-    margin-top:500px;
-    width: 146px;
-    height: 56px;
+    margin-top:91px;
+ 
 
   }
-  #Donate{
-    margin-top:500px;
-    width: 146px;
-    height: 56px;
+
+  ::slotted([slot=socialnetworks]){
+    margin-top:33px;
+ 
+ 
   }
+  
 
     `];
   }
@@ -54,7 +55,9 @@ export class _ extends LitElement {
     <slot name="list"></slot>
 
     </ul>
-<slot name="Donate" id="Donate"></slot>
+    <slot name="socialnetworks"></slot>
+
+<slot name="Donate"  ></slot>
     </main>
   `;
   }
