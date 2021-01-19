@@ -112,12 +112,11 @@ export class _ extends LitElement {
 
         </div>
         <p>&nbsp;</p>
-
         <slot name="submit"></slot>
-       
+        <p></p>
       </div>
       <div class="account-wrapper">
-      <slot name="noaccount"></slot>
+        <slot name="noaccount"></slot>
       </div>
       <slot name="contact"></slot>
   </div>

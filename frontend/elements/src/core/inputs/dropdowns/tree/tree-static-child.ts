@@ -1,72 +1,68 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { MEDIA_UI } from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
 
-
-@customElement('dropdown-tree-static-child')
+@customElement("dropdown-tree-static-child")
 export class _ extends LitElement {
+  static get styles() {
+    return [
+      css`
+      li{
+          position:relative;
+          display:flex;
+          content-items:center;
 
-  static get styles() {
-    return [css`
-    li{
+      }
+      .open img-ui{
+          transform: rotate(90deg);
+      }
+    
+      .inside {
+        position:absolute;
+        border:solid 1px #c4dbff;
+        border-right:none; 
+        border-top:none;
+        width:26px;
+        height:24px;
+        left:-28px;
+        top: -10px
+
+
+      }
+      .icon-wrapper{
         position:relative;
-        display:flex;
-        content-items:center;
+        
+      }
+      .titleoptions{
+        margin-top:8px;
+        position: relative;
+        top: 6px;
+        
+      }
+    `,
+    ];
+  }
 
-    }
-    .open img-ui{
-        transform: rotate(90deg);
-    }
-   
-    .inside {
-      position:absolute;
-      border:solid 1px #c4dbff;
-      border-right:none; 
-      border-top:none;
-      width:26px;
-      height:24px;
-      left:-28px;
-      top: -10px
+  @property()
+  label: string = "";
 
+  @property({ type: Boolean })
+  open: boolean = false;
 
-    }
-    .icon-wrapper{
-      position:relative;
-      
-    }
-    .titleoptions{
-      margin-top:8px;
-      position: relative;
-      top: 6px;
-      
-    }
-    `];
-  }
+  render() {
+    const { label, open } = this;
 
-@property()
-label: string = "";
-
-@property({type: Boolean})
-open: boolean = false;
-
-  render() {
-
-    const {label, open} = this;
-
-    return html`
-  
-  <li class="titleoptions open">
-    
-    
-    <div class="icon-wrapper">
-      <div class="inside">
-    </div>
-    </div>
-    <div data-id="label">${label}</div>
-    <ul>
-            <slot></slot>
+    return html`
+      <li class="titleoptions open">
+        <div class="icon-wrapper">
+          <div class="inside"></div>
+        </div>
+        <div data-id="label">${label}</div>
+        <ul>
+          <slot></slot>
         </ul>
-  </li>
+      </li>
 
-  `;
-  }
+        
+    `;
+  }
 }
