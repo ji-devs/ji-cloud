@@ -4,13 +4,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 
 // <password-strength strength="2" />
 
-export enum Strength {
-  None, //0
-  Weak, //1
-  Average, //2
-  Strong, //3
-  
-}
+export type Strength = "none" | "weak" | "average" | "strong";
 
 @customElement('password-strength')
 export class _ extends LitElement {
@@ -48,25 +42,22 @@ export class _ extends LitElement {
     `];
   }
 
-  @property({type: Number})
-  strength:Strength = Strength.None
-
-
+  @property()
+  strength:Strength = "none" 
   
   render() {
 
     const {strength} = this;
 
-    const className = strength === Strength.Weak ? "strength-weak"
-      : strength === Strength.Average ? "strength-average"
-      : strength === Strength.Strong ? "strength-strong"
+    const className = strength === "weak" ? "strength-weak"
+      : strength === "average" ? "strength-average"
+      : strength === "strong" ? "strength-strong"
       : "";
 
     return html`
    
         <div class="wrapper ${className}">
           <div class="inner"></div>
-
         </div>
       
 

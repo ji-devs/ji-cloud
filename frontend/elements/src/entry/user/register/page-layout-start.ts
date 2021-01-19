@@ -1,6 +1,8 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('page-register')
+import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
+
+@customElement('page-layout-start')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -9,7 +11,7 @@ export class _ extends LitElement {
     
     }
     .inside-wrapper{
-        width:624px;
+        width:296px;
     }
     .side-image{
         width: 480px;
@@ -23,19 +25,15 @@ export class _ extends LitElement {
     }
     .content-wrapper{
         padding:80px;
+        position:relative;
     }
     h1{
         font-size: 32px;
         font-weight: 900;
         color:#5662a3
     }
-    ::slotted([slot=topleft]), ::slotted([slot=topright]),::slotted([slot=bottomleft]), ::slotted([slot=bottomright]){
-       max-width:296px;
-       min-width:296px;
-       margin-bottom:40px;
-    }
-    ::slotted([slot=topleft]),::slotted([slot=bottomleft]){
-        margin-right:32px;
+    ::slotted([slot=google]){
+        margin-bottom:20px;
     }
     ::slotted([slot=input]){
         margin-top:20px;
@@ -43,33 +41,16 @@ export class _ extends LitElement {
     ::slotted([slot=passwordreminder]){
         text-align: end;
     }
-    ::slotted([slot=subtitle]){
-        white-space: nowrap;
-    }
     ::slotted([slot=submit]){
         margin-top:40px;
+        margin-bottom: 24px;
     }
-    ::slotted([slot=location]){
-        margin-bottom:40px;
-    }
-    ::slotted([slot=noaccount]:last-child){
-        margin-left:4px;
-    }
-    .noaccount{
-        display:flex;
-        align-items:center;
-        margin-top:16px;
-    }
-    .two-row{
-        display:flex;
-        
-    }
-  
+   
   
     .spacer{
         height:20px;
     }
-    .hidden {
+    .text-hidden {
         display:none;
     }
     .password-wrapper {
@@ -80,7 +61,21 @@ export class _ extends LitElement {
         top: 33%;
         right: -76px;
     }
-   
+    ::slotted([slot=contact]){
+        position:absolute;
+        bottom:20px;
+        white-space:nowrap;
+    }
+    .account-wrapper{
+        display:flex;
+        align-items:center;
+    }
+    ::slotted([slot=noaccount]:last-child){
+        margin-left:4px;
+    }
+    ::slotted([slot=sub]){
+        white-space: nowrap;
+    }
    
     `];
   }
@@ -89,14 +84,12 @@ export class _ extends LitElement {
   title:string = ""; 
 
   @property()
-  subtitle:string = ""; 
-
-  @property()
-  hidden:boolean = true; 
+  passwordStrength: PasswordStrength = "none";
 
   render() {
 
-    const {title, hidden, subtitle} = this;
+    const {title, passwordStrength} = this;
+
 
     return html`
  <div class="wrapper">
@@ -104,36 +97,44 @@ export class _ extends LitElement {
   </div>
   <div class="content-wrapper">
     <h1>${title}</h1>
-    <slot name="subtitle"></slot>
+    <slot name="sub"></slot>
     <div class="inside-wrapper">
-       <div class="two-row">
-            <slot name="topleft"></slot>
-            <slot name="topright"></slot>
-        </div>
-        <div class="two-row">
-            <slot name="bottomleft"></slot>
-            <slot name="bottomright"></slot>
-        </div>
-        <slot name="location"></slot>
+        <slot name="google"></slot>
+        <slot name="divider"></slot>
         <slot name="username"></slot>
         <div class="spacer"></div>
-        <slot name="passwordstrength"></slot>
+        <password-strength strength ="${passwordStrength}"></password-strength>
         <div class="password-wrapper">
         
-        <slot name="checkbox">
+        <slot name="password">
             
         </slot>
-        
-        <slot name="passwordreminder"></slot>
-        
+        <div>
+        ${strengthText(passwordStrength)}
+        </div>
+
+        </div>
+        <p></p> 
         <slot name="submit"></slot>
        
       </div>
-      <div class="noaccount">
-        <slot name="noaccount"></slot>
+      <div class="account-wrapper">
+      <slot name="noaccount"></slot>
       </div>
+      <slot name="contact"></slot>
   </div>
+  
 </div>
   `;
   }
 }
+
+function strengthText(mode: PasswordStrength) {
+    const strengthlabel = mode === "weak" ? "Weak"
+      : mode === "average" ? "Average"
+      : mode === "strong" ? "Strong"
+      : "";
+    
+      return html`<p>${strengthlabel}</p>`
+    
+  }

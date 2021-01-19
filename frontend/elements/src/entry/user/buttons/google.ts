@@ -1,6 +1,10 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('google-button')
+
+const STR_LABEL = "Sign in with Google";
+
+
+@customElement('button-google')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -25,20 +29,15 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  label:string = ""; 
-
-  @property()
-  path:string = ""; 
-  
   render() {
-
-    const {label, path} = this;
 
     return html`
    
         <div class="wrapper">
-          <span class="flex items-center font-sans font-normal text-lg"><img-ui path="${path}" alt=""></img-ui>${label}</span>
+          <span class="flex items-center font-sans font-normal text-lg">
+            <img-ui path="icn-google-button-64.svg" alt=""></img-ui>
+            ${STR_LABEL}
+          </span>
 
         </div>
       
