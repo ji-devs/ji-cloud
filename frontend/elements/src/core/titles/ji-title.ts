@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
 
-@customElement('title-container')
+@customElement('ji-title')
 export class _ extends LitElement {
 
   static get styles() {

@@ -28,21 +28,18 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  label: string = "";
-
   @property({type:Boolean})
-  checked: boolean = false;
+  selected: boolean = false;
  
 
   render() {
 
-    const {checked, label} = this;
+    const {selected} = this;
 
     return html`
         <li>
-            <p>${label}</p>
-            ${checked ? `<img-ui class="${checked ? 'checked' : ''}" path="icn-chosen-check.svg"></img-ui>` : nothing}
+            <p><slot></slot></p>
+            ${selected ? html`<img-ui class="${selected ? 'checked' : ''}" path="icn-chosen-check.svg"></img-ui>` : nothing}
         </li>
     `;
   }

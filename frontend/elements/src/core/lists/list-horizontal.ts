@@ -1,6 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('list-vertical')
+@customElement('list-horizontal')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -25,8 +25,6 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  label:string = ""; 
   @property()
   title:string = ""; 
 
