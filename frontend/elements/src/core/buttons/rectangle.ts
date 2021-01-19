@@ -1,9 +1,13 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
+import { nothing} from 'lit-html';
 import {BaseButton} from "@elements/_styles/buttons";
 
 export type Color = "red" | "blue" | "white" | "green";
 export type Size = "small" | "medium" | "large";
+
+export type IconAfter = "arrow"
+export type IconBefore = ""
 
 @customElement('button-rect')
 export class _ extends BaseButton {
@@ -89,9 +93,6 @@ export class _ extends BaseButton {
   size: Size = "medium";
 
   @property()
-  label: string = "";
-
-  @property()
   color: Color = "red";
 
   @property({type: Boolean})
@@ -100,18 +101,14 @@ export class _ extends BaseButton {
   @property({type: Boolean})
   italic:boolean = false; 
 
-  @property({type: Boolean})
-  imglefthidden:boolean = false; 
-
-  @property({type: Boolean})
-  imgrighthidden:boolean = false; 
-
   @property()
-  iconpath: string = "";
+  iconBefore?: IconBefore;
+  @property()
+  iconAfter?: IconAfter;
 
   render() {
 
-    const {size, label, color, bold, italic, imglefthidden, imgrighthidden,iconpath} = this;
+    const {size, color, bold, italic, iconAfter, iconBefore} = this;
 
     const classes = classMap({ 
       [size]: true,
@@ -120,11 +117,15 @@ export class _ extends BaseButton {
       italic: italic,
     });
 
+    const iconBeforePath = "";
+    const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
+      : "";
+
     return html`
       <button type="button" name="button" class="${classes}" >
-      <img-ui class="${imglefthidden ? 'img-hidden' : ''} left" path="${iconpath}"></img-ui>
-      ${label}
-      <img-ui class="${imgrighthidden ? 'img-hidden' : ''} right" path="${iconpath}"></img-ui>
+      ${iconBefore && html`<img-ui class="left" path="${iconBeforePath}"></img-ui>`}
+      <slot></slot>
+      ${iconAfter && html`<img-ui class="right" path="${iconAfterPath}"></img-ui>`}
     </button>
   `;
   }

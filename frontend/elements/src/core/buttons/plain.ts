@@ -65,9 +65,6 @@ export class _ extends BaseButton {
   size:Size = "medium";
 
   @property()
-  label: string = "";
-
-  @property()
   color:Color = "red" 
 
   @property({type: Boolean})
@@ -78,7 +75,7 @@ export class _ extends BaseButton {
 
   render() {
 
-    const {size, label, color, bold, italic} = this;
+    const {size, color, bold, italic} = this;
 
     const classes = classMap({ 
       [size]: true,
@@ -89,8 +86,8 @@ export class _ extends BaseButton {
 
     return html`
       <p  class="${classes}" >
-      ${label}
-  </p>
+      <slot></slot>
+      </p>
   `;
   }
 }

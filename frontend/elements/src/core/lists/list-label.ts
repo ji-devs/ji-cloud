@@ -23,15 +23,15 @@ export class _ extends LitElement {
   }
 
   @property()
-  title:string = ""; 
+  label:string = ""; 
 
   render() {
 
-    const {title} = this;
+    const {label} = this;
 
     return html`
     <main>
-    <p>${title}</p>
+    <p>${label}</p>
     <ul>
       <slot></slot>    
     </ul>

@@ -1,5 +1,3 @@
-import "@elements/buttons/circle-button";
-
 import { LitElement, html, css, customElement, property} from 'lit-element';
 import {nothing} from "lit-html";
 import {colorStyles} from "@elements/_styles/colors";
@@ -34,17 +32,17 @@ export class _ extends LitElement {
   }
 
   @property({type: Number})
-  steps:number = 0;
+  count:number = 0;
 
   // Define the element's template
   render() {
-    const {steps} = this;
+    const {count} = this;
 
     return html`
       <main>
         <div class="steps">
-          ${arrayCount(steps)
-              .map(step => makeStep(step, steps))
+          ${arrayCount(count)
+              .map(step => makeStep(step, count))
           }
         </div>
       </main>
@@ -53,7 +51,7 @@ export class _ extends LitElement {
 }
 
 const makeStep = (step:number, lastStep:number) => html`
-  <slot name="btn-${step}"></slot>
+  <slot name="slot-${step}"></slot>
   ${step !== lastStep 
       ? html`<div class="separator"></div>` 
       : nothing
