@@ -46,15 +46,15 @@ export class _ extends LitElement {
   label: string = "";
 
   @property()
-  path: string = "";
+  value: string = "";
 
   render() {
 
-    const {label, path} = this;
+    const {label, value} = this;
     return html`
     <div class="wrapper">
-        <img-ui path="${path}" alt="" class=""></img-ui>
-        <input  type="search" name="" value="" placeholder="${label}">
+        <img-ui path="REPLACE-ME.svg" alt="" class=""></img-ui>
+        <input  type="search" name="" value="${value}" placeholder="${label}">
     </div>
   
 

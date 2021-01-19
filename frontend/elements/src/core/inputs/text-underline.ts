@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
-@customElement('text-area-underlined')
+@customElement('input-text-underline')
 export class _ extends LitElement {
 
   static get styles() {
@@ -14,12 +14,12 @@ export class _ extends LitElement {
     }
     span{
         color: #5590fc;
-        
+        margin-bottom:8px;
     }
-    .textarea-wrapper{
+    .input-wrapper{
         display:flex;
         align-items:center;
-        
+        border-bottom:solid 1px #e5e7ef;
         position:relative;
     }
 
@@ -29,6 +29,7 @@ export class _ extends LitElement {
         font-size:16px;
         padding:0 8px;
         width:100%;
+        
     }
     focus{
         outline:none;
@@ -39,20 +40,6 @@ export class _ extends LitElement {
     img{
         position:absolute;
         right:-10px;
-    }
-    textarea{
-        resize:none;
-        border-bottom:solid 1px #e5e7ef;
-        width:100%;
-        outline:none;
-        background: transparent;
-        appearance: none;
-        border-right: none;
-        border-top: none;
-        border-left: none;
-        padding-left: 8px;
-        font-family: Poppins;
-        font-size:16px;
     }
    
   
@@ -69,16 +56,16 @@ export class _ extends LitElement {
 
   render() {
 
-    const {label} = this;
+    const {label, src, icon} = this;
 
     return html`
     
     <div class="wrapper">
   <label for="name" class="">
-    <span class="text-jibuttonBlue">${label}</span>
-    <div class="textarea-wrapper">
-      <textarea rows="10"
-        contenteditable="true" type="text" placeholder="Jane Doe" aria-label="Full name"></textarea>
+    <span class="">${label}</span>
+    <div class="input-wrapper">
+      <input class="" type="text" placeholder="Jane Doe" aria-label="Full name">
+      <!-- <img-ui src="${src}"></img-ui> -->
     </div>
   </label>
 </div>

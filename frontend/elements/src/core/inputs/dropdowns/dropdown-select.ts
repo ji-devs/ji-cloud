@@ -66,11 +66,11 @@ export class _ extends LitElement {
      border-radius:0 0 14px 14px;
      z-index:-1;
    }
-   ::slotted([slot=inner-dropdown]){
+   ::slotted(*){
       padding-top:16px;
       display:none;
    }
-   .open ::slotted([slot=inner-dropdown]){
+   .open ::slotted(*){
      display:block
    }
    
@@ -84,12 +84,15 @@ export class _ extends LitElement {
   @property()
   error: string = "";
 
+  @property()
+  value: string = "";
+
   @property({type:Boolean})
   open: boolean = false;
 
   render() {
 
-    const {label, open, error} = this;
+    const {label, open, error, value} = this;
     const isError:boolean = error !== "";
 
     const errorwrapper = isError ? "errorwrapper" : "";
@@ -97,12 +100,11 @@ export class _ extends LitElement {
     return html`
     
     <div class="input-wrapper ${errorwrapper ? "errorwrapper" : ''}">
-        <input placeholder="Placeholder" type="text" class="">
+        <input placeholder="Placeholder" value="${value}" type="text" class="">
         <label class="">${label}</label>
         <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
         <div class="${open ? "open" : ''}">
-        
-          <slot name="inner-dropdown"></slot>
+          <slot></slot>
         </div>
     </div>
 

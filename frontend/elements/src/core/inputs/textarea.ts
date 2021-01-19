@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
-@customElement('text-area')
+@customElement('input-textarea')
 export class _ extends LitElement {
 
   static get styles() {
@@ -68,34 +68,27 @@ export class _ extends LitElement {
   label: string = "";
 
   @property()
-  errormessage: string = "";
+  placeholder: string = "";
 
   @property()
-  instruction: boolean = false;
+  value: string = "";
 
-  @property()
-  helpertext: string = "";
-
-  @property()
-  error: boolean = false;
+  @property({type: Number})
+  rows: number = 10;
 
   render() {
 
-    const {label} = this;
-
-
-
+    const {label, value, rows, placeholder} = this;
 
     return html`
        <div class="wrapper">
-  <label for="name" class="">
-    <span class="text-jibuttonBlue">${label}</span>
-    <div class="textarea-wrapper">
-      <textarea rows="10"
-       type="text" placeholder="Jane Doe" ></textarea>
-    </div>
-  </label>
-</div>
+        <label for="name" class="">
+          <span class="text-jibuttonBlue">${label}</span>
+          <div class="textarea-wrapper">
+            <textarea rows="${rows}" type="text" placeholder="${placeholder}" >${value}</textarea>
+          </div>
+        </label>
+      </div>
    
      
   `;
