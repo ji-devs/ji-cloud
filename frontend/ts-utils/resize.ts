@@ -79,6 +79,7 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             paddingX: STAGE_PADDING_X_PERC, 
             paddingY: STAGE_PADDING_Y_PERC
         }
+    console.log(stage);
     let lastInfo:ResizeInfo = {
         scale: 0,
         x: 0,
