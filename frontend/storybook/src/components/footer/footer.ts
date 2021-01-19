@@ -22,7 +22,7 @@ const STR_PATHYOUTUBE="Icn_Youtube.png";
 const STR_PATHFACEBOOK="Icn_Youtube.png";
 const STR_PATHINSTAGRAM="Icn_Youtube.png";
 const STR_PATHLINKEDIN="Icn_Youtube.png";
- const STR_PATHKIDSAFE="logo-kid-safe.jpg";
+ const STR_PATHKIDSAFE="logo-kid-safe.png";
 const STR_TERMS="Terms & Conditions";
 const STR_PRIVACY="Privacy Policy";
 export const footer = () => {

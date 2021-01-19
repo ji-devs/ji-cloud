@@ -8,6 +8,11 @@ export class _ extends LitElement {
       display:flex;
       overflow:hidden;
       scroll:auto;
+      justify-content:space-between;
+     
+      width:100%;
+      border-bottom: solid 1px #3c7df0;
+      
        
     }
     .collapsed{
@@ -20,30 +25,57 @@ export class _ extends LitElement {
     .collapsed ::slotted([slot=content]){
         display:none;
     }
+    .expanded img-ui{
+      transform: rotate(180deg)
+    }
+    .content-inside{
+      display:flex;
+      flex-wrap: wrap;
+    }
+    .title-wrapper{
+      display:flex;
+      flex-wrap: wrap;
+      margin-bottom:10px;
+      padding-top:10px;
+      
+    }
+    ::slotted([slot=title]){
+      display:block;
+      margin-bottom:10px;
+    }
+    img-ui{
+      margin-top:10px;
+      cursor:pointer;
+    }
+    
+   
     `];
   }
 
   @property({type:Boolean})
   collapsed: boolean = true;
 
-  @property()
-  icon: string = "";
+  
 
   @property()
   label: string = "";
 
   render() {
 
-    const {collapsed,icon,label} = this;
+    const {collapsed,label} = this;
 
     return html`
      <main class="${collapsed ? 'collapsed' : 'expanded'}">
-        <div class="content-wrapper">
-            <slot name="title">${label}</slot>
-            <slot name="content"></slot>
+        <div class="title-wrapper">
+      
+          <slot name="title">${label}</slot>
         </div>
+        <div class="content-inside">
+          <slot name="content"></slot>
+        </div>
+       
         
-        <img-ui path="${icon}"></img-ui>
+        <img-ui path="Icn_Chevron_White.svg"></img-ui>
     </main>
   `;
   }

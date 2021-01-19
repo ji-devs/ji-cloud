@@ -55,7 +55,11 @@ const STR_JI = "JiTeam -";
 const STR_BEREISHIT = "Bereishit Stories, Briat Haolam Story, Adam veChava"
 const STR_LIGHTBLUE = "lightblue";
 const STR_DARKGREY = "darkgrey";
-const STR_TWOWEEKS = "2 weeks ago"
+const STR_TWOWEEKS = "2 weeks ago";
+const STR_DESCRIPTION ="Description";
+const STR_DESCRIPTIONPARA = "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry";
+const STR_RESOURCES = "Additional resources";
+const STR_FILEICON = ""
 
 
 
@@ -80,13 +84,15 @@ export const SearchCard = (props?:CardArgs) => {
 
 
 interface CardBackArgs {
-    negative: boolean
+    negative: boolean,
+    collapsed:boolean,
     
    
    }
    
    const DEFAULT_BACK_ARGS:CardBackArgs = {
     negative:true,
+    collapsed:true,
      
    }
 
@@ -96,13 +102,26 @@ interface CardBackArgs {
 
 export const SearchCardBack = (props?:CardBackArgs) => {
 
-    const {negative} = props || DEFAULT_BACK_ARGS;
+    const {negative, collapsed} = props || DEFAULT_BACK_ARGS;
 
     return `<search-card-full label="Placeholder" color="blue" size="medium" fontweight="" back>
        <plain-white title="${STR_BEREISHIT}" bold="true" slot="title"></plain-white>
        <age-group slot="subtitle" icon="${STR_WORLDICON}" label="${STR_TWOWEEKS}" color="${STR_LIGHTBLUE}"></age-group>
-       <card-dropdown slot="dropdowns">
+       <card-dropdown slot="dropdowns" ${collapsed && "collapsed"}>
             <pill-listitem label=${STR_HEBREW } ${negative && 'negative'} slot="title"></pill-listitem>
+            <pill-listitem label=${STR_HEBREW } ${negative && 'negative'} slot="title"></pill-listitem>
+            <pill-listitem label=${STR_HEBREW } ${negative && 'negative'} slot="title"></pill-listitem>
+            <pill-listitem label=${STR_HEBREW } ${negative && 'negative'} slot="title"></pill-listitem>
+
+       </card-dropdown>
+       <card-dropdown slot="dropdowns" ${collapsed && "collapsed"}>
+       <plain-white title="${STR_DESCRIPTION}" bold="false" small="true" slot="title"></plain-white>
+       <plain-white title="${STR_DESCRIPTIONPARA}" bold="false" small="true" slot="content"></plain-white>
+       </card-dropdown>
+       <card-dropdown slot="dropdowns" ${collapsed && "collapsed"}>
+       <plain-white title="${STR_RESOURCES}" bold="false" small="true" slot="title"></plain-white>
+       <age-group slot="content" icon="${STR_FILEICON}" label="${STR_TWOWEEKS}" color="${STR_LIGHTBLUE}"></age-group>
+
        </card-dropdown>
 
     </search-card-full>

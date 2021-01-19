@@ -48,8 +48,16 @@ export class _ extends LitElement {
         height:40px;
        
     }
+    ::slotted([slot="dropdowns"]) {
+        display:flex;
+        align-items:center;
+        width:100%;
+        position:relative;
+       
+    }
     .subtitle-wrapper{
         display:flex;
+        flex-direction:column;
     }
     .age-language{
         display:flex;
@@ -59,6 +67,13 @@ export class _ extends LitElement {
         width:100%;
         
       
+    }
+    .dropdown-wrapper{
+        display:flex;
+        align-items:center;
+        margin-top:26px;
+        flex-direction:column;
+        
     }
     `];
   }
@@ -78,8 +93,11 @@ export class _ extends LitElement {
     <slot name="title"></slot>
     <div class="subtitle-wrapper">
     <slot name="subtitle"></slot>
+    </div>
+    <div class="dropdown-wrapper">
     <slot name="dropdowns"></slot>
     </div>
+    
     <div class="age-language">
         <slot name="age"></slot>
         <slot name="language"></slot>

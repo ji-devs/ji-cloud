@@ -30,7 +30,7 @@ export const LeftLabel = (props?:Props) => {
       <input-checkbox label="Premium Image" slot="checkbox"></input-checkbox>
       <input-underlined slot="description" label="Image name"></input-underlined>
       <textarea-underlined slot="description" label="Image description"></textarea-underlined>
-    </image-settings>
+    </imagelabel-left>
 
     
     `
