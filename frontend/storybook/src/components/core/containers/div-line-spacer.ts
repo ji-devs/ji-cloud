@@ -1,5 +1,5 @@
 import "@elements/core/containers/div-line-spacer";
-import "@elements/core/buttons/plain";
+import "@elements/core/buttons/text";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
@@ -21,7 +21,7 @@ export const DivLineSpacer = (props?:Partial<Args>) => {
 
     return `<div-line-spacer nSlots="${nSlots}" >
         ${mapToString(arrayCount(nSlots), i => 
-            `<button-plain slot="slot-${i}" color="blue" size="none">Slot ${i}</button-plain>`
+            `<button-text slot="slot-${i}" color="blue" size="none">Slot ${i}</button-text>`
         )}
     </div-line-spacer>`;
 }

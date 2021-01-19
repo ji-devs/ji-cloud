@@ -4,40 +4,44 @@ import "@elements/core/titles/ji";
 import "@elements/core/dividers/or-divider";
 import "@elements/core/buttons/rectangle";
 import "@elements/entry/user/_common/buttons/google";
+import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
 export default {
   title: 'Entry / User / Password / Pages',
 }
 
-const STR_NEWPASSWORD = "Create a New Password";
-const STR_LABEL = "Set Password";
-const STR_ENTERPASSWORD = "Enter new Password";
-const STR_LOGGEDOUT = "You’ll be logged in automatically after this";
-const STR_HELP ="8 Characters or longer"
+const STR_SUBMIT = "Set Password";
+const STR_PASSWORD_LABEL = "Enter new Password";
+const STR_PASSWORD_HELP ="8 Characters or longer"
 
 interface Args {
+  passwordStrength: PasswordStrength,
 }
 
 const DEFAULT_ARGS:Args = {
+    passwordStrength: "none"
 }
 
 export const Reset = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {} = props;
+    const {passwordStrength} = props;
 
     return `
-        <page-password-reset title="${STR_NEWPASSWORD}">
-            <input-text slot="password" label="${STR_ENTERPASSWORD}" helpertext="${STR_HELP}"  mode="passwordHidden">
-            </input-text>
-
-            <button-rect slot="submit" color="red" size="medium">
-              ${STR_LABEL}
-            </button-rect> 
-            <title-ji color="black" slot="noaccount">${STR_LOGGEDOUT}</title-ji>
+        <page-password-reset passwordStrength="${passwordStrength}">
+            <input-text slot="password" label="${STR_PASSWORD_LABEL}" helpertext="${STR_PASSWORD_HELP}"  mode="passwordHidden"></input-text>
+            <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
         </page-password-reset>
-    
     `
 }
 
 Reset.args = DEFAULT_ARGS;
+
+Reset.argTypes = {
+    passwordStrength: {
+        control: {
+            type: 'inline-radio',
+            options: ["none", "weak", "average", "strong"]
+        }
+    }
+}

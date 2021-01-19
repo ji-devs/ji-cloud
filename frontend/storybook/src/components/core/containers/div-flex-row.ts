@@ -1,5 +1,5 @@
 import "@elements/core/containers/div-flex-row";
-import "@elements/core/buttons/plain";
+import "@elements/core/buttons/text";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
@@ -21,7 +21,7 @@ export const DivFlexRow = (props?:Partial<Args>) => {
 
     return `<div-flex-row>
         ${mapToString(arrayCount(nSlots), i => 
-            `<button-plain color="blue" size="none">Slot ${i}</button-plain>`
+            `<button-text color="blue" size="none">Slot ${i}</button-text>`
         )}
     </div-flex-row>`;
 }

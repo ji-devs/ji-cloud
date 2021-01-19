@@ -1,5 +1,7 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+import "@elements/core/dividers/spacer-fourty";
+
+const STR_TITLE = "Sign Up - Step 2";
 
 @customElement("page-register-step2")
 export class _ extends LitElement {
@@ -87,23 +89,12 @@ export class _ extends LitElement {
     ];
   }
 
-  @property()
-  title: string = "";
-
-  @property()
-  subtitle: string = "";
-
-  @property()
-  hidden: boolean = true;
-
   render() {
-    const { title, hidden, subtitle } = this;
-
     return html`
       <div class="wrapper">
         <div class="side-image"></div>
         <div class="content-wrapper">
-          <h1>${title}</h1>
+          <h1>${STR_TITLE}</h1>
           <slot name="subtitle"></slot>
           <div class="inside-wrapper">
             <div class="two-row">
@@ -114,7 +105,9 @@ export class _ extends LitElement {
               <slot name="bottomleft"></slot>
               <slot name="bottomright"></slot>
             </div>
+
             <slot name="location"></slot>
+            <spacer-fourty></spacer-fourty>
             <slot name="username"></slot>
             <div class="spacer"></div>
             <div class="password-wrapper">

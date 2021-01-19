@@ -1,26 +1,27 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { BaseButton } from "@elements/_styles/buttons";
+import {nothing} from "lit-html";
 
 export type Color = "red" | "blue" | "white" | "green";
 export type Size = "small" | "medium" | "large";
+export type Weight = "normal" | "medium" | "bold";
 
-@customElement("button-plain")
+@customElement("button-text")
 export class _ extends BaseButton {
   static get styles() {
     return [
       css`
-        p {
-          font-weight: 500;
+        div {
           cursor: pointer;
         }
         .small {
           padding: 0;
         }
-        .medium {
+        .padding-medium {
           padding: 13.6px 24px 11.4px;
         }
-        .large {
+        .padding-large {
           padding: 15px 40px 16px;
         }
 
@@ -44,8 +45,15 @@ export class _ extends BaseButton {
           color: #a9b1b5;
         }
 
-        .bold {
-          font-weight: bold;
+        .weight-bold {
+          font-weight: 700;
+        }
+        .weight-normal {
+          font-weight: 400;
+        }
+
+        .weight-medium{
+          font-weight: 500;
         }
         .green {
           color: #71cf92;
@@ -61,28 +69,35 @@ export class _ extends BaseButton {
   size: Size = "medium";
 
   @property()
-  color: Color = "red";
+  color: Color = "blue";
 
-  @property({ type: Boolean })
-  bold: boolean = false;
+  @property()
+  weight: Weight = "normal";
 
   @property({ type: Boolean })
   italic: boolean = false;
 
+  @property({ type: Boolean })
+  p: boolean = false;
   render() {
-    const { size, color, bold, italic } = this;
+    const { size, color, weight, italic, p } = this;
 
     const classes = classMap({
+      [`weight-${weight}`]: true,
       [size]: true,
       [color]: true,
-      bold: bold,
       italic: italic,
     });
 
     return html`
-      <p class="${classes}">
-        <slot></slot>
-      </p>
+
+      ${p ? html`<p>`: nothing}
+
+      <div class="${classes}">
+          <slot></slot>
+      </div>
+
+      ${p ? html`</p>` : nothing}
     `;
   }
 }

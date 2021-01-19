@@ -1,5 +1,9 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+
+
+const STR_TITLE = "Sign Up - Step 1";
+
 @customElement("page-register-step1")
 export class _ extends LitElement {
   static get styles() {
@@ -59,7 +63,7 @@ export class _ extends LitElement {
         ::slotted([slot="noaccount"]:last-child) {
           margin-left: 4px;
         }
-        .noaccount {
+        .account-wrapper {
           display: flex;
           align-items: center;
           margin-top: 16px;
@@ -86,24 +90,12 @@ export class _ extends LitElement {
     ];
   }
 
-  @property()
-  title: string = "";
-
-  @property()
-  subtitle: string = "";
-
-  @property()
-  hidden: boolean = true;
-
   render() {
-    const { title, hidden, subtitle } = this;
-
     return html`
       <div class="wrapper">
         <div class="side-image"></div>
         <div class="content-wrapper">
-          <h1>${title}</h1>
-          <slot name="subtitle"></slot>
+          <h1>${STR_TITLE}</h1>
           <div class="inside-wrapper">
             <div class="two-row">
               <slot name="topleft"></slot>
@@ -122,9 +114,7 @@ export class _ extends LitElement {
               <p></p>
               <slot name="submit"></slot>
             </div>
-            <div class="noaccount">
-              <slot name="noaccount"></slot>
-            </div>
+            <slot name="footer"></slot>
           </div>
         </div>
       </div>

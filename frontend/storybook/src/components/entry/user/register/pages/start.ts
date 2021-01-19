@@ -1,9 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/start";
 import "@elements/entry/user/register/widgets/password-strength";
+import "@elements/entry/user/register/footer/login";
 import "@elements/core/titles/ji";
-import "@elements/core/dividers/or-divider";
 import "@elements/core/buttons/rectangle";
+import "@elements/core/buttons/text";
 import "@elements/entry/user/_common/buttons/google";
 
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
@@ -12,16 +13,11 @@ export default {
   title: 'Entry / User / Register / Pages',
 }
 
-const STR_TITLE = "Sign Up";
 const STR_SUBMIT = "Submit";
-const STR_EMAIL = "Email";
-const STR_PLCEMAIL = "Type or paste your email";
-const STR_PASSWORD = "Create Password";
-const STR_PLCPASSWORD ="********";
-const STR_ACCOUNT = "Already have an account?";
-const STR_REGISTER = "Login";
-const STR_HELPEMAIL = "Test";
-const STR_HELPPASSWORD = "8 Characters or more";
+const STR_EMAIL_LABEL = "Email";
+const STR_EMAIL_PLACEHOLDER= "Type or paste your email";
+const STR_PASSWORD_LABEL = "Create Password";
+const STR_PASSWORD_PLACEHOLDER ="********";
 
 interface Args {
   passwordStrength: PasswordStrength,
@@ -37,22 +33,13 @@ export const Start = (props?:Partial<Args>) => {
     const {passwordStrength} = props;
 
     return `
-        <page-register-start title="${STR_TITLE}" passwordStrength=${passwordStrength}>
+        <page-register-start passwordStrength="${passwordStrength}">
             <button-google slot="google"></button-google>
-            <or-divider slot="divider"></or-divider>
-            
-            <input-text slot="username" label="${STR_EMAIL}" mode="text" placeholder=${STR_PLCEMAIL}>
-            </input-text>
-            <input-text slot="password" label="${STR_PASSWORD}" mode="passwordHidden" placeholder="${STR_PLCPASSWORD}">
-            </input-text>
-            <button-rect slot="submit" color="red" size="medium">
-              ${STR_SUBMIT}
-            </button-rect> 
-
-            <title-ji slot="noaccount" color="black">${STR_ACCOUNT}</title-ji>
-            <title-ji slot="noaccount" color="blue" link>${STR_REGISTER}</title-ji>
+            <input-text slot="username" label="${STR_EMAIL_LABEL}" mode="text" placeholder=${STR_EMAIL_PLACEHOLDER}></input-text>
+            <input-text slot="password" label="${STR_PASSWORD_LABEL}" mode="passwordHidden" placeholder="${STR_PASSWORD_PLACEHOLDER}"></input-text>
+            <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
+            <footer-register-login slot="footer"></footer-register-login>
         </page-register-start>
-    
     `
 }
 

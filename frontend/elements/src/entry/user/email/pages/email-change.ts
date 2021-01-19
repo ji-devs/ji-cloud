@@ -3,6 +3,9 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/footer/contact";
 import "@elements/core/titles/ji";
 
+const STR_TITLE = "Change Email Account";
+const STR_SUB = "This is the email that you filled in. You can change it now.";
+
 @customElement("page-email-change")
 export class _ extends LitElement {
   static get styles() {
@@ -81,8 +84,6 @@ export class _ extends LitElement {
   }
 
   render() {
-    const STR_TITLE = "Change Email Account";
-    const STR_SUB = "This is the email that you filled in. You can change it now.";
 
     return html`
       <div class="wrapper">

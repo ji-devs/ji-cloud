@@ -12,9 +12,6 @@ export default {
   title: 'Entry / User / Register / Pages',
 }
 
-const STR_TITLE = "Sign Up - Step 3";
-const STR_SUBTITLE = "We want to tailor the content that you find to your interests and needs.";
-const STR_SUBSUBTITLE = "You can select as many as you like now and edit it later it in your profile page";
 const STR_AGE_LABEL = "Which age group are you interested in?";
 const STR_AFFILIATION_LABEL = "Content from which streams of Judaism do you want to see?";
 
@@ -28,9 +25,7 @@ export const Step3 = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <page-register-step3 title="${STR_TITLE}">
-            <title-ji slot="subtitle" size="subMedium">${STR_SUBTITLE}</title-ji>
-            <title-ji slot="subtitle" size="subMedium">${STR_SUBSUBTITLE}</title-ji>
+        <page-register-step3>
             <card-grey slot="main">
                 <list-horizontal label="${STR_AGE_LABEL}">
                 ${mapToString(AGE_OPTIONS, label => {

@@ -3,6 +3,10 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/_common/footer/contact";
 import "@elements/entry/user/email/buttons/email-send";
 
+const STR_TITLE = "We Just Sent You an Email";
+const STR_SUBTITLE = "Open the email and click on the Verification button";
+const STR_SUBSUBTITLE = "It may have been filtered into the promotion or spam folders";
+
 @customElement("page-email-send")
 export class _ extends LitElement {
   static get styles() {
@@ -63,11 +67,11 @@ export class _ extends LitElement {
       <div class="wrapper">
         <div class="side-image"></div>
         <div class="content-wrapper">
-          <h1>${title}</h1>
-          <slot name="subtitle"></slot>
-          <slot name="main"></slot>
-
-          <button-email-send></button-email-send>
+          <h1>${STR_TITLE}</h1>
+          <title-ji size="subMedium">${STR_SUBTITLE}</title-ji>
+          <title-ji size="subMedium">${STR_SUBSUBTITLE}</title-ji>
+          <slot name="change"></slot>
+          <slot name="send"></slot>
           <slot name="submit"></slot>
           <footer-contact></footer-contact>
         </div>
