@@ -4,6 +4,12 @@ Here we refer explicitly to the components created in Storybook for UI/UX protot
 
 ----
 
+### VSCode helpers
+
+There are a couple snippets you can add to your VSCode config to automate the boilerplate for new components:
+
+[VSCode snippets gist](https://gist.github.com/dakom/77e9b8299870b71512e55fb9222c4535)
+
 ### Import the element
 
 It's a straight import of the code, not a module import (because it's executed right away and defines the custom element for usage by name).
@@ -66,6 +72,8 @@ Note that for the sake of jargon, "args" and "props" are used interchangeably, b
 Example:
 
 ```typescript
+import "@elements/my-button";
+
 export default {
   title: 'Buttons',
 }
@@ -87,6 +95,37 @@ export const Button = (props?:ButtonArgs) => {
 Button.args = DEFAULT_ARGS;
 
 ```
+
+The destructuring of props and then turning them into attributes can be simplified via the `argsToAttrs` helper:
+
+```typescript
+import {argsToAttrs} from "@utils/attributes";
+import "@elements/my-button";
+
+export default {
+  title: 'Buttons',
+}
+
+interface ButtonArgs {
+  text: string
+}
+
+const DEFAULT_ARGS:ButtonArgs = {
+  text: "click me"
+}
+
+export const Button = (props?:ButtonArgs) => {
+    props = props || DEFAULT_ARGS;
+
+    //can still destructure if needed:
+    //const {text} = props;
+
+    return `<my-button ${argsToAttrs(props)} />`
+}
+
+Button.args = DEFAULT_ARGS;
+```
+
 
 If the element itself needs to be changed, but it uses the same basic arguments, re-use them:
 
