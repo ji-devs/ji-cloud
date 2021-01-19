@@ -117,7 +117,6 @@ export class _ extends LitElement {
         <slot name="location"></slot>
         <slot name="username"></slot>
         <div class="spacer"></div>
-        <slot name="passwordstrength"></slot>
         <div class="password-wrapper">
         
         <slot name="checkbox">

@@ -92,10 +92,9 @@ export class _ extends LitElement {
 
 
     return html`
- <div class="wrapper">
-  <div class="side-image">
-  </div>
-  <div class="content-wrapper">
+    <div class="wrapper">
+    <div class="side-image"></div>
+    <div class="content-wrapper">
     <h1>${title}</h1>
     <slot name="sub"></slot>
     <div class="inside-wrapper">
@@ -106,15 +105,14 @@ export class _ extends LitElement {
         <password-strength strength ="${passwordStrength}"></password-strength>
         <div class="password-wrapper">
         
-        <slot name="password">
-            
-        </slot>
+        <slot name="password"></slot>
         <div>
         ${strengthText(passwordStrength)}
         </div>
 
         </div>
-        <p></p> 
+        <p>&nbsp;</p>
+
         <slot name="submit"></slot>
        
       </div>
