@@ -82,20 +82,7 @@ export class _ extends LitElement {
   label: string = "";
 
   @property()
-  errormessage: string = "";
-
-  @property({type:Boolean})
-  instruction: boolean = false;
-
-  @property()
-  helpertext: string = "";
-
-  @property()
   error: string = "";
-
-
-  @property({type:Boolean})
-  errorwrapper: boolean = false;
 
   @property({type:Boolean})
   open: boolean = false;
