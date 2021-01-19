@@ -43,18 +43,18 @@ export class _ extends LitElement {
   }
 
   @property()
-  label: string = "";
+  placeholder: string = "";
 
   @property()
   value: string = "";
 
   render() {
 
-    const {label, value} = this;
+    const {placeholder, value} = this;
     return html`
     <div class="wrapper">
         <img-ui path="REPLACE-ME.svg" alt="" class=""></img-ui>
-        <input  type="search" name="" value="${value}" placeholder="${label}">
+        <input  type="search" name="" value="${value}" placeholder="${placeholder}">
     </div>
   
 

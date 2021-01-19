@@ -73,8 +73,12 @@ export class _ extends LitElement {
    .open ::slotted(*){
      display:block
    }
-   
   
+    ul{
+        padding:0;
+        margin:0;
+        overflow:auto
+    }
     `];
   }
 
@@ -90,9 +94,12 @@ export class _ extends LitElement {
   @property({type:Boolean})
   open: boolean = false;
 
+  @property({type:Number})
+  maxChildrenHeight: number = 400;
+
   render() {
 
-    const {label, open, error, value} = this;
+    const {label, open, error, value, maxChildrenHeight} = this;
     const isError:boolean = error !== "";
 
     const errorwrapper = isError ? "errorwrapper" : "";
@@ -104,7 +111,9 @@ export class _ extends LitElement {
         <label class="">${label}</label>
         <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
         <div class="${open ? "open" : ''}">
-          <slot></slot>
+          <ul style="height: ${maxChildrenHeight}px">
+            <slot></slot>
+          </ul>
         </div>
     </div>
 

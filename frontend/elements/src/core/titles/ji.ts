@@ -1,7 +1,9 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
+export type Color = "red" | "blue" | "white" | "green";
+export type Size = "small" | "medium" | "large";
 
-@customElement('title-container')
+@customElement('title-ji')
 export class _ extends LitElement {
 
   static get styles() {
@@ -19,18 +21,26 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  title: string = "";
+  @property({type: Boolean})
+  bold:boolean = false;
 
-  @property()
-  path: string = "";
+  @property({type: Boolean})
+  italic:boolean = false;
+
+  @property({type: Boolean})
+  underlined:boolean = false;
+
+  @property({type: Boolean})
+  size:Size = "medium";
+
+  @property({type: Boolean})
+  color:Color = "red";
 
   render() {
 
     const {title} = this;
     return html`
     <div>
-        <p>${title}</p>
         <slot></slot>
     </div>
   

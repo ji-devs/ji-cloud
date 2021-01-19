@@ -58,12 +58,9 @@ export class CircleButton extends LitElement {
   @property()
   label: string = "";
 
-  @property()
-  text: string = "";
-
   // Define the element's template
   render() {
-    const { active, disabled, text, label} = this;
+    const { active, disabled, label} = this;
 
     const circleClasses = classMap({ 
       circle: true, 
@@ -83,7 +80,7 @@ export class CircleButton extends LitElement {
     return html`
       <main>
         <div class="${circleClasses}">
-          <p class="${textClasses}">${text}</p>
+          <p class="${textClasses}"><slot></slot></p>
         </div>
         <p class="${labelClasses}">${label}</p>
       </main>

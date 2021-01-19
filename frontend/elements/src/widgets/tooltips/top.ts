@@ -1,5 +1,9 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { nothing } from 'lit-html';
+
+export type Kind = "plain" | "error"
+
 @customElement('tooltip-top')
 export class _ extends LitElement {
   static get styles() {
@@ -70,27 +74,27 @@ export class _ extends LitElement {
   }
 
   @property()
-  label:string = ""; 
-
-  @property()
-  path:string = ""; 
-
-  @property()
-  type:string = "";
-
-  @property({type: Boolean})
-  hidden:boolean = false; 
+  kind:Kind = "error";
 
   render() {
 
-    const {path, label, hidden, type} = this;
+    const {hidden, kind} = this;
+
+    const wrapperClass = kind === "error" ? "error"
+      : "";
+
+    const uiPath = kind === "error" ? "group-12812.svg"
+      : "";
 
     return html`
    
-        <div class="tooltip-wrapper ${type}">
+        <div class="tooltip-wrapper ${wrapperClass}">
             <span class="tooltip-wrapper-inside">
-                <img-ui path="${path}" alt="" class="${hidden ? 'hidden' : ''}"></img-ui>
-                <p>${label}</p>
+                ${kind !== "plain"
+                  ? html`<img-ui path="${uiPath}" alt=""></img-ui>`
+                  : nothing
+                }
+                <p><slot></slot></p>
             </span>
         
         </div>

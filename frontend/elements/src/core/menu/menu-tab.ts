@@ -38,18 +38,13 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  label: string = "";
-
   render() {
-
-    const {label} = this;
-
     return html`
     <main class="">
         <div class="tab-content-wrapper">
         <div class="tab-content">
-        <img class="menu-icon" src="${MEDIA_UI}/icons/icn-menu-home.svg"/><p>${label}</p>
+        <img class="menu-icon" src="${MEDIA_UI}/icons/icn-menu-home.svg"/>
+        <p><slot></slot></p>
         </div>
         </div>
         

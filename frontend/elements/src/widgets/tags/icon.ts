@@ -1,7 +1,9 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-export type Color = "green" | "blue" | "white";
-@customElement('icon-line')
+
+export type IconKind = "age" | "lang";
+
+@customElement('tag-icon')
 export class _ extends LitElement {
 
   static get styles() {
@@ -26,24 +28,27 @@ export class _ extends LitElement {
     `];
   }
 
-@property()
-icon: string = "";
+    @property()
+    kind: IconKind = "age";
 
-@property()
-label: string = "";
-
-@property()
-color: string = "";
-
+    @property()
+    label: string = "";
 
   render() {
-    const {icon, label,color} = this;
+    const {kind, label} = this;
    
+    const iconPath = kind === "age" ? "Icn_Age.svg"
+        : kind === "lang" ? "icn-language.svg"
+        : "";
+
+    const colorClass = kind === "age" ? "darkgrey"
+        : kind === "lang" ? "lightblue"
+        : "";
 
     return html`
 <div class="wrapper">
-        <img-ui path="${icon}"></img-ui>
-        <p class="${color}">${label}</p>
+        <img-ui path="${iconPath}"></img-ui>
+        <p class="${colorClass}">${label}</p>
 </div>
   `;
   }
