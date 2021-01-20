@@ -1,4 +1,4 @@
-use dominator_helpers::{futures::AsyncLoader};
+use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use crate::firebase::*;

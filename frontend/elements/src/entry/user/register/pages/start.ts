@@ -1,5 +1,6 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+import "@elements/entry/user/register/widgets/password-strength";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
 import "@elements/core/dividers/or-divider";
 
@@ -96,7 +97,7 @@ export class _ extends LitElement {
           <div class="inside-wrapper">
             <slot name="google"></slot>
             <or-divider slot="divider"></or-divider>
-            <slot name="username"></slot>
+            <slot name="email"></slot>
             <div class="spacer"></div>
             <div class="password-wrapper">
               <slot name="password"></slot>

@@ -9,7 +9,8 @@ use futures_signals::{
 use dominator::{Dom, html};
 use crate::{
     login::dom::LoginPage,
-    profile::dom::ProfilePage
+    profile::dom::ProfilePage,
+    register::pages::start::dom::StartPage as RegisterPage,
 };
 
 pub struct Router {
@@ -33,11 +34,9 @@ impl Router {
                         match route {
                             UserRoute::Login => Some(LoginPage::render()),
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
+                            UserRoute::Register => Some(RegisterPage::render()),
                             /*
-                            UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
-                            UserRoute::Register => Some(RegisterPage::render(RegisterPage::new(None))),
                             UserRoute::ContinueRegistration(user) => Some(RegisterPage::render(RegisterPage::new(Some(user)))),
-                            UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render(ProfilePage::new())),
                             UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),
                             UserRoute::SendEmailConfirmation => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new())),
                             UserRoute::GotEmailConfirmation => Some(GotEmailConfirmationPage::render(GotEmailConfirmationPage::new())),
