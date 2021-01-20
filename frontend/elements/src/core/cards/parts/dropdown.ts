@@ -27,7 +27,8 @@ export class _ extends LitElement {
   @property({ type: Boolean })
   collapsed: boolean = true;
 
-
+  @property()
+  icon: string = "";
 
   @property()
   label: string = "";

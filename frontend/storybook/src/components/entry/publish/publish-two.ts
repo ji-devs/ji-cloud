@@ -57,7 +57,7 @@ export const PublishFullTwo = (props?:PublishArgs) => {
         
         </div>
         <publish-dropdown ${closed && 'closed'} title="${STR_DROPDOWNTITLE}" slot="dropdown">
-          <icon-wtext icon="${STR_STUDENT}" text="${STR_SHARESTUDENT}"></icon-wtext>
+          <icon-wtext path="${STR_STUDENT}" text="${STR_SHARESTUDENT}"></icon-wtext>
           <icon-wtext icon="${STR_URLICON}" text="${STR_URL}"></icon-wtext>
         </publish-dropdown>
         <div slot="button-collection">${Rectangle({contents:STR_CREATE, size:STR_MEDIUM,color:STR_WHITE,  bold:false, italic:false  })}</div>
