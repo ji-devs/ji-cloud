@@ -6,4 +6,7 @@ contact_links:
   - name: Legacy Player
     about: create a Legacy Player issue
     url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
-  
+    
+  - name: Login and Registration (David)
+    about: create a Legacy Player issue
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Login/Registration&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
