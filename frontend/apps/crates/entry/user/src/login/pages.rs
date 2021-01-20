@@ -14,7 +14,7 @@ impl Login {
                 html!("button-google", {
                     .property("slot", "google")
                     .event(|evt:events::Click| {
-                        log::info!("clicked google!");
+                        log::info!("clicked!");
                     })
                 })
             ])
