@@ -93,6 +93,9 @@ export class _ extends LitElement {
   @property()
   value: string = "";
 
+  @property()
+  placeholder: string = "";
+
   @property({ type: Boolean })
   open: boolean = false;
 
@@ -100,7 +103,7 @@ export class _ extends LitElement {
   maxChildrenHeight: number = 400;
 
   render() {
-    const { label, open, error, value, maxChildrenHeight } = this;
+    const { label, open, error, value, maxChildrenHeight,placeholder } = this;
     const isError: boolean = error !== "";
 
     const errorwrapper = isError ? "errorwrapper" : "";
@@ -108,7 +111,7 @@ export class _ extends LitElement {
     return html`
       <div class="input-wrapper ${errorwrapper ? "errorwrapper" : ""}">
         <input
-          placeholder="Placeholder"
+          placeholder="${placeholder}"
           value="${value}"
           type="text"
           class=""
