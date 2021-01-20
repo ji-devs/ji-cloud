@@ -5,7 +5,7 @@ import {BaseButton} from "@elements/_styles/buttons";
 import { lastAttributeNameRegex } from 'lit-html/lib/template';
 
 export type Color = "red" | "blue" | "white" | "green";
-export type Size = "small" | "medium" | "large";
+export type Size = "small" | "medium" | "large" | "x-large";
 
 export type IconAfter = "arrow"
 export type IconBefore = "magnifyer"
@@ -85,8 +85,9 @@ export class _ extends BaseButton {
       .img-hidden{
         display:none
       }
-      .largetext{
-        font-size:24px !important;
+      .x-large{
+        font-size:24px;
+        padding: 13.6px 24px 11.4px;
       }
     
     `];
@@ -104,8 +105,7 @@ export class _ extends BaseButton {
   @property({ type: Boolean })
   italic: boolean = false;
 
-  @property({type: Boolean})
-  largetext:boolean = false; 
+ 
 
   @property()
   iconBefore?: IconBefore;
@@ -115,14 +115,14 @@ export class _ extends BaseButton {
   render() {
     
 
-    const {size, color, bold, italic, largetext, iconAfter, iconBefore} = this;
+    const {size, color, bold, italic,  iconAfter, iconBefore} = this;
 
     const classes = classMap({ 
       [size]: true,
       [color]: true,
       bold: bold,
       italic: italic,
-      largetext: largetext,
+     
     });
 
     

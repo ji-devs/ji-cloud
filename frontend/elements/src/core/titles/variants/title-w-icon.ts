@@ -18,6 +18,15 @@ export class _ extends LitElement {
         img-ui{
           margin-right: 12px
         }
+        .delete{
+          display:none;
+        }
+        .wrapper:hover .delete{
+          display:block;
+        }
+        .delete:hover #Icn_Delete_Idle path{
+          fill:#5590fc
+        }
         
    
     `];
@@ -38,6 +47,7 @@ export class _ extends LitElement {
     <div class="wrapper">
         <img-ui path="${path}"></img-ui>
         <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
+        <img-ui path="icn-delete.svg" class="delete"></img-ui>
         
     </div>
   `;

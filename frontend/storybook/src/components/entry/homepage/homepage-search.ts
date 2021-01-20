@@ -1,5 +1,5 @@
 import "@elements/entry/home/sections/search-bar";
-import "@elements/core/inputs/dropdowns/search-dropdown";
+import "@elements/entry/home/search-dropdown"; 
 import "@elements/core/buttons/rectangle";
 import "@elements/core/lists/searchbox-li-check";
 import "@elements/core/titles/ji";
