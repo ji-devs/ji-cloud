@@ -19,6 +19,10 @@ const DEFAULT_ARGS: SearchArgs = {
 
 const STR_RED = "red";
 const STR_SEARCH = "Search";
+const STR_LANGUAGES = "All languages";
+const STR_ADVANCED = "Advanced ";
+
+
 
 export const Search = (props?: SearchArgs) => {
 
@@ -31,9 +35,9 @@ export const Search = (props?: SearchArgs) => {
         <searchbox-li-check ${checked && 'checked'}>Passover</searchbox-li-check>
     
     </search-dropdown>
-    <search-dropdown slot="dropdown-language" placeholder="All languages"></search-dropdown>
-    <button-rect slot="button" iconBefore="magnifyer" size="medium" bold=true color="${STR_RED}" largetext=true>Search</button-rect>
-    <title-ji slot="advanced" color="lightblue" weight="x-bold">Advanced <br> Search</title-ji>
+    <search-dropdown slot="dropdown-language" placeholder="${STR_LANGUAGES}"></search-dropdown>
+    <button-rect slot="button" iconBefore="magnifyer" size="x-large" bold=true color="${STR_RED}" largetext=true>${STR_SEARCH}</button-rect>
+    <title-ji slot="advanced" color="lightblue" weight="x-bold" link=true>${STR_ADVANCED} <br> ${STR_SEARCH}</title-ji>
 
     </search-bar>
     `
