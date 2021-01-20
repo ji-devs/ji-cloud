@@ -19,6 +19,15 @@ export class _ extends LitElement {
    margin-left:40px;
    
    }
+   img-ui{
+    width: 193px;
+    height: 118px;
+
+   }
+   ::slotted([slot=button]){
+     display:block;
+     margin-left:410px;
+  }
  
     `];
   }
@@ -35,7 +44,7 @@ export class _ extends LitElement {
     <slot name="line"></slot>
     <slot name="cancel"></slot>
     <slot name="button"></slot>
-
+<img-ui path="yellow_Illustration.png"><img-ui>
    
     </main>
   `;

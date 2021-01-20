@@ -7,9 +7,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod firebase;
 mod google_maps;
-mod templates;
 mod router;
-mod pages;
+mod login;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

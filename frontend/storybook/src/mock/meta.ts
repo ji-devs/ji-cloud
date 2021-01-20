@@ -20,15 +20,7 @@ export const AGE_OPTIONS = [
     "University",
 ]
 
-export const AGETWO_OPTIONS = [
-    "Kindergarden",
-    "Elementary",
-    "Middle school",
-    "High school",
-    "University",
-]
-
-export const STREAM_OPTIONS = [
+export const AFFILIATION_OPTIONS = [
     "Show me everything",
     "No religious content",
     "Reform content",

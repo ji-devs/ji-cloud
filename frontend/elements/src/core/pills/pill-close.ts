@@ -37,26 +37,18 @@ img-ui{
 }
     `];
   }
-
-
-
-  @property()
-  label:string = ""; 
-
   @property({type:Boolean})
   negative:boolean = false; 
 
-  @property()
-  path:string = "icn-delete-tab.svg"; 
-
   render() {
 
-    const {label,path, negative} = this;
+    const {negative} = this;
 
     return html`
-<div class="wrapper ${negative ? 'negative' : ''}">${label}
-<img-ui path="${path}"></img-ui>
-</div>
+      <div class="wrapper ${negative ? 'negative' : ''}">
+        <slot></slot>
+        <img-ui path="icn-delete-tab.svg"></img-ui>
+      </div>
 
   `;
   }

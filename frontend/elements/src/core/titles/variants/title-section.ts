@@ -38,7 +38,11 @@ color:#5662a3;
   }
   
   
+.small{
+  font-size: 32px;
+  font-weight: 900;
 
+}
 
   .medium{
     font-size: 48px;

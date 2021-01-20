@@ -26,7 +26,7 @@ pub enum Route {
 pub enum UserRoute {
     Profile(ProfileSection),
     ContinueRegistration(FirebaseUserInfo),
-    Signin,
+    Login,
     Register,
     SendEmailConfirmation,
     GotEmailConfirmation,
@@ -118,7 +118,7 @@ impl Route {
             }
             ["user", "profile"] => Self::User(UserRoute::Profile(ProfileSection::Landing)),
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
-            ["user", "signin"] => Self::User(UserRoute::Signin),
+            ["user", "login"] => Self::User(UserRoute::Login),
             ["user", "register"] => Self::User(UserRoute::Register),
             ["user", "continue-registration"] => {
                 if let Some(user) = json_query {
@@ -198,7 +198,7 @@ impl From<&Route> for String {
                         let query = serde_qs::to_string(&query).unwrap_throw();
                         format!("/user/continue-registration?{}", query) 
                     }
-                    UserRoute::Signin => "/user/signin".to_string(),
+                    UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
                     UserRoute::GotEmailConfirmation => "/user/got-email-confirmation".to_string(),

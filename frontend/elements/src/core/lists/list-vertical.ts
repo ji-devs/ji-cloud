@@ -1,5 +1,7 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import {nothing} from "lit-html";
+
 @customElement('list-vertical')
 export class _ extends LitElement {
   static get styles() {
@@ -10,13 +12,10 @@ export class _ extends LitElement {
     }
     ul{
       padding-left:0;
-      display:flex;
-      margin-bottom:12px;
     }
-  ::slotted(*){
-     margin-right:18px;
-}
- 
+  li{
+      margin-bottom:12px;
+  }
   p{
     color: #5590fc;
     font-weight:500;
@@ -26,17 +25,15 @@ export class _ extends LitElement {
   }
 
   @property()
-  label:string = ""; 
-  @property()
-  title:string = ""; 
+  label?:string = ""; 
 
   render() {
 
-    const {title} = this;
+    const {label} = this;
 
     return html`
     <main>
-    <p>${title}</p>
+    ${label && label != "" ? html`<p>${label}</p>` : nothing}
     <ul>
       <slot></slot>    
     </ul>
