@@ -7,9 +7,7 @@ export default {
   title: 'Entry / User / Login / Pages',
 }
 
-const STR_ACCOUNT = "Don't have an account yet?";
 const STR_REGISTER = "Sign Up";
-const STR_TITLE = "Login";
 const STR_PASSWORD = "Password";
 const STR_FORGOTTEN ="Forgot your Password?";
 const STR_USERLABEL = "User Name";
