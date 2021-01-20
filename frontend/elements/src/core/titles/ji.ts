@@ -92,6 +92,7 @@ export class _ extends LitElement {
     return html`
     ${p ? html`<p>`: nothing}
     <div class="${classes}">
+
         <slot></slot>
     </div>
     ${p ? html`</p>` : nothing}
