@@ -1,8 +1,8 @@
-name: User - Elements - Sandbox
+name: User - Elements - Release 
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
     - 'frontend/config/**'
@@ -61,7 +61,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/elements/dist/user gs://ji-cloud-sandbox-frontend-origin-eu-001/user/elements
+        run: gsutil -m rsync -d -r frontend/elements/dist/user gs://ji-cloud-frontend-origin-eu-001/user/elements
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
