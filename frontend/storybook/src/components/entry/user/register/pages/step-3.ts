@@ -1,9 +1,9 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/step3";
-import "@elements/core/titles/ji";
-import "@elements/core/dividers/or-divider";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/lists/list-vertical";
+import "@elements/core/lists/list-horizontal";
+import "@elements/core/inputs/checkbox";
 import {Rectangle as RectangleButton} from "~/components/core/buttons/rectangle";
 import {AFFILIATION_OPTIONS, AGE_OPTIONS} from "~/mock/meta";
 import {mapToString} from "@utils/array";

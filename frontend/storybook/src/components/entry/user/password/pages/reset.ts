@@ -1,9 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/password/pages/reset";
-import "@elements/core/titles/ji";
-import "@elements/core/dividers/or-divider";
 import "@elements/core/buttons/rectangle";
-import "@elements/entry/user/_common/buttons/google";
+import "@elements/core/buttons/text";
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
 export default {

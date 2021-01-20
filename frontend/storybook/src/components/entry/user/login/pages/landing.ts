@@ -1,6 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/login/pages/landing";
-import "@elements/core/titles/ji";
 import "@elements/core/buttons/rectangle";
 import "@elements/entry/user/_common/buttons/google";
 

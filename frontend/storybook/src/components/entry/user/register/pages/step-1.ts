@@ -1,9 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/step1";
-import "@elements/entry/user/register/widgets/password-strength";
 import "@elements/entry/user/register/footer/login";
-import "@elements/core/titles/ji";
-import "@elements/core/dividers/or-divider";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 
