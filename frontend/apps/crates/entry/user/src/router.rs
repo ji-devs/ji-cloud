@@ -7,10 +7,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::signin::SigninPage;
-use crate::pages::register::RegisterPage;
-use crate::pages::profile::{ProfilePage, ProfileEmailChangePage};
-use crate::pages::email_confirmation::{SendEmailConfirmationPage, GotEmailConfirmationPage};
+use crate::login::pages::Login;
 
 pub struct Router {
 }
@@ -31,6 +28,8 @@ impl Router {
                 match route {
                     Route::User(route) => {
                         match route {
+                            UserRoute::Login => Some(Login::render()),
+                            /*
                             UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
                             UserRoute::Register => Some(RegisterPage::render(RegisterPage::new(None))),
                             UserRoute::ContinueRegistration(user) => Some(RegisterPage::render(RegisterPage::new(Some(user)))),
@@ -38,6 +37,7 @@ impl Router {
                             UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),
                             UserRoute::SendEmailConfirmation => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new())),
                             UserRoute::GotEmailConfirmation => Some(GotEmailConfirmationPage::render(GotEmailConfirmationPage::new())),
+                            */
                             _ => None
                         }
                     }
