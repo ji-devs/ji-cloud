@@ -1,30 +1,23 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { classMap } from 'lit-html/directives/class-map';
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
 
-@customElement('spacer-fourty')
+@customElement("spacer-fourty")
 export class _ extends LitElement {
-
   static get styles() {
-    return [css`
-    div{
-       height:40px;
-       width:100%;
-       display:block
-    }
-    `];
+    return [
+      css`
+        div {
+          height: 40px;
+          width: 100%;
+          display: block;
+        }
+      `,
+    ];
   }
 
-
-
-
   render() {
-
     const {} = this;
 
-    return html`
-    <div>
-
-    </div>
-  `;
+    return html` <div></div> `;
   }
 }

@@ -1,4 +1,11 @@
-export const argsToAttrs = (args:Object):string => {
+export const deleteNone = (args:any):any => {
+    return (Object as any)
+        .entries(args)
+        .filter(([key, value]) => value !== "none")
+        .reduce((acc, [key, value]) => Object.assign(acc, {[key]: value}), {})
+}
+
+export const argsToAttrs = (args:any):string => {
     return (Object as any)
         .entries(args)
         .map(argToAttr)
@@ -17,3 +24,4 @@ export const argToAttr = ([key, value]:[string, any]):string => {
     } 
     
 }
+

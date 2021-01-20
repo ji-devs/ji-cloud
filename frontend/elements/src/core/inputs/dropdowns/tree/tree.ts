@@ -1,13 +1,12 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { noChange } from 'lit-html';
+import { MEDIA_UI } from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { noChange } from "lit-html";
 
-
-@customElement('dropdown-tree')
+@customElement("dropdown-tree")
 export class _ extends LitElement {
-
-  static get styles() {
-    return [css`
+  static get styles() {
+    return [
+      css`
     .main-wrapper{
         border-color:#e6f0ff;
         border-style:solid;
@@ -63,37 +62,43 @@ export class _ extends LitElement {
     .open .downarrow {
         display:block;
     }
-    `];
-  }
+    `,
+    ];
+  }
 
+  @property()
+  label: string = "";
 
-@property()
-label: string = "";
+  @property({ type: Boolean })
+  open: boolean = false;
 
-@property({type: Boolean})
-open: boolean = false;
+  render() {
+    const { label, open } = this;
 
-  render() {
-
-    const {label, open} = this;
-
-    return html`
-  
-    <div class="main-wrapper ${open ? "bordergreen open" : ''}">
+    return html`
+      <div class="main-wrapper ${open ? "bordergreen open" : ""}">
         <div class="inside-wrapper">
-            <div class="text-wrapper flex py-3">
-                <img-ui class="sidearrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-                <img-ui class="downarrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
+          <div class="text-wrapper flex py-3">
+            <img-ui
+              class="sidearrow"
+              path="icon-chevron-categories-24-px.svg"
+              alt=""
+            ></img-ui>
+            <img-ui
+              class="downarrow"
+              path="icon-chevron-categories-24-px-active.svg"
+              alt=""
+            ></img-ui>
 
-                <p>${label}</p>
-            </div>
-
+            <p>${label}</p>
+          </div>
         </div>
-        <ul class="${open ? 'open' : 'closed'}">
-            <slot></slot>
+        <ul class="${open ? "open" : "closed"}">
+          <slot></slot>
         </ul>
-    </div>
+      </div>
 
-  `;
-  }
+        
+    `;
+  }
 }

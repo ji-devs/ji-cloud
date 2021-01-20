@@ -1,24 +1,22 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import {imageLib} from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { imageLib } from "@utils/path";
 import "./basic";
 
-@customElement('img-ji')
+@customElement("img-ji")
 export class _ extends LitElement {
-
+  @property()
+  lib: "global" | "user" | "web" = "global";
 
   @property()
-  lib:"global" | "user" | "web"= "global"; 
+  size: "original" | "full" | "thumb" = "full";
 
   @property()
-  size:"original" | "full" | "thumb"= "full"; 
-
-  @property()
-  id:string = "";
+  id: string = "";
 
   render() {
-    const { lib, size, id} = this;
+    const { lib, size, id } = this;
 
-    const src = imageLib({lib, size, id});
+    const src = imageLib({ lib, size, id });
 
     return html`<img-basic id="img" src="${src}"></img>`;
   }

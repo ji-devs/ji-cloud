@@ -1,12 +1,12 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
-import { classMap } from 'lit-html/directives/class-map';
-import {mediaUi} from "@utils/path";
+import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
+import { mediaUi } from "@utils/path";
 import "./basic";
 
-@customElement('img-ui')
+@customElement("img-ui")
 export class _ extends LitElement {
   @property()
-  path:string = ""; 
+  path: string = "";
 
   render() {
     const { path } = this;

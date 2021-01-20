@@ -1,10 +1,14 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
+import "@elements/core/images/ui";
 
-export type Mode = "confirmation" | "sendagain";
+const STR_SENT = "We have just sent you another email";
+const STR_SEND = "I didn’t receive an email, Please send again";
 
-@customElement('confirmation-button')
+export type Mode = "send" | "sent";
+
+@customElement('button-email-send')
 export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -16,6 +20,7 @@ export class _ extends LitElement {
         align-items:center;
         width: 374px;
         justify-items:center;
+        cursor: pointer;
     }
     span{
         display:flex;
@@ -46,7 +51,7 @@ export class _ extends LitElement {
   path:string = ""; 
   
   @property()
-    mode: Mode = "sendagain";
+    mode: Mode = "sent";
 
   render() {
 
@@ -54,22 +59,22 @@ export class _ extends LitElement {
 
     return html`
 
-        ${mode === "confirmation" ? confirmation() : sendagain()}
+        ${mode === "sent" ? sent() : send()}
   `;
   }
 }
 
 
-function confirmation() {
+function sent() {
     return html`  <div class="wrapper">
-    <span class="flex items-center font-sans font-normal text-lg"><img-ui path="icon-sent.svg" alt=""></img-ui>We have just sent you another email</span>
+    <span class="flex items-center font-sans font-normal text-lg"><img-ui path="icon-sent.svg" alt=""></img-ui>${STR_SENT}</span>
 
   </div>`
   
 }
 
-function sendagain() {
-  return html`  <p>I didn’t receive an email, Please send again</p>`
+function send() {
+  return html`<p>${STR_SEND}</p>`
 
 }
 

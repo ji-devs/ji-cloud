@@ -10,22 +10,20 @@ export type Size = "small" | "medium" | "large";
 export type IconAfter = "arrow"
 export type IconBefore = "magnifyer"
 
-@customElement('button-rect')
+@customElement("button-rect")
 export class _ extends BaseButton {
-
   static get styles() {
-    return [css`
-    button {
-        border-radius: 24px;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-        display:flex;
-        align-items:center;
-        
-        
-      }
-      .medium{
+    return [
+      css`
+        button {
+          border-radius: 24px;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+        }
+        .medium {
           padding: 13.6px 24px 11.4px;
       }
       .large{
@@ -100,11 +98,11 @@ export class _ extends BaseButton {
   @property()
   color: Color = "red";
 
-  @property({type: Boolean})
-  bold:boolean = false; 
+  @property({ type: Boolean })
+  bold: boolean = false;
 
-  @property({type: Boolean})
-  italic:boolean = false; 
+  @property({ type: Boolean })
+  italic: boolean = false;
 
   @property({type: Boolean})
   largetext:boolean = false; 
@@ -115,6 +113,7 @@ export class _ extends BaseButton {
   iconAfter?: IconAfter;
 
   render() {
+    
 
     const {size, color, bold, italic, largetext, iconAfter, iconBefore} = this;
 

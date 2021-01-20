@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
-
+import {nothing} from "lit-html";
 export type Color = "red" | "blue" | "white" | "green" | "lightgreen" | "lightblue" | "black";
 export type Size = "small" | "medium" | "large" | "x-large";
 export type Weight = "thin" | "bolder" | "x-bold";
@@ -14,10 +14,16 @@ export class _ extends LitElement {
         align-items:center;
     }
     p{
-        color: #5590fc;
         font-weight: 500;
         margin-right:36px;
+    }
 
+    .link {
+      cursor: pointer;
+    }
+
+    .blue {
+      color: #5590fc;
     }
     .thin{
       font-weight:300
@@ -65,9 +71,15 @@ export class _ extends LitElement {
   @property()
   weight:Weight = "x-bold";
 
+  @property({type: Boolean})
+  p:boolean = false;
+
+  @property({type: Boolean})
+  link:boolean = false;
+
   render() {
 
-    const {size, color, bold, italic, weight} = this;
+    const {size, color, bold, italic, weight, p, link} = this;
 
     const classes = classMap({ 
       [size]: true,
@@ -75,11 +87,14 @@ export class _ extends LitElement {
       bold: bold,
       italic: italic,
       [weight]:true,
+      link,
     });
     return html`
+    ${p ? html`<p>`: nothing}
     <div class="${classes}">
         <slot></slot>
     </div>
+    ${p ? html`</p>` : nothing}
   
 
   `;
