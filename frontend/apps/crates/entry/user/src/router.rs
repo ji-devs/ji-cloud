@@ -7,7 +7,10 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::login::pages::Login;
+use crate::{
+    login::dom::LoginPage,
+    profile::dom::ProfilePage
+};
 
 pub struct Router {
 }
@@ -28,7 +31,8 @@ impl Router {
                 match route {
                     Route::User(route) => {
                         match route {
-                            UserRoute::Login => Some(Login::render()),
+                            UserRoute::Login => Some(LoginPage::render()),
+                            UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
                             /*
                             UserRoute::Signin => Some(SigninPage::render(SigninPage::new())),
                             UserRoute::Register => Some(RegisterPage::render(RegisterPage::new(None))),
