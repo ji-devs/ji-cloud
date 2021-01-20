@@ -1,8 +1,9 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map';
 
-export type Color = "red" | "blue" | "white" | "green";
-export type Size = "small" | "medium" | "large";
-
+export type Color = "red" | "blue" | "white" | "green" | "lightgreen" | "lightblue" | "black";
+export type Size = "small" | "medium" | "large" | "x-large";
+export type Weight = "thin" | "bolder" | "x-bold";
 @customElement('title-ji')
 export class _ extends LitElement {
 
@@ -18,6 +19,31 @@ export class _ extends LitElement {
         margin-right:36px;
 
     }
+    .thin{
+      font-weight:300
+    }
+    .black{
+      color: #4a4a4a
+    }
+    .lightgreen{
+      color: #9cddb2
+    }
+    .x-large{
+      font-size:64px;
+    }
+    .large{
+      font-size:32px;
+    }
+    .x-bold{
+      font-weight:900
+    }
+    .lightblue{
+      color:#e7f0fe;
+    }
+    .medium{
+      font-size:16px;
+    }
+    .bold{font-weight:600}
     `];
   }
 
@@ -30,17 +56,28 @@ export class _ extends LitElement {
   @property({type: Boolean})
   underlined:boolean = false;
 
-  @property({type: Boolean})
+  @property()
   size:Size = "medium";
 
-  @property({type: Boolean})
+  @property()
   color:Color = "red";
+
+  @property()
+  weight:Weight = "x-bold";
 
   render() {
 
-    const {title} = this;
+    const {size, color, bold, italic, weight} = this;
+
+    const classes = classMap({ 
+      [size]: true,
+      [color]: true,
+      bold: bold,
+      italic: italic,
+      [weight]:true,
+    });
     return html`
-    <div>
+    <div class="${classes}">
         <slot></slot>
     </div>
   

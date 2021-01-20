@@ -2,12 +2,13 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import { nothing} from 'lit-html';
 import {BaseButton} from "@elements/_styles/buttons";
+import { lastAttributeNameRegex } from 'lit-html/lib/template';
 
 export type Color = "red" | "blue" | "white" | "green";
 export type Size = "small" | "medium" | "large";
 
 export type IconAfter = "arrow"
-export type IconBefore = ""
+export type IconBefore = "magnifyer"
 
 @customElement('button-rect')
 export class _ extends BaseButton {
@@ -29,6 +30,7 @@ export class _ extends BaseButton {
       }
       .large{
        padding: 15px 40px 16px;
+       
       }
       
       .red {
@@ -85,6 +87,9 @@ export class _ extends BaseButton {
       .img-hidden{
         display:none
       }
+      .largetext{
+        font-size:24px !important;
+      }
     
     `];
   }
@@ -101,6 +106,9 @@ export class _ extends BaseButton {
   @property({type: Boolean})
   italic:boolean = false; 
 
+  @property({type: Boolean})
+  largetext:boolean = false; 
+
   @property()
   iconBefore?: IconBefore;
   @property()
@@ -108,23 +116,26 @@ export class _ extends BaseButton {
 
   render() {
 
-    const {size, color, bold, italic, iconAfter, iconBefore} = this;
+    const {size, color, bold, italic, largetext, iconAfter, iconBefore} = this;
 
     const classes = classMap({ 
       [size]: true,
       [color]: true,
       bold: bold,
       italic: italic,
+      largetext: largetext,
     });
 
-    const iconBeforePath = "";
+    
+    const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg"
+      : "";
     const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
       : "";
 
     return html`
       <button type="button" name="button" class="${classes}" >
       ${iconBefore && html`<img-ui class="left" path="${iconBeforePath}"></img-ui>`}
-      <slot></slot>
+      <slot class="${classes}"></slot>
       ${iconAfter && html`<img-ui class="right" path="${iconAfterPath}"></img-ui>`}
     </button>
   `;
