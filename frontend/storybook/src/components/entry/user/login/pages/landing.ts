@@ -12,6 +12,7 @@ const STR_PASSWORD = "Password";
 const STR_FORGOTTEN ="Forgot your Password?";
 const STR_USERLABEL = "User Name";
 const STR_SUBMIT = "Submit";
+const STR_PASSWORDPLACEHOLDER = "Type your password";
 
 interface Args {
 }
