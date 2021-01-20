@@ -77,6 +77,10 @@ export class _ extends LitElement {
         ::slotted([slot="sub"]) {
           white-space: nowrap;
         }
+        ::slotted([slot="password-forgot"]){
+          margin-top:16px;
+          display:block;
+        }
       `,
     ];
   }
