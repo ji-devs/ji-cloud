@@ -5,9 +5,9 @@ use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 
-const STR_PASSWORD:&'static str = "Password";
+const STR_PASSWORD_LABEL:&'static str = "Password";
 const STR_FORGOTTEN:&'static str ="Forgot your Password?";
-const STR_USERLABEL:&'static str = "User Name";
+const STR_EMAIL_LABEL:&'static str = "Email";
 const STR_SUBMIT:&'static str = "Submit";
 
 
@@ -24,22 +24,22 @@ impl LoginPage {
             }))
             .children(vec![
                 html!("input-text", {
-                    .property("slot", "username")
+                    .property("slot", "email")
                     .property("mode", "text")
-                    .property("label", STR_USERLABEL)
-                    .property_signal("error", state.username_error())
+                    .property("label", STR_EMAIL_LABEL)
+                    .property_signal("error", state.email_error())
                     .event(clone!(state => move |evt:events::CustomInput| {
-                        state.clear_status();
-                        *state.username.borrow_mut() = evt.value();
+                        state.clear_email_status();
+                        *state.email.borrow_mut() = evt.value();
                     }))
                 }),
                 html!("input-text", {
                     .property("slot", "password")
                     .property("mode", "passwordHidden")
-                    .property("label", STR_PASSWORD)
+                    .property("label", STR_PASSWORD_LABEL)
                     .property_signal("error", state.password_error())
                     .event(clone!(state => move |evt:events::CustomInput| {
-                        state.clear_status();
+                        state.clear_password_status();
                         *state.password.borrow_mut() = evt.value();
                     }))
                 }),

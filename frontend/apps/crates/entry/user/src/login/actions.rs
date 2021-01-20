@@ -18,11 +18,12 @@ use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
 
 pub fn signin_email(state: Rc<State>) {
-    state.clear_status();
+    state.clear_email_status();
+    state.clear_password_status();
 
     state.loader.load(clone!(state => async move {
 
-        let email:String = state.username.borrow().clone();
+        let email:String = state.email.borrow().clone();
         let password:String = state.password.borrow().clone();
 
         let token_promise = unsafe { firebase_signin_email(&email, &password) };
@@ -39,7 +40,8 @@ pub fn signin_email(state: Rc<State>) {
 }
 
 pub fn signin_google(state: Rc<State>) {
-    state.clear_status();
+    state.clear_email_status();
+    state.clear_password_status();
 
     state.loader.load(clone!(state => async move {
         let token_promise = unsafe { firebase_signin_google() };
@@ -55,10 +57,10 @@ pub fn signin_google(state: Rc<State>) {
 }
 
 pub fn forgot_password(state: Rc<State>) {
-    state.clear_status();
+    state.clear_password_status();
 
     state.loader.load(clone!(state => async move {
-        let email:String = state.username.borrow().clone();
+        let email:String = state.email.borrow().clone();
         let token_promise = unsafe { firebase_forgot_password(&email) };
         let res = JsFuture::from(token_promise).await
             .map(|_| ())

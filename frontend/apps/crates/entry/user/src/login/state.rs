@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 
 pub struct State {
     pub loader: AsyncLoader,
-    pub username: RefCell<String>,
+    pub email: RefCell<String>,
     pub password: RefCell<String>,
     pub status: Mutable<Option<Status>>,
 }
@@ -14,22 +14,29 @@ impl State {
     pub fn new() -> Self {
         Self {
             loader: AsyncLoader::new(),
-            username: RefCell::new("".to_string()),
+            email: RefCell::new("".to_string()),
             password: RefCell::new("".to_string()),
             status: Mutable::new(None),
         }
     }
 
-    pub fn clear_status(&self) {
-        self.status.set(None);
+    pub fn clear_email_status(&self) {
+        if self.status.get_cloned().and_then(|x| x.email_error()).is_some() {
+            self.status.set(None);
+        }
+    }
+    pub fn clear_password_status(&self) {
+        if self.status.get_cloned().and_then(|x| x.password_error()).is_some() {
+            self.status.set(None);
+        }
     }
 
-    pub fn username_error(&self) -> impl Signal<Item = &'static str> {
+    pub fn email_error(&self) -> impl Signal<Item = &'static str> {
         self.status
             .signal_cloned()
             .map(|err| {
                  err
-                 .and_then(|err| err.username_error())
+                 .and_then(|err| err.email_error())
                  .unwrap_or("")
             })
     }
@@ -59,7 +66,7 @@ pub enum Status {
 }
 
 impl Status {
-    pub fn username_error(&self) -> Option<&'static str> {
+    pub fn email_error(&self) -> Option<&'static str> {
         match self {
             Self::NoSuchFirebaseUser => Some("no such user!"),
             Self::InvalidEmail => Some("invalid email"),

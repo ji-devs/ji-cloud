@@ -92,7 +92,7 @@ export class _ extends LitElement {
             <slot name="google"></slot>
 
             <or-divider></or-divider>
-            <slot name="username"></slot>
+            <slot name="email"></slot>
             <div class="spacer"></div>
             <slot name="password"> </slot>
             <slot name="password-forgot"></slot>
