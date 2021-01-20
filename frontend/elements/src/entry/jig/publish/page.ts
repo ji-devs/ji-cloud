@@ -76,6 +76,14 @@ export class _ extends LitElement {
         left:40%;
     
     }
+    .pill-wrapper{
+        display:flex;
+        flex-wrap:wrap;
+        margin-top:24px;
+    }
+    ::slotted([slot="pills"]){
+        margin-top:8px;
+    }
        
     `];
   }
@@ -101,7 +109,11 @@ export class _ extends LitElement {
                 <div class="content">
                     <div class="column"><slot name="column_one"></slot></div>
                     <div class="column"><slot name="column_two"></slot></div>
-                    <div class="column"><slot name="column_three"></slot></div>
+                    <div class="column"><slot name="column_three"></slot>
+                        <div class="pill-wrapper">
+                        <slot name="pills"></slot>
+                        </div>
+                    </div>
                     <div class="column"><slot name="column_four"></slot></div>
                 </div>
                 <div class="button-wrapper">
