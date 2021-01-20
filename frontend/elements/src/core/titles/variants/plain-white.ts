@@ -10,10 +10,14 @@ export class _ extends LitElement {
         margin-bottom:0;
         word-wrap:normal;
         
+
     }
     
     .bold {
       font-weight:600;
+    }
+    .small{
+      font-size:14px;
     }
     
    
@@ -24,13 +28,15 @@ export class _ extends LitElement {
   title:string = ""; 
   @property({type: Boolean})
   bold:boolean = false; 
+  @property({type: Boolean})
+  small:boolean = false; 
 
   render() {
 
-    const {title, bold} = this;
+    const {title, bold,small} = this;
 
     return html`
-    <p class="${bold ? 'bold' : ''}">${title}</p>
+    <p class="${bold ? 'bold' : ''} ${small ? 'small' : ''}">${title}</p>
   `;
   }
 }
