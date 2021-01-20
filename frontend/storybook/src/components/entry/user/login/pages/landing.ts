@@ -1,6 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/login/pages/landing";
-import "@elements/core/titles/ji";
 import "@elements/core/buttons/rectangle";
 import "@elements/entry/user/_common/buttons/google";
 
@@ -8,9 +7,7 @@ export default {
   title: 'Entry / User / Login / Pages',
 }
 
-const STR_ACCOUNT = "Don't have an account yet?";
 const STR_REGISTER = "Sign Up";
-const STR_TITLE = "Login";
 const STR_PASSWORD = "Password";
 const STR_FORGOTTEN ="Forgot your Password?";
 const STR_USERLABEL = "User Name";
