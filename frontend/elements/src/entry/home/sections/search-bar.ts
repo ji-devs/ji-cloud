@@ -50,7 +50,7 @@ export class _ extends LitElement {
     position:absolute;
     text-align:center;
     right:-100px;
-    cursor:pointer;
+    
   }
   
     `];

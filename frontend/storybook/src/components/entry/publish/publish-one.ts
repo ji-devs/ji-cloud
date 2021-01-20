@@ -83,7 +83,11 @@ export const PublishFullOne = (props?:PublishArgs) => {
         <spacer-fourty slot="column_three"></spacer-fourty>
         <dropdown-select slot="column_three" placeholder="${STR_SELECTCATEGORIES}" label="${STR_CATEGORIES}" error="${errormessage}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}>
         </dropdown-select>
-        <div slot="column_three">${PillClose({contents:STR_PILL})}</div>
+        <div slot="pills">${PillClose({contents:STR_PILL})}</div>
+        <div slot="pills">${PillClose({contents:STR_PILL})}</div>
+        <div slot="pills">${PillClose({contents:STR_PILL})}</div>
+        <div slot="pills">${PillClose({contents:STR_PILL})}</div>
+        <div slot="pills">${PillClose({contents:STR_PILL})}</div>
         <title-ji slot="column_four" color="blue" size="medium" weight="normal">${STR_RESOURCES}</title-ji>
         <title-wicon title="${STR_ICONLABEL}" path="${STR_CHECKBOX}" ${uploaded && "uploaded"} slot="column_four"></title-wicon>
         <title-wicon title="${STR_ICONLABELTWO}" path="${STR_ADD}"  slot="column_four"></title-wicon>

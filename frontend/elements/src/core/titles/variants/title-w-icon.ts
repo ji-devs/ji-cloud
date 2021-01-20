@@ -18,7 +18,15 @@ export class _ extends LitElement {
         img-ui{
           margin-right: 12px
         }
-        
+        .delete{
+          display:none;
+        }
+        .wrapper:hover .delete{
+          display:block;
+        }
+       
+       
+
    
     `];
   }
@@ -29,15 +37,24 @@ export class _ extends LitElement {
   path:string = ""; 
   @property({type: Boolean})
   uploaded: boolean = false;
+  @property({type: Boolean})
+  hover:boolean = false;
+  
+  onHover() {
+    this.hover = !this.hover
+  }
 
   render() {
 
-    const {title, path, uploaded} = this;
+    const {title, path, uploaded,hover} = this;
+
+    const src = hover ? "icn-delete-blue.svg" : "icn-delete.svg";
 
     return html`
     <div class="wrapper">
         <img-ui path="${path}"></img-ui>
         <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
+        <img-ui path="${src}"  @mouseover="${this.onHover}" class="delete"></img-ui>
         
     </div>
   `;
