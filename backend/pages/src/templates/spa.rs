@@ -74,7 +74,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_css: settings.remote_target().css_url(true),
         app_custom_elements_js: settings
             .remote_target()
-            .spa_url(&*spa.as_str(), "js/custom-elements.js"),
+            .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
