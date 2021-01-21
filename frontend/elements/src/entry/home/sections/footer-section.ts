@@ -12,9 +12,7 @@ import { MEDIA_UI } from '@utils/path';
    }
    #titleJi{
    }
-   #titleAbout{
-    place-items::right;
-   }
+  
    #titles{
      display:flex;
    }
@@ -22,7 +20,9 @@ import { MEDIA_UI } from '@utils/path';
     margin-left:90px;
   }
   ::slotted([slot=titleAbout]){
-    margin-left:490px;
+    margin-left:600px;
+    place-items::right;
+
   }
   ::slotted([slot=titleJi]){
     margin-left:80px;
@@ -31,11 +31,13 @@ import { MEDIA_UI } from '@utils/path';
     margin-top:80px;
   }
 
-
-
   ::slotted([slot=kidsafe]){
     margin-left:100px;
     margin-bottom:99px;
+ 
+  }
+
+  
  
   }
     `];
@@ -45,16 +47,15 @@ import { MEDIA_UI } from '@utils/path';
     return html`
     <main>
     <div id="titles">  
-      <slot id="titleJi" name="titleJi"></slot>
-    <slot id="titleAbout" name="titleAbout"></slot>
+      <slot  name="titleJi"></slot>
+    <slot  name="titleAbout"></slot>
     </div>
          <div class="inside-wrapper">
          <slot id="footer-column" name="footer-column"></slot>
          <slot name="button"></slot>
          </div>
 
-         <slot name="socialnetworks"></slot>
-         <slot name="kidsafe"></slot>
+          <slot name="kidsafe"></slot>
     </main>
   `;
   }

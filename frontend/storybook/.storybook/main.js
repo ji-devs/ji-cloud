@@ -6,15 +6,17 @@ module.exports = {
     "../src/components/**/*.@(js|jsx|ts|tsx)"
   ],
   "addons": [
-    "@storybook/addon-links",
+    "@storybook/addon-controls",
+    "@storybook/addon-docs",
+    /*doesn't help to see source :/
     {
-      name: '@storybook/addon-essentials',
+      name: '@storybook/addon-docs',
       options: {
-        backgrounds: false,
-        actions: true,
-        controls: true 
-      }
-    }
+        configureJSX: false,
+        babelOptions: {},
+      },
+    },
+    */
   ],
 
   webpackFinal: makeWebpackFinal

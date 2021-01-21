@@ -32,12 +32,24 @@ color:#5662a3;
   .white{
     color:#ffffff;
   }
+
+  .yellow{
+    color:#fed657;
+  }
   
   
+.small{
+  font-size: 32px;
+  font-weight: 900;
 
+}
 
-  #medium{
+  .medium{
     font-size: 48px;
+    font-weight: 900;
+  }
+  .large{
+    font-size: 64px;
     font-weight: 900;
   }
 
@@ -63,7 +75,7 @@ color:#5662a3;
     const {title,titlecolor,size} = this;
 
     return html`
-        <h1 class="${titlecolor}" id="${size}">${title}</h1> 
+        <h1 class="${titlecolor} ${size}"  >${title}</h1> 
   `;
   }
 }
