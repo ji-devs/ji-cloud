@@ -50,14 +50,6 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
-      - name: install npm deps
-        run: npm ci 
-        working-directory: "./frontend/apps"
-
-      - name: install npm deps (build-utils)
-        run: npm ci 
-        working-directory: "./frontend/build-utils"
-
       - name: build 
         run: cargo make release "user"
         working-directory: "./frontend/apps"

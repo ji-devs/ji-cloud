@@ -9,6 +9,8 @@ mod firebase;
 mod google_maps;
 mod router;
 mod login;
+mod register;
+mod profile;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
