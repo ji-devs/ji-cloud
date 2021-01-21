@@ -12,8 +12,7 @@ export default {
   title: 'Entry / User / Register / Pages',
 }
 
-const STR_AGE_LABEL = "Which age group are you interested in?";
-const STR_AFFILIATION_LABEL = "Content from which streams of Judaism do you want to see?";
+const STR_SUBMIT = "Submit";
 
 interface Args {
 }
@@ -26,22 +25,13 @@ export const Step3 = (props?:Partial<Args>) => {
 
     return `
         <page-register-step3>
-            <card-grey slot="main">
-                <list-horizontal label="${STR_AGE_LABEL}">
-                ${mapToString(AGE_OPTIONS, label => {
-                    return `<input-checkbox label="${label}"></input-checkbox>`
-                })}
-                </list-horizontal>
-            </card-grey>
-            <card-grey slot="main">
-                <list-vertical label="${STR_AFFILIATION_LABEL}">
-                ${mapToString(AFFILIATION_OPTIONS, label => {
-                    return `<input-checkbox label="${label}"></input-checkbox>`
-                })}
-                </list-vertical>
-            </card-grey>
-
-            <div slot="submit">${RectangleButton()}</div>
+            ${mapToString(AGE_OPTIONS, label => {
+                return `<input-checkbox label="${label}" slot="ages"></input-checkbox>`
+            })}
+            ${mapToString(AFFILIATION_OPTIONS, label => {
+                return `<input-checkbox label="${label}" slot="affiliations"></input-checkbox>`
+            })}
+            <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
         </page-register-step3>
 
     `
