@@ -14,5 +14,6 @@ import "@elements/entry/user/register/pages/step3";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 import "@elements/core/inputs/checkbox";
+import "@elements/core/inputs/text";
 import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";

@@ -21,9 +21,6 @@ export class _ extends LitElement {
         }
         li {
           list-style-type: none;
-          border: solid 1px #ffffff;
-
-          border-radius: 14px;
           padding: 2px 16px 2px 4px;
         }
         .errorwrapper {

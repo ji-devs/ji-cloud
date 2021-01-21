@@ -17,7 +17,9 @@ export class _ extends LitElement {
     margin-right:8px;
     height:24px;
     color:#387af4;
+    position:relative;
 }
+
 img-ui{
   position:absolute;
   top: -7px;
