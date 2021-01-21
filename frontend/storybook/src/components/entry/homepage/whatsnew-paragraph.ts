@@ -5,7 +5,7 @@ import "@elements/core/titles/variants/subtitle";
 import "@elements/entry/home/TOSORT/list-type";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/dividers/circle-div";
-import "@elements/entry/home/TOSORT/contet-wimg";
+import "@elements/entry/home/TOSORT/content-wimg";
 
 
   

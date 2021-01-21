@@ -5,11 +5,7 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
 
-  .wrapper{
-    // width: 274px;
-    // margin-left:50px;
 
-  }
   .yellow {
     color: #fed657    ;
   }

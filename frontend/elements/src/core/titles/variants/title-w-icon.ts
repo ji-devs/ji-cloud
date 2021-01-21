@@ -57,7 +57,7 @@ leave() {
     <div class="wrapper">
         <img-ui path="${path}"></img-ui>
         <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
-        <img-ui path="${src}"  @mouseenter=${this.enter} @mouseleave=${this.leave} class="delete"></img-ui>
+        <img-ui path="${src}"  @mouseenter="${this.enter}" @mouseleave="${this.leave}" class="delete"></img-ui>
         
     </div>
   `;

@@ -4,7 +4,7 @@ import "@elements/core/titles/variants/title-section";
 import "@elements/core/titles/variants/subtitle";
 import "@elements/entry/home/TOSORT/list-type";
 import "@elements/core/dividers/circle-div";
-import "@elements/title-sub-paragraph";
+import "@elements/core/titles/title-sub-paragraph";
 
 
   
