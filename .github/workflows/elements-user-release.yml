@@ -1,13 +1,16 @@
-name: User - Sandbox
+name: User - Elements - Release 
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
-    - 'shared/**'
-    - 'frontend/apps/crates/core/**'
-    - 'frontend/apps/crates/entry/user/**'
+    - 'frontend/config/**'
+    - 'frontend/ts-utils/**'
+    - 'frontend/elements/src/_styles/**'
+    - 'frontend/elements/src/widgets/**'
+    - 'frontend/elements/src/_bundles/user/**'
+    - 'frontend/elements/src/entry/user/**'
 
 jobs:
   bundle:
@@ -19,7 +22,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - user - app]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - user - elements]\")"
         id: extract_label
 
       - name: Notify slack
@@ -37,25 +40,20 @@ jobs:
         with:
           node-version: '12'
 
-      - name: download cargo-make release
-        run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/elements"
 
-      - name: extract cargo-make to folder 
-        run: unzip -j cargo-make.zip -d cargo-make
-      
-      - name: add cargo-make to path
-        uses: dakom/actions-path@master
-        with:
-          path: ${{github.workspace}}/cargo-make
+      - name: test elements 
+        run: npm run test 
+        working-directory: "./frontend/elements"
 
-      - name: build 
-        run: cargo make sandbox "user"
-        working-directory: "./frontend/apps"
-        env:
-          LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
-      
+      - name: build elements 
+        run: npm run build:sandbox 
+        working-directory: "./frontend/elements"
+        env: 
+          APP_NAME: "user"
+
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
@@ -63,7 +61,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/user/js gs://ji-cloud-sandbox-frontend-origin-eu-001/user/js
+        run: gsutil -m rsync -d -r frontend/elements/dist/user gs://ji-cloud-frontend-origin-eu-001/user/elements
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

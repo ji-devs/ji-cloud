@@ -34,7 +34,7 @@ export const Start = (props?:Partial<Args>) => {
     return `
         <page-register-start passwordStrength="${passwordStrength}">
             <button-google slot="google"></button-google>
-            <input-text slot="username" label="${STR_EMAIL_LABEL}" mode="text" placeholder=${STR_EMAIL_PLACEHOLDER}></input-text>
+            <input-text slot="email" label="${STR_EMAIL_LABEL}" mode="text" placeholder=${STR_EMAIL_PLACEHOLDER}></input-text>
             <input-text slot="password" label="${STR_PASSWORD_LABEL}" mode="passwordHidden" placeholder="${STR_PASSWORD_PLACEHOLDER}"></input-text>
             <button-rect slot="submit" color="red" size="medium" IconAfter="arrow">${STR_CONTINUE}</button-rect> 
             <footer-register-login slot="footer"></footer-register-login>
