@@ -20,7 +20,7 @@ export default {
     }
 
     const DEFAULT_ARGS:PublishArgs = {
-       closed:false,
+       closed:true,
       }
 
       const STR_TITLE = "Your JIG is on air now";
@@ -45,7 +45,7 @@ export default {
 
 export const PublishFullTwo = (props?:PublishArgs) => {
 
- const {} = props || DEFAULT_ARGS;
+ const {closed} = props || DEFAULT_ARGS;
  
 
     return `

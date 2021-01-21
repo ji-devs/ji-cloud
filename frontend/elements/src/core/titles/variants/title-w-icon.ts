@@ -37,13 +37,16 @@ export class _ extends LitElement {
   path:string = ""; 
   @property({type: Boolean})
   uploaded: boolean = false;
-  
+
   @property({type: Boolean})
   hover:boolean = false;
   
-  onHover() {
-    this.hover = !this.hover;
-  }
+  enter() {
+    this.hover = true
+}
+leave() {
+    this.hover = false
+}
   
   render() {
 
@@ -54,7 +57,7 @@ export class _ extends LitElement {
     <div class="wrapper">
         <img-ui path="${path}"></img-ui>
         <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
-        <img-ui path="${src}"  @mouseover="${() => this.onHover()}" class="delete"></img-ui>
+        <img-ui path="${src}"  @mouseenter=${this.enter} @mouseleave=${this.leave} class="delete"></img-ui>
         
     </div>
   `;
