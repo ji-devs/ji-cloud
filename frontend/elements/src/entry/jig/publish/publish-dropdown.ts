@@ -11,6 +11,7 @@ export class _ extends LitElement {
         box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
         background-color:#ffffff;
         position:relative;
+        display:block;
      
         
     }
@@ -43,13 +44,16 @@ export class _ extends LitElement {
   title: string = "";
 
   
+  @property({type:Boolean})
+  closed: boolean = false;
+  
 
   render() {
 
-    const {title} = this;
+    const {title, closed} = this;
 
     return html`
-     <main>
+     <main class="${closed ? 'closed' : ''}">
      <img-ui path="icn-x-close.svg"></img-ui>
       <div class="dropdown-wrapper">
         <div class="title">
