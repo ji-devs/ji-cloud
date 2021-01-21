@@ -17,6 +17,8 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use crate::firebase::*;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
+use crate::register::state::{Step, Step1Data};
+
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
     state.clear_password_status();
@@ -47,13 +49,7 @@ pub fn register_email(state: Rc<State>) {
         match JsFuture::from(token_promise).await {
             Ok(info) => {
                 let user:EmailUserInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
-                log::info!("{:#?}", user);
-                /*
-                    data.token = Some(info.token);
-                    data.email= Some(email);
-                    data.confirmed_email = info.email_verified;
-                    _self.step.set(Step::One);
-                */
+                next_step(state, user.token, user.email, user.email_verified);
             },
 
             Err(err) => { 
@@ -94,13 +90,7 @@ pub fn register_google(state: Rc<State>) {
         match JsFuture::from(token_promise).await {
             Ok(info) => {
                 let user:GoogleUserInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
-                log::info!("{:#?}", user);
-                /*
-                    data.token = Some(info.token);
-                    data.email= Some(info.email);
-                    data.confirmed_email = info.email_verified;
-                    _self.step.set(Step::One);
-                */
+                next_step(state, user.token, user.email, user.email_verified);
             },
 
             Err(err) => { 
@@ -111,10 +101,10 @@ pub fn register_google(state: Rc<State>) {
     }));
 }
 
-pub fn go_login(state: Rc<State>) {
-    let route:String = Route::User(UserRoute::Login).into();
-    dominator::routing::go_to_url(&route);
+fn next_step(state: Rc<State>, token: String, email: String, email_verified: bool) {
+    state.step.set(Step::One(Step1Data{token, email, email_verified}));
 }
+
 
 pub fn update_password_strength(state: &Rc<State>) {
     let password:&str = &state.password.borrow();

@@ -10,7 +10,7 @@ use dominator::{Dom, html};
 use crate::{
     login::dom::LoginPage,
     profile::dom::ProfilePage,
-    register::pages::start::dom::StartPage as RegisterPage,
+    register::dom::RegisterPage,
 };
 
 pub struct Router {
