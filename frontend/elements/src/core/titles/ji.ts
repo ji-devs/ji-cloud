@@ -70,7 +70,7 @@ export class _ extends LitElement {
   color:Color = "red";
 
   @property()
-  weight:Weight = "x-bold";
+  weight:Weight = "normal";
 
   @property({type: Boolean})
   p:boolean = false;
