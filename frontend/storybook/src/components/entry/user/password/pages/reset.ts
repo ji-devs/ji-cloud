@@ -27,7 +27,7 @@ export const Reset = (props?:Partial<Args>) => {
 
     return `
         <page-password-reset passwordStrength="${passwordStrength}">
-            <input-text slot="password" label="${STR_PASSWORD_LABEL}" helpertext="${STR_PASSWORD_HELP}"  mode="passwordHidden"></input-text>
+            <input-text slot="password" placeholder=${STR_PASSWORD_LABEL} label="${STR_PASSWORD_LABEL}" helpertext="${STR_PASSWORD_HELP}"  mode="passwordHidden"></input-text>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
         </page-password-reset>
     `

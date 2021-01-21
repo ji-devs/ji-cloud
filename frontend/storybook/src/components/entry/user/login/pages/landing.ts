@@ -13,7 +13,7 @@ const STR_FORGOTTEN ="Forgot your Password?";
 const STR_EMAIL = "Email";
 const STR_SUBMIT = "Submit";
 const STR_PASSWORDPLACEHOLDER = "Type your password";
-
+const STR_USERNAMEPLACEHOLDER = "Type your username";
 interface Args {
 }
 
@@ -30,11 +30,13 @@ export const Landing = (props?:Partial<Args>) => {
 
             <button-google slot="google"></button-google>
             
-            <input-text slot="email" mode="text" label="${STR_EMAIL}" }></input-text>
-            <input-text slot="password" mode="passwordHidden" label="${STR_PASSWORD}" ></input-text>
+
+            <input-text slot="username" placeholder="${STR_USERNAMEPLACEHOLDER}" mode="text" label="${STR_USERLABEL}" }></input-text>
+            <input-text slot="password" placeholder="${STR_PASSWORDPLACEHOLDER}" mode="passwordHidden" label="${STR_PASSWORD}" ></input-text>
             <button-text color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-text>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
-            <footer-login-register slot="footer"></footer-login-register>
+            <button-text color="blue" slot="register" weight="normal">${STR_REGISTER}</button-text>
+
         </page-login-landing>
     
     `
