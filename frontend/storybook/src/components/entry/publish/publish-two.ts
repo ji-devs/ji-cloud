@@ -23,8 +23,8 @@ export default {
        closed:false,
       }
 
-      const STR_TITLE = "Settings and JIG info.";
-      const STR_SUBTITLE = "Last step before publishing";
+      const STR_TITLE = "Your JIG is on air now";
+      const STR_SUBTITLE = "What would you like to do next?";
       const STR_MEDIUM = "medium";
       const STR_WHITE = "white";
       const STR_SHARE = "share the JIG";

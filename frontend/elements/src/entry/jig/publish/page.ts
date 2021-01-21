@@ -1,5 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import "@elements/core/dividers/spacer-fourty";
 @customElement('publish-page')
 export class _ extends LitElement {
   static get styles() {
@@ -67,6 +68,7 @@ export class _ extends LitElement {
     
         align-items:center;
     }
+ 
     ::slotted(*){
         position:relative;
     }
@@ -84,6 +86,15 @@ export class _ extends LitElement {
     ::slotted([slot="pills"]){
         margin-top:8px;
     }
+    ::slotted([slot="column_three"]){
+        display:block;
+        margin-bottom:40px;
+    }
+    ::slotted([slot="column_three"]:last-of-type){
+       
+        margin-bottom:0;
+    }
+  
        
     `];
   }
@@ -110,6 +121,7 @@ export class _ extends LitElement {
                     <div class="column"><slot name="column_one"></slot></div>
                     <div class="column"><slot name="column_two"></slot></div>
                     <div class="column"><slot name="column_three"></slot>
+                    
                         <div class="pill-wrapper">
                         <slot name="pills"></slot>
                         </div>
