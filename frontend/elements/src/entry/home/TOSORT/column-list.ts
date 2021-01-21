@@ -23,6 +23,18 @@ export class _ extends LitElement {
       list-style-type: none;
 
      }
+
+     .white{
+       color:#ffffff;
+     }
+
+     .black{
+       color:#383838;
+     }
+
+     .darkblue{
+     color=#192150;
+     }
     `];
   }
   @property()
@@ -32,13 +44,15 @@ export class _ extends LitElement {
 
   @property()
   size:string = ""; 
+  @property()
+  color:string = ""; 
  
 
   render() {
-    const {text_line, bold,size} = this;
+    const {text_line, bold,size,color} = this;
 
     return html`
-     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"}" >${text_line}</li>
+     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"} ${color ? "white"||"darkblue" :"black"}" >${text_line}</li>
     
   `;
   }

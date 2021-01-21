@@ -7,8 +7,8 @@ export class _ extends LitElement {
   img-ui{
     width: 32px;
     height: 32px;
-     object-fit: contain;
-     nargin-left:100px;
+     nargin-right:100px;
+     display:block;
   }
   
   .wrapper{
