@@ -70,6 +70,7 @@ export class _ extends LitElement {
         .account-wrapper {
           display: flex;
           align-items: center;
+          margin-top:16px;
         }
         ::slotted([slot="noaccount"]:last-child) {
           margin-left: 4px;
@@ -84,8 +85,10 @@ export class _ extends LitElement {
       `,
     ];
   }
-
+ 
   render() {
+
+    
     return html`
       <div class="wrapper">
         <div class="side-image"></div>
@@ -104,7 +107,10 @@ export class _ extends LitElement {
             <slot name="submit"></slot>
           </div>
 
-          <slot name="footer"></slot>
+            <title-ji color="blue"></title-ji>
+            &nbsp;
+            <slot name="register"></slot>
+          </div>
         </div>
       </div>
     `;
