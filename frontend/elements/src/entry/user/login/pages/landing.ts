@@ -76,6 +76,7 @@ export class _ extends LitElement {
         .account-wrapper {
           display: flex;
           align-items: center;
+          margin-top:16px;
         }
         ::slotted([slot="noaccount"]:last-child) {
           margin-left: 4px;
@@ -111,7 +112,7 @@ export class _ extends LitElement {
           </div>
           <div class="account-wrapper">
 
-            <title-ji color="black">${STR_ACCOUNT}</title-ji>
+            <title-ji color="blue">${STR_ACCOUNT}</title-ji>
             &nbsp;
             <slot name="register"></slot>
           </div>

@@ -7,7 +7,7 @@ export default {
   title: 'Entry / User / Login / Pages',
 }
 
-const STR_REGISTER = "Sign Up";
+const STR_REGISTER = "Don't have an account yet?";
 const STR_PASSWORD = "Password";
 const STR_FORGOTTEN ="Forgot your Password?";
 const STR_USERLABEL = "User Name";
@@ -34,7 +34,7 @@ export const Landing = (props?:Partial<Args>) => {
             <input-text slot="password" placeholder="${STR_PASSWORDPLACEHOLDER}" mode="passwordHidden" label="${STR_PASSWORD}" ></input-text>
             <button-text color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-text>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
-            <button-text color="blue" slot="register" weight="normal">${STR_REGISTER}</button-text>
+            
         </page-login-landing>
     
     `
