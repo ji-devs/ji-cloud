@@ -1,7 +1,7 @@
 import "@elements/entry/user/_common/buttons/google";
 import "@elements/entry/user/email/buttons/email-send";
 import "@elements/entry/user/email/pages/email-change";
-import "@elements/entry/user/email/pages/email-confirm";
+import "@elements/entry/user/register-complete/pages/landing";
 import "@elements/entry/user/email/pages/email-send";
 import "@elements/entry/user/login/footer/register";
 import "@elements/entry/user/login/pages/landing";

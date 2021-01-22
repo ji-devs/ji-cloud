@@ -15,8 +15,8 @@ impl State {
     cfg_if! {
         if #[cfg(all(feature = "local"))] {
             pub fn new() -> Self {
-                //Self::default()
-                Self::debug_step_2()
+                Self::default()
+                //Self::debug_step_3()
             }
 
             fn debug_step_1() -> Self {
