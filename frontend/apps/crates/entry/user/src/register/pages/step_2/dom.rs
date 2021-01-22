@@ -5,75 +5,66 @@ use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 use crate::firebase::*;
-use crate::google_maps::*;
-use crate::register::state::{Step, Step2Data};
+use crate::register::{
+    state::{Step, Step1Data},
+    components::footer::Footer
+};
 
 const STR_SUBMIT:&'static str = "Submit";
 const STR_LOCATION_LABEL:&'static str = "Location*";
 const STR_TERMS_LABEL:&'static str = "I have read the terms and conditions (legal text…)";
 const STR_LANGUAGE_LABEL:&'static str = "Preferred language of communication*";
-const STR_GDPR_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
+const STR_MARKETING_LABEL:&'static str = "I would like to receive educational resources (GDPR legal text….)";
 
 pub struct Step2Page {
 }
 
 impl Step2Page {
-    pub fn render(step: Mutable<Step>, init_data: Step2Data) -> Dom {
-        let state = Rc::new(State::new(step, init_data));
+    pub fn render(step: Mutable<Step>, step_1: Step1Data) -> Dom {
+        let state = Rc::new(State::new(step, step_1));
 
         html!("page-register-step2", {
             .children(&mut [
-                // TODO - make custom element
-                /*
-                html!("input-text", {
+                html!("input-location", {
                     .property("slot", "location")
-                    .property("label", STR_LOCATION_LABEL)
-                    .property("mode", "text")
-                    .after_inserted(clone!(_self => move |elem| {
-                        let cb = Closure::wrap(Box::new(clone!(_self => move |location_json:String| {
-                            let mut data = _self.data.borrow_mut();
-                            if location_json == "" {
-                                data.location_json = None;
-                            } else {
-                                let value:serde_json::Value = serde_json::from_str(&location_json).unwrap_throw();
-                                data.location_json = Some(value);
-                            }
-                        })) as Box<dyn FnMut(String)>);
-
-                        //doesn't actually have to be unsafe but rust-analyzer doesn't like it
-                        unsafe { bind_google_maps(elem, &cb); }
-
-                        *_self.maps_callback.borrow_mut() = Some(cb);
+                    .event(clone!(state => move |evt:events::GoogleLocation| {
+                        *state.location_json.borrow_mut() = evt.raw_json();
                     }))
-
-                    .event(|_:events::Focus| {
-                        //doesn't actually have to be unsafe but rust-analyzer doesn't like it
-                        unsafe { geolocate(); }
-                    })
                 }),
-                */
                 html!("input-text", {
-                    .property("slot", "username")
+                    .property("slot", "language")
                     .property("label", STR_LANGUAGE_LABEL)
                     .property("mode", "text")
+                    .event(clone!(state => move |evt:events::CustomInput| {
+                        *state.language.borrow_mut() = evt.value();
+                    }))
                 }),
                 html!("input-checkbox", {
                     .property("slot", "checkbox")
+                    .property_signal("error", state.terms_error())
                     .property("label", STR_TERMS_LABEL)
+                    .event(clone!(state => move |evt:events::CustomToggle| {
+                        state.clear_terms_status();
+                        *state.terms.borrow_mut() = evt.value();
+                    }))
                 }),
                 html!("input-checkbox", {
                     .property("slot", "checkbox")
-                    .property("label", STR_GDPR_LABEL)
+                    .property("label", STR_MARKETING_LABEL)
+                    .event(clone!(state => move |evt:events::CustomToggle| {
+                        *state.marketing.borrow_mut() = evt.value();
+                    }))
                 }),
                 html!("button-rect", {
                     .property("slot", "submit")
                     .property("color", "red")
                     .property("size", "medium")
                     .text(STR_SUBMIT)
+                    .event(clone!(state => move |evt:events::Click| {
+                        actions::submit(state.clone());
+                    }))
                 }),
-                html!("footer-register-login", {
-                    .property("slot", "footer")
-                }),
+                Footer::render()
             ])
         })
             

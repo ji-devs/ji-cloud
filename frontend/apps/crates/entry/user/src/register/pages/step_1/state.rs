@@ -1,11 +1,11 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use crate::register::state::{Step, Step1Data};
+use crate::register::state::{Step, StartData};
 use std::cell::RefCell;
 
 pub struct State {
     pub step: Mutable<Step>,
-    pub init_data: Step1Data,
+    pub start: StartData,
     pub username_taken_loader: AsyncLoader,
     pub firstname: RefCell<String>,
     pub firstname_status: Mutable<Option<NameError>>,
@@ -19,10 +19,10 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(step: Mutable<Step>, init_data: Step1Data) -> Self {
+    pub fn new(step: Mutable<Step>, start: StartData) -> Self {
         Self {
             step,
-            init_data,
+            start,
             username_taken_loader: AsyncLoader::new(),
             firstname: RefCell::new("".to_string()),
             firstname_status: Mutable::new(None),

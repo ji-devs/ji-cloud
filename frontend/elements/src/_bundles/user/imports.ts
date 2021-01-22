@@ -15,5 +15,6 @@ import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 import "@elements/core/inputs/checkbox";
 import "@elements/core/inputs/text";
+import "@elements/core/inputs/location";
 import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";

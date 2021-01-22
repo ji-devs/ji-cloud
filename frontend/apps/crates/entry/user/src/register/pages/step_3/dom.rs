@@ -4,7 +4,7 @@ use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
-use crate::register::state::Step;
+use crate::register::state::{Step, Step2Data};
 
 const STR_SUBMIT:&'static str = "Submit";
 const STR_AGE_LABEL:&'static str = "Which age group are you interested in?";
@@ -14,8 +14,8 @@ pub struct Step3Page {
 }
 
 impl Step3Page {
-    pub fn render(step: Mutable<Step>) -> Dom {
-        let state = Rc::new(State::new(step));
+    pub fn render(step: Mutable<Step>, step_2: Step2Data) -> Dom {
+        let state = Rc::new(State::new(step, step_2));
         html!("page-register-step3", {
             .children(&mut [
                 html!("button-rect", {

@@ -37,3 +37,21 @@ impl CustomToggle {
     }
 }
 
+// Google Location 
+#[derive(Deserialize, Debug)]
+pub struct GoogleLocationData {
+    #[serde(rename = "rawJson")]
+    pub raw_json: Option<String>,
+    pub input: Option<String>,
+
+    //not going to try and decode place
+}
+
+make_custom_event_serde!("google-location", GoogleLocation, GoogleLocationData);
+
+impl GoogleLocation {
+    pub fn raw_json(&self) -> Option<String> {
+        self.data().raw_json
+    }
+}
+

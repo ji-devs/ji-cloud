@@ -17,7 +17,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use crate::firebase::*;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
-use crate::register::state::{Step, Step1Data};
+use crate::register::state::{Step, StartData};
 
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
@@ -102,7 +102,7 @@ pub fn register_google(state: Rc<State>) {
 }
 
 fn next_step(state: Rc<State>, token: String, email: String, email_verified: bool) {
-    state.step.set(Step::One(Step1Data{token, email, email_verified}));
+    state.step.set(Step::One(StartData{token, email, email_verified}));
 }
 
 

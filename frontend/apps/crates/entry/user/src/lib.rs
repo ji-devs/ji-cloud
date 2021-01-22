@@ -6,7 +6,6 @@
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod firebase;
-mod google_maps;
 mod router;
 mod login;
 mod register;

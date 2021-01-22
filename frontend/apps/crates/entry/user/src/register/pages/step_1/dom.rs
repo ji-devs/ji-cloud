@@ -5,7 +5,7 @@ use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 use crate::register::{
-    state::{Step, Step1Data},
+    state::{Step, StartData},
     components::footer::Footer
 };
 
@@ -22,8 +22,8 @@ pub struct Step1Page {
 }
 
 impl Step1Page {
-    pub fn render(step: Mutable<Step>, init_data: Step1Data) -> Dom {
-        let state = Rc::new(State::new(step, init_data));
+    pub fn render(step: Mutable<Step>, start: StartData) -> Dom {
+        let state = Rc::new(State::new(step, start));
 
         html!("page-register-step1", {
             .children(vec![
@@ -73,7 +73,7 @@ impl Step1Page {
                     .property("size", "medium")
                     .text(STR_CONTINUE)
                     .event(clone!(state => move |evt:events::Click| {
-                        actions::next_step(state.clone());
+                        actions::submit(state.clone());
                     }))
                 }),
                 Footer::render()

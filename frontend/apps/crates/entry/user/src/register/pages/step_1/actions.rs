@@ -15,9 +15,9 @@ use dominator::clone;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use crate::register::state::{Step, Step2Data};
+use crate::register::state::{Step, Step1Data};
 
-pub fn next_step(state: Rc<State>) {
+pub fn submit(state: Rc<State>) {
     let mut ready = true;
 
     if !*state.over_18.borrow() {
@@ -48,17 +48,19 @@ pub fn next_step(state: Rc<State>) {
         if username_exists(state.username.borrow().clone()).await {
             state.username_status.set(Some(NameError::Exists));
         } else {
-
-            state.step.set(Step::Two(Step2Data{
-                step_1: state.init_data.clone(), 
-                firstname: state.firstname.borrow().clone(),
-                lastname: state.lastname.borrow().clone(),
-                username: state.username.borrow().clone(),
-            }));
+            next_step(state);
         }
     }));
 }
 
+fn next_step(state: Rc<State>) {
+    state.step.set(Step::Two(Step1Data{
+        start: state.start.clone(), 
+        firstname: state.firstname.borrow().clone(),
+        lastname: state.lastname.borrow().clone(),
+        username: state.username.borrow().clone(),
+    }));
+}
 async fn username_exists(name:String) -> bool {
 
     let query = UserLookupQuery {
