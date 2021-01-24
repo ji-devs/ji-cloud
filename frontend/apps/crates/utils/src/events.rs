@@ -7,7 +7,9 @@ pub use dominator::events::*;
 
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
+make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
+// Custom Input
 #[derive(Deserialize, Debug)]
 pub struct CustomInputData {
     pub value: String,
@@ -21,6 +23,35 @@ impl CustomInput {
     }
 }
 
-make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
+// Custom Toggle 
+#[derive(Deserialize, Debug)]
+pub struct CustomToggleData {
+    pub value: bool,
+}
 
+make_custom_event_serde!("custom-toggle", CustomToggle, CustomToggleData);
+
+impl CustomToggle {
+    pub fn value(&self) -> bool {
+        self.data().value
+    }
+}
+
+// Google Location 
+#[derive(Deserialize, Debug)]
+pub struct GoogleLocationData {
+    #[serde(rename = "rawJson")]
+    pub raw_json: Option<String>,
+    pub input: Option<String>,
+
+    //not going to try and decode place
+}
+
+make_custom_event_serde!("google-location", GoogleLocation, GoogleLocationData);
+
+impl GoogleLocation {
+    pub fn raw_json(&self) -> Option<String> {
+        self.data().raw_json
+    }
+}
 

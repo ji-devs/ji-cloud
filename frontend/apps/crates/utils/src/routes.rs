@@ -29,7 +29,7 @@ pub enum UserRoute {
     Login,
     Register,
     SendEmailConfirmation,
-    GotEmailConfirmation,
+    RegisterComplete,
 }
 
 #[derive(Debug, Clone)]
@@ -129,7 +129,7 @@ impl Route {
                 }
             }
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
-            ["user", "got-email-confirmation"] => Self::User(UserRoute::GotEmailConfirmation),
+            ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
@@ -201,7 +201,7 @@ impl From<&Route> for String {
                     UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
-                    UserRoute::GotEmailConfirmation => "/user/got-email-confirmation".to_string(),
+                    UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }
             },
             Route::Admin(route) => {

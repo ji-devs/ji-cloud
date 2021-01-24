@@ -10,7 +10,8 @@ use dominator::{Dom, html};
 use crate::{
     login::dom::LoginPage,
     profile::dom::ProfilePage,
-    register::pages::start::dom::StartPage as RegisterPage,
+    register::dom::RegisterPage,
+    register_complete::dom::RegisterCompletePage,
 };
 
 pub struct Router {
@@ -35,6 +36,7 @@ impl Router {
                             UserRoute::Login => Some(LoginPage::render()),
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
                             UserRoute::Register => Some(RegisterPage::render()),
+                            UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                             /*
                             UserRoute::ContinueRegistration(user) => Some(RegisterPage::render(RegisterPage::new(Some(user)))),
                             UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),

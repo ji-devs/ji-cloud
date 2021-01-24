@@ -5,7 +5,7 @@ const STR_TITLE = "Welcome to JI Family";
 const STR_SUB = "You can now create, play, and share your content.";
 const STR_SUBSUB = "We are here to help you in whatever you need.";
 
-@customElement("page-email-confirm")
+@customElement("page-register-complete")
 export class _ extends LitElement {
   static get styles() {
     return [

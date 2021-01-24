@@ -1,9 +1,13 @@
 use dominator::{Dom, html, clone, with_node};
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::Mutable;
 use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
+use crate::register::{
+    state::Step,
+    components::footer::Footer
+};
 
 const STR_SUBMIT:&'static str = "Submit";
 const STR_EMAIL_LABEL:&'static str = "Email";
@@ -13,9 +17,10 @@ const STR_PASSWORD_PLACEHOLDER:&'static str ="********";
 
 pub struct StartPage {
 }
+
 impl StartPage {
-    pub fn render() -> Dom {
-        let state = Rc::new(State::new());
+    pub fn render(step: Mutable<Step>) -> Dom {
+        let state = Rc::new(State::new(step));
 
         html!("page-register-start", {
             .property_signal("passwordStrength", state.get_password_strength())
@@ -58,12 +63,7 @@ impl StartPage {
                         actions::register_email(state.clone())
                     }))
                 }),
-                html!("footer-register-login", {
-                    .property("slot", "footer")
-                    .event(clone!(state => move |evt:events::Click| {
-                        actions::go_login(state.clone())
-                    }))
-                }),
+                Footer::render()
             ])
         })
     }

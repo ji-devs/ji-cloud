@@ -108,7 +108,7 @@ export class _ extends LitElement {
 
             <slot name="location"></slot>
             <spacer-fourty></spacer-fourty>
-            <slot name="username"></slot>
+            <slot name="language"></slot>
             <div class="spacer"></div>
             <div class="password-wrapper">
               <slot name="checkbox"> </slot>
