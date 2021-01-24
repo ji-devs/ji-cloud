@@ -46,8 +46,8 @@ const STR_BLACK="black";
 const STR_SMALL="small";
 const STR_WHITE="white";
 const STR_MEDIUM="medium";
-const STR_SARAHN="Sarah Nazirah.jpg";
-const STR_SARAHH="Sara-Halberstadt.jpg";
+const STR_SARAHN="sarah-nazirah.png";
+const STR_SARAHH="Sara-Halberstadt.png";
 
 
 export const AboutUsParagraph = (props?:Partial<Args>) => {
