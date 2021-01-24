@@ -10,7 +10,7 @@ import { Rectangle } from "~/components/core/buttons/rectangle";
 import { colorStyles } from "@elements/_styles/colors";
 
 export default {
-  title: 'Full Pages/Publish',
+  title: 'Entry/Jig/Publish/Pages',
 }
 
   

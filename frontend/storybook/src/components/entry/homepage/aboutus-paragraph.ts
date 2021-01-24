@@ -1,3 +1,4 @@
+import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/entry/home/TOSORT/icon-wparagraph";
 import "@elements/entry/home/sections/aboutus-section";
 import "@elements/core/titles/variants/title-section";
@@ -5,11 +6,22 @@ import "@elements/core/titles/variants/subtitle";
 import "@elements/entry/home/TOSORT/list-type";
 import "@elements/core/dividers/circle-div";
 import "@elements/core/titles/title-sub-paragraph";
+import {Color, FontSize} from "@elements/core/titles/title-sub-paragraph";
 
 
   
 export default {
   title: 'Homepage',
+}
+
+interface Args{
+  color: Color,
+  size: FontSize,
+}
+
+const DEFAULT_ARGS:Args = {
+  color:"black",
+  size: "small",
 }
 
 
@@ -40,13 +52,14 @@ const STR_SARAHN="Sarah Nazirah.jpg";
 const STR_SARAHH="Sara-Halberstadt.jpg";
 
 
-export const aboutusParagraph = () => {
+export const AboutUsParagraph = (props?:Partial<Args>) => {
+  const {...titleProps} = props;
+  props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
 
-    
     <aboutus-section>
    
-    <title-section titlecolor="${STR_WHITE}" title="${STR_STARTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
+    <title-section color="${color}" ${argsToAttrs(deleteNone(titleProps))} title="${STR_STARTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
     <title-section titlecolor="${STR_YELLOW}" title="${STR_ENDTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
 <title-sub-paragraph slot="title-sub-paragraph-right" colortitle="${STR_YELLOW}" colorsubtitle="${STR_BLACK}" sizetitle="${STR_MEDIUM}" sizesubtitle="${STR_SMALL}" title="${STR_TITLEPARENTS}" subtitle="${STR_SUBTITLEPARENTS}">
 
@@ -90,4 +103,19 @@ export const aboutusParagraph = () => {
 
     </aboutus-section>
     `
+}
+AboutUsParagraph.args = DEFAULT_ARGS;
+AboutUsParagraph.argTypes = {
+  color: {
+      control: {
+          type: 'inline-radio',
+          options: ["white", "black", "yellow"]
+      }
+  },
+  size: {
+    control: {
+        type: 'inline-radio',
+        options: ["small", "medium"]
+    }
+}
 }

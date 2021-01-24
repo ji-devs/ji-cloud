@@ -1,5 +1,10 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map';
+
+export type Color = "yellow" | "black" | "white";
+export type FontSize = "small" | "medium";
+
 @customElement('title-sub-paragraph')
 export class _ extends LitElement {
   static get styles() {
@@ -7,10 +12,14 @@ export class _ extends LitElement {
 
 
   .yellow {
-    color: #fed657    ;
+    color: #fed657;
   }
   .black{
-    #383838
+    color:#383838;
+  
+  }
+  .white{
+    color:#ffffff;
   }
 
   .medium{
@@ -54,16 +63,27 @@ h3{
  
   @property()
   subtitle:string = ""; 
- 
+  @property()
+  color:Color = "black"; 
+  @property()
+  size:FontSize = "small"; 
 
   render() {
 
-    const {colortitle, colorsubtitle,sizetitle,sizesubtitle,title,subtitle} = this;
+    const {size,color, title} = this;
+
+    const classes = classMap({ 
+      [size]: true,
+      [color]: true,
+     
+      
+     
+    });
 
     return html`
      <div class="wrapper">
         <div class="inside">
-          <h2 class="${colortitle} ${sizetitle} ">${title}</h2>
+          <h2 class="${classes}">${title}</h2>
           <h3 class="${colorsubtitle} ${sizesubtitle} ">${subtitle}</h3>
 
          <slot name="line"></slot>

@@ -12,6 +12,7 @@ export class _ extends LitElement {
         margin-left:80px;
         border-radius: 25px;
         box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.16);
+        overflow:hidden;
  
      }
 
@@ -20,9 +21,8 @@ export class _ extends LitElement {
           width: 940px;
           height: 540px;
           display:block;
-          border-radius: 25px 0px 0px 25px;
-          // background-image: url("Sara-Halberstadt.jpg");
-          background-color:#fffde6;
+          
+          
 
 
        }
@@ -79,7 +79,7 @@ export class _ extends LitElement {
 
     return html`
     <div class="inside-wrapper">
-    // <slot name="img"></slot>
+    
      <div class="img"></div>
 
     
