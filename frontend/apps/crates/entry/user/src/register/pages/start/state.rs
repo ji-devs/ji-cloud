@@ -1,25 +1,28 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Signal, Mutable, SignalExt};
 use std::cell::RefCell;
+use crate::register::state::Step;
 
 pub struct State {
     pub loader: AsyncLoader,
     pub password_strength: Mutable<PasswordStrength>,
     pub email: RefCell<String>,
-    pub password: RefCell<String>,
     pub email_status: Mutable<Option<EmailStatus>>,
+    pub password: RefCell<String>,
     pub password_status: Mutable<Option<PasswordStatus>>,
+    pub step: Mutable<Step>,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(step: Mutable<Step>) -> Self {
         Self {
             loader: AsyncLoader::new(),
             password_strength: Mutable::new(PasswordStrength::Weak),
             email: RefCell::new("".to_string()),
-            password: RefCell::new("".to_string()),
             email_status: Mutable::new(None),
+            password: RefCell::new("".to_string()),
             password_status: Mutable::new(None),
+            step
         }
     }
 

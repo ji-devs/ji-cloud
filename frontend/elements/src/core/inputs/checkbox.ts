@@ -40,6 +40,18 @@ export class _ extends LitElement {
     ];
   }
 
+  onChange(evt:Event) {
+    const {checked} = (evt.target as any);
+    this.checked = checked;
+
+    this.dispatchEvent(new CustomEvent("custom-toggle", {
+      detail: { value: checked },
+    }))
+  }
+
+  @property({type: Boolean})
+  checked: boolean = false; 
+
   @property()
   label: string = "";
 
@@ -47,7 +59,7 @@ export class _ extends LitElement {
   error: string = "";
 
   render() {
-    const { label, error } = this;
+    const { label, error, checked} = this;
 
     const isError: boolean = error !== "";
 
@@ -57,7 +69,7 @@ export class _ extends LitElement {
       <div>
         <li class="${errorwrapper}">
           <label class="">
-            <input type="checkbox" />
+            <input type="checkbox" .checked=${checked} @change="${this.onChange}"/>
             <span class=""> ${label} </span>
           </label>
         </li>
