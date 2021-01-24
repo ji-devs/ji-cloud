@@ -9,8 +9,13 @@ export class _ extends LitElement {
      
     }
    main{
+     width:1920px;
+     height:890px;
      background-image: url("Strip_Background_Jigglings@2x.jpg");
-     
+     background-repeat: no-repeat;
+     background-attachment: fixed;
+     background-position: center;
+
    }
    
    ::slotted([slot=title]){
@@ -18,6 +23,7 @@ export class _ extends LitElement {
     font-weight: 900;
     color:#5662a3;
     text-align: center;
+    display:block;
    }
  
     `];
@@ -31,7 +37,7 @@ export class _ extends LitElement {
 
     return html`
     <main>
-    <slot   name="title"></slot>
+    <slot name="title"></slot>
     <div class="inside-wrapper">
         <slot name="icon-title-paragraph"></slot>
     </div>

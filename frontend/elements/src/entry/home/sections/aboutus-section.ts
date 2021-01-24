@@ -80,8 +80,8 @@ export class _ extends LitElement {
     width: 275.5px;
     height: 245.4px;
     position: absolute;
-    margin-top:0px;
-    margin-left:50px;
+    top:100px;
+    left:50px;
    }
   
     `];
@@ -101,7 +101,7 @@ export class _ extends LitElement {
     <div class="inside-wrapper">
     <slot name="title"></slot>
     </div>
-    <img-ui class="yellowimg" path="yellow_square.jpg"></img-ui>
+    <img-ui class="yellowimg" path="Jiggling_Community%402x.png"></img-ui>
      <div class="right-side">
      <img-ui class="arrow" path="${PATH_ARROW}"></img-ui>
 
