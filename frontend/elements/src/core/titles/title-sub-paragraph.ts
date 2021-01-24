@@ -70,13 +70,11 @@ h3{
 
   render() {
 
-    const {size,color, title} = this;
+    const {size,color, title, subtitle, colorsubtitle, sizesubtitle} = this;
 
     const classes = classMap({ 
       [size]: true,
-      [color]: true,
-     
-      
+      [color]: true
      
     });
 

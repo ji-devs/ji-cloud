@@ -53,13 +53,13 @@ const STR_SARAHH="Sara-Halberstadt.jpg";
 
 
 export const AboutUsParagraph = (props?:Partial<Args>) => {
-  const {...titleProps} = props;
+  const {...titleP} = props;
   props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
 
     <aboutus-section>
    
-    <title-section color="${color}" ${argsToAttrs(deleteNone(titleProps))} title="${STR_STARTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
+    <title-section ${argsToAttrs(deleteNone(titleProps))} title="${STR_STARTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
     <title-section titlecolor="${STR_YELLOW}" title="${STR_ENDTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
 <title-sub-paragraph slot="title-sub-paragraph-right" colortitle="${STR_YELLOW}" colorsubtitle="${STR_BLACK}" sizetitle="${STR_MEDIUM}" sizesubtitle="${STR_SMALL}" title="${STR_TITLEPARENTS}" subtitle="${STR_SUBTITLEPARENTS}">
 
@@ -111,11 +111,5 @@ AboutUsParagraph.argTypes = {
           type: 'inline-radio',
           options: ["white", "black", "yellow"]
       }
-  },
-  size: {
-    control: {
-        type: 'inline-radio',
-        options: ["small", "medium"]
-    }
-}
+  }
 }
