@@ -20,8 +20,8 @@ interface Args{
 }
 
 const DEFAULT_ARGS:Args = {
-  color:"black",
-  size: "small",
+  color:"yellow",
+  size: "medium",
 }
 
 
@@ -41,10 +41,8 @@ const STR_LINE2="learning Hebrew and English simultaneously. For my ";
 const STR_LINE3="children, you are not only teaching two children, you"
 const STR_LINE4="are also saving their souls. I reaffirm that they have";
 const STR_LINE5="achieved educational rehabilitation, thanks to JI.";
-
 const STR_YELLOW="yellow";
 const STR_BLACK="black";
-
 const STR_SMALL="small";
 const STR_WHITE="white";
 const STR_MEDIUM="medium";
@@ -59,11 +57,10 @@ export const AboutUsParagraph = (props?:Partial<Args>) => {
 
     <aboutus-section>
    
-    <title-section color="${color}" ${argsToAttrs(deleteNone(titleProps))} title="${STR_STARTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
+    <title-section  title="${STR_STARTTITLE}"   slot="title"></title-section>
     <title-section titlecolor="${STR_YELLOW}" title="${STR_ENDTTITLE}" size="${STR_SIZELARGE}" slot="title"></title-section>
-<title-sub-paragraph slot="title-sub-paragraph-right" colortitle="${STR_YELLOW}" colorsubtitle="${STR_BLACK}" sizetitle="${STR_MEDIUM}" sizesubtitle="${STR_SMALL}" title="${STR_TITLEPARENTS}" subtitle="${STR_SUBTITLEPARENTS}">
-
-
+<title-sub-paragraph slot="title-sub-paragraph-right"   ${argsToAttrs(deleteNone(titleProps))}  colorsubtitle="${STR_BLACK}" sizesubtitle="${STR_SMALL}"  title="${STR_TITLEPARENTS}" subtitle="${STR_SUBTITLEPARENTS}">
+ 
 
 <column-list slot="line" text_line="${STR_LINE1}" size="medium"></column-list>
 <column-list slot="line" text_line="${STR_LINE2}" size="medium"></column-list>
@@ -81,7 +78,7 @@ export const AboutUsParagraph = (props?:Partial<Args>) => {
 <img-ui slot="imgparent" path="${STR_SARAHN}"> </img-ui>
 
 
-<title-sub-paragraph slot="title-sub-paragraph-left" colortitle="${STR_YELLOW}" colorsubtitle="${STR_BLACK}" sizetitle="${STR_MEDIUM}" sizesubtitle="${STR_SMALL}" title="${STR_TITLETEACHERS}" subtitle="${STR_SUBTITLETEACHERS}">
+<title-sub-paragraph slot="title-sub-paragraph-left"   ${argsToAttrs(deleteNone(titleProps))}  colorsubtitle="${STR_BLACK}"   sizesubtitle="${STR_SMALL}" title="${STR_TITLETEACHERS}" subtitle="${STR_SUBTITLETEACHERS}">
 
 
 

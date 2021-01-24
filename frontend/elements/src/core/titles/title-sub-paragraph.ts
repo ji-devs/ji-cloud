@@ -50,17 +50,13 @@ h3{
   }
 
 
-  @property()
-  colortitle:string = ""; 
+ 
   @property()
   colorsubtitle:string = ""; 
   @property()
   title:string = ""; 
   @property()
-  sizetitle:string = ""; 
-  @property()
   sizesubtitle:string = ""; 
- 
   @property()
   subtitle:string = ""; 
   @property()
@@ -70,16 +66,16 @@ h3{
 
   render() {
 
-    const {size,color, title} = this;
+    const {size,color, title,colorsubtitle,sizesubtitle,subtitle} = this;
 
     const classes = classMap({ 
       [size]: true,
       [color]: true,
      
-      
      
     });
 
+  
     return html`
      <div class="wrapper">
         <div class="inside">
