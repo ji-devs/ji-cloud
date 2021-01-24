@@ -51,7 +51,7 @@ const STR_SARAHH="Sara-Halberstadt.jpg";
 
 
 export const AboutUsParagraph = (props?:Partial<Args>) => {
-  const {...titleP} = props;
+  const {...titleProps} = props;
   props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
 
