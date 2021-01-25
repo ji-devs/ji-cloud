@@ -5,7 +5,7 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
-         div{
+      input[type=number]{
            background-color:#ffffff;
            border-radius:14px;
          }
@@ -31,8 +31,7 @@ export class _ extends LitElement {
     const { colorborder, size } = this;
 
     return html`
-      <div class="${colorborder} ${size}">
-      </div>
-    `;
+      <input type="number" class="${colorborder} ${size}">
+     `;
   }
 }

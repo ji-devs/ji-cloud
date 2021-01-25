@@ -3,6 +3,8 @@ import "@elements/entry/home/sections/footer-section";
 import "@elements/core/dividers/stripe-along";
 import "@elements/entry/home/social-networks";
 import "@elements/entry/home/TOSORT/footer-kidsafe"; 
+import "@elements/entry/home/sections/contactus-section";
+import "@elements/entry/home/sections/products-section";
 
   import {footerjigs} from "~/components/entry/homepage/footer/footer-jigs";
   import {footerhelp} from "~/components/entry/homepage/footer/footer-help";
@@ -33,13 +35,14 @@ export const footer = () => {
         ${footerjigs()}
     </div>
     <div slot="footer-column">
-${footerproduct()}
-</div>
+<products-section></products-section>
+    </div>
     <div slot="footer-column">
     ${footerhelp()}
 </div>
 <div slot="footer-column">
-${footercontactus()}
+ 
+<contactus-section ></contactus-section>
 </div>
 <stripe-along slot="footer-column"></stripe-along>
 <div slot="footer-column">

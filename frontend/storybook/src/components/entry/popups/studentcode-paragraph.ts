@@ -5,6 +5,7 @@ import {Color,Size} from "@elements/core/popups/popup";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
 import "@elements/entry/popup/sections/studentcode-section";
+import {Image} from "@elements/entry/popup/sections/studentcode-section";
 import "@elements/core/dividers/square-divider";
 
 
@@ -23,11 +24,13 @@ export default {
   interface Args{
     color: Color,
     size: Size,
+    image:Image
   }
   
   const DEFAULT_ARGS:Args = {
     color:"green",
     size: "large",
+    image:"Illustration_JIG_Sad_1.png.png"
   }
   
   
@@ -45,7 +48,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
- <img-ui path="${STR_PATH}" slot="leftimg"></img-ui>
+<img-ui  ${argsToAttrs(deleteNone(popupProps))} slot="img"></img-ui>
 </studentcode-section>
 
 
@@ -69,6 +72,12 @@ studentCode.argTypes = {
     control: {
         type: 'inline-radio',
         options: ["medium", "large"]
+    }
+},
+image: {
+  control: {
+      type: 'inline-radio',
+      options: ["Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png"]
     }
 }
 }
