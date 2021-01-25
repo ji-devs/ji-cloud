@@ -1,5 +1,10 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import "@elements/core/titles/variants/subtitle";
+import "@elements/core/titles/variants/title-section";
+import "@elements/entry/home/TOSORT/column-list"
+import "@elements/core/buttons/rectangle";
+
 @customElement('create-section')
 export class _ extends LitElement {
   static get styles() {
@@ -21,41 +26,37 @@ export class _ extends LitElement {
     }
   
    
-   img-ui{
-    width: 323.7px;
-    height: 354.9px;
-    margin-top:-250px;
-    margin-left:380px;
-    width: 323.7px;
-    height: 354.9px;
+   .gears{
+    width: 325px;
+    height: 355px;
+    bottom:30px;
+    right:40px;
     position: absolute;
 
    }
-   .gears{
-  
-    
-  }
-  ::slotted([slot=subtitle]){
+   
+  .subtitle{
      margin-top: 65px;
      margin-left:80px;
      display:block;
   
   }
 
-  ::slotted([slot=title]){
+  .title{
     margin-left:10px;
     display:block;
  
  }
 
-  ::slotted([slot=line]){
+  .line{
     display:flex;
+    align-items:center;
     margin-top:16px;
     margin-left:80px;
 
     }
 
-::slotted([slot=Start-creating]){
+.Start-creating{
         margin-top:50px;
         display:block;
         margin-left:80px;
@@ -73,6 +74,16 @@ export class _ extends LitElement {
     height: 600px;
 
 }
+.line::before{
+  content:'';
+  height:12px;
+  width:12px;
+  border-radius:50%;
+  background-color: #fed758;
+  margin-right:16px;
+
+}
+
 
 
     `];
@@ -90,19 +101,24 @@ export class _ extends LitElement {
      return html`
     <main>
     <div class="left_side">
-      <slot name="girl"></slot>
+      <img-ui path="girl@2x.jpg" class="girl"><img-ui>
     </div> 
 
     <div class="right_side">
-    <slot name="subtitle"></slot>
+    <sub-title size="medium" class="subtitle" title="Learning Through Creation"></sub-title>
+
      <div class="inside-wrapper">
-     <slot name="title"></slot>
+     <title-section titlecolor="pink" title="Create" size="large" class="title"></title-section>
+    <title-section titlecolor="darkblue" title="your own JIGs" size="large" class="title"></title-section>
     </div>
+    
+    <column-list text_line="Big content library" size="medium" class="line"></column-list>
+    <column-list text_line="Smart & friendly interface" size="medium" class="line"></column-list>
+    <column-list text_line="Teaching through creation" size="medium" class="line"></column-list>
+    <column-list text_line="All in one" size="medium" class="line"></column-list>
 
-     <slot name="line"></slot>
-
-    <slot name="Start-creating"></slot>
-    <img-ui path="Illustration_Gears.jpg" class="gears"><img-ui>
+    <button-rect class="Start-creating" size="large"  color="red", bold="true" imglefthidden="false" imgrighthidden="true">Start creating</button-rect>
+    <img-ui path="illustration-gears.png" class="gears"><img-ui>
 
     </div>
 
