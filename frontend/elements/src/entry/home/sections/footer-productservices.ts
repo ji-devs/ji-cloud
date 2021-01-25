@@ -32,16 +32,7 @@ export class _ extends LitElement {
     `];
   }
 
-
-  @property()
-  head_title:string = ""; 
-
-
- 
-
   render() {
-
-    const {head_title} = this;
 
     const STR_TEACHERS = "Teachers";
     const STR_PARENTS = "Parents";

@@ -1,12 +1,13 @@
 import "@elements/entry/home/TOSORT/column-details";
 import "@elements/entry/home/TOSORT/column-list";
-import "@elements/core/popups/popups-template";
-import {Color,Size} from "@elements/core/popups/popups-template";
+import "@elements/core/popups/popup-container";
+import {Color,Size} from "@elements/core/popups/popup-container";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
-import "@elements/entry/popup/sections/studentcode-section";
+import "@elements/entry/home/widgets/studentcode-section";
  import "@elements/core/dividers/square-divider";
- 
+ import {ColorBorder} from "@elements/core/dividers/square-divider";
+ import {Size as DividerSize} from "@elements/core/dividers/square-divider";
 const STR_SMALL="small";
 const STR_DARKBLUE="darkblue";
 const STR_TITLE="Enter your student code";
@@ -22,11 +23,14 @@ export default {
   interface Args{
     color: Color,
     size: Size,
+    colorborder:ColorBorder,
+    
   }
   
   const DEFAULT_ARGS:Args = {
     color:"green",
     size: "large",
+    colorborder: "blue"
   }
   
   
@@ -37,7 +41,7 @@ export const askForHelp= (props?:Partial<Args>) => {
 const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
- <template-popups  ${argsToAttrs(deleteNone(popupProps))}>
+ <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
 
@@ -49,12 +53,12 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 
 
-</studentcode-section>
+</popup-container>
 
 
 
 
- </template-popups>
+ </popup-container>
 
 
     `

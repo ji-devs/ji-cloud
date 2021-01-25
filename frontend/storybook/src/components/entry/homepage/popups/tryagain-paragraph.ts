@@ -4,18 +4,17 @@ import "@elements/core/popups/popup-container";
 import {Color,Size} from "@elements/core/popups/popup-container";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
-import "@elements/entry/popup/sections/studentcode-section";
-import {Image} from "@elements/entry/popup/sections/studentcode-section";
+import "@elements/entry/home/widgets/studentcode-section";
 import "@elements/core/dividers/square-divider";
 
 
 const STR_SMALL="small";
 const STR_DARKBLUE="darkblue";
 const STR_TITLE="Enter your student code";
-const STR_PATH="Image_JIG_StudentCode@2x.png";
+const STR_PATH="Illustration_JIG_Sad_1.png";
+const STR_PATHBALOON="Baloon_1@2x.png";
 const STR_BLUE="blue";
  
-
 
 export default {
     title: 'Popups',
@@ -24,31 +23,30 @@ export default {
   interface Args{
     color: Color,
     size: Size,
-    image:Image
   }
   
   const DEFAULT_ARGS:Args = {
     color:"green",
     size: "large",
-    image:"Illustration_JIG_Sad_1.png.png"
   }
   
   
  
 
 
-export const studentCode= (props?:Partial<Args>) => {
+export const tryAgain= (props?:Partial<Args>) => {
 const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
- <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
+ <popup-container ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
- <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<img-ui  ${argsToAttrs(deleteNone(popupProps))} slot="img"></img-ui>
+ <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
+<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
+<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
+<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
+
+
 </studentcode-section>
 
 
@@ -60,8 +58,8 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     `
 }
 
-studentCode.args = DEFAULT_ARGS;
-studentCode.argTypes = {
+tryAgain.args = DEFAULT_ARGS;
+tryAgain.argTypes = {
   color: {
       control: {
           type: 'inline-radio',
@@ -72,12 +70,6 @@ studentCode.argTypes = {
     control: {
         type: 'inline-radio',
         options: ["medium", "large"]
-    }
-},
-image: {
-  control: {
-      type: 'inline-radio',
-      options: ["Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png"]
     }
 }
 }
