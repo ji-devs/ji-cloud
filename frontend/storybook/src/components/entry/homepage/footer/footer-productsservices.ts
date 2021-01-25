@@ -1,4 +1,4 @@
-import "@elements/entry/home/TOSORT/column-details";
+import "@elements/entry/home/sections/footer-productservices";
 import "@elements/entry/home/TOSORT/column-list";
 export default {
     title: 'Homepage Paragraph',
@@ -18,17 +18,8 @@ export default {
 
 export const footerproductsservices= () => {
     return `
-    <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE2}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE3}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE4}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE5}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE6}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE7}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE8}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE9}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE10}" color="${STR_WHITE}" slot="list" ></column-list>
-     </column-details>
+    <footer-productservices>
+   
+     </footer-productservices>
     `
 }
