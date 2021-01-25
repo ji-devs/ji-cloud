@@ -5,7 +5,9 @@ import "@elements/core/titles/variants/title-w-icon";
 export class _ extends LitElement {
   static get styles() {
     return [css`
-
+    title-w-icon{
+      cursor:pointer;
+    }
     
     `];
   }
@@ -21,10 +23,10 @@ export class _ extends LitElement {
     
     return html`
     <div>
-        <title-wicon title="Add lesson plan" path="Icn_Add.svg"  .uploaded=${uploaded}></title-wicon>
-        <title-wicon title="Add Curriculum" path="Icn_Add.svg" .uploaded=${uploaded}></title-wicon>
-        <title-wicon title="Add activity ideas" path="Icn_Add.svg" .uploaded=${uploaded}></title-wicon>
-        <title-wicon title="Add link" path="Icn_Add.svg" .uploaded=${uploaded}></title-wicon>
+        <title-w-icon title="Add lesson plan" path="Icn_Add.svg"  .uploaded=${uploaded}></title-w-icon>
+        <title-w-icon title="Add Curriculum" path="Icn_Add.svg" .uploaded=${uploaded}></title-w-icon>
+        <title-w-icon title="Add activity ideas" path="Icn_Add.svg" .uploaded=${uploaded}></title-w-icon>
+        <title-w-icon title="Add link" path="Icn_Add.svg" .uploaded=${uploaded}></title-w-icon>
     </div>
   `;
   }
