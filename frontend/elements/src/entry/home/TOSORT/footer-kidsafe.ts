@@ -16,8 +16,7 @@ export class _ extends LitElement {
 
   }
   .wrapper{
-//  margin-left:50px;
-// margin-top:50px;
+
 display:flex;
   }
 .stripe{
@@ -41,23 +40,19 @@ column-list{
 }
     `]
   }
-  @property()
-  path_kidsafe:string = ""; 
-  @property()
-  term:string = ""; 
-  @property()
-  privacy:string = ""; 
+
+
 
   render() {
-    const {path_kidsafe, term,privacy } = this;
+    const {} = this;
     const STR_WHITE="white"
     return html`
      <div class="wrapper">
-        <img-ui class="img" path="${path_kidsafe}"></img-ui>
+        <img-ui class="img" path="logo-kid-safe.png"></img-ui>
         <div class="line">
-        <column-list text_line="${term}" color="${STR_WHITE}" ></column-list>
+        <column-list text_line="Terms & Conditions" color="${STR_WHITE}" ></column-list>
         <div class="stripe"></div>
-        <column-list text_line="${privacy}" color="${STR_WHITE}"></column-list>
+        <column-list text_line="Privacy Policy" color="${STR_WHITE}"></column-list>
         </div>
       </div>
   `;
