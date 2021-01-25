@@ -1,4 +1,4 @@
-import "@elements/entry/home/TOSORT/column-details";
+import "@elements/entry/home/sections/footer-jigs";
 import "@elements/entry/home/TOSORT/column-list";
 
 export default {
@@ -15,14 +15,9 @@ export default {
 
 export const footerjigs= () => {
     return `
-    <column-details head_title="${STR_TITLE}">
-    <column-list text_line="${STR_LINE1}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE2}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE3}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE4}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE5}" color="${STR_WHITE}" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE6}" color="${STR_WHITE}" slot="list" ></column-list>
-     </column-details>
+    <footer-jigs head_title="${STR_TITLE}">
+    
+     </footer-jigs>
     `
 }
 
