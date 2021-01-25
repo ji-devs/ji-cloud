@@ -43,15 +43,21 @@ export class _ extends LitElement {
 
     const {head_title} = this;
 
+    const STR_SUPPORT ="Support & FAQ";
+    const STR_TOUR = "Quick tour";
+    const STR_TUTORIALS = "JI Tutorials";
+    const STR_WEBINARS = "Online webinars";
+    const STR_ACCESSIBILITY = "Accessibility"
+
     return html`
     <main>
     <h3>JIGs</h3>
     <ul>
-    <column-list text_line="Support & FAQ" color="white" class="list" ></column-list>
-    <column-list text_line="Quick tour" color="white" class="list" ></column-list>
-    <column-list text_line="JI Tutorials" color="white" class="list" ></column-list>
-    <column-list text_line="Online webinars" color="white" class="list" ></column-list>
-    <column-list text_line="Accessibility" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_SUPPORT}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_TOUR}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_TUTORIALS}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_WEBINARS}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_ACCESSIBILITY}" color="white" class="list" ></column-list>
 
     </ul>
     
