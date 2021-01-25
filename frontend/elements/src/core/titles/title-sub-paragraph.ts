@@ -52,11 +52,11 @@ h3{
 
  
   @property()
-  colorsubtitle:string = ""; 
+  colorsubtitle:Color = "black"; 
   @property()
   title:string = ""; 
   @property()
-  sizesubtitle:string = ""; 
+  sizesubtitle:FontSize = "small"; 
   @property()
   subtitle:string = ""; 
   @property()

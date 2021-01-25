@@ -50,9 +50,9 @@ div{
 
 
   @property()
-  color:string = ""; 
+  color:Color = "green"; 
   @property()
-  size:string = ""; 
+  size:Size = "medium"; 
 
 
   render() {
