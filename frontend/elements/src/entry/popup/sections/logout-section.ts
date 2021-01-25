@@ -1,5 +1,9 @@
 import { MEDIA_UI } from '@utils/path';
  import { LitElement, html, css, customElement, property } from 'lit-element';
+ import "@elements/core/titles/variants/title-section";
+ import "@elements/core/buttons/rectangle" ;
+ import "@elements/entry/home/TOSORT/column-list";
+
   @customElement('logout-section')
  export class _ extends LitElement {
   static get styles() {
@@ -15,19 +19,19 @@ import { MEDIA_UI } from '@utils/path';
   }
     
   
-  ::slotted([slot=title]){
+  .title{
  left:40px;
     
     position:relative;
     top:86px;
   }
   
-  ::slotted([slot=line]){
+  .line{
     margin-left:40px;
     margin-top:7px;
     display:block;
   }
-  ::slotted([slot=button]){
+  .button{
     right:40px;
     bottom:40px;
     // display:block;
@@ -35,7 +39,7 @@ import { MEDIA_UI } from '@utils/path';
 
   }
 
-  ::slotted([slot=textbutton]){
+  .textbutton{
     left:40px;
     bottom:50px;
      position:absolute;
@@ -60,16 +64,31 @@ import { MEDIA_UI } from '@utils/path';
   }
   render() {
     const {} = this;
+
+
+    const STR_TITLE="Logout";
+     const STR_LINE1="If you are using a public computer, remember to";
+     const STR_LINE2=" log out when you’re done.";
+     const STR_LINE3="Do you want to logout? ";
+    const STR_LABEL="Logout";
+    const STR_Cancel="Cancel";
+
     return html`
     <main>
     <img-ui path="yellow_Illustration.png"></img-ui>
-        <slot  name="title"></slot>
-        <div class="lines">
-       <slot name="line"></slot>
-       </div>
+    <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" class="title"></title-section>
+
+         <div class="lines">
+
+        <column-list class="line" text_line="${STR_LINE1}" size="medium"></column-list>
+     <column-list class="line" text_line="${STR_LINE2}" size="medium"></column-list>
+     <column-list class="line" text_line="${STR_LINE3}" size="medium"></column-list>
+
+        </div>
          <div class="inside-wrapper">
-         <slot name="button"></slot>
-         <slot name="textbutton"></slot>
+         <button-rect size="large" color="blue" class="button">${STR_LABEL}</button-rect>
+         <button-text  size="large"  color="blue" class="textbutton" >${STR_Cancel}</button-text>
+     
 
          </div>
 
