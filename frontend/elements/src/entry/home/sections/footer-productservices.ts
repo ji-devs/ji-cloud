@@ -45,6 +45,15 @@ export class _ extends LitElement {
 
     const STR_TEACHERS = "Teachers";
     const STR_PARENTS = "Parents";
+    const STR_BITES ="JI Bites";
+    const STR_PRIME = "JI Prime";
+    const STR_TAP = "JI Tap";
+    const STR_STUDIO = "JI Studio";
+    const STR_COLLECTION = "The JI Collection";
+    const STR_JSTREAM = "J-Stream";
+    const STR_BLOG = "JI Blog";
+    const STR_JOBS = "Jobs";
+
 
     return html`
     <main>
@@ -52,14 +61,14 @@ export class _ extends LitElement {
     <ul>
     <column-list text_line="${STR_TEACHERS}" color="white" class="list" ></column-list>
     <column-list text_line="${STR_PARENTS}" color="white" class="list" ></column-list>
-    <column-list text_line="JI Bites" color="white" class="list" ></column-list>
-    <column-list text_line="JI Prime" color="white" class="list" ></column-list>
-    <column-list text_line="JI Tap" color="white" class="list" ></column-list>
-    <column-list text_line="JI Studio" color="white" class="list" ></column-list>
-    <column-list text_line="The JI Collection" color="white" class="list" ></column-list>
-    <column-list text_line="J-Stream" color="white" class="list" ></column-list>
-    <column-list text_line="JI Blog" color="white" class="list" ></column-list>
-    <column-list text_line="Jobs" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_BITES}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_PRIME}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_TAP}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_STUDIO}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_COLLECTION}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_JSTREAM}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_BLOG}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_JOBS}" color="white" class="list" ></column-list>
 
     </ul>
     
