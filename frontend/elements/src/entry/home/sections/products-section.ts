@@ -47,10 +47,10 @@ export class _ extends LitElement {
     <main>
     <h3>Product </h3>
     <ul>
-    <column-list text_line="Manage" color="white" slot="list" ></column-list>
-    <column-list text_line="Classroom" color="white" slot="list" ></column-list>
-    <column-list text_line="Create activities" color="white" slot="list" ></column-list>
-    <column-list text_line="Go pro" color="white" slot="list" ></column-list>
+    <column-list text_line="Manage" color="white" class="list" ></column-list>
+    <column-list text_line="Classroom" color="white" class="list" ></column-list>
+    <column-list text_line="Create activities" color="white" class="list" ></column-list>
+    <column-list text_line="Go pro" color="white" class="list" ></column-list>
     </ul>
     </main>
   `;
