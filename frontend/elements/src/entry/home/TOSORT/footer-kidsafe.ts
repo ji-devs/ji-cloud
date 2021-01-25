@@ -45,14 +45,17 @@ column-list{
 
   render() {
     const {} = this;
-   
+    
+    const STR_TERMS ="Terms & Conditions";
+    const STR_PRIVACY = "Privacy Policy";
+
     return html`
      <div class="wrapper">
         <img-ui class="img" path="logo-kid-safe.png"></img-ui>
         <div class="line">
-        <column-list text_line="Terms & Conditions" color="white" ></column-list>
+        <column-list text_line="${STR_TERMS}" color="white" ></column-list>
         <div class="stripe"></div>
-        <column-list text_line="Privacy Policy" color="white"></column-list>
+        <column-list text_line="${STR_PRIVACY}" color="white"></column-list>
         </div>
       </div>
   `;
