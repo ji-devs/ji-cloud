@@ -47,8 +47,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
 
 
- <img-ui path="${STR_PATH}" slot="bottomimg"></img-ui>
- <img-ui path="${STR_PATHBALOON}" slot="baloon"></img-ui>
+
 
 </studentcode-section>
 
@@ -73,6 +72,12 @@ askForHelp.argTypes = {
     control: {
         type: 'inline-radio',
         options: ["medium", "large"]
+    }
+},
+image: {
+    control: {
+        type: 'inline-radio',
+        options: ["Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png"]
     }
 }
 }

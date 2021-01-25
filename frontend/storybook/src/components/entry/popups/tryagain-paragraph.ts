@@ -45,8 +45,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
 <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
- <img-ui path="${STR_PATH}" slot="bottomimg"></img-ui>
- <img-ui path="${STR_PATHBALOON}" slot="baloon"></img-ui>
+
 
 </studentcode-section>
 

@@ -16,9 +16,10 @@ import { MEDIA_UI } from '@utils/path';
     
   
   ::slotted([slot=title]){
-    margin-left:40px;
-    margin-top:150px;
-    display:block;
+ left:40px;
+    
+    position:relative;
+    top:86px;
   }
   
   ::slotted([slot=line]){

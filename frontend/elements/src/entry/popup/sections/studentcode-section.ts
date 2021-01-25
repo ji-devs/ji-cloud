@@ -1,5 +1,7 @@
 import { MEDIA_UI } from '@utils/path';
  import { LitElement, html, css, customElement, property } from 'lit-element';
+ export type Image = "Illustration_JIG_Sad_1.png.png" | "Illustration_JIG_Sad_1.png.png"| "Illustration_JIG_Sad_1.png.png" ;
+
   @customElement('studentcode-section')
  export class _ extends LitElement {
   static get styles() {
@@ -17,19 +19,19 @@ import { MEDIA_UI } from '@utils/path';
     
   
   ::slotted([slot=title]){
-    display:block;
+    position:relative;
     text-align: center;
-    margin-top:86px;
+    top:86px;
 
 
   }
   
-  ::slotted([slot=leftimg]){
+  ::slotted([slot=img]){
     bottom:-5px;
     left:0px;
      position:absolute;
   }
-  ::slotted([slot=bottomimg]){
+ img-ui{
     bottom:-5px;
     left:0px;
      position:absolute;
@@ -49,8 +51,12 @@ import { MEDIA_UI } from '@utils/path';
 
     `];
   }
+  @property()
+  image:string = ""; 
+
+
   render() {
-    const {} = this;
+    const {image} = this;
     return html`
     <main>
         <slot  name="title"></slot>
@@ -58,10 +64,7 @@ import { MEDIA_UI } from '@utils/path';
           <div class="inside-wrapper"> 
           <slot name="square"></slot>
           </div>
-
-         <slot name="leftimg"></slot>
-         <slot name="bottomimg"></slot>
-         <slot name="baloon"></slot>
+         <slot name="img"></slot>
 
        
 
