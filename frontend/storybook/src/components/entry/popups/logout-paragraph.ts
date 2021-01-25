@@ -15,13 +15,13 @@ const STR_MEDIUM="medium";
 
 export const logoutParagraph = () => {
     return `
-<template-popups color="${STR_PEACH}" size="${STR_MEDIUM}">
+<popups-template color="${STR_PEACH}" size="${STR_MEDIUM}">
 
 <logout-section >
      
 
 </logout-section>
 
-</template-popups>
+</popups-template>
     `
 }

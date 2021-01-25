@@ -41,7 +41,7 @@ export const studentCode= (props?:Partial<Args>) => {
 const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
- <template-popups  ${argsToAttrs(deleteNone(popupProps))}>
+ <popups-template  ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
  <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
@@ -54,7 +54,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 
 
- </template-popups>
+ </popups-template>
 
 
     `
