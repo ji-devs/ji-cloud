@@ -43,12 +43,15 @@ export class _ extends LitElement {
 
     const {head_title} = this;
 
+    const STR_TEACHERS = "Teachers";
+    const STR_PARENTS = "Parents";
+
     return html`
     <main>
     <h3>Products & Services</h3>
     <ul>
-    <column-list text_line="Teachers" color="white" class="list" ></column-list>
-    <column-list text_line="Parents" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_TEACHERS}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_PARENTS}" color="white" class="list" ></column-list>
     <column-list text_line="JI Bites" color="white" class="list" ></column-list>
     <column-list text_line="JI Prime" color="white" class="list" ></column-list>
     <column-list text_line="JI Tap" color="white" class="list" ></column-list>
