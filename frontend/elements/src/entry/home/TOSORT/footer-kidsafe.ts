@@ -10,15 +10,14 @@ export class _ extends LitElement {
     width: 156px;
     height: 54px;
     object-fit: contain;
-    nargin-right:23px;
     margin-bottom:99px;
     display: block;
     margin-left:123px;
 
   }
   .wrapper{
-//  width: 274px;
-// margin-left:50px;
+//  margin-left:50px;
+// margin-top:50px;
 display:flex;
   }
 .stripe{
@@ -36,6 +35,10 @@ column-list{
   margin-left:16px;
   display: block;
 }
+.line{
+  display:flex;
+  margin-top:25px;
+}
     `]
   }
   @property()
@@ -51,9 +54,11 @@ column-list{
     return html`
      <div class="wrapper">
         <img-ui class="img" path="${path_kidsafe}"></img-ui>
+        <div class="line">
         <column-list text_line="${term}" color="${STR_WHITE}" ></column-list>
         <div class="stripe"></div>
         <column-list text_line="${privacy}" color="${STR_WHITE}"></column-list>
+        </div>
       </div>
   `;
   }
