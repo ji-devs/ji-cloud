@@ -9,6 +9,8 @@ import { MEDIA_UI } from '@utils/path';
     }
    main{
     background-color: #192150;
+    width: 1920px;
+    height: 700px;
    }
    #titleJi{
    }
@@ -20,7 +22,7 @@ import { MEDIA_UI } from '@utils/path';
     margin-left:90px;
   }
   ::slotted([slot=titleAbout]){
-    margin-left:600px;
+    margin-left:640px;
     place-items::right;
 
   }

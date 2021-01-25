@@ -20,7 +20,7 @@ const STR_lightBlue = "lightBlue";
 const STR_TITLEJi="Jewish Interactive";
 const STR_TITLEAbout="About Us";
 const STR_SIZEMEDIUM="medium";
-const STR_PATHKIDSAFE="logo-kid-safe.jpg";
+const STR_PATHKIDSAFE="logo-kid-safe.png";
 const STR_TERMS="Terms & Conditions";
 const STR_PRIVACY="Privacy Policy";
 

@@ -1,5 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+ 
 @customElement('jiggling-section')
 export class _ extends LitElement {
   static get styles() {
@@ -11,8 +12,8 @@ export class _ extends LitElement {
    main{
      width:1920px;
      height:890px;
-     background-image: url("Strip_Background_Jigglings@2x.jpg");
-     background-repeat: no-repeat;
+     background-image: url("path/to/Strip_Background_Jigglings@2x.jpg");
+      background-repeat: no-repeat;
      background-attachment: fixed;
      background-position: center;
 

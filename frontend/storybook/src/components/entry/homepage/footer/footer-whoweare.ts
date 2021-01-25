@@ -33,7 +33,7 @@ export const footerwhoweare= () => {
 
     <column-list text_line="${STR_LINE6}" color="${STR_WHITE}" slot="list"></column-list>
     <column-list text_line="${STR_LINE7}" color="${STR_WHITE}" slot="list"></column-list>
-<button-rect slot="Donate" size="medium"  color="blue"  bold="true" imglefthidden="true" imgrighthidden="true">${STR_DONATE} </button-rect>
+<button-rect slot="Donate" size="large"  color="blue"  bold="true" imglefthidden="true" imgrighthidden="true">${STR_DONATE} </button-rect>
 
      </column-details>
     `
