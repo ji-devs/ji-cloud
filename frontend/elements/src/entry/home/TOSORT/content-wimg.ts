@@ -91,10 +91,10 @@ export class _ extends LitElement {
      </div>
      <slot name="button"></slot>
      </div>
+     //  <img-ui path="${pathimg}"></img-ui>
 
     </div>
         
   `;
   }
 }
-    //  <img-ui path="${pathimg}"></img-ui>
