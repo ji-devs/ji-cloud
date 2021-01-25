@@ -1,5 +1,5 @@
-import "@elements/module-page/grid-resize";
-import "@elements/legacy/sidebar";
-import "@elements/legacy/sidebar-module";
-import "@elements/legacy/main";
-import "@elements/images/legacy";
+import "@elements/widgets/module-page/grid-resize";
+import "@elements/entry/legacy/sidebar";
+import "@elements/entry/legacy/sidebar-module";
+import "@elements/entry/legacy/main";
+import "@elements/core/images/legacy";
