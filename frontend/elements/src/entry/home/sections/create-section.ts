@@ -96,7 +96,17 @@ export class _ extends LitElement {
 
   render() {
 
+    const STR_TITLE = "Create";
+    const STR_TITLETWO = "your own JIGs";
+    const STR_SUBTITLE = "Learning Through Creation";
+    const STR_LIBRARY = "Big content library";
+    const STR_INTERFACE = "Smart & friendly interface";
+    const STR_TEACHING = "Teaching through creation";
+    const STR_ALL = "All in one";
+    const STR_START ="Start creating";
+
     const {} = this;
+
  
      return html`
     <main>
@@ -105,19 +115,19 @@ export class _ extends LitElement {
     </div> 
 
     <div class="right_side">
-    <sub-title size="medium" class="subtitle" title="Learning Through Creation"></sub-title>
+    <sub-title size="medium" class="subtitle" title="${STR_SUBTITLE}"></sub-title>
 
      <div class="inside-wrapper">
-     <title-section titlecolor="pink" title="Create" size="large" class="title"></title-section>
-    <title-section titlecolor="darkblue" title="your own JIGs" size="large" class="title"></title-section>
+     <title-section titlecolor="pink" title="${STR_TITLE}" size="large" class="title"></title-section>
+    <title-section titlecolor="darkblue" title="${STR_TITLETWO}" size="large" class="title"></title-section>
     </div>
     
-    <column-list text_line="Big content library" size="medium" class="line"></column-list>
-    <column-list text_line="Smart & friendly interface" size="medium" class="line"></column-list>
-    <column-list text_line="Teaching through creation" size="medium" class="line"></column-list>
-    <column-list text_line="All in one" size="medium" class="line"></column-list>
+    <column-list text_line="${STR_LIBRARY}" size="medium" class="line"></column-list>
+    <column-list text_line="${STR_INTERFACE}" size="medium" class="line"></column-list>
+    <column-list text_line="${STR_TEACHING}" size="medium" class="line"></column-list>
+    <column-list text_line="${STR_ALL}" size="medium" class="line"></column-list>
 
-    <button-rect class="Start-creating" size="large"  color="red", bold="true" imglefthidden="false" imgrighthidden="true">Start creating</button-rect>
+    <button-rect class="Start-creating" size="large"  color="red", bold="true" imglefthidden="false" imgrighthidden="true">${STR_START}</button-rect>
     <img-ui path="illustration-gears.png" class="gears"><img-ui>
 
     </div>
