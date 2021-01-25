@@ -22,30 +22,18 @@ pub struct StickerImage {
 }
 
 //Some properties aren't in the transform
-//see https://jitap.net/media/webplayer/player.js?v=1.3.6
 //
 impl StickerImage {
     pub fn render(jig_id: &str, module_id: &str, img: &Image, mock: bool) -> Dom {
 
         html!("div", {
             .style("position", "absolute")
-            .style_signal("top", top_signal(img.height)) 
-            .style_signal("left", left_signal(img.width)) 
-            .style_signal("width", width_signal(img.width)) 
-            .style_signal("height", height_signal(img.height)) 
+            .style("top", "0px") 
+            .style("left", "0px") 
+            .style("width", &format!("{}px", img.width))
+            .style("height", &format!("{}px", img.height))
             .style("transform-origin", "center") 
-            /*
-            .style("transform", 
-                format!("matrix({}, {}, {}, {}, {}, {})",
-                    img.transform[0],
-                    img.transform[1],
-                    img.transform[2],
-                    img.transform[3],
-                    img.transform[4],
-                    img.transform[5],
-                )
-            )
-            */
+            .style_signal("transform", transform_signal(img.transform, img.width, img.height)) 
             .child(html!("img-legacy", {
                 .property("jigId", jig_id)
                 .property("moduleId", module_id)
@@ -54,6 +42,42 @@ impl StickerImage {
             }))
         })
     }
+}
+
+//TODO - not working
+//backend Ji -> TT example: https://github.com/ji-devs/jitap-backend/blob/master/create/src/endpoints/playerMeta/PlayerMeta-Common.ts
+//see https://jitap.net/media/webplayer/player.js?v=1.3.6
+//previous player example just used our format so not viable as a reference
+//
+fn transform_signal(src:[f64;6], img_width: f64, img_height: f64) -> impl Signal<Item = String> {
+    //TODO - adapt transform based on resize signal
+    get_resize_info()
+        .signal_ref(move |info| {
+            let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
+            let stage_width = info.width;
+            let stage_height = info.height;
+            let scale = info.scale;
+
+            //Move origin to center of stage
+            transform_2d::translate_mut(&mut transform, 
+                (stage_width - img_width)/2.0,
+                (stage_height - img_height)/2.0,
+            );
+            //Scale to stage size
+            transform_2d::scale_mut(&mut transform, scale, scale);
+
+            //Apply saved transform (which assumes coordinates in stage center)
+            transform_2d::mul_mut(&mut transform, &src);
+
+            format!("matrix({}, {}, {}, {}, {}, {})",
+                transform[0],
+                transform[1],
+                transform[2],
+                transform[3],
+                transform[4],
+                transform[5],
+            )
+        })
 }
 
 fn top_signal(height: f64) -> impl Signal<Item = String> {
@@ -94,46 +118,6 @@ fn height_signal(height: f64) -> impl Signal<Item = String> {
             format!("{}px", height * scale)
         })
 }
-//TODO - not working
-//backend Ji -> TT example: https://github.com/ji-devs/jitap-backend/blob/master/create/src/endpoints/playerMeta/PlayerMeta-Common.ts
-//previous player example just used our format so not viable as a reference
-//
-fn transform_signal(transform:[f64;6], img_width: f64, img_height: f64) -> impl Signal<Item = String> {
-    //TODO - adapt transform based on resize signal
-    get_resize_info()
-        .signal_ref(move |info| {
-            //need to clone each time - otherwise changes accumulate
-            let mut transform = transform.clone();
-
-            //let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
-            let ResizeInfo {scale, x, y, width, height, ..} = *info;
-
-            //log::info!("{} {}", img_width, img_height);
-
-            transform_2d::scale_mut(&mut transform, scale, scale);
-            /*
-            transform_2d::translate_mut(&mut transform, 
-                (width / 2.0) - (img_width)/2.0,
-                height / 2.0,
-                //(width / 2.0) + (img_width / 2.0),
-                //(height / 2.0) - (img_height / 2.0),
-            );
-            */
-            //transform_2d::translate_mut(&mut transform, (self.x + basis[0]) * self.scale, basis[1] + self.y);
-
-            //log::info!("{:#?}", info);
-
-            format!("matrix({}, {}, {}, {}, {}, {})",
-                transform[0],
-                transform[1],
-                transform[2],
-                transform[3],
-                transform[4],
-                transform[5],
-            )
-        })
-}
-
 /*
  *
     pub scale: f64,
