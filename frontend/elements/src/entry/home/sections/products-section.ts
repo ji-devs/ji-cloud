@@ -42,15 +42,21 @@ export class _ extends LitElement {
   render() {
 
     const {} = this;
+    const STR_TITLE="Product"; 
+    const STR_LINE1="Manage";
+    const STR_LINE2="Classroom";
+    const STR_LINE3="Create activities";
+    const STR_LINE4="Go pro";
+
 
     return html`
     <main>
-    <h3>Product </h3>
+    <h3>${STR_TITLE} </h3>
     <ul>
-    <column-list text_line="Manage" color="white" class="list" ></column-list>
-    <column-list text_line="Classroom" color="white" class="list" ></column-list>
-    <column-list text_line="Create activities" color="white" class="list" ></column-list>
-    <column-list text_line="Go pro" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_LINE1}" color="white" slot="list" ></column-list>
+    <column-list text_line="${STR_LINE2}" color="white" slot="list" ></column-list>
+    <column-list text_line="${STR_LINE3}" color="white" slot="list" ></column-list>
+    <column-list text_line="${STR_LINE4}" color="white" slot="list" ></column-list>
     </ul>
     </main>
   `;
