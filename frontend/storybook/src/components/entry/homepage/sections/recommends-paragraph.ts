@@ -28,10 +28,10 @@ const STR_TITLE_HOP = "HOP";
 const STR_PARAGRAPH_HOP= "Hebrew Series";
  
 
- const STR_SIZELARGE = "large";
+ 
 
 
-export const reccomendsParagraph = () => {
+export const RecommendsParagraph = () => {
     return `
 
     <recommends-section>

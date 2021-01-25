@@ -7,6 +7,7 @@ export class _ extends LitElement {
         .wrapper{
             display: flex;
             align-items:center;
+            position:relative;
         }
         .uploaded{
             color: #46ba6f;
