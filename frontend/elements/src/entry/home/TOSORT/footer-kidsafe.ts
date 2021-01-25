@@ -45,14 +45,14 @@ column-list{
 
   render() {
     const {} = this;
-    const STR_WHITE="white"
+   
     return html`
      <div class="wrapper">
         <img-ui class="img" path="logo-kid-safe.png"></img-ui>
         <div class="line">
-        <column-list text_line="Terms & Conditions" color="${STR_WHITE}" ></column-list>
+        <column-list text_line="Terms & Conditions" color="white" ></column-list>
         <div class="stripe"></div>
-        <column-list text_line="Privacy Policy" color="${STR_WHITE}"></column-list>
+        <column-list text_line="Privacy Policy" color="white"></column-list>
         </div>
       </div>
   `;
