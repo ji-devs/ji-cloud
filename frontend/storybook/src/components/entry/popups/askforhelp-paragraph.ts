@@ -1,7 +1,7 @@
 import "@elements/entry/home/TOSORT/column-details";
 import "@elements/entry/home/TOSORT/column-list";
-import "@elements/core/popups/popup";
-import {Color,Size} from "@elements/core/popups/popup";
+import "@elements/core/popups/popups-template";
+import {Color,Size} from "@elements/core/popups/popups-template";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
 import "@elements/entry/popup/sections/studentcode-section";
