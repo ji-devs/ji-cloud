@@ -74,7 +74,7 @@ export class _ extends LitElement {
     </slot>
 
     </ul>
-    <social-networks class="socialnetworks" path_instagram"Icn_Instagram.png" path_facebook="icn_facebook.png"   path_youtube"Icn_Youtube.png" path_linkedin"Icn_Linkdin.png"> </social-networks>
+    <social-networks class="socialnetworks" path_instagram="Icn_Instagram.png" path_facebook="icn_facebook.png"   path_youtube="Icn_Youtube.png" path_linkedin="Icn_Linkdin.png"> </social-networks>
     </main>
   `;
   }
