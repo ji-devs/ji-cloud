@@ -32,16 +32,7 @@ export class _ extends LitElement {
     `];
   }
 
-
-  @property()
-  head_title:string = ""; 
-
-
- 
-
   render() {
-
-    const {head_title} = this;
 
     const STR_SUPPORT ="Support & FAQ";
     const STR_TOUR = "Quick tour";
@@ -52,14 +43,14 @@ export class _ extends LitElement {
     return html`
     <main>
     <h3>JIGs</h3>
-    <ul>
-    <column-list text_line="${STR_SUPPORT}" color="white" class="list" ></column-list>
-    <column-list text_line="${STR_TOUR}" color="white" class="list" ></column-list>
-    <column-list text_line="${STR_TUTORIALS}" color="white" class="list" ></column-list>
-    <column-list text_line="${STR_WEBINARS}" color="white" class="list" ></column-list>
-    <column-list text_line="${STR_ACCESSIBILITY}" color="white" class="list" ></column-list>
+      <ul>
+        <column-list text_line="${STR_SUPPORT}" color="white" class="list" ></column-list>
+        <column-list text_line="${STR_TOUR}" color="white" class="list" ></column-list>
+        <column-list text_line="${STR_TUTORIALS}" color="white" class="list" ></column-list>
+        <column-list text_line="${STR_WEBINARS}" color="white" class="list" ></column-list>
+        <column-list text_line="${STR_ACCESSIBILITY}" color="white" class="list" ></column-list>
 
-    </ul>
+      </ul>
     
     </main>
   `;
