@@ -14,6 +14,7 @@ export class _ extends LitElement {
 
 div{
   position: relative;
+  border-radius:25px;
 }
 
 
@@ -21,6 +22,17 @@ div{
     width: 576px;
     height: 352px;
   }
+div::before{
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+ 
 
   .large{
     width: 760px;
