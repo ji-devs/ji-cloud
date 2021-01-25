@@ -7,7 +7,7 @@ export type Color = "peach" | "green" ;
 export type Size ="medium" | "large";
 
 
-@customElement('popups-template')
+@customElement('popup-container')
 export class _ extends LitElement {
   static get styles() {
     return [css`

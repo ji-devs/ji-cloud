@@ -1,7 +1,7 @@
 import "@elements/entry/home/TOSORT/column-details";
 import "@elements/entry/home/TOSORT/column-list";
-import "@elements/core/popups/popups-template";
-import {Color,Size} from "@elements/core/popups/popups-template";
+import "@elements/core/popups/popup-container";
+import {Color,Size} from "@elements/core/popups/popup-container";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
 import "@elements/entry/popup/sections/studentcode-section";
@@ -38,7 +38,7 @@ export const tryAgain= (props?:Partial<Args>) => {
 const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
- <popups-template ${argsToAttrs(deleteNone(popupProps))}>
+ <popup-container ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
  <square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
@@ -52,7 +52,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 
 
- </popups-template>
+ </popup-container>
 
 
     `
