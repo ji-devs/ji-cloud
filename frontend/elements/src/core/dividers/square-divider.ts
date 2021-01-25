@@ -1,5 +1,7 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+export type ColorBorder = "blue" | "none";
+export type Size = "small" | "large";
 @customElement("square-divider")
 export class _ extends LitElement {
   static get styles() {
@@ -22,10 +24,10 @@ export class _ extends LitElement {
   }
 
   @property()
-  colorborder: string = "";
+  colorborder: ColorBorder = "blue";
 
   @property()
-  size: string = "";
+  size: Size = "small";
 
   render() {
     const { colorborder, size } = this;
