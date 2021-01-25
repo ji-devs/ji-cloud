@@ -1,5 +1,46 @@
-use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageOutputFormat};
-use shared::domain::image::ImageKind;
+use image::{
+    gif::GifDecoder, imageops::FilterType, AnimationDecoder, DynamicImage, GenericImageView,
+    ImageOutputFormat,
+};
+use shared::media::WebMediaKind as SharedWebMediaKind;
+use shared::{domain::image::ImageKind, media::AnimationVariant};
+
+/// Kinds of media used with the web media library
+#[repr(i16)]
+#[derive(Copy, Clone, Debug, sqlx::Type)]
+pub enum WebMediaKind {
+    /// Media is a Png, and an Image
+    PngStickerImage = 0,
+
+    /// Media is a Gif, and Animated
+    GifAnimation = 1,
+}
+
+impl WebMediaKind {
+    pub fn to_shared(self) -> SharedWebMediaKind {
+        match self {
+            Self::PngStickerImage => SharedWebMediaKind::Image(ImageKind::Sticker),
+            Self::GifAnimation => SharedWebMediaKind::Animation(AnimationVariant::Gif),
+        }
+    }
+}
+
+// todo: use a better method for this
+pub fn detect_image_kind(data: &[u8]) -> anyhow::Result<WebMediaKind> {
+    let decoder = GifDecoder::new(&*data);
+
+    let frames = match decoder {
+        Ok(decoder) => decoder.into_frames().count(),
+        Err(image::ImageError::Decoding(_)) => return Ok(WebMediaKind::PngStickerImage),
+        Err(e) => return Err(e.into()),
+    };
+
+    if frames < 2 {
+        Ok(WebMediaKind::PngStickerImage)
+    } else {
+        Ok(WebMediaKind::GifAnimation)
+    }
+}
 
 pub fn generate_images(
     original: &DynamicImage,

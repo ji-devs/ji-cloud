@@ -11,11 +11,12 @@ use rusoto_s3::{
 use shared::{
     domain::{animation::AnimationId, audio::AudioId, image::ImageId},
     media::{
-        self, audio_id_to_key, image_id_to_key, AnimationVariant, AudioVariant, ImageVariant,
-        MediaLibraryKind,
+        self, audio_id_to_key, image_id_to_key, web_media_key, AnimationVariant, AudioVariant,
+        FileKind, ImageVariant, MediaLibraryKind,
     },
 };
 use url::Url;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Client {
@@ -213,6 +214,29 @@ impl Client {
         Ok(())
     }
 
+    pub async fn upload_web_media(
+        &self,
+        data: Vec<u8>,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<()> {
+        let client = match &self.client {
+            Some(client) => client,
+            None => return Ok(()),
+        };
+
+        client
+            .put_object(PutObjectRequest {
+                bucket: self.bucket.clone(),
+                key: media::web_media_key(id, file_kind),
+                content_type: Some(file_kind.content_type().to_owned()),
+                body: Some(data.into()),
+                ..PutObjectRequest::default()
+            })
+            .await?;
+        Ok(())
+    }
+
     pub fn audio_presigned_get_url(
         &self,
         library: MediaLibraryKind,
@@ -251,6 +275,10 @@ impl Client {
         );
 
         Ok(url.parse()?)
+    }
+
+    pub async fn delete_web_media_file(&self, id: Uuid, file_kind: FileKind) {
+        self.delete_media(&web_media_key(id, file_kind)).await
     }
 
     pub async fn delete_audio(

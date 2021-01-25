@@ -1549,6 +1549,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "sha2",
  "shared",
  "sqlx",
  "time 0.2.24",
@@ -2965,6 +2966,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
+ "base64 0.13.0",
  "chrono",
  "chrono-tz",
  "csv",

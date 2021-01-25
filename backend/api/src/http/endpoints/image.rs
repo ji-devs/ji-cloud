@@ -5,6 +5,7 @@ use crate::{
     image_ops::generate_images,
     s3,
 };
+use actix_http::error::BlockingError;
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
@@ -27,6 +28,7 @@ use uuid::Uuid;
 
 pub mod user {
     use crate::{db, error, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3};
+    use actix_http::error::BlockingError;
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -74,14 +76,18 @@ pub mod user {
 
         let kind = ImageKind::Sticker;
 
-        let res: Result<_, error::Upload> = tokio::task::spawn_blocking(move || {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-            Ok(generate_images(&original, kind)?)
-        })
-        .await?;
+        let (original, resized, thumbnail) =
+            actix_web::web::block(move || -> Result<_, error::Upload> {
+                let original =
+                    image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
+                Ok(generate_images(&original, kind)?)
+            })
+            .await
+            .map_err(|err| match err {
+                BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
+                BlockingError::Error(e) => e,
+            })?;
 
-        let (original, resized, thumbnail) = res?;
         s3.upload_images(MediaLibraryKind::User, id, original, resized, thumbnail)
             .await?;
 
@@ -234,13 +240,18 @@ async fn upload(
         .await?
         .ok_or(error::Upload::ResourceNotFound)?;
 
-    let res: Result<_, error::Upload> = tokio::task::spawn_blocking(move || {
-        let original = image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-        Ok(generate_images(&original, kind)?)
-    })
-    .await?;
+    let (original, resized, thumbnail) =
+        actix_web::web::block(move || -> Result<_, error::Upload> {
+            let original =
+                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
+            Ok(generate_images(&original, kind)?)
+        })
+        .await
+        .map_err(|err| match err {
+            BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
+            BlockingError::Error(e) => e,
+        })?;
 
-    let (original, resized, thumbnail) = res?;
     s3.upload_images(MediaLibraryKind::Global, id, original, resized, thumbnail)
         .await?;
 

@@ -1,5 +1,9 @@
-use serde::de::DeserializeOwned;
-use std::fmt::Write;
+use serde::de::{DeserializeOwned, Visitor};
+use std::{
+    fmt::{self, Write},
+    marker::PhantomData,
+    str::FromStr,
+};
 use uuid::Uuid;
 
 /// Hack to deserialize an Optional [`Option<T>`]
@@ -7,7 +11,7 @@ use uuid::Uuid;
 /// This is to differentiate between "missing" values and null values.
 /// For example in json `{"v": null}` and `{}` are different things, in the first one, `v` is `null`, but in the second, v is `undefined`.
 ///
-/// [`Option<T>`]: https://doc.rust-lang.org/stable/std/option/enum.Option.html
+/// [`Option<T>`]: Option
 pub(super) fn deserialize_optional_field<'de, T, D>(
     deserializer: D,
 ) -> Result<Option<Option<T>>, D::Error>
@@ -81,5 +85,23 @@ impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
             .next()
             .unwrap_or_else(|| Ok(Vec::new()))
             .map_err(|e| E::custom(format!("could not deserialize sequence value: {:?}", e)))
+    }
+}
+
+pub(super) struct FromStrVisiter<T>(pub PhantomData<T>);
+
+impl<'de, TErr: std::fmt::Debug, T: FromStr<Err = TErr>> Visitor<'de> for FromStrVisiter<T> {
+    type Value = T;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("string")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        FromStr::from_str(value)
+            .map_err(|e| E::custom(format!("could not deserialize string: {:?}", e)))
     }
 }
