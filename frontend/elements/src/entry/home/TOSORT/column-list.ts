@@ -30,6 +30,8 @@ export class _ extends LitElement {
 
      .black{
        color:#383838;
+       list-style-type: none;
+
      }
 
      .darkblue{

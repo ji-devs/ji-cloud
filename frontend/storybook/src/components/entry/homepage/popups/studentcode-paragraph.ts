@@ -4,8 +4,8 @@ import "@elements/core/popups/popup-container";
 import {Color,Size} from "@elements/core/popups/popup-container";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";
-import "@elements/entry/home/widgets/studentcode-section";
-import {Image} from "@elements/entry/home/widgets/studentcode-section";
+import "@elements/entry/home/widgets/popup-section";
+import {Image} from "@elements/entry/home/widgets/popup-section";
 import "@elements/core/dividers/square-divider";
 
 
@@ -41,14 +41,14 @@ const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
  <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
- <studentcode-section  ${argsToAttrs(deleteNone(popupProps))}>
+ <popup-section  ${argsToAttrs(deleteNone(popupProps))}>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
  <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 
- </studentcode-section>
+ </popup-section>
 
 
 

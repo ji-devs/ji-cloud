@@ -22,15 +22,26 @@ div{
     width: 576px;
     height: 352px;
   }
-div::before{
+.peach::before{
   content: "";
   position: absolute;
   bottom: 100%;
-  left: 50%;
+  left: 75%;
   margin-left: -5px;
-  border-width: 5px;
+  border-width: 20px;
   border-style: solid;
-  border-color: transparent transparent black transparent;
+  border-color: transparent transparent #fff2cb transparent;
+}
+
+.green::before{
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 75%;
+  margin-left: -5px;
+  border-width: 20px;
+  border-style: solid;
+  border-color: transparent transparent #c4ead1 transparent;
 }
  
 

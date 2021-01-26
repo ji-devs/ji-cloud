@@ -6,12 +6,15 @@ export default {
 }
 
 interface Args {
-    contents: string
+    contents: string,
+    path:string
 }
 
 const DEFAULT_ARGS:Args = {
-    contents: "hello"
-}
+    contents: "hello",
+    path:"Icn_Menu_About.png"
+ 
+ }
 
 export const MenuTab = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;

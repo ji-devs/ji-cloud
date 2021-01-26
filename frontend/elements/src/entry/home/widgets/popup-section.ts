@@ -4,7 +4,7 @@ import { MEDIA_UI } from '@utils/path';
  export type Image = "" | "play"| "askforhelp" |"tryagain" ;
 
 
-  @customElement('studentcode-section')
+  @customElement('popup-section')
  export class _ extends LitElement {
   static get styles() {
     return [css`

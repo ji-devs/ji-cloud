@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
-import { nothing} from 'lit-html';
-import {BaseButton} from "@elements/_styles/buttons";
+import { nothing } from 'lit-html';
+import { BaseButton } from "@elements/_styles/buttons";
 import { lastAttributeNameRegex } from 'lit-html/lib/template';
 
 export type Color = "red" | "blue" | "white" | "green";
@@ -26,6 +26,11 @@ export class _ extends BaseButton {
         .medium {
           padding: 13.6px 24px 11.4px;
       }
+     .small{
+    padding: 5px 24px 4px;
+ 
+}
+
       .large{
        padding: 15px 40px 16px;
        
@@ -105,7 +110,7 @@ export class _ extends BaseButton {
   @property({ type: Boolean })
   italic: boolean = false;
 
- 
+
 
   @property()
   iconBefore?: IconBefore;
@@ -113,19 +118,19 @@ export class _ extends BaseButton {
   iconAfter?: IconAfter;
 
   render() {
-    
 
-    const {size, color, bold, italic,  iconAfter, iconBefore} = this;
 
-    const classes = classMap({ 
+    const { size, color, bold, italic, iconAfter, iconBefore } = this;
+
+    const classes = classMap({
       [size]: true,
       [color]: true,
       bold: bold,
       italic: italic,
-     
+
     });
 
-    
+
     const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg"
       : "";
     const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"

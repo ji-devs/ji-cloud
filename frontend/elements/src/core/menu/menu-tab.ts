@@ -23,8 +23,10 @@ export class _ extends LitElement {
         
     }
     .menu-icon{
-        margin-right:6px;
-        
+        margin-right:10px;
+        margin-left:6px;
+        margin-top:17px;
+
     }
     p{
         font-weight: 500; 
@@ -38,12 +40,21 @@ export class _ extends LitElement {
     `];
   }
 
+  @property()
+  path:string = ""; 
+ 
+
+
   render() {
+
+
+const {path}=this;
+
     return html`
     <main class="">
         <div class="tab-content-wrapper">
         <div class="tab-content">
-        <img class="menu-icon" src="${MEDIA_UI}/icons/icn-menu-home.svg"/>
+         <img-ui class="menu-icon" path="${path}"></img-ui>
         <p><slot></slot></p>
         </div>
         </div>
