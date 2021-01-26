@@ -33,9 +33,6 @@ const STR_SUBTITLEPARENTS = "Sarah Nazirah, Mexico";
 
 const STR_TITLETEACHERS = "Teachers";
 const STR_SUBTITLETEACHERS = "Sarah Nazirah, Mexico";
-
-const STR_PINK = "pink";
-
 const STR_LINE1="I want to tell you, because of JI, my children are";
 const STR_LINE2="learning Hebrew and English simultaneously. For my ";
 const STR_LINE3="children, you are not only teaching two children, you"
