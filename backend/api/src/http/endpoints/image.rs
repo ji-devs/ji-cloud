@@ -5,6 +5,7 @@ use crate::{
     image_ops::generate_images,
     s3,
 };
+use actix_http::error::BlockingError;
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
@@ -27,6 +28,7 @@ use uuid::Uuid;
 
 pub mod user {
     use crate::{db, error, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3};
+    use actix_http::error::BlockingError;
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -74,14 +76,18 @@ pub mod user {
 
         let kind = ImageKind::Sticker;
 
-        let res: Result<_, error::Upload> = tokio::task::spawn_blocking(move || {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-            Ok(generate_images(&original, kind)?)
-        })
-        .await?;
+        let (original, resized, thumbnail) =
+            actix_web::web::block(move || -> Result<_, error::Upload> {
+                let original =
+                    image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
+                Ok(generate_images(&original, kind)?)
+            })
+            .await
+            .map_err(|err| match err {
+                BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
+                BlockingError::Error(e) => e,
+            })?;
 
-        let (original, resized, thumbnail) = res?;
         s3.upload_images(MediaLibraryKind::User, id, original, resized, thumbnail)
             .await?;
 
@@ -139,41 +145,6 @@ pub mod user {
             .await?;
 
         Ok(Json(UserImageListResponse { images }))
-    }
-}
-
-mod web_library {
-    use core::settings::RuntimeSettings;
-
-    use paperclip::actix::{
-        api_v2_operation,
-        web::{Data, Json, Query},
-    };
-
-    use shared::{
-        api::{endpoints, ApiEndpoint},
-        domain::image::web::WebImageSearchResponse,
-    };
-
-    use crate::{error, extractor::WrapAuthClaimsNoDb};
-
-    /// Search for images in the web image library.
-    #[api_v2_operation]
-    pub async fn search(
-        runtime_settings: Data<RuntimeSettings>,
-        _claims: WrapAuthClaimsNoDb,
-        query: Query<<endpoints::image::web::Search as ApiEndpoint>::Req>,
-    ) -> Result<Json<<endpoints::image::web::Search as ApiEndpoint>::Res>, error::Server> {
-        let query = query.into_inner();
-
-        // todo: handle empty queries (they're invalid in bing)
-
-        let res = match &runtime_settings.bing_search_key {
-            Some(key) => crate::image_search::get_images(&query.q, key).await?,
-            None => WebImageSearchResponse { images: Vec::new() },
-        };
-
-        Ok(Json(res))
     }
 }
 
@@ -269,13 +240,18 @@ async fn upload(
         .await?
         .ok_or(error::Upload::ResourceNotFound)?;
 
-    let res: Result<_, error::Upload> = tokio::task::spawn_blocking(move || {
-        let original = image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-        Ok(generate_images(&original, kind)?)
-    })
-    .await?;
+    let (original, resized, thumbnail) =
+        actix_web::web::block(move || -> Result<_, error::Upload> {
+            let original =
+                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
+            Ok(generate_images(&original, kind)?)
+        })
+        .await
+        .map_err(|err| match err {
+            BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
+            BlockingError::Error(e) => e,
+        })?;
 
-    let (original, resized, thumbnail) = res?;
     s3.upload_images(MediaLibraryKind::Global, id, original, resized, thumbnail)
         .await?;
 
@@ -455,11 +431,5 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::user::List::PATH,
         image::user::List::METHOD.route().to(self::user::list),
-    )
-    .route(
-        image::web::Search::PATH,
-        image::web::Search::METHOD
-            .route()
-            .to(self::web_library::search),
     );
 }

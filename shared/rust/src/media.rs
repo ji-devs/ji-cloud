@@ -1,7 +1,12 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use crate::domain::{animation::AnimationId, audio::AudioId, image::ImageId};
+use crate::domain::{
+    animation::AnimationId,
+    audio::AudioId,
+    image::{ImageId, ImageKind},
+};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// Media Kinds
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -180,4 +185,53 @@ pub fn animation_id_to_key(
         variant.to_str(),
         id.0.to_hyphenated()
     )
+}
+
+/// Kinds of media used with the web media library
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+pub enum WebMediaKind {
+    /// media is an Animation
+    Animation(AnimationVariant),
+    /// Media is an Image
+    Image(ImageKind),
+    // Audio()
+}
+
+/// Kinds of media files
+/// FIXME: Really awkward
+#[derive(Copy, Clone, Debug)]
+pub enum FileKind {
+    /// File for an Animated Gif
+    AnimationGif,
+
+    /// Files for a PNG Image
+    ImagePng(ImageVariant),
+    // Spritesheet(Image,JSON),
+}
+
+impl FileKind {
+    /// Returns the content type of the represented file
+    pub const fn content_type(self) -> &'static str {
+        match self {
+            Self::AnimationGif => "image/gif",
+            Self::ImagePng(_) => "image/png",
+        }
+    }
+
+    const fn suffix(self) -> &'static str {
+        match self {
+            Self::AnimationGif => "animation.gif",
+            Self::ImagePng(ImageVariant::Original) => "original.png",
+            Self::ImagePng(ImageVariant::Thumbnail) => "thumbnail.png",
+            Self::ImagePng(ImageVariant::Resized) => "resized.png",
+        }
+    }
+}
+
+/// gives the key for some media in the web media library with the given parameters
+/// this is *not* a full url, (for CDN it's missing the domain)
+/// FIXME: This method is _really_ awkward.
+pub fn web_media_key(id: Uuid, file_kind: FileKind) -> String {
+    format!("media/web/{}/{}", id.to_hyphenated(), file_kind.suffix())
 }

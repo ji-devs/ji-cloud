@@ -225,6 +225,7 @@ impl Into<actix_web::Error> for CategoryUpdate {
     code = 420, description = "Unprocessable Entity: Invalid Content"
     code = 500
 )]
+#[derive(Debug)]
 pub enum Upload {
     ResourceNotFound,
     InvalidMedia,

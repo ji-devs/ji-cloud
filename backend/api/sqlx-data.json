@@ -1,5 +1,17 @@
 {
   "db": "PostgreSQL",
+  "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
+    "query": "delete from web_media_library_url where media_url = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -705,6 +717,50 @@
       "nullable": []
     }
   },
+  "54e20f1b26cfad9e9a15ba0ee4edbca29c579fa149ce712f66a39cc23b039314": {
+    "query": "\nselect id,\n       kind as \"kind: WebMediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = id) as \"urls!\"\nfrom web_media_library\nwhere id = (select media_id from web_media_library_url where media_url = $1)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: WebMediaKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "urls!",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null
+      ]
+    }
+  },
   "579ce9012c9391b99eac4ac15eb804a3fd8fe7bb8b7665bb74f9128a03653e36": {
     "query": "select exists(select 1 from user_image_library where id = $1) as \"exists!\"",
     "describe": {
@@ -955,6 +1011,32 @@
       ]
     }
   },
+  "6e53e1fff3845e965731ffc8f961f6b1a8e6f55aec7e1d333fedda1f7f10024a": {
+    "query": "\nselect id,\n       kind as \"kind: WebMediaKind\"\nfrom web_media_library\nwhere hash = $1\nfor update\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: WebMediaKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bytea"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
     "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
     "describe": {
@@ -1075,6 +1157,50 @@
       ]
     }
   },
+  "83456a82350c48f43c79c54f7ad7e95cb7df191530c7e63d8d2402e3aeb7ba78": {
+    "query": "\nselect id,\n       kind as \"kind: WebMediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = $1) as \"urls!\"\nfrom web_media_library\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: WebMediaKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "urls!",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        null
+      ]
+    }
+  },
   "837809b203432d774c6ce23f6213712da91017985ddb5ffdcf6ca771a33e7570": {
     "query": "\nselect parent_id, index from category where id = $1\n    ",
     "describe": {
@@ -1099,6 +1225,66 @@
         true,
         false
       ]
+    }
+  },
+  "84f05210fc0d761dda68090751705c6448814262eab6eae4c3c1fc04290cf357": {
+    "query": "insert into web_media_library (\"hash\", kind) values($1, $2) returning id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bytea",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "88bc0de5b07b064f9efaac3a264d56120a5eb74f0f8b5c31118db0d2d4e34e2c": {
+    "query": "\nselect media_id,\n       kind as \"kind: WebMediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "media_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: WebMediaKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
+    "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2) on conflict (media_id, media_url) do nothing",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "9666f0d8851a8bd23cdf541a3a99af9590a458915e00001de434ea91d767d5b9": {
@@ -1607,6 +1793,19 @@
       ]
     }
   },
+  "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6": {
+    "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b": {
     "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
     "describe": {
@@ -1636,6 +1835,26 @@
         "Left": []
       },
       "nullable": []
+    }
+  },
+  "f8ce681260b59d67ed44e77ebd80e1e927f235fb0d04a8170b86630c73e909e2": {
+    "query": "delete from web_media_library where id = $1 returning kind as \"kind: WebMediaKind\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: WebMediaKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "fa66e89e6b008f41f95a2489415e76fd57f37f08d64ad6c59809033b7b105a66": {
