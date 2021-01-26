@@ -1,6 +1,7 @@
 import "@elements/entry/home/TOSORT/icon-wparagraph";
-import "@elements/entry/home/sections/reccomends-section";
+import "@elements/entry/home/sections/recommend";
  
+
 export default {
   title: 'Homepage',
 }
@@ -34,7 +35,7 @@ const STR_PARAGRAPH_HOP= "Hebrew Series";
 export const reccomendsParagraph = () => {
     return `
 
-    <reccomends-section>
+    <recommends-section>
       
     <div slot="icon-title-paragraph">
     <icon-wparagraph path="${STR_PATH_HEBREW}" title="${STR_TITLE_HEBREW}" paragraph="${STR_PARAGRAPH_HEBREW}" color="${STR_DARKGRAY}" >
@@ -59,6 +60,6 @@ export const reccomendsParagraph = () => {
 <icon-wparagraph path="${STR_PATH_HOP}" title="${STR_TITLE_HOP}" paragraph="${STR_PARAGRAPH_HOP}" color="${STR_DARKGRAY}" >
  </icon-wparagraph>
  </div>
-</reccomends-section>
+</recommends-section>
     `
 }
