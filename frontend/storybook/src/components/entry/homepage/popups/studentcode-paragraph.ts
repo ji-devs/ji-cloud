@@ -12,8 +12,7 @@ import "@elements/core/dividers/square-divider";
 const STR_SMALL="small";
 const STR_DARKBLUE="darkblue";
 const STR_TITLE="Enter your student code";
-const STR_PATH="Image_JIG_StudentCode@2x.png";
-const STR_BLUE="blue";
+ const STR_BLUE="blue";
  
 
 
@@ -24,13 +23,13 @@ export default {
   interface Args{
     color: Color,
     size: Size,
-    image:Image
+    kindimage:Image
   }
   
   const DEFAULT_ARGS:Args = {
     color:"green",
     size: "large",
-    image:"Illustration_JIG_Sad_1.png.png"
+    kindimage:"play"
   }
   
   
@@ -42,14 +41,14 @@ const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
  <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
- <studentcode-section>
+ <studentcode-section  ${argsToAttrs(deleteNone(popupProps))}>
  <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
  <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
 <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
-<img-ui  ${argsToAttrs(deleteNone(popupProps))} slot="img"></img-ui>
-</studentcode-section>
+
+ </studentcode-section>
 
 
 
@@ -74,10 +73,10 @@ studentCode.argTypes = {
         options: ["medium", "large"]
     }
 },
-image: {
+kindimage: {
   control: {
       type: 'inline-radio',
-      options: ["Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png", "Illustration_JIG_Sad_1.png.png"]
+      options: ["play", "Ask for help", "Try again"]
     }
 }
 }
