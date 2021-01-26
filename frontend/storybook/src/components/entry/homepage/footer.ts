@@ -27,7 +27,7 @@ export const footer = () => {
     return `
     <footer-section >   
     <title-section titlecolor="lightBlue" title="${STR_JEWISHINTERACTIVE}" size="medium" slot="titleJi"></title-section>
-    <title-section titlecolor="lightBlue" title="${STR_ABOUTUS}" slot="titleAbout"></title-section>
+    <title-section titlecolor="lightBlue" title="${STR_ABOUTUS}" size="medium" slot="titleAbout"></title-section>
     <div slot="footer-column">
         ${footerjigs()}
     </div>

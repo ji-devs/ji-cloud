@@ -12,8 +12,7 @@ import "@elements/core/dividers/square-divider";
 const STR_SMALL="small";
 const STR_DARKBLUE="darkblue";
 const STR_TITLE="Enter your student code";
-const STR_PATH="Image_JIG_StudentCode@2x.png";
-const STR_BLUE="blue";
+ const STR_BLUE="blue";
  
 
 
