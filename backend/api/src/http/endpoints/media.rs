@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     error,
     extractor::{AuthUserWithScope, ScopeAdmin, WrapAuthClaimsNoDb},
-    image_ops::WebMediaKind,
+    image_ops::MediaKind,
     s3,
 };
 use actix_web::web::Path;
@@ -13,11 +13,14 @@ use paperclip::actix::{
     CreatedJson, NoContent,
 };
 use sha2::Digest as _;
-use shared::domain::{image::ImageKind, Base64};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
-    media::{FileKind, ImageVariant},
+    media::{FileKind, PngImageFile},
+};
+use shared::{
+    domain::{image::ImageKind, Base64},
+    media::MediaLibrary,
 };
 use sqlx::PgPool;
 use url::Url;
@@ -51,7 +54,7 @@ pub async fn create(
     if let Some(record) = sqlx::query!(
         r#"
 select media_id,
-       kind as "kind: WebMediaKind"
+       kind as "kind: MediaKind"
 from web_media_library_url
 inner join web_media_library on id = media_id
 where media_url = $1"#,
@@ -102,7 +105,7 @@ where media_url = $1"#,
     let record = sqlx::query!(
         r#"
 select id,
-       kind as "kind: WebMediaKind"
+       kind as "kind: MediaKind"
 from web_media_library
 where hash = $1
 for update
@@ -163,28 +166,25 @@ for update
     txn.commit().await?;
 
     match kind {
-        WebMediaKind::GifAnimation => {
-            s3.upload_web_media(
+        MediaKind::GifAnimation => {
+            s3.upload_media(
                 Arc::try_unwrap(data).expect("This should be unique by now"),
+                MediaLibrary::Web,
                 id,
                 FileKind::AnimationGif,
             )
             .await?;
         }
 
-        WebMediaKind::PngStickerImage => {
+        MediaKind::PngStickerImage => {
             let (original, resized, thumbnail) = actix_web::web::block(move || {
                 let original = image::load_from_memory(&data)?;
                 crate::image_ops::generate_images(&original, ImageKind::Sticker)
             })
             .await?;
 
-            futures::future::try_join3(
-                s3.upload_web_media(original, id, FileKind::ImagePng(ImageVariant::Original)),
-                s3.upload_web_media(resized, id, FileKind::ImagePng(ImageVariant::Resized)),
-                s3.upload_web_media(thumbnail, id, FileKind::ImagePng(ImageVariant::Thumbnail)),
-            )
-            .await?;
+            s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
+                .await?;
         }
     }
 
@@ -206,7 +206,7 @@ async fn delete_media(
     Path(id): Path<Uuid>,
 ) -> Result<NoContent, error::Server> {
     let record = sqlx::query!(
-        r#"delete from web_media_library where id = $1 returning kind as "kind: WebMediaKind""#,
+        r#"delete from web_media_library where id = $1 returning kind as "kind: MediaKind""#,
         id
     )
     .fetch_optional(pool.as_ref())
@@ -217,19 +217,18 @@ async fn delete_media(
         None => return Ok(NoContent),
     };
 
-    let delete = |file_kind| s3.delete_web_media_file(id, file_kind);
-
+    let delete = |file_kind| s3.delete_media(MediaLibrary::Web, file_kind, id);
     match kind {
-        WebMediaKind::PngStickerImage => {
+        MediaKind::PngStickerImage => {
             futures::future::join3(
-                delete(FileKind::ImagePng(ImageVariant::Original)),
-                delete(FileKind::ImagePng(ImageVariant::Resized)),
-                delete(FileKind::ImagePng(ImageVariant::Thumbnail)),
+                delete(FileKind::ImagePng(PngImageFile::Original)),
+                delete(FileKind::ImagePng(PngImageFile::Resized)),
+                delete(FileKind::ImagePng(PngImageFile::Thumbnail)),
             )
             .await;
         }
 
-        WebMediaKind::GifAnimation => {
+        MediaKind::GifAnimation => {
             delete(FileKind::AnimationGif).await;
         }
     }
@@ -263,7 +262,7 @@ async fn get(
     let media = sqlx::query!(
         r#"
 select id,
-       kind as "kind: WebMediaKind",
+       kind as "kind: MediaKind",
        created_at,
        updated_at,
        array(select media_url from web_media_library_url where media_id = $1) as "urls!"
@@ -297,7 +296,7 @@ async fn get_by_url(
     let media = sqlx::query!(
         r#"
 select id,
-       kind as "kind: WebMediaKind",
+       kind as "kind: MediaKind",
        created_at,
        updated_at,
        array(select media_url from web_media_library_url where media_id = id) as "urls!"

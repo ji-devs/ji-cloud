@@ -21,7 +21,7 @@ use shared::{
         },
         meta::MetaKind,
     },
-    media::{ImageVariant, MediaLibraryKind},
+    media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -45,8 +45,8 @@ pub mod user {
             },
             CreateResponse,
         },
-        media::ImageVariant,
-        media::MediaLibraryKind,
+        media::MediaLibrary,
+        media::{FileKind, PngImageFile},
     };
     use sqlx::PgPool;
 
@@ -88,7 +88,7 @@ pub mod user {
                 BlockingError::Error(e) => e,
             })?;
 
-        s3.upload_images(MediaLibraryKind::User, id, original, resized, thumbnail)
+        s3.upload_png_images(MediaLibrary::User, id.0, original, resized, thumbnail)
             .await?;
 
         Ok(NoContent)
@@ -107,11 +107,11 @@ pub mod user {
             .await
             .map_err(super::check_conflict_delete)?;
 
-        let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
+        let delete = |kind| s3.delete_media(MediaLibrary::User, FileKind::ImagePng(kind), image.0);
         let ((), (), ()) = futures::future::join3(
-            delete_image(ImageVariant::Original),
-            delete_image(ImageVariant::Resized),
-            delete_image(ImageVariant::Thumbnail),
+            delete(PngImageFile::Original),
+            delete(PngImageFile::Resized),
+            delete(PngImageFile::Thumbnail),
         )
         .await;
 
@@ -252,7 +252,7 @@ async fn upload(
             BlockingError::Error(e) => e,
         })?;
 
-    s3.upload_images(MediaLibraryKind::Global, id, original, resized, thumbnail)
+    s3.upload_png_images(MediaLibrary::Global, id.0, original, resized, thumbnail)
         .await?;
 
     Ok(NoContent)
@@ -376,11 +376,11 @@ async fn delete(
 
     // todo: 501 when algolia is disabled.
 
-    let delete_image = |kind| s3.delete_image(MediaLibraryKind::Global, kind, image);
+    let delete = |kind| s3.delete_media(MediaLibrary::Global, FileKind::ImagePng(kind), image.0);
     let ((), (), (), ()) = futures::future::join4(
-        delete_image(ImageVariant::Original),
-        delete_image(ImageVariant::Resized),
-        delete_image(ImageVariant::Thumbnail),
+        delete(PngImageFile::Original),
+        delete(PngImageFile::Resized),
+        delete(PngImageFile::Thumbnail),
         algolia.delete_image(image),
     )
     .await;

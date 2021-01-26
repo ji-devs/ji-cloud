@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 use uuid::Uuid;
 
-use crate::media::WebMediaKind;
+use crate::media::MediaKind;
 
 /// Response for adding a URL to the Web Media Library
 #[derive(Serialize, Deserialize, Debug)]
@@ -17,7 +17,7 @@ pub struct UrlCreatedResponse {
     pub id: Uuid,
 
     /// What kind of media this was inferred to be.
-    pub kind: WebMediaKind,
+    pub kind: MediaKind,
 }
 
 /// Request for adding a URL to the Web Media Library
@@ -38,7 +38,7 @@ pub struct WebMediaMetadataResponse {
     pub id: Uuid,
 
     /// What kind of media this is
-    pub kind: WebMediaKind,
+    pub kind: MediaKind,
 
     /// The urls associated with this media (can be empty)
     pub urls: Vec<Url>,
