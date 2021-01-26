@@ -16,19 +16,16 @@ export default {
 }
 
 
-const STR_lightBlue = "lightBlue";
 const STR_TITLEJi="Jewish Interactive";
 const STR_TITLEAbout="About Us";
-const STR_SIZEMEDIUM="medium";
-const STR_PATHKIDSAFE="logo-kid-safe.jpg";
-const STR_TERMS="Terms & Conditions";
-const STR_PRIVACY="Privacy Policy";
+
+
 
 export const footer = () => {
     return `
     <footer-section >   
-    <title-section titlecolor="${STR_lightBlue}" title="${STR_TITLEJi}" size="${STR_SIZEMEDIUM}" slot="titleJi"></title-section>
-    <title-section titlecolor="${STR_lightBlue}" title="${STR_TITLEAbout}" size="${STR_SIZEMEDIUM}" slot="titleAbout"></title-section>
+    <title-section titlecolor="lightblue" title="${STR_TITLEJi}" size="medium" slot="titleJi"></title-section>
+    <title-section titlecolor="lightblue" title="${STR_TITLEAbout}" size="medium" slot="titleAbout"></title-section>
     <div slot="footer-column">
         ${footerjigs()}
     </div>
