@@ -9,10 +9,8 @@ import {Image} from "@elements/entry/home/widgets/studentcode-section";
 import "@elements/core/dividers/square-divider";
 
 
-const STR_SMALL="small";
-const STR_DARKBLUE="darkblue";
+
 const STR_TITLE="Enter your student code";
- const STR_BLUE="blue";
  
 
 
