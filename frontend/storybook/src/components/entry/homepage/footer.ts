@@ -9,9 +9,7 @@ import "@elements/entry/home/sections/whoweare-section";
 
   import {footerjigs} from "~/components/entry/homepage/footer/footer-jigs";
   import {footerhelp} from "~/components/entry/homepage/footer/footer-help";
-  import {footerproduct} from "~/components/entry/homepage/footer/footer-product";
-  import {footercontactus} from "~/components/entry/homepage/footer/footer-contactus";
-  import {footerwhoweare} from "~/components/entry/homepage/footer/footer-whoweare";
+
   import {footerproductsservices} from "~/components/entry/homepage/footer/footer-productsservices";
 
 export default {

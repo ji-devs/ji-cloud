@@ -5,19 +5,22 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
  
-    .wrapper, ::slotted(*){
+    .wrapper{
         width:288px;
     }
     ::slotted([slot=image-actions]){
-      display:flex;
-      justify-content: flex-end;
-      width:100%;
+     
     }
     ::slotted([slot=divider]){
       margin: 0 16px;
     }
     ::slotted([slot=checkbox]){
       margin-bottom: 34px;
+    }
+    .image-actions-wrapper{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
     }
     `];
   }
@@ -29,7 +32,9 @@ export class _ extends LitElement {
     return html`
     <div class="wrapper">
         <slot name="image"></slot>
-        <slot name="image-actions"></slot>
+        <div class="image-actions-wrapper">
+          <slot name="image-actions"></slot>
+        </div>
         <slot name="divider"></slot>
         <slot name="checkbox"></slot>
         <slot name="description"></slot>
