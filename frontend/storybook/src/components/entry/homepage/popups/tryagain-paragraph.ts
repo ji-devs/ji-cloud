@@ -40,11 +40,11 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
  <popup-container ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
- <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
- <square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
-<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
-<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
-<square-divider colorborder="${STR_BLUE}" size="${STR_SMALL}" slot="square"></square-divider>
+ <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" slot="title"></title-section>
+ <square-divider colorborder="blue" size="small" slot="square"></square-divider>
+<square-divider colorborder="blue" size="small" slot="square"></square-divider>
+<square-divider colorborder="blue" size="small" slot="square"></square-divider>
+<square-divider colorborder="blue" size="small" slot="square"></square-divider>
 
 
 </studentcode-section>
@@ -59,20 +59,7 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 }
 
 tryAgain.args = DEFAULT_ARGS;
-tryAgain.argTypes = {
-  color: {
-      control: {
-          type: 'inline-radio',
-          options: ["peach", "green"]
-      }
-  },
-  size: {
-    control: {
-        type: 'inline-radio',
-        options: ["medium", "large"]
-    }
-}
-}
+
 
 
 
