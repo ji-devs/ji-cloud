@@ -18,15 +18,16 @@ export default {
   title: 'Homepage',
 }
 
-
+const STR_JEWISHINTERACTIVE="Jewish Interactive";
+const STR_ABOUTUS="About Us";
 
 
 
 export const footer = () => {
     return `
     <footer-section >   
-    <title-section titlecolor="lightBlue" title="Jewish Interactive" size="medium" slot="titleJi"></title-section>
-    <title-section titlecolor="lightBlue" title="About Us" size="medium" slot="titleAbout"></title-section>
+    <title-section titlecolor="lightBlue" title="${STR_JEWISHINTERACTIVE}" size="medium" slot="titleJi"></title-section>
+    <title-section titlecolor="lightBlue" title="${STR_ABOUTUS}" slot="titleAbout"></title-section>
     <div slot="footer-column">
         ${footerjigs()}
     </div>
