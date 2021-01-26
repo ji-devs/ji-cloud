@@ -75,7 +75,6 @@ pub mod user {
     }
 }
 
-
 /// Get an image by ID.
 pub struct Get;
 impl ApiEndpoint for Get {

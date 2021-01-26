@@ -1,4 +1,8 @@
-use crate::{api::Method, domain::media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest}, error::EmptyError};
+use crate::{
+    api::Method,
+    domain::media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
+    error::EmptyError,
+};
 
 use super::ApiEndpoint;
 
@@ -23,7 +27,6 @@ impl ApiEndpoint for GetUrl {
     const METHOD: Method = Method::Get;
 }
 
-
 /// Get media from the web media library by id.
 pub struct GetId;
 impl ApiEndpoint for GetId {
@@ -43,7 +46,6 @@ impl ApiEndpoint for DeleteUrl {
     const PATH: &'static str = "/v1/media/url/{url}";
     const METHOD: Method = Method::Delete;
 }
-
 
 /// Remove media from the web media library.
 pub struct DeleteId;
