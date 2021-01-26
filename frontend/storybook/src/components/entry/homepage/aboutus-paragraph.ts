@@ -11,7 +11,7 @@ import {Color, FontSize} from "@elements/core/titles/title-sub-paragraph";
 
   
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
 interface Args{

@@ -15,7 +15,7 @@ import "@elements/entry/home/sections/whoweare-section";
   import {footerproductsservices} from "~/components/entry/homepage/footer/footer-productsservices";
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
 const STR_JEWISHINTERACTIVE="Jewish Interactive";

@@ -4,7 +4,7 @@ import "@elements/core/buttons/rectangle";
 
 
 export default {
-    title: 'Homepage Paragraph',
+    title: 'Entry/ Homepage / Section',
   }
   
 

@@ -12,7 +12,7 @@ import "@elements/entry/home/TOSORT/footer-kidsafe";
   import {footerproductsservices} from "~/components/entry/homepage/footer/footer-productsservices";
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
 

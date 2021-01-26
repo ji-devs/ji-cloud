@@ -1,7 +1,7 @@
 import "@elements/entry/home/sections/products-section";
 import "@elements/entry/home/TOSORT/column-list";
 export default {
-    title: 'Homepage Paragraph',
+    title: 'Entry/ Homepage / Section',
   }
  
 

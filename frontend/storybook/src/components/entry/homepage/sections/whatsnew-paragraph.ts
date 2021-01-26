@@ -10,7 +10,7 @@ import "@elements/entry/home/TOSORT/content-wimg";
 
   
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
 

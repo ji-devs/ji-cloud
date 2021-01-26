@@ -1,7 +1,7 @@
 import "@elements/entry/home/sections/create-section";
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
 

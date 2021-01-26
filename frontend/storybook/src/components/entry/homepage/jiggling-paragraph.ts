@@ -2,7 +2,7 @@ import "@elements/entry/home/sections/jiggling-section";
    
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Homepage / Section',
 }
 
   
