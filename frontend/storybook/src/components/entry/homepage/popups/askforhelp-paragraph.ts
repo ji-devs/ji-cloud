@@ -11,8 +11,7 @@ import "@elements/entry/home/widgets/studentcode-section";
 const STR_SMALL="small";
 const STR_DARKBLUE="darkblue";
 const STR_TITLE="Enter your student code";
-const STR_PATH="Illustration_JIG_Sad_1%20copy.png";
-const STR_PATHBALOON="Baloon_1@2x.png";
+
 const STR_BLUE="blue";
  
 
@@ -43,12 +42,12 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
  <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
  <studentcode-section>
- <title-section titlecolor="${STR_DARKBLUE}" title="${STR_TITLE}" size="${STR_SMALL}" slot="title"></title-section>
+ <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" slot="title"></title-section>
 
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
-<square-divider colorborder="${STR_SMALL}" size="${STR_BLUE}" slot="square"></square-divider>
+<square-divider colorborder="small" size="blue" slot="square"></square-divider>
+<square-divider colorborder="small" size="blue" slot="square"></square-divider>
+<square-divider colorborder="small" size="blue" slot="square"></square-divider>
+<square-divider colorborder="small" size="blue" slot="square"></square-divider>
 
 
 
