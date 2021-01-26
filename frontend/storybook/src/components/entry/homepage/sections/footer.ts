@@ -48,7 +48,7 @@ ${footerwhoweare()}
    <div slot="footer-column">
         ${footerproductsservices()}
     </div>
-<footer-kidsafe slot="kidsafe" path_kidsafe="${STR_PATHKIDSAFE}" term="${STR_TERMS}" privacy="${STR_PRIVACY}" ></footer-kidsafe>
+<footer-kidsafe slot="kidsafe" ></footer-kidsafe>
    </footer-section>
     `
 }
