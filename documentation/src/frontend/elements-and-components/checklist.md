@@ -18,7 +18,9 @@ The list here is meant to be consulted before a PR is submitted/merged:
 
   - Use enums or unions instead of primitive types where appropriate
 
-  - Strings should be outside of the render function (or at least outside the return `html`) and prefixed with `STR_`
+  - Sane defaults (don't rely on the Storybook mock to set a property)
+
+  - Displayable strings should be outside of the render function (or at least outside the return `html`) and prefixed with `STR_`
 
   - Use lit-html's `nothing` instead of `null` or `""`
 
@@ -30,7 +32,7 @@ The list here is meant to be consulted before a PR is submitted/merged:
 
 Tip: 
 
-  - Plan the architecture carefully and consider how the element is intended to be used, not just as a wrapper for a bunch of HTML/CSS. Container elements with nothing other than slots and styles are absolutely fine, as are static elements that have no properties. Complex large elements that abstract over a ton of functionality are fine too if that's what's needed
+  - Plan the architecture carefully and consider how the element is intended to be used, not just as a wrapper for a bunch of HTML/CSS. Container elements with nothing other than slots and styles are absolutely fine, as are static elements that have no properties. Complex large elements that abstract over a ton of functionality are fine too if that's what's needed. For example, when separating this way, you may find that "my-custom-page" gets broken into a generic re-usable container which has nothing to do with that specific page, and only needs to be slotted with the custom content.
 
 ### Components / Stories
 
