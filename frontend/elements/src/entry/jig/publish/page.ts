@@ -17,7 +17,7 @@ export class _ extends LitElement {
         }
         .wrapper{
             background-color: #ffffff;
-            width: 1688px;
+            width: 1474px;
             height: 802px;
             border-radius: 32px;
             display:flex;
@@ -28,19 +28,16 @@ export class _ extends LitElement {
             
         }
         .inside-wrapper{
-            padding-top:26px;
-            margin-left:auto;
-            margin-right:auto
+            padding:26px 64px;
+            width:100%;
         }
         .content{
             display:flex;
-            position:relative;
             
            
         }
        .column{
-           width:296px;
-           max-width:296px;
+           width:25%;
            margin-right:48px;
        }
        h1{
@@ -97,23 +94,20 @@ export class _ extends LitElement {
        
         margin-bottom:0;
     }
-    ::slotted([slot="sharingcaring"]){
-        position:absolute;
-        top: 270px;
-        left: -140px;
-        z-index:3
-    }
   
        
     `];
   }
 
+  @property()
+  title:string = ""; 
+
+  @property()
+  subtitle:string = ""; 
 
   render() {
 
-    const {} = this;
-    const STR_TITLE ="Settings and JIG info.";
-    const STR_SUBTITLE = "Last step before publishing";
+    const {title, subtitle} = this;
 
     return html`    
     <main>
@@ -121,11 +115,10 @@ export class _ extends LitElement {
             <slot name="animation"></slot>
             <div class="inside-wrapper">
             
-                <h1>${STR_TITLE}</h1>
-                <p name="subtitle">${STR_SUBTITLE}</p>
+                <h1>${title}</h1>
+                <p name="subtitle">${subtitle}</p>
                 <div class="content">
                     <div class="column"><slot name="column_one"></slot></div>
-                    <slot name="sharingcaring"></slot>
                     <div class="column"><slot name="column_two"></slot></div>
                     <div class="column"><slot name="column_three"></slot>
                     
