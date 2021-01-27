@@ -4,18 +4,8 @@ use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
     HttpClient, Region,
 };
-use rusoto_s3::{
-    util::{PreSignedRequest as _, PreSignedRequestOption},
-    DeleteObjectRequest, GetObjectRequest, PutObjectRequest, S3,
-};
-use shared::{
-    domain::{animation::AnimationId, audio::AudioId, image::ImageId},
-    media::{
-        self, audio_id_to_key, image_id_to_key, web_media_key, AnimationVariant, AudioVariant,
-        FileKind, ImageVariant, MediaLibraryKind,
-    },
-};
-use url::Url;
+use rusoto_s3::{DeleteObjectRequest, PutObjectRequest, S3};
+use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -63,58 +53,28 @@ impl Client {
         })
     }
 
-    pub async fn upload_images(
+    pub async fn upload_png_images(
         &self,
-        library: MediaLibraryKind,
-        image: ImageId,
+        library: MediaLibrary,
+        image: Uuid,
         original: Vec<u8>,
         resized: Vec<u8>,
         thumbnail: Vec<u8>,
     ) -> anyhow::Result<()> {
-        let client = match &self.client {
-            Some(client) => client,
-            None => return Ok(()),
-        };
+        let upload = |data, file| self.upload_media(data, library, image, FileKind::ImagePng(file));
 
-        let make_req = |kind, body: Vec<u8>| PutObjectRequest {
-            bucket: self.bucket.clone(),
-            key: image_id_to_key(library, kind, image),
-            body: Some(body.into()),
-            content_type: Some("image/png".to_owned()),
-            ..PutObjectRequest::default()
-        };
-
-        let original = client.put_object(make_req(ImageVariant::Original, original));
-        let resized = client.put_object(make_req(ImageVariant::Resized, resized));
-        let thumbnail = client.put_object(make_req(ImageVariant::Thumbnail, thumbnail));
+        let original = upload(original, PngImageFile::Original);
+        let resized = upload(resized, PngImageFile::Resized);
+        let thumbnail = upload(thumbnail, PngImageFile::Thumbnail);
 
         futures::future::try_join3(original, resized, thumbnail).await?;
 
         Ok(())
     }
 
-    pub fn image_presigned_get_url(
-        &self,
-        library: MediaLibraryKind,
-        kind: ImageVariant,
-        image: ImageId,
-    ) -> anyhow::Result<Url> {
-        let url = GetObjectRequest {
-            bucket: self.bucket.clone(),
-            key: image_id_to_key(library, kind, image),
-            ..GetObjectRequest::default()
-        }
-        .get_presigned_url(
-            &self.region,
-            &self.creds,
-            &PreSignedRequestOption::default(),
-        );
-
-        Ok(url.parse()?)
-    }
-
-    async fn delete_media(&self, key: &str) {
-        if let Err(err) = self.try_delete(key.to_string()).await {
+    pub async fn delete_media(&self, library: MediaLibrary, file: FileKind, id: Uuid) {
+        let key = media_key(library, id, file);
+        if let Err(err) = self.try_delete(key.clone()).await {
             log::warn!("failed to delete {} from s3: {}", key, err);
 
             sentry::with_scope(
@@ -124,7 +84,7 @@ impl Client {
                         ty: "info".to_owned(),
                         data: {
                             let mut map = sentry::protocol::Map::new();
-                            map.insert("key".to_owned(), key.to_string().into());
+                            map.insert("key".to_owned(), key.clone().into());
                             map
                         },
                         ..Default::default()
@@ -152,71 +112,10 @@ impl Client {
         Ok(())
     }
 
-    pub async fn delete_image(
-        &self,
-        library: MediaLibraryKind,
-        variant: ImageVariant,
-        image: ImageId,
-    ) {
-        self.delete_media(&image_id_to_key(library, variant, image))
-            .await
-    }
-
-    pub async fn upload_audio(
-        &self,
-        library: MediaLibraryKind,
-        audio: AudioId,
-        original: Vec<u8>,
-    ) -> anyhow::Result<()> {
-        let client = match &self.client {
-            Some(client) => client,
-            None => return Ok(()),
-        };
-
-        let id_to_key = |kind| audio_id_to_key(library, kind, audio);
-
-        client
-            .put_object(PutObjectRequest {
-                bucket: self.bucket.clone(),
-                key: id_to_key(AudioVariant::Original),
-                body: Some(original.into()),
-                content_type: Some("audio/mp3".to_owned()),
-                ..PutObjectRequest::default()
-            })
-            .await?;
-
-        Ok(())
-    }
-
-    // note for future maintainers:
-    // this is split into 2 functions because they're basically entirely different
-    pub async fn upload_animation_gif(
-        &self,
-        library: MediaLibraryKind,
-        animation: AnimationId,
-        gif: Vec<u8>,
-    ) -> anyhow::Result<()> {
-        let client = match &self.client {
-            Some(client) => client,
-            None => return Ok(()),
-        };
-
-        client
-            .put_object(PutObjectRequest {
-                bucket: self.bucket.clone(),
-                key: media::animation_id_to_key(library, AnimationVariant::Gif, animation),
-                body: Some(gif.into()),
-                content_type: Some("image/gif".to_owned()),
-                ..PutObjectRequest::default()
-            })
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn upload_web_media(
+    pub async fn upload_media(
         &self,
         data: Vec<u8>,
+        library: MediaLibrary,
         id: Uuid,
         file_kind: FileKind,
     ) -> anyhow::Result<()> {
@@ -228,76 +127,12 @@ impl Client {
         client
             .put_object(PutObjectRequest {
                 bucket: self.bucket.clone(),
-                key: media::web_media_key(id, file_kind),
+                key: media::media_key(library, id, file_kind),
                 content_type: Some(file_kind.content_type().to_owned()),
                 body: Some(data.into()),
                 ..PutObjectRequest::default()
             })
             .await?;
         Ok(())
-    }
-
-    pub fn audio_presigned_get_url(
-        &self,
-        library: MediaLibraryKind,
-        kind: AudioVariant,
-        audio: AudioId,
-    ) -> anyhow::Result<Url> {
-        let url = GetObjectRequest {
-            bucket: self.bucket.clone(),
-            key: audio_id_to_key(library, kind, audio),
-            ..GetObjectRequest::default()
-        }
-        .get_presigned_url(
-            &self.region,
-            &self.creds,
-            &PreSignedRequestOption::default(),
-        );
-
-        Ok(url.parse()?)
-    }
-
-    pub fn animation_presigned_get_url(
-        &self,
-        library: MediaLibraryKind,
-        kind: AnimationVariant,
-        animation: AnimationId,
-    ) -> anyhow::Result<Url> {
-        let url = GetObjectRequest {
-            bucket: self.bucket.clone(),
-            key: media::animation_id_to_key(library, kind, animation),
-            ..GetObjectRequest::default()
-        }
-        .get_presigned_url(
-            &self.region,
-            &self.creds,
-            &PreSignedRequestOption::default(),
-        );
-
-        Ok(url.parse()?)
-    }
-
-    pub async fn delete_web_media_file(&self, id: Uuid, file_kind: FileKind) {
-        self.delete_media(&web_media_key(id, file_kind)).await
-    }
-
-    pub async fn delete_audio(
-        &self,
-        library: MediaLibraryKind,
-        variant: AudioVariant,
-        audio: AudioId,
-    ) {
-        self.delete_media(&audio_id_to_key(library, variant, audio))
-            .await
-    }
-
-    pub async fn delete_animation(
-        &self,
-        library: MediaLibraryKind,
-        variant: AnimationVariant,
-        animation: AnimationId,
-    ) {
-        self.delete_media(&media::animation_id_to_key(library, variant, animation))
-            .await
     }
 }

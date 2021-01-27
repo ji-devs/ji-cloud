@@ -30,8 +30,7 @@ pub mod user {
             },
             CreateResponse,
         },
-        media::AudioVariant,
-        media::MediaLibraryKind,
+        media::{FileKind, MediaLibrary},
     };
     use sqlx::PgPool;
 
@@ -69,7 +68,7 @@ pub mod user {
             .unwrap()?
         };
 
-        s3.upload_audio(MediaLibraryKind::User, id, bytes.to_vec())
+        s3.upload_media(bytes.to_vec(), MediaLibrary::User, id.0, FileKind::AudioMp3)
             .await?;
 
         Ok(NoContent)
@@ -88,7 +87,7 @@ pub mod user {
             .await
             .map_err(super::check_conflict_delete)?;
 
-        s3.delete_audio(MediaLibraryKind::Global, AudioVariant::Original, audio)
+        s3.delete_media(MediaLibrary::User, FileKind::AudioMp3, audio.0)
             .await;
 
         Ok(NoContent)

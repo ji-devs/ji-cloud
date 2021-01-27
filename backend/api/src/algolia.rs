@@ -13,7 +13,7 @@ use shared::{
     domain::{
         category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
     },
-    media::MediaKind,
+    media::AlgoliaMediaFilterKind,
 };
 use sqlx::PgPool;
 use std::{convert::TryInto, time::Duration, time::Instant};
@@ -310,7 +310,7 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
-fn media_filter(kind: MediaKind, invert: bool) -> CommonFilter<FacetFilter> {
+fn media_filter(kind: AlgoliaMediaFilterKind, invert: bool) -> CommonFilter<FacetFilter> {
     CommonFilter {
         filter: FacetFilter {
             facet_name: "media_kind".to_owned(),
@@ -375,7 +375,7 @@ impl Client {
         let client = with_client!(self.inner; None);
 
         let mut filters = algolia::filter::AndFilter {
-            filters: vec![Box::new(media_filter(MediaKind::Image, false))],
+            filters: vec![Box::new(media_filter(AlgoliaMediaFilterKind::Image, false))],
         };
 
         if let Some(is_published) = is_published {

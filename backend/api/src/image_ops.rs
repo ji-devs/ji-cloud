@@ -2,13 +2,13 @@ use image::{
     gif::GifDecoder, imageops::FilterType, AnimationDecoder, DynamicImage, GenericImageView,
     ImageOutputFormat,
 };
-use shared::media::WebMediaKind as SharedWebMediaKind;
-use shared::{domain::image::ImageKind, media::AnimationVariant};
+use shared::domain::{animation::AnimationKind, image::ImageKind};
+use shared::media::MediaKind as SharedMediaKind;
 
 /// Kinds of media used with the web media library
 #[repr(i16)]
 #[derive(Copy, Clone, Debug, sqlx::Type)]
-pub enum WebMediaKind {
+pub enum MediaKind {
     /// Media is a Png, and an Image
     PngStickerImage = 0,
 
@@ -16,29 +16,29 @@ pub enum WebMediaKind {
     GifAnimation = 1,
 }
 
-impl WebMediaKind {
-    pub fn to_shared(self) -> SharedWebMediaKind {
+impl MediaKind {
+    pub fn to_shared(self) -> SharedMediaKind {
         match self {
-            Self::PngStickerImage => SharedWebMediaKind::Image(ImageKind::Sticker),
-            Self::GifAnimation => SharedWebMediaKind::Animation(AnimationVariant::Gif),
+            Self::PngStickerImage => SharedMediaKind::Image(ImageKind::Sticker),
+            Self::GifAnimation => SharedMediaKind::Animation(AnimationKind::Gif),
         }
     }
 }
 
 // todo: use a better method for this
-pub fn detect_image_kind(data: &[u8]) -> anyhow::Result<WebMediaKind> {
+pub fn detect_image_kind(data: &[u8]) -> anyhow::Result<MediaKind> {
     let decoder = GifDecoder::new(&*data);
 
     let frames = match decoder {
         Ok(decoder) => decoder.into_frames().count(),
-        Err(image::ImageError::Decoding(_)) => return Ok(WebMediaKind::PngStickerImage),
+        Err(image::ImageError::Decoding(_)) => return Ok(MediaKind::PngStickerImage),
         Err(e) => return Err(e.into()),
     };
 
     if frames < 2 {
-        Ok(WebMediaKind::PngStickerImage)
+        Ok(MediaKind::PngStickerImage)
     } else {
-        Ok(WebMediaKind::GifAnimation)
+        Ok(MediaKind::GifAnimation)
     }
 }
 

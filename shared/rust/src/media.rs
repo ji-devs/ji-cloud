@@ -1,10 +1,6 @@
 //! Mostly contains functions for getting the `key`/url of media stored in s3.
 
-use crate::domain::{
-    animation::AnimationId,
-    audio::AudioId,
-    image::{ImageId, ImageKind},
-};
+use crate::domain::{animation::AnimationKind, audio::AudioKind, image::ImageKind};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -12,7 +8,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(tag = "media_kind")]
 #[serde(rename_all = "camelCase")]
-pub enum MediaKind {
+pub enum AlgoliaMediaFilterKind {
     /// Media is audio
     Audio,
 
@@ -23,7 +19,7 @@ pub enum MediaKind {
     Animation,
 }
 
-impl MediaKind {
+impl AlgoliaMediaFilterKind {
     /// returns `self` in a string representation.
     #[must_use]
     pub const fn to_str(self) -> &'static str {
@@ -37,7 +33,7 @@ impl MediaKind {
 
 /// Image size Variants
 #[derive(Debug, Copy, Clone)]
-pub enum ImageVariant {
+pub enum PngImageFile {
     /// The original image
     Original,
 
@@ -48,61 +44,9 @@ pub enum ImageVariant {
     Thumbnail,
 }
 
-impl ImageVariant {
-    /// returns `self` in a string representation.
-    #[must_use]
-    pub const fn to_str(self) -> &'static str {
-        match self {
-            Self::Original => "original",
-            Self::Resized => "resized",
-            Self::Thumbnail => "thumbnail",
-        }
-    }
-}
-
-/// Audio Variants - for now just one but could add more later
-#[derive(Debug, Copy, Clone)]
-pub enum AudioVariant {
-    /// The original audio
-    Original,
-}
-
-impl AudioVariant {
-    /// returns `self` in a string representation.
-    #[must_use]
-    pub const fn to_str(self) -> &'static str {
-        match self {
-            Self::Original => "original",
-        }
-    }
-}
-
-/// Animation Variants
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
-#[repr(i16)]
-pub enum AnimationVariant {
-    /// Gif Animation
-    Gif = 0,
-    /// Spritesheet Animation
-    Spritesheet = 1,
-}
-
-impl AnimationVariant {
-    /// returns `self` in a string representation.
-    #[must_use]
-    pub const fn to_str(self) -> &'static str {
-        match self {
-            Self::Gif => "gif",
-            Self::Spritesheet => "spritesheet",
-        }
-    }
-}
-
 /// Media Libraries
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub enum MediaLibraryKind {
+pub enum MediaLibrary {
     /// The default / global library
     Global,
 
@@ -113,88 +57,29 @@ pub enum MediaLibraryKind {
     Web,
 }
 
-impl MediaLibraryKind {
-    const fn image_prefix(self) -> &'static str {
+impl MediaLibrary {
+    #[must_use]
+    const fn to_str(self) -> &'static str {
         match self {
-            Self::Global => "image",
-            Self::User => "image-user",
-            Self::Web => "image-web",
+            Self::Global => "global",
+            Self::User => "user",
+            Self::Web => "web",
         }
     }
-
-    const fn audio_prefix(self) -> &'static str {
-        match self {
-            Self::Global => "audio/global",
-            Self::User => "audio/user",
-            Self::Web => "audio/web",
-        }
-    }
-
-    const fn animation_prefix(self) -> &'static str {
-        match self {
-            Self::Global => "animation/global",
-            Self::User => "animation/user",
-            Self::Web => "animation/web",
-        }
-    }
-}
-
-/// gives the key for a image with the given parameters
-/// this is *not* a full url, (for CDN it's missing the domain)
-#[must_use]
-pub fn image_id_to_key(
-    library_kind: MediaLibraryKind,
-    variant: ImageVariant,
-    id: ImageId,
-) -> String {
-    format!(
-        "{}/{}/{}",
-        library_kind.image_prefix(),
-        variant.to_str(),
-        id.0.to_hyphenated()
-    )
-}
-
-/// gives the key for a audio-file with the given parameters
-/// this is *not* a full url, (for CDN it's missing the domain)
-#[must_use]
-pub fn audio_id_to_key(
-    library_kind: MediaLibraryKind,
-    variant: AudioVariant,
-    id: AudioId,
-) -> String {
-    format!(
-        "{}/{}/{}",
-        library_kind.audio_prefix(),
-        variant.to_str(),
-        id.0.to_hyphenated()
-    )
-}
-
-/// gives the key for an animation with the given parameters
-/// this is *not* a full url, (for CDN it's missing the domain)
-#[must_use]
-pub fn animation_id_to_key(
-    library_kind: MediaLibraryKind,
-    variant: AnimationVariant,
-    id: AnimationId,
-) -> String {
-    format!(
-        "{}/{}/{}",
-        library_kind.animation_prefix(),
-        variant.to_str(),
-        id.0.to_hyphenated()
-    )
 }
 
 /// Kinds of media used with the web media library
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
-pub enum WebMediaKind {
+pub enum MediaKind {
     /// media is an Animation
-    Animation(AnimationVariant),
+    Animation(AnimationKind),
+
     /// Media is an Image
     Image(ImageKind),
+
+    /// Media is audio
+    Audio(AudioKind),
     // Audio()
 }
 
@@ -206,32 +91,44 @@ pub enum FileKind {
     AnimationGif,
 
     /// Files for a PNG Image
-    ImagePng(ImageVariant),
+    ImagePng(PngImageFile),
+
     // Spritesheet(Image,JSON),
+    /// File for Mp3 audio
+    AudioMp3,
 }
 
 impl FileKind {
     /// Returns the content type of the represented file
+    #[must_use]
     pub const fn content_type(self) -> &'static str {
         match self {
             Self::AnimationGif => "image/gif",
             Self::ImagePng(_) => "image/png",
+            Self::AudioMp3 => "audio/mp3",
         }
     }
 
+    #[must_use]
     const fn suffix(self) -> &'static str {
         match self {
             Self::AnimationGif => "animation.gif",
-            Self::ImagePng(ImageVariant::Original) => "original.png",
-            Self::ImagePng(ImageVariant::Thumbnail) => "thumbnail.png",
-            Self::ImagePng(ImageVariant::Resized) => "resized.png",
+            Self::ImagePng(PngImageFile::Original) => "original.png",
+            Self::ImagePng(PngImageFile::Thumbnail) => "thumbnail.png",
+            Self::ImagePng(PngImageFile::Resized) => "resized.png",
+            Self::AudioMp3 => "audio.mp3",
         }
     }
 }
 
-/// gives the key for some media in the web media library with the given parameters
+/// gives the key for some media with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
-/// FIXME: This method is _really_ awkward.
-pub fn web_media_key(id: Uuid, file_kind: FileKind) -> String {
-    format!("media/web/{}/{}", id.to_hyphenated(), file_kind.suffix())
+#[must_use]
+pub fn media_key(library: MediaLibrary, id: Uuid, file_kind: FileKind) -> String {
+    format!(
+        "media/{}/{}/{}",
+        library.to_str(),
+        id.to_hyphenated(),
+        file_kind.suffix()
+    )
 }
