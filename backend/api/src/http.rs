@@ -63,7 +63,6 @@ pub async fn run(
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
-
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .data(pool.clone())
@@ -98,7 +97,6 @@ pub async fn run(
             .configure(endpoints::admin::configure)
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
-            .configure(endpoints::media::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });

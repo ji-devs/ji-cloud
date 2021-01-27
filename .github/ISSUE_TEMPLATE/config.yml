@@ -1,7 +1,7 @@
 # see https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/about-automation-for-issues-and-pull-requests-with-query-parameters
 # and https://docs.github.com/en/enterprise-server@2.20/github/building-a-strong-community/configuring-issue-templates-for-your-repository#configuring-the-template-chooser
 
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Legacy Player
     about: create a Legacy Player issue
@@ -10,7 +10,3 @@ contact_links:
   - name: Login and Registration (David)
     about: create a Legacy Player issue
     url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Login/Registration&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
-    
-  - name: Strings Util (Mendy)
-    about: create a Strings Util issue
-    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=MendyBerger&milestone=Strings%20Util&labels=utils

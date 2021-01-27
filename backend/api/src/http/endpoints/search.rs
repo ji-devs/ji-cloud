@@ -1,16 +1,16 @@
-use crate::{
-    error::{self, ServiceKind},
-    extractor::WrapAuthClaimsNoDb,
-};
-use core::settings::RuntimeSettings;
 use paperclip::actix::{
     api_v2_operation,
-    web::{Data, Json, Query, ServiceConfig},
+    web::{Data, ServiceConfig},
     CreatedJson,
 };
 use shared::{
     api::{endpoints::search, ApiEndpoint},
-    domain::search::{CreateSearchKeyResponse, WebImageSearchResponse},
+    domain::search::CreateSearchKeyResponse,
+};
+
+use crate::{
+    error::{self, ServiceKind},
+    extractor::WrapAuthClaimsNoDb,
 };
 
 /// Create an Algolia search key based on the user's auth. Currently expires after 15 minutes, but that number is subject to change.
@@ -28,32 +28,9 @@ async fn create_key(
     Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
 }
 
-/// Search for images over the web.
-#[api_v2_operation]
-pub async fn search_web_images(
-    runtime_settings: Data<RuntimeSettings>,
-    _claims: WrapAuthClaimsNoDb,
-    query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
-) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
-    let query = query.into_inner();
-
-    // todo: handle empty queries (they're invalid in bing)
-
-    let res = match &runtime_settings.bing_search_key {
-        Some(key) => crate::image_search::get_images(&query.q, key).await?,
-        None => WebImageSearchResponse { images: Vec::new() },
-    };
-
-    Ok(Json(res))
-}
-
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         search::CreateKey::PATH,
         search::CreateKey::METHOD.route().to(create_key),
-    )
-    .route(
-        search::WebImageSearch::PATH,
-        search::WebImageSearch::METHOD.route().to(search_web_images),
     );
 }

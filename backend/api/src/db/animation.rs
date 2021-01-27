@@ -1,12 +1,15 @@
 use chrono::{DateTime, Utc};
-use shared::domain::animation::{AnimationId, AnimationKind, AnimationMetadata};
+use shared::{
+    domain::animation::{AnimationId, AnimationMetadata},
+    media::AnimationVariant,
+};
 use sqlx::{PgConnection, PgPool};
 
-pub async fn delete(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<AnimationKind>> {
+pub async fn delete(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<AnimationVariant>> {
     let mut conn = db.begin().await?;
 
     let res = sqlx::query!(
-        r#"delete from animation where id = $1 returning variant as "variant: AnimationKind""#,
+        r#"delete from animation where id = $1 returning variant as "variant: AnimationVariant""#,
         animation.0
     )
     .fetch_optional(&mut conn)
@@ -24,7 +27,7 @@ pub async fn create(
     is_premium: bool,
     is_looping: bool,
     publish_at: Option<DateTime<Utc>>,
-    variant: AnimationKind,
+    variant: AnimationVariant,
 ) -> sqlx::Result<AnimationId> {
     let id: AnimationId = sqlx::query!(
         r#"
@@ -56,7 +59,7 @@ select id as "id: AnimationId",
        publish_at,
        created_at,
        updated_at,
-       variant as "kind: AnimationKind",
+       variant as "variant: AnimationVariant",
        looping as is_looping
 from animation
 where id = $1
@@ -67,12 +70,15 @@ where id = $1
     .await
 }
 
-pub async fn get_kind(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<AnimationKind>> {
+pub async fn get_animation_variant(
+    db: &PgPool,
+    animation: AnimationId,
+) -> sqlx::Result<Option<AnimationVariant>> {
     sqlx::query!(
-        r#"select variant as "kind: AnimationKind" from animation where id = $1"#,
+        r#"select variant as "variant: AnimationVariant" from animation where id = $1"#,
         animation.0
     )
     .fetch_optional(db)
     .await
-    .map(|opt| opt.map(|it| it.kind))
+    .map(|opt| opt.map(|it| it.variant))
 }

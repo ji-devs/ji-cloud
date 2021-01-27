@@ -49,8 +49,7 @@ web-sys = { version = "0.3.46", features = [
     'MouseEvent',
     'FileList',
     'File',
-    'DomRect',
-    'CanvasRenderingContext2d',
+    'DomRect'
 ] }
 wasm-bindgen-futures = "0.4.19"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
@@ -69,7 +68,7 @@ uuid = { version = "0.8.1", features = ["serde", "wasm-bindgen"] }
 url = "2.2.0"
 gloo = "0.2.1"
 itertools = "0.9.0"
-awsm_web = { version = "0.16.0", features = ["dom", "loaders", "canvas", "serde_iso"] }
+awsm_web = { version = "0.16.0", features = ["dom", "loaders", "serde_iso"] }
 
 [features]
 default = ["wee_alloc"]

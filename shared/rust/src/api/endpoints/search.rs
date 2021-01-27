@@ -2,7 +2,7 @@
 
 use crate::{
     api::{ApiEndpoint, Method},
-    domain::search::{CreateSearchKeyResponse, WebImageSearchQuery, WebImageSearchResponse},
+    domain::search::CreateSearchKeyResponse,
     error::EmptyError,
 };
 
@@ -14,14 +14,4 @@ impl ApiEndpoint for CreateKey {
     type Err = EmptyError;
     const PATH: &'static str = "/v1/search/key";
     const METHOD: Method = Method::Post;
-}
-
-/// Search for images over the web.
-pub struct WebImageSearch;
-impl ApiEndpoint for WebImageSearch {
-    type Req = WebImageSearchQuery;
-    type Res = WebImageSearchResponse;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/search/web/image";
-    const METHOD: Method = Method::Get;
 }

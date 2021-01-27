@@ -10,8 +10,6 @@
     - [Guideline - Elements](./frontend/elements-and-components/guideline-elements.md)
     - [Guideline - Components](./frontend/elements-and-components/guideline-components.md)
     - [Images](./frontend/elements-and-components/images.md)
-    - [Directory Structure](./frontend/elements-and-components/directory-structure.md)
-    - [Checklist](./frontend/elements-and-components/checklist.md)
 
 # Infrastructure
   - [Project Management](./infrastructure/project-management/project-management.md)

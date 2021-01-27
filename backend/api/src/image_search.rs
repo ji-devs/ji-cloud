@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use shared::domain::search::{WebImageSearchItem, WebImageSearchResponse};
+use shared::domain::image::web::{WebImageSearchItem, WebImageSearchResponse};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -19,8 +19,6 @@ struct ImagesResponse {
 }
 
 pub async fn get_images(query: &str, key: &str) -> anyhow::Result<WebImageSearchResponse> {
-    // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/endpoints
-    // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/query-parameters
     let res = reqwest::Client::new()
         .get("https://api.bing.microsoft.com/v7.0/images/search")
         .query(&[("q", query)])

@@ -104,8 +104,10 @@ impl Shell {
             .property("legacy", true)
             .children(vec![
                 Sidebar::render(_self.clone()),
-                html!("empty-fragment", {
+                html!("div", {
                     .property("slot", "main")
+                    .property("width", "100%")
+                    .property("height", "100%")
                     .child_signal(_self.loaded_index.signal().map(clone!(_self => move |index| {
                         index
                             .and_then(|_| {

@@ -18,7 +18,6 @@ pub mod auth;
 pub mod category;
 pub mod image;
 pub mod jig;
-pub mod media;
 pub mod meta;
 pub mod search;
 mod ser;
@@ -30,31 +29,6 @@ use paperclip::actix::Apiv2Schema;
 use ser::{csv_encode_uuids, deserialize_optional_field, from_csv};
 use uuid::Uuid;
 
-/// Serialize/Deserialize wrapper for Base64 encoded content.
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
-#[derive(Debug)]
-pub struct Base64<T>(pub T);
-
-impl<T: std::fmt::Display> serde::Serialize for Base64<T> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(&base64::encode(&self.0.to_string()))
-    }
-}
-
-impl<'de, E: std::fmt::Debug, T: std::str::FromStr<Err = E>> serde::Deserialize<'de> for Base64<T> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(Self(deserializer.deserialize_str(ser::FromStrVisiter(
-            std::marker::PhantomData,
-        ))?))
-    }
-}
 /// Response for successfuly creating a Resource.
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

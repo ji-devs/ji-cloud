@@ -1,4 +1,3 @@
-use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
 use paperclip::actix::api_v2_errors;
 use shared::error::{auth::RegisterErrorKind, ApiError, EmptyError, MetadataNotFound};
@@ -14,7 +13,7 @@ pub fn ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = HttpResponse::InternalServerError();
     resp.extensions_mut().insert(e);
     resp.json(BasicError::new(
-        actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
+        actix_http::http::StatusCode::INTERNAL_SERVER_ERROR,
     ))
     .into()
 }
@@ -226,20 +225,10 @@ impl Into<actix_web::Error> for CategoryUpdate {
     code = 420, description = "Unprocessable Entity: Invalid Content"
     code = 500
 )]
-#[derive(Debug)]
 pub enum Upload {
     ResourceNotFound,
     InvalidMedia,
     InternalServerError(anyhow::Error),
-}
-
-impl Upload {
-    pub fn blocking_error(err: BlockingError<Self>) -> Self {
-        match err {
-            BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
-            BlockingError::Error(e) => e,
-        }
-    }
 }
 
 impl<T: Into<anyhow::Error>> From<T> for Upload {

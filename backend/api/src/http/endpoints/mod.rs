@@ -4,7 +4,6 @@ pub mod audio;
 pub mod category;
 pub mod image;
 pub mod jig;
-pub mod media;
 pub mod meta;
 pub mod module;
 pub mod search;

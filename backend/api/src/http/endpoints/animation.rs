@@ -7,10 +7,10 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::animation, ApiEndpoint},
     domain::{
-        animation::{AnimationId, AnimationKind, AnimationResponse},
+        animation::{AnimationId, AnimationResponse},
         CreateResponse,
     },
-    media::{FileKind, MediaLibrary},
+    media::{AnimationVariant, MediaLibraryKind},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
@@ -38,18 +38,12 @@ async fn delete(
     s3: Data<s3::Client>,
 ) -> Result<NoContent, error::Delete> {
     let animation = req.into_inner();
-    let kind = db::animation::delete(&db, animation)
+    let variant = db::animation::delete(&db, animation)
         .await
         .map_err(check_conflict_delete)?;
 
-    if let Some(kind) = kind {
-        let file = match kind {
-            AnimationKind::Gif => FileKind::AnimationGif,
-            // todo:
-            _ => return Err(anyhow::anyhow!("Unsupported animation kind").into()),
-        };
-
-        s3.delete_media(MediaLibrary::Global, file, animation.0)
+    if let Some(variant) = variant {
+        s3.delete_animation(MediaLibraryKind::Global, variant, animation)
             .await;
     }
 
@@ -103,29 +97,24 @@ async fn upload(
     Path(id): Path<AnimationId>,
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
-    let kind = db::animation::get_kind(db.as_ref(), id)
+    let variant = db::animation::get_animation_variant(db.as_ref(), id)
         .await?
         .ok_or(error::Upload::ResourceNotFound)?;
 
-    if !matches!(kind, AnimationKind::Gif) {
-        return Err(anyhow::anyhow!("Unimplemented Animation Kind: {:?}", kind).into());
+    if !matches!(variant, AnimationVariant::Gif) {
+        return Err(anyhow::anyhow!("Unimplemented Animation Variant: {:?}", variant).into());
     }
 
-    let validated: Bytes = actix_web::web::block(move || -> Result<_, error::Upload> {
+    let res: Result<Bytes, error::Upload> = tokio::task::spawn_blocking(move || {
         let _original = image::load_from_memory_with_format(&bytes, image::ImageFormat::Gif)
             .map_err(|_| error::Upload::InvalidMedia)?;
         Ok(bytes)
     })
-    .await
-    .map_err(error::Upload::blocking_error)?;
-
-    s3.upload_media(
-        validated.to_vec(),
-        MediaLibrary::Global,
-        id.0,
-        FileKind::AnimationGif,
-    )
     .await?;
+    let validated = res?;
+
+    s3.upload_animation_gif(MediaLibraryKind::Global, id, validated.to_vec())
+        .await?;
 
     Ok(NoContent)
 }

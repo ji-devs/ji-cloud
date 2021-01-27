@@ -46,7 +46,9 @@ and it should be easy to step through all the components (and elements) with the
 Future example:
 
 ```typescript
-import {STR_HOWDY} from "~/config/strings";
+import {English} from "~/config/strings";
+
+const STR_HOWDY = English.button.howdy;
 ```
 
 ### Controls
@@ -59,12 +61,11 @@ Once that button is used in another component where the text is predefined, e.g.
 
 ### Provide arguments
 
-1. Args should always be well-typed and optional (e.g. `foo(args?:Partial<MyArgs>)`)
+1. Args should always be well-typed and optional (e.g. `foo(args?:MyArgs)`)
 2. A hardcoded default should be used as a fallback if no args are provided
 3. To implement the fallback, destructure _in_ the component
 4. Assign the default to the components `args` property (this makes it part of Storybook's Controls)
 5. Enumerations should be expressed as actual enums or unions (not free-for-all strings/numbers) - and should similarly have a control type of radio, dropdown, etc.
-6. Use `argsToAttrs()` to make life easier
 
 Note that for the sake of jargon, "args" and "props" are used interchangeably, but we tend to use "args" on the outside since that fits with Storybook's lingo, and "props" on the inside since that fits with React/Component lingo.
 
@@ -85,46 +86,77 @@ const DEFAULT_ARGS:ButtonArgs = {
   text: "click me"
 }
 
-export const Button = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Button = (props?:ButtonArgs) => {
+    const {text} = props || DEFAULT_ARGS;
 
-    return `<my-button ${argsToAttrs(props)} />`
-    //same as return `<my-button text="${props.text}" />`
+    return `<my-button text="${text}" />`
 }
 
 Button.args = DEFAULT_ARGS;
 
 ```
 
-Destructing into separate objects is straightforward:
+The destructuring of props and then turning them into attributes can be simplified via the `argsToAttrs` helper:
 
 ```typescript
+import {argsToAttrs} from "@utils/attributes";
+import "@elements/my-button";
+
+export default {
+  title: 'Buttons',
+}
+
 interface ButtonArgs {
-  text: string,
-  src: string,
+  text: string
 }
 
 const DEFAULT_ARGS:ButtonArgs = {
-  text: "click me",
-  src: "example.jpg",
+  text: "click me"
 }
 
-export const Button = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const Button = (props?:ButtonArgs) => {
+    props = props || DEFAULT_ARGS;
 
-    const {src, ...buttonProps} = props;
+    //can still destructure if needed:
+    //const {text} = props;
 
-    return `
-      <my-button ${argsToAttrs(buttonProps)}>
-        <my-image src="${src}" />
-      </my-button>
-      `
+    return `<my-button ${argsToAttrs(props)} />`
 }
+
+Button.args = DEFAULT_ARGS;
+```
+
+
+If the element itself needs to be changed, but it uses the same basic arguments, re-use them:
+
+```typescript
+export const CircleButton = (props?:ButtonArgs) => {
+    const {text} = props || DEFAULT_ARGS;
+    return `<circle-button text="${text}" />`
+}
+export const RectButton = (props?:ButtonArgs) => {
+    const {text} = props || DEFAULT_ARGS;
+    return `<rect-button text="${text}" />`
+}
+
+CircleButton.args = DEFAULT_ARGS;
+RectButton.args = DEFAULT_ARGS;
+
+```
+
+Of course that can also be made into a function, e.g.:
+
+```typescript
+const buttonArgs = (text) => ({...DEFAULT_ARGS, text});
+
+CircleButton.args = buttonArgs("click a circle");
+RectButton.args = buttonArgs("click a rectangle");
 ```
 
 ### Sometimes controls are abstract 
 
-One use case for stories/components is to show elements 1:1. Another is to show a larger composition, where controls need to be mapped.
+When the element needs a certain property to be set, but it makes more sense to provide a control in another format, feel free to do so.
+This is usually going to be the case when a component is showing a larger composition as opposed to showing the element itself.
 
 Example:
 
@@ -163,7 +195,7 @@ UserPage.args = DEFAULT_ARGS;
 
 By default, Storybook will try to guess the control type, but it defaults to a string most of the time.
 
-Set it explicitly for more control. For example, this creates a radio selection:
+Set it explicitly for more control:
 
 ```typescript
 
