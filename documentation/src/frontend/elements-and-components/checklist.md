@@ -42,6 +42,8 @@ Tip:
 
   - If it corresponds to an element, names and directory structure should match
 
+  - Storybook title nesting should match directory structure
+
   - Args/Props should be defined properly (tip: use the snippet)
 
   - Set the appropriate Control type (e.g. radios for unions/enums)
