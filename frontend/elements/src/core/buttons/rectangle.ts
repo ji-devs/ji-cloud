@@ -128,7 +128,7 @@ export class _ extends BaseButton {
     
     const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg" 
     : iconBefore === "share" ? "Icn_Share_Red.svg" 
-    : iconBefore === "create" ? "Icn_Plus_Red.svg" 
+    : iconBefore === "create" ? "icn-plus-red.svg" 
     : iconBefore === "play" ? "icn-video-activity-hover.svg"
     : nothing;
     const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
