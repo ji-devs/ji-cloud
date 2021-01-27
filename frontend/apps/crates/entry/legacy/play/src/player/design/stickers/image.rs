@@ -24,7 +24,7 @@ pub struct StickerImage {
 impl StickerImage {
     pub fn render(jig_id: &str, module_id: &str, img: &Image, mock: bool) -> Dom {
 
-        html!("div", {
+        html!("empty-fragment", {
             .style("position", "absolute")
             .style("top", "0px") 
             .style("left", "0px") 
