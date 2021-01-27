@@ -2,7 +2,7 @@ import "@elements/entry/home/TOSORT/icon-wparagraph";
 import "@elements/entry/home/sections/recommend";
  
 export default {
-  title: 'Entry/ Homepage / Section',
+  title: 'Entry/ Home / Section',
 }
 
 

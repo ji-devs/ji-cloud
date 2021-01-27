@@ -1,6 +1,6 @@
 
 export default {
-  title: 'Entry/ Homepage / Section',
+  title: 'Entry/ Home / Section',
 }
 
 

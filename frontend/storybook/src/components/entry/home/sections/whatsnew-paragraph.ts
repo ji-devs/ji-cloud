@@ -10,7 +10,7 @@ import "@elements/entry/home/TOSORT/content-wimg";
 
   
 export default {
-  title: 'Entry/ Homepage / Section',
+  title: 'Entry/ Home / Section',
 }
 
 
@@ -20,8 +20,6 @@ const STR_TITLE = "What’s new?";
 const STR_SUBTITLE="HOP TV - New Hebrew Series";
 
 
-
- const STR_PATHGIRL = "girl@2x.jpg";
 const STR_LINE1="Learning Hebrew with HOP Channel, Learning Hebrew with ";
 const STR_LINE2="HOP Channel, Learning Hebrew with HOP Channel, Learning ";
 const STR_LINE3="Hebrew with HOP Channel Learning Hebrew with HOP ";
@@ -36,7 +34,7 @@ export const whatsnewParagraph = () => {
     <whatsnew-section>
     <title-section titlecolor="white" title="${STR_TITLE}"  slot="title"></title-section>
 
-    <content-wimg slot="contentpage" pathimg="${STR_PATHGIRL}">
+    <content-wimg slot="contentpage" pathimg="image_News.png">
     <sub-title size="large" slot="subtitle" title="${STR_SUBTITLE}" color="pink"></sub-title>
 
 
@@ -44,7 +42,7 @@ export const whatsnewParagraph = () => {
      <column-list slot="line" text_line="${STR_LINE2}" size="medium"></column-list>
      <column-list slot="line" text_line="${STR_LINE3}" size="medium"></column-list>
 
-<button-rect slot="button" size="large" color="pink"  bold="true" imglefthidden="true" imgrighthidden="true"> ${STR_PLAY}</button-rect>
+<button-rect slot="button" size="large" color="red"  bold="true" imglefthidden="true" imgrighthidden="true"> ${STR_PLAY}</button-rect>
      </content-wimg>
 
       <circle-div slot="point" color="yellow" size="medium"></circle-div>

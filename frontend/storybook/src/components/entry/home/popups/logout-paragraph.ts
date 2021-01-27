@@ -4,7 +4,7 @@ import "@elements/core/titles/variants/title-section";
  import "@elements/core/buttons/rectangle" ;
  import "@elements/core/popups/popup-container";
 export default {
-  title: 'Popups',
+  title: 'Entry /Home/Widgets/Popups',
 }
 
 

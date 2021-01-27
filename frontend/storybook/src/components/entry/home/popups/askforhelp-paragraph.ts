@@ -16,7 +16,7 @@ const STR_BLUE="blue";
  
 
 export default {
-    title: 'Popups',
+    title: 'Entry /Home/Widgets/Popups',
   }
 
   interface Args{
