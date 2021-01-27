@@ -99,15 +99,10 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  title:string = ""; 
-
-  @property()
-  subtitle:string = ""; 
 
   render() {
 
-    const {title, subtitle} = this;
+    
     const STR_TITLE ="Settings and JIG info.";
     const STR_SUBTITLE = "Last step before publishing";
 
