@@ -36,10 +36,12 @@ impl Hotspot {
 
         let ResizeInfo {scale, height, ..} = resize_info;
 
+
         for point in path.iter() {
             let PathPoint {kind, x, y, cp1x, cp1y, cp2x, cp2y} = point;
             let x = x * scale;
             let y = y * scale;
+
             match kind {
                 PathElementKind::MoveToPoint => {
                     ctx.move_to(x, y);
