@@ -7,13 +7,11 @@ export class _ extends LitElement {
   img-ui{
     width: 32px;
     height: 32px;
-     object-fit: contain;
-     nargin-left:100px;
+     margin-right:24px;
+     display:block;
   }
   
   .wrapper{
-//     width: 274px;
-// margin-left:50px;
 display:flex;
 
   }
