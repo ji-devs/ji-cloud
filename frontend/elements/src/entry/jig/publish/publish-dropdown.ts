@@ -1,5 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+
 @customElement('publish-dropdown')
 export class _ extends LitElement {
   static get styles() {
@@ -38,9 +39,6 @@ export class _ extends LitElement {
   }
 
   @property()
-  label: string = "";
-
-  @property()
   title: string = "";
 
   
@@ -59,7 +57,9 @@ export class _ extends LitElement {
         <div class="title">
             <h1>${title}</h1>
         </div>
-        <slot></slot>
+        <slot name="list"></slot>
+       
+        
       </div>
     </main>
   `;
