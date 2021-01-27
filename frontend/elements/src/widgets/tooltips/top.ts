@@ -83,7 +83,7 @@ export class _ extends LitElement {
     const wrapperClass = kind === "error" ? "error"
       : "";
 
-    const uiPath = kind === "error" ? "group-12812.svg"
+    const uiPath = kind === "error" ? "red-error.svg"
       : "";
 
     return html`
