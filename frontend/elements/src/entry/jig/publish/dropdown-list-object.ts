@@ -44,7 +44,7 @@ mode: Mode = "share"
   
 
   render() {
-    const {icon,mode} = this;
+    const {mode} = this;
     const STR_SHARE ="Share with Students";
     const STR_URL ="Copy URL";
     const STR_EMBED ="Embed this JIG";
