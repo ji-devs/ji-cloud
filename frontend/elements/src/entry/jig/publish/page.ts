@@ -108,6 +108,8 @@ export class _ extends LitElement {
   render() {
 
     const {title, subtitle} = this;
+    const STR_TITLE ="Settings and JIG info.";
+    const STR_SUBTITLE = "Last step before publishing";
 
     return html`    
     <main>
@@ -115,8 +117,8 @@ export class _ extends LitElement {
             <slot name="animation"></slot>
             <div class="inside-wrapper">
             
-                <h1>${title}</h1>
-                <p name="subtitle">${subtitle}</p>
+                <h1>${STR_TITLE}</h1>
+                <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="content">
                     <div class="column"><slot name="column_one"></slot></div>
                     <div class="column"><slot name="column_two"></slot></div>
