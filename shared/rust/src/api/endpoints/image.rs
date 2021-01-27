@@ -75,26 +75,6 @@ pub mod user {
     }
 }
 
-/// image routes for the web image library
-
-pub mod web {
-    use crate::{
-        api::{ApiEndpoint, Method},
-        domain::image::web::{WebImageSearchQuery, WebImageSearchResponse},
-        error::EmptyError,
-    };
-
-    /// Search for images over the web.
-    pub struct Search;
-    impl ApiEndpoint for Search {
-        type Req = WebImageSearchQuery;
-        type Res = WebImageSearchResponse;
-        type Err = EmptyError;
-        const PATH: &'static str = "/v1/image/web/search";
-        const METHOD: Method = Method::Get;
-    }
-}
-
 /// Get an image by ID.
 pub struct Get;
 impl ApiEndpoint for Get {

@@ -47,4 +47,14 @@ pub mod user {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioId(pub Uuid);
 
+/// Represents different kinds of audio.
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+pub enum AudioKind {
+    /// Audio is an Mp3
+    Mp3 = 0,
+}
+
 into_uuid![AudioId];
