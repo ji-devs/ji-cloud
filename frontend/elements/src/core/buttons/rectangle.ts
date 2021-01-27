@@ -2,13 +2,13 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import { nothing} from 'lit-html';
 import {BaseButton} from "@elements/_styles/buttons";
-import { lastAttributeNameRegex } from 'lit-html/lib/template';
 
 export type Color = "red" | "blue" | "white" | "green";
 export type Size = "small" | "medium" | "large" | "x-large";
 
-export type IconAfter = "arrow"
-export type IconBefore = "magnifyer"
+export type IconAfter = "arrow";
+export type IconBefore = "magnifyer" | "share" | "create" | "play";
+
 
 @customElement("button-rect")
 export class _ extends BaseButton {
@@ -126,8 +126,11 @@ export class _ extends BaseButton {
     });
 
     
-    const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg"
-      : "";
+    const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg" 
+    : iconBefore === "share" ? "Icn_Share_Red.svg" 
+    : iconBefore === "create" ? "Icn_Plus_Red.svg" 
+    : iconBefore === "play" ? "icn-video-activity-hover.svg"
+    : nothing;
     const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
       : "";
 
