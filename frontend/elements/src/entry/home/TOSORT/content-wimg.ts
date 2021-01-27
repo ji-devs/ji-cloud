@@ -44,13 +44,6 @@ export class _ extends LitElement {
 
      }
 
-     .lines{
-        // width: 604px;
-        // height: 119px;
-        // margin-right:56px;
-        // margin-top:-144px;
-        // display:block;
-    }
 
     ::slotted([slot=button]){
      margin-top:200px;
@@ -80,7 +73,7 @@ export class _ extends LitElement {
     return html`
     <div class="inside-wrapper">
     
-     <div class="img"></div>
+    <img-ui path="image_News.png"></img-ui>
 
     
 
@@ -91,7 +84,7 @@ export class _ extends LitElement {
      </div>
      <slot name="button"></slot>
      </div>
-     //  <img-ui path="${pathimg}"></img-ui>
+    
 
     </div>
         

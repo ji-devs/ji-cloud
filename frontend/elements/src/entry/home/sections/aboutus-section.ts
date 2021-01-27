@@ -141,11 +141,3 @@ export class _ extends LitElement {
   }
 }
 
-// <div class="left-side">
-//         <slot name="title-sub-paragraph"></slot>
-      
-//         <div class="4points">
-//         <slot name="points"></slot>
-//         </div>
-        
-//         </div>
