@@ -36,7 +36,7 @@ Tip:
 
 ### Components / Stories
 
-  - Headspace: "temp mockups/prototypes for Dominator reference"
+  - Headspace: "temp mockups/prototypes for Dominator reference" and/or "Element Tests"
 
   - Should mostly be about configuring and composing elements for interactivity. Move static data to the appropriate element.
 
