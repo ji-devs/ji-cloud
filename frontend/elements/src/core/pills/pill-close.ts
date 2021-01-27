@@ -25,6 +25,8 @@ img-ui{
   top: -7px;
   left: 80px;
   display:none;
+  height:16px;
+  width:16px;
  
 }
 

@@ -8,7 +8,7 @@ export class _ extends LitElement {
     return [css`
 
    main{
-    width:100%;
+    width:1920px;
     height:512px;
     background-color: #6ca1fc;
     position:relative; 

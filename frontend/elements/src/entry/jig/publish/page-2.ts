@@ -57,8 +57,8 @@ export class _ extends LitElement {
     ::slotted([slot="dropdown"]){
         position:absolute;
         z-index:10;
-       
-        left: 200px;
+       top:-50px;
+        left: 150px;
     }
     ::slotted([slot="button-collection"]:last-child){
        margin-right:0;
@@ -84,10 +84,15 @@ export class _ extends LitElement {
 
   @property({type:Boolean})
   closed: boolean = false;
+  
+
 
   render() {
 
     const {title, subtitle, closed} = this;
+    
+    const STR_TITLE = "Your JIG is on air now";
+    const STR_SUBTITLE ="What would you like to do next?"
 
     return html`    
     <main>
@@ -95,11 +100,13 @@ export class _ extends LitElement {
             
             <div class="inside-wrapper">
                 <slot name="animation"></slot>
-                <h1>${title}</h1>
-                <p name="subtitle">${subtitle}</p>
+                <h1>${STR_TITLE}</h1>
+                <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="button-wrapper">
                     <slot name="button-collection"></slot>
+                    
                     <slot name="dropdown" class="${closed ? 'closed' : ''}"></slot>
+                    
                 </div>
             </div>
         </div>

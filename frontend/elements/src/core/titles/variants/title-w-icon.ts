@@ -1,12 +1,13 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-@customElement('title-wicon')
+@customElement('title-w-icon')
 export class _ extends LitElement {
   static get styles() {
     return [css`
         .wrapper{
             display: flex;
             align-items:center;
+            position:relative;
         }
         .uploaded{
             color: #46ba6f;
@@ -24,6 +25,9 @@ export class _ extends LitElement {
         .wrapper:hover .delete{
           display:block;
         }
+        .wrapper:hover p{
+          color:#5590fc;
+        }
        
        
 
@@ -37,24 +41,27 @@ export class _ extends LitElement {
   path:string = ""; 
   @property({type: Boolean})
   uploaded: boolean = false;
+
   @property({type: Boolean})
   hover:boolean = false;
   
-  onHover() {
-    this.hover = !this.hover
-  }
-
+  enter() {
+    this.hover = true
+}
+leave() {
+    this.hover = false
+}
+  
   render() {
 
     const {title, path, uploaded,hover} = this;
 
-    const src = hover ? "icn-delete-blue.svg" : "icn-delete.svg";
-
+    const src = hover ? "icn-delete.svg" : "icn-delete-blue.svg";
     return html`
-    <div class="wrapper">
+    <div class="wrapper" @mouseenter="${this.enter}" @mouseleave="${this.leave}">
         <img-ui path="${path}"></img-ui>
         <p class="${uploaded ? 'uploaded' : ''}">${title}</p>
-        <img-ui path="${src}"  @mouseover="${this.onHover}" class="delete"></img-ui>
+        <img-ui path="${src}" class="delete"></img-ui>
         
     </div>
   `;
