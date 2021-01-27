@@ -74,6 +74,7 @@ impl Shell {
             }
         }));
 
+
         html!("module-page-grid-resize", {
             .event(|event:ModuleResizeEvent| {
                 //in utils / global static
