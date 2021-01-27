@@ -1,4 +1,3 @@
-import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { nothing } from "lit-html";
 
@@ -9,7 +8,6 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
     p{
-    
         margin-left:12px;
         margin-top:0;
         margin-bottom:0;
@@ -30,18 +28,14 @@ export class _ extends LitElement {
     ::slotted([slot="tooltip"]){
         position:absolute;
         left: 110px;
-    top: -30px;
+        top: -30px;
     }
    
     `];
   }
 
 @property()
-icon: string = "";
-@property()
 mode: Mode = "share"
-
-  
 
   render() {
     const {mode} = this;
@@ -60,13 +54,13 @@ mode: Mode = "share"
    
 
     return html`
-<div class="wrapper">
-    <div class="inside-wrapper">
-        <img-ui path="${iconPath}"></img-ui>
-        <p>${label}</p>
-    </div>
-    <img-ui path="icn-record-activity-hover.svg"></img-ui>
-    <slot name="tooltip"></slot>
-</div>`
+    <div class="wrapper">
+        <div class="inside-wrapper">
+            <img-ui path="${iconPath}"></img-ui>
+            <p>${label}</p>
+        </div>
+        <img-ui path="icn-record-activity-hover.svg"></img-ui>
+        <slot name="tooltip"></slot>
+    </div>`
   }
 }
