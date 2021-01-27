@@ -47,14 +47,17 @@ export class _ extends LitElement {
   render() {
 
     const {sharing} = this;
+    const STR_TITLE = "Sharing is Caring";
+    const STR_SUB = "Imagine how great it is to have a huge collection of great activities made by teachers, and everything you need, you can find there.";
+    const STR_TOGGLE = "Set the toggle back to share your JIG with the JI community."
     
     return html`
     <main class="${sharing ? 'sharing' : ''}">
     <div>
        <img-ui class="close" path="icn-x-close.svg"></img-ui>
-       <h1>Sharing is Caring</h1>
-       <p>Imagine how great it is to have a huge collection of great activities made by teachers, and everything you need, you can find there.</p>
-       <p>Set the toggle back to share your JIG with the JI community. </p>
+       <h1>${STR_TITLE}</h1>
+       <p>${STR_SUB}</p>
+       <p> ${STR_TOGGLE}</p>
        </div>
     </main>
   `;
