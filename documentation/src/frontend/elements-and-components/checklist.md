@@ -1,6 +1,6 @@
 # Checklist
 
-The list here is meant to be consulted before a PR is submitted/merged:
+The list here is meant to be consulted before a PR is submitted/merged to `sandbox`:
 
 ### Elements
 
@@ -22,13 +22,13 @@ The list here is meant to be consulted before a PR is submitted/merged:
 
   - Displayable strings should be outside of the render function (or at least outside the return `html`) and prefixed with `STR_`
 
-  - Use lit-html's `nothing` instead of `null` or `""`
+  - Use lit-html's `nothing` instead of `null` or `""` when inside an html template
 
   - Use the suggested conditional syntax when there are multiple conditions
 
-  - Use CSS Vars for colors
+  - Use top-level CSS Vars for colors
 
-  - Use Inheritance where appropriate (such as re-using styles)
+  - Use inheritance where appropriate (such as re-using styles)
 
 Tip: 
 
