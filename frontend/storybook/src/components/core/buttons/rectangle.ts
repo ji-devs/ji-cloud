@@ -13,7 +13,7 @@ interface Args {
   bold: boolean,
   italic: boolean,
   iconAfter:IconAfter | "none",
-  iconBefore:IconAfter | "none",
+  iconBefore:IconBefore | "none",
 }
 
 const DEFAULT_ARGS:Args = {
