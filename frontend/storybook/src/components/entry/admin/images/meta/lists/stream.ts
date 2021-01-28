@@ -1,11 +1,11 @@
 import "@elements/core/lists/list-vertical";
 import "@elements/core/inputs/checkbox";
-import {STYLE_OPTIONS} from "~/mock/meta";
+import {AFFILIATION_OPTIONS} from "~/mock/meta";
 import {mapToString} from "@utils/array";
 
 
 export default {
-  title: 'Admin / Images / Lists',
+  title: 'Entry / Admin / Images / Meta / Lists',
 }
 
 interface Props {
@@ -13,15 +13,13 @@ interface Props {
 }
 
 const DEFAULT_PROPS:Props = {
-    options: STYLE_OPTIONS
+    options: AFFILIATION_OPTIONS
 }
 
-const STR_STYLE = "Image style"
-
-export const ImageStyle = (props?:Props) => {
+export const Stream = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
     return `
-        <list-vertical label="${STR_STYLE}">
+        <list-vertical label="Suitable for jewish stream?">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}
@@ -30,4 +28,5 @@ export const ImageStyle = (props?:Props) => {
     `;
 }
 
-ImageStyle.args = DEFAULT_PROPS;
+Stream.args = DEFAULT_PROPS;
+

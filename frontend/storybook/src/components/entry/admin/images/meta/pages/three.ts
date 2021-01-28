@@ -1,5 +1,5 @@
 import "@elements/entry/admin/images/meta/page";
-import {LeftLabel} from "~/components/entry/admin/images/meta/image-label-left";
+import {LeftLabel} from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/cards/blue";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/variants/plain-black-list"; 
@@ -8,7 +8,7 @@ import { Rectangle } from "~/components/core/buttons/rectangle";
 
 
 export default {
-  title: 'Admin/Image Label',
+  title: 'Entry/Admin/Images/Meta/Pages',
 }
 
 const STR_CATEGORIES = "Categories Summary";

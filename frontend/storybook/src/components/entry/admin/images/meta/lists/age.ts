@@ -1,11 +1,11 @@
-import "@elements/core/dividers/vertical-full";
+import "@elements/core/lists/list-vertical";
 import "@elements/core/inputs/checkbox";
 import {AGE_OPTIONS} from "~/mock/meta";
 import {mapToString} from "@utils/array";
 
 
 export default {
-  title: 'Admin / Images / Lists',
+  title: 'Entry / Admin / Images / Meta / Lists',
 }
 interface Props {
     options: Array<String>
@@ -15,18 +15,18 @@ const DEFAULT_PROPS:Props = {
     options: AGE_OPTIONS
 }
 
-export const AgeTwo = (props?:Props) => {
+export const Age = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
 
     return `
-        <vertical-full title="Which age group are you interested in?">
+        <list-vertical label="Suitable for age">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}
 
-        </vertical-full>
+        </list-vertical>
     `;
 }
 
-AgeTwo.args = DEFAULT_PROPS;
+Age.args = DEFAULT_PROPS;
 

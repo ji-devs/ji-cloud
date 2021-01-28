@@ -1,11 +1,11 @@
 import "@elements/entry/admin/images/meta/page";
-import { LeftLabel } from "~/components/entry/admin/images/meta/image-label-left";
-import {LabelRight} from "~/components/entry/admin/images/meta/image-label-right";
+import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
+import {LabelRight} from "~/components/entry/admin/images/meta/sections/image-label-right";
 import "@elements/core/titles/variants/underlined-title";
 import { Rectangle } from "~/components/core/buttons/rectangle";
 
 export default {
-  title: 'Admin/Image Label',
+  title: 'Entry/Admin/Images/Meta/Pages',
 }
 
 interface Args {

@@ -7,7 +7,7 @@ import {AGE_OPTIONS} from "~/mock/meta";
 
 
 export default {
-  title: ' Admin / Images / Lists'
+  title: 'Entry / Admin / Images / Meta / Lists'
   
 }
 

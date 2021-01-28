@@ -8,7 +8,7 @@ import "@elements/core/dividers/horizontal-full";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import "@elements/core/images/ji";
 export default {
-  title: 'Admin/Images/Settings',
+  title: 'Entry/Admin/Images/Sections',
 }
 
 interface Props {

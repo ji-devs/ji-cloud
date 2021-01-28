@@ -1,5 +1,5 @@
 import "@elements/entry/admin/images/meta/page";
-import { LeftLabel } from "~/components/entry/admin/images/meta/image-label-left";
+import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
 import { DropdownTree } from "~/components/core/inputs/dropdowns/dropdown-tree";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
@@ -15,7 +15,7 @@ import { Rectangle } from "~/components/core/buttons/rectangle";
 
 
 export default {
-  title: 'Admin/Image Label',
+  title: 'Entry/Admin/Images/Meta/Pages',
 }
 
 const STR_NEXT = "Next"
