@@ -2,6 +2,10 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { colorStyles, colorValues } from "@elements/_styles/colors";
 
+export type Color =  "white" | "pink"  ;
+export type Size = "small" | "large" ;
+
+
 @customElement("button-circle")
 export class CircleButton extends LitElement {
   static get styles() {
@@ -47,6 +51,31 @@ export class CircleButton extends LitElement {
         .label-active {
           color: ${colorValues.blue};
         }
+
+
+        .pink{
+          background-color:#fd6b71 ;
+          border-width: 0px;
+
+        } 
+
+      .white{
+        background-color:#ffffff;
+        border-width: 0px;
+
+      }  
+        
+      .large{
+        height: 48px;
+        width: 48px;
+      }
+
+      .small{
+        width: 16px;
+        height: 16px;
+      }
+
+
       `,
     ];
   }
@@ -60,15 +89,23 @@ export class CircleButton extends LitElement {
   @property()
   label: string = "";
 
+  @property()
+  color: Color = "white";
+
+  @property()
+  size: Size = "large";
+
   // Define the element's template
   render() {
-    const { active, disabled, label } = this;
+    const { active, disabled, label,color,size } = this;
 
     const circleClasses = classMap({
       circle: true,
       active,
       disabled,
       inactive: !active,
+      [size]: true,
+      [color]: true,
     });
 
     const textClasses = classMap({

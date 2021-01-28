@@ -17,6 +17,8 @@ export class _ extends LitElement {
 
      }
 
+
+
      .medium{
       font-size: 20px;
       font-weight: normal;
@@ -47,14 +49,14 @@ export class _ extends LitElement {
   @property()
   size:string = ""; 
   @property()
-  color:string = ""; 
+  color:string = "black"; 
  
 
   render() {
     const {text_line, bold,size,color} = this;
 
     return html`
-     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"} ${color ? "white"||"darkblue" :"black"}" >${text_line}</li>
+     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"} ${color}">${text_line}</li>
     
   `;
   }

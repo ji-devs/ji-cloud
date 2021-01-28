@@ -88,6 +88,7 @@ export class _ extends LitElement {
   render() {
 
     const {passwordStrength} = this;
+    
 
     return html`
       <div class="wrapper">

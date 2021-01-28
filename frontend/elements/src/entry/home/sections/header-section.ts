@@ -87,7 +87,7 @@ export class _ extends LitElement {
 
 <div class="userdetails">
 <img-ui class="imguser" path="${STR_PATHIMGUSER}"></img-ui>
-<column-list class="username" text_line="${STR_NAMEUSER}"   class="fullname" ></column-list>
+<column-list class="username" text_line="${STR_NAMEUSER}" ></column-list>
 <img-ui class="arrow" path="Icn_Chevron_Hover.svg"></img-ui>
 </div>
 

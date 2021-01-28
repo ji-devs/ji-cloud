@@ -89,7 +89,7 @@ export class _ extends LitElement {
     `];
   }
   @property()
-  STR_PATHGEARS:string = ""; 
+  STR_PATHGEARS: string = "";
 
 
 
@@ -103,12 +103,12 @@ export class _ extends LitElement {
     const STR_INTERFACE = "Smart & friendly interface";
     const STR_TEACHING = "Teaching through creation";
     const STR_ALL = "All in one";
-    const STR_START ="Start creating";
+    const STR_START = "Start creating";
 
-    const {} = this;
+    const { } = this;
 
- 
-     return html`
+
+    return html`
     <main>
     <div class="left_side">
       <img-ui path="girl@2x.jpg" class="girl"><img-ui>
