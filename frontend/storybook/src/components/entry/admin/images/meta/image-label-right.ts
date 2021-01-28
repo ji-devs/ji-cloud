@@ -1,6 +1,6 @@
-import {ImageStyle} from "~/components/entry/admin/imagelabel/images/lists/image-style";
-import {Age} from "~/components/entry/admin/imagelabel/images/lists/age";
-import {Stream} from "~/components/entry/admin/imagelabel/images/lists/stream";
+import {ImageStyle} from "~/components/entry/admin/images/lists/image-style";
+import {Age} from "~/components/entry/admin/images/lists/age";
+import {Stream} from "~/components/entry/admin/images/lists/stream";
 import "@elements/core/inputs/text-underline";
 import "@elements/core/lists/list-two-column";
 import "@elements/core/images/ji";
