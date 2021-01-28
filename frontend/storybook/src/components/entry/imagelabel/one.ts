@@ -18,7 +18,7 @@ const DEFAULT_ARGS:Args = {
 const STR_NEXT = "Next";
 const STR_LABEL ="Label Images"
 
-export const ImageLabelFullOne = (props?:Args) => {
+export const ImageLabelFullOne = (props?:Partial<Args>) => {
 
   props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
   const {} = props

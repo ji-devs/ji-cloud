@@ -24,7 +24,7 @@ const STR_PREMIUM ="Premium Image";
 const STR_IMAGENAME = "Image name";
 const STR_DESCRIPTION = "Image description"
 
-export const LeftLabel = (props?:Props) => {
+export const LeftLabel = (props?:Partial<Props>) => {
 
     return `
     <section-left>
