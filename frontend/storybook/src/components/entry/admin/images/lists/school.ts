@@ -6,7 +6,7 @@ import {SCHOOL_OPTIONS} from "~/mock/meta";
 
 
 export default {
-  title: 'Entry / Admin / Images / Lists',
+  title: 'Admin / Images / Lists',
 }
 
 interface Props {
