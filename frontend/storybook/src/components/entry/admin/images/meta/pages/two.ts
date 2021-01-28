@@ -1,4 +1,4 @@
-import "@elements/entry/admin/images/meta/page";
+import "@elements/entry/admin/images/meta/page-two";
 import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
 import { DropdownTree } from "~/components/core/inputs/dropdowns/dropdown-tree";
 import "@elements/core/titles/variants/underlined-title";
@@ -52,51 +52,37 @@ const leafNodeV2 = ({label, open, children}:TreeNode) => {
 }
 
 interface Props {
-  title: string,
-  label: string,
-  titletwo: string,
   data: Array<TreeNode>
 }
 
 const DEFAULT_ARGS:Props = {
-  title: "Label Images",
-  label: "Category",
-  titletwo: "Categories Summary",
   data: mockHierarchy
 }
-//To put in search-input: "search-24-px.svg",
-const STR_CATEGORIES = "Categories"
 
 export const ImageLabelFullTwo = (props?:Props) => {
-  const { title, label, data, titletwo } = props || DEFAULT_ARGS;
+  const {data} = props || DEFAULT_ARGS;
 
   console.log(data);
 
   return `
-    <image-meta-page>
-      <underlined-title slot="title" title=${title}></underlined-title>
+    <image-meta-page-two>
       <div slot="left">${LeftLabel()}</div>
       
       <div slot="middle">
-      <title-ji color="blue">${STR_CATEGORIES}</title-ji>
-          <search-input placeholder="${label}" slot="input">
-
-          </search-input>
-        </title-w-input>
         ${mapToString(data, rootNode)}
       </div>
       <div slot="right">
-        <title-ji color="blue" >${titletwo}</title-ji>
-        <card-blue>
+        
+        
         <div>
         ${mapToString(data,rootNodeV2)}
         </div>
-        </card-blue>
+        
       </div>
       <div slot="button">
       ${Rectangle({color:"red",size:"medium",contents:STR_NEXT,bold:false, italic:false})}
     </div>
-    </image-meta-page>
+    </image-meta-page-two>
     
     `
 }

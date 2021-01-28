@@ -1,4 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import "@elements/core/titles/variants/underlined-title";
+
 @customElement('image-meta-page')
 export class _ extends LitElement {
   static get styles() {
@@ -39,10 +41,11 @@ export class _ extends LitElement {
   render() {
 
     const {} = this;
+    const STR_LABEL ="Label Images"
 
     return html`
     <div class="main-wrapper">
-        <slot name="title"></slot>
+    <underlined-title slot="title" title=${STR_LABEL}></underlined-title>
         <div class="wrapper">
             <slot name="left"></slot>
             <slot name="middle"></slot>
