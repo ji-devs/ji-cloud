@@ -6,7 +6,7 @@ import "@elements/core/lists/list-two-column";
 import "@elements/core/images/ji";
 
 export default {
-  title: 'Entry/Admin/Images/Sections',
+  title: 'Entry/Admin/Images/Meta/Sections',
 }
 
 const STR_USED = "To be used only for";
