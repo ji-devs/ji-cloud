@@ -4,7 +4,7 @@ import "@elements/core/inputs/checkbox";
 
 
 export default {
-  title: 'Lists/Pill',
+  title: 'Entry / Admin / Images / Lists',
 }
 
 interface PillArgs {

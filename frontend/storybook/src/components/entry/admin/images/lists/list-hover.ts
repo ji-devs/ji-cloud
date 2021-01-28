@@ -1,7 +1,7 @@
 import "@elements/core/lists/list-vertical";
 import "@elements/core/inputs/checkbox";
 export default {
-  title: 'Lists/List',
+  title: 'Entry / Admin / Images / Lists',
 }
 
 export const ListHover = ({label}) => {

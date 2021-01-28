@@ -5,7 +5,7 @@ import {mapToString} from "@utils/array";
 
 
 export default {
-  title: 'Lists/List',
+  title: 'Entry / Admin / Images / Lists',
 }
 interface Props {
     options: Array<String>
