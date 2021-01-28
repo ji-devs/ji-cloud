@@ -57,7 +57,7 @@ export class _ extends LitElement {
     }
     .subtitle-wrapper{
         display:flex;
-        
+        flex-direction:column;
     }
     .age-language{
         display:flex;
