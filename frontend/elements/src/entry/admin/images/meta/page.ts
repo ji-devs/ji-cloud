@@ -26,6 +26,7 @@ export class _ extends LitElement {
     ::slotted([slot=right]){
       width:100%;
   }
+
   ::slotted([slot=button]){
     padding-top: 24px;
     display:flex;
