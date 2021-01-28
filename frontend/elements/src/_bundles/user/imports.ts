@@ -11,6 +11,7 @@ import "@elements/entry/user/register/pages/start";
 import "@elements/entry/user/register/pages/step1";
 import "@elements/entry/user/register/pages/step2";
 import "@elements/entry/user/register/pages/step3";
+import "@elements/entry/user/test-fluent";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 import "@elements/core/inputs/checkbox";

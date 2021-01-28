@@ -11,6 +11,7 @@ mod login;
 mod register;
 mod profile;
 mod register_complete;
+mod locale;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

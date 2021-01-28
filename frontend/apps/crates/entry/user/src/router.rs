@@ -46,7 +46,18 @@ impl Router {
                             _ => None
                         }
                     }
-                    _ => None
+                    _ => {
+                        Some(
+                            html!("div",{
+                                .children(&mut [
+                                    html!("user-test-fluent"),
+                                    html!("h1", {
+                                        .text(&crate::locale::test_message("test-rust", "world"))
+                                    })
+                                ])
+                            })
+                        )
+                    }
                 }
             })
     }
