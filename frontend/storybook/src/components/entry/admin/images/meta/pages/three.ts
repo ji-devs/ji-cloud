@@ -12,6 +12,7 @@ export default {
 }
 
 
+
 const STR_IMGCONTENT = "Moses parts the Nile";
 const STR_DESCRIPTION = "An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile. An open book, Moses hold his stick and raise his hands up, and part the Nile.   "
 const STR_CLIPART = "Clipart";
@@ -24,7 +25,7 @@ const STR_REFORM = "Reform/Conservative";
 const STR_ORTHODOX = "Orthodox";
 const STR_NEXT = "Next"
 
-export const ImageLabelFullThree = ({}) => {
+export const ImageLabelFullThree = () => {
     return `
     <image-meta-page-three>
       <div slot="left">${LeftLabel()}</div>
@@ -64,6 +65,4 @@ export const ImageLabelFullThree = ({}) => {
     `
 }
 
-ImageLabelFullThree.args = {
- title: "Label Images",
-}
+

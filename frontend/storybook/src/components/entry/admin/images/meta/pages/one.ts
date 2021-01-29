@@ -8,20 +8,14 @@ export default {
   title: 'Entry/Admin/Images/Meta/Pages',
 }
 
-interface Args {
-}
-
-const DEFAULT_ARGS:Args = {
-}
-
 
 const STR_NEXT = "Next";
 
 
-export const ImageLabelFullOne = (props?:Partial<Args>) => {
+export const ImageLabelFullOne = () => {
 
-  props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-  const {} = props
+
+
 
   return `<image-meta-page>
     <div slot="left">${LeftLabel()}</div>
@@ -33,5 +27,4 @@ export const ImageLabelFullOne = (props?:Partial<Args>) => {
   </image-meta-page>`;
 }
 
-ImageLabelFullOne.args = DEFAULT_ARGS;
 
