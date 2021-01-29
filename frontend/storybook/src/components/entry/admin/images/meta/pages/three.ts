@@ -1,8 +1,6 @@
 import "@elements/entry/admin/images/meta/page-three";
 import {LeftLabel} from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/cards/blue";
-import "@elements/core/titles/variants/underlined-title";
-import "@elements/core/titles/variants/plain-black-list"; 
 import "@elements/core/titles/ji";
 import { Rectangle } from "~/components/core/buttons/rectangle";
 

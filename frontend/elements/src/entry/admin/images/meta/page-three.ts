@@ -67,7 +67,6 @@ export class _ extends LitElement {
 
     render() {
 
-        const { } = this;
         const STR_LABEL = "Label Images";
         const STR_GENERAL = "General Summary";
         const STR_EDIT = "Edit";

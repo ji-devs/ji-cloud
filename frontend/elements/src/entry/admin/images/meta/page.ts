@@ -40,7 +40,6 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
     const STR_LABEL ="Label Images"
 
     return html`

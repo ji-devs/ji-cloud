@@ -9,16 +9,8 @@ export default {
   
 }
 
-interface UserInfoArgs {
 
-
-  }
-
-  const DEFAULT_ARGS:UserInfoArgs = {
-
-  }
-
-export const UserInfo = (props?:UserInfoArgs) => {
+export const UserInfo = () => {
 
 
 
@@ -30,4 +22,4 @@ export const UserInfo = (props?:UserInfoArgs) => {
     `
 }
 
-UserInfo.args = DEFAULT_ARGS;
+
