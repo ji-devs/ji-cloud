@@ -1,30 +1,23 @@
 import "@elements/entry/admin/images/meta/page";
-import { LeftLabel } from "~/components/entry/admin/images/meta/image-label-left";
-import {LabelRight} from "~/components/entry/admin/images/meta/image-label-right";
-import "@elements/core/titles/variants/underlined-title";
+import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
+import {LabelRight} from "~/components/entry/admin/images/meta/sections/image-label-right";
+
 import { Rectangle } from "~/components/core/buttons/rectangle";
 
 export default {
-  title: 'Admin/Image Label',
-}
-
-interface Args {
-}
-
-const DEFAULT_ARGS:Args = {
+  title: 'Entry/Admin/Images/Meta/Pages',
 }
 
 
 const STR_NEXT = "Next";
-const STR_LABEL ="Label Images"
 
-export const ImageLabelFullOne = (props?:Partial<Args>) => {
 
-  props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-  const {} = props
+export const ImageLabelFullOne = () => {
+
+
+
 
   return `<image-meta-page>
-    <underlined-title slot="title" title=${STR_LABEL}></underlined-title>
     <div slot="left">${LeftLabel()}</div>
     <div slot="middle">${LabelRight()}</div>
     <div slot="button">
@@ -34,5 +27,4 @@ export const ImageLabelFullOne = (props?:Partial<Args>) => {
   </image-meta-page>`;
 }
 
-ImageLabelFullOne.args = DEFAULT_ARGS;
 

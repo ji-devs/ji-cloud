@@ -8,15 +8,10 @@ import "@elements/core/dividers/horizontal-full";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import "@elements/core/images/ji";
 export default {
-  title: 'Admin/Images/Settings',
+  title: 'Entry/Admin/Images/Meta/Sections',
 }
 
-interface Props {
-  
-}
 
-const DEFAULT_PROPS:Props = {
-}
 
 const STR_REPLACE ="Replace";
 const STR_DELETE = "Delete";
@@ -24,7 +19,7 @@ const STR_PREMIUM ="Premium Image";
 const STR_IMAGENAME = "Image name";
 const STR_DESCRIPTION = "Image description"
 
-export const LeftLabel = (props?:Partial<Props>) => {
+export const LeftLabel = () => {
 
     return `
     <section-left>
@@ -41,4 +36,3 @@ export const LeftLabel = (props?:Partial<Props>) => {
     `
 }
 
-LeftLabel.args = DEFAULT_PROPS;
