@@ -15,11 +15,12 @@ interface Props {
 const DEFAULT_PROPS:Props = {
     options: AFFILIATION_OPTIONS
 }
+const STR_STREAM = "Suitable for jewish stream?";
 
 export const Stream = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
     return `
-        <list-vertical label="Suitable for jewish stream?">
+        <list-vertical label="${STR_STREAM}">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}

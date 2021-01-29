@@ -15,11 +15,13 @@ const DEFAULT_PROPS:Props = {
     options: AGE_OPTIONS
 }
 
+const STR_AGETITLE ="Which age group are you interested in?";
+
 export const AgeTwo = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
 
     return `
-        <vertical-full title="Which age group are you interested in?">
+        <vertical-full title="${STR_AGETITLE}">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}

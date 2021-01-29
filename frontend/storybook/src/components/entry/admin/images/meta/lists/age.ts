@@ -15,11 +15,13 @@ const DEFAULT_PROPS:Props = {
     options: AGE_OPTIONS
 }
 
+const STR_AGESUITABLE = "Suitable for age";
+
 export const Age = (props?:Props) => {
     const {options} = props || DEFAULT_PROPS;
 
     return `
-        <list-vertical label="Suitable for age">
+        <list-vertical label="${STR_AGESUITABLE}">
             ${mapToString(options, label => {
                 return `<input-checkbox label="${label}"></input-checkbox>`
             })}
