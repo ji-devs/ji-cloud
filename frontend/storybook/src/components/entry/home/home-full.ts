@@ -6,7 +6,7 @@ import { CreateParagraph } from "~/components/entry/home/sections/create-paragra
 import { JigglingParagraph } from "~/components/entry/home/sections/jiggling-paragraph";
 import { whatsnewParagraph } from "~/components/entry/home/sections/whatsnew-paragraph";
 import { AboutUsParagraph } from "~/components/entry/home/sections/aboutus-paragraph";
-import { Footer } from "~/components/entry/home/sections/footer";
+  import { Footer } from "~/components/entry/home/sections/footer";
 
 export default {
     title: "Entry/ Home"

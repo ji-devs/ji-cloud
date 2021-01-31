@@ -31,17 +31,15 @@ export default {
       const nItems=items.length;
 
 
-      const json1=JSON.stringify(items);
-      const json2=JSON.stringify(items);
-
+      const json=JSON.stringify(items);
+ 
        console.log("nItems"  ,nItems );
 
 
     return `
-      <moving-card items='${json1}' nItems="${nItems}"/>
+      <moving-card items='${json}' nItems="${nItems}"/>
 
-      <moving-card items='${json2}' nItems="${nItems}"/>
-
+ 
 
      
     `

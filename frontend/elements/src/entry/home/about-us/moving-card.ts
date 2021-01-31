@@ -1,8 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/buttons/circle";
 import "@elements/core/buttons/arrow-button";
-import "@elements/widgets/nav/steps-nav";
-import { arrayIndex } from '@utils/array';
+ import { arrayIndex } from '@utils/array';
 
 export interface Item {
   imgPath: string,

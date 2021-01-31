@@ -1,37 +1,23 @@
-import {argsToAttrs, deleteNone} from "@utils/attributes";
-import "@elements/entry/home/sections/aboutus-section";
+ import "@elements/entry/home/sections/aboutus-section";
 import "@elements/core/titles/variants/title-section";
 import {Color, FontSize} from "@elements/core/titles/title-sub-paragraph";
-import {MovingCard} from "~/components/entry/home/sections/About-us/card";
-import {Item} from "@elements/entry/home/about-us/moving-card";
-
+import {MovingCard} from "~/components/core/cards/card";
+ 
 export default {
   title: 'Homepage',
 }
 
 interface Args{
   color: Color,
-  size: FontSize,
-  activeIndex:number,
-
+  
 }
 
 const DEFAULT_ARGS:Args = {
   color:"yellow",
-  size: "medium",
-  activeIndex:0,
-
+  
 }
 
-interface Argsteacher{
-  items1:Array<Item>,
-  activeIndex:number,
-  }
-  
-  
-   const STR_STARTTITLE = "What they say ";
-  const STR_ENDTTITLE = "about us ";
-
+ 
   
   const PATH_SARAHN="sarah-nazirah.png";
 const STR_TITLEPARENTS = "Parents";
@@ -72,9 +58,6 @@ const STR_BODYTEACHER="I want to tell you, because of JI, my children are learni
     return `
 
     <aboutus-section>
-   
-    <title-section titlecolor="white"  title="${STR_STARTTITLE}" size="large"  slot="title"></title-section>
-    <title-section titlecolor="yellow" title="${STR_ENDTTITLE}" size="large" slot="title"></title-section>
  <div slot="cardteachers">${MovingCard({items:ITEMSTeacher,activeIndex:activeIndexTeacher})}</div>
  <div slot="cardparents">${MovingCard({items:ITEMSPARENTS,activeIndex:activeIndexTeacher})}</div>
     </aboutus-section>
@@ -87,7 +70,9 @@ AboutUsParagraph.argTypes = {
           type: 'inline-radio',
           options: ["white", "black", "yellow"]
       }
-  }
+  } 
+  
+ 
 }
 
 

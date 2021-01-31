@@ -22,7 +22,7 @@ export class _ extends LitElement {
 
    }
    
-   ::slotted([slot=title]){
+  .title{
     display:block;
     margin-left:10px;
    }
@@ -96,14 +96,17 @@ export class _ extends LitElement {
 
     const {} = this;
 
-    const PATH_ARROW="icn-arrow.svg";
-
+   
+    const STR_STARTTITLE = "What they say ";
+    const STR_ENDTTITLE = "about us ";
+  
 
     return html`
     <main>
     <div class="inside-wrapper">
-    <slot name="title"></slot>
-    </div>
+    <title-section titlecolor="white"  title="${STR_STARTTITLE}" size="large"  class="title"></title-section>
+    <title-section titlecolor="yellow" title="${STR_ENDTTITLE}" size="large" class="title"></title-section>
+     </div>
     <img-ui class="yellowimg" path="yellow_square.png"></img-ui>
      <div class="cards">
      <slot name="cardteachers"></slot>
