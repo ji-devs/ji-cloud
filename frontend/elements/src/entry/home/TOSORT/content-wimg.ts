@@ -44,6 +44,7 @@ export class _ extends LitElement {
 
      }
 
+<<<<<<< HEAD:frontend/elements/src/entry/home/TOSORT/content-wimg.ts
      .lines{
         // width: 604px;
         // height: 119px;
@@ -51,6 +52,18 @@ export class _ extends LitElement {
         // margin-top:-144px;
         // display:block;
     }
+=======
+
+    ::slotted([slot=button]){
+     margin-top:200px;
+     display:block;
+  }
+
+  ::slotted([slot=line]){
+    margin-top:8px;
+    display:block;
+ }
+>>>>>>> naomi/master:frontend/elements/src/entry/home/TOSORT/contet-wimg.ts
 
     ::slotted([slot=button]){
      margin-top:200px;
@@ -80,7 +93,11 @@ export class _ extends LitElement {
     return html`
     <div class="inside-wrapper">
     
+<<<<<<< HEAD:frontend/elements/src/entry/home/TOSORT/content-wimg.ts
      <div class="img"></div>
+=======
+    <img-ui path="image_News.png"></img-ui>
+>>>>>>> naomi/master:frontend/elements/src/entry/home/TOSORT/contet-wimg.ts
 
     
 
@@ -91,7 +108,11 @@ export class _ extends LitElement {
      </div>
      <slot name="button"></slot>
      </div>
+<<<<<<< HEAD:frontend/elements/src/entry/home/TOSORT/content-wimg.ts
      //  <img-ui path="${pathimg}"></img-ui>
+=======
+    
+>>>>>>> naomi/master:frontend/elements/src/entry/home/TOSORT/contet-wimg.ts
 
     </div>
         

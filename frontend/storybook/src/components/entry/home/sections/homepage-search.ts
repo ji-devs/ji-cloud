@@ -4,7 +4,7 @@ import "@elements/core/buttons/rectangle";
 import "@elements/core/lists/searchbox-li-check";
 import "@elements/core/titles/ji";
 export default {
-    title: 'Homepage',
+    title: 'Entry/ Home / Section',
 }
 
 interface SearchArgs {

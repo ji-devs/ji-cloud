@@ -1,28 +1,28 @@
- import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/buttons/circle";
 import "@elements/core/buttons/arrow-button";
 import "@elements/widgets/nav/steps-nav";
- 
-interface Item {
-  imgPath: string;  
-  title: string;
-  subtitle: string;
-  body: string;
+import { arrayIndex } from '@utils/array';
+
+export interface Item {
+  imgPath: string,
+  title: string,
+  subtitle: string,
+  body: string,
 }
 
-  @customElement('moving-card')
+@customElement('moving-card')
 export class _ extends LitElement {
   static get styles() {
     return [css`
 
    main{
-    width: 822.3px;
+    width: 822px;
     height: 403px;
-    background-color:#fd9087;
+     
    }
  
-   
-
+  
    .wrapper{
      display:flex;
    }
@@ -32,69 +32,109 @@ export class _ extends LitElement {
      display:block;
    }
 
-   .footer{
-    margin-left:80px;
-    margin-top:80px;
-
-    display:block;
-    display:flex;
+   .nav{
+      margin-left:320px;
+      margin-top:30px;
+      display:flex;
 
    }
+
+.title{
+  font-weight: bold;
+  color: #fed657;
+  font-size: 40px;
+
+
+}
+
+.subtitle{
+  color:#383838;
+  font-weight: 500;
+  font-size: 18px;
+
+}
+.body{
+  width:382px;;
+  margin-right:30px;
+ display:block;
+ margin-top:60px;
+
+}
+.content-card{
+  display:flex;
+
+}
+
+arrow-button{
+  margin-top:240px;
+  display:block;
+   margin-right:35px;
+
+}
+
+img-ui{
+  margin-right:40px;
+  margin-left:32px;
+  margin-top:175px;
+  display:block;
+}
     `];
   }
 
-  @property()
-  nItems: number = 0;
+  @property({ type: Number })
+  nItems: number= 5;
+
+  @property({ type: Array })
+  items: Array<Item> = [];
+
+  @property({ type: Number })
+  activeIndex: number = 0;
 
   @property()
-  items: Array<Item>= new Array(5);
+  rightArrowState: boolean = false;
 
   @property()
-  activeIndex: number=0;
+  leftArrowState: boolean = false;
 
-  @property()
-  activearrowright: boolean=true;
 
-  @property()
-  activearrowleft: boolean=true;
 
 
 
   render() {
 
-    const {} = this;
+    const { activeIndex, nItems, items } = this;
+    const { title, subtitle, body, imgPath } = items[activeIndex];
 
-const PATHTEACHER="Sara-Halberstadt.png";
 
     return html`
     <main>
-<div class="wrapper"> 
+      <div class="wrapper"> 
 
-<arrow-button direction="left"></arrow-button>
- <img-ui path="${PATHTEACHER}">  </img-ui>
+      <arrow-button  color="pink" direction="left"></arrow-button>
 
- <arrow-button direction="right"></arrow-button>
-
- </div>
-
-
- <div class="footer">
-     <button-circle color="white" size="small"></button-circle>
-    <button-circle color="pink" size="small"></button-circle>
-    <button-circle color="pink" size="small"></button-circle>
-    <button-circle color="pink" size="small"></button-circle>
-    <button-circle color="pink" size="small"></button-circle>
+      <div class="content-card">
+      <img-ui path="${imgPath}"></img-ui>
+      <div class="body">
+       <h2 class="title">${title}</h2>
+        <h3 class="subtitle">${subtitle}</h3>
+        <column-list text_line="${body}"></column-list>
+        </div>
+         </div>
+        <arrow-button  color="yellow"></arrow-button>
+         </div>
+          <div class="nav">
+          ${makeCircles(activeIndex, nItems)}
      </div>
     </main>
   `;
   }
 }
 
-function disablearrow(nItems:number,activeIndex: number){
 
-  if(nItems-1>=activeIndex)
-  {
-
-  }
-
+const makeCircles = (activeIndex: number, nItems: number) => {
+  return arrayIndex(nItems)
+  .map(() => html`
+<button-circle color="pink" size="small"></button-circle>
+ 
+`)
 }

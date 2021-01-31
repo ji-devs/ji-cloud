@@ -47,27 +47,24 @@ export class _ extends LitElement {
 
     const { } = this;
 
-    const STR_PATH_PinkSmiley = "Jiggling_Content@2x.png";
+   
     const STR_TITLE_PinkSmiley = "Content";
     const STR_PARAGRAPH_PinkSmiley = "A huge library of activities for the jewish holidays, Hebrew, culture, Tora and many more";
     const STR_BUTTONLABEL_PinkSmiley = "See our templates";
 
-    const STR_PATH_BlueWheel = "Jiggling_Creator@2x.png";
+    
     const STR_TITLE_BlueWheel = "Create";
     const STR_PARAGRAPH_BlueWheel = "Create your own activities, Teach your class to create their own games. The most fun way to learn something new.";
     const STR_BUTTONLABEL_BlueWheel = "Try it for free";
 
-    const STR_PATH_GreenRectangle = "Jiggling_Customize@2x.png";
     const STR_TITLE_GreenRectangle = "Customize";
     const STR_PARAGRAPH_GreenRectangle = "Easily, saving time way. Customize our templates for your needs. ";
     const STR_BUTTONLABEL_GreenRectangle = "See our templates";
 
-    const STR_PATH_YellowSquare = "Jiggling_Community@2x.png";
     const STR_TITLE_YellowSquare = "Community";
     const STR_PARAGRAPH_YellowSquare = "Meet X users around the world. See who plays now. Meet other teachers.";
     const STR_BUTTONLABEL_YellowSquare = "Get inspired";
 
-    const STR_PATH_BlueTriangle = "Jiggling_Classroom@2x.png";
     const STR_TITLE_BlueTriangle = "Classroom";
     const STR_PARAGRAPH_BlueTriangle = "track your students journey, manage your lessons, See which activities are more successful.";
     const STR_BUTTONLABEL_BlueTriangle = "Manage your class";
@@ -79,23 +76,23 @@ export class _ extends LitElement {
     <main>
     <title-section titlecolor="purple" title="${STR_TITLE}" class="title"></title-section>
     <div class="inside-wrapper">
-    <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="${STR_PATH_PinkSmiley}" title="${STR_TITLE_PinkSmiley}" paragraph="${STR_PARAGRAPH_PinkSmiley}" color="pink" >
+    <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Content@2x.png" title="${STR_TITLE_PinkSmiley}" paragraph="${STR_PARAGRAPH_PinkSmiley}" color="pink" >
     <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_PinkSmiley}</button-text>
  </icon-wtitle-wparagraph>
 
- <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="${STR_PATH_BlueWheel}" title="${STR_TITLE_BlueWheel}" paragraph="${STR_PARAGRAPH_BlueWheel}" color="darkblue" >
+ <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Creator@2x.png" title="${STR_TITLE_BlueWheel}" paragraph="${STR_PARAGRAPH_BlueWheel}" color="darkblue" >
  <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_BlueWheel}</button-text>
 </icon-wtitle-wparagraph>
 
-<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="${STR_PATH_GreenRectangle}" title="${STR_TITLE_GreenRectangle}" paragraph="${STR_PARAGRAPH_GreenRectangle}" color="green" >
+<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Customize@2x.png" title="${STR_TITLE_GreenRectangle}" paragraph="${STR_PARAGRAPH_GreenRectangle}" color="green" >
 <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_GreenRectangle}</button-text>
 </icon-wtitle-wparagraph>
 
-<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="${STR_PATH_YellowSquare}" title="${STR_TITLE_YellowSquare}" paragraph="${STR_PARAGRAPH_YellowSquare}" color="orange" >
+<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Community@2x.png" title="${STR_TITLE_YellowSquare}" paragraph="${STR_PARAGRAPH_YellowSquare}" color="orange" >
 <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_YellowSquare}</button-text>
 </icon-wtitle-wparagraph>
 
-<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="${STR_PATH_BlueTriangle}" title="${STR_TITLE_BlueTriangle}" paragraph="${STR_PARAGRAPH_BlueTriangle}" color="lightblue" >
+<icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Classroom@2x.png" title="${STR_TITLE_BlueTriangle}" paragraph="${STR_PARAGRAPH_BlueTriangle}" color="lightblue" >
 <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_BlueTriangle}</button-text>
 </icon-wtitle-wparagraph>
 

@@ -4,15 +4,15 @@
 
 From a design perspective, _everything is a component_. Whether it's a single line of text with a specific font, or a full page consisting of hundreds of tiny pieces, the concept is all about composing pieces together in order to create larger structures - not as a hierarchy, but as an arbitrary mix of pieces, much like LEGO.
 
-Once we move from a visual brief to the frontend engineering side, we have to consider another level of how these things compose together: dynamic properties and event propogation. 
+Once we move from a visual brief to the frontend engineering side, we have to consider another level of how these things compose together: interaction. More specifically: dynamic properties and event propogation. 
 
 By way of example, consider a single button with a label. Now let's imagine what happens if we have a menu containing a dozen of these buttons. If we want to change the text or color of precisely one of the menu's sub-buttons, how do we know which one to target? Furthermore, if a button is clicked, how do we know _which_ one was clicked?
 
 In the old days, we would do this _imperatively_, by getting access to an element that we manually added to the DOM (e.g. via jQuery). This isn't necessarily a bad thing, but it becomes hard to maintain at scale and the more modern trend in web development is to favor _declarative_ frameworks like React, Vue, etc.
 
-However, these frameworks introduce a level of indirection which require using special domain-specific language (JSX, v-* properties, Svelte, etc.), and then this forces the components to be tied to that specific framework.
+These frameworks introduce a level of indirection which require using special domain-specific language (JSX, v-* properties, Svelte, etc.), and then this forces the components to be tied to that specific framework. We are using Rust/Dominator which requires writing in a language that bears no resemblance to HTML syntax. 
 
-That first gulp of Kool-Aid may not seem so bad, because they go to great lengths to make it feel similar to HTML. In fact it's often hard to tell the difference at first glance, and semantically, they often are an implementation of valid html (well... debatably... sure classNames is valid syntax... but it doesn't do anything outside of JSX/React)
+In some frameworks, they go to great lengths to make their DSL look like HTML. In fact it's often hard to tell the difference at first glance, and semantically, they often are an implementation of valid html (well... debatably... sure classNames is valid syntax... but it doesn't do anything outside of JSX/React)
 
 In our case, it's a dealbreaker, because our framework of choice makes no effort at all to pretend to be HTML. In fact it's not even Javascript (we're using a Rust/WASM approach which has no JSX-like solution).
 
@@ -54,7 +54,7 @@ This works because the `my-menu` _element_ will have declared the `buttons` slot
 
 ### Event propogation
 
-It's actually the same pattern, but with a bit more nuance due to event bubbling.
+It's actually the same pattern, but with a bit more nuance due to event bubbling (even through shadow dom).
 
 Starting off with the simple case again - no nesting, no problem, just target the element itself and all is good.
 

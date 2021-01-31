@@ -1,4 +1,4 @@
-import { MEDIA_UI } from '@utils/path';
+import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/dividers/spacer-fourty";
 @customElement('publish-page')
@@ -7,7 +7,6 @@ export class _ extends LitElement {
     return [css`
         main{
             
-            background-image:url("http://localhost:4102/ui/Background@2x.jpg");
             background-repeat: no-repeat;
             background-attachment: inherit;
             background-position: top;
@@ -99,24 +98,21 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  title:string = ""; 
-
-  @property()
-  subtitle:string = ""; 
 
   render() {
 
-    const {title, subtitle} = this;
+    
+    const STR_TITLE ="Settings and JIG info.";
+    const STR_SUBTITLE = "Last step before publishing";
 
     return html`    
-    <main>
+    <main style="background-image:url('${mediaUi("Background@2x.jpg")}')">
         <div class="wrapper">
             <slot name="animation"></slot>
             <div class="inside-wrapper">
             
-                <h1>${title}</h1>
-                <p name="subtitle">${subtitle}</p>
+                <h1>${STR_TITLE}</h1>
+                <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="content">
                     <div class="column"><slot name="column_one"></slot></div>
                     <div class="column"><slot name="column_two"></slot></div>

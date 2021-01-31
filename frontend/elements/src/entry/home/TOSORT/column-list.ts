@@ -9,7 +9,12 @@ export class _ extends LitElement {
       font-size: 14px;
       font-weight: 200;
       color:#ffffff;
+ 
+     }
+
+     li{
       list-style-type: none;
+
      }
      .bold {
        font-weight:600;
@@ -22,8 +27,7 @@ export class _ extends LitElement {
      .medium{
       font-size: 20px;
       font-weight: normal;
-      list-style-type: none;
-
+ 
      }
 
      .white{
@@ -32,8 +36,6 @@ export class _ extends LitElement {
 
      .black{
        color:#383838;
-       list-style-type: none;
-
      }
 
      .darkblue{

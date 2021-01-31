@@ -6,9 +6,30 @@ use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::media::AnimationVariant;
-
 use super::Publish;
+
+/// Animation Variants
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+#[repr(i16)]
+pub enum AnimationKind {
+    /// Gif Animation
+    Gif = 0,
+    /// Spritesheet Animation
+    Spritesheet = 1,
+}
+
+impl AnimationKind {
+    /// returns `self` in a string representation.
+    #[must_use]
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Gif => "gif",
+            Self::Spritesheet => "spritesheet",
+        }
+    }
+}
 
 /// Wrapper type around [`Uuid`], represents the ID of an animation.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -45,7 +66,7 @@ pub struct AnimationMetadata {
     pub publish_at: Option<DateTime<Utc>>,
 
     /// What kind of animation this is.
-    pub variant: AnimationVariant,
+    pub kind: AnimationKind,
 
     /// Should the animation loop?
     pub is_looping: bool,
@@ -77,7 +98,7 @@ pub struct AnimationCreateRequest {
     pub publish_at: Option<Publish>,
 
     /// What kind of animation this is.
-    pub variant: AnimationVariant,
+    pub variant: AnimationKind,
 
     /// Should the animation loop?
     pub is_looping: bool,

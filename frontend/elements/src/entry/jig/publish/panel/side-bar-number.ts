@@ -50,7 +50,6 @@ export class _ extends LitElement {
   render() {
 
     const {path,title} = this;
-
      
 
 

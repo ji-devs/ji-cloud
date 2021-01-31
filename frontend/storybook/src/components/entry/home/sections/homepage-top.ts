@@ -1,8 +1,8 @@
 import "@elements/entry/home/sections/header-blue";
 import "@elements/core/titles/ji";
-import { Search } from "~/components/entry/homepage/homepage-search";
+import { Search } from "~/components/entry/home/sections/homepage-search";
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
 const STR_LEARNING = "Learning Through";

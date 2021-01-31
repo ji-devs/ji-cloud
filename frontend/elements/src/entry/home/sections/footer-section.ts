@@ -1,6 +1,15 @@
 import { MEDIA_UI } from '@utils/path';
  import { LitElement, html, css, customElement, property } from 'lit-element';
-  @customElement('footer-section')
+ import "@elements/entry/home/sections/footer-jigs";
+ import "@elements/entry/home/sections/products-section";
+ import "@elements/entry/home/sections/footer-help";
+ import "@elements/entry/home/sections/contactus-section.ts";
+ import "@elements/core/dividers/stripe-along";
+ import "@elements/entry/home/sections/whoweare-section.ts";
+ import "@elements/entry/home/sections/footer-productservices";
+ import "@elements/entry/home/TOSORT/footer-kidsafe"; 
+
+ @customElement('footer-section')
  export class _ extends LitElement {
   static get styles() {
     return [css`
@@ -18,24 +27,40 @@ import { MEDIA_UI } from '@utils/path';
    #titles{
      display:flex;
    }
-   ::slotted([slot=footer-column]){
+   .footer-column{
     margin-left:90px;
   }
+<<<<<<< HEAD
   ::slotted([slot=titleAbout]){
     margin-left:640px;
     place-items::right;
+=======
+  .titleAbout{
+    margin-left:600px;
+>>>>>>> naomi/master
 
   }
-  ::slotted([slot=titleJi]){
+  .titleJi{
     margin-left:80px;
   }
   ::slotted([slot=button]){
     margin-top:80px;
   }
 
+<<<<<<< HEAD
   ::slotted([slot=kidsafe]){
     margin-left:100px;
     margin-bottom:99px;
+=======
+  .kidsafe{
+   display:block;
+   
+   margin-top:-100px;
+ 
+  }
+
+  
+>>>>>>> naomi/master
  
   }
 
@@ -46,19 +71,49 @@ import { MEDIA_UI } from '@utils/path';
   }
   render() {
     const {} = this;
+    const STR_TITLEJi="Jewish Interactive";
+const STR_TITLEAbout="About Us";
     return html`
     <main>
     <div id="titles">  
       <slot  name="titleJi"></slot>
+<<<<<<< HEAD
+=======
+      <title-section titlecolor="lightblue" title="${STR_TITLEJi}" size="medium" class="titleJi"></title-section>
+    <title-section titlecolor="lightblue" title="${STR_TITLEAbout}" size="medium" class="titleAbout"></title-section>
+>>>>>>> naomi/master
     <slot  name="titleAbout"></slot>
     </div>
          <div class="inside-wrapper">
-         <slot id="footer-column" name="footer-column"></slot>
+         <div class="footer-column">
+          <footer-jigs></footer-jigs>
+         </div>
+         <div class="footer-column">
+          <products-section></products-section>
+         </div>
+         <div class="footer-column">
+          <footer-help></footer-help>
+         </div>
+         <div class="footer-column">
+          <contactus-section></contactus-section>
+         </div>
+         <stripe-along class="footer-column"></stripe-along>
+         <div class="footer-column">
+          <whoweare-section></whoweare-section>
+         </div>
+         <div class="footer-column">
+         <footer-productservices></footer-productservices>
+         </div>
          <slot name="button"></slot>
          </div>
 
+<<<<<<< HEAD
           <slot name="kidsafe"></slot>
     </main>
+=======
+
+         <footer-kidsafe class="kidsafe" ></footer-kidsafe>    </main>
+>>>>>>> naomi/master
   `;
   }
  }

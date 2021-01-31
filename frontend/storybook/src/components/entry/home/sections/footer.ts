@@ -23,7 +23,7 @@ const STR_ABOUTUS="About Us";
 
 
 
-export const footer = () => {
+export const Footer = () => {
     return `
     <footer-section >   
     <title-section titlecolor="lightBlue" title="${STR_JEWISHINTERACTIVE}" size="medium" slot="titleJi"></title-section>

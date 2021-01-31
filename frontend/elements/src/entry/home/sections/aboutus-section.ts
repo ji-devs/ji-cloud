@@ -6,12 +6,15 @@ export class _ extends LitElement {
     return [css`
     .inside-wrapper{
        display:flex;
-       margin-left:550px;    
+       margin-left:566px;    
+       margin-left:566px;    
+       margin-top:72px;    
+
     }
 
     
    main{
-    background-color:#fd9087    ; 
+    background-color:#fd6b71    ; 
     width: 1920px;
     height: 783px;
     display:block;
@@ -24,66 +27,66 @@ export class _ extends LitElement {
     margin-left:10px;
    }
 
-   ::slotted([slot=imgteacher] ){
-    display:block;
-     margin-top:100px;
-   }
  
-   ::slotted([slot=imgparent]){
-    display:block;
-     margin-top:100px;
-   }
+  
 
    .content{
     display:block;
     margin-left:30px;
 
    }
- .right-side{
-  margin-top:40px;
-  margin-left:1011px;
-  width: 822.3px;
-  height: 403px;
-  display:flex;
+   ::slotted([slot=cardparents]){
+  margin-top:0px;
+  margin-left:160px;
+  z-index:1;
+
+ 
 
  }
 
- .left-side{
-   margin-top:-280px;
-   margin-left:100px;
-  width: 822.3px;
-  height: 403px;
-  display:flex;
+   ::slotted([slot=cardteachers]){
+   margin-top:100px;
+   margin-left:0px;
+   display:block;
+   z-index:1;
 
  }
 
-
-   .rpoints , .lpoints{
-     display:flex;
-     margin-top:50px;
-
-   }
-
-   .arrow{
-    margin-top:160px;
-    margin-right:30px;
-
-   }
-
-   .fliparrow{
-    transform: scaleX(-1);
-    margin-top:160px;
-    margin-left:30px;
-
-   }
+ 
    .yellowimg{
-    width: 275.5px;
-    height: 245.4px;
+    width: 276px;
+    height: 246px;
     position: absolute;
-    top:100px;
-    left:50px;
+    top:120px;
+    left:30px;
+    z-index:2;
+   
    }
   
+   .cards{
+    display:flex;
+
+   }
+
+   .Shape_Teachers{
+    width: 821.3px;
+  height: 401.9px;
+   position: absolute;
+  z-index:0;
+  left:60px;
+  top:300px;
+
+
+   }
+   .Shape_Parents{
+    width: 821.3px;
+    height: 401.9px;
+    position: absolute;
+    z-index:0;
+    left:1030px;
+    top:200px;
+
+   }
     `];
   }
 
@@ -101,51 +104,20 @@ export class _ extends LitElement {
     <div class="inside-wrapper">
     <slot name="title"></slot>
     </div>
-    <img-ui class="yellowimg" path="Jiggling_Community%402x.png"></img-ui>
-     <div class="right-side">
-     <img-ui class="arrow" path="${PATH_ARROW}"></img-ui>
+    <img-ui class="yellowimg" path="yellow_square.png"></img-ui>
+     <div class="cards">
+     <slot name="cardteachers"></slot>
+     <slot name="cardparents"></slot>
+    
+     <img-ui class="Shape_Teachers" path="Image_Shape_Teachers@2x.png"></img-ui>
+     <img-ui class="Shape_Parents" path="Image_Shape_Parents@2x.png"></img-ui>
 
-       <slot name="imgparent"></slot>
-
-       <div class="content">
-          <slot name="title-sub-paragraph-right"></slot>
-        <div class="rpoints">
-           <slot name="rpoint"></slot>
-        </div>
-
-    </div>
-    <img-ui class="fliparrow" path="${PATH_ARROW}"></img-ui>
-
-</div>
-
-
-
- <div class="left-side">
-  <img-ui class="arrow" path="${PATH_ARROW}"></img-ui>
-
- <slot name="imgteacher"></slot>
-
-   <div class="content">
-     <slot name="title-sub-paragraph-left"></slot>
-   <div class="lpoints">
-      <slot name="lpoint"></slot>
      </div>
 
- </div>
- <img-ui class="fliparrow" path="${PATH_ARROW}"></img-ui>
-
-  </div>
+  
         
     </main>
   `;
   }
 }
 
-// <div class="left-side">
-//         <slot name="title-sub-paragraph"></slot>
-      
-//         <div class="4points">
-//         <slot name="points"></slot>
-//         </div>
-        
-//         </div>

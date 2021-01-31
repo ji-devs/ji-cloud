@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-import { BaseButton } from "@elements/_styles/buttons";
+ import { BaseButton } from "@elements/_styles/buttons";
 import {nothing} from "lit-html";
 
 export type Color = "yellow" | "pink"  ;
@@ -18,12 +17,7 @@ export class _ extends BaseButton {
         height: 48px;
         cursor:pointer;
       }
-        .yellow{
-
-         }
-        .pink{
-
-         }
+  
  
  .right{
 
@@ -48,16 +42,16 @@ margin-left:100px;
   
   render() {
     const { direction , color } = this;
-
+    const patharrow = color === "yellow" ? "chevron_arrow_yellow_right.svg"
+    : color === "pink" ? "chevron_arrow_pink.svg"
+     : nothing;
     
 
     return html`
 
-    <img-ui path="chevron_arrow_yellow_right.svg" class="${direction}" ></img-ui>
-    <img-ui path="chevron_arrow_yellow_right.svg" class="${direction}" ></img-ui>
-
-    // class="${direction} ${color}"
-  
+    <img-ui  path="${patharrow}" class="${direction}" ></img-ui>
+ 
+   
     `;
   }
 }

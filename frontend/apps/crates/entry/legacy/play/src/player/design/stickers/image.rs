@@ -21,12 +21,10 @@ use utils::{resize::*, math::transform_2d};
 pub struct StickerImage {
 }
 
-//Some properties aren't in the transform
-//
 impl StickerImage {
     pub fn render(jig_id: &str, module_id: &str, img: &Image, mock: bool) -> Dom {
 
-        html!("div", {
+        html!("empty-fragment", {
             .style("position", "absolute")
             .style("top", "0px") 
             .style("left", "0px") 
@@ -44,11 +42,9 @@ impl StickerImage {
     }
 }
 
-//TODO - not working
 //backend Ji -> TT example: https://github.com/ji-devs/jitap-backend/blob/master/create/src/endpoints/playerMeta/PlayerMeta-Common.ts
 //see https://jitap.net/media/webplayer/player.js?v=1.3.6
 //previous player example just used our format so not viable as a reference
-//
 fn transform_signal(src:[f64;6], img_width: f64, img_height: f64) -> impl Signal<Item = String> {
     //TODO - adapt transform based on resize signal
     get_resize_info()
@@ -79,58 +75,3 @@ fn transform_signal(src:[f64;6], img_width: f64, img_height: f64) -> impl Signal
             )
         })
 }
-
-fn top_signal(height: f64) -> impl Signal<Item = String> {
-    get_resize_info()
-        .signal_ref(move |info| {
-            //let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
-            let ResizeInfo {scale, ..} = *info;
-
-            //format!("{}px", (768.0 - height * scale) / 2.0)
-            format!("0px")
-        })
-}
-fn left_signal(width: f64) -> impl Signal<Item = String> {
-    get_resize_info()
-        .signal_ref(move |info| {
-            //let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
-            let ResizeInfo {scale, ..} = *info;
-
-            format!("{}px", (info.width - (width * scale)) / 2.0)
-        })
-}
-
-fn width_signal(width: f64) -> impl Signal<Item = String> {
-    get_resize_info()
-        .signal_ref(move |info| {
-            //let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
-            let ResizeInfo {scale, ..} = *info;
-
-            format!("{}px", width * scale)
-        })
-}
-fn height_signal(height: f64) -> impl Signal<Item = String> {
-    get_resize_info()
-        .signal_ref(move |info| {
-            //let mut transform = [ 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ];
-            let ResizeInfo {scale, ..} = *info;
-
-            format!("{}px", height * scale)
-        })
-}
-/*
- *
-    pub scale: f64,
-    pub x: f64,
-    pub y: f64,
-    pub width: f64,
-    pub height: f64,
-    #[serde(rename(deserialize = "contentX"))]
-    pub content_x: f64,
-    #[serde(rename(deserialize = "contentY"))]
-    pub content_y: f64,
-    #[serde(rename(deserialize = "contentWidth"))]
-    pub content_width: f64,
-    #[serde(rename(deserialize = "contentHeight"))]
-    pub content_height:f64 
-    */
