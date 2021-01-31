@@ -11,6 +11,6 @@ contact_links:
     about: create a Legacy Player issue
     url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Login/Registration&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
     
-  - name: Strings Util (Mendy)
+  - name: Localization
     about: create a Strings Util issue
-    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=MendyBerger&milestone=Strings%20Util&labels=utils
+    url: https://github.com/ji-devs/ji-cloud/issues/new?milestone=Localization&labels=utils

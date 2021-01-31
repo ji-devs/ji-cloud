@@ -1,4 +1,3 @@
-import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('add-image')
 export class _ extends LitElement {
@@ -41,13 +40,13 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
+    const STR_UPLOAD = "Upload image";
 
     return html`
  
   <div class="wrapper">
-    <div class="inside-wrapper hover:border-jiblueDark addImage transition duration-300 ease-in-out">
-        <slot></slot>
+    <div class="inside-wrapper">
+        <button-rect color="blue" size="medium" iconBefore="plus">${STR_UPLOAD}</button-rect>
     </div>
   </div>
   
