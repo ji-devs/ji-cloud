@@ -1,5 +1,4 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
+ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/entry/home/TOSORT/column-list";
 @customElement('footer-productservices')
 export class _ extends LitElement {

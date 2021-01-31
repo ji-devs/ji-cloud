@@ -54,7 +54,7 @@ export class _ extends LitElement {
  render() {
    const {} = this;
    const STR_TITLEJi="Jewish Interactive";
-const STR_TITLEAbout="About Us";
+   const STR_TITLEAbout="About Us";
    return html`
    <main>
    <div class="title">  

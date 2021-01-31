@@ -1,5 +1,4 @@
-import { MEDIA_UI } from '@utils/path';
-import { LitElement, html, css, customElement, property } from 'lit-element';
+ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/entry/home/TOSORT/column-list";
 @customElement('footer-jigs')
 export class _ extends LitElement {
@@ -12,9 +11,7 @@ export class _ extends LitElement {
       color:#ffffff;
     
     }
-   main{
-     
-   }
+    
    
    ul{
     list-style-type: none;
