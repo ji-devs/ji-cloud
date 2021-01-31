@@ -40,10 +40,10 @@ export const RecommendsParagraph = () => {
     <icon-wparagraph path="${ PATH_HEBREW}" title="${STR_TITLE_HEBREW}" paragraph="${STR_PARAGRAPH_HEBREW}" color="${STR_DARKGRAY}" >
     </icon-wparagraph>
 
-     </div>
-    <div slot="icon-title-paragraph">
-    <icon-wparagraph path="${ PATH_CHANUKAH}" title="${STR_TITLE_CHANUKAH}" paragraph="${STR_PARAGRAPH_CHANUKAH}" color="${STR_DARKGRAY}" >
-    </icon-wparagraph>
+ </div>
+ <div slot="icon-title-paragraph">
+  <icon-wparagraph path="${ PATH_CHANUKAH}" title="${STR_TITLE_CHANUKAH}" paragraph="${STR_PARAGRAPH_CHANUKAH}" color="${STR_DARKGRAY}" >
+  </icon-wparagraph>
 
  </div>
 <div slot="icon-title-paragraph">

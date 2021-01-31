@@ -18,12 +18,11 @@ export default {
 const STR_TITLE = "What’s new?";
 const STR_SUBTITLE="HOP TV - New Hebrew Series";
 const STR_WHITE = "white";
-const STR_DARKBLUE = "darkblue";
- const STR_LARGE = "large";
- const STR_PINK = "pink";
+const STR_LARGE = "large";
+const STR_PINK = "pink";
 
 
- const STR_PATHGIRL = "girl@2x.jpg";
+const PATHGIRL = "girl@2x.jpg";
 const STR_LINE1="Learning Hebrew with HOP Channel, Learning Hebrew with ";
 const STR_LINE2="HOP Channel, Learning Hebrew with HOP Channel, Learning ";
 const STR_LINE3="Hebrew with HOP Channel Learning Hebrew with HOP ";
@@ -39,7 +38,7 @@ export const whatsnewParagraph = () => {
     <whatsnew-section>
     <title-section titlecolor="${STR_WHITE}" title="${STR_TITLE}"  slot="title"></title-section>
 
-    <content-wimg slot="contentpage" pathimg="${STR_PATHGIRL}">
+    <content-wimg slot="contentpage" pathimg="${ PATHGIRL}">
     <sub-title size="${STR_LARGE}" slot="subtitle" title="${STR_SUBTITLE}" color="${STR_PINK}"></sub-title>
 
 

@@ -1,6 +1,4 @@
-import "@elements/entry/home/TOSORT/column-details";
-import "@elements/entry/home/TOSORT/column-list";
-import "@elements/core/popups/popup-container";
+ import "@elements/core/popups/popup-container";
 import {Color,Size} from "@elements/core/popups/popup-container";
 import {argsToAttrs, deleteNone} from "@utils/attributes";
 import "@elements/core/titles/variants/title-section";

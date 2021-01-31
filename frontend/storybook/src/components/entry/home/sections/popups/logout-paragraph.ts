@@ -1,8 +1,6 @@
-import "@elements/entry/home/TOSORT/column-list";
-import "@elements/entry/home/sections/logout-section";
-import "@elements/core/titles/variants/title-section";
- import "@elements/core/buttons/rectangle" ;
- import "@elements/core/popups/popup-container";
+ import "@elements/entry/home/sections/logout-section";
+  import "@elements/core/popups/popup-container";
+  
 export default {
   title: 'Popups',
 }

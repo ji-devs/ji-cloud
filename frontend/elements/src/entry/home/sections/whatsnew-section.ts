@@ -1,4 +1,4 @@
-import { MEDIA_UI } from '@utils/path';
+import "@elements/core/buttons/arrow-button";
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('whatsnew-section')
 export class _ extends LitElement {
@@ -12,7 +12,6 @@ export class _ extends LitElement {
        height: 909px;
    }
    ::slotted([slot=title]){
-  
     text-align: center;
     margin-top:72px;
     margin-right:749px;
@@ -21,17 +20,21 @@ export class _ extends LitElement {
 
  
 .fliparrow{
-     transform: scaleX(-1);
      margin-top:247px;
+      margin-left:10px;
+     display:block;
+
    }
 
    .arrow{
        margin-top:247px;
+        margin-right:45px;
+        display:block;
    }
 
  
-       .points{
-        display:flex;
+   .points{
+    display:flex;
         margin-left:912px;
         margin-top:80px;
        }
@@ -52,25 +55,21 @@ export class _ extends LitElement {
   height:201px;
 
  }
-
-
-
-
+ ::slotted([slot=contentpage]){
+  display:block;
+ margin-left:-110px;
+ }
 
     `];
   }
 
-  @property()
-  PATH_ARROW:string = ""; 
-
-
+   
 
   render() {
 
-    const {} = this;
+    const { } = this;
 
-    const PATH_ARROW="icn-arrow.svg";
-
+ 
 
     return html`
     <main>
@@ -78,12 +77,15 @@ export class _ extends LitElement {
     <slot name="title"></slot>
     </div>
 
+
     <div class="wrapper">
-     <img-ui class="arrow" path="${PATH_ARROW}"></img-ui>
-    
+      <arrow-button class="arrow"  color="blue" direction="left"></arrow-button>
+
+
     <slot name="contentpage"></slot>
 
-    <img-ui class="fliparrow" path="${PATH_ARROW}"></img-ui>
+     <arrow-button class="fliparrow"  color="blue" direction="right"></arrow-button>
+
     </div>
 
    <div class="footer">

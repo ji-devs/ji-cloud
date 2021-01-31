@@ -1,5 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/home/home-full";
+import "@elements/entry/home/pages/home-full";
 import { TopSection } from "~/components/entry/home/sections/homepage-top";
 import { RecommendsParagraph } from "~/components/entry/home/sections/recommends-paragraph";
 import { CreateParagraph } from "~/components/entry/home/sections/create-paragraph";

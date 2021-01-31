@@ -4,8 +4,8 @@ import "@elements/core/buttons/rectangle";
 
 
 export default {
-    title: 'Homepage Paragraph',
-  }
+  title: 'footer',
+}
   
 
 export const footerwhoweare= () => {

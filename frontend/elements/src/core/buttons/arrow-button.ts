@@ -44,6 +44,7 @@ margin-left:100px;
     const { direction , color } = this;
     const patharrow = color === "yellow" ? "chevron_arrow_yellow_right.svg"
     : color === "pink" ? "chevron_arrow_pink.svg"
+    :color ==="blue" ? "chevron_arrow_blue_right.svg"
      : nothing;
     
 

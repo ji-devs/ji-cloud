@@ -22,7 +22,6 @@ div{
     width: 576px;
     height: 352px;
   }
-<<<<<<< HEAD
 .peach::before{
   content: "";
   position: absolute;
@@ -43,17 +42,6 @@ div{
   border-width: 20px;
   border-style: solid;
   border-color: transparent transparent #c4ead1 transparent;
-=======
-div::before{
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent transparent black transparent;
->>>>>>> naomi/master
 }
  
 

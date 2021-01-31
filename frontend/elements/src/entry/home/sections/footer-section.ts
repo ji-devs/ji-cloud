@@ -20,18 +20,25 @@ export class _ extends LitElement {
    width: 1920px;
    height: 700px;
   }
-  #titleJi{
-  }
-  #titles{
+   
+  .title{
     display:flex;
+    margin-bottom:-20px;
+
   }
   .footer-column{
    margin-left:90px;
+   display:block;
+   margin-top:20px;
  }
  .titleAbout{
+  display:block;
+  margin-top:50px;
    margin-left:600px;
  }
  .titleJi{
+  display:block;
+  margin-top:50px;
    margin-left:80px;
  }
  ::slotted([slot=button]){
@@ -50,12 +57,10 @@ export class _ extends LitElement {
 const STR_TITLEAbout="About Us";
    return html`
    <main>
-   <div id="titles">  
-     <slot  name="titleJi"></slot>
-     <title-section titlecolor="white" title="${STR_TITLEJi}" size="medium" class="titleJi"></title-section>
-   <title-section titlecolor="white" title="${STR_TITLEAbout}" size="medium" class="titleAbout"></title-section>
-   <slot  name="titleAbout"></slot>
-   </div>
+   <div class="title">  
+      <title-section titlecolor="lightBlue" title="${STR_TITLEJi}" size="medium" class="titleJi"></title-section>
+      <title-section titlecolor="lightBlue" title="${STR_TITLEAbout}" size="medium" class="titleAbout"></title-section>
+    </div>
         <div class="inside-wrapper">
         <div class="footer-column">
          <footer-jigs></footer-jigs>
