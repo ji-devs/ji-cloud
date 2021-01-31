@@ -17,6 +17,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.10",
+    "@fluent/bundle": "^0.16.0",
     "@storybook/addon-actions": "^6.1.11",
     "@storybook/addon-controls": "^6.1.14",
     "@storybook/addon-docs": "^6.1.14",
