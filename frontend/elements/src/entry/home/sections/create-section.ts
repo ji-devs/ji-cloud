@@ -103,21 +103,12 @@ export class _ extends LitElement {
     const STR_INTERFACE = "Smart & friendly interface";
     const STR_TEACHING = "Teaching through creation";
     const STR_ALL = "All in one";
-<<<<<<< HEAD
-    const STR_START = "Start creating";
-
-    const { } = this;
-
-
-    return html`
-=======
     const STR_START ="Start creating";
 
     const {} = this;
 
  
      return html`
->>>>>>> naomi/master
     <main>
     <div class="left_side">
       <img-ui path="girl@2x.jpg" class="girl"><img-ui>
