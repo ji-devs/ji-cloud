@@ -1,6 +1,5 @@
-import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-
+import "@elements/entry/jig/publish/dropdown-list-object";
 @customElement('publish-dropdown')
 export class _ extends LitElement {
   static get styles() {
@@ -8,7 +7,7 @@ export class _ extends LitElement {
     main{
         width: 419px;
         border-radius:16px;
-        padding:32px 0 32px 32px;
+        padding:32px;
         box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
         background-color:#ffffff;
         position:relative;
@@ -34,6 +33,12 @@ export class _ extends LitElement {
         right:10px;
         top:10px;
     }
+    .tooltip-wrapper.copied{
+      display:block;
+    }
+    .tooltip-wrapper{
+      display:none
+    }
     
     `];
   }
@@ -43,23 +48,31 @@ export class _ extends LitElement {
 
   
   @property({type:Boolean})
-  closed: boolean = false;
-  
+  closed: boolean = true;
+
+  @property({type:Boolean})
+  copied: boolean = false;
 
   render() {
 
-    const {title, closed} = this;
+    const {closed, copied} = this;
+
+    const STR_DROPDOWNTITLE = "Select Share Option";
 
     return html`
      <main class="${closed ? 'closed' : ''}">
      <img-ui path="icn-x-close.svg"></img-ui>
       <div class="dropdown-wrapper">
         <div class="title">
-            <h1>${title}</h1>
+            <h1>${STR_DROPDOWNTITLE}</h1>
         </div>
-        <slot name="list"></slot>
-       
-        
+        <dropdown-list-object  class="list" mode="share"></dropdown-list-object>
+          <dropdown-list-object class="list" mode="embed"></dropdown-list-object>
+          <dropdown-list-object class="list" mode="link">
+          </dropdown-list-object>
+           <div class="${copied ? 'copied' : ''} tooltip-wrapper">
+            <slot name="tooltip" ></slot>
+        </div>
       </div>
     </main>
   `;

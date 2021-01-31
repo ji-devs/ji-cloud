@@ -1,12 +1,12 @@
-import { MEDIA_UI } from '@utils/path';
+import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import "@elements/entry/home/TOSORT/placeholder"; 
+
 @customElement('publish-page-two')
 export class _ extends LitElement {
   static get styles() {
     return [css`
         main{
-           
-            background-image:url("http://localhost:4102/ui/Background@2x.jpg");
             background-repeat: no-repeat;
             background-attachment: inherit;
             background-position: top;
@@ -24,8 +24,6 @@ export class _ extends LitElement {
             margin-right:auto;
             margin-left: auto;
            
-            
-            
         }
         .inside-wrapper{
             padding-top:56px;
@@ -88,11 +86,11 @@ export class _ extends LitElement {
     const STR_SUBTITLE ="What would you like to do next?"
 
     return html`    
-    <main>
+    <main style="background-image:url('${mediaUi("Background@2x.jpg")}')">
         <div class="wrapper">
             
             <div class="inside-wrapper">
-                <slot name="animation"></slot>
+            <placeholder-img class="animation"></placeholder-img>
                 <h1>${STR_TITLE}</h1>
                 <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="button-wrapper">
