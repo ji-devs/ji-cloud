@@ -80,11 +80,7 @@ export class _ extends LitElement {
 
     <div class="wrapper">
      <img-ui class="arrow" path="${PATH_ARROW}"></img-ui>
-<<<<<<< HEAD
-
-=======
     
->>>>>>> naomi/master
     <slot name="contentpage"></slot>
 
     <img-ui class="fliparrow" path="${PATH_ARROW}"></img-ui>

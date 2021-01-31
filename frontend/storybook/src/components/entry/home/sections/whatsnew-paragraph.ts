@@ -1,5 +1,4 @@
-import "@elements/entry/home/TOSORT/icon-wparagraph";
-import "@elements/entry/home/sections/whatsnew-section";
+ import "@elements/entry/home/sections/whatsnew-section";
 import "@elements/core/titles/variants/title-section";
 import "@elements/core/titles/variants/subtitle";
 import "@elements/entry/home/TOSORT/list-type";
