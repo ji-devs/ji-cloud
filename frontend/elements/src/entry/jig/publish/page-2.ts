@@ -1,6 +1,6 @@
 import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/entry/home/TOSORT/placeholder"; 
+import "@elements/entry/jig/publish/publish-placeholder-img"; 
 
 @customElement('publish-page-two')
 export class _ extends LitElement {
@@ -90,7 +90,7 @@ export class _ extends LitElement {
         <div class="wrapper">
             
             <div class="inside-wrapper">
-            <placeholder-img class="animation"></placeholder-img>
+            <publish-placeholder-img class="animation"></publish-placeholder-img>
                 <h1>${STR_TITLE}</h1>
                 <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="button-wrapper">
