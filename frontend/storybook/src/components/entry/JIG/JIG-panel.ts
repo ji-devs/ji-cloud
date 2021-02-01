@@ -3,10 +3,7 @@ import "@elements/entry/jig/publish/panel/side-bar-number";
 import "@elements/core/lists/column-list";
 import "@elements/entry/jig/publish/panel/jig-squad";
 import "@elements/entry/jig/publish/panel/jig-panel";
-
  
-
-   
 
 export default {
   title: 'Homepage',

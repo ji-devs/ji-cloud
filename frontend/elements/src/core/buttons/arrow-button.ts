@@ -19,8 +19,11 @@ export class _ extends BaseButton {
  
  .left{
   transform: scaleX(-1);
-   margin-left:100px;
+   margin-left:80px;
+   display:block;
  }
+
+ 
 
 
       `,
