@@ -1,5 +1,9 @@
 import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+
+export type Color="white"|"black"|"darkBlue";
+export type Size="medium"|"normal";
+
 @customElement('column-list')
 export class _ extends LitElement {
     static get styles() {
@@ -38,7 +42,7 @@ export class _ extends LitElement {
        color:#383838;
      }
 
-     .darkblue{
+     .darkBlue{
      color=#192150;
      }
     `];
@@ -49,16 +53,16 @@ export class _ extends LitElement {
   bold:boolean = false; 
 
   @property()
-  size:string = ""; 
+  size:Size = "normal"; 
   @property()
-  color:string = "black"; 
+  color:Color = "black"; 
  
 
   render() {
     const {text_line, bold,size,color} = this;
 
     return html`
-     <li class="${bold ? "bold" : ''} ${ size ? "medium":"normal"} ${color}">${text_line}</li>
+     <li class="${bold } ${ size } ${color}">${text_line}</li>
     
   `;
   }

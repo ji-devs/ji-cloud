@@ -28,8 +28,7 @@ export class _ extends LitElement {
 
    button-circle{
      margin-left:-50px;
-     display:block;
-   }
+    }
 
    .nav{
       margin-left:320px;
@@ -53,10 +52,9 @@ export class _ extends LitElement {
 
 }
 .body{
-  width:382px;;
+  width:382px;
   margin-right:30px;
- display:block;
- margin-top:60px;
+  margin-top:60px;
 
 }
 .content-card{
@@ -66,8 +64,7 @@ export class _ extends LitElement {
 
 arrow-button{
   margin-top:240px;
-  display:block;
-   margin-right:35px;
+    margin-right:35px;
 
 }
 
@@ -75,8 +72,7 @@ img-ui{
   margin-right:40px;
   margin-left:32px;
   margin-top:175px;
-  display:block;
-}
+ }
     `];
   }
 

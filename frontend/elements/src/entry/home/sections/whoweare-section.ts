@@ -1,5 +1,5 @@
 import { MEDIA_UI } from '@utils/path';
-import "@elements/entry/home/TOSORT/column-list";
+import "@elements/core/lists/column-list";
 import "@elements/entry/home/social-networks";
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('whoweare-section')
@@ -48,8 +48,7 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
-
+ 
 
     const STR_TITLE="Who we are";
     const STR_LINE1="  Jewish Interactive is a registered 501(c)(3)  ";

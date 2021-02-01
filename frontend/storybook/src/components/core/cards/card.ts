@@ -1,6 +1,6 @@
  
-  import "@elements/entry/home/about-us/moving-card";
-  import {Item} from "@elements/entry/home/about-us/moving-card";
+  import "@elements/core/cards/moving-card";
+  import {Item} from "@elements/core/cards/moving-card";
 
 interface Args{
 items:Array<Item>,

@@ -1,11 +1,11 @@
 import "@elements/entry/home/sections/create-section";
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
 
-export const CreateParagraph = () => {
+export const CreateSection = () => {
     return `
 
     <create-section>

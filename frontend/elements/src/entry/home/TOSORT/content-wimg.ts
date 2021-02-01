@@ -18,8 +18,7 @@ export class _ extends LitElement {
 
     
      .img{
-          width: 940px;
-          height: 540px;
+         
           display:block;
           
           

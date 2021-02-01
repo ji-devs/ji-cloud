@@ -1,11 +1,11 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/home/pages/home-full";
 import { TopSection } from "~/components/entry/home/sections/homepage-top";
-import { RecommendsParagraph } from "~/components/entry/home/sections/recommends-paragraph";
-import { CreateParagraph } from "~/components/entry/home/sections/create-paragraph";
-import { JigglingParagraph } from "~/components/entry/home/sections/jiggling-paragraph";
-import { whatsnewParagraph } from "~/components/entry/home/sections/whatsnew-paragraph";
-import { AboutUsParagraph } from "~/components/entry/home/sections/aboutus-paragraph";
+import { RecommendsSection } from "~/components/entry/home/sections/recommends-section";
+import { CreateSection } from "~/components/entry/home/sections/create-section";
+import { JigglingSection } from "~/components/entry/home/sections/jiggling-section";
+import { whatsnewSection } from "~/components/entry/home/sections/whatsnew-section";
+import { AboutUsSection } from "~/components/entry/home/sections/aboutus-section";
   import { Footer } from "~/components/entry/home/sections/footer";
 
 export default {
@@ -25,11 +25,11 @@ export const HomePageFull = (props?:Args) => {
 
     return `<homepage-full ${argsToAttrs(props)}>
         ${TopSection()}
-        ${RecommendsParagraph()}
-        ${CreateParagraph()}
-        ${JigglingParagraph()}
-        ${whatsnewParagraph()}
-        ${AboutUsParagraph()}
+        ${RecommendsSection()}
+        ${CreateSection()}
+        ${JigglingSection()}
+        ${whatsnewSection()}
+        ${AboutUsSection()}
         ${Footer()}
     
     </homepage-full>`;

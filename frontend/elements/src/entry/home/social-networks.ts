@@ -8,8 +8,7 @@ export class _ extends LitElement {
     width: 32px;
     height: 32px;
      margin-right:24px;
-     display:block;
-  }
+   }
   
   .wrapper{
 display:flex;

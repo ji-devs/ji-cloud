@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/titles/variants/subtitle";
 import "@elements/core/titles/variants/title-section";
-import "@elements/entry/home/TOSORT/column-list"
+import "@elements/core/lists/column-list"
 import "@elements/core/buttons/rectangle";
 
 @customElement('create-section')
@@ -26,8 +26,7 @@ export class _ extends LitElement {
   
    
    .gears{
-    width: 325px;
-    height: 355px;
+    
     bottom:30px;
     right:40px;
     position: absolute;
@@ -99,13 +98,12 @@ export class _ extends LitElement {
     const STR_ALL = "All in one";
     const STR_START ="Start creating";
 
-    const {} = this;
-
+ 
  
      return html`
     <main>
     <div class="left_side">
-      <img-ui path="girl@2x.jpg" class="girl"><img-ui>
+      <img-ui path="girl@2x.jpg" ><img-ui>
     </div> 
 
     <div class="right_side">

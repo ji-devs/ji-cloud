@@ -9,7 +9,7 @@ import "@elements/entry/home/TOSORT/content-wimg";
 
   
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
 
@@ -32,7 +32,7 @@ const STR_MEDIUM="medium";
 const STR_PLAY="Play Series";
 
 
-export const whatsnewParagraph = () => {
+export const whatsnewSection = () => {
     return `
 
     <whatsnew-section>

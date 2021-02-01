@@ -27,8 +27,7 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
-
+ 
     return html`
     <div class="wrapper">
         <slot name="image"></slot>

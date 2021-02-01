@@ -2,7 +2,7 @@ import "@elements/entry/home/TOSORT/icon-wparagraph";
 import "@elements/entry/home/sections/recommend";
  
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
 
@@ -31,7 +31,7 @@ const STR_PARAGRAPH_HOP= "Hebrew Series";
  
 
 
-export const RecommendsParagraph = () => {
+export const RecommendsSection = () => {
     return `
 
     <recommends-section>

@@ -2,7 +2,7 @@ import "@elements/entry/home/sections/jiggling-section";
    
 
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
   
@@ -10,7 +10,7 @@ export default {
 
 
 
-export const JigglingParagraph = () => {
+export const JigglingSection = () => {
     return `
 
     <jiggling-section>

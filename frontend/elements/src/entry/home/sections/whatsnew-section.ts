@@ -22,15 +22,13 @@ export class _ extends LitElement {
 .fliparrow{
      margin-top:247px;
       margin-left:10px;
-     display:block;
-
+ 
    }
 
    .arrow{
        margin-top:247px;
         margin-right:45px;
-        display:block;
-   }
+    }
 
  
    .points{

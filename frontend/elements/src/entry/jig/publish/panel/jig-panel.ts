@@ -17,13 +17,9 @@ export class _ extends LitElement {
    }
   
 .jig-head{ 
-   width: 150px;
-   height: 182.1px;
    display:block;
-   left:170px;
-   top:150px;
-    position:absolute;
-  }
+    
+   }
 
   .jig-neck{
     display:block;
@@ -34,8 +30,8 @@ export class _ extends LitElement {
   }
 .hand{
   position:absolute;
-   margin-left:311px;
-   margin-top:-110px;
+   left:311px;
+   top:-110px;
 }
 .tail{
   display:block;
@@ -44,8 +40,7 @@ export class _ extends LitElement {
 }
 
 .logo{
-  width:115.4px;
-  height:40.1px;
+ 
   position:absolute;
   left:25px;
    top:30px;
@@ -82,13 +77,14 @@ display:block;
     const {  } = this;
 
      const STR_SEE="See my JIGs"
+     const STR_PLACEHOLDER="My JIG’s name"
 
 
     return html`
     <main>
     <img-ui class="logo" path="Logo.png"></img-ui>
     <button-text class="seemyji" color="blue" size="large">${STR_SEE}</button-text>
-    <input type="text" placeholder="My JIG’s name"  style=background-image:url("Icn_Edit.svg")  >
+    <input type="text" placeholder="${STR_PLACEHOLDER}"  style=background-image:url("Icn_Edit.svg")  >
     <img-ui class="jig-head" path="Asset 1@2x.png"></img-ui>
     <img-ui  class="jig-neck" path="Path 148075.svg"></img-ui>
     <img-ui class="hand" path="Group 14809.svg"></img-ui>

@@ -11,22 +11,15 @@ export class _ extends BaseButton {
   static get styles() {
     return [
       css`
-
       button{
         width: 48px;
         height: 48px;
         cursor:pointer;
       }
-  
  
- .right{
-
- }
-
  .left{
   transform: scaleX(-1);
-display:block;
-margin-left:100px;
+   margin-left:100px;
  }
 
 
@@ -35,7 +28,7 @@ margin-left:100px;
   }
 
   @property()
-  direction:Direction   = "right";
+  direction:Direction = "right";
 
   @property()
   color: Color  = "yellow";
@@ -45,7 +38,7 @@ margin-left:100px;
     const patharrow = color === "yellow" ? "chevron_arrow_yellow_right.svg"
     : color === "pink" ? "chevron_arrow_pink.svg"
     :color ==="blue" ? "chevron_arrow_blue_right.svg"
-     : nothing;
+     : " ";
     
 
     return html`

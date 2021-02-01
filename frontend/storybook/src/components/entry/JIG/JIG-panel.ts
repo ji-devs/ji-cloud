@@ -1,6 +1,6 @@
  import "@elements/entry/jig/publish/panel/jiggling-body";
 import "@elements/entry/jig/publish/panel/side-bar-number";
-import "@elements/entry/home/TOSORT/column-list";
+import "@elements/core/lists/column-list";
 import "@elements/entry/jig/publish/panel/jig-squad";
 import "@elements/entry/jig/publish/panel/jig-panel";
 

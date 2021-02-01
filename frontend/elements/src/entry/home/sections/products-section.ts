@@ -1,5 +1,5 @@
 import { MEDIA_UI } from '@utils/path';
-import "@elements/entry/home/TOSORT/column-list";
+import "@elements/core/lists/column-list";
 import "@elements/entry/home/social-networks";
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('products-section')
@@ -41,8 +41,7 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
-    const STR_TITLE="Product"; 
+     const STR_TITLE="Product"; 
     const STR_LINE1="Manage";
     const STR_LINE2="Classroom";
     const STR_LINE3="Create activities";
@@ -53,10 +52,10 @@ export class _ extends LitElement {
     <main>
     <h3>${STR_TITLE} </h3>
     <ul>
-    <column-list text_line="${STR_LINE1}" color="white" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE2}" color="white" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE3}" color="white" slot="list" ></column-list>
-    <column-list text_line="${STR_LINE4}" color="white" slot="list" ></column-list>
+    <column-list text_line="${STR_LINE1}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_LINE2}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_LINE3}" color="white" class="list" ></column-list>
+    <column-list text_line="${STR_LINE4}" color="white" class="list" ></column-list>
     </ul>
     </main>
   `;

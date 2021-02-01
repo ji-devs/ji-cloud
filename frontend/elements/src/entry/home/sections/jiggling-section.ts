@@ -15,8 +15,7 @@ export class _ extends LitElement {
    main{
      width:1920px;
      height:890px;
-     background-image: url("path/to/Strip_Background_Jigglings@2x.jpg");
-      background-repeat: no-repeat;
+     background-repeat: no-repeat;
      background-attachment: fixed;
      background-position: center;
  
@@ -28,14 +27,12 @@ export class _ extends LitElement {
     font-weight: 900;
     color:#5662a3;
     text-align: center;
-    display:block;
-    margin-top:62px;
+     margin-top:62px;
 
    }
    .icon-wtitle-wparagraph{
      margin-left:25px;
-     display:block;
-   }
+    }
 
  
     `];
@@ -73,9 +70,8 @@ export class _ extends LitElement {
 
 
     return html`
-    <main  style="background-image: url('Strip_Background_Jigglings%402x.jpg')">
-
-      <title-section titlecolor="purple" title="${STR_TITLE}" class="title"></title-section>
+    <main  style="background-image: url("Strip_Background_Jigglings.jpg")">
+       <title-section titlecolor="purple" title="${STR_TITLE}" class="title"></title-section>
     <div class="inside-wrapper">
     <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Content@2x.png" title="${STR_TITLE_PinkSmiley}" paragraph="${STR_PARAGRAPH_PinkSmiley}" color="pink" >
     <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_PinkSmiley}</button-text>

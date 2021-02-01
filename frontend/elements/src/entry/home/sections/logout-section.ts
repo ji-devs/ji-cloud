@@ -1,7 +1,6 @@
   import { LitElement, html, css, customElement, property } from 'lit-element';
  import "@elements/core/titles/variants/title-section";
- import "@elements/core/buttons/rectangle" ;
- import "@elements/entry/home/TOSORT/column-list";
+ import "@elements/core/lists/column-list";
 
   @customElement('logout-section')
  export class _ extends LitElement {
@@ -30,14 +29,13 @@
     margin-top:7px;
     display:block;
   }
-  .button{
+  ::slotted([slot=button]) {
     right:40px;
     bottom:40px;
      position:absolute;
 
   }
-
-  .textbutton{
+  ::slotted([slot=textbutton]) {
     left:40px;
     bottom:50px;
      position:absolute;
@@ -61,15 +59,13 @@
     `];
   }
   render() {
-    const {} = this;
-
+ 
 
     const STR_TITLE="Logout";
      const STR_IFYOU="If you are using a public computer, remember to";
      const STR_LOG=" log out when you’re done.";
      const STR_DOYOU="Do you want to logout? ";
-    const STR_LOGOUT="Logout";
-    const STR_Cancel="Cancel";
+
 
     return html`
     <main>
@@ -84,9 +80,9 @@
 
         </div>
          <div class="inside-wrapper">
-         <button-rect size="large" color="blue" class="button">${STR_LOGOUT}</button-rect>
-         <button-text  size="large"  color="blue" class="textbutton" >${STR_Cancel}</button-text>
-     
+
+         <slot name="button"></slot>
+         <slot name="textbutton"></slot>
 
          </div>
 

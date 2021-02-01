@@ -1,5 +1,5 @@
  import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/entry/home/TOSORT/column-list";
+import "@elements/core/lists/column-list";
 @customElement('footer-jigs')
 export class _ extends LitElement {
   static get styles() {

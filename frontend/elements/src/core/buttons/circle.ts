@@ -108,21 +108,13 @@ export class CircleButton extends LitElement {
       [color]: true,
     });
 
-    const textClasses = classMap({
-      ["text-white"]: active,
-    });
-
-    const labelClasses = classMap({
-      ["label-active"]: active,
-    });
+ 
 
     return html`
       <main>
         <div class="${circleClasses}">
-          <p class="${textClasses}"><slot></slot></p>
-        </div>
-        <p class="${labelClasses}">${label}</p>
-      </main>
+         </div>
+       </main>
     `;
   }
 }

@@ -28,17 +28,14 @@ export class _ extends LitElement {
   }
   .footer-column{
    margin-left:90px;
-   display:block;
-   margin-top:20px;
+    margin-top:20px;
  }
  .titleAbout{
-  display:block;
-  margin-top:50px;
+   margin-top:50px;
    margin-left:600px;
  }
  .titleJi{
-  display:block;
-  margin-top:50px;
+   margin-top:50px;
    margin-left:80px;
  }
  ::slotted([slot=button]){

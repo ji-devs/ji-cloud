@@ -17,8 +17,7 @@ export class _ extends LitElement {
     background-color:#fd6b71    ; 
     width: 1920px;
     height: 783px;
-    display:block;
-    position: relative;
+     position: relative;
 
    }
    
@@ -83,7 +82,7 @@ export class _ extends LitElement {
     height: 401.9px;
     position: absolute;
     z-index:0;
-    left:1030px;
+      right:80px;
     top:200px;
 
    }
@@ -94,8 +93,7 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
-
+ 
    
     const STR_STARTTITLE = "What they say ";
     const STR_ENDTTITLE = "about us ";

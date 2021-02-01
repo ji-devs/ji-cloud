@@ -12,8 +12,7 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
-
+ 
     return html`
     <main>
         <slot></slot>

@@ -63,8 +63,7 @@ div{
   img-ui{
     top:20px;
      right:25px;
-      display:block;
-      position: absolute;
+       position: absolute;
 
   }
     `]

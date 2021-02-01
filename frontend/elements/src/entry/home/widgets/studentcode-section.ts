@@ -1,4 +1,7 @@
   import { LitElement, html, css, customElement, property } from 'lit-element';
+  import "@elements/core/titles/variants/title-section";
+  import "@elements/core/dividers/square-divider";
+
 import { nothing } from 'lit-html';
  
  export type Image =  "play"| "askforhelp" |"tryagain" ;
@@ -20,7 +23,7 @@ import { nothing } from 'lit-html';
   }
     
   
-  ::slotted([slot=title]){
+  .title{
     position:relative;
     text-align: center;
     top:86px;
@@ -34,14 +37,8 @@ import { nothing } from 'lit-html';
      position:absolute;
   }
  
-  ::slotted([slot=baloon]){
-    width: 216.6px;
-    height: 143.1px;
-     bottom:40px;
-     left:120px;
-      position:absolute;
-  }
-  ::slotted([slot=square]){
+ 
+  .square{
      margin-left:32px;
      display:block;
   }
@@ -54,6 +51,7 @@ import { nothing } from 'lit-html';
 
   render() {
     const {kindimage } = this;
+    const STR_TITLE="Enter your student code";
 
     const path = kindimage === "play" ? "Image_JIG_StudentCode%402x.png"
         : kindimage === "askforhelp" ? "Image_Jig_Studentcode_error2@2x.png"
@@ -62,10 +60,13 @@ import { nothing } from 'lit-html';
 
      return html`
     <main>
-        <slot  name="title"></slot>
+         <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" class="title"></title-section>
 
           <div class="inside-wrapper"> 
-          <slot name="square"></slot>
+           <square-divider colorborder="small" size="blue" class="square"></square-divider>
+          <square-divider colorborder="small" size="blue" class="square"></square-divider>
+          <square-divider colorborder="small" size="blue" class="square"></square-divider>
+          <square-divider colorborder="small" size="blue" class="square"></square-divider>
           </div>
          <img-ui class="img" path="${path}"></img-ui>
        

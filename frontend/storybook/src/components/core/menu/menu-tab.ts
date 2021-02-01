@@ -7,12 +7,12 @@ export default {
 
 interface Args {
     contents: string,
-    path:string
+    uiIconPath :string
 }
 
 const DEFAULT_ARGS:Args = {
     contents: "hello",
-    path:"Icn_Menu_About.png"
+    uiIconPath :"Icn_Menu_About.png"
  
  }
 

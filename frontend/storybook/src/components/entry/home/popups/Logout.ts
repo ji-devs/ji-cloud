@@ -3,8 +3,9 @@ import "@elements/core/titles/variants/title-section";
   import "@elements/core/popups/popup-container";
   import {Color,Size} from "@elements/core/popups/popup-container";
 import { argsToAttrs, deleteNone } from "@utils/attributes";
+import "@elements/core/buttons/rectangle" ;
+import "@elements/core/buttons/text";
 
-  
 export default {
   title: 'Entry /Home/Widgets/Popups',
 }
@@ -20,7 +21,8 @@ const DEFAULT_ARGS:Args = {
 }
 
  
-
+const STR_LOGOUT="Logout";
+const STR_Cancel="Cancel";
 
 
 export const Logout = (props?:Partial<Args>) => {
@@ -31,7 +33,8 @@ props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 <logout-section >
      
-
+<button-rect size="large" color="blue" slot="button">${STR_LOGOUT}</button-rect>
+<button-text  size="large"  color="blue" slot="textbutton" >${STR_Cancel}</button-text>
 </logout-section>
 
 </popup-container>

@@ -4,7 +4,7 @@ import {Color, FontSize} from "@elements/core/titles/title-sub-paragraph";
 import {MovingCard} from "~/components/core/cards/card";
  
 export default {
-  title: 'Homepage',
+  title: 'Entry/ Home / Section',
 }
 
 interface Args{
@@ -52,7 +52,7 @@ const STR_BODYTEACHER="I want to tell you, because of JI, my children are learni
 
 
 
-   export const AboutUsParagraph = (props?:Partial<Args>) => {
+   export const AboutUsSection = (props?:Partial<Args>) => {
   const {...titleProps} = props;
   props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
@@ -63,8 +63,8 @@ const STR_BODYTEACHER="I want to tell you, because of JI, my children are learni
     </aboutus-section>
     `
 }
-AboutUsParagraph.args = DEFAULT_ARGS;
-AboutUsParagraph.argTypes = {
+AboutUsSection.args = DEFAULT_ARGS;
+AboutUsSection.argTypes = {
   color: {
       control: {
           type: 'inline-radio',

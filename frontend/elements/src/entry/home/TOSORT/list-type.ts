@@ -43,8 +43,7 @@ color:orange;
 
   render() {
 
-    const {} = this;
-const line1="eeeeeeeeeeeeee";
+ const line1="eeeeeeeeeeeeee";
 const line2="eeeeeeeeeeeeee"
 const line3="eeeeeeeeeeeeee"
 const line4="eeeeeeeeeeeeee"

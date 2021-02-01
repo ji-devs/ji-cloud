@@ -17,7 +17,7 @@ export class _ extends LitElement {
     display:flex;
   }
 .feet{
-    margin-left:48%;
+    margin-left:100px;
     margin-top:-78px;
 
     display:block;

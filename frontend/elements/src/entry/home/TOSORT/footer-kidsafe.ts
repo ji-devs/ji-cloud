@@ -1,5 +1,5 @@
 import { MEDIA_UI } from '@utils/path';
-import "@elements/entry/home/TOSORT/column-list";
+import "@elements/core/lists/column-list";
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('footer-kidsafe')
 
@@ -44,14 +44,13 @@ column-list{
 
 
   render() {
-    const {} = this;
-    
+     
     const STR_TERMS ="Terms & Conditions";
     const STR_PRIVACY = "Privacy Policy";
 
     return html`
      <div class="wrapper">
-        <img-ui class="img" path="logo-kid-safe.png"></img-ui>
+        <img-ui   path="logo-kid-safe.png"></img-ui>
         <div class="line">
         <column-list text_line="${STR_TERMS}" color="white" ></column-list>
         <div class="stripe"></div>

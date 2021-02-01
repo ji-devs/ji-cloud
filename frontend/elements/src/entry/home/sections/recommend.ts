@@ -40,8 +40,7 @@ margin-right:48px;
 
   render() {
 
-    const {} = this;
-    const PATH_ARROW="icn-arrow.svg"
+     const PATH_ARROW="icn-arrow.svg"
 
 
 

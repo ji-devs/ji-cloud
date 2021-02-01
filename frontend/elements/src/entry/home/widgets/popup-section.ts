@@ -1,5 +1,6 @@
 import { MEDIA_UI } from '@utils/path';
  import { LitElement, html, css, customElement, property } from 'lit-element';
+import { nothing } from 'lit-html';
  
  export type Image = "" | "play"| "askforhelp" |"tryagain" ;
 
@@ -49,7 +50,7 @@ import { MEDIA_UI } from '@utils/path';
     `];
   }
   @property()
-  kindimage:Image = ""; 
+  kindimage:Image = ''; 
 
 
   render() {
@@ -58,7 +59,7 @@ import { MEDIA_UI } from '@utils/path';
     const path = kindimage === "play" ? " Illustration_JIG_Sad_1.png"
         : kindimage === "askforhelp" ? "Image_Jig_Studentcode_error2@2x.png"
         : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png"
-        : "";
+        : nothing;
 
     return html`
     <main>

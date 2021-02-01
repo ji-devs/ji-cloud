@@ -41,20 +41,20 @@ export class _ extends LitElement {
   }
 
   @property()
-  path:string = ""; 
+  uiIconPath :string = ""; 
  
 
 
   render() {
 
 
-const {path}=this;
+const {uiIconPath }=this;
 
     return html`
     <main class="">
         <div class="tab-content-wrapper">
         <div class="tab-content">
-         <img-ui class="menu-icon" path="${path}"></img-ui>
+         <img-ui class="menu-icon" path="${uiIconPath }"></img-ui>
         <p><slot></slot></p>
         </div>
         </div>
