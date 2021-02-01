@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-
+export type Color = "black" | "blue" ;
 @customElement("horizontal-full")
 export class _ extends LitElement {
   static get styles() {
@@ -13,13 +12,23 @@ export class _ extends LitElement {
           margin-left: 14px;
           margin-right: 14px;
         }
+        .black{
+          background-color: #e5e7ef;
+        }
+        .blue{
+          background-color: #5590fc
+        }
       `,
     ];
   }
 
-  render() {
-    const {} = this;
 
-    return html` <div></div> `;
+  @property()
+  color: Color = "black";
+
+  render() {
+    const {color} = this;
+
+    return html` <div class="${color}"></div> `;
   }
 }
