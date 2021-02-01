@@ -58,13 +58,8 @@ export class _ extends LitElement {
     ::slotted([slot="dropdown"]){
         position:absolute;
         z-index:10;
-<<<<<<< HEAD
-       top:-50px;
-        left: 150px;
-=======
         top: -150px;
         left: 185px;
->>>>>>> naomi/master
     }
     ::slotted([slot="button-collection"]:last-child){
        margin-right:0;
@@ -85,17 +80,9 @@ export class _ extends LitElement {
   @property({type:Boolean})
   closed: boolean = false;
   
-<<<<<<< HEAD
-
-
-  render() {
-
-    const {title, subtitle, closed} = this;
-=======
   render() {
 
     const {closed} = this;
->>>>>>> naomi/master
     
     const STR_TITLE = "Your JIG is on air now";
     const STR_SUBTITLE ="What would you like to do next?"

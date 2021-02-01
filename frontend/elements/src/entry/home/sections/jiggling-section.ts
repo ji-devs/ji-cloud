@@ -73,8 +73,9 @@ export class _ extends LitElement {
 
 
     return html`
-    <main>
-    <title-section titlecolor="purple" title="${STR_TITLE}" class="title"></title-section>
+    <main  style="background-image: url('Strip_Background_Jigglings%402x.jpg')">
+
+      <title-section titlecolor="purple" title="${STR_TITLE}" class="title"></title-section>
     <div class="inside-wrapper">
     <icon-wtitle-wparagraph class="icon-wtitle-wparagraph" path="Jiggling_Content@2x.png" title="${STR_TITLE_PinkSmiley}" paragraph="${STR_PARAGRAPH_PinkSmiley}" color="pink" >
     <button-text color="blue" size="small" weight="normal" italic=false >${STR_BUTTONLABEL_PinkSmiley}</button-text>

@@ -1,5 +1,4 @@
-import { MEDIA_UI } from '@utils/path';
- import { LitElement, html, css, customElement, property } from 'lit-element';
+  import { LitElement, html, css, customElement, property } from 'lit-element';
  import "@elements/core/titles/variants/title-section";
  import "@elements/core/buttons/rectangle" ;
  import "@elements/entry/home/TOSORT/column-list";
@@ -34,8 +33,7 @@ import { MEDIA_UI } from '@utils/path';
   .button{
     right:40px;
     bottom:40px;
-    // display:block;
-    position:absolute;
+     position:absolute;
 
   }
 
@@ -67,10 +65,10 @@ import { MEDIA_UI } from '@utils/path';
 
 
     const STR_TITLE="Logout";
-     const STR_LINE1="If you are using a public computer, remember to";
-     const STR_LINE2=" log out when you’re done.";
-     const STR_LINE3="Do you want to logout? ";
-    const STR_LABEL="Logout";
+     const STR_IFYOU="If you are using a public computer, remember to";
+     const STR_LOG=" log out when you’re done.";
+     const STR_DOYOU="Do you want to logout? ";
+    const STR_LOGOUT="Logout";
     const STR_Cancel="Cancel";
 
     return html`
@@ -80,13 +78,13 @@ import { MEDIA_UI } from '@utils/path';
 
          <div class="lines">
 
-        <column-list class="line" text_line="${STR_LINE1}" size="medium"></column-list>
-     <column-list class="line" text_line="${STR_LINE2}" size="medium"></column-list>
-     <column-list class="line" text_line="${STR_LINE3}" size="medium"></column-list>
+        <column-list class="line" text_line="${STR_IFYOU}" size="medium"></column-list>
+     <column-list class="line" text_line="${STR_LOG}" size="medium"></column-list>
+     <column-list class="line" text_line="${STR_DOYOU}" size="medium"></column-list>
 
         </div>
          <div class="inside-wrapper">
-         <button-rect size="large" color="blue" class="button">${STR_LABEL}</button-rect>
+         <button-rect size="large" color="blue" class="button">${STR_LOGOUT}</button-rect>
          <button-text  size="large"  color="blue" class="textbutton" >${STR_Cancel}</button-text>
      
 

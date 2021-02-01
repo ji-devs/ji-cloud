@@ -1,7 +1,7 @@
-import { MEDIA_UI } from '@utils/path';
- import { LitElement, html, css, customElement, property } from 'lit-element';
+  import { LitElement, html, css, customElement, property } from 'lit-element';
+import { nothing } from 'lit-html';
  
- export type Image = "" | "play"| "askforhelp" |"tryagain" ;
+ export type Image =  "play"| "askforhelp" |"tryagain" ;
 
 
   @customElement('studentcode-section')
@@ -49,25 +49,25 @@ import { MEDIA_UI } from '@utils/path';
     `];
   }
   @property()
-  kindimage:Image = ""; 
+  kindimage:Image = "play"; 
 
 
   render() {
     const {kindimage } = this;
 
-    const path = kindimage === "play" ? " Illustration_JIG_Sad_1.png"
+    const path = kindimage === "play" ? "Image_JIG_StudentCode%402x.png"
         : kindimage === "askforhelp" ? "Image_Jig_Studentcode_error2@2x.png"
         : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png"
-        : "";
+        :nothing;
 
-    return html`
+     return html`
     <main>
         <slot  name="title"></slot>
 
           <div class="inside-wrapper"> 
           <slot name="square"></slot>
           </div>
-     <img-ui class="img" path="${path}"></img-ui>
+         <img-ui class="img" path="${path}"></img-ui>
        
 
     </main>

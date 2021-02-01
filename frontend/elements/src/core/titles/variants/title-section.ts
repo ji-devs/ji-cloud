@@ -40,7 +40,7 @@ color:#5662a3;
   
 .small{
   font-size: 32px;
-  font-weight: 900;
+  font-weight:900;
 
 }
 

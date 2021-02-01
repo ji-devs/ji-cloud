@@ -1,4 +1,3 @@
-import { MEDIA_UI } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/titles/variants/subtitle";
 import "@elements/core/titles/variants/title-section";
@@ -88,12 +87,7 @@ export class _ extends LitElement {
 
     `];
   }
-  @property()
-  STR_PATHGEARS: string = "";
-
-
-
-
+ 
   render() {
 
     const STR_TITLE = "Create";

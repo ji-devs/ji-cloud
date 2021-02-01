@@ -1,9 +1,6 @@
-import { MEDIA_UI } from '@utils/path';
-import "@elements/entry/home/TOSORT/column-list";
-import "@elements/entry/home/social-networks";
-import "@elements/core/buttons/rectangle";
-import "@elements/entry/home/TOSORT/column-list";
-
+ import "@elements/entry/home/TOSORT/column-list";
+ import "@elements/core/buttons/rectangle";
+ 
 
 import { LitElement, html, css, customElement, property } from 'lit-element';
 @customElement('header-section')
@@ -76,7 +73,7 @@ export class _ extends LitElement {
     const STR_DONATE="Donate"; 
 
     const STR_NAMEUSER="Shalom Corinne";
-    const STR_PATHIMGUSER="Image_User.png";
+    const PATHIMGUSER="Image_User.png";
    
     return html`
     <main>
@@ -86,7 +83,7 @@ export class _ extends LitElement {
    <slot name="icon"></slot>
 
 <div class="userdetails">
-<img-ui class="imguser" path="${STR_PATHIMGUSER}"></img-ui>
+<img-ui class="imguser" path="${PATHIMGUSER}"></img-ui>
 <column-list class="username" text_line="${STR_NAMEUSER}" ></column-list>
 <img-ui class="arrow" path="Icn_Chevron_Hover.svg"></img-ui>
 </div>
