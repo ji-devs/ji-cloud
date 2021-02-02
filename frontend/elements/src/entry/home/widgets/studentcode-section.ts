@@ -4,7 +4,7 @@
 
 import { nothing } from 'lit-html';
  
- export type Image =  "none"|"play"| "askforhelp" |"tryagain" ;
+ export type Image =  "hidden"| "play"| "askforhelp" |"tryagain" ;
 
 
   @customElement('studentcode-section')
@@ -46,24 +46,20 @@ import { nothing } from 'lit-html';
     `];
   }
   @property()
-  kindimage:Image = "play"; 
+  kindimage:Image = "hidden"; 
   
-  @property({type:Boolean})
-  imgVisible :boolean = false; 
-
-
+ 
+ 
   render() {
-    const {kindimage,imgVisible } = this;
+    const {kindimage } = this;
     const STR_TITLE="Enter your student code";
 
     const path = kindimage === "play" ? "Image_JIG_StudentCode%402x.png"
         : kindimage === "askforhelp" ? "Image_Jig_Studentcode_error2@2x.png"
-        : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png"
-        :"none";
-
-        // const imgVisible = path === "none"? true
-        // :false;
-
+        : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png";
+ 
+         const  imgVisible = kindimage === "hidden"? true:false;
+        
      return html`
     <main>
          <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" class="title"></title-section>
@@ -81,3 +77,5 @@ import { nothing } from 'lit-html';
   `;
   }
  }
+
+   
