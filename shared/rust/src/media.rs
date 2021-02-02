@@ -46,15 +46,18 @@ pub enum PngImageFile {
 
 /// Media Libraries
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+#[repr(i16)]
 pub enum MediaLibrary {
     /// The default / global library
-    Global,
+    Global = 0,
 
     /// The user library
-    User,
+    User = 1,
 
     /// The web library
-    Web,
+    Web = 2,
 }
 
 impl MediaLibrary {

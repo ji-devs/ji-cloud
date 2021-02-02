@@ -183,6 +183,8 @@ for update
             s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
                 .await?;
         }
+
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
     }
 
     sqlx::query!(
@@ -237,6 +239,8 @@ async fn delete_media(
         MediaKind::GifAnimation => {
             delete(FileKind::AnimationGif).await;
         }
+
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
     }
 
     Ok(NoContent)
