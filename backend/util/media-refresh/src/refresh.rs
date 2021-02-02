@@ -3,7 +3,10 @@ use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
 use flume::Sender;
 use futures::{stream::FuturesUnordered, StreamExt};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
-use reqwest::{header, StatusCode, Url};
+use reqwest::{
+    header::{self, HeaderMap, HeaderValue},
+    StatusCode, Url,
+};
 use shared::media::MediaLibrary;
 use tokio::task;
 use uuid::Uuid;
@@ -115,6 +118,7 @@ pub async fn run(
         ProgressStyle::default_bar().template("[{elapsed}] {wide_bar} {pos}/{len} {msg}"),
     );
 
+    let client = create_client(&token, &csrf)?;
     let mut tasks = FuturesUnordered::new();
 
     while let Some(item) = data.pop() {
@@ -125,16 +129,16 @@ pub async fn run(
         let pb = main_pb.clone();
         let mp = Arc::clone(&mp);
 
-        // todo: don't clone all this stuff, just use 1 client + base urls
+        // todo: don't clone all this stuff, ~~just use 1 client~~ + base urls
         let endpoint = endpoint.clone();
-        let token = token.clone();
-        let csrf = csrf.clone();
         let tx = tx.clone();
+        let client = client.clone();
+
         tasks.push(tokio::spawn(async move {
             {
                 let pb = mp.add(ProgressBar::new_spinner());
                 pb.set_message(&format!("handling item: {}", item.id));
-                refresh_item(pb.clone(), item, &endpoint, &token, &csrf, tx).await;
+                refresh_item(pb.clone(), item, client, &endpoint, tx).await;
                 pb.finish_and_clear();
             }
             pb.inc(1);
@@ -154,37 +158,49 @@ pub async fn run(
 async fn refresh_item(
     pb: ProgressBar,
     item: MediaItem,
+    client: reqwest::Client,
     endpoint: &str,
-    token: &str,
-    csrf: &str,
     tx: Sender<MediaRecord>,
 ) {
     let id = item.id;
-    if let Err(e) = refresh_item_inner(item, endpoint, token, csrf, tx).await {
+    if let Err(e) = refresh_item_inner(item, client, endpoint, tx).await {
         log::error!("Failed to refresh item `{}`: {}", id, e);
         pb.println(format!("Failed to refresh item: {}", id));
     }
 }
 
+fn create_client(token: &str, csrf: &str) -> anyhow::Result<reqwest::Client> {
+    let mut default_headers = HeaderMap::new();
+    let mut csrf = HeaderValue::from_str(csrf)?;
+    csrf.set_sensitive(true);
+
+    default_headers.append("X-CSRF", csrf);
+
+    let mut cookie = HeaderValue::from_str(&format!("X-JWT={}", token))?;
+    cookie.set_sensitive(true);
+
+    default_headers.append(header::COOKIE, cookie);
+
+    let client = reqwest::Client::builder()
+        .default_headers(default_headers)
+        .build()?;
+
+    Ok(client)
+}
+
 async fn refresh_item_inner(
     item: MediaItem,
+    client: reqwest::Client,
     endpoint: &str,
-    token: &str,
-    csrf: &str,
     tx: Sender<MediaRecord>,
 ) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
-
     let endpoint = Url::parse(endpoint)?;
 
     let path = media_refresh_path(item.library, item.id);
 
     let url = endpoint.join(&path)?;
 
-    let request = client
-        .post(url)
-        .header("Cookie", &format!("X-JWT={}", token))
-        .header("X-CSRF", csrf);
+    let request = client.post(url);
 
     let request = match item.etag {
         None => request.header(header::IF_NONE_MATCH, "*"),
