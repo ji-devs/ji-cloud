@@ -4,14 +4,15 @@
 
 # Frontend 
   - [Pipeline](./frontend/pipeline.md)
-  - [Elements and Components](./frontend/elements-and-components.md)
-    - [Overview](./frontend/elements-and-components/overview.md)
-    - [Implementation](./frontend/elements-and-components/implementation.md)
-    - [Guideline - Elements](./frontend/elements-and-components/guideline-elements.md)
-    - [Guideline - Components](./frontend/elements-and-components/guideline-components.md)
-    - [Images](./frontend/elements-and-components/images.md)
-    - [Directory Structure](./frontend/elements-and-components/directory-structure.md)
-    - [Checklist](./frontend/elements-and-components/checklist.md)
+  - [Elements and Stories](./frontend/elements-and-stories.md)
+    - [Overview](./frontend/elements-and-stories/overview.md)
+    - [How to Compose Elements](./frontend/elements-and-stories/element-composition.md)
+    - [How to Write Stories](./frontend/elements-and-stories/writing-stories.md)
+    - [Code style - Elements](./frontend/elements-and-stories/code-style-elements.md)
+    - [Code style - Stories](./frontend/elements-and-stories/code-style-stories.md)
+    - [Images](./frontend/elements-and-stories/images.md)
+    - [Directory Structure](./frontend/elements-and-stories/directory-structure.md)
+    - [Checklist](./frontend/elements-and-stories/checklist.md)
 
 # Infrastructure
   - [Project Management](./infrastructure/project-management/project-management.md)

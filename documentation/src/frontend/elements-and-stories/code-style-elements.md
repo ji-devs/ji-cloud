@@ -1,4 +1,4 @@
-# Elements
+# Code Style - Elements
 
 ### Consult the library guides for general rules
 
@@ -27,8 +27,10 @@ The exception to this is when defining a base class for the sake of inheritance 
 Example - a property "color" should not be defined as a string, rather it should be defined as an enum or string variants:
 
 ```typescript
+export type Color = "red" | "blue" | "green";
+
 @property()
-color: "red" | "blue" | "green" = "red"; 
+color: Color = "red"; 
 ```
 
 ### No null values 
@@ -40,7 +42,7 @@ In the example above, it could have instead be written as:
 color: "red" | "blue" | "green" | null = null; 
 ```
 
-This is bad. There should _always_ be a sane non-null value (for example, an empty string might be okay if that's a valid thing to render)
+This is bad. There should _always_ be a sane non-null value.
 
 
 ### Favor a declarative code style
@@ -50,6 +52,7 @@ Some tips:
 * There is almost never a need for a `var` or `let`, everything should be `const`.
 * Instead of switch+return, use conditionals (a.k.a. ternaries) or a predefined lookup
 * Create pure functions instead of class methods (i.e. in `render()`, call `renderFooter(args)` instead of `this.renderFooter()`)
+* Split things out into small functions as needed
 
 When conditionals get long, use the following style:
 
@@ -68,7 +71,9 @@ See [lit-html docs](https://lit-html.polymer-project.org/guide/writing-templates
 
 ### Don't hardcode data in the render function
 
-Static data should be moved out of the render function and defined as a `const`. For strings, use the `STR_` prefix in order to facilitate string replacement / localization later (a similar technique is used in Components).
+Static data should be moved out of the render function and defined as a `const` with an all-caps variable name. 
+
+For displayable strings, we will eventually have a more complex localization solution, but for now - use the `STR_` prefix in order to facilitate string replacement / localization later
 
 Example:
 
@@ -84,25 +89,25 @@ export class _ extends LitElement {
 }
 ```
 
-Note that the next step which is currently unimplemented will be moving those strings into the config folder.
-That will be an easy transition from the above, since it will _not_ require any change in the html,
-and it should be easy to step through all the elements (and components) with the `STR_` prefix to switch over.
+## Dynamic styles
 
-Future example:
+lit-element and lit-html provide some helpers like `classMap` and `styleMap` to make some of the code around dynamic styling cleaner.
 
-```typescript
-import {English} from "~/config/strings";
+At the end of the day, you're just returning html. Both classes and inline styles can be changed at runtime based on properties.
 
-const STR_HOWDY = English.button.howdy;
-```
+## Reusable styles 
 
-### Global styles - inheritance
+There are a few approaches to reusable static styles: css vars, inheritance, interpolation, and mixins.
 
-Some things are global and used very often, like text weight options.
+### Reusable styles - CSS Vars
 
-These should be created as base classes in `_styles` and then imported and extended as needed.
+CSS Vars pierce down through the shadow dom, and can be used by any nested child anywhere.
 
-In fact it's probably a good idea to have a handful of base classes from which _all_ elements extend.
+It's a great way to define global themes, or, more generally, for a child element to declare which of its styles can be overridden by an ancestor
+
+### Reusable styles - Inheritance
+
+This approach is handy when there's a clear hierarchy of global styles for particular kinds of elements, but not others.
 
 Example:
 
@@ -143,11 +148,68 @@ export class _ extends BaseText {
 }
 ```
 
-### Global styles - interpolation
+### Reusable styles - Mixins
 
-Some styles are global in terms of their _value_ but not their _usage_. For example, we may have a particular shade of blue - but that blue is used in many contexts such as background, border, font, etc.
+Mixins are more flexible than inheritance, but can also be harder to reason about and decide what should/should not be included.
 
-These should also exist in `_styles` but be defined as plain objects, where each value has the `css` tag on the literal, and then imported / used as-needed.
+Example:
+
+_in _styles/colors.ts_
+
+```typescript
+
+import { css} from 'lit-element';
+
+export const colorTheme = css`
+    .red { rgba(161,168,173,255) }
+    .blue { rgba(85,144,252,255) }
+`;
+  
+```
+
+_anywhere_
+
+```typescript
+
+import {colorTheme} from "@elements/_styles/colors";
+
+@customElement('circle-button')
+export class _ extends LitElement {
+
+  static get styles() {
+    return [colorTheme, css`
+      .foo {
+        border-style: solid;
+        border-width: 1px;
+        border-color: ${colorValues.grey}; 
+      }
+    `]
+  }
+
+  render() { 
+      //... 
+  }
+}
+```
+
+Of course, they are just JS objects, so they can be grouped into their own arrays and mixed in like:
+
+```
+//cssThemes is an array of css objects
+static get styles() {
+    return [...cssThemes, css`
+      .foo {
+        border-style: solid;
+        border-width: 1px;
+        border-color: ${colorValues.grey}; 
+      }
+    `]
+}
+```
+
+### Reusable styles - Interpolation 
+
+The static CSS getter cannot be interpolated at runtime with dynamic values, but it can be interpolated with static `css` literals 
 
 Example:
 
@@ -187,9 +249,3 @@ export class _ extends LitElement {
   }
 }
 ```
-
-### Compose elements together
-
-It's absolutely fine to import other elements and compose them together in elements, not just components.
-
-That said, if it leads to excessive "prop drilling" or "event retargeting", it's probably better to do that composition on the component level.
