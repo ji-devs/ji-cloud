@@ -4,11 +4,11 @@ select id as "id!",
         when 0 then 3
         -- PngStickerImage
         when 1 then 0
-    end "kind!: MediaKind", 
+    end::int2 "kind!: MediaKind", 
     created_at as "created_at!",
     updated_at,
     uploaded_at,
-    0 as "library!: MediaLibrary" -- global
+    0::int2 as "library!: MediaLibrary" -- global
 from image_metadata
 union all
 select id as "id!",
@@ -17,29 +17,29 @@ select id as "id!",
         when 0 then 1
         -- SpritesheetAnimation
         when 1 then 2
-    end "kind!: MediaKind", 
+    end::int2 "kind!: MediaKind", 
     created_at as "created_at!",
     updated_at,
     uploaded_at,
-    0 as "library!: MediaLibrary" -- global
+    0::int2 as "library!: MediaLibrary" -- global
 from animation
 union all
 select id as "id!",
     -- PngStickerImage
-    0 as "kind!: MediaKind",
+    0::int2 as "kind!: MediaKind",
     created_at as "created_at!",
     updated_at,
     uploaded_at,
-    1 as "library!: MediaLibrary" -- user
+    1::int2 as "library!: MediaLibrary" -- user
 from user_image_library
 union all
 select id as "id!",
     -- Mp3Audio
-    4 as "kind!: MediaKind",
+    4::int2 as "kind!: MediaKind",
     created_at as "created_at!",
     updated_at,
     uploaded_at,
-    1 as "library!: MediaLibrary" -- user
+    1::int2 as "library!: MediaLibrary" -- user
 from user_audio_library
 union all
 select id as "id!",
@@ -47,5 +47,5 @@ select id as "id!",
     created_at as "created_at!",
     updated_at,
     uploaded_at,
-    2 as "library!: MediaLibrary" -- web
+    2::int2 as "library!: MediaLibrary" -- web
 from web_media_library

@@ -113,10 +113,14 @@ async fn refresh_image_files(
         Some(IfMatch::Items(items)) => {
             let uploaded_at = match uploaded_at {
                 Some(uploaded_at) => EntityTag::strong(uploaded_at.timestamp_nanos().to_string()),
-                None => return Err(error::Refresh::PreconditionFailed),
+                None => {
+                    eprintln!("missing uploaded at");
+                    return Err(error::Refresh::PreconditionFailed);
+                }
             };
 
             if !items.iter().any(|item| item.strong_eq(&uploaded_at)) {
+                eprintln!("mismatch {:?}", items);
                 return Err(error::Refresh::PreconditionFailed);
             }
 
@@ -124,7 +128,8 @@ async fn refresh_image_files(
         }
 
         Some(IfMatch::Any) if !uploaded_at.is_some() => {
-            return Err(error::Refresh::PreconditionFailed)
+            eprintln!("missing uploaded at");
+            return Err(error::Refresh::PreconditionFailed);
         }
 
         _ => {}
@@ -133,8 +138,9 @@ async fn refresh_image_files(
     match if_none_match {
         Some(IfNoneMatch::Items(items)) => {
             if let Some(uploaded_at) = uploaded_at {
-                let uploaded_at = EntityTag::strong(uploaded_at.to_string());
+                let uploaded_at = EntityTag::strong(uploaded_at.timestamp_nanos().to_string());
                 if items.iter().any(|item| item.strong_eq(&uploaded_at)) {
+                    eprintln!("match {:?}", items);
                     return Err(error::Refresh::PreconditionFailed);
                 }
             }
@@ -143,7 +149,8 @@ async fn refresh_image_files(
         }
 
         Some(IfNoneMatch::Any) if uploaded_at.is_some() => {
-            return Err(error::Refresh::PreconditionFailed)
+            eprintln!("uploaded at");
+            return Err(error::Refresh::PreconditionFailed);
         }
 
         _ => {}
@@ -208,7 +215,7 @@ async fn list_media(
         .fetch(db.as_ref())
         .map_ok(|row| AdminMediaItem {
             id: row.id,
-            kind: row.kind.to_shared(),
+            kind: dbg!(row.kind).to_shared(),
             created_at: row.created_at,
             updated_at: row.updated_at,
             uploaded_at: row.uploaded_at.clone(),
@@ -219,6 +226,13 @@ async fn list_media(
         })
         .try_collect()
         .await?;
+
+    dbg!(items.len());
+
+    dbg!(items
+        .iter()
+        .filter(|it| matches!(it.kind, shared::media::MediaKind::Image(ImageKind::Canvas)))
+        .count());
 
     Ok(Json(AdminListMediaResponse { media: items }))
 }

@@ -1,7 +1,10 @@
 use std::{fs::File, io::BufWriter, path::PathBuf};
 
 use indicatif::ProgressBar;
-use shared::error::{ApiError, EmptyError};
+use shared::{
+    error::{ApiError, EmptyError},
+    media::MediaKind,
+};
 
 pub async fn run(
     output_file: PathBuf,
@@ -10,12 +13,10 @@ pub async fn run(
     csrf: String,
     show_progress: bool,
 ) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
+    let client = crate::create_http_client(&token, &csrf)?;
 
     let response = client
         .get(&format!("{}/v0/admin/media", endpoint))
-        .header("Cookie", &format!("X-JWT={}", token))
-        .header("X-CSRF", csrf)
         .send()
         .await?;
 
@@ -32,9 +33,12 @@ pub async fn run(
         }
     }
 
-    let data = response
+    let mut data = response
         .json::<shared::domain::admin::AdminListMediaResponse>()
         .await?;
+
+    data.media
+        .retain(|it| matches!(it.kind, MediaKind::Image(_)));
 
     tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
         let writer = File::create(&output_file)?;

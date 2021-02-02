@@ -16,6 +16,7 @@
 use std::{fs::File, path::PathBuf};
 
 use clap::Clap;
+use reqwest::header::{self, HeaderMap, HeaderValue};
 use simplelog::Config;
 
 mod download;
@@ -123,4 +124,23 @@ async fn main() -> anyhow::Result<()> {
             .await
         } // Command::RestoreBackup { .. } => todo!("restore backup"),
     }
+}
+
+fn create_http_client(token: &str, csrf: &str) -> anyhow::Result<reqwest::Client> {
+    let mut default_headers = HeaderMap::new();
+    let mut csrf = HeaderValue::from_str(csrf)?;
+    csrf.set_sensitive(true);
+
+    default_headers.append("X-CSRF", csrf);
+
+    let mut cookie = HeaderValue::from_str(&format!("X-JWT={}", token))?;
+    cookie.set_sensitive(true);
+
+    default_headers.append(header::COOKIE, cookie);
+
+    let client = reqwest::Client::builder()
+        .default_headers(default_headers)
+        .build()?;
+
+    Ok(client)
 }

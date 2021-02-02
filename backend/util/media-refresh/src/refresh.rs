@@ -3,10 +3,7 @@ use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
 use flume::Sender;
 use futures::{stream::FuturesUnordered, StreamExt};
 use indicatif::{MultiProgress, ProgressBar, ProgressDrawTarget, ProgressStyle};
-use reqwest::{
-    header::{self, HeaderMap, HeaderValue},
-    StatusCode, Url,
-};
+use reqwest::{header, StatusCode, Url};
 use shared::media::MediaLibrary;
 use tokio::task;
 use uuid::Uuid;
@@ -28,6 +25,7 @@ enum MediaResolution {
 #[derive(serde::Deserialize)]
 struct MediaItem {
     id: Uuid,
+    #[serde(alias = "file_etag")]
     etag: Option<Box<str>>,
     library: MediaLibrary,
 }
@@ -37,15 +35,7 @@ struct MediaItems {
     media: Vec<MediaItem>,
 }
 
-pub async fn run(
-    input_file: PathBuf,
-    record_file: PathBuf,
-    max_tasks: usize,
-    endpoint: String,
-    token: String,
-    csrf: String,
-    show_progress: bool,
-) -> anyhow::Result<()> {
+async fn load(input_file: PathBuf, show_progress: bool) -> anyhow::Result<Vec<MediaItem>> {
     let reader = File::open(input_file)?;
     let len = reader.metadata()?.len();
     let reader = BufReader::new(reader);
@@ -62,6 +52,7 @@ pub async fn run(
         );
 
         pb.set_message("loading input file");
+
         let reader = pb.wrap_read(reader);
 
         let records = serde_json::from_reader(reader)?;
@@ -75,8 +66,21 @@ pub async fn run(
         Err(e) => std::panic::resume_unwind(e.into_panic()),
     };
 
-    let mut data = data.media;
+    Ok(data.media)
+}
 
+pub async fn run(
+    input_file: PathBuf,
+    record_file: PathBuf,
+    max_tasks: usize,
+    endpoint: String,
+    token: String,
+    csrf: String,
+    show_progress: bool,
+) -> anyhow::Result<()> {
+    let endpoint = Arc::new(Url::parse(&endpoint)?);
+
+    let mut data = load(input_file, show_progress).await?;
     let (tx, rx) = flume::bounded(max_tasks);
 
     task::spawn(async move {
@@ -118,7 +122,7 @@ pub async fn run(
         ProgressStyle::default_bar().template("[{elapsed}] {wide_bar} {pos}/{len} {msg}"),
     );
 
-    let client = create_client(&token, &csrf)?;
+    let client = crate::create_http_client(&token, &csrf)?;
     let mut tasks = FuturesUnordered::new();
 
     while let Some(item) = data.pop() {
@@ -129,7 +133,6 @@ pub async fn run(
         let pb = main_pb.clone();
         let mp = Arc::clone(&mp);
 
-        // todo: don't clone all this stuff, ~~just use 1 client~~ + base urls
         let endpoint = endpoint.clone();
         let tx = tx.clone();
         let client = client.clone();
@@ -147,7 +150,10 @@ pub async fn run(
 
     drop(mp);
 
-    tasks.for_each(|_| async {}).await;
+    while let Some(_) = tasks.next().await {
+        // do nothing
+    }
+
     main_pb.finish();
 
     mp_task.await??;
@@ -159,7 +165,7 @@ async fn refresh_item(
     pb: ProgressBar,
     item: MediaItem,
     client: reqwest::Client,
-    endpoint: &str,
+    endpoint: &Url,
     tx: Sender<MediaRecord>,
 ) {
     let id = item.id;
@@ -169,42 +175,19 @@ async fn refresh_item(
     }
 }
 
-fn create_client(token: &str, csrf: &str) -> anyhow::Result<reqwest::Client> {
-    let mut default_headers = HeaderMap::new();
-    let mut csrf = HeaderValue::from_str(csrf)?;
-    csrf.set_sensitive(true);
-
-    default_headers.append("X-CSRF", csrf);
-
-    let mut cookie = HeaderValue::from_str(&format!("X-JWT={}", token))?;
-    cookie.set_sensitive(true);
-
-    default_headers.append(header::COOKIE, cookie);
-
-    let client = reqwest::Client::builder()
-        .default_headers(default_headers)
-        .build()?;
-
-    Ok(client)
-}
-
 async fn refresh_item_inner(
     item: MediaItem,
     client: reqwest::Client,
-    endpoint: &str,
+    endpoint: &Url,
     tx: Sender<MediaRecord>,
 ) -> anyhow::Result<()> {
-    let endpoint = Url::parse(endpoint)?;
-
     let path = media_refresh_path(item.library, item.id);
 
-    let url = endpoint.join(&path)?;
-
-    let request = client.post(url);
+    let request = client.post(endpoint.join(&path)?);
 
     let request = match item.etag {
         None => request.header(header::IF_NONE_MATCH, "*"),
-        Some(etag) => request.header(header::IF_MATCH, format!("\"{}\"", etag)),
+        Some(etag) => request.header(header::IF_MATCH, &*etag),
     };
 
     let response = request.send().await?;

@@ -1,10 +1,7 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::{
-        admin::{AdminListMediaQuery, AdminListMediaResponse},
-        auth::SigninSuccess,
-    },
+    domain::{admin::AdminListMediaResponse, auth::SigninSuccess},
     error::EmptyError,
 };
 
@@ -35,7 +32,7 @@ impl ApiEndpoint for RefreshFiles {
 /// NOTE: This route is super unstable (v0), and may change at any time, for any reason, in any way, including removal.
 pub struct ListMedia;
 impl ApiEndpoint for ListMedia {
-    type Req = AdminListMediaQuery;
+    type Req = ();
     type Res = AdminListMediaResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v0/admin/media";

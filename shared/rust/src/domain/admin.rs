@@ -6,20 +6,6 @@ use uuid::Uuid;
 
 use crate::media::{MediaKind, MediaLibrary};
 
-/// Query for [`ListMedia`](crate::api::endpoints::admin::ListMedia)
-/// Super unstable, may change at any time, for any reason.
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
-pub struct AdminListMediaQuery {
-    /// Filter to *only* using this specific media kind
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub filter_kind: Option<MediaKind>,
-
-    /// Filter out anything that was uploaded after this time
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_uploaded_at: Option<DateTime<Utc>>,
-}
-
 /// Response for [`ListMedia`](crate::api::endpoints::admin::ListMedia)
 /// Super unstable, may change at any time, for any reason.
 #[derive(Serialize, Deserialize, Debug, Clone)]
