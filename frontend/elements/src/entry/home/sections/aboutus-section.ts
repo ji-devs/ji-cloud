@@ -6,9 +6,8 @@ export class _ extends LitElement {
     return [css`
     .inside-wrapper{
        display:flex;
-       margin-left:566px;    
-       margin-left:566px;    
-       margin-top:72px;    
+        margin-left:566px;    
+        margin-top:72px;    
 
     }
 
@@ -68,8 +67,8 @@ export class _ extends LitElement {
    }
 
    .Shape_Teachers{
-    width: 821.3px;
-  height: 401.9px;
+    width: 821px;
+  height: 402px;
    position: absolute;
   z-index:0;
   left:60px;

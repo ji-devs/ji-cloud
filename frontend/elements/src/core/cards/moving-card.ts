@@ -100,7 +100,9 @@ img-ui{
     const { activeIndex, nItems, items } = this;
     const { title, subtitle, body, imgPath } = items[activeIndex];
 
+    const ablerightarrow = activeIndex >= nItems-1 ?"disable":"able";
 
+    const ableleftarrow = activeIndex === 0 ? "disable":"able";
     return html`
     <main>
       <div class="wrapper"> 
@@ -127,8 +129,9 @@ img-ui{
 
 
 const makeCircles = (activeIndex: number, nItems: number) => {
-  return arrayIndex(nItems)
-  .map(() => html`
+   return arrayIndex(nItems)
+  .map((  ) => html`
+  
 <button-circle color="pink" size="small"></button-circle>
  
 `)

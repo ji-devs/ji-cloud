@@ -4,7 +4,7 @@
 
 import { nothing } from 'lit-html';
  
- export type Image =  "hidden"| "play"| "askforhelp" |"tryagain" ;
+ export type Image =  "play"| "askforhelp" |"tryagain" ;
 
 
   @customElement('studentcode-section')
@@ -31,8 +31,8 @@ import { nothing } from 'lit-html';
 
   }
   
-  .img{
-    bottom:-5px;
+  img-ui{
+    bottom:0px;
     left:0px;
      position:absolute;
   }
@@ -43,23 +43,30 @@ import { nothing } from 'lit-html';
      display:block;
   }
 
+  .hidden{
+
+   display:none;
+  }
+
     `];
   }
   @property()
-  kindimage:Image = "hidden"; 
+  kindimage:Image = "play"; 
   
+  @property()
+  imgVisible:string = ""; 
  
  
   render() {
-    const {kindimage } = this;
+    const {kindimage ,imgVisible} = this;
     const STR_TITLE="Enter your student code";
 
     const path = kindimage === "play" ? "Image_JIG_StudentCode%402x.png"
         : kindimage === "askforhelp" ? "Image_Jig_Studentcode_error2@2x.png"
-        : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png";
+        : kindimage ==="tryagain" ? "Image_Jig_Studentcode_error1@2x.png"
+        : "play";
  
-         const  imgVisible = kindimage === "hidden"? true:false;
-        
+           
      return html`
     <main>
          <title-section titlecolor="darkblue" title="${STR_TITLE}" size="small" class="title"></title-section>
@@ -70,7 +77,7 @@ import { nothing } from 'lit-html';
           <square-divider colorborder="small" size="blue" class="square"></square-divider>
           <square-divider colorborder="small" size="blue" class="square"></square-divider>
           </div>
-         <img-ui class="img" path="${path}" hidden="${imgVisible}"> </img-ui>
+         <img-ui   path="${path}" class="${imgVisible }"> </img-ui>
        
 
     </main>

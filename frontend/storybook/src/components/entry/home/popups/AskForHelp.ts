@@ -31,7 +31,7 @@ const {...popupProps} = props;
 props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     return `
  <popup-container  ${argsToAttrs(deleteNone(popupProps))}>
- <studentcode-section kindimage="askforhelp">
+ <studentcode-section kindimage="askforhelp"  >
  
 </popup-container>
  </popup-container>
@@ -58,8 +58,7 @@ AskForHelp.argTypes = {
  
 }
 
-
-
+ 
 
 
 

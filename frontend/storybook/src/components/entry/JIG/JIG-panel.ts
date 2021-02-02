@@ -10,10 +10,18 @@ export default {
 }
 
  const PATHEDIT="Edit - JIG panel.svg";
+ const PATHDONE="Icn_Done.svg";
+
 const STR_01="01";
 const STR_COVER="Cover";
 
 const PATHCOVER="Cover_small.svg";
+const PATHPOSTER="poster_small.svg";
+const PATHMEMORY="Memory Game_small.svg";
+const PATHFLASHCARDS="Flashcards_small.svg";
+const PATHTAPPING="Tapping  board_small.svg";
+const PATHPUBLISH="Publish_small.svg";
+
 
 const STR_02="02";
 const STR_POSTER="Poster";
@@ -32,7 +40,7 @@ const STR_PUBLISH="Publish";
 
 
 const PATHFEET1="Group 13365.svg";
-const PATHFEET2="Group 13414.svg";
+ const PATHFEET2="Group 13414.svg";
 const PATHFEET3="Group 13374.svg";
 const PATHFEET4="Path 148075.svg";
  
@@ -45,6 +53,7 @@ export const JIGpanel = () => {
 <jig-panel>
 
     <jig-squad pathfeet="${PATHFEET1}" slot="jig-squad">   
+    <img-ui slot="leftHand" path="Group 13369.svg"></img-ui>
 
     <div slot="side-bar-number">
     <side-bar-number path="${PATHCOVER}" title="${STR_01}">
@@ -60,7 +69,7 @@ export const JIGpanel = () => {
   <jig-squad pathfeet="${PATHFEET2}"  slot="jig-squad">   
 
   <div slot="side-bar-number">
-  <side-bar-number path="${PATHCOVER}" title="${STR_02}">
+  <side-bar-number path="${PATHPOSTER}" title="${STR_02}">
   <column-list   text_line="${STR_POSTER}"  slot="subtitle"  ></column-list>
 
   </side-bar-number>
@@ -76,13 +85,13 @@ export const JIGpanel = () => {
   <jig-squad pathfeet="${PATHFEET3}"  slot="jig-squad">   
 
   <div slot="side-bar-number">
-  <side-bar-number path="${PATHCOVER}" title="${STR_03}">
+  <side-bar-number path="${PATHMEMORY}" title="${STR_03}">
   <column-list   text_line="${STR_MEMORY}"  slot="subtitle"  ></column-list>
 
   </side-bar-number>
   </div>
   <div slot="jiggling-body">
-  <jiggling-body path="${PATHEDIT}"></jiggling-body>
+  <jiggling-body path="${PATHDONE}"></jiggling-body>
   </div>
 
 </jig-squad>
@@ -92,7 +101,7 @@ export const JIGpanel = () => {
   <jig-squad pathfeet="${PATHFEET1}"  slot="jig-squad">   
 
   <div slot="side-bar-number">
-  <side-bar-number path="${PATHCOVER}" title="${STR_04}">
+  <side-bar-number path="${PATHFLASHCARDS}" title="${STR_04}">
   <column-list   text_line="${STR_FLASHCARDS}"  slot="subtitle"  ></column-list>
 
   </side-bar-number>
@@ -108,7 +117,7 @@ export const JIGpanel = () => {
   <jig-squad pathfeet="${PATHFEET2}"  slot="jig-squad">   
 
   <div slot="side-bar-number">
-  <side-bar-number path="${PATHCOVER}" title="${STR_05}">
+  <side-bar-number path="${PATHTAPPING}" title="${STR_05}">
   <column-list   text_line="${STR_TAPPING}"  slot="subtitle"  ></column-list>
 
   </side-bar-number>
@@ -125,7 +134,7 @@ export const JIGpanel = () => {
   <jig-squad pathfeet="${PATHFEET4}"  slot="jig-squad">   
 
   <div slot="side-bar-number">
-  <side-bar-number path="${PATHCOVER}" title="${STR_ENDING}">
+  <side-bar-number path="${PATHPUBLISH}" title="${STR_ENDING}">
   <column-list   text_line="${STR_PUBLISH}"  slot="subtitle"  ></column-list>
 
   </side-bar-number>

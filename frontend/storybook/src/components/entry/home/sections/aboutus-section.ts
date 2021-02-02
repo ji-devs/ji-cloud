@@ -38,7 +38,15 @@ const STR_BODYTEACHER="I want to tell you, because of JI, my children are learni
     subtitle:STR_SUBTITLETEACHERS,
     body: STR_BODYTEACHER
     
-  }]
+  },
+  {imgPath:PATH_SARAHH,
+    title:STR_TITLETEACHERS,
+    subtitle:STR_SUBTITLETEACHERS,
+    body: STR_BODYTEACHER
+    
+  }
+
+]
   const  activeIndexTeacher=0;
 
 
@@ -47,7 +55,14 @@ const STR_BODYTEACHER="I want to tell you, because of JI, my children are learni
     title:STR_TITLEPARENTS,
     subtitle:STR_SUBTITLEPARENTS,
     body: STR_BODYPARENT
-  }]
+  },
+  {imgPath:PATH_SARAHN,
+    title:STR_TITLEPARENTS,
+    subtitle:STR_SUBTITLEPARENTS,
+    body: STR_BODYPARENT
+  }
+
+]
 
 
 
