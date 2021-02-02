@@ -9,7 +9,7 @@ use shared::media::MediaKind as SharedMediaKind;
 #[repr(i16)]
 #[derive(Copy, Clone, Debug, sqlx::Type)]
 pub enum MediaKind {
-    /// Media is a Png, and an Sticker Image
+    /// Media is a Png, and a Sticker Image
     PngStickerImage = 0,
 
     /// Media is a Gif, and Animated
