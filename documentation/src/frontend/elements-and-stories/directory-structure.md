@@ -1,13 +1,14 @@
 # Directory Structure
 
-There are currently 2 top level directories:
+Top-level directories (both in Storybook and Elements):
 
   - **core**: Used everywhere. Examples are "buttons" and "images"
   - **entry**: Corresponds to the actual app entry point, follows the division of Rust code and backend routes.
+  - **modules**: Corresponds to the various module entry points 
 
-Within `entry`, there are some optional patterns which may appear at any level:
+Additionally, there are some optional patterns which may appear at any level:
 
-  - **_common**: used in multiple places from this directory and deeper (but not parent)
+  - **_common**: used in multiple places from this directory's siblings and deeper (but not parent)
   - **pages**: full pages.
   - **buttons**, **sections**, **widgets**, etc.: exactly as they sound, used in this directory and deeper (but not parent). The names here can also be specific for a unique one-off component/element.
 

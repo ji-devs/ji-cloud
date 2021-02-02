@@ -34,9 +34,9 @@ Tip:
 
   - Plan the architecture carefully and consider how the element is intended to be used, not just as a wrapper for a bunch of HTML/CSS. Container elements with nothing other than slots and styles are absolutely fine, as are static elements that have no properties. Complex large elements that abstract over a ton of functionality are fine too if that's what's needed. For example, when separating this way, you may find that "my-custom-page" gets broken into a generic re-usable container which has nothing to do with that specific page, and only needs to be slotted with the custom content.
 
-### Components / Stories
+### Stories
 
-  - Headspace: "temp mockups/prototypes for Dominator reference" and/or "Element Tests"
+  - Headspace: "temp prototypes for QA, app reference, or Element tests"
 
   - Should mostly be about configuring and composing elements for interactivity. Move static data to the appropriate element.
 
@@ -49,6 +49,8 @@ Tip:
   - Set the appropriate Control type (e.g. radios for unions/enums)
 
   - For now - prefer using HTML directly instead of importing and re-using component functions (makes it easier to copy/paste the HTML for now, due to a bug in the "view source" functionality in Storybook)
+  
+  - Displayable strings should be outside of the render function (or at least outside the return `html`) and prefixed with `STR_`
 
 Tip:
 
@@ -59,6 +61,6 @@ Tip:
 
   - File is in the correct directory structure
 
-  - STR_* is only for displayable strings and will eventually be moved to an external tool for copywriter/translater administration. For other strings like image paths, just use literals (and this should almost always be in the elements, not components)
-
   - Cleanup temp code. It's okay to commit it, but clean it up with another commit before making a PR
+
+  - Rebase before making a PR
