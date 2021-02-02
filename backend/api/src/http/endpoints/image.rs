@@ -5,7 +5,6 @@ use crate::{
     image_ops::generate_images,
     s3,
 };
-use actix_http::error::BlockingError;
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
@@ -17,7 +16,8 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{
-            CreateResponse, Image, ImageId, ImageResponse, ImageSearchResponse, ImageUpdateRequest,
+            CreateResponse, Image, ImageId, ImageKind, ImageResponse, ImageSearchResponse,
+            ImageUpdateRequest,
         },
         meta::MetaKind,
     },
@@ -28,7 +28,6 @@ use uuid::Uuid;
 
 pub mod user {
     use crate::{db, error, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3};
-    use actix_http::error::BlockingError;
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -70,9 +69,15 @@ pub mod user {
         Path(id): Path<ImageId>,
         bytes: Bytes,
     ) -> Result<NoContent, error::Upload> {
-        if !db::image::user::exists(db.as_ref(), id).await? {
-            return Err(error::Upload::ResourceNotFound);
-        }
+        let mut txn = db.begin().await?;
+
+        sqlx::query!(
+            r#"select 1 as discard from user_image_library where id = $1 for update"#,
+            id.0
+        )
+        .fetch_optional(&mut txn)
+        .await?
+        .ok_or(error::Upload::ResourceNotFound)?;
 
         let kind = ImageKind::Sticker;
 
@@ -83,13 +88,19 @@ pub mod user {
                 Ok(generate_images(&original, kind)?)
             })
             .await
-            .map_err(|err| match err {
-                BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
-                BlockingError::Error(e) => e,
-            })?;
+            .map_err(error::Upload::blocking_error)?;
 
         s3.upload_png_images(MediaLibrary::User, id.0, original, resized, thumbnail)
             .await?;
+
+        sqlx::query!(
+            "update user_image_library set uploaded_at = now() where id = $1",
+            id.0
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
 
         Ok(NoContent)
     }
@@ -236,9 +247,16 @@ async fn upload(
     Path(id): Path<ImageId>,
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
-    let kind = db::image::get_image_kind(db.as_ref(), id)
-        .await?
-        .ok_or(error::Upload::ResourceNotFound)?;
+    let mut txn = db.begin().await?;
+
+    let kind = sqlx::query!(
+        r#"select kind as "kind: ImageKind" from image_metadata where id = $1 for update"#,
+        id.0
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .ok_or(error::Upload::ResourceNotFound)?
+    .kind;
 
     let (original, resized, thumbnail) =
         actix_web::web::block(move || -> Result<_, error::Upload> {
@@ -247,13 +265,19 @@ async fn upload(
             Ok(generate_images(&original, kind)?)
         })
         .await
-        .map_err(|err| match err {
-            BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
-            BlockingError::Error(e) => e,
-        })?;
+        .map_err(error::Upload::blocking_error)?;
 
     s3.upload_png_images(MediaLibrary::Global, id.0, original, resized, thumbnail)
         .await?;
+
+    sqlx::query!(
+        "update image_metadata set uploaded_at = now() where id = $1",
+        id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
 
     Ok(NoContent)
 }

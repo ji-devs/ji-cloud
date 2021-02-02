@@ -103,17 +103,24 @@ async fn upload(
     Path(id): Path<AnimationId>,
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
-    let kind = db::animation::get_kind(db.as_ref(), id)
-        .await?
-        .ok_or(error::Upload::ResourceNotFound)?;
+    let mut txn = db.begin().await?;
+
+    let kind = sqlx::query!(
+        r#"select variant as "kind: AnimationKind" from animation where id = $1 for update"#,
+        id.0
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .ok_or(error::Upload::ResourceNotFound)?
+    .kind;
 
     if !matches!(kind, AnimationKind::Gif) {
         return Err(anyhow::anyhow!("Unimplemented Animation Kind: {:?}", kind).into());
     }
 
-    let validated: Bytes = actix_web::web::block(move || -> Result<_, error::Upload> {
+    let validated: Bytes = actix_web::web::block(move || {
         let _original = image::load_from_memory_with_format(&bytes, image::ImageFormat::Gif)
-            .map_err(|_| error::Upload::InvalidMedia)?;
+            .or(Err(error::Upload::InvalidMedia));
         Ok(bytes)
     })
     .await
@@ -126,6 +133,15 @@ async fn upload(
         FileKind::AnimationGif,
     )
     .await?;
+
+    sqlx::query!(
+        "update animation set uploaded_at = now() where id = $1",
+        id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
 
     Ok(NoContent)
 }
