@@ -56,6 +56,7 @@ impl Into<actix_web::Error> for Server {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub enum ServiceKind {
     Algolia,
     S3,
@@ -79,6 +80,7 @@ impl Into<actix_web::Error> for ServiceKind {
 }
 
 #[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+#[derive(Debug)]
 pub enum Service {
     InternalServerError(anyhow::Error),
     DisabledService(ServiceKind),
@@ -95,6 +97,47 @@ impl Into<actix_web::Error> for Service {
         match self {
             Self::InternalServerError(e) => crate::error::ise(e),
             Self::DisabledService(s) => s.into(),
+        }
+    }
+}
+
+#[api_v2_errors(
+    code = 400,
+    code = 401,
+    code = 403,
+    code = 404,
+    description = "Not Found: Resource Not Found",
+    code = 412,
+    code = 500,
+    code = 501
+)]
+#[derive(Debug)]
+pub enum Refresh {
+    InternalServerError(anyhow::Error),
+    DisabledService(ServiceKind),
+    PreconditionFailed,
+    ResourceNotFound,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Refresh {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Refresh {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::DisabledService(s) => s.into(),
+            Self::PreconditionFailed => {
+                BasicError::new(http::StatusCode::PRECONDITION_FAILED).into()
+            }
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
         }
     }
 }
