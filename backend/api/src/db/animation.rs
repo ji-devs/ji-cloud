@@ -66,13 +66,3 @@ where id = $1
     .fetch_optional(db)
     .await
 }
-
-pub async fn get_kind(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<AnimationKind>> {
-    sqlx::query!(
-        r#"select variant as "kind: AnimationKind" from animation where id = $1"#,
-        animation.0
-    )
-    .fetch_optional(db)
-    .await
-    .map(|opt| opt.map(|it| it.kind))
-}

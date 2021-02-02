@@ -67,9 +67,8 @@ impl ImageKind {
     #[must_use]
     pub const fn size(self) -> (u32, u32) {
         match self {
-            // note: these are placeholder values and *not* the actual final values.
-            Self::Canvas => (2560, 1440),
-            Self::Sticker => (2048, 1152),
+            Self::Canvas => (1920, 1080),
+            Self::Sticker => (1440, 810),
         }
     }
 }
