@@ -51,3 +51,6 @@ pub mod admin;
 
 /// Audio endpoints
 pub mod audio;
+
+/// Web Media library endpoints
+pub mod media;

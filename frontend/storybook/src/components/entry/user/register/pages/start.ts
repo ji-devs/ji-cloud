@@ -1,8 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/start";
-import "@elements/entry/user/register/widgets/password-strength";
 import "@elements/entry/user/register/footer/login";
-import "@elements/core/titles/ji";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 import "@elements/entry/user/_common/buttons/google";
@@ -18,6 +16,7 @@ const STR_EMAIL_LABEL = "Email";
 const STR_EMAIL_PLACEHOLDER= "Type or paste your email";
 const STR_PASSWORD_LABEL = "Create Password";
 const STR_PASSWORD_PLACEHOLDER ="********";
+const STR_CONTINUE = "Continue";
 
 interface Args {
   passwordStrength: PasswordStrength,
@@ -35,9 +34,9 @@ export const Start = (props?:Partial<Args>) => {
     return `
         <page-register-start passwordStrength="${passwordStrength}">
             <button-google slot="google"></button-google>
-            <input-text slot="username" label="${STR_EMAIL_LABEL}" mode="text" placeholder=${STR_EMAIL_PLACEHOLDER}></input-text>
+            <input-text slot="email" label="${STR_EMAIL_LABEL}" mode="text" placeholder=${STR_EMAIL_PLACEHOLDER}></input-text>
             <input-text slot="password" label="${STR_PASSWORD_LABEL}" mode="passwordHidden" placeholder="${STR_PASSWORD_PLACEHOLDER}"></input-text>
-            <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
+            <button-rect slot="submit" color="red" size="medium" IconAfter="arrow">${STR_CONTINUE}</button-rect> 
             <footer-register-login slot="footer"></footer-register-login>
         </page-register-start>
     `

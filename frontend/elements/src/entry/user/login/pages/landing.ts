@@ -2,13 +2,7 @@ import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/dividers/or-divider";
 
-const STR_ACCOUNT = "Don't have an account yet?";
-const STR_REGISTER = "Sign Up";
 const STR_TITLE = "Login";
-const STR_PASSWORD = "Password";
-const STR_FORGOTTEN ="Forgot your Password?";
-const STR_USERLABEL = "User Name";
-const STR_SUBMIT = "Submit";
 
 @customElement("page-login-landing")
 export class _ extends LitElement {
@@ -76,6 +70,7 @@ export class _ extends LitElement {
         .account-wrapper {
           display: flex;
           align-items: center;
+          margin-top:16px;
         }
         ::slotted([slot="noaccount"]:last-child) {
           margin-left: 4px;
@@ -83,11 +78,17 @@ export class _ extends LitElement {
         ::slotted([slot="sub"]) {
           white-space: nowrap;
         }
+        ::slotted([slot="password-forgot"]){
+          margin-top:16px;
+          display:block;
+        }
       `,
     ];
   }
-
+ 
   render() {
+
+    
     return html`
       <div class="wrapper">
         <div class="side-image"></div>
@@ -98,16 +99,15 @@ export class _ extends LitElement {
             <slot name="google"></slot>
 
             <or-divider></or-divider>
-            <slot name="username"></slot>
+            <slot name="email"></slot>
             <div class="spacer"></div>
             <slot name="password"> </slot>
             <slot name="password-forgot"></slot>
 
             <slot name="submit"></slot>
           </div>
-          <div class="account-wrapper">
 
-            <title-ji color="black">${STR_ACCOUNT}</title-ji>
+            <title-ji color="blue"></title-ji>
             &nbsp;
             <slot name="register"></slot>
           </div>

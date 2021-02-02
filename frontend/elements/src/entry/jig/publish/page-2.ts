@@ -1,12 +1,12 @@
-import { MEDIA_UI } from '@utils/path';
+import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import "@elements/entry/jig/publish/publish-placeholder-img"; 
+
 @customElement('publish-page-two')
 export class _ extends LitElement {
   static get styles() {
     return [css`
         main{
-           
-            background-image:url("http://localhost:4102/ui/Background@2x.jpg");
             background-repeat: no-repeat;
             background-attachment: inherit;
             background-position: top;
@@ -16,7 +16,7 @@ export class _ extends LitElement {
         }
         .wrapper{
             background-color: #ffffff;
-            width: 1474px;
+            width: 1688px;
             height: 802px;
             border-radius: 32px;
             display:flex;
@@ -24,12 +24,11 @@ export class _ extends LitElement {
             margin-right:auto;
             margin-left: auto;
            
-            
-            
         }
         .inside-wrapper{
-            padding:56px 64px;
-            width:100%;
+            padding-top:56px;
+            margin-left:auto;
+            margin-right:auto;
             display:flex;
             align-items:center;
             flex-direction:column;
@@ -57,8 +56,8 @@ export class _ extends LitElement {
     ::slotted([slot="dropdown"]){
         position:absolute;
         z-index:10;
-       
-        left: 200px;
+        top: -150px;
+        left: 185px;
     }
     ::slotted([slot="button-collection"]:last-child){
        margin-right:0;
@@ -76,30 +75,29 @@ export class _ extends LitElement {
     `];
   }
 
-  @property()
-  title:string = ""; 
-
-  @property()
-  subtitle:string = ""; 
-
   @property({type:Boolean})
   closed: boolean = false;
-
+  
   render() {
 
-    const {title, subtitle, closed} = this;
+    const {closed} = this;
+    
+    const STR_TITLE = "Your JIG is on air now";
+    const STR_SUBTITLE ="What would you like to do next?"
 
     return html`    
-    <main>
+    <main style="background-image:url('${mediaUi("Background@2x.jpg")}')">
         <div class="wrapper">
             
             <div class="inside-wrapper">
-                <slot name="animation"></slot>
-                <h1>${title}</h1>
-                <p name="subtitle">${subtitle}</p>
+            <publish-placeholder-img class="animation"></publish-placeholder-img>
+                <h1>${STR_TITLE}</h1>
+                <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="button-wrapper">
                     <slot name="button-collection"></slot>
+                    
                     <slot name="dropdown" class="${closed ? 'closed' : ''}"></slot>
+                    
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ export class _ extends LitElement {
     return [css`
     .wrapper{
         
-        border-radius: 4px;
+        border-radius: 14px;
         box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.16);
         border: solid 1px #f0f1f4;
         background-color: #ffffff;

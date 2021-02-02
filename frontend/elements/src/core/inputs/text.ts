@@ -98,6 +98,23 @@ export class _ extends LitElement {
   @property()
   mode: Mode = "text";
 
+  onPwToggle() {
+    const {mode} = this;
+
+    this.mode = mode === "passwordHidden" ? "passwordVisible"
+      : mode === "passwordVisible" ? "passwordHidden"
+      : mode;
+  }
+
+  onInput(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-input", {
+      detail: { value },
+    }))
+  }
+
   render() {
     const { label, help, mode, placeholder, error, value } = this;
 
@@ -116,9 +133,10 @@ export class _ extends LitElement {
           type="${inputType}"
           class=""
           value="${value}"
+          @input="${this.onInput}"
         />
         <label class="">${label}</label>
-        ${mode !== "text" ? makeImage(mode) : nothing}
+        ${mode !== "text" ? makeImage(mode, this.onPwToggle) : nothing}
       </div>
 
       ${isHelp ? html`<p class="instruction">${help}</p>` : nothing}
@@ -127,13 +145,13 @@ export class _ extends LitElement {
   }
 }
 
-function makeImage(mode: Mode) {
+function makeImage(mode: Mode, onPwToggle:(_:Event) => any) {
   const path =
     mode === "passwordVisible"
-      ? "icn-hide-idle.svg"
-      : mode === "passwordHidden"
       ? "icn-show-idle.svg"
+      : mode === "passwordHidden"
+      ? "icn-hide-idle.svg"
       : "";
 
-  return html`<img-ui path="${path}"></img-ui>`;
+  return html`<img-ui path="${path}" @click="${onPwToggle}" ></img-ui>`;
 }

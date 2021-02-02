@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import {nothing} from "lit-html";
-export type Color = "red" | "blue" | "white" | "green";
-export type Size = "small" | "medium" | "large";
-
+export type Color = "red" | "blue" | "white" | "green" | "lightgreen" | "lightblue" | "black";
+export type Size = "small" | "medium" | "large" | "x-large";
+export type Weight = "thin" | "normal" | "bolder" | "x-bold";
 @customElement('title-ji')
 export class _ extends LitElement {
 
@@ -25,11 +25,37 @@ export class _ extends LitElement {
     .blue {
       color: #5590fc;
     }
+    .normal{
+      font-weight:500
+    }
+    .thin{
+      font-weight:300
+    }
+    .black{
+      color: #4a4a4a
+    }
+    .lightgreen{
+      color: #9cddb2
+    }
+    .x-large{
+      font-size:64px;
+    }
+    .large{
+      font-size:32px;
+    }
+    .x-bold{
+      font-weight:900
+    }
+    .lightblue{
+      color:#e7f0fe;
+    }
+    .medium{
+      font-size:16px;
+    }
+    .bold{font-weight:600}
     `];
   }
 
-  @property({type: Boolean})
-  bold:boolean = false;
 
   @property({type: Boolean})
   italic:boolean = false;
@@ -43,6 +69,9 @@ export class _ extends LitElement {
   @property()
   color:Color = "red";
 
+  @property()
+  weight:Weight = "normal";
+
   @property({type: Boolean})
   p:boolean = false;
 
@@ -51,16 +80,19 @@ export class _ extends LitElement {
 
   render() {
 
-    const {bold, italic, underlined, size, color, p, link} = this;
+    const {size, color, italic, weight, p, link} = this;
 
-    const classNames = classMap({
+    const classes = classMap({ 
+      [size]: true,
+      [color]: true,
+      italic: italic,
+      [weight]:true,
       link,
-      [color]: true 
     });
-
     return html`
     ${p ? html`<p>`: nothing}
-    <div class="${classNames}">
+    <div class="${classes}">
+
         <slot></slot>
     </div>
     ${p ? html`</p>` : nothing}

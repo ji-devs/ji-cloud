@@ -21,7 +21,7 @@ export class _ extends LitElement {
   render() {
     return html`
         <main>
-            <title-ji color="black">${STR_ACCOUNT}</title-ji>
+            <title-ji color="black" weight="normal">${STR_ACCOUNT}</title-ji>
             &nbsp;
             <button-text color="blue">${STR_LOGIN}</button-text>
         </main>

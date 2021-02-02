@@ -95,14 +95,8 @@ cm_run_task build-local-iframe-nomedia
 [tasks.build-sandbox]
 run_task = {name = [
     "ci-deps",
-    "sandbox-build-elements",
     "sandbox-build-app",
 ]}
-
-[tasks.sandbox-build-elements]
-script_runner = "@shell"
-script = ["npm run build:sandbox"]
-cwd = "../elements"
 
 [tasks.sandbox-build-app]
 script_runner = "@shell"
@@ -114,14 +108,8 @@ script = ["npm run build:sandbox"]
 [tasks.build-release]
 run_task = {name = [
     "ci-deps",
-    "release-build-elements",
     "release-build-app",
 ]}
-
-[tasks.release-build-elements]
-script_runner = "@shell"
-script = ["npm run build:release"]
-cwd = "../elements"
 
 [tasks.release-build-app]
 script_runner = "@shell"
@@ -200,9 +188,8 @@ script = ["npm run build:watch"]
 run_task = {name = [
     "npm-install-app",
     "npm-install-build-utils",
-    "npm-install-elements",
     "npm-install-config",
-    "ts-config-build"
+    "config-build"
 ]}
 
 [tasks.npm-install-app]
@@ -214,17 +201,12 @@ script_runner = "@shell"
 script = ["npm install"]
 cwd = "../build-utils"
 
-[tasks.npm-install-elements]
-script_runner = "@shell"
-script = ["npm install"]
-cwd = "../elements"
-
 [tasks.npm-install-config]
 script_runner = "@shell"
 script = ["npm install"]
 cwd = "../../config/typescript"
 
-[tasks.ts-config-build]
+[tasks.config-build]
 script_runner = "@shell"
 script = ["npm run build"]
 cwd = "../../config/typescript"

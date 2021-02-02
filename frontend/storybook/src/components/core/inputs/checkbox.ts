@@ -8,11 +8,13 @@ export default {
 interface Args {
     label: string,
     error: string,
+    checked: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
     label: "hello",
-    error: ""
+    error: "",
+    checked: false,
 }
 
 export const Checkbox = (props?:Partial<Args>) => {

@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo TODO: add tests",
     "start": "npm-run-all -p _media-server start:nomedia",
-    "start:nomedia": "cross-env STORYBOOK_DEPLOY_TARGET=local start-storybook -p 6006 -s ./dist",
-    "storybook:build:sandbox": "cross-env STORYBOOK_DEPLOY_TARGET=sandbox build-storybook -o ./dist/storybook-build",
-    "storybook:build:release": "cross-env STORYBOOK_DEPLOY_TARGET=release build-storybook -o ./dist/storybook-build",
+    "start:nomedia": "cross-env STORYBOOK_DEPLOY_TARGET=local STORYBOOK_GOOGLE_MAPS=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I start-storybook -p 6006 -s ./dist",
+    "storybook:build:sandbox": "cross-env STORYBOOK_DEPLOY_TARGET=sandbox STORYBOOK_GOOGLE_MAPS=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I build-storybook -o ./dist/storybook-build",
+    "storybook:build:release": "cross-env STORYBOOK_DEPLOY_TARGET=release STORYBOOK_GOOGLE_MAPS=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I build-storybook -o ./dist/storybook-build",
     "clean": "rimraf ./dist && mkdirp ./dist",
     "_media-server": "cd ../build-utils && npm run local-media-server"
   },
@@ -17,10 +17,12 @@
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.10",
+    "@fluent/bundle": "^0.16.0",
     "@storybook/addon-actions": "^6.1.11",
-    "@storybook/addon-essentials": "^6.1.11",
-    "@storybook/addon-links": "^6.1.11",
+    "@storybook/addon-controls": "^6.1.14",
+    "@storybook/addon-docs": "^6.1.14",
     "@storybook/html": "^6.1.11",
+    "@types/googlemaps": "^3.43.2",
     "babel-loader": "^8.2.2",
     "babel-plugin-root-import": "^6.6.0",
     "cross-env": "^7.0.3",

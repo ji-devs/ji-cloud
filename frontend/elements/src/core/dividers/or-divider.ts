@@ -17,6 +17,7 @@ export class _ extends LitElement {
         }
         hr {
           width: 112px;
+          border: solid 1px #dee1eb;
         }
       `,
     ];

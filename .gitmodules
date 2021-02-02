@@ -1,0 +1,4 @@
+[submodule "localization"]
+	path = localization
+	url = https://github.com/ji-devs/ji-cloud-localization.git
+	branch = master

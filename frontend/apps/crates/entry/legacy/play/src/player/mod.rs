@@ -1,4 +1,6 @@
 mod player;
 pub use player::*;
 
-pub mod sticker_image;
+pub mod design;
+pub mod hotspot;
+pub mod activities;
