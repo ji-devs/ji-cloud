@@ -52,7 +52,7 @@ export class _ extends LitElement {
   open: boolean = false;
 
   render() {
-    const { label, path, open } = this;
+    const { label} = this;
 
     return html`
       <div class="main-wrapper">

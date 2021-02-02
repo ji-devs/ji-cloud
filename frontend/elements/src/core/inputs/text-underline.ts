@@ -40,6 +40,12 @@ export class _ extends LitElement {
           position: absolute;
           right: -10px;
         }
+        img-ui{
+          display:none;
+        }
+        .icon{
+          display:block;
+        }
       `,
     ];
   }
@@ -65,7 +71,7 @@ export class _ extends LitElement {
               placeholder="Jane Doe"
               aria-label="Full name"
             />
-            <!-- <img-ui src="${src}"></img-ui> -->
+            <img-ui path="search-24-px.svg" class="${icon ? 'icon' : ''}"></img-ui>
           </div>
         </label>
       </div>
