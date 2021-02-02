@@ -1,6 +1,9 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing} from 'lit-html';
+
 export type Color = "green" | "blue" | "white";
+export type IconKind = "ji" | "";
+
 @customElement("card-banner")
 export class _ extends LitElement {
   static get styles() {
@@ -26,14 +29,14 @@ export class _ extends LitElement {
         }
         img-ui {
             margin-right: 8px;
+            height:19px;
+            width:auto;
         }
         p{
         color: #5590fc;
         font-weight:400;
         }
-        .imghidden, .teamhidden{
-            display:none;
-        }
+    
         .team{
             font-weight:500
         }
@@ -41,31 +44,32 @@ export class _ extends LitElement {
     ];
   }
 
-  @property()
-  icon: string = "";
-
+ 
   @property()
   label: string = "";
 
   @property()
-  team: string = "";
-
-  @property({ type: Boolean })
-  imghidden: boolean = false;
-
-  @property({ type: Boolean })
-  teamhidden: boolean = false;
+  team: IconKind = "ji";
 
   @property()
   color: Color = "blue";
 
+  @property()
+  kind: IconKind = "ji";
+
+
   render() {
-    const { icon, label, color, imghidden, team, teamhidden } = this;
+    const {label, color, kind } = this;
+    const iconPath = kind === "ji" ? "JI_Badge.svg"
+        : nothing;
+    const teamtitle = kind === "ji" ? "Ji Team -  "
+        : nothing;
+
 
     return html`
       <div class="wrapper ${color}">
-        <img-ui path="${icon}" class="${imghidden ? "imghidden" : ""}"></img-ui>
-        <p class="team ${teamhidden ? "teamhidden" : ""}">${team}</p>
+        <img-ui path="${iconPath}"></img-ui>
+        <p class="team">${teamtitle}</p>
         <p>${label}</p>
       </div>
         

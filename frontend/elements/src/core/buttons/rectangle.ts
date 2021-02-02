@@ -3,11 +3,11 @@ import { classMap } from 'lit-html/directives/class-map';
 import { nothing} from 'lit-html';
 import {BaseButton} from "@elements/_styles/buttons";
 
-export type Color = "red" | "blue" | "white" | "green";
+export type Color = "red" | "blue" | "white" | "green" | "whiteblue";
 export type Size = "small" | "medium" | "large" | "x-large";
 
 export type IconAfter = "arrow";
-export type IconBefore = "magnifyer" | "share" | "create" | "play";
+export type IconBefore = "magnifyer" | "share" | "create" | "play" | "plus" | "blueplay";
 
 
 @customElement("button-rect")
@@ -89,6 +89,10 @@ export class _ extends BaseButton {
         font-size:24px;
         padding: 13.6px 24px 11.4px;
       }
+      .whiteblue{
+        background-color:#ffffff;
+        color:#5590fc;
+      }
     
     `];
   }
@@ -130,6 +134,8 @@ export class _ extends BaseButton {
     : iconBefore === "share" ? "Icn_Share_Red.svg" 
     : iconBefore === "create" ? "icn-plus-red.svg" 
     : iconBefore === "play" ? "icn-video-activity-hover.svg"
+    : iconBefore === "plus" ? "icon-add-24-white.svg"
+    : iconBefore === "blueplay" ? "play.svg"
     : nothing;
     const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
       : "";

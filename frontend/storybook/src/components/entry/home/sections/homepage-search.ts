@@ -37,7 +37,7 @@ export const Search = (props?: SearchArgs) => {
     </search-dropdown>
     <search-dropdown slot="dropdown-language" placeholder="${STR_LANGUAGES}"></search-dropdown>
     <button-rect slot="button" iconBefore="magnifyer" size="x-large" bold=true color="${STR_RED}" largetext=true>${STR_SEARCH}</button-rect>
-    <title-ji slot="advanced" color="lightblue" weight="x-bold" link=true>${STR_ADVANCED} <br> ${STR_SEARCH}</title-ji>
+    <title-ji slot="advanced" color="lightblue" weight="boldest" link=true>${STR_ADVANCED} <br> ${STR_SEARCH}</title-ji>
 
     </search-bar>
     `

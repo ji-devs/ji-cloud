@@ -1,6 +1,5 @@
 import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/core/dividers/spacer-fourty";
 @customElement('publish-page')
 export class _ extends LitElement {
   static get styles() {

@@ -8,7 +8,7 @@ export class _ extends LitElement {
       css`
         div {
           display: flex;
-          flex-direction: row;
+        
         }
       `,
     ];

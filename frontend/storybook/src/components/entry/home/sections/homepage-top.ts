@@ -15,15 +15,15 @@ const STR_JIG = "JIGs";
 export const TopSection = () => {
     return `
     <header-blue>
-        <title-ji slot="subtitle" size="x-large" color="lightblue" weight="x-bold">${STR_LEARNING }&nbsp;</title-ji>
-        <title-ji slot="subtitle" size="x-large" color="lightgreen" weight="x-bold"> ${STR_CREATION}</title-ji>
+        <title-ji slot="subtitle" size="x-large" color="lightblue" weight="boldest">${STR_LEARNING }&nbsp;</title-ji>
+        <title-ji slot="subtitle" size="x-large" color="lightgreen" weight="boldest"> ${STR_CREATION}</title-ji>
         <div slot="search">
         ${Search()}
         </div>
       
-        <title-ji slot="undertext" size="large" color="black" weight="thin">${STR_MAKELEARNING} &nbsp; </title-ji>
+        <title-ji slot="undertext" size="large" color="black" weight="lighter">${STR_MAKELEARNING} &nbsp; </title-ji>
         <title-ji slot="undertext" size="large" color="black" weight="bold">${STR_NUMBER} &nbsp;</title-ji>
-        <title-ji slot="undertext" size="large" color="black" weight="thin">${STR_JIG}</title-ji>
+        <title-ji slot="undertext" size="large" color="black" weight="lighter ">${STR_JIG}</title-ji>
        
         
     </header-blue>

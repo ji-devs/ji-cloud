@@ -9,6 +9,9 @@ export class _ extends LitElement {
           display: flex;
           overflow: hidden;
           scroll: auto;
+          justify-content:space-between;
+          width:100%;
+          border-bottom: solid 1px #3c7df0;
         }
         .collapsed {
           height: 44px;
@@ -19,15 +22,44 @@ export class _ extends LitElement {
         }
         .collapsed ::slotted([slot="content"]) {
           display: none;
+          
+        
         }
+        .content-wrapper{
+          display:flex;
+          flex-wrap:wrap;
+          width:90%;
+        }
+        .pill{
+          height:65px;
+        }
+        .inner-wrapper{
+          display:flex;
+          flex-wrap:wrap;
+        }
+        ::slotted([slot="content"]){
+          margin-right:14px;
+          
+        }
+        ::slotted([slot="title"]){
+          margin-bottom:8px;
+          display:block;
+        }
+        .expanded img-ui{
+          transform:rotate(180deg);
+          align-self:end;
+        }
+        
       `,
     ];
   }
 
   @property({ type: Boolean })
-  collapsed: boolean = true;
+  collapsed: boolean = false;
 
-  //temporarily added to fix build
+  @property({ type: Boolean })
+  pill: boolean = false;
+
   @property()
   icon: string = "";
 
@@ -35,16 +67,19 @@ export class _ extends LitElement {
   label: string = "";
 
   render() {
-    const { collapsed, icon, label } = this;
+    const { collapsed,label,pill } = this;
 
     return html`
-      <main class="${collapsed ? "collapsed" : "expanded"}">
+      <main class="${collapsed ? "collapsed" : "expanded"} ${pill ? "pill" : ''}">
         <div class="content-wrapper">
           <slot name="title">${label}</slot>
+
+          <div class="inner-wrapper">
           <slot name="content"></slot>
+          </div>
         </div>
 
-        <img-ui path="${icon}"></img-ui>
+        <img-ui path="Icn_arrow_nm.svg"></img-ui>
       </main>
     `;
   }
