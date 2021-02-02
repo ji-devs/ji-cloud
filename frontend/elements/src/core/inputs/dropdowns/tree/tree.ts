@@ -47,6 +47,7 @@ export class _ extends LitElement {
     }
     ul{
         margin:0;
+        padding:0;
     }
     p{
         line-height:0;
@@ -60,6 +61,9 @@ export class _ extends LitElement {
     }
     .open .downarrow {
         display:block;
+    }
+    ::slotted(*){
+      display:flex;
     }
     `,
     ];
@@ -84,7 +88,7 @@ export class _ extends LitElement {
     return html`
       <div class="main-wrapper ${open ? "bordergreen open" : ""}">
         <div class="inside-wrapper">
-          <div class="text-wrapper flex py-3">
+          <div class="text-wrapper">
             <img-ui class="sidearrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
             <img-ui class="downarrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
 
