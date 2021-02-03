@@ -1,4 +1,4 @@
-import "@elements/entry/admin/category/category-two";
+import "@elements/entry/admin/category/pages/category-two";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/dropdowns/tree/tree-child";

@@ -1,4 +1,4 @@
-import "@elements/entry/admin/category/category-one";
+import "@elements/entry/admin/category/pages/category-one";
 import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
@@ -57,7 +57,7 @@ const DEFAULT_ARGS:Props = {
   data: mockHierarchy
 }
 
-export const CategoryLabelOne = (props?:Props) => {
+export const CategoryOne = (props?:Props) => {
   const {data} = props || DEFAULT_ARGS;
 
   console.log(data);
@@ -85,8 +85,8 @@ export const CategoryLabelOne = (props?:Props) => {
     `
 }
 
-CategoryLabelOne.args = DEFAULT_ARGS;
-CategoryLabelOne.argTypes = {
+CategoryOne.args = DEFAULT_ARGS;
+CategoryOne.argTypes = {
   data: {
     control: {
       type: 'object',
