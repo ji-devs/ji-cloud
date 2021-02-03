@@ -76,17 +76,17 @@ export class _ extends LitElement {
   open: boolean = false;
 
   @property()
-  content: Mode = "inputText";
+  mode: Mode = "inputText";
 
   @property()
   page: Page = "image";
 
   render() {
-    const { label, open, content, page } = this;
-    const inside = content === "checkbox" ? html`
+    const { label, open, mode, page } = this;
+    const inside = mode === "checkbox" ? html`
     <input type="checkbox"/>
     <div class="inside"></div>`
-    : content === "inputText" ? html`
+    : mode === "inputText" ? html`
     <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
     <div class="inside"></div>
     `
