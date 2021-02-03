@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 
-@customElement('tag-ellipses')
+@customElement('button-ellipses')
 export class _ extends LitElement {
 
   static get styles() {

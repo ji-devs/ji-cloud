@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import "@elements/widgets/tags/ellipses";
+import "@elements/core/buttons/ellipses";
 
 import { nothing } from "lit-html";
 export type Mode = "checkbox" | "inputText";
@@ -92,7 +92,7 @@ export class _ extends LitElement {
     `
     : nothing;
 
-    const ellipses = page === "category" ? html`<tag-ellipses class="ellipses"></tag-ellipses>`
+    const ellipses = page === "category" ? html`<button-ellipses class="ellipses"></button-ellipses>`
     : nothing;
 
     return html`
