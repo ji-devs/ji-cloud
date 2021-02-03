@@ -11,8 +11,6 @@ That means the content in Storybook is temporary
 
 ## K.I.S.S.
 
-Stories should generally be simple and stripped down to what's required for functionality only.
-
 Some general tips:
 
 * Do _not_ have static, real data in a story. It should always be in an element.

@@ -8,6 +8,7 @@
     - [Overview](./frontend/elements-and-stories/overview.md)
     - [How to Compose Elements](./frontend/elements-and-stories/element-composition.md)
     - [How to Write Stories](./frontend/elements-and-stories/writing-stories.md)
+    - [Use the Platform](./frontend/elements-and-stories/use-the-platform.md)
     - [Code style - Elements](./frontend/elements-and-stories/code-style-elements.md)
     - [Code style - Stories](./frontend/elements-and-stories/code-style-stories.md)
     - [Images](./frontend/elements-and-stories/images.md)

@@ -8,7 +8,8 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(tag = "media_kind")]
 #[serde(rename_all = "camelCase")]
-pub enum AlgoliaMediaFilterKind {
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+pub enum MediaGroupKind {
     /// Media is audio
     Audio,
 
@@ -19,7 +20,7 @@ pub enum AlgoliaMediaFilterKind {
     Animation,
 }
 
-impl AlgoliaMediaFilterKind {
+impl MediaGroupKind {
     /// returns `self` in a string representation.
     #[must_use]
     pub const fn to_str(self) -> &'static str {
@@ -46,15 +47,18 @@ pub enum PngImageFile {
 
 /// Media Libraries
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
+#[repr(i16)]
 pub enum MediaLibrary {
     /// The default / global library
-    Global,
+    Global = 0,
 
     /// The user library
-    User,
+    User = 1,
 
     /// The web library
-    Web,
+    Web = 2,
 }
 
 impl MediaLibrary {

@@ -54,9 +54,15 @@ pub mod user {
         Path(id): Path<AudioId>,
         bytes: Bytes,
     ) -> Result<NoContent, error::Upload> {
-        if !db::audio::user::exists(db.as_ref(), id).await? {
-            return Err(error::Upload::ResourceNotFound);
-        }
+        let mut txn = db.begin().await?;
+
+        sqlx::query!(
+            r#"select 1 as discard from user_audio_library where id = $1 for update"#,
+            id.0
+        )
+        .fetch_optional(&mut txn)
+        .await?
+        .ok_or(error::Upload::ResourceNotFound)?;
 
         // todo: use the duration
         let _duration = {
@@ -70,6 +76,15 @@ pub mod user {
 
         s3.upload_media(bytes.to_vec(), MediaLibrary::User, id.0, FileKind::AudioMp3)
             .await?;
+
+        sqlx::query!(
+            "update user_audio_library set uploaded_at = now() where id = $1",
+            id.0
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
 
         Ok(NoContent)
     }

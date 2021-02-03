@@ -35,16 +35,6 @@ returning id as "id: ImageId"
             .map(drop)
     }
 
-    pub async fn exists(db: &PgPool, image: ImageId) -> sqlx::Result<bool> {
-        sqlx::query!(
-            r#"select exists(select 1 from user_image_library where id = $1) as "exists!""#,
-            image.0
-        )
-        .fetch_one(db)
-        .await
-        .map(|it| it.exists)
-    }
-
     pub async fn get(db: &PgPool, image: ImageId) -> sqlx::Result<Option<UserImage>> {
         sqlx::query_as!(
             UserImage,
@@ -227,14 +217,4 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
         .execute(&mut conn)
         .await?;
     conn.commit().await
-}
-
-pub async fn get_image_kind(db: &PgPool, image: ImageId) -> sqlx::Result<Option<ImageKind>> {
-    sqlx::query!(
-        r#"select kind as "kind: ImageKind" from image_metadata where id = $1"#,
-        image.0
-    )
-    .fetch_optional(db)
-    .await
-    .map(|opt| opt.map(|it| it.kind))
 }
