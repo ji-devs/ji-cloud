@@ -68,7 +68,7 @@ export class _ extends LitElement {
         <div class="wrapper">
             <div class="left">
             <slot name="left"></slot>
-            <title-ji color="blue">${STR_BACK}</title-ji>
+            <button-text color="blue">${STR_BACK}</button-text>
             </div>
             <div class="middle">
                 <div class="title-wrapper">
