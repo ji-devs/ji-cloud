@@ -582,11 +582,11 @@ test('update image - two styles', async (t) => {
 test.skip('create jig - default', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
-    const category = await got.post('http://0.0.0.0/v1/jig', {
+    const jig = await got.post('http://0.0.0.0/v1/jig', {
         ...t.context.loggedInReqBase,
     });
 
-    t.deepEqual(typeof (category.body.id), 'string');
+    t.deepEqual(typeof (jig.body.id), 'string');
 });
 
 test.todo("create jig - params");
