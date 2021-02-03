@@ -2,11 +2,11 @@
 
 ## Intro and reasoning
 
-When all is said and done, everything is a _component_. Whether it's a single line of text with a specific font, or a full page consisting of hundreds of tiny configurable pieces, the concept is all about composing pieces together in order to create larger structures, much like LEGO.
+We tend to say everything is a _component_. Whether it's a single line of text with a specific font, or a full page consisting of hundreds of tiny configurable pieces, the concept is all about composing pieces together in order to create larger structures, much like LEGO.
 
 However, once we move from a visual brief to the engineering side, we have to consider the implementation details of exactly how these things compose together and the limitations of our target platform. How do properties change? How do events propogate? How do children get swapped out? 
 
-By way of example, consider a single button with a label. Now let's imagine what happens if we have a menu containing a dozen of these buttons. If we want to change the text or color of precisely one of the menu's sub-buttons, how do we know which one to target? Furthermore, if a button is clicked, how do we know _which_ one was clicked?
+By way of example, consider a single button with a label. Now let's imagine what happens if we have a menu containing a dozen of these buttons. If we want to change the text or color of precisely one of the menu's sub-buttons, how do we know which one to target? Furthermore, if a button is clicked, how do we know which one was clicked?
 
 In the old days, we would do this _imperatively_, by getting access to an element that we manually added to the DOM (e.g. via jQuery). This isn't necessarily a bad thing, but it becomes hard to maintain at scale and the more modern trend in web development is to favor _declarative_ frameworks like React, Vue, etc.
 
@@ -30,7 +30,7 @@ This is technically accurate enough - "custom elements" are part of the "web com
 
 ## Storybook
 
-Creating the elements is one thing, but we still need to see how they behave for QA purposes. In order to test with mock data, and prototype before signing off on the elements for further application development, we use Storybook as a visual testing environment.
+Creating the elements is one thing, but we still need to see how they behave for QA purposes, and it's much faster to iterate on that before it gets bogged down with all the other requirements of the live app. In order to test with mock data, and prototype before signing off on the elements for further application development, we use Storybook as a visual testing environment.
 
 The purpose of storybook is _only_ for QA/testing. Content created in Storybook alone is never bundled into the final app.
 
