@@ -64,6 +64,7 @@ export class _ extends LitElement {
     }
     ::slotted(*){
       display:flex;
+      margin-left:40px;
     }
     `,
     ];
