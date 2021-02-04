@@ -1,4 +1,4 @@
-import "@elements/entry/admin/images/meta/page-two";
+import "@elements/entry/admin/images/meta/pages/page-two";
 import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";

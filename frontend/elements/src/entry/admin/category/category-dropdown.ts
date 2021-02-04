@@ -13,7 +13,17 @@ export class _ extends LitElement {
         }
         ul{
             list-style-type:none;
-            padding:0;
+            
+            display:block;
+            z-index:2;
+            background-color:#ffffff;
+            position:absolute;
+            top: 0;
+            left: 85px;
+            width: 125px;
+            border-radius: 4px;
+            box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
+            padding:16px;
         }
    
     `];

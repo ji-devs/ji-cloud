@@ -51,12 +51,12 @@ export class _ extends LitElement {
         position:relative;
        
       }
-      .ellipses{
+      .ellipses-wrapper ::slotted([slot="menu-dropdown"]){
         display:none;
         position:absolute;
         left:50px;
       }
-      .ellipses-wrapper:hover .ellipses{
+      .ellipses-wrapper:hover ::slotted([slot="menu-dropdown"]){
         display:flex;
       }
       ::slotted(*){
@@ -85,7 +85,7 @@ export class _ extends LitElement {
   mode: Mode = "textDisplay";
 
   @property({ type: Boolean })
-  hasMenu: boolean = false;
+  hasMenu: boolean = true;
 
   render() {
     const { label, open, mode, hasMenu } = this;
@@ -96,9 +96,7 @@ export class _ extends LitElement {
         <div class="inside"></div>
       </div>
       <div>${label}</div>
-      <button-ellipses class="ellipses ${hasMenu ? 'ellipsesMenu' : ''}">
-      <category-dropdown></category-dropdown>
-      </button-ellipses>
+      <slot name="menu-dropdown"></slot>
 `
       : mode === "textDisplay" ? 
       html`
@@ -107,9 +105,7 @@ export class _ extends LitElement {
           <div class="inside"></div>
         </div>
         <div>${label}</div>
-        <button-ellipses class="ellipses ${hasMenu ? 'ellipsesMenu' : ''}">
-          <category-dropdown></category-dropdown>
-        </button-ellipses>
+       <slot name="menu-dropdown"></slot>
 
         `
       : mode === "textInput" ?

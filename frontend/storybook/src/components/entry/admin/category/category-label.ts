@@ -5,6 +5,7 @@ import "@elements/core/inputs/dropdowns/tree/tree-child";
 import "@elements/core/inputs/dropdowns/tree/tree-static-child";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/cards/blue";
+import "@elements/core/menu/ellipses-menu";
 import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
 
 import {mapToString} from "@utils/array";
@@ -22,6 +23,9 @@ const leafNode = ({label, mode, open, children}:TreeNode) => {
   return `
     <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
     ${mapToString (children, leafNode)}
+    <ellipses-menu slot="menu-dropdown">
+      <category-dropdown></category-dropdown> 
+    </ellipses-menu>
     </dropdown-tree-child>
   `;
 }
@@ -29,6 +33,7 @@ const rootNode = ({label, open, children}:TreeNode) => {
   return `
     <dropdown-tree label="${label}" ${open ? "open" : ""}>
       ${mapToString (children, leafNode)}
+      <ellipses-menu slot="menu-dropdown"></ellipses-menu>
     </dropdown-tree>
   `;
 }
@@ -53,6 +58,7 @@ export const CategoryLabel = (props?:Props) => {
     
       <div slot="middle">
         ${mapToString(data, rootNode)}
+        
       </div>
      
       <div slot="button">

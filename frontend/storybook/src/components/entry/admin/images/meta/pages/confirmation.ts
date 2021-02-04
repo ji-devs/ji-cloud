@@ -1,4 +1,4 @@
-import "@elements/entry/admin/images/meta/page";
+import "@elements/entry/admin/images/meta/pages/page";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/entry/admin/images/add/add-image";
 

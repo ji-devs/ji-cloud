@@ -15,25 +15,7 @@ export class _ extends LitElement {
     .results{
         display:flex;
     }
-    .list-object li{
-        padding-left:16px;
-    }
-
-    .list-object li::before{
-        content:'';
-        height:16px;
-        width:16px;
-        border-radius:50%;
-        display:inline-block;
-        margin-right:8px;
-    }
-    .published::before{
-        background-color: #6eca90;
-    }
-    .saved::before{
-       background-color: #e36486;
-
-    }
+  
     .images{
         display:grid;
         grid-template-columns:repeat(5, 1fr);
@@ -76,15 +58,8 @@ export class _ extends LitElement {
 
             </div>
             <slot name="pagination"></slot>
-            <div class="dropdown-wrapper ">
-                <dropdown-underlined>
-                <div class="list-object">
-                <li class="published">${STR_PUBLISHED}</li>
-                </div>
-                <div class="list-object">
-                <li class="saved">${STR_SAVED}</li>
-                </div>
-                </dropdown-underlined>
+            <div class="dropdown-wrapper">
+               <slot name="dropdown"></slot>
             </div>
         </div>
         <div class="images">
