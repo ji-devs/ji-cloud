@@ -1,5 +1,4 @@
 import "@elements/core/buttons/text";
-// import "@elements/buttons/replace-delete";
 
 export default {
   title: 'Entry /Home/Widgets/Plain Text Button',}

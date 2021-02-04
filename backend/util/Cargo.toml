@@ -2,4 +2,5 @@
 
 members = [
     "s3-key-migrate",
+    "media-refresh",
 ]

@@ -88,6 +88,24 @@ impl<'de, T: DeserializeOwned> serde::de::Visitor<'de> for CSVVecVisitor<T> {
     }
 }
 
+// pub(super) fn vec_encode_csv<T: Serialize, S>(v: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+// where
+//     S: serde::Serializer,
+// {
+//     let mut writer = csv::WriterBuilder::new()
+//         .has_headers(false)
+//         .from_writer(vec![]);
+
+//     writer.serialize(v).map_err(Error::custom)?;
+
+//     // This error might not be triggerable.
+//     let raw = writer.into_inner().map_err(Error::custom)?;
+
+//     let s = std::str::from_utf8(&raw).map_err(Error::custom)?;
+
+//     serializer.serialize_str(s)
+// }
+
 pub(super) struct FromStrVisiter<T>(pub PhantomData<T>);
 
 impl<'de, TErr: std::fmt::Debug, T: FromStr<Err = TErr>> Visitor<'de> for FromStrVisiter<T> {

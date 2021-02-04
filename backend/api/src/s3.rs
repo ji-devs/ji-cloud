@@ -2,10 +2,11 @@ use anyhow::Context;
 use core::settings::S3Settings;
 use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
-    HttpClient, Region,
+    HttpClient, Region, RusotoError,
 };
-use rusoto_s3::{DeleteObjectRequest, PutObjectRequest, S3};
+use rusoto_s3::{DeleteObjectRequest, GetObjectError, GetObjectRequest, PutObjectRequest, S3};
 use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
+use tokio::io::AsyncReadExt;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -51,6 +52,23 @@ impl Client {
             bucket,
             client,
         })
+    }
+
+    pub async fn upload_png_images_resized_thumb(
+        &self,
+        library: MediaLibrary,
+        image: Uuid,
+        resized: Vec<u8>,
+        thumbnail: Vec<u8>,
+    ) -> anyhow::Result<()> {
+        let upload = |data, file| self.upload_media(data, library, image, FileKind::ImagePng(file));
+
+        let resized = upload(resized, PngImageFile::Resized);
+        let thumbnail = upload(thumbnail, PngImageFile::Thumbnail);
+
+        futures::future::try_join(resized, thumbnail).await?;
+
+        Ok(())
     }
 
     pub async fn upload_png_images(
@@ -134,5 +152,41 @@ impl Client {
             })
             .await?;
         Ok(())
+    }
+
+    pub async fn download_media_file(
+        &self,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<Option<Option<Vec<u8>>>> {
+        let client = match &self.client {
+            Some(client) => client,
+            None => return Ok(None),
+        };
+
+        let resp = client
+            .get_object(GetObjectRequest {
+                bucket: self.bucket.clone(),
+                key: media::media_key(library, id, file_kind),
+                ..GetObjectRequest::default()
+            })
+            .await;
+
+        let resp = match resp {
+            Ok(resp) => resp,
+            Err(RusotoError::Service(GetObjectError::NoSuchKey(_))) => return Ok(Some(None)),
+            Err(e) => return Err(e.into()),
+        };
+
+        let mut body = vec![];
+
+        resp.body
+            .ok_or_else(|| anyhow::anyhow!("missing response"))?
+            .into_async_read()
+            .read_to_end(&mut body)
+            .await?;
+
+        Ok(Some(Some(body)))
     }
 }

@@ -162,9 +162,6 @@ for update
     .execute(&mut txn)
     .await?;
 
-    // todo: commit here or later?
-    txn.commit().await?;
-
     match kind {
         MediaKind::GifAnimation => {
             s3.upload_media(
@@ -186,7 +183,18 @@ for update
             s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
                 .await?;
         }
+
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
     }
+
+    sqlx::query!(
+        "update web_media_library set uploaded_at = now() where id = $1",
+        id
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
 
     Ok(CreatedJson(UrlCreatedResponse {
         id,
@@ -231,6 +239,8 @@ async fn delete_media(
         MediaKind::GifAnimation => {
             delete(FileKind::AnimationGif).await;
         }
+
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind).into()),
     }
 
     Ok(NoContent)

@@ -12,6 +12,7 @@ macro_rules! into_uuid {
     };
 }
 
+pub mod admin;
 pub mod animation;
 pub mod audio;
 pub mod auth;
