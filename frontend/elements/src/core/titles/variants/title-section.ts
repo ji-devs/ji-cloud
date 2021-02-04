@@ -14,7 +14,7 @@ export class _ extends LitElement {
     color: #5662a3;
   }
   
-  .lightBlue{
+  .lightblue{
 color:#6ca1fc;
 
   }

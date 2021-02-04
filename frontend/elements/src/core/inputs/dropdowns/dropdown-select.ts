@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 @customElement("dropdown-select")
 export class _ extends LitElement {
@@ -40,6 +39,7 @@ export class _ extends LitElement {
           top: 33%;
           right: 20px;
           transform: rotate(180deg);
+          cursor:pointer;
         }
         .errorwrapper {
           border: solid 1px #f00813;
@@ -79,6 +79,9 @@ export class _ extends LitElement {
           padding: 0;
           margin: 0;
           overflow: auto;
+        }
+        input::placeholder{
+          color:#94a1aa;
         }
       `,
     ];
