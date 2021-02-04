@@ -29,7 +29,7 @@ export const ImageSearch = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     const {results,number, searchword} = props
 
-    return `<image-search ${argsToAttrs(props)}>
+    return `<image-search ${argsToAttrs(props)} ${closed && "closed"}>
     <title-ji color="black" size="medium-large" slot="number">${number}&nbsp;</title-ji>
     <title-ji color="black" size="medium-large" slot="searchword">${searchword}&nbsp;</title-ji>
 

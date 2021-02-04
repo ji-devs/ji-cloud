@@ -1,9 +1,10 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/buttons/ellipses";
+import "@elements/entry/admin/category/category-dropdown";
 
 import { nothing } from "lit-html";
-export type Mode = "checkbox" | "inputText";
-export type Page = "category" | "image";
+export type Mode = "checkbox" | "textInput" | "textDisplay";
+
 @customElement("dropdown-tree-child")
 export class _ extends LitElement {
   static get styles() {
@@ -62,9 +63,14 @@ export class _ extends LitElement {
         display:flex;
       }
       .noellipses{
-        display:none;
+        display:block;
       }
-      
+    
+      .ellipsesMenu{
+        display:block;
+      }
+   
+    
     `,
     ];
   }
@@ -76,37 +82,55 @@ export class _ extends LitElement {
   open: boolean = false;
 
   @property()
-  mode: Mode = "inputText";
+  mode: Mode = "textDisplay";
 
-  @property()
-  page: Page = "image";
+  @property({ type: Boolean })
+  hasMenu: boolean = false;
 
   render() {
-    const { label, open, mode, page } = this;
-    const inside = mode === "checkbox" ? html`
-    <input type="checkbox"/>
-    <div class="inside"></div>`
-    : mode === "inputText" ? html`
-    <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-    <div class="inside"></div>
-    `
-    : nothing;
+    const { label, open, mode, hasMenu } = this;
+    const inside = mode === "checkbox" ? 
+      html`
+      <div class="icon-wrapper">
+        <input type="checkbox" />
+        <div class="inside"></div>
+      </div>
+      <div>${label}</div>
+      <button-ellipses class="ellipses ${hasMenu ? 'ellipsesMenu' : ''}">
+      <category-dropdown></category-dropdown>
+      </button-ellipses>
+`
+      : mode === "textDisplay" ? 
+      html`
+        <div class="icon-wrapper">
+          <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
+          <div class="inside"></div>
+        </div>
+        <div>${label}</div>
+        <button-ellipses class="ellipses ${hasMenu ? 'ellipsesMenu' : ''}">
+          <category-dropdown></category-dropdown>
+        </button-ellipses>
 
-    const ellipses = page === "category" ? html`<button-ellipses class="ellipses"></button-ellipses>`
-    : nothing;
+        `
+      : mode === "textInput" ?
+      html`
+      <div class="icon-wrapper">
+      <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
+      <input type="text"/>
+      <div class="inside"></div>
+      </div>`
+      :nothing;
+
+
 
     return html`
       <li class="titleoptions open">
-      <div class="ellipses-wrapper">
-        <div class="icon-wrapper">
-        ${inside}
-          
+        <div class="ellipses-wrapper">
+       
+            ${inside}
         </div>
-        <div>${label}</div>
-        ${ellipses}
-        </div>
-        
-        <ul class="${open ? "open" : "closed"}">
+      
+        <ul class="${open ? " open" : "closed" }">
           <slot></slot>
         </ul>
       </li>

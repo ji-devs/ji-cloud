@@ -3,18 +3,103 @@ export interface TreeNode {
     label: string,
     open: boolean,
     children: Array<TreeNode>,
-    mode: "checkbox" | "inputText"}
+    mode: "checkbox" | "textInput" | "textDisplay"}
 
-export const mockHierarchy: Array<TreeNode> = [
+export const mockCategoryHierarchy: Array<TreeNode> = [
     {
         label: "A",
         open: true,
-        mode: "inputText",
+        mode: "textDisplay",
         children: [
             {
                 label: "A.1",
                 open: false,
-                mode: "inputText",
+                mode: "textDisplay",
+                children: [{
+                    label: "A.1.1",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                },
+                {
+                    label: "A.1.2",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                }]
+            },
+            {
+                label: "A.2",
+                open: true,
+                mode: "textDisplay",
+                children: [{
+                    label: "A.2.1",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                },
+                {
+                    label: "A.2.2",
+                    open: false,
+                    children: [],
+                    mode: "textInput"
+                }]
+            }
+        ]
+    },
+    {
+        label: "B",
+        open: true,
+        mode: "textDisplay",
+        children: [
+            {
+                label: "B.1",
+                open: true,
+                mode: "textDisplay",
+                children: [{
+                    label: "B.1.1",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                },
+                {
+                    label: "B.1.2",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                }]
+            },
+            {
+                label: "B.2",
+                open: false,
+                mode: "textDisplay",
+                children: [{
+                    label: "B.2.1",
+                    open: false,
+                    children: [],
+                    mode: "textInput"
+                },
+                {
+                    label: "B.2.2",
+                    open: false,
+                    children: [],
+                    mode: "textDisplay"
+                }]
+            }
+        ]
+    }
+]
+
+export const mockImagesHierarchy: Array<TreeNode> = [
+    {
+        label: "A",
+        open: true,
+        mode: "textDisplay",
+        children: [
+            {
+                label: "A.1",
+                open: false,
+                mode: "textDisplay",
                 children: [{
                     label: "A.1.1",
                     open: false,
@@ -25,24 +110,24 @@ export const mockHierarchy: Array<TreeNode> = [
                     label: "A.1.2",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 }]
             },
             {
                 label: "A.2",
                 open: true,
-                mode: "inputText",
+                mode: "textDisplay",
                 children: [{
                     label: "A.2.1",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 },
                 {
                     label: "A.2.2",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 }]
             }
         ]
@@ -50,40 +135,40 @@ export const mockHierarchy: Array<TreeNode> = [
     {
         label: "B",
         open: true,
-        mode: "inputText",
+        mode: "textDisplay",
         children: [
             {
                 label: "B.1",
                 open: true,
-                mode: "checkbox",
+                mode: "textDisplay",
                 children: [{
                     label: "B.1.1",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 },
                 {
                     label: "B.1.2",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 }]
             },
             {
                 label: "B.2",
                 open: false,
-                mode: "inputText",
+                mode: "textDisplay",
                 children: [{
                     label: "B.2.1",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 },
                 {
                     label: "B.2.2",
                     open: false,
                     children: [],
-                    mode: "inputText"
+                    mode: "checkbox"
                 }]
             }
         ]

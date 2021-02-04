@@ -45,12 +45,17 @@ export class _ extends LitElement {
         display:flex;
         justify-content:center;
     }
+    .closed .dropdown{
+        display:none;
+    }
     
  
     `];
   }
+  
 
   render() {
+      
     const STR_LABEL = "Label Image";
     const STR_FOUND = "We found";
     const STR_IMAGES = "images for";
@@ -72,7 +77,7 @@ export class _ extends LitElement {
             </div>
             <slot name="pagination"></slot>
             <div class="dropdown-wrapper ">
-                <dropdown-underlined class="${closed ? "closed" : "open"}">
+                <dropdown-underlined>
                 <div class="list-object">
                 <li class="published">${STR_PUBLISHED}</li>
                 </div>

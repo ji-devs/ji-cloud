@@ -20,10 +20,7 @@ export class _ extends LitElement {
             background-color: #83aef7;
             margin-right:4px;
         }
-        ul{
-            list-style-type:none;
-            padding:0;
-        }
+       
         .dropdown{
             width: 125px;
             height: 148px;
@@ -31,26 +28,23 @@ export class _ extends LitElement {
             box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.25);
             padding:16px;
             display:none;
+            background-color:#ffffff
+
         }
         .clicked{
             display:block;
+            z-index:2;
         }
-        li{
-            cursor:pointer;
-        }
+       
     `];
   }
 
  @property({type:Boolean})
-clicked:boolean = false;
+clicked:boolean = true;
 
   render() {
    const {clicked} = this;
-   const STR_SIBLING = "Add a sibling";
-   const STR_CHILD ="Add a child";
-   const STR_RENAME = "Rename";
-   const STR_DELETE = "Delete";
-   const STR_HIDE = "Hide";
+  
  
     return html`
 <div class="wrapper">
@@ -58,13 +52,8 @@ clicked:boolean = false;
        <div class="circle"></div>
        <div class="circle"></div>
        <div class="dropdown ${clicked ? "clicked" : ""}">
-       <ul>
-       <li>${STR_SIBLING}</li>
-       <li>${STR_CHILD}</li>
-       <li>${STR_RENAME}</li>
-       <li>${STR_DELETE}</li>
-       <li>${STR_HIDE}</li>
-       </ul>
+       <slot></slot>
+    
        </div>
 </div>
   `;

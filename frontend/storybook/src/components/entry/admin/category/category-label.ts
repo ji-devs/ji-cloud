@@ -5,7 +5,7 @@ import "@elements/core/inputs/dropdowns/tree/tree-child";
 import "@elements/core/inputs/dropdowns/tree/tree-static-child";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/cards/blue";
-import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
+import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
 
 import {mapToString} from "@utils/array";
 import { Rectangle } from "~/components/core/buttons/rectangle";
@@ -18,11 +18,11 @@ export default {
 const STR_PUBLISH = "Publish"
 
 
-const leafNode = ({label, open, children}:TreeNode) => {
+const leafNode = ({label, mode, open, children}:TreeNode) => {
   return `
-    <tree-dropdown-child label="${label}" ${open ? "open" : ""} page="category">
+    <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
     ${mapToString (children, leafNode)}
-    </tree-dropdown-child>
+    </dropdown-tree-child>
   `;
 }
 const rootNode = ({label, open, children}:TreeNode) => {
@@ -33,27 +33,14 @@ const rootNode = ({label, open, children}:TreeNode) => {
   `;
 }
 
-const rootNodeV2 = ({label, open, children}:TreeNode) => {
-  return `
-    <dropdown-tree-static label="${label}" ${open ? "open" : ""}>
-      ${mapToString (children, leafNodeV2)}
-    </dropdown-tree-static>
-  `;
-}
-const leafNodeV2 = ({label, open, children}:TreeNode) => {
-  return `
-    <dropdown-tree-static-child label="${label}" ${open ? "open" : ""} page="category">
-    ${mapToString (children, leafNodeV2)}
-    </dropdown-tree-static-child>
-  `;
-}
+
 
 interface Props {
   data: Array<TreeNode>
 }
 
 const DEFAULT_ARGS:Props = {
-  data: mockHierarchy
+  data: mockCategoryHierarchy
 }
 
 export const CategoryLabel = (props?:Props) => {
@@ -67,14 +54,7 @@ export const CategoryLabel = (props?:Props) => {
       <div slot="middle">
         ${mapToString(data, rootNode)}
       </div>
-      <div slot="right">
-        
-        
-        <div>
-        ${mapToString(data,rootNodeV2)}
-        </div>
-        
-      </div>
+     
       <div slot="button">
       ${Rectangle({color:"red",size:"medium",contents:STR_PUBLISH,bold:false, italic:false})}
     </div>
