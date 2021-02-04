@@ -3,6 +3,7 @@ import {mapToString, arrayCount} from "@utils/array";
 import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/inputs/dropdowns/tree/tree-child";
+import { Mode } from "@elements/core/inputs/dropdowns/tree/tree-child";
 
 export default {
     title: "Core / Inputs / Dropdowns"
@@ -10,11 +11,13 @@ export default {
 
 interface Args {
     data: Array<TreeNode>,
+    
 }
 
 
 const DEFAULT_ARGS:Args = {
-    data: mockHierarchy
+    data: mockHierarchy,
+ 
 };
 
 export const DropdownTree = (props?:Partial<Args>) => {
@@ -31,9 +34,9 @@ DropdownTree.argTypes = {
     }
   }
 }
-const leafNode = ({label, open, children}:TreeNode) => {
+const leafNode = ({label, content, open, children}:TreeNode) => {
   return `
-    <dropdown-tree-child label="${label}" ${open ? "open" : ""}>
+    <dropdown-tree-child label="${label}" ${open ? "open" : ""} content="${content}">
     ${mapToString (children, leafNode)}
     </dropdown-tree-child>
   `;

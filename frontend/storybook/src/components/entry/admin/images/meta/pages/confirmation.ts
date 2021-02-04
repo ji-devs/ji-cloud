@@ -12,7 +12,7 @@ const STR_LABEL = "Label Images";
 
 
 
-export const Confirmation = () => {
+export const AddImage = () => {
     return `
     <image-meta-page>
       <underlined-title slot="title" title=${STR_LABEL}></underlined-title>
