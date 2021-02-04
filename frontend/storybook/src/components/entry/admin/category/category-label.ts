@@ -1,5 +1,4 @@
-import "@elements/entry/admin/category/pages/category-one";
-import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
+import "@elements/entry/admin/category/pages/category-label";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/dropdowns/tree/tree-child";
@@ -21,7 +20,7 @@ const STR_PUBLISH = "Publish"
 
 const leafNode = ({label, open, children}:TreeNode) => {
   return `
-    <tree-dropdown-child label="${label}" ${open ? "open" : ""}>
+    <tree-dropdown-child label="${label}" ${open ? "open" : ""} page="category">
     ${mapToString (children, leafNode)}
     </tree-dropdown-child>
   `;
@@ -57,15 +56,14 @@ const DEFAULT_ARGS:Props = {
   data: mockHierarchy
 }
 
-export const CategoryOne = (props?:Props) => {
+export const CategoryLabel = (props?:Props) => {
   const {data} = props || DEFAULT_ARGS;
 
   console.log(data);
 
   return `
-    <category-one>
-      <div slot="left">${LeftLabel()}</div>
-      
+    <category-label>
+    
       <div slot="middle">
         ${mapToString(data, rootNode)}
       </div>
@@ -80,13 +78,13 @@ export const CategoryOne = (props?:Props) => {
       <div slot="button">
       ${Rectangle({color:"red",size:"medium",contents:STR_PUBLISH,bold:false, italic:false})}
     </div>
-    </category-one>
+    </category-label>
     
     `
 }
 
-CategoryOne.args = DEFAULT_ARGS;
-CategoryOne.argTypes = {
+CategoryLabel.args = DEFAULT_ARGS;
+CategoryLabel.argTypes = {
   data: {
     control: {
       type: 'object',

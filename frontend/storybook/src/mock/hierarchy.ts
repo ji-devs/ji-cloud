@@ -3,47 +3,46 @@ export interface TreeNode {
     label: string,
     open: boolean,
     children: Array<TreeNode>,
-    content: string
-}
+    mode: "checkbox" | "inputText"}
 
 export const mockHierarchy: Array<TreeNode> = [
     {
         label: "A",
         open: true,
-        content: "inputText",
+        mode: "inputText",
         children: [
             {
                 label: "A.1",
                 open: false,
-                content: "inputText",
+                mode: "inputText",
                 children: [{
                     label: "A.1.1",
                     open: false,
                     children: [],
-                    content: "checkbox"
+                    mode: "checkbox"
                 },
                 {
                     label: "A.1.2",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 }]
             },
             {
                 label: "A.2",
                 open: true,
-                content: "inputText",
+                mode: "inputText",
                 children: [{
                     label: "A.2.1",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 },
                 {
                     label: "A.2.2",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 }]
             }
         ]
@@ -51,40 +50,40 @@ export const mockHierarchy: Array<TreeNode> = [
     {
         label: "B",
         open: true,
-        content: "inputText",
+        mode: "inputText",
         children: [
             {
                 label: "B.1",
                 open: true,
-                content: "checkbox",
+                mode: "checkbox",
                 children: [{
                     label: "B.1.1",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 },
                 {
                     label: "B.1.2",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 }]
             },
             {
                 label: "B.2",
                 open: false,
-                content: "inputText",
+                mode: "inputText",
                 children: [{
                     label: "B.2.1",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 },
                 {
                     label: "B.2.2",
                     open: false,
                     children: [],
-                    content: "inputText"
+                    mode: "inputText"
                 }]
             }
         ]

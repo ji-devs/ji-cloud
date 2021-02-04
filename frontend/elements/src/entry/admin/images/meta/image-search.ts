@@ -40,6 +40,11 @@ export class _ extends LitElement {
         grid-column-gap: 62px;
         grid-row-gap:40px;
     }
+    ::slotted([slot="pagination-bottom"]){
+        margin-top:66px;
+        display:flex;
+        justify-content:center;
+    }
     
  
     `];
@@ -66,8 +71,8 @@ export class _ extends LitElement {
 
             </div>
             <slot name="pagination"></slot>
-            <div class="dropdown-wrapper">
-                <dropdown-underlined>
+            <div class="dropdown-wrapper ">
+                <dropdown-underlined class="${closed ? "closed" : "open"}">
                 <div class="list-object">
                 <li class="published">${STR_PUBLISHED}</li>
                 </div>
@@ -80,6 +85,7 @@ export class _ extends LitElement {
         <div class="images">
         <slot name="image-display"></slot>
         </div>
+        <slot name="pagination-bottom"></slot>
     </main>
   `;
   }

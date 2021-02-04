@@ -11,6 +11,7 @@ interface Args {
     number:string,
     searchword:string,
     active:boolean,
+    closed:boolean
     
 }
 
@@ -18,7 +19,8 @@ const DEFAULT_ARGS:Args = {
     results: "35",
     number: "5",
     searchword:"Pesach",
-    active:false
+    active:false,
+    closed:false,
    
 }
 
@@ -31,7 +33,7 @@ export const ImageSearch = (props?:Partial<Args>) => {
     <title-ji color="black" size="medium-large" slot="number">${number}&nbsp;</title-ji>
     <title-ji color="black" size="medium-large" slot="searchword">${searchword}&nbsp;</title-ji>
 
-    <search-pagination slot="pagination">
+    <search-pagination slot="pagination" ${closed && "closed"}>
     <span>${results}</span>
     </search-pagination>
     <div slot="image-display">
@@ -52,6 +54,7 @@ export const ImageSearch = (props?:Partial<Args>) => {
     <div slot="image-display">
     ${SearchImageDisplay()}
     </div>
+    <search-pagination slot="pagination-bottom">
     </image-search>`;
 }
 
