@@ -1,4 +1,4 @@
-import "@elements/entry/admin/images/meta/page-three";
+import "@elements/entry/admin/images/meta/pages/page-three";
 import {LeftLabel} from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/cards/blue";
 import "@elements/core/titles/ji";

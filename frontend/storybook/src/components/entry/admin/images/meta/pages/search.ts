@@ -1,6 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/admin/images/meta/image-search";
+import "@elements/entry/admin/images/meta/pages/image-search";
 import "@elements/core/menu/search-pagination";
+import "@elements/core/menu/ellipses-menu";
+import "@elements/core/inputs/dropdowns/dropdown-underlined";
+import "@elements/entry/admin/images/meta/widgets/image-menu";
+
 import { SearchImageDisplay } from "~/components/entry/admin/images/meta/sections/search-image-display";
 export default {
     title: "Entry/Admin/Images/Meta/Pages"
@@ -11,6 +15,7 @@ interface Args {
     number:string,
     searchword:string,
     active:boolean,
+    closed:boolean
     
 }
 
@@ -18,7 +23,8 @@ const DEFAULT_ARGS:Args = {
     results: "35",
     number: "5",
     searchword:"Pesach",
-    active:false
+    active:false,
+    closed:false,
    
 }
 
@@ -33,7 +39,11 @@ export const ImageSearch = (props?:Partial<Args>) => {
 
     <search-pagination slot="pagination">
     <span>${results}</span>
+    
     </search-pagination>
+    <dropdown-underlined slot="dropdown">
+        <image-menu></image-menu>
+    </dropdown-underlined>
     <div slot="image-display">
     ${SearchImageDisplay({active:true})}
     </div>
@@ -52,6 +62,7 @@ export const ImageSearch = (props?:Partial<Args>) => {
     <div slot="image-display">
     ${SearchImageDisplay()}
     </div>
+    <search-pagination slot="pagination-bottom">
     </image-search>`;
 }
 

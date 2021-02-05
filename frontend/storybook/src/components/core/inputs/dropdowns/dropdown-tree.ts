@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
+import {mockCategoryHierarchy, mockImagesHierarchy, TreeNode} from "~/mock/hierarchy";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/inputs/dropdowns/tree/tree-child";
 import { Mode } from "@elements/core/inputs/dropdowns/tree/tree-child";
@@ -12,31 +12,55 @@ export default {
 interface Args {
     data: Array<TreeNode>,
     
+    
 }
 
 
-const DEFAULT_ARGS:Args = {
-    data: mockHierarchy,
+const DEFAULT_ARGS_ONE:Args = {
+    data: mockImagesHierarchy,
  
 };
 
-export const DropdownTree = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+export const DropdownTreeOne = (props?:Partial<Args>) => {
+    props = props ? {...DEFAULT_ARGS_ONE, ...props} : DEFAULT_ARGS_ONE;
 
     return mapToString(props.data, rootNode);
 }
 
-DropdownTree.args = DEFAULT_ARGS;
-DropdownTree.argTypes = {
+DropdownTreeOne.args = DEFAULT_ARGS_ONE;
+DropdownTreeOne.argTypes = {
   data: {
     control: {
       type: 'object',
     }
   }
 }
-const leafNode = ({label, content, open, children}:TreeNode) => {
+
+const DEFAULT_ARGS_TWO:Args = {
+  data: mockCategoryHierarchy,
+
+};
+
+export const DropdownTreeTwo = (props?:Partial<Args>) => {
+  props = props ? {...DEFAULT_ARGS_TWO, ...props} : DEFAULT_ARGS_TWO;
+
+  return mapToString(props.data, rootNode);
+}
+
+DropdownTreeTwo.args = DEFAULT_ARGS_TWO;
+DropdownTreeTwo.argTypes = {
+data: {
+  control: {
+    type: 'object',
+  }
+}
+}
+
+
+
+const leafNode = ({label, mode, open, children}:TreeNode) => {
   return `
-    <dropdown-tree-child label="${label}" ${open ? "open" : ""} content="${content}">
+    <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
     ${mapToString (children, leafNode)}
     </dropdown-tree-child>
   `;

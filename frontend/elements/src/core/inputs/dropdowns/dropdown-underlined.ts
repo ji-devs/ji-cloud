@@ -7,6 +7,7 @@ export class _ extends LitElement {
       css`
       .wrapper {
         margin-bottom: 16px;
+        position:relative;
       }
    
       span {
@@ -46,10 +47,13 @@ export class _ extends LitElement {
     }
     .dropdown{
         padding:8px 0;
-        background-color:#ffffff
+        background-color:#ffffff;
         box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-        border: solid 1px #f0f1f5;    }
-  
+        border: solid 1px #f0f1f5;    
+        position: absolute;  
+        z-index:10;
+        width:100%;
+      }
     ul{
         padding:0;
         list-style-type: none;
@@ -69,7 +73,7 @@ export class _ extends LitElement {
 
  
   @property({type:Boolean})
-  closed: boolean = true;
+  closed: boolean = false;
 
   render() {
     const {closed } = this; 

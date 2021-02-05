@@ -1,4 +1,4 @@
-import "@elements/entry/admin/images/meta/page-two";
+import "@elements/entry/admin/images/meta/pages/page-two";
 import { LeftLabel } from "~/components/entry/admin/images/meta/sections/image-label-left";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
@@ -6,7 +6,7 @@ import "@elements/core/inputs/dropdowns/tree/tree-child";
 import "@elements/core/inputs/dropdowns/tree/tree-static-child";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/cards/blue";
-import {mockHierarchy, TreeNode} from "~/mock/hierarchy";
+import {mockImagesHierarchy, TreeNode} from "~/mock/hierarchy";
 
 import {mapToString} from "@utils/array";
 import { Rectangle } from "~/components/core/buttons/rectangle";
@@ -19,11 +19,11 @@ export default {
 const STR_NEXT = "Next"
 
 
-const leafNode = ({label, open, children}:TreeNode) => {
+const leafNode = ({label, mode, open, children}:TreeNode) => {
   return `
-    <tree-dropdown-child label="${label}" ${open ? "open" : ""}>
+    <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
     ${mapToString (children, leafNode)}
-    </tree-dropdown-child>
+    </dropdown-tree-child>
   `;
 }
 const rootNode = ({label, open, children}:TreeNode) => {
@@ -54,7 +54,7 @@ interface Props {
 }
 
 const DEFAULT_ARGS:Props = {
-  data: mockHierarchy
+  data: mockImagesHierarchy
 }
 
 export const ImageLabelFullTwo = (props?:Props) => {
