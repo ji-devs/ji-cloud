@@ -47,9 +47,11 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .back{
   margin-right:55px;
+  cursor:pointer;
 }
 .next{
   margin-left:55px;
+  cursor:pointer;
 }
 span{
   margin-left: 4px;

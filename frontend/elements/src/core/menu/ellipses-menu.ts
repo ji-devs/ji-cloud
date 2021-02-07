@@ -4,23 +4,26 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
   static get styles() {
     return [css`
-    .wrapper{
-        display:relative;
+    .dropdown.menuVisible{display:block}
+    .dropdown{
+      display:none;
     }
+    
+    
 
     
     `];
   }
 
   @property({type:Boolean})
-  clicked:boolean = true;
+  menuVisible:boolean = false;
 
   render() {
-      const {clicked} = this;
+      const {menuVisible} = this;
     return html`
-    <div class="wrapper ${clicked ? "clicked" : "hide"}">
+    <div class="wrapper ">
     <button-ellipses></button-ellipses>
-    <div class="dropdown">
+    <div class="dropdown ${menuVisible ? "menuVisible" : ""}">
        <slot></slot>
     
        </div>

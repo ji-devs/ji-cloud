@@ -8,6 +8,7 @@ export class _ extends LitElement {
       .wrapper {
         margin-bottom: 16px;
         position:relative;
+        cursor:pointer;
       }
    
       span {
@@ -35,9 +36,10 @@ export class _ extends LitElement {
       ::placeholder {
         color: #a1a8ad;
       }
-      img {
+      img-ui {
         position: absolute;
         right: -10px;
+        cursor:pointer
       }
       .closed img-ui{
           transform:rotate(90deg)
@@ -77,7 +79,7 @@ export class _ extends LitElement {
 
   render() {
     const {closed } = this; 
-
+    const STR_SEEALL = "See all"
     return html`
          <div class="wrapper ${closed ? "closed" : "open"}">
       
@@ -85,8 +87,10 @@ export class _ extends LitElement {
             <input
               class=""
               type="text"
-              placeholder="Jane Doe"
+              placeholder="${STR_SEEALL}"
               aria-label="Full name"
+              value="${STR_SEEALL}"
+              readonly
             />
             <img-ui path="icon-chevron-categories-24-px.svg"></img-ui>
           </div>
