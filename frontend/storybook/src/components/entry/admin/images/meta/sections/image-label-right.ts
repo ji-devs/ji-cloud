@@ -9,7 +9,6 @@ export default {
   title: 'Entry/Admin/Images/Meta/Sections',
 }
 
-const STR_USED = "To be used only for";
 
 export const LabelRight = () => {
     
@@ -17,7 +16,6 @@ export const LabelRight = () => {
     <list-two-column>
      <div slot="one">${ImageStyle()}</div>
      <div slot="two">
-      <input-text-underline label="${STR_USED}" icon=true></input-text-underline>
       ${
         Age() +
         Stream()

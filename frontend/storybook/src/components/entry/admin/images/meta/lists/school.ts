@@ -27,6 +27,4 @@ export const ListHover = (props?:Props) => {
     })}    </vertical-full>`
 }
 
-ListHover.args = {
-    label:"Placeholder"
-}
+ListHover.args = DEFAULT_PROPS

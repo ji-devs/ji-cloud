@@ -1,9 +1,9 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/admin/images/meta/sections/search-image-display";
-import { Mode } from "@elements/entry/admin/images/meta/sections/search-image-display";
+import "@elements/entry/admin/images/search/widgets/search-image-display";
+import { Mode } from "@elements/entry/admin/images/search/widgets/search-image-display";
 
 export default {
-    title: "Entry/Admin/Images/Meta/Sections"
+    title: "Entry/Admin/Images/Search/Widgets"
 }
 
 interface Args {

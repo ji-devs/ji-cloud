@@ -4,12 +4,12 @@ export default {
   title: 'Entry / Admin / Images / Meta / Lists',
 }
 
-export const ListHover = ({label}) => {
+export const ListHoverItem = ({label}) => {
     return `<vertical-full>
     <input-checkbox label="${label}" slot="one"></input-checkbox>
     </vertical-full>`
 }
 
-ListHover.args = {
+ListHoverItem.args = {
     label:"Placeholder"
 }

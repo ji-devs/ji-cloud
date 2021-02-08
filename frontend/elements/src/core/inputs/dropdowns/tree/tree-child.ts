@@ -69,6 +69,12 @@ export class _ extends LitElement {
       .ellipsesMenu{
         display:block;
       }
+      input{
+        display: block;
+    margin-top: -28px;
+    margin-left: 25px;
+}
+      }
    
     
     `,

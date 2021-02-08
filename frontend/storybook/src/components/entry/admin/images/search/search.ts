@@ -1,13 +1,13 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/admin/images/meta/pages/image-search";
+import "@elements/entry/admin/images/search/pages/image-search";
 import "@elements/core/menu/search-pagination";
 import "@elements/core/menu/ellipses-menu";
 import "@elements/core/inputs/dropdowns/dropdown-underlined";
 import "@elements/entry/admin/images/meta/widgets/image-menu";
 
-import { SearchImageDisplay } from "~/components/entry/admin/images/meta/sections/search-image-display";
+import { SearchImageDisplay } from "~/components/entry/admin/images/search/widgets/search-image-display";
 export default {
-    title: "Entry/Admin/Images/Meta/Pages"
+    title: "Entry/Admin/Images/Search/Pages"
 }
 
 interface Args {

@@ -6,19 +6,19 @@ export default {
 }
 
 interface Args {
-    clicked:boolean,
+    menuVisible:boolean,
 }
 
 const DEFAULT_ARGS:Args = {
-    clicked:true
+    menuVisible:false
 }
 
 export const EllipsesMenu = (props?:Args) => {
 
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {clicked} = props
+    const {menuVisible} = props
 
-    return `<ellipses-menu ${argsToAttrs(props)} ${clicked && "clicked"}></ellipses-menu>`;
+    return `<ellipses-menu ${argsToAttrs(props)} ${menuVisible && "menuVisible"}></ellipses-menu>`;
 }
 
 EllipsesMenu.args = DEFAULT_ARGS;
