@@ -1,4 +1,5 @@
-import "@elements/entry/admin/category/pages/category-label";
+import "@elements/entry/admin/category/pages/landing";
+import "@elements/entry/admin/category/buttons/add";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/dropdowns/tree/tree-child";
@@ -6,6 +7,7 @@ import "@elements/core/inputs/dropdowns/tree/tree-static-child";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/cards/blue";
 import "@elements/core/menu/ellipses-menu";
+import "@elements/core/buttons/expand";
 import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
 
 import {mapToString} from "@utils/array";
@@ -48,7 +50,8 @@ const DEFAULT_ARGS:Props = {
   data: mockCategoryHierarchy
 }
 
-export const CategoryLabel = (props?:Props) => {
+export const Landing = (props?:Props) => {
+  
   const {data} = props || DEFAULT_ARGS;
 
   console.log(data);
@@ -60,17 +63,16 @@ export const CategoryLabel = (props?:Props) => {
         ${mapToString(data, rootNode)}
         
       </div>
-     
-      <div slot="button">
-      ${Rectangle({color:"red",size:"medium",contents:STR_PUBLISH,bold:false, italic:false})}
-    </div>
+      <button-expand slot="expand"></button-expand>
+      <category-button-add slot="add"></category-button-add>
+
     </category-label>
     
     `
 }
 
-CategoryLabel.args = DEFAULT_ARGS;
-CategoryLabel.argTypes = {
+Landing.args = DEFAULT_ARGS;
+Landing.argTypes = {
   data: {
     control: {
       type: 'object',

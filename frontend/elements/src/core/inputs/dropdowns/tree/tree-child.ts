@@ -118,7 +118,7 @@ export class _ extends LitElement {
       html`
       <div class="icon-wrapper">
       <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-      <input class="textinput" type="text"/>
+      <input class="textinput" type="text" value="${label}"/>
       <div class="inside"></div>
       </div>`
       :nothing;

@@ -3,7 +3,6 @@ import "@elements/core/titles/ji";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/inputs/search";
 import { nothing } from "lit-html";
-export type Display = "collapsed" | "expanded";
 
 @customElement('category-label')
 export class _ extends LitElement {
@@ -47,17 +46,10 @@ export class _ extends LitElement {
     `];
     }
 
-    @property()
-  display:Display = "expanded";
-
     render() {
-        const {display} = this;
         const STR_LABEL = "Edit Categories";
         const STR_CATEGORIES = "Categories";
         const STR_ADD = "Add Category"
-        const icon = display === "expanded" ? "Icon_CollapseAll_24.svg"
-        : display === "collapsed" ? "Icon_ExpandAll_24.svg"
-        : nothing;
 
         return html`
     <div class="main-wrapper">
@@ -69,9 +61,9 @@ export class _ extends LitElement {
                     <div class="title-wrapper">
     
                         <title-ji class="title" color="blue">${STR_CATEGORIES}</title-ji>
-                        <img-ui path="${icon}"></img-ui>
+                        <slot name="expand"></slot>
                     </div>
-                    <button-rect color="blue" iconBefore="plus">${STR_ADD}</button-rect>
+                    <slot name="add"></slot>
                 </div>
                 <slot name="middle"></slot>
     

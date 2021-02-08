@@ -31,7 +31,7 @@ export const mockCategoryHierarchy: Array<TreeNode> = [
             {
                 label: "A.2",
                 open: true,
-                mode: "textDisplay",
+                mode: "textInput",
                 children: [{
                     label: "A.2.1",
                     open: false,
@@ -94,7 +94,7 @@ export const mockImagesHierarchy: Array<TreeNode> = [
     {
         label: "A",
         open: true,
-        mode: "textDisplay",
+        mode: "checkbox",
         children: [
             {
                 label: "A.1",

@@ -7,11 +7,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::{
-    container::ContainerPage,
-    categories::CategoriesPage,
-    images::{ImagesPage, PageMode},
-};
+use crate::categories::dom::CategoriesPage;
 
 pub struct Router {
 }
@@ -26,16 +22,19 @@ impl Router {
             .signal_ref(|url| Route::from_url(&url))
     }
 
-    fn signal_dom() -> impl Signal<Item = Option<Dom>> {
+    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
             Self::route_signal()
                 .map(|route| {
                     match route {
                         Route::Admin(route) => {
                             match route {
-                                AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
+                                AdminRoute::Categories=> Some(CategoriesPage::render()),
+                                _ => None
+                                /*
                                 AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
                                 AdminRoute::ImageEdit(id, query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id, query)))),
                                 AdminRoute::ImageSearch(query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Search(query)))),
+                                */
                             }
                         }
                         _ => None
@@ -44,9 +43,6 @@ impl Router {
     }
 
     pub fn render(&self) -> Dom {
-        ContainerPage::render(ContainerPage::new(),
-            Self::signal_dom(),
-            Self::route_signal()
-        )
+        html!("empty-fragment", { .child_signal(Self::dom_signal()) } )
     }
 }
