@@ -69,7 +69,7 @@ export class _ extends LitElement {
       .ellipsesMenu{
         display:block;
       }
-      input{
+      .textinput{
         display: block;
     margin-top: -28px;
     margin-left: 25px;
@@ -118,7 +118,7 @@ export class _ extends LitElement {
       html`
       <div class="icon-wrapper">
       <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-      <input type="text"/>
+      <input class="textinput" type="text"/>
       <div class="inside"></div>
       </div>`
       :nothing;
