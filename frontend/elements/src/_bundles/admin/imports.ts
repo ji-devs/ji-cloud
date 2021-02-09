@@ -8,3 +8,4 @@ import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/cards/blue";
 import "@elements/core/menu/ellipses-menu";
 import "@elements/core/buttons/expand";
+import "@elements/core/window/window-loader-block";

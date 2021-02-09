@@ -2,16 +2,29 @@ use super::state::*;
 use std::rc::Rc;
 use shared::{
     api::endpoints::{ApiEndpoint,self},
-    domain::category::{GetCategoryRequest, CategoryResponse, CategoryTreeScope},
+    domain::category::{GetCategoryRequest, CreateCategoryRequest,NewCategoryResponse,CategoryResponse, CategoryTreeScope, CategoryId},
     error::EmptyError
 };
 use utils::fetch::api_with_auth;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::prelude::*;
+use dominator::clone;
 
+pub fn handle_double_click(cat: &Rc<Category>) {
+    if !cat.editing.get() {
+        cat.editing.set(true);
+    }
+}
+
+pub fn toggle_expand_all(cat: &Rc<Category>, flag: bool) {
+    cat.expanded.set(flag);
+
+    for child in cat.children.lock_ref().iter() {
+        toggle_expand_all(child, flag);
+    }
+}
 pub fn load_categories(state:Rc<State>) {
-    
-    spawn_local(async move {
+    state.loader.load(clone!(state => async move {
         let req = GetCategoryRequest {
             ids: Vec::new(), 
             scope: Some(CategoryTreeScope::Decendants)
@@ -32,31 +45,27 @@ pub fn load_categories(state:Rc<State>) {
                 log::info!("err!")
             }
         }
-        /*
-        fn load_children(categories:Vec<Category>, parent:Rc<MutableCategory>) {
-            for cat in categories.into_iter() {
-                let item = MutableCategory::append_child(Some(cat.name.to_string()), cat.id.0.to_string(), Some(parent.clone()));
-                if !cat.children.is_empty() {
-                    load_children(cat.children, item);
-                }
-            }
-        }
+    }));
+}
 
-        let resp = load_categories().await;
-        match resp {
+
+pub fn add_category(state:Rc<State>, parent: Option<Rc<Category>>) {
+    state.loader.load(clone!(state => async move {
+        let name = crate::strings::STR_NEW_CATEGORY_NAME.to_string();
+
+        let req = CreateCategoryRequest {
+            name: name.clone(),
+            parent_id: parent.map(|cat| cat.id)
+        };
+
+        match api_with_auth::<NewCategoryResponse, EmptyError, _>(endpoints::category::Create::PATH, endpoints::category::Create::METHOD, Some(req)).await {
             Ok(resp) => {
-                let mut categories:Vec<Category> = resp.categories;
-                let mut parent:Rc<MutableCategory> = page.categories_root.clone();
-                
-                load_children(categories, parent);
-
-                page.loader_status.set(Some(Ok(())));
-            }, 
-            Err(err) => {
-                log::info!("{}", serde_json::to_string(&err).unwrap());
-                page.loader_status.set(Some(Err(())))
+                let cat = Rc::new(Category::new(resp.id, name));
+                state.categories.lock_mut().push_cloned(cat);
+            },
+            Err(_) => {
+                log::info!("err!")
             }
         }
-        */
-    });
+    }));
 }

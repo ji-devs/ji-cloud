@@ -1,0 +1,1 @@
+pub const STR_AUTH_ALERT:&'static str = "You're not authorized!";

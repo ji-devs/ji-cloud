@@ -80,6 +80,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     if res.ok() {
         Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
     } else {
+        side_effect_error(res.status());
         Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
@@ -97,6 +98,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     if res.ok() {
         Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
     } else {
+        side_effect_error(res.status());
         Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
@@ -116,7 +118,8 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     if res.ok() {
         Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
     } else {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        side_effect_error(res.status());
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
 
@@ -134,9 +137,19 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
     if res.ok() {
         Ok(())
     } else {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        side_effect_error(res.status());
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
     }
 }
+
+fn side_effect_error(status_code:u16) {
+    match status_code {
+        403 | 401 => {
+            web_sys::window().unwrap_throw().alert_with_message(crate::strings::STR_AUTH_ALERT);
+        },
+        _ => {}
+    }
+} 
 
 /**** DEPRECATED BELOW HERE - JUST FOR REFERENCE ***/
 /*

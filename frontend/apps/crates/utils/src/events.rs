@@ -7,6 +7,10 @@ pub use dominator::events::*;
 
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
+
+temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);
+temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
+
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
 // Custom Input
