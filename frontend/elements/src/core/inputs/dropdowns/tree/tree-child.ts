@@ -3,10 +3,11 @@ import "@elements/core/buttons/ellipses";
 import "@elements/entry/admin/category/category-dropdown";
 
 import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 export type Mode = "checkbox" | "textInput" | "textDisplay";
 
 @customElement("dropdown-tree-child")
-export class _ extends LitElement {
+export class DropdownTreeChild extends LitElement {
   static get styles() {
     return [
       css`
@@ -15,9 +16,6 @@ export class _ extends LitElement {
           display:flex;
           content-items:center;
 
-      }
-      .open img-ui{
-          transform: rotate(90deg);
       }
       ul.closed {
         display: none;
@@ -71,12 +69,17 @@ export class _ extends LitElement {
       }
       .textinput{
         display: block;
-    margin-top: -28px;
-    margin-left: 25px;
-}
+          margin-top: -28px;
+          margin-left: 25px;
       }
    
-    
+      .arrow {
+        display: inline-block;
+        cursor: pointer;
+      }
+      .arrow.expanded {
+          transform: rotate(90deg);
+      }
     `,
     ];
   }
@@ -84,8 +87,11 @@ export class _ extends LitElement {
   @property()
   label: string = "";
 
-  @property({ type: Boolean })
-  open: boolean = false;
+  @property({type: Boolean})
+  expanded: boolean = false; 
+
+  @property({type: Boolean})
+  hasChildren: boolean = false; 
 
   @property()
   mode: Mode = "textDisplay";
@@ -94,50 +100,76 @@ export class _ extends LitElement {
   hasMenu: boolean = true;
 
   render() {
-    const { label, open, mode, hasMenu } = this;
-    const inside = mode === "checkbox" ? 
-      html`
-      <div class="icon-wrapper">
-        <input type="checkbox" />
-        <div class="inside"></div>
-      </div>
-      <div>${label}</div>
-      <slot name="menu-dropdown"></slot>
-`
-      : mode === "textDisplay" ? 
-      html`
-        <div class="icon-wrapper">
-          <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-          <div class="inside"></div>
-        </div>
-        <div>${label}</div>
-       <slot name="menu-dropdown"></slot>
-
-        `
-      : mode === "textInput" ?
-      html`
-      <div class="icon-wrapper">
-      <img-ui path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-      <input class="textinput" type="text"/>
-      <div class="inside"></div>
-      </div>`
-      :nothing;
-
-
+    const { expanded, mode} = this;
 
     return html`
       <li class="titleoptions open">
         <div class="ellipses-wrapper">
-       
-            ${inside}
+            ${mode === "checkbox" ? renderCheckbox(this)
+              : mode === "textInput" ? renderTextInput(this)
+              : mode === "textDisplay" ? renderTextDisplay(this)
+              : nothing
+            }
         </div>
       
-        <ul class="${open ? " open" : "closed" }">
+        <ul class="${expanded ? " open" : "closed" }">
           <slot></slot>
         </ul>
       </li>
-
-        
     `;
   }
+}
+
+function renderCheckbox(self:DropdownTreeChild) {
+  const {label} = self;
+
+    return html`
+    <div class="icon-wrapper">
+      <input type="checkbox" />
+      <div class="inside"></div>
+    </div>
+    <div>${label}</div>
+    <slot name="menu-dropdown"></slot>
+    `
+}
+
+function renderTextDisplay(self:DropdownTreeChild) {
+  const {label} = self;
+  return html`
+    <div class="icon-wrapper">
+      ${renderArrow(self)}
+      <div class="inside"></div>
+    </div>
+    <div>${label}</div>
+    <slot name="menu-dropdown"></slot>
+  `
+}
+function renderTextInput(self:DropdownTreeChild) {
+  const {label} = self;
+    return html`
+    <div class="icon-wrapper">
+    ${renderArrow(self)}
+    <input class="textinput" type="text" value="${label}"/>
+    <div class="inside"></div>
+    </div>`
+}
+
+function renderArrow(self:DropdownTreeChild) {
+    const {expanded, hasChildren} = self;
+
+    if(!hasChildren) {
+      //THIS BREAKS WHEN MODE IS textInput
+      return nothing;
+    }
+    const classes = classMap({
+      arrow: true,
+      expanded
+    });
+
+    return html`<img-ui 
+      @click="${() => self.expanded = !self.expanded}" 
+      path="icon-chevron-categories-24-px.svg" 
+      alt=""
+      class="${classes}"
+    ></img-ui>`
 }

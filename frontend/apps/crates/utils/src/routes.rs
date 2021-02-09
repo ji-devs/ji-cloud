@@ -43,7 +43,7 @@ pub enum AdminRoute {
     Categories,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageEdit(Id, Option<ImageSearchQuery>),
+    ImageMeta(Id, Option<ImageSearchQuery>),
 }
 
 #[derive(Debug, Clone)]
@@ -140,12 +140,12 @@ impl Route {
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
-            ["admin", "image-edit", id] => {
+            ["admin", "image-meta", id] => {
                 if let Some(search) = json_query {
                     let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
-                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), Some(search)))
+                    Self::Admin(AdminRoute::ImageMeta(id.to_string(), Some(search)))
                 } else {
-                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), None))
+                    Self::Admin(AdminRoute::ImageMeta(id.to_string(), None))
                 }
             },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
@@ -219,14 +219,14 @@ impl From<&Route> for String {
                         }
                     }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
-                    AdminRoute::ImageEdit(id, search) => {
+                    AdminRoute::ImageMeta(id, search) => {
                         match search {
-                            None => format!("/admin/image-edit/{}", id),
+                            None => format!("/admin/image-meta/{}", id),
                             Some(search) => {
                                 let data = serde_json::to_string(&search).unwrap_throw();
                                 let query = JsonQuery { data };
                                 let query = serde_qs::to_string(&query).unwrap_throw();
-                                format!("/admin/image-edit/{}?{}", id, query)
+                                format!("/admin/image-meta/{}?{}", id, query)
                             }
                         }
                     }

@@ -1,20 +1,61 @@
-use shared::domain::category::*;
-use std::convert::TryInto;
-use utils::{
-    routes::{Route, UserRoute},
-    storage,
-};
-use futures_signals::{signal::{Mutable, Signal, SignalExt}, signal_vec::MutableVec};
-use serde::{Serialize, Deserialize};
-use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use dominator::clone;
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal_vec::{MutableVec, SignalVec, SignalVecExt};
 use std::rc::Rc;
-use super::CategoriesPage;
-use futures::future::ready;
-pub const EMPTY_NAME:&'static str = "New Category";
-use super::actions;
+use std::cell::RefCell;
+use wasm_bindgen::prelude::*;
+use shared::domain::category::{CategoryId, Category as DbCategory};
 
+pub struct State {
+    pub categories: MutableVec<Rc<Category>>
+}
+impl State {
+    pub fn new() -> Self {
+        Self {
+            categories: MutableVec::new()
+        }
+    }
+}
+
+pub struct Category {
+    pub id: CategoryId,
+    pub name: Mutable<String>,
+    pub children: MutableVec<Rc<Category>>,
+    pub expanded: Mutable<bool>,
+    pub editing: Mutable<bool>,
+}
+
+impl Category {
+    pub fn edge_signal(&self) -> impl Signal<Item = bool> {
+        self
+            .children
+            .signal_vec_cloned()
+            .len()
+            .map(|len| if len > 0 { false } else { true })
+    }
+}
+
+impl From<DbCategory> for Category {
+    fn from(cat:DbCategory) -> Self {
+
+        let categories:Vec<Rc<Self>> = cat.children
+            .into_iter()
+            .map(Category::from)
+            .map(Rc::new)
+            .collect();
+
+        let children = MutableVec::new_with_values(categories);
+
+        Self {
+            id: cat.id,
+            name: Mutable::new(cat.name),
+            children,
+            expanded: Mutable::new(true),
+            editing: Mutable::new(true)
+        }
+    }
+}
+/*
 pub struct MutableCategory {
     pub id: String,
     pub name: Mutable<Option<String>>,
@@ -111,3 +152,4 @@ impl MutableCategory {
         } 
     }
 }
+*/

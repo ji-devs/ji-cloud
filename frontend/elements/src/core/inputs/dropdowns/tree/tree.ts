@@ -1,7 +1,7 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { noChange, nothing } from "lit-html";
-export type Display = "collapsed" | "expanded";
+import "@elements/core/buttons/expand";
 
 @customElement("dropdown-tree")
 export class _ extends LitElement {
@@ -66,39 +66,41 @@ export class _ extends LitElement {
       display:flex;
       margin-left:40px;
     }
+    .pointer {
+      cursor: pointer;
+    }
     `,
     ];
+  }
+
+  onExpandAllToggle(evt:CustomEvent) {
+    const {value} = evt.detail;
+    this.dispatchEvent(new Event(value ? "expand-all" : "collapse-all"));
   }
 
   @property()
   label: string = "";
 
-  @property({ type: Boolean })
-  open: boolean = false;
-
-  @property()
-  display:Display = "expanded";
+  @property({type: Boolean})
+  expanded: boolean = false; 
 
   render() {
-    const { label, open,display } = this;
-
-    const icon = display === "expanded" ? "Icon_CollapseAll_24.svg"
-    : display === "collapsed" ? "Icon_ExpandAll_24.svg"
-    : nothing;
+    const { label, expanded} = this;
 
     return html`
-      <div class="main-wrapper ${open ? "bordergreen open" : ""}">
+      <div class="main-wrapper ${expanded ? "bordergreen open" : ""}">
         <div class="inside-wrapper">
           <div class="text-wrapper">
-            <img-ui class="sidearrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-            <img-ui class="downarrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
+            <img-ui @click="${() => this.expanded = true}" class="sidearrow pointer" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
+            <img-ui @click="${() => this.expanded = false}" class="downarrow pointer" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
 
             <p>${label}</p>
-            <img-ui path="${icon}"></img-ui>
+
+            <button-expand @custom-toggle="${this.onExpandAllToggle.bind(this)}" .expanded="${expanded}" ></button-expand>
 
           </div>
         </div>
-        <ul class="${open ? "open" : "closed"}">
+        <ul class="${expanded ? "open" : "closed"}">
           <slot></slot>
         </ul>
       </div>

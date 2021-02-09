@@ -41,9 +41,9 @@ cfg_if! {
 extern "C" {
     #[wasm_bindgen(js_name = FRONTEND_DEV_AUTH)]
     fn frontend_dev_auth() -> bool;
-    #[wasm_bindgen(js_name = FRONTEND_DEV_TOKEN)]
+    #[wasm_bindgen(js_name = API_TOKEN)]
     fn frontend_dev_token() -> String;
-    #[wasm_bindgen(js_name = FRONTEND_DEV_CSRF)]
+    #[wasm_bindgen(js_name = API_CSRF)]
     fn frontend_dev_csrf() -> String;
 }
 
