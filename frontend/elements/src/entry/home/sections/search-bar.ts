@@ -64,9 +64,10 @@ export class _ extends LitElement {
   render() {
 
     const {label} = this;
+    const STR_LOOIKINGFOR = "What are you looking for?"
     return html`
     <div class="wrapper">
-        <input  type="search" name="" value="" placeholder="What are you looking for?">
+        <input  type="search" name="" value="" placeholder="${STR_LOOIKINGFOR}">
         <div class="age">
           <slot name="dropdown"></slot>
         </div>
