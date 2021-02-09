@@ -2,9 +2,9 @@ import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { noChange, nothing } from "lit-html";
 import "@elements/core/buttons/expand";
-
+export type Mode = "checkbox" | "textInput" | "textDisplay";
 @customElement("dropdown-tree")
-export class _ extends LitElement {
+export class DropdownTree extends LitElement {
   static get styles() {
     return [
       css`
@@ -84,8 +84,11 @@ export class _ extends LitElement {
   @property({type: Boolean})
   expanded: boolean = false; 
 
+  @property()
+  mode: Mode = "textDisplay";
+
   render() {
-    const { label, expanded} = this;
+    const { label, expanded, mode} = this;
 
     return html`
       <div class="main-wrapper ${expanded ? "bordergreen open" : ""}">
@@ -94,8 +97,11 @@ export class _ extends LitElement {
             <img-ui @click="${() => this.expanded = true}" class="sidearrow pointer" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
             <img-ui @click="${() => this.expanded = false}" class="downarrow pointer" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
 
-            <p>${label}</p>
-
+            ${mode === "checkbox" ? renderCheckbox(this)
+            : mode === "textInput" ? renderTextInput(this)
+            : mode === "textDisplay" ? renderTextDisplay(this)
+            : nothing
+            }
             <button-expand @custom-toggle="${this.onExpandAllToggle.bind(this)}" .expanded="${expanded}" ></button-expand>
 
           </div>
@@ -108,4 +114,35 @@ export class _ extends LitElement {
         
     `;
   }
+}
+function renderCheckbox(self:DropdownTree) {
+  const {label} = self;
+
+    return html`
+    <div class="icon-wrapper">
+      <input type="checkbox" />
+      <div class="inside"></div>
+    </div>
+    <div>${label}</div>
+    <slot name="menu-dropdown"></slot>
+    `
+}
+
+function renderTextDisplay(self:DropdownTree) {
+  const {label} = self;
+  return html`
+    <div class="icon-wrapper">
+      <div class="inside"></div>
+    </div>
+    <div>${label}</div>
+    <slot name="menu-dropdown"></slot>
+  `
+}
+function renderTextInput(self:DropdownTree) {
+  const {label} = self;
+    return html`
+    <div class="icon-wrapper">
+    <input class="textinput" type="text" value="${label}"/>
+    <div class="inside"></div>
+    </div>`
 }
