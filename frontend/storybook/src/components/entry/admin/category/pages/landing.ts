@@ -9,7 +9,7 @@ import "@elements/core/cards/blue";
 import "@elements/core/menu/ellipses-menu";
 import "@elements/core/buttons/expand";
 import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
-
+import {argsToAttrs} from "@utils/attributes";
 import {mapToString} from "@utils/array";
 import { Rectangle } from "~/components/core/buttons/rectangle";
 
@@ -21,25 +21,28 @@ export default {
 const STR_PUBLISH = "Publish"
 
 
-const leafNode = ({label, mode, open, children}:TreeNode) => {
+
+const leafNode = ({children, ...props}:TreeNode) => {
+  const hasChildren = children.length > 0;
+
   return `
-    <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
-    ${mapToString (children, leafNode)}
-    <ellipses-menu slot="menu-dropdown">
-      <category-dropdown></category-dropdown> 
-    </ellipses-menu>
+    <dropdown-tree-child ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
+      <ellipses-menu slot="menu-dropdown">
+        <category-dropdown></category-dropdown> 
+      </ellipses-menu>
+      ${mapToString (children, leafNode)}
     </dropdown-tree-child>
   `;
 }
-const rootNode = ({label, open, children}:TreeNode) => {
+const rootNode = ({children, ...props}:TreeNode) => {
+  const hasChildren = children.length > 0;
   return `
-    <dropdown-tree label="${label}" ${open ? "open" : ""}>
-      ${mapToString (children, leafNode)}
+    <dropdown-tree ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
       <ellipses-menu slot="menu-dropdown"></ellipses-menu>
+      ${mapToString (children, leafNode)}
     </dropdown-tree>
   `;
 }
-
 
 
 interface Props {

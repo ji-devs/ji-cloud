@@ -56,8 +56,6 @@ data: {
 }
 }
 
-
-
 const leafNode = ({children, ...props}:TreeNode) => {
   const hasChildren = children.length > 0;
 
