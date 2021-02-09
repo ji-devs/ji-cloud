@@ -7,11 +7,11 @@ export default {
 }
 
 interface Args {
-    mode: Mode
+    expanded: boolean
 }
 
 const DEFAULT_ARGS:Args = {
-    mode: "expanded",
+    expanded: false
 }
 
 export const Expand = (props?:Partial<Args>) => {
@@ -21,12 +21,3 @@ export const Expand = (props?:Partial<Args>) => {
 }
 
 Expand.args = DEFAULT_ARGS;
-
-Expand.argTypes = {
-    mode: {
-        control: {
-            type: 'inline-radio',
-            options: ["expanded", "collapsed"]
-        }
-    }
-}

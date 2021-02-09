@@ -1,8 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 
-export type Mode = "expanded" | "collapsed";
-
 @customElement("button-expand")
 export class _ extends LitElement {
   static get styles() {
@@ -15,15 +13,22 @@ export class _ extends LitElement {
     ];
   }
 
-  @property()
-  mode: Mode = "expanded";
+  onToggle() {
+    this.expanded = !this.expanded;
+
+    this.dispatchEvent(new CustomEvent("custom-toggle", {
+      detail: { value: this.expanded},
+    }))
+  }
+
+  @property({type: Boolean})
+  expanded: boolean = true;
 
   render() {
-    const { mode } = this;
+    const { expanded } = this;
 
-    const icon =
-      mode === "collapsed" ? "Icon_CollapseAll_24.svg" : "Icon_ExpandAll_24.svg";
+    const icon = expanded ? "Icon_ExpandAll_24.svg": "Icon_CollapseAll_24.svg";
 
-    return html`<img-ui path="${icon}"></img-ui>`;
+    return html`<img-ui path="${icon}" @click="${this.onToggle.bind(this)}"></img-ui>`;
   }
 }

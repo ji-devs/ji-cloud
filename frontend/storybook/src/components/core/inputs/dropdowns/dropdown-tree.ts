@@ -58,16 +58,19 @@ data: {
 
 
 
-const leafNode = ({label, mode, open, children}:TreeNode) => {
+const leafNode = ({children, ...props}:TreeNode) => {
+  const hasChildren = children.length > 0;
+
   return `
-    <dropdown-tree-child label="${label}" ${open ? "open" : ""} mode="${mode}">
+    <dropdown-tree-child ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
     ${mapToString (children, leafNode)}
     </dropdown-tree-child>
   `;
 }
-const rootNode = ({label, open, children}:TreeNode) => {
+const rootNode = ({children, ...props}:TreeNode) => {
+  const hasChildren = children.length > 0;
   return `
-    <dropdown-tree label="${label}" ${open ? "open" : ""}>
+    <dropdown-tree ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
       ${mapToString (children, leafNode)}
     </dropdown-tree>
   `;
