@@ -43,8 +43,11 @@ sha2 = "0.9.2"
 shared = {path = "../../shared/rust", features = ["backend"]}
 time = "0.2.16"
 tokio = { version = "0.2", features = ["rt-threaded"] }
-url = { version = "2.1.1", features = ["serde"] }
+url = { version = "2.2.0", features = ["serde"] }
 uuid = "0.8.1"
+argon2 = "0.1.0"
+actix-web-httpauth = "0.5.0"
+paseto = "2.0.0"
 
 [dependencies.sqlx]
 version = "0.4.0"

@@ -276,6 +276,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-web-httpauth"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "536a75d767c5c2b3e64d3f569621f38ed7609359a0c82d149c88290a6ba41b22"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "base64 0.12.3",
+ "bytes 0.5.6",
+ "futures-util",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -346,6 +359,16 @@ name = "anyhow"
 version = "1.0.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afddf7f520a80dbf76e6f50a35bca42a2331ef227a28b3b6dc5c2e2338d114b1"
+
+[[package]]
+name = "argon2"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62c80a0d3a25e484544c69c2b4b8c7e40fb2ef523c252f50c25b9693664d40b8"
+dependencies = [
+ "blake2",
+ "password-hash",
+]
 
 [[package]]
 name = "arrayref"
@@ -459,6 +482,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
+name = "base64ct"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22fb38fd6e62e4ceec8543db40ceb714454ff173451a0f2a6c8952fdf39a2d6c"
+
+[[package]]
 name = "bitflags"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -483,6 +512,17 @@ dependencies = [
  "radium",
  "tap",
  "wyz",
+]
+
+[[package]]
+name = "blake2"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10a5720225ef5daecf08657f23791354e1685a8c91a4c60c7f3d3b2892f978f4"
+dependencies = [
+ "crypto-mac 0.8.0",
+ "digest",
+ "opaque-debug",
 ]
 
 [[package]]
@@ -697,6 +737,7 @@ dependencies = [
  "base64 0.13.0",
  "config",
  "futures-util",
+ "hex",
  "jsonwebtoken",
  "listenfd",
  "log",
@@ -992,6 +1033,28 @@ dependencies = [
  "log",
  "regex",
  "termcolor",
+]
+
+[[package]]
+name = "failure"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d32e9bd16cc02eae7db7ef620b392808b89f6a5e16bb3497d159c6b92a0f4f86"
+dependencies = [
+ "backtrace",
+ "failure_derive",
+]
+
+[[package]]
+name = "failure_derive"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa4da3c766cd7a0db8242e326e9e4e081edd567072893ed320008189715366a4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+ "synstructure",
 ]
 
 [[package]]
@@ -1522,8 +1585,10 @@ dependencies = [
  "actix-rt",
  "actix-service",
  "actix-web",
+ "actix-web-httpauth",
  "algolia",
  "anyhow",
+ "argon2",
  "chrono",
  "chrono-tz",
  "config",
@@ -1539,6 +1604,7 @@ dependencies = [
  "mp3-metadata",
  "openssl",
  "paperclip",
+ "paseto",
  "percent-encoding",
  "pin-project 1.0.4",
  "rand 0.7.3",
@@ -1631,6 +1697,17 @@ name = "libc"
 version = "0.2.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89203f3fba0a3795506acaad8ebce3c80c0af93f994d5a1d7a0b1eeb23271929"
+
+[[package]]
+name = "libsodium-sys"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a685b64f837b339074115f2e7f7b431ac73681d08d75b389db7498b8892b8a58"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+]
 
 [[package]]
 name = "linked-hash-map"
@@ -2105,6 +2182,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c705f256449c60da65e11ff6626e0c16a0a0b96aaa348de61376b249bc340f41"
 dependencies = [
  "regex",
+]
+
+[[package]]
+name = "paseto"
+version = "2.0.0+1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3bf44e557a5d7b45687ef0dbe365f8ceb0ade6c93d6a0f2d8967a57587602a0b"
+dependencies = [
+ "base64 0.13.0",
+ "chrono",
+ "failure",
+ "failure_derive",
+ "openssl",
+ "ring",
+ "serde_json",
+ "sodiumoxide",
+]
+
+[[package]]
+name = "password-hash"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "721a49e14f1803441886c688ba8b653b52e1dcc926969081d22384e300ea4106"
+dependencies = [
+ "base64ct",
+ "rand_core 0.6.1",
 ]
 
 [[package]]
@@ -3040,6 +3143,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sodiumoxide"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7038b67c941e23501573cb7242ffb08709abe9b11eb74bceff875bbda024a6a8"
+dependencies = [
+ "libc",
+ "libsodium-sys",
+ "serde",
+]
+
+[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3257,6 +3371,18 @@ checksum = "cc60a3d73ea6594cd712d830cc1f0390fd71542d8c8cd24e70cc54cdfd5e05d5"
 dependencies = [
  "proc-macro2",
  "quote",
+ "unicode-xid",
+]
+
+[[package]]
+name = "synstructure"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b834f2d66f734cb897113e34aaff2f1ab4719ca946f9a7358dba8f8064148701"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
  "unicode-xid",
 ]
 

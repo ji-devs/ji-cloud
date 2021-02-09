@@ -1,6 +1,6 @@
 use crate::{
     error::{self, ServiceKind},
-    extractor::WrapAuthClaimsNoDb,
+    extractor::TokenUser,
 };
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
@@ -19,10 +19,10 @@ use shared::{
 #[api_v2_operation]
 async fn create_key(
     algolia: Data<crate::algolia::Client>,
-    claims: WrapAuthClaimsNoDb,
+    claims: TokenUser,
 ) -> actix_web::Result<CreatedJson<<search::CreateKey as ApiEndpoint>::Res>, error::Service> {
     let key = algolia
-        .generate_virtual_key(Some(claims.0.id), Some(chrono::Duration::minutes(15)))
+        .generate_virtual_key(Some(claims.0.sub), Some(chrono::Duration::minutes(15)))
         .ok_or(error::Service::DisabledService(ServiceKind::Algolia))?;
 
     Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
@@ -32,7 +32,7 @@ async fn create_key(
 #[api_v2_operation]
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
     let query = query.into_inner();

@@ -16,27 +16,27 @@ use shared::{
     api::{endpoints::admin, ApiEndpoint},
     domain::{
         admin::{AdminListMediaResponse, AdminMediaItem},
-        auth::SigninSuccess,
         image::ImageKind,
+        session::CreateSessionSuccess,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::image_ops::MediaKind;
 use crate::{
     db,
     error::{self, ServiceKind},
-    extractor::{reply_signin_auth, AuthUserWithScope, ScopeAdmin},
+    extractor::{reply_signin_auth, ScopeAdmin, TokenUserWithScope},
     image_ops::regenerate_images,
     s3,
 };
+use crate::{image_ops::MediaKind, jwt::TokenSource};
 
 /// Impersonate another user
 #[api_v2_operation]
 async fn impersonate(
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    auth: TokenUserWithScope<ScopeAdmin>,
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: Path<Uuid>,
@@ -49,19 +49,23 @@ async fn impersonate(
         return Err(error::UserNotFound::UserNotFound);
     }
 
-    let (csrf, cookie) =
-        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())?;
+    let (csrf, cookie) = reply_signin_auth(
+        user_id,
+        &settings.token_secret,
+        settings.is_local(),
+        TokenSource::Impersonate(auth.claims.sub),
+    )?;
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
-        .json(SigninSuccess { csrf }))
+        .json(CreateSessionSuccess { csrf }))
 }
 
 /// Forcefully refresh an item of media (as if it was just uploaded)
 /// Note: this request can be conditional on `If-Match`
 #[api_v2_operation]
 async fn refresh_image_files(
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     s3: Data<s3::Client>,
     db: Data<PgPool>,
     Path((library, id)): Path<(MediaLibrary, Uuid)>,
@@ -208,7 +212,7 @@ async fn refresh_image_files(
 
 #[api_v2_operation]
 async fn list_media(
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
 ) -> actix_web::Result<Json<AdminListMediaResponse>, error::Server> {
     let items: Vec<AdminMediaItem> = sqlx::query_file!("query/list_media.sql")

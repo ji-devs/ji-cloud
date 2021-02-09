@@ -55,8 +55,22 @@ pub mod algolia {
 }
 
 pub const JWT_SECRET: &str = "JWT_SECRET";
+pub const PASSWORD_SECRET: &str = "PASSWORD_SECRET";
+
+/// Must be 32 bytes of hex
+pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 
 pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
 pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
 
 pub const BING_SEARCH_KEY: &str = "BING_SEARCH_KEY";
+
+/// ID of the google oauth client.
+/// Is optional. If missing, all google-oauth related services will be disabled,
+/// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+pub const GOOGLE_OAUTH_CLIENT: &str = "GOOGLE_OAUTH_CLIENT";
+
+/// Secret for the google oauth client.
+/// Is optional. If missing, all google-oauth related services will be disabled,
+/// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+pub const GOOGLE_OAUTH_SECRET: &str = "GOOGLE_OAUTH_SECRET";

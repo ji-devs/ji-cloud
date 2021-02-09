@@ -13,7 +13,7 @@
 
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
-use ji_cloud_api::{algolia, db, http, jwkkeys, logger, s3};
+use ji_cloud_api::{algolia, db, http, logger, s3};
 use std::thread;
 
 #[tokio::main]
@@ -22,17 +22,13 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (runtime_settings, jwk_verifier, s3, algolia_client, algolia_manager, db_pool, _guard) = {
+    let (runtime_settings, s3, algolia_client, algolia_manager, db_pool, _guard) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
         let runtime_settings = settings.runtime_settings().await?;
-
-        let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?);
-
-        let _ = jwkkeys::run_task(jwk_verifier.clone());
 
         let s3 = s3::Client::new(settings.s3_settings().await?)?;
 
@@ -53,7 +49,6 @@ async fn main() -> anyhow::Result<()> {
 
         (
             runtime_settings,
-            jwk_verifier,
             s3,
             algolia_client,
             algolia_manager,
@@ -72,8 +67,7 @@ async fn main() -> anyhow::Result<()> {
         let _ = algolia_manager.spawn();
     }
 
-    let handle =
-        thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia_client));
+    let handle = thread::spawn(|| http::run(db_pool, runtime_settings, s3, algolia_client));
 
     log::info!("app started!");
 

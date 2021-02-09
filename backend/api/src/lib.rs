@@ -38,7 +38,6 @@ mod extractor;
 pub mod http;
 mod image_ops;
 pub mod image_search;
-pub mod jwkkeys;
 mod jwt;
 pub mod logger;
 pub(crate) mod more_futures;

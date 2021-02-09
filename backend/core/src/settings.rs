@@ -9,6 +9,7 @@ use crate::{
 use config::RemoteTarget;
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use std::{
+    convert::TryInto,
     env::VarError,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -33,6 +34,25 @@ pub fn read_remote_target() -> anyhow::Result<RemoteTarget> {
 #[cfg(feature = "db")]
 pub fn read_sql_proxy() -> bool {
     std::env::args().any(|s| s == "sqlproxy")
+}
+
+/// Settings related to Google's OAuth.
+#[derive(Clone)]
+pub struct GoogleOAuth {
+    /// Client ID for google oauth.
+    pub client: String,
+
+    /// Client Secret for google oauth.
+    pub secret: String,
+}
+
+impl GoogleOAuth {
+    fn from_parts(client: Option<String>, secret: Option<String>) -> Option<Self> {
+        Some(Self {
+            client: client?,
+            secret: secret?,
+        })
+    }
 }
 
 /// Settings that are accessed at runtime (as compared to startup time)
@@ -64,6 +84,16 @@ pub struct RuntimeSettings {
     jwt_decoding_key: String,
 
     remote_target: RemoteTarget,
+
+    /// Settings for google OAuth
+    /// if missing / disabled, related routes will return `501 - Not Implemented`
+    pub google_oauth: Option<GoogleOAuth>,
+
+    /// Secret for password
+    pub password_secret: String,
+
+    /// Secret for signing/encrypting tokens.
+    pub token_secret: Box<[u8; 32]>,
 }
 
 impl RuntimeSettings {
@@ -72,6 +102,9 @@ impl RuntimeSettings {
         jwt_decoding_key: String,
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
+        google_oauth: Option<GoogleOAuth>,
+        password_secret: String,
+        token_secret: Box<[u8; 32]>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -84,6 +117,8 @@ impl RuntimeSettings {
 
         let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
 
+        assert_eq!(token_secret.len(), 32);
+
         Ok(Self {
             api_port,
             pages_port,
@@ -93,6 +128,9 @@ impl RuntimeSettings {
             jwt_decoding_key,
             remote_target,
             bing_search_key,
+            google_oauth,
+            password_secret,
+            token_secret,
         })
     }
 
@@ -385,14 +423,39 @@ impl SettingsManager {
     /// Load the `RuntimeSettings`.
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
         let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
+        let password_secret = self.get_secret(keys::PASSWORD_SECRET).await?;
+        let token_secret = self
+            .get_secret(keys::TOKEN_SECRET)
+            .await
+            .and_then(|secret| {
+                let secret = hex::decode(secret)?;
+
+                let secret: [u8; 32] = secret.try_into().map_err(|s: Vec<u8>| {
+                    anyhow::anyhow!(
+                        "token secret must be 32 bytes long, it was: {} bytes long",
+                        s.len()
+                    )
+                })?;
+
+                Ok(Box::new(secret))
+            })?;
+
         let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
         let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
+
+        let google_oauth = GoogleOAuth::from_parts(
+            self.get_varying_secret(keys::GOOGLE_OAUTH_CLIENT).await?,
+            self.get_varying_secret(keys::GOOGLE_OAUTH_SECRET).await?,
+        );
 
         RuntimeSettings::new(
             jwt_encoding_key,
             jwt_secret,
             self.remote_target,
             bing_search_key,
+            google_oauth,
+            password_secret,
+            token_secret,
         )
     }
 }
