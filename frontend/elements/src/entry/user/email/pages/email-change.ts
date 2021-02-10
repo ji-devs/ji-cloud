@@ -49,6 +49,10 @@ export class _ extends LitElement {
           margin-top: 40px;
           margin-bottom: 24px;
         }
+        .sub{
+          margin-bottom:32px;
+          display:block;
+        }
 
         .spacer {
           height: 20px;
