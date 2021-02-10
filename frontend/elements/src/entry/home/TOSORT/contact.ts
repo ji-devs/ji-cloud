@@ -18,10 +18,10 @@ export class _ extends LitElement {
 
   render() {
 
-    const {} = this;
+    const STR_CONTACT = "If you need our help, kindly contact us at: ";
 
     return html`
-    <p>If you need our help, kindly contact us on: <a href="mailto:info@jewishinteractive.org ">info@jewishinteractive.org</a></p>
+    <p>${STR_CONTACT} &nbsp; <a href="mailto:info@jewishinteractive.org ">info@jewishinteractive.org</a></p>
  
   `;
   }
