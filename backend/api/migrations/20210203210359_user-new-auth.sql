@@ -7,8 +7,6 @@ alter table "user" add column email_verified_at timestamptz;
 create table "user_auth_google" (
     user_id      uuid primary key references "user" (id) on delete cascade,
     google_id    text unique not null,
-    access_token text unique not null,
-    expires_at   timestamptz not null,
     created_at   timestamptz not null default now(),
     updated_at   timestamptz
 );

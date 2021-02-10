@@ -27,11 +27,12 @@ use uuid::Uuid;
 use crate::{
     db,
     error::{self, ServiceKind},
-    extractor::{reply_signin_auth, ScopeAdmin, TokenUserWithScope},
+    extractor::{ScopeAdmin, TokenUserWithScope},
     image_ops::regenerate_images,
     s3,
+    token::create_signin_token,
 };
-use crate::{image_ops::MediaKind, jwt::TokenSource};
+use crate::{image_ops::MediaKind, token::TokenSource};
 
 /// Impersonate another user
 #[api_v2_operation]
@@ -49,7 +50,7 @@ async fn impersonate(
         return Err(error::UserNotFound::UserNotFound);
     }
 
-    let (csrf, cookie) = reply_signin_auth(
+    let (csrf, cookie) = create_signin_token(
         user_id,
         &settings.token_secret,
         settings.is_local(),

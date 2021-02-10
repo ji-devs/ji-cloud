@@ -1,8 +1,8 @@
-use crate::extractor::{reply_signin_auth, TokenUser};
 use crate::{
     db::{self, user::register},
     error,
 };
+use crate::{extractor::TokenUser, token::create_signin_token};
 use actix_web::HttpResponse;
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
@@ -61,7 +61,7 @@ async fn handle_register(
     let id = register(db.as_ref(), &req).await?;
 
     // fixme: remove the todo, remove the `#[allow]` above.
-    let (csrf, cookie) = reply_signin_auth(
+    let (csrf, cookie) = create_signin_token(
         id,
         &settings.token_secret,
         settings.is_local(),

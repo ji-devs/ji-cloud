@@ -174,15 +174,6 @@ pub struct S3Settings {
     pub secret_access_key: String,
 }
 
-/// Settings for managing JWKs from Google.
-#[derive(Debug)]
-pub struct JwkSettings {
-    /// What audience should JWTs be checked for?
-    pub audience: String,
-    /// What issuer should JWTs be checked for?
-    pub issuer: String,
-}
-
 /// Settings to initialize a algolia client.
 #[derive(Clone, Debug)]
 pub struct AlgoliaSettings {
@@ -340,16 +331,6 @@ impl SettingsManager {
         self.get_optional_secret(keys::SENTRY_DSN_PAGES)
             .await
             .map(|it| it.filter(|it| !it.is_empty()))
-    }
-
-    /// Load the settings for JWKs.
-    pub async fn jwk_settings(&self) -> anyhow::Result<JwkSettings> {
-        let issuer = format!("{}/{}", config::JWK_ISSUER_URL, &self.project_id);
-
-        Ok(JwkSettings {
-            audience: self.project_id.clone(),
-            issuer,
-        })
     }
 
     /// Load the settings for connecting to the db.

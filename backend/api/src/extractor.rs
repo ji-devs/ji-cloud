@@ -1,25 +1,15 @@
 use crate::{
     error::BasicError,
-    jwt::{check_token, TokenClaims, TokenSource},
     more_futures::ReadyOrNot,
+    token::{check_login_token, AuthorizedTokenClaims},
 };
-use actix_web::{
-    cookie::{Cookie, CookieBuilder, SameSite},
-    http::HeaderMap,
-    web::Data,
-    FromRequest, HttpMessage,
-};
+use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, FromRequest, HttpMessage};
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{password_hash::Encoding, Argon2, PasswordHasher, PasswordVerifier, Version};
-use chrono::{Duration, Utc};
-use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
 use http::StatusCode;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
-use paseto::PasetoBuilder;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
 use shared::domain::{
     auth::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserScope,
@@ -64,7 +54,7 @@ fn check_cookie_csrf<'a>(
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct TokenUser(pub TokenClaims);
+pub struct TokenUser(pub AuthorizedTokenClaims);
 
 impl FromRequest for TokenUser {
     type Error = actix_web::Error;
@@ -91,7 +81,8 @@ impl FromRequest for TokenUser {
         async move {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
+            let claims =
+                check_login_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
 
             Ok(Self(claims))
         }
@@ -169,7 +160,7 @@ impl Scope for ScopeManageAnimation {
 )]
 #[repr(transparent)]
 pub struct TokenUserWithScope<S: Scope> {
-    pub claims: TokenClaims,
+    pub claims: AuthorizedTokenClaims,
     _phantom: PhantomData<S>,
 }
 
@@ -198,7 +189,7 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         async move {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
+            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
 
             let has_scope = sqlx::query!(
                 r#"select exists(select 1 from "user_scope" where user_id = $1 and scope = $2) as "exists!""#,
@@ -300,35 +291,4 @@ impl FromRequest for EmailBasicUser {
         .boxed()
         .into()
     }
-}
-
-pub fn reply_signin_auth(
-    user_id: Uuid,
-    token_secret: &[u8; 32],
-    local_insecure: bool,
-    source: TokenSource,
-) -> anyhow::Result<(String, Cookie<'static>)> {
-    let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
-
-    let token = PasetoBuilder::new()
-        .set_subject(&user_id.to_hyphenated().to_string())
-        .set_issued_at(None)
-        .set_expiration(&(Utc::now() + Duration::weeks(2)))
-        .set_encryption_key(token_secret)
-        .set_claim("csrf", serde_json::Value::String(csrf.clone()))
-        .set_claim("source", serde_json::to_value(source)?)
-        .build()
-        .map_err(|err| anyhow::anyhow!("failed to create token: {}", err))?;
-
-    let mut cookie = CookieBuilder::new(AUTH_COOKIE_NAME, token)
-        .http_only(true)
-        .secure(!local_insecure)
-        .same_site(SameSite::Lax)
-        .max_age(MAX_SIGNIN_COOKIE_DURATION);
-
-    if !local_insecure {
-        cookie = cookie.domain(COOKIE_DOMAIN);
-    }
-
-    Ok((csrf, cookie.finish()))
 }

@@ -1,9 +1,9 @@
 mod cors;
 mod endpoints;
 
-use crate::{error::BasicError,  s3};
+use crate::{error::BasicError, s3};
 use actix_service::Service;
-use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
+use actix_web::{dev::{MessageBody, ServiceRequest, ServiceResponse}, web::Data};
 use actix_web::HttpResponse;
 use config::JSON_BODY_LIMIT;
 use core::{
@@ -13,6 +13,7 @@ use core::{
 use futures::Future;
 use paperclip::actix::OpenApiExt;
 use sqlx::postgres::PgPool;
+use std::sync::Arc;
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
@@ -58,6 +59,7 @@ pub async fn run(
     settings: RuntimeSettings,
     s3: s3::Client,
     algolia: crate::algolia::Client,
+    jwk_verifier: Arc<crate::jwk::JwkVerifier>,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -68,6 +70,7 @@ pub async fn run(
             .data(settings.clone())
             .data(s3.clone())
             .data(algolia.clone())
+            .app_data(Data::from(jwk_verifier.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
