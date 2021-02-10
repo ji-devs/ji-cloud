@@ -5,14 +5,20 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use shared::domain::category::{CategoryId, Category as DbCategory};
+use super::debug;
+use std::collections::HashSet;
+
+
 
 pub struct State {
-    pub categories: MutableVec<Rc<Category>>
+    pub categories: MutableVec<Rc<Category>>,
+    pub loader: AsyncLoader
 }
 impl State {
     pub fn new() -> Self {
         Self {
-            categories: MutableVec::new()
+            categories: MutableVec::new(),
+            loader: AsyncLoader::new(),
         }
     }
 }
@@ -26,33 +32,46 @@ pub struct Category {
 }
 
 impl Category {
-    pub fn edge_signal(&self) -> impl Signal<Item = bool> {
+    pub fn has_children_signal(&self) -> impl Signal<Item = bool> {
         self
             .children
             .signal_vec_cloned()
             .len()
-            .map(|len| if len > 0 { false } else { true })
+            .map(|len| if len > 0 { true } else { false })
+    }
+
+    pub fn new(id: CategoryId, name: String) -> Self {
+        Self::_new(id, name, None)
+    }
+    pub fn new_with_children(id: CategoryId, name: String, children: Vec<Rc<Self>>) -> Self {
+        Self::_new(id, name, Some(children))
+    }
+
+    fn _new(id: CategoryId, name: String, children: Option<Vec<Rc<Self>>>) -> Self {
+        Self {
+            id,
+            name: Mutable::new(name),
+            children: match children {
+                Some(children) => MutableVec::new_with_values(children),
+                None => MutableVec::new()
+            },
+            expanded: Mutable::new(debug::INIT_EXPANDED),
+            editing: Mutable::new(debug::INIT_EDITING)
+        }
     }
 }
 
 impl From<DbCategory> for Category {
     fn from(cat:DbCategory) -> Self {
 
-        let categories:Vec<Rc<Self>> = cat.children
+        let children:Vec<Rc<Self>> = cat.children
             .into_iter()
             .map(Category::from)
             .map(Rc::new)
             .collect();
 
-        let children = MutableVec::new_with_values(categories);
-
-        Self {
-            id: cat.id,
-            name: Mutable::new(cat.name),
-            children,
-            expanded: Mutable::new(true),
-            editing: Mutable::new(true)
-        }
+        
+        Self::new_with_children(cat.id, cat.name, children)
     }
 }
 /*
