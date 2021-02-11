@@ -14,7 +14,7 @@ use sqlx::PgPool;
 
 use crate::{
     db, error,
-    extractor::{TokenUserWithScope, ScopeManageModule, TokenUser},
+    extractor::{ScopeManageModule, TokenUser, TokenUserWithScope},
 };
 
 /// Create a new module.

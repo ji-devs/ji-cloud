@@ -55,6 +55,7 @@ async fn impersonate(
         &settings.token_secret,
         settings.is_local(),
         TokenSource::Impersonate(auth.claims.sub),
+        settings.login_token_valid_duration,
     )?;
 
     Ok(HttpResponse::Ok()

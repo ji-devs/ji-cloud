@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     error,
-    extractor::{TokenUserWithScope, ScopeAdmin, TokenUser},
+    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     image_ops::MediaKind,
     s3,
 };

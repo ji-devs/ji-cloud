@@ -60,6 +60,11 @@ pub const PASSWORD_SECRET: &str = "PASSWORD_SECRET";
 /// Must be 32 bytes of hex
 pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 
+/// How long *login* tokens are valid for (measured in seconds).
+/// This environment variable can only be set on `local`
+/// This environment variable is optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
+pub const LOGIN_TOKEN_VALID_DURATION: &str = "LOGIN_TOKEN_VALID_DURATION";
+
 pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
 pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
 

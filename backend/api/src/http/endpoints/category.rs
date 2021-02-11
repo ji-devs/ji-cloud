@@ -1,9 +1,9 @@
 use crate::{
     db,
     error::{self, BasicError},
-    extractor::TokenUserWithScope,
     extractor::ScopeManageCategory,
     extractor::TokenUser,
+    extractor::TokenUserWithScope,
 };
 use paperclip::actix::{
     api_v2_errors, api_v2_operation,

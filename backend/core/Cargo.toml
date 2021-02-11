@@ -11,6 +11,7 @@ publish = false
 [dependencies]
 anyhow = "1.0.32"
 base64 = "0.13"
+chrono = "0.4.19"
 config = {path = "../../config/rust"}
 futures-util = "0.3"
 hex = "0.4.2"

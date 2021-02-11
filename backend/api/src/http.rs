@@ -3,8 +3,11 @@ mod endpoints;
 
 use crate::{error::BasicError, s3};
 use actix_service::Service;
-use actix_web::{dev::{MessageBody, ServiceRequest, ServiceResponse}, web::Data};
 use actix_web::HttpResponse;
+use actix_web::{
+    dev::{MessageBody, ServiceRequest, ServiceResponse},
+    web::Data,
+};
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},

@@ -83,6 +83,7 @@ async fn handle_register(
                 &settings.token_secret,
                 settings.is_local(),
                 TokenSource::OAuth(token.0.provider),
+                settings.login_token_valid_duration,
             )?;
 
             Ok(HttpResponse::Created()

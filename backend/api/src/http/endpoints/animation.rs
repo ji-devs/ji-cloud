@@ -16,7 +16,7 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::{
     db, error,
-    extractor::{TokenUserWithScope, ScopeManageAnimation, TokenUser},
+    extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
     s3,
 };
 

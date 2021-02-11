@@ -7,6 +7,7 @@ use crate::{
     google::{get_access_token_and_project_id, get_optional_secret},
 };
 use config::RemoteTarget;
+use std::str::FromStr;
 use std::{
     convert::TryInto,
     env::VarError,
@@ -85,6 +86,11 @@ pub struct RuntimeSettings {
 
     /// Secret for signing/encrypting tokens.
     pub token_secret: Box<[u8; 32]>,
+
+    /// How long *login* tokens are valid for (measured in seconds).
+    /// * can only be set on `local`
+    /// * optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
+    pub login_token_valid_duration: Option<chrono::Duration>,
 }
 
 impl RuntimeSettings {
@@ -94,6 +100,7 @@ impl RuntimeSettings {
         google_oauth: Option<GoogleOAuth>,
         password_secret: String,
         token_secret: Box<[u8; 32]>,
+        login_token_valid_duration: Option<chrono::Duration>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -118,6 +125,7 @@ impl RuntimeSettings {
             google_oauth,
             password_secret,
             token_secret,
+            login_token_valid_duration,
         })
     }
 
@@ -399,6 +407,17 @@ impl SettingsManager {
 
         let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
+        let login_token_valid_duration = match self.remote_target {
+            RemoteTarget::Local => self
+                .get_optional_secret(keys::LOGIN_TOKEN_VALID_DURATION)
+                .await?
+                .as_deref()
+                .map(i64::from_str)
+                .transpose()?
+                .map(chrono::Duration::seconds),
+            _ => None,
+        };
+
         let google_oauth = GoogleOAuth::from_parts(
             self.get_varying_secret(keys::GOOGLE_OAUTH_CLIENT).await?,
             self.get_varying_secret(keys::GOOGLE_OAUTH_SECRET).await?,
@@ -410,6 +429,7 @@ impl SettingsManager {
             google_oauth,
             password_secret,
             token_secret,
+            login_token_valid_duration,
         )
     }
 }

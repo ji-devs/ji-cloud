@@ -11,7 +11,6 @@ pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
-
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[cfg_attr(feature = "backend", openapi(empty))]

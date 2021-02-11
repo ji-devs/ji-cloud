@@ -23,8 +23,8 @@ pub mod media;
 pub mod meta;
 pub mod search;
 mod ser;
-pub mod user;
 pub mod session;
+pub mod user;
 
 use chrono::Utc;
 #[cfg(feature = "backend")]

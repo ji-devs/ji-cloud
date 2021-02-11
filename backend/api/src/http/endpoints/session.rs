@@ -3,6 +3,7 @@ use actix_web::{
     web::{Data, Json, Path},
     HttpRequest, HttpResponse,
 };
+use chrono::Duration;
 use core::settings::{GoogleOAuth, RuntimeSettings};
 use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
@@ -71,6 +72,7 @@ async fn create_session(
         &settings.token_secret,
         settings.is_local(),
         TokenSource::Basic,
+        settings.login_token_valid_duration,
     )?;
 
     Ok(HttpResponse::Created()
@@ -101,6 +103,7 @@ async fn create_oauth_session(
                 settings.is_local(),
                 &jwks,
                 &code,
+                settings.login_token_valid_duration,
             )
             .await?
         }
@@ -119,6 +122,7 @@ async fn handle_google_oauth(
     local_insecure: bool,
     jwks: &jwk::JwkVerifier,
     code: &str,
+    login_token_valid_duration: Option<Duration>,
 ) -> Result<(CreateSessionOAuthResponse, Cookie<'static>), error::Service> {
     let tokens = google::convert_oauth_code(config, code).await?;
     let claims = jwks.verify_oauth(&tokens.id_token, 3).await?;
@@ -140,6 +144,7 @@ async fn handle_google_oauth(
             token_secret,
             local_insecure,
             TokenSource::OAuth(provider),
+            login_token_valid_duration,
         )?,
         None => create_oauth_signup_token(&claims.email, token_secret, local_insecure, provider)?,
     };

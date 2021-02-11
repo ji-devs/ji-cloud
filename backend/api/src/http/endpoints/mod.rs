@@ -8,5 +8,5 @@ pub mod media;
 pub mod meta;
 pub mod module;
 pub mod search;
-pub mod user;
 pub mod session;
+pub mod user;

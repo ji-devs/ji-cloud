@@ -220,11 +220,13 @@ pub fn create_signin_token(
     token_secret: &[u8; 32],
     local_insecure: bool,
     source: TokenSource,
+    valid_duration: Option<Duration>,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
+    let ttl = valid_duration.unwrap_or(Duration::weeks(2));
     let csrf = generate_csrf();
 
     let mut builder = PasetoBuilder::new();
-    let token = base_token(&mut builder, csrf.clone(), token_secret, Duration::hours(1))
+    let token = base_token(&mut builder, csrf.clone(), token_secret, ttl)
         .set_subject(&user_id.to_hyphenated().to_string())
         .set_claim("source", serde_json::to_value(source)?)
         .set_footer(AUTHORIZED_FOOTER)
@@ -267,9 +269,9 @@ fn base_token<'a>(
 ) -> &'a mut PasetoBuilder<'a> {
     let now = Utc::now();
     builder
-        .set_issued_at(None)
         .set_expiration(&(now + ttl))
         .set_not_before(&now)
+        .set_issued_at(Some(now))
         .set_encryption_key(token_secret)
         .set_claim("csrf", serde_json::Value::String(csrf))
         .set_footer(OAUTH_SIGNUP_FOOTER)

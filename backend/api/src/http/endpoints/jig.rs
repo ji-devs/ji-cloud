@@ -16,7 +16,7 @@ use sqlx::PgPool;
 use crate::{
     db,
     error::{self, UpdateWithMetadata},
-    extractor::{TokenUserWithScope, ScopeManageJig, TokenUser},
+    extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
 };
 
 /// Create a jig.
