@@ -1,75 +1,98 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {mockCategoryHierarchy, mockImagesHierarchy, TreeNode} from "~/mock/hierarchy";
+import {mockTempHierarchy, mockCategoryHierarchy, mockImagesHierarchy, TreeNode} from "~/mock/hierarchy";
 import "@elements/core/inputs/dropdowns/tree/tree";
-import "@elements/core/inputs/dropdowns/tree/tree-child";
-import { Mode } from "@elements/core/inputs/dropdowns/tree/tree-child";
-
+import { ContainerMode } from "@elements/core/inputs/dropdowns/tree/tree";
+import "@elements/core/buttons/ellipses";
+import "@elements/core/buttons/expand";
+import "@elements/core/menu/ellipses/ellipses-menu-line";
 export default {
     title: "Core / Inputs / Dropdowns"
 }
 
+type Mock = "categories" | "images";
 interface Args {
-    data: Array<TreeNode>,
-    
-    
+    mock: Mock
 }
 
 
-const DEFAULT_ARGS_ONE:Args = {
-    data: mockImagesHierarchy,
- 
+const DEFAULT_ARGS:Args = {
+  mock: "categories"
 };
 
-export const DropdownTreeOne = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS_ONE, ...props} : DEFAULT_ARGS_ONE;
+export const DropdownTree = (props?:Partial<Args>) => {
+    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    return mapToString(props.data, rootNode);
+    const {mock} = props;
+
+    const data = mock === "categories" ? mockCategoryHierarchy
+      : mock === "images" ? mockImagesHierarchy
+      : mockTempHierarchy;
+
+
+    const containerMode = mock ===  "categories" ? "multi-color"
+      : "none";
+
+    const getContent = ({label, mode, expandAllButton}:Partial<TreeNode>) => {
+      let content = (() => {
+        switch(mode) {
+          case "checkbox": return `<input-checkbox slot="content" label="${label}"></input-checkbox>`
+          case "textDisplay": return `<span slot="content">${label}</span>`
+          case "textInput": return `<input slot="content" style="text" value="${label}" />`
+          default: return ``;
+        }
+      })();
+
+      if(expandAllButton) {
+        content += `<button-expand slot="content"></button-expand>`;
+      }
+
+      return content;
+    }
+
+    const renderMenu = (content:any, menuContents:boolean) => {
+      return `<ellipses-menu-line slot="content" ${menuContents ? "visible" : ""} hover>
+        ${content}
+        <div slot="menu-content">
+          Menu Here!
+        </div>
+      </ellipses-menu-line>`
+    }
+
+    const renderNode = (nodeProps:TreeNode, depth: number) => {
+      const {children, menuButton, menuContents, ...rest} = nodeProps;
+      const hasChildren = children.length > 0;
+      const isChild = depth > 0;
+
+
+      const props = {
+        containerMode,
+        hasChildren,
+        isChild,
+        ...rest
+      } 
+    
+      const content = getContent(rest);
+
+      return `
+        <dropdown-tree ${argsToAttrs(props)} >
+          ${menuButton ? renderMenu(content, menuContents) : content }
+          <div slot="children">
+            ${mapToString (children, child => renderNode(child, depth+1))}
+          </div>
+        </dropdown-tree>
+      `;
+    }
+
+    return mapToString(data, child => renderNode(child, 0));
 }
 
-DropdownTreeOne.args = DEFAULT_ARGS_ONE;
-DropdownTreeOne.argTypes = {
-  data: {
+DropdownTree.args = DEFAULT_ARGS;
+DropdownTree.argTypes = {
+  mock: {
     control: {
-      type: 'object',
+      type: 'inline-radio',
+      options: ["categories", "images"]
     }
   }
-}
-
-const DEFAULT_ARGS_TWO:Args = {
-  data: mockCategoryHierarchy,
-
-};
-
-export const DropdownTreeTwo = (props?:Partial<Args>) => {
-  props = props ? {...DEFAULT_ARGS_TWO, ...props} : DEFAULT_ARGS_TWO;
-
-  return mapToString(props.data, rootNode);
-}
-
-DropdownTreeTwo.args = DEFAULT_ARGS_TWO;
-DropdownTreeTwo.argTypes = {
-data: {
-  control: {
-    type: 'object',
-  }
-}
-}
-
-const leafNode = ({children, ...props}:TreeNode) => {
-  const hasChildren = children.length > 0;
-
-  return `
-    <dropdown-tree-child ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
-    ${mapToString (children, leafNode)}
-    </dropdown-tree-child>
-  `;
-}
-const rootNode = ({children, ...props}:TreeNode) => {
-  const hasChildren = children.length > 0;
-  return `
-    <dropdown-tree ${argsToAttrs(props)} ${hasChildren && "hasChildren"}>
-      ${mapToString (children, leafNode)}
-    </dropdown-tree>
-  `;
 }
