@@ -1,7 +1,7 @@
 use crate::{
     error::BasicError,
     more_futures::ReadyOrNot,
-    token::{check_login_token, AuthorizedTokenClaims},
+    token::{check_login_token, check_signup_token, AuthorizedTokenClaims, OAuthSignupClaims},
 };
 use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, FromRequest, HttpMessage};
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
@@ -287,6 +287,51 @@ impl FromRequest for EmailBasicUser {
                 .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))?;
 
             Ok(Self { id: user.user_id })
+        }
+        .boxed()
+        .into()
+    }
+}
+
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    alias = "signupOAuthKey",
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
+#[repr(transparent)]
+pub struct OAuthSignupToken(pub OAuthSignupClaims);
+
+impl FromRequest for OAuthSignupToken {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
+
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
+            Err(e) => return futures::future::err(e.into()).into(),
+        };
+
+        async move {
+            let csrf = csrf;
+            let claims =
+                check_signup_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
+
+            Ok(Self(claims))
         }
         .boxed()
         .into()

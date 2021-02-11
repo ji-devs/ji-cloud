@@ -8,7 +8,7 @@ use shared::domain::auth::AUTH_COOKIE_NAME;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::BasicError;
+use crate::error::{self, BasicError};
 
 const AUTHORIZED_FOOTER: &str = "authorized";
 const OAUTH_SIGNUP_FOOTER: &str = "oauth_signup";
@@ -18,13 +18,13 @@ const OAUTH_SIGNUP_FOOTER: &str = "oauth_signup";
 pub struct OAuthSignupClaims {
     /// The email getting signed for
     #[serde(rename = "sub")]
-    email: String,
+    pub email: String,
 
     /// The csrf that must match for the token to be considered valid.
     csrf: String,
 
     /// What OAuth provider is being used
-    provider: OAuthProvider,
+    pub provider: OAuthProvider,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
@@ -55,6 +55,43 @@ pub enum TokenSource {
     OAuth(OAuthProvider),
 }
 
+fn validate_token(
+    token_string: &str,
+    footer: &str,
+    token_key: &[u8; 32],
+) -> Result<serde_json::Value, actix_web::Error> {
+    let token =
+        paseto::validate_local_token(token_string, Some(footer), token_key, &TimeBackend::Chrono);
+
+    let err = match token {
+        Ok(token) => return Ok(token),
+        Err(e) => e,
+    };
+
+    let err_401 = |message: &'static str| {
+        BasicError::with_message(StatusCode::UNAUTHORIZED, message.to_owned())
+    };
+
+    let e = match err.downcast::<paseto::errors::GenericError>() {
+        Ok(paseto::errors::GenericError::ExpiredToken {}) => err_401("Expired token"),
+        Ok(paseto::errors::GenericError::InvalidNotBeforeToken {}) => {
+            err_401("Token is not valid yet")
+        }
+        Ok(paseto::errors::GenericError::InvalidFooter {}) => err_401(
+            "Token footer is wrong (this currently means the token is meant for something else)",
+        ),
+
+        Ok(_) => err_401("Invalid token"),
+        Err(e) => {
+            return Err(
+                error::ise(anyhow::anyhow!("Server failure for decoding token: {}", e)).into(),
+            )
+        }
+    };
+
+    Err(e.into())
+}
+
 // todo: accept a transaction instead so that we can do `for share` row locks
 pub async fn check_login_token(
     db: &PgPool,
@@ -62,17 +99,11 @@ pub async fn check_login_token(
     csrf: &str,
     token_key: &[u8; 32],
 ) -> Result<AuthorizedTokenClaims, actix_web::Error> {
-    let token = paseto::validate_local_token(
-        token_string,
-        Some(AUTHORIZED_FOOTER),
-        token_key,
-        &TimeBackend::Chrono,
-    )
-    .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))?;
+    let token = validate_token(token_string, AUTHORIZED_FOOTER, token_key)?;
 
     let claims: AuthorizedTokenClaims = serde_json::from_value(token)
         .map_err(Into::into)
-        .map_err(crate::error::ise)?;
+        .map_err(error::ise)?;
 
     if claims.csrf != csrf {
         return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
@@ -88,7 +119,7 @@ pub async fn check_login_token(
             .fetch_one(db)
             .await
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(error::ise)?;
 
             if !exists.exists {
                 return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
@@ -110,7 +141,7 @@ select
             .fetch_one(db)
             .await
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(error::ise)?;
 
             if !user_checks.impersonated_exists {
                 return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
@@ -132,7 +163,7 @@ select exists(select 1 from user_auth_google where user_id = $1 and google_id = 
             .fetch_one(db)
             .await
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(error::ise)?;
 
             if !checks.user_valid_oauth {
                 return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
@@ -143,26 +174,22 @@ select exists(select 1 from user_auth_google where user_id = $1 and google_id = 
     Ok(claims)
 }
 
-pub async fn _check_signup_token(
+pub async fn check_signup_token(
     db: &PgPool,
     token_string: &str,
     csrf: &str,
     token_key: &[u8; 32],
 ) -> Result<OAuthSignupClaims, actix_web::Error> {
-    let token = paseto::validate_local_token(
-        token_string,
-        Some(OAUTH_SIGNUP_FOOTER),
-        token_key,
-        &TimeBackend::Chrono,
-    )
-    .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))?;
+    let token = validate_token(token_string, OAUTH_SIGNUP_FOOTER, token_key)?;
 
     let claims: OAuthSignupClaims = serde_json::from_value(token)
         .map_err(Into::into)
-        .map_err(crate::error::ise)?;
+        .map_err(error::ise)?;
 
     if claims.csrf != csrf {
-        return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
+        return Err(
+            BasicError::with_message(StatusCode::UNAUTHORIZED, "csrf mismatch".to_owned()).into(),
+        );
     }
 
     // fixme: handle the email belonging to a user that exists (how?)
@@ -177,7 +204,7 @@ select exists(select 1 from user_auth_google where google_id = $1) as "oauth_exi
             .fetch_one(db)
             .await
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(error::ise)?;
 
             if checks.oauth_exists {
                 return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
@@ -238,9 +265,11 @@ fn base_token<'a>(
     token_secret: &'a [u8; 32],
     ttl: Duration,
 ) -> &'a mut PasetoBuilder<'a> {
+    let now = Utc::now();
     builder
         .set_issued_at(None)
-        .set_expiration(&(Utc::now() + ttl))
+        .set_expiration(&(now + ttl))
+        .set_not_before(&now)
         .set_encryption_key(token_secret)
         .set_claim("csrf", serde_json::Value::String(csrf))
         .set_footer(OAUTH_SIGNUP_FOOTER)

@@ -1,6 +1,11 @@
 use crate::{
-    db::{self, user::register},
+    db::{
+        self,
+        user::{register, register_google_oauth},
+    },
     error,
+    extractor::OAuthSignupToken,
+    token::{OAuthProvider, TokenSource},
 };
 use crate::{extractor::TokenUser, token::create_signin_token};
 use actix_web::HttpResponse;
@@ -14,10 +19,7 @@ use shared::{
         user::{Profile, Register, UserLookup},
         ApiEndpoint,
     },
-    domain::{
-        auth::{RegisterRequest, RegisterSuccess},
-        user::UserLookupQuery,
-    },
+    domain::{auth::RegisterRequest, session::CreateSessionSuccess, user::UserLookupQuery},
     error::auth::RegisterErrorKind,
 };
 use sqlx::PgPool;
@@ -53,24 +55,41 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), error::Regis
 async fn handle_register(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    // user: FirebaseUser,
+    // todo: Option ignores errors, don't do that.
+    signup_user: OAuthSignupToken,
     req: Json<RegisterRequest>,
 ) -> actix_web::Result<HttpResponse, error::Register> {
-    validate_register_req(&req).await?;
+    let signup_user = Some(signup_user);
+    match signup_user {
+        None => return Err(anyhow::anyhow!("handle authless register request").into()),
+        Some(token) => {
+            validate_register_req(&req).await?;
 
-    let id = register(db.as_ref(), &req).await?;
+            let mut txn = db.begin().await?;
 
-    // fixme: remove the todo, remove the `#[allow]` above.
-    let (csrf, cookie) = create_signin_token(
-        id,
-        &settings.token_secret,
-        settings.is_local(),
-        todo!("re-implement todo"),
-    )?;
+            let id = register(&mut txn, &req, &token.0.email).await?;
 
-    Ok(HttpResponse::Created()
-        .cookie(cookie)
-        .json(RegisterSuccess::Signin(csrf)))
+            match &token.0.provider {
+                OAuthProvider::Google { google_id } => {
+                    register_google_oauth(&mut txn, &google_id, id).await?;
+                }
+            }
+
+            txn.commit().await?;
+
+            // fixme: remove the todo, remove the `#[allow]` above.
+            let (csrf, cookie) = create_signin_token(
+                id,
+                &settings.token_secret,
+                settings.is_local(),
+                TokenSource::OAuth(token.0.provider),
+            )?;
+
+            Ok(HttpResponse::Created()
+                .cookie(cookie)
+                .json(CreateSessionSuccess { csrf }))
+        }
+    }
 }
 
 /// Get a user by their profile.

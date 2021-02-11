@@ -11,17 +11,6 @@ pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
-#[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Response for a successful registration.
-pub enum RegisterSuccess {
-    // fixme: what does this even do?
-    #[allow(missing_docs)]
-    Signin(String),
-    // fixme: what does this even do?
-    #[allow(missing_docs)]
-    ConfirmEmail,
-}
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -32,11 +21,6 @@ pub struct RegisterRequest {
     ///
     /// This must be unique.
     pub username: String,
-
-    /// The user's email.
-    ///
-    /// This must be unique.
-    pub email: String,
 
     /// Is the user >= 18 yeas old?
     pub over_18: bool,
