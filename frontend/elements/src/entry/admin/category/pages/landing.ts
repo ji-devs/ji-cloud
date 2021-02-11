@@ -4,7 +4,7 @@ import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/inputs/search";
 import { nothing } from "lit-html";
 
-@customElement('category-label')
+@customElement('category-page')
 export class _ extends LitElement {
     static get styles() {
         return [css`
@@ -27,8 +27,11 @@ export class _ extends LitElement {
         margin-top:18px;
   }
 ::slotted([slot="middle"]){
-   display:block;
+   display:flex;
+   flex-direction: column;
+   gap: 8px;
    margin-top:18px;
+   min-width: 848px;
 }
 .title-wrapper{
     display:flex;

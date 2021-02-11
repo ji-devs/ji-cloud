@@ -12,7 +12,7 @@ export default {
 const STR_NEXT = "Next";
 
 
-export const ImageLabelFullOne = () => {
+export const ImageMeta1 = () => {
 
 
 

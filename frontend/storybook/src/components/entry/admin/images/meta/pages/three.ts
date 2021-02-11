@@ -3,7 +3,7 @@ import {LeftLabel} from "~/components/entry/admin/images/meta/sections/image-lab
 import "@elements/core/cards/blue";
 import "@elements/core/titles/ji";
 import { Rectangle } from "~/components/core/buttons/rectangle";
-
+import {ReportTree} from "~/components/core/reports/tree"
 
 export default {
   title: 'Entry/Admin/Images/Meta/Pages',
@@ -23,7 +23,7 @@ const STR_REFORM = "Reform/Conservative";
 const STR_ORTHODOX = "Orthodox";
 const STR_NEXT = "Next"
 
-export const ImageLabelFullThree = () => {
+export const ImageMeta3 = () => {
     return `
     <image-meta-page-three>
       <div slot="left">${LeftLabel()}</div>
@@ -52,7 +52,7 @@ export const ImageLabelFullThree = () => {
       <div slot="right">
       
       <card-blue>
-        
+        ${ReportTree({mock: "images"})}
       </card-blue>
       </div>
     <div slot="button">

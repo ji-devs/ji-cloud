@@ -1,7 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/admin/images/search/pages/image-search";
 import "@elements/core/menu/search-pagination";
-import "@elements/core/menu/ellipses-menu";
 import "@elements/core/inputs/dropdowns/dropdown-underlined";
 import "@elements/entry/admin/images/meta/widgets/image-menu";
 

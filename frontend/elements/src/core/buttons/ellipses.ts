@@ -5,12 +5,10 @@ export class _ extends LitElement {
 
   static get styles() {
     return [css`
-        .wrapper{
+        :host {
             display:flex;
-            padding-top:8px;
-            margin-left:48px;
-            height:6px;
             cursor:pointer;
+            height: 6px;
         }
         .circle{
             width: 6px;
@@ -30,12 +28,9 @@ export class _ extends LitElement {
    
  
     return html`
-<div class="wrapper">
        <div class="circle"></div>
        <div class="circle"></div>
        <div class="circle"></div>
-       
-</div>
   `;
   }
 }

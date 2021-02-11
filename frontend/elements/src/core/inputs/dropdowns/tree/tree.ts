@@ -1,74 +1,73 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+import {classMap} from "lit-html/directives/class-map";
 import { noChange, nothing } from "lit-html";
 import "@elements/core/buttons/expand";
-export type Mode = "checkbox" | "textInput" | "textDisplay";
+
+export type ContainerMode = "multi-color" | "none";
+
 @customElement("dropdown-tree")
 export class DropdownTree extends LitElement {
   static get styles() {
     return [
       css`
-    .main-wrapper{
-        border-color:#e6f0ff;
-        border-style:solid;
-        border-width: 2px 2px 2px 8px;
-        width:848px;
-        min-height:48px;
-        border-radius:12px;  
-        
-    }
-    .bordergreen {
+      .container-multi-color {
+          border-color:#e6f0ff;
+          border-style:solid;
+          border-width: 2px 2px 2px 8px;
+          border-radius:12px;  
+        padding-top: 13px;
+        padding-bottom: 16px;
+        padding-left: 2px;
+      }
+
+      .container-multi-color.expanded {
+        background-color: white;
+      }
+
+      .container-multi-color.closed {
+        background-color: #e6f0ff;
+        border: solid 2px #e6f0ff;
+
         border-left: solid 8px #6eca90;
-    }
-    .inside-wrapper{
-        display:flex;
-        align-items:center;
-        padding-top:12px;
-        
-        
-    }
-    .text-wrapper{
-        display:flex; 
-        align-items:center;
-    }
-    ::slotted([slot=children]) {
-        margin-top: 8px;
-        margin-left:16px;
-        
-    }
-    img {
-        margin: 0 8px;
-    }
-    .open img{
-        transform: rotate(90deg);
-    }
-    ul.closed {
+      }
+
+
+
+      .indent-left-root {
+        margin-left: 35px;
+      }
+      .indent-left-child {
+        margin-left: 60px;
+      }
+
+      .marker-offset-down {
+        margin-top: 10px;
+      }
+
+      .marker {
+        border:solid 1px #c4dbff;
+        border-right:none; 
+        border-top:none;
+        width:26px;
+        height:24px;
+      }
+
+      .arrow {
+        cursor: pointer;
+        margin-right: 5px;
+      }
+
+      .children-visible {
+        display: block;
+      }
+      .children-hidden {
         display: none;
-    }
-    ul{
-        margin:0;
-        padding:0;
-    }
-    p{
-        line-height:0;
-        margin:0;
-    }
-    .open .sidearrow{
-        display:none;
-    }
-    .downarrow {
-        display:none;
-    }
-    .open .downarrow {
-        display:block;
-    }
-    ::slotted(*){
-      display:flex;
-      margin-left:40px;
-    }
-    .pointer {
-      cursor: pointer;
-    }
+      }
+
+      .content-line {
+        display: flex;
+      }
     `,
     ];
   }
@@ -78,71 +77,76 @@ export class DropdownTree extends LitElement {
     this.dispatchEvent(new Event(value ? "expand-all" : "collapse-all"));
   }
 
-  @property()
-  label: string = "";
-
   @property({type: Boolean})
   expanded: boolean = false; 
 
+  @property({type: Boolean})
+  hasChildren: boolean = false; 
+
+  @property({type: Boolean})
+  isChild : boolean = false; 
+
   @property()
-  mode: Mode = "textDisplay";
+  containerMode: ContainerMode = "multi-color";
 
   render() {
-    const { label, expanded, mode} = this;
+    const { expanded, containerMode, isChild} = this;
+
+    const containerClasses = containerMode === "multi-color" ? multiColorClasses(this)
+      : "";
+
+    const hasMarker = isChild; 
+
+    const contentClasses = classMap({
+      ["content-line"]: true,
+      ["marker-offset-down"]: hasMarker,
+    });
+
+    const childrenClasses = classMap({
+      ["children-visible"]: expanded,
+      ["children-hidden"]: !expanded,
+      ["indent-left-root"]: !isChild,
+      ["indent-left-child"]: isChild,
+    });
 
     return html`
-      <div class="main-wrapper ${expanded ? "bordergreen open" : ""}">
-        <div class="inside-wrapper">
-          <div class="text-wrapper">
-            <img-ui @click="${() => this.expanded = true}" class="sidearrow pointer" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>
-            <img-ui @click="${() => this.expanded = false}" class="downarrow pointer" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>
-
-            ${mode === "checkbox" ? renderCheckbox(this)
-            : mode === "textInput" ? renderTextInput(this)
-            : mode === "textDisplay" ? renderTextDisplay(this)
-            : nothing
-            }
-            <button-expand @custom-toggle="${this.onExpandAllToggle.bind(this)}" .expanded="${expanded}" ></button-expand>
-
+        <div class="${containerClasses}">
+          <div class="content-line">
+              ${hasMarker ? html`<div class="marker"></div>` : nothing}
+              <div class="${contentClasses}"> 
+                ${renderArrow(this)}
+                <slot name="content"></slot>
+              </div>
+          </div>
+          <div class="${childrenClasses}">
+            <slot name="children"></slot>
           </div>
         </div>
-        <ul class="${expanded ? "open" : "closed"}">
-          <slot></slot>
-        </ul>
-      </div>
-
-        
-    `;
+    `
   }
 }
-function renderCheckbox(self:DropdownTree) {
-  const {label} = self;
 
-    return html`
-    <div class="icon-wrapper">
-      <input type="checkbox" />
-      <div class="inside"></div>
-    </div>
-    <div>${label}</div>
-    <slot name="menu-dropdown"></slot>
-    `
+function renderArrow(self: DropdownTree) {
+  const {expanded, hasChildren} = self;
+
+
+  if(!hasChildren) {
+    return nothing;
+  }
+
+  return expanded ? html`<img-ui @click="${() => self.expanded = true}" class="arrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>`
+    : html`<img-ui @click="${() => self.expanded = false}" class="arrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>`
 }
 
-function renderTextDisplay(self:DropdownTree) {
-  const {label} = self;
-  return html`
-    <div class="icon-wrapper">
-      <div class="inside"></div>
-    </div>
-    <div>${label}</div>
-    <slot name="menu-dropdown"></slot>
-  `
-}
-function renderTextInput(self:DropdownTree) {
-  const {label} = self;
-    return html`
-    <div class="icon-wrapper">
-    <input class="textinput" type="text" value="${label}"/>
-    <div class="inside"></div>
-    </div>`
+function multiColorClasses(self: DropdownTree) {
+  const {expanded, isChild} = self;
+ 
+  if(isChild) return "";
+
+  return classMap({
+    ["container-multi-color"]: true,
+    expanded,
+    closed: !expanded,
+  });
+
 }
