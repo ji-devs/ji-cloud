@@ -4,7 +4,7 @@ import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/text";
 
-const STR_SUBMIT = "Submit"
+const STR_SUBMIT = "One more step"
 const STR_TERMS_LABEL = "I have read the terms and conditions (legal text…)";
 const STR_LANGUAGE_LABEL = "Preferred language of communication*";
 const STR_MARKETING_LABEL = "I would like to receive educational resources (GDPR legal text….)";
