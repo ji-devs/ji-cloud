@@ -1,5 +1,8 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
+import {closestElement} from "@utils/dom";
+
+import "@elements/core/buttons/ellipses";
 
 @customElement('ellipses-menu-line')
 export class _ extends LitElement {
@@ -8,6 +11,7 @@ export class _ extends LitElement {
       main {
         display: flex; 
         align-items: center;
+        justify-items: center;
       }
 
       .button {
@@ -49,11 +53,39 @@ export class _ extends LitElement {
   @property({type:Boolean})
   hover :boolean = false;
 
+
   onEnter() {
     this.hover = true;
   }
+
   onLeave() {
-    this.hover = false;
+    this.hover = this.visible;
+  }
+
+  onGlobalMouseDown = (evt: MouseEvent) => {
+    if(!evt.composedPath().includes(this.shadowRoot?.getElementById("menu-container") as any)) {
+      this.hover = this.visible = false;
+    }
+  }
+  updated(changed:any) {
+        if(typeof changed.get("visible") === "boolean") {
+            const {visible} = this;
+            this.removeGlobalListener(); 
+            if(visible) {
+                console.log("adding!");
+                window.addEventListener("mousedown", this.onGlobalMouseDown);
+            }
+        }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeGlobalListener(); 
+  }
+
+  removeGlobalListener() {
+    console.log("removing!");
+     window.removeEventListener("mousedown", this.onGlobalMouseDown);
   }
   render() {
     const {visible, hover} = this;
@@ -72,7 +104,7 @@ export class _ extends LitElement {
         <main @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
           <slot name="content"></slot>
           <button-ellipses class="${buttonClasses}" @click=${() => this.visible = !this.visible}></button-ellipses>
-          <div class="${menuContainerClasses}">
+          <div id="menu-container" class="${menuContainerClasses}">
             <div class="menu">
               <slot name="menu-content"></slot>
             </div>

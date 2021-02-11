@@ -13,6 +13,20 @@ temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
+// Custom Change 
+#[derive(Deserialize, Debug)]
+pub struct CustomChangeData {
+    pub value: String,
+}
+
+make_custom_event_serde!("custom-change", CustomChange, CustomChangeData);
+
+impl CustomChange {
+    pub fn value(&self) -> String {
+        self.data().value
+    }
+}
+
 // Custom Input
 #[derive(Deserialize, Debug)]
 pub struct CustomInputData {

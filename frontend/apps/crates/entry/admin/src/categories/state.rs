@@ -28,7 +28,6 @@ pub struct Category {
     pub name: Mutable<String>,
     pub children: MutableVec<Rc<Category>>,
     pub expanded: Mutable<bool>,
-    pub editing: Mutable<bool>,
 }
 
 impl Category {
@@ -56,7 +55,6 @@ impl Category {
                 None => MutableVec::new()
             },
             expanded: Mutable::new(debug::INIT_EXPANDED),
-            editing: Mutable::new(debug::INIT_EDITING)
         }
     }
 }
