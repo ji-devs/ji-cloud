@@ -32,6 +32,7 @@ export class _ extends LitElement {
         }
         ::slotted([slot="button"]) {
           margin-top: 60px;
+          display:block;
         }
       `,
     ];
@@ -44,8 +45,8 @@ export class _ extends LitElement {
         <div class="content-wrapper">
           <div class="title">
             <h1>${STR_TITLE}</h1>
-            <title-ji size="subMedium">${STR_SUB}</title-ji>
-            <title-ji size="subMedium">${STR_SUBSUB}</title-ji>
+            <title-ji size="subMedium" color="black">${STR_SUB}</title-ji>
+            <title-ji size="subMedium" color="black">${STR_SUBSUB}</title-ji>
             <slot name="button"></slot>
           </div>
         </div>
