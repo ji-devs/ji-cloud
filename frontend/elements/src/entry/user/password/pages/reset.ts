@@ -2,7 +2,7 @@ import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
-const STR_TITLE = "Create a New Password";
+const STR_TITLE = "Create a New password";
 const STR_LOGGEDOUT = "You’ll be logged in automatically after this";
 
 @customElement("page-password-reset")
@@ -47,6 +47,7 @@ export class _ extends LitElement {
         ::slotted([slot="submit"]) {
           margin-top: 40px;
           margin-bottom: 24px;
+          display:block;
         }
 
         .spacer {
@@ -71,6 +72,7 @@ export class _ extends LitElement {
         .account-wrapper {
           display: flex;
           align-items: center;
+          margin-top:24px;
         }
         ::slotted([slot="noaccount"]:last-child) {
           margin-left: 4px;
@@ -96,8 +98,9 @@ export class _ extends LitElement {
           <h1>${STR_TITLE}</h1>
           <div class="inside-wrapper">
             <div class="password-wrapper">
+            <password-strength strength ="${passwordStrength}"></password-strength>
+
               <slot name="password"> </slot>
-                <password-strength strength ="${passwordStrength}"></password-strength>
               <div>${strengthText(passwordStrength)}</div>
             </div>
             <slot name="submit"></slot>
