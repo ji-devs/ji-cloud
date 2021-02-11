@@ -7,7 +7,10 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::categories::dom::CategoriesPage;
+use crate::{
+    categories::dom::CategoriesPage,
+    locale::dom::LocalePage,
+};
 
 pub struct Router {
 }
@@ -29,6 +32,7 @@ impl Router {
                         Route::Admin(route) => {
                             match route {
                                 AdminRoute::Categories=> Some(CategoriesPage::render()),
+                                AdminRoute::Locale => Some(LocalePage::render()),
                                 _ => None
                                 /*
                                 AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),

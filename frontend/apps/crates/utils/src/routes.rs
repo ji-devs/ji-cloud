@@ -41,6 +41,7 @@ pub enum ProfileSection {
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
     Categories,
+    Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
     ImageMeta(Id, Option<ImageSearchQuery>),
@@ -130,6 +131,7 @@ impl Route {
             }
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
+            ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
@@ -206,6 +208,7 @@ impl From<&Route> for String {
             },
             Route::Admin(route) => {
                 match route {
+                    AdminRoute::Locale => "/admin/locale".to_string(),
                     AdminRoute::Categories => "/admin/categories".to_string(),
                     AdminRoute::ImageSearch(search) => {
                         match search {
