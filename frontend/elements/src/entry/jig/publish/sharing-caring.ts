@@ -12,6 +12,7 @@ export class _ extends LitElement {
             background-color: #ffe1d5;
             position:relative;
             display:none;
+            z-index:2;
 
         }
         div {
@@ -24,6 +25,7 @@ export class _ extends LitElement {
             position:absolute;
             top:10px;
             right:10px;
+            cursor:pointer;
         }
         h1{
             font-size:32px;
@@ -34,6 +36,10 @@ export class _ extends LitElement {
         }
         p{
             margin-bottom: 32px;
+        }
+        .heartjiggling{
+            position:absolute;
+            bottom:0;
         }
     
     `];
@@ -59,6 +65,7 @@ export class _ extends LitElement {
        <p>${STR_SUB}</p>
        <p> ${STR_TOGGLE}</p>
        </div>
+       <img-ui class="heartjiggling" path="Image_Sharing@2x.png"></img-ui>
     </main>
   `;
   }
