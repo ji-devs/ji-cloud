@@ -738,7 +738,6 @@ dependencies = [
  "config",
  "futures-util",
  "hex",
- "jsonwebtoken",
  "listenfd",
  "log",
  "percent-encoding",

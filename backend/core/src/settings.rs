@@ -7,7 +7,6 @@ use crate::{
     google::{get_access_token_and_project_id, get_optional_secret},
 };
 use config::RemoteTarget;
-use jsonwebtoken::{DecodingKey, EncodingKey};
 use std::{
     convert::TryInto,
     env::VarError,
@@ -69,19 +68,11 @@ pub struct RuntimeSettings {
     /// When the server started.
     pub epoch: Duration,
 
-    /// Used to encode jwt tokens.
-    pub jwt_encoding_key: EncodingKey,
-
     /// Used to search for images via the bing image search api
     ///
     /// If missing, implies that bing searching is disabled.
     // todo: move this and make it runtime reloadable somehow (bing suggests rotating keys)
     pub bing_search_key: Option<String>,
-
-    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    //Keeping a string is a stop-gap measure for now, not ideal
-    /// Used to _decode_ jwt tokens.
-    jwt_decoding_key: String,
 
     remote_target: RemoteTarget,
 
@@ -98,8 +89,6 @@ pub struct RuntimeSettings {
 
 impl RuntimeSettings {
     pub(crate) fn new(
-        jwt_encoding_key: EncodingKey,
-        jwt_decoding_key: String,
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
@@ -124,8 +113,6 @@ impl RuntimeSettings {
             pages_port,
             firebase_no_auth,
             epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
             remote_target,
             bing_search_key,
             google_oauth,
@@ -143,16 +130,6 @@ impl RuntimeSettings {
     /// Are we running "locally" (dev)?
     pub fn is_local(&self) -> bool {
         matches!(self.remote_target(), RemoteTarget::Local)
-    }
-
-    /// Should we assume that anything that says firebase sent it is right?
-    pub fn firebase_assume_valid(&self) -> bool {
-        self.is_local() && self.firebase_no_auth
-    }
-
-    /// Get key used to decode jwt tokens.
-    pub fn jwt_decoding_key(&self) -> DecodingKey {
-        DecodingKey::from_secret(self.jwt_decoding_key.as_bytes())
     }
 }
 
@@ -403,7 +380,6 @@ impl SettingsManager {
 
     /// Load the `RuntimeSettings`.
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
-        let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
         let password_secret = self.get_secret(keys::PASSWORD_SECRET).await?;
         let token_secret = self
             .get_secret(keys::TOKEN_SECRET)
@@ -421,7 +397,6 @@ impl SettingsManager {
                 Ok(Box::new(secret))
             })?;
 
-        let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
         let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
         let google_oauth = GoogleOAuth::from_parts(
@@ -430,8 +405,6 @@ impl SettingsManager {
         );
 
         RuntimeSettings::new(
-            jwt_encoding_key,
-            jwt_secret,
             self.remote_target,
             bing_search_key,
             google_oauth,

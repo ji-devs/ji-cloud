@@ -1,7 +1,7 @@
 use crate::{
     db::{self, meta::MetaWrapperError, nul_if_empty},
     error::{self, ServiceKind},
-    extractor::{TokenUserWithScope, ScopeManageImage, TokenUser},
+    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
     image_ops::generate_images,
     s3,
 };
@@ -304,7 +304,7 @@ async fn search(
     _claims: TokenUser,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
-    let query = dbg!(query.map_or_else(Default::default, Query::into_inner));
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
     let (ids, pages, total_hits) = algolia
         .search_image(

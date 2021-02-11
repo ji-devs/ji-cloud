@@ -220,7 +220,7 @@ async fn list_media(
         .fetch(db.as_ref())
         .map_ok(|row| AdminMediaItem {
             id: row.id,
-            kind: dbg!(row.kind).to_shared(),
+            kind: row.kind.to_shared(),
             created_at: row.created_at,
             updated_at: row.updated_at,
             uploaded_at: row.uploaded_at.clone(),
@@ -232,12 +232,12 @@ async fn list_media(
         .try_collect()
         .await?;
 
-    dbg!(items.len());
+    items.len();
 
-    dbg!(items
+    items
         .iter()
         .filter(|it| matches!(it.kind, shared::media::MediaKind::Image(ImageKind::Canvas)))
-        .count());
+        .count();
 
     Ok(Json(AdminListMediaResponse { media: items }))
 }
