@@ -2,19 +2,14 @@ use super::state::*;
 use std::rc::Rc;
 use shared::{
     api::endpoints::{ApiEndpoint,self},
-    domain::category::{GetCategoryRequest, CreateCategoryRequest,NewCategoryResponse,CategoryResponse, CategoryTreeScope, CategoryId},
+    domain::category::{GetCategoryRequest, UpdateCategoryRequest, CreateCategoryRequest,NewCategoryResponse,CategoryResponse, CategoryTreeScope, CategoryId},
     error::EmptyError
 };
-use utils::fetch::api_with_auth;
+use utils::fetch::{api_with_auth, api_with_auth_empty};
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::prelude::*;
 use dominator::clone;
 
-pub fn handle_double_click(cat: &Rc<Category>) {
-    if !cat.editing.get() {
-        cat.editing.set(true);
-    }
-}
 
 pub fn toggle_expand_all(cat: &Rc<Category>, flag: bool) {
     cat.expanded.set(flag);
@@ -62,6 +57,29 @@ pub fn add_category(state:Rc<State>, parent: Option<Rc<Category>>) {
             Ok(resp) => {
                 let cat = Rc::new(Category::new(resp.id, name));
                 state.categories.lock_mut().push_cloned(cat);
+            },
+            Err(_) => {
+                log::info!("err!")
+            }
+        }
+    }));
+}
+
+
+pub fn rename_category(cat: &Rc<Category>, state: Rc<State>, name: String) {
+    cat.name.set(name.clone());
+    let id = cat.id;
+
+    state.loader.load(clone!(state => async move {
+        let path = endpoints::category::Update::PATH.replace("{id}",&id.0.to_string());
+        let req = UpdateCategoryRequest {
+            name: Some(name),
+            parent_id: None,
+            index: None
+        };
+
+        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::category::Update::METHOD, Some(req)).await {
+            Ok(_) => {
             },
             Err(_) => {
                 log::info!("err!")

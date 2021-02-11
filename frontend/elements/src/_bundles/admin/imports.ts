@@ -7,4 +7,6 @@ import "@elements/core/reports/tree";
 import "@elements/core/cards/blue";
 import "@elements/core/menu/ellipses/ellipses-menu-line";
 import "@elements/core/buttons/expand";
+import "@elements/core/buttons/text";
 import "@elements/core/window/window-loader-block";
+import "@elements/core/inputs/text-content";

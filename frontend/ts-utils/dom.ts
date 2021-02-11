@@ -1,3 +1,17 @@
+// https://stackoverflow.com/a/56105394/784519
+export function closestElement(selector: string, base: Element): Element | null {
+  function __closestFrom(el: Element | Window | Document): Element | null{
+    if (!el || el === document || el === window) return null;
+    if ((el as any).assignedSlot) el = (el as any).assignedSlot;
+    let found = (el as Element).closest(selector);
+    return found
+      ? found
+      : __closestFrom(((el as Element).getRootNode() as ShadowRoot).host);
+  }
+  return __closestFrom(base);
+}
+
+/* not using any of these any more
 export function withSlot(slot:string, html:string):string {
     const getInsertPos = ():number => {
         for(let i = 1; i < html.length; i++) {
@@ -131,3 +145,5 @@ export function getChildId(element:Element, id:string, supressError?:boolean) {
 export function dataId(id) {
     return `[data-id='${id}']`;
 }
+
+*/
