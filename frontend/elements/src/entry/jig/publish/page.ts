@@ -113,7 +113,9 @@ export class _ extends LitElement {
                 <h1>${STR_TITLE}</h1>
                 <p name="subtitle">${STR_SUBTITLE}</p>
                 <div class="content">
-                    <div class="column"><slot name="column_one"></slot></div>
+                    <div class="column"><slot name="column_one"></slot>
+                    <slot name="sharing"></slot>
+                    </div>
                     <div class="column"><slot name="column_two"></slot></div>
                     <div class="column"><slot name="column_three"></slot>
                     
