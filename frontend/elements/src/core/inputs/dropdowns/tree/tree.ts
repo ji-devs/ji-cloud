@@ -77,6 +77,9 @@ export class DropdownTree extends LitElement {
     this.dispatchEvent(new Event(value ? "expand-all" : "collapse-all"));
   }
 
+  toggleExpand() {
+    this.expanded = !this.expanded;
+  }
   @property({type: Boolean})
   expanded: boolean = false; 
 
@@ -134,8 +137,8 @@ function renderArrow(self: DropdownTree) {
     return nothing;
   }
 
-  return expanded ? html`<img-ui @click="${() => self.expanded = true}" class="arrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>`
-    : html`<img-ui @click="${() => self.expanded = false}" class="arrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>`
+  return expanded ? html`<img-ui @click="${self.toggleExpand}" class="arrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>`
+    : html`<img-ui @click="${self.toggleExpand}" class="arrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>`
 }
 
 function multiColorClasses(self: DropdownTree) {

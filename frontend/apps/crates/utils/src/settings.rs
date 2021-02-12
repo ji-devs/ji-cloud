@@ -4,7 +4,7 @@ use cfg_if::cfg_if;
 use config::RemoteTarget;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use shared::domain::auth::JWT_COOKIE_NAME;
+use shared::domain::auth::AUTH_COOKIE_NAME;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -59,13 +59,17 @@ fn _init(remote_target:RemoteTarget) -> Settings {
             if frontend_dev_auth() {
                 let csrf = frontend_dev_csrf();
                 let token = frontend_dev_token();
+                log::info!("manually setting auth for dev mode");
+
                 super::storage::save_csrf_token(&csrf);
+
+
                 web_sys::window()
                     .unwrap_throw()
                     .document()
                     .unwrap_throw()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("{}={}; PATH=/", JWT_COOKIE_NAME, token));
+                    .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
             }
         }
     }
