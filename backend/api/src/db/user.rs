@@ -1,4 +1,4 @@
-use crate::{error, extractor::FirebaseId};
+use crate::error;
 use chrono_tz::Tz;
 use shared::{
     domain::{
@@ -17,14 +17,12 @@ use super::{nul_if_empty, recycle_metadata};
 pub async fn lookup(
     db: &sqlx::PgPool,
     id: Option<Uuid>,
-    firebase_id: Option<&str>,
     name: Option<&str>,
 ) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select id from "user" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)"#,
+        r#"select id from "user" where (id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
         id,
-        firebase_id,
         name
     )
     .fetch_optional(db)
@@ -35,7 +33,7 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
     let row = sqlx::query!(
         r#"
         select id,
-        firebase_id,
+        -- firebase_id,
         username,
         email::text                                                              as "email!",
         given_name,
@@ -73,7 +71,6 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
         family_name: row.family_name,
         language: row.language,
         locale: row.locale,
-
         opt_into_edu_resources: row.opt_into_edu_resources,
         over_18: row.over_18,
         timezone: Tz::from_str(&row.timezone).map_err(|e| anyhow::anyhow!(e))?,
@@ -102,34 +99,37 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
     .map(|it| it.exists)
 }
 
-pub async fn firebase_to_id(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
-) -> sqlx::Result<Option<Uuid>> {
-    sqlx::query!(r#"select id from "user" where firebase_id = $1"#, id)
-        .fetch_optional(db)
-        .await
-        .map(|it| it.map(|it| it.id))
+pub async fn register_google_oauth(
+    txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    google_id: &str,
+    user_id: Uuid,
+) -> sqlx::Result<()> {
+    sqlx::query!(
+        "insert into user_auth_google (user_id, google_id) values ($1, $2)",
+        user_id,
+        google_id
+    )
+    .execute(txn)
+    .await?;
+
+    Ok(())
 }
 
 pub async fn register(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
+    txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &RegisterRequest,
+    email: &str,
 ) -> Result<Uuid, error::Register> {
-    let mut txn = db.begin().await?;
-
     let user_id = sqlx::query!(
         r#"
 INSERT INTO "user" 
-    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
+    (username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
 VALUES 
-    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    ($1, $2::text, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 returning id
         "#,
-        id,
         &req.username,
-        &req.email,
+        &email,
         req.over_18,
         &req.given_name,
         &req.family_name,
@@ -140,7 +140,7 @@ returning id
         req.organization.as_deref(),
         req.location.as_ref(),
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await
     .map(|it| it.id)
     .map_err(|err| match err {
@@ -170,15 +170,13 @@ returning id
     })?;
 
     update_metadata(
-        &mut txn,
+        txn,
         user_id,
         nul_if_empty(&req.subjects),
         nul_if_empty(&req.affiliations),
         nul_if_empty(&req.age_ranges),
     )
     .await?;
-
-    txn.commit().await?;
 
     Ok(user_id)
 }

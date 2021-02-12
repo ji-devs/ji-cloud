@@ -23,6 +23,7 @@ pub mod media;
 pub mod meta;
 pub mod search;
 mod ser;
+pub mod session;
 pub mod user;
 
 use chrono::Utc;

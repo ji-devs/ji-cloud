@@ -1,10 +1,13 @@
 mod cors;
 mod endpoints;
 
-use crate::{error::BasicError, jwkkeys::JwkVerifier, s3};
+use crate::{error::BasicError, s3};
 use actix_service::Service;
-use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
 use actix_web::HttpResponse;
+use actix_web::{
+    dev::{MessageBody, ServiceRequest, ServiceResponse},
+    web::Data,
+};
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
@@ -57,9 +60,9 @@ where
 pub async fn run(
     pool: PgPool,
     settings: RuntimeSettings,
-    jwk_verifier: Arc<JwkVerifier>,
     s3: s3::Client,
     algolia: crate::algolia::Client,
+    jwk_verifier: Arc<crate::jwk::JwkVerifier>,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -70,7 +73,7 @@ pub async fn run(
             .data(settings.clone())
             .data(s3.clone())
             .data(algolia.clone())
-            .app_data(jwk_verifier.clone())
+            .app_data(Data::from(jwk_verifier.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
@@ -86,6 +89,10 @@ pub async fn run(
             .app_data(
                 actix_web::web::PathConfig::default().error_handler(|_, _| bad_request_handler()),
             )
+            .external_resource(
+                "google_cloud_oauth",
+                "https://accounts.google.com/o/oauth2/v2/auth",
+            )
             .default_service(actix_web::web::to(default_route))
             .wrap_api()
             .configure(endpoints::user::configure)
@@ -99,6 +106,7 @@ pub async fn run(
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
             .configure(endpoints::media::configure)
+            .configure(endpoints::session::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });

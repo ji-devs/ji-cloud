@@ -88,8 +88,10 @@ jobs:
           toolchain: stable
           override: true
 
-      - uses: actions/setup-node@v1
-
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+          
       - uses: actions/cache@v2
         with:
           path: |

@@ -123,6 +123,27 @@
       ]
     }
   },
+  "18a1517547f9c103dd8ca35f2773719d37bf849f484474f1f822ffaee2b4d610": {
+    "query": "\nselect exists(select 1 from user_auth_google where user_id = $1 and google_id = $2) as \"user_valid_oauth!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_valid_oauth!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "19cf8c137d4072d2231ba5708f31fbd415f665a338de2473cf1aca4390e46a61": {
     "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    cover_id  = coalesce($4, cover_id),\n    ending_id  = coalesce($5, ending_id),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::uuid is not null and $4 is distinct from cover_id) or\n       ($5::uuid is not null and $5 is distinct from ending_id))",
     "describe": {
@@ -134,6 +155,19 @@
           "Uuid",
           "Uuid",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
+    "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
         ]
       },
       "nullable": []
@@ -353,8 +387,8 @@
       "nullable": []
     }
   },
-  "2a38d6204b4e0dc27a944c0af4c85f89a1dd12fd6507e136b70430422ff4a066": {
-    "query": "\n        select id,\n        firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        location,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
+  "2b0f1d326288a2541d2f9ab4298026a47dfd5494d013b43cddba83e38b90bc0c": {
+    "query": "\n        select id,\n        -- firebase_id,\n        username,\n        email::text                                                              as \"email!\",\n        given_name,\n        family_name,\n        language,\n        locale,\n        opt_into_edu_resources,\n        over_18,\n        timezone,\n        created_at,\n        updated_at,\n        organization,\n        location,\n        array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n        array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n        array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n        array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\"\n from \"user\"\n where id = $1",
     "describe": {
       "columns": [
         {
@@ -364,91 +398,86 @@
         },
         {
           "ordinal": 1,
-          "name": "firebase_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
           "name": "username",
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
+          "ordinal": 2,
           "name": "email!",
           "type_info": "Text"
         },
         {
-          "ordinal": 4,
+          "ordinal": 3,
           "name": "given_name",
           "type_info": "Text"
         },
         {
-          "ordinal": 5,
+          "ordinal": 4,
           "name": "family_name",
           "type_info": "Text"
         },
         {
-          "ordinal": 6,
+          "ordinal": 5,
           "name": "language",
           "type_info": "Text"
         },
         {
-          "ordinal": 7,
+          "ordinal": 6,
           "name": "locale",
           "type_info": "Text"
         },
         {
-          "ordinal": 8,
+          "ordinal": 7,
           "name": "opt_into_edu_resources",
           "type_info": "Bool"
         },
         {
-          "ordinal": 9,
+          "ordinal": 8,
           "name": "over_18",
           "type_info": "Bool"
         },
         {
-          "ordinal": 10,
+          "ordinal": 9,
           "name": "timezone",
           "type_info": "Text"
         },
         {
-          "ordinal": 11,
+          "ordinal": 10,
           "name": "created_at",
           "type_info": "Timestamptz"
         },
         {
-          "ordinal": 12,
+          "ordinal": 11,
           "name": "updated_at",
           "type_info": "Timestamptz"
         },
         {
-          "ordinal": 13,
+          "ordinal": 12,
           "name": "organization",
           "type_info": "Text"
         },
         {
-          "ordinal": 14,
+          "ordinal": 13,
           "name": "location",
           "type_info": "Jsonb"
         },
         {
-          "ordinal": 15,
+          "ordinal": 14,
           "name": "scopes!: Vec<i16>",
           "type_info": "Int2Array"
         },
         {
-          "ordinal": 16,
+          "ordinal": 15,
           "name": "subjects!: Vec<Uuid>",
           "type_info": "UuidArray"
         },
         {
-          "ordinal": 17,
+          "ordinal": 16,
           "name": "affiliations!: Vec<Uuid>",
           "type_info": "UuidArray"
         },
         {
-          "ordinal": 18,
+          "ordinal": 17,
           "name": "age_ranges!: Vec<Uuid>",
           "type_info": "UuidArray"
         }
@@ -459,7 +488,6 @@
         ]
       },
       "nullable": [
-        false,
         false,
         false,
         null,
@@ -639,26 +667,6 @@
       "nullable": []
     }
   },
-  "3917a9f539e6514f36cb79a79236a4351970d48d1fd37cf06483c3013ff32b30": {
-    "query": "select id from \"user\" where firebase_id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
     "query": "update category set name = $1 where id = $2",
     "describe": {
@@ -670,6 +678,33 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "3e8a5d9336a0b24446585c3ced6014fb8642c6c94680de2a0b64eb1a85488003": {
+    "query": "\nselect \n    exists(select 1 from \"user\" where id = $1) as \"impersonated_exists!\",\n    exists(select 1 from user_scope where user_id = $2) as \"impersonator_admin!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "impersonated_exists!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 1,
+          "name": "impersonator_admin!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null,
+        null
+      ]
     }
   },
   "3fba9bb8028fc134499ea67c056c4018692bde07b26c5d578c54017fec5f95dd": {
@@ -717,6 +752,36 @@
         false,
         false,
         true
+      ]
+    }
+  },
+  "469ea33d225ee6955744c49b563776ed069a71a3a863f23022aae83425c7e856": {
+    "query": "\nINSERT INTO \"user\" \n    (username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nVALUES \n    ($1, $2::text, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -1020,6 +1085,27 @@
       ]
     }
   },
+  "6bb256e4157df72cafeb8133695a33f24d4df495edb5e43bdd5131f4b589f5c3": {
+    "query": "select id from \"user\" where (id = $1 and $1 is not null) or (username = $2 and $2 is not null)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
     "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
     "describe": {
@@ -1142,6 +1228,52 @@
         "Left": []
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
+    "query": "select user_id from user_auth_google where google_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "776139b032b9126ee3685d135f388e7138f46e36285b5dfca7eaa69e557e3b40": {
+    "query": "select user_id, password from user_auth_basic where email = $1::text",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "password",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
         false
       ]
     }
@@ -1290,6 +1422,46 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "8e9299d3386431b442336868f6fb37ff32899763ed05c041228c386f7af1d04d": {
+    "query": "select exists(select 1 from user_auth_basic where user_id = $1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "916a9aceabd0ad68ffa2a98d76f5d4d58081f48f1ad78434a88bc067d53f319d": {
+    "query": "\nselect exists(select 1 from user_auth_google where google_id = $1) as \"oauth_exists!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "oauth_exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "91ee22dc378de1a25690f2bc695064afe6472aef6b1f985562bded864f95ef8e": {
@@ -1827,28 +1999,6 @@
       ]
     }
   },
-  "d3d8991c6bd250cd87a4d5eb211ceec43f77e6e9eaeb75d114c2bd350ac25467": {
-    "query": "select id from \"user\" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
     "describe": {
@@ -1949,37 +2099,6 @@
       },
       "nullable": [
         false,
-        false
-      ]
-    }
-  },
-  "e97f7e0f4996d2e1a7c870880fd11e30a2b14f8fbcffcef9be1227afc05b67a7": {
-    "query": "\nINSERT INTO \"user\" \n    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nVALUES \n    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)\nreturning id\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": [
         false
       ]
     }

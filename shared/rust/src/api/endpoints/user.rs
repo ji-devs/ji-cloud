@@ -3,43 +3,24 @@ use super::ApiEndpoint;
 use crate::{
     api::method::Method,
     domain::{
-        auth::{RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
+        auth::RegisterRequest,
+        session::CreateSessionSuccess,
         user::{OtherUser, UserLookupQuery, UserProfile},
     },
     error::{auth::RegisterError, EmptyError},
 };
 
-/// Sign in.
-pub struct Signin;
-impl ApiEndpoint for Signin {
-    type Req = ();
-    type Res = SigninSuccess;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/login";
-    const METHOD: Method = Method::Post;
-}
-
-/// Sign in via SSO.
-pub struct SingleSignOn;
-impl ApiEndpoint for SingleSignOn {
-    type Req = ();
-    type Res = SingleSignOnSuccess;
-    type Err = EmptyError;
-    const PATH: &'static str = "/v1/authorize";
-    const METHOD: Method = Method::Post;
-}
-
 /// Register a new user.
 pub struct Register;
 impl ApiEndpoint for Register {
     type Req = RegisterRequest;
-    type Res = RegisterSuccess;
+    type Res = CreateSessionSuccess;
     type Err = RegisterError;
     const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Post;
 }
 
-/// Fetch a user's profile.
+/// Fetch your own user profile.
 pub struct Profile;
 impl ApiEndpoint for Profile {
     type Req = ();

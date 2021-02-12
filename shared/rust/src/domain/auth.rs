@@ -4,42 +4,12 @@ use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 /// The name to use for JWT cookies.
-pub const JWT_COOKIE_NAME: &str = "X-JWT";
+pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
 
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
-
-// todo: do we even need this?
-#[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Response for a successful signin.
-pub struct SigninSuccess {
-    /// The csrf of the signin.
-    pub csrf: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Response for a successful SSO.
-pub struct SingleSignOnSuccess {
-    /// The jwt token to be sent as authorization for future requests.
-    pub jwt: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Response for a successful registration.
-pub enum RegisterSuccess {
-    // fixme: what does this even do?
-    #[allow(missing_docs)]
-    Signin(String),
-    // fixme: what does this even do?
-    #[allow(missing_docs)]
-    ConfirmEmail,
-}
 
 #[derive(Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -50,11 +20,6 @@ pub struct RegisterRequest {
     ///
     /// This must be unique.
     pub username: String,
-
-    /// The user's email.
-    ///
-    /// This must be unique.
-    pub email: String,
 
     /// Is the user >= 18 yeas old?
     pub over_18: bool,
@@ -103,15 +68,4 @@ pub struct RegisterRequest {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// The claims that are used as part of the user's jwt.
-pub struct AuthClaims {
-    // fixme: use `sub` (short for subject, it's a standard jwt claim.)
-    /// The user claimed by the jwt.
-    pub id: Uuid,
-    /// The csrf that must match for the jwt to be considered valid.
-    pub csrf: Option<String>,
 }

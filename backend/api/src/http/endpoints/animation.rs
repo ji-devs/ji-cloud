@@ -16,7 +16,7 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::{
     db, error,
-    extractor::{AuthUserWithScope, ScopeManageAnimation, WrapAuthClaimsNoDb},
+    extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
     s3,
 };
 
@@ -33,7 +33,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageAnimation>,
+    _claims: TokenUserWithScope<ScopeManageAnimation>,
     req: Path<AnimationId>,
     s3: Data<s3::Client>,
 ) -> Result<NoContent, error::Delete> {
@@ -60,7 +60,7 @@ async fn delete(
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageAnimation>,
+    _claims: TokenUserWithScope<ScopeManageAnimation>,
     req: Json<<animation::Create as ApiEndpoint>::Req>,
 ) -> Result<CreatedJson<<animation::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.into_inner();
@@ -99,7 +99,7 @@ async fn create(
 async fn upload(
     db: Data<PgPool>,
     s3: Data<s3::Client>,
-    _claims: AuthUserWithScope<ScopeManageAnimation>,
+    _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
@@ -150,7 +150,7 @@ async fn upload(
 #[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     req: Path<AnimationId>,
 ) -> Result<Json<<animation::Get as ApiEndpoint>::Res>, error::NotFound> {
     let metadata = db::animation::get_one(&db, req.into_inner())

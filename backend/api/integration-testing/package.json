@@ -14,7 +14,8 @@
     "get-port": "^5.1.1",
     "got": "^11.5.1",
     "qs": "^6.9.4",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "paseto": "^1.0.8"
   },
   "scripts": {
     "test:build": "cargo fetch --manifest-path ../Cargo.toml && cargo build --manifest-path ../Cargo.toml --bin ji-cloud-api --offline",

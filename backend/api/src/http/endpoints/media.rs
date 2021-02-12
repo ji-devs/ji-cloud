@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     error,
-    extractor::{AuthUserWithScope, ScopeAdmin, WrapAuthClaimsNoDb},
+    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     image_ops::MediaKind,
     s3,
 };
@@ -37,7 +37,7 @@ const fn max(a: usize, b: usize) -> usize {
 #[api_v2_operation]
 pub async fn create(
     pool: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     s3: Data<s3::Client>,
     request: Json<WebMediaUrlCreateRequest>,
 ) -> Result<CreatedJson<UrlCreatedResponse>, error::Server> {
@@ -209,7 +209,7 @@ for update
 #[api_v2_operation]
 async fn delete_media(
     pool: Data<PgPool>,
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     s3: Data<s3::Client>,
     Path(id): Path<Uuid>,
 ) -> Result<NoContent, error::Server> {
@@ -249,7 +249,7 @@ async fn delete_media(
 #[api_v2_operation]
 async fn delete_url(
     pool: Data<PgPool>,
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     url: Path<Base64<Url>>,
 ) -> Result<NoContent, error::Server> {
     let url = url.into_inner().0;
@@ -266,7 +266,7 @@ async fn delete_url(
 #[api_v2_operation]
 async fn get(
     pool: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     Path(id): Path<Uuid>,
 ) -> Result<Json<WebMediaMetadataResponse>, error::NotFound> {
     let media = sqlx::query!(
@@ -300,7 +300,7 @@ where id = $1"#,
 #[api_v2_operation]
 async fn get_by_url(
     pool: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     Path(Base64(url)): Path<Base64<Url>>,
 ) -> Result<Json<WebMediaMetadataResponse>, error::NotFound> {
     let media = sqlx::query!(

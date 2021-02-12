@@ -1,26 +1,25 @@
-use crate::extractor::{
-    reply_signin_auth, FirebaseUser, WrapAuthClaimsCookieDbNoCsrf, WrapAuthClaimsNoDb,
-};
 use crate::{
-    db::{self, user::register},
+    db::{
+        self,
+        user::{register, register_google_oauth},
+    },
     error,
+    extractor::OAuthSignupToken,
+    token::{OAuthProvider, TokenSource},
 };
+use crate::{extractor::TokenUser, token::create_signin_token};
 use actix_web::HttpResponse;
 use core::settings::RuntimeSettings;
-use jsonwebtoken as jwt;
 use paperclip::actix::{
     api_v2_operation,
     web::{Data, Json, Query, ServiceConfig},
 };
 use shared::{
     api::endpoints::{
-        user::{Profile, Register, Signin, SingleSignOn, UserLookup},
+        user::{Profile, Register, UserLookup},
         ApiEndpoint,
     },
-    domain::{
-        auth::{AuthClaims, RegisterRequest, RegisterSuccess, SigninSuccess, SingleSignOnSuccess},
-        user::UserLookupQuery,
-    },
+    domain::{auth::RegisterRequest, session::CreateSessionSuccess, user::UserLookupQuery},
     error::auth::RegisterErrorKind,
 };
 use sqlx::PgPool;
@@ -33,38 +32,10 @@ async fn user_lookup(
 ) -> Result<Json<<UserLookup as ApiEndpoint>::Res>, error::UserNotFound> {
     let query = query.into_inner();
 
-    if query.id.is_none() && query.firebase_id.is_none() && query.name.is_none() {
-        return Err(error::UserNotFound::UserNotFound);
-    }
-
-    db::user::lookup(
-        db.as_ref(),
-        query.id,
-        query.firebase_id.as_deref(),
-        query.name.as_deref(),
-    )
-    .await?
-    .map(Json)
-    .ok_or(error::UserNotFound::UserNotFound)
-}
-
-/// Login with a user.
-#[api_v2_operation]
-async fn handle_signin_credentials(
-    settings: Data<RuntimeSettings>,
-    db: Data<PgPool>,
-    user: FirebaseUser,
-) -> Result<HttpResponse, error::UserNotFound> {
-    let user_id = db::user::firebase_to_id(&db, &user.id)
+    db::user::lookup(db.as_ref(), query.id, query.name.as_deref())
         .await?
-        .ok_or(error::UserNotFound::UserNotFound)?;
-
-    let (csrf, cookie) =
-        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())?;
-
-    Ok(HttpResponse::Ok()
-        .cookie(cookie)
-        .json(SigninSuccess { csrf }))
+        .map(Json)
+        .ok_or(error::UserNotFound::UserNotFound)
 }
 
 async fn validate_register_req(req: &RegisterRequest) -> Result<(), error::Register> {
@@ -79,52 +50,61 @@ async fn validate_register_req(req: &RegisterRequest) -> Result<(), error::Regis
 }
 
 /// Register a new user.
+#[allow(unreachable_code, unused_variables)]
 #[api_v2_operation]
 async fn handle_register(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    user: FirebaseUser,
+    // todo: Option ignores errors, don't do that.
+    signup_user: OAuthSignupToken,
     req: Json<RegisterRequest>,
 ) -> actix_web::Result<HttpResponse, error::Register> {
-    validate_register_req(&req).await?;
+    let signup_user = Some(signup_user);
+    match signup_user {
+        None => return Err(anyhow::anyhow!("handle authless register request").into()),
+        Some(token) => {
+            validate_register_req(&req).await?;
 
-    let id = register(db.as_ref(), &user.id, &req).await?;
+            let mut txn = db.begin().await?;
 
-    let (csrf, cookie) = reply_signin_auth(id, &settings.jwt_encoding_key, settings.is_local())?;
+            let id = register(&mut txn, &req, &token.0.email).await?;
 
-    Ok(HttpResponse::Created()
-        .cookie(cookie)
-        .json(RegisterSuccess::Signin(csrf)))
+            match &token.0.provider {
+                OAuthProvider::Google { google_id } => {
+                    register_google_oauth(&mut txn, &google_id, id).await?;
+                }
+            }
+
+            txn.commit().await?;
+
+            // fixme: remove the todo, remove the `#[allow]` above.
+            let (csrf, cookie) = create_signin_token(
+                id,
+                &settings.token_secret,
+                settings.is_local(),
+                TokenSource::OAuth(token.0.provider),
+                settings.login_token_valid_duration,
+            )?;
+
+            Ok(HttpResponse::Created()
+                .cookie(cookie)
+                .json(CreateSessionSuccess { csrf }))
+        }
+    }
 }
 
 /// Get a user by their profile.
 #[api_v2_operation]
 async fn handle_get_profile(
     db: Data<PgPool>,
-    claims: WrapAuthClaimsNoDb,
+    claims: TokenUser,
 ) -> Result<Json<<Profile as ApiEndpoint>::Res>, error::UserNotFound> {
     // todo: figure out how to do `<Profile as ApiEndpoint>::Err`
 
-    db::user::profile(db.as_ref(), claims.0.id)
+    db::user::profile(db.as_ref(), claims.0.sub)
         .await?
         .map(Json)
         .ok_or(error::UserNotFound::UserNotFound)
-}
-
-/// Sign in as a user via SSO.
-#[api_v2_operation]
-async fn handle_authorize(
-    settings: Data<RuntimeSettings>,
-    auth: WrapAuthClaimsCookieDbNoCsrf,
-) -> Result<Json<<SingleSignOn as ApiEndpoint>::Res>, error::Server> {
-    let claims = AuthClaims {
-        id: auth.0.id,
-        csrf: None,
-    };
-
-    let jwt = jwt::encode(&jwt::Header::default(), &claims, &settings.jwt_encoding_key)?;
-
-    Ok(Json(SingleSignOnSuccess { jwt }))
 }
 
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
@@ -132,14 +112,6 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         Profile::PATH,
         Profile::METHOD.route().to(handle_get_profile),
     )
-    .route(
-        SingleSignOn::PATH,
-        SingleSignOn::METHOD.route().to(handle_authorize),
-    )
     .route(Register::PATH, Register::METHOD.route().to(handle_register))
-    .route(
-        Signin::PATH,
-        Signin::METHOD.route().to(handle_signin_credentials),
-    )
     .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup));
 }

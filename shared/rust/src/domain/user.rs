@@ -61,10 +61,6 @@ pub struct UserLookupQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<Uuid>,
 
-    /// The *Firebase* ID we're filtering by.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub firebase_id: Option<String>,
-
     /// The name we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,

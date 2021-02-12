@@ -1,10 +1,10 @@
-use crate::extractor::FirebaseId;
 use anyhow::{anyhow, bail, Context};
 use jsonwebtoken as jwt;
 use jwt::{Algorithm, DecodingKey, TokenData, Validation};
 use reqwest::{header, Response};
 use serde::Deserialize;
 use std::{
+    cmp,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -87,7 +87,62 @@ fn parse_max_age_value(cache_control_value: &str) -> anyhow::Result<Duration> {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Claims {
+pub struct IdentityClaims {
+    /// should be `https://accounts.google.com`
+    #[serde(rename = "iss")]
+    pub issuer: String,
+
+    /// should be the oauth client
+    #[serde(rename = "azp")]
+    pub authorizing_party: String,
+
+    /// should be the oauth client
+    #[serde(rename = "aud")]
+    pub audience: String,
+
+    /// The google id of the user
+    #[serde(rename = "sub")]
+    pub google_id: String,
+
+    /// The user's email
+    pub email: String,
+
+    /// If the user's email is verified.
+    pub email_verified: bool,
+
+    /// Hash of the user's access token
+    #[serde(rename = "at_hash")]
+    pub access_token_hash: String,
+
+    /// The user's name
+    pub name: String,
+
+    /// the user's profile picture
+    #[serde(rename = "picture", default)]
+    pub profile_picture: Option<String>,
+
+    /// The user's given / first name
+    #[serde(default)]
+    pub given_name: Option<String>,
+
+    /// The user's family / last name
+    #[serde(default)]
+    pub family_name: Option<String>,
+
+    /// The user's locale
+    pub locale: String,
+
+    /// When this token was issued
+    #[serde(rename = "iat")]
+    pub issued_at: u64,
+
+    /// When this token expires
+    #[serde(rename = "exp")]
+    pub expire_at: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FirebaseClaims {
     pub sub: String,
     pub iat: u64,
     pub auth_time: u64,
@@ -114,23 +169,33 @@ impl JwkVerifier {
         }
     }
 
-    pub async fn verify(&self, token: &str, max_attempts: usize) -> anyhow::Result<FirebaseId> {
+    pub async fn verify_oauth(
+        &self,
+        token: &str,
+        max_attempts: usize,
+    ) -> anyhow::Result<IdentityClaims> {
+        // todo: replace with better errors (401, 403)
         let token_kid = jwt::decode_header(token)
             .map_err(|e| anyhow!("error decoding jwt header: {}", e))?
             .kid
             .ok_or_else(|| anyhow!("Missing Key ID"))?;
 
-        for _ in 0..(max_attempts.max(1)) {
+        for _ in 0..cmp::max(max_attempts, 1) {
             match self.key_holder.read().await.get_key(&token_kid) {
                 Ok(Some(key)) => {
-                    let claims: Claims = self.decode_token_with_key(key, token)?.claims;
+                    let claims: IdentityClaims =
+                        self.decode_identity_token_with_key(key, token)?.claims;
                     let now = chrono::Utc::now().timestamp() as u64;
 
-                    if claims.auth_time > now || claims.iat > now {
+                    if claims.issued_at > now {
                         bail!("token isn't valid yet")
                     }
 
-                    return Ok(FirebaseId(claims.sub));
+                    if claims.email_verified == false {
+                        bail!("token belongs to an non-verified email")
+                    }
+
+                    return Ok(claims);
                 }
                 Ok(None) => bail!("invalid KID"),
                 Err(delay_until) => tokio::time::delay_until(delay_until.into()).await,
@@ -144,11 +209,11 @@ impl JwkVerifier {
         *self.key_holder.write().await = keys;
     }
 
-    fn decode_token_with_key(
+    fn decode_identity_token_with_key(
         &self,
         key: &JwkKey,
         token: &str,
-    ) -> anyhow::Result<TokenData<Claims>> {
+    ) -> anyhow::Result<TokenData<IdentityClaims>> {
         let mut validation = Validation::new(key.alg);
         validation.set_audience(&[&self.audience]);
         validation.iss = Some(self.issuer.clone());
@@ -187,6 +252,9 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 }
 
 #[must_use]
-pub fn create_verifier(config: core::settings::JwkSettings) -> Arc<JwkVerifier> {
-    Arc::new(JwkVerifier::new(config.issuer, config.audience))
+pub fn create_verifier(audience: String) -> Arc<JwkVerifier> {
+    Arc::new(JwkVerifier::new(
+        config::JWK_ISSUER_URL.to_owned(),
+        audience,
+    ))
 }

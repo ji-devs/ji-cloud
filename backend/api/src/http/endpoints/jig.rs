@@ -16,18 +16,18 @@ use sqlx::PgPool;
 use crate::{
     db,
     error::{self, UpdateWithMetadata},
-    extractor::{AuthUserWithScope, ScopeManageJig, WrapAuthClaimsNoDb},
+    extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
 };
 
 /// Create a jig.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    auth: AuthUserWithScope<ScopeManageJig>,
+    auth: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
-    let creator_id = auth.claims.id;
+    let creator_id = auth.claims.sub;
 
     let id = db::jig::create(
         &*db,
@@ -49,7 +49,7 @@ async fn create(
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageJig>,
+    _claims: TokenUserWithScope<ScopeManageJig>,
     path: web::Path<JigId>,
 ) -> Result<NoContent, error::Delete> {
     db::jig::delete(&*db, path.into_inner()).await?;
@@ -61,7 +61,7 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageJig>,
+    _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
 ) -> Result<NoContent, UpdateWithMetadata> {
@@ -91,7 +91,7 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
     let jig = db::jig::get(&db, path.into_inner())
