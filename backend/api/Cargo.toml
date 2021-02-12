@@ -32,7 +32,7 @@ paperclip = { version = "0.5", features = ["actix", "uuid", "chrono"] }
 percent-encoding = "2.1.0"
 pin-project = "1.0.1"
 # pin-project = "0.4.23"
-rand = "0.7"
+rand = "0.8"
 reqwest = { version = "0.10", features = ["json", "stream"] }
 rusoto_core = "0.45.0"
 rusoto_s3 = "0.45.0"

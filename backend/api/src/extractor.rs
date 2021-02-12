@@ -3,13 +3,18 @@ use crate::{
     more_futures::ReadyOrNot,
     token::{check_login_token, check_signup_token, AuthorizedTokenClaims, OAuthSignupClaims},
 };
-use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, FromRequest, HttpMessage};
+use actix_http::error::BlockingError;
+use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
-use argon2::{password_hash::Encoding, Argon2, PasswordHasher, PasswordVerifier, Version};
+use argon2::{
+    password_hash::{Encoding, SaltString},
+    Argon2, PasswordHasher, PasswordVerifier,
+};
 use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
 use http::StatusCode;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
+use rand::thread_rng;
 use shared::domain::{
     auth::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserScope,
@@ -238,8 +243,6 @@ impl FromRequest for EmailBasicUser {
     ) -> Self::Future {
         let db: &Data<PgPool> = req.app_data().unwrap();
         let db = db.as_ref().clone();
-        let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
-        let settings = settings.clone();
 
         let basic = match req.get_header::<Authorization<Basic>>() {
             Some(basic) => basic.into_scheme(),
@@ -261,35 +264,55 @@ impl FromRequest for EmailBasicUser {
             .map_err(Into::into)
             .map_err(crate::error::ise)?;
 
-            let password_hasher = Argon2::new(
-                Some(settings.password_secret.as_bytes()),
-                3,
-                4096,
-                1,
-                Version::default(),
-            )
-            .expect("Mostly default argon2 settings");
+            actix_web::web::block(move || {
+                let password_hasher = Argon2::default();
 
-            let user = match user {
-                Some(user) => user,
-                None => {
-                    // we don't care about the results of this
-                    let _ = password_hasher.hash_password_simple(password.as_bytes(), "");
-                    return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
-                }
-            };
+                let user = match user {
+                    Some(user) => user,
+                    None => {
+                        let salt = SaltString::generate(thread_rng());
+                        let _ = password_hasher.hash_password(
+                            password.as_bytes(),
+                            None,
+                            None,
+                            DEFAULT_PARAMS,
+                            salt.as_salt(),
+                        );
 
-            let hash = argon2::PasswordHash::parse(&user.password, Encoding::default())
-                .map_err(|it| crate::error::ise(anyhow::anyhow!("{}", it)))?;
+                        return Err(Either::A(BasicError::new(StatusCode::UNAUTHORIZED)));
+                    }
+                };
 
-            password_hasher
-                .verify_password(password.as_bytes(), &hash)
-                .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))?;
+                let hash = argon2::PasswordHash::parse(&user.password, Encoding::default())
+                    .map_err(|it| Either::B(anyhow::anyhow!("{}", it)))?;
 
-            Ok(Self { id: user.user_id })
+                password_hasher
+                    .verify_password(password.as_bytes(), &hash)
+                    .map_err(|_| Either::A(BasicError::new(StatusCode::UNAUTHORIZED)))?;
+
+                Ok(Self { id: user.user_id })
+            })
+            .await
+            .map_err(blocking_error)
         }
         .boxed()
         .into()
+    }
+}
+
+// todo: make this configurable?
+const DEFAULT_PARAMS: argon2::Params = argon2::Params {
+    m_cost: 8192,
+    p_cost: 1,
+    t_cost: 16,
+    output_length: 32,
+};
+
+fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> actix_web::Error {
+    match err {
+        BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
+        BlockingError::Error(Either::B(e)) => crate::error::ise(e),
+        BlockingError::Error(Either::A(e)) => e.into(),
     }
 }
 

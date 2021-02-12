@@ -6,26 +6,7 @@ const path = require('path');
 const tough = require('tough-cookie');
 const spawnAsync = require('@expo/spawn-async');
 const qs = require('qs');
-
-// to whom it might concern, this JWT is made of the following header, payload:
-// {"alg": "HS256", "typ": "JWT"}
-// {"sub": "SGkgdGhpcyBpcyBhIHRlc3QgdG9rZW4K", "iat": 1597096685, "auth_time": 1597096686 }
-// The secret used is `aaaaa`
-const TEST_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTR2tnZEdocGN5QnBjeUJoSUhSbGMzUWdkRzlyWlc0SyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.BNpCIBuNq0bhgXuAEqrAfPpIein0Y54hj352d2ke1sI';
-
-// this jwt is used for register *erroring*
-// {"alg": "HS256", "typ": "JWT"}
-// {"sub": "JmaZTj2b5X9ksf5oFSXnCdVuLJkMROCS", "iat": 1597096685, "auth_time": 1597096686 }
-// The secret used is `aaaaa`
-const REGISTER_ERR_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKbWFaVGoyYjVYOWtzZjVvRlNYbkNkVnVMSmtNUk9DUyIsImlhdCI6MTU5NzA5NjY4NSwiYXV0aF90aW1lIjoxNTk3MDk2Njg2fQ.fxdYc2Dhr6RVrWFkh8xh-ROz6fYKI9yW7WKJuaEfdqs';
-
-// login cookie
-const COOKIE = 'X-JWT=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.'
-    + 'eyJpZCI6IjFmMjQxZTFiLWI1MzctNDkzZi1hMjMwLTA3NWNiMTYzMTViZSIsImNzcmYiOiJSdVF1WmI1QW9HU2R4SUdBIn0.osvyaIW4Mt-3Em4kkuvO4wXAsCVA9gZwkqXlQvQETAs; '
-    + 'Max-Age=1209600; Path=/v1; HttpOnly; SameSite=Lax; hostOnly=true; aAge=2ms; cAge=6ms; hostOnly=true; aAge=1ms; cAge=1ms';
-
-// login csrf
-const CSRF = 'RuQuZb5AoGSdxIGA';
+const paseto = require('paseto');
 
 const fixtures = {
     user: '1_user.sql',
@@ -80,14 +61,29 @@ async function runFixtures(files, dbUrl, dir) {
     await spawnAsync('/usr/bin/psql', args, { env: { PGUSER: 'postgres' }, encoding: 'utf8' });
 }
 
-async function login() {
+async function login(context) {
+    const userId = '1f241e1b-b537-493f-a230-075cb16315be';
+    const csrf = 'iQzmm4e8hVP6poK5';
+
+    const claims = {
+        sub: userId,
+        csrf,
+        source:
+            'Basic'
+        ,
+    };
+
+    const options = { footer: 'authorized', expiresIn: '10 min', notBefore: '0s' };
+
+    const token = await paseto.V2.encrypt(claims, context.pasetoKey, options);
+
     const cookieJar = new tough.CookieJar();
-    await cookieJar.setCookie(COOKIE, 'http://0.0.0.0/v1/login');
+    await cookieJar.setCookie(`X-AUTH=${token}`, 'http://0.0.0.0/v1/login');
 
     return {
         cookieJar,
         headers: {
-            'X-CSRF': CSRF,
+            'X-CSRF': csrf,
         },
     };
 }
@@ -106,6 +102,11 @@ test.before(async (t) => {
         t.context.getDbUrl = (name) => `${t.context.baseDbUrl}/${name}`;
     }
 
+    // use a single key for the entire instance (they take time to generate)
+    t.context.pasetoKey = (await paseto.V2.generateKey('local'));
+
+    // this gets used in every server, cache it.
+    t.context.pasetoKeyHex = t.context.pasetoKey.export().toString('hex');
 });
 
 test.beforeEach(async (t) => {
@@ -122,6 +123,7 @@ test.beforeEach(async (t) => {
         DATABASE_URL: t.context.dbUrl,
         PGUSER: 'postgres',
         JWT_SECRET: 'abc123',
+        TOKEN_SECRET: t.context.pasetoKeyHex,
         LOCAL_PAGES_PORT: 0,
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,
@@ -131,17 +133,15 @@ test.beforeEach(async (t) => {
         GOOGLE_S3_ACCESS_SECRET: '',
         DISABLE_GOOGLE_CLOUD: true,
         PROJECT_ID: '',
-        ALGOLIA_PROJECT_ID: '',
-        ALGOLIA_KEY: '',
         ALGOLIA_LOCAL_DISABLE_CLIENT: true,
-        RUST_LOG: "warning,actix_server::builder=info",
+        RUST_LOG: 'warning,actix_server::builder=info',
     };
 
     t.context.port = port;
     t.context.server = spawnAsync(t.context.BIN_FILE, { env, encoding: 'utf8' });
 
     t.context.loggedInReqBase = {
-        ...await login(),
+        ...await login(t.context),
         port,
         responseType: 'json',
     };
@@ -173,15 +173,11 @@ test('pass', async (t) => {
     t.is(e.response.statusCode, 404);
 });
 
-test('missing auth (firebase)', async (t) => {
-    const e = await t.throwsAsync(got.post('http://0.0.0.0/v1/user', {
+test('login missing auth', async (t) => {
+    const e = await t.throwsAsync(got.post('http://0.0.0.0/v1/session', {
         port: t.context.port,
-        // As you can see, we properly have the body,
+        // As you can see, we properly have the body, (namely none, now.)
         // so the only thing that should cause this to fail is...
-        json: {
-            display_name: 'test',
-            email: 'test@test.test',
-        },
         responseType: 'json',
         headers: {
             // ... the fact that we're skipping out on authorization
@@ -192,7 +188,8 @@ test('missing auth (firebase)', async (t) => {
     t.is(e.response.statusCode, 401);
 });
 
-test('register user', async (t) => {
+// needs 1 use tokens (for basic auth) or forged tokens (for oauth)
+test.skip('register user', async (t) => {
     const cookieJar = new tough.CookieJar();
 
     const { body } = await got.post('http://0.0.0.0/v1/user', {
@@ -252,21 +249,22 @@ async function registerDuplicateUserError(t, args) {
 
 registerDuplicateUserError.title = (providedTitle = 'register duplicate user error', args) => `${providedTitle} (${args.key !== '' ? args.key : 'id'})`;
 
-test(registerDuplicateUserError, { jwt: TEST_JWT, key: '', value: '' });
-test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'username', value: 'test' });
-test(registerDuplicateUserError, { jwt: REGISTER_ERR_JWT, key: 'email', value: 'test@test.test' });
+test.skip(registerDuplicateUserError, { /* jwt: TEST_JWT, */ key: '', value: '' });
+test.skip(registerDuplicateUserError, { /* jwt: REGISTER_ERR_JWT, */ key: 'username', value: 'test' });
+test.skip(registerDuplicateUserError, {/* jwt: REGISTER_ERR_JWT, */ key: 'email', value: 'test@test.test' });
 
+// todo: (nomerge) figure out the proper encoding here
 test('login user', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const cookieJar = new tough.CookieJar();
 
-    const { body } = await got.post('http://0.0.0.0/v1/login', {
+    const { body } = await got.post('http://0.0.0.0/v1/session', {
         cookieJar,
         port: t.context.port,
         responseType: 'json',
         headers: {
-            authorization: `Bearer ${TEST_JWT}`,
+            authorization: 'Basic dGVzdEB0ZXN0LnRlc3Q6cGFzc3dvcmQx',
         },
     });
 
@@ -308,6 +306,7 @@ function assertCategoryUpdatedAt(t, categories) {
 
 test('delete category', async (t) => {
     await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
+
     await t.notThrowsAsync(got.delete(
         'http://0.0.0.0/v1/category/7fe19326-e883-11ea-93f0-5343493c17c4',
         t.context.loggedInReqBase,
@@ -578,7 +577,7 @@ test('update image - two styles', async (t) => {
     t.snapshot(metadata);
 });
 
-// 500s, but for some reason diagnosis is being difficult 
+// 500s, but for some reason diagnosis is being difficult
 test.skip('create jig - default', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
@@ -589,10 +588,10 @@ test.skip('create jig - default', async (t) => {
     t.deepEqual(typeof (jig.body.id), 'string');
 });
 
-test.todo("create jig - params");
-test.todo("delete jig");
-test.todo("get jig");
-test.todo("update jig");
+test.todo('create jig - params');
+test.todo('delete jig');
+test.todo('get jig');
+test.todo('update jig');
 
 async function authFail(t, data) {
     await runFixtures([fixtures.userNoPerms], t.context.dbUrl, t.context.FIXTURES_DIR);
@@ -636,9 +635,9 @@ test(authFail, {
     body: {
         method: 'POST',
         json: {
-            name: ''
+            name: '',
         },
-    }
+    },
 });
 
 test(authFail, {
@@ -646,7 +645,7 @@ test(authFail, {
     route: 'v1/category/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
-    }
+    },
 });
 
 test(authFail, {
@@ -654,7 +653,7 @@ test(authFail, {
     route: 'v1/category?ids=00000000-0000-0000-0000-000000000000',
     body: {
         method: 'GET',
-    }
+    },
 });
 
 test(authFail, {
@@ -662,7 +661,7 @@ test(authFail, {
     route: 'v1/category/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
-    }
+    },
 });
 
 test(authFail, {
@@ -681,7 +680,7 @@ test(authFail, {
             categories: [],
             kind: 'Canvas',
         },
-    }
+    },
 });
 
 test(authFail, {
@@ -689,7 +688,7 @@ test(authFail, {
     route: 'v1/image/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
-    }
+    },
 });
 
 test(authFail, {
@@ -697,7 +696,7 @@ test(authFail, {
     route: 'v1/image/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'GET',
-    }
+    },
 });
 
 test(authFail, {
@@ -705,7 +704,7 @@ test(authFail, {
     route: 'v1/image/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
-    }
+    },
 });
 
 test(authFail, {
@@ -713,7 +712,7 @@ test(authFail, {
     route: 'v1/jig',
     body: {
         method: 'POST',
-    }
+    },
 });
 
 test(authFail, {
@@ -721,7 +720,7 @@ test(authFail, {
     route: 'v1/jig/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
-    }
+    },
 });
 
 test(authFail, {
@@ -729,16 +728,15 @@ test(authFail, {
     route: 'v1/jig/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'GET',
-    }
+    },
 });
-
 
 test(authFail, {
     kind: 'jig',
     route: 'v1/jig/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
-    }
+    },
 });
 
 test(authFail, {
@@ -746,7 +744,7 @@ test(authFail, {
     route: 'v1/module',
     body: {
         method: 'POST',
-    }
+    },
 });
 
 test(authFail, {
@@ -754,7 +752,7 @@ test(authFail, {
     route: 'v1/module/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
-    }
+    },
 });
 
 test(authFail, {
@@ -762,7 +760,7 @@ test(authFail, {
     route: 'v1/module/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'GET',
-    }
+    },
 });
 
 test(authFail, {
@@ -770,9 +768,8 @@ test(authFail, {
     route: 'v1/module/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
-    }
+    },
 });
-
 
 test(authFail, {
     kind: 'animation',
@@ -787,7 +784,7 @@ test(authFail, {
             publish_at: null,
             variant: 'Gif',
         },
-    }
+    },
 });
 
 // route doesn't exist yet.
@@ -796,7 +793,7 @@ test.skip(authFail, {
     route: 'v1/animation/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'PATCH',
-    }
+    },
 });
 
 test(authFail, {
@@ -804,7 +801,7 @@ test(authFail, {
     route: 'v1/animation/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'GET',
-    }
+    },
 });
 
 test(authFail, {
@@ -812,5 +809,5 @@ test(authFail, {
     route: 'v1/animation/00000000-0000-0000-0000-000000000000',
     body: {
         method: 'DELETE',
-    }
+    },
 });

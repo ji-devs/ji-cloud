@@ -81,9 +81,6 @@ pub struct RuntimeSettings {
     /// if missing / disabled, related routes will return `501 - Not Implemented`
     pub google_oauth: Option<GoogleOAuth>,
 
-    /// Secret for password
-    pub password_secret: String,
-
     /// Secret for signing/encrypting tokens.
     pub token_secret: Box<[u8; 32]>,
 
@@ -98,7 +95,6 @@ impl RuntimeSettings {
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
-        password_secret: String,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
     ) -> anyhow::Result<Self> {
@@ -123,7 +119,6 @@ impl RuntimeSettings {
             remote_target,
             bing_search_key,
             google_oauth,
-            password_secret,
             token_secret,
             login_token_valid_duration,
         })
@@ -388,7 +383,6 @@ impl SettingsManager {
 
     /// Load the `RuntimeSettings`.
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
-        let password_secret = self.get_secret(keys::PASSWORD_SECRET).await?;
         let token_secret = self
             .get_secret(keys::TOKEN_SECRET)
             .await
@@ -427,7 +421,6 @@ impl SettingsManager {
             self.remote_target,
             bing_search_key,
             google_oauth,
-            password_secret,
             token_secret,
             login_token_valid_duration,
         )

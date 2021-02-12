@@ -274,7 +274,6 @@ fn base_token<'a>(
         .set_issued_at(Some(now))
         .set_encryption_key(token_secret)
         .set_claim("csrf", serde_json::Value::String(csrf))
-        .set_footer(OAUTH_SIGNUP_FOOTER)
 }
 
 fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Cookie<'static> {
@@ -292,5 +291,9 @@ fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Co
 }
 
 pub fn generate_csrf() -> String {
-    thread_rng().sample_iter(&Alphanumeric).take(16).collect()
+    thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(16)
+        .map(char::from)
+        .collect()
 }

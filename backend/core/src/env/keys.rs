@@ -54,9 +54,6 @@ pub mod algolia {
     pub const FRONTEND_SEARCH_KEY: &str = "ALGOLIA_FRONTEND_SEARCH_KEY";
 }
 
-/// Secret for passwords
-pub const PASSWORD_SECRET: &str = "PASSWORD_SECRET";
-
 /// Must be 32 bytes of hex
 pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 
