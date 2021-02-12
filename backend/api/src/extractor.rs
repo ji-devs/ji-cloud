@@ -304,7 +304,7 @@ impl FromRequest for EmailBasicUser {
 const DEFAULT_PARAMS: argon2::Params = argon2::Params {
     m_cost: 8192,
     p_cost: 1,
-    t_cost: 16,
+    t_cost: 192,
     output_length: 32,
 };
 
