@@ -59,7 +59,11 @@ fn _init(remote_target:RemoteTarget) -> Settings {
             if frontend_dev_auth() {
                 let csrf = frontend_dev_csrf();
                 let token = frontend_dev_token();
+                log::info!("manually setting auth for dev mode");
+
                 super::storage::save_csrf_token(&csrf);
+
+
                 web_sys::window()
                     .unwrap_throw()
                     .document()

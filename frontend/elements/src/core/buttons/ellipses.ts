@@ -6,16 +6,22 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
         :host {
-            display:flex;
+            display: grid;
+            grid-template-columns: 6px 6px 6px;
+            grid-template-rows: 6px 6px 6px;
+            gap: 0px 4px;
+            grid-template-areas:
+                ". . ."
+                "l m r"
+                ". . .";
+
             cursor:pointer;
-            height: 6px;
         }
         .circle{
             width: 6px;
             height: 6px;
             border-radius:50%;
             background-color: #83aef7;
-            margin-right:4px;
         }
        
      
@@ -28,9 +34,9 @@ export class _ extends LitElement {
    
  
     return html`
-       <div class="circle"></div>
-       <div class="circle"></div>
-       <div class="circle"></div>
+       <div class="circle" style="grid-area: l"></div>
+       <div class="circle" style="grid-area: m"></div>
+       <div class="circle" style="grid-area: r"></div>
   `;
   }
 }
