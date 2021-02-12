@@ -72,7 +72,6 @@ export class _ extends LitElement {
             const {visible} = this;
             this.removeGlobalListener(); 
             if(visible) {
-                console.log("adding!");
                 window.addEventListener("mousedown", this.onGlobalMouseDown);
             }
         }
@@ -84,7 +83,6 @@ export class _ extends LitElement {
   }
 
   removeGlobalListener() {
-    console.log("removing!");
      window.removeEventListener("mousedown", this.onGlobalMouseDown);
   }
   render() {
