@@ -153,7 +153,7 @@ pub struct Translation {
     pub english: String,
     pub hebrew: String,
     pub status: TranslationStatus,
-    pub zeplin_reference: Option<Url>,
+    pub zeplin_reference: Mutable<Option<Url>>,
     pub comments: String,
     pub in_app: bool,
     pub in_element: bool,

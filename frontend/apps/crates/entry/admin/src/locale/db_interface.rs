@@ -1,3 +1,4 @@
+use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
 use super::temp_utils::log;
 use super::state::{Translation, TranslationStatus};
@@ -91,7 +92,7 @@ pub async fn create_translation() -> Translation {
         section: Some("sec2".to_string()),
         item_kind: Some("Subheading".to_string()),
         status: TranslationStatus::Discuss,
-        zeplin_reference: None,
+        zeplin_reference: Mutable::new(None),
         comments: String::new(),
         in_app: false,
         in_element: false,

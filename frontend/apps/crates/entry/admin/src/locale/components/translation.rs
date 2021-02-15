@@ -17,6 +17,14 @@ pub struct TranslationRow {
 }
 
 impl TranslationRow {
+    fn url_option_string(url: &Option<Url>) -> String {
+        if url.is_some() {
+            url.clone().unwrap().to_string()
+        } else {
+            String::new()
+        }
+    }
+
     pub fn render(translation: Rc<Mutable<Translation>>, state: Rc<State>) -> Dom {
         let translation_ref = translation.lock_ref();
         html!("div", {
@@ -95,21 +103,31 @@ impl TranslationRow {
                 }),
                 html!("div", {
                     .class("ftl-cell")
-                    .child(html!("input", {
-                        .property("type", "url")
-                        .apply_if(translation_ref.zeplin_reference.is_some(), |dom| {
-                            dom.property("value", &translation_ref.zeplin_reference.clone().unwrap().to_string())
-                        })
-                        .event(clone!(translation => move |event: events::Input| {
-                            let value: String = event.value().unwrap_throw();
-                            let value = Url::parse(&value);
+                    .class("zeplin-link-cell")
+                    .children(&mut [
+                        html!("a", {
+                            .attribute("target", "_blank")
+                            .class("zeplin-link")
+                            .text_signal(translation_ref.zeplin_reference.signal_ref(|url| TranslationRow::url_option_string(url)))
+                            .property_signal("href", translation_ref.zeplin_reference.signal_ref(|url| TranslationRow::url_option_string(url)))
+                        }),
+                        html!("input", {
+                            .property("type", "url")
+                            .apply_if(translation_ref.zeplin_reference.lock_ref().is_some(), |dom| {
+                                dom.property("value", &translation_ref.zeplin_reference.lock_ref().clone().unwrap().to_string())
+                            })
+                            .event(clone!(translation => move |event: events::Input| {
+                                let value: String = event.value().unwrap_throw();
+                                let value = Url::parse(&value);
 
-                            if value.is_ok() {
-                                let mut translation = translation.lock_mut();
-                                translation.zeplin_reference = Some(value.unwrap());
-                            }
-                        }))
-                    }))
+                                let zeplin_reference = &translation.lock_ref().zeplin_reference;
+                                match value {
+                                    Ok(value) => zeplin_reference.set(Some(value)),
+                                    Err(_) => zeplin_reference.set(None),
+                                };
+                            }))
+                        }),
+                    ])
                 }),
                 html!("div", {
                     .class("ftl-cell")

@@ -85,6 +85,18 @@ main {
     min-height: 100px;
 }
 
+.ftl-table .zeplin-link-cell:hover .zeplin-link {
+    display: block;
+}
+.ftl-table .zeplin-link {
+    display: none;
+    position: absolute;
+    background-color: white;
+    line-height: 2em;
+    margin-top: -1.5em;
+    padding: 0 10px;
+}
+
 .link-button {
     background-color: transparent;
     border: 0;
