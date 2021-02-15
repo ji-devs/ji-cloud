@@ -1,9 +1,11 @@
+use std::hash::Hash;
+use std::str::FromStr;
 use std::collections::HashSet;
 use dominator_helpers::futures::AsyncLoader;
 use std::collections::HashMap;
 use super::db_interface;
 use url::Url;
-use web_sys::HtmlDialogElement;
+use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
 use std::rc::Rc;
 use std::clone::Clone;
 use serde_derive::{Deserialize, Serialize};
@@ -11,6 +13,7 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use strum_macros::{EnumString, Display, EnumIter};
 use strum::IntoEnumIterator;
+use wasm_bindgen::JsCast;
 
 
 pub struct State {
@@ -120,6 +123,20 @@ impl State {
         } else {
             sort.column = sort_kind;
             sort.order = SortOrder::Asc;
+        }
+    }
+
+    pub fn filter_change<T>(options: &HtmlOptionsCollection, set: &mut HashSet<T> ) where T: FromStr + Eq + Hash {
+        for i in 0..options.length() {
+            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+
+            let parsed = T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
+            
+            if option.selected() {
+                set.insert(parsed);
+            } else {
+                set.remove(&parsed);
+            }
         }
     }
 

@@ -1,5 +1,4 @@
 use crate::locale::state::{TranslationStatus, SortOrder};
-use web_sys::HtmlOptionElement;
 use web_sys::HtmlSelectElement;
 use crate::locale::state::{State, SortKind};
 use std::rc::Rc;
@@ -8,10 +7,7 @@ use futures_signals::signal_vec::SignalVecExt;
 use super::translation::TranslationRow;
 use dominator::{Dom, html, clone, events, with_node};
 use super::select_columns::SelectColumns;
-use wasm_bindgen::JsCast;
 use strum::IntoEnumIterator;
-use std::str::FromStr;
-use wasm_bindgen::prelude::*;
 
 
 #[derive(Debug)]
@@ -65,16 +61,9 @@ impl TableComponent {
                                                         })))
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        for i in 0..options.length() {
-                                                            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+                                                        let mut filters = state.filters.lock_mut();
 
-                                                            let mut filters = state.filters.lock_mut();
-                                                            if option.selected() {
-                                                                filters.section.insert(option.value());
-                                                            } else {
-                                                                filters.section.remove(&option.value());
-                                                            }
-                                                        }
+                                                        State::filter_change(&options, &mut filters.section);
                                                     }))
                                                 })
                                             }))
@@ -111,16 +100,9 @@ impl TableComponent {
                                                         })))
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        for i in 0..options.length() {
-                                                            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+                                                        let mut filters = state.filters.lock_mut();
 
-                                                            let mut filters = state.filters.lock_mut();
-                                                            if option.selected() {
-                                                                filters.item_kind.insert(option.value());
-                                                            } else {
-                                                                filters.item_kind.remove(&option.value());
-                                                            }
-                                                        }
+                                                        State::filter_change(&options, &mut filters.item_kind);
                                                     }))
                                                 })
                                             }))
@@ -170,17 +152,9 @@ impl TableComponent {
                                                     )
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        for i in 0..options.length() {
-                                                            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+                                                        let mut filters = state.filters.lock_mut();
 
-                                                            let mut filters = state.filters.lock_mut();
-                                                            let status = TranslationStatus::from_str(&option.value()).unwrap_throw();
-                                                            if option.selected() {
-                                                                filters.status.insert(status);
-                                                            } else {
-                                                                filters.status.remove(&status);
-                                                            }
-                                                        }
+                                                        State::filter_change(&options, &mut filters.status);
                                                     }))
                                                 })
                                             }))
