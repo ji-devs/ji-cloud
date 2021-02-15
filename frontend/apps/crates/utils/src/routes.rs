@@ -26,6 +26,7 @@ pub enum Route {
 pub enum UserRoute {
     Profile(ProfileSection),
     ContinueRegistration(FirebaseUserInfo),
+    RegisterOauth(OauthData),
     Login,
     Register,
     SendEmailConfirmation,
@@ -83,6 +84,12 @@ struct JsonQuery {
     pub data: String  //json-encoded data as-needed
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum OauthData {
+    Google(OauthCode)
+}
+pub type OauthCode = String;
+
 impl Route {
     pub fn redirect(self) {
         let location = web_sys::window().unwrap_throw().location();
@@ -121,6 +128,15 @@ impl Route {
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "login"] => Self::User(UserRoute::Login),
             ["user", "register"] => Self::User(UserRoute::Register),
+
+            ["user", "register-oauth"] => {
+                if let Some(code) = params.get("code") {
+                    let data = OauthData::Google(code);
+                    Self::User(UserRoute::RegisterOauth(data))
+                } else {
+                    Self::NoAuth
+                }
+            }
             ["user", "continue-registration"] => {
                 if let Some(user) = json_query {
                     let user:FirebaseUserInfo = serde_json::from_str(&user).unwrap_throw();
@@ -202,6 +218,7 @@ impl From<&Route> for String {
                     }
                     UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
+                    UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }
