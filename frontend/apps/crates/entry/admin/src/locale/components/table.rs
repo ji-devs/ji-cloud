@@ -1,4 +1,4 @@
-use crate::locale::state::TranslationStatus;
+use crate::locale::state::{TranslationStatus, SortOrder};
 use web_sys::HtmlOptionElement;
 use web_sys::HtmlSelectElement;
 use crate::locale::state::{State, SortKind};
@@ -270,7 +270,36 @@ impl TableComponent {
                             ])
                         })
                     )
-                    .children_signal_vec(state.translations.signal_vec_cloned()
+                    .children_signal_vec(state.sort
+                        .signal_cloned()
+                        .switch(clone!(state => move |sort| {
+                            state.translations
+                                .signal_vec_cloned()
+                                .to_signal_map(clone!(state => move |translations| {
+                                    let mut translations = translations.to_vec();
+
+                                    translations.sort_by(|a, b| {
+                                        let a = a.lock_ref();
+                                        let b = b.lock_ref();
+                                        let mut ord = match sort.column {
+                                            SortKind::Section => a.section.cmp(&b.section),
+                                            SortKind::ItemKind => a.item_kind.cmp(&b.item_kind),
+                                            SortKind::English => a.english.cmp(&b.english),
+                                            SortKind::Status => a.status.to_string().cmp(&b.status.to_string()),
+                                            SortKind::Comments => a.comments.cmp(&b.comments),
+                                        };
+
+                                        if sort.order == SortOrder::Asc {
+                                            ord = ord.reverse();
+                                        }
+
+                                        ord
+                                    });
+
+                                    translations
+                                }))
+                        }))
+                        .to_signal_vec()
                         .filter_signal_cloned(clone!(state => move |translation| {
                             state.filters.signal_cloned().map(clone!(translation => move |filters| {
                                 let section = translation.lock_ref().section.clone();
@@ -295,38 +324,6 @@ impl TableComponent {
                         .map(clone!(state => move |translation| {
                             TranslationRow::render(translation.clone(), state.clone())
                         })))
-
-
-
-
-
-
-
-                        // .map_signal(clone!(state => move |translation| {
-                        //     state.sort.signal_cloned().map(clone!(translation => move |sort| {
-                        //         (translation.clone(), sort)
-                        //     }))
-                        // }))
-                        // .sort_by_cloned(|(a, sort), (b, _)| {
-                        //     let a = a.lock_ref();
-                        //     let b = b.lock_ref();
-                        //     let mut ord = match sort.column {
-                        //         SortKind::Section => a.section.cmp(&b.section),
-                        //         SortKind::ItemKind => a.item_kind.cmp(&b.item_kind),
-                        //         SortKind::English => a.english.cmp(&b.english),
-                        //         SortKind::Status => a.status.to_string().cmp(&b.status.to_string()),
-                        //         SortKind::Comments => a.comments.cmp(&b.comments),
-                        //     };
-
-                        //     if sort.order == SortOrder::Asc {
-                        //         ord = ord.reverse();
-                        //     };
-                        //     ord
-                        // })
-                        // .map(|(translation, _)| translation)
-                        // .map(clone!(state => move |translation| {
-                        //     TranslationRow::render(translation.clone(), state.clone())
-                        // })))
                 }),
 
                 html!("datalist", {
