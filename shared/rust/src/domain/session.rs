@@ -20,7 +20,7 @@ pub struct CreateSessionSuccess {
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub enum GetOAuthUrlKind {
+pub enum OAuthUrlKind {
     /// Get OAuth Url for login
     Login,
     /// Get OAuth Url for register
@@ -56,6 +56,9 @@ pub enum CreateSessionOAuthRequest {
     Google {
         /// The google OAuth Code
         code: String,
+
+        /// Which OAuth url was used
+        redirect_kind: OAuthUrlKind,
     },
 }
 
