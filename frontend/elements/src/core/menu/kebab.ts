@@ -7,12 +7,9 @@ import "@elements/core/buttons/icon";
 export class _ extends LitElement {
   static get styles() {
     return [css`
-        :host {
-            display: inline-block;
-        }
         .menu-container {
             display: none;
-                position: absolute;
+                position: fixed;
                 top: 0;
                 left: 0;
               border-radius: 8px;
@@ -79,8 +76,9 @@ export class _ extends LitElement {
           return "display: none;";
       }
 
-      const {top, right} = buttonRef.getBoundingClientRect(); 
+      const domRect = buttonRef.getBoundingClientRect(); 
 
+      const {top, right} = domRect;
       return `top: ${top + 8}px; left: ${right + 40}px`;
   }
 

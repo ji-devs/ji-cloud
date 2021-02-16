@@ -16,13 +16,13 @@ const DEFAULT_ARGS:Args = {
     nModules: 10
 }
 
-export const WithModules = (props?:Partial<Args>) => {
+export const WithModules = (props?:Partial<Args> & {slot?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     
-    const {nModules} = props;
+    const {slot, nModules} = props;
 
     return `
-        <jig-edit-sidebar>
+        <jig-edit-sidebar ${slot && `slot="${slot}"`}>
         <jig-edit-sidebar-header slot="header"> </jig-edit-sidebar-header>
         ${mapToString(arrayIndex(nModules), index => {
             return Module({

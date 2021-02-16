@@ -1,6 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/sidebar/header";
+import "@elements/entry/jig/edit/pages/landing";
 import {mapToString, arrayIndex} from "@utils/array";
 import {WithModules as Sidebar} from "../sidebar/sidebar";
 
@@ -22,9 +23,12 @@ export const Landing = (props?:Partial<Args>) => {
     const {nModules} = props;
 
     return `
+        <jig-edit-page>
         ${Sidebar({
-            nModules
+            nModules,
+            slot: "sidebar"
         })}
+        </jig-edit-page>
     `;
 }
 

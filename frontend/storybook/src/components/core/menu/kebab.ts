@@ -22,13 +22,15 @@ export const Kebab = (props?:Args) => {
 
     const {width, ...menuProps} = props;
     return `
+    <div style="position: absolute; top: 100px; left: 100px;">
     <menu-kebab ${argsToAttrs(menuProps)}>
         <div slot="menu-content">
             <div style="width: ${width}px">
             Menu Here
             </div>
         </div>
-    </menu-kebab>
+        </menu-kebab>
+        </div>
         `;
 }
 

@@ -44,7 +44,9 @@ export class _ extends LitElement {
                 align-items: center;
                 justify-content: center;
                 height: 100%;
+                cursor: pointer;
             }
+
             .text {
                 color: white;
                 white-space: pre-wrap;

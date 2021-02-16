@@ -1,6 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/sidebar";
-import "@elements/entry/jig/edit/sidebar/header";
+import "@elements/entry/jig/edit/selection/selection";
 import {mapToString, arrayIndex} from "@utils/array";
 
 export default {
@@ -17,7 +16,7 @@ export const ModuleSelection = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     
 
-    return `<div>TODO</div>
+    return `<jig-edit-selection>TODO</jig-edit-selection>
     `;
 }
 

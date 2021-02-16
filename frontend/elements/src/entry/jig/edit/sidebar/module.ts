@@ -42,6 +42,7 @@ export class _ extends LitElement {
                 grid-area: right;
                 margin-left: 16px;
                 display: flex;
+                z-index: 1;
             }
             section.selected {
               border: solid 1px #e7f0fd;
@@ -80,6 +81,7 @@ export class _ extends LitElement {
             }
             .window {
                 position: relative;
+                z-index: 1;
             }
             .decorations {
                 position: relative;
