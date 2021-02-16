@@ -39,7 +39,7 @@ export class _ extends LitElement {
     return html`
         <li>
             <p><slot></slot></p>
-            ${selected ? html`<img-ui class="${selected ? 'checked' : ''}" path="icn-chosen-check.svg"></img-ui>` : nothing}
+            ${selected ? html`<img-ui class="${selected ? 'checked' : ''}" path="core/lists/check.svg"></img-ui>` : nothing}
         </li>
     `;
   }

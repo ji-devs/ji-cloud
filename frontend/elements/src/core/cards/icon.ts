@@ -39,7 +39,7 @@ export class _ extends LitElement {
   render() {
     const { label, icon } = this;
 
-    const src = icon === "group" ? "group-13809.svg" : "";
+    const src = "core/cards/icon-group.svg"; 
 
     return html`
       <main>

@@ -51,7 +51,7 @@ export class _ extends LitElement {
     const { placeholder, value } = this;
     return html`
       <div class="wrapper">
-        <img-ui path="search-24-px.svg" alt="" class=""></img-ui>
+        <img-ui path="core/inputs/search.svg" alt="" class=""></img-ui>
         <input
           type="search"
           name=""
