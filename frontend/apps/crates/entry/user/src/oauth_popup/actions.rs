@@ -36,7 +36,9 @@ pub async fn open(service_kind:GetOAuthUrlServiceKind, url_kind:GetOAuthUrlKind)
     let req = (GetOAuthUrlServiceKind::Google, GetOAuthUrlKind::Register);
 
     if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, _>(&path, GetOAuthUrl::METHOD, Some(req)).await {
-        unsafe { oauth_open_window(&resp.url, &url_kind_str); }
+        //TODO - change to popup
+        web_sys::window().unwrap_throw().location().set_href(&resp.url);
+        //unsafe { oauth_open_window(&resp.url, &url_kind_str); }
     }
 
 }
