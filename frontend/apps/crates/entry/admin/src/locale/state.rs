@@ -17,7 +17,7 @@ use wasm_bindgen::JsCast;
 
 
 pub struct State {
-    pub entries: HashMap<String, bool>,
+    pub bundles: HashMap<String, bool>,
     pub translations: MutableVec<Rc<Mutable<Translation>>>,
     pub sections: MutableVec<Section>,
     pub item_kinds: MutableVec<ItemKind>,
@@ -33,18 +33,18 @@ pub struct State {
 
 impl State {
     pub fn new() -> State {
-        let entries: HashMap<String, bool> = db_interface::get_entries()
+        let bundles: HashMap<Bundle, bool> = db_interface::get_bundles()
             .iter()
-            .map(|entry| (entry.clone(), true))
+            .map(|bundle| (bundle.clone(), true))
             .collect();
 
         // this should probably react to a signal update
-        let visible_entries: Vec<&String> = entries
+        let visible_bundles: Vec<&Bundle> = bundles
             .iter()
-            .filter(|entry| *entry.1)
-            .map(|entry| entry.0)
+            .filter(|bundle| *bundle.1)
+            .map(|bundle| bundle.0)
             .collect();
-        let translations = db_interface::get_translations(&visible_entries);
+        let translations = db_interface::get_translations(&visible_bundles);
         let sections_vec = Self::generate_sections(&translations);
         let sections = MutableVec::new_with_values(sections_vec.clone());
         let item_kinds_vec = Self::generate_item_kinds(&translations);
@@ -71,7 +71,7 @@ impl State {
         let visible_columns = MutableVec::new_with_values(visible_columns);
         let hidden_columns = MutableVec::new_with_values(hidden_columns);
         Self {
-            entries,
+            bundles,
             translations,
             sections,
             item_kinds,
@@ -161,6 +161,7 @@ pub enum TranslationStatus {
 
 pub type Section = String;
 pub type ItemKind = String;
+pub type Bundle = String;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Translation {

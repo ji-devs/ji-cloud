@@ -22,12 +22,12 @@ impl LocalePage {
                     .attribute("multiple", "")
                     .with_node!(elem => {
                         .event(clone!(elem => move |_:events::Change| {
-                            let selected_entry: String = elem.value();
-                            super::temp_utils::log(&selected_entry);
+                            let selected_bundle: Bundle = elem.value();
+                            super::temp_utils::log(&selected_bundle);
                         }))
                     })
                     .children(
-                        state.entries.iter().map(|(e, selected)| {
+                        state.bundles.iter().map(|(e, selected)| {
                             html!("option", {
                                 .property("text", e.to_string())
                                 .property("value", e.to_string())

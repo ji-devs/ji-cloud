@@ -1,10 +1,10 @@
 use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
 use super::temp_utils::log;
-use super::state::{Translation, TranslationStatus};
+use super::state::{Translation, TranslationStatus, Bundle};
 
 // make async
-pub fn get_entries() -> Vec<String> {
+pub fn get_bundles() -> Vec<String> {
     vec![
         "JIG".to_string(),
         "Memory game".to_string(),
@@ -15,8 +15,8 @@ pub fn get_entries() -> Vec<String> {
 
 
 // make async
-pub fn get_translations(entries: &Vec<&String>) -> Vec<Translation> {
-    println!("{:?}", entries);
+pub fn get_translations(bundles: &Vec<&Bundle>) -> Vec<Translation> {
+    println!("{:?}", bundles);
     let json = r#"
         [
             {
