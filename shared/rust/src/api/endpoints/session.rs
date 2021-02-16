@@ -2,7 +2,7 @@ use crate::{
     api::Method,
     domain::session::{
         CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlResponse, GetOAuthUrlServiceKind, OAuthUrlKind,
+        GetOAuthUrlResponse,
     },
     error::EmptyError,
 };
