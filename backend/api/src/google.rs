@@ -45,7 +45,7 @@ pub fn oauth_url(remote_target: RemoteTarget, url_kind: OAuthUrlKind) -> String 
         OAuthUrlKind::Login => "user/login-oauth",
     };
 
-    format!("{}/{}", remote_target.frontend_url(), route)
+    format!("{}/{}", remote_target.pages_url(), route)
 }
 
 pub async fn convert_oauth_code(
