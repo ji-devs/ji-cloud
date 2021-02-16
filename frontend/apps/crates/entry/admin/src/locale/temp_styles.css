@@ -47,6 +47,17 @@ main {
     align-items: flex-end;
     justify-content: end;
 }
+.ftl-table .sorted::before {
+    font-size: 15px;
+    display: inline-block;
+    margin-right: 3px;
+}
+.ftl-table.asc .sorted::before {
+    content: '⇩';
+}
+.ftl-table.desc .sorted::before {
+    content: '⇧';
+}
 .ftl-table .ftl-cell, .ftl-table .ftl-header-cell {
     border: solid white 2px;
 }
@@ -100,7 +111,7 @@ main {
 .link-button {
     background-color: transparent;
     border: 0;
-    padding: 0;
+    padding: 3px 3px;
     cursor: pointer;
 }
 .link-button:hover {

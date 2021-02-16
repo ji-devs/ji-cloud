@@ -24,6 +24,8 @@ impl TableComponent {
             .children(&mut [
                 html!("div", {
                     .class("ftl-table")
+                    .class_signal("asc", state.sort.signal_ref(|sort| sort.order == SortOrder::Asc))
+                    .class_signal("desc", state.sort.signal_ref(|sort| sort.order == SortOrder::Desc))
                     .child(
                         html!("div", {
                             .class("ftl-row")
@@ -37,6 +39,7 @@ impl TableComponent {
                                         html!("button", {
                                             .class("link-button")
                                             .text("Sort")
+                                            .class_signal("sorted", state.sort.signal_ref(|sort| sort.column == SortKind::Section))
                                             .event(clone!(state => move |_event: events::Click| {
                                                 state.sort_clicked(SortKind::Section);
                                             }))
@@ -76,6 +79,7 @@ impl TableComponent {
                                         html!("button", {
                                             .class("link-button")
                                             .text("Sort")
+                                            .class_signal("sorted", state.sort.signal_ref(|sort| sort.column == SortKind::ItemKind))
                                             .event(clone!(state => move |_event: events::Click| {
                                                 state.sort_clicked(SortKind::ItemKind);
                                             }))
@@ -115,6 +119,7 @@ impl TableComponent {
                                         html!("button", {
                                             .class("link-button")
                                             .text("Sort")
+                                            .class_signal("sorted", state.sort.signal_ref(|sort| sort.column == SortKind::English))
                                             .event(clone!(state => move |_event: events::Click| {
                                                 state.sort_clicked(SortKind::English);
                                             }))
@@ -127,6 +132,7 @@ impl TableComponent {
                                         html!("button", {
                                             .class("link-button")
                                             .text("Sort")
+                                            .class_signal("sorted", state.sort.signal_ref(|sort| sort.column == SortKind::Status))
                                             .event(clone!(state => move |_event: events::Click| {
                                                 state.sort_clicked(SortKind::Status);
                                             }))
@@ -170,6 +176,7 @@ impl TableComponent {
                                         html!("button", {
                                             .class("link-button")
                                             .text("Sort")
+                                            .class_signal("sorted", state.sort.signal_ref(|sort| sort.column == SortKind::Comments))
                                             .event(clone!(state => move |_event: events::Click| {
                                                 state.sort_clicked(SortKind::Comments);
                                             }))
