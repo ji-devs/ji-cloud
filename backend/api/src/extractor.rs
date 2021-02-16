@@ -197,9 +197,10 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
             let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
 
             let has_scope = sqlx::query!(
-                r#"select exists(select 1 from "user_scope" where user_id = $1 and scope = $2) as "exists!""#,
+                r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
                 claims.sub,
-                S::scope() as i16
+                S::scope() as i16,
+                UserScope::Admin as i16
             )
             .fetch_one(&db)
             .await
