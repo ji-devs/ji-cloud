@@ -22,13 +22,16 @@ export class _ extends LitElement {
   }
 
   @property({type: Boolean})
-  expanded: boolean = true;
+  expanded: boolean = false;
 
   render() {
     const { expanded } = this;
 
-    const icon = expanded ? "Icon_ExpandAll_24.svg": "Icon_CollapseAll_24.svg";
+    const icon = expanded ? "expand-all.svg": "collapse-all.svg";
 
-    return html`<img-ui path="${icon}" @click="${this.onToggle.bind(this)}"></img-ui>`;
+    const path = `core/buttons/${icon}`;
+
+
+    return html`<img-ui path="${path}" @click="${this.onToggle.bind(this)}"></img-ui>`;
   }
 }

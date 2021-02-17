@@ -75,7 +75,7 @@ span{
     <main>
       <div class="wrapper">
         <div class="inner-wrapper back">
-          <img-ui path="icon-chevron-categories-24-px.svg" alt="" class="left-arrow"></img-ui>
+          <img-ui path="core/_common/chevron-right-grey.svg" alt="" class="left-arrow"></img-ui>
           <p>
             ${STR_BACK}
           </p>
@@ -89,7 +89,7 @@ span{
         </div>
         <div class="inner-wrapper next">
           <p>${STR_NEXT}</p>
-          <img-ui path="icon-chevron-categories-24-px.svg" alt="" class="arrow"></img-ui>
+          <img-ui path="core/_common/chevron-right-grey.svg" alt="" class="arrow"></img-ui>
         </div>
       </div>
     </main>

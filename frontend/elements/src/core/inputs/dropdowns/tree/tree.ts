@@ -137,8 +137,8 @@ function renderArrow(self: DropdownTree) {
     return nothing;
   }
 
-  return expanded ? html`<img-ui @click="${self.toggleExpand}" class="arrow" path="icon-chevron-categories-24-px-active.svg" alt=""></img-ui>`
-    : html`<img-ui @click="${self.toggleExpand}" class="arrow" path="icon-chevron-categories-24-px.svg" alt=""></img-ui>`
+  return expanded ? html`<img-ui @click="${self.toggleExpand}" class="arrow" path="core/inputs/chevron-circle-down-green.svg" alt=""></img-ui>`
+    : html`<img-ui @click="${self.toggleExpand}" class="arrow" path="core/_common/chevron-right-grey.svg" alt=""></img-ui>`
 }
 
 function multiColorClasses(self: DropdownTree) {

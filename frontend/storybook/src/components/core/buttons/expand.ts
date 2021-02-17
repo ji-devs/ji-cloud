@@ -1,6 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/core/buttons/expand";
-import {Mode} from "@elements/core/buttons/expand";
 
 export default {
   title: 'Core / Buttons',

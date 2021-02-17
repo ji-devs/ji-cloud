@@ -13,7 +13,7 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-  path: `sidebar-logo.png`
+  path: `core/cards/icon-group.svg`
 }
 
 export const Ui = (props?:Partial<Args>) => {

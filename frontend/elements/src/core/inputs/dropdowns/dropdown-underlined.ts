@@ -92,7 +92,7 @@ export class _ extends LitElement {
               value="${STR_SEEALL}"
               readonly
             />
-            <img-ui path="icon-chevron-categories-24-px.svg"></img-ui>
+            <img-ui path="core/_common/chevron-right-grey.svg"></img-ui>
           </div>
        
         <div class="dropdown">
