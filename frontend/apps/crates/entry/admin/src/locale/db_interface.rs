@@ -1,6 +1,5 @@
 use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
-use super::temp_utils::log;
 use super::state::{Entry, EntryStatus, Bundle};
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
@@ -102,7 +101,7 @@ pub async fn clone_entry(entry: &Entry) -> Entry {
 
     let mut entry = entry.clone();
     entry.id = get_random_string(10);
-    log(&entry);
+    log::info!("{:?}", entry);
     entry
 }
 
@@ -127,6 +126,6 @@ pub async fn create_entry() -> Entry {
 pub async fn save_entry(entry:Entry) ->Entry {
     resolve_after(100).await;
 
-    log(&entry);
+    log::info!("{:?}", entry);
     entry
 }

@@ -20,7 +20,8 @@ impl LocaleOuterDom {
                     .with_node!(elem => {
                         .event(clone!(elem => move |_:events::Change| {
                             let selected_bundle: Bundle = elem.value();
-                            super::super::temp_utils::log(&selected_bundle);
+                            log::info!("{:?}", selected_bundle);
+
                         }))
                     })
                     .children(

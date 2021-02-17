@@ -93,7 +93,7 @@ impl State {
     pub async fn add_entry(&self) {
         let entry = db_interface::create_entry().await;
         let mut vec = self.entries.lock_mut();
-        super::temp_utils::log(&entry);
+        log::info!("{:?}", entry);
         vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
@@ -197,7 +197,7 @@ pub enum SortKind {
     Comments,
 }
 
-#[derive(Clone, PartialEq, Serialize)]
+#[derive(Clone, PartialEq)]
 pub enum SortOrder {
     Asc,
     Desc
