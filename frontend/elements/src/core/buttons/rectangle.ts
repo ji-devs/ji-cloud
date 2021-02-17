@@ -7,7 +7,7 @@ export type Color = "red" | "blue" | "white" | "green" | "whiteblue";
 export type Size = "small" | "medium" | "large" | "x-large";
 
 export type IconAfter = "arrow";
-export type IconBefore = "magnifyer" | "share" | "create" | "play" | "plus" | "blueplay";
+export type IconBefore = "magnifier" | "share" | "create" | "play" | "plus" | "blueplay";
 
 
 @customElement("button-rect")
