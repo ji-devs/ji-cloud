@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { classMap } from 'lit-html/directives/class-map';
 import "@elements/core/images/ui";
 
 export type IconKind = "circle-check" | "circle-kebab-grey" | "circle-kebab-blue" | "circle-pencil" | "gears" | "x";
@@ -10,6 +11,13 @@ export class _ extends LitElement {
       css`
         :host {
           cursor: pointer;
+        }
+        .box32 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
         }
       `,
     ];
@@ -31,7 +39,10 @@ export class _ extends LitElement {
 
     const path = `core/buttons/icon/${filename}`;
 
+    const classes = classMap({
+        ["box32"]: icon === "x"
+    });
 
-    return html`<img-ui path="${path}"></img-ui>`;
+    return html`<div class="${classes}"><img-ui path="${path}"></img-ui></div>`;
   }
 }
