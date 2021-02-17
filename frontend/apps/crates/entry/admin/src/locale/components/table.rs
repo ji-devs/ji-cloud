@@ -1,13 +1,14 @@
-use crate::locale::state::{TranslationStatus, SortOrder};
+use std::collections::BTreeMap;
+use crate::locale::state::{ItemKind, Section, SortOrder};
 use web_sys::HtmlSelectElement;
 use crate::locale::state::{State, SortKind};
 use std::rc::Rc;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
+use futures_signals::map_ref;
 use super::translation::TranslationRow;
 use dominator::{Dom, html, clone, events, with_node};
 use super::select_columns::SelectColumns;
-use strum::IntoEnumIterator;
 
 
 #[derive(Debug)]
@@ -54,19 +55,22 @@ impl TableComponent {
                                                 .with_node!(elem => {
                                                     .attribute("multiple", "")
                                                     .style("width", "100px")
-                                                    .children_signal_vec(state.sections.signal_vec_cloned()
-                                                        .map(clone!(state => move |section| {
-                                                            html!("option", {
-                                                                .property("value", &section)
-                                                                .property("selected", state.filters.lock_ref().section.contains(&section))
-                                                                .text(&section)
-                                                            })
-                                                        })))
+                                                    .children_signal_vec(state.section_options.signal_cloned()
+                                                        .map(|section_options: BTreeMap<Section, bool>| {
+                                                            section_options.iter().map(|(section_option, visible): (&Section, &bool)| {
+                                                                html!("option", {
+                                                                    .property("value", section_option)
+                                                                    .property("selected", *visible)
+                                                                    .text(&section_option)
+                                                                })
+                                                            }).collect()
+                                                        })
+                                                        .to_signal_vec())
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        let mut filters = state.filters.lock_mut();
+                                                        let mut section_options = state.section_options.lock_mut();
 
-                                                        State::filter_change(&options, &mut filters.section);
+                                                        State::filter_change(&options, &mut section_options);
                                                     }))
                                                 })
                                             }))
@@ -94,19 +98,22 @@ impl TableComponent {
                                                 .with_node!(elem => {
                                                     .attribute("multiple", "")
                                                     .style("width", "100px")
-                                                    .children_signal_vec(state.item_kinds.signal_vec_cloned()
-                                                        .map(clone!(state => move |item_kind| {
-                                                            html!("option", {
-                                                                .property("value", &item_kind)
-                                                                .property("selected", state.filters.lock_ref().item_kind.contains(&item_kind))
-                                                                .text(&item_kind)
-                                                            })
-                                                        })))
+                                                    .children_signal_vec(state.item_kind_options.signal_cloned()
+                                                        .map(|item_kind_options: BTreeMap<ItemKind, bool>| {
+                                                            item_kind_options.iter().map(|(section_option, visible): (&ItemKind, &bool)| {
+                                                                html!("option", {
+                                                                    .property("value", section_option)
+                                                                    .property("selected", *visible)
+                                                                    .text(&section_option)
+                                                                })
+                                                            }).collect()
+                                                        })
+                                                        .to_signal_vec())
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        let mut filters = state.filters.lock_mut();
+                                                        let mut item_kind_options = state.item_kind_options.lock_mut();
 
-                                                        State::filter_change(&options, &mut filters.item_kind);
+                                                        State::filter_change(&options, &mut item_kind_options);
                                                     }))
                                                 })
                                             }))
@@ -148,19 +155,20 @@ impl TableComponent {
                                                     .attribute("multiple", "")
                                                     .style("width", "100px")
                                                     .children(
-                                                        TranslationStatus::iter().map(|o| {
+
+                                                        state.status_options.lock_ref().iter().map(|(o, selected)| {
                                                             html!("option", {
                                                                 .property("text", o.to_string())
                                                                 .property("value", o.to_string())
-                                                                .property("selected", state.filters.lock_ref().status.contains(&o))
+                                                                .property("selected", *selected)
                                                             })
                                                         })
                                                     )
                                                     .event(clone!(state => move |_event: events::Change| {
                                                         let options = elem.options();
-                                                        let mut filters = state.filters.lock_mut();
+                                                        let mut status_options = state.status_options.lock_mut();
 
-                                                        State::filter_change(&options, &mut filters.status);
+                                                        State::filter_change(&options, &mut status_options);
                                                     }))
                                                 })
                                             }))
@@ -282,25 +290,24 @@ impl TableComponent {
                         }))
                         .to_signal_vec()
                         .filter_signal_cloned(clone!(state => move |translation| {
-                            state.filters.signal_cloned().map(clone!(translation => move |filters| {
-                                let section = translation.lock_ref().section.clone();
-                                let section = section.unwrap_or(String::new());
-                                if !filters.section.contains(&section) {
-                                    return false
-                                };
-
-                                let item_kind = translation.lock_ref().item_kind.clone();
-                                let item_kind = item_kind.unwrap_or(String::new());
-                                if !filters.item_kind.contains(&item_kind) {
-                                    return false
-                                };
-
-                                let status = translation.lock_ref().status.clone();
-                                if !filters.status.contains(&status) {
-                                    return false
-                                }
-                                true
-                            }))
+                            map_ref! {
+                                let in_section = state.section_options.signal_cloned().map(clone!(translation => move |section_options| {
+                                    let section = translation.lock_ref().section.clone();
+                                    let section = section.unwrap_or(String::new());
+                                    *section_options.get(&section).unwrap()
+                                })),
+                                let in_item_kind = state.item_kind_options.signal_cloned().map(clone!(translation => move |item_kind_options| {
+                                    let item_kind = translation.lock_ref().item_kind.clone();
+                                    let item_kind = item_kind.unwrap_or(String::new());
+                                    *item_kind_options.get(&item_kind).unwrap()
+                                })),
+                                let in_status = state.status_options.signal_cloned().map(clone!(translation => move |status_options| {
+                                    let status = translation.lock_ref().status.clone();
+                                    *status_options.get(&status).unwrap()
+                                })) =>
+                                *in_section && *in_item_kind && *in_status
+                            }
+                            
                         }))
                         .map(clone!(state => move |translation| {
                             TranslationRow::render(translation.clone(), state.clone())
@@ -309,22 +316,30 @@ impl TableComponent {
 
                 html!("datalist", {
                     .property("id", "sections")
-                    .children_signal_vec(state.sections.signal_vec_cloned()
-                        .map(|section| {
-                            html!("option", {
-                                .property("value", section)
-                            })
-                        }))
+                    .children_signal_vec(state.section_options.signal_cloned()
+                        .map(|section_options: BTreeMap<Section, bool>| {
+                            section_options.iter().map(|(section_option, _)| {
+                                html!("option", {
+                                    .property("value", section_option)
+                                    .text(&section_option)
+                                })
+                            }).collect()
+                        })
+                        .to_signal_vec())
                 }),
 
                 html!("datalist", {
-                    .property("id", "translation-kinds")
-                    .children_signal_vec(state.item_kinds.signal_vec_cloned()
-                        .map(|item_kind| {
-                            html!("option", {
-                                .property("value", item_kind)
-                            })
-                        }))
+                    .property("id", "item-kinds")
+                    .children_signal_vec(state.item_kind_options.signal_cloned()
+                        .map(|item_kind_options: BTreeMap<Section, bool>| {
+                            item_kind_options.iter().map(|(item_kind_option, _)| {
+                                html!("option", {
+                                    .property("value", item_kind_option)
+                                    .text(&item_kind_option)
+                                })
+                            }).collect()
+                        })
+                        .to_signal_vec())
                 }),
 
                 SelectColumns::render(state.clone()),

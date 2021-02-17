@@ -1,6 +1,5 @@
-use std::hash::Hash;
+use std::collections::BTreeMap;
 use std::str::FromStr;
-use std::collections::HashSet;
 use dominator_helpers::futures::AsyncLoader;
 use std::collections::HashMap;
 use super::db_interface;
@@ -14,21 +13,22 @@ use futures_signals::signal_vec::MutableVec;
 use strum_macros::{EnumString, Display, EnumIter};
 use strum::IntoEnumIterator;
 use wasm_bindgen::JsCast;
+use std::cmp::Ord;
 
 
 pub struct State {
     pub bundles: HashMap<String, bool>,
     pub translations: MutableVec<Rc<Mutable<Translation>>>,
-    pub sections: MutableVec<Section>,
-    pub item_kinds: MutableVec<ItemKind>,
     pub visible_columns: MutableVec<String>,
     pub hidden_columns: MutableVec<String>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
 
+    pub section_options: Mutable<BTreeMap<Section, bool>>,
+    pub item_kind_options: Mutable<BTreeMap<ItemKind, bool>>,
+    pub status_options: Mutable<BTreeMap<TranslationStatus, bool>>,
 
     pub sort: Mutable<Sort>,
-    pub filters: Rc<Mutable<Filters>>,
 }
 
 impl State {
@@ -45,10 +45,10 @@ impl State {
             .map(|bundle| bundle.0)
             .collect();
         let translations = db_interface::get_translations(&visible_bundles);
-        let sections_vec = Self::generate_sections(&translations);
-        let sections = MutableVec::new_with_values(sections_vec.clone());
-        let item_kinds_vec = Self::generate_item_kinds(&translations);
-        let item_kinds = MutableVec::new_with_values(item_kinds_vec.clone());
+
+        let section_options = Self::generate_options(&translations, |t| t.section.clone().unwrap());
+        let item_kind_options = Self::generate_options(&translations, |t| t.item_kind.clone().unwrap());
+        let status_options = TranslationStatus::iter().map(|s| (s, true)).collect::<BTreeMap<TranslationStatus, bool>>();
 
         let translations = translations.iter().map(|i| Rc::new(Mutable::new(i.clone()))).collect();
         let translations = MutableVec::new_with_values(translations);
@@ -73,24 +73,19 @@ impl State {
         Self {
             bundles,
             translations,
-            sections,
-            item_kinds,
             visible_columns,
             hidden_columns,
             dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
 
-
+            section_options: Mutable::new(section_options),
+            item_kind_options: Mutable::new(item_kind_options),
+            status_options: Mutable::new(status_options),
 
             sort: Mutable::new(Sort {
                 column: SortKind::ItemKind,
                 order: SortOrder::Asc,
             }),
-            filters: Rc::new(Mutable::new(Filters {
-                section: sections_vec.iter().map(|s| s.clone()).collect(),
-                item_kind: item_kinds_vec.iter().map(|ik| ik.clone()).collect(),
-                status: TranslationStatus::iter().collect(),
-            })),
         }
     }
 
@@ -126,32 +121,40 @@ impl State {
         }
     }
 
-    pub fn filter_change<T>(options: &HtmlOptionsCollection, set: &mut HashSet<T> ) where T: FromStr + Eq + Hash {
+    pub fn filter_change<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool> ) where T: FromStr + Ord {
         for i in 0..options.length() {
             let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
 
             let parsed = T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
-            
-            if option.selected() {
-                set.insert(parsed);
-            } else {
-                set.remove(&parsed);
-            }
+
+            map.insert(parsed, option.selected());
         }
     }
 
-    fn generate_sections(translation_vec: &Vec<Translation>) -> Vec<String> {
-        translation_vec.iter().filter(|t| t.section.is_some()).map(|s| s.section.clone().unwrap()).collect()
+    // Both of the regenerate function should be chagned after the db_interface is made async, current state is pretty bad
+    pub fn regenerate_section_options(&self) {
+        let translations: Vec<Translation> = self.translations.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
+        let section_options = Self::generate_options(&translations, |t| t.section.clone().unwrap());
+        let mut lock = self.section_options.lock_mut();
+        *lock = section_options;
     }
 
-    fn generate_item_kinds(translation_vec: &Vec<Translation>) -> Vec<String> {
-        translation_vec.iter().filter(|t| t.item_kind.is_some()).map(|s| s.item_kind.clone().unwrap()).collect()
+    pub fn regenerate_item_kind_options(&self) {
+        let translations: Vec<Translation> = self.translations.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
+        let item_kind_options = Self::generate_options(&translations, |t| t.item_kind.clone().unwrap());
+        let mut lock = self.item_kind_options.lock_mut();
+        *lock = item_kind_options;
     }
 
+    fn generate_options<T>(translation_vec: &Vec<Translation>, f: fn(&Translation) -> T) -> BTreeMap<T, bool>
+        where T: Ord
+    {
+        translation_vec.iter().map(|t| (f(t), true)).collect()
+    }
 }
 
 
-#[derive(Debug, Clone, Deserialize, Serialize, EnumString, Display, EnumIter, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Deserialize, Serialize, EnumString, Display, EnumIter, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TranslationStatus {
     Approved,
     Discuss,
@@ -191,13 +194,6 @@ pub enum SortKind {
     English,
     Status,
     Comments,
-}
-
-#[derive(Clone)]
-pub struct Filters {
-    pub section: HashSet<Section>,
-    pub item_kind: HashSet<ItemKind>,
-    pub status: HashSet<TranslationStatus>,
 }
 
 #[derive(Clone, PartialEq, Serialize)]

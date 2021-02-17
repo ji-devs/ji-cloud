@@ -1,6 +1,5 @@
 use url::Url;
-use crate::locale::state::Section;
-use crate::locale::state::{TranslationStatus, ItemKind, Translation, State};
+use crate::locale::state::{TranslationStatus, ItemKind, Translation, State, Section};
 use web_sys::HtmlSelectElement;
 use std::rc::Rc;
 use std::clone::Clone;
@@ -53,6 +52,9 @@ impl TranslationRow {
                             let mut translation = translation.lock_mut();
                             translation.section = Some(value);
                         }))
+                        .event(clone!(state => move |_: events::Change| {
+                            state.regenerate_section_options();
+                        }))
                     }))
                 }),
                 html!("div", {
@@ -61,11 +63,14 @@ impl TranslationRow {
                         .apply_if(translation_ref.item_kind.is_some(), |dom| {
                             dom.property("value", &translation_ref.item_kind.clone().unwrap())
                         })
-                        .attribute("list", "translation-kinds")
+                        .attribute("list", "item-kinds")
                         .event(clone!(translation => move |event: events::Input| {
                             let value: ItemKind = event.value().unwrap_throw();
                             let mut translation = translation.lock_mut();
                             translation.item_kind = Some(value);
+                        }))
+                        .event(clone!(state => move |_: events::Change| {
+                            state.regenerate_item_kind_options();
                         }))
                     }))
                 }),
