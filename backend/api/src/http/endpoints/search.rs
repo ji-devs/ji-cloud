@@ -1,7 +1,4 @@
-use crate::{
-    error::{self, ServiceKind},
-    extractor::TokenUser,
-};
+use crate::{error, extractor::TokenUser, service::ServiceData};
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
     api_v2_operation,
@@ -18,12 +15,10 @@ use shared::{
 /// 501: If the server doesn't have algolia enabled, or it doesn't have a key to derive for the frontend.
 #[api_v2_operation]
 async fn create_key(
-    algolia: Data<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::SearchKeyStore>,
     claims: TokenUser,
 ) -> actix_web::Result<CreatedJson<<search::CreateKey as ApiEndpoint>::Res>, error::Service> {
-    let key = algolia
-        .generate_virtual_key(Some(claims.0.sub), Some(chrono::Duration::minutes(15)))
-        .ok_or(error::Service::DisabledService(ServiceKind::Algolia))?;
+    let key = algolia.generate_virtual_key(Some(claims.0.sub), Some(chrono::Duration::minutes(15)));
 
     Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
 }

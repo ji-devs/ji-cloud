@@ -5,6 +5,7 @@ use crate::{
     extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
     image_ops::MediaKind,
     s3,
+    service::ServiceData,
 };
 use actix_web::web::Path;
 use paperclip::actix::{
@@ -38,7 +39,7 @@ const fn max(a: usize, b: usize) -> usize {
 pub async fn create(
     pool: Data<PgPool>,
     _claims: TokenUser,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
     request: Json<WebMediaUrlCreateRequest>,
 ) -> Result<CreatedJson<UrlCreatedResponse>, error::Server> {
     let url = request.into_inner().url;
@@ -210,7 +211,7 @@ for update
 async fn delete_media(
     pool: Data<PgPool>,
     _auth: TokenUserWithScope<ScopeAdmin>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
     Path(id): Path<Uuid>,
 ) -> Result<NoContent, error::Server> {
     let record = sqlx::query!(

@@ -5,14 +5,29 @@ pub mod google {
 }
 
 pub mod s3 {
+    /// The s3 endpoint to connect to.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const ENDPOINT: &str = "S3_ENDPOINT";
 
+    /// The s3 bucket that should be used for media.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const BUCKET: &str = "S3_BUCKET";
 
+    /// The s3 access key.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const ACCESS_KEY: &str = "GOOGLE_S3_ACCESS_KEY";
 
+    /// The s3 access key's secret.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const SECRET: &str = "GOOGLE_S3_ACCESS_SECRET";
 
+    /// Disable S3 locally (avoiding the warnings for missing secrets)
+    /// if specified in a way that maps to `true` (currently "true", "1", "y"), all s3 related services will be disabled
+    /// all related routes will return "501 - Not Implemented".
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
 }
 
@@ -25,7 +40,6 @@ pub mod db {
 }
 
 pub mod algolia {
-
     /// The ID of the algolia application.
     /// Is optional. If missing, all algolia related services will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.

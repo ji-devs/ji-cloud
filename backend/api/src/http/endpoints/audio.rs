@@ -14,7 +14,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 pub mod user {
-    use crate::{db, error, extractor::TokenUser, s3};
+    use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
     use futures::TryStreamExt;
     use paperclip::actix::{
         api_v2_operation,
@@ -49,7 +49,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
         _claims: TokenUser,
         Path(id): Path<AudioId>,
         bytes: Bytes,
@@ -95,7 +95,7 @@ pub mod user {
         db: Data<PgPool>,
         _claims: TokenUser,
         req: Path<AudioId>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
     ) -> Result<NoContent, error::Delete> {
         let audio = req.into_inner();
         db::audio::user::delete(&db, audio)

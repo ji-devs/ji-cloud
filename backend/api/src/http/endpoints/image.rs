@@ -4,6 +4,7 @@ use crate::{
     extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
     image_ops::generate_images,
     s3,
+    service::ServiceData,
 };
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
@@ -27,7 +28,9 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
 pub mod user {
-    use crate::{db, error, extractor::TokenUser, image_ops::generate_images, s3};
+    use crate::{
+        db, error, extractor::TokenUser, image_ops::generate_images, s3, service::ServiceData,
+    };
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -64,7 +67,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
         _claims: TokenUser,
         Path(id): Path<ImageId>,
         bytes: Bytes,
@@ -111,7 +114,7 @@ pub mod user {
         db: Data<PgPool>,
         _claims: TokenUser,
         req: Path<ImageId>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
     ) -> Result<NoContent, error::Delete> {
         let image = req.into_inner();
         db::image::user::delete(&db, image)
@@ -242,7 +245,7 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
     bytes: Bytes,
@@ -300,7 +303,7 @@ async fn get_one(
 #[api_v2_operation]
 async fn search(
     db: Data<PgPool>,
-    algolia: Data<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Client>,
     _claims: TokenUser,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
@@ -388,10 +391,10 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    algolia: Data<crate::algolia::Client>,
+    algolia: ServiceData<crate::algolia::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
 ) -> Result<NoContent, error::Delete> {
     let image = req.into_inner();
     db::image::delete(&db, image)
