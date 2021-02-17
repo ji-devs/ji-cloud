@@ -1,0 +1,160 @@
+main {
+    display: grid;
+    grid-template-columns: 200px auto 180px 180px;
+    row-gap: 40px;
+    column-gap: 50px;
+    padding: 50px;
+}
+
+.icon-button {
+    height: 33px;
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+}
+.icon-button button {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+    width: 50px;
+}
+.icon-button button img {
+    max-height: 100%;
+    max-width: 50px;
+}
+.icon-button.select-columns {
+    grid-column: 3;
+}
+.icon-button.add-text {
+    grid-column: 4;
+}
+
+.ftl-table {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(11, auto);
+}
+.ftl-table .ftl-row {
+    display: contents;
+}
+.ftl-table .ftl-sup-header-cell {
+    display: flex;
+    column-gap: 5px;
+    justify-content: flex-end;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    justify-content: end;
+}
+.ftl-table .sorted::before {
+    font-size: 15px;
+    display: inline-block;
+    margin-right: 3px;
+}
+.ftl-table.asc .sorted::before {
+    content: '⇩';
+}
+.ftl-table.desc .sorted::before {
+    content: '⇧';
+}
+.ftl-table .ftl-cell, .ftl-table .ftl-header-cell {
+    border: solid white 2px;
+}
+.ftl-table .ftl-header-cell {
+    background-color: #4472c4;
+    color: white;
+    text-align: left;
+    padding: 10px 10px;
+    font-size: .8em;
+}
+.ftl-table .ftl-header-cell.office-use-only {
+    background-color: #afabab;
+}
+.ftl-table .ftl-cell {
+    margin: 0;
+    padding: 0;
+}
+.ftl-table .ftl-row:nth-child(even) .ftl-cell {
+    background-color: #cfd5ea;
+}
+.ftl-table .ftl-row:nth-child(odd) .ftl-cell {
+    background-color: #e9ebf5;
+}
+.ftl-table .ftl-cell input:not([type=checkbox]),
+.ftl-table .ftl-cell textarea,
+.ftl-table .ftl-cell select {
+    background-color: transparent;
+    border: 0;
+    /* resize: vertical; */
+    height: 100%;
+    padding: 0 10px;
+    min-width: 100px;
+    width: calc(100% - 20px);
+}
+
+.ftl-table .ftl-cell textarea {
+    min-width: 300px;
+    min-height: 100px;
+}
+
+.ftl-table .zeplin-link-cell:hover .zeplin-link {
+    display: block;
+}
+.ftl-table .zeplin-link {
+    display: none;
+    position: absolute;
+    background-color: white;
+    line-height: 2em;
+    margin-top: -1.5em;
+    padding: 0 10px;
+}
+
+.link-button {
+    background-color: transparent;
+    border: 0;
+    padding: 3px 3px;
+    cursor: pointer;
+    line-height: 1.8em;
+}
+.link-button:hover {
+    text-decoration: underline;
+}
+
+.actions-wrapper {
+    display: flex;
+    padding: 10px 10px;
+    column-gap: 5px;
+}
+
+dialog {
+    border-radius: 8px;
+    border: solid #00000040 1px;
+}
+dialog::backdrop {
+    background-color: #00000060;
+}
+.column-selection-contents {
+    display: grid;
+    grid-template-columns: repeat(2, 200px);
+}
+.column-selection-contents hr {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+.column-selection-contents header {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+.column-selection-contents ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.column-selection-contents .actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    column-gap: 10px;
+}
