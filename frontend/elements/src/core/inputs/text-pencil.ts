@@ -64,11 +64,11 @@ export class _ extends LitElement {
     }))
   }
 
-  onFocus(evt:any) {
+  onFocus(_evt:any) {
       this.editing = true;
   }
 
-  onBlur(evt:any) {
+  onBlur(_evt:any) {
       this.editing = false;
   }
 
