@@ -9,14 +9,21 @@ export class _ extends LitElement {
   static get styles() {
     return [
         css`
-            `,
+        section {
+            display: flex;
+        }
+        `,
     ];
   }
 
 
   render() {
-      return html`<bg-jig>
-          <slot name="sidebar"></slot>
+      return html`
+        <bg-jig>
+          <section>
+              <div><slot name="sidebar"></slot></div>
+              <div><slot name="selection"></slot></div>
+          </section>
         </bg-jig>
     `;
   }

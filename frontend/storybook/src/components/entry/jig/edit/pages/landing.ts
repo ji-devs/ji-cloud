@@ -4,6 +4,7 @@ import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/pages/landing";
 import {mapToString, arrayIndex} from "@utils/array";
 import {WithModules as Sidebar} from "../sidebar/sidebar";
+import {ModuleSelection} from "../selection/selection";
 
 export default {
     title: "Entry / Jig / Edit / Pages"
@@ -27,6 +28,10 @@ export const Landing = (props?:Partial<Args>) => {
         ${Sidebar({
             nModules,
             slot: "sidebar"
+        })}
+        ${ModuleSelection({
+            nModules,
+            slot: "selection"
         })}
         </jig-edit-page>
     `;

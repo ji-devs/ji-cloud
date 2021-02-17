@@ -11,7 +11,8 @@ export class _ extends LitElement {
             :host {
                 display: block;
                 background-color: var(--Light_Blue_3);
-                min-height: 100vh;
+                width: 100vw;
+                height: 100vh;
             }
 
             .right, .left {
