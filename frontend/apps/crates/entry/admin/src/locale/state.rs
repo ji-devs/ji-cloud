@@ -32,8 +32,9 @@ pub struct State {
 }
 
 impl State {
-    pub fn new() -> State {
+    pub async fn new() -> State {
         let bundles: HashMap<Bundle, bool> = db_interface::get_bundles()
+            .await
             .iter()
             .map(|bundle| (bundle.clone(), true))
             .collect();
@@ -44,7 +45,7 @@ impl State {
             .filter(|bundle| *bundle.1)
             .map(|bundle| bundle.0)
             .collect();
-        let entries = db_interface::get_entries(&visible_bundles);
+        let entries = db_interface::get_entries(&visible_bundles).await;
 
         let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap());
         let item_kind_options = Self::generate_options(&entries, |t| t.item_kind.clone().unwrap());

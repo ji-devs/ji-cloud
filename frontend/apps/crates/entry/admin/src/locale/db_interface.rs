@@ -2,9 +2,27 @@ use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
 use super::temp_utils::log;
 use super::state::{Entry, EntryStatus, Bundle};
+use wasm_bindgen::prelude::*;
+use js_sys::Promise;
 
-// make async
-pub fn get_bundles() -> Vec<String> {
+
+#[wasm_bindgen(inline_js = "
+export function js_resolve_after(time) {
+    return new Promise(resolve => setTimeout(resolve, time))
+}
+")]
+extern "C" {
+    fn js_resolve_after(time: u32) -> Promise;
+}
+
+async fn resolve_after(time: u32) {
+    let _ = wasm_bindgen_futures::JsFuture::from(js_resolve_after(time)).await;
+}
+
+pub async fn get_bundles() -> Vec<String> {
+
+    resolve_after(100).await;
+
     vec![
         "JIG".to_string(),
         "Memory game".to_string(),
@@ -14,9 +32,11 @@ pub fn get_bundles() -> Vec<String> {
 }
 
 
-// make async
-pub fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
+pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
+
+    resolve_after(100).await;
     println!("{:?}", bundles);
+
     let json = r#"
         [
             {
@@ -78,6 +98,8 @@ pub fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 }
 
 pub async fn clone_entry(entry: &Entry) -> Entry {
+    resolve_after(100).await;
+
     let mut entry = entry.clone();
     entry.id = get_random_string(10);
     log(&entry);
@@ -85,6 +107,8 @@ pub async fn clone_entry(entry: &Entry) -> Entry {
 }
 
 pub async fn create_entry() -> Entry {
+    resolve_after(100).await;
+
     Entry {
         id: get_random_string(10),
         english: String::new(),
@@ -101,6 +125,8 @@ pub async fn create_entry() -> Entry {
 }
 
 pub async fn save_entry(entry:Entry) ->Entry {
+    resolve_after(100).await;
+
     log(&entry);
     entry
 }

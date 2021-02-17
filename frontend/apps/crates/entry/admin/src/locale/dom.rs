@@ -1,9 +1,11 @@
-use super::components::table::TableComponent;
-use dominator::{Dom, html, with_node, clone};
+use futures_signals::signal::Mutable;
+use crate::locale::components::locale_outer::LocaleOuterDom;
+use dominator_helpers::futures::AsyncLoader;
+use dominator::{Dom, html, clone};
 use std::rc::Rc;
 use super::state::*;
-use web_sys::HtmlSelectElement;
-use utils::events;
+use futures_signals::signal::SignalExt;
+
 
 pub struct LocalePage {
     pub state: Rc<State>
@@ -14,68 +16,27 @@ impl LocalePage {
         // pretty bad, ha?
         super::temp_utils::add_styles(&std::include_str!("./temp_styles.css"));
 
-        let state: Rc<State> = Rc::new(State::new());
 
-        html!("main", {
-            .children(&mut [
-                html!("select" => HtmlSelectElement, {
-                    .attribute("multiple", "")
-                    .with_node!(elem => {
-                        .event(clone!(elem => move |_:events::Change| {
-                            let selected_bundle: Bundle = elem.value();
-                            super::temp_utils::log(&selected_bundle);
+        let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
+
+        let loader = AsyncLoader::new();
+        loader.load(clone!(state => async move {
+            state.set(Some(Rc::new(State::new().await)));
+        }));
+
+        Dom::with_state(loader, move |loader| {
+            html!("empty-fragment", {
+                .child_signal(loader.is_loading().map(move |loading| {
+                    if loading {
+                        Some(html!("window-loader-block", {
+                            .property("visible", true)
                         }))
-                    })
-                    .children(
-                        state.bundles.iter().map(|(e, selected)| {
-                            html!("option", {
-                                .property("text", e.to_string())
-                                .property("value", e.to_string())
-                                .property("selected", selected.clone())
-                            })
-                        })
-                    )
-                }),
-                html!("div", {
-                    .class("icon-button")
-                    .class("select-columns")
-                    .children(&mut [
-                        html!("button", {
-                            .child(html!("img", {
-                                .attribute("src", "assets/select-columns-icon.png")
-                            }))
-                            .event(clone!(state => move |_event: events::Click| {
-                                state.dialog_ref
-                                    .lock_ref().clone().expect("Can't get dialog")
-                                    .show_modal().expect("Can't open dialog");
-                            }))
-                        }),
-                        html!("span", {
-                            .text("Select columns to display")
-                        }),
-                    ])
-                }),
-                html!("div", {
-                    .class("icon-button")
-                    .class("add-text")
-                    .children(&mut [
-                        html!("button", {
-                            .child(html!("img", {
-                                .attribute("src", "assets/add-icon.png")
-                            }))
-                            .event(clone!(state => move |_event: events::Click| {
-                                state.loader.load(clone!(state => async move {
-                                    state.add_entry().await;
-                                }))
-                            }))
-                        }),
-                        html!("span", {
-                            .text("Add a text")
-                        }),
-                    ])
-                }),
-                TableComponent::render(state),
-            ])
+                    } else {
+                        let thingy: Rc<State> = state.lock_ref().clone().unwrap();
+                        Some(LocaleOuterDom::render(thingy))
+                    }
+                }))
+            })
         })
     }
 }
