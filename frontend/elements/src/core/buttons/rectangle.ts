@@ -9,7 +9,6 @@ export type Size = "small" | "medium" | "large" | "x-large";
 export type IconAfter = "arrow";
 export type IconBefore = "magnifier" | "share" | "create" | "play" | "plus";
 
-
 @customElement("button-rect")
 export class _ extends BaseButton {
   static get styles() {
@@ -128,16 +127,14 @@ export class _ extends BaseButton {
       italic: italic,
      
     });
-
     
-    const iconBeforePath = iconBefore === "magnifier" ? "core/inputs/magnifier.svg" 
-    : iconBefore === "share" ? "core/inputs/share-red.svg" 
-    : iconBefore === "create" ? "core/inputs/plus-red.svg" 
-    : iconBefore === "play" ? "core/inputs/TODO-PLAY.svg"
-    : iconBefore === "plus" ? getPlus(color)
-    : iconBefore === "blueplay" ? "core/inputs/play-blue.svg"
-    : nothing;
-    const iconAfterPath = iconAfter === "arrow" ? "core/inputs/arrow.svg"
+    const iconBeforePath = iconBefore === "magnifier" ? "core/buttons/rect/magnifier.svg" 
+        : iconBefore === "share" ? `core/buttons/rect/share-${color}.svg`
+        : iconBefore === "create" ? `core/buttons/rect/plus-${color}.svg`
+        : iconBefore === "play" ? `core/buttons/rect/play-${color}.svg`
+        : iconBefore === "plus" ? getPlus(color)
+        : nothing;
+    const iconAfterPath = iconAfter === "arrow" ? "core/buttons/rect/arrow-right.svg"
       : "";
 
     return html`
