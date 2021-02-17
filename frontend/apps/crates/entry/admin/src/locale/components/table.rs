@@ -220,7 +220,7 @@ impl TableComponent {
                                 }),
                                 html!("div", {
                                     .class("ftl-header-cell")
-                                    .text("Translation Kind")
+                                    .text("Item Kind")
                                 }),
                                 html!("div", {
                                     .class("ftl-header-cell")

@@ -66,6 +66,7 @@ main {
     color: white;
     text-align: left;
     padding: 10px 10px;
+    font-size: .8em;
 }
 .ftl-table .ftl-header-cell.office-use-only {
     background-color: #afabab;

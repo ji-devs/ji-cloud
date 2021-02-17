@@ -57,7 +57,7 @@ impl State {
         let visible_columns = vec![
             "ID".to_string(),
             "Section".to_string(),
-            "Translation Kind".to_string(),
+            "Item Kind".to_string(),
             "English".to_string(),
             "Status".to_string(),
             "Zeplin reference".to_string(),
