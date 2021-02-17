@@ -22,7 +22,16 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (runtime_settings, s3, algolia_client, algolia_manager, db_pool, jwk_verifier, _guard) = {
+    let (
+        runtime_settings,
+        s3,
+        algolia_client,
+        algolia_key_store,
+        algolia_manager,
+        db_pool,
+        jwk_verifier,
+        _guard,
+    ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
@@ -32,11 +41,21 @@ async fn main() -> anyhow::Result<()> {
 
         let runtime_settings = settings.runtime_settings().await?;
 
-        let s3 = s3::Client::new(settings.s3_settings().await?)?;
+        let s3 = settings
+            .s3_settings()
+            .await?
+            .map(s3::Client::new)
+            .transpose()?;
 
         let algolia_settings = settings.algolia_settings().await?;
 
         let algolia_client = crate::algolia::Client::new(algolia_settings.clone())?;
+
+        let algolia_key_store = algolia_settings
+            .as_ref()
+            .and_then(|it| it.frontend_search_key.clone())
+            .map(crate::algolia::SearchKeyStore::new)
+            .transpose()?;
 
         let db_pool = db::get_pool(
             settings
@@ -60,6 +79,7 @@ async fn main() -> anyhow::Result<()> {
             runtime_settings,
             s3,
             algolia_client,
+            algolia_key_store,
             algolia_manager,
             db_pool,
             jwk_verifier,
@@ -77,8 +97,16 @@ async fn main() -> anyhow::Result<()> {
         let _ = algolia_manager.spawn();
     }
 
-    let handle =
-        thread::spawn(|| http::run(db_pool, runtime_settings, s3, algolia_client, jwk_verifier));
+    let handle = thread::spawn(|| {
+        http::run(
+            db_pool,
+            runtime_settings,
+            s3,
+            algolia_client,
+            algolia_key_store,
+            jwk_verifier,
+        )
+    });
 
     log::info!("app started!");
 

@@ -144,9 +144,6 @@ pub struct S3Settings {
     /// The s3 bucket that should be used for media.
     pub bucket: String,
 
-    /// Should a s3 client be started? (for things like deleting images)
-    pub use_client: bool,
-
     /// What's the access key's id?
     pub access_key_id: String,
 
@@ -273,30 +270,39 @@ impl SettingsManager {
     }
 
     /// Load the settings for s3.
-    pub async fn s3_settings(&self) -> anyhow::Result<S3Settings> {
+    pub async fn s3_settings(&self) -> anyhow::Result<Option<S3Settings>> {
+        let disable_local = crate::env::env_bool(keys::s3::DISABLE);
+
+        if disable_local && self.remote_target == RemoteTarget::Local {
+            return Ok(None);
+        }
+
         let endpoint = match self.remote_target.s3_endpoint() {
-            Some(e) => e.to_string(),
-            None => self.get_secret(keys::s3::ENDPOINT).await?,
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => self.get_varying_secret(keys::s3::ENDPOINT).await?,
         };
 
         let bucket = match self.remote_target.s3_bucket() {
-            Some(b) => b.to_string(),
-            None => self.get_secret(keys::s3::BUCKET).await?,
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::BUCKET).await?,
         };
 
-        let access_key_id = self.get_secret(keys::s3::ACCESS_KEY).await?;
+        let access_key_id = self.get_varying_secret(keys::s3::ACCESS_KEY).await?;
 
-        let secret_access_key = self.get_secret(keys::s3::SECRET).await?;
+        let secret_access_key = self.get_varying_secret(keys::s3::SECRET).await?;
 
-        let disable_local = crate::env::env_bool(keys::s3::DISABLE);
+        match (endpoint, bucket, access_key_id, secret_access_key) {
+            (Some(endpoint), Some(bucket), Some(access_key_id), Some(secret_access_key)) => {
+                Ok(Some(S3Settings {
+                    endpoint,
+                    bucket,
+                    access_key_id,
+                    secret_access_key,
+                }))
+            }
 
-        Ok(S3Settings {
-            endpoint,
-            bucket,
-            use_client: self.remote_target != RemoteTarget::Local || !disable_local,
-            access_key_id,
-            secret_access_key,
-        })
+            _ => return Ok(None),
+        }
     }
 
     /// Load the key required for initializing sentry (for the api)
