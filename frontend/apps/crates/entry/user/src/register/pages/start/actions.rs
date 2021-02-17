@@ -87,7 +87,24 @@ pub fn register_google(state: Rc<State>) {
   
 
     state.loader.load(clone!(state => async move {
-        crate::oauth_popup::actions::open(GetOAuthUrlServiceKind::Google, GetOAuthUrlKind::Register).await;
+
+        let service_kind_str = serde_wasm_bindgen::to_value(&GetOAuthUrlServiceKind::Google)
+            .unwrap_throw()
+            .as_string()
+            .unwrap_throw();
+
+        let url_kind_str = serde_wasm_bindgen::to_value(&OAuthUrlKind::Register)
+            .unwrap_throw()
+            .as_string()
+            .unwrap_throw();
+
+        let path = GetOAuthUrl::PATH
+            .replace("{service}", &service_kind_str)
+            .replace("{kind}", &url_kind_str);
+        if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, GetOAuthUrl::METHOD, None).await {
+            //web_sys::window().unwrap_throw().location().set_href(&resp.url);
+            unsafe { crate::oauth_popup::actions::oauth_open_window(&resp.url, "oauth"); }
+        }
     }));
 }
 

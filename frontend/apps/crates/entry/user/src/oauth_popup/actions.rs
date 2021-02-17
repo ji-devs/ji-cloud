@@ -17,31 +17,6 @@ extern "C" {
     pub fn oauth_open_window(url:&str, name:&str);
 }
 
-//Merely opens the window to the oauth url
-pub async fn open(service_kind:GetOAuthUrlServiceKind, url_kind:GetOAuthUrlKind) {
-    let service_kind_str = serde_wasm_bindgen::to_value(&service_kind)
-        .unwrap_throw()
-        .as_string()
-        .unwrap_throw();
-
-    let url_kind_str = serde_wasm_bindgen::to_value(&url_kind)
-        .unwrap_throw()
-        .as_string()
-        .unwrap_throw();
-
-    let path = GetOAuthUrl::PATH
-        .replace("{service}", &service_kind_str)
-        .replace("{kind}", &url_kind_str);
-
-    let req = (GetOAuthUrlServiceKind::Google, GetOAuthUrlKind::Register);
-
-    if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, _>(&path, GetOAuthUrl::METHOD, Some(req)).await {
-        //TODO - change to popup
-        web_sys::window().unwrap_throw().location().set_href(&resp.url);
-        //unsafe { oauth_open_window(&resp.url, &url_kind_str); }
-    }
-
-}
 
 //Called from the oauth popup - posts a message back to the _opener_ window
 pub async fn finalize(req: CreateSessionOAuthRequest) {
@@ -60,6 +35,8 @@ pub async fn finalize(req: CreateSessionOAuthRequest) {
         let msg = serde_wasm_bindgen::to_value(&resp).unwrap_throw();
 
         parent.post_message(&msg, &domain);
+
+        window.close();
     }
 
 }

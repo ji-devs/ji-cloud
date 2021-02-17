@@ -5,7 +5,7 @@ use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 use dominator_helpers::futures::AsyncLoader;
 use super::actions;
-use shared::domain::session::CreateSessionOAuthRequest;
+use shared::domain::session::*;
 
 //The popup dom
 pub struct RegisterOauthPage {
@@ -19,7 +19,8 @@ impl RegisterOauthPage {
             let req = match data {
                 OauthData::Google(code) => {
                     CreateSessionOAuthRequest::Google {
-                        code
+                        code,
+                        redirect_kind: OAuthUrlKind::Register
                     }
                 }
             };
