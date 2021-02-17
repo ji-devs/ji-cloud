@@ -130,14 +130,13 @@ export class _ extends BaseButton {
     });
 
     
-    const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg" 
-    : iconBefore === "share" ? "Icn_Share_Red.svg" 
-    : iconBefore === "create" ? "icn-plus-red.svg" 
-    : iconBefore === "play" ? "icn-video-activity-hover.svg"
-    : iconBefore === "plus" ? "icon-add-24-white.svg"
-    : iconBefore === "blueplay" ? "play.svg"
-    : nothing;
-    const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
+    const iconBeforePath = iconBefore === "magnifier" ? "core/buttons/rect/magnifier.svg" 
+        : iconBefore === "share" ? `core/buttons/rect/share-${color}.svg`
+        : iconBefore === "create" ? `core/buttons/rect/plus-${color}.svg`
+        : iconBefore === "play" ? `core/buttons/rect/play-${color}.svg`
+        : iconBefore === "plus" ? "core/buttons/rect/icon-add-24-white.svg" //?
+        : nothing;
+    const iconAfterPath = iconAfter === "arrow" ? "core/buttons/rect/arrow-right.svg"
       : "";
 
     return html`
