@@ -8,10 +8,13 @@ use futures_signals::{
 };
 use dominator::{Dom, html};
 use crate::{
+    register::dom::RegisterPage,
+    oauth_popup::dom::RegisterOauthPage,
+    /*
     login::dom::LoginPage,
     profile::dom::ProfilePage,
-    register::dom::RegisterPage,
     register_complete::dom::RegisterCompletePage,
+    */
 };
 
 pub struct Router {
@@ -33,10 +36,13 @@ impl Router {
                 match route {
                     Route::User(route) => {
                         match route {
+                            UserRoute::Register => Some(RegisterPage::render()),
+                            UserRoute::RegisterOauth(data) => Some(RegisterOauthPage::render(data)),
+                            /*
                             UserRoute::Login => Some(LoginPage::render()),
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
-                            UserRoute::Register => Some(RegisterPage::render()),
                             UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
+                            */
                             /*
                             UserRoute::ContinueRegistration(user) => Some(RegisterPage::render(RegisterPage::new(Some(user)))),
                             UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),

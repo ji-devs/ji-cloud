@@ -35,7 +35,7 @@ export class _ extends LitElement {
    
         <div class="wrapper">
           <span class="flex items-center font-sans font-normal text-lg">
-            <img-ui path="icn-google-button-64.svg" alt=""></img-ui>
+              <img-ui path="entry/user/google.svg" alt=""></img-ui>
             ${STR_LABEL}
           </span>
 

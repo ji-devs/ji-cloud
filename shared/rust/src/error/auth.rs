@@ -19,10 +19,6 @@ pub enum RegisterErrorKind {
     /// Another user with the provided email already exists.
     TakenEmail,
 
-    // todo: this can't occur anymore
-    /// Another user with the provided OAuth ID already exists.
-    TakenId,
-
     /// Another user with the provided username already exists.
     TakenUsername,
 }

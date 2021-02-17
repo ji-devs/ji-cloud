@@ -5,7 +5,7 @@ import "@elements/core/inputs/dropdowns/tree/tree";
 import { ContainerMode } from "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/buttons/ellipses";
 import "@elements/core/buttons/expand";
-import "@elements/core/menu/ellipses/ellipses-menu-line";
+import "@elements/core/menu/ellipses";
 export default {
     title: "Core / Inputs / Dropdowns"
 }
@@ -51,12 +51,12 @@ export const DropdownTree = (props?:Partial<Args>) => {
     }
 
     const renderMenu = (content:any, menuContents:boolean) => {
-      return `<ellipses-menu-line slot="content" ${menuContents ? "visible" : ""} hover>
+      return `<menu-ellipses slot="content" ${menuContents ? "visible" : ""} hover>
         ${content}
         <div slot="menu-content">
           Menu Here!
         </div>
-      </ellipses-menu-line>`
+      </menu-ellipses>`
     }
 
     const renderNode = (nodeProps:TreeNode, depth: number) => {

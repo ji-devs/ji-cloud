@@ -147,10 +147,8 @@ export class _ extends LitElement {
 
 function makeImage(mode: Mode, onPwToggle:(_:Event) => any) {
   const path =
-    mode === "passwordVisible"
-      ? "icn-show-idle.svg"
-      : mode === "passwordHidden"
-      ? "icn-hide-idle.svg"
+    mode === "passwordVisible" ? "core/inputs/eye-open.svg"
+      : mode === "passwordHidden" ? "core/inputs/eye-closed.svg"
       : "";
 
   return html`<img-ui path="${path}" @click="${onPwToggle}" ></img-ui>`;

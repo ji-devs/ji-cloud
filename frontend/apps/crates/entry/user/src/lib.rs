@@ -5,12 +5,14 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod firebase;
 mod router;
-mod login;
 mod register;
+mod oauth_popup;
+/*
+mod login;
 mod profile;
 mod register_complete;
+*/
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -27,19 +29,8 @@ pub async fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
 
-
-
-    let promise = unsafe { firebase::init_firebase(settings.firebase_dev) };
-
-    match JsFuture::from(promise).await {
-        Ok(_) => {
-            let router = router::Router::new();
-            dominator::append_dom(&dominator::body(), router.render());
-        },
-        Err(err) => {
-            log::error!("could not initialize firebase!"); 
-        }
-    }
+    let router = router::Router::new();
+    dominator::append_dom(&dominator::body(), router.render());
 }
 
 

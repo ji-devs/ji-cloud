@@ -11,7 +11,6 @@ pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 #[derive(Clone)]
 pub struct Settings {
     pub remote_target: RemoteTarget,
-    pub firebase_dev: bool,
 }
 
 cfg_if! {
@@ -39,12 +38,12 @@ cfg_if! {
 //However they are only called in local mode, so it's fine
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(js_name = FRONTEND_DEV_AUTH)]
-    fn frontend_dev_auth() -> bool;
+    #[wasm_bindgen(js_name = DEV_AUTH)]
+    fn dev_auth() -> bool;
     #[wasm_bindgen(js_name = API_TOKEN)]
-    fn frontend_dev_token() -> String;
+    fn dev_token() -> String;
     #[wasm_bindgen(js_name = API_CSRF)]
-    fn frontend_dev_csrf() -> String;
+    fn dev_csrf() -> String;
 }
 
 fn _init(remote_target:RemoteTarget) -> Settings {
@@ -56,9 +55,9 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
     if remote_target == RemoteTarget::Local {
         unsafe {
-            if frontend_dev_auth() {
-                let csrf = frontend_dev_csrf();
-                let token = frontend_dev_token();
+            if dev_auth() {
+                let csrf = dev_csrf();
+                let token = dev_token();
                 log::info!("manually setting auth for dev mode");
 
                 super::storage::save_csrf_token(&csrf);
@@ -81,7 +80,7 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "remote_target is [{:?}] and firebase_dev is [{:?}]", self.remote_target, self.firebase_dev)
+        write!(f, "remote_target is [{:?}]", self.remote_target)
     }
 }
 
@@ -89,19 +88,16 @@ impl Settings {
     pub fn new_local() -> Self {
         Self {
             remote_target: RemoteTarget::Local,
-            firebase_dev: true,
         }
     }
     pub fn new_sandbox() -> Self {
         Self {
             remote_target: RemoteTarget::Sandbox,
-            firebase_dev: true,
         }
     }
     pub fn new_release() -> Self {
         Self {
             remote_target: RemoteTarget::Release,
-            firebase_dev: false,
         }
     }
     

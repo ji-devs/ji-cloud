@@ -2,7 +2,7 @@ use crate::{
     api::Method,
     domain::session::{
         CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlKind, GetOAuthUrlResponse, GetOAuthUrlServiceKind,
+        GetOAuthUrlResponse,
     },
     error::EmptyError,
 };
@@ -35,7 +35,7 @@ impl ApiEndpoint for CreateOAuth {
 /// Get URL for oauth callback
 pub struct GetOAuthUrl;
 impl ApiEndpoint for GetOAuthUrl {
-    type Req = (GetOAuthUrlServiceKind, GetOAuthUrlKind);
+    type Req = ();
     type Res = GetOAuthUrlResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/session/oauth/url/{service}/{kind}";

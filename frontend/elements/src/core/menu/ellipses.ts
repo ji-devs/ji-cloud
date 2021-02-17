@@ -3,7 +3,7 @@ import {classMap} from "lit-html/directives/class-map";
 
 import "@elements/core/buttons/ellipses";
 
-@customElement('ellipses-menu-line')
+@customElement('menu-ellipses')
 export class _ extends LitElement {
   static get styles() {
     return [css`

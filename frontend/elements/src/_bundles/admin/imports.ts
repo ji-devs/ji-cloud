@@ -5,7 +5,7 @@ import "@elements/core/titles/ji";
 import "@elements/core/inputs/dropdowns/tree/tree";
 import "@elements/core/reports/tree";
 import "@elements/core/cards/blue";
-import "@elements/core/menu/ellipses/ellipses-menu-line";
+import "@elements/core/menu/ellipses";
 import "@elements/core/buttons/expand";
 import "@elements/core/buttons/text";
 import "@elements/core/window/window-loader-block";

@@ -35,10 +35,11 @@ export class _ extends LitElement {
           font-size: 16px;
         }
         img-ui {
+          width: 24px;
+          height: 24px;
           position: absolute;
           top: 33%;
           right: 20px;
-          transform: rotate(180deg);
           cursor:pointer;
         }
         .errorwrapper {
@@ -120,7 +121,7 @@ export class _ extends LitElement {
           class=""
         />
         <label class="">${label}</label>
-        <img-ui path="icn-chevron-dropdown-up.svg"></img-ui>
+        <img-ui path="core/inputs/chevron-down-blue.svg"></img-ui>
         <div class="${open ? "open" : ""}">
           <ul style="height: ${maxChildrenHeight}px">
             <slot></slot>

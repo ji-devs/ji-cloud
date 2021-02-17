@@ -288,6 +288,28 @@
       ]
     }
   },
+  "1fecc2613bdeb1cb5ef0e88661eb5a43f995623a28c26cf77cb01e50a7c9ebb7": {
+    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and (scope = $2 or scope = $3)) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "21a74b49a0bc1fef8a461d87e9596df3418c161536cb490f6cbccf511c0ae3fe": {
     "query": "update web_media_library set uploaded_at = now() where id = $1",
     "describe": {
@@ -2308,27 +2330,6 @@
       },
       "nullable": [
         true
-      ]
-    }
-  },
-  "fddb73f2c44ea4cd230b443e60390a8b79a3560d28e240d5e1d75e8334087196": {
-    "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and scope = $2) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   }
