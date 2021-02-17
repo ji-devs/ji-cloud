@@ -65,7 +65,7 @@ impl LocalePage {
                             }))
                             .event(clone!(state => move |_event: events::Click| {
                                 state.loader.load(clone!(state => async move {
-                                    state.add_translation().await;
+                                    state.add_entry().await;
                                 }))
                             }))
                         }),

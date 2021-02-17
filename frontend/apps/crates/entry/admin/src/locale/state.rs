@@ -18,7 +18,7 @@ use std::cmp::Ord;
 
 pub struct State {
     pub bundles: HashMap<String, bool>,
-    pub translations: MutableVec<Rc<Mutable<Translation>>>,
+    pub entries: MutableVec<Rc<Mutable<Entry>>>,
     pub visible_columns: MutableVec<String>,
     pub hidden_columns: MutableVec<String>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
@@ -26,7 +26,7 @@ pub struct State {
 
     pub section_options: Mutable<BTreeMap<Section, bool>>,
     pub item_kind_options: Mutable<BTreeMap<ItemKind, bool>>,
-    pub status_options: Mutable<BTreeMap<TranslationStatus, bool>>,
+    pub status_options: Mutable<BTreeMap<EntryStatus, bool>>,
 
     pub sort: Mutable<Sort>,
 }
@@ -44,14 +44,14 @@ impl State {
             .filter(|bundle| *bundle.1)
             .map(|bundle| bundle.0)
             .collect();
-        let translations = db_interface::get_translations(&visible_bundles);
+        let entries = db_interface::get_entries(&visible_bundles);
 
-        let section_options = Self::generate_options(&translations, |t| t.section.clone().unwrap());
-        let item_kind_options = Self::generate_options(&translations, |t| t.item_kind.clone().unwrap());
-        let status_options = TranslationStatus::iter().map(|s| (s, true)).collect::<BTreeMap<TranslationStatus, bool>>();
+        let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap());
+        let item_kind_options = Self::generate_options(&entries, |t| t.item_kind.clone().unwrap());
+        let status_options = EntryStatus::iter().map(|s| (s, true)).collect::<BTreeMap<EntryStatus, bool>>();
 
-        let translations = translations.iter().map(|i| Rc::new(Mutable::new(i.clone()))).collect();
-        let translations = MutableVec::new_with_values(translations);
+        let entries = entries.iter().map(|i| Rc::new(Mutable::new(i.clone()))).collect();
+        let entries = MutableVec::new_with_values(entries);
 
 
         let visible_columns = vec![
@@ -72,7 +72,7 @@ impl State {
         let hidden_columns = MutableVec::new_with_values(hidden_columns);
         Self {
             bundles,
-            translations,
+            entries,
             visible_columns,
             hidden_columns,
             dialog_ref: Mutable::new(None),
@@ -89,21 +89,21 @@ impl State {
         }
     }
 
-    pub async fn add_translation(&self) {
-        let translation = db_interface::create_translation().await;
-        let mut vec = self.translations.lock_mut();
-        super::temp_utils::log(&translation);
-        vec.push_cloned(Rc::new(Mutable::new(translation)));
+    pub async fn add_entry(&self) {
+        let entry = db_interface::create_entry().await;
+        let mut vec = self.entries.lock_mut();
+        super::temp_utils::log(&entry);
+        vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
-    pub async fn clone_translation(&self, translation: &Translation) {
-        let translation = db_interface::clone_translation(&translation).await;
-        let mut vec = self.translations.lock_mut();
-        vec.push_cloned(Rc::new(Mutable::new(translation)));
+    pub async fn clone_entry(&self, entry: &Entry) {
+        let entry = db_interface::clone_entry(&entry).await;
+        let mut vec = self.entries.lock_mut();
+        vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
-    pub fn remove_translation(&self, id: &str) {
-        let mut vec = self.translations.lock_mut();
+    pub fn remove_entry(&self, id: &str) {
+        let mut vec = self.entries.lock_mut();
         let index = vec.iter().position(|i| i.lock_ref().id == id).unwrap();
         vec.remove(index);
     }
@@ -133,29 +133,29 @@ impl State {
 
     // Both of the regenerate function should be chagned after the db_interface is made async, current state is pretty bad
     pub fn regenerate_section_options(&self) {
-        let translations: Vec<Translation> = self.translations.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
-        let section_options = Self::generate_options(&translations, |t| t.section.clone().unwrap());
+        let entries: Vec<Entry> = self.entries.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
+        let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap());
         let mut lock = self.section_options.lock_mut();
         *lock = section_options;
     }
 
     pub fn regenerate_item_kind_options(&self) {
-        let translations: Vec<Translation> = self.translations.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
-        let item_kind_options = Self::generate_options(&translations, |t| t.item_kind.clone().unwrap());
+        let entries: Vec<Entry> = self.entries.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
+        let item_kind_options = Self::generate_options(&entries, |t| t.item_kind.clone().unwrap());
         let mut lock = self.item_kind_options.lock_mut();
         *lock = item_kind_options;
     }
 
-    fn generate_options<T>(translation_vec: &Vec<Translation>, f: fn(&Translation) -> T) -> BTreeMap<T, bool>
+    fn generate_options<T>(entry_vec: &Vec<Entry>, f: fn(&Entry) -> T) -> BTreeMap<T, bool>
         where T: Ord
     {
-        translation_vec.iter().map(|t| (f(t), true)).collect()
+        entry_vec.iter().map(|t| (f(t), true)).collect()
     }
 }
 
 
 #[derive(Debug, Clone, Deserialize, Serialize, EnumString, Display, EnumIter, PartialEq, Eq, PartialOrd, Ord)]
-pub enum TranslationStatus {
+pub enum EntryStatus {
     Approved,
     Discuss,
     #[strum(serialize = "On Hold")]
@@ -167,13 +167,13 @@ pub type ItemKind = String;
 pub type Bundle = String;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Translation {
+pub struct Entry {
     pub id: String,
     pub section: Option<Section>,
     pub item_kind: Option<ItemKind>,
     pub english: String,
     pub hebrew: String,
-    pub status: TranslationStatus,
+    pub status: EntryStatus,
     pub zeplin_reference: Mutable<Option<Url>>,
     pub comments: String,
     pub in_app: bool,

@@ -1,5 +1,5 @@
 use url::Url;
-use crate::locale::state::{TranslationStatus, ItemKind, Translation, State, Section};
+use crate::locale::state::{EntryStatus, ItemKind, Entry, State, Section};
 use web_sys::HtmlSelectElement;
 use std::rc::Rc;
 use std::clone::Clone;
@@ -11,11 +11,11 @@ use strum::IntoEnumIterator;
 
 
 #[derive(Clone)]
-pub struct TranslationRow {
+pub struct EntryRow {
 
 }
 
-impl TranslationRow {
+impl EntryRow {
     fn url_option_string(url: &Option<Url>) -> String {
         if url.is_some() {
             url.clone().unwrap().to_string()
@@ -24,33 +24,33 @@ impl TranslationRow {
         }
     }
 
-    pub fn render(translation: Rc<Mutable<Translation>>, state: Rc<State>) -> Dom {
-        let translation_ref = translation.lock_ref();
+    pub fn render(entry: Rc<Mutable<Entry>>, state: Rc<State>) -> Dom {
+        let entry_ref = entry.lock_ref();
         html!("div", {
             .class("ftl-row")
             .children(&mut [
                 html!("div", {
                     .class("ftl-cell")
                     .child(html!("input", {
-                        .property("value", &translation_ref.id)
-                        .event(clone!(translation => move |event: events::Input| {
+                        .property("value", &entry_ref.id)
+                        .event(clone!(entry => move |event: events::Input| {
                             let value: String = event.value().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.id = value;
+                            let mut entry = entry.lock_mut();
+                            entry.id = value;
                         }))
                     }))
                 }),
                 html!("div", {
                     .class("ftl-cell")
                     .child(html!("input", {
-                        .apply_if(translation_ref.section.is_some(), |dom| {
-                            dom.property("value", &translation_ref.section.clone().unwrap())
+                        .apply_if(entry_ref.section.is_some(), |dom| {
+                            dom.property("value", &entry_ref.section.clone().unwrap())
                         })
                         .attribute("list", "sections")
-                        .event(clone!(translation => move |event: events::Input| {
+                        .event(clone!(entry => move |event: events::Input| {
                             let value: Section = event.value().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.section = Some(value);
+                            let mut entry = entry.lock_mut();
+                            entry.section = Some(value);
                         }))
                         .event(clone!(state => move |_: events::Change| {
                             state.regenerate_section_options();
@@ -60,14 +60,14 @@ impl TranslationRow {
                 html!("div", {
                     .class("ftl-cell")
                     .child(html!("input", {
-                        .apply_if(translation_ref.item_kind.is_some(), |dom| {
-                            dom.property("value", &translation_ref.item_kind.clone().unwrap())
+                        .apply_if(entry_ref.item_kind.is_some(), |dom| {
+                            dom.property("value", &entry_ref.item_kind.clone().unwrap())
                         })
                         .attribute("list", "item-kinds")
-                        .event(clone!(translation => move |event: events::Input| {
+                        .event(clone!(entry => move |event: events::Input| {
                             let value: ItemKind = event.value().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.item_kind = Some(value);
+                            let mut entry = entry.lock_mut();
+                            entry.item_kind = Some(value);
                         }))
                         .event(clone!(state => move |_: events::Change| {
                             state.regenerate_item_kind_options();
@@ -77,11 +77,11 @@ impl TranslationRow {
                 html!("div", {
                     .class("ftl-cell")
                     .child(html!("textarea", {
-                        .text(&translation_ref.english)
-                        .event(clone!(translation => move |event: events::Input| {
+                        .text(&entry_ref.english)
+                        .event(clone!(entry => move |event: events::Input| {
                             let value: String = event.value().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.english = value;
+                            let mut entry = entry.lock_mut();
+                            entry.english = value;
                         }))
                     }))
                 }),
@@ -89,18 +89,18 @@ impl TranslationRow {
                     .class("ftl-cell")
                     .child(html!("select" => HtmlSelectElement, {
                         .with_node!(elem => {
-                            .event(clone!(translation => move |_event: events::Change| {
+                            .event(clone!(entry => move |_event: events::Change| {
                                 let value: String = elem.value();
-                                let mut translation = translation.lock_mut();
-                                translation.status = TranslationStatus::from_str(&value).unwrap_throw();
+                                let mut entry = entry.lock_mut();
+                                entry.status = EntryStatus::from_str(&value).unwrap_throw();
                             }))
                         })
                         .children(
-                            TranslationStatus::iter().map(|o| {
+                            EntryStatus::iter().map(|o| {
                                 html!("option", {
                                     .property("text", o.to_string())
                                     .property("value", o.to_string())
-                                    .property("selected", o == translation_ref.status)
+                                    .property("selected", o == entry_ref.status)
                                 })
                             })
                         )
@@ -113,19 +113,19 @@ impl TranslationRow {
                         html!("a", {
                             .attribute("target", "_blank")
                             .class("zeplin-link")
-                            .text_signal(translation_ref.zeplin_reference.signal_ref(|url| TranslationRow::url_option_string(url)))
-                            .property_signal("href", translation_ref.zeplin_reference.signal_ref(|url| TranslationRow::url_option_string(url)))
+                            .text_signal(entry_ref.zeplin_reference.signal_ref(|url| Self::url_option_string(url)))
+                            .property_signal("href", entry_ref.zeplin_reference.signal_ref(|url| Self::url_option_string(url)))
                         }),
                         html!("input", {
                             .property("type", "url")
-                            .apply_if(translation_ref.zeplin_reference.lock_ref().is_some(), |dom| {
-                                dom.property("value", &translation_ref.zeplin_reference.lock_ref().clone().unwrap().to_string())
+                            .apply_if(entry_ref.zeplin_reference.lock_ref().is_some(), |dom| {
+                                dom.property("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap().to_string())
                             })
-                            .event(clone!(translation => move |event: events::Input| {
+                            .event(clone!(entry => move |event: events::Input| {
                                 let value: String = event.value().unwrap_throw();
                                 let value = Url::parse(&value);
 
-                                let zeplin_reference = &translation.lock_ref().zeplin_reference;
+                                let zeplin_reference = &entry.lock_ref().zeplin_reference;
                                 match value {
                                     Ok(value) => zeplin_reference.set(Some(value)),
                                     Err(_) => zeplin_reference.set(None),
@@ -137,11 +137,11 @@ impl TranslationRow {
                 html!("div", {
                     .class("ftl-cell")
                     .child(html!("input", {
-                        .property("value", &translation_ref.comments)
-                        .event(clone!(translation => move |event: events::Input| {
+                        .property("value", &entry_ref.comments)
+                        .event(clone!(entry => move |event: events::Input| {
                             let value: String = event.value().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.comments = value;
+                            let mut entry = entry.lock_mut();
+                            entry.comments = value;
                         }))
                     }))
                 }),
@@ -149,11 +149,11 @@ impl TranslationRow {
                     .class("ftl-cell")
                     .child(html!("input", {
                         .attribute("type", "checkbox")
-                        .property("checked", translation_ref.in_app)
-                        .event(clone!(translation => move |event: events::Change| {
+                        .property("checked", entry_ref.in_app)
+                        .event(clone!(entry => move |event: events::Change| {
                             let value: bool = event.checked().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.in_app = value;
+                            let mut entry = entry.lock_mut();
+                            entry.in_app = value;
                         }))
                     }))
                 }),
@@ -161,11 +161,11 @@ impl TranslationRow {
                     .class("ftl-cell")
                     .child(html!("input", {
                         .attribute("type", "checkbox")
-                        .property("checked", translation_ref.in_element)
-                        .event(clone!(translation => move |event: events::Change| {
+                        .property("checked", entry_ref.in_element)
+                        .event(clone!(entry => move |event: events::Change| {
                             let value: bool = event.checked().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.in_element = value;
+                            let mut entry = entry.lock_mut();
+                            entry.in_element = value;
                         }))
                     }))
                 }),
@@ -173,11 +173,11 @@ impl TranslationRow {
                     .class("ftl-cell")
                     .child(html!("input", {
                         .attribute("type", "checkbox")
-                        .property("checked", translation_ref.in_mock)
-                        .event(clone!(translation => move |event: events::Change| {
+                        .property("checked", entry_ref.in_mock)
+                        .event(clone!(entry => move |event: events::Change| {
                             let value: bool = event.checked().unwrap_throw();
-                            let mut translation = translation.lock_mut();
-                            translation.in_mock = value;
+                            let mut entry = entry.lock_mut();
+                            entry.in_mock = value;
                         }))
                     }))
                 }),
@@ -190,9 +190,9 @@ impl TranslationRow {
                                 html!("button", {
                                     .class("link-button")
                                     .text("Clone")
-                                    .event(clone!(state, translation => move |_event: events::Click| {
-                                        state.loader.load(clone!(state, translation => async move {
-                                            state.clone_translation(&translation.lock_ref()).await;
+                                    .event(clone!(state, entry => move |_event: events::Click| {
+                                        state.loader.load(clone!(state, entry => async move {
+                                            state.clone_entry(&entry.lock_ref()).await;
                                         }))
                                     }))
                                 }),
@@ -202,8 +202,8 @@ impl TranslationRow {
                                 html!("button", {
                                     .class("link-button")
                                     .text("Delete")
-                                    .event(clone!(state, translation => move |_event: events::Click| {
-                                        state.remove_translation(&translation.lock_ref().id);
+                                    .event(clone!(state, entry => move |_event: events::Click| {
+                                        state.remove_entry(&entry.lock_ref().id);
                                     }))
                                 }),
                             ])

@@ -1,7 +1,7 @@
 use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
 use super::temp_utils::log;
-use super::state::{Translation, TranslationStatus, Bundle};
+use super::state::{Entry, EntryStatus, Bundle};
 
 // make async
 pub fn get_bundles() -> Vec<String> {
@@ -15,7 +15,7 @@ pub fn get_bundles() -> Vec<String> {
 
 
 // make async
-pub fn get_translations(bundles: &Vec<&Bundle>) -> Vec<Translation> {
+pub fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
     println!("{:?}", bundles);
     let json = r#"
         [
@@ -73,25 +73,25 @@ pub fn get_translations(bundles: &Vec<&Bundle>) -> Vec<Translation> {
             }
         ]
     "#;
-    let vec: Vec<Translation> = serde_json::from_str(&json).unwrap();
+    let vec: Vec<Entry> = serde_json::from_str(&json).unwrap();
     vec
 }
 
-pub async fn clone_translation(translation: &Translation) -> Translation {
-    let mut translation = translation.clone();
-    translation.id = get_random_string(10);
-    log(&translation);
-    translation
+pub async fn clone_entry(entry: &Entry) -> Entry {
+    let mut entry = entry.clone();
+    entry.id = get_random_string(10);
+    log(&entry);
+    entry
 }
 
-pub async fn create_translation() -> Translation {
-    Translation {
+pub async fn create_entry() -> Entry {
+    Entry {
         id: get_random_string(10),
         english: String::new(),
         hebrew: String::new(),
         section: Some("sec2".to_string()),
         item_kind: Some("Subheading".to_string()),
-        status: TranslationStatus::Discuss,
+        status: EntryStatus::Discuss,
         zeplin_reference: Mutable::new(None),
         comments: String::new(),
         in_app: false,
@@ -100,7 +100,7 @@ pub async fn create_translation() -> Translation {
     }
 }
 
-pub async fn save_translation(translation:Translation) ->Translation {
-    log(&translation);
-    translation
+pub async fn save_entry(entry:Entry) ->Entry {
+    log(&entry);
+    entry
 }

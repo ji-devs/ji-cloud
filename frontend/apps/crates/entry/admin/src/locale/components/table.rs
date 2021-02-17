@@ -6,7 +6,7 @@ use std::rc::Rc;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use futures_signals::map_ref;
-use super::translation::TranslationRow;
+use super::entry_row::EntryRow;
 use dominator::{Dom, html, clone, events, with_node};
 use super::select_columns::SelectColumns;
 
@@ -262,12 +262,12 @@ impl TableComponent {
                     .children_signal_vec(state.sort
                         .signal_cloned()
                         .switch(clone!(state => move |sort| {
-                            state.translations
+                            state.entries
                                 .signal_vec_cloned()
-                                .to_signal_map(clone!(state => move |translations| {
-                                    let mut translations = translations.to_vec();
+                                .to_signal_map(clone!(state => move |entries| {
+                                    let mut entries = entries.to_vec();
 
-                                    translations.sort_by(|a, b| {
+                                    entries.sort_by(|a, b| {
                                         let a = a.lock_ref();
                                         let b = b.lock_ref();
                                         let mut ord = match sort.column {
@@ -285,32 +285,32 @@ impl TableComponent {
                                         ord
                                     });
 
-                                    translations
+                                    entries
                                 }))
                         }))
                         .to_signal_vec()
-                        .filter_signal_cloned(clone!(state => move |translation| {
+                        .filter_signal_cloned(clone!(state => move |entry| {
                             map_ref! {
-                                let in_section = state.section_options.signal_cloned().map(clone!(translation => move |section_options| {
-                                    let section = translation.lock_ref().section.clone();
+                                let in_section = state.section_options.signal_cloned().map(clone!(entry => move |section_options| {
+                                    let section = entry.lock_ref().section.clone();
                                     let section = section.unwrap_or(String::new());
                                     *section_options.get(&section).unwrap()
                                 })),
-                                let in_item_kind = state.item_kind_options.signal_cloned().map(clone!(translation => move |item_kind_options| {
-                                    let item_kind = translation.lock_ref().item_kind.clone();
+                                let in_item_kind = state.item_kind_options.signal_cloned().map(clone!(entry => move |item_kind_options| {
+                                    let item_kind = entry.lock_ref().item_kind.clone();
                                     let item_kind = item_kind.unwrap_or(String::new());
                                     *item_kind_options.get(&item_kind).unwrap()
                                 })),
-                                let in_status = state.status_options.signal_cloned().map(clone!(translation => move |status_options| {
-                                    let status = translation.lock_ref().status.clone();
+                                let in_status = state.status_options.signal_cloned().map(clone!(entry => move |status_options| {
+                                    let status = entry.lock_ref().status.clone();
                                     *status_options.get(&status).unwrap()
                                 })) =>
                                 *in_section && *in_item_kind && *in_status
                             }
                             
                         }))
-                        .map(clone!(state => move |translation| {
-                            TranslationRow::render(translation.clone(), state.clone())
+                        .map(clone!(state => move |entry| {
+                            EntryRow::render(entry.clone(), state.clone())
                         })))
                 }),
 
