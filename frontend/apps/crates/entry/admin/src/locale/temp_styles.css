@@ -89,7 +89,8 @@ main {
     /* resize: vertical; */
     height: 100%;
     padding: 0 10px;
-    width: 100px;
+    min-width: 100px;
+    width: calc(100% - 20px);
 }
 
 .ftl-table .ftl-cell textarea {
@@ -114,6 +115,7 @@ main {
     border: 0;
     padding: 3px 3px;
     cursor: pointer;
+    line-height: 1.8em;
 }
 .link-button:hover {
     text-decoration: underline;
