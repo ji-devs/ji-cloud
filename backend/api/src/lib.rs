@@ -43,5 +43,5 @@ pub mod jwk;
 pub mod logger;
 pub(crate) mod more_futures;
 pub mod s3;
-mod token;
 mod service;
+mod token;
