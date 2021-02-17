@@ -16,7 +16,7 @@ use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum UserScope {
-    /// The user has access to everything(?)
+    /// The user has access to everything, implies all other scopes.
     Admin = 1,
 
     /// The user can create/delete/modify categories

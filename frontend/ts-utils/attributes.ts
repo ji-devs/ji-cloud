@@ -7,7 +7,8 @@ export const deleteNone = (args:any):any => {
 
 export const argsToAttrs = (args:any):string => {
     return (Object as any)
-        .entries(args)
+    .entries(args)
+        .filter(([key, value]) => value != null)
         .map(argToAttr)
         .filter(x => x != null)
         .join(' ')

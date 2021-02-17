@@ -98,7 +98,7 @@ impl ContentDom {
         
 
         let visible_signal = Mutable::new(false);
-        html!("ellipses-menu-line", {
+        html!("menu-ellipses", {
             .property("slot", "content")
             .children(ContentLineDom::render(content_state.clone()))
             .child(MenuDom::render(content_state.clone()))

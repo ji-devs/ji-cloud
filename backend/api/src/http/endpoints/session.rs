@@ -4,13 +4,14 @@ use actix_web::{
     HttpRequest, HttpResponse,
 };
 use chrono::Duration;
+use config::RemoteTarget;
 use core::settings::{GoogleOAuth, RuntimeSettings};
 use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
     api::{endpoints::session, ApiEndpoint},
     domain::session::{
         CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlKind, GetOAuthUrlResponse, GetOAuthUrlServiceKind,
+        GetOAuthUrlResponse, GetOAuthUrlServiceKind, OAuthUrlKind,
     },
 };
 use sqlx::PgPool;
@@ -28,7 +29,7 @@ use crate::{
 async fn get_oauth_url(
     req: HttpRequest,
     config: Data<RuntimeSettings>,
-    Path((service_kind, url_kind)): Path<(GetOAuthUrlServiceKind, GetOAuthUrlKind)>,
+    Path((service_kind, url_kind)): Path<(GetOAuthUrlServiceKind, OAuthUrlKind)>,
 ) -> Result<Json<GetOAuthUrlResponse>, error::Service> {
     match service_kind {
         GetOAuthUrlServiceKind::Google => {}
@@ -88,13 +89,16 @@ async fn create_oauth_session(
     settings: Data<RuntimeSettings>,
     req: Json<CreateSessionOAuthRequest>,
     jwks: Data<jwk::JwkVerifier>,
-) -> Result<HttpResponse, error::Service> {
+) -> Result<HttpResponse, error::OAuth> {
     let (response, cookie) = match req.into_inner() {
-        CreateSessionOAuthRequest::Google { code } => {
+        CreateSessionOAuthRequest::Google {
+            code,
+            redirect_kind,
+        } => {
             let config = settings
                 .google_oauth
                 .as_ref()
-                .ok_or(error::Service::DisabledService(ServiceKind::GoogleOAuth))?;
+                .ok_or(error::GoogleOAuth::Disabled)?;
 
             handle_google_oauth(
                 &db,
@@ -104,6 +108,8 @@ async fn create_oauth_session(
                 &jwks,
                 &code,
                 settings.login_token_valid_duration,
+                settings.remote_target(),
+                redirect_kind,
             )
             .await?
         }
@@ -114,7 +120,7 @@ async fn create_oauth_session(
     Ok(HttpResponse::Created().cookie(cookie).json(response))
 }
 
-// todo: what happens if the user has a basic auth
+// todo: what happens if the user has a basic auth?
 async fn handle_google_oauth(
     db: &PgPool,
     config: &GoogleOAuth,
@@ -123,8 +129,13 @@ async fn handle_google_oauth(
     jwks: &jwk::JwkVerifier,
     code: &str,
     login_token_valid_duration: Option<Duration>,
-) -> Result<(CreateSessionOAuthResponse, Cookie<'static>), error::Service> {
-    let tokens = google::convert_oauth_code(config, code).await?;
+    remote_target: RemoteTarget,
+    redirect_kind: OAuthUrlKind,
+) -> Result<(CreateSessionOAuthResponse, Cookie<'static>), error::OAuth> {
+    let redirect_url = google::oauth_url(remote_target, redirect_kind);
+
+    let tokens = google::convert_oauth_code(config, code, &redirect_url).await?;
+
     let claims = jwks.verify_oauth(&tokens.id_token, 3).await?;
 
     let google_auth = sqlx::query!(

@@ -146,14 +146,6 @@ returning id
     .map_err(|err| match err {
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()
-                == Some("user_firebase_id_key") =>
-        {
-            error::Register
-            ::RegisterError(RegisterErrorKind::TakenId)
-        }
-
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
             error::Register::RegisterError(RegisterErrorKind::TakenUsername)

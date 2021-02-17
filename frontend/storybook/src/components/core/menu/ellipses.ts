@@ -1,5 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/core/menu/ellipses/ellipses-menu-line";
+import "@elements/core/menu/ellipses";
 
 export default {
     title: "Core / Menu"
@@ -15,14 +15,14 @@ const DEFAULT_ARGS:Args = {
     visible: true
 }
 
-export const EllipsesMenuLine = (props?:Args) => {
+export const Ellipses = (props?:Args) => {
 
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    return `<ellipses-menu-line ${argsToAttrs(props)}>
-        <div slot="content">Line Here</div>
+    return `<menu-ellipses ${argsToAttrs(props)}>
+        <div slot="content">Menu Line Here</div>
         <div slot="menu-content">Menu Here</div>
-    </ellipses-menu-line>`;
+    </menu-ellipses>`;
 }
 
-EllipsesMenuLine.args = DEFAULT_ARGS;
+Ellipses.args = DEFAULT_ARGS;

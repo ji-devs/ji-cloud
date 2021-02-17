@@ -5,6 +5,9 @@ use shared::error::{auth::RegisterErrorKind, ApiError, EmptyError, MetadataNotFo
 
 use crate::db::meta::MetaWrapperError;
 
+mod oauth;
+pub use oauth::{GoogleOAuth, OAuth};
+
 /// Represents an error returned by the api.
 // mostly used in this module
 #[allow(clippy::clippy::module_name_repetitions)]
@@ -13,10 +16,8 @@ pub type BasicError = ApiError<EmptyError>;
 pub fn ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = HttpResponse::InternalServerError();
     resp.extensions_mut().insert(e);
-    resp.json(BasicError::new(
-        actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-    ))
-    .into()
+    resp.json(BasicError::new(http::StatusCode::INTERNAL_SERVER_ERROR))
+        .into()
 }
 
 #[non_exhaustive]
@@ -36,7 +37,7 @@ impl Into<actix_web::Error> for Delete {
     fn into(self) -> actix_web::Error {
         match self {
             Self::Conflict => BasicError::new(http::StatusCode::CONFLICT).into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -52,7 +53,7 @@ impl<T: Into<anyhow::Error>> From<T> for Server {
 
 impl Into<actix_web::Error> for Server {
     fn into(self) -> actix_web::Error {
-        crate::error::ise(self.0)
+        ise(self.0)
     }
 }
 
@@ -101,7 +102,7 @@ impl<T: Into<anyhow::Error>> From<T> for Service {
 impl Into<actix_web::Error> for Service {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
             Self::DisabledService(s) => s.into(),
         }
     }
@@ -134,7 +135,7 @@ impl<T: Into<anyhow::Error>> From<T> for Refresh {
 impl Into<actix_web::Error> for Refresh {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
             Self::DisabledService(s) => s.into(),
             Self::PreconditionFailed => {
                 BasicError::new(http::StatusCode::PRECONDITION_FAILED).into()
@@ -173,7 +174,7 @@ impl Into<actix_web::Error> for UserNotFound {
                 BasicError::with_message(http::StatusCode::NOT_FOUND, "User Not Found".to_owned())
                     .into()
             }
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -205,7 +206,7 @@ impl Into<actix_web::Error> for NotFound {
                 "Resource Not Found".to_owned(),
             )
             .into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -261,7 +262,7 @@ impl Into<actix_web::Error> for CategoryUpdate {
             )
             .into(),
 
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -310,7 +311,7 @@ impl Into<actix_web::Error> for Upload {
                 "Invalid Content".to_owned(),
             )
             .into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -343,7 +344,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
                 extra: data,
             }
             .into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -385,7 +386,7 @@ impl Into<actix_web::Error> for UpdateWithMetadata {
                 "Resource Not Found".to_owned(),
             )
             .into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -439,7 +440,6 @@ impl Into<actix_web::Error> for Register {
                 let message = match kind {
                     RegisterErrorKind::EmptyDisplayName => "No username was provided",
                     RegisterErrorKind::TakenEmail => "Email already taken",
-                    RegisterErrorKind::TakenId => "Firebase ID already associated with a user",
                     RegisterErrorKind::TakenUsername => "Username already taken",
                     _ => "Unprocessable Entity",
                 };
@@ -451,7 +451,7 @@ impl Into<actix_web::Error> for Register {
                 }
             }
             .into(),
-            Self::InternalServerError(e) => crate::error::ise(e),
+            Self::InternalServerError(e) => ise(e),
         }
     }
 }
