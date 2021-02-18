@@ -19,14 +19,26 @@ pub struct ModuleId(pub Uuid);
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ModuleKind {
-    /// The module represents a Poster.
-    Poster = 0,
+    /// This is a sortof special module, every jig has one and it can't be deleted 
+    Cover = 0,
 
-    /// The module represents a Memory Game.
-    MemoryGame = 1,
+    /// Flashcards
+    Flashcards = 1,
+    /// Matching 
+    Matching = 2,
+    /// Memory Game 
+    Memory = 3,
+    /// Poster 
+    Poster = 4,
+    /// Tapping Board 
+    TappingBoard= 5,
+    /// Tracing 
+    Tracing = 6,
+    /// Video 
+    Video = 7,
+    /// Visual Quiz 
+    VisualQuiz = 8,
 
-    /// The module represents the first / last page of a jig.
-    DesignPage = 2,
 }
 
 impl ModuleKind {
@@ -34,9 +46,15 @@ impl ModuleKind {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::Cover => "cover",
+            Self::Flashcards => "flashcards",
+            Self::Matching => "matching",
+            Self::Memory => "memory",
             Self::Poster => "poster",
-            Self::MemoryGame => "memory",
-            Self::DesignPage => "design-page",
+            Self::TappingBoard => "tapping-board",
+            Self::Tracing => "tracing",
+            Self::Video => "video",
+            Self::VisualQuiz => "visual-quiz",
         }
     }
 }
@@ -45,9 +63,15 @@ impl FromStr for ModuleKind {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let res = match s {
+            "cover" => Self::Cover,
+            "flashcards" => Self::Flashcards,
+            "matching" => Self::Matching,
+            "memory" => Self::Memory,
             "poster" => Self::Poster,
-            "memory" => Self::MemoryGame,
-            "design-page" => Self::DesignPage,
+            "tapping-board" => Self::TappingBoard,
+            "tracing" => Self::Tracing,
+            "video" => Self::Video,
+            "visual-quiz" => Self::VisualQuiz,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };
 
@@ -56,7 +80,7 @@ impl FromStr for ModuleKind {
 }
 
 /// Minimal information about a module.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct LiteModule {
     /// The module's ID.

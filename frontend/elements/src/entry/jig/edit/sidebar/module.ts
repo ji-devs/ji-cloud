@@ -26,6 +26,7 @@ export class _ extends LitElement {
               grid-template-areas:
                 "left middle right";
             }
+
             .left {
                 padding-left: 16px;
                 grid-area: left;
@@ -87,6 +88,18 @@ export class _ extends LitElement {
                 position: relative;
                 top: 0;
                 left: 0;
+            }
+
+            .add-container {
+                position: relative;
+                top: 0px; 
+                left: 0px; 
+                z-index: 1;
+            }
+            .add {
+                position: absolute;
+                top: -15px; 
+                left: calc(416px - (30px + 17px)); 
             }
             .arm-left, .arm-right, .neck, .head, .torso-columns, .torso-gears, .torso-spring, .feet-spring, .feet-rollers {
                 position: absolute;
@@ -174,29 +187,40 @@ export class _ extends LitElement {
                         </div>
                   </div>
                   <div class="right">
-                        <slot name="menu"></slot>
+                      <slot name="menu"></slot>
                   </div>
-            </section>
+          </section>
+          <div class="add-container">
+              <div class="add">
+                  <slot name="add"></slot>
+              </div>
+          </div>
       `;
   }
 }
 
 function renderDecoration(module: ModuleKind | "", index: number, lastBottomDecoration: boolean) {
     const getImage = (path:string, classes:string) => html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
-
+    
+    const renderBottomDecoration = () => {
+        return html`
+            ${getImage("feet-spring.svg", "feet-spring")}
+            ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
+        `
+    }
     if(module === "cover") {
         return html`
             ${getImage("arm-left.svg", "arm-left")}
             ${getImage("arm-right.svg", "arm-right")}
             ${getImage("neck-spring.svg", "neck")}
             ${getImage("yellow/face.png", "head")}
-            ${getImage("torso-columns.svg", "torso-columns")}
+            ${lastBottomDecoration 
+                ? renderBottomDecoration() 
+                : getImage("torso-columns.svg", "torso-columns")
+            }
         `
     } else if(lastBottomDecoration) {
-        return html`
-            ${getImage("feet-spring.svg", "feet-spring")}
-            ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
-        `
+        return renderBottomDecoration();
     } else {
         switch(index % 3) {
             case 0: return getImage("torso-columns.svg", "torso-columns");
