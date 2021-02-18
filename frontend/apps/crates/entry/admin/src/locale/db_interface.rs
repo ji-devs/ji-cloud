@@ -1,6 +1,5 @@
 use futures_signals::signal::Mutable;
 use super::temp_utils::get_random_string;
-use super::temp_utils::log;
 use super::state::{Entry, EntryStatus, Bundle};
 use wasm_bindgen::prelude::*;
 use js_sys::Promise;
@@ -21,7 +20,7 @@ async fn resolve_after(time: u32) {
 
 pub async fn get_bundles() -> Vec<String> {
 
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     vec![
         "JIG".to_string(),
@@ -34,7 +33,7 @@ pub async fn get_bundles() -> Vec<String> {
 
 pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 
-    resolve_after(100).await;
+    resolve_after(500).await;
     println!("{:?}", bundles);
 
     let json = r#"
@@ -98,16 +97,16 @@ pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 }
 
 pub async fn clone_entry(entry: &Entry) -> Entry {
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     let mut entry = entry.clone();
     entry.id = get_random_string(10);
-    log(&entry);
+    log::info!("{:?}", entry);
     entry
 }
 
 pub async fn create_entry() -> Entry {
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     Entry {
         id: get_random_string(10),
@@ -124,9 +123,10 @@ pub async fn create_entry() -> Entry {
     }
 }
 
-pub async fn save_entry(entry:Entry) ->Entry {
-    resolve_after(100).await;
+pub async fn save_entry(entry: &Entry) -> Entry {
+    resolve_after(500).await;
 
-    log(&entry);
+    let entry = entry.clone();
+    log::info!("{:?}", entry);
     entry
 }

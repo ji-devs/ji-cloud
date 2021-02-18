@@ -17,12 +17,13 @@ use std::cmp::Ord;
 
 
 pub struct State {
-    pub bundles: HashMap<String, bool>,
+    pub bundles: HashMap<Bundle, bool>,
     pub entries: MutableVec<Rc<Mutable<Entry>>>,
     pub visible_columns: MutableVec<String>,
     pub hidden_columns: MutableVec<String>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
+    pub saving_loader: Rc<AsyncLoader>,
 
     pub section_options: Mutable<BTreeMap<Section, bool>>,
     pub item_kind_options: Mutable<BTreeMap<ItemKind, bool>>,
@@ -39,7 +40,6 @@ impl State {
             .map(|bundle| (bundle.clone(), true))
             .collect();
 
-        // this should probably react to a signal update
         let visible_bundles: Vec<&Bundle> = bundles
             .iter()
             .filter(|bundle| *bundle.1)
@@ -55,7 +55,7 @@ impl State {
         let entries = MutableVec::new_with_values(entries);
 
 
-        let visible_columns = vec![
+        let visible_columns = MutableVec::new_with_values(vec![
             "ID".to_string(),
             "Section".to_string(),
             "Item Kind".to_string(),
@@ -63,14 +63,12 @@ impl State {
             "Status".to_string(),
             "Zeplin reference".to_string(),
             "Comments".to_string(),
-        ];
-        let hidden_columns = vec![
+        ]);
+        let hidden_columns = MutableVec::new_with_values(vec![
             "App".to_string(),
             "Element".to_string(),
             "Mock".to_string(),
-        ];
-        let visible_columns = MutableVec::new_with_values(visible_columns);
-        let hidden_columns = MutableVec::new_with_values(hidden_columns);
+        ]);
         Self {
             bundles,
             entries,
@@ -78,6 +76,7 @@ impl State {
             hidden_columns,
             dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
+            saving_loader: Rc::new(AsyncLoader::new()),
 
             section_options: Mutable::new(section_options),
             item_kind_options: Mutable::new(item_kind_options),
@@ -93,7 +92,7 @@ impl State {
     pub async fn add_entry(&self) {
         let entry = db_interface::create_entry().await;
         let mut vec = self.entries.lock_mut();
-        super::temp_utils::log(&entry);
+        log::info!("{:?}", entry);
         vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
@@ -101,6 +100,10 @@ impl State {
         let entry = db_interface::clone_entry(&entry).await;
         let mut vec = self.entries.lock_mut();
         vec.push_cloned(Rc::new(Mutable::new(entry)));
+    }
+
+    pub async fn save_entry(&self, entry: &Entry) {
+        let _entry: Entry = db_interface::save_entry(&entry).await;
     }
 
     pub fn remove_entry(&self, id: &str) {
@@ -132,7 +135,22 @@ impl State {
         }
     }
 
-    // Both of the regenerate function should be chagned after the db_interface is made async, current state is pretty bad
+    pub async fn selected_bundles_change(&self, options: &HtmlOptionsCollection) {
+        let mut visible_bundles = Vec::new();
+        for i in 0..options.length() {
+            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            if option.selected() {
+                visible_bundles.push(option.value());
+            }
+        };
+        let entries: Vec<Rc<Mutable<Entry>>> = db_interface::get_entries(&visible_bundles.iter().map(|s| s).collect())
+            .await
+            .into_iter()
+            .map(|e| Rc::new(Mutable::new(e)))
+            .collect();
+        self.entries.lock_mut().replace_cloned(entries);
+    }
+
     pub fn regenerate_section_options(&self) {
         let entries: Vec<Entry> = self.entries.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
         let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap());
@@ -197,7 +215,7 @@ pub enum SortKind {
     Comments,
 }
 
-#[derive(Clone, PartialEq, Serialize)]
+#[derive(Clone, PartialEq)]
 pub enum SortOrder {
     Asc,
     Desc
