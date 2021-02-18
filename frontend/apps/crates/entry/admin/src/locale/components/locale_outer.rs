@@ -16,6 +16,10 @@ impl LocaleOuterDom {
             .child(
                 html!("main", {
                     .children(&mut [
+                        html!("div", {
+                            .class("saving-indicator")
+                            .class_signal("visible", state.saving_loader.is_loading())
+                        }),
                         html!("select" => HtmlSelectElement, {
                             .attribute("multiple", "")
                             .with_node!(elem => {

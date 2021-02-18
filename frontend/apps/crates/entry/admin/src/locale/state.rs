@@ -23,6 +23,7 @@ pub struct State {
     pub hidden_columns: MutableVec<String>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
+    pub saving_loader: Rc<AsyncLoader>,
 
     pub section_options: Mutable<BTreeMap<Section, bool>>,
     pub item_kind_options: Mutable<BTreeMap<ItemKind, bool>>,
@@ -78,6 +79,7 @@ impl State {
             hidden_columns,
             dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
+            saving_loader: Rc::new(AsyncLoader::new()),
 
             section_options: Mutable::new(section_options),
             item_kind_options: Mutable::new(item_kind_options),
@@ -101,6 +103,10 @@ impl State {
         let entry = db_interface::clone_entry(&entry).await;
         let mut vec = self.entries.lock_mut();
         vec.push_cloned(Rc::new(Mutable::new(entry)));
+    }
+
+    pub async fn save_entry(&self, entry: &Entry) {
+        let _entry: Entry = db_interface::save_entry(&entry).await;
     }
 
     pub fn remove_entry(&self, id: &str) {

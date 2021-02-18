@@ -123,9 +123,10 @@ pub async fn create_entry() -> Entry {
     }
 }
 
-pub async fn save_entry(entry:Entry) ->Entry {
+pub async fn save_entry(entry: &Entry) -> Entry {
     resolve_after(500).await;
 
+    let entry = entry.clone();
     log::info!("{:?}", entry);
     entry
 }

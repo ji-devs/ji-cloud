@@ -6,6 +6,23 @@ main {
     padding: 50px;
 }
 
+.saving-indicator {
+    color: white;
+    background-color: #000000cc;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 20px;
+    grid-column: 4;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+}
+
+.saving-indicator.visible::after {
+    padding: 10px;
+    content: 'Saving...';
+}
+
 .icon-button {
     height: 33px;
     display: flex;

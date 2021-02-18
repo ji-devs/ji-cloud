@@ -211,6 +211,12 @@ impl EntryRow {
                     )
                 }),
             ])
+            .event(clone!(state, entry => move |_event: events::Input| {
+                state.saving_loader.load(clone!(state, entry => async move {
+                    let entry = &entry.lock_ref().clone();
+                    state.save_entry(entry).await;
+                }))
+            }))
         })
     }
 }
