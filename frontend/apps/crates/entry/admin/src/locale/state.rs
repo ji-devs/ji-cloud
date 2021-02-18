@@ -40,7 +40,6 @@ impl State {
             .map(|bundle| (bundle.clone(), true))
             .collect();
 
-        // this should probably react to a signal update
         let visible_bundles: Vec<&Bundle> = bundles
             .iter()
             .filter(|bundle| *bundle.1)
@@ -56,7 +55,7 @@ impl State {
         let entries = MutableVec::new_with_values(entries);
 
 
-        let visible_columns = vec![
+        let visible_columns = MutableVec::new_with_values(vec![
             "ID".to_string(),
             "Section".to_string(),
             "Item Kind".to_string(),
@@ -64,14 +63,12 @@ impl State {
             "Status".to_string(),
             "Zeplin reference".to_string(),
             "Comments".to_string(),
-        ];
-        let hidden_columns = vec![
+        ]);
+        let hidden_columns = MutableVec::new_with_values(vec![
             "App".to_string(),
             "Element".to_string(),
             "Mock".to_string(),
-        ];
-        let visible_columns = MutableVec::new_with_values(visible_columns);
-        let hidden_columns = MutableVec::new_with_values(hidden_columns);
+        ]);
         Self {
             bundles,
             entries,
@@ -154,7 +151,6 @@ impl State {
         self.entries.lock_mut().replace_cloned(entries);
     }
 
-    // Both of the regenerate function should be chagned after the db_interface is made async, current state is pretty bad
     pub fn regenerate_section_options(&self) {
         let entries: Vec<Entry> = self.entries.lock_ref().iter().map(|t| t.lock_ref().clone()).collect();
         let section_options = Self::generate_options(&entries, |t| t.section.clone().unwrap());
