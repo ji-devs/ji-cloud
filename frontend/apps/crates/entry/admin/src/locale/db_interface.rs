@@ -20,7 +20,7 @@ async fn resolve_after(time: u32) {
 
 pub async fn get_bundles() -> Vec<String> {
 
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     vec![
         "JIG".to_string(),
@@ -33,7 +33,7 @@ pub async fn get_bundles() -> Vec<String> {
 
 pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 
-    resolve_after(100).await;
+    resolve_after(500).await;
     println!("{:?}", bundles);
 
     let json = r#"
@@ -97,7 +97,7 @@ pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 }
 
 pub async fn clone_entry(entry: &Entry) -> Entry {
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     let mut entry = entry.clone();
     entry.id = get_random_string(10);
@@ -106,7 +106,7 @@ pub async fn clone_entry(entry: &Entry) -> Entry {
 }
 
 pub async fn create_entry() -> Entry {
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     Entry {
         id: get_random_string(10),
@@ -124,7 +124,7 @@ pub async fn create_entry() -> Entry {
 }
 
 pub async fn save_entry(entry:Entry) ->Entry {
-    resolve_after(100).await;
+    resolve_after(500).await;
 
     log::info!("{:?}", entry);
     entry

@@ -17,7 +17,7 @@ use std::cmp::Ord;
 
 
 pub struct State {
-    pub bundles: HashMap<String, bool>,
+    pub bundles: HashMap<Bundle, bool>,
     pub entries: MutableVec<Rc<Mutable<Entry>>>,
     pub visible_columns: MutableVec<String>,
     pub hidden_columns: MutableVec<String>,
@@ -130,6 +130,22 @@ impl State {
 
             map.insert(parsed, option.selected());
         }
+    }
+
+    pub async fn selected_bundles_change(&self, options: &HtmlOptionsCollection) {
+        let mut visible_bundles = Vec::new();
+        for i in 0..options.length() {
+            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            if option.selected() {
+                visible_bundles.push(option.value());
+            }
+        };
+        let entries: Vec<Rc<Mutable<Entry>>> = db_interface::get_entries(&visible_bundles.iter().map(|s| s).collect())
+            .await
+            .into_iter()
+            .map(|e| Rc::new(Mutable::new(e)))
+            .collect();
+        self.entries.lock_mut().replace_cloned(entries);
     }
 
     // Both of the regenerate function should be chagned after the db_interface is made async, current state is pretty bad
