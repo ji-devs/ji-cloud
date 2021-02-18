@@ -22,7 +22,8 @@ interface Args {
     menuOpen: boolean,
     showAdvancedMenu: boolean,
     makeDemoRoomAtTop: boolean,
-    lastBottomDecoration: boolean,
+    lastModule: boolean,
+    showAdd: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -34,7 +35,8 @@ const DEFAULT_ARGS:Args = {
     menuOpen: false,
     showAdvancedMenu: false,
     makeDemoRoomAtTop: true,
-    lastBottomDecoration: false,
+    lastModule: false,
+    showAdd: true,
 }
 
 type InternalExtra = {
@@ -44,7 +46,7 @@ type InternalExtra = {
 export const Module = (props?:Partial<Args> & InternalExtra) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     
-    const {state, slot, thumbnail, showAdvancedMenu, rawIndex, makeDemoRoomAtTop, menuOpen, ...rest} = props;
+    const {state, slot, showAdd, thumbnail, lastModule, showAdvancedMenu, rawIndex, makeDemoRoomAtTop, menuOpen, ...rest} = props;
     const moduleProps:any = rest;
     const windowProps = {
         state: moduleProps.module === "none" ? "empty" : state, 
@@ -59,9 +61,10 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
 
     return `
     <div style="${makeDemoRoomAtTop && `position: absolute; top: 200px;`}" ${slot && `slot="${slot}"`}>
-        <jig-edit-sidebar-module ${argsToAttrs(moduleProps)}>
+        <jig-edit-sidebar-module ${argsToAttrs(moduleProps)} ${lastModule && "lastBottomDecoration"}>
             <jig-edit-sidebar-module-window ${argsToAttrs(windowProps)} slot="window"></jig-edit-sidebar-module-window>
             ${renderMenu(menuOpen, showAdvancedMenu)} 
+            ${showAdd && `<button-icon icon="gears" slot="add"></button-icon>`}
             </jig-edit-sidebar-module>
         </div>`;
 }
@@ -69,16 +72,13 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
 function renderMenu(visible: boolean, showAdvanced:boolean) {
     return `
     <menu-kebab ${visible && "visible"} slot="menu">
-        <jig-edit-sidebar-module-menu slot="menu-content">
+        <jig-edit-sidebar-module-menu slot="menu-content" ${showAdvanced && "advanced"}>
         <menu-line slot="lines" icon="edit"></menu-line>
         <menu-line slot="lines" icon="move-up"></menu-line>
         <menu-line slot="lines" icon="move-down"></menu-line>
         <menu-line slot="lines" icon="duplicate"></menu-line>
         <menu-line slot="lines" icon="delete"></menu-line>
-        ${showAdvanced 
-            ? `<menu-line slot="advanced" icon="copy" customLabel="${STR_CUSTOM_COPY}"></menu-line>`
-            : ``
-        }
+        <menu-line slot="advanced" icon="copy" customLabel="${STR_CUSTOM_COPY}"></menu-line>
         </jig-edit-sidebar-module-menu>
     </menu-kebab>
     `;

@@ -1,12 +1,14 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
-    jig::ModuleKind,
-    image::ImageSearchQuery
+    jig::{JigId, ModuleId, ModuleKind},
+    image::ImageSearchQuery,
+
 };
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
+use uuid::Uuid;
 
 pub type Id = String;
 
@@ -56,8 +58,8 @@ pub enum LegacyRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
-    Edit(Id, Option<Id>),
-    Play(Id, Option<Id>) 
+    Edit(JigId, Option<ModuleId>),
+    Play(JigId, Option<ModuleId>) 
 }
 
 #[derive(Debug, Clone)]
@@ -167,10 +169,27 @@ impl Route {
                 }
             },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
-            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), None)),
-            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
-            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), None)),
-            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
+            ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_u128(0)),
+                    None
+            )),
+            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    None
+            )),
+            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+            )),
+            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    None
+            )),
+            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+            )),
+                    
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
@@ -179,14 +198,6 @@ impl Route {
 
             _ => Self::NotFound
         }
-    }
-}
-
-pub fn module_kind_to_label(kind:ModuleKind) -> &'static str {
-    match kind {
-        ModuleKind::Poster => "Poster",
-        ModuleKind::DesignPage => "Design",
-        ModuleKind::MemoryGame => "Memory Game",
     }
 }
 
@@ -257,16 +268,16 @@ impl From<&Route> for String {
                     JigRoute::Gallery => "/jig/gallery".to_string(),
                     JigRoute::Edit(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
-                            format!("/jig/edit/{}/{}", jig_id, module_id)
+                            format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
                         } else {
-                            format!("/jig/edit/{}", jig_id)
+                            format!("/jig/edit/{}", jig_id.0.to_string())
                         }
                     }
                     JigRoute::Play(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
-                            format!("/jig/play/{}/{}", jig_id, module_id)
+                            format!("/jig/play/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
                         } else {
-                            format!("/jig/play/{}", jig_id)
+                            format!("/jig/play/{}", jig_id.0.to_string())
                         }
                     }
                 }

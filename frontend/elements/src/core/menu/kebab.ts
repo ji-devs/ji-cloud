@@ -37,11 +37,19 @@ export class _ extends LitElement {
   @property({type:Boolean})
   visible:boolean = false;
 
+  @property({type:Number})
+  offsetVertical:number = 8; //specific to jig menu, but w/e
+
+  @property({type:Number})
+  offsetHorizontal:number = 50; //enough for a scrollbar
 
   onGlobalMouseDown = (evt: MouseEvent) => {
-    if(!evt.composedPath().includes(this.shadowRoot?.getElementById("menu-container") as any)) {
-      this.visible = false;
-    }
+      const path = evt.composedPath();
+      if(!path.includes(this.shadowRoot?.getElementById("menu-container") as any)
+         && !path.includes(this.shadowRoot?.getElementById("button") as any)
+        ) {
+              this.visible = false;
+          }
   }
 
   firstUpdated(_changed:any) {
@@ -70,16 +78,19 @@ export class _ extends LitElement {
   }
 
   getMenuContainerStyle() {
-      const {buttonRef, visible} = this;
+      const {buttonRef, visible, offsetVertical, offsetHorizontal} = this;
 
-      if(buttonRef == null) {
+      if(buttonRef == null || !visible) {
           return "display: none;";
       }
 
       const domRect = buttonRef.getBoundingClientRect(); 
 
-      const {top, right} = domRect;
-      return `top: ${top + 8}px; left: ${right + 40}px`;
+      //using the `right` measurement breaks in storybook for some reason
+      //maybe it's a race condition to measuring after paint
+      //but anyway, we know the exact size of the button
+      const {top, left} = domRect;
+      return `top: ${top + offsetVertical}px; left: ${left + offsetHorizontal}px`;
   }
 
   render() {
@@ -94,12 +105,12 @@ export class _ extends LitElement {
 
       return html`
         <section>
-            <button-icon id="button" icon="${menuButtonIcon}" @click=${() => this.visible = !this.visible}></button-icon>
-              <div id="menu-container" class="${menuContainerClasses}" style="${this.getMenuContainerStyle()}">
-                <div class="menu">
-                  <slot name="menu-content"></slot>
-                </div>
-              </div>
+        <button-icon id="button" icon="${menuButtonIcon}" @click=${() => this.visible = !this.visible}></button-icon>
+          <div id="menu-container" class="${menuContainerClasses}" style="${this.getMenuContainerStyle()}">
+            <div class="menu">
+              <slot name="menu-content"></slot>
+            </div>
+          </div>
         </section>
       `
         

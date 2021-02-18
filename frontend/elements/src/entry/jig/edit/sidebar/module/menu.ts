@@ -32,27 +32,54 @@ export class _ extends LitElement {
             justify-content: center;
         }
 
+        .hidden {
+            display: none;
+        }
+
+
             `,
     ];
   }
 
+  @property({type: Boolean})
+  advanced:boolean = false;
+
+  @property({type: Boolean})
+  hideAdvancedSection:boolean = false;
 
   render() {
+      const {advanced, hideAdvancedSection} = this;
+
+      const advancedClasses = classMap({
+          advanced: true,
+          hidden: !advanced
+      });
+      const advancedButtonClasses = classMap({
+          ["advanced-button"]: true,
+          hidden: advanced
+      });
+      const advancedSectionClasses = classMap({
+          hidden: hideAdvancedSection
+      });
+
       return html`
           <section>
               <div class="lines">
                   <slot name="lines"></slot>
               </div>
-              <div class="separator"></div>
-              <div class="advanced">
-                  <slot name="advanced">
-                    <div class="advanced-button">
-                        <button-text color="blue">${STR_ADVANCED}</button-text>
-                    </div>
-                  </slot>
-              </div>
+              <div class="${advancedSectionClasses}">
+                  <div class="separator"></div>
+
+                  <div @click=${() => this.advanced = true} class="${advancedButtonClasses}">
+                      <button-text color="blue">${STR_ADVANCED}</button-text>
+                  </div>
+                  <div class="${advancedClasses}">
+                      <slot name="advanced">
+                      </slot>
+                  </div>
+            </div>
 
           </section>
-    `;
+      `;
   }
 }

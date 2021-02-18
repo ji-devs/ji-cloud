@@ -37,7 +37,7 @@ export class _ extends LitElement {
         .icon {
           position: absolute;
           right: 5px;
-          top: 2px;
+          top: 5px;
         }
 
         .icon.editing {

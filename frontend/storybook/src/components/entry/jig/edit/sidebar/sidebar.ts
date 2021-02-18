@@ -9,17 +9,19 @@ export default {
 }
 
 interface Args {
-    nModules: number
+    nModules: number,
+    menuIndex: number
 }
 
 const DEFAULT_ARGS:Args = {
-    nModules: 10
+    nModules: 10,
+    menuIndex: 1
 }
 
 export const WithModules = (props?:Partial<Args> & {slot?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     
-    const {slot, nModules} = props;
+    const {slot, menuIndex, nModules} = props;
 
     return `
         <jig-edit-sidebar ${slot && `slot="${slot}"`}>
@@ -28,11 +30,13 @@ export const WithModules = (props?:Partial<Args> & {slot?: string}) => {
             return Module({
                 module: index === 0 ? "cover" : "memory",
                 rawIndex: index,
-                menuOpen: false,
+                menuOpen: index === menuIndex,
                 slot: index === 0 ? "cover-module" : "modules",
                 selected: index === 1,
                 makeDemoRoomAtTop: false,
-                lastBottomDecoration: index === nModules-1
+                lastModule: index === nModules-1,
+                showAdd: index !== nModules-1,
+
             });
         })}
         </jig-edit-sidebar>
