@@ -641,15 +641,12 @@ dependencies = [
  "base64 0.13.0",
  "chrono",
  "config",
- "futures-util",
  "hex",
  "listenfd",
  "log",
- "percent-encoding",
  "reqwest",
  "sentry",
  "serde",
- "serde_json",
  "yup-oauth2",
 ]
 

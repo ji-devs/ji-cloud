@@ -31,6 +31,36 @@ pub mod s3 {
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
 }
 
+
+pub mod email {
+    /// Disable email client locally (avoiding the warnings for missing secrets)
+    /// If specified in a way that maps to `true` (currently "true", "1", "y"), all mailing related services,
+    /// such as email verification, password resetting, and email changing(1) will be disabled.
+    /// all related routes will return "501 - Not Implemented"
+    /// (1): currently not implemented.
+    pub const DISABLE: &str = "SENDGRID_DISABLE_LOCAL";
+
+    /// Sendgrid / email client api key.
+    // Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const API_KEY: &str = "SENDGRID_API_KEY";
+
+    /// Email client sender email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const SENDER_EMAIL: &str = "EMAIL_SENDER_ADDRESS";
+
+    /// Email client template ID for verifying emails at signup.
+    /// Is optional. If missing, email verification (at signup) will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const SIGNUP_VERIFY_TEMPLATE: &str = "EMAIL_SIGNUP_VERIFY_TEMPLATE";
+
+    /// Email client template ID for resetting passwords.
+    /// Is optional. If missing, password resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const PASSWORD_RESET_TEMPLATE: &str = "EMAIL_PASSWORD_RESET_TEMPLATE";
+}
+
 #[cfg(feature = "db")]
 pub mod db {
     pub const DATABASE_URL: &str = "DATABASE_URL";

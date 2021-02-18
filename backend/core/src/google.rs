@@ -1,6 +1,5 @@
 use crate::env::req_env;
 use anyhow::{anyhow, Context};
-use futures_util::future::TryFutureExt;
 use reqwest::StatusCode;
 use serde::Deserialize;
 use yup_oauth2::{AccessToken, ServiceAccountAuthenticator, ServiceAccountKey};
@@ -45,7 +44,10 @@ pub async fn get_access_token_and_project_id(
         }
 
         Err(_) => {
-            let token = get_google_token_from_metaserver().await?;
+            let token = get_google_token_from_metaserver().await.with_context(|| {
+                anyhow::anyhow!("couldn't get google access token from metaserver",)
+            })?;
+
             let project_id = req_env("PROJECT_ID")?;
 
             Ok((token, project_id))
@@ -65,14 +67,9 @@ pub(crate) async fn get_google_token_from_metaserver() -> anyhow::Result<String>
         .get(url)
         .header("Metadata-Flavor", "Google")
         .send()
-        .and_then(|res| res.json())
-        .await
-        .map_err(|err| {
-            anyhow::anyhow!(
-                "couldn't get google access token from metaserver: {:?}",
-                err
-            )
-        })?;
+        .await?
+        .json()
+        .await?;
 
     Ok(token_response.access_token)
 }

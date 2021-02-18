@@ -176,6 +176,30 @@ pub struct AlgoliaSettings {
     pub frontend_search_key: Option<String>,
 }
 
+/// Settings for the email (sendgrid) client.
+#[derive(Clone, Debug)]
+pub struct EmailClientSettings {
+    /// Sendgrid / email client api key.
+    // Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub api_key: String,
+
+    /// Email client sender email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub sender_email: String,
+
+    /// Email client template ID for verifying emails at signup.
+    /// Is optional. If missing, email verification (at signup) will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub signup_verify_template: Option<String>,
+
+    /// Email client template ID for resetting passwords.
+    /// Is optional. If missing, password resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub password_reset_template: Option<String>,
+}
+
 /// Manages access to settings.
 pub struct SettingsManager {
     token: Option<String>,
@@ -384,6 +408,39 @@ impl SettingsManager {
             management_key,
             media_index,
             frontend_search_key,
+        }))
+    }
+
+    /// Load the Email Client settings.
+    pub async fn email_client_settings(&self) -> anyhow::Result<Option<EmailClientSettings>> {
+        let disable_local = crate::env::env_bool(keys::email::DISABLE);
+
+        if disable_local && self.remote_target == RemoteTarget::Local {
+            return Ok(None);
+        }
+
+        let api_key = self.get_varying_secret(keys::email::API_KEY).await?;
+
+        let sender_email = self.get_varying_secret(keys::email::SENDER_EMAIL).await?;
+
+        let signup_verify_template = self
+            .get_varying_secret(keys::email::SIGNUP_VERIFY_TEMPLATE)
+            .await?;
+
+        let password_reset_template = self
+            .get_varying_secret(keys::email::PASSWORD_RESET_TEMPLATE)
+            .await?;
+
+        let (api_key, sender_email) = match (api_key, sender_email) {
+            (Some(api_key), Some(sender_email)) => (api_key, sender_email),
+            _ => return Ok(None),
+        };
+
+        Ok(Some(EmailClientSettings {
+            api_key,
+            sender_email,
+            signup_verify_template,
+            password_reset_template,
         }))
     }
 
