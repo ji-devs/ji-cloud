@@ -273,24 +273,29 @@ select id,
     }
 }
 
-macro_rules! with_client {
-    ($client:expr; $ret:expr) => {{
-        let c: &Inner = match &$client {
-            Some(c) => c,
-            None => return Ok($ret),
-        };
-
-        c
-    }};
-
-    ($client:expr) => { with_client!($client; ()) };
+#[derive(Clone)]
+pub struct SearchKeyStore {
+    frontend_search_parent_key: ApiKey,
 }
 
-#[derive(Clone)]
-pub struct Client {
-    inner: Option<Inner>,
-    index: String,
-    frontend_search_parent_key: Option<ApiKey>,
+impl SearchKeyStore {
+    pub fn new(frontend_search_parent_key: String) -> anyhow::Result<Self> {
+        Ok(Self {
+            frontend_search_parent_key: ApiKey(frontend_search_parent_key),
+        })
+    }
+
+    pub fn generate_virtual_key(
+        &self,
+        user_id: Option<Uuid>,
+        ttl: Option<chrono::Duration>,
+    ) -> ApiKey {
+        self.frontend_search_parent_key
+            .generate_virtual_key(&VirtualKeyRestrictions {
+                user_token: user_id.map(|u| u.to_string()),
+                valid_until: ttl.map(|ttl| Utc::now() + ttl),
+            })
+    }
 }
 
 fn filters_for_ids<T: Into<Uuid> + Copy>(
@@ -320,42 +325,26 @@ fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter>
     }
 }
 
+#[derive(Clone)]
+pub struct Client {
+    inner: Inner,
+    index: String,
+}
+
 impl Client {
-    pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Self> {
+    pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Option<Self>> {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
-            let frontend_search_parent_key = settings.frontend_search_key.map(ApiKey);
 
             let (inner, index) = match (settings.backend_search_key, settings.media_index) {
-                (Some(key), Some(index)) => (Some(Inner::new(app_id, ApiKey(key))?), index),
-                _ => (None, String::new()),
+                (Some(key), Some(index)) => (Inner::new(app_id, ApiKey(key))?, index),
+                _ => return Ok(None),
             };
 
-            Ok(Self {
-                inner,
-                index,
-                frontend_search_parent_key,
-            })
+            Ok(Some(Self { inner, index }))
         } else {
-            Ok(Self {
-                inner: None,
-                index: String::new(),
-                frontend_search_parent_key: None,
-            })
+            Ok(None)
         }
-    }
-
-    pub fn generate_virtual_key(
-        &self,
-        user_id: Option<Uuid>,
-        ttl: Option<chrono::Duration>,
-    ) -> Option<ApiKey> {
-        self.frontend_search_parent_key.as_ref().map(|it| {
-            it.generate_virtual_key(&VirtualKeyRestrictions {
-                user_token: user_id.map(|u| u.to_string()),
-                valid_until: ttl.map(|ttl| Utc::now() + ttl),
-            })
-        })
     }
 
     // todo: return ImageId (can't because of repr issues in sqlx)
@@ -371,8 +360,6 @@ impl Client {
         categories: &[CategoryId],
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let compare_time = Utc::now().timestamp_nanos();
-
-        let client = with_client!(self.inner; None);
 
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
@@ -400,7 +387,8 @@ impl Client {
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
 
-        let results: SearchResponse = client
+        let results: SearchResponse = self
+            .inner
             .search(
                 &self.index,
                 SearchQuery {
@@ -436,7 +424,7 @@ impl Client {
     }
 
     pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
-        with_client!(self.inner)
+        self.inner
             .delete_object(&self.index, &id.to_string())
             .await?;
 

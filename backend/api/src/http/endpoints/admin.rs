@@ -30,6 +30,7 @@ use crate::{
     extractor::{ScopeAdmin, TokenUserWithScope},
     image_ops::regenerate_images,
     s3,
+    service::ServiceData,
     token::create_signin_token,
 };
 use crate::{image_ops::MediaKind, token::TokenSource};
@@ -68,7 +69,7 @@ async fn impersonate(
 #[api_v2_operation]
 async fn refresh_image_files(
     _auth: TokenUserWithScope<ScopeAdmin>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
     db: Data<PgPool>,
     Path((library, id)): Path<(MediaLibrary, Uuid)>,
     req: HttpRequest,

@@ -18,6 +18,7 @@ use crate::{
     db, error,
     extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
     s3,
+    service::ServiceData,
 };
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
@@ -35,7 +36,7 @@ async fn delete(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     req: Path<AnimationId>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
 ) -> Result<NoContent, error::Delete> {
     let animation = req.into_inner();
     let kind = db::animation::delete(&db, animation)
@@ -98,7 +99,7 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
     bytes: Bytes,

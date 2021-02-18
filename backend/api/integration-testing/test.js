@@ -127,13 +127,8 @@ test.beforeEach(async (t) => {
         LOCAL_PAGES_PORT: 0,
         LOCAL_NO_FIREBASE_AUTH: true,
         S3_LOCAL_DISABLE_CLIENT: true,
-        S3_ENDPOINT: '',
-        S3_BUCKET: '',
-        GOOGLE_S3_ACCESS_KEY: '',
-        GOOGLE_S3_ACCESS_SECRET: '',
         DISABLE_GOOGLE_CLOUD: true,
         PROJECT_ID: '',
-        ALGOLIA_LOCAL_DISABLE_CLIENT: true,
         RUST_LOG: 'warning,actix_server::builder=info',
     };
 
@@ -253,7 +248,6 @@ test.skip(registerDuplicateUserError, { /* jwt: TEST_JWT, */ key: '', value: '' 
 test.skip(registerDuplicateUserError, { /* jwt: REGISTER_ERR_JWT, */ key: 'username', value: 'test' });
 test.skip(registerDuplicateUserError, {/* jwt: REGISTER_ERR_JWT, */ key: 'email', value: 'test@test.test' });
 
-// todo: (nomerge) figure out the proper encoding here
 test('login user', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
@@ -528,7 +522,9 @@ test('GET image', async (t) => {
 
 test.todo('GET images');
 
-test('DELETE image', async (t) => {
+
+// skipped because no s3 (nor algolia)
+test.skip('DELETE image', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds, fixtures.image], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     await t.notThrowsAsync(got.delete('http://0.0.0.0/v1/image/3095d05e-f2c7-11ea-89c3-3b621dd74a1f', t.context.loggedInReqBase));
@@ -699,7 +695,8 @@ test(authFail, {
     },
 });
 
-test(authFail, {
+// skipped because no s3
+test.skip(authFail, {
     kind: 'image',
     route: 'v1/image/00000000-0000-0000-0000-000000000000',
     body: {
@@ -804,7 +801,8 @@ test(authFail, {
     },
 });
 
-test(authFail, {
+// skipped because no s3
+test.skip(authFail, {
     kind: 'animation',
     route: 'v1/animation/00000000-0000-0000-0000-000000000000',
     body: {

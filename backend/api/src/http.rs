@@ -1,7 +1,7 @@
 mod cors;
 mod endpoints;
 
-use crate::{error::BasicError, s3};
+use crate::{error::BasicError, s3, service::ServiceData};
 use actix_service::Service;
 use actix_web::HttpResponse;
 use actix_web::{
@@ -60,19 +60,35 @@ where
 pub async fn run(
     pool: PgPool,
     settings: RuntimeSettings,
-    s3: s3::Client,
-    algolia: crate::algolia::Client,
+    s3: Option<s3::Client>,
+    algolia: Option<crate::algolia::Client>,
+    algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
 
+    let s3 = s3.map(ServiceData::new);
+    let algolia = algolia.map(ServiceData::new);
+    let algolia_key_store = algolia_key_store.map(ServiceData::new);
+
     let server = actix_web::HttpServer::new(move || {
-        actix_web::App::new()
+        let server = actix_web::App::new()
             .data(pool.clone())
             .data(settings.clone())
-            .data(s3.clone())
-            .data(algolia.clone())
+            .data(s3.clone());
+
+        let server = match algolia.clone() {
+            Some(algolia) => server.app_data(algolia),
+            None => server,
+        };
+
+        let server = match algolia_key_store.clone() {
+            Some(algolia_key_store) => server.app_data(algolia_key_store),
+            None => server,
+        };
+
+        server
             .app_data(Data::from(jwk_verifier.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)

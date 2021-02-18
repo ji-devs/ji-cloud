@@ -142,7 +142,7 @@ pub struct IdentityClaims {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct FirebaseClaims {
+struct FirebaseClaims {
     pub sub: String,
     pub iat: u64,
     pub auth_time: u64,
