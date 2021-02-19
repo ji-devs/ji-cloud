@@ -8,6 +8,7 @@ import "@elements/entry/jig/edit/sidebar/module/window";
 import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/sidebar/module";
 import "@elements/entry/jig/edit/sidebar/sidebar";
+import "@elements/entry/jig/edit/sidebar/filler";
 import "@elements/entry/jig/_common/bg";
 import "@elements/core/buttons/icon";
 import "@elements/core/menu/kebab";

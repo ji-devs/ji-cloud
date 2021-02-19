@@ -12,10 +12,15 @@ use super::{
     {actions, debug},
     header::dom::HeaderDom,
     module::dom::ModuleDom,
+    dragging::{
+        dom::DraggingDom,
+        actions as drag_actions
+    },
     state::*,
 };
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
+use utils::events;
 
 pub struct SidebarDom {
 }
@@ -52,28 +57,51 @@ impl SidebarDom {
         let state = Rc::new(State::new(jig));
 
 
-        html!("jig-edit-sidebar", {
-            .child(HeaderDom::render(state.clone()))
-            .children_signal_vec(state.modules
-                .signal_vec_cloned()
-                .enumerate()
-                .map_signal(clone!(state => move |(index, module)| {
-                    map_ref! {
-                        let len = state.modules.signal_vec_cloned().len(),
-                        let index = index.signal()
-                            => move {
-                            (
-                                index.unwrap_or_default(),
-                                *len,
-                                module.clone()
-                            )
+        html!("empty-fragment", {
+            .child(html!("jig-edit-sidebar", {
+                .child(HeaderDom::render(state.clone()))
+                .children_signal_vec(state.modules
+                    .signal_vec_cloned()
+                    .enumerate()
+                    .map_signal(clone!(state => move |(index, module)| {
+                        map_ref! {
+                            let len = state.modules.signal_vec_cloned().len(),
+                            let index = index.signal(),
+                            let drag_target_index = state.drag_target_index_signal()
+                                => move {
+                                (
+                                    index.unwrap_or_default(),
+                                    *len,
+                                    *drag_target_index, 
+                                    module.clone()
+                                )
+                            }
                         }
-                    }
+                    }))
+                    .map(clone!(state => move |(index, len, drag_target_index, module)| {
+                        if Some(index) == drag_target_index {
+                            html!("jig-edit-sidebar-filler", {
+                                .property("slot", {
+                                    if index == 0 {
+                                        "cover-module"
+                                    } else {
+                                        "modules"
+                                    }
+                                })
+                            })
+                        } else {
+                            ModuleDom::render(state.clone(), index, len, module)
+                        }
+                    }))
+                )
+                .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
+                    drag_actions::mouse_up(state.clone(), evt.x(), evt.y());
                 }))
-                .map(clone!(state => move |(index, len, module)| { 
-                    ModuleDom::render(state.clone(), index, len, module)
+                .global_event_preventable(clone!(state => move |evt:events::MouseMove| {
+                    drag_actions::mouse_move(state.clone(), evt.x(), evt.y());
                 }))
-            )
+            }))
+            .child(DraggingDom::render(state.clone()))
         })
     }
 }

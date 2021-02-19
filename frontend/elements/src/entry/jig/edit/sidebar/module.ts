@@ -12,10 +12,28 @@ export class _ extends LitElement {
   static get styles() {
     return [
         css`
+            section.dragging {
+                transform: rotate(-5deg);
+            }
+
+            .dragging .menu, .dragging .decorations, .add-container.dragging {
+                display: none;
+            }
+
+            .drag-overlay, section {
+                  width: 416px;
+                  height: 168px;
+            }
+            .drag-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 1;
+                cursor: grabbing;
+            }
             section {
-              width: 416px;
-              height: 168px;
-                display: flex;
+              display: flex;
+              cursor: grab;
             }
             .grid-container {
                 margin-top: 23px;
@@ -32,6 +50,10 @@ export class _ extends LitElement {
                 grid-area: left;
                 display: flex;
                 flex-direction: column;
+            }
+
+            .left, .decorations {
+                pointer-events: none;
             }
 
             .left.selected {
@@ -152,9 +174,15 @@ export class _ extends LitElement {
   @property()
   module:ModuleKind | "" = "";
 
+  @property({type: Boolean})
+  dragging: boolean = false;
+
+
   render() {
-      const {selected, index, lastBottomDecoration, module} = this;
-      const sectionClasses = classMap({selected});
+      const {selected, index, lastBottomDecoration, dragging, module} = this;
+
+      const sectionClasses = classMap({selected, dragging});
+      const addContainerClasses = classMap({["add-container"]: true, dragging});
       const asideClasses = classMap({selected});
 
       const title = (index+1).toString().padStart(2, '0');
@@ -165,37 +193,40 @@ export class _ extends LitElement {
       const iconPath = module === "" ? "" 
           : `entry/jig/modules/small/${module}.svg`;
 
-      return html`
-          <section class="${sectionClasses}">
-              <aside class="${asideClasses}"></aside>
-              <div class="grid-container">
-                  <div class="left">
-                      <div class="title">${title}</div>
-                      ${subtitle === "" ? nothing
-                          : html`<div class="subtitle">${subtitle}</div>`
-                      }
-                      ${iconPath === "" ? nothing
-                          : html`<img-ui class="icon" path="${iconPath}"></img-ui>`
-                      }
-                  </div>
-                  <div class="middle">
-                      <div class="decorations">
-                          ${renderDecoration(module, index, lastBottomDecoration)}
-                      </div>
-                      <div class="window">
-                          <slot name="window"></slot>
+            return html`
+                <section class="${sectionClasses}">
+                    <aside class="${asideClasses}"></aside>
+                    <div class="grid-container">
+                        <div class="left">
+                            <div class="title">${title}</div>
+                            ${subtitle === "" ? nothing
+                                : html`<div class="subtitle">${subtitle}</div>`
+                            }
+                            ${iconPath === "" ? nothing
+                                : html`<img-ui class="icon" path="${iconPath}"></img-ui>`
+                            }
                         </div>
-                  </div>
-                  <div class="right">
-                      <slot name="menu"></slot>
-                  </div>
-          </section>
-          <div class="add-container">
-              <div class="add">
-                  <slot name="add"></slot>
-              </div>
-          </div>
-      `;
+                        <div class="middle">
+                            <div class="decorations">
+                                ${renderDecoration(module, index, lastBottomDecoration)}
+                            </div>
+                            <div class="window">
+                                <slot name="window"></slot>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="menu">
+                                <slot name="menu"></slot>
+                            </div>
+                        </div>
+                        ${dragging ? html`<div class="drag-overlay"></div>` : nothing}
+                    </section>
+                    <div class="${addContainerClasses}">
+                        <div class="add">
+                            <slot name="add"></slot>
+                        </div>
+                    </div>
+                `;
   }
 }
 

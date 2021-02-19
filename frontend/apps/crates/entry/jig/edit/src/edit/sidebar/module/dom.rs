@@ -22,23 +22,16 @@ impl ModuleDom {
 
 
         html!("jig-edit-sidebar-module", {
-            .property_signal("module", state.kind_signal().map(|kind| {
-                match kind {
-                    Some(kind) => kind.as_str(),
-                    None => ""
-                }
-            }))
+            .property_signal("module", state.kind_str_signal())
             .property("index", index as u32)
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
             .property("lastBottomDecoration", index == total_len-1)
+            .event(clone!(state => move |evt:events::MouseDown| {
+                actions::mouse_down(state.clone(), evt.x(), evt.y());
+            }))
             .child(html!("jig-edit-sidebar-module-window", {
                 .property("slot", "window")
-                .property_signal("state", state.kind_signal().map(|kind| {
-                    match kind {
-                        Some(kind) => "draft",
-                        None => "empty"
-                    }
-                }))
+                .property_signal("state", state.window_state_signal())
                 .event_preventable(clone!(state => move |evt:events::DragOver| {
                     if let Some(data_transfer) = evt.data_transfer() {
                         if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {

@@ -1,6 +1,12 @@
 use shared::domain::jig::{ModuleId, ModuleKind};
 use std::rc::Rc;
 use super::state::{State, Module};
+use utils::drag::Drag;
+use crate::edit::sidebar::dragging::state::State as DragState;
+
+pub fn mouse_down(state: Rc<State>, x: i32, y:i32) {
+    state.sidebar.drag.set(Some(Rc::new(DragState::new(state.clone(), x, y))));
+}
 
 pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
     state.module.kind.set_neq(Some(kind));
