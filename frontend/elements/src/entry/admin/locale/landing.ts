@@ -3,6 +3,9 @@ import { LitElement, html, css, customElement, property, query } from "lit-eleme
 export type Bundle = [string, boolean];
 export type Column = [string, boolean];
 
+const STR_SELECT_COLUMNS = "Selectn columns to display";
+const STR_ADD_ENTRY = "Add a text";
+
 @customElement("locale-page")
 export class _ extends LitElement {
 
@@ -166,11 +169,11 @@ export class _ extends LitElement {
             </select>
             <div class="icon-button select-columns">
                 <button @click="${this.showSelectColumns}"><img src="assets/select-columns-icon.png"></button>
-                <span>{STR} Selectn columns to display</span>
+                <span>${STR_SELECT_COLUMNS}</span>
             </div>
             <div class="icon-button add-text">
                 <button @click="${this.addEntry}"><img src="assets/add-icon.png"></button>
-                <span>{STR} Add a text</span>
+                <span>${STR_ADD_ENTRY}</span>
             </div>
             <div class="table">
                 <slot name="rows"></slot>
