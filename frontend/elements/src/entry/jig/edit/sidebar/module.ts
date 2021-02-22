@@ -12,10 +12,28 @@ export class _ extends LitElement {
   static get styles() {
     return [
         css`
+            section.dragging {
+                transform: rotate(-5deg);
+            }
+
+            .dragging .menu, .dragging .decorations, .add-container.dragging {
+                display: none;
+            }
+
+            .drag-overlay, section {
+                  width: 416px;
+                  height: 168px;
+            }
+            .drag-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 1;
+                cursor: grabbing;
+            }
             section {
-              width: 416px;
-              height: 168px;
-                display: flex;
+              display: flex;
+              cursor: grab;
             }
             .grid-container {
                 margin-top: 23px;
@@ -26,11 +44,16 @@ export class _ extends LitElement {
               grid-template-areas:
                 "left middle right";
             }
+
             .left {
                 padding-left: 16px;
                 grid-area: left;
                 display: flex;
                 flex-direction: column;
+            }
+
+            .left, .decorations {
+                pointer-events: none;
             }
 
             .left.selected {
@@ -88,6 +111,18 @@ export class _ extends LitElement {
                 top: 0;
                 left: 0;
             }
+
+            .add-container {
+                position: relative;
+                top: 0px; 
+                left: 0px; 
+                z-index: 1;
+            }
+            .add {
+                position: absolute;
+                top: -15px; 
+                left: calc(416px - (30px + 17px)); 
+            }
             .arm-left, .arm-right, .neck, .head, .torso-columns, .torso-gears, .torso-spring, .feet-spring, .feet-rollers {
                 position: absolute;
                 top: 0;
@@ -139,9 +174,15 @@ export class _ extends LitElement {
   @property()
   module:ModuleKind | "" = "";
 
+  @property({type: Boolean})
+  dragging: boolean = false;
+
+
   render() {
-      const {selected, index, lastBottomDecoration, module} = this;
-      const sectionClasses = classMap({selected});
+      const {selected, index, lastBottomDecoration, dragging, module} = this;
+
+      const sectionClasses = classMap({selected, dragging});
+      const addContainerClasses = classMap({["add-container"]: true, dragging});
       const asideClasses = classMap({selected});
 
       const title = (index+1).toString().padStart(2, '0');
@@ -152,51 +193,65 @@ export class _ extends LitElement {
       const iconPath = module === "" ? "" 
           : `entry/jig/modules/small/${module}.svg`;
 
-      return html`
-          <section class="${sectionClasses}">
-              <aside class="${asideClasses}"></aside>
-              <div class="grid-container">
-                  <div class="left">
-                      <div class="title">${title}</div>
-                      ${subtitle === "" ? nothing
-                          : html`<div class="subtitle">${subtitle}</div>`
-                      }
-                      ${iconPath === "" ? nothing
-                          : html`<img-ui class="icon" path="${iconPath}"></img-ui>`
-                      }
-                  </div>
-                  <div class="middle">
-                      <div class="decorations">
-                          ${renderDecoration(module, index, lastBottomDecoration)}
-                      </div>
-                      <div class="window">
-                          <slot name="window"></slot>
+            return html`
+                <section class="${sectionClasses}">
+                    <aside class="${asideClasses}"></aside>
+                    <div class="grid-container">
+                        <div class="left">
+                            <div class="title">${title}</div>
+                            ${subtitle === "" ? nothing
+                                : html`<div class="subtitle">${subtitle}</div>`
+                            }
+                            ${iconPath === "" ? nothing
+                                : html`<img-ui class="icon" path="${iconPath}"></img-ui>`
+                            }
                         </div>
-                  </div>
-                  <div class="right">
-                        <slot name="menu"></slot>
-                  </div>
-            </section>
-      `;
+                        <div class="middle">
+                            <div class="decorations">
+                                ${renderDecoration(module, index, lastBottomDecoration)}
+                            </div>
+                            <div class="window">
+                                <slot name="window"></slot>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="menu">
+                                <slot name="menu"></slot>
+                            </div>
+                        </div>
+                        ${dragging ? html`<div class="drag-overlay"></div>` : nothing}
+                    </section>
+                    <div class="${addContainerClasses}">
+                        <div class="add">
+                            <slot name="add"></slot>
+                        </div>
+                    </div>
+                `;
   }
 }
 
 function renderDecoration(module: ModuleKind | "", index: number, lastBottomDecoration: boolean) {
     const getImage = (path:string, classes:string) => html`<img-ui class="${classes}" path="entry/jig/jiggling/${path}" />`;
-
+    
+    const renderBottomDecoration = () => {
+        return html`
+            ${getImage("feet-spring.svg", "feet-spring")}
+            ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
+        `
+    }
     if(module === "cover") {
         return html`
             ${getImage("arm-left.svg", "arm-left")}
             ${getImage("arm-right.svg", "arm-right")}
             ${getImage("neck-spring.svg", "neck")}
             ${getImage("yellow/face.png", "head")}
-            ${getImage("torso-columns.svg", "torso-columns")}
+            ${lastBottomDecoration 
+                ? renderBottomDecoration() 
+                : getImage("torso-columns.svg", "torso-columns")
+            }
         `
     } else if(lastBottomDecoration) {
-        return html`
-            ${getImage("feet-spring.svg", "feet-spring")}
-            ${getImage("yellow/feet-rollers.svg", "feet-rollers")}
-        `
+        return renderBottomDecoration();
     } else {
         switch(index % 3) {
             case 0: return getImage("torso-columns.svg", "torso-columns");

@@ -3,7 +3,7 @@ import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/pages/landing";
 import {mapToString, arrayIndex} from "@utils/array";
-import {WithModules as Sidebar} from "../sidebar/sidebar";
+import {Sidebar} from "../sidebar/sidebar";
 import {ModuleSelection} from "../selection/selection";
 
 export default {
@@ -30,7 +30,6 @@ export const Landing = (props?:Partial<Args>) => {
             slot: "sidebar"
         })}
         ${ModuleSelection({
-            nModules,
             slot: "selection"
         })}
         </jig-edit-page>
