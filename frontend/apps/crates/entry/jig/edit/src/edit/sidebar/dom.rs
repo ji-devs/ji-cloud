@@ -67,7 +67,7 @@ impl SidebarDom {
                         map_ref! {
                             let len = state.modules.signal_vec_cloned().len(),
                             let index = index.signal(),
-                            let drag_target_index = state.drag_target_index_signal()
+                            let drag_target_index = state.drag_target_index.signal()
                                 => move {
                                 (
                                     index.unwrap_or_default(),
@@ -79,19 +79,7 @@ impl SidebarDom {
                         }
                     }))
                     .map(clone!(state => move |(index, len, drag_target_index, module)| {
-                        if Some(index) == drag_target_index {
-                            html!("jig-edit-sidebar-filler", {
-                                .property("slot", {
-                                    if index == 0 {
-                                        "cover-module"
-                                    } else {
-                                        "modules"
-                                    }
-                                })
-                            })
-                        } else {
-                            ModuleDom::render(state.clone(), index, len, module)
-                        }
+                        ModuleDom::render(state.clone(), index, drag_target_index, len, module)
                     }))
                 )
                 .global_event_preventable(clone!(state => move |evt:events::MouseUp| {

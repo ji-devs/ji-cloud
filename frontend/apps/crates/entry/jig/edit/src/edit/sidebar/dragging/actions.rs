@@ -11,17 +11,12 @@ pub fn mouse_move(sidebar: Rc<SidebarState>, x: i32, y:i32) {
     //internally, drag uses Mutable and Atomic so this works in Rc
     if let Some(drag) = &*sidebar.drag.lock_ref() {
         drag.inner.update(x, y);
+
     }
 }
 
 pub fn mouse_up(sidebar: Rc<SidebarState>, x: i32, y:i32) {
     if let Some(drag) = sidebar.drag.replace(None) {
-        log::info!("stopped drag listener!");
+        sidebar.drag_target_index.set_neq(None);
     }
-}
-
-pub fn update_index(state: Rc<State>, x: i32, y: i32) {
-    let sidebar = &state.module.sidebar;
-    //TODO - actually update based on pos
-    state.target_index.set_neq(Some(state.module.index));
 }

@@ -27,12 +27,6 @@ impl DraggingDom {
                             let module = &state.module;
 
                             html!("jig-edit-sidebar-module", {
-                                .future(state.inner.pos_signal().for_each(clone!(state => move |pos| {
-                                    if let Some(pos) = pos {
-                                        actions::update_index(state.clone(), pos.x, pos.y);
-                                    }
-                                    async {}
-                                })))
                                 .style_signal("display", state.inner.active_signal().map(|active| {
                                     if active { "block" } else { "none" }
                                 }))

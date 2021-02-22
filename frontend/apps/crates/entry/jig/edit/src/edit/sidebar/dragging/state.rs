@@ -12,7 +12,6 @@ const ANCHOR_Y:f64 = 100.0;
 
 pub struct State {
     pub module: Rc<ModuleState>,
-    pub target_index: Mutable<Option<usize>>,
     pub inner: Drag,
 }
 
@@ -21,7 +20,6 @@ impl State {
         Self {
             module,
             inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y),
-            target_index: Mutable::new(None)
         }
     }
 
