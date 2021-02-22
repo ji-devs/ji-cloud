@@ -32,10 +32,8 @@ async fn create(
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
-        req.cover,
         &req.modules,
         &req.content_types,
-        req.ending,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
     )
@@ -71,9 +69,7 @@ async fn update(
         path.into_inner(),
         req.display_name.as_deref(),
         req.author_id,
-        req.cover,
         req.modules.as_deref(),
-        req.ending,
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
