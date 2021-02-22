@@ -21,12 +21,12 @@ export const Landing = () => {
         <locale-cell-header
             label="Section"
             sortable
-            filteroptions='["sec1", "sec2", "sec3", "sec4"]'
+            filteroptions='[["sec1", true], ["sec2", true], ["sec3", true], ["sec4", true]]'
         ></locale-cell-header>
         <locale-cell-header
             label="Item Kind"
             sortable
-            filteroptions='["Button", "Subheading", "hay"]'
+            filteroptions='[["Button", true], ["Subheading", true], ["hay", true]]'
         ></locale-cell-header>
         <locale-cell-header
             label="English"
@@ -35,7 +35,7 @@ export const Landing = () => {
         <locale-cell-header
             label="Status"
             sortable
-            filteroptions='["Approved", "Discuss", "On Hold"]'
+            filteroptions='[["Approved", true], ["Discuss", true], ["On Hold", true]]'
         ></locale-cell-header>
         <locale-cell-header
             label="Zeplin reference"

@@ -1,6 +1,8 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
+export type FilterOption = [string, boolean];
+
 @customElement("locale-cell-header")
 export class _ extends LitElement {
 
@@ -9,9 +11,12 @@ export class _ extends LitElement {
     
     @property({type: Boolean})
     public sortable: boolean = false;
+    
+    @property({type: Boolean, reflect: true})
+    public sorted: boolean = false;
 
     @property({type: Array, reflect: true})
-    public filterOptions: string[] | null = null;
+    public filterOptions: FilterOption[] | null = null;
 
     @property({type: Boolean, reflect: true})
     public adminOnly: boolean = false;
@@ -42,8 +47,8 @@ export class _ extends LitElement {
             .sort-button:hover {
                 text-decoration: underline;
             }
-            .sort-button::before {
-                content: '⇩';
+            :host([sorted]) .sort-button::before {
+                content: var(--sort-arrow);
                 font-size: 15px;
                 display: inline-block;
                 margin-right: 3px;
@@ -66,10 +71,14 @@ export class _ extends LitElement {
 
     private onFilter(e: Event) {
         const select = e.target as HTMLSelectElement;
-        const options = Array.from(select.options).map(o => o.value);
+        const options = select.options;
+        this.filterOptions!.forEach((o, i) => {
+            o[1] = options[i].selected;
+        });
+
         this.dispatchEvent(
             new CustomEvent("filter", {
-                detail: options
+                detail: this.filterOptions
             })
         );
     }
@@ -83,7 +92,15 @@ export class _ extends LitElement {
     render() {
         return html`
             ${ this.filterOptions && (
-                html`<select multiple class="filter-select" @change="${this.onFilter}">${ this.filterOptions.map(o => html`<option>${o}</option>`) }</select>`
+                
+                html`<select multiple class="filter-select" @change="${this.onFilter}">${this.filterOptions.map(([option, selected]) => {
+                    return html`<option
+                        .value="${option}"
+                        .selected="${selected}"
+                    >
+                        ${option}
+                    </option>`;
+                })}</select>`
             ) }
             ${ this.sortable ? 
                 html`<button @click="${this.addSort}" class="sort-button">Sort</button>`

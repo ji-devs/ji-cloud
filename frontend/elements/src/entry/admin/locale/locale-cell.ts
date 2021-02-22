@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 border: solid white 2px;
                 background-color: var(--row-background-color);
             }
-            ::slotted(:not(input[type=checkbox])) {
+            ::slotted(input:not([type=checkbox])), ::slotted(textarea), ::slotted(select) {
                 background-color: transparent;
                 border: 0;
                 height: 100%;

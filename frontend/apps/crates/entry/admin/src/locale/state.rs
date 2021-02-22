@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
-use std::str::FromStr;
 use dominator_helpers::futures::AsyncLoader;
 use std::collections::HashMap;
 use super::db_interface;
 use url::Url;
-use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
+use web_sys::HtmlDialogElement;
 use std::rc::Rc;
 use std::clone::Clone;
 use serde_derive::{Deserialize, Serialize};
@@ -12,15 +11,13 @@ use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use strum_macros::{EnumString, Display, EnumIter};
 use strum::IntoEnumIterator;
-use wasm_bindgen::JsCast;
 use std::cmp::Ord;
 
 
 pub struct State {
     pub bundles: HashMap<Bundle, bool>,
     pub entries: MutableVec<Rc<Mutable<Entry>>>,
-    pub visible_columns: MutableVec<String>,
-    pub hidden_columns: MutableVec<String>,
+    pub columns: BTreeMap<String, bool>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
     pub saving_loader: Rc<AsyncLoader>,
@@ -54,26 +51,25 @@ impl State {
         let entries = entries.iter().map(|i| Rc::new(Mutable::new(i.clone()))).collect();
         let entries = MutableVec::new_with_values(entries);
 
+        let mut columns = BTreeMap::new();
+        columns.insert("ID".to_string(), true);
+        columns.insert("Section".to_string(), true);
+        columns.insert("Item Kind".to_string(), true);
+        columns.insert("English".to_string(), true);
+        columns.insert("Hebrew".to_string(), false);
+        columns.insert("Status".to_string(), true);
+        columns.insert("Zeplin reference".to_string(), true);
+        columns.insert("Comments".to_string(), true);
+        columns.insert("App".to_string(), true);
+        columns.insert("Element".to_string(), true);
+        columns.insert("Mock".to_string(), true);
+        columns.insert("Actions".to_string(), true);
 
-        let visible_columns = MutableVec::new_with_values(vec![
-            "ID".to_string(),
-            "Section".to_string(),
-            "Item Kind".to_string(),
-            "English".to_string(),
-            "Status".to_string(),
-            "Zeplin reference".to_string(),
-            "Comments".to_string(),
-        ]);
-        let hidden_columns = MutableVec::new_with_values(vec![
-            "App".to_string(),
-            "Element".to_string(),
-            "Mock".to_string(),
-        ]);
+
         Self {
             bundles,
             entries,
-            visible_columns,
-            hidden_columns,
+            columns,
             dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
             saving_loader: Rc::new(AsyncLoader::new()),
@@ -92,7 +88,6 @@ impl State {
     pub async fn add_entry(&self) {
         let entry = db_interface::create_entry().await;
         let mut vec = self.entries.lock_mut();
-        log::info!("{:?}", entry);
         vec.push_cloned(Rc::new(Mutable::new(entry)));
     }
 
@@ -125,24 +120,13 @@ impl State {
         }
     }
 
-    pub fn filter_change<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool> ) where T: FromStr + Ord {
-        for i in 0..options.length() {
-            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
-
-            let parsed = T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
-
-            map.insert(parsed, option.selected());
-        }
-    }
-
-    pub async fn selected_bundles_change(&self, options: &HtmlOptionsCollection) {
+    pub async fn selected_bundles_change(&self, bundles: HashMap<Bundle, bool>) {
         let mut visible_bundles = Vec::new();
-        for i in 0..options.length() {
-            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
-            if option.selected() {
-                visible_bundles.push(option.value());
+        for (bundle, visible) in bundles {
+            if visible {
+                visible_bundles.push(bundle);
             }
-        };
+        }
         let entries: Vec<Rc<Mutable<Entry>>> = db_interface::get_entries(&visible_bundles.iter().map(|s| s).collect())
             .await
             .into_iter()
@@ -177,7 +161,7 @@ impl State {
 pub enum EntryStatus {
     Approved,
     Discuss,
-    #[strum(serialize = "On Hold")]
+    // #[strum(serialize = "On Hold")]
     OnHold,
 }
 
@@ -215,8 +199,11 @@ pub enum SortKind {
     Comments,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Display)]
 pub enum SortOrder {
+    #[strum(serialize = "asc")]
     Asc,
+
+    #[strum(serialize = "desc")]
     Desc
 }

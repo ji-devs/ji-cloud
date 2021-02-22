@@ -27,7 +27,7 @@ export class _ extends LitElement {
                 bottom: 10px;
                 right: 10px;
             }
-            .saving-indicator.visible::after {
+            :host([saving]) .saving-indicator::after {
                 padding: 10px;
                 content: 'Saving...';
             }
@@ -63,6 +63,12 @@ export class _ extends LitElement {
             }
             ::slotted([slot=rows]) {
                 display: contents;
+            }
+            :host([sortOrder=asc]) {
+                --sort-arrow: '⇩';
+            }
+            :host([sortOrder=desc]) {
+                --sort-arrow: '⇧';
             }
 
             dialog {
@@ -104,10 +110,10 @@ export class _ extends LitElement {
     @property({type: Array})
     public columns: Column[] = []
 
-    @property({type: Boolean})
+    @property({type: Boolean, reflect: true})
     public saving = false;
 
-    @property()
+    @property({reflect: true})
     public sortOrder: 'asc' | 'desc' = 'asc';
 
     @query('dialog', true)
@@ -116,16 +122,13 @@ export class _ extends LitElement {
     private onBundleSelect(e: Event) {
         const select = e.target as HTMLSelectElement;
         const options = select.options;
-        const bundles = Array.from(this.bundles);
         this.bundles.forEach((b, i) => {
             b[1] = options[i].selected;
         });
-        console.log(bundles);
         
-
         this.dispatchEvent(
             new CustomEvent("selected-bundle-change", {
-                detail: bundles
+                detail: this.bundles
             })
         );
     }

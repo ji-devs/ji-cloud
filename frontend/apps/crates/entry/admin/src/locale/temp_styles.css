@@ -1,7 +1,7 @@
-.ftl-table .zeplin-link-cell:hover .zeplin-link {
+.zeplin-link-cell:hover .zeplin-link {
     display: block;
 }
-.ftl-table .zeplin-link {
+.zeplin-link {
     display: none;
     position: absolute;
     background-color: white;
@@ -23,6 +23,6 @@
 
 .actions-wrapper {
     display: flex;
-    padding: 10px 10px;
+    align-items: baseline;
     column-gap: 5px;
 }

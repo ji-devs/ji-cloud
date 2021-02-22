@@ -26,11 +26,10 @@ impl EntryRow {
 
     pub fn render(entry: Rc<Mutable<Entry>>, state: Rc<State>) -> Dom {
         let entry_ref = entry.lock_ref();
-        html!("div", {
-            .class("ftl-row")
+        html!("locale-row", {
+            .property("slot", "rows")
             .children(&mut [
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .property("value", &entry_ref.id)
                         .event(clone!(entry => move |event: events::Input| {
@@ -40,8 +39,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .apply_if(entry_ref.section.is_some(), |dom| {
                             dom.property("value", &entry_ref.section.clone().unwrap())
@@ -57,8 +55,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .apply_if(entry_ref.item_kind.is_some(), |dom| {
                             dom.property("value", &entry_ref.item_kind.clone().unwrap())
@@ -74,8 +71,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("textarea", {
                         .text(&entry_ref.english)
                         .event(clone!(entry => move |event: events::Input| {
@@ -85,8 +81,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("select" => HtmlSelectElement, {
                         .with_node!(elem => {
                             .event(clone!(entry => move |_event: events::Change| {
@@ -106,8 +101,7 @@ impl EntryRow {
                         )
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .class("zeplin-link-cell")
                     .children(&mut [
                         html!("a", {
@@ -134,8 +128,7 @@ impl EntryRow {
                         }),
                     ])
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .property("value", &entry_ref.comments)
                         .event(clone!(entry => move |event: events::Input| {
@@ -145,8 +138,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .attribute("type", "checkbox")
                         .property("checked", entry_ref.in_app)
@@ -157,8 +149,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .attribute("type", "checkbox")
                         .property("checked", entry_ref.in_element)
@@ -169,8 +160,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(html!("input", {
                         .attribute("type", "checkbox")
                         .property("checked", entry_ref.in_mock)
@@ -181,8 +171,7 @@ impl EntryRow {
                         }))
                     }))
                 }),
-                html!("div", {
-                    .class("ftl-cell")
+                html!("locale-cell", {
                     .child(
                         html!("div", {
                             .class("actions-wrapper")
