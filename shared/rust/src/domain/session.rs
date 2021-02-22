@@ -6,12 +6,26 @@ use std::fmt;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-/// Response for successfully signing in.
+/// Response for creating a session with basic auth
+///
 /// Note: This response *also* includes a cookie.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CreateSessionSuccess {
+pub enum CreateSessionResponse {
+    /// A new session was successfully created and the user may use the api as normal.
+    Login(NewSessionResponse),
+
+    /// The user has no profile, a token for creating one has been returned
+    Register(NewSessionResponse),
+}
+
+/// Response for successfully creating a session.
+/// Note: This response *also* includes a cookie.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct NewSessionResponse {
     /// A transparent CSRF token to use for this Session.
     pub csrf: String,
 }

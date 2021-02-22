@@ -19,7 +19,7 @@ use shared::{
         user::{Profile, Register, UserLookup},
         ApiEndpoint,
     },
-    domain::{auth::RegisterRequest, session::CreateSessionSuccess, user::UserLookupQuery},
+    domain::{auth::RegisterRequest, session::NewSessionResponse, user::UserLookupQuery},
     error::auth::RegisterErrorKind,
 };
 use sqlx::PgPool;
@@ -88,7 +88,7 @@ async fn handle_register(
 
             Ok(HttpResponse::Created()
                 .cookie(cookie)
-                .json(CreateSessionSuccess { csrf }))
+                .json(NewSessionResponse { csrf }))
         }
     }
 }

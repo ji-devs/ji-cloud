@@ -7,6 +7,7 @@ pub(crate) mod locale;
 pub(crate) mod meta;
 pub(crate) mod module;
 pub(crate) mod user;
+pub(crate) mod session;
 
 use config::DB_POOL_CONNECTIONS;
 use shared::domain::{

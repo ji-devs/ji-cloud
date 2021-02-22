@@ -293,3 +293,11 @@ pub fn generate_csrf() -> String {
         .map(char::from)
         .collect()
 }
+
+pub fn generate_session_token() -> String {
+    thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect()
+}

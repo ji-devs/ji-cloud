@@ -17,7 +17,7 @@ use shared::{
     domain::{
         admin::{AdminListMediaResponse, AdminMediaItem},
         image::ImageKind,
-        session::CreateSessionSuccess,
+        session::NewSessionResponse,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
@@ -61,7 +61,7 @@ async fn impersonate(
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
-        .json(CreateSessionSuccess { csrf }))
+        .json(NewSessionResponse { csrf }))
 }
 
 /// Forcefully refresh an item of media (as if it was just uploaded)

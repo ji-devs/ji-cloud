@@ -4,7 +4,7 @@ use crate::{
     api::method::Method,
     domain::{
         auth::RegisterRequest,
-        session::CreateSessionSuccess,
+        session::NewSessionResponse,
         user::{OtherUser, UserLookupQuery, UserProfile},
     },
     error::{auth::RegisterError, EmptyError},
@@ -14,7 +14,7 @@ use crate::{
 pub struct Register;
 impl ApiEndpoint for Register {
     type Req = RegisterRequest;
-    type Res = CreateSessionSuccess;
+    type Res = NewSessionResponse;
     type Err = RegisterError;
     const PATH: &'static str = "/v1/user";
     const METHOD: Method = Method::Post;

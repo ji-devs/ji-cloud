@@ -1,8 +1,8 @@
 use crate::{
     api::Method,
     domain::session::{
-        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlResponse,
+        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionResponse,
+        GetOAuthUrlResponse, NewSessionResponse,
     },
     error::EmptyError,
 };
@@ -10,12 +10,13 @@ use crate::{
 use super::ApiEndpoint;
 
 /// Sign in.
+///
 /// requires `Basic` auth in the form `BASE64(email:password)`
 /// see: https://tools.ietf.org/html/rfc7617#section-2
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ();
-    type Res = CreateSessionSuccess;
+    type Res = CreateSessionResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/session";
     const METHOD: Method = Method::Post;

@@ -3,21 +3,23 @@ use actix_web::{
     web::{Data, Json, Path},
     HttpRequest, HttpResponse,
 };
-use chrono::Duration;
+use chrono::{Duration, Utc};
 use config::RemoteTarget;
 use core::settings::{GoogleOAuth, RuntimeSettings};
 use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
     api::{endpoints::session, ApiEndpoint},
     domain::session::{
-        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlResponse, GetOAuthUrlServiceKind, OAuthUrlKind,
+        CreateSessionOAuthRequest, CreateSessionOAuthResponse, GetOAuthUrlResponse,
+        GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
     },
 };
 use sqlx::PgPool;
 use url::Url;
 
 use crate::{
+    db,
+    domain::RegistrationStatus,
     error::{self, ServiceKind},
     extractor::EmailBasicUser,
     google::{self, oauth_url},
@@ -61,12 +63,28 @@ async fn get_oauth_url(
 }
 
 /// Login with basic authorization.
+/// May return resources for *signing up* if the user doesn't have a profile.
 #[api_v2_operation]
 async fn create_session(
+    db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
     user: EmailBasicUser,
 ) -> Result<HttpResponse, error::Server> {
-    // todo: make sure there isn't anything that needs to be done with the db? (eg, actually creating a session id or smth)
+    let session = crate::token::generate_session_token();
+
+    let login_ttl = settings
+        .login_token_valid_duration
+        .unwrap_or(Duration::weeks(2));
+
+    let (temporary, valid_until) = match user.registration_status {
+        RegistrationStatus::New => panic!("This isn't currently possible"),
+        RegistrationStatus::Validated => (true, Some(Utc::now() + Duration::hours(1))),
+        RegistrationStatus::Complete => (false, Some(Utc::now() + login_ttl)),
+    };
+
+    let mut txn = db.begin().await?;
+
+    db::session::create_new(&mut txn, user.id, &session, valid_until.as_ref(), temporary).await?;
 
     let (csrf, cookie) = create_signin_token(
         user.id,
@@ -76,9 +94,11 @@ async fn create_session(
         settings.login_token_valid_duration,
     )?;
 
+    txn.commit().await?;
+
     Ok(HttpResponse::Created()
         .cookie(cookie)
-        .json(CreateSessionSuccess { csrf }))
+        .json(NewSessionResponse { csrf }))
 }
 
 #[api_v2_operation]

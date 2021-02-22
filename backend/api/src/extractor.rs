@@ -1,4 +1,5 @@
 use crate::{
+    domain::RegistrationStatus,
     error::BasicError,
     more_futures::ReadyOrNot,
     token::{check_login_token, check_signup_token, AuthorizedTokenClaims, OAuthSignupClaims},
@@ -231,6 +232,7 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         .into()
     }
 }
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
@@ -241,6 +243,7 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
 )]
 pub struct EmailBasicUser {
     pub id: Uuid,
+    pub registration_status: RegistrationStatus,
 }
 
 impl FromRequest for EmailBasicUser {
@@ -266,7 +269,14 @@ impl FromRequest for EmailBasicUser {
 
         async move {
             let user = sqlx::query!(
-                "select user_id, password from user_auth_basic where email = $1::text",
+                r#"
+select
+    user_id,
+    password,
+    exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as "has_profile!",
+    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!"
+from user_auth_basic where email = $1::text
+"#,
                 &*email
             )
             .fetch_optional(&db)
@@ -300,7 +310,15 @@ impl FromRequest for EmailBasicUser {
                     .verify_password(password.as_bytes(), &hash)
                     .map_err(|_| Either::A(BasicError::new(StatusCode::UNAUTHORIZED)))?;
 
-                Ok(Self { id: user.user_id })
+                let registration_status = match (user.has_verified_email, user.has_profile) {
+                    // todo: "???"
+                    (false, _) => return Err(Either::A(BasicError::new(StatusCode::FORBIDDEN))),
+                    // (false, _) => RegistrationStatus::New,
+                    (true, false) => RegistrationStatus::Validated,
+                    (true, true) => RegistrationStatus::Complete,
+                };
+
+                Ok(Self { id: user.user_id, registration_status })
             })
             .await
             .map_err(blocking_error)

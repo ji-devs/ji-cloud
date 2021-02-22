@@ -66,3 +66,34 @@ fn build_tree_recursive(
         })
         .collect()
 }
+
+#[derive(Debug, Copy, Clone, sqlx::Type)]
+#[repr(u16)]
+pub enum RegistrationStatus {
+    /// The user was just registered ([`POST /v1/user`](shared::api::endpoints::user::Register))
+    ///
+    /// This state is *skipped* via ouath (they're automatically [`Validated`](Self::Validated))
+    /// In this state the user is allowed to:
+    /// * Request a new verification email
+    /// * Request a password reset(?)
+    New = 0,
+
+    /// The user has gone through OAuth and created a new user, or has finished email verification.
+    ///
+    /// In this state the user is allowed to:
+    /// * Request a password reset
+    /// * Complete registration via creating their profile
+    /// * Delete their account
+    Validated = 1,
+
+    /// The user has *completely* finished signup, and their profile has been completed.
+    ///
+    /// In this state the user is allowed to do anything that their scopes allow.
+    /// All users can:
+    /// * Change their email (not implemented nor currently on the roadmap)
+    /// * Change their password if logged in, reset their password if not.
+    /// * Access the API
+    /// * Change their profile details (not currently implemented)
+    /// * Delete their account
+    Complete = 2,
+}

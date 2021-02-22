@@ -21,7 +21,7 @@ pub async fn lookup(
 ) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select id from "user" where (id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
+        r#"select user_id as "id" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
         id,
         name
     )
@@ -32,27 +32,28 @@ pub async fn lookup(
 pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
         r#"
-        select id,
-        -- firebase_id,
-        username,
-        email::text                                                              as "email!",
-        given_name,
-        family_name,
-        language,
-        locale,
-        opt_into_edu_resources,
-        over_18,
-        timezone,
-        created_at,
-        updated_at,
-        organization,
-        location,
-        array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
-        array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
-        array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
-        array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
- from "user"
- where id = $1"#,
+select user_id as "id",
+    username,
+    user_email.email::text                                                              as "email!",
+    given_name,
+    family_name,
+    language,
+    locale,
+    opt_into_edu_resources,
+    over_18,
+    timezone,
+    user_profile.created_at,
+    user_profile.updated_at,
+    organization,
+    location,
+    array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
+    array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
+    array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
+    array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
+from "user"
+inner join user_profile on "user".id = user_profile.user_id
+inner join user_email using(user_id)
+where id = $1"#,
         id
     )
     .fetch_optional(db)
