@@ -19,26 +19,25 @@ pub struct ModuleId(pub Uuid);
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ModuleKind {
-    /// This is a sortof special module, every jig has one and it can't be deleted 
+    /// This is a sortof special module, every jig has one and it can't be deleted
     Cover = 0,
 
     /// Flashcards
     Flashcards = 1,
-    /// Matching 
+    /// Matching
     Matching = 2,
-    /// Memory Game 
+    /// Memory Game
     Memory = 3,
-    /// Poster 
+    /// Poster
     Poster = 4,
-    /// Tapping Board 
-    TappingBoard= 5,
-    /// Tracing 
+    /// Tapping Board
+    TappingBoard = 5,
+    /// Tracing
     Tracing = 6,
-    /// Video 
+    /// Video
     Video = 7,
-    /// Visual Quiz 
+    /// Visual Quiz
     VisualQuiz = 8,
-
 }
 
 impl ModuleKind {
