@@ -28,16 +28,6 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The JIG's cover module.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub cover: Option<ModuleId>,
-
-    /// The JIG's ending module.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub ending: Option<ModuleId>,
-
     /// The JIG's remaining modules.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
@@ -63,12 +53,6 @@ pub struct Jig {
 
     /// The JIG's name.
     pub display_name: Option<String>,
-
-    /// The JIG's cover module.
-    pub cover: LiteModule,
-
-    /// The JIG's ending module.
-    pub ending: LiteModule,
 
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,
@@ -102,16 +86,6 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
-
-    /// The JIG's cover module.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub cover: Option<ModuleId>,
-
-    /// The JIG's ending module.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub ending: Option<ModuleId>,
 
     /// The JIG's remaining modules.
     #[serde(skip_serializing_if = "Option::is_none")]

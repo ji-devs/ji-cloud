@@ -144,22 +144,6 @@
       ]
     }
   },
-  "19cf8c137d4072d2231ba5708f31fbd415f665a338de2473cf1aca4390e46a61": {
-    "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    cover_id  = coalesce($4, cover_id),\n    ending_id  = coalesce($5, ending_id),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::uuid is not null and $4 is distinct from cover_id) or\n       ($5::uuid is not null and $5 is distinct from ending_id))",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Uuid",
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
     "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
     "describe": {
@@ -1009,30 +993,6 @@
       ]
     }
   },
-  "62a5573f3774ed3c06160100a4a20acd85eee9df7ec45bdc5b55633765ddcbd4": {
-    "query": "\ninsert into jig\n    (display_name, cover_id, ending_id, creator_id, author_id, publish_at)\nvalues ($1, $2, $3, $4, $4, $5)\nreturning id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Uuid",
-          "Uuid",
-          "Timestamptz"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "636342d58945675c620fb5016f6a32bb94c463f879276812bd5440405dc67cca": {
     "query": "delete from jig_module where jig_id = $1",
     "describe": {
@@ -1534,6 +1494,28 @@
       ]
     }
   },
+  "92c5c371e4a92571e51415646965db25d4fefe44f5dba458cc14d812a70c198e": {
+    "query": "\ninsert into jig\n    (display_name, creator_id, author_id, publish_at)\nvalues ($1, $2, $2, $3)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Timestamptz"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "9666f0d8851a8bd23cdf541a3a99af9590a458915e00001de434ea91d767d5b9": {
     "query": "\nselect id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n    array((select style.display_name\n           from style\n                    inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    publish_at,\n    is_premium\n from image_metadata\n where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)\n limit 100;\n     ",
     "describe": {
@@ -1652,6 +1634,20 @@
       "columns": [],
       "parameters": {
         "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "aebc3735f274e138af5f1852e9775b81f383f34e7a5cbddcbe3f10acf8c80426": {
+    "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
           "Uuid"
         ]
       },
@@ -1896,86 +1892,6 @@
       ]
     }
   },
-  "cd373895127d95d42cf1b2117e6a9c5c877f4bc50afb2833aa3227c5784a42c0": {
-    "query": "\nselect id                                             as \"id: JigId\",\n       display_name,\n       cover_id                                       as \"cover_id: ModuleId\",\n       (select kind from module where id = cover_id)  as \"cover_kind: ModuleKind\",\n       ending_id                                      as \"ending_id: ModuleId\",\n       (select kind from module where id = ending_id) as \"ending_kind: ModuleKind\",\n       creator_id,\n       author_id,\n       publish_at,\n       array(select row (module_id, kind)\n             from jig_module\n                      inner join module on module_id = module.id\n             where jig_id = $1\n             order by \"index\")                        as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n        array(select row(content_type_id) from jig_content_type where jig_id = $1) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "cover_id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "cover_kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 4,
-          "name": "ending_id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "ending_kind: ModuleKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 6,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 7,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 8,
-          "name": "publish_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 9,
-          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "content_types!: Vec<(ContentTypeId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        false,
-        null,
-        false,
-        null,
-        true,
-        true,
-        true,
-        null,
-        null
-      ]
-    }
-  },
   "cf12ae2072a2ec2886a2484643dae2b5dea7869eda0b0fe3ff4c5ba2cf158592": {
     "query": "\ninsert into animation (name, description, is_premium, publish_at, variant, looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
     "describe": {
@@ -2122,6 +2038,62 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "e8a4188202eca177fdb675e0c305f651d023e8edcbaba5f914c6ad3590f0c584": {
+    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (module_id, kind)\n        from jig_module\n        inner join module on module_id = module.id\n        where jig_id = $1\n        order by \"index\"\n    ) as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = $1) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null
       ]
     }
   },
