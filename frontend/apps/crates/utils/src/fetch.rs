@@ -85,6 +85,23 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     }
 }
 
+//really just used for login and registration, but w/e
+pub async fn api_no_auth_with_credentials<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
+    let (url, data) = api_get_query(endpoint, method, data);
+
+    let res = fetch_with_data(&url, method.as_str(), true, data).await.unwrap();
+
+    if res.ok() {
+        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+    } else {
+        side_effect_error(res.status());
+        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+    }
+}
+
 pub async fn api_with_token<T, E, Payload>(endpoint: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {

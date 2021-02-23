@@ -5,7 +5,7 @@ use shared::{
 };
 use utils::{
     routes::*,
-    fetch::{api_with_token, api_no_auth},
+    fetch::{api_no_auth, api_no_auth_with_credentials},
     storage,
 };
 use wasm_bindgen::prelude::*;
@@ -18,9 +18,28 @@ extern "C" {
 }
 
 
-pub async fn finalize(req: CreateSessionOAuthRequest, redirect_kind: OAuthUrlKind) {
+pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKind) {
+    let service_kind_str = serde_wasm_bindgen::to_value(&service_kind)
+        .unwrap_throw()
+        .as_string()
+        .unwrap_throw();
+
+    let url_kind_str = serde_wasm_bindgen::to_value(&url_kind)
+        .unwrap_throw()
+        .as_string()
+        .unwrap_throw();
+
+    let path = GetOAuthUrl::PATH
+        .replace("{service}", &service_kind_str)
+        .replace("{kind}", &url_kind_str);
+    if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, GetOAuthUrl::METHOD, None).await {
+        web_sys::window().unwrap_throw().location().set_href(&resp.url);
+        //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
+    }
+}
+pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
     
-    if let Ok(resp) = api_no_auth::<CreateSessionOAuthResponse, EmptyError, _>(&CreateOAuth::PATH, CreateOAuth::METHOD, Some(req)).await {
+    if let Ok(resp) = api_no_auth_with_credentials::<CreateSessionOAuthResponse, EmptyError, _>(&CreateOAuth::PATH, CreateOAuth::METHOD, Some(req)).await {
 
         match resp {
             CreateSessionOAuthResponse::Login {csrf} => {
@@ -29,7 +48,7 @@ pub async fn finalize(req: CreateSessionOAuthRequest, redirect_kind: OAuthUrlKin
                 dominator::routing::go_to_url(&route);
             },
             CreateSessionOAuthResponse::CreateUser {csrf} => {
-                match redirect_kind {
+                match url_kind {
                     OAuthUrlKind::Register => {
                         storage::save_csrf_token(&csrf);
                         let route:String = Route::User(UserRoute::ContinueRegistration).into();
