@@ -54,6 +54,7 @@ async fn impersonate(
     let (csrf, cookie) = create_signin_token(
         user_id,
         &settings.token_secret,
+        settings.is_local(),
         TokenSource::Impersonate(auth.claims.sub),
         settings.login_token_valid_duration,
     )?;
