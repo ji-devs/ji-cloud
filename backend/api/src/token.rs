@@ -1,6 +1,6 @@
 use actix_http::cookie::{Cookie, CookieBuilder, SameSite};
 use chrono::{Duration, Utc};
-use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION, MAX_SIGNUP_COOKIE_DURATION};
+use config::{MAX_SIGNIN_COOKIE_DURATION, MAX_SIGNUP_COOKIE_DURATION};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
@@ -218,7 +218,6 @@ select exists(select 1 from user_auth_google where google_id = $1) as "oauth_exi
 pub fn create_signin_token(
     user_id: Uuid,
     token_secret: &[u8; 32],
-    local_insecure: bool,
     source: TokenSource,
     valid_duration: Option<Duration>,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
@@ -233,16 +232,12 @@ pub fn create_signin_token(
         .build()
         .map_err(|err| anyhow::anyhow!("failed to create token: {}", err))?;
 
-    Ok((
-        csrf,
-        create_cookie(token, local_insecure, MAX_SIGNIN_COOKIE_DURATION),
-    ))
+    Ok((csrf, create_cookie(token, MAX_SIGNIN_COOKIE_DURATION)))
 }
 
 pub fn create_oauth_signup_token(
     email: &str,
     token_secret: &[u8; 32],
-    local_insecure: bool,
     provider: OAuthProvider,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
     let csrf = generate_csrf();
@@ -255,10 +250,7 @@ pub fn create_oauth_signup_token(
         .build()
         .map_err(|err| anyhow::anyhow!("failed to create token: {}", err))?;
 
-    Ok((
-        csrf,
-        create_cookie(token, local_insecure, MAX_SIGNUP_COOKIE_DURATION),
-    ))
+    Ok((csrf, create_cookie(token, MAX_SIGNUP_COOKIE_DURATION)))
 }
 
 fn base_token<'a>(
@@ -276,16 +268,13 @@ fn base_token<'a>(
         .set_claim("csrf", serde_json::Value::String(csrf))
 }
 
-fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Cookie<'static> {
-    let mut cookie = CookieBuilder::new(AUTH_COOKIE_NAME, token)
+fn create_cookie(token: String, ttl: time::Duration) -> Cookie<'static> {
+    let cookie = CookieBuilder::new(AUTH_COOKIE_NAME, token)
         .http_only(true)
-        .secure(!local_insecure)
+        .secure(true)
         .same_site(SameSite::Lax)
-        .max_age(ttl);
-
-    if !local_insecure {
-        cookie = cookie.domain(COOKIE_DOMAIN);
-    }
+        .max_age(ttl)
+        .path("/");
 
     cookie.finish()
 }
