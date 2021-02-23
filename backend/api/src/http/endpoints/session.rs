@@ -71,7 +71,6 @@ async fn create_session(
     let (csrf, cookie) = create_signin_token(
         user.id,
         &settings.token_secret,
-        settings.is_local(),
         TokenSource::Basic,
         settings.login_token_valid_duration,
     )?;
@@ -104,7 +103,6 @@ async fn create_oauth_session(
                 &db,
                 &config,
                 &settings.token_secret,
-                settings.is_local(),
                 &jwks,
                 &code,
                 settings.login_token_valid_duration,
@@ -125,7 +123,6 @@ async fn handle_google_oauth(
     db: &PgPool,
     config: &GoogleOAuth,
     token_secret: &[u8; 32],
-    local_insecure: bool,
     jwks: &jwk::JwkVerifier,
     code: &str,
     login_token_valid_duration: Option<Duration>,
@@ -153,11 +150,10 @@ async fn handle_google_oauth(
         Some(auth) => create_signin_token(
             auth.user_id,
             token_secret,
-            local_insecure,
             TokenSource::OAuth(provider),
             login_token_valid_duration,
         )?,
-        None => create_oauth_signup_token(&claims.email, token_secret, local_insecure, provider)?,
+        None => create_oauth_signup_token(&claims.email, token_secret, provider)?,
     };
 
     let response = match google_auth {

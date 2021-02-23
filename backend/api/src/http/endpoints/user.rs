@@ -81,7 +81,6 @@ async fn handle_register(
             let (csrf, cookie) = create_signin_token(
                 id,
                 &settings.token_secret,
-                settings.is_local(),
                 TokenSource::OAuth(token.0.provider),
                 settings.login_token_valid_duration,
             )?;
