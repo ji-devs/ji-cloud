@@ -24,9 +24,6 @@ impl StartPage {
 
         html!("page-register-start", {
             .property_signal("passwordStrength", state.get_password_strength())
-            .global_event(clone!(state => move |evt:dominator_helpers::events::Message| {
-                actions::handle_window_message(state.clone(), evt);
-            }))
             .children(vec![
                 html!("input-text", {
                     .property("slot", "email")

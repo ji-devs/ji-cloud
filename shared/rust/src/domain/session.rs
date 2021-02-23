@@ -73,7 +73,7 @@ impl fmt::Debug for CreateSessionOAuthRequest {
 
 /// Response for successfully creating a session / signing in, via oauth.
 /// Note: This response *also* includes a cookie.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[non_exhaustive]

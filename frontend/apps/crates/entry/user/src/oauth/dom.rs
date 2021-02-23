@@ -6,13 +6,11 @@ use utils::{events, routes::*};
 use dominator_helpers::futures::AsyncLoader;
 use super::actions;
 use shared::domain::session::*;
-
-//The popup dom
-pub struct RegisterOauthPage {
+pub struct OauthPage {
 }
 
-impl RegisterOauthPage {
-    pub fn render(data: OauthData) -> Dom {
+impl OauthPage {
+    pub fn render(data: OauthData, redirect_kind: OAuthUrlKind) -> Dom {
         let loader = AsyncLoader::new();
 
         loader.load(async move {
@@ -20,11 +18,11 @@ impl RegisterOauthPage {
                 OauthData::Google(code) => {
                     CreateSessionOAuthRequest::Google {
                         code,
-                        redirect_kind: OAuthUrlKind::Register
+                        redirect_kind
                     }
                 }
             };
-            actions::finalize(req).await;
+            actions::finalize(req, redirect_kind).await;
         });
 
         Dom::with_state(loader, |loader| {
@@ -40,4 +38,3 @@ impl RegisterOauthPage {
         })
     }
 }
-

@@ -3,7 +3,7 @@ import "@elements/entry/user/register-complete/pages/landing";
 import "@elements/core/buttons/rectangle";
 
 export default {
-  title: 'Entry / User / Register Complete / Pages',
+  title: 'Entry / User / Register / Pages',
 }
 
 const STR_BUTTON = "Go to JI home";
@@ -14,7 +14,7 @@ interface Args {
 const DEFAULT_ARGS:Args = {
 }
 
-export const Landing = (props?:Partial<Args>) => {
+export const Complete = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
@@ -24,4 +24,4 @@ export const Landing = (props?:Partial<Args>) => {
     `
 }
 
-Landing.args = DEFAULT_ARGS;
+Complete.args = DEFAULT_ARGS;

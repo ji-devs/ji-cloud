@@ -1,10 +1,6 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
-use shared::domain::{
-    jig::{JigId, ModuleId, ModuleKind},
-    image::ImageSearchQuery,
-
-};
+use shared::domain::{image::ImageSearchQuery, jig::{JigId, ModuleId, ModuleKind}, search::CreateSearchKeyResponse, session::CreateSessionOAuthResponse};
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
@@ -27,10 +23,11 @@ pub enum Route {
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     Profile(ProfileSection),
-    ContinueRegistration(FirebaseUserInfo),
     RegisterOauth(OauthData),
+    LoginOauth(OauthData),
     Login,
     Register,
+    ContinueRegistration,
     SendEmailConfirmation,
     RegisterComplete,
 }
@@ -139,14 +136,15 @@ impl Route {
                     Self::NoAuth
                 }
             }
-            ["user", "continue-registration"] => {
-                if let Some(user) = json_query {
-                    let user:FirebaseUserInfo = serde_json::from_str(&user).unwrap_throw();
-                    Self::User(UserRoute::ContinueRegistration(user))
+            ["user", "login-oauth"] => {
+                if let Some(code) = params.get("code") {
+                    let data = OauthData::Google(code);
+                    Self::User(UserRoute::LoginOauth(data))
                 } else {
                     Self::NoAuth
                 }
             }
+            ["user", "continue-registration"] => Self::User(UserRoute::ContinueRegistration),
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
@@ -221,15 +219,11 @@ impl From<&Route> for String {
                 match route {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
                     UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
-                    UserRoute::ContinueRegistration(user) => {
-                        let data = serde_json::to_string(&user).unwrap_throw();
-                        let query = JsonQuery { data };
-                        let query = serde_qs::to_string(&query).unwrap_throw();
-                        format!("/user/continue-registration?{}", query) 
-                    }
+                    UserRoute::ContinueRegistration => "/user/continue-registration".to_string(),
                     UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
+                    UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }

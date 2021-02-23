@@ -1,27 +1,30 @@
+use dominator::{Dom, html, clone, with_node};
+use futures_signals::signal::Mutable;
 use std::rc::Rc;
-use dominator::{html, Dom};
+use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 
+const STR_SUBMIT:&'static str = "Go to JI home";
 
-const STR_BUTTON:&'static str = "Go to JI Home";
-
-pub struct RegisterCompletePage {
+pub struct CompletePage {
 }
 
-impl RegisterCompletePage {
+impl CompletePage {
     pub fn render() -> Dom {
+
         html!("page-register-complete", {
             .child(
                 html!("button-rect", {
                     .property("slot", "button")
                     .property("color", "red")
                     .property("size", "medium")
-                    .text(STR_BUTTON)
+                    .text(STR_SUBMIT)
                     .event(|evt:events::Click| {
-                        //actions::signin_email(state.clone())
+                        dominator::routing::go_to_url("/");
                     })
                 })
             )
         })
     }
 }
+

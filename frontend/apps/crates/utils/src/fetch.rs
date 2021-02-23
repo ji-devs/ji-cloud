@@ -142,12 +142,13 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
     }
 }
 
-fn side_effect_error(status_code:u16) {
+fn side_effect_error(status_code:u16) -> bool {
     match status_code {
         403 | 401 => {
             web_sys::window().unwrap_throw().alert_with_message(crate::strings::STR_AUTH_ALERT);
+            true
         },
-        _ => {}
+        _ => false
     }
 } 
 

@@ -55,7 +55,6 @@ pub fn submit(state: Rc<State>) {
 
 fn next_step(state: Rc<State>) {
     state.step.set(Step::Two(Step1Data{
-        start: state.start.clone(), 
         firstname: state.firstname.borrow().clone(),
         lastname: state.lastname.borrow().clone(),
         username: state.username.borrow().clone(),
@@ -65,7 +64,6 @@ async fn username_exists(name:String) -> bool {
 
     let query = UserLookupQuery {
         id: None,
-        firebase_id: None, 
         name: Some(name) 
     };
 

@@ -7,23 +7,17 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod router;
 mod register;
-mod oauth_popup;
-/*
 mod login;
+mod oauth;
+mod strings;
 mod profile;
-mod register_complete;
-*/
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-/*
-mod page;
-mod pages;
-mod header;
-*/
+
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();

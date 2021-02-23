@@ -55,20 +55,22 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
     if remote_target == RemoteTarget::Local {
         unsafe {
-            if dev_auth() {
+            let window = web_sys::window().unwrap_throw();
+            if dev_auth() && !window.location().pathname().unwrap_throw().contains("user/"){
+
                 let csrf = dev_csrf();
                 let token = dev_token();
                 log::info!("manually setting auth for dev mode");
 
                 super::storage::save_csrf_token(&csrf);
 
-
-                web_sys::window()
-                    .unwrap_throw()
+                window
                     .document()
                     .unwrap_throw()
                     .unchecked_into::<web_sys::HtmlDocument>()
                     .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
+            } else {
+                log::info!("skipping auth for dev mode");
             }
         }
     }

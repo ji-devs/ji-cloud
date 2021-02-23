@@ -16,7 +16,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
-use crate::register::state::{Step, StartData};
+use crate::register::state::{Step};
 
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
@@ -102,37 +102,11 @@ pub fn register_google(state: Rc<State>) {
             .replace("{service}", &service_kind_str)
             .replace("{kind}", &url_kind_str);
         if let Ok(resp) = api_no_auth::<GetOAuthUrlResponse, EmptyError, ()>(&path, GetOAuthUrl::METHOD, None).await {
-            //web_sys::window().unwrap_throw().location().set_href(&resp.url);
-            unsafe { crate::oauth_popup::actions::oauth_open_window(&resp.url, "oauth"); }
+            web_sys::window().unwrap_throw().location().set_href(&resp.url);
+            //unsafe { crate::oauth::actions::oauth_open_window(&resp.url, "oauth"); }
         }
     }));
 }
-
-pub fn handle_window_message(state: Rc<State>, evt: dominator_helpers::events::Message) {
-    match evt.try_serde_data::<CreateSessionOAuthResponse>() {
-        Ok(resp) => {
-            match resp {
-                CreateSessionOAuthResponse::Login {csrf} => {
-                    log::info!("Login with {}", csrf);
-                },
-                CreateSessionOAuthResponse::CreateUser {csrf} => {
-                    log::info!("Register with {}", csrf);
-                },
-                _ => {
-                    log::info!("some other resp?");
-                }
-            }
-        },
-        Err(_) => {
-            log::info!("couldn't deserialize window message into oauth");
-        }
-    }
-}
-
-fn next_step(state: Rc<State>, token: String, email: String, email_verified: bool) {
-    state.step.set(Step::One(StartData{token, email, email_verified}));
-}
-
 
 pub fn update_password_strength(state: &Rc<State>) {
     let password:&str = &state.password.borrow();
