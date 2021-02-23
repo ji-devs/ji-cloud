@@ -34,7 +34,7 @@ pub async fn get_bundles() -> Vec<String> {
 pub async fn get_entries(bundles: &Vec<&Bundle>) -> Vec<Entry> {
 
     resolve_after(500).await;
-    println!("{:?}", bundles);
+    log::info!("{:?}", bundles);
 
     let json = r#"
         [

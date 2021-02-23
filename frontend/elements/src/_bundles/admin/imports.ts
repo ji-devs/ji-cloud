@@ -1,5 +1,9 @@
 import "@elements/entry/admin/category/pages/landing";
 import "@elements/entry/admin/category/buttons/add";
+import "@elements/entry/admin/locale/landing";
+import "@elements/entry/admin/locale/locale-cell-header";
+import "@elements/entry/admin/locale/locale-cell";
+import "@elements/entry/admin/locale/locale-row";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
 import "@elements/core/inputs/dropdowns/tree/tree";
