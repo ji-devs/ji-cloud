@@ -40,7 +40,7 @@ export class _ extends LitElement {
         const {imageKind} = this;
 
         return html`
-            <image-page title="${STR_TITLE}">
+            <image-page title="${STR_TITLE}" hideAdd>
                 <div class="button">
                     <slot name="button"></slot>
                 </div>

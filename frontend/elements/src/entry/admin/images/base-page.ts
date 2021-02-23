@@ -4,6 +4,8 @@ import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/inputs/search";
 import { nothing } from "lit-html";
 
+const STR_ADD = "Add image";
+
 @customElement('image-page')
 export class _ extends LitElement {
     static get styles() {
@@ -26,6 +28,11 @@ export class _ extends LitElement {
                 color: #000000;
             }
 
+            .right {
+                display: flex;
+                gap: 24px;
+            }
+
             :host {
                     display: block;
                 margin-top: 29px;
@@ -38,16 +45,31 @@ export class _ extends LitElement {
     `];
     }
 
+    gotoAdd() {
+        this.dispatchEvent(
+            new CustomEvent("custom-route", {
+                detail: { route: "add"},
+                composed: true,
+                bubbles: true
+            })
+        );
+    }
     @property()
     title:string = "";
 
+    @property({type: Boolean})
+    hideAdd:boolean = false;
+
     render() {
-        const {title} = this;
+        const {title, hideAdd} = this;
 
         return html`
             <aside>
-                <div class="title">${title}</div> 
-                <input-search></input-search>
+                <div class="title">${title}</div>
+                <div class="right">
+                    ${hideAdd ? nothing : html`<button-rect @click=${this.gotoAdd} color="blue" size="small" iconBefore="plus">${STR_ADD}</button-rect>`}
+                    <input-search></input-search>
+                </div>
             </aside>
             <article>
                 <slot></slot>

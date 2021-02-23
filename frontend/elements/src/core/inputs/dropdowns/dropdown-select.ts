@@ -13,11 +13,10 @@ export class _ extends LitElement {
           border-radius: 14px;
           padding: 8px 48px 8px 16px;
         }
-        input {
-          outline: none;
-          border: none;
+        .value, .placeholder {
           margin-top: 33px;
           width: inherit;
+          font-size: 16px;
         }
         label {
           position: absolute;
@@ -30,9 +29,6 @@ export class _ extends LitElement {
         .input-wrapper:active {
           border: solid 2px #5590fc;
           margin: -1px;
-        }
-        input {
-          font-size: 16px;
         }
         img-ui {
           width: 24px;
@@ -81,7 +77,7 @@ export class _ extends LitElement {
           margin: 0;
           overflow: auto;
         }
-        input::placeholder{
+        .placeholder{
           color:#94a1aa;
         }
       `,
@@ -113,13 +109,11 @@ export class _ extends LitElement {
     const errorwrapper = isError ? "errorwrapper" : "";
 
     return html`
-      <div class="input-wrapper ${errorwrapper ? "errorwrapper" : ""}">
-        <input
-          placeholder="${placeholder}"
-          value="${value}"
-          type="text"
-          class=""
-        />
+        <div class="input-wrapper ${errorwrapper ? "errorwrapper" : ""}">
+            ${value !== ""
+                ? html`<div class="value">${value}</div>`
+                : html`<div class="placeholder">${placeholder}</div>`
+            }
         <label class="">${label}</label>
         <img-ui path="core/inputs/chevron-down-blue.svg"></img-ui>
         <div class="${open ? "open" : ""}">

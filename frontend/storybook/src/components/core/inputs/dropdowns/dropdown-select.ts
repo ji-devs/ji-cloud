@@ -11,15 +11,18 @@ interface Args {
     label: string,
     error: string,
     value: string,
+    placeholder: string,
     open: boolean,
-    count: number,
     maxChildrenHeight: number,
+    //Just used for demo
+    count: number,
     width: number,
 }
 
 const DEFAULT_ARGS:Args = {
     label: "hello",
     value: "world",
+    placeholder: "select something",
     error: "",
     open: true,
     count: 3,
