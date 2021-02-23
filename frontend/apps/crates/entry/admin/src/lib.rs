@@ -7,6 +7,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod router;
 mod categories;
+mod images;
 mod strings;
 mod locale;
 

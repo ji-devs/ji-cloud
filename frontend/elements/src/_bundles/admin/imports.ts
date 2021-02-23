@@ -10,3 +10,5 @@ import "@elements/core/buttons/expand";
 import "@elements/core/buttons/text";
 import "@elements/core/window/window-loader-block";
 import "@elements/core/inputs/text-content";
+import "@elements/entry/admin/images/add/pages/landing";
+import "@elements/entry/admin/images/add/buttons/add";

@@ -10,6 +10,7 @@ use dominator::{Dom, html};
 use crate::{
     categories::dom::CategoriesPage,
     locale::dom::LocalePage,
+    images::add::dom::ImageAddPage,
 };
 
 pub struct Router {
@@ -33,6 +34,7 @@ impl Router {
                             match route {
                                 AdminRoute::Categories=> Some(CategoriesPage::render()),
                                 AdminRoute::Locale => Some(LocalePage::render()),
+                                AdminRoute::ImageAdd => Some(ImageAddPage::render()),
                                 _ => None
                                 /*
                                 AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
