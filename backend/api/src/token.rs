@@ -1,6 +1,6 @@
 use actix_http::cookie::{Cookie, CookieBuilder, SameSite};
 use chrono::{Duration, Utc};
-use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION, MAX_SIGNUP_COOKIE_DURATION};
+use config::{MAX_SIGNIN_COOKIE_DURATION, MAX_SIGNUP_COOKIE_DURATION};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};

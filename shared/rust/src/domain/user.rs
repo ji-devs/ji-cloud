@@ -33,6 +33,9 @@ pub enum UserScope {
 
     /// The user can create/delete/modify animations.
     ManageAnimation = 6,
+
+    /// The user can create/delete/modify locale entries.
+    ManageEntry = 7,
 }
 
 impl TryFrom<i16> for UserScope {
@@ -46,6 +49,7 @@ impl TryFrom<i16> for UserScope {
             4 => Ok(Self::ManageJig),
             5 => Ok(Self::ManageModule),
             6 => Ok(Self::ManageAnimation),
+            7 => Ok(Self::ManageEntry),
             _ => anyhow::bail!("Scope {} is invalid"),
         }
     }

@@ -57,3 +57,6 @@ pub mod media;
 
 /// Session endpoints
 pub mod session;
+
+/// Locale endpoints
+pub mod locale;

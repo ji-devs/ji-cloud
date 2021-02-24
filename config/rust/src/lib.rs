@@ -117,7 +117,7 @@ impl RemoteTarget {
         }
     }
 
-    pub fn css_url(&self, minified: bool) -> String {
+    pub fn css_url(&self, _minified: bool) -> String {
         format!("{}/css/head.css", self.media_ui_url())
         /*
         if minified {
