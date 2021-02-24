@@ -75,8 +75,12 @@ pub async fn run(
     let server = actix_web::HttpServer::new(move || {
         let server = actix_web::App::new()
             .data(pool.clone())
-            .data(settings.clone())
-            .data(s3.clone());
+            .data(settings.clone());
+
+        let server = match s3.clone() {
+            Some(s3) => server.app_data(s3),
+            None => server,
+        };
 
         let server = match algolia.clone() {
             Some(algolia) => server.app_data(algolia),
