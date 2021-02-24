@@ -123,6 +123,7 @@ pub async fn run(
             .configure(endpoints::search::configure)
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
+            .configure(endpoints::locale::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });

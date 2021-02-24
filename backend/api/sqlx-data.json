@@ -52,6 +52,112 @@
       "nullable": []
     }
   },
+  "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
+    "query": "select exists(select 1 from locale_entry where id = $1 for update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "0eaa3162be77943a44df9ba08acf627d0f82b1b11b5486710ccfc445691b8a5f": {
+    "query": "\nselect\n    id as \"id: u32\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere id = $1\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: u32",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "bundle_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "section",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_kind_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "english",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "hebrew",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "status: EntryStatus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 7,
+          "name": "zeplin_reference",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "comments",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "in_app",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "in_element",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "in_mock",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "10d913a55fedf3aac997e0772c81bfb30a99a7169ea917586a14abceaf4765d2": {
     "query": "update image_metadata set last_synced_at = $1 where id = any($2)",
     "describe": {
@@ -63,6 +169,36 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
+    "query": "\ninsert into locale_entry (bundle_id, section, item_kind_id, english, hebrew, status, zeplin_reference, comments, in_app, in_element, in_mock)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2",
+          "Text",
+          "Text",
+          "Bool",
+          "Bool",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "12733111814b439e48d7e9f8ce720e88382a2e0a92dc6ec1dc077c09ad4a47a9": {
@@ -119,6 +255,30 @@
         "Left": []
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "1781983a4042cb8447163d98ee232c71d24ef75c29ea58219fc7604d95780767": {
+    "query": "select id, display_name as name from locale_bundle order by created_at",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
         false
       ]
     }
@@ -1367,6 +1527,93 @@
       ]
     }
   },
+  "8731b3b67aae4e9ceaab3893d91215f857dbe9642a301409ebc50fc1860342b6": {
+    "query": "\nselect\n    id as \"id: u32\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere $2 or bundle_id = any($1)\norder by id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: u32",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "bundle_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "section",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_kind_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "english",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "hebrew",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "status: EntryStatus",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 7,
+          "name": "zeplin_reference",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "comments",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "in_app",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "in_element",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "in_mock",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "8d817d6384c10aa3eddcbe4b990c830b69970f782ad4ecdd5af9380994dfef0c": {
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1",
     "describe": {
@@ -1892,6 +2139,18 @@
       ]
     }
   },
+  "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
+    "query": "delete from locale_entry where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "cf12ae2072a2ec2886a2484643dae2b5dea7869eda0b0fe3ff4c5ba2cf158592": {
     "query": "\ninsert into animation (name, description, is_premium, publish_at, variant, looping) values ($1, $2, $3, $4, $5, $6)\nreturning id as \"id: AnimationId\"\n        ",
     "describe": {
@@ -1983,6 +2242,32 @@
         null,
         null
       ]
+    }
+  },
+  "dc713784b032fea246bc93f78a1d6156e1e66d5eeb27a840a405450da93443f7": {
+    "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce(item_kind_id, $3),\n    english = coalesce(english, $4),\n    hebrew = coalesce(hebrew, $5),\n    status = coalesce(status, $6),\n    in_app = coalesce(in_app, $7),\n    in_element = coalesce(in_element, $8),\n    in_mock = coalesce(in_mock, $9),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "deb684379042b0f339ef2d3bca47d627a7a6b8ac0c003f8d4a3c9c67f64dd1b7": {
@@ -2128,6 +2413,30 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "f61ec8402e7de26b770073be29eee23dd893751db1fe71f55def28f880b32e3a": {
+    "query": "select id, display_name as name from locale_item_kind order by created_at",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
       ]
     }
   },

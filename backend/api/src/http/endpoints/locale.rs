@@ -33,15 +33,21 @@ async fn list_item_kinds(db: Data<PgPool>) -> Result<Json<ListItemKindResponse>,
 }
 
 mod entry {
-    use actix_web::web::{Data, Json, Path};
-    use paperclip::actix::{api_v2_operation, CreatedJson};
+    use std::collections::HashMap;
+
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Data, Json, Path, Query},
+        CreatedJson, NoContent,
+    };
     use shared::domain::locale::{
         CreateEntryRequest, CreateEntryResponse, Entry, EntryStatus, GetEntryResponse,
+        ListEntryGroupBy, ListEntryQuery, ListEntryResponse, UpdateEntryRequest,
     };
     use sqlx::PgPool;
 
     use crate::{
-        error,
+        db, error,
         extractor::{ScopeManageManageEntry, TokenUserWithScope},
     };
 
@@ -68,6 +74,56 @@ returning id
     }
 
     #[api_v2_operation]
+    pub async fn list(
+        db: Data<PgPool>,
+        query: Option<Query<ListEntryQuery>>,
+    ) -> Result<Json<ListEntryResponse>, error::Server> {
+        let query = query.map_or_else(ListEntryQuery::default, Query::into_inner);
+
+        let entries = sqlx::query_as!(
+            Entry,
+            r#"
+select
+    id as "id: u32",
+    bundle_id,
+    section,
+    item_kind_id,
+    english,
+    hebrew,
+    status as "status: EntryStatus",
+    zeplin_reference,
+    comments,
+    in_app, 
+    in_element, 
+    in_mock
+from locale_entry
+where $2 or bundle_id = any($1)
+order by id
+"#,
+            &query.bundles,
+            query.bundles.is_empty(),
+        )
+        .fetch_all(db.as_ref())
+        .await?;
+
+        match query.group_by {
+            ListEntryGroupBy::None => Ok(Json(ListEntryResponse::List(entries))),
+            ListEntryGroupBy::Bundle => {
+                let mut map = HashMap::new();
+                for entry in entries {
+                    map.entry(entry.bundle_id)
+                        .or_insert_with(Vec::new)
+                        .push(entry);
+                }
+
+                Ok(Json(ListEntryResponse::Bundles(map)))
+            }
+
+            it => Err(anyhow::anyhow!("Unknown groupBy kind: {:?}", it).into()),
+        }
+    }
+
+    #[api_v2_operation]
     pub async fn get(
         db: Data<PgPool>,
         id: Path<u32>,
@@ -76,28 +132,62 @@ returning id
             Entry,
             r#"
 select
-id as "id: u32",
-bundle_id,
-section,
-item_kind_id,
-english,
-hebrew,
-status as "status: EntryStatus",
-zeplin_reference,
-comments,
-in_app, 
-in_element, 
-in_mock
-from
-locale_entry
+    id as "id: u32",
+    bundle_id,
+    section,
+    item_kind_id,
+    english,
+    hebrew,
+    status as "status: EntryStatus",
+    zeplin_reference,
+    comments,
+    in_app, 
+    in_element, 
+    in_mock
+from locale_entry
 where id = $1
 "#,
             id.into_inner() as u32,
         )
-        .fetch_one(db.as_ref())
-        .await?;
+        .fetch_optional(db.as_ref())
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
 
         Ok(Json(GetEntryResponse { entry }))
+    }
+
+    #[api_v2_operation]
+    pub async fn update(
+        _user: TokenUserWithScope<ScopeManageManageEntry>,
+        db: Data<PgPool>,
+        id: Path<u32>,
+        req: Json<UpdateEntryRequest>,
+    ) -> Result<NoContent, error::NotFound> {
+        // todo: use a more descriptive error.
+        let id = id.into_inner() as i32;
+        let req = req.into_inner();
+
+        let mut txn = db.begin().await?;
+        db::locale::update_entry(&mut txn, id, req).await?;
+        txn.commit().await?;
+
+        Ok(NoContent)
+    }
+
+    #[api_v2_operation]
+    pub async fn delete(
+        _user: TokenUserWithScope<ScopeManageManageEntry>,
+        db: Data<PgPool>,
+        id: Path<u32>,
+    ) -> Result<NoContent, error::Delete> {
+        sqlx::query!(
+            "delete from locale_entry where id = $1",
+            id.into_inner() as i32
+        )
+        .execute(db.as_ref())
+        .await?;
+
+        Ok(NoContent)
     }
 }
 
@@ -117,17 +207,17 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         locale::entry::Create::PATH,
         locale::entry::Create::METHOD.route().to(entry::create),
-        //     )
-        //    .route(
-        //         locale::entry::List::PATH,
-        //         locale::entry::List::METHOD.route().to(entry::list),
-        //     )
-        //     .route(
-        //         locale::entry::Update::PATH,
-        //         locale::entry::Update::METHOD.route().to(entry::update),
-        //     )
-        //     .route(
-        //         locale::entry::Delete::PATH,
-        //         locale::entry::Delete::METHOD.route().to(entry::delete),
+    )
+    .route(
+        locale::entry::List::PATH,
+        locale::entry::List::METHOD.route().to(entry::list),
+    )
+    .route(
+        locale::entry::Update::PATH,
+        locale::entry::Update::METHOD.route().to(entry::update),
+    )
+    .route(
+        locale::entry::Delete::PATH,
+        locale::entry::Delete::METHOD.route().to(entry::delete),
     );
 }
