@@ -421,11 +421,10 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
 
 #[api_v2_errors(
     code = 400,
+    code = 409,
+    description = "Conflict: Another user with the provided username already exists"
     code = 420,
-    description = "Unprocessable Entity: No username was provided OR "
-    "Another user with the provided email already exists OR "
-    "Another user with the provided firebase-id already exists OR "
-    "Another user with the provided username already exists",
+    description = "Unprocessable Entity: No username was provided",
     code = 500
 )]
 pub enum Register {

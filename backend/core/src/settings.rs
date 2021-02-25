@@ -3,7 +3,7 @@ use anyhow::Context;
 use sqlx::postgres::PgConnectOptions;
 
 use crate::{
-    env::{env_bool, keys, req_env},
+    env::{keys, req_env},
     google::{get_access_token_and_project_id, get_optional_secret},
 };
 use config::RemoteTarget;
@@ -58,8 +58,6 @@ impl GoogleOAuth {
 /// Settings that are accessed at runtime (as compared to startup time)
 #[derive(Clone)]
 pub struct RuntimeSettings {
-    firebase_no_auth: bool,
-
     /// The port that the api runs on.
     pub api_port: u16,
 
@@ -107,14 +105,11 @@ impl RuntimeSettings {
             RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
         };
 
-        let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
-
         assert_eq!(token_secret.len(), 32);
 
         Ok(Self {
             api_port,
             pages_port,
-            firebase_no_auth,
             epoch: get_epoch(),
             remote_target,
             bing_search_key,

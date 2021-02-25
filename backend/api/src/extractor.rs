@@ -369,7 +369,7 @@ from user_auth_basic where email = $1::text
                             password.as_bytes(),
                             None,
                             None,
-                            DEFAULT_PARAMS,
+                            crate::ARGON2_DEFAULT_PARAMS,
                             salt.as_salt(),
                         );
 
@@ -401,14 +401,6 @@ from user_auth_basic where email = $1::text
         .into()
     }
 }
-
-// todo: make this configurable?
-const DEFAULT_PARAMS: argon2::Params = argon2::Params {
-    m_cost: 8192,
-    p_cost: 1,
-    t_cost: 192,
-    output_length: 32,
-};
 
 fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> actix_web::Error {
     match err {

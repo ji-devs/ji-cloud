@@ -87,7 +87,7 @@ async fn create_session(
 
     let mut txn = db.begin().await?;
 
-    db::session::create_new(
+    db::session::create_with_token(
         &mut txn,
         user.id,
         &session,
@@ -212,6 +212,8 @@ async fn handle_google_oauth(
             .execute(&mut txn)
             .await?;
 
+            // todo: handle duplicate email here (return a conflict error)
+
             sqlx::query!(
                 "insert into user_email (user_id, email) values ($1, $2::text)",
                 id,
@@ -234,7 +236,7 @@ async fn handle_google_oauth(
 
     let session = crate::token::generate_session_token();
 
-    db::session::create_new(
+    db::session::create_with_token(
         &mut txn,
         user_id,
         &session,

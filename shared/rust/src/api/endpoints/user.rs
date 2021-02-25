@@ -6,7 +6,7 @@ use crate::{
         session::NewSessionResponse,
         user::{
             CreateUserRequest, OtherUser, PutProfileRequest, ResetPasswordRequest, UserLookupQuery,
-            UserProfile, VerifyEmailRequest, VerifyEmailResponse,
+            UserProfile, VerifyEmailRequest,
         },
     },
     error::EmptyError,
@@ -56,7 +56,7 @@ impl ApiEndpoint for Create {
 /// # Register Flow
 /// 1. [`POST /v1/user`](Create)
 ///     * This will send the email for verification
-/// 2. `POST` this route with `Authorization: Bearer <token>` (`<token>` being the token from the email) and no body.
+/// 2. `POST` this route with the Verify request.
 ///     * recieve one of:
 ///         1. a 200 ([`NewSessionResponse`])
 ///         2. a 401 response (`<token>` is invalid)
@@ -81,7 +81,7 @@ impl ApiEndpoint for Create {
 pub struct VerifyEmail;
 impl ApiEndpoint for VerifyEmail {
     type Req = VerifyEmailRequest;
-    type Res = VerifyEmailResponse;
+    type Res = Option<NewSessionResponse>;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/verify-email";
     const METHOD: Method = Method::Post;

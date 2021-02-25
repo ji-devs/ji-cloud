@@ -56,7 +56,7 @@ async fn impersonate(
 
     let session = crate::token::generate_session_token();
 
-    db::session::create_new(
+    db::session::create_with_token(
         &mut *db.acquire().await?,
         user_id,
         &session,

@@ -74,3 +74,7 @@ features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
 # we use native-tls but this ensures we have a stable version of OpenSSL on *nix
 [target.'cfg(unix)'.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
+
+# argon2 *needs* perf
+[profile.dev.package.argon2]
+opt-level = 3

@@ -8,10 +8,7 @@ use uuid::Uuid;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 
-use super::{
-    meta::{AffiliationId, AgeRangeId, SubjectId},
-    session::NewSessionResponse,
-};
+use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 
 /// Represents a user's permissions.
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
@@ -161,31 +158,16 @@ pub struct UserProfile {
 #[serde(rename_all = "camelCase")]
 pub enum VerifyEmailRequest {
     /// Attempt to verify the email
-    Verify,
+    Verify {
+        /// The token to verify.
+        token: String,
+    },
 
     /// Resend a confirmation link if a verification is in progress
     Resend {
         /// The email to send a verification link to.
         email: String,
     },
-}
-
-impl Default for VerifyEmailRequest {
-    fn default() -> Self {
-        Self::Verify
-    }
-}
-
-/// Response for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
-#[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[serde(rename_all = "camelCase")]
-pub enum VerifyEmailResponse {
-    /// The email was verified or the verification email has been sent.
-    Success,
-
-    /// The email was verified, and a token to finish registration has been provided.
-    ContinueRegistration(NewSessionResponse),
 }
 
 /// Request for [`PutProfile`](crate::api::endpoints::user::PutProfile)
