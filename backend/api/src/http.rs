@@ -1,7 +1,11 @@
 mod cors;
 mod endpoints;
 
-use crate::{error::BasicError, s3, service::ServiceData};
+use crate::{
+    error::BasicError,
+    s3,
+    service::{mail, ServiceData},
+};
 use actix_service::Service;
 use actix_web::HttpResponse;
 use actix_web::{
@@ -64,6 +68,7 @@ pub async fn run(
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
+    mail_client: Option<mail::Client>,
 ) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
@@ -71,6 +76,7 @@ pub async fn run(
     let s3 = s3.map(ServiceData::new);
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
+    let mail_client = mail_client.map(ServiceData::new);
 
     let server = actix_web::HttpServer::new(move || {
         let server = actix_web::App::new()
@@ -89,6 +95,11 @@ pub async fn run(
 
         let server = match algolia_key_store.clone() {
             Some(algolia_key_store) => server.app_data(algolia_key_store),
+            None => server,
+        };
+
+        let server = match mail_client.clone() {
+            Some(mail_client) => server.app_data(mail_client),
             None => server,
         };
 

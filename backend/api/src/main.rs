@@ -13,7 +13,7 @@
 
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
-use ji_cloud_api::{algolia, db, http, jwk, logger, s3};
+use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
 use std::thread;
 
 #[tokio::main]
@@ -30,6 +30,7 @@ async fn main() -> anyhow::Result<()> {
         algolia_manager,
         db_pool,
         jwk_verifier,
+        mail_client,
         _guard,
     ) = {
         log::trace!("initializing settings and processes");
@@ -75,6 +76,11 @@ async fn main() -> anyhow::Result<()> {
 
         let _ = jwk::run_task(jwk_verifier.clone());
 
+        let mail_client = settings
+            .email_client_settings()
+            .await?
+            .map(service::mail::Client::new);
+
         (
             runtime_settings,
             s3,
@@ -83,6 +89,7 @@ async fn main() -> anyhow::Result<()> {
             algolia_manager,
             db_pool,
             jwk_verifier,
+            mail_client,
             guard,
         )
     };
@@ -105,6 +112,7 @@ async fn main() -> anyhow::Result<()> {
             algolia_client,
             algolia_key_store,
             jwk_verifier,
+            mail_client,
         )
     });
 

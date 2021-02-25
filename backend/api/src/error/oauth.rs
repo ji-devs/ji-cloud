@@ -4,11 +4,12 @@ use crate::google;
 
 use super::BasicError;
 
-#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+#[api_v2_errors(code = 400, code = 401, code = 409, code = 403, code = 500, code = 501)]
 #[derive(Debug)]
 pub enum OAuth {
     InternalServerError(anyhow::Error),
     Google(GoogleOAuth),
+    Conflict,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for OAuth {
@@ -28,6 +29,11 @@ impl Into<actix_web::Error> for OAuth {
         match self {
             Self::InternalServerError(err) => super::ise(err),
             Self::Google(it) => it.into(),
+            Self::Conflict => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "User with same email exists, but they haven't enabled oauth".to_owned(),
+            )
+            .into(),
         }
     }
 }
@@ -40,6 +46,7 @@ pub enum GoogleOAuth {
     Disabled,
     InvalidCode,
     RedirectUriMismatch,
+    UnverifiedEmail,
 }
 
 impl From<google::TokenErrorResponse> for GoogleOAuth {
@@ -87,6 +94,12 @@ impl Into<actix_web::Error> for GoogleOAuth {
             GoogleOAuth::RedirectUriMismatch => BasicError::with_message(
                 http::StatusCode::UNAUTHORIZED,
                 "Redirect URI Mismatch".to_owned(),
+            )
+            .into(),
+
+            GoogleOAuth::UnverifiedEmail => BasicError::with_message(
+                http::StatusCode::UNAUTHORIZED,
+                "Email isn't verified".to_owned(),
             )
             .into(),
         }

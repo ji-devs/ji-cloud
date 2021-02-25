@@ -2,9 +2,8 @@ use crate::error;
 use chrono_tz::Tz;
 use shared::{
     domain::{
-        auth::RegisterRequest,
         meta::{AffiliationId, AgeRangeId, SubjectId},
-        user::{OtherUser, UserProfile, UserScope},
+        user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
     },
     error::auth::RegisterErrorKind,
 };
@@ -100,37 +99,31 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
     .map(|it| it.exists)
 }
 
-pub async fn register_google_oauth(
+pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    google_id: &str,
+    req: &PutProfileRequest,
     user_id: Uuid,
-) -> sqlx::Result<()> {
+) -> Result<(), error::Register> {
     sqlx::query!(
-        "insert into user_auth_google (user_id, google_id) values ($1, $2)",
-        user_id,
-        google_id
-    )
-    .execute(txn)
-    .await?;
-
-    Ok(())
-}
-
-pub async fn register(
-    txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    req: &RegisterRequest,
-    email: &str,
-) -> Result<Uuid, error::Register> {
-    let user_id = sqlx::query!(
         r#"
-INSERT INTO "user" 
-    (username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
-VALUES 
-    ($1, $2::text, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-returning id
-        "#,
+insert into user_profile
+    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
+values 
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+on conflict (user_id) do update
+set
+    over_18 = $3,
+    given_name = $4,
+    family_name = $5,
+    language = $6,
+    locale = $7,
+    timezone = $8,
+    opt_into_edu_resources = $9,
+    organization = $10,
+    location = $11
+"#,
+        user_id,
         &req.username,
-        &email,
         req.over_18,
         &req.given_name,
         &req.family_name,
@@ -141,22 +134,14 @@ returning id
         req.organization.as_deref(),
         req.location.as_ref(),
     )
-    .fetch_one(&mut *txn)
+    .execute(&mut *txn)
     .await
-    .map(|it| it.id)
     .map_err(|err| match err {
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
             error::Register::RegisterError(RegisterErrorKind::TakenUsername)
-        }
-
-        // fixme: This doesn't actually trigger right now because emails aren't marked `unique`
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint() == Some("user_email_key") =>
-        {
-            error::Register::RegisterError(RegisterErrorKind::TakenEmail)
         }
 
         e => e.into(),
@@ -171,7 +156,7 @@ returning id
     )
     .await?;
 
-    Ok(user_id)
+    Ok(())
 }
 
 pub async fn update_metadata(

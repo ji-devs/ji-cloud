@@ -1,3 +1,5 @@
+pub mod mail;
+
 use std::{
     future::{ready, Ready},
     ops::Deref,

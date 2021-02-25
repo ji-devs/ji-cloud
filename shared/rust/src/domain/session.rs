@@ -6,6 +6,12 @@ use std::fmt;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
+/// The name to use for auth cookies.
+pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
+
+/// The name of the CSRF header.
+pub const CSRF_HEADER_NAME: &str = "X-CSRF";
+
 /// Response for creating a session with basic auth
 ///
 /// Note: This response *also* includes a cookie.
@@ -106,12 +112,12 @@ pub enum CreateSessionOAuthResponse {
 }
 
 impl CreateSessionOAuthResponse {
-    /// Returns `true` if `self` is [`Login`].
+    /// Returns `true` if `self` is [`Login`](Self::Login).
     pub const fn is_login(&self) -> bool {
         matches!(self, Self::Login { .. })
     }
 
-    /// Returns `true` if `self` is [`CreateUser`].
+    /// Returns `true` if `self` is [`CreateUser`](Self::CreateUser).
     pub const fn is_create_user(&self) -> bool {
         matches!(self, Self::CreateUser { .. })
     }

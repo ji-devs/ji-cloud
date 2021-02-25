@@ -5,7 +5,7 @@ use actix_http::{
     http::header::{self, EntityTag, Header, IfMatch, IfNoneMatch},
 };
 use actix_web::{web::Json, HttpResponse};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
@@ -28,12 +28,11 @@ use crate::{
     db,
     error::{self, ServiceKind},
     extractor::{ScopeAdmin, TokenUserWithScope},
-    image_ops::regenerate_images,
+    image_ops::{regenerate_images, MediaKind},
     s3,
     service::ServiceData,
-    token::create_signin_token,
+    token::create_auth_token,
 };
-use crate::{image_ops::MediaKind, token::TokenSource};
 
 /// Impersonate another user
 #[api_v2_operation]
@@ -51,12 +50,27 @@ async fn impersonate(
         return Err(error::UserNotFound::UserNotFound);
     }
 
-    let (csrf, cookie) = create_signin_token(
+    let login_ttl = settings
+        .login_token_valid_duration
+        .unwrap_or(Duration::weeks(2));
+
+    let session = crate::token::generate_session_token();
+
+    db::session::create_new(
+        &mut *db.acquire().await?,
         user_id,
+        &session,
+        Some(&(Utc::now() + login_ttl)),
+        None,
+        Some(auth.claims.user_id),
+    )
+    .await?;
+
+    let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
         settings.is_local(),
-        TokenSource::Impersonate(auth.claims.sub),
-        settings.login_token_valid_duration,
+        login_ttl,
+        &session,
     )?;
 
     Ok(HttpResponse::Ok()

@@ -18,7 +18,8 @@ async fn create_key(
     algolia: ServiceData<crate::algolia::SearchKeyStore>,
     claims: TokenUser,
 ) -> actix_web::Result<CreatedJson<<search::CreateKey as ApiEndpoint>::Res>, error::Service> {
-    let key = algolia.generate_virtual_key(Some(claims.0.sub), Some(chrono::Duration::minutes(15)));
+    let key =
+        algolia.generate_virtual_key(Some(claims.0.user_id), Some(chrono::Duration::minutes(15)));
 
     Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
 }

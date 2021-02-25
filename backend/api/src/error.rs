@@ -62,6 +62,7 @@ pub enum ServiceKind {
     Algolia,
     S3,
     GoogleOAuth,
+    Mail,
 }
 
 impl Into<actix_web::Error> for ServiceKind {
@@ -80,6 +81,11 @@ impl Into<actix_web::Error> for ServiceKind {
             Self::GoogleOAuth => BasicError::with_message(
                 http::StatusCode::NOT_IMPLEMENTED,
                 "Google OAuth service is disabled".to_owned(),
+            )
+            .into(),
+            Self::Mail => BasicError::with_message(
+                http::StatusCode::NOT_IMPLEMENTED,
+                "Mail service is disabled".to_owned(),
             )
             .into(),
         }

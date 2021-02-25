@@ -2,7 +2,7 @@ use crate::{
     domain::RegistrationStatus,
     error::BasicError,
     more_futures::ReadyOrNot,
-    token::{check_login_token, check_signup_token, AuthorizedTokenClaims, OAuthSignupClaims},
+    token::{check_login_token, SessionClaims, TokenPurpose},
 };
 use actix_http::error::BlockingError;
 use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
@@ -17,7 +17,7 @@ use http::StatusCode;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
 use rand::thread_rng;
 use shared::domain::{
-    auth::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
+    session::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserScope,
 };
 use sqlx::postgres::PgPool;
@@ -60,7 +60,7 @@ fn check_cookie_csrf<'a>(
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct TokenUser(pub AuthorizedTokenClaims);
+pub struct TokenUser(pub SessionClaims);
 
 impl FromRequest for TokenUser {
     type Error = actix_web::Error;
@@ -88,7 +88,7 @@ impl FromRequest for TokenUser {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
             let claims =
-                check_login_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
+                check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, None).await?;
 
             Ok(Self(claims))
         }
@@ -175,7 +175,7 @@ impl Scope for ScopeManageManageEntry {
 )]
 #[repr(transparent)]
 pub struct TokenUserWithScope<S: Scope> {
-    pub claims: AuthorizedTokenClaims,
+    pub claims: SessionClaims,
     _phantom: PhantomData<S>,
 }
 
@@ -204,24 +204,98 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         async move {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
+            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, None).await?;
 
             let has_scope = sqlx::query!(
                 r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
-                claims.sub,
+                claims.user_id,
                 S::scope() as i16,
                 UserScope::Admin as i16
             )
-            .fetch_one(&db)
+            .fetch_optional(&db)
             .await
-            .map(|it| it.exists)
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(crate::error::ise)?.map(|it| it.exists).ok_or_else(|| BasicError::new(StatusCode::FORBIDDEN))?;
 
             if !has_scope {
                 // todo: message for which scope is needed
                 return Err(BasicError::new(StatusCode::FORBIDDEN).into());
             }
+
+            Ok(Self {
+                claims,
+                _phantom: PhantomData,
+            })
+        }
+        .boxed()
+        .into()
+    }
+}
+
+pub trait SessionPurpose {
+    const SESSION_PURPOSE: TokenPurpose;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionPurposeCreateProfile;
+
+impl SessionPurpose for SessionPurposeCreateProfile {
+    const SESSION_PURPOSE: TokenPurpose = TokenPurpose::CreateProfile;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionPurposeVerifyEmail;
+
+impl SessionPurpose for SessionPurposeVerifyEmail {
+    const SESSION_PURPOSE: TokenPurpose = TokenPurpose::VerifyEmail;
+}
+
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    alias = "temporaryApiKey",
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Bearer TOKEN'"
+)]
+#[repr(transparent)]
+pub struct TokenUserWithPurposedSession<S: SessionPurpose> {
+    pub claims: SessionClaims,
+    _phantom: PhantomData<S>,
+}
+
+impl<S: SessionPurpose> FromRequest for TokenUserWithPurposedSession<S> {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
+
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
+            Err(e) => return futures::future::err(e.into()).into(),
+        };
+
+        async move {
+            let csrf = csrf;
+            let claims = check_login_token(
+                &db,
+                cookie.value(),
+                &csrf,
+                &settings.token_secret,
+                Some(S::SESSION_PURPOSE),
+            )
+            .await?;
 
             Ok(Self {
                 claims,
@@ -341,50 +415,5 @@ fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> acti
         BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
         BlockingError::Error(Either::B(e)) => crate::error::ise(e),
         BlockingError::Error(Either::A(e)) => e.into(),
-    }
-}
-
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    alias = "signupOAuthKey",
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Bearer TOKEN'"
-)]
-#[repr(transparent)]
-pub struct OAuthSignupToken(pub OAuthSignupClaims);
-
-impl FromRequest for OAuthSignupToken {
-    type Error = actix_web::Error;
-    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
-    fn from_request(
-        req: &actix_web::HttpRequest,
-        _payload: &mut actix_web::dev::Payload,
-    ) -> Self::Future {
-        let cookie = req.cookie(AUTH_COOKIE_NAME);
-        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
-
-        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
-        let settings = Data::clone(settings);
-
-        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
-        let db = db.as_ref().clone();
-
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
-            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
-            Err(e) => return futures::future::err(e.into()).into(),
-        };
-
-        async move {
-            let csrf = csrf;
-            let claims =
-                check_signup_token(&db, cookie.value(), &csrf, &settings.token_secret).await?;
-
-            Ok(Self(claims))
-        }
-        .boxed()
-        .into()
     }
 }

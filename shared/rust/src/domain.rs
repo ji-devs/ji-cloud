@@ -15,7 +15,6 @@ macro_rules! into_uuid {
 pub mod admin;
 pub mod animation;
 pub mod audio;
-pub mod auth;
 pub mod category;
 pub mod image;
 pub mod jig;

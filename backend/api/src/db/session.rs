@@ -2,29 +2,23 @@ use chrono::{DateTime, Utc};
 use sqlx::PgConnection;
 use uuid::Uuid;
 
+use crate::token::TokenPurpose;
+
 pub async fn create_new(
     conn: &mut PgConnection,
     user_id: Uuid,
     token: &str,
     valid_until: Option<&DateTime<Utc>>,
-    temporary: bool,
+    purpose: Option<TokenPurpose>,
+    impersonator_id: Option<Uuid>,
 ) -> sqlx::Result<()> {
-    // only allow 1 temporary token for now
-    if temporary {
-        sqlx::query!(
-            "delete from session where user_id = $1 and temporary is true",
-            user_id
-        )
-        .execute(&mut *conn)
-        .await?;
-    }
-
     sqlx::query!(
-        "insert into session (token, user_id, expires_at, temporary) values ($1, $2, $3, $4)",
+        "insert into session (token, user_id, impersonator_id, expires_at, scope) values ($1, $2, $3, $4, $5)",
         &token,
         user_id,
+        impersonator_id,
         valid_until,
-        temporary
+        purpose.map(|it| it as i16)
     )
     .execute(&mut *conn)
     .await?;

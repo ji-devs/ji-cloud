@@ -24,7 +24,7 @@ use crate::{
     extractor::EmailBasicUser,
     google::{self, oauth_url},
     jwk,
-    token::{create_oauth_signup_token, create_signin_token, OAuthProvider, TokenSource},
+    token::{create_auth_token, TokenPurpose},
 };
 
 #[api_v2_operation]
@@ -76,22 +76,32 @@ async fn create_session(
         .login_token_valid_duration
         .unwrap_or(Duration::weeks(2));
 
-    let (temporary, valid_until) = match user.registration_status {
+    let (purpose, valid_until) = match user.registration_status {
         RegistrationStatus::New => panic!("This isn't currently possible"),
-        RegistrationStatus::Validated => (true, Some(Utc::now() + Duration::hours(1))),
-        RegistrationStatus::Complete => (false, Some(Utc::now() + login_ttl)),
+        RegistrationStatus::Validated => (
+            Some(TokenPurpose::CreateProfile),
+            Some(Utc::now() + Duration::hours(1)),
+        ),
+        RegistrationStatus::Complete => (None, Some(Utc::now() + login_ttl)),
     };
 
     let mut txn = db.begin().await?;
 
-    db::session::create_new(&mut txn, user.id, &session, valid_until.as_ref(), temporary).await?;
-
-    let (csrf, cookie) = create_signin_token(
+    db::session::create_new(
+        &mut txn,
         user.id,
+        &session,
+        valid_until.as_ref(),
+        purpose,
+        None,
+    )
+    .await?;
+
+    let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
         settings.is_local(),
-        TokenSource::Basic,
-        settings.login_token_valid_duration,
+        login_ttl,
+        &session,
     )?;
 
     txn.commit().await?;
@@ -140,7 +150,6 @@ async fn create_oauth_session(
     Ok(HttpResponse::Created().cookie(cookie).json(response))
 }
 
-// todo: what happens if the user has a basic auth?
 async fn handle_google_oauth(
     db: &PgPool,
     config: &GoogleOAuth,
@@ -158,27 +167,86 @@ async fn handle_google_oauth(
 
     let claims = jwks.verify_oauth(&tokens.id_token, 3).await?;
 
+    let mut txn = db.begin().await?;
+
     let google_auth = sqlx::query!(
         "select user_id from user_auth_google where google_id = $1",
         &claims.google_id
     )
-    .fetch_optional(db)
+    .fetch_optional(&mut txn)
     .await?;
 
-    let provider = OAuthProvider::Google {
-        google_id: claims.google_id,
+    let (user_id, purpose) = match &google_auth {
+        Some(google_auth) => {
+            // make sure that the user either has a profile, or can only *create* one.
+            let check_profile = sqlx::query!(
+                r#"select exists(select 1 from user_profile where user_id = $1) as "exists!""#,
+                google_auth.user_id
+            )
+            .fetch_one(&mut txn)
+            .await?;
+
+            let purpose = if check_profile.exists {
+                None
+            } else {
+                Some(TokenPurpose::CreateProfile)
+            };
+
+            (google_auth.user_id, purpose)
+        }
+        None => {
+            if !claims.email_verified {
+                return Err(error::OAuth::Google(error::GoogleOAuth::UnverifiedEmail));
+            }
+
+            let id = sqlx::query!(r#"insert into "user" default values returning id"#)
+                .fetch_one(&mut txn)
+                .await?
+                .id;
+
+            sqlx::query!(
+                r"insert into user_auth_google (user_id, google_id) values ($1, $2)",
+                id,
+                &claims.google_id
+            )
+            .execute(&mut txn)
+            .await?;
+
+            sqlx::query!(
+                "insert into user_email (user_id, email) values ($1, $2::text)",
+                id,
+                &claims.email
+            )
+            .execute(&mut txn)
+            .await?;
+            (id, Some(TokenPurpose::CreateProfile))
+        }
     };
 
-    let (csrf, cookie) = match &google_auth {
-        Some(auth) => create_signin_token(
-            auth.user_id,
-            token_secret,
-            local_insecure,
-            TokenSource::OAuth(provider),
-            login_token_valid_duration,
-        )?,
-        None => create_oauth_signup_token(&claims.email, token_secret, local_insecure, provider)?,
-    };
+    let login_ttl = login_token_valid_duration.unwrap_or(Duration::weeks(2));
+
+    let valid_until = Utc::now()
+        + if let Some(TokenPurpose::CreateProfile) = purpose {
+            Duration::hours(1)
+        } else {
+            login_ttl
+        };
+
+    let session = crate::token::generate_session_token();
+
+    db::session::create_new(
+        &mut txn,
+        user_id,
+        &session,
+        Some(&valid_until),
+        purpose,
+        None,
+    )
+    .await?;
+
+    txn.commit().await?;
+
+    let (csrf, cookie) = create_auth_token(token_secret, local_insecure, login_ttl, &session)?;
 
     let response = match google_auth {
         Some(_) => CreateSessionOAuthResponse::Login { csrf },
