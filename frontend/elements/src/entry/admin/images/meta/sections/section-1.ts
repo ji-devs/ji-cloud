@@ -33,7 +33,7 @@ export class _ extends LitElement {
                 </list-vertical>
                 <div class="container2">
                     <list-vertical label="${STR_AGE}">
-                        <slot name="ages"></slot>
+                        <slot name="age_ranges"></slot>
                     </list-vertical>
                     <list-vertical label="${STR_AFFILIATION}">
                         <slot name="affiliations"></slot>

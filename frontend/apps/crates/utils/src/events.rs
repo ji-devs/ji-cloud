@@ -55,7 +55,7 @@ impl CustomToggle {
     }
 }
 
-// Custom Change 
+// Custom Route 
 #[derive(Deserialize, Debug)]
 pub struct CustomRouteData {
     pub route: String,
@@ -69,6 +69,20 @@ impl CustomRoute {
     }
 }
 
+
+// Custom Search 
+#[derive(Deserialize, Debug)]
+pub struct CustomSearchData {
+    pub query: String,
+}
+
+make_custom_event_serde!("custom-search", CustomSearch, CustomSearchData);
+
+impl CustomSearch {
+    pub fn query(&self) -> String {
+        self.data().query
+    }
+}
 
 // Google Location 
 #[derive(Deserialize, Debug)]

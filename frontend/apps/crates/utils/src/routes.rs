@@ -1,6 +1,11 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
-use shared::domain::{image::ImageSearchQuery, jig::{JigId, ModuleId, ModuleKind}, search::CreateSearchKeyResponse, session::CreateSessionOAuthResponse};
+use shared::domain::{
+    image::{ImageId, ImageSearchQuery}, 
+    jig::{JigId, ModuleId, ModuleKind}, 
+    search::CreateSearchKeyResponse, 
+    session::CreateSessionOAuthResponse
+};
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
@@ -44,7 +49,7 @@ pub enum AdminRoute {
     Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageMeta(Id, Option<ImageSearchQuery>),
+    ImageMeta(ImageId, Option<ImageSearchQuery>),
 }
 
 #[derive(Debug, Clone)]
@@ -159,11 +164,14 @@ impl Route {
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-meta", id] => {
+
+                let id = ImageId(Uuid::from_str(id).unwrap_throw());
+
                 if let Some(search) = json_query {
                     let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
-                    Self::Admin(AdminRoute::ImageMeta(id.to_string(), Some(search)))
+                    Self::Admin(AdminRoute::ImageMeta(id, Some(search)))
                 } else {
-                    Self::Admin(AdminRoute::ImageMeta(id.to_string(), None))
+                    Self::Admin(AdminRoute::ImageMeta(id, None))
                 }
             },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
@@ -246,12 +254,12 @@ impl From<&Route> for String {
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
                     AdminRoute::ImageMeta(id, search) => {
                         match search {
-                            None => format!("/admin/image-meta/{}", id),
+                            None => format!("/admin/image-meta/{}", id.0.to_string()),
                             Some(search) => {
                                 let data = serde_json::to_string(&search).unwrap_throw();
                                 let query = JsonQuery { data };
                                 let query = serde_qs::to_string(&query).unwrap_throw();
-                                format!("/admin/image-meta/{}?{}", id, query)
+                                format!("/admin/image-meta/{}?{}", id.0.to_string(), query)
                             }
                         }
                     }

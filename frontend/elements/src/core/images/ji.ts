@@ -16,13 +16,17 @@ export class _ extends LitElement {
         ];
     }
 
+    @property({type: Boolean})
+    cacheBust:boolean = false;
+
     @property()
     lib: "global" | "user" | "web" = "global";
 
     @property()
     size: "original" | "full" | "thumb" = "full";
 
-    @property()
+    //use with cacheBust true to force reloading when id changes to the same thing
+    @property({hasChanged: () => true})
     id: string = "";
 
     onLoad(evt: Event) {
@@ -41,9 +45,13 @@ export class _ extends LitElement {
 
 
     render() {
-        const { lib, size, id } = this;
+        const { lib, size, id, cacheBust } = this;
 
-        const src = imageLib({ lib, size, id });
+        let src = imageLib({ lib, size, id });
+
+        if(cacheBust) {
+            src += `?cb=${Date.now()}`;
+        }
 
         if (sameOrigin(src)) {
             return html`<img .src="${src}" @load="${this.onLoad}" ></img>`;

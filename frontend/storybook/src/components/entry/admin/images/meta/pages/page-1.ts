@@ -14,7 +14,7 @@ export const ImageMeta1 = () => {
         content: `
             <image-meta-section-1>
             ${mapToString(AGE_OPTIONS, label => {
-                return `<input-checkbox slot="ages" label="${label}"></input-checkbox>`
+                return `<input-checkbox slot="age_ranges" label="${label}"></input-checkbox>`
             })}
             ${mapToString(STYLE_OPTIONS, label => {
                 return `<input-checkbox slot="styles" label="${label}"></input-checkbox>`

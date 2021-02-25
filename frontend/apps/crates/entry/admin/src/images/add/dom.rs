@@ -38,6 +38,11 @@ impl ImageAddPage {
                     }
                 }))
             }))
+            .child(
+                html!("window-loader-block", {
+                    .property_signal("visible", state.loader.is_loading())
+                })
+            )
             .event(clone!(state => move |evt:events::CustomChange| {
                 actions::on_change(state.clone(), evt.value());
             }))

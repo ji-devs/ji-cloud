@@ -57,16 +57,19 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
     }
 }
 
-pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), anyhow::Error> {
+pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), ()> {
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
     let csrf = load_csrf_token().unwrap();
 
-    fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)])
-        .await
-        .map(|res| ())
-        .map_err(|err| anyhow::Error::msg(err.to_string()))
+    let res = fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap();
+    if res.ok() {
+        Ok(())
+    } else {
+        side_effect_error(res.status());
+        Err(())
+    }
 }
 
 pub async fn api_no_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 

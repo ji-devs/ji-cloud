@@ -12,7 +12,7 @@ mod paperclip_impl;
 /// Wrapper type around [`Uuid`], represents the ID of a category.
 ///
 /// [`Uuid`]: ../../uuid/struct.Uuid.html
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
