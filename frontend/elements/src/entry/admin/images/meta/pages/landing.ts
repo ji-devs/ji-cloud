@@ -83,7 +83,8 @@ export class _ extends LitElement {
                     <div class="bottom">
                         <slot name="next"></slot>
                     </div>
-                </article>
+              </article>
+              <slot name="modal"></slot>
           </image-page>
   `;
   }

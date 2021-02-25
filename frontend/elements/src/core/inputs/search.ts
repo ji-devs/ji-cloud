@@ -55,7 +55,7 @@ export class _ extends LitElement {
         this.value = value;
 
         this.dispatchEvent(new CustomEvent("custom-search", {
-            detail: { value },
+            detail: { query: value },
             composed: true,
             bubbles: true
         }))

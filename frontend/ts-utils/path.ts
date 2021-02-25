@@ -17,9 +17,9 @@ export type MediaSizeOptions = "original" | "full" | "thumb";
 const imagePrefix = (lib:MediaLibOptions):string => {
     switch(lib) {
         case "mock": return "mock";
-        case "global": return "image";
-        case "user": return "image-user";
-        case "web": return "image-web";
+        case "global": return "media/global";
+        case "user": return "media/user";
+        case "web": return "media/web";
 		default: return "";
     }
 }
@@ -48,7 +48,7 @@ export const imageLib = ({lib, size, id}:{lib: MediaLibOptions, size: MediaSizeO
 
     return lib === "mock" 
         ? mediaUi(`${prefix}/${variant}/${id}`)
-        : mediaUploads(`${prefix}/${variant}/${id}`);
+        : mediaUploads(`${prefix}/${id}/${variant}.png`);
 }
 
 interface LegacyMedia {

@@ -5,19 +5,22 @@ import {BaseButton} from "@elements/_styles/buttons";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 
-export type Mode = "deleteModule";
+export type Mode = "deleteModule" | "deleteImage";
 
 const STR_TITLE_WARNING = "Warning";
 const STR_BODY_DELETE_MODULE = "Are you sure you want to delete this activity?";
 const STR_CONFIRM_DELETE_MODULE = "Delete activity";
 const STR_CANCEL_DELETE_MODULE = "Don't delete";
 
+const STR_BODY_DELETE_IMAGE = "Are you sure you want to delete this image?";
+const STR_CONFIRM_DELETE_IMAGE = "Delete image";
+const STR_CANCEL_DELETE_IMAGE = "Don't delete";
 @customElement("modal-confirm")
 export class _ extends BaseButton {
     static get styles() {
         return [
             css`
-                :host {
+                article {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -102,37 +105,71 @@ export class _ extends BaseButton {
                 `];
     }
 
+    onAnyClick(evt:MouseEvent) {
+
+      const path = evt.composedPath();
+      if(!path.includes(this.shadowRoot?.getElementById("section") as any)) {
+          this.onCancel();
+      }
+    }
+
+    onCancel() {
+        this.dispatchEvent(new CustomEvent("custom-toggle", {
+          detail: { value: false},
+        }))
+    }
+
+    onConfirm() {
+        this.dispatchEvent(new CustomEvent("custom-toggle", {
+          detail: { value: true},
+        }))
+    }
+
     @property()
     mode: Mode = "deleteModule";
+
+    @property({type: Boolean})
+    visible: boolean = false;
 
     render() {
 
 
-        const {mode} = this;
+        const {visible, mode} = this;
+
+        if(!visible) {
+            return nothing;
+        }
 
         const title = STR_TITLE_WARNING;
-        const body = STR_BODY_DELETE_MODULE;
-        const confirm = html`<div class="confirm-warning">${STR_CONFIRM_DELETE_MODULE}</div>`
-        const cancel = html`<button-rect color="blue">${STR_CANCEL_DELETE_MODULE}</button-rect>`
+        const body = mode === "deleteModule" ? STR_BODY_DELETE_MODULE
+            : STR_BODY_DELETE_IMAGE;
+        const confirm_str = mode === "deleteModule" ? STR_CONFIRM_DELETE_MODULE
+            : STR_CONFIRM_DELETE_IMAGE;
+        const cancel_str = mode === "deleteModule" ? STR_CANCEL_DELETE_MODULE
+            : STR_CANCEL_DELETE_IMAGE;
+        const confirm = html`<div class="confirm-warning">${confirm_str}</div>`
+        const cancel = html`<button-rect color="blue">${cancel_str}</button-rect>`
 
         const titleClasses = classMap({
             title: true,
-            warning: mode === "deleteModule"
+            warning: mode === "deleteModule" || mode === "deleteImage"
         });
 
         return html`
-            <section>
-                <button-icon class="close" icon="x"></button-icon>
-                <div class="contents">
-                    <div class="${titleClasses}">${title}</div>
-                    <div class="divider"></div>
-                    <div class="body">${body}</div>
-                    <div class="options">
-                        <div class="confirm">${confirm}</div>
-                        <div class="cancel">${cancel}</div>
+            <article @click=${this.onAnyClick}>
+                <section id="section">
+                    <button-icon class="close" icon="x" @click=${this.onCancel}></button-icon>
+                    <div class="contents">
+                        <div class="${titleClasses}">${title}</div>
+                        <div class="divider"></div>
+                        <div class="body">${body}</div>
+                        <div class="options">
+                            <div @click=${this.onConfirm} class="confirm">${confirm}</div>
+                            <div @click=${this.onCancel} class="cancel">${cancel}</div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </article>
         `;
     }
 }
