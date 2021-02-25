@@ -1,9 +1,10 @@
+use std::str::FromStr;
 use std::collections::BTreeMap;
 use dominator_helpers::futures::AsyncLoader;
 use std::collections::HashMap;
 use super::db_interface;
 use url::Url;
-use web_sys::HtmlDialogElement;
+use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
 use std::rc::Rc;
 use std::clone::Clone;
 use serde_derive::{Deserialize, Serialize};
@@ -12,12 +13,14 @@ use futures_signals::signal_vec::MutableVec;
 use strum_macros::{EnumString, Display, EnumIter};
 use strum::IntoEnumIterator;
 use std::cmp::Ord;
+use wasm_bindgen::JsCast;
 
 
 pub struct State {
     pub bundles: HashMap<Bundle, bool>,
     pub entries: MutableVec<Rc<Mutable<Entry>>>,
-    pub columns: BTreeMap<String, bool>,
+    pub visible_columns: Rc<MutableVec<Column>>,
+    pub hidden_columns: Rc<MutableVec<Column>>,
     pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
     pub saving_loader: Rc<AsyncLoader>,
@@ -65,11 +68,29 @@ impl State {
         columns.insert("Mock".to_string(), true);
         columns.insert("Actions".to_string(), true);
 
+        let visible_columns = Rc::new(MutableVec::new_with_values(vec![
+            Column::ID,
+            Column::Section,
+            Column::ItemKind,
+            Column::English,
+            Column::Status,
+            Column::ZeplinReference,
+            Column::Comments,
+            Column::App,
+            Column::Element,
+            Column::Mock,
+            Column::Actions,
+        ]));
+        let hidden_columns = Rc::new(MutableVec::new_with_values(vec![
+            Column::Hebrew,
+        ]));
+
 
         Self {
             bundles,
             entries,
-            columns,
+            visible_columns,
+            hidden_columns,
             dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
             saving_loader: Rc::new(AsyncLoader::new()),
@@ -120,13 +141,25 @@ impl State {
         }
     }
 
-    pub async fn selected_bundles_change(&self, bundles: HashMap<Bundle, bool>) {
-        let mut visible_bundles = Vec::new();
-        for (bundle, visible) in bundles {
-            if visible {
-                visible_bundles.push(bundle);
-            }
+    pub fn filter_change<T>(options: &HtmlOptionsCollection, map: &mut BTreeMap<T, bool> ) where T: FromStr + Ord {
+        for i in 0..options.length() {
+            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+
+            let parsed = T::from_str(&option.value()).unwrap_or_else(|_| panic!("Invalid option in select"));
+
+            map.insert(parsed, option.selected());
         }
+    }
+
+    pub async fn selected_bundles_change(&self, options: &HtmlOptionsCollection) {
+        let mut visible_bundles = Vec::new();
+        for i in 0..options.length() {
+            let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+            if option.selected() {
+                visible_bundles.push(option.value());
+            }
+        };
+
         let entries: Vec<Rc<Mutable<Entry>>> = db_interface::get_entries(&visible_bundles.iter().map(|s| s).collect())
             .await
             .into_iter()
@@ -195,6 +228,7 @@ pub enum SortKind {
     Section,
     ItemKind,
     English,
+    Hebrew,
     Status,
     Comments,
 }
@@ -206,4 +240,22 @@ pub enum SortOrder {
 
     #[strum(serialize = "desc")]
     Desc
+}
+
+#[derive(Clone, PartialEq, Display)]
+pub enum Column {
+    ID,
+    Section,
+    #[strum(serialize = "Item Kind")]
+    ItemKind,
+    English,
+    Hebrew,
+    Status,
+    #[strum(serialize = "Zeplin Reference")]
+    ZeplinReference,
+    Comments,
+    App,
+    Element,
+    Mock,
+    Actions
 }

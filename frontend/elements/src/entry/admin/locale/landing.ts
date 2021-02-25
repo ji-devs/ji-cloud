@@ -3,8 +3,7 @@ import { LitElement, html, css, customElement, property, query } from "lit-eleme
 export type Bundle = [string, boolean];
 export type Column = [string, boolean];
 
-const STR_SELECT_COLUMNS = "Selectn columns to display";
-const STR_ADD_ENTRY = "Add a text";
+const STR_SELECT_COLUMNS = "Select columns to display";
 
 @customElement("locale-page")
 export class _ extends LitElement {
@@ -13,7 +12,7 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
-                grid-template-columns: 200px auto 180px 180px;
+                grid-template-columns: 200px auto 230px 140px;
                 row-gap: 40px;
                 column-gap: 50px;
                 padding: 50px;
@@ -35,34 +34,17 @@ export class _ extends LitElement {
                 content: 'Saving...';
             }
 
-            .icon-button {
-                height: 33px;
-                display: flex;
-                align-items: center;
-                column-gap: 10px;
-            }
-            .icon-button button {
-                background-color: transparent;
-                border: 0;
-                cursor: pointer;
-                padding: 0;
-                width: 50px;
-            }
-            .icon-button button img {
-                max-height: 100%;
-                max-width: 50px;
-            }
-            .icon-button.select-columns {
+            .select-columns {
                 grid-column: 3;
             }
-            .icon-button.add-text {
+            .add-entry {
                 grid-column: 4;
+                justify-self: end;
             }
 
             .table {
                 grid-column: 1 / -1;
                 display: grid;
-                grid-template-columns: repeat(11, auto);
             }
             ::slotted([slot=rows]) {
                 display: contents;
@@ -83,35 +65,13 @@ export class _ extends LitElement {
             }
             .column-selection-contents {
                 display: grid;
-                grid-template-columns: repeat(2, 200px);
-            }
-            .column-selection-contents hr {
-                grid-column: 1 / -1;
-                width: 100%;
-            }
-            .column-selection-contents header {
-                grid-column: 1 / -1;
-                text-align: center;
-            }
-            .column-selection-contents ul {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-            .column-selection-contents .actions {
-                grid-column: 1 / -1;
-                display: flex;
-                justify-content: flex-end;
-                column-gap: 10px;
+                justify-items: end;
             }
         `];
     }
 
-    @property({type: Array})
-    public bundles: Bundle[] = [];
-
-    @property({type: Array})
-    public columns: Column[] = []
+    @property({type: Number})
+    public columnsAmount: number = 11;
 
     @property({type: Boolean, reflect: true})
     public saving = false;
@@ -121,26 +81,6 @@ export class _ extends LitElement {
 
     @query('dialog', true)
     public dialog!: HTMLDialogElement;
-
-    private onBundleSelect(e: Event) {
-        const select = e.target as HTMLSelectElement;
-        const options = select.options;
-        this.bundles.forEach((b, i) => {
-            b[1] = options[i].selected;
-        });
-        
-        this.dispatchEvent(
-            new CustomEvent("selected-bundle-change", {
-                detail: this.bundles
-            })
-        );
-    }
-
-    private addEntry() {
-        this.dispatchEvent(
-            new CustomEvent("add-entry")
-        );
-    }
 
     private showSelectColumns() {
         // this.dialog.showModal();
@@ -157,48 +97,19 @@ export class _ extends LitElement {
     public render() {
         return html`
             <div class="saving-indicator"></div>
-            <select multiple @change="${this.onBundleSelect}">
-                ${this.bundles.map(([bundleName, selected]) => {
-                    return html`<option
-                        .value="${bundleName}"
-                        .selected="${selected}"
-                    >
-                        ${bundleName}
-                    </option>`;
-                })}
-            </select>
-            <div class="icon-button select-columns">
-                <button @click="${this.showSelectColumns}"><img src="assets/select-columns-icon.png"></button>
-                <span>${STR_SELECT_COLUMNS}</span>
-            </div>
-            <div class="icon-button add-text">
-                <button @click="${this.addEntry}"><img src="assets/add-icon.png"></button>
-                <span>${STR_ADD_ENTRY}</span>
-            </div>
-            <div class="table">
+            <slot name="bundles"></slot>
+            <button-rect color="blue" @click="${this.showSelectColumns}" class="select-columns">
+                ${STR_SELECT_COLUMNS}
+                <!-- <img src="assets/select-columns-icon.png"> -->
+            </button-rect>
+            <slot class="add-entry" name="add-entry"></slot>
+            <div class="table" style="grid-template-columns: repeat(${this.columnsAmount}, auto)">
                 <slot name="rows"></slot>
             </div>
             <dialog>
                 <div class="column-selection-contents">
-                    <header>Select Fields to Display</header>
-                    <hr>
-                    <ul class="columns-hidden">
-                        ${this.columns
-                            .filter(([_, visible]) => !visible)
-                            .map(([columnName, _]) => html`<li>{{${columnName}}}</li>`)
-                        }
-                    </ul>
-                    <ul class="columns-visible">
-                        ${this.columns
-                            .filter(([_, visible]) => visible)
-                            .map(([columnName, _]) => html`<li>{{${columnName}}}</li>`)
-                        }
-                    </ul>
-                    <hr>
-                    <div class="actions">
-                        <button @click="${this.dismissSelectColumns}">Cancel</button>
-                        <button @click="${this.dismissSelectColumns}">Save</button>
-                    </div>
+                    <slot name="dialog-content"></slot>
+                    <button-rect @click="${this.dismissSelectColumns}" color="blue">Okay</button-rect>
                 </div>
             </dialog>
         `;

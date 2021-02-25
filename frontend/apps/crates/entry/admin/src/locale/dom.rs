@@ -13,10 +13,6 @@ pub struct LocalePage {
 
 impl LocalePage {
     pub fn render() -> Dom {
-        // pretty bad, ha?
-        super::temp_utils::add_styles(&std::include_str!("./temp_styles.css"));
-
-
         let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
 
         let loader = AsyncLoader::new();

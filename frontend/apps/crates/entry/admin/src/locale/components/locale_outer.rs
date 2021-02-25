@@ -1,14 +1,16 @@
-use crate::locale::actions::{map_to_js, b_tree_to_js};
+use utils::events;
+use web_sys::HtmlSelectElement;
 use crate::locale::components::table_headers::TableHeaderDom;
 use crate::locale::components::entry_row::EntryRow;
-use dominator::{Dom, html, clone};
+use crate::locale::components::select_columns;
+use dominator::{Dom, html, clone, with_node};
 use std::rc::Rc;
 use super::super::state::*;
-use super::super::events;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use futures_signals::map_ref;
 
+const STR_ADD_ENTRY: &'static str = "Add a text";
 
 pub struct LocaleOuterDom {
 
@@ -19,21 +21,47 @@ impl LocaleOuterDom {
         html!("empty-fragment", {
             .child(
                 html!("locale-page", {
-                    .property("bundles", map_to_js(&state.bundles))
-                    .property("columns", b_tree_to_js(&state.columns))
                     .property_signal("sortOrder", state.sort.signal_ref(|sort| sort.order.to_string()))
                     .property_signal("saving", state.saving_loader.is_loading())
-                    .event(clone!(state => move |_event: events::AddEntryEvent| {
-                        state.loader.load(clone!(state => async move {
-                            state.add_entry().await;
-                        }))
-                    }))
-                    .event(clone!(state => move |event: events::SelectedBundleChangeEvent| {
-                        state.loader.load(clone!(state => async move {
-                            state.selected_bundles_change(event.bundles()).await;
-                        }))
-                    }))
-                    .child(TableHeaderDom::render(state.clone()))
+                    .property_signal("columnsAmount", state.visible_columns.signal_vec_cloned().map(|_| 1).sum())
+                    .children(&mut [
+                        html!("select" => HtmlSelectElement, {
+                            .property("slot", "bundles")
+                            .attribute("multiple", "")
+                            .with_node!(elem => {
+                                .event(clone!(state, elem => move |_:events::Change| {
+                                    state.loader.load(clone!(state, elem => async move {
+                                        let options = elem.options();
+                                        state.selected_bundles_change(&options).await;
+                                    }))
+                                }))
+                            })
+                            .children(
+                                state.bundles.iter().map(|(e, selected)| {
+                                    html!("option", {
+                                        .property("text", e.to_string())
+                                        .property("value", e.to_string())
+                                        .property("selected", selected.clone())
+                                    })
+                                })
+                            )
+                        }),
+                        html!("button-rect", {
+                            .property("color", "blue")
+                            .property("slot", "add-entry")
+                            .text(STR_ADD_ENTRY)
+                            // .child(html!("img", {
+                            //     .attribute("src", "assets/add-icon.png")
+                            // }))
+                            .event(clone!(state => move |_event: events::Click| {
+                                state.loader.load(clone!(state => async move {
+                                    state.add_entry().await;
+                                }))
+                            }))
+                        }),
+                        select_columns::render(state.clone()),
+                        TableHeaderDom::render(state.clone()),
+                    ])
                     .children_signal_vec(state.sort
                         .signal_cloned()
                         .switch(clone!(state => move |sort| {
@@ -49,6 +77,7 @@ impl LocaleOuterDom {
                                             SortKind::Section => a.section.cmp(&b.section),
                                             SortKind::ItemKind => a.item_kind.cmp(&b.item_kind),
                                             SortKind::English => a.english.cmp(&b.english),
+                                            SortKind::Hebrew => a.hebrew.cmp(&b.hebrew),
                                             SortKind::Status => a.status.to_string().cmp(&b.status.to_string()),
                                             SortKind::Comments => a.comments.cmp(&b.comments),
                                         };
