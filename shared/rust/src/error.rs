@@ -1,7 +1,5 @@
 //! Home of the error types.
 
-pub mod auth;
-
 use serde::{Deserialize, Serialize};
 
 use crate::domain::meta::MetaKind;

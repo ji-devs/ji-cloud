@@ -1,7 +1,7 @@
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
 use paperclip::actix::api_v2_errors;
-use shared::error::{auth::RegisterErrorKind, ApiError, EmptyError, MetadataNotFound};
+use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
 use crate::db::meta::MetaWrapperError;
 
@@ -429,7 +429,8 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
     code = 500
 )]
 pub enum Register {
-    RegisterError(RegisterErrorKind),
+    EmptyUsername,
+    TakenUsername,
     InternalServerError(anyhow::Error),
 }
 
@@ -442,21 +443,18 @@ impl<T: Into<anyhow::Error>> From<T> for Register {
 impl Into<actix_web::Error> for Register {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::RegisterError(kind) => {
-                let message = match kind {
-                    RegisterErrorKind::EmptyDisplayName => "No username was provided",
-                    RegisterErrorKind::TakenEmail => "Email already taken",
-                    RegisterErrorKind::TakenUsername => "Username already taken",
-                    _ => "Unprocessable Entity",
-                };
-
-                ApiError {
-                    code: http::StatusCode::UNPROCESSABLE_ENTITY,
-                    message: message.to_owned(),
-                    extra: shared::error::auth::RegisterError { kind },
-                }
-            }
+            Self::EmptyUsername => BasicError::with_message(
+                http::StatusCode::UNPROCESSABLE_ENTITY,
+                "No username was provided".to_owned(),
+            )
             .into(),
+
+            Self::TakenUsername => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "Username already taken".to_owned(),
+            )
+            .into(),
+
             Self::InternalServerError(e) => ise(e),
         }
     }

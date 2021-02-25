@@ -12,7 +12,7 @@ use super::ApiEndpoint;
 /// Sign in.
 ///
 /// requires `Basic` auth in the form `BASE64(email:password)`
-/// see: https://tools.ietf.org/html/rfc7617#section-2
+/// see: <https://tools.ietf.org/html/rfc7617#section-2>
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ();
@@ -23,6 +23,7 @@ impl ApiEndpoint for Create {
 }
 
 /// Sign in via oauth
+///
 /// Note: If the account doesn't exist, but the oauth token is valid, it'll return a token that can be used to create an account.
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {

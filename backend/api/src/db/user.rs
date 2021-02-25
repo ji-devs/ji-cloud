@@ -1,11 +1,8 @@
 use crate::error;
 use chrono_tz::Tz;
-use shared::{
-    domain::{
-        meta::{AffiliationId, AgeRangeId, SubjectId},
-        user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
-    },
-    error::auth::RegisterErrorKind,
+use shared::domain::{
+    meta::{AffiliationId, AgeRangeId, SubjectId},
+    user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
 };
 use sqlx::{postgres::PgDatabaseError, PgConnection};
 use std::{convert::TryFrom, str::FromStr};
@@ -141,7 +138,7 @@ set
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
-            error::Register::RegisterError(RegisterErrorKind::TakenUsername)
+            error::Register::TakenUsername
         }
 
         e => e.into(),

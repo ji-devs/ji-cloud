@@ -246,3 +246,24 @@ pub struct PutProfileRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
 }
+
+/// Request for [`Create`](crate::api::endpoints::user::Create)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct CreateUserRequest {
+    /// The new user's email
+    pub email: String,
+
+    /// The new user's password
+    pub password: String,
+}
+
+/// Request for [`ResetPassword`](crate::api::endpoints::user::ResetPassword)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct ResetPasswordRequest {
+    /// The email to request a password reset for
+    pub email: String,
+}

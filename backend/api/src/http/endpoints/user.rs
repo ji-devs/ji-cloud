@@ -20,7 +20,6 @@ use shared::{
         session::NewSessionResponse,
         user::{PutProfileRequest, UserLookupQuery},
     },
-    error::auth::RegisterErrorKind,
 };
 use sqlx::{Acquire, PgPool};
 
@@ -38,11 +37,9 @@ async fn user_lookup(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
-async fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register> {
+fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register> {
     if req.username.is_empty() {
-        return Err(error::Register::RegisterError(
-            RegisterErrorKind::EmptyDisplayName,
-        ));
+        return Err(error::Register::EmptyUsername);
     }
 
     Ok(())
@@ -56,7 +53,7 @@ async fn handle_put_profile(
     signup_user: TokenUserWithPurposedSession<SessionPurposeCreateProfile>,
     req: Json<PutProfileRequest>,
 ) -> actix_web::Result<HttpResponse, error::Register> {
-    validate_register_req(&req).await?;
+    validate_register_req(&req)?;
 
     let mut txn = db.begin().await?;
 
