@@ -13,16 +13,3 @@ pub fn get_random_string(length: usize) -> String {
         .collect()
 }
 
-
-#[wasm_bindgen(inline_js = "
-export function add_styles(contents) {
-    let head = document.head;
-    var link = document.createElement('style');
-    link.textContent = contents;
-    head.appendChild(link);
-}
-")]
-extern "C" {
-    pub fn add_styles(s: &str);
-}
-
