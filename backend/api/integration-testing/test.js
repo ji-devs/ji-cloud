@@ -264,10 +264,6 @@ test('login user', async (t) => {
 test('user profile', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
-    console.log(t.context.loggedInReqBase);
-
-    console.log(t.context.pasetoKeyHex);
-
     const profile = await got.get('http://0.0.0.0/v1/user/me/profile', t.context.loggedInReqBase);
 
     t.snapshot(profile.body);

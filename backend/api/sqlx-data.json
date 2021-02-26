@@ -72,22 +72,6 @@
       "nullable": []
     }
   },
-  "09bdb26246845203aeace215d765731eeb48747919c40ef0363fb0d15ef4d923": {
-    "query": "insert into session (token, user_id, impersonator_id, expires_at, scope) values ($1, $2, $3, $4, $5)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Uuid",
-          "Timestamptz",
-          "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "0a1f9e5fee4b10a173b8723976cecfb920f90a4828d723abb14f6e0215cf880b": {
     "query": "select exists(select 1 from locale_entry where id = $1 for update) as \"exists!\"",
     "describe": {
@@ -203,6 +187,27 @@
         true,
         false,
         false,
+        false
+      ]
+    }
+  },
+  "1082caa76c50d662add789abc85cdb108355e7e8660c7da1b5aab9239f9acb7e": {
+    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, user_auth_basic.email\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere \n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2\nreturning user_id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2"
+        ]
+      },
+      "nullable": [
         false
       ]
     }
@@ -521,19 +526,6 @@
       "nullable": []
     }
   },
-  "24d9861d7b7bbfd2fb1972e9129ab0c3c66e53be4778c929b34b7cefcbe86bc9": {
-    "query": "delete from session where user_id = $1 and scope = $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "28fb8b1e761b9606fe607a8d42a63d459008846a71ddc39d6728d2226fa7224f": {
     "query": "with recursive links as\n                   (\n                       select id,\n                              parent_id\n                       from category co\n                       where id = any ($1::uuid[])\n                       union all\n                       select co.id,\n                              co.parent_id\n                       from category co\n                                inner join links ct on (ct.parent_id = co.id)\n                   )\n\nselect distinct id,\n       category.parent_id,\n       name,\n       category.index,\n       created_at,\n       updated_at,\n       (select count(*) from image_category where category_id = id)::int8 as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\n         inner join links using (id);\n",
     "describe": {
@@ -817,6 +809,19 @@
       "nullable": []
     }
   },
+  "3cfa772cac043b6accabfde5a1fd872956182b08d67b5a9ab2e35a6bb95405b3": {
+    "query": "delete from session where user_id = $1 and (scope_mask | $2) <> 0",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3f7ad7f5eb03139f9584aa6928a1b805b4f8908a1df023a12a7cf8cba3d56d26": {
     "query": "delete from session where token = $1",
     "describe": {
@@ -875,6 +880,22 @@
         false,
         true
       ]
+    }
+  },
+  "44559bdf72e9071b9dd849039e4ae6ccf90281a3e751b1bd2ff5ecf18132e53e": {
+    "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "46fccf7d3c9f71b3c15e06ef08705676557e4a47ab331baed7f1754804e0eaf6": {
@@ -981,28 +1002,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "5aa7cb134e318d338a948bca51a2d77350d7685c1b41a56e5113b20f62feccc5": {
-    "query": "\nselect user_id\nfrom session\nwhere \n    token = $1 and\n    expires_at < now() is not true and\n    scope is not distinct from $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {
@@ -1557,27 +1556,6 @@
       ]
     }
   },
-  "8bc9b15318046459ce8aef85444f6f27ef20bde0962e0fdb5908079bdbaaa5f6": {
-    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, user_auth_basic.email\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere \n    session.token = $1 and\n    session.expires_at > now() and\n    session.scope is not distinct from $2\nreturning user_id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "8d817d6384c10aa3eddcbe4b990c830b69970f782ad4ecdd5af9380994dfef0c": {
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1",
     "describe": {
@@ -1796,6 +1774,28 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "a0d48e53ffcf69c3a2fbaa6b994e9ad3636a4f6b0f0fbe9850492693c8e1c6e9": {
+    "query": "\nselect user_id\nfrom session\nwhere \n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
