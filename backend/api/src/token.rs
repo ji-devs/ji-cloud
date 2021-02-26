@@ -169,7 +169,7 @@ fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Co
 }
 
 #[must_use]
-pub fn generate_csrf() -> String {
+fn generate_csrf() -> String {
     thread_rng()
         .sample_iter(&Alphanumeric)
         .take(16)
