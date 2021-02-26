@@ -22,6 +22,11 @@ impl ApiEndpoint for Create {
 /// Sign in via oauth
 ///
 /// Note: If the account doesn't exist, but the oauth token is valid, it'll return a token that can be used to create an account.
+///
+/// # Errors
+/// (non exhaustive list)
+/// If there is already a user with the oauth user's email,
+/// and it isn't them - [`409 - Conflict`](http::StatusCode::CONFLICT)
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {
     type Req = CreateSessionOAuthRequest;

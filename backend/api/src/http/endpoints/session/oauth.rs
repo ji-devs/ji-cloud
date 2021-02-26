@@ -12,7 +12,7 @@ use shared::domain::session::{
     CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse, GetOAuthUrlServiceKind,
     NewSessionResponse, OAuthUrlKind,
 };
-use sqlx::PgPool;
+use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::{
     db, error,
@@ -20,6 +20,19 @@ use crate::{
     jwk,
     token::{create_auth_token, SessionMask},
 };
+
+fn handle_user_email_error(e: sqlx::Error) -> error::OAuth {
+    let db_err = match &e {
+        sqlx::Error::Database(e) => e.downcast_ref::<PgDatabaseError>(),
+        _ => return e.into(),
+    };
+
+    match db_err.constraint() {
+        Some("user_email_email_key") => error::OAuth::Conflict,
+
+        _ => e.into(),
+    }
+}
 
 #[api_v2_operation]
 pub async fn get_url(
@@ -159,15 +172,14 @@ async fn handle_google_oauth(
             .execute(&mut txn)
             .await?;
 
-            // todo: handle duplicate email here (return a conflict error)
-
             sqlx::query!(
                 "insert into user_email (user_id, email) values ($1, $2::text)",
                 id,
                 &claims.email
             )
             .execute(&mut txn)
-            .await?;
+            .await
+            .map_err(handle_user_email_error)?;
             (id, SessionMask::PUT_PROFILE)
         }
     };
