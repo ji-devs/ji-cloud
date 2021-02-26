@@ -4,6 +4,5 @@ create table session (
     impersonator_id uuid                 references "user" (id) on delete cascade,
     created_at      timestamptz not null default now(),
     expires_at      timestamptz,
-    -- null is      "unrestricted"
-    scope           int2
+    scope_mask      int2        not null
 );

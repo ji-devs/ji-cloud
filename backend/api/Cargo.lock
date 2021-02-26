@@ -1589,6 +1589,7 @@ dependencies = [
  "algolia",
  "anyhow",
  "argon2",
+ "bitflags",
  "chrono",
  "chrono-tz",
  "config",

@@ -43,3 +43,13 @@ impl ApiEndpoint for GetOAuthUrl {
     const PATH: &'static str = "/v1/session/oauth/url/{service}/{kind}";
     const METHOD: Method = Method::Get;
 }
+
+/// Delete a session (logout)
+pub struct Delete;
+impl ApiEndpoint for Delete {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/session";
+    const METHOD: Method = Method::Delete;
+}

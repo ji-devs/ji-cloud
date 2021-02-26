@@ -1,9 +1,9 @@
 use crate::{
     db::{self, user::upsert_profile},
     error,
-    extractor::{SessionPurposeCreateProfile, TokenUserWithPurposedSession},
+    extractor::{SessionPutProfile, TokenUserWithPurposedSession},
     service::{mail, ServiceData},
-    token::TokenPurpose,
+    token::SessionMask,
 };
 use crate::{extractor::TokenUser, token::create_auth_token};
 use actix_http::error::BlockingError;
@@ -28,7 +28,36 @@ use shared::{
         user::{PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
-use sqlx::{Acquire, PgPool};
+use sqlx::{Acquire, PgConnection, PgPool};
+use uuid::Uuid;
+
+async fn send_verification_email(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+    email_address: String,
+    mail: &mail::Client,
+    pages_url: &str,
+) -> Result<(), error::Service> {
+    let session = db::session::create(
+        &mut *txn,
+        user_id,
+        Some(&(Utc::now() + Duration::hours(1))),
+        SessionMask::VERIFY_EMAIL,
+        None,
+    )
+    .await?;
+
+    let template = mail
+        .signup_verify_template()
+        .map_err(error::Service::DisabledService)?;
+
+    let email_link = format!("{}/verify-email/{}", pages_url, session);
+
+    mail.send_signup_verify(template, Email::new(email_address), email_link)
+        .await?;
+
+    Ok(())
+}
 
 /// Create a user
 #[api_v2_operation]
@@ -86,29 +115,16 @@ async fn create_user(
     .execute(&mut txn)
     .await?;
 
-    let session = db::session::create(
+    send_verification_email(
         &mut txn,
         user.id,
-        Some(&(Utc::now() + Duration::hours(1))),
-        Some(TokenPurpose::VerifyEmail),
-        None,
+        req.email,
+        &mail,
+        config.remote_target().pages_url(),
     )
     .await?;
 
     txn.commit().await?;
-
-    let template = mail
-        .signup_verify_template()
-        .map_err(error::Service::DisabledService)?;
-
-    let email_link = format!(
-        "{}/verify-email/{}",
-        config.remote_target().pages_url(),
-        session
-    );
-
-    mail.send_signup_verify(template, Email::new(req.email), email_link)
-        .await?;
 
     Ok(NoContent)
 }
@@ -148,37 +164,18 @@ where
             };
 
             // make sure they can't use the old link anymore
-            sqlx::query!(
-                "delete from session where user_id = $1 and scope = $2",
-                user.user_id,
-                TokenPurpose::VerifyEmail as i16,
-            )
-            .execute(&mut txn)
-            .await?;
+            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
 
-            let session = db::session::create(
+            send_verification_email(
                 &mut txn,
                 user.user_id,
-                Some(&(Utc::now() + Duration::hours(1))),
-                Some(TokenPurpose::VerifyEmail),
-                None,
+                email,
+                &mail,
+                config.remote_target().pages_url(),
             )
             .await?;
 
             txn.commit().await?;
-
-            let template = mail
-                .signup_verify_template()
-                .map_err(error::Service::DisabledService)?;
-
-            let email_link = format!(
-                "{}/verify-email/{}",
-                config.remote_target().pages_url(),
-                session
-            );
-
-            mail.send_signup_verify(template, Email::new(email), email_link)
-                .await?;
 
             Ok(HttpResponse::NoContent().into())
         }
@@ -187,6 +184,7 @@ where
             let mut txn = db.begin().await?;
 
             // todo: make this more future proof and exhaustive.
+            // todo: handle the conflict case?
 
             let user = sqlx::query!(
                 r#"
@@ -197,26 +195,18 @@ inner join user_auth_basic on user_auth_basic.user_id = session.user_id
 where 
     session.token = $1 and
     session.expires_at > now() and
-    session.scope is not distinct from $2
+    (session.scope_mask & $2) = $2
 returning user_id
 "#,
                 token,
-                TokenPurpose::VerifyEmail as i16,
+                SessionMask::VERIFY_EMAIL.bits(),
             )
             .fetch_optional(&mut txn)
             .await?
             .ok_or_else(|| anyhow::anyhow!("this should 401"))?;
 
-            // make sure they can't use the old link anymore
-            sqlx::query!(
-                "delete from session where user_id = $1 and scope = $2",
-                user.user_id,
-                TokenPurpose::VerifyEmail as i16,
-            )
-            .execute(&mut txn)
-            .await?;
-
-            let purpose = TokenPurpose::CreateProfile;
+            // make sure they can't use the link, now that they're verified.
+            db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
 
             let login_ttl = config
                 .login_token_valid_duration
@@ -224,13 +214,11 @@ returning user_id
 
             let valid_until = Utc::now() + Duration::hours(1);
 
-            crate::token::generate_session_token();
-
             let session = db::session::create(
                 &mut txn,
                 user.user_id,
                 Some(&valid_until),
-                Some(purpose),
+                SessionMask::PUT_PROFILE,
                 None,
             )
             .await?;
@@ -274,7 +262,7 @@ fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register>
 async fn put_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    signup_user: TokenUserWithPurposedSession<SessionPurposeCreateProfile>,
+    signup_user: TokenUserWithPurposedSession<SessionPutProfile>,
     req: Json<PutProfileRequest>,
 ) -> actix_web::Result<HttpResponse, error::Register> {
     validate_register_req(&req)?;
@@ -285,20 +273,19 @@ async fn put_profile(
 
     upsert_profile(&mut upsert_txn, &req, signup_user.claims.user_id).await?;
 
-    upsert_txn.commit().await?;
+    db::session::delete(&mut upsert_txn, &signup_user.claims.token).await?;
 
-    let session = crate::token::generate_session_token();
+    upsert_txn.commit().await?;
 
     let login_ttl = settings
         .login_token_valid_duration
         .unwrap_or(Duration::weeks(2));
 
-    db::session::create_with_token(
+    let session = db::session::create(
         &mut txn,
         signup_user.claims.user_id,
-        &session,
         Some(&(Utc::now() + login_ttl)),
-        None,
+        SessionMask::GENERAL,
         None,
     )
     .await?;

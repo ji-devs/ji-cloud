@@ -2,7 +2,7 @@ use crate::{
     domain::RegistrationStatus,
     error::BasicError,
     more_futures::ReadyOrNot,
-    token::{check_login_token, SessionClaims, TokenPurpose},
+    token::{check_login_token, SessionClaims, SessionMask},
 };
 use actix_http::error::BlockingError;
 use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
@@ -86,8 +86,14 @@ impl FromRequest for TokenUser {
 
         async move {
             let csrf = csrf;
-            let claims =
-                check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, None).await?;
+            let claims = check_login_token(
+                &db,
+                cookie.value(),
+                &csrf,
+                &settings.token_secret,
+                SessionMask::GENERAL_API,
+            )
+            .await?;
 
             Ok(Self(claims))
         }
@@ -203,7 +209,7 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         async move {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, None).await?;
+            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, SessionMask::GENERAL_API).await?;
 
             let has_scope = sqlx::query!(
                 r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
@@ -231,22 +237,22 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
     }
 }
 
-pub trait SessionPurpose {
-    const SESSION_PURPOSE: TokenPurpose;
+pub trait SessionMaskRequirement {
+    const REQUIREMENTS: SessionMask;
 }
 
 #[derive(Apiv2Schema)]
-pub struct SessionPurposeCreateProfile;
+pub struct SessionPutProfile;
 
-impl SessionPurpose for SessionPurposeCreateProfile {
-    const SESSION_PURPOSE: TokenPurpose = TokenPurpose::CreateProfile;
+impl SessionMaskRequirement for SessionPutProfile {
+    const REQUIREMENTS: SessionMask = SessionMask::PUT_PROFILE;
 }
 
 #[derive(Apiv2Schema)]
-pub struct SessionPurposeVerifyEmail;
+pub struct SessionVerifyEmail;
 
-impl SessionPurpose for SessionPurposeVerifyEmail {
-    const SESSION_PURPOSE: TokenPurpose = TokenPurpose::VerifyEmail;
+impl SessionMaskRequirement for SessionVerifyEmail {
+    const REQUIREMENTS: SessionMask = SessionMask::VERIFY_EMAIL;
 }
 
 #[derive(Apiv2Security)]
@@ -258,12 +264,12 @@ impl SessionPurpose for SessionPurposeVerifyEmail {
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct TokenUserWithPurposedSession<S: SessionPurpose> {
+pub struct TokenUserWithPurposedSession<S: SessionMaskRequirement> {
     pub claims: SessionClaims,
     _phantom: PhantomData<S>,
 }
 
-impl<S: SessionPurpose> FromRequest for TokenUserWithPurposedSession<S> {
+impl<S: SessionMaskRequirement> FromRequest for TokenUserWithPurposedSession<S> {
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
@@ -292,7 +298,7 @@ impl<S: SessionPurpose> FromRequest for TokenUserWithPurposedSession<S> {
                 cookie.value(),
                 &csrf,
                 &settings.token_secret,
-                Some(S::SESSION_PURPOSE),
+                S::REQUIREMENTS,
             )
             .await?;
 

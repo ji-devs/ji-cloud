@@ -31,7 +31,7 @@ use crate::{
     image_ops::{regenerate_images, MediaKind},
     s3,
     service::ServiceData,
-    token::create_auth_token,
+    token::{create_auth_token, SessionMask},
 };
 
 /// Impersonate another user
@@ -54,14 +54,11 @@ async fn impersonate(
         .login_token_valid_duration
         .unwrap_or(Duration::weeks(2));
 
-    let session = crate::token::generate_session_token();
-
-    db::session::create_with_token(
+    let session = db::session::create(
         &mut *db.acquire().await?,
         user_id,
-        &session,
         Some(&(Utc::now() + login_ttl)),
-        None,
+        SessionMask::GENERAL,
         Some(auth.claims.user_id),
     )
     .await?;

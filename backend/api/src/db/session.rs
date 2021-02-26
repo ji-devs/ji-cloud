@@ -2,46 +2,50 @@ use chrono::{DateTime, Utc};
 use sqlx::PgConnection;
 use uuid::Uuid;
 
-use crate::token::TokenPurpose;
-
-pub async fn create_with_token(
-    conn: &mut PgConnection,
-    user_id: Uuid,
-    token: &str,
-    valid_until: Option<&DateTime<Utc>>,
-    purpose: Option<TokenPurpose>,
-    impersonator_id: Option<Uuid>,
-) -> sqlx::Result<()> {
-    sqlx::query!(
-        "insert into session (token, user_id, impersonator_id, expires_at, scope) values ($1, $2, $3, $4, $5)",
-        &token,
-        user_id,
-        impersonator_id,
-        valid_until,
-        purpose.map(|it| it as i16)
-    )
-    .execute(&mut *conn)
-    .await?;
-    Ok(())
-}
+use crate::token::SessionMask;
 
 pub async fn create(
     conn: &mut PgConnection,
     user_id: Uuid,
     valid_until: Option<&DateTime<Utc>>,
-    purpose: Option<TokenPurpose>,
+    mask: SessionMask,
     impersonator_id: Option<Uuid>,
 ) -> sqlx::Result<String> {
     let session = crate::token::generate_session_token();
     sqlx::query!(
-        "insert into session (token, user_id, impersonator_id, expires_at, scope) values ($1, $2, $3, $4, $5)", 
+        "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)", 
         &session,
         user_id,
         impersonator_id,
         valid_until,
-        purpose.map(|it| it as i16)
+        mask.bits()
     )
     .execute(conn).await?;
 
     Ok(session)
+}
+
+pub async fn clear_any(
+    conn: &mut PgConnection,
+    user_id: Uuid,
+    mask: SessionMask,
+) -> sqlx::Result<()> {
+    // make sure they can't use the old link anymore
+    sqlx::query!(
+        "delete from session where user_id = $1 and (scope_mask | $2) <> 0",
+        user_id,
+        mask.bits(),
+    )
+    .execute(conn)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn delete(txn: &mut PgConnection, token: &str) -> sqlx::Result<()> {
+    sqlx::query!("delete from session where token = $1", &token)
+        .execute(txn)
+        .await?;
+
+    Ok(())
 }

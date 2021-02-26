@@ -12,7 +12,7 @@ pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
 
-/// Response for creating a session with basic auth
+/// Response for creating a session
 ///
 /// Note: This response *also* includes a cookie.
 #[derive(Serialize, Deserialize, Debug)]
@@ -104,7 +104,7 @@ pub enum CreateSessionOAuthResponse {
         csrf: String,
     },
 
-    /// Failed to log in; a token for creating a user has been returned.
+    /// Failed to log in; a token for creating a profile has been returned.
     CreateUser {
         /// A transparent CSRF token to use for this Session.
         csrf: String,

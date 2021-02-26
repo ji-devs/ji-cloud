@@ -13,6 +13,7 @@ const AUTHORIZED_FOOTER: &str = "authorized";
 
 pub struct SessionClaims {
     pub user_id: Uuid,
+    pub token: String,
 }
 
 /// The claims that are used as part of the user's token.
@@ -25,14 +26,18 @@ struct AuthorizedTokenClaims {
     csrf: String,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, sqlx::Type)]
-#[repr(i16)]
-pub enum TokenPurpose {
-    /// Token is restricted to only creating profiles.
-    CreateProfile = 0,
+bitflags::bitflags! {
+    #[derive(sqlx::Type)]
+    pub struct SessionMask: i16 {
+        const GENERAL_API = 0b0000_0000_0000_0001;
+        const PUT_PROFILE = 0b0000_0000_0000_0010;
+        const VERIFY_EMAIL = 0b0000_0000_0000_0100;
+        const RESET_PASSWORD = 0b0000_0000_0000_1000;
+        const DELETE_ACCOUNT = 0b0000_0000_0001_0000;
 
-    /// Token is restricted to verifying emails.
-    VerifyEmail = 1,
+        const GENERAL = Self::GENERAL_API.bits | Self::DELETE_ACCOUNT.bits;
+        const ONE_TIME = Self::RESET_PASSWORD.bits | Self::VERIFY_EMAIL.bits;
+    }
 }
 
 fn validate_token(
@@ -78,7 +83,7 @@ pub async fn check_login_token(
     token_string: &str,
     csrf: &str,
     token_key: &[u8; 32],
-    required_purpose: Option<TokenPurpose>,
+    min_mask: SessionMask,
 ) -> Result<SessionClaims, actix_web::Error> {
     let token = validate_token(token_string, AUTHORIZED_FOOTER, token_key)?;
 
@@ -99,11 +104,11 @@ from session
 where 
     token = $1 and
     expires_at < now() is not true and
-    scope is not distinct from $2 and
+    (scope_mask & $2) = $2 and
     (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))
 "#,
-        claims.sub,
-        required_purpose.map(|it| it as i16),
+        &claims.sub,
+        min_mask.bits as i16,
         UserScope::Admin as i16
     )
     .fetch_optional(&mut txn)
@@ -112,14 +117,8 @@ where
     .map_err(error::ise)?
     .ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED))?;
 
-    let should_delete = match required_purpose {
-        None => false,
-        Some(TokenPurpose::CreateProfile) => false,
-        Some(TokenPurpose::VerifyEmail) => true,
-    };
-
-    if should_delete {
-        sqlx::query!("delete from session where token = $1", claims.sub)
+    if min_mask.intersects(SessionMask::ONE_TIME) {
+        sqlx::query!("delete from session where token = $1", &claims.sub)
             .execute(&mut txn)
             .await
             .map_err(Into::into)
@@ -128,6 +127,7 @@ where
 
     Ok(SessionClaims {
         user_id: session_info.user_id,
+        token: claims.sub,
     })
 }
 
@@ -157,6 +157,7 @@ pub fn create_auth_token(
     Ok((csrf, create_cookie(token, local_insecure, valid_duration)))
 }
 
+#[must_use]
 fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Cookie<'static> {
     CookieBuilder::new(AUTH_COOKIE_NAME, token)
         .http_only(true)
@@ -167,6 +168,7 @@ fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Co
         .finish()
 }
 
+#[must_use]
 pub fn generate_csrf() -> String {
     thread_rng()
         .sample_iter(&Alphanumeric)
@@ -175,6 +177,7 @@ pub fn generate_csrf() -> String {
         .collect()
 }
 
+#[must_use]
 pub fn generate_session_token() -> String {
     thread_rng()
         .sample_iter(&Alphanumeric)

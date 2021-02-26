@@ -10,8 +10,8 @@ use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
     api::{endpoints::session, ApiEndpoint},
     domain::session::{
-        CreateSessionOAuthRequest, CreateSessionOAuthResponse, GetOAuthUrlResponse,
-        GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
+        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionResponse,
+        GetOAuthUrlResponse, GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
     },
 };
 use sqlx::PgPool;
@@ -24,7 +24,7 @@ use crate::{
     extractor::EmailBasicUser,
     google::{self, oauth_url},
     jwk,
-    token::{create_auth_token, TokenPurpose},
+    token::{create_auth_token, SessionMask},
 };
 
 #[api_v2_operation]
@@ -70,32 +70,22 @@ async fn create_session(
     settings: Data<RuntimeSettings>,
     user: EmailBasicUser,
 ) -> Result<HttpResponse, error::Server> {
-    let session = crate::token::generate_session_token();
-
     let login_ttl = settings
         .login_token_valid_duration
         .unwrap_or(Duration::weeks(2));
 
-    let (purpose, valid_until) = match user.registration_status {
+    let (mask, valid_until) = match user.registration_status {
         RegistrationStatus::New => panic!("This isn't currently possible"),
         RegistrationStatus::Validated => (
-            Some(TokenPurpose::CreateProfile),
-            Some(Utc::now() + Duration::hours(1)),
+            SessionMask::PUT_PROFILE | SessionMask::DELETE_ACCOUNT,
+            Utc::now() + Duration::hours(1),
         ),
-        RegistrationStatus::Complete => (None, Some(Utc::now() + login_ttl)),
+        RegistrationStatus::Complete => (SessionMask::GENERAL, Utc::now() + login_ttl),
     };
 
     let mut txn = db.begin().await?;
 
-    db::session::create_with_token(
-        &mut txn,
-        user.id,
-        &session,
-        valid_until.as_ref(),
-        purpose,
-        None,
-    )
-    .await?;
+    let session = db::session::create(&mut txn, user.id, Some(&valid_until), mask, None).await?;
 
     let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
@@ -106,9 +96,15 @@ async fn create_session(
 
     txn.commit().await?;
 
-    Ok(HttpResponse::Created()
-        .cookie(cookie)
-        .json(NewSessionResponse { csrf }))
+    let response = NewSessionResponse { csrf };
+
+    let response = if !mask.contains(SessionMask::GENERAL) {
+        CreateSessionResponse::Register(response)
+    } else {
+        CreateSessionResponse::Login(response)
+    };
+
+    Ok(HttpResponse::Created().cookie(cookie).json(response))
 }
 
 #[api_v2_operation]
@@ -176,7 +172,7 @@ async fn handle_google_oauth(
     .fetch_optional(&mut txn)
     .await?;
 
-    let (user_id, purpose) = match &google_auth {
+    let (user_id, mask) = match &google_auth {
         Some(google_auth) => {
             // make sure that the user either has a profile, or can only *create* one.
             let check_profile = sqlx::query!(
@@ -186,13 +182,13 @@ async fn handle_google_oauth(
             .fetch_one(&mut txn)
             .await?;
 
-            let purpose = if check_profile.exists {
-                None
+            let mask = if check_profile.exists {
+                SessionMask::GENERAL
             } else {
-                Some(TokenPurpose::CreateProfile)
+                SessionMask::PUT_PROFILE | SessionMask::DELETE_ACCOUNT
             };
 
-            (google_auth.user_id, purpose)
+            (google_auth.user_id, mask)
         }
         None => {
             if !claims.email_verified {
@@ -221,38 +217,29 @@ async fn handle_google_oauth(
             )
             .execute(&mut txn)
             .await?;
-            (id, Some(TokenPurpose::CreateProfile))
+            (id, SessionMask::PUT_PROFILE)
         }
     };
 
     let login_ttl = login_token_valid_duration.unwrap_or(Duration::weeks(2));
 
     let valid_until = Utc::now()
-        + if let Some(TokenPurpose::CreateProfile) = purpose {
+        + if mask.contains(SessionMask::PUT_PROFILE) {
             Duration::hours(1)
         } else {
             login_ttl
         };
 
-    let session = crate::token::generate_session_token();
-
-    db::session::create_with_token(
-        &mut txn,
-        user_id,
-        &session,
-        Some(&valid_until),
-        purpose,
-        None,
-    )
-    .await?;
+    let session = db::session::create(&mut txn, user_id, Some(&valid_until), mask, None).await?;
 
     txn.commit().await?;
 
     let (csrf, cookie) = create_auth_token(token_secret, local_insecure, login_ttl, &session)?;
 
-    let response = match google_auth {
-        Some(_) => CreateSessionOAuthResponse::Login { csrf },
-        None => CreateSessionOAuthResponse::CreateUser { csrf },
+    let response = if !mask.contains(SessionMask::GENERAL) {
+        CreateSessionOAuthResponse::CreateUser { csrf }
+    } else {
+        CreateSessionOAuthResponse::Login { csrf }
     };
 
     Ok((response, cookie))
