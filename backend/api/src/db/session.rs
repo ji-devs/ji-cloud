@@ -4,6 +4,16 @@ use uuid::Uuid;
 
 use crate::token::SessionMask;
 
+#[must_use]
+fn generate_session_token() -> String {
+    use rand::Rng;
+    rand::thread_rng()
+        .sample_iter(&rand::distributions::Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect()
+}
+
 pub async fn create(
     conn: &mut PgConnection,
     user_id: Uuid,
@@ -11,7 +21,7 @@ pub async fn create(
     mask: SessionMask,
     impersonator_id: Option<Uuid>,
 ) -> sqlx::Result<String> {
-    let session = crate::token::generate_session_token();
+    let session = generate_session_token();
     sqlx::query!(
         "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)", 
         &session,
