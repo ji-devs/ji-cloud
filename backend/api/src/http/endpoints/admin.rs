@@ -58,7 +58,7 @@ async fn impersonate(
         &mut *db.acquire().await?,
         user_id,
         Some(&(Utc::now() + login_ttl)),
-        SessionMask::GENERAL,
+        SessionMask::GENERAL_API,
         Some(auth.claims.user_id),
     )
     .await?;
