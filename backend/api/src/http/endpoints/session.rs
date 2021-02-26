@@ -10,8 +10,8 @@ use paperclip::actix::{api_v2_operation, web::ServiceConfig};
 use shared::{
     api::{endpoints::session, ApiEndpoint},
     domain::session::{
-        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionResponse,
-        GetOAuthUrlResponse, GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
+        CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse,
+        GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
     },
 };
 use sqlx::PgPool;
@@ -156,7 +156,7 @@ async fn handle_google_oauth(
     login_token_valid_duration: Option<Duration>,
     remote_target: RemoteTarget,
     redirect_kind: OAuthUrlKind,
-) -> Result<(CreateSessionOAuthResponse, Cookie<'static>), error::OAuth> {
+) -> Result<(CreateSessionResponse, Cookie<'static>), error::OAuth> {
     let redirect_url = google::oauth_url(remote_target, redirect_kind);
 
     let tokens = google::convert_oauth_code(config, code, &redirect_url).await?;
@@ -236,10 +236,12 @@ async fn handle_google_oauth(
 
     let (csrf, cookie) = create_auth_token(token_secret, local_insecure, login_ttl, &session)?;
 
+    let response = NewSessionResponse { csrf };
+
     let response = if !mask.contains(SessionMask::GENERAL) {
-        CreateSessionOAuthResponse::CreateUser { csrf }
+        CreateSessionResponse::Register(response)
     } else {
-        CreateSessionOAuthResponse::Login { csrf }
+        CreateSessionResponse::Login(response)
     };
 
     Ok((response, cookie))
