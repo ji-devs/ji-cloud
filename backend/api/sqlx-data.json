@@ -983,6 +983,28 @@
       "nullable": []
     }
   },
+  "5aa7cb134e318d338a948bca51a2d77350d7685c1b41a56e5113b20f62feccc5": {
+    "query": "\nselect user_id\nfrom session\nwhere \n    token = $1 and\n    expires_at < now() is not true and\n    scope is not distinct from $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {
     "query": "\ninsert into module (kind)\nvalues ($1)\nreturning id as \"id: ModuleId\"\n",
     "describe": {
@@ -1787,28 +1809,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "ac70eacecbcefdd184169e9852d99fa23b8adb3e0e853432f3174df42a81f3f1": {
-    "query": "\nselect user_id\nfrom session\nwhere \n    token = $1 and\n    expires_at > now() and\n    scope is not distinct from $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "aebc3735f274e138af5f1852e9775b81f383f34e7a5cbddcbe3f10acf8c80426": {

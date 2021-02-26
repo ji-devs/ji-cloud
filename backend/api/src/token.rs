@@ -98,15 +98,19 @@ select user_id
 from session
 where 
     token = $1 and
-    expires_at > now() and
+    expires_at < now() is not true and
     scope is not distinct from $2 and
     (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))
 "#,
         claims.sub,
         required_purpose.map(|it| it as i16),
         UserScope::Admin as i16
-    ).fetch_optional(&mut txn).await.map_err(anyhow::Error::from)
-    .map_err(error::ise)?.ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED))?;
+    )
+    .fetch_optional(&mut txn)
+    .await
+    .map_err(anyhow::Error::from)
+    .map_err(error::ise)?
+    .ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED))?;
 
     let should_delete = match required_purpose {
         None => false,

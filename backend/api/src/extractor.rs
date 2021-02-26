@@ -86,7 +86,6 @@ impl FromRequest for TokenUser {
 
         async move {
             let csrf = csrf;
-            // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
             let claims =
                 check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, None).await?;
 
