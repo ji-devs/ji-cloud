@@ -31,7 +31,6 @@ pub mod s3 {
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
 }
 
-
 pub mod email {
     /// Disable email client locally (avoiding the warnings for missing secrets)
     /// If specified in a way that maps to `true` (currently "true", "1", "y"), all mailing related services,
