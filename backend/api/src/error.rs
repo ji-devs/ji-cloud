@@ -114,6 +114,30 @@ impl Into<actix_web::Error> for Service {
     }
 }
 
+#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+#[derive(Debug)]
+pub enum VerifyEmail {
+    InternalServerError(anyhow::Error),
+    DisabledService(ServiceKind),
+    Unauthorized,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for VerifyEmail {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+            Self::DisabledService(s) => s.into(),
+            Self::Unauthorized => BasicError::new(http::StatusCode::UNAUTHORIZED).into(),
+        }
+    }
+}
+
 #[api_v2_errors(
     code = 400,
     code = 401,

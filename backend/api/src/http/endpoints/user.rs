@@ -136,7 +136,7 @@ async fn verify_email(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<VerifyEmail as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::Service> {
+) -> Result<HttpResponse, error::VerifyEmail> {
     let req = req.into_inner();
 
     match req {
@@ -173,7 +173,13 @@ where
                 &mail,
                 config.remote_target().pages_url(),
             )
-            .await?;
+            .await
+            .map_err(|it| match it {
+                error::Service::InternalServerError(it) => {
+                    error::VerifyEmail::InternalServerError(it)
+                }
+                error::Service::DisabledService(it) => error::VerifyEmail::DisabledService(it),
+            })?;
 
             txn.commit().await?;
 
@@ -203,7 +209,7 @@ returning user_id
             )
             .fetch_optional(&mut txn)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("this should 401"))?;
+            .ok_or(error::VerifyEmail::Unauthorized)?;
 
             // make sure they can't use the link, now that they're verified.
             db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
