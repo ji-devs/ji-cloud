@@ -2,7 +2,7 @@ use actix_http::cookie::{Cookie, CookieBuilder, SameSite};
 use chrono::{Duration, Utc};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rand::Rng;
 use shared::domain::{session::AUTH_COOKIE_NAME, user::UserScope};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -170,9 +170,7 @@ fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Co
 
 #[must_use]
 fn generate_csrf() -> String {
-    thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(16)
-        .map(char::from)
-        .collect()
+    let mut bytes = [0_u8; 32];
+    rand::thread_rng().fill(&mut bytes[..]);
+    base64::encode_config(&bytes, base64::URL_SAFE)
 }

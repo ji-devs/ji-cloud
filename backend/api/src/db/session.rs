@@ -7,11 +7,10 @@ use crate::token::SessionMask;
 #[must_use]
 fn generate_session_token() -> String {
     use rand::Rng;
-    rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
-        .take(32)
-        .map(char::from)
-        .collect()
+
+    let mut bytes = [0_u8; 48];
+    rand::thread_rng().fill(&mut bytes[..]);
+    base64::encode_config(&bytes, base64::URL_SAFE)
 }
 
 pub async fn create(

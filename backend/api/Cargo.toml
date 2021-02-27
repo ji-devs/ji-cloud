@@ -49,6 +49,7 @@ argon2 = "0.1.0"
 actix-web-httpauth = "0.5.0"
 paseto = "2.0.0"
 bitflags = "1.2.1"
+base64 = "0.13.0"
 
 [dependencies.sendgrid]
 version = "0.15.0"
