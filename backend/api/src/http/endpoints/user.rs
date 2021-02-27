@@ -1,7 +1,7 @@
 use crate::{
     db::{self, user::upsert_profile},
     error,
-    extractor::{SessionPutProfile, TokenUserWithPurposedSession},
+    extractor::{SessionPutProfile, TokenSessionOf},
     service::{mail, ServiceData},
     token::SessionMask,
 };
@@ -262,7 +262,7 @@ fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register>
 async fn put_profile(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
-    signup_user: TokenUserWithPurposedSession<SessionPutProfile>,
+    signup_user: TokenSessionOf<SessionPutProfile>,
     req: Json<PutProfileRequest>,
 ) -> actix_web::Result<HttpResponse, error::Register> {
     validate_register_req(&req)?;

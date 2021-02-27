@@ -255,6 +255,13 @@ impl SessionMaskRequirement for SessionVerifyEmail {
     const REQUIREMENTS: SessionMask = SessionMask::VERIFY_EMAIL;
 }
 
+#[derive(Apiv2Schema)]
+pub struct SessionAny;
+
+impl SessionMaskRequirement for SessionAny {
+    const REQUIREMENTS: SessionMask = SessionMask::empty();
+}
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
@@ -264,12 +271,12 @@ impl SessionMaskRequirement for SessionVerifyEmail {
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct TokenUserWithPurposedSession<S: SessionMaskRequirement> {
+pub struct TokenSessionOf<S: SessionMaskRequirement> {
     pub claims: SessionClaims,
     _phantom: PhantomData<S>,
 }
 
-impl<S: SessionMaskRequirement> FromRequest for TokenUserWithPurposedSession<S> {
+impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();

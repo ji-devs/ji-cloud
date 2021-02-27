@@ -10,9 +10,9 @@ use sqlx::PgPool;
 
 use crate::{
     db,
-    domain::RegistrationStatus,
+    domain::{NoContentClearAuth, RegistrationStatus},
     error,
-    extractor::EmailBasicUser,
+    extractor::{EmailBasicUser, SessionAny, TokenSessionOf},
     token::{create_auth_token, SessionMask},
 };
 
@@ -63,6 +63,19 @@ async fn create_session(
     Ok(HttpResponse::Created().cookie(cookie).json(response))
 }
 
+/// Logout
+#[api_v2_operation]
+async fn delete_session(
+    db: Data<PgPool>,
+    session: TokenSessionOf<SessionAny>,
+) -> Result<NoContentClearAuth, error::Server> {
+    sqlx::query!("delete from session where token = $1", session.claims.token)
+        .execute(db.as_ref())
+        .await?;
+
+    Ok(NoContentClearAuth)
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(
         session::GetOAuthUrl::PATH,
@@ -71,6 +84,10 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         session::Create::PATH,
         session::Create::METHOD.route().to(create_session),
+    )
+    .route(
+        session::Delete::PATH,
+        session::Delete::METHOD.route().to(delete_session),
     )
     .route(
         session::CreateOAuth::PATH,

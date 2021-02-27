@@ -1,6 +1,23 @@
+use actix_http::cookie::{Cookie, SameSite};
+use actix_web::Responder;
 use chrono::{DateTime, Utc};
-use shared::domain::category::{Category, CategoryId};
-use std::collections::HashMap;
+use http::StatusCode;
+use paperclip::{
+    actix::OperationModifier,
+    v2::{
+        models::{DefaultOperationRaw, Either, Response},
+        schema::Apiv2Schema,
+    },
+};
+use shared::domain::{
+    category::{Category, CategoryId},
+    session::AUTH_COOKIE_NAME,
+};
+use std::{
+    collections::HashMap,
+    fmt,
+    future::{ready, Ready},
+};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -96,4 +113,46 @@ pub enum RegistrationStatus {
     /// * Change their profile details (not currently implemented)
     /// * Delete their account
     Complete = 2,
+}
+
+#[derive(Debug)]
+pub struct NoContentClearAuth;
+
+impl fmt::Display for NoContentClearAuth {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("No Content")
+    }
+}
+
+impl Responder for NoContentClearAuth {
+    type Error = actix_web::Error;
+    type Future = Ready<Result<actix_web::HttpResponse, Self::Error>>;
+
+    fn respond_to(self, _: &actix_web::HttpRequest) -> Self::Future {
+        let mut cookie = Cookie::named(AUTH_COOKIE_NAME);
+        cookie.set_max_age(time::Duration::seconds(0));
+        cookie.set_http_only(true);
+        cookie.set_same_site(SameSite::Strict);
+
+        ready(Ok(actix_web::HttpResponse::build(StatusCode::NO_CONTENT)
+            .content_type("application/octet-stream")
+            .cookie(cookie)
+            .finish()))
+    }
+}
+
+impl Apiv2Schema for NoContentClearAuth {}
+
+impl OperationModifier for NoContentClearAuth {
+    fn update_response(op: &mut DefaultOperationRaw) {
+        let status = StatusCode::NO_CONTENT;
+        op.responses.insert(
+            status.as_str().into(),
+            Either::Right(Response {
+                description: status.canonical_reason().map(ToString::to_string),
+                schema: None,
+                ..Default::default()
+            }),
+        );
+    }
 }
