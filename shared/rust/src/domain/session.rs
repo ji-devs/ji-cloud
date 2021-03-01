@@ -6,12 +6,32 @@ use std::fmt;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-/// Response for successfully signing in.
+/// The name to use for auth cookies.
+pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
+
+/// The name of the CSRF header.
+pub const CSRF_HEADER_NAME: &str = "X-CSRF";
+
+/// Response for creating a session
+///
 /// Note: This response *also* includes a cookie.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CreateSessionSuccess {
+pub enum CreateSessionResponse {
+    /// A new session was successfully created and the user may use the api as normal.
+    Login(NewSessionResponse),
+
+    /// The user has no profile, a token for creating one has been returned
+    Register(NewSessionResponse),
+}
+
+/// Response for successfully creating a session.
+/// Note: This response *also* includes a cookie.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct NewSessionResponse {
     /// A transparent CSRF token to use for this Session.
     pub csrf: String,
 }
@@ -68,37 +88,5 @@ impl fmt::Debug for CreateSessionOAuthRequest {
             // todo: replace with `finish_non_exhaustive`
             Self::Google { .. } => f.debug_struct("Google").finish(),
         }
-    }
-}
-
-/// Response for successfully creating a session / signing in, via oauth.
-/// Note: This response *also* includes a cookie.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[non_exhaustive]
-pub enum CreateSessionOAuthResponse {
-    /// Successfully logged in.
-    Login {
-        /// A transparent CSRF token to use for this Session.
-        csrf: String,
-    },
-
-    /// Failed to log in; a token for creating a user has been returned.
-    CreateUser {
-        /// A transparent CSRF token to use for this Session.
-        csrf: String,
-    },
-}
-
-impl CreateSessionOAuthResponse {
-    /// Returns `true` if `self` is [`Login`].
-    pub const fn is_login(&self) -> bool {
-        matches!(self, Self::Login { .. })
-    }
-
-    /// Returns `true` if `self` is [`CreateUser`].
-    pub const fn is_create_user(&self) -> bool {
-        matches!(self, Self::CreateUser { .. })
     }
 }

@@ -1,7 +1,7 @@
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
 use paperclip::actix::api_v2_errors;
-use shared::error::{auth::RegisterErrorKind, ApiError, EmptyError, MetadataNotFound};
+use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
 use crate::db::meta::MetaWrapperError;
 
@@ -62,6 +62,7 @@ pub enum ServiceKind {
     Algolia,
     S3,
     GoogleOAuth,
+    Mail,
 }
 
 impl Into<actix_web::Error> for ServiceKind {
@@ -80,6 +81,11 @@ impl Into<actix_web::Error> for ServiceKind {
             Self::GoogleOAuth => BasicError::with_message(
                 http::StatusCode::NOT_IMPLEMENTED,
                 "Google OAuth service is disabled".to_owned(),
+            )
+            .into(),
+            Self::Mail => BasicError::with_message(
+                http::StatusCode::NOT_IMPLEMENTED,
+                "Mail service is disabled".to_owned(),
             )
             .into(),
         }
@@ -104,6 +110,30 @@ impl Into<actix_web::Error> for Service {
         match self {
             Self::InternalServerError(e) => ise(e),
             Self::DisabledService(s) => s.into(),
+        }
+    }
+}
+
+#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+#[derive(Debug)]
+pub enum VerifyEmail {
+    InternalServerError(anyhow::Error),
+    DisabledService(ServiceKind),
+    Unauthorized,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for VerifyEmail {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+            Self::DisabledService(s) => s.into(),
+            Self::Unauthorized => BasicError::new(http::StatusCode::UNAUTHORIZED).into(),
         }
     }
 }
@@ -415,15 +445,15 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
 
 #[api_v2_errors(
     code = 400,
+    code = 409,
+    description = "Conflict: Another user with the provided username already exists"
     code = 420,
-    description = "Unprocessable Entity: No username was provided OR "
-    "Another user with the provided email already exists OR "
-    "Another user with the provided firebase-id already exists OR "
-    "Another user with the provided username already exists",
+    description = "Unprocessable Entity: No username was provided",
     code = 500
 )]
 pub enum Register {
-    RegisterError(RegisterErrorKind),
+    EmptyUsername,
+    TakenUsername,
     InternalServerError(anyhow::Error),
 }
 
@@ -436,21 +466,18 @@ impl<T: Into<anyhow::Error>> From<T> for Register {
 impl Into<actix_web::Error> for Register {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::RegisterError(kind) => {
-                let message = match kind {
-                    RegisterErrorKind::EmptyDisplayName => "No username was provided",
-                    RegisterErrorKind::TakenEmail => "Email already taken",
-                    RegisterErrorKind::TakenUsername => "Username already taken",
-                    _ => "Unprocessable Entity",
-                };
-
-                ApiError {
-                    code: http::StatusCode::UNPROCESSABLE_ENTITY,
-                    message: message.to_owned(),
-                    extra: shared::error::auth::RegisterError { kind },
-                }
-            }
+            Self::EmptyUsername => BasicError::with_message(
+                http::StatusCode::UNPROCESSABLE_ENTITY,
+                "No username was provided".to_owned(),
+            )
             .into(),
+
+            Self::TakenUsername => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "Username already taken".to_owned(),
+            )
+            .into(),
+
             Self::InternalServerError(e) => ise(e),
         }
     }

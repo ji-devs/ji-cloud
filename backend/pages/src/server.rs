@@ -2,9 +2,8 @@ mod cors;
 mod routes;
 
 use crate::templates::direct;
-use actix_service::Service;
 use actix_web::{
-    dev::{MessageBody, ServiceRequest, ServiceResponse},
+    dev::{MessageBody, Service, ServiceRequest, ServiceResponse},
     web,
 };
 use config::JSON_BODY_LIMIT;
@@ -12,24 +11,24 @@ use core::{
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
 };
-use futures::Future;
+use sentry::types::protocol::v7::value::Value as JsonValue;
 
 // todo: dedup this with api
 fn log_ise<B: MessageBody, T>(
     req: ServiceRequest,
     srv: &mut T,
-) -> impl Future<Output = actix_web::Result<T::Response>>
+) -> impl std::future::Future<Output = actix_web::Result<T::Response>>
 where
     T: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
-    let uri: serde_json::Value = req.uri().to_string().into();
-    let method: serde_json::Value = req.method().to_string().into();
+    let uri: JsonValue = req.uri().to_string().into();
+    let method: JsonValue = req.method().to_string().into();
 
     let fut = srv.call(req);
     async {
         let mut res = fut.await?;
         if res.status() == 500 {
-            let resp: &mut actix_http::Response<_> = res.response_mut();
+            let resp: &mut actix_web::HttpResponse<B> = res.response_mut();
 
             if let Some(err) = resp.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);

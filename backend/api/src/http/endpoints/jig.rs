@@ -27,7 +27,7 @@ async fn create(
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
-    let creator_id = auth.claims.sub;
+    let creator_id = auth.claims.user_id;
 
     let id = db::jig::create(
         &*db,

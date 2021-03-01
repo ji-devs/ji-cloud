@@ -6,6 +6,7 @@ pub(crate) mod jig;
 pub(crate) mod locale;
 pub(crate) mod meta;
 pub(crate) mod module;
+pub(crate) mod session;
 pub(crate) mod user;
 
 use config::DB_POOL_CONNECTIONS;

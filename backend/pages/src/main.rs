@@ -4,7 +4,7 @@ mod logger;
 mod server;
 mod templates;
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv();
 

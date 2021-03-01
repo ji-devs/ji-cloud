@@ -1,32 +1,36 @@
 use crate::{
     api::Method,
-    domain::session::{
-        CreateSessionOAuthRequest, CreateSessionOAuthResponse, CreateSessionSuccess,
-        GetOAuthUrlResponse,
-    },
+    domain::session::{CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse},
     error::EmptyError,
 };
 
 use super::ApiEndpoint;
 
 /// Sign in.
+///
 /// requires `Basic` auth in the form `BASE64(email:password)`
-/// see: https://tools.ietf.org/html/rfc7617#section-2
+/// see: <https://tools.ietf.org/html/rfc7617#section-2>
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ();
-    type Res = CreateSessionSuccess;
+    type Res = CreateSessionResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/session";
     const METHOD: Method = Method::Post;
 }
 
 /// Sign in via oauth
+///
 /// Note: If the account doesn't exist, but the oauth token is valid, it'll return a token that can be used to create an account.
+///
+/// # Errors
+/// (non exhaustive list)
+/// If there is already a user with the oauth user's email,
+/// and it isn't them - [`409 - Conflict`](http::StatusCode::CONFLICT)
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {
     type Req = CreateSessionOAuthRequest;
-    type Res = CreateSessionOAuthResponse;
+    type Res = CreateSessionResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/session/oauth";
     const METHOD: Method = Method::Post;
@@ -40,4 +44,14 @@ impl ApiEndpoint for GetOAuthUrl {
     type Err = EmptyError;
     const PATH: &'static str = "/v1/session/oauth/url/{service}/{kind}";
     const METHOD: Method = Method::Get;
+}
+
+/// Delete a session (logout)
+pub struct Delete;
+impl ApiEndpoint for Delete {
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/session";
+    const METHOD: Method = Method::Delete;
 }

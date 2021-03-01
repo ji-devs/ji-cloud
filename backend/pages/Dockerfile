@@ -7,7 +7,6 @@ FROM ekidd/rust-musl-builder:latest AS pages-builder
 # Add our source code.
 
 RUN mkdir -p ./backend/pages
-COPY ./shared ./shared
 COPY ./config/rust ./config/rust
 COPY ./backend/core ./backend/core
 COPY ./backend/pages ./backend/pages

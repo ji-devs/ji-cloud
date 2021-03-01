@@ -62,15 +62,12 @@ async function runFixtures(files, dbUrl, dir) {
 }
 
 async function login(context) {
-    const userId = '1f241e1b-b537-493f-a230-075cb16315be';
+    const sub = 'Uv9rrKftNlHV0w2cbCHhf7wmtt5wQq8V';
     const csrf = 'iQzmm4e8hVP6poK5';
 
     const claims = {
-        sub: userId,
+        sub: sub,
         csrf,
-        source:
-            'Basic'
-        ,
     };
 
     const options = { footer: 'authorized', expiresIn: '10 min', notBefore: '0s' };
@@ -176,7 +173,6 @@ test('login missing auth', async (t) => {
         responseType: 'json',
         headers: {
             // ... the fact that we're skipping out on authorization
-            // authorization: "Bearer " + TEST_JWT,
         },
     }));
 
