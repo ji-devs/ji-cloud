@@ -26,6 +26,20 @@ mod ser;
 pub mod session;
 pub mod user;
 
+#[deprecated]
+/// auth types (deprecated)
+pub mod auth {
+
+    #[deprecated]
+    pub use super::session::AUTH_COOKIE_NAME;
+
+    #[deprecated]
+    pub use super::session::CSRF_HEADER_NAME;
+
+    #[deprecated]
+    pub use super::user::PutProfileRequest as RegisterRequest;
+}
+
 use chrono::Utc;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
