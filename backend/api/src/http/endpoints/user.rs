@@ -1,7 +1,8 @@
 use crate::{
     db::{self, user::upsert_profile},
+    domain::NoContentClearAuth,
     error,
-    extractor::{SessionPutProfile, TokenSessionOf},
+    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf},
     service::{mail, ServiceData},
     token::SessionMask,
 };
@@ -20,7 +21,7 @@ use rand::thread_rng;
 use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
-        user::{Create, Profile, PutProfile, UserLookup, VerifyEmail},
+        user::{Create, Delete, Profile, PutProfile, UserLookup, VerifyEmail},
         ApiEndpoint,
     },
     domain::{
@@ -324,6 +325,22 @@ async fn get_profile(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
+/// Delete your account
+#[api_v2_operation]
+async fn delete(
+    db: Data<PgPool>,
+    session: TokenSessionOf<SessionDelete>,
+) -> Result<NoContentClearAuth, error::Server> {
+    sqlx::query!(
+        r#"delete from "user" where id = $1"#,
+        session.claims.user_id
+    )
+    .execute(db.as_ref())
+    .await?;
+
+    Ok(NoContentClearAuth)
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(Profile::PATH, Profile::METHOD.route().to(get_profile))
         .route(Create::PATH, Create::METHOD.route().to(create_user))
@@ -332,5 +349,6 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             VerifyEmail::METHOD.route().to(verify_email),
         )
         .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
-        .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup));
+        .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
+        .route(Delete::PATH, Delete::METHOD.route().to(delete));
 }
