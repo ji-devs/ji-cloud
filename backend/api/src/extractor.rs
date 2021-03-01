@@ -262,6 +262,13 @@ impl SessionMaskRequirement for SessionAny {
     const REQUIREMENTS: SessionMask = SessionMask::empty();
 }
 
+#[derive(Apiv2Schema)]
+pub struct SessionDelete;
+
+impl SessionMaskRequirement for SessionDelete {
+    const REQUIREMENTS: SessionMask = SessionMask::DELETE_ACCOUNT;
+}
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,

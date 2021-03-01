@@ -2349,6 +2349,18 @@
       ]
     }
   },
+  "e476295de7bbf205eb11c2a4046c46c9352f30eb4c32bad44714b9053841fd58": {
+    "query": "delete from \"user\" where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "e53665c81494eec03a5148d47f3a8e68b49071f7e69717c95e91dee992efa6bf": {
     "query": "\ninsert into user_image_library default values\nreturning id as \"id: ImageId\"\n",
     "describe": {
