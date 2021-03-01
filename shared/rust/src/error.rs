@@ -4,6 +4,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::meta::MetaKind;
 
+/// auth errors
+#[deprecated]
+pub mod auth {
+    #[deprecated]
+    pub use super::EmptyError as RegisterError;
+}
+
 /// Represents an error returned by the api.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ApiError<T> {

@@ -105,3 +105,6 @@ impl ApiEndpoint for Delete {
     const PATH: &'static str = "/v1/user/me";
     const METHOD: Method = Method::Delete;
 }
+
+#[deprecated]
+pub use profile::Put as Register;
