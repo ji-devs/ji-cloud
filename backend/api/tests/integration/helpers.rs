@@ -174,7 +174,7 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
 pub fn log_init() {
     let _ = env_logger::builder()
         .is_test(true)
-        .parse_filters("info,sqlx::query=warn")
+        .parse_filters("info,sqlx::query=warn,sqlx::postgres::notice=warn")
         .parse_default_env()
         .try_init();
 }

@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[actix_rt::test]
-async fn get_user_profile() -> anyhow::Result<()> {
+async fn get_profile() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User]).await;
 
     let port = app.port();

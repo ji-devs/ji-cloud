@@ -297,59 +297,6 @@ test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', 
 test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { index: 1 } });
 test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { name: 'abc123' } });
 
-test('get categories', async (t) => {
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    const categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
-
-    t.snapshot(categories.body);
-});
-
-async function getNestedCategories(t, options) {
-    await runFixtures([fixtures.user, fixtures.categoryNesting], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    const categories = await got.get(`http://0.0.0.0/v1/category?${qs.stringify(options, { arrayFormat: 'comma', encodeValuesOnly: true })}`, t.context.loggedInReqBase);
-
-    t.snapshot(categories.body);
-}
-
-getNestedCategories.title = (providedTitle = '', meta) => {
-    const {
-        scope, ids,
-    } = {
-        scope: null, ids: [], ...meta,
-    };
-
-    let title;
-
-    if (providedTitle !== '') {
-        title = `get categories nested - ${providedTitle}`;
-    } else {
-        title = 'get categories nested';
-    }
-
-    return `${title} - scope=${scope || ''}, ids=${ids}`;
-};
-
-test('top level', getNestedCategories);
-test('whole tree', getNestedCategories, {
-    scope: 'Decendants',
-});
-
-test('tree overlapping', getNestedCategories, {
-    scope: 'Decendants',
-    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
-});
-
-test('ancestors', getNestedCategories, {
-    scope: 'Ancestors',
-    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', 'e315d3b2-e90f-11ea-8281-73cd69c14821'],
-});
-
-test('exact', getNestedCategories, {
-    ids: ['afbce03c-e90f-11ea-8281-cfde02f6b582', '01cff7d8-e910-11ea-8281-7f86c625a156'],
-});
-
 test('update category ordering', async (t) => {
     const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';
     await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
