@@ -1,12 +1,38 @@
 use core::settings::RuntimeSettings;
 use std::{collections::HashSet, sync::Mutex};
 
+use chrono::{Duration, Utc};
 use config::RemoteTarget;
 use ji_cloud_api::http::Application;
 use rand::Rng;
 use sqlx::{Connection, Executor};
 
 use crate::fixture::Fixture;
+
+pub trait LoginExt {
+    fn login(self) -> Self;
+}
+
+impl LoginExt for reqwest::RequestBuilder {
+    fn login(self) -> Self {
+        const SUB: &str = "Uv9rrKftNlHV0w2cbCHhf7wmtt5wQq8V";
+        const CSRF: &str = "iQzmm4e8hVP6poK5";
+
+        let key = &**PASETO_KEY;
+
+        let token = ji_cloud_api::token::create_auth_token_no_cookie(
+            key,
+            Duration::minutes(10),
+            SUB,
+            CSRF.to_owned(),
+            Utc::now(),
+        )
+        .expect("failed to create auth token");
+
+        self.header("X-CSRF", CSRF)
+            .header("Cookie", format!("X-AUTH={}", token))
+    }
+}
 
 #[must_use]
 fn generate_db_name() -> String {
@@ -21,10 +47,6 @@ pub fn generate_paseto_key() -> [u8; 32] {
     rand::thread_rng().fill(&mut arr[..]);
 
     arr
-}
-
-fn env_bool(key: &str) -> bool {
-    std::env::var(key).map_or(false, |it| ["true", "1", "y"].contains(&it.as_ref()))
 }
 
 pub struct DbManager {
@@ -111,6 +133,9 @@ pub fn init_db() -> DbManager {
 
 static DB_URL_MANAGER: once_cell::sync::Lazy<DbManager> = once_cell::sync::Lazy::new(init_db);
 
+pub static PASETO_KEY: once_cell::sync::Lazy<Box<[u8; 32]>> =
+    once_cell::sync::Lazy::new(|| Box::new(generate_paseto_key()));
+
 pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
     log_init();
     let jwk_verifier = ji_cloud_api::jwk::create_verifier("".to_string());
@@ -136,7 +161,7 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
         0,
         None,
         None,
-        Box::new(generate_paseto_key()),
+        PASETO_KEY.clone(),
         None,
     );
 

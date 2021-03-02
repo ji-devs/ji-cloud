@@ -1,7 +1,8 @@
-use fixture::Fixture;
-use http::StatusCode;
-
 mod helpers;
+
+mod session;
+
+mod user;
 
 mod fixture {
     #[derive(Debug, Copy, Clone)]
@@ -40,54 +41,7 @@ async fn pass() -> anyhow::Result<()> {
 
     let resp = reqwest::get(&format!("http://0.0.0.0:{}", port)).await?;
 
-    assert_eq!(resp.status(), StatusCode::NOT_FOUND);
-
-    Ok(())
-}
-
-#[actix_rt::test]
-async fn login_missing_auth() -> anyhow::Result<()> {
-    let app = helpers::initialize_server(&[]).await;
-
-    let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
-
-    let client = reqwest::Client::new();
-
-    let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/session", port))
-        .send()
-        .await?;
-
-    assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
-
-    Ok(())
-}
-
-#[actix_rt::test]
-async fn login_user_basic() -> anyhow::Result<()> {
-    let app = helpers::initialize_server(&[Fixture::User]).await;
-
-    let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
-
-    let client = reqwest::Client::new();
-
-    let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/session", port))
-        .basic_auth("test@test.test", Some("password1"))
-        .send()
-        .await?
-        .error_for_status()?;
-
-    assert_eq!(resp.status(), StatusCode::CREATED);
-
-    let body: serde_json::Value = resp.json().await?;
-    body.as_object()
-        .expect("body wasn't a object")
-        .contains_key("csrf");
+    assert_eq!(resp.status(), http::StatusCode::NOT_FOUND);
 
     Ok(())
 }
