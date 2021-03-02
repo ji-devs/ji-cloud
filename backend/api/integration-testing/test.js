@@ -160,25 +160,6 @@ test.afterEach.always('kill server', async (t) => {
     }
 });
 
-test('pass', async (t) => {
-    const e = await t.throwsAsync(got('http://0.0.0.0', { port: t.context.port }));
-    t.is(e.response.statusCode, 404);
-});
-
-test('login missing auth', async (t) => {
-    const e = await t.throwsAsync(got.post('http://0.0.0.0/v1/session', {
-        port: t.context.port,
-        // As you can see, we properly have the body, (namely none, now.)
-        // so the only thing that should cause this to fail is...
-        responseType: 'json',
-        headers: {
-            // ... the fact that we're skipping out on authorization
-        },
-    }));
-
-    t.is(e.response.statusCode, 401);
-});
-
 // needs 1 use tokens (for basic auth) or forged tokens (for oauth)
 test.skip('register user', async (t) => {
     const cookieJar = new tough.CookieJar();
@@ -243,23 +224,6 @@ registerDuplicateUserError.title = (providedTitle = 'register duplicate user err
 test.skip(registerDuplicateUserError, { /* jwt: TEST_JWT, */ key: '', value: '' });
 test.skip(registerDuplicateUserError, { /* jwt: REGISTER_ERR_JWT, */ key: 'username', value: 'test' });
 test.skip(registerDuplicateUserError, {/* jwt: REGISTER_ERR_JWT, */ key: 'email', value: 'test@test.test' });
-
-test('login user', async (t) => {
-    await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    const cookieJar = new tough.CookieJar();
-
-    const { body } = await got.post('http://0.0.0.0/v1/session', {
-        cookieJar,
-        port: t.context.port,
-        responseType: 'json',
-        headers: {
-            authorization: 'Basic dGVzdEB0ZXN0LnRlc3Q6cGFzc3dvcmQx',
-        },
-    });
-
-    t.not(body.csrf, null);
-});
 
 test('user profile', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);

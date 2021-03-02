@@ -36,8 +36,7 @@ env = { "USE_PG_TMP" = "true" }
 
 [tasks.test]
 run_task = { name = [
-    # we currently don't have any tests ran via cargo, so, save some time.
-    # "test-cargo",
+    "test-cargo",
     "test-integration"
 ] }
 

@@ -80,3 +80,6 @@ openssl = { version = "0.10", features = ["vendored"] }
 # argon2 *needs* perf
 [profile.dev.package.argon2]
 opt-level = 3
+
+[dev-dependencies]
+once_cell = "1.7.2"
