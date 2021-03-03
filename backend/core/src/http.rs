@@ -14,8 +14,13 @@ pub fn get_tcp_fd() -> Option<TcpListener> {
 }
 
 /// Get the port to run the server on.
-pub fn get_addr(default: u16) -> SocketAddr {
-    let port = std::env::var("PORT").map_or(default, |it| it.parse().unwrap_or(default));
+pub fn get_addr(default: Option<u16>) -> SocketAddr {
+    // 0 is a special port that means "assign me whatever port you want"
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|it| it.parse().ok())
+        .or(default)
+        .unwrap_or(0);
 
     ([0, 0, 0, 0], port).into()
 }

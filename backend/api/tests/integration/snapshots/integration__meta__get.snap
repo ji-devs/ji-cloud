@@ -1,0 +1,107 @@
+---
+source: tests/integration/meta.rs
+expression: body
+
+---
+{
+  "styles": [
+    {
+      "id": "6389eaa0-de76-11ea-b7ab-0399bcf84df2",
+      "display_name": "A",
+      "created_at": "2020-08-14T21:37:44.569428Z",
+      "updated_at": null
+    },
+    {
+      "id": "6389ff7c-de76-11ea-b7ab-9b5661dd4f70",
+      "display_name": "B",
+      "created_at": "2020-08-14T21:37:44.569428Z",
+      "updated_at": null
+    },
+    {
+      "id": "638a02a6-de76-11ea-b7ab-9300ed788cc1",
+      "display_name": "C",
+      "created_at": "2020-08-14T21:37:44.569428Z",
+      "updated_at": null
+    }
+  ],
+  "age_ranges": [
+    {
+      "id": "f37217d2-de76-11ea-b7ab-0b8ba2fb36ab",
+      "display_name": "0-12",
+      "created_at": "2020-08-14T21:41:46.006699Z",
+      "updated_at": null
+    },
+    {
+      "id": "f372266e-de76-11ea-b7ab-3f6038429131",
+      "display_name": "13-17",
+      "created_at": "2020-08-14T21:41:46.006699Z",
+      "updated_at": null
+    },
+    {
+      "id": "f3722790-de76-11ea-b7ab-77b45e9af3ef",
+      "display_name": ">= 18",
+      "created_at": "2020-08-14T21:41:46.006699Z",
+      "updated_at": null
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "c0cd3d84-de76-11ea-b7ab-7fb0c04e8fe9",
+      "display_name": "Apple Ichor",
+      "created_at": "2020-08-14T21:40:21.040076Z",
+      "updated_at": null
+    },
+    {
+      "id": "c0cd4446-de76-11ea-b7ab-93987e8aa112",
+      "display_name": "Brittle Brawns",
+      "created_at": "2020-08-14T21:40:21.040076Z",
+      "updated_at": null
+    },
+    {
+      "id": "c0cd470c-de76-11ea-b7ab-c3aae340120b",
+      "display_name": "Creative Creations",
+      "created_at": "2020-08-14T21:40:21.040076Z",
+      "updated_at": null
+    }
+  ],
+  "subjects": [
+    {
+      "id": "5eac0740-f224-11ea-9b22-cf2ee94195fe",
+      "display_name": "Subject A",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    },
+    {
+      "id": "5eac07b8-f224-11ea-9b22-db3bdfab8258",
+      "display_name": "Subject B",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    },
+    {
+      "id": "5eac081c-f224-11ea-9b22-cbb8b4f00518",
+      "display_name": "Subject C",
+      "created_at": "2020-09-08T22:41:55.203383Z",
+      "updated_at": null
+    }
+  ],
+  "content_types": [
+    {
+      "id": "533898ea-3367-11eb-a473-8f2df3b13671",
+      "display_name": "A",
+      "created_at": "2020-11-30T23:54:39.198381Z",
+      "updated_at": null
+    },
+    {
+      "id": "533899b2-3367-11eb-a473-ef2577a4de84",
+      "display_name": "B",
+      "created_at": "2020-11-30T23:54:39.198381Z",
+      "updated_at": null
+    },
+    {
+      "id": "53389a20-3367-11eb-a473-bbdc8773362a",
+      "display_name": "C",
+      "created_at": "2020-11-30T23:54:39.198381Z",
+      "updated_at": null
+    }
+  ]
+}

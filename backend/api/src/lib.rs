@@ -44,7 +44,7 @@ pub mod logger;
 pub(crate) mod more_futures;
 pub mod s3;
 pub mod service;
-mod token;
+pub mod token;
 
 // todo: make this configurable?
 const ARGON2_DEFAULT_PARAMS: argon2::Params = argon2::Params {

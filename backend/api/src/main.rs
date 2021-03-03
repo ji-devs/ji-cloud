@@ -105,7 +105,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     let handle = thread::spawn(|| {
-        http::run(
+        http::build_and_run(
             db_pool,
             runtime_settings,
             s3,

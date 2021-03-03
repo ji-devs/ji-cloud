@@ -1,0 +1,8 @@
+---
+source: tests/integration/image.rs
+expression: body
+
+---
+{
+  "id": "[id]"
+}

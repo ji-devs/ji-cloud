@@ -73,7 +73,7 @@ pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
     let server: _ = if let Some(l) = get_tcp_fd() {
         server.listen(l)?
     } else {
-        server.bind(get_addr(pages_port))?
+        server.bind(get_addr(Some(pages_port)))?
     };
 
     server.run().await.unwrap();

@@ -89,7 +89,31 @@ pub struct RuntimeSettings {
 }
 
 impl RuntimeSettings {
-    pub(crate) fn new(
+    /// create new runtime settings.
+    pub fn new(
+        remote_target: RemoteTarget,
+        api_port: u16,
+        pages_port: u16,
+        bing_search_key: Option<String>,
+        google_oauth: Option<GoogleOAuth>,
+        token_secret: Box<[u8; 32]>,
+        login_token_valid_duration: Option<chrono::Duration>,
+    ) -> Self {
+        assert_eq!(token_secret.len(), 32);
+
+        Self {
+            api_port,
+            pages_port,
+            epoch: get_epoch(),
+            remote_target,
+            bing_search_key,
+            google_oauth,
+            token_secret,
+            login_token_valid_duration,
+        }
+    }
+
+    pub(crate) fn with_env(
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
@@ -475,7 +499,7 @@ impl SettingsManager {
             self.get_varying_secret(keys::GOOGLE_OAUTH_SECRET).await?,
         );
 
-        RuntimeSettings::new(
+        RuntimeSettings::with_env(
             self.remote_target,
             bing_search_key,
             google_oauth,

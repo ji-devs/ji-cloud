@@ -7,7 +7,7 @@ use crate::{
     service::{mail, ServiceData},
 };
 use actix_service::Service;
-use actix_web::HttpResponse;
+use actix_web::{dev::Server, HttpResponse};
 use actix_web::{
     dev::{MessageBody, ServiceRequest, ServiceResponse},
     web::Data,
@@ -20,7 +20,7 @@ use core::{
 use futures::Future;
 use paperclip::actix::OpenApiExt;
 use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use std::{net::TcpListener, sync::Arc};
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
@@ -60,8 +60,25 @@ where
     }
 }
 
+pub struct Application {
+    port: u16,
+    server: Server,
+}
+
+impl Application {
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    // A more expressive name that makes it clear that
+    // this function only returns when the application is stopped.
+    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
+        self.server.await
+    }
+}
+
 #[actix_web::main]
-pub async fn run(
+pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
@@ -70,6 +87,29 @@ pub async fn run(
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
     mail_client: Option<mail::Client>,
 ) -> anyhow::Result<()> {
+    let app = build(
+        pool,
+        settings,
+        s3,
+        algolia,
+        algolia_key_store,
+        jwk_verifier,
+        mail_client,
+    )?;
+    app.run_until_stopped().await?;
+
+    Ok(())
+}
+
+pub fn build(
+    pool: PgPool,
+    settings: RuntimeSettings,
+    s3: Option<s3::Client>,
+    algolia: Option<crate::algolia::Client>,
+    algolia_key_store: Option<crate::algolia::SearchKeyStore>,
+    jwk_verifier: Arc<crate::jwk::JwkVerifier>,
+    mail_client: Option<mail::Client>,
+) -> anyhow::Result<Application> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
 
@@ -146,15 +186,20 @@ pub async fn run(
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
     // the command above), we fall back to explicitly binding to a given
     // host:port.
-    let server: _ = if let Some(l) = get_tcp_fd() {
-        server.listen(l)?
+    let listener = if let Some(l) = get_tcp_fd() {
+        l
     } else {
-        server.bind(get_addr(api_port))?
+        TcpListener::bind(get_addr(Some(api_port)))?
     };
 
-    server.run().await.unwrap();
+    let port = listener.local_addr().unwrap().port();
 
-    Ok(())
+    let server = server.listen(listener)?;
+
+    Ok(Application {
+        server: server.run(),
+        port,
+    })
 }
 
 #[actix_web::get("/spec")]

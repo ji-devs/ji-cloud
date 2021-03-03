@@ -1,5 +1,5 @@
 use actix_http::cookie::{Cookie, CookieBuilder, SameSite};
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
 use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::Rng;
@@ -141,20 +141,31 @@ pub fn create_auth_token(
 
     let now = Utc::now();
 
-    let token = PasetoBuilder::new()
-        .set_expiration(&(now + valid_duration))
-        .set_not_before(&now)
-        .set_issued_at(Some(now))
-        .set_encryption_key(token_secret)
-        .set_claim("csrf", serde_json::Value::String(csrf.clone()))
-        .set_subject(&session)
-        .set_footer(AUTHORIZED_FOOTER)
-        .build()
-        .map_err(|err| anyhow::anyhow!("failed to create token: {}", err))?;
+    let token =
+        create_auth_token_no_cookie(token_secret, valid_duration, session, csrf.clone(), now)?;
 
     let valid_duration = time::Duration::seconds(valid_duration.num_seconds());
 
     Ok((csrf, create_cookie(token, local_insecure, valid_duration)))
+}
+
+pub fn create_auth_token_no_cookie(
+    token_secret: &[u8; 32],
+    valid_duration: Duration,
+    session: &str,
+    csrf: String,
+    now: DateTime<Utc>,
+) -> anyhow::Result<String> {
+    PasetoBuilder::new()
+        .set_expiration(&(now + valid_duration))
+        .set_not_before(&now)
+        .set_issued_at(Some(now))
+        .set_encryption_key(token_secret)
+        .set_claim("csrf", serde_json::Value::String(csrf))
+        .set_subject(&session)
+        .set_footer(AUTHORIZED_FOOTER)
+        .build()
+        .map_err(|err| anyhow::anyhow!("failed to create token: {}", err))
 }
 
 #[must_use]
