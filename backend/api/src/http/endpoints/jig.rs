@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, ServiceConfig},
-    NoContent,
+    CreatedJson, NoContent,
 };
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
@@ -25,7 +25,7 @@ async fn create(
     db: Data<PgPool>,
     auth: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
+) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
     let creator_id = auth.claims.user_id;
 
@@ -40,7 +40,7 @@ async fn create(
     .await
     .map_err(db::meta::handle_metadata_err)?;
 
-    Ok(Json(CreateResponse { id }))
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
 /// Delete a jig.

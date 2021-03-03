@@ -8,7 +8,7 @@ use crate::{
 use paperclip::actix::{
     api_v2_errors, api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
-    NoContent,
+    CreatedJson, NoContent,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::domain::category::{
@@ -81,12 +81,12 @@ async fn create_category(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageCategory>,
     req: Json<<category::Create as ApiEndpoint>::Req>,
-) -> actix_web::Result<Json<<category::Create as ApiEndpoint>::Res>, CreateError> {
+) -> actix_web::Result<CreatedJson<<category::Create as ApiEndpoint>::Res>, CreateError> {
     let CreateCategoryRequest { name, parent_id } = req.into_inner();
 
     let (id, index) = db::category::create(&db, &name, parent_id).await?;
 
-    Ok(Json(NewCategoryResponse { id, index }))
+    Ok(CreatedJson(NewCategoryResponse { id, index }))
 }
 
 /// Update a category.

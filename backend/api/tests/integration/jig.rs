@@ -1,11 +1,5 @@
 use http::StatusCode;
-use serde_json::json;
-use shared::domain::{
-    category::{CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse},
-    jig::JigId,
-    CreateResponse,
-};
-use uuid::Uuid;
+use shared::domain::{jig::JigId, CreateResponse};
 
 use crate::{
     fixture::Fixture,

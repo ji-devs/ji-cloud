@@ -1,5 +1,4 @@
 use http::StatusCode;
-use insta::assert_json_snapshot;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
 use uuid::Uuid;
