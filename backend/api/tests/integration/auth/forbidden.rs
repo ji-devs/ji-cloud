@@ -195,3 +195,6 @@ async fn animation_delete() -> anyhow::Result<()> {
     )
     .await
 }
+
+// todo: admin routes
+// todo: locale routes
