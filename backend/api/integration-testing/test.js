@@ -225,42 +225,6 @@ test.skip(registerDuplicateUserError, { /* jwt: TEST_JWT, */ key: '', value: '' 
 test.skip(registerDuplicateUserError, { /* jwt: REGISTER_ERR_JWT, */ key: 'username', value: 'test' });
 test.skip(registerDuplicateUserError, {/* jwt: REGISTER_ERR_JWT, */ key: 'email', value: 'test@test.test' });
 
-function assertCategoryUpdatedAt(t, categories) {
-    categories.forEach((it) => {
-        if (it.children) {
-            assertCategoryUpdatedAt(t, it.children);
-        }
-
-        t.true(it.updated_at === null || typeof (it.updated_at) === 'string');
-        delete it.updated_at;
-    });
-}
-
-
-async function updateCategoryFactory(t, args) {
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    await t.notThrowsAsync(got.patch(`http://0.0.0.0/v1/category/${args.category}`, {
-        ...t.context.loggedInReqBase,
-        json: args.json,
-    }));
-
-    const { body: resp } = await got.get('http://0.0.0.0/v1/category?scope=Decendants', t.context.loggedInReqBase);
-
-    assertCategoryUpdatedAt(t, resp.categories);
-
-    t.snapshot(resp);
-}
-
-updateCategoryFactory.title = (providedTitle = 'update category', args) => `${providedTitle} - (id: ${args.category}, ${JSON.stringify(args.json)})`;
-
-// todo: combine the following several tests into a test factory.
-
-test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', json: { parent_id: '81c4796a-e883-11ea-93f0-df2484ab6b11' } });
-test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', json: { parent_id: null, index: 0 } });
-test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { index: 1 } });
-test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { name: 'abc123' } });
-
 test('GET metadata', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.FIXTURES_DIR);
 
@@ -402,7 +366,7 @@ test('update image - two styles', async (t) => {
 });
 
 // 500s, but for some reason diagnosis is being difficult
-test.skip('create jig - default', async (t) => {
+test('create jig - default', async (t) => {
     await runFixtures([fixtures.user], t.context.dbUrl, t.context.FIXTURES_DIR);
 
     const jig = await got.post('http://0.0.0.0/v1/jig', {

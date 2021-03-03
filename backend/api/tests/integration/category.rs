@@ -3,6 +3,7 @@ use serde_json::json;
 use shared::domain::category::{
     CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
 };
+use uuid::Uuid;
 
 use crate::{
     fixture::Fixture,
@@ -172,7 +173,7 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     let resp = client
         .patch(&format!(
@@ -198,7 +199,7 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
 }
@@ -236,7 +237,81 @@ async fn delete() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
+}
+
+async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+
+    let port = app.port();
+
+    let _ = tokio::spawn(app.run_until_stopped());
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .patch(&format!("http://0.0.0.0:{}/v1/category/{}", port, id))
+        .json(&body)
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/category?scope=Decendants",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn update_parent() -> anyhow::Result<()> {
+    update(
+        "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
+        &json!({"parent_id": "81c4796a-e883-11ea-93f0-df2484ab6b11"}),
+    )
+    .await
+}
+
+#[actix_rt::test]
+async fn update_reparent_move() -> anyhow::Result<()> {
+    update(
+        "7fe19326-e883-11ea-93f0-5343493c17c4".parse()?,
+        &json!({"parent_id": (), "index": 0}),
+    )
+    .await
+}
+
+#[actix_rt::test]
+async fn update_move() -> anyhow::Result<()> {
+    update(
+        "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
+        &json!({"index": 1}),
+    )
+    .await
+}
+
+#[actix_rt::test]
+async fn update_rename() -> anyhow::Result<()> {
+    update(
+        "81c4796a-e883-11ea-93f0-df2484ab6b11".parse()?,
+        &json!({"name": "abc123"}),
+    )
+    .await
 }
