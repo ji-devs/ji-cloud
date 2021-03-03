@@ -15,8 +15,6 @@ COPY ./backend/api ./backend/api
 # Fix permissions on source code.
 RUN sudo chown -R rust:rust /home/rust
 
-RUN rm -r backend/api/integration-testing backend/api/fixtures
-
 # Build our application.
 WORKDIR ./backend/api
 RUN cargo build --release --no-default-features
