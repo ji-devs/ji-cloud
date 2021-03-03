@@ -1,8 +1,9 @@
+mod auth;
+mod category;
 mod fixture;
 mod helpers;
 mod session;
 mod user;
-mod category;
 
 #[actix_rt::test]
 async fn pass() -> anyhow::Result<()> {

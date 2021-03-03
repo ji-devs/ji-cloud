@@ -1,10 +1,40 @@
 use http::StatusCode;
-use shared::domain::category::{CategoryTreeScope, GetCategoryRequest};
+use shared::domain::category::{
+    CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
+};
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+
+#[actix_rt::test]
+async fn create() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User]).await;
+
+    let port = app.port();
+
+    let _ = tokio::spawn(app.run_until_stopped());
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .post(&format!("http://0.0.0.0:{}/v1/category", port))
+        .login()
+        .json(&CreateCategoryRequest {
+            name: "One".to_owned(),
+            parent_id: None,
+        })
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::CREATED);
+
+    let _body: NewCategoryResponse = resp.json().await?;
+
+    Ok(())
+}
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
