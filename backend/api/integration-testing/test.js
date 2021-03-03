@@ -236,20 +236,6 @@ function assertCategoryUpdatedAt(t, categories) {
     });
 }
 
-test('delete category', async (t) => {
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    await t.notThrowsAsync(got.delete(
-        'http://0.0.0.0/v1/category/7fe19326-e883-11ea-93f0-5343493c17c4',
-        t.context.loggedInReqBase,
-    ));
-
-    const { body: resp } = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
-
-    assertCategoryUpdatedAt(t, resp.categories);
-
-    t.snapshot(resp);
-});
 
 async function updateCategoryFactory(t, args) {
     await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
@@ -274,49 +260,6 @@ test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', 
 test(updateCategoryFactory, { category: '7fe19326-e883-11ea-93f0-5343493c17c4', json: { parent_id: null, index: 0 } });
 test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { index: 1 } });
 test(updateCategoryFactory, { category: '81c4796a-e883-11ea-93f0-df2484ab6b11', json: { name: 'abc123' } });
-
-test('update category ordering', async (t) => {
-    const categoryThree = '81c4796a-e883-11ea-93f0-df2484ab6b11';
-    await runFixtures([fixtures.user, fixtures.categoryOrdering], t.context.dbUrl, t.context.FIXTURES_DIR);
-
-    const updateResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
-        ...t.context.loggedInReqBase,
-        json: {
-            index: 0,
-        },
-    });
-
-    t.deepEqual(updateResp.statusCode, 204);
-
-    let categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
-
-    // ignore updated at (but make sure it exists, and is a string)
-    categories.body.categories.forEach((it) => {
-        t.deepEqual(typeof (it.updated_at), 'string');
-        delete it.updated_at;
-    });
-
-    t.snapshot(categories.body);
-
-    const revertResp = await got.patch(`http://0.0.0.0/v1/category/${categoryThree}`, {
-        ...t.context.loggedInReqBase,
-        json: {
-            index: 2,
-        },
-    });
-
-    t.deepEqual(revertResp.statusCode, 204);
-
-    categories = await got.get('http://0.0.0.0/v1/category', t.context.loggedInReqBase);
-
-    // ignore updated at (but make sure it exists, and is a string)
-    categories.body.categories.forEach((it) => {
-        t.deepEqual(typeof (it.updated_at), 'string');
-        delete it.updated_at;
-    });
-
-    t.snapshot(categories.body);
-});
 
 test('GET metadata', async (t) => {
     await runFixtures([fixtures.user, fixtures.metaKinds], t.context.dbUrl, t.context.FIXTURES_DIR);

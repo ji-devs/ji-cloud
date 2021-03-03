@@ -1,4 +1,5 @@
 use http::StatusCode;
+use serde_json::json;
 use shared::domain::category::{
     CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest, NewCategoryResponse,
 };
@@ -133,4 +134,109 @@ async fn nested_exact() -> anyhow::Result<()> {
         ],
     })
     .await
+}
+
+#[actix_rt::test]
+async fn upgdate_ordering() -> anyhow::Result<()> {
+    let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
+
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+
+    let port = app.port();
+
+    let _ = tokio::spawn(app.run_until_stopped());
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/category/{}",
+            port, category_three
+        ))
+        .json(&json!({"index": 0}))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/category", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/category/{}",
+            port, category_three
+        ))
+        .json(&json!({"index": 2}))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/category", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn delete() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+
+    let port = app.port();
+
+    let _ = tokio::spawn(app.run_until_stopped());
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .delete(&format!(
+            "http://0.0.0.0:{}/v1/category/7fe19326-e883-11ea-93f0-5343493c17c4",
+            port,
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/category", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".categories[].updated_at" => "[timestamp]"});
+
+    Ok(())
 }
