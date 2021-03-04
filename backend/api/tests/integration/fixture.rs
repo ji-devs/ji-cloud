@@ -8,6 +8,7 @@ pub enum Fixture {
     UserNoPerms,
     Locale,
     Jig,
+    Animation,
 }
 
 impl Fixture {
@@ -23,6 +24,7 @@ impl Fixture {
             Self::UserNoPerms => include_str!("../../fixtures/6_user_no_perms.sql"),
             Self::Locale => include_str!("../../fixtures/7_locale.sql"),
             Self::Jig => include_str!("../../fixtures/8_jig.sql"),
+            Self::Animation => include_str!("../../fixtures/9_animation.sql"),
         }
     }
 }
