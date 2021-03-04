@@ -62,18 +62,43 @@ where
 
 pub struct Application {
     port: u16,
-    server: Server,
+    server: Option<Server>,
 }
 
 impl Application {
+    fn new(port: u16, server: Server) -> Self {
+        Self {
+            port,
+            server: Some(server),
+        }
+    }
+
     pub fn port(&self) -> u16 {
         self.port
     }
 
     // A more expressive name that makes it clear that
     // this function only returns when the application is stopped.
-    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.server.await
+    pub async fn run_until_stopped(mut self) -> Result<(), std::io::Error> {
+        if let Some(server) = self.server.take() {
+            server.await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn stop(mut self, graceful: bool) {
+        if let Some(server) = self.server.take() {
+            server.stop(graceful).await
+        }
+    }
+}
+
+impl Drop for Application {
+    fn drop(&mut self) {
+        if let Some(server) = self.server.take() {
+            let _ = tokio::spawn(server.stop(false));
+        }
     }
 }
 
@@ -196,10 +221,7 @@ pub fn build(
 
     let server = server.listen(listener)?;
 
-    Ok(Application {
-        server: server.run(),
-        port,
-    })
+    Ok(Application::new(port, server.run()))
 }
 
 #[actix_web::get("/spec")]

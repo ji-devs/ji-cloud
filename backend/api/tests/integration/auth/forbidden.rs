@@ -16,8 +16,6 @@ async fn forbidden(
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let request = client
@@ -37,6 +35,8 @@ async fn forbidden(
     let body: ApiError<EmptyError> = resp.json().await?;
 
     assert_eq!(body.code, StatusCode::FORBIDDEN);
+
+    app.stop(false).await;
 
     Ok(())
 }

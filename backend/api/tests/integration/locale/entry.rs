@@ -1,12 +1,6 @@
 use http::StatusCode;
 
-use serde_json::json;
-use shared::domain::{
-    image::ImageId,
-    locale::{CreateEntryRequest, EntryStatus},
-    CreateResponse,
-};
-use uuid::Uuid;
+use shared::domain::locale::{CreateEntryRequest, EntryStatus};
 
 use crate::{
     fixture::Fixture,
@@ -18,8 +12,6 @@ async fn delete() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -40,8 +32,6 @@ async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -64,8 +54,6 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -128,8 +116,6 @@ async fn create() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 

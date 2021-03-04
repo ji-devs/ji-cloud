@@ -18,8 +18,6 @@ async fn create(
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -84,8 +82,6 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -141,8 +137,6 @@ async fn get_metadata() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -173,8 +167,6 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 

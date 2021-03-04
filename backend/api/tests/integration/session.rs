@@ -8,8 +8,6 @@ async fn create_401_no_auth() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -27,8 +25,6 @@ async fn create_basic() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
