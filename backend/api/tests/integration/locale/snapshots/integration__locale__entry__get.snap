@@ -1,0 +1,21 @@
+---
+source: tests/integration/locale/entry.rs
+expression: body
+
+---
+{
+  "entry": {
+    "id": 3,
+    "bundleId": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+    "section": "A",
+    "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+    "english": "Entry #3",
+    "hebrew": null,
+    "status": "approved",
+    "zeplinReference": null,
+    "comments": null,
+    "inApp": true,
+    "inElement": true,
+    "inMock": false
+  }
+}

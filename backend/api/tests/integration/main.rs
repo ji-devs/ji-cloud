@@ -4,6 +4,7 @@ mod fixture;
 mod helpers;
 mod image;
 mod jig;
+mod locale;
 mod meta;
 mod session;
 mod user;
@@ -14,13 +15,9 @@ async fn pass() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let resp = reqwest::get(&format!("http://0.0.0.0:{}", port)).await?;
 
     assert_eq!(resp.status(), http::StatusCode::NOT_FOUND);
 
     Ok(())
 }
-
-// todo: locale tests

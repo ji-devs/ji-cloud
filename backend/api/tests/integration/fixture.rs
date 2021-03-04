@@ -6,6 +6,8 @@ pub enum Fixture {
     CategoryNesting,
     Image,
     UserNoPerms,
+    Locale,
+    Jig,
 }
 
 impl Fixture {
@@ -19,6 +21,8 @@ impl Fixture {
             Self::CategoryNesting => include_str!("../../fixtures/4_category_nesting.sql"),
             Self::Image => include_str!("../../fixtures/5_image.sql"),
             Self::UserNoPerms => include_str!("../../fixtures/6_user_no_perms.sql"),
+            Self::Locale => include_str!("../../fixtures/7_locale.sql"),
+            Self::Jig => include_str!("../../fixtures/8_jig.sql"),
         }
     }
 }

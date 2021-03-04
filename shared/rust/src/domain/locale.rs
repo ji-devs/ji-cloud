@@ -1,6 +1,6 @@
 //! Locale types
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -199,7 +199,7 @@ pub struct ListEntryQuery {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ListEntryResponse {
     /// Entries grouped by [`Bundle`]
-    Bundles(HashMap<Uuid, Vec<Entry>>),
+    Bundles(BTreeMap<Uuid, Vec<Entry>>),
 
     /// Ungrouped entries
     List(Vec<Entry>),

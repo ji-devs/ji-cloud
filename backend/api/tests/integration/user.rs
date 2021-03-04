@@ -11,8 +11,6 @@ async fn get_profile() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client

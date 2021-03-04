@@ -16,8 +16,6 @@ async fn create() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -44,8 +42,6 @@ async fn get() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -68,8 +64,6 @@ async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()>
     let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 
@@ -145,8 +139,6 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -210,8 +202,6 @@ async fn delete() -> anyhow::Result<()> {
 
     let port = app.port();
 
-    let _ = tokio::spawn(app.run_until_stopped());
-
     let client = reqwest::Client::new();
 
     let resp = client
@@ -246,8 +236,6 @@ async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
 
     let port = app.port();
-
-    let _ = tokio::spawn(app.run_until_stopped());
 
     let client = reqwest::Client::new();
 

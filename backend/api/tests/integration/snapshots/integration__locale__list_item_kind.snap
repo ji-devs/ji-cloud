@@ -1,0 +1,33 @@
+---
+source: tests/integration/locale.rs
+expression: body
+
+---
+{
+  "itemKinds": [
+    {
+      "id": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "name": "kind 1"
+    },
+    {
+      "id": "17114886-7c68-11eb-a0d7-57627e53e068",
+      "name": "kind 2"
+    },
+    {
+      "id": "182c77f4-7c68-11eb-a0d7-cbab2eafe435",
+      "name": "kind 3"
+    },
+    {
+      "id": "18f46e4e-7c68-11eb-a0d7-6351ca8502e6",
+      "name": "kind 4"
+    },
+    {
+      "id": "1a749ee2-7c68-11eb-a0d7-f3acfa7b44a1",
+      "name": "kind 5"
+    },
+    {
+      "id": "1b4097e0-7c68-11eb-a0d7-836dd16fe69a",
+      "name": "kind 6"
+    }
+  ]
+}
