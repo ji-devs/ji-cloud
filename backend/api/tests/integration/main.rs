@@ -1,3 +1,4 @@
+mod animation;
 mod auth;
 mod category;
 mod fixture;
