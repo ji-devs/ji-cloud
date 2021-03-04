@@ -33,7 +33,7 @@ async fn list_item_kinds(db: Data<PgPool>) -> Result<Json<ListItemKindResponse>,
 }
 
 mod entry {
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     use paperclip::actix::{
         api_v2_operation,
@@ -109,7 +109,7 @@ order by id
         match query.group_by {
             ListEntryGroupBy::None => Ok(Json(ListEntryResponse::List(entries))),
             ListEntryGroupBy::Bundle => {
-                let mut map = HashMap::new();
+                let mut map = BTreeMap::new();
                 for entry in entries {
                     map.entry(entry.bundle_id)
                         .or_insert_with(Vec::new)

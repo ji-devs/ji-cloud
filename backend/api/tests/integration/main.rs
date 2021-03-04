@@ -4,6 +4,7 @@ mod fixture;
 mod helpers;
 mod image;
 mod jig;
+mod locale;
 mod meta;
 mod session;
 mod user;
@@ -23,4 +24,3 @@ async fn pass() -> anyhow::Result<()> {
     Ok(())
 }
 
-// todo: locale tests

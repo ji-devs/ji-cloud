@@ -1,0 +1,79 @@
+---
+source: tests/integration/locale/entry.rs
+expression: body
+
+---
+{
+  "list": [
+    {
+      "id": 1,
+      "bundleId": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+      "section": "A",
+      "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "english": "Entry #1",
+      "hebrew": null,
+      "status": "approved",
+      "zeplinReference": null,
+      "comments": null,
+      "inApp": true,
+      "inElement": true,
+      "inMock": false
+    },
+    {
+      "id": 2,
+      "bundleId": "8359a48a-7c67-11eb-a0d7-0fd74777a62c",
+      "section": "A",
+      "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "english": "Entry #2",
+      "hebrew": null,
+      "status": "approved",
+      "zeplinReference": null,
+      "comments": null,
+      "inApp": true,
+      "inElement": true,
+      "inMock": false
+    },
+    {
+      "id": 3,
+      "bundleId": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+      "section": "A",
+      "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "english": "Entry #3",
+      "hebrew": null,
+      "status": "approved",
+      "zeplinReference": null,
+      "comments": null,
+      "inApp": true,
+      "inElement": true,
+      "inMock": false
+    },
+    {
+      "id": 4,
+      "bundleId": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+      "section": "B",
+      "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "english": "Entry #B-1",
+      "hebrew": null,
+      "status": "approved",
+      "zeplinReference": null,
+      "comments": null,
+      "inApp": true,
+      "inElement": true,
+      "inMock": false
+    },
+    {
+      "id": 5,
+      "bundleId": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+      "section": "C",
+      "itemKindId": "1623eab4-7c68-11eb-a0d7-5f27277abc1b",
+      "english": "Entry #B-1",
+      "hebrew": null,
+      "status": "approved",
+      "zeplinReference": null,
+      "comments": null,
+      "inApp": true,
+      "inElement": true,
+      "inMock": false
+    }
+  ]
+}
