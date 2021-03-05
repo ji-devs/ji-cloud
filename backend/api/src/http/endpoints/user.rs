@@ -21,12 +21,15 @@ use rand::thread_rng;
 use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
-        user::{Create, Delete, Profile, PutProfile, UserLookup, VerifyEmail},
+        user::{
+            ChangePassword, Create, Delete, Profile, PutProfile, ResetPassword, UserLookup,
+            VerifyEmail,
+        },
         ApiEndpoint,
     },
     domain::{
         session::NewSessionResponse,
-        user::{PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
+        user::{ChangePasswordRequest, PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
 use sqlx::{Acquire, PgConnection, PgPool};
@@ -60,30 +63,35 @@ async fn send_verification_email(
     Ok(())
 }
 
-/// Create a user
-#[api_v2_operation]
-async fn create_user(
-    config: Data<RuntimeSettings>,
-    mail: ServiceData<mail::Client>,
-    db: Data<PgPool>,
-    req: Json<<Create as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::Service> {
-    let req = req.into_inner();
+async fn send_password_email(
+    txn: &mut PgConnection,
+    user_id: Uuid,
+    email_address: String,
+    mail: &mail::Client,
+    pages_url: &str,
+) -> Result<(), error::Service> {
+    let session = db::session::create(
+        &mut *txn,
+        user_id,
+        Some(&(Utc::now() + Duration::hours(1))),
+        SessionMask::CHANGE_PASSWORD,
+        None,
+    )
+    .await?;
 
-    if req.password.is_empty() {
-        todo!("empty password is error");
-    }
+    let template = mail
+        .password_reset_template()
+        .map_err(error::Service::DisabledService)?;
 
-    let mut txn = db.begin().await?;
+    let email_link = format!("{}/change-pw/{}", pages_url, session);
 
-    // todo: handle duplicate emails
-
-    let user = sqlx::query!(r#"insert into "user" default values returning id"#)
-        .fetch_one(&mut txn)
+    mail.send_password_reset(template, Email::new(email_address), email_link)
         .await?;
 
-    let pass = req.password;
+    Ok(())
+}
 
+async fn hash_password(pass: String) -> anyhow::Result<String> {
     let res = actix_web::web::block(move || {
         let password_hasher = Argon2::default();
 
@@ -106,6 +114,33 @@ async fn create_user(
         Err(BlockingError::Canceled) => return Err(anyhow::anyhow!("Thread pool is gone").into()),
         Err(BlockingError::Error(e)) => return Err(anyhow::anyhow!("{}", e).into()),
     };
+
+    Ok(pass_hash)
+}
+
+/// Create a user
+#[api_v2_operation]
+async fn create_user(
+    config: Data<RuntimeSettings>,
+    mail: ServiceData<mail::Client>,
+    db: Data<PgPool>,
+    req: Json<<Create as ApiEndpoint>::Req>,
+) -> Result<NoContent, error::Service> {
+    let req = req.into_inner();
+
+    if req.password.is_empty() {
+        return Err(anyhow::anyhow!("properly handle empty password error").into());
+    }
+
+    let mut txn = db.begin().await?;
+
+    // todo: handle duplicate emails
+
+    let user = sqlx::query!(r#"insert into "user" default values returning id"#)
+        .fetch_one(&mut txn)
+        .await?;
+
+    let pass_hash = hash_password(req.password).await?;
 
     sqlx::query!(
         "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
@@ -137,7 +172,7 @@ async fn verify_email(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<VerifyEmail as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::VerifyEmail> {
+) -> Result<HttpResponse, error::ServiceSession> {
     let req = req.into_inner();
 
     match req {
@@ -177,9 +212,9 @@ where
             .await
             .map_err(|it| match it {
                 error::Service::InternalServerError(it) => {
-                    error::VerifyEmail::InternalServerError(it)
+                    error::ServiceSession::InternalServerError(it)
                 }
-                error::Service::DisabledService(it) => error::VerifyEmail::DisabledService(it),
+                error::Service::DisabledService(it) => error::ServiceSession::DisabledService(it),
             })?;
 
             txn.commit().await?;
@@ -210,7 +245,7 @@ returning user_id
             )
             .fetch_optional(&mut txn)
             .await?
-            .ok_or(error::VerifyEmail::Unauthorized)?;
+            .ok_or(error::ServiceSession::Unauthorized)?;
 
             // make sure they can't use the link, now that they're verified.
             db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
@@ -341,12 +376,140 @@ async fn delete(
     Ok(NoContentClearAuth)
 }
 
+/// Reset password
+#[api_v2_operation]
+async fn reset_password(
+    config: Data<RuntimeSettings>,
+    req: Json<<ResetPassword as ApiEndpoint>::Req>,
+    db: Data<PgPool>,
+    mail: ServiceData<mail::Client>,
+) -> Result<NoContent, error::Service> {
+    let req = req.into_inner();
+
+    let mut txn = db.begin().await?;
+
+    let user = sqlx::query!(
+        "select user_id from user_email where email = $1::text",
+        &req.email
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    let user_id = match user {
+        Some(user) => user.user_id,
+        None => return Ok(NoContent),
+    };
+
+    send_password_email(
+        &mut txn,
+        user_id,
+        req.email,
+        mail.as_ref(),
+        config.remote_target().pages_url(),
+    )
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(NoContent)
+}
+
+/// Change password
+#[api_v2_operation]
+async fn put_password(
+    db: Data<PgPool>,
+    req: Json<<ChangePassword as ApiEndpoint>::Req>,
+) -> Result<NoContent, error::ServiceSession> {
+    let ChangePasswordRequest::Change {
+        password,
+        force_logout,
+        token,
+    } = req.into_inner();
+
+    if password.is_empty() {
+        return Err(anyhow::anyhow!("properly handle empty password error").into());
+    }
+
+    let mut txn = db.begin().await?;
+
+    let user_id = db::session::get_onetime(&mut txn, SessionMask::CHANGE_PASSWORD, &token)
+        .await?
+        .ok_or(error::ServiceSession::Unauthorized)?;
+
+    // todo: handle duplicate emails
+
+    let email = sqlx::query!(
+        r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
+        user_id
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    let email = match email {
+        Some(email) => email.email,
+        None => return Err(anyhow::anyhow!("Handle no confirmed email").into()),
+    };
+
+    let pass_hash = hash_password(password).await?;
+
+    sqlx::query!("delete from user_auth_basic where user_id = $1", user_id)
+        .execute(&mut txn)
+        .await?;
+
+    let user_to_delete = sqlx::query!(
+        r#"select user_id from user_auth_basic where user_id <> $1 and email = $2 for update"#,
+        user_id,
+        email as _
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    if let Some(user_to_delete) = user_to_delete {
+        sqlx::query!(
+            r#"delete from "user" where id = $1"#,
+            user_to_delete.user_id
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    sqlx::query!(
+        r#"
+insert into user_auth_basic (user_id, email, password)
+values ($1, $2::text, $3)
+"#,
+        user_id,
+        &email,
+        pass_hash.to_string(),
+    )
+    .execute(&mut txn)
+    .await?;
+
+    if force_logout {
+        sqlx::query!("delete from session where user_id = $1", user_id)
+            .execute(&mut txn)
+            .await?;
+    }
+
+    txn.commit().await?;
+
+    Ok(NoContent)
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(Profile::PATH, Profile::METHOD.route().to(get_profile))
         .route(Create::PATH, Create::METHOD.route().to(create_user))
         .route(
             VerifyEmail::PATH,
             VerifyEmail::METHOD.route().to(verify_email),
+        )
+        .route(
+            ResetPassword::PATH,
+            ResetPassword::METHOD.route().to(reset_password),
+        )
+        .route(
+            ChangePassword::PATH,
+            ChangePassword::METHOD.route().to(put_password),
         )
         .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
         .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
