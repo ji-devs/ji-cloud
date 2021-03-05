@@ -32,11 +32,11 @@ bitflags::bitflags! {
         const GENERAL_API = 0b0000_0000_0000_0001;
         const PUT_PROFILE = 0b0000_0000_0000_0010;
         const VERIFY_EMAIL = 0b0000_0000_0000_0100;
-        const RESET_PASSWORD = 0b0000_0000_0000_1000;
+        const CHANGE_PASSWORD = 0b0000_0000_0000_1000;
         const DELETE_ACCOUNT = 0b0000_0000_0001_0000;
 
         const GENERAL = Self::GENERAL_API.bits | Self::DELETE_ACCOUNT.bits;
-        const ONE_TIME = Self::RESET_PASSWORD.bits | Self::VERIFY_EMAIL.bits;
+        const ONE_TIME = Self::CHANGE_PASSWORD.bits | Self::VERIFY_EMAIL.bits;
     }
 }
 

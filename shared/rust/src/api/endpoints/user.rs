@@ -5,7 +5,8 @@ use crate::{
     domain::{
         session::NewSessionResponse,
         user::{
-            CreateUserRequest, OtherUser, ResetPasswordRequest, UserLookupQuery, VerifyEmailRequest,
+            ChangePasswordRequest, CreateUserRequest, OtherUser, ResetPasswordRequest,
+            UserLookupQuery, VerifyEmailRequest,
         },
     },
     error::EmptyError,
@@ -72,11 +73,11 @@ impl ApiEndpoint for VerifyEmail {
 
 /// Reset a user's password
 ///
-/// # Flow (NOT IMPLEMENTED)
+/// # Flow
 /// 1. `POST` This route.
 ///      * email gets sent to the included email address
 ///      * recieve [`204 - No Content`](http::StatusCode::NO_CONTENT)
-/// 2. `PUT /v1/user/me/password`
+/// 2. [`PUT /v1/user/me/password`](ChangePassword)
 pub struct ResetPassword;
 impl ApiEndpoint for ResetPassword {
     type Req = ResetPasswordRequest;
@@ -84,6 +85,24 @@ impl ApiEndpoint for ResetPassword {
     type Err = EmptyError;
     const PATH: &'static str = "/v1/user/password-reset";
     const METHOD: Method = Method::Post;
+}
+
+/// Change your password
+///
+/// # Responses
+///
+/// success - [`204 - No Content`](http::StatusCode::NO_CONTENT)
+///
+/// # Errors
+///
+/// If the user isn't authorized to change their password ([`403 - Forbidden`](http::StatusCode::FORBIDDEN))
+pub struct ChangePassword;
+impl ApiEndpoint for ChangePassword {
+    type Req = ChangePasswordRequest;
+    type Res = ();
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/user/me/password";
+    const METHOD: Method = Method::Put;
 }
 
 /// Find a user by username.

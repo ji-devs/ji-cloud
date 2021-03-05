@@ -249,6 +249,13 @@ impl SessionMaskRequirement for SessionPutProfile {
 }
 
 #[derive(Apiv2Schema)]
+pub struct SessionChangePassword;
+
+impl SessionMaskRequirement for SessionChangePassword {
+    const REQUIREMENTS: SessionMask = SessionMask::CHANGE_PASSWORD;
+}
+
+#[derive(Apiv2Schema)]
 pub struct SessionVerifyEmail;
 
 impl SessionMaskRequirement for SessionVerifyEmail {

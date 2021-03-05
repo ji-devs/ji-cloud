@@ -232,7 +232,6 @@ pub struct PutProfileRequest {
 /// Request for [`Create`](crate::api::endpoints::user::Create)
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct CreateUserRequest {
     /// The new user's email
     pub email: String,
@@ -244,8 +243,25 @@ pub struct CreateUserRequest {
 /// Request for [`ResetPassword`](crate::api::endpoints::user::ResetPassword)
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct ResetPasswordRequest {
     /// The email to request a password reset for
     pub email: String,
+}
+
+/// Request for [`ChangePassword`](crate::api::endpoints::user::ChangePassword)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub enum ChangePasswordRequest {
+    /// Change the email
+    Change {
+        /// The token to verify with
+        token: String,
+
+        /// The new password
+        password: String,
+
+        /// Forcibly logout of all sessions.
+        force_logout: bool,
+    },
 }
