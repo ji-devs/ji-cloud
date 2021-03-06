@@ -27,6 +27,15 @@ impl ApiEndpoint for Create {
 /// (non exhaustive list)
 /// If there is already a user with the oauth user's email,
 /// and it isn't them - [`409 - Conflict`](http::StatusCode::CONFLICT)
+///
+/// # Flow (login)
+/// 1. [`GET /v1/session/oauth/url/{service}/{kind}`](GetOAuthUrl)
+/// 2. `POST /v1/session/oauth` (this route) with the token
+///
+/// # Flow (register)
+/// 1. [`GET /v1/session/oauth/url/{service}/{kind}`](GetOAuthUrl)
+/// 2. `POST /v1/session/oauth` (this route) with the token
+/// 3. [`PUT /v1/user/me/profile`](super::user::PutProfile)
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {
     type Req = CreateSessionOAuthRequest;
@@ -37,6 +46,10 @@ impl ApiEndpoint for CreateOAuth {
 }
 
 /// Get URL for oauth callback
+///
+/// # Flow (login/register)
+/// 1. `GET /v1/session/oauth/url/{service}/{kind}` (this route)
+/// 2. Continue from [`CreateOAuth`]
 pub struct GetOAuthUrl;
 impl ApiEndpoint for GetOAuthUrl {
     type Req = ();
@@ -47,6 +60,11 @@ impl ApiEndpoint for GetOAuthUrl {
 }
 
 /// Delete a session (logout)
+///
+/// # Authorization
+/// standard/any
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if the authorization is invalid
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
