@@ -1,10 +1,17 @@
 mod cors;
 mod endpoints;
 
-use crate::{error::BasicError, jwkkeys::JwkVerifier, s3};
+use crate::{
+    error::BasicError,
+    s3,
+    service::{mail, ServiceData},
+};
 use actix_service::Service;
-use actix_web::dev::{MessageBody, ServiceRequest, ServiceResponse};
-use actix_web::HttpResponse;
+use actix_web::{dev::Server, HttpResponse};
+use actix_web::{
+    dev::{MessageBody, ServiceRequest, ServiceResponse},
+    web::Data,
+};
 use config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
@@ -13,7 +20,7 @@ use core::{
 use futures::Future;
 use paperclip::actix::OpenApiExt;
 use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use std::{net::TcpListener, sync::Arc};
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
@@ -53,24 +60,116 @@ where
     }
 }
 
+pub struct Application {
+    port: u16,
+    server: Option<Server>,
+}
+
+impl Application {
+    fn new(port: u16, server: Server) -> Self {
+        Self {
+            port,
+            server: Some(server),
+        }
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    // A more expressive name that makes it clear that
+    // this function only returns when the application is stopped.
+    pub async fn run_until_stopped(mut self) -> Result<(), std::io::Error> {
+        if let Some(server) = self.server.take() {
+            server.await?;
+        }
+
+        Ok(())
+    }
+
+    pub async fn stop(mut self, graceful: bool) {
+        if let Some(server) = self.server.take() {
+            server.stop(graceful).await
+        }
+    }
+}
+
+impl Drop for Application {
+    fn drop(&mut self) {
+        if let Some(server) = self.server.take() {
+            let _ = tokio::spawn(server.stop(false));
+        }
+    }
+}
+
 #[actix_web::main]
-pub async fn run(
+pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
-    jwk_verifier: Arc<JwkVerifier>,
-    s3: s3::Client,
-    algolia: crate::algolia::Client,
+    s3: Option<s3::Client>,
+    algolia: Option<crate::algolia::Client>,
+    algolia_key_store: Option<crate::algolia::SearchKeyStore>,
+    jwk_verifier: Arc<crate::jwk::JwkVerifier>,
+    mail_client: Option<mail::Client>,
 ) -> anyhow::Result<()> {
+    let app = build(
+        pool,
+        settings,
+        s3,
+        algolia,
+        algolia_key_store,
+        jwk_verifier,
+        mail_client,
+    )?;
+    app.run_until_stopped().await?;
+
+    Ok(())
+}
+
+pub fn build(
+    pool: PgPool,
+    settings: RuntimeSettings,
+    s3: Option<s3::Client>,
+    algolia: Option<crate::algolia::Client>,
+    algolia_key_store: Option<crate::algolia::SearchKeyStore>,
+    jwk_verifier: Arc<crate::jwk::JwkVerifier>,
+    mail_client: Option<mail::Client>,
+) -> anyhow::Result<Application> {
     let local_insecure = settings.is_local();
     let api_port = settings.api_port;
 
+    let s3 = s3.map(ServiceData::new);
+    let algolia = algolia.map(ServiceData::new);
+    let algolia_key_store = algolia_key_store.map(ServiceData::new);
+    let mail_client = mail_client.map(ServiceData::new);
+
     let server = actix_web::HttpServer::new(move || {
-        actix_web::App::new()
+        let server = actix_web::App::new()
             .data(pool.clone())
-            .data(settings.clone())
-            .data(s3.clone())
-            .data(algolia.clone())
-            .app_data(jwk_verifier.clone())
+            .data(settings.clone());
+
+        let server = match s3.clone() {
+            Some(s3) => server.app_data(s3),
+            None => server,
+        };
+
+        let server = match algolia.clone() {
+            Some(algolia) => server.app_data(algolia),
+            None => server,
+        };
+
+        let server = match algolia_key_store.clone() {
+            Some(algolia_key_store) => server.app_data(algolia_key_store),
+            None => server,
+        };
+
+        let server = match mail_client.clone() {
+            Some(mail_client) => server.app_data(mail_client),
+            None => server,
+        };
+
+        server
+            .app_data(Data::from(jwk_verifier.clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap_fn(log_ise)
             .wrap(cors::get(local_insecure))
@@ -86,6 +185,10 @@ pub async fn run(
             .app_data(
                 actix_web::web::PathConfig::default().error_handler(|_, _| bad_request_handler()),
             )
+            .external_resource(
+                "google_cloud_oauth",
+                "https://accounts.google.com/o/oauth2/v2/auth",
+            )
             .default_service(actix_web::web::to(default_route))
             .wrap_api()
             .configure(endpoints::user::configure)
@@ -99,6 +202,8 @@ pub async fn run(
             .configure(endpoints::animation::configure)
             .configure(endpoints::search::configure)
             .configure(endpoints::media::configure)
+            .configure(endpoints::session::configure)
+            .configure(endpoints::locale::configure)
             .with_json_spec_at("/spec.json")
             .build()
     });
@@ -106,15 +211,17 @@ pub async fn run(
     // if listenfd doesn't take a TcpListener (i.e. we're not running via
     // the command above), we fall back to explicitly binding to a given
     // host:port.
-    let server: _ = if let Some(l) = get_tcp_fd() {
-        server.listen(l)?
+    let listener = if let Some(l) = get_tcp_fd() {
+        l
     } else {
-        server.bind(get_addr(api_port))?
+        TcpListener::bind(get_addr(Some(api_port)))?
     };
 
-    server.run().await.unwrap();
+    let port = listener.local_addr().unwrap().port();
 
-    Ok(())
+    let server = server.listen(listener)?;
+
+    Ok(Application::new(port, server.run()))
 }
 
 #[actix_web::get("/spec")]

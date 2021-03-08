@@ -1,12 +1,15 @@
 use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
-    jig::ModuleKind,
-    image::ImageSearchQuery
+    image::{ImageId, ImageSearchQuery}, 
+    jig::{JigId, ModuleId, ModuleKind}, 
+    search::CreateSearchKeyResponse, 
+    session::CreateSessionOAuthResponse
 };
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
+use uuid::Uuid;
 
 pub type Id = String;
 
@@ -25,9 +28,11 @@ pub enum Route {
 #[derive(Debug, Clone)]
 pub enum UserRoute {
     Profile(ProfileSection),
-    ContinueRegistration(FirebaseUserInfo),
+    RegisterOauth(OauthData),
+    LoginOauth(OauthData),
     Login,
     Register,
+    ContinueRegistration,
     SendEmailConfirmation,
     RegisterComplete,
 }
@@ -41,9 +46,10 @@ pub enum ProfileSection {
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
     Categories,
+    Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageEdit(Id, Option<ImageSearchQuery>),
+    ImageMeta(ImageId, bool), //flag is for if it's a new image
 }
 
 #[derive(Debug, Clone)]
@@ -54,8 +60,8 @@ pub enum LegacyRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
-    Edit(Id, Option<Id>),
-    Play(Id, Option<Id>) 
+    Edit(JigId, Option<ModuleId>),
+    Play(JigId, Option<ModuleId>) 
 }
 
 #[derive(Debug, Clone)]
@@ -81,6 +87,12 @@ pub enum DevRoute {
 struct JsonQuery {
     pub data: String  //json-encoded data as-needed
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum OauthData {
+    Google(OauthCode)
+}
+pub type OauthCode = String;
 
 impl Route {
     pub fn redirect(self) {
@@ -120,16 +132,27 @@ impl Route {
             ["user", "profile", "change-email"] => Self::User(UserRoute::Profile(ProfileSection::ChangeEmail)),
             ["user", "login"] => Self::User(UserRoute::Login),
             ["user", "register"] => Self::User(UserRoute::Register),
-            ["user", "continue-registration"] => {
-                if let Some(user) = json_query {
-                    let user:FirebaseUserInfo = serde_json::from_str(&user).unwrap_throw();
-                    Self::User(UserRoute::ContinueRegistration(user))
+
+            ["user", "register-oauth"] => {
+                if let Some(code) = params.get("code") {
+                    let data = OauthData::Google(code);
+                    Self::User(UserRoute::RegisterOauth(data))
                 } else {
                     Self::NoAuth
                 }
             }
+            ["user", "login-oauth"] => {
+                if let Some(code) = params.get("code") {
+                    let data = OauthData::Google(code);
+                    Self::User(UserRoute::LoginOauth(data))
+                } else {
+                    Self::NoAuth
+                }
+            }
+            ["user", "continue-registration"] => Self::User(UserRoute::ContinueRegistration),
             ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
+            ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
@@ -140,19 +163,32 @@ impl Route {
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
-            ["admin", "image-edit", id] => {
-                if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
-                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), Some(search)))
-                } else {
-                    Self::Admin(AdminRoute::ImageEdit(id.to_string(), None))
-                }
+            ["admin", "image-meta", id, flag] => {
+                let id = ImageId(Uuid::from_str(id).unwrap_throw());
+                Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_throw()))
             },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
-            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), None)),
-            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(jig_id.to_string(), Some(module_id.to_string()))),
-            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), None)),
-            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
+            ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_u128(0)),
+                    None
+            )),
+            ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    None
+            )),
+            ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+            )),
+            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    None
+            )),
+            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(
+                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+            )),
+                    
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
@@ -161,14 +197,6 @@ impl Route {
 
             _ => Self::NotFound
         }
-    }
-}
-
-pub fn module_kind_to_label(kind:ModuleKind) -> &'static str {
-    match kind {
-        ModuleKind::Poster => "Poster",
-        ModuleKind::DesignPage => "Design",
-        ModuleKind::MemoryGame => "Memory Game",
     }
 }
 
@@ -192,20 +220,18 @@ impl From<&Route> for String {
                 match route {
                     UserRoute::Profile(ProfileSection::Landing) => "/user/profile".to_string(),
                     UserRoute::Profile(ProfileSection::ChangeEmail) => "/user/profile/change-email".to_string(),
-                    UserRoute::ContinueRegistration(user) => {
-                        let data = serde_json::to_string(&user).unwrap_throw();
-                        let query = JsonQuery { data };
-                        let query = serde_qs::to_string(&query).unwrap_throw();
-                        format!("/user/continue-registration?{}", query) 
-                    }
+                    UserRoute::ContinueRegistration => "/user/continue-registration".to_string(),
                     UserRoute::Login => "/user/login".to_string(),
                     UserRoute::Register => "/user/register".to_string(),
+                    UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
+                    UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
                     UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }
             },
             Route::Admin(route) => {
                 match route {
+                    AdminRoute::Locale => "/admin/locale".to_string(),
                     AdminRoute::Categories => "/admin/categories".to_string(),
                     AdminRoute::ImageSearch(search) => {
                         match search {
@@ -219,17 +245,7 @@ impl From<&Route> for String {
                         }
                     }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
-                    AdminRoute::ImageEdit(id, search) => {
-                        match search {
-                            None => format!("/admin/image-edit/{}", id),
-                            Some(search) => {
-                                let data = serde_json::to_string(&search).unwrap_throw();
-                                let query = JsonQuery { data };
-                                let query = serde_qs::to_string(&query).unwrap_throw();
-                                format!("/admin/image-edit/{}?{}", id, query)
-                            }
-                        }
-                    }
+                    AdminRoute::ImageMeta(id, is_new) => format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new),
                 }
             },
             Route::Jig(route) => {
@@ -237,16 +253,16 @@ impl From<&Route> for String {
                     JigRoute::Gallery => "/jig/gallery".to_string(),
                     JigRoute::Edit(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
-                            format!("/jig/edit/{}/{}", jig_id, module_id)
+                            format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
                         } else {
-                            format!("/jig/edit/{}", jig_id)
+                            format!("/jig/edit/{}", jig_id.0.to_string())
                         }
                     }
                     JigRoute::Play(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
-                            format!("/jig/play/{}/{}", jig_id, module_id)
+                            format!("/jig/play/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
                         } else {
-                            format!("/jig/play/{}", jig_id)
+                            format!("/jig/play/{}", jig_id.0.to_string())
                         }
                     }
                 }

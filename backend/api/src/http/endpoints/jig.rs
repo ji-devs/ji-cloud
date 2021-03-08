@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, ServiceConfig},
-    NoContent,
+    CreatedJson, NoContent,
 };
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
@@ -16,40 +16,38 @@ use sqlx::PgPool;
 use crate::{
     db,
     error::{self, UpdateWithMetadata},
-    extractor::{AuthUserWithScope, ScopeManageJig, WrapAuthClaimsNoDb},
+    extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
 };
 
 /// Create a jig.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    auth: AuthUserWithScope<ScopeManageJig>,
+    auth: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
+) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
-    let creator_id = auth.claims.id;
+    let creator_id = auth.claims.user_id;
 
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
-        req.cover,
         &req.modules,
         &req.content_types,
-        req.ending,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
     )
     .await
     .map_err(db::meta::handle_metadata_err)?;
 
-    Ok(Json(CreateResponse { id }))
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
 /// Delete a jig.
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageJig>,
+    _claims: TokenUserWithScope<ScopeManageJig>,
     path: web::Path<JigId>,
 ) -> Result<NoContent, error::Delete> {
     db::jig::delete(&*db, path.into_inner()).await?;
@@ -61,7 +59,7 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageJig>,
+    _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
 ) -> Result<NoContent, UpdateWithMetadata> {
@@ -71,9 +69,7 @@ async fn update(
         path.into_inner(),
         req.display_name.as_deref(),
         req.author_id,
-        req.cover,
         req.modules.as_deref(),
-        req.ending,
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
@@ -91,7 +87,7 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
     let jig = db::jig::get(&db, path.into_inner())

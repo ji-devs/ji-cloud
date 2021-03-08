@@ -7,8 +7,7 @@ export type Color = "red" | "blue" | "white" | "green" | "whiteblue";
 export type Size = "small" | "medium" | "large" | "x-large";
 
 export type IconAfter = "arrow";
-export type IconBefore = "magnifyer" | "share" | "create" | "play" | "plus" | "blueplay";
-
+export type IconBefore = "magnifier" | "share" | "create" | "play" | "plus";
 
 @customElement("button-rect")
 export class _ extends BaseButton {
@@ -128,16 +127,14 @@ export class _ extends BaseButton {
       italic: italic,
      
     });
-
     
-    const iconBeforePath = iconBefore === "magnifyer" ? "Icn_Magnfing.svg" 
-    : iconBefore === "share" ? "Icn_Share_Red.svg" 
-    : iconBefore === "create" ? "icn-plus-red.svg" 
-    : iconBefore === "play" ? "icn-video-activity-hover.svg"
-    : iconBefore === "plus" ? "icon-add-24-white.svg"
-    : iconBefore === "blueplay" ? "play.svg"
-    : nothing;
-    const iconAfterPath = iconAfter === "arrow" ? "continue_arrow.svg"
+    const iconBeforePath = iconBefore === "magnifier" ? "core/buttons/rect/magnifier.svg" 
+        : iconBefore === "share" ? `core/buttons/rect/share-${color}.svg`
+        : iconBefore === "create" ? `core/buttons/rect/plus-${color}.svg`
+        : iconBefore === "play" ? `core/buttons/rect/play-${color}.svg`
+        : iconBefore === "plus" ? getPlus(color)
+        : nothing;
+    const iconAfterPath = iconAfter === "arrow" ? "core/buttons/rect/arrow-right.svg"
       : "";
 
     return html`
@@ -148,4 +145,9 @@ export class _ extends BaseButton {
     </button>
   `;
   }
+}
+
+function getPlus(color:Color) {
+  return color === "blue" ? "core/inputs/plus-white.svg"
+    : nothing;
 }

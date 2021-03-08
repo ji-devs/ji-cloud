@@ -4,7 +4,6 @@ use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
-use crate::firebase::*;
 use crate::register::{
     state::{Step, Step1Data},
     components::footer::Footer

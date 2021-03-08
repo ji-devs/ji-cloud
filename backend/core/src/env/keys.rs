@@ -5,15 +5,59 @@ pub mod google {
 }
 
 pub mod s3 {
+    /// The s3 endpoint to connect to.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const ENDPOINT: &str = "S3_ENDPOINT";
 
+    /// The s3 bucket that should be used for media.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const BUCKET: &str = "S3_BUCKET";
 
+    /// The s3 access key.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const ACCESS_KEY: &str = "GOOGLE_S3_ACCESS_KEY";
 
+    /// The s3 access key's secret.
+    /// Is optional. If missing, all s3 related services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const SECRET: &str = "GOOGLE_S3_ACCESS_SECRET";
 
+    /// Disable S3 locally (avoiding the warnings for missing secrets)
+    /// if specified in a way that maps to `true` (currently "true", "1", "y"), all s3 related services will be disabled
+    /// all related routes will return "501 - Not Implemented".
     pub const DISABLE: &str = "S3_LOCAL_DISABLE_CLIENT";
+}
+
+pub mod email {
+    /// Disable email client locally (avoiding the warnings for missing secrets)
+    /// If specified in a way that maps to `true` (currently "true", "1", "y"), all mailing related services,
+    /// such as email verification, password resetting, and email changing(1) will be disabled.
+    /// all related routes will return "501 - Not Implemented"
+    /// (1): currently not implemented.
+    pub const DISABLE: &str = "SENDGRID_DISABLE_LOCAL";
+
+    /// Sendgrid / email client api key.
+    // Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const API_KEY: &str = "SENDGRID_API_KEY";
+
+    /// Email client sender email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const SENDER_EMAIL: &str = "EMAIL_SENDER_ADDRESS";
+
+    /// Email client template ID for verifying emails at signup.
+    /// Is optional. If missing, email verification (at signup) will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const SIGNUP_VERIFY_TEMPLATE: &str = "EMAIL_SIGNUP_VERIFY_TEMPLATE";
+
+    /// Email client template ID for resetting passwords.
+    /// Is optional. If missing, password resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const PASSWORD_RESET_TEMPLATE: &str = "EMAIL_PASSWORD_RESET_TEMPLATE";
 }
 
 #[cfg(feature = "db")]
@@ -25,7 +69,6 @@ pub mod db {
 }
 
 pub mod algolia {
-
     /// The ID of the algolia application.
     /// Is optional. If missing, all algolia related services will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
@@ -54,9 +97,25 @@ pub mod algolia {
     pub const FRONTEND_SEARCH_KEY: &str = "ALGOLIA_FRONTEND_SEARCH_KEY";
 }
 
-pub const JWT_SECRET: &str = "JWT_SECRET";
+/// Must be 32 bytes of hex
+pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
+
+/// How long *login* tokens are valid for (measured in seconds).
+/// This environment variable can only be set on `local`
+/// This environment variable is optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
+pub const LOGIN_TOKEN_VALID_DURATION: &str = "LOGIN_TOKEN_VALID_DURATION";
 
 pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
 pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
 
 pub const BING_SEARCH_KEY: &str = "BING_SEARCH_KEY";
+
+/// ID of the google oauth client.
+/// Is optional. If missing, all google-oauth related services will be disabled,
+/// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+pub const GOOGLE_OAUTH_CLIENT: &str = "GOOGLE_OAUTH_CLIENT";
+
+/// Secret for the google oauth client.
+/// Is optional. If missing, all google-oauth related services will be disabled,
+/// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+pub const GOOGLE_OAUTH_SECRET: &str = "GOOGLE_OAUTH_SECRET";

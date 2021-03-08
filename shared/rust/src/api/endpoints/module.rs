@@ -13,6 +13,16 @@ use crate::{
 use super::ApiEndpoint;
 
 /// Get a Module by ID.
+///
+/// # Authorization
+/// Standard
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist.
+///
+/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid).
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
@@ -23,6 +33,16 @@ impl ApiEndpoint for Get {
 }
 
 /// Create a Module.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageModule`](crate::domain::user::UserScope)
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+///
+/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the request is missing/invalid.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ModuleCreateRequest;
@@ -33,6 +53,18 @@ impl ApiEndpoint for Create {
 }
 
 /// Update a Module.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageModule`](crate::domain::user::UserScope)
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+///
+/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+///
+/// [`NotFound`](http::StatusCode::NOT_FOUND) if the module does not exist.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = ModuleUpdateRequest;
@@ -43,6 +75,16 @@ impl ApiEndpoint for Update {
 }
 
 /// Delete a Module.
+///
+/// # Authorization
+/// Standard + [`UserScope::ManageModule`](crate::domain::user::UserScope)
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+///
+/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid).
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

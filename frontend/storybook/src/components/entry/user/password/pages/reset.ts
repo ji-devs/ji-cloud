@@ -9,7 +9,7 @@ export default {
 }
 
 const STR_SUBMIT = "Set Password";
-const STR_PASSWORD_LABEL = "Enter new Password";
+const STR_PASSWORD_LABEL = "Enter new password";
 const STR_PASSWORD_HELP ="8 Characters or longer"
 
 interface Args {

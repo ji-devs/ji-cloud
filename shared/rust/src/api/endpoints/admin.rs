@@ -1,7 +1,7 @@
 use super::ApiEndpoint;
 use crate::{
     api::Method,
-    domain::{admin::AdminListMediaResponse, auth::SigninSuccess},
+    domain::{admin::AdminListMediaResponse, session::NewSessionResponse},
     error::EmptyError,
 };
 
@@ -9,9 +9,9 @@ use crate::{
 pub struct Impersonate;
 impl ApiEndpoint for Impersonate {
     type Req = ();
-    type Res = SigninSuccess;
+    type Res = NewSessionResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/admin/user/{id}";
+    const PATH: &'static str = "/v1/admin/session/user/{id}";
     const METHOD: Method = Method::Post;
 }
 

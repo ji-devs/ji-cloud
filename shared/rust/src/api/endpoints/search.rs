@@ -7,6 +7,14 @@ use crate::{
 };
 
 /// Create a search key.
+///
+/// # Authorization
+///
+/// standard
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if missing/invalid auth was provided.
+/// [`Unimplemented`](http::StatusCode::UNIMPLEMENTED) If the route is not configured.
 pub struct CreateKey;
 impl ApiEndpoint for CreateKey {
     type Req = ();
@@ -17,6 +25,14 @@ impl ApiEndpoint for CreateKey {
 }
 
 /// Search for images over the web.
+///
+/// # Authorization
+///
+/// standard
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if missing/invalid auth was provided.
+/// [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request was not provided in a proper format
 pub struct WebImageSearch;
 impl ApiEndpoint for WebImageSearch {
     type Req = WebImageSearchQuery;

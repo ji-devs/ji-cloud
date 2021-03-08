@@ -35,11 +35,21 @@ pub mod db;
 mod domain;
 mod error;
 mod extractor;
+mod google;
 pub mod http;
 mod image_ops;
 pub mod image_search;
-pub mod jwkkeys;
-mod jwt;
+pub mod jwk;
 pub mod logger;
 pub(crate) mod more_futures;
 pub mod s3;
+pub mod service;
+pub mod token;
+
+// todo: make this configurable?
+const ARGON2_DEFAULT_PARAMS: argon2::Params = argon2::Params {
+    m_cost: 8192,
+    p_cost: 1,
+    t_cost: 192,
+    output_length: 32,
+};

@@ -88,37 +88,20 @@ jobs:
           toolchain: stable
           override: true
 
-      - uses: actions/setup-node@v1
-
       - uses: actions/cache@v2
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             backend/api/target
-          key: ${{ runner.os }}-test-rs-${{ hashFiles('backend/api/Cargo.lock') }}
+          key: ${{ runner.os }}-test-backend-rs-${{ hashFiles('backend/api/Cargo.lock') }}
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-           'backend/api/integration-testing/node_modules'
-           '~/.cache/yarn'
-           '~/.yarn'
-          key: ${{ runner.os }}-test-js-${{ hashFiles('backend/api/integration-testing/yarn.lock') }}
-        
       - uses: actions-rs/cargo@v1
         with:
-          command: build
+          command: test
           args: >
             --manifest-path backend/api/Cargo.toml
             --no-default-features
-      
-      - run: yarn install --frozen-lockfile
-        working-directory: 'backend/api/integration-testing'
-
-      - run: yarn test:ava -v -T 5m
-        working-directory: 'backend/api/integration-testing'
         env: 
           DATABASE_URL: postgres://postgres:password@localhost
-
-
+          SQLX_OFFLINE: 1

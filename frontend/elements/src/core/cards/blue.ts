@@ -6,11 +6,9 @@ export class _ extends LitElement {
     return [
       css`
         div{
-            height: 650px;
             border-radius: 10px;
             background-color: #edf2ff;
             overflow:auto;
-            width:600px;
             padding:32px 40px;
         }
        

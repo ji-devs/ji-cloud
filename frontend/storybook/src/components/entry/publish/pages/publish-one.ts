@@ -1,4 +1,5 @@
 import "@elements/entry/jig/publish/page";
+import "@elements/entry/jig/publish/sharing-caring";
 import "@elements/entry/home/TOSORT/image-thumbnail"; 
 import "@elements/core/inputs/textarea";
 import "@elements/core/inputs/switch";
@@ -18,7 +19,8 @@ export default {
         errormessage: string,
         instruction: boolean,
         uploaded:boolean,
-        errorwrapper:boolean
+        errorwrapper:boolean,
+        sharing:boolean
     
     }
 
@@ -28,6 +30,7 @@ export default {
       instruction: false,
       uploaded:false,
       errorwrapper: true,
+      sharing:true,
       
       }
 
@@ -50,17 +53,19 @@ const STR_SELECTLANGUAGE = "Select language";
 const STR_AGEPLACEHOLDER = "Select age";
 const STR_SELECTLIST = "Select from the list";
 const STR_SELECTCATEGORIES ="Select from the categories";
+const STR_BERESHIT = "Parashat Bereshit";
 
 export const PublishFullOne = (props?:PublishArgs) => {
 
- const {errormessage, instruction, errorwrapper, errorname} = props || DEFAULT_ARGS;
+ const {errormessage, instruction, errorwrapper, errorname, sharing} = props || DEFAULT_ARGS;
 
 
     return `
     <publish-page>
         <image-thumbnail path="${STR_IMGTHUMBNAIL}" slot="column_one"></image-thumbnail>
         <input-switch slot="column_one" label="${STR_SLIDERLABEL}"></input-switch>
-        <input-text slot="column_two" mode="text" label="${STR_NAME}" helpertext="${STR_HELP}" error="${errorname}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}>
+        <sharing-caring slot="sharing" ${sharing && "sharing"}></sharing-caring>
+        <input-text slot="column_two" mode="text" placeholder="${STR_BERESHIT}" label="${STR_NAME}" helpertext="${STR_HELP}" error="${errorname}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}>
         </input-text>
         <input-textarea label="${STR_DESCRIPTION}" slot="column_two" placeholder="${STR_JANE}"></input-textarea>
         <dropdown-select slot="column_three" placeholder="${STR_SELECTLANGUAGE}" label="${STR_LANGUAGE}"  error="${errormessage}" ${instruction && "instruction"} ${errorwrapper && "errorwrapper"}>

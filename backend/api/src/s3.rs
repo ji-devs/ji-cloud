@@ -11,10 +11,8 @@ use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Client {
-    creds: AwsCredentials,
-    region: Region,
     bucket: String,
-    client: Option<rusoto_s3::S3Client>,
+    client: rusoto_s3::S3Client,
 }
 
 impl Client {
@@ -24,7 +22,6 @@ impl Client {
             bucket,
             access_key_id,
             secret_access_key,
-            use_client,
         } = s3_settings;
 
         let region = Region::Custom {
@@ -32,26 +29,17 @@ impl Client {
             endpoint,
         };
 
-        let creds = AwsCredentials::new(access_key_id, secret_access_key, None, None);
+        let credentials_provider = StaticProvider::from(AwsCredentials::new(
+            access_key_id,
+            secret_access_key,
+            None,
+            None,
+        ));
 
-        let credentials_provider = StaticProvider::from(creds.clone());
+        let client =
+            rusoto_s3::S3Client::new_with(HttpClient::new()?, credentials_provider, region.clone());
 
-        let client = if use_client {
-            Some(rusoto_s3::S3Client::new_with(
-                HttpClient::new()?,
-                credentials_provider,
-                region.clone(),
-            ))
-        } else {
-            None
-        };
-
-        Ok(Self {
-            region,
-            creds,
-            bucket,
-            client,
-        })
+        Ok(Self { bucket, client })
     }
 
     pub async fn upload_png_images_resized_thumb(
@@ -114,18 +102,16 @@ impl Client {
         }
     }
 
-    // note: does nothing if object doesn't exist, or if the client is disabled.
+    // note: does nothing if object doesn't exist.
     async fn try_delete(&self, key: String) -> anyhow::Result<()> {
-        if let Some(client) = self.client.as_ref() {
-            client
-                .delete_object(DeleteObjectRequest {
-                    key,
-                    bucket: self.bucket.clone(),
-                    ..DeleteObjectRequest::default()
-                })
-                .await
-                .context("failed to delete object from s3")?;
-        }
+        self.client
+            .delete_object(DeleteObjectRequest {
+                key,
+                bucket: self.bucket.clone(),
+                ..DeleteObjectRequest::default()
+            })
+            .await
+            .context("failed to delete object from s3")?;
 
         Ok(())
     }
@@ -137,12 +123,7 @@ impl Client {
         id: Uuid,
         file_kind: FileKind,
     ) -> anyhow::Result<()> {
-        let client = match &self.client {
-            Some(client) => client,
-            None => return Ok(()),
-        };
-
-        client
+        self.client
             .put_object(PutObjectRequest {
                 bucket: self.bucket.clone(),
                 key: media::media_key(library, id, file_kind),
@@ -160,12 +141,8 @@ impl Client {
         id: Uuid,
         file_kind: FileKind,
     ) -> anyhow::Result<Option<Option<Vec<u8>>>> {
-        let client = match &self.client {
-            Some(client) => client,
-            None => return Ok(None),
-        };
-
-        let resp = client
+        let resp = self
+            .client
             .get_object(GetObjectRequest {
                 bucket: self.bucket.clone(),
                 key: media::media_key(library, id, file_kind),

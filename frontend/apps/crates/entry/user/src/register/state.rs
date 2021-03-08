@@ -6,22 +6,19 @@ pub struct State {
 }
 
 impl State {
-    fn default() -> Self {
-        Self {
-            step: Mutable::new(Step::Start),
-        }
-    }
 
     cfg_if! {
         if #[cfg(all(feature = "local"))] {
-            pub fn new() -> Self {
-                Self::default()
+            pub fn new(step:Option<Step>) -> Self {
+                Self {
+                    step: Mutable::new(step.unwrap_or(Step::Start)),
+                }
                 //Self::debug_step_3()
             }
 
             fn debug_step_1() -> Self {
                 Self {
-                    step: Mutable::new(Step::One(StartData::debug()))
+                    step: Mutable::new(Step::One)
                 }
             }
             fn debug_step_2() -> Self {
@@ -35,8 +32,10 @@ impl State {
                 }
             }
         } else {
-            pub fn new() -> Self {
-                Self::default()
+            pub fn new(step:Option<Step>) -> Self {
+                Self {
+                    step: Mutable::new(step.unwrap_or(Step::Start)),
+                }
             }
         }
     }
@@ -46,32 +45,14 @@ impl State {
 #[derive(Clone, Debug)]
 pub enum Step {
     Start,
-    One(StartData),
+    One,
     Two(Step1Data),
     Three(Step2Data),
-}
-
-#[derive(Clone, Debug)]
-pub struct StartData {
-    pub token: String,
-    pub email: String,
-    pub email_verified: bool,
-}
-
-impl StartData {
-    fn debug() -> Self {
-        Self {
-            email: "foo@example.com".to_string(),
-            token: "blah".to_string(),
-            email_verified: true
-        }
-    }
 }
 
 
 #[derive(Clone, Debug)]
 pub struct Step1Data {
-    pub start: StartData,
     pub firstname: String,
     pub username: String,
     pub lastname: String,
@@ -80,7 +61,6 @@ pub struct Step1Data {
 impl Step1Data {
     fn debug() -> Self {
         Self {
-            start: StartData::debug(),
             username: "first".to_string(),
             firstname: "user".to_string(),
             lastname: "last".to_string(),

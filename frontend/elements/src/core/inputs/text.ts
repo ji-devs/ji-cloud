@@ -114,6 +114,14 @@ export class _ extends LitElement {
       detail: { value },
     }))
   }
+  onChange(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-change", {
+      detail: { value },
+    }))
+  }
 
   render() {
     const { label, help, mode, placeholder, error, value } = this;
@@ -134,6 +142,7 @@ export class _ extends LitElement {
           class=""
           value="${value}"
           @input="${this.onInput}"
+        @change="${this.onChange}"
         />
         <label class="">${label}</label>
         ${mode !== "text" ? makeImage(mode, this.onPwToggle) : nothing}
@@ -147,10 +156,8 @@ export class _ extends LitElement {
 
 function makeImage(mode: Mode, onPwToggle:(_:Event) => any) {
   const path =
-    mode === "passwordVisible"
-      ? "icn-show-idle.svg"
-      : mode === "passwordHidden"
-      ? "icn-hide-idle.svg"
+    mode === "passwordVisible" ? "core/inputs/eye-open.svg"
+      : mode === "passwordHidden" ? "core/inputs/eye-closed.svg"
       : "";
 
   return html`<img-ui path="${path}" @click="${onPwToggle}" ></img-ui>`;

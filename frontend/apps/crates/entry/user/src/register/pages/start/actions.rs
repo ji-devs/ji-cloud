@@ -1,23 +1,21 @@
 use std::rc::Rc;
 use super::state::*;
 use shared::{
-    api::endpoints::{ApiEndpoint, user::*,},
-    domain::auth::SigninSuccess,
+    api::endpoints::{ApiEndpoint, user::*, session::*},
+    domain::session::*,
     error::EmptyError
 };
 use utils::{
     routes::*,
     firebase::*,
-    fetch::api_with_token,
     storage,
 };
 use dominator::clone;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use crate::firebase::*;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
-use crate::register::state::{Step, StartData};
+use crate::register::state::{Step};
 
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
@@ -41,9 +39,10 @@ pub fn register_email(state: Rc<State>) {
     if early_exit {
         return;
     }
+
     state.loader.load(clone!(state => async move {
 
-
+        /*
         let token_promise = unsafe { firebase_register_email(&email, &password) };
 
         match JsFuture::from(token_promise).await {
@@ -77,6 +76,7 @@ pub fn register_email(state: Rc<State>) {
                 }
             }
         }
+        */
     }));
 }
 
@@ -85,26 +85,9 @@ pub fn register_google(state: Rc<State>) {
     state.clear_password_status();
 
     state.loader.load(clone!(state => async move {
-        let token_promise = unsafe { firebase_register_google() };
-
-        match JsFuture::from(token_promise).await {
-            Ok(info) => {
-                let user:GoogleUserInfo = serde_wasm_bindgen::from_value(info).unwrap_throw();
-                next_step(state, user.token, user.email, user.email_verified);
-            },
-
-            Err(err) => { 
-                //Just canceled?
-                state.email_status.set(None);
-            }
-        }
+        crate::oauth::actions::redirect(GetOAuthUrlServiceKind::Google, OAuthUrlKind::Register).await;
     }));
 }
-
-fn next_step(state: Rc<State>, token: String, email: String, email_verified: bool) {
-    state.step.set(Step::One(StartData{token, email, email_verified}));
-}
-
 
 pub fn update_password_strength(state: &Rc<State>) {
     let password:&str = &state.password.borrow();

@@ -6,14 +6,11 @@ documentation/output
 .env
 .firebase
 _secret-keys
-wasm-pack.log
-yarn-*.log
+*.log
 .template_output
 *.exe
-firebase-debug.log
 .idea
-build-utils/image-upload/report.csv
-debug.log
+report.csv
 *.code-workspace
 
 # for now it's safe to ignore all windows scripts since they'd only be local

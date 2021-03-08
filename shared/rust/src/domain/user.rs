@@ -16,7 +16,7 @@ use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum UserScope {
-    /// The user has access to everything(?)
+    /// The user has access to everything, implies all other scopes.
     Admin = 1,
 
     /// The user can create/delete/modify categories
@@ -33,6 +33,9 @@ pub enum UserScope {
 
     /// The user can create/delete/modify animations.
     ManageAnimation = 6,
+
+    /// The user can create/delete/modify locale entries.
+    ManageEntry = 7,
 }
 
 impl TryFrom<i16> for UserScope {
@@ -46,6 +49,7 @@ impl TryFrom<i16> for UserScope {
             4 => Ok(Self::ManageJig),
             5 => Ok(Self::ManageModule),
             6 => Ok(Self::ManageAnimation),
+            7 => Ok(Self::ManageEntry),
             _ => anyhow::bail!("Scope {} is invalid"),
         }
     }
@@ -60,10 +64,6 @@ pub struct UserLookupQuery {
     /// The user ID we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<Uuid>,
-
-    /// The *Firebase* ID we're filtering by.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub firebase_id: Option<String>,
 
     /// The name we're filtering by.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -150,4 +150,118 @@ pub struct UserProfile {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
+}
+
+/// Request for [`VerifyEmail`](crate::api::endpoints::user::VerifyEmail)
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub enum VerifyEmailRequest {
+    /// Attempt to verify the email
+    Verify {
+        /// The token to verify.
+        token: String,
+    },
+
+    /// Resend a confirmation link if a verification is in progress
+    Resend {
+        /// The email to send a verification link to.
+        email: String,
+    },
+}
+
+/// Request for [`PutProfile`](crate::api::endpoints::user::PutProfile)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct PutProfileRequest {
+    /// The user's username.
+    ///
+    /// This must be unique.
+    pub username: String,
+
+    /// Is the user >= 18 yeas old?
+    pub over_18: bool,
+
+    /// The user's given name / "first name".
+    pub given_name: String,
+
+    /// The user's family name / "last name".
+    pub family_name: String,
+
+    // todo: create a struct that enforces format like `en_us`
+    /// the language the user prefers to communicate with.
+    pub language: String,
+
+    /// The locale that should be used for the user.
+    pub locale: String,
+
+    /// the timezone that the user uses.
+    pub timezone: chrono_tz::Tz,
+
+    // todo: does this have something to do with emails?
+    /// Does the user want educational resources sent to them?
+    pub opt_into_edu_resources: bool,
+
+    /// The organization that the user belongs to.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<String>,
+
+    /// The user's taught subjects.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub subjects: Vec<SubjectId>,
+
+    /// The user's age-ranges.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// The user's affiliations.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// The user's location
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<serde_json::Value>,
+}
+
+/// Request for [`Create`](crate::api::endpoints::user::Create)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct CreateUserRequest {
+    /// The new user's email
+    pub email: String,
+
+    /// The new user's password
+    pub password: String,
+}
+
+/// Request for [`ResetPassword`](crate::api::endpoints::user::ResetPassword)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ResetPasswordRequest {
+    /// The email to request a password reset for
+    pub email: String,
+}
+
+/// Request for [`ChangePassword`](crate::api::endpoints::user::ChangePassword)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub enum ChangePasswordRequest {
+    /// Change the email
+    Change {
+        /// The token to verify with
+        token: String,
+
+        /// The new password
+        password: String,
+
+        /// Forcibly logout of all sessions.
+        force_logout: bool,
+    },
 }

@@ -1,0 +1,25 @@
+---
+source: tests/integration/locale.rs
+expression: body
+
+---
+{
+  "bundles": [
+    {
+      "id": "7c11d04e-7c67-11eb-a0d7-9b5fb8f29de9",
+      "name": "main page"
+    },
+    {
+      "id": "8046692c-7c67-11eb-a0d7-b7924e4289df",
+      "name": "locale"
+    },
+    {
+      "id": "8359a48a-7c67-11eb-a0d7-0fd74777a62c",
+      "name": "login"
+    },
+    {
+      "id": "85a46ffe-7c67-11eb-a0d7-277d94fe130c",
+      "name": "test 4"
+    }
+  ]
+}

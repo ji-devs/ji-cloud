@@ -1,6 +1,4 @@
 //TODO - read from env to get local/dev port settings and minio bucket name
-use time::Duration;
-
 pub const STAGE_WIDTH: f64 = 1920.0;
 pub const STAGE_HEIGHT: f64 = 1080.0;
 pub const STAGE_PADDING_Y_PERC: f64 = 0.00; // in percentage, to offset the stage area a bit
@@ -8,10 +6,8 @@ pub const STAGE_PADDING_X_PERC: f64 = 0.00;
 pub const STAGE_RATIO: f64 = STAGE_WIDTH / STAGE_HEIGHT;
 
 pub const MEDIA_UI_PATH: &str = "ui";
-pub const MAX_SIGNIN_COOKIE_DURATION: Duration = Duration::weeks(2); // 2 weeks
-pub const JWK_ISSUER_URL: &str = "https://securetoken.google.com";
-pub const JWK_URL: &str =
-    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
+pub const JWK_ISSUER_URL: &str = "https://accounts.google.com";
+pub const JWK_URL: &str = "https://www.googleapis.com/oauth2/v3/certs";
 
 /// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
 /// as there's no way to get the string number of seconds from it `const`ly
@@ -96,7 +92,7 @@ impl RemoteTarget {
 
     pub const fn pages_url(&self) -> &'static str {
         match self {
-            Self::Local => "http://localhost:10001",
+            Self::Local => "http://localhost:4104",
             Self::Sandbox => "https://sandbox.jicloud.org",
             Self::Release => "https://jicloud.org",
         }
@@ -117,12 +113,15 @@ impl RemoteTarget {
         }
     }
 
-    pub fn css_url(&self, minified: bool) -> String {
+    pub fn css_url(&self, _minified: bool) -> String {
+        format!("{}/css/head.css", self.media_ui_url())
+        /*
         if minified {
             format!("{}/_css/styles.min.css", self.frontend_url())
         } else {
             format!("{}/_css/styles.css", self.frontend_url())
         }
+        */
     }
 
     pub fn spa_url(&self, app: &str, path: &str) -> String {

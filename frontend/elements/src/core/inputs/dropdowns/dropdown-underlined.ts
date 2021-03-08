@@ -1,100 +1,63 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
+
 @customElement("dropdown-underlined")
 export class _ extends LitElement {
   static get styles() {
     return [
       css`
-      .wrapper {
-        margin-bottom: 16px;
+      section.selected {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: solid 1px #d3d3d3;
+          cursor: pointer;
       }
-   
-      span {
-        color: #5590fc;
-        margin-bottom: 8px;
+      .arrow.open {
+          transform: rotate(90deg);
       }
-      .input-wrapper {
-        display: flex;
-        align-items: center;
-        border-bottom: solid 1px #e5e7ef;
-        position: relative;
-        padding-bottom:8px;
+      section.options {
+          position: absolute;
+          display: none;
+          box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+          width: 100%;
+          border-radius: 0 0 14px 14px;
+          padding-top: 10px;
+          cursor: pointer;
       }
-
-      input {
-        outline: none;
-        border: none;
-        font-size: 16px;
-        padding: 0 8px;
-        width: 100%;
+      section.options.open {
+          display: flex;
+          flex-direction: column;
       }
-      focus {
-        outline: none;
-      }
-      ::placeholder {
-        color: #a1a8ad;
-      }
-      img {
-        position: absolute;
-        right: -10px;
-      }
-      .closed img-ui{
-          transform:rotate(90deg)
-      }
-      .open img-ui{
-        transform:rotate(-90deg)
-    }
-    .dropdown{
-        padding:8px 0;
-        background-color:#ffffff
-        box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-        border: solid 1px #f0f1f5;    }
-  
-    ul{
-        padding:0;
-        list-style-type: none;
-    }
-    ::slotted(*:hover){
-        background-color: #e6f0ff;
-      
-      }
-      .closed .dropdown{
-          display:none;
-      }
-      
-   
       `,
     ];
   }
 
  
-  @property({type:Boolean})
-  closed: boolean = true;
+  @property()
+  value: string = "";
+
+  @property()
+  placeholder: string = "";
+
+  @property({ type: Boolean })
+  open: boolean = false;
+
+  @property({ type: Number })
+  maxChildrenHeight: number = 400;
 
   render() {
-    const {closed } = this; 
-
+    const {value, placeholder, open} = this; 
     return html`
-         <div class="wrapper ${closed ? "closed" : "open"}">
-      
-          <div class="input-wrapper">
-            <input
-              class=""
-              type="text"
-              placeholder="Jane Doe"
-              aria-label="Full name"
-            />
-            <img-ui path="icon-chevron-categories-24-px.svg"></img-ui>
-          </div>
-       
-        <div class="dropdown">
-        <ul>
-        <div class="slot-wrapper">
-        <slot></slot>
-        </div>
-        </ul>
-        </div>
-      </div>
+        <section @click=${() => this.open = !this.open} class="selected">
+            ${value !== ""
+                ? html`<div class="value">${value}</div>`
+                : html`<div class="placeholder">${placeholder}</div>`
+            }
+            <img-ui class="arrow ${open ? "open" : ""}" path="core/_common/chevron-right-grey.svg"></img-ui>
+        </section>
+            <section class="options ${open ? "open" : ""}">
+                <slot name="options"></slot>
+            </section>
 
     `;
   }

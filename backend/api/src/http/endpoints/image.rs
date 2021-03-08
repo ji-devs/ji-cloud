@@ -1,9 +1,10 @@
 use crate::{
     db::{self, meta::MetaWrapperError, nul_if_empty},
     error::{self, ServiceKind},
-    extractor::{AuthUserWithScope, ScopeManageImage, WrapAuthClaimsNoDb},
+    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
     image_ops::generate_images,
     s3,
+    service::ServiceData,
 };
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
@@ -27,7 +28,9 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
 pub mod user {
-    use crate::{db, error, extractor::WrapAuthClaimsNoDb, image_ops::generate_images, s3};
+    use crate::{
+        db, error, extractor::TokenUser, image_ops::generate_images, s3, service::ServiceData,
+    };
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -53,7 +56,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
     ) -> Result<CreatedJson<<endpoints::image::user::Create as ApiEndpoint>::Res>, error::Server>
     {
         let id = db::image::user::create(db.as_ref()).await?;
@@ -64,8 +67,8 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: Data<s3::Client>,
-        _claims: WrapAuthClaimsNoDb,
+        s3: ServiceData<s3::Client>,
+        _claims: TokenUser,
         Path(id): Path<ImageId>,
         bytes: Bytes,
     ) -> Result<NoContent, error::Upload> {
@@ -109,9 +112,9 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
         req: Path<ImageId>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
     ) -> Result<NoContent, error::Delete> {
         let image = req.into_inner();
         db::image::user::delete(&db, image)
@@ -133,7 +136,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
         req: Path<ImageId>,
     ) -> Result<Json<<endpoints::image::user::Get as ApiEndpoint>::Res>, error::NotFound> {
         let metadata = db::image::user::get(&db, req.into_inner())
@@ -147,7 +150,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
     ) -> Result<Json<<endpoints::image::user::List as ApiEndpoint>::Res>, error::Server> {
         let images: Vec<_> = db::image::user::list(db.as_ref())
             .err_into::<error::Server>()
@@ -205,7 +208,7 @@ fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageImage>,
+    _claims: TokenUserWithScope<ScopeManageImage>,
     req: Json<<endpoints::image::Create as ApiEndpoint>::Req>,
 ) -> Result<CreatedJson<<endpoints::image::Create as ApiEndpoint>::Res>, error::CreateWithMetadata>
 {
@@ -242,8 +245,8 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: Data<s3::Client>,
-    _claims: AuthUserWithScope<ScopeManageImage>,
+    s3: ServiceData<s3::Client>,
+    _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
@@ -286,7 +289,7 @@ async fn upload(
 #[api_v2_operation]
 async fn get_one(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     req: Path<ImageId>,
 ) -> Result<Json<<endpoints::image::Get as ApiEndpoint>::Res>, error::NotFound> {
     let metadata = db::image::get_one(&db, req.into_inner())
@@ -300,11 +303,11 @@ async fn get_one(
 #[api_v2_operation]
 async fn search(
     db: Data<PgPool>,
-    algolia: Data<crate::algolia::Client>,
-    _claims: WrapAuthClaimsNoDb,
+    algolia: ServiceData<crate::algolia::Client>,
+    _claims: TokenUser,
     query: Option<Query<<endpoints::image::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<endpoints::image::Search as ApiEndpoint>::Res>, error::Service> {
-    let query = dbg!(query.map_or_else(Default::default, Query::into_inner));
+    let query = query.map_or_else(Default::default, Query::into_inner);
 
     let (ids, pages, total_hits) = algolia
         .search_image(
@@ -337,7 +340,7 @@ async fn search(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageImage>,
+    _claims: TokenUserWithScope<ScopeManageImage>,
     req: Option<Json<<endpoints::image::UpdateMetadata as ApiEndpoint>::Req>>,
     id: Path<ImageId>,
 ) -> Result<NoContent, error::UpdateWithMetadata> {
@@ -388,10 +391,10 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    algolia: Data<crate::algolia::Client>,
-    _claims: AuthUserWithScope<ScopeManageImage>,
+    algolia: ServiceData<crate::algolia::Client>,
+    _claims: TokenUserWithScope<ScopeManageImage>,
     req: Path<ImageId>,
-    s3: Data<s3::Client>,
+    s3: ServiceData<s3::Client>,
 ) -> Result<NoContent, error::Delete> {
     let image = req.into_inner();
     db::image::delete(&db, image)

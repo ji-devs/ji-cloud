@@ -6,7 +6,7 @@ export class _ extends LitElement {
     return [css`
     .wrapper{
     width: 88px;
-    padding: 3px 0;
+    
     border-radius: 12px;
     border: solid 1px #b0ccf2;
     background-color: #f3f8fe;
@@ -32,6 +32,7 @@ img-ui{
 
 .wrapper:hover img-ui{
   display:block;
+  cursor:pointer;
 }
 .negative{
   border: solid 1px #6ea3f9;
@@ -44,13 +45,16 @@ img-ui{
   @property({type:Boolean})
   negative:boolean = false; 
 
+  @property()
+  label:string = ""; 
+
   render() {
 
-    const {negative} = this;
+    const {negative, label} = this;
 
     return html`
       <div class="wrapper ${negative ? 'negative' : ''}">
-        <slot></slot>
+        <p>${label}</p>
         <img-ui path="icn-delete-tab.svg"></img-ui>
       </div>
 

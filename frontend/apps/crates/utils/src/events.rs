@@ -7,7 +7,25 @@ pub use dominator::events::*;
 
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
+
+temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);
+temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
+
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
+
+// Custom Change 
+#[derive(Deserialize, Debug)]
+pub struct CustomChangeData {
+    pub value: String,
+}
+
+make_custom_event_serde!("custom-change", CustomChange, CustomChangeData);
+
+impl CustomChange {
+    pub fn value(&self) -> String {
+        self.data().value
+    }
+}
 
 // Custom Input
 #[derive(Deserialize, Debug)]
@@ -34,6 +52,35 @@ make_custom_event_serde!("custom-toggle", CustomToggle, CustomToggleData);
 impl CustomToggle {
     pub fn value(&self) -> bool {
         self.data().value
+    }
+}
+
+// Custom Route 
+#[derive(Deserialize, Debug)]
+pub struct CustomRouteData {
+    pub route: String,
+}
+
+make_custom_event_serde!("custom-route", CustomRoute, CustomRouteData);
+
+impl CustomRoute {
+    pub fn route(&self) -> String {
+        self.data().route
+    }
+}
+
+
+// Custom Search 
+#[derive(Deserialize, Debug)]
+pub struct CustomSearchData {
+    pub query: String,
+}
+
+make_custom_event_serde!("custom-search", CustomSearch, CustomSearchData);
+
+impl CustomSearch {
+    pub fn query(&self) -> String {
+        self.data().query
     }
 }
 

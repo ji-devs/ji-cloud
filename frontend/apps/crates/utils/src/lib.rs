@@ -13,3 +13,5 @@ pub mod math;
 pub mod drag;
 pub mod events;
 pub mod api_helpers;
+
+pub(crate) mod strings;

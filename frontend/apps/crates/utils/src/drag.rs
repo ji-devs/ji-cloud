@@ -1,3 +1,16 @@
+/*
+ * Drag is merely a lightweight state machine to track:
+ * 1. Whether the pointer has moved enough to start dragging
+ * 2. The current drag position
+ *
+ * The consumer is expected to:
+ * 1. create/stash it on mouse down
+ * 2. update it on global mouse move
+ * 3. drop it on global mouse up
+ *
+ * In addition to the _tracking_ it provides signals of all the required state
+ */
+
 use wasm_bindgen::prelude::*;
 use web_sys::Element;
 use std::cell::RefCell;
@@ -14,30 +27,37 @@ use std::future::Future;
 use std::task::{Context, Poll};
 use shared::domain::jig::ModuleKind;
 use crate::math::*;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering::SeqCst;
 
 const MOVE_THRESHHOLD:i32 = 3;
 
 
-#[derive(Debug, Clone)]
-pub struct BasicDrag {
+pub struct Drag {
     state: Mutable<DragState>,
     pos: Mutable<PointI32>,
-    mouse: PointI32,
+    mouse_x: AtomicI32,
+    mouse_y: AtomicI32,
 }
 
-impl BasicDrag {
-    pub fn new() -> Self {
+impl Drag {
+    pub fn new(mouse_x: i32, mouse_y: i32, anchor_x: f64, anchor_y: f64) -> Self {
         Self { 
-            state: Mutable::new(DragState::None),
+            state: Mutable::new(DragState::Waiting(DragWait {
+                anchor: PointF64::new(anchor_x, anchor_y),
+                accum: PointI32::new(0, 0),
+            })),
             pos: Mutable::new(PointI32::new(0, 0)),
-            mouse: PointI32::new(0, 0),
+            mouse_x: AtomicI32::new(mouse_x),
+            mouse_y: AtomicI32::new(mouse_y),
+
         }
     }
+
 }
 
 #[derive(Debug, Clone)]
 pub enum DragState {
-    None,
     Waiting(DragWait),
     Active
 }
@@ -48,19 +68,13 @@ pub struct DragWait {
     pub accum: PointI32,
 }
 
-impl BasicDrag {
+impl Drag {
 
     //Top-level state changes
     pub fn get_active(&self) -> bool { 
         match *self.state.lock_ref() {
             DragState::Active => true,
             _ => false 
-        }
-    }
-    pub fn get_listening(&self) -> bool { 
-        match *self.state.lock_ref() {
-            DragState::Active | DragState::Waiting(_) => true,
-            DragState::None => false 
         }
     }
 
@@ -144,69 +158,54 @@ impl BasicDrag {
 
 
 
-    // Engine start/update/stop
-    pub fn start(
-        &mut self, 
-        mouse_x: i32, mouse_y: i32, 
-        anchor_x: f64, anchor_y: f64, 
-    ) {
-
-        self.mouse = PointI32::new(mouse_x, mouse_y);
-
-        self.state.set(DragState::Waiting(DragWait {
-            anchor: PointF64::new(anchor_x, anchor_y),
-            accum: PointI32::new(0, 0),
-        }))
+    pub fn get_mouse(&self) -> PointI32 {
+        PointI32::new(self.mouse_x.load(SeqCst), self.mouse_y.load(SeqCst))
     }
 
-    pub fn stop(&self) {
-        *self.state.lock_mut() = DragState::None;
+    pub fn set_mouse(&self, mouse: PointI32) {
+        self.mouse_x.store(mouse.x, SeqCst);
+        self.mouse_y.store(mouse.y, SeqCst);
     }
+    pub fn update(&self, x:i32, y:i32) -> Option<PointI32> {
 
-    pub fn on_move(&mut self, x:i32, y:i32) -> Option<PointI32> {
+        let prev_mouse = self.get_mouse();
+        let next_mouse = PointI32::new(x, y);
+        let diff = prev_mouse - next_mouse;
+        let (next_state, next_pos) = match &mut *self.state.lock_mut() {
+            DragState::Waiting(wait) => {
+                wait.accum += diff;
+                let next_state = {
+                    if wait.accum.x > MOVE_THRESHHOLD || wait.accum.y > MOVE_THRESHHOLD {
+                        self.pos.set(PointI32::new(
+                            next_mouse.x - wait.anchor.x as i32, 
+                            next_mouse.y - wait.anchor.y as i32
+                        ));
+                        Some(DragState::Active)
+                    } else {
+                        None
+                    }
+                };
+                (next_state, None)
+            },
 
-        if self.get_listening() {
-            let prev_mouse = self.mouse;
-            let next_mouse = PointI32::new(x, y);
-            let diff = prev_mouse - next_mouse;
-            let (next_state, next_pos) = match &mut *self.state.lock_mut() {
-                DragState::Waiting(wait) => {
-                    wait.accum += diff;
-                    let next_state = {
-                        if wait.accum.x > MOVE_THRESHHOLD || wait.accum.y > MOVE_THRESHHOLD {
-                            self.pos.set(PointI32::new(
-                                next_mouse.x - wait.anchor.x as i32, 
-                                next_mouse.y - wait.anchor.y as i32
-                            ));
-                            Some(DragState::Active)
-                        } else {
-                            None
-                        }
-                    };
-                    (next_state, None)
-                },
+            DragState::Active => {
+                self.set_mouse(next_mouse);
+                let pos = self.pos.get();
+                let next_pos = Some(PointI32::new(pos.x - diff.x, pos.y - diff.y));
+                (None, next_pos)
+            },
 
-                DragState::Active => {
-                    self.mouse = next_mouse;
-                    let pos = self.pos.get();
-                    let next_pos = Some(PointI32::new(pos.x - diff.x, pos.y - diff.y));
-                    (None, next_pos)
-                },
+            _ => (None,None)
+        };
 
-                _ => (None,None)
-            };
-
-            if let Some(next_state) = next_state {
-                self.state.set(next_state);
-            }
-
-            if let Some(next_pos) = next_pos {
-                self.pos.set(next_pos);
-            }
-
-            next_pos
-        } else {
-            None
+        if let Some(next_state) = next_state {
+            self.state.set(next_state);
         }
+
+        if let Some(next_pos) = next_pos {
+            self.pos.set(next_pos);
+        }
+
+        next_pos
     }
 }

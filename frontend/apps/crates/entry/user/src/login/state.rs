@@ -1,7 +1,6 @@
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
-use crate::firebase::*;
 use wasm_bindgen::prelude::*;
 
 pub struct State {
@@ -55,10 +54,7 @@ impl State {
 
 #[derive(Debug, Clone)]
 pub enum Status {
-    NoSuchFirebaseUser,
-    NoSuchDbUser(FirebaseUserInfo),
     BadPassword,
-    UnknownFirebase,
     Technical,
     PasswordResetSent,
     InvalidEmail,
@@ -68,7 +64,6 @@ pub enum Status {
 impl Status {
     pub fn email_error(&self) -> Option<&'static str> {
         match self {
-            Self::NoSuchFirebaseUser => Some("no such user!"),
             Self::InvalidEmail => Some("invalid email"),
             Self::ConfirmEmail => Some("need to confirm your email!"),
             _ => None
@@ -84,32 +79,8 @@ impl Status {
 
     pub fn technical_error(&self) -> String {
         match self {
-            Self::UnknownFirebase => "firebase error!",
             _ => "technical error!"
         }.to_string()
     }
 
-    pub fn from_firebase_err(err:JsValue) -> Self {
-        match serde_wasm_bindgen::from_value::<FirebaseError>(err) {
-            Ok(err) => {
-                let code:&str = err.code.as_ref();
-                log::info!("{}", code);
-                let status = match code {
-                    "auth/wrong-password" => Self::BadPassword,
-                    "auth/user-not-found" => Self::NoSuchFirebaseUser,
-                    "auth/invalid-email" => Self::InvalidEmail,
-                    "internal/confirm-email" => Self::ConfirmEmail,
-                    _ => {
-                        log::warn!("firebase error: {}", code);
-                        Self::UnknownFirebase
-                    }
-                };
-                status
-            },
-            Err(_) => {
-                Self::Technical
-            }
-
-        }
-    }
 }

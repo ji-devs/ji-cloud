@@ -1,14 +1,14 @@
 use crate::{
     db,
     error::{self, BasicError},
-    extractor::AuthUserWithScope,
     extractor::ScopeManageCategory,
-    extractor::WrapAuthClaimsNoDb,
+    extractor::TokenUser,
+    extractor::TokenUserWithScope,
 };
 use paperclip::actix::{
     api_v2_errors, api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
-    NoContent,
+    CreatedJson, NoContent,
 };
 use shared::api::endpoints::{category, ApiEndpoint};
 use shared::domain::category::{
@@ -53,7 +53,7 @@ impl Into<actix_web::Error> for CreateError {
 #[api_v2_operation]
 async fn get_categories(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     req: Option<Query<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, error::Server> {
     let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
@@ -79,21 +79,21 @@ async fn get_categories(
 #[api_v2_operation]
 async fn create_category(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageCategory>,
+    _claims: TokenUserWithScope<ScopeManageCategory>,
     req: Json<<category::Create as ApiEndpoint>::Req>,
-) -> actix_web::Result<Json<<category::Create as ApiEndpoint>::Res>, CreateError> {
+) -> actix_web::Result<CreatedJson<<category::Create as ApiEndpoint>::Res>, CreateError> {
     let CreateCategoryRequest { name, parent_id } = req.into_inner();
 
     let (id, index) = db::category::create(&db, &name, parent_id).await?;
 
-    Ok(Json(NewCategoryResponse { id, index }))
+    Ok(CreatedJson(NewCategoryResponse { id, index }))
 }
 
 /// Update a category.
 #[api_v2_operation]
 async fn update_category(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageCategory>,
+    _claims: TokenUserWithScope<ScopeManageCategory>,
     req: Option<Json<<category::Update as ApiEndpoint>::Req>>,
     path: web::Path<CategoryId>,
 ) -> actix_web::Result<NoContent, error::CategoryUpdate> {
@@ -119,7 +119,7 @@ async fn update_category(
 #[api_v2_operation]
 async fn delete_category(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageCategory>,
+    _claims: TokenUserWithScope<ScopeManageCategory>,
     path: web::Path<CategoryId>,
 ) -> actix_web::Result<NoContent, error::Delete> {
     db::category::delete(&db, path.into_inner()).await?;

@@ -1,29 +1,59 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { legacyMock, legacyMedia } from "@utils/path";
-import "./basic";
+import {sameOrigin} from "@utils/image";
 
 @customElement("img-legacy")
 export class _ extends LitElement {
-  @property()
-  jigId: string = "";
+    static get styles() {
+        return [
+            css`
+            img {
+                width: inherit;
+                height: inherit;
+                object-fit: inherit;
+            }
+            `,
+        ];
+    }
 
-  @property()
-  moduleId: string = "";
 
-  @property()
-  path: string = "";
+    onLoad(evt: Event) {
+        const img = evt.currentTarget as HTMLImageElement;
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
 
-  @property({ type: Boolean })
-  mock: boolean = false;
+        this.dispatchEvent(
+            new CustomEvent("image-load", {
+                detail: { width, height },
+                bubbles: true,
+                composed: true,
+            })
+        );
+    }
 
-  render() {
+      @property()
+      jigId: string = "";
+
+      @property()
+      moduleId: string = "";
+
+      @property()
+      path: string = "";
+
+      @property({ type: Boolean })
+      mock: boolean = false;
+
+    render() {
     const { jigId, moduleId, path, mock } = this;
 
     const src = mock
       ? legacyMock({ jigId, moduleId, path })
       : legacyMedia({ jigId, moduleId, path });
 
-    return html`<img-basic src="${src}"></img>`;
-  }
+        if (sameOrigin(src)) {
+            return html`<img .src="${src}" @load="${this.onLoad}" ></img>`;
+        } else {
+            return html`<img .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
+            }
+    }
 }

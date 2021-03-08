@@ -3,12 +3,13 @@ use anyhow::Context;
 use sqlx::postgres::PgConnectOptions;
 
 use crate::{
-    env::{env_bool, keys, req_env},
+    env::{keys, req_env},
     google::{get_access_token_and_project_id, get_optional_secret},
 };
 use config::RemoteTarget;
-use jsonwebtoken::{DecodingKey, EncodingKey};
+use std::str::FromStr;
 use std::{
+    convert::TryInto,
     env::VarError,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -35,11 +36,28 @@ pub fn read_sql_proxy() -> bool {
     std::env::args().any(|s| s == "sqlproxy")
 }
 
+/// Settings related to Google's OAuth.
+#[derive(Clone)]
+pub struct GoogleOAuth {
+    /// Client ID for google oauth.
+    pub client: String,
+
+    /// Client Secret for google oauth.
+    pub secret: String,
+}
+
+impl GoogleOAuth {
+    fn from_parts(client: Option<String>, secret: Option<String>) -> Option<Self> {
+        Some(Self {
+            client: client?,
+            secret: secret?,
+        })
+    }
+}
+
 /// Settings that are accessed at runtime (as compared to startup time)
 #[derive(Clone)]
 pub struct RuntimeSettings {
-    firebase_no_auth: bool,
-
     /// The port that the api runs on.
     pub api_port: u16,
 
@@ -49,29 +67,58 @@ pub struct RuntimeSettings {
     /// When the server started.
     pub epoch: Duration,
 
-    /// Used to encode jwt tokens.
-    pub jwt_encoding_key: EncodingKey,
-
     /// Used to search for images via the bing image search api
     ///
     /// If missing, implies that bing searching is disabled.
     // todo: move this and make it runtime reloadable somehow (bing suggests rotating keys)
     pub bing_search_key: Option<String>,
 
-    //TODO see: https://github.com/Keats/jsonwebtoken/issues/120#issuecomment-634096881
-    //Keeping a string is a stop-gap measure for now, not ideal
-    /// Used to _decode_ jwt tokens.
-    jwt_decoding_key: String,
-
     remote_target: RemoteTarget,
+
+    /// Settings for google OAuth
+    /// if missing / disabled, related routes will return `501 - Not Implemented`
+    pub google_oauth: Option<GoogleOAuth>,
+
+    /// Secret for signing/encrypting tokens.
+    pub token_secret: Box<[u8; 32]>,
+
+    /// How long *login* tokens are valid for (measured in seconds).
+    /// * can only be set on `local`
+    /// * optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
+    pub login_token_valid_duration: Option<chrono::Duration>,
 }
 
 impl RuntimeSettings {
-    pub(crate) fn new(
-        jwt_encoding_key: EncodingKey,
-        jwt_decoding_key: String,
+    /// create new runtime settings.
+    pub fn new(
+        remote_target: RemoteTarget,
+        api_port: u16,
+        pages_port: u16,
+        bing_search_key: Option<String>,
+        google_oauth: Option<GoogleOAuth>,
+        token_secret: Box<[u8; 32]>,
+        login_token_valid_duration: Option<chrono::Duration>,
+    ) -> Self {
+        assert_eq!(token_secret.len(), 32);
+
+        Self {
+            api_port,
+            pages_port,
+            epoch: get_epoch(),
+            remote_target,
+            bing_search_key,
+            google_oauth,
+            token_secret,
+            login_token_valid_duration,
+        }
+    }
+
+    pub(crate) fn with_env(
         remote_target: RemoteTarget,
         bing_search_key: Option<String>,
+        google_oauth: Option<GoogleOAuth>,
+        token_secret: Box<[u8; 32]>,
+        login_token_valid_duration: Option<chrono::Duration>,
     ) -> anyhow::Result<Self> {
         let (api_port, pages_port) = match remote_target {
             RemoteTarget::Local => (
@@ -82,17 +129,17 @@ impl RuntimeSettings {
             RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
         };
 
-        let firebase_no_auth = env_bool("LOCAL_NO_FIREBASE_AUTH");
+        assert_eq!(token_secret.len(), 32);
 
         Ok(Self {
             api_port,
             pages_port,
-            firebase_no_auth,
             epoch: get_epoch(),
-            jwt_encoding_key,
-            jwt_decoding_key,
             remote_target,
             bing_search_key,
+            google_oauth,
+            token_secret,
+            login_token_valid_duration,
         })
     }
 
@@ -106,16 +153,6 @@ impl RuntimeSettings {
     pub fn is_local(&self) -> bool {
         matches!(self.remote_target(), RemoteTarget::Local)
     }
-
-    /// Should we assume that anything that says firebase sent it is right?
-    pub fn firebase_assume_valid(&self) -> bool {
-        self.is_local() && self.firebase_no_auth
-    }
-
-    /// Get key used to decode jwt tokens.
-    pub fn jwt_decoding_key(&self) -> DecodingKey {
-        DecodingKey::from_secret(self.jwt_decoding_key.as_bytes())
-    }
 }
 
 /// Settings for initializing a S3 client
@@ -126,23 +163,11 @@ pub struct S3Settings {
     /// The s3 bucket that should be used for media.
     pub bucket: String,
 
-    /// Should a s3 client be started? (for things like deleting images)
-    pub use_client: bool,
-
     /// What's the access key's id?
     pub access_key_id: String,
 
     /// What's the access key's secret?
     pub secret_access_key: String,
-}
-
-/// Settings for managing JWKs from Google.
-#[derive(Debug)]
-pub struct JwkSettings {
-    /// What audience should JWTs be checked for?
-    pub audience: String,
-    /// What issuer should JWTs be checked for?
-    pub issuer: String,
 }
 
 /// Settings to initialize a algolia client.
@@ -168,6 +193,30 @@ pub struct AlgoliaSettings {
     /// The key to use for the *frontend* for the algolia client.
     /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
+}
+
+/// Settings for the email (sendgrid) client.
+#[derive(Clone, Debug)]
+pub struct EmailClientSettings {
+    /// Sendgrid / email client api key.
+    // Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub api_key: String,
+
+    /// Email client sender email address.
+    /// Is optional. If missing, all mailing services will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub sender_email: String,
+
+    /// Email client template ID for verifying emails at signup.
+    /// Is optional. If missing, email verification (at signup) will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub signup_verify_template: Option<String>,
+
+    /// Email client template ID for resetting passwords.
+    /// Is optional. If missing, password resetting will be disabled,
+    /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub password_reset_template: Option<String>,
 }
 
 /// Manages access to settings.
@@ -264,30 +313,39 @@ impl SettingsManager {
     }
 
     /// Load the settings for s3.
-    pub async fn s3_settings(&self) -> anyhow::Result<S3Settings> {
+    pub async fn s3_settings(&self) -> anyhow::Result<Option<S3Settings>> {
+        let disable_local = crate::env::env_bool(keys::s3::DISABLE);
+
+        if disable_local && self.remote_target == RemoteTarget::Local {
+            return Ok(None);
+        }
+
         let endpoint = match self.remote_target.s3_endpoint() {
-            Some(e) => e.to_string(),
-            None => self.get_secret(keys::s3::ENDPOINT).await?,
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => self.get_varying_secret(keys::s3::ENDPOINT).await?,
         };
 
         let bucket = match self.remote_target.s3_bucket() {
-            Some(b) => b.to_string(),
-            None => self.get_secret(keys::s3::BUCKET).await?,
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::BUCKET).await?,
         };
 
-        let access_key_id = self.get_secret(keys::s3::ACCESS_KEY).await?;
+        let access_key_id = self.get_varying_secret(keys::s3::ACCESS_KEY).await?;
 
-        let secret_access_key = self.get_secret(keys::s3::SECRET).await?;
+        let secret_access_key = self.get_varying_secret(keys::s3::SECRET).await?;
 
-        let disable_local = crate::env::env_bool(keys::s3::DISABLE);
+        match (endpoint, bucket, access_key_id, secret_access_key) {
+            (Some(endpoint), Some(bucket), Some(access_key_id), Some(secret_access_key)) => {
+                Ok(Some(S3Settings {
+                    endpoint,
+                    bucket,
+                    access_key_id,
+                    secret_access_key,
+                }))
+            }
 
-        Ok(S3Settings {
-            endpoint,
-            bucket,
-            use_client: self.remote_target != RemoteTarget::Local || !disable_local,
-            access_key_id,
-            secret_access_key,
-        })
+            _ => return Ok(None),
+        }
     }
 
     /// Load the key required for initializing sentry (for the api)
@@ -302,16 +360,6 @@ impl SettingsManager {
         self.get_optional_secret(keys::SENTRY_DSN_PAGES)
             .await
             .map(|it| it.filter(|it| !it.is_empty()))
-    }
-
-    /// Load the settings for JWKs.
-    pub async fn jwk_settings(&self) -> anyhow::Result<JwkSettings> {
-        let issuer = format!("{}/{}", config::JWK_ISSUER_URL, &self.project_id);
-
-        Ok(JwkSettings {
-            audience: self.project_id.clone(),
-            issuer,
-        })
     }
 
     /// Load the settings for connecting to the db.
@@ -382,17 +430,81 @@ impl SettingsManager {
         }))
     }
 
+    /// Load the Email Client settings.
+    pub async fn email_client_settings(&self) -> anyhow::Result<Option<EmailClientSettings>> {
+        let disable_local = crate::env::env_bool(keys::email::DISABLE);
+
+        if disable_local && self.remote_target == RemoteTarget::Local {
+            return Ok(None);
+        }
+
+        let api_key = self.get_varying_secret(keys::email::API_KEY).await?;
+
+        let sender_email = self.get_varying_secret(keys::email::SENDER_EMAIL).await?;
+
+        let signup_verify_template = self
+            .get_varying_secret(keys::email::SIGNUP_VERIFY_TEMPLATE)
+            .await?;
+
+        let password_reset_template = self
+            .get_varying_secret(keys::email::PASSWORD_RESET_TEMPLATE)
+            .await?;
+
+        let (api_key, sender_email) = match (api_key, sender_email) {
+            (Some(api_key), Some(sender_email)) => (api_key, sender_email),
+            _ => return Ok(None),
+        };
+
+        Ok(Some(EmailClientSettings {
+            api_key,
+            sender_email,
+            signup_verify_template,
+            password_reset_template,
+        }))
+    }
+
     /// Load the `RuntimeSettings`.
     pub async fn runtime_settings(&self) -> anyhow::Result<RuntimeSettings> {
-        let jwt_secret = self.get_secret(keys::JWT_SECRET).await?;
-        let jwt_encoding_key = EncodingKey::from_secret(jwt_secret.as_ref());
+        let token_secret = self
+            .get_secret(keys::TOKEN_SECRET)
+            .await
+            .and_then(|secret| {
+                let secret = hex::decode(secret)?;
+
+                let secret: [u8; 32] = secret.try_into().map_err(|s: Vec<u8>| {
+                    anyhow::anyhow!(
+                        "token secret must be 32 bytes long, it was: {} bytes long",
+                        s.len()
+                    )
+                })?;
+
+                Ok(Box::new(secret))
+            })?;
+
         let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
 
-        RuntimeSettings::new(
-            jwt_encoding_key,
-            jwt_secret,
+        let login_token_valid_duration = match self.remote_target {
+            RemoteTarget::Local => self
+                .get_optional_secret(keys::LOGIN_TOKEN_VALID_DURATION)
+                .await?
+                .as_deref()
+                .map(i64::from_str)
+                .transpose()?
+                .map(chrono::Duration::seconds),
+            _ => None,
+        };
+
+        let google_oauth = GoogleOAuth::from_parts(
+            self.get_varying_secret(keys::GOOGLE_OAUTH_CLIENT).await?,
+            self.get_varying_secret(keys::GOOGLE_OAUTH_SECRET).await?,
+        );
+
+        RuntimeSettings::with_env(
             self.remote_target,
             bing_search_key,
+            google_oauth,
+            token_secret,
+            login_token_valid_duration,
         )
     }
 }

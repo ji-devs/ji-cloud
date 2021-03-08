@@ -35,5 +35,5 @@ export const SCHOOL_OPTIONS = [
     "Kerem",
     "Lauder",
     "Naima JPS",
-    "Rimon"
+    "Rimon",
 ]

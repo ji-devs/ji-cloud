@@ -4,14 +4,13 @@ use cfg_if::cfg_if;
 use config::RemoteTarget;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use shared::domain::auth::JWT_COOKIE_NAME;
+use shared::domain::auth::AUTH_COOKIE_NAME;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
 #[derive(Clone)]
 pub struct Settings {
     pub remote_target: RemoteTarget,
-    pub firebase_dev: bool,
 }
 
 cfg_if! {
@@ -39,12 +38,12 @@ cfg_if! {
 //However they are only called in local mode, so it's fine
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(js_name = FRONTEND_DEV_AUTH)]
-    fn frontend_dev_auth() -> bool;
-    #[wasm_bindgen(js_name = FRONTEND_DEV_TOKEN)]
-    fn frontend_dev_token() -> String;
-    #[wasm_bindgen(js_name = FRONTEND_DEV_CSRF)]
-    fn frontend_dev_csrf() -> String;
+    #[wasm_bindgen(js_name = DEV_AUTH)]
+    fn dev_auth() -> bool;
+    #[wasm_bindgen(js_name = API_TOKEN)]
+    fn dev_token() -> String;
+    #[wasm_bindgen(js_name = API_CSRF)]
+    fn dev_csrf() -> String;
 }
 
 fn _init(remote_target:RemoteTarget) -> Settings {
@@ -56,16 +55,22 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
     if remote_target == RemoteTarget::Local {
         unsafe {
-            if frontend_dev_auth() {
-                let csrf = frontend_dev_csrf();
-                let token = frontend_dev_token();
+            let window = web_sys::window().unwrap_throw();
+            if dev_auth() && !window.location().pathname().unwrap_throw().contains("user/"){
+
+                let csrf = dev_csrf();
+                let token = dev_token();
+                log::info!("manually setting auth for dev mode");
+
                 super::storage::save_csrf_token(&csrf);
-                web_sys::window()
-                    .unwrap_throw()
+
+                window
                     .document()
                     .unwrap_throw()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("{}={}; PATH=/", JWT_COOKIE_NAME, token));
+                    .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
+            } else {
+                log::info!("skipping auth for dev mode");
             }
         }
     }
@@ -77,7 +82,7 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "remote_target is [{:?}] and firebase_dev is [{:?}]", self.remote_target, self.firebase_dev)
+        write!(f, "remote_target is [{:?}]", self.remote_target)
     }
 }
 
@@ -85,19 +90,16 @@ impl Settings {
     pub fn new_local() -> Self {
         Self {
             remote_target: RemoteTarget::Local,
-            firebase_dev: true,
         }
     }
     pub fn new_sandbox() -> Self {
         Self {
             remote_target: RemoteTarget::Sandbox,
-            firebase_dev: true,
         }
     }
     pub fn new_release() -> Self {
         Self {
             remote_target: RemoteTarget::Release,
-            firebase_dev: false,
         }
     }
     

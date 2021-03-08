@@ -5,7 +5,7 @@ use actix_http::{
     http::header::{self, EntityTag, Header, IfMatch, IfNoneMatch},
 };
 use actix_web::{web::Json, HttpResponse};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
@@ -16,27 +16,28 @@ use shared::{
     api::{endpoints::admin, ApiEndpoint},
     domain::{
         admin::{AdminListMediaResponse, AdminMediaItem},
-        auth::SigninSuccess,
         image::ImageKind,
+        session::NewSessionResponse,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::image_ops::MediaKind;
 use crate::{
     db,
     error::{self, ServiceKind},
-    extractor::{reply_signin_auth, AuthUserWithScope, ScopeAdmin},
-    image_ops::regenerate_images,
+    extractor::{ScopeAdmin, TokenUserWithScope},
+    image_ops::{regenerate_images, MediaKind},
     s3,
+    service::ServiceData,
+    token::{create_auth_token, SessionMask},
 };
 
 /// Impersonate another user
 #[api_v2_operation]
 async fn impersonate(
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    auth: TokenUserWithScope<ScopeAdmin>,
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     user: Path<Uuid>,
@@ -49,20 +50,37 @@ async fn impersonate(
         return Err(error::UserNotFound::UserNotFound);
     }
 
-    let (csrf, cookie) =
-        reply_signin_auth(user_id, &settings.jwt_encoding_key, settings.is_local())?;
+    let login_ttl = settings
+        .login_token_valid_duration
+        .unwrap_or(Duration::weeks(2));
+
+    let session = db::session::create(
+        &mut *db.acquire().await?,
+        user_id,
+        Some(&(Utc::now() + login_ttl)),
+        SessionMask::GENERAL_API,
+        Some(auth.claims.user_id),
+    )
+    .await?;
+
+    let (csrf, cookie) = create_auth_token(
+        &settings.token_secret,
+        settings.is_local(),
+        login_ttl,
+        &session,
+    )?;
 
     Ok(HttpResponse::Ok()
         .cookie(cookie)
-        .json(SigninSuccess { csrf }))
+        .json(NewSessionResponse { csrf }))
 }
 
 /// Forcefully refresh an item of media (as if it was just uploaded)
 /// Note: this request can be conditional on `If-Match`
 #[api_v2_operation]
 async fn refresh_image_files(
-    _auth: AuthUserWithScope<ScopeAdmin>,
-    s3: Data<s3::Client>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    s3: ServiceData<s3::Client>,
     db: Data<PgPool>,
     Path((library, id)): Path<(MediaLibrary, Uuid)>,
     req: HttpRequest,
@@ -208,14 +226,14 @@ async fn refresh_image_files(
 
 #[api_v2_operation]
 async fn list_media(
-    _auth: AuthUserWithScope<ScopeAdmin>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
     db: Data<PgPool>,
 ) -> actix_web::Result<Json<AdminListMediaResponse>, error::Server> {
     let items: Vec<AdminMediaItem> = sqlx::query_file!("query/list_media.sql")
         .fetch(db.as_ref())
         .map_ok(|row| AdminMediaItem {
             id: row.id,
-            kind: dbg!(row.kind).to_shared(),
+            kind: row.kind.to_shared(),
             created_at: row.created_at,
             updated_at: row.updated_at,
             uploaded_at: row.uploaded_at.clone(),
@@ -227,12 +245,12 @@ async fn list_media(
         .try_collect()
         .await?;
 
-    dbg!(items.len());
+    items.len();
 
-    dbg!(items
+    items
         .iter()
         .filter(|it| matches!(it.kind, shared::media::MediaKind::Image(ImageKind::Canvas)))
-        .count());
+        .count();
 
     Ok(Json(AdminListMediaResponse { media: items }))
 }

@@ -5,9 +5,8 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod templates;
 mod router;
-mod pages;
+mod edit;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

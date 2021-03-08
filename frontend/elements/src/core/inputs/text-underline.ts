@@ -36,29 +36,38 @@ export class _ extends LitElement {
         ::placeholder {
           color: #a1a8ad;
         }
-        img {
-          position: absolute;
-          right: -10px;
-        }
-        img-ui{
-          display:none;
-        }
-        .icon{
-          display:block;
-        }
       `,
     ];
   }
 
+  onInput(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-input", {
+      detail: { value },
+    }))
+  }
+  onChange(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-change", {
+      detail: { value },
+    }))
+  }
+
   @property()
   label: string = "";
-  @property()
-  src: string = "";
-  @property()
-  icon: boolean = false;
 
+  @property()
+  value: string = "";
+
+
+  @property()
+  placeholder: string = "";
   render() {
-    const { label, src, icon } = this;
+    const { label, value, placeholder } = this;
 
     return html`
       <div class="wrapper">
@@ -68,10 +77,11 @@ export class _ extends LitElement {
             <input
               class=""
               type="text"
-              placeholder="Jane Doe"
-              aria-label="Full name"
+              placeholder="${placeholder}"
+              value="${value}"
+                @input="${this.onInput}"
+                @change="${this.onChange}"
             />
-            <img-ui path="search-24-px.svg" class="${icon ? 'icon' : ''}"></img-ui>
           </div>
         </label>
       </div>

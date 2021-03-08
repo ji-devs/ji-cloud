@@ -47,12 +47,28 @@ export class _ extends LitElement {
   @property()
   value: string = "";
 
+  onKeyUp(evt:KeyboardEvent) {
+    let { key } = evt;
+    key = key.toLowerCase();
+    if (key === "enter") {
+        const {value} = (evt.target as any);
+        this.value = value;
+
+        this.dispatchEvent(new CustomEvent("custom-search", {
+            detail: { query: value },
+            composed: true,
+            bubbles: true
+        }))
+    }
+  }
+
   render() {
     const { placeholder, value } = this;
     return html`
       <div class="wrapper">
-        <img-ui path="search-24-px.svg" alt="" class=""></img-ui>
+        <img-ui path="core/inputs/search.svg" alt="" class=""></img-ui>
         <input
+            @keyup="${this.onKeyUp}"
           type="search"
           name=""
           value="${value}"

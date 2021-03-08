@@ -1,12 +1,8 @@
-use crate::{error, extractor::FirebaseId};
+use crate::error;
 use chrono_tz::Tz;
-use shared::{
-    domain::{
-        auth::RegisterRequest,
-        meta::{AffiliationId, AgeRangeId, SubjectId},
-        user::{OtherUser, UserProfile, UserScope},
-    },
-    error::auth::RegisterErrorKind,
+use shared::domain::{
+    meta::{AffiliationId, AgeRangeId, SubjectId},
+    user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
 };
 use sqlx::{postgres::PgDatabaseError, PgConnection};
 use std::{convert::TryFrom, str::FromStr};
@@ -17,14 +13,12 @@ use super::{nul_if_empty, recycle_metadata};
 pub async fn lookup(
     db: &sqlx::PgPool,
     id: Option<Uuid>,
-    firebase_id: Option<&str>,
     name: Option<&str>,
 ) -> anyhow::Result<Option<OtherUser>> {
     Ok(sqlx::query_as!(
         OtherUser,
-        r#"select id from "user" where (id = $1 and $1 is not null) or (firebase_id = $2 and $2 is not null) or (username = $3 and $3 is not null)"#,
+        r#"select user_id as "id" from user_profile where (user_id = $1 and $1 is not null) or (username = $2 and $2 is not null)"#,
         id,
-        firebase_id,
         name
     )
     .fetch_optional(db)
@@ -34,27 +28,28 @@ pub async fn lookup(
 pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserProfile>> {
     let row = sqlx::query!(
         r#"
-        select id,
-        firebase_id,
-        username,
-        email::text                                                              as "email!",
-        given_name,
-        family_name,
-        language,
-        locale,
-        opt_into_edu_resources,
-        over_18,
-        timezone,
-        created_at,
-        updated_at,
-        organization,
-        location,
-        array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
-        array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
-        array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
-        array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
- from "user"
- where id = $1"#,
+select user_id as "id",
+    username,
+    user_email.email::text                                                              as "email!",
+    given_name,
+    family_name,
+    language,
+    locale,
+    opt_into_edu_resources,
+    over_18,
+    timezone,
+    user_profile.created_at,
+    user_profile.updated_at,
+    organization,
+    location,
+    array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
+    array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
+    array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
+    array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
+from "user"
+inner join user_profile on "user".id = user_profile.user_id
+inner join user_email using(user_id)
+where id = $1"#,
         id
     )
     .fetch_optional(db)
@@ -73,7 +68,6 @@ pub async fn profile(db: &sqlx::PgPool, id: Uuid) -> anyhow::Result<Option<UserP
         family_name: row.family_name,
         language: row.language,
         locale: row.locale,
-
         opt_into_edu_resources: row.opt_into_edu_resources,
         over_18: row.over_18,
         timezone: Tz::from_str(&row.timezone).map_err(|e| anyhow::anyhow!(e))?,
@@ -102,34 +96,31 @@ pub async fn exists(db: &sqlx::PgPool, id: Uuid) -> sqlx::Result<bool> {
     .map(|it| it.exists)
 }
 
-pub async fn firebase_to_id(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
-) -> sqlx::Result<Option<Uuid>> {
-    sqlx::query!(r#"select id from "user" where firebase_id = $1"#, id)
-        .fetch_optional(db)
-        .await
-        .map(|it| it.map(|it| it.id))
-}
-
-pub async fn register(
-    db: &sqlx::PgPool,
-    FirebaseId(id): &FirebaseId,
-    req: &RegisterRequest,
-) -> Result<Uuid, error::Register> {
-    let mut txn = db.begin().await?;
-
-    let user_id = sqlx::query!(
+pub async fn upsert_profile(
+    txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    req: &PutProfileRequest,
+    user_id: Uuid,
+) -> Result<(), error::Register> {
+    sqlx::query!(
         r#"
-INSERT INTO "user" 
-    (firebase_id, username, email, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
-VALUES 
-    ($1, $2, $3::text, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-returning id
-        "#,
-        id,
+insert into user_profile
+    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
+values 
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+on conflict (user_id) do update
+set
+    over_18 = $3,
+    given_name = $4,
+    family_name = $5,
+    language = $6,
+    locale = $7,
+    timezone = $8,
+    opt_into_edu_resources = $9,
+    organization = $10,
+    location = $11
+"#,
+        user_id,
         &req.username,
-        &req.email,
         req.over_18,
         &req.given_name,
         &req.family_name,
@@ -140,37 +131,21 @@ returning id
         req.organization.as_deref(),
         req.location.as_ref(),
     )
-    .fetch_one(&mut txn)
+    .execute(&mut *txn)
     .await
-    .map(|it| it.id)
     .map_err(|err| match err {
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint()
-                == Some("user_firebase_id_key") =>
-        {
-            error::Register
-            ::RegisterError(RegisterErrorKind::TakenId)
-        }
-
         sqlx::Error::Database(err)
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
-            error::Register::RegisterError(RegisterErrorKind::TakenUsername)
-        }
-
-        // fixme: This doesn't actually trigger right now because emails aren't marked `unique`
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint() == Some("user_email_key") =>
-        {
-            error::Register::RegisterError(RegisterErrorKind::TakenEmail)
+            error::Register::TakenUsername
         }
 
         e => e.into(),
     })?;
 
     update_metadata(
-        &mut txn,
+        txn,
         user_id,
         nul_if_empty(&req.subjects),
         nul_if_empty(&req.affiliations),
@@ -178,9 +153,7 @@ returning id
     )
     .await?;
 
-    txn.commit().await?;
-
-    Ok(user_id)
+    Ok(())
 }
 
 pub async fn update_metadata(

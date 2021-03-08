@@ -18,10 +18,12 @@ export class _ extends LitElement {
         }
         span {
           margin-left: 12px;
+          white-space: nowrap;
         }
         li {
           list-style-type: none;
           padding: 2px 16px 2px 4px;
+          word-wrap:none;
         }
         .errorwrapper {
           border: solid 1px #f00813;

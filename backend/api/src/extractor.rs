@@ -1,122 +1,28 @@
 use crate::{
+    domain::RegistrationStatus,
     error::BasicError,
-    jwkkeys::{self, JwkVerifier},
-    jwt::{check_no_csrf, check_no_db},
     more_futures::ReadyOrNot,
+    token::{check_login_token, SessionClaims, SessionMask},
 };
-use actix_web::{
-    cookie::{Cookie, CookieBuilder, SameSite},
-    http::{header, HeaderMap, HeaderValue},
-    web::Data,
-    FromRequest, HttpMessage,
+use actix_http::error::BlockingError;
+use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
+use actix_web_httpauth::headers::authorization::{Authorization, Basic};
+use argon2::{
+    password_hash::{Encoding, SaltString},
+    Argon2, PasswordHasher, PasswordVerifier,
 };
-use config::{COOKIE_DOMAIN, MAX_SIGNIN_COOKIE_DURATION};
 use core::settings::RuntimeSettings;
 use futures::future::{self, FutureExt};
 use http::StatusCode;
-use jsonwebtoken as jwt;
-use jwt::EncodingKey;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::thread_rng;
 use shared::domain::{
-    auth::{AuthClaims, CSRF_HEADER_NAME, JWT_COOKIE_NAME},
+    session::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserScope,
 };
 use sqlx::postgres::PgPool;
-use std::{marker::PhantomData, sync::Arc};
+use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
-
-fn try_insecure_decode(token: &str) -> Option<FirebaseId> {
-    let claims: jwkkeys::Claims = jsonwebtoken::dangerous_insecure_decode(token).ok()?.claims;
-    let user_id = claims.sub;
-    Some(FirebaseId(user_id))
-}
-
-#[derive(Apiv2Security)]
-#[openapi(
-    apiKey,
-    alias = "firebaseApiKey",
-    in = "header",
-    name = "Authorization",
-    description = "Use format 'Bearer TOKEN'"
-)]
-pub struct FirebaseUser {
-    pub id: FirebaseId,
-}
-
-pub struct FirebaseId(pub String);
-
-// stolen from the stdlib and modified (to work on stable)
-fn split_once(s: &'_ str, delimiter: char) -> Option<(&'_ str, &'_ str)> {
-    let start = s.find(delimiter)?;
-    let end = start + delimiter.len_utf8();
-    Some((&s[..start], &s[end..]))
-}
-
-fn bearer_token(headers: &HeaderMap) -> Option<&str> {
-    let header: &HeaderValue = headers.get(header::AUTHORIZATION)?;
-
-    split_once(header.to_str().ok()?, ' ')
-        .filter(|(kind, _)| kind.eq_ignore_ascii_case("bearer"))
-        .map(|(_, token)| token)
-}
-
-impl FromRequest for FirebaseUser {
-    type Error = BasicError;
-    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
-    type Config = ();
-    fn from_request(
-        req: &actix_web::HttpRequest,
-        _payload: &mut actix_web::dev::Payload,
-    ) -> Self::Future {
-        let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
-        let settings = settings.clone();
-        let jwk_verifier: &Arc<JwkVerifier> = req.app_data().unwrap();
-        let jwk_verifier = jwk_verifier.clone();
-
-        // this whole dance is to avoid cloning the headers.
-        let token = match bearer_token(req.headers()) {
-            Some(token) => token.to_owned(),
-            None => {
-                return futures::future::err(BasicError::with_message(
-                    StatusCode::UNAUTHORIZED,
-                    "Unauthorized: Missing Bearer Token".to_owned(),
-                ))
-                .into()
-            }
-        };
-
-        let invalid_token = || {
-            BasicError::with_message(
-                StatusCode::UNAUTHORIZED,
-                "Unauthorized: Invalid Token".to_owned(),
-            )
-        };
-
-        // HACK for testing.
-        if settings.firebase_assume_valid() {
-            return futures::future::ready(
-                try_insecure_decode(&token)
-                    .map(|id| Self { id })
-                    .ok_or_else(invalid_token),
-            )
-            .into();
-        }
-
-        async move {
-            // todo: more specific errors.
-            let id = jwk_verifier
-                .verify(&token, 3)
-                .await
-                .map_err(|_| invalid_token())?;
-
-            Ok(Self { id })
-        }
-        .boxed()
-        .into()
-    }
-}
 
 fn csrf_header(headers: &HeaderMap) -> Option<&str> {
     headers.get(CSRF_HEADER_NAME)?.to_str().ok()
@@ -124,8 +30,8 @@ fn csrf_header(headers: &HeaderMap) -> Option<&str> {
 
 fn check_cookie_csrf<'a>(
     cookie: Option<Cookie<'a>>,
-    csrf: Option<&'a str>,
-) -> Result<(Cookie<'a>, &'a str), BasicError> {
+    csrf: Option<Cow<'a, str>>,
+) -> Result<(Cookie<'a>, Cow<'a, str>), BasicError> {
     match (cookie, csrf) {
         (Some(cookie), Some(csrf)) => Ok((cookie, csrf)),
 
@@ -154,43 +60,45 @@ fn check_cookie_csrf<'a>(
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct WrapAuthClaimsNoDb(pub AuthClaims);
+pub struct TokenUser(pub SessionClaims);
 
-impl FromRequest for WrapAuthClaimsNoDb {
-    type Error = BasicError;
-    type Future = future::Ready<Result<Self, Self::Error>>;
+impl FromRequest for TokenUser {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
     fn from_request(
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let cookie = req.cookie(JWT_COOKIE_NAME);
-        let csrf = csrf_header(req.headers());
-        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
 
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf) {
-            Ok((cookie, csrf)) => (cookie, csrf),
-            Err(e) => return futures::future::err(e),
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
+            Err(e) => return futures::future::err(e.into()).into(),
         };
 
-        future::ready(
-            check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key())
-                .map_err(|_| {
-                    BasicError::with_message(
-                        StatusCode::UNAUTHORIZED,
-                        "Unauthorized: bad JWT".to_owned(),
-                    )
-                })
-                .and_then(|it| {
-                    it.ok_or_else(|| {
-                        BasicError::with_message(
-                            StatusCode::UNAUTHORIZED,
-                            "Unauthorized: CSRF mismatch".to_owned(),
-                        )
-                    })
-                })
-                .map(Self),
-        )
+        async move {
+            let csrf = csrf;
+            let claims = check_login_token(
+                &db,
+                cookie.value(),
+                &csrf,
+                &settings.token_secret,
+                SessionMask::GENERAL_API,
+            )
+            .await?;
+
+            Ok(Self(claims))
+        }
+        .boxed()
+        .into()
     }
 }
 
@@ -253,6 +161,15 @@ impl Scope for ScopeManageAnimation {
     }
 }
 
+#[derive(Apiv2Schema)]
+pub struct ScopeManageManageEntry;
+
+impl Scope for ScopeManageManageEntry {
+    fn scope() -> UserScope {
+        UserScope::ManageEntry
+    }
+}
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
@@ -262,12 +179,12 @@ impl Scope for ScopeManageAnimation {
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct AuthUserWithScope<S: Scope> {
-    pub claims: AuthClaims,
+pub struct TokenUserWithScope<S: Scope> {
+    pub claims: SessionClaims,
     _phantom: PhantomData<S>,
 }
 
-impl<S: Scope> FromRequest for AuthUserWithScope<S> {
+impl<S: Scope> FromRequest for TokenUserWithScope<S> {
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
@@ -275,37 +192,35 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let cookie = req.cookie(JWT_COOKIE_NAME);
-        let csrf = csrf_header(req.headers());
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
+
         let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf) {
-            Ok((cookie, csrf)) => (cookie, csrf),
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
             Err(e) => return futures::future::err(e.into()).into(),
-        };
-        // get claims and check csrf
-        let claims = check_no_db(cookie.value(), csrf, &settings.jwt_decoding_key())
-            .map_err(|_| BasicError::new(StatusCode::UNAUTHORIZED))
-            .and_then(|it| it.ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED)));
-
-        let claims = match claims {
-            Ok(claims) => claims,
-            Err(e) => return future::err(e.into()).into(),
         };
 
         async move {
+            let csrf = csrf;
+            // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
+            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, SessionMask::GENERAL_API).await?;
+
             let has_scope = sqlx::query!(
-                r#"select exists(select 1 from "user_scope" where user_id = $1 and scope = $2) as "exists!""#,
-                claims.id,
-                S::scope() as i16
+                r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
+                claims.user_id,
+                S::scope() as i16,
+                UserScope::Admin as i16
             )
-            .fetch_one(&db)
+            .fetch_optional(&db)
             .await
-            .map(|it| it.exists)
             .map_err(Into::into)
-            .map_err(crate::error::ise)?;
+            .map_err(crate::error::ise)?.map(|it| it.exists).ok_or_else(|| BasicError::new(StatusCode::FORBIDDEN))?;
 
             if !has_scope {
                 // todo: message for which scope is needed
@@ -322,17 +237,116 @@ impl<S: Scope> FromRequest for AuthUserWithScope<S> {
     }
 }
 
+pub trait SessionMaskRequirement {
+    const REQUIREMENTS: SessionMask;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionPutProfile;
+
+impl SessionMaskRequirement for SessionPutProfile {
+    const REQUIREMENTS: SessionMask = SessionMask::PUT_PROFILE;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionChangePassword;
+
+impl SessionMaskRequirement for SessionChangePassword {
+    const REQUIREMENTS: SessionMask = SessionMask::CHANGE_PASSWORD;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionVerifyEmail;
+
+impl SessionMaskRequirement for SessionVerifyEmail {
+    const REQUIREMENTS: SessionMask = SessionMask::VERIFY_EMAIL;
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionAny;
+
+impl SessionMaskRequirement for SessionAny {
+    const REQUIREMENTS: SessionMask = SessionMask::empty();
+}
+
+#[derive(Apiv2Schema)]
+pub struct SessionDelete;
+
+impl SessionMaskRequirement for SessionDelete {
+    const REQUIREMENTS: SessionMask = SessionMask::DELETE_ACCOUNT;
+}
+
 #[derive(Apiv2Security)]
 #[openapi(
     apiKey,
+    alias = "temporaryApiKey",
     in = "header",
     name = "Authorization",
     description = "Use format 'Bearer TOKEN'"
 )]
 #[repr(transparent)]
-pub struct WrapAuthClaimsCookieDbNoCsrf(pub AuthClaims);
+pub struct TokenSessionOf<S: SessionMaskRequirement> {
+    pub claims: SessionClaims,
+    _phantom: PhantomData<S>,
+}
 
-impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
+impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
+
+        let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
+        let settings = Data::clone(settings);
+
+        let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
+        let db = db.as_ref().clone();
+
+        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
+            Err(e) => return futures::future::err(e.into()).into(),
+        };
+
+        async move {
+            let csrf = csrf;
+            let claims = check_login_token(
+                &db,
+                cookie.value(),
+                &csrf,
+                &settings.token_secret,
+                S::REQUIREMENTS,
+            )
+            .await?;
+
+            Ok(Self {
+                claims,
+                _phantom: PhantomData,
+            })
+        }
+        .boxed()
+        .into()
+    }
+}
+
+#[derive(Apiv2Security)]
+#[openapi(
+    apiKey,
+    alias = "BasicApi",
+    in = "header",
+    name = "Authorization",
+    description = "Use format 'Basic email:password'"
+)]
+pub struct EmailBasicUser {
+    pub id: Uuid,
+    pub registration_status: RegistrationStatus,
+}
+
+impl FromRequest for EmailBasicUser {
     type Error = actix_web::Error;
     type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
     type Config = ();
@@ -342,48 +356,82 @@ impl FromRequest for WrapAuthClaimsCookieDbNoCsrf {
     ) -> Self::Future {
         let db: &Data<PgPool> = req.app_data().unwrap();
         let db = db.as_ref().clone();
-        let settings: &Data<RuntimeSettings> = req.app_data().unwrap();
-        let settings = settings.clone();
 
-        let cookie = match req.cookie(JWT_COOKIE_NAME) {
-            Some(token) => token.to_owned(),
+        let basic = match req.get_header::<Authorization<Basic>>() {
+            Some(basic) => basic.into_scheme(),
+            None => return future::err(BasicError::new(StatusCode::UNAUTHORIZED).into()).into(),
+        };
+
+        let (email, password) = match basic.password() {
+            Some(password) => (Cow::clone(basic.user_id()), Cow::clone(password)),
             None => return future::err(BasicError::new(StatusCode::UNAUTHORIZED).into()).into(),
         };
 
         async move {
-            check_no_csrf(&db, cookie.value(), &settings.jwt_decoding_key())
-                .await
-                .map_err(crate::error::ise)?
-                .map(Self)
-                .ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED).into())
+            let user = sqlx::query!(
+                r#"
+select
+    user_id,
+    password,
+    exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as "has_profile!",
+    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!"
+from user_auth_basic where email = $1::text
+"#,
+                &*email
+            )
+            .fetch_optional(&db)
+            .await
+            .map_err(Into::into)
+            .map_err(crate::error::ise)?;
+
+            actix_web::web::block(move || {
+                let password_hasher = Argon2::default();
+
+                let user = match user {
+                    Some(user) => user,
+                    None => {
+                        let salt = SaltString::generate(thread_rng());
+                        let _ = password_hasher.hash_password(
+                            password.as_bytes(),
+                            None,
+                            None,
+                            crate::ARGON2_DEFAULT_PARAMS,
+                            salt.as_salt(),
+                        );
+
+                        return Err(Either::A(BasicError::new(StatusCode::UNAUTHORIZED)));
+                    }
+                };
+
+                let hash = argon2::PasswordHash::parse(&user.password, Encoding::default())
+                    .map_err(|it| Either::B(anyhow::anyhow!("{}", it)))?;
+
+                password_hasher
+                    .verify_password(password.as_bytes(), &hash)
+                    .map_err(|_| Either::A(BasicError::new(StatusCode::UNAUTHORIZED)))?;
+
+                let registration_status = match (user.has_verified_email, user.has_profile) {
+                    // todo: "???"
+                    (false, _) => return Err(Either::A(BasicError::new(StatusCode::FORBIDDEN))),
+                    // (false, _) => RegistrationStatus::New,
+                    (true, false) => RegistrationStatus::Validated,
+                    (true, true) => RegistrationStatus::Complete,
+                };
+
+                Ok(Self { id: user.user_id, registration_status })
+            })
+            .await
+            .map_err(blocking_error)
         }
         .boxed()
         .into()
     }
 }
 
-pub fn reply_signin_auth(
-    user_id: Uuid,
-    jwt_encoding_key: &EncodingKey,
-    local_insecure: bool,
-) -> anyhow::Result<(String, Cookie<'static>)> {
-    let csrf: String = thread_rng().sample_iter(&Alphanumeric).take(16).collect();
-
-    let claims = AuthClaims {
-        id: user_id,
-        csrf: Some(csrf.clone()),
-    };
-
-    let jwt = jwt::encode(&jwt::Header::default(), &claims, jwt_encoding_key)?;
-
-    let mut cookie = CookieBuilder::new(JWT_COOKIE_NAME, jwt)
-        .http_only(true)
-        .same_site(SameSite::Lax)
-        .max_age(MAX_SIGNIN_COOKIE_DURATION);
-
-    if !local_insecure {
-        cookie = cookie.domain(COOKIE_DOMAIN);
+fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> actix_web::Error {
+    match err {
+        BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
+        BlockingError::Error(Either::B(e)) => crate::error::ise(e),
+        BlockingError::Error(Either::A(e)) => e.into(),
     }
-
-    Ok((csrf, cookie.finish()))
 }

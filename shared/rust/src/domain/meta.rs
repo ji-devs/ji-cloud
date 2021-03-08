@@ -8,35 +8,35 @@ use uuid::Uuid;
 use paperclip::actix::Apiv2Schema;
 
 /// Wrapper type around [`Uuid`], represents [`Style::id`].
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct StyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRangeId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Affiliation::id`].
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AffiliationId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Subject::id`].
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SubjectId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`ContentType::id`].
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

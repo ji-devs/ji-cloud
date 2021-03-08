@@ -7,10 +7,15 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::pages::{
-    container::ContainerPage,
-    categories::CategoriesPage,
-    images::{ImagesPage, PageMode},
+use crate::{
+    categories::dom::CategoriesPage,
+    locale::dom::LocalePage,
+    images::{
+        add::dom::ImageAddPage,
+        meta::dom::ImageMetaPage,
+        search::dom::ImageSearchPage
+    },
+    sidebar::dom::SidebarDom,
 };
 
 pub struct Router {
@@ -20,22 +25,30 @@ impl Router {
     pub fn new() -> Self {
         Self { }
     }
+    pub fn render(&self) -> Dom {
+        html!("empty_fragment", {
+            .child_signal(Self::dom_signal())
+        })
+    }
 
     fn route_signal() -> impl Signal<Item = Route> {
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
     }
 
-    fn signal_dom() -> impl Signal<Item = Option<Dom>> {
+    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
             Self::route_signal()
                 .map(|route| {
                     match route {
-                        Route::Admin(route) => {
-                            match route {
-                                AdminRoute::Categories=> Some(CategoriesPage::render(CategoriesPage::new())),
-                                AdminRoute::ImageAdd => Some(ImagesPage::render(ImagesPage::new(PageMode::Add))),
-                                AdminRoute::ImageEdit(id, query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Edit(id, query)))),
-                                AdminRoute::ImageSearch(query) => Some(ImagesPage::render(ImagesPage::new(PageMode::Search(query)))),
+                        Route::Admin(route_ref) => {
+                            let route = route_ref.clone();
+                            match route_ref {
+                                AdminRoute::Categories=> Some(Self::with_child(route, CategoriesPage::render())),
+                                AdminRoute::Locale => Some(Self::with_child(route, LocalePage::render())),
+                                AdminRoute::ImageAdd => Some(Self::with_child(route, ImageAddPage::render())),
+                                AdminRoute::ImageMeta(id, is_new) => Some(Self::with_child(route, ImageMetaPage::render(id, is_new))),
+                                AdminRoute::ImageSearch(query) => Some(Self::with_child(route, ImageSearchPage::render(query))),
+                                _ => None
                             }
                         }
                         _ => None
@@ -43,10 +56,10 @@ impl Router {
                 })
     }
 
-    pub fn render(&self) -> Dom {
-        ContainerPage::render(ContainerPage::new(),
-            Self::signal_dom(),
-            Self::route_signal()
-        )
+    fn with_child(route: AdminRoute, dom:Dom) -> Dom {
+        html!("admin-shell", { 
+            .child(SidebarDom::render(route))
+            .child(dom)
+        })
     }
 }

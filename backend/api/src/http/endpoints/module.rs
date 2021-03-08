@@ -14,14 +14,14 @@ use sqlx::PgPool;
 
 use crate::{
     db, error,
-    extractor::{AuthUserWithScope, ScopeManageModule, WrapAuthClaimsNoDb},
+    extractor::{ScopeManageModule, TokenUser, TokenUserWithScope},
 };
 
 /// Create a new module.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    _auth: AuthUserWithScope<ScopeManageModule>,
+    _auth: TokenUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
 ) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Server> {
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
@@ -34,7 +34,7 @@ async fn create(
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageModule>,
+    _claims: TokenUserWithScope<ScopeManageModule>,
     path: web::Path<ModuleId>,
 ) -> Result<NoContent, error::Delete> {
     db::module::delete(&*db, path.into_inner()).await?;
@@ -46,7 +46,7 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: AuthUserWithScope<ScopeManageModule>,
+    _claims: TokenUserWithScope<ScopeManageModule>,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<ModuleId>,
 ) -> Result<NoContent, error::NotFound> {
@@ -64,7 +64,7 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     path: web::Path<ModuleId>,
 ) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
     let module = db::module::get(&db, path.into_inner())

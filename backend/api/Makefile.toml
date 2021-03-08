@@ -10,45 +10,28 @@ default_to_workspace = false
 command = "cargo"
 args = ["fetch"]
 
-[tasks.build-api-offline]
-command = "cargo"
-args = ["build", "--offline", "--bin", "ji-cloud-api"]
-dependencies = ["fetch", "check-sqlx"]
-
 [tasks.check-sqlx]
 command = "cargo"
 args = ["sqlx", "prepare", "--check", "--", "--lib"]
+
 
 ###################
 ## Test          ##
 ###################
 
-[tasks.test-cargo]
+[tasks.test]
 command = "cargo"
 args = ["test"]
 dependencies = ["check-sqlx"]
-
-[tasks.test-integration]
-command = "yarn"
-args = ["--cwd", "integration-testing", "test:ava", "--verbose"]
-dependencies = ["build-api-offline"]
-env = { "USE_PG_TMP" = "true" }
-
-[tasks.test]
-run_task = { name = [
-    # we currently don't have any tests ran via cargo, so, save some time.
-    # "test-cargo",
-    "test-integration"
-] }
 
 [tasks.test-watch]
 command = "cargo"
 args = ["watch", "-w", "../../shared/rust", "-w", ".", "-x", "test -- --nocapture"]
 
+
 ###################
 ## Dev           ##
 ###################
-
 
 [tasks.dev-proxy]
 run_task = { name = [ "google-sql-proxy", "server-local-proxy", ], parallel = true }

@@ -15,15 +15,30 @@ macro_rules! into_uuid {
 pub mod admin;
 pub mod animation;
 pub mod audio;
-pub mod auth;
 pub mod category;
 pub mod image;
 pub mod jig;
+pub mod locale;
 pub mod media;
 pub mod meta;
 pub mod search;
 mod ser;
+pub mod session;
 pub mod user;
+
+#[deprecated]
+/// auth types (deprecated)
+pub mod auth {
+
+    #[deprecated]
+    pub use super::session::AUTH_COOKIE_NAME;
+
+    #[deprecated]
+    pub use super::session::CSRF_HEADER_NAME;
+
+    #[deprecated]
+    pub use super::user::PutProfileRequest as RegisterRequest;
+}
 
 use chrono::Utc;
 #[cfg(feature = "backend")]

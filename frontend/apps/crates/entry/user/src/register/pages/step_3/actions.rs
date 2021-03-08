@@ -7,7 +7,8 @@ use shared::{
     api::{ApiEndpoint, endpoints},
     domain::{
         meta::{AgeRangeId, AffiliationId},
-        auth::{RegisterRequest, RegisterSuccess},
+        auth::RegisterRequest,
+        session::CreateSessionSuccess,
     },
     error::auth::RegisterError
 };
@@ -16,7 +17,7 @@ use wasm_bindgen::prelude::*;
 use utils::{
     storage,
     routes::*,
-    fetch::api_with_token
+    fetch::api_with_auth
 };
 
 pub fn submit(state: Rc<State>) {
@@ -40,11 +41,9 @@ pub fn submit(state: Rc<State>) {
 
     let step_2 = state.step_2.clone();
     let step_1 = step_2.step_1;
-    let start = step_1.start;
 
     let req = RegisterRequest {
         username: step_1.username,
-        email: start.email,
         over_18: true,
         given_name: step_1.firstname,
         family_name: step_1.lastname,
@@ -62,31 +61,14 @@ pub fn submit(state: Rc<State>) {
     };
 
 
-    let token = start.token;
-    let email_verified = start.email_verified;
-
     state.register_loader.load(clone!(state => async move {
-        let resp:Result<RegisterSuccess, RegisterError> = api_with_token(&endpoints::user::Register::PATH, &token, endpoints::user::Register::METHOD, Some(req)).await;
+        let resp:Result<CreateSessionSuccess, RegisterError> = api_with_auth(&endpoints::user::Register::PATH, endpoints::user::Register::METHOD, Some(req)).await;
 
         match resp {
-            Ok(resp) => match resp {
-                //This is confusing... we need to confirm email
-                //with both firebase *and* our server??
-                RegisterSuccess::Signin(csrf) => {
-                    if email_verified {
-                        storage::save_csrf_token(&csrf);
-                        let route:String = Route::User(UserRoute::RegisterComplete).into();
-                        dominator::routing::go_to_url(&route);
-                    } else {
-                        let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
-                        dominator::routing::go_to_url(&route);
-                    }
-                },
-                RegisterSuccess::ConfirmEmail => {
-                    let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
-                    dominator::routing::go_to_url(&route);
-                }
-
+            Ok(resp) => {
+                storage::save_csrf_token(&resp.csrf);
+                let route:String = Route::User(UserRoute::RegisterComplete).into();
+                dominator::routing::go_to_url(&route);
             }, 
             Err(err) => {
                 log::error!("unexpected technical error!");

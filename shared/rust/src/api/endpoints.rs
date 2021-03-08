@@ -54,3 +54,9 @@ pub mod audio;
 
 /// Web Media library endpoints
 pub mod media;
+
+/// Session endpoints
+pub mod session;
+
+/// Locale endpoints
+pub mod locale;

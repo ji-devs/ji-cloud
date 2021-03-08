@@ -1,0 +1,8 @@
+---
+source: tests/integration/locale/entry.rs
+expression: body
+
+---
+{
+  "list": []
+}

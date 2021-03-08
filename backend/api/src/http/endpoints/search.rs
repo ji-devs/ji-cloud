@@ -1,7 +1,4 @@
-use crate::{
-    error::{self, ServiceKind},
-    extractor::WrapAuthClaimsNoDb,
-};
+use crate::{error, extractor::TokenUser, service::ServiceData};
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
     api_v2_operation,
@@ -18,12 +15,11 @@ use shared::{
 /// 501: If the server doesn't have algolia enabled, or it doesn't have a key to derive for the frontend.
 #[api_v2_operation]
 async fn create_key(
-    algolia: Data<crate::algolia::Client>,
-    claims: WrapAuthClaimsNoDb,
+    algolia: ServiceData<crate::algolia::SearchKeyStore>,
+    claims: TokenUser,
 ) -> actix_web::Result<CreatedJson<<search::CreateKey as ApiEndpoint>::Res>, error::Service> {
-    let key = algolia
-        .generate_virtual_key(Some(claims.0.id), Some(chrono::Duration::minutes(15)))
-        .ok_or(error::Service::DisabledService(ServiceKind::Algolia))?;
+    let key =
+        algolia.generate_virtual_key(Some(claims.0.user_id), Some(chrono::Duration::minutes(15)));
 
     Ok(CreatedJson(CreateSearchKeyResponse { key: key.0 }))
 }
@@ -32,7 +28,7 @@ async fn create_key(
 #[api_v2_operation]
 pub async fn search_web_images(
     runtime_settings: Data<RuntimeSettings>,
-    _claims: WrapAuthClaimsNoDb,
+    _claims: TokenUser,
     query: Query<<search::WebImageSearch as ApiEndpoint>::Req>,
 ) -> Result<Json<<search::WebImageSearch as ApiEndpoint>::Res>, error::Server> {
     let query = query.into_inner();

@@ -13,7 +13,7 @@
 
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
-use ji_cloud_api::{algolia, db, http, jwkkeys, logger, s3};
+use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
 use std::thread;
 
 #[tokio::main]
@@ -22,23 +22,41 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (runtime_settings, jwk_verifier, s3, algolia_client, algolia_manager, db_pool, _guard) = {
+    let (
+        runtime_settings,
+        s3,
+        algolia_client,
+        algolia_key_store,
+        algolia_manager,
+        db_pool,
+        jwk_verifier,
+        mail_client,
+        _guard,
+    ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
+        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+
         let runtime_settings = settings.runtime_settings().await?;
 
-        let jwk_verifier = jwkkeys::create_verifier(settings.jwk_settings().await?);
-
-        let _ = jwkkeys::run_task(jwk_verifier.clone());
-
-        let s3 = s3::Client::new(settings.s3_settings().await?)?;
+        let s3 = settings
+            .s3_settings()
+            .await?
+            .map(s3::Client::new)
+            .transpose()?;
 
         let algolia_settings = settings.algolia_settings().await?;
 
         let algolia_client = crate::algolia::Client::new(algolia_settings.clone())?;
+
+        let algolia_key_store = algolia_settings
+            .as_ref()
+            .and_then(|it| it.frontend_search_key.clone())
+            .map(crate::algolia::SearchKeyStore::new)
+            .transpose()?;
 
         let db_pool = db::get_pool(
             settings
@@ -49,15 +67,29 @@ async fn main() -> anyhow::Result<()> {
 
         let algolia_manager = crate::algolia::Manager::new(algolia_settings, db_pool.clone())?;
 
-        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        let jwk_verifier = jwk::create_verifier(
+            runtime_settings
+                .google_oauth
+                .as_ref()
+                .map_or_else(String::new, |it| it.client.clone()),
+        );
+
+        let _ = jwk::run_task(jwk_verifier.clone());
+
+        let mail_client = settings
+            .email_client_settings()
+            .await?
+            .map(service::mail::Client::new);
 
         (
             runtime_settings,
-            jwk_verifier,
             s3,
             algolia_client,
+            algolia_key_store,
             algolia_manager,
             db_pool,
+            jwk_verifier,
+            mail_client,
             guard,
         )
     };
@@ -72,8 +104,17 @@ async fn main() -> anyhow::Result<()> {
         let _ = algolia_manager.spawn();
     }
 
-    let handle =
-        thread::spawn(|| http::run(db_pool, runtime_settings, jwk_verifier, s3, algolia_client));
+    let handle = thread::spawn(|| {
+        http::build_and_run(
+            db_pool,
+            runtime_settings,
+            s3,
+            algolia_client,
+            algolia_key_store,
+            jwk_verifier,
+            mail_client,
+        )
+    });
 
     log::info!("app started!");
 

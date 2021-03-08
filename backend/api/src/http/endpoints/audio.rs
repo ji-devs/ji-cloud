@@ -14,7 +14,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 }
 
 pub mod user {
-    use crate::{db, error, extractor::WrapAuthClaimsNoDb, s3};
+    use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
     use futures::TryStreamExt;
     use paperclip::actix::{
         api_v2_operation,
@@ -38,7 +38,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn create(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
     ) -> Result<CreatedJson<<endpoints::audio::user::Create as ApiEndpoint>::Res>, error::NotFound>
     {
         let id = db::audio::user::create(db.as_ref()).await?;
@@ -49,8 +49,8 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        s3: Data<s3::Client>,
-        _claims: WrapAuthClaimsNoDb,
+        s3: ServiceData<s3::Client>,
+        _claims: TokenUser,
         Path(id): Path<AudioId>,
         bytes: Bytes,
     ) -> Result<NoContent, error::Upload> {
@@ -93,9 +93,9 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn delete(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
         req: Path<AudioId>,
-        s3: Data<s3::Client>,
+        s3: ServiceData<s3::Client>,
     ) -> Result<NoContent, error::Delete> {
         let audio = req.into_inner();
         db::audio::user::delete(&db, audio)
@@ -112,7 +112,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn get(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
         req: Path<AudioId>,
     ) -> Result<Json<<endpoints::audio::user::Get as ApiEndpoint>::Res>, error::NotFound> {
         let metadata = db::audio::user::get(&db, req.into_inner())
@@ -126,7 +126,7 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn list(
         db: Data<PgPool>,
-        _claims: WrapAuthClaimsNoDb,
+        _claims: TokenUser,
     ) -> Result<Json<<endpoints::audio::user::List as ApiEndpoint>::Res>, error::Server> {
         let audio_files: Vec<_> = db::audio::user::list(db.as_ref())
             .err_into::<error::Server>()
