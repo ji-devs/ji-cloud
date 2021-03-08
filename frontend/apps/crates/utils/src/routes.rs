@@ -49,7 +49,7 @@ pub enum AdminRoute {
     Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
-    ImageMeta(ImageId, Option<ImageSearchQuery>),
+    ImageMeta(ImageId, bool), //flag is for if it's a new image
 }
 
 #[derive(Debug, Clone)]
@@ -163,16 +163,9 @@ impl Route {
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
-            ["admin", "image-meta", id] => {
-
+            ["admin", "image-meta", id, flag] => {
                 let id = ImageId(Uuid::from_str(id).unwrap_throw());
-
-                if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
-                    Self::Admin(AdminRoute::ImageMeta(id, Some(search)))
-                } else {
-                    Self::Admin(AdminRoute::ImageMeta(id, None))
-                }
+                Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_throw()))
             },
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
@@ -252,17 +245,7 @@ impl From<&Route> for String {
                         }
                     }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
-                    AdminRoute::ImageMeta(id, search) => {
-                        match search {
-                            None => format!("/admin/image-meta/{}", id.0.to_string()),
-                            Some(search) => {
-                                let data = serde_json::to_string(&search).unwrap_throw();
-                                let query = JsonQuery { data };
-                                let query = serde_qs::to_string(&query).unwrap_throw();
-                                format!("/admin/image-meta/{}?{}", id.0.to_string(), query)
-                            }
-                        }
-                    }
+                    AdminRoute::ImageMeta(id, is_new) => format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new),
                 }
             },
             Route::Jig(route) => {

@@ -47,7 +47,7 @@ pub fn on_file(state: Rc<State>, file: File) {
                 let path = endpoints::image::Upload::PATH.replace("{id}",&id.0.to_string());
                 match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
                     Ok(_) => {
-                        let route:String = Route::Admin(AdminRoute::ImageMeta(id, None)).into();
+                        let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
                         dominator::routing::go_to_url(&route);
                     },
                     Err(_) => {

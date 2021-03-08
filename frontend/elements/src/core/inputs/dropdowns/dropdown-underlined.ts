@@ -16,6 +16,7 @@ export class _ extends LitElement {
           transform: rotate(90deg);
       }
       section.options {
+          position: absolute;
           display: none;
           box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
           width: 100%;

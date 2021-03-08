@@ -60,15 +60,18 @@ export class _ extends LitElement {
     @property({type: Boolean})
     hideAdd:boolean = false;
 
+    @property()
+    query:string = "";
+
     render() {
-        const {title, hideAdd} = this;
+        const {title, hideAdd, query} = this;
 
         return html`
             <aside>
                 <div class="title">${title}</div>
                 <div class="right">
                     ${hideAdd ? nothing : html`<button-rect @click=${this.gotoAdd} color="blue" size="small" iconBefore="plus">${STR_ADD}</button-rect>`}
-                    <input-search></input-search>
+                    <input-search .value=${query}></input-search>
                 </div>
             </aside>
             <article>

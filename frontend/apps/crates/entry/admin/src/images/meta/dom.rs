@@ -27,8 +27,8 @@ pub struct ImageMetaPage {
 }
 
 impl ImageMetaPage {
-    pub fn render(id: ImageId, query: Option<ImageSearchQuery>) -> Dom {
-        let state = Rc::new(State::new(id, query));
+    pub fn render(id: ImageId, is_new: bool) -> Dom {
+        let state = Rc::new(State::new(id, is_new));
         
         let initial_data = actions::load_initial(state.clone());
 

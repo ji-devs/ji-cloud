@@ -75,7 +75,7 @@ export class _ extends LitElement {
       const hasSearched = nResults != 0; 
 
     return html`
-        <image-page title="${STR_TITLE}">
+        <image-page title="${STR_TITLE}" .query=${query} >
             <header>
                 <div class="${classMap({resultsText: true, visible: hasSearched})}">
                     ${STR_FOUND_1}<span class="highlight">${nResults}</span>${STR_FOUND_2}<span class="highlight">${query}</span>

@@ -217,7 +217,7 @@ pub struct ImageSearchQuery {
 }
 
 /// Response for successful search.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageSearchResponse {
     /// the images returned.
@@ -231,7 +231,7 @@ pub struct ImageSearchResponse {
 }
 
 /// Response for getting a single image.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageResponse {
     /// The image metadata.

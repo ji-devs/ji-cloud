@@ -39,7 +39,7 @@ impl Router {
                                 AdminRoute::Categories=> Some(CategoriesPage::render()),
                                 AdminRoute::Locale => Some(LocalePage::render()),
                                 AdminRoute::ImageAdd => Some(ImageAddPage::render()),
-                                AdminRoute::ImageMeta(id, query) => Some(ImageMetaPage::render(id, query)),
+                                AdminRoute::ImageMeta(id, is_new) => Some(ImageMetaPage::render(id, is_new)),
                                 AdminRoute::ImageSearch(query) => Some(ImageSearchPage::render(query)),
                                 _ => None
                             }

@@ -1,8 +1,9 @@
 use dominator::{html, Dom, clone};
+use shared::domain::image::{ImageId, ImageSearchQuery};
 use web_sys::HtmlInputElement;
 use std::rc::Rc;
 use super::{actions, state::*};
-use utils::events;
+use utils::{routes::*, events};
 
 pub struct ImageAddPage {
 }
@@ -20,6 +21,21 @@ impl ImageAddPage {
                     }
                 }))
             }))
+            .event(|evt:events::CustomSearch| {
+                let q:String = evt.query();
+                let query = ImageSearchQuery {
+                    q,
+                    page: None, 
+                    styles: Vec::new(),
+                    age_ranges: Vec::new(),
+                    affiliations: Vec::new(),
+                    categories: Vec::new(),
+                    is_premium: None,
+                    is_published: None,
+                };
+                let route:String = Route::Admin(AdminRoute::ImageSearch(Some(query))).into();
+                dominator::routing::go_to_url(&route);
+            })
             .child(html!("input" => HtmlInputElement, {
                 .property("type", "file")
                 .property("accept", "image/*")

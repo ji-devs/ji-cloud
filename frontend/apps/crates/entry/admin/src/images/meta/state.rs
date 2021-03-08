@@ -11,7 +11,6 @@ use std::cell::RefCell;
 
 pub struct State {
     pub id: ImageId, 
-    pub query: Option<ImageSearchQuery>,
     pub section: Mutable<Section>,
     pub loader: AsyncLoader,
     pub loaded: Mutable<bool>,
@@ -20,18 +19,17 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(id: ImageId, query: Option<ImageSearchQuery>) -> Self {
+    pub fn new(id: ImageId, is_new: bool) -> Self {
 
         let section = {
-            if query.is_some() 
-                { Section::Three }
+            if is_new 
+                { Section::One}
             else
-                { Section:: Three}
+                { Section::Three}
         };
 
         Self {
             id,
-            query,
             section: Mutable::new(section),
             loader: AsyncLoader::new(),
             loaded: Mutable::new(false),
