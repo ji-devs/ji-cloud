@@ -58,7 +58,7 @@ cm_run_task build-sandbox
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-releasee
+cm_run_task build-release
 '''
 
 [tasks.local-main]
