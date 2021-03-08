@@ -26,6 +26,7 @@ export class _ extends LitElement {
                 letter-spacing: -0.24px;
                 text-align: left;
                 color: #000000;
+                margin-right: 10px;
             }
 
             .right {

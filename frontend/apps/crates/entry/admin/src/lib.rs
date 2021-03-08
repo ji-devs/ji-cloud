@@ -10,6 +10,7 @@ mod categories;
 mod images;
 mod strings;
 mod locale;
+mod sidebar;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

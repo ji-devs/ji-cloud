@@ -15,6 +15,7 @@ use crate::{
         meta::dom::ImageMetaPage,
         search::dom::ImageSearchPage
     },
+    sidebar::dom::SidebarDom,
 };
 
 pub struct Router {
@@ -23,6 +24,11 @@ pub struct Router {
 impl Router {
     pub fn new() -> Self {
         Self { }
+    }
+    pub fn render(&self) -> Dom {
+        html!("empty_fragment", {
+            .child_signal(Self::dom_signal())
+        })
     }
 
     fn route_signal() -> impl Signal<Item = Route> {
@@ -34,13 +40,14 @@ impl Router {
             Self::route_signal()
                 .map(|route| {
                     match route {
-                        Route::Admin(route) => {
-                            match route {
-                                AdminRoute::Categories=> Some(CategoriesPage::render()),
-                                AdminRoute::Locale => Some(LocalePage::render()),
-                                AdminRoute::ImageAdd => Some(ImageAddPage::render()),
-                                AdminRoute::ImageMeta(id, is_new) => Some(ImageMetaPage::render(id, is_new)),
-                                AdminRoute::ImageSearch(query) => Some(ImageSearchPage::render(query)),
+                        Route::Admin(route_ref) => {
+                            let route = route_ref.clone();
+                            match route_ref {
+                                AdminRoute::Categories=> Some(Self::with_child(route, CategoriesPage::render())),
+                                AdminRoute::Locale => Some(Self::with_child(route, LocalePage::render())),
+                                AdminRoute::ImageAdd => Some(Self::with_child(route, ImageAddPage::render())),
+                                AdminRoute::ImageMeta(id, is_new) => Some(Self::with_child(route, ImageMetaPage::render(id, is_new))),
+                                AdminRoute::ImageSearch(query) => Some(Self::with_child(route, ImageSearchPage::render(query))),
                                 _ => None
                             }
                         }
@@ -49,7 +56,10 @@ impl Router {
                 })
     }
 
-    pub fn render(&self) -> Dom {
-        html!("empty-fragment", { .child_signal(Self::dom_signal()) } )
+    fn with_child(route: AdminRoute, dom:Dom) -> Dom {
+        html!("admin-shell", { 
+            .child(SidebarDom::render(route))
+            .child(dom)
+        })
     }
 }
