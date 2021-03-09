@@ -2,8 +2,8 @@ use super::ApiEndpoint;
 use crate::{
     api::Method,
     domain::image::{
-        CreateResponse, ImageCreateRequest, ImageResponse, ImageSearchQuery, ImageSearchResponse,
-        ImageUpdateRequest,
+        CreateResponse, ImageBrowseQuery, ImageBrowseResponse, ImageCreateRequest, ImageResponse,
+        ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest,
     },
     error::{EmptyError, MetadataNotFound},
 };
@@ -92,6 +92,16 @@ impl ApiEndpoint for Search {
     type Res = ImageSearchResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/image";
+    const METHOD: Method = Method::Get;
+}
+
+/// Browse images.
+pub struct Browse;
+impl ApiEndpoint for Browse {
+    type Req = ImageBrowseQuery;
+    type Res = ImageBrowseResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/image/browse";
     const METHOD: Method = Method::Get;
 }
 
