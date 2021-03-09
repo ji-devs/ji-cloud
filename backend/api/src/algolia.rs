@@ -219,9 +219,10 @@ select id,
            where image_category.image_id = image_metadata.id))                               as "category_names!",
     publish_at,
     is_premium
- from image_metadata
- where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
- limit 100;
+from image_metadata
+where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
+limit 100
+for update skip locked;
      "#, &sync_time
         )
         .fetch(&mut txn)

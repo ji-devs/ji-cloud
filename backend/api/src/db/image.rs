@@ -185,6 +185,41 @@ where id = $1
     .await
 }
 
+pub fn list(
+    db: &PgPool,
+    is_published: Option<bool>,
+    page: i32,
+) -> BoxStream<'_, sqlx::Result<Image>> {
+    sqlx::query_as(
+r#"
+select id,
+       name,
+       description,
+       is_premium,
+       publish_at,
+       created_at,
+       updated_at,
+       array((select row (category_id) from image_category where image_id = id))       as categories,
+       array((select row (style_id) from image_style where image_id = id))             as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+from image_metadata
+where publish_at < now() is not distinct from $1 or $1 is null
+order by coalesce(updated_at, created_at) desc
+limit 20 offset 20 * $2
+"#)
+    .bind(is_published)
+    .bind(page)
+    .fetch(db)
+}
+
+pub async fn filtered_count(db: &PgPool, is_published: Option<bool>) -> sqlx::Result<u64> {
+    sqlx::query!(r#"select count(*) as "count!: i64" from image_metadata where publish_at < now() is not distinct from $1 or $1 is null"#, is_published)
+        .fetch_one(db)
+        .await
+        .map(|it| it.count as u64)
+}
+
 pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Image>> {
     sqlx::query_as(
 r#"
