@@ -10,17 +10,13 @@ use futures_signals::{
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::data::*; 
-use components::image::{
-    search::ImageSearchWidgetDebug, 
-    data::*
-};
 
 pub struct DebugSettings {
     pub data:Option<raw::GameData>,
     pub step:Option<Step>,
     //just used for words and images, but whatever
     pub content_mode: ContentMode,
-    pub image_search: Option<ImageSearchWidgetDebug>,
+    pub image_search: Option<()>,
 }
 
 impl DebugSettings {

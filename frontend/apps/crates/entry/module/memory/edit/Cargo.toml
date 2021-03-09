@@ -17,7 +17,7 @@ crate-type = ["cdylib"]
 [dependencies]
 # Common deps
 app-memory-common = {path = "../_common"}
-once_cell = "1.5.2"
+once_cell = "1.7.2"
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}
@@ -25,9 +25,9 @@ config = {path = "../../../../../../../config/rust"}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-wasm-bindgen = { version = "0.2.69", features = ["nightly"] }
-js-sys = "0.3.46"
-web-sys = { version = "0.3.46", features = [
+wasm-bindgen = { version = "0.2.71", features = ["nightly"] }
+js-sys = "0.3.48"
+web-sys = { version = "0.3.48", features = [
     'Url',
     'Request',
     'RequestInit',
@@ -54,25 +54,24 @@ web-sys = { version = "0.3.46", features = [
     'DomRect',
     'HtmlIFrameElement'
 ] }
-wasm-bindgen-futures = "0.4.19"
-simple-html-template = { version = "0.2.4", features = ["wasm"] }
-htmlescape = "0.3.1"
+wasm-bindgen-futures = "0.4.21"
 dominator = "0.5.14"
 futures-signals = "0.3.16"
 dominator_helpers = "0.6.0"
-serde = { version = "1.0.118", features = ["derive"] }
+serde = { version = "1.0.124", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
-serde_json = "1.0.60"
-futures = "0.3.8"
-log = "0.4.11"
+serde_json = "1.0.64"
+futures = "0.3.13"
+log = "0.4.14"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.6.7", features = ["dom"] }
+awsm_web = { version = "0.16.0", features = ["dom", "loaders"] }
 discard = "1.0.4"
-uuid = { version = "0.8.1", features = ["serde", "wasm-bindgen"] }
-url = "2.2.0"
+uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
+url = "2.2.1"
 gloo = "0.2.1"
-itertools = "0.9.0"
-async-trait = "0.1.42"
+gloo-timers = { version = "0.2.1", features = ["futures"] }
+itertools = "0.10.0"
+async-trait = "0.1.48"
 
 [features]
 default = ["wee_alloc"]
