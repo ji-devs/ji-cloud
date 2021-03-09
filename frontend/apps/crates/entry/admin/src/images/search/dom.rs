@@ -27,6 +27,7 @@ impl ImageSearchPage {
                 .event(clone!(state => move |evt:events::CustomSearch| {
                     let mut query = state.query.lock_mut();
                     query.q = evt.query();
+                    query.page = None;
                 }))
                 .event(|evt:events::CustomRoute| {
                     match evt.route().as_ref() {
@@ -129,6 +130,7 @@ impl FilterDom {
                     .event(clone!(state, _self => move |evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = None;
+                        query.page = None;
                         _self.close_menu();
                     }))
                 }),
@@ -138,6 +140,7 @@ impl FilterDom {
                     .event(clone!(state, _self => move |evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(true);
+                        query.page = None;
                         _self.close_menu();
                     }))
                 }),
@@ -147,6 +150,7 @@ impl FilterDom {
                     .event(clone!(state, _self => move |evt:events::Click| {
                         let mut query = state.query.lock_mut();
                         query.is_published = Some(false);
+                        query.page = None;
                         _self.close_menu();
                     }))
                 }),

@@ -48,7 +48,7 @@ impl Router {
                                 AdminRoute::ImageAdd => Some(Self::with_child(route, ImageAddPage::render())),
                                 AdminRoute::ImageMeta(id, is_new) => Some(Self::with_child(route, ImageMetaPage::render(id, is_new))),
                                 AdminRoute::ImageSearch(query) => Some(Self::with_child(route, ImageSearchPage::render(query))),
-                                _ => None
+                                _ => Some(Self::with_child(route, html!("empty-fragment"))),
                             }
                         }
                         _ => None
