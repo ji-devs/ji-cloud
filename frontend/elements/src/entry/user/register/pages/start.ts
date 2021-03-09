@@ -3,7 +3,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/entry/user/register/widgets/password-strength";
 import { Strength as PasswordStrength } from "@elements/entry/user/register/widgets/password-strength";
 import "@elements/core/dividers/or-divider";
-
+import "@elements/entry/user/_common/base-page";
 const STR_TITLE = "Sign Up";
 
 @customElement("page-register-start")
@@ -11,25 +11,8 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
-        .wrapper {
-          display: flex;
-        }
         .inside-wrapper {
           width: 296px;
-        }
-        .side-image {
-          width: 480px;
-          min-width: 300;
-          min-height: 100vh;
-          background-color: #def4ff;
-          background-image: url("https://i.ibb.co/g9N7MLy/shapes-1.png");
-          background-repeat: no-repeat;
-          background-attachment: inherit;
-          background-position: center;
-        }
-        .content-wrapper {
-          padding: 80px;
-          position: relative;
         }
         h1 {
           font-size: 32px;
@@ -90,9 +73,7 @@ export class _ extends LitElement {
     const { passwordStrength } = this;
 
     return html`
-      <div class="wrapper">
-        <div class="side-image"></div>
-        <div class="content-wrapper">
+        <base-page>
           <h1>${STR_TITLE}</h1>
           <div class="inside-wrapper">
             <slot name="google"></slot>
@@ -109,8 +90,7 @@ export class _ extends LitElement {
             <p></p>
           </div>
           <slot name="footer"></slot>
-        </div>
-      </div>
+      </base-page>
     `;
   }
 }

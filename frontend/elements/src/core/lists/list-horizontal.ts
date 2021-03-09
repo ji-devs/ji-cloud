@@ -4,24 +4,17 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
   static get styles() {
     return [css`
-    main{
-      padding-left: 8px;
-      padding-right: 80px;
-    }
     ul{
       padding-left:0;
       display:flex;
-      margin-bottom:12px;
+      flex-wrap: wrap;
     }
-  ::slotted(*){
-     margin-right:18px;
-}
  
-  p{
-    color: #5590fc;
-    font-weight:500;
-    margin-top:0;
-  }
+      .label {
+        color: #5590fc;
+        font-weight:500;
+        margin-top:0;
+      }
     `];
   }
 
@@ -34,7 +27,7 @@ export class _ extends LitElement {
 
     return html`
     <main>
-    <p>${label}</p>
+    <p class="label">${label}</p>
     <ul>
       <slot></slot>    
     </ul>

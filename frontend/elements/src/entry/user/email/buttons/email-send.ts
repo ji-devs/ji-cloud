@@ -67,7 +67,7 @@ export class _ extends LitElement {
 
 function sent() {
     return html`  <div class="wrapper">
-    <span class="flex items-center font-sans font-normal text-lg"><img-ui path="icon-sent.svg" alt=""></img-ui>${STR_SENT}</span>
+        <span class="flex items-center font-sans font-normal text-lg"><img-ui path="entry/user/email-sent.svg" alt=""></img-ui>${STR_SENT}</span>
 
   </div>`
   
