@@ -45,6 +45,7 @@ pub enum ProfileSection {
 
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
+    Landing,
     Categories,
     Locale,
     ImageSearch(Option<ImageSearchQuery>),
@@ -167,6 +168,7 @@ impl Route {
                 let id = ImageId(Uuid::from_str(id).unwrap_throw());
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_throw()))
             },
+            ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
@@ -231,6 +233,7 @@ impl From<&Route> for String {
             },
             Route::Admin(route) => {
                 match route {
+                    AdminRoute::Landing => "/admin".to_string(),
                     AdminRoute::Locale => "/admin/locale".to_string(),
                     AdminRoute::Categories => "/admin/categories".to_string(),
                     AdminRoute::ImageSearch(search) => {
