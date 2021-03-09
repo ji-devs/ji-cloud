@@ -1,6 +1,7 @@
 import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/dividers/or-divider";
+import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "Login";
 
@@ -9,25 +10,8 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
-        .wrapper {
-          display: flex;
-        }
         .inside-wrapper {
           width: 296px;
-        }
-        .side-image {
-          width: 480px;
-          min-width: 300;
-          min-height: 100vh;
-          background-color: #def4ff;
-          background-image: url("https://i.ibb.co/g9N7MLy/shapes-1.png");
-          background-repeat: no-repeat;
-          background-attachment: inherit;
-          background-position: center;
-        }
-        .content-wrapper {
-          padding: 80px;
-          position: relative;
         }
         h1 {
           font-size: 32px;
@@ -89,10 +73,8 @@ export class _ extends LitElement {
   render() {
 
     
-    return html`
-      <div class="wrapper">
-        <div class="side-image"></div>
-        <div class="content-wrapper">
+      return html`
+          <base-page>
           <h1>${STR_TITLE}</h1>
 
           <div class="inside-wrapper">
@@ -111,8 +93,7 @@ export class _ extends LitElement {
             &nbsp;
             <slot name="register"></slot>
           </div>
-        </div>
-      </div>
+        </base-page>
     `;
   }
 }

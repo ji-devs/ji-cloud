@@ -1,9 +1,9 @@
-import { MEDIA_UI } from "@utils/path";
-import { LitElement, html, css, customElement, property } from "lit-element";
+import { mediaUi } from "@utils/path";
+import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
 import "@elements/core/lists/list-horizontal";
 import "@elements/core/lists/list-vertical";
-import "@elements/core/cards/grey";
 import "@elements/core/titles/ji";
+import "@elements/entry/user/_common/base-page";
 
 const STR_TITLE = "Sign Up - Step 3";
 const STR_SUBTITLE = "We want to tailor the content that you find to your interests and needs.";
@@ -16,39 +16,23 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
-        .wrapper {
-          display: flex;
-        }
-        .inside-wrapper {
-          width: 624px;
-        }
-        .side-image {
-          width: 480px;
-          min-width: 300;
-          min-height: 100vh;
-          background-color: #def4ff;
-          background-image: url("https://i.ibb.co/g9N7MLy/shapes-1.png");
-          background-repeat: no-repeat;
-          background-attachment: inherit;
-          background-position: center;
-        }
-        .content-wrapper {
-          padding: 80px;
-          width: 867px;
-          position: relative;
+        .card-grey {
+            padding: 32px 32px 32px 32px;
+            border-radius: 14px;
+            background-color: #f7f7f7;
         }
         h1 {
           font-size: 32px;
           font-weight: 900;
           color: #5662a3;
         }
-        ::slotted([slot="contact"]) {
-          position: absolute;
-          bottom: 20px;
-        }
 
         .subtitle {
           white-space: nowrap;
+        }
+
+        .submit {
+            align-self: flex-end;
         }
       `,
     ];
@@ -56,28 +40,25 @@ export class _ extends LitElement {
 
   render() {
 
-    return html`
-      <div class="wrapper">
-        <div class="side-image"></div>
-        <div class="content-wrapper">
-          <h1>${STR_TITLE}</h1>
+      return html`
+          <base-page>
+                  <h1>${STR_TITLE}</h1>
 
-          <title-ji class="subtitle" size="subMedium">${STR_SUBTITLE}</title-ji>
-          <title-ji class="subtitle" size="subMedium">${STR_SUBSUBTITLE}</title-ji>
-            <card-grey>
-                <list-horizontal label="${STR_AGES_LABEL}">
-                  <slot name="ages"></slot>
-                </list-horizontal>
-            </card-grey>
-            <card-grey>
-                <list-vertical label="${STR_AFFILIATIONS_LABEL}">
-                  <slot name="affiliations"></slot>
-                </list-vertical>
-            </card-grey>
-          <slot name="main"></slot>
-          <slot name="submit"></slot>
-        </div>
-      </div>
-    `;
+                  <title-ji class="subtitle" size="subMedium">${STR_SUBTITLE}<br/>${STR_SUBSUBTITLE}</title-ji>
+                  <div class="card-grey">
+                      <list-horizontal label="${STR_AGES_LABEL}">
+                          <slot name="ages"></slot>
+                      </list-horizontal>
+                  </div>
+                  <div class="card-grey">
+                      <list-vertical label="${STR_AFFILIATIONS_LABEL}">
+                          <slot name="affiliations"></slot>
+                      </list-vertical>
+                  </div>
+                  <div class="submit">
+                      <slot name="submit"></slot>
+                  </div>
+          </base-page>
+          `;
   }
 }
