@@ -269,6 +269,8 @@ select id,
         .execute(&mut txn)
         .await?;
 
+        txn.commit().await?;
+
         Ok(true)
     }
 }
