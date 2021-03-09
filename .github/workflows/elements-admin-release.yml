@@ -49,7 +49,7 @@ jobs:
         working-directory: "./frontend/elements"
 
       - name: build elements 
-        run: npm run build:sandbox 
+        run: npm run build:release
         working-directory: "./frontend/elements"
         env: 
           APP_NAME: "admin"
