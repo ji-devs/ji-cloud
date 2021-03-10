@@ -39,7 +39,7 @@ Rectangle.argTypes = {
   color: {
     control: {
       type: 'inline-radio',
-      options: ["red", "blue", "green", "white"]
+      options: ["red", "grey", "blue", "green", "white"]
     }
   },
   size: {
@@ -57,7 +57,7 @@ Rectangle.argTypes = {
   iconAfter: {
     control: {
       type: 'inline-radio',
-      options: ["none", "arrow"]
+      options: ["none", "arrow", "done"]
     }
   }
 }

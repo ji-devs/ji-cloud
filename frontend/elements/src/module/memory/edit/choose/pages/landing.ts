@@ -12,6 +12,9 @@ const STR_SUBTITLE = "What do you want to do?";
 export class _ extends LitElement {
   static get styles() {
       return [css`
+          header {
+              margin-left: 116px;
+            }
             .title {
               font-family: Poppins;
               font-size: 40px;
@@ -41,8 +44,10 @@ export class _ extends LitElement {
 
   render() {
       return html`
-          <div class="title">${STR_TITLE}</div>
-          <div class="subtitle">${STR_SUBTITLE}</div>
+          <header>
+              <div class="title">${STR_TITLE}</div>
+              <div class="subtitle">${STR_SUBTITLE}</div>
+          </header>
           <carousel-multi class="carousel">
               <slot></slot>
           </carousel-multi>

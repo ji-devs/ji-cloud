@@ -1,8 +1,13 @@
 /* See https://codepen.io/dakom/pen/WNxYrQM */
 
-import { STAGE_WIDTH, STAGE_HEIGHT, STAGE_PADDING_X_PERC, STAGE_PADDING_Y_PERC } from "@project-config";
-import { LEGACY_STAGE_WIDTH, LEGACY_STAGE_HEIGHT, LEGACY_STAGE_PADDING_X_PERC, LEGACY_STAGE_PADDING_Y_PERC } from "@project-config";
-
+export interface ResizeStageConfig {
+    width: number, 
+    height: number, 
+    paddingX: number, 
+    paddingY: number, 
+    marginX: number, 
+    marginY: number
+}
 export type OnResize = (info:ResizeInfo) => any;
 
 export interface ResizeInfo {
@@ -58,28 +63,14 @@ type ResizeObserver = any;
 type ReturnTuple = [ResizeObserver, CancelFn];
 
 export interface Options {
+    stage: ResizeStageConfig,
     container?: Element | null,
     observeTargets?: Array<Element | null | undefined>,
     ignoreWindow?: boolean,
-    isLegacy?: boolean,
-    adjustBounds?: (rect:DOMRect) => DOMRect
+    adjustBounds?: (rect:DOMRect) => DOMRect,
 }
 
-export function startResizer({container, ignoreWindow, observeTargets, adjustBounds, isLegacy}:Options, onResize: OnResize):ReturnTuple {
-    const stage = isLegacy 
-        ? {
-            width: LEGACY_STAGE_WIDTH, 
-            height: LEGACY_STAGE_HEIGHT, 
-            paddingX: LEGACY_STAGE_PADDING_X_PERC, 
-            paddingY: LEGACY_STAGE_PADDING_Y_PERC
-        }
-        : {
-            width: STAGE_WIDTH, 
-            height: STAGE_HEIGHT, 
-            paddingX: STAGE_PADDING_X_PERC, 
-            paddingY: STAGE_PADDING_Y_PERC
-        }
-    console.log(stage);
+export function startResizer({container, ignoreWindow, observeTargets, adjustBounds, stage}:Options, onResize: OnResize):ReturnTuple {
     let lastInfo:ResizeInfo = {
         scale: 0,
         x: 0,
@@ -101,8 +92,14 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             return;
         }
 
-        const bounds = adjustBounds ? adjustBounds(containerBounds) : containerBounds;
+        let bounds = adjustBounds ? adjustBounds(containerBounds) : containerBounds;
 
+        bounds = new DOMRect(
+            bounds.x + stage.marginX, 
+            bounds.y + stage.marginY,
+            bounds.width - (stage.marginX * 2),
+            bounds.height - (stage.marginY * 2)
+        );
         const targetRatio = stage.width / stage.height;
 
         let width = bounds.width;
@@ -126,11 +123,13 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             y,
             width,
             height,
-            contentX: (stage.paddingX / 2) * width,
-            contentY: (stage.paddingY / 2) * height,
-            contentWidth: width - (stage.paddingX * width),
-            contentHeight: height - (stage.paddingY * height)
+            contentX: stage.paddingX,
+            contentY: stage.paddingY,
+            contentWidth: width - (stage.paddingX * 2),
+            contentHeight: height - (stage.paddingY * 2)
         };
+
+        console.log(info);
 
         if(!sizeEqual(info, lastInfo)) {
             onResize(info);

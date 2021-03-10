@@ -15,14 +15,8 @@ export class _ extends BaseButton {
         div {
           cursor: pointer;
         }
-        .small {
-          padding: 0;
-        }
-        .padding-medium {
-          padding: 13.6px 24px 11.4px;
-        }
-        .padding-large {
-          padding: 15px 40px 16px;
+        .medium {
+            font-size: 16px;
         }
 
         .red {

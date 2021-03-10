@@ -13,13 +13,16 @@ const STR_LETTERING = "Lettering";
 export class _ extends LitElement {
   static get styles() {
       return [css`
-          :host {
-              display: block;
+        section {
+          display: flex;
           width: 389px;
           height: 387px;
           border-radius: 24px;
           background-color: #c8defd;
           cursor: pointer;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
         }
 
 
@@ -51,7 +54,8 @@ export class _ extends LitElement {
 
       return html`
           <section>
-            <div class="label">${label}</div>  
+              <div class="label">${label}</div>  
+              <img-ui class="image" path="module/memory/${mode}.png" alt="${label}"></img-ui>
           </section>
       `
   }

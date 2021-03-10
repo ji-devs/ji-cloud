@@ -3,10 +3,10 @@ import { classMap } from 'lit-html/directives/class-map';
 import { nothing} from 'lit-html';
 import {BaseButton} from "@elements/_styles/buttons";
 
-export type Color = "red" | "blue" | "white" | "green" | "whiteblue";
+export type Color = "grey" | "red" | "blue" | "white" | "green" | "whiteblue";
 export type Size = "small" | "medium" | "large" | "x-large";
 
-export type IconAfter = "arrow";
+export type IconAfter = "arrow" | "done";
 export type IconBefore = "magnifier" | "share" | "create" | "play" | "plus";
 
 @customElement("button-rect")
@@ -22,6 +22,10 @@ export class _ extends BaseButton {
           display: flex;
           align-items: center;
         }
+        .small {
+        padding: 8px 21px 8px 24px;
+       
+      }
         .medium {
           padding: 13.6px 24px 11.4px;
       }
@@ -46,6 +50,11 @@ export class _ extends BaseButton {
       
       .blue:hover{
         background: #387af4
+      }
+
+      .grey{
+          background-color: var(--Light_Gray_4);
+          color: white;
       }
       
       button:disabled{
@@ -134,8 +143,9 @@ export class _ extends BaseButton {
         : iconBefore === "play" ? `core/buttons/rect/play-${color}.svg`
         : iconBefore === "plus" ? getPlus(color)
         : nothing;
-    const iconAfterPath = iconAfter === "arrow" ? "core/buttons/rect/arrow-right.svg"
-      : "";
+    const iconAfterPath = iconAfter === "arrow" ? getArrow(color) 
+        : iconAfter === "done" ? "core/buttons/rect/done-check.svg"
+        : "";
 
     return html`
       <button type="button" name="button" class="${classes}" >
@@ -150,4 +160,9 @@ export class _ extends BaseButton {
 function getPlus(color:Color) {
   return color === "blue" ? "core/inputs/plus-white.svg"
     : nothing;
+}
+
+function getArrow(color:Color) {
+    return color === "grey" ? "core/buttons/rect/arrow-right-white.svg"
+     :  "core/buttons/rect/arrow-right-yellow.svg";
 }

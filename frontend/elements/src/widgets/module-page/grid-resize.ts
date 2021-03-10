@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { nothing } from "lit-html";
 import { BgBlue } from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
+import {STAGE, STAGE_LEGACY} from "@project-config";
 
 @customElement('module-page-grid-resize')
 export class _ extends BgBlue {
@@ -51,10 +52,10 @@ export class _ extends BgBlue {
             display: grid;
 
             grid-template-areas:
-                        "sidebar header"
-                        "sidebar main"
-                        "sidebar footer";
-            grid-template-columns: auto 1fr;
+                        "sidebar fillLeft header fillRight"
+                        "sidebar fillLeft main fillRight"
+                        "sidebar fillLeft footer fillRight";
+            grid-template-columns: auto 40px 1fr 40px;
             grid-template-rows: auto 1fr auto;
             height: 100%;
             width: 100%;
@@ -83,6 +84,7 @@ export class _ extends BgBlue {
             grid-area: footer;
             z-index: 1;
         }
+
     `];
     }
 
@@ -100,6 +102,7 @@ export class _ extends BgBlue {
         const footer = shadowRoot.querySelector("footer") as HTMLElement;
 
         const [_, cancelResize] = startResizer({
+            stage: this.legacy ? STAGE_LEGACY : STAGE,
             observeTargets: [sidebar, header, footer],
             adjustBounds: (bounds: DOMRect) => {
                 const sidebarBounds = sidebar.getBoundingClientRect();
@@ -112,7 +115,6 @@ export class _ extends BgBlue {
                     bounds.height - (headerBounds.height + footerBounds.height)
                 );
             },
-            isLegacy: this.legacy
         }, (info) => {
             setResizeOnDocumentRoot(info);
             this.dispatchEvent(new CustomEvent('module-resize', {
