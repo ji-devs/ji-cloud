@@ -6,3 +6,4 @@
 
 pub mod module;
 //pub mod image;
+pub mod color_select;
