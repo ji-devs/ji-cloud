@@ -10,7 +10,7 @@ import {argsToAttrs} from "@utils/attributes";
 
 
 export default {
-  title: 'Entry/Admin/Locale',
+  title: 'Entry/Admin/Locale/pages',
 }
 
 interface Args {

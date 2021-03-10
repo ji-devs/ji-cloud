@@ -3,7 +3,7 @@ import {argsToAttrs} from "@utils/attributes";
 
 
 export default {
-  title: 'Entry/Admin/locale-cell-header',
+  title: 'Entry/Admin/Locale',
 }
 
 interface Args {
