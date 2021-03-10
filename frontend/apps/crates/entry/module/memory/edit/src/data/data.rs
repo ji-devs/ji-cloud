@@ -13,10 +13,10 @@ use super::raw;
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
+use crate::index::state::State as IndexState;
 
 pub struct State {
-    pub jig_id: String,
-    pub module_id: String,
+    pub index: Rc<IndexState>,
     pub game_mode: Mutable<Option<GameMode>>,
     pub pairs: MutableVec<(Card, Card)>,
     pub step: Mutable<Step>,
@@ -81,7 +81,7 @@ pub enum CardMode {
 }
 
 impl State {
-    pub fn new(jig_id:String, module_id: String, raw_data:Option<raw::GameData>) -> Rc<Self> {
+    pub fn new(index: Rc<IndexState>, raw_data:Option<raw::GameData>) -> Self {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
@@ -103,16 +103,15 @@ impl State {
             }
         };
 
-        Rc::new(Self {
-            jig_id,
-            module_id,
+        Self {
+            index,
             game_mode: Mutable::new(game_mode),
             pairs: MutableVec::new_with_values(pairs),
             step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
             theme_id: Mutable::new(theme_id),
             first_text: RefCell::new(true),
             content_mode: Mutable::new(debug::settings().content_mode)
-        })
+        }
     }
 
     pub fn to_raw(&self) -> raw::GameData {

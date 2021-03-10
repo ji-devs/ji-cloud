@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameData {
     pub mode: Mode,
     pub pairs: Vec<(Card, Card)>,
@@ -17,6 +17,14 @@ impl GameData {
     pub async fn load(jig_id:String, module_id:String) -> Result<Self, ()> {
         //TODO - load
         Err(())
+    }
+    pub fn new_duplicate() -> Self 
+    {
+        Self {
+            mode: Mode::Duplicate,
+            pairs: Vec::new(), 
+            theme_id: "".to_string()
+        }
     }
 
     pub fn duplicate_debug<I, S>(words:I, theme_id: String) -> Self 
