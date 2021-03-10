@@ -17,8 +17,8 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{
-            CreateResponse, Image, ImageId, ImageKind, ImageResponse, ImageSearchResponse,
-            ImageUpdateRequest,
+            CreateResponse, Image, ImageBrowseResponse, ImageId, ImageKind, ImageResponse,
+            ImageSearchResponse, ImageUpdateRequest,
         },
         meta::MetaKind,
     },
@@ -336,6 +336,35 @@ async fn search(
     }))
 }
 
+#[api_v2_operation]
+async fn browse(
+    db: Data<PgPool>,
+    _claims: TokenUserWithScope<ScopeManageImage>,
+    query: Option<Query<<endpoints::image::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<endpoints::image::Browse as ApiEndpoint>::Res>, error::Server> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let images: Vec<_> = db::image::list(
+        db.as_ref(),
+        query.is_published,
+        query.page.unwrap_or(0) as i32,
+    )
+    .err_into::<error::Server>()
+    .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
+    .try_collect()
+    .await?;
+
+    let total_count = db::image::filtered_count(db.as_ref(), query.is_published).await?;
+
+    let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
+
+    Ok(Json(ImageBrowseResponse {
+        images,
+        pages,
+        total_image_count: total_count,
+    }))
+}
+
 /// Update an image in the global image library.
 #[api_v2_operation]
 async fn update(
@@ -430,6 +459,10 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::Search::PATH,
         image::Search::METHOD.route().to(search),
+    )
+    .route(
+        image::Browse::PATH,
+        image::Browse::METHOD.route().to(browse),
     )
     .route(
         image::UpdateMetadata::PATH,

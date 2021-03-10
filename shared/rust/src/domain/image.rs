@@ -230,6 +230,36 @@ pub struct ImageSearchResponse {
     pub total_image_count: u64,
 }
 
+/// Query for [`Browse`](crate::api::endpoints::image::Browse).
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub struct ImageBrowseQuery {
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
+
+    /// The page number of the images to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+}
+/// Response for [`Browse`](crate::api::endpoints::image::Browse).
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub struct ImageBrowseResponse {
+    /// the images returned.
+    pub images: Vec<ImageResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of images found
+    pub total_image_count: u64,
+}
+
 /// Response for getting a single image.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
