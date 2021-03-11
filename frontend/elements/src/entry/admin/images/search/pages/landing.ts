@@ -57,7 +57,7 @@ export class _ extends LitElement {
           .highlight:after { content: "\\00a0 "; }
 
           .publish-filter {
-              width: 200px;
+              --width: 200px;
           }
     `];
   }

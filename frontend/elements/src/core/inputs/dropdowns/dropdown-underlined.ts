@@ -1,11 +1,17 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
+//Requires passing a css var of --width
+
 @customElement("dropdown-underlined")
 export class _ extends LitElement {
   static get styles() {
     return [
-      css`
+        css`
+            :host {
+                display: block;
+                width: var(--width);
+            }
       section.selected {
           display: flex;
           justify-content: space-between;
@@ -19,10 +25,11 @@ export class _ extends LitElement {
           position: absolute;
           display: none;
           box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-          width: 100%;
+          width: var(--width);
           border-radius: 0 0 14px 14px;
           padding-top: 10px;
           cursor: pointer;
+          background-color: white;
       }
       section.options.open {
           display: flex;
