@@ -2,6 +2,8 @@ import { LitElement, html, css, customElement, property} from 'lit-element';
 import {nothing} from "lit-html";
 import {BgBlue} from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
+import {STAGE, STAGE_LEGACY} from "@project-config";
+
 @customElement('module-page-iframe')
 export class _ extends BgBlue {
     private cancelResize: (() => any) | null = null;
@@ -51,15 +53,21 @@ export class _ extends BgBlue {
     @property({ type: Boolean })
     scrollable: boolean = false;
 
+    @property({ type: Boolean })
+    legacy: boolean = false;
+
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
 
-        const [_, cancelResize] = startResizer({}, (info) => {
-            setResizeOnDocumentRoot(info);
-            this.dispatchEvent(new CustomEvent('module-resize', {
-                detail: info
-            }));
-        });
+        const [_, cancelResize] = startResizer(
+            {
+                stage: this.legacy ? STAGE_LEGACY : STAGE,
+            }, (info) => {
+                setResizeOnDocumentRoot(info);
+                this.dispatchEvent(new CustomEvent('module-resize', {
+                    detail: info
+                }));
+            });
 
         this.cancelResize = cancelResize;
     }
