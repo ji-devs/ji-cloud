@@ -24,4 +24,4 @@ export const Header = (props?:Partial<Args>) => {
     </module-header>`
 }
 
-Header.Args = DEFAULT_ARGS;
+Header.args = DEFAULT_ARGS;

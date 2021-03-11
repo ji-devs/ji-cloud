@@ -35,4 +35,4 @@ export const SingleList = (props?:Partial<Args>) => {
     </sidebar-widget-single-list>`
 }
 
-SingleList.Args = DEFAULT_ARGS;
+SingleList.args = DEFAULT_ARGS;

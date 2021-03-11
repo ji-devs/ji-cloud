@@ -22,7 +22,7 @@ export const Card = (props?:Partial<Args>) => {
     `;
 }
 
-Card.Args = DEFAULT_ARGS;
+Card.args = DEFAULT_ARGS;
 Card.argTypes = {
     mode: {
         control: {

@@ -19,4 +19,4 @@ export const Header = (props?:Partial<Args>) => {
     return CommonHeader({title: STR_TITLE});
 }
 
-Header.Args = DEFAULT_ARGS;
+Header.args = DEFAULT_ARGS;

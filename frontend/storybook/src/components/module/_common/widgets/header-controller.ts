@@ -20,4 +20,4 @@ export const HeaderController = (props?:Partial<Args>) => {
     </module-header-controller>`
 }
 
-HeaderController.Args = DEFAULT_ARGS;
+HeaderController.args = DEFAULT_ARGS;

@@ -28,4 +28,4 @@ export const Duplicate = (props?:Partial<Args>) => {
     </step1-sidebar-duplicate>`
 }
 
-Duplicate.Args = DEFAULT_ARGS;
+Duplicate.args = DEFAULT_ARGS;

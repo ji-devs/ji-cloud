@@ -22,4 +22,4 @@ export const Footer = (props?:Partial<Args>) => {
     </module-footer>`
 }
 
-Footer.Args = DEFAULT_ARGS;
+Footer.args = DEFAULT_ARGS;
