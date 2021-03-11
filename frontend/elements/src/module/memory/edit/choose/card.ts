@@ -1,8 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-
-export type MODE = "duplicate" | "words-images" | "begins" | "lettering";
+import {MODE} from "@elements/module/memory/_common/types.ts";
 
 const STR_DUPLICATE = "Duplicate";
 const STR_WORDS_IMAGES = "Words & Images";
@@ -55,7 +54,7 @@ export class _ extends LitElement {
       return html`
           <section>
               <div class="label">${label}</div>  
-              <img-ui class="image" path="module/memory/${mode}.png" alt="${label}"></img-ui>
+              <img-ui class="image" path="module/memory/choose/${mode}.png" alt="${label}"></img-ui>
           </section>
       `
   }

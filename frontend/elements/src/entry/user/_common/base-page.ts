@@ -1,7 +1,7 @@
 import { mediaUi } from "@utils/path";
 import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
 
-const jigglingImage = mediaUi('/entry/user/jigglings.png');
+const jigglingImage = mediaUi('entry/user/jigglings.png');
 
 @customElement("base-page")
 export class _ extends LitElement {

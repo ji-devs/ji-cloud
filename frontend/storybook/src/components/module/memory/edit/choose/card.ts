@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/memory/edit/choose/card";
-import {MODE} from "@elements/module/memory/edit/choose/card";
+import {MODE} from "@elements/module/memory/_common/types.ts";
 
 export default {
     title: "Module / Memory / Edit / Choose"
