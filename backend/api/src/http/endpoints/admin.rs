@@ -25,8 +25,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    db,
-    error::{self, ServiceKind},
+    db, error,
     extractor::{ScopeAdmin, TokenUserWithScope},
     image_ops::{regenerate_images, MediaKind},
     s3,
@@ -114,12 +113,12 @@ async fn refresh_image_files(
         .map(|it| (it.uploaded_at, ImageKind::Sticker)),
 
         MediaLibrary::Global => sqlx::query!(
-            r#"select uploaded_at, kind as "kind: ImageKind" from image_metadata where id = $1 for update"#,
+            r#"select uploaded_at from image_upload where image_id = $1 for update"#,
             id
         )
         .fetch_optional(&mut txn)
         .await?
-        .map(|it| (it.uploaded_at, it.kind)),
+        .map(|it| (it.uploaded_at, ImageKind::Sticker)),
     };
 
     let (uploaded_at, kind): (Option<DateTime<Utc>>, ImageKind) =
@@ -132,13 +131,11 @@ async fn refresh_image_files(
             let uploaded_at = match uploaded_at {
                 Some(uploaded_at) => EntityTag::strong(uploaded_at.timestamp_nanos().to_string()),
                 None => {
-                    eprintln!("missing uploaded at");
                     return Err(error::Refresh::PreconditionFailed);
                 }
             };
 
             if !items.iter().any(|item| item.strong_eq(&uploaded_at)) {
-                eprintln!("mismatch {:?}", items);
                 return Err(error::Refresh::PreconditionFailed);
             }
 
@@ -146,7 +143,6 @@ async fn refresh_image_files(
         }
 
         Some(IfMatch::Any) if !uploaded_at.is_some() => {
-            eprintln!("missing uploaded at");
             return Err(error::Refresh::PreconditionFailed);
         }
 
@@ -158,7 +154,6 @@ async fn refresh_image_files(
             if let Some(uploaded_at) = uploaded_at {
                 let uploaded_at = EntityTag::strong(uploaded_at.timestamp_nanos().to_string());
                 if items.iter().any(|item| item.strong_eq(&uploaded_at)) {
-                    eprintln!("match {:?}", items);
                     return Err(error::Refresh::PreconditionFailed);
                 }
             }
@@ -167,7 +162,6 @@ async fn refresh_image_files(
         }
 
         Some(IfNoneMatch::Any) if uploaded_at.is_some() => {
-            eprintln!("uploaded at");
             return Err(error::Refresh::PreconditionFailed);
         }
 
@@ -178,8 +172,15 @@ async fn refresh_image_files(
     let original = s3
         .download_media_file(library, id, FileKind::ImagePng(PngImageFile::Original))
         .await?
-        .ok_or(error::Refresh::DisabledService(ServiceKind::S3))?
         .ok_or(error::Refresh::ResourceNotFound)?;
+
+    if matches!(library, MediaLibrary::Global) {
+        sqlx::query!("update image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
+            .execute(&mut txn)
+            .await?;
+
+        return Ok(NoContent);
+    }
 
     let (resized, thumbnail) = actix_web::web::block(move || -> Result<_, error::Refresh> {
         let original = image::load_from_memory(&original)?;
@@ -211,12 +212,7 @@ async fn refresh_image_files(
             .execute(&mut txn)
             .await?,
 
-            MediaLibrary::Global => sqlx::query!(
-                "update image_metadata set uploaded_at = now(), updated_at = now() where id = $1",
-                id
-            )
-            .execute(&mut txn)
-            .await?,
+            MediaLibrary::Global => unreachable!(),
         };
 
     txn.commit().await?;

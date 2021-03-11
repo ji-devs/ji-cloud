@@ -140,7 +140,7 @@ impl Client {
         library: MediaLibrary,
         id: Uuid,
         file_kind: FileKind,
-    ) -> anyhow::Result<Option<Option<Vec<u8>>>> {
+    ) -> anyhow::Result<Option<Vec<u8>>> {
         let resp = self
             .client
             .get_object(GetObjectRequest {
@@ -152,7 +152,7 @@ impl Client {
 
         let resp = match resp {
             Ok(resp) => resp,
-            Err(RusotoError::Service(GetObjectError::NoSuchKey(_))) => return Ok(Some(None)),
+            Err(RusotoError::Service(GetObjectError::NoSuchKey(_))) => return Ok(None),
             Err(e) => return Err(e.into()),
         };
 
@@ -164,6 +164,6 @@ impl Client {
             .read_to_end(&mut body)
             .await?;
 
-        Ok(Some(Some(body)))
+        Ok(Some(body))
     }
 }

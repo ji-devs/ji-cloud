@@ -192,7 +192,6 @@ impl Into<actix_web::Error> for ServiceSession {
 #[derive(Debug)]
 pub enum Refresh {
     InternalServerError(anyhow::Error),
-    DisabledService(ServiceKind),
     PreconditionFailed,
     ResourceNotFound,
 }
@@ -207,7 +206,6 @@ impl Into<actix_web::Error> for Refresh {
     fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
-            Self::DisabledService(s) => s.into(),
             Self::PreconditionFailed => {
                 BasicError::new(http::StatusCode::PRECONDITION_FAILED).into()
             }
