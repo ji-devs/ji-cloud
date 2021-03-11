@@ -10,6 +10,7 @@ select id as "id!",
     uploaded_at,
     0::int2 as "library!: MediaLibrary" -- global
 from image_metadata
+left join image_upload on image_id = id
 union all
 select id as "id!",
     case variant
