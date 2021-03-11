@@ -32,9 +32,6 @@ export class _ extends LitElement {
           color: var(--Light_Blue_5);
           }
 
-          .btn-done {
-            align-self: flex-end;
-          }
 
     `];
   }
@@ -54,10 +51,6 @@ export class _ extends LitElement {
                   <slot name="input-widget">
                   </slot>
                   <div class="input-footer">${STR_INPUT_FOOTER}</div>
-              </div>
-              <div class="btn-done">
-                  <slot name="btn-done">
-                  </slot>
               </div>
           </section>
       `

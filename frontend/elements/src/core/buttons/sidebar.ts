@@ -25,10 +25,14 @@ export class _ extends LitElement {
         }
         .keyboard {
             display: flex;
-            align-items: end;
+            align-items: center;
             justify-content: center;
             gap: 15px;
             margin: 0 20px;
+        }
+
+        .keyboard > img-ui {
+            margin-top: 5px;
         }
 
         .dicta {

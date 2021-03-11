@@ -10,7 +10,7 @@ export class _ extends LitElement {
       return [css`
           :host {
               display: block;
-          width: 492px;
+          width: calc(100% - 4px);
           border-radius: 16px;
           border: solid 2px var(--Light_Blue_4);
           background-color: var(--white);

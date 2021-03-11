@@ -4,7 +4,7 @@ import {nothing} from "lit-html";
 
 const STR_EMPTY = "No preview yet";
 
-@customElement('step1-main-duplicate')
+@customElement('module-main-empty')
 export class _ extends LitElement {
   static get styles() {
       return [css`
@@ -15,13 +15,19 @@ export class _ extends LitElement {
               justify-content: center;
               align-items: center;
           }
+          section.empty {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+          }
     `];
   }
 
   render() {
       return html`
           <section class="empty">
-              Cards here..
+              <img-ui path="module/_common/main/empty.svg"></img-ui>
+              <div class="label">${STR_EMPTY}</div>
           </section>
       `
   }

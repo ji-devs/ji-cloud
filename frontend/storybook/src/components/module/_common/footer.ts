@@ -1,7 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/memory/edit/steps/_common/footer";
+import "@elements/module/_common/footer";
 export default {
-    title: "Module / Memory / Edit / Steps"
+    title: "Module / _common"
 }
 
 const STR_CONTINUE = "Continue";
@@ -16,10 +16,10 @@ export const Footer = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 
-    return `<steps-footer slot="footer">
+    return `<module-footer slot="footer">
 
         <button-rect color="grey" size="small" iconAfter="arrow" slot="btn">${STR_CONTINUE}</button-rect>
-    </steps-footer>`
+    </module-footer>`
 }
 
 Footer.Args = DEFAULT_ARGS;

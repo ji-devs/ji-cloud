@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 
-@customElement('steps-sidebar')
+@customElement('module-sidebar')
 export class _ extends LitElement {
   static get styles() {
       return [css`
@@ -20,9 +20,21 @@ export class _ extends LitElement {
               padding-right: 50px;
           }
           article {
-              padding: 0 32px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              width: 100%;
               height: 100%;
               overflow-y: auto;
+          }
+
+          .content, .btn {
+              width: 492px;
+          }
+          .btn {
+              display: flex;
+              justify-content: flex-end;
+              padding-bottom: 40px;
           }
     `];
   }
@@ -33,8 +45,14 @@ export class _ extends LitElement {
               <slot name="nav"></slot>
           </div>
           <article>
-              <slot><slot>
-            </article>
+              <div class="content">
+                  <slot name="content"></slot>
+              </div>
+              <div class="btn">
+                  <slot name="btn"></slot>
+              </div>
+          </article>
+
       `
   }
 }
