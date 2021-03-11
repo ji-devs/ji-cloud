@@ -1,5 +1,7 @@
 pub mod mail;
 
+pub mod uploads;
+
 use std::{
     future::{ready, Ready},
     ops::Deref,

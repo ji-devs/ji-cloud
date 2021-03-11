@@ -2,7 +2,6 @@ use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
-    image_ops::generate_images,
     s3,
     service::ServiceData,
 };
@@ -76,29 +75,30 @@ async fn upload(
 ) -> Result<NoContent, error::Upload> {
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
-        r#"select kind as "kind: ImageKind" from image_metadata where id = $1 for update"#,
+    // fixme: don't bother with this query, just create the `image_upload` when the image is created.
+
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
         id.0
     )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::Upload::ResourceNotFound)?
-    .kind;
+    .fetch_one(&mut txn)
+    .await?.exists;
 
-    let (original, resized, thumbnail) =
-        actix_web::web::block(move || -> Result<_, error::Upload> {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-            Ok(generate_images(&original, kind)?)
-        })
-        .await
-        .map_err(error::Upload::blocking_error)?;
+    if !exists {
+        return Err(error::Upload::ResourceNotFound);
+    }
 
-    s3.upload_png_images(MediaLibrary::Global, id.0, original, resized, thumbnail)
-        .await?;
+    // todo: ferry the data more efficently?
+    s3.upload_media(
+        bytes.to_vec(),
+        MediaLibrary::Global,
+        id.0,
+        FileKind::ImagePng(PngImageFile::Original),
+    )
+    .await?;
 
     sqlx::query!(
-        "update image_metadata set uploaded_at = now() where id = $1",
+        "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
         id.0
     )
     .execute(&mut txn)
@@ -282,14 +282,14 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
             .route(image::Upload::METHOD.route().to(upload)),
     )
-    .route(
-        image::Browse::PATH,
-        image::Browse::METHOD.route().to(browse),
-    )
     .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
         image::Search::PATH,
         image::Search::METHOD.route().to(search),
+    )
+    .route(
+        image::Browse::PATH,
+        image::Browse::METHOD.route().to(browse),
     )
     .route(
         image::UpdateMetadata::PATH,
