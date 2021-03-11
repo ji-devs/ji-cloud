@@ -5,7 +5,7 @@ import {argsToAttrs} from "@utils/attributes";
 
 
 export default {
-  title: 'Entry/Admin/select-columns',
+  title: 'Entry/Admin/Locale',
 }
 
 interface Args {
