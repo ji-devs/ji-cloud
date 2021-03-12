@@ -68,6 +68,7 @@ gloo-timers = { version = "0.2.1", features = ["futures"] }
 jsonwebtoken = "7.2.0"
 chrono = { version = "0.4.19", features = ["serde"] }
 chrono-tz = { version = "0.5.3", features = ["serde"] }
+zxcvbn = "2"
 
 [features]
 default = ["wee_alloc"]

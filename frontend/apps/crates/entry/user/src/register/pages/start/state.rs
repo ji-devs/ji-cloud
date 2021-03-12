@@ -2,6 +2,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Signal, Mutable, SignalExt};
 use std::cell::RefCell;
 use crate::register::state::Step;
+use zxcvbn::Entropy;
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -17,7 +18,7 @@ impl State {
     pub fn new(step: Mutable<Step>) -> Self {
         Self {
             loader: AsyncLoader::new(),
-            password_strength: Mutable::new(PasswordStrength::Weak),
+            password_strength: Mutable::new(PasswordStrength::None),
             email: RefCell::new("".to_string()),
             email_status: Mutable::new(None),
             password: RefCell::new("".to_string()),
@@ -75,6 +76,19 @@ impl PasswordStrength {
             Self::Weak => "weak",
             Self::Average => "average",
             Self::Strong => "strong",
+        }
+    }
+}
+
+impl From<Entropy> for PasswordStrength {
+    fn from(entropy:Entropy) -> Self {
+        let score = entropy.score();
+        if score < 2 {
+            Self::Weak
+        } else if score < 4 {
+            Self::Average
+        } else {
+            Self::Strong
         }
     }
 }
