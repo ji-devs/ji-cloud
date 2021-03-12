@@ -115,7 +115,8 @@ pub struct IdentityClaims {
     pub access_token_hash: String,
 
     /// The user's name
-    pub name: String,
+    #[serde(default)]
+    pub name: Option<String>,
 
     /// the user's profile picture
     #[serde(rename = "picture", default)]
@@ -130,7 +131,8 @@ pub struct IdentityClaims {
     pub family_name: Option<String>,
 
     /// The user's locale
-    pub locale: String,
+    #[serde(default)]
+    pub locale: Option<String>,
 
     /// When this token was issued
     #[serde(rename = "iat")]
