@@ -13,6 +13,7 @@
 
 use core::settings::{self, SettingsManager};
 use ji_cloud_api::{db, logger, s3};
+use tokio::task;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -46,17 +47,45 @@ async fn main() -> anyhow::Result<()> {
 
     log::info!("task started!");
 
+    task::spawn({
+        let db_pool = db_pool.clone();
+        let s3 = s3.clone();
+        async move {
+            loop {
+                let start = tokio::time::Instant::now();
+                log::info!("running watch_image loop");
+
+                let delay_time =
+                    match ji_cloud_api::service::uploads::watch_image(&db_pool, &s3).await {
+                        // there was an image processed, delay for shorter.
+                        Ok(true) => tokio::time::Duration::from_secs(1),
+                        // Out of images to process, wait longer.
+                        Ok(false) => tokio::time::Duration::from_secs(5),
+                        Err(e) => {
+                            log::error!("watch_image task error: {:?}", e);
+
+                            continue;
+                        }
+                    };
+
+                // only process an image at most every second (it probably takes longer than that to process one anyway)
+                tokio::time::delay_until(start + delay_time).await;
+            }
+        }
+    });
+
     loop {
         let start = tokio::time::Instant::now();
-        log::info!("running task loop");
+        log::info!("running watch_user_image loop");
 
-        let delay_time = match ji_cloud_api::service::uploads::watch_image(&db_pool, &s3).await {
+        let delay_time = match ji_cloud_api::service::uploads::watch_user_image(&db_pool, &s3).await
+        {
             // there was an image processed, delay for shorter.
             Ok(true) => tokio::time::Duration::from_secs(1),
             // Out of images to process, wait longer.
             Ok(false) => tokio::time::Duration::from_secs(5),
             Err(e) => {
-                log::error!("watch_image task error: {:?}", e);
+                log::error!("watch_user_image task error: {:?}", e);
 
                 continue;
             }

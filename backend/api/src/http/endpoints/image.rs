@@ -74,8 +74,8 @@ pub mod user {
         let mut txn = db.begin().await?;
 
         sqlx::query!(
-            r#"select 1 as discard from user_image_library where id = $1 for update"#,
-            id.0
+            r#"select exists(select 1 from user_image_upload where image_id = $1 for no key update) as "exists!""#,
+                id.0
         )
         .fetch_optional(&mut txn)
         .await?
@@ -96,7 +96,7 @@ pub mod user {
             .await?;
 
         sqlx::query!(
-            "update user_image_library set uploaded_at = now() where id = $1",
+            "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
             id.0
         )
         .execute(&mut txn)
@@ -250,8 +250,6 @@ async fn upload(
     bytes: Bytes,
 ) -> Result<NoContent, error::Upload> {
     let mut txn = db.begin().await?;
-
-    // fixme: don't bother with this query, just create the `image_upload` when the image is created.
 
     let exists = sqlx::query!(
         r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
@@ -429,8 +427,6 @@ async fn delete(
     db::image::delete(&db, image)
         .await
         .map_err(check_conflict_delete)?;
-
-    // todo: 501 when algolia is disabled.
 
     let delete = |kind| s3.delete_media(MediaLibrary::Global, FileKind::ImagePng(kind), image.0);
     let ((), (), (), ()) = futures::future::join4(

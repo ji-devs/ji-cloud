@@ -33,6 +33,7 @@ select id as "id!",
     uploaded_at,
     1::int2 as "library!: MediaLibrary" -- user
 from user_image_library
+left join user_image_upload on image_id = id
 union all
 select id as "id!",
     -- Mp3Audio

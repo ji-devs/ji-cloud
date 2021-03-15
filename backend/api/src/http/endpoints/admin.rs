@@ -105,7 +105,7 @@ async fn refresh_image_files(
         .map(|it| (it.uploaded_at, ImageKind::Sticker)),
 
         MediaLibrary::User => sqlx::query!(
-            "select uploaded_at from user_image_library where id = $1 for update",
+            "select uploaded_at from user_image_upload where image_id = $1 for update",
             id
         )
         .fetch_optional(&mut txn)
@@ -174,12 +174,24 @@ async fn refresh_image_files(
         .await?
         .ok_or(error::Refresh::ResourceNotFound)?;
 
-    if matches!(library, MediaLibrary::Global) {
-        sqlx::query!("update image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
+    match library {
+        MediaLibrary::Global => {
+            sqlx::query!("update image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
             .execute(&mut txn)
             .await?;
 
-        return Ok(NoContent);
+            return Ok(NoContent);
+        }
+
+        MediaLibrary::User => {
+            sqlx::query!("update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
+            .execute(&mut txn)
+            .await?;
+
+            return Ok(NoContent);
+        }
+
+        _ => {}
     }
 
     let (resized, thumbnail) = actix_web::web::block(move || -> Result<_, error::Refresh> {
@@ -205,14 +217,7 @@ async fn refresh_image_files(
             .execute(&mut txn)
             .await?,
 
-            MediaLibrary::User => sqlx::query!(
-                "update user_image_library set uploaded_at = now(), updated_at = now() where id = $1",
-                id
-            )
-            .execute(&mut txn)
-            .await?,
-
-            MediaLibrary::Global => unreachable!(),
+            MediaLibrary::User | MediaLibrary::Global => unreachable!(),
         };
 
     txn.commit().await?;
