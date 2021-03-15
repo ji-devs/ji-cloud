@@ -32,9 +32,13 @@ returning id as "id: ImageId"
         publish_at,
         kind as i16,
     )
-    .fetch_one(conn)
+    .fetch_one(&mut *conn)
     .await?
     .id;
+
+    sqlx::query!("insert into image_upload (image_id) values($1)", id.0)
+        .execute(&mut *conn)
+        .await?;
 
     Ok(id)
 }
@@ -230,9 +234,14 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     )
     .await?;
 
+    sqlx::query!("delete from image_upload where image_id = $1", image.0)
+        .execute(&mut conn)
+        .await?;
+
     // then drop.
     sqlx::query!("delete from image_metadata where id = $1", image.0)
         .execute(&mut conn)
         .await?;
+
     conn.commit().await
 }
