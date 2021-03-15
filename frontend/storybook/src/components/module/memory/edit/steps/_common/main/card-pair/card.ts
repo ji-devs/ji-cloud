@@ -1,0 +1,72 @@
+import {argsToAttrs} from "@utils/attributes";
+import "@elements/module/memory/edit/steps/_common/main/card-pair/card";
+import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
+import "@elements/core/inputs/text-content";
+import {Ji as MockJiImage} from "~/components/core/images/ji";
+export default {
+    title: "Module / Memory / Edit / Steps / Main / Card-Pair"
+}
+
+type CONTENT_MODE = "text" | "image" | "image-empty";
+type IO_MODE = "edit" | "preview";
+
+interface Args {
+    ioMode: IO_MODE,
+    contentMode: CONTENT_MODE,
+    editTarget: boolean,
+    theme: ThemeKind,
+}
+
+const DEFAULT_ARGS:Args = {
+    ioMode: "preview",
+    contentMode: "image-empty",
+    theme: "chalkboard",
+    editTarget: true
+}
+
+export const Card= (props?:Partial<Args> & {slot?: string}) => {
+    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+
+    const {slot, contentMode, ioMode, editTarget, ...cardProps} = props;
+
+    Object.assign(cardProps, {
+        flippable: ioMode === "preview",
+        editing: editTarget
+    });
+
+    if(cardProps.theme === "") {
+        delete cardProps["theme"];
+    }
+    return `
+    <main-card ${argsToAttrs(cardProps)} ${slot ? `slot="${slot}"` : ""}>
+        ${getContent(contentMode, ioMode)}
+    </main-card>`
+}
+
+function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE) {
+    const editing = ioMode === "edit"; 
+    if(contentMode === "text") {
+        const value = "hello";
+        return `<input-text-content value="${value}" ${editing}></input-text-content>`;
+    } else if(contentMode === "image") {
+        return MockJiImage({size: "thumb"})
+    } else if(contentMode === "image-empty") {
+        return `<img-ui path="core/_common/image-empty.svg"></img-ui>`
+    }
+}
+Card.args = DEFAULT_ARGS;
+Card.argTypes = {
+    ioMode: {
+        control: {
+            type: 'inline-radio',
+            options: ["edit", "preview"]
+        }
+    },
+    contentMode: {
+        control: {
+            type: 'inline-radio',
+            options: ["text", "image", "image-empty"]
+        }
+    },
+    theme: ThemeControl
+}

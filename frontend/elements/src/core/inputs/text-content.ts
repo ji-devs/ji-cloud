@@ -1,13 +1,51 @@
+/* This is effectively like a contenteditable
+ * but it uses a real input element
+ * and thereby avoids many of the quirks
+ *
+ * the implementation uses local refs, so don't rely on the `input` property
+ * e.g. only use `input` for setting the _initial_ value
+ *
+ * Starting in edit mode might be off if waiting for fonts to load
+ */
+
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
-export type Mode = "passwordVisible" | "passwordHidden" | "text";
-
 @customElement("input-text-content")
 export class _ extends LitElement {
   static get styles() {
-    return [css``];
+      return [css`
+          input, span {
+              font-family: Poppins;
+              font-size: 16px;
+              display: none;
+          }
+
+          span {
+                white-space: pre;
+          }
+          input {
+              outline: 0;
+              border: none;
+              padding: 0;
+          }
+
+          input.visible {
+              display: inline-block;
+          }
+
+          span#measure, span.visible {
+              display: inline;
+          }
+
+          span#measure {
+              position: absolute;
+              left: -10000px;
+              bottom: 10000px;
+          }
+
+      `];
   }
 
   @property()
@@ -20,10 +58,26 @@ export class _ extends LitElement {
     let { key } = evt;
     key = key.toLowerCase();
     if (key === "escape") {
+        const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        input.value = this.value;
       this.editing = false;
     } else if(key === "enter") {
         this.dispatchChange();
     }
+  }
+
+  onInput() {
+      this.resizeInput();
+  }
+
+  resizeInput = () => {
+      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+      const measure = this.shadowRoot?.getElementById("measure") as HTMLInputElement;
+
+      measure.textContent = input.value;
+      const rect = measure.getBoundingClientRect();
+
+      input.style.width = `${rect.width}px`;
   }
 
   onGlobalMouseDown = (evt: MouseEvent) => {
@@ -33,13 +87,22 @@ export class _ extends LitElement {
     }
   }
 
+  firstUpdated(_changed:any) {
+    this.resizeInput();
+  }
   updated(changed:any) {
         if(typeof changed.get("editing") === "boolean") {
             const {editing} = this;
             this.removeGlobalListener(); 
             if(editing) {
                 window.addEventListener("mousedown", this.onGlobalMouseDown);
-                this.shadowRoot?.getElementById("input")?.focus();
+                const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+                if(input) {
+                    input.focus();
+                    input.value = this.value;
+                    input.setSelectionRange(-1, -1);
+                    this.resizeInput();
+                }
             }
         }
   }
@@ -53,18 +116,25 @@ export class _ extends LitElement {
      window.removeEventListener("mousedown", this.onGlobalMouseDown);
   }
 
-  dispatchChange = () => {
+  getValue = () => {
       const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
       if(input == null) {
           console.warn("input should never be null!");
+          return undefined;
       } else {
           const {value} = input;
+          return value;
+      }
+
+      
+  }
+  dispatchChange = () => {
+      const value = this.getValue();
         this.dispatchEvent(
             new CustomEvent("custom-change", {
                 detail: { value},
             })
         );
-      }
 
       this.editing = false;
   }
@@ -72,8 +142,10 @@ export class _ extends LitElement {
   render() {
     const { value, editing } = this;
 
-    return editing
-      ? html`<input id="input" type="text" @keyup="${this.onKey}" value="${value}"></input>`
-      : html`<span @dblclick=${() => this.editing = true}>${value}</span>`;
+    return html`
+        <input class="${classMap({visible: editing})}" id="input" type="text" @input="${this.onInput}" @keyup="${this.onKey}" value="${value}"></input>
+        <span class="${classMap({visible: !editing})}" @dblclick=${() => this.editing = true}>${value}</span>
+        <span id="measure">${value}</span>
+        `;
   }
 }
