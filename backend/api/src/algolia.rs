@@ -1,5 +1,5 @@
 use algolia::{
-    filter::{AndFilterable, BooleanFilter, CmpFilter, CommonFilter, FacetFilter, FilterOperator},
+    filter::{AndFilterable, CommonFilter, FacetFilter, TagFilter},
     request::{BatchWriteRequests, SearchQuery, VirtualKeyRestrictions},
     response::SearchResponse,
     ApiKey, AppId, Client as Inner,
@@ -24,6 +24,9 @@ use migration::ResyncKind;
 
 mod migration;
 
+const PREMIUM_TAG: &'static str = "premium";
+const PUBLISHED_TAG: &'static str = "published";
+
 #[derive(Serialize)]
 struct BatchImage<'a> {
     name: &'a str,
@@ -36,8 +39,8 @@ struct BatchImage<'a> {
     affiliation_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
-    publish_at: Option<i64>,
-    is_premium: bool,
+    #[serde(rename = "_tags")]
+    tags: Vec<&'static str>,
 }
 
 #[derive(Serialize)]
@@ -189,8 +192,6 @@ select algolia_index_version as "algolia_index_version!" from "settings"
             return Ok(false);
         }
 
-        let sync_time = Utc::now();
-
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
         let requests: Vec<_> = sqlx::query!(
             r#"
@@ -217,16 +218,29 @@ select id,
            from category
                     inner join image_category on category.id = image_category.category_id
            where image_category.image_id = image_metadata.id))                               as "category_names!",
-    publish_at,
+    (publish_at >= now() is true) as "is_published!",
     is_premium
 from image_metadata
-where last_synced_at is null or (updated_at is not null and last_synced_at < updated_at and updated_at <= $1)
+where 
+    last_synced_at is null or
+    (updated_at is not null and last_synced_at < updated_at) or
+    (publish_at is not null and publish_at < last_synced_at)
 limit 100
-for update skip locked;
-     "#, &sync_time
+for no key update skip locked;
+     "#
         )
         .fetch(&mut txn)
-        .map_ok(|row| algolia::request::BatchWriteRequest::UpdateObject {
+        .map_ok(|row| {
+            let mut tags = Vec::new();
+            if row.is_published {
+                tags.push(PUBLISHED_TAG);
+            }
+
+            if row.is_premium {
+                tags.push(PREMIUM_TAG);
+            }
+
+            algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
                 name: &row.name,
                 description: &row.description,
@@ -238,8 +252,7 @@ for update skip locked;
                 affiliation_names: &row.affiliation_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
-                publish_at: row.publish_at.map(|t| t.timestamp_nanos()),
-                is_premium: row.is_premium,
+                tags
             }))
             .expect("failed to serialize BatchImage to json")
             {
@@ -247,7 +260,7 @@ for update skip locked;
                 _ => panic!("failed to serialize BatchImage to json map"),
             },
             object_id: row.id.to_string(),
-        })
+        }})
         .try_collect()
         .await?;
 
@@ -263,8 +276,7 @@ for update skip locked;
         log::debug!("Updated a batch of {} image(s)", ids.len());
 
         sqlx::query!(
-            "update image_metadata set last_synced_at = $1 where id = any($2)",
-            sync_time,
+            "update image_metadata set last_synced_at = now() where id = any($1)",
             &ids
         )
         .execute(&mut txn)
@@ -362,26 +374,21 @@ impl Client {
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
-        let compare_time = Utc::now().timestamp_nanos();
-
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
         };
 
         if let Some(is_published) = is_published {
             filters.filters.push(Box::new(CommonFilter {
-                filter: CmpFilter::new("publish_at".to_owned(), FilterOperator::Le, compare_time),
+                filter: TagFilter(PUBLISHED_TAG.to_owned()),
                 invert: !is_published,
             }))
         }
 
         if let Some(is_premium) = is_premium {
             filters.filters.push(Box::new(CommonFilter {
-                filter: BooleanFilter {
-                    facet_name: "is_premium".to_owned(),
-                    value: is_premium,
-                },
-                invert: false,
+                filter: TagFilter(PREMIUM_TAG.to_owned()),
+                invert: !is_premium,
             }))
         }
 
