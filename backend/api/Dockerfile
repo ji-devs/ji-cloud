@@ -62,3 +62,49 @@ WORKDIR /usr/local/bin/cloud-run-app/
 
 
 CMD ["./ji-cloud-api", "sandbox"]
+
+
+
+#####################
+## Release (media) ##
+#####################
+
+FROM alpine:latest as release_media_watch
+
+# Used at runtime
+ENV PROJECT_ID=ji-cloud
+
+RUN apk --no-cache add ca-certificates
+
+RUN mkdir /usr/local/bin/cloud-run-app
+
+COPY --from=api-builder \
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/watch-uploads \
+    /usr/local/bin/cloud-run-app/watch-uploads
+
+WORKDIR /usr/local/bin/cloud-run-app/
+
+
+CMD ["./watch-uploads", "release"]
+
+#####################
+## Sandbox (media) ##
+#####################
+
+FROM alpine:latest as sandbox_media_watch
+
+# Used at runtime
+ENV PROJECT_ID=ji-cloud-developer-sandbox
+
+RUN apk --no-cache add ca-certificates
+
+RUN mkdir /usr/local/bin/cloud-run-app
+
+COPY --from=api-builder \
+    /home/rust/src/backend/api/target/x86_64-unknown-linux-musl/release/watch-uploads \
+    /usr/local/bin/cloud-run-app/watch-uploads
+
+WORKDIR /usr/local/bin/cloud-run-app/
+
+
+CMD ["./watch-uploads", "sandbox"]
