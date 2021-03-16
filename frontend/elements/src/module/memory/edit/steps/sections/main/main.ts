@@ -4,13 +4,14 @@ import {nothing} from "lit-html";
 
 const STR_EMPTY = "No preview yet";
 
-@customElement('step1-main-duplicate')
+@customElement('main-cards')
 export class _ extends LitElement {
   static get styles() {
       return [css`
           :host {
               display: flex;
               justify-content: center;
+              overflow-x: hidden;
           }
           section {
               margin: 80rem;

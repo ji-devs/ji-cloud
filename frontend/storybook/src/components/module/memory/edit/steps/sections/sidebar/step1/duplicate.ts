@@ -1,11 +1,11 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/memory/edit/steps/step1/sidebar/duplicate";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/duplicate";
 import {SingleList} from "./widgets/single-list";
 
 const STR_CLEAR = "Clear list";
 
 export default {
-    title: "Module / Memory / Edit / Steps / Step1 / Sidebar"
+    title: "Module / Memory / Edit / Steps / Sections / Sidebar / Step1"
 }
 
 interface Args {

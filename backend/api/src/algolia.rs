@@ -224,7 +224,7 @@ from image_metadata
 where 
     last_synced_at is null or
     (updated_at is not null and last_synced_at < updated_at) or
-    (publish_at is not null and publish_at < last_synced_at)
+    (publish_at < now() is true and last_synced_at < publish_at)
 limit 100
 for no key update skip locked;
      "#

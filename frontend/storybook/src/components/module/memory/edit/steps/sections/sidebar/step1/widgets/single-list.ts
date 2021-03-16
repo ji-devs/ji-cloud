@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/memory/edit/steps/step1/sidebar/widgets/single-list";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list";
 import {mapToString, arrayCount} from "@utils/array";
 const STR_CLEAR = "Clear list";
 
 export default {
-    title: "Module / Memory / Edit / Steps / Step1 / Sidebar / Widgets"
+    title: "Module / Memory / Edit / Steps / Sections / Sidebar / Step1 / Widgets"
 }
 
 interface Args {

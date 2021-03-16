@@ -3,41 +3,15 @@ import {mapToString, arrayCount} from "@utils/array";
 
 import "@elements/widgets/nav/steps-nav";
 import "@elements/widgets/nav/step-nav";
-/*
-import { argsToAttrs } from "@utils/attributes";
-
-export default {
-    title: "Widgets / Nav"
-}
-
-interface Args {
-}
-
-const DEFAULT_ARGS:Args = {
-}
-
-export const StepsNav = (props?:Partial<Args>) => {
-    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-
-    return `
-        <steps-nav ${argsToAttrs(props)}>
-            <step-nav number="1" label="Themes" completed></step-nav>
-            <step-nav number="2" label="Background" completed></step-nav>
-            <step-nav number="3" label="Content" active></step-nav>
-            <step-nav number="4" label="Preview"></step-nav>
-        </steps-nav>
-    `;
-}
-
-StepsNav.args = DEFAULT_ARGS;
- */
 import "@elements/core/buttons/rectangle";
 import "@elements/module/_common/sidebar";
 import {MODE} from "@elements/module/memory/_common/types.ts";
-import {Empty as Step1Empty} from "../step1/sidebar/empty";
-import {Duplicate as Step1Duplicate} from "../step1/sidebar/duplicate";
+import {Empty as Step1Empty} from "./step1/empty";
+import {Duplicate as Step1Duplicate} from "./step1/duplicate";
+import {Container as Step2} from "./step2/container";
+import {ThemeKind} from "~/components/module/_common/theme";
 export default {
-    title: "Module / Memory / Edit / Steps"
+    title: "Module / Memory / Edit / Steps / Sections"
 }
 
 const STR_CONTENT = "Content";
@@ -50,18 +24,20 @@ interface Args {
     activeStep: number,
     mode: MODE,
     empty: boolean,
+    theme: ThemeKind, 
 }
 
 const DEFAULT_ARGS:Args = {
     activeStep: 2,
     mode: "duplicate",
-    empty: false 
+    empty: false,
+    theme: "chalkboard",
 }
 
 export const Sidebar = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {activeStep, mode, empty} = props;
+    const {activeStep, mode, empty, theme} = props;
     const stepState = (step:number) => {
         if(step == activeStep) {
             return "active";
@@ -79,13 +55,7 @@ export const Sidebar = (props?:Partial<Args>) => {
             <step-nav number="3" label="${STR_SETTINGS}" ${stepState(3)}></step-nav>
             <step-nav number="4" label="${STR_PREVIEW}" ${stepState(4)}></step-nav>
         </steps-nav>
-            <steps-nav slot="nav" count="4">
-                <button-circle slot="slot-1" label="${STR_CONTENT}" ${activeStep == 1 && "active"}>1</button-circle>
-                <button-circle slot="slot-2" label="${STR_DESIGN}" ${activeStep == 2 && "active"}>2</button-circle>
-                <button-circle slot="slot-3" label="${STR_SETTINGS}" ${activeStep == 3 && "active"}>3</button-circle>
-                <button-circle slot="slot-4" label="${STR_PREVIEW}" ${activeStep == 4 && "active"}>4</button-circle>
-                </steps-nav>
-                ${getContents(activeStep, mode, empty)}
+                ${getContents(activeStep, mode, empty, theme)}
                 ${getButton(activeStep, mode, empty)}
                 
         </module-sidebar>
@@ -94,7 +64,7 @@ export const Sidebar = (props?:Partial<Args>) => {
 
 Sidebar.args = DEFAULT_ARGS;
 
-function getContents(step: number, mode: MODE, empty: boolean) {
+function getContents(step: number, mode: MODE, empty: boolean, theme: ThemeKind) {
     switch(mode) {
         case "duplicate": {
             switch(step) {
@@ -105,6 +75,7 @@ function getContents(step: number, mode: MODE, empty: boolean) {
                         return Step1Duplicate();
                     }
                 }
+                case 2: return Step2({theme});
                 default: return ""
             }
         }

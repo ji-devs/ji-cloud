@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import {Header as CommonHeader} from "~/components/module/_common/header";
 
 export default {
-    title: "Module / Memory / Edit / Steps"
+    title: "Module / Memory / Edit / Steps / Sections"
 }
 
 const STR_TITLE = "Create a Memory Game";

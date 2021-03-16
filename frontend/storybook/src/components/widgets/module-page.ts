@@ -47,7 +47,7 @@ export const Iframe = ({main}) => {
 }
 export const GridEditPreview = ({header, main}) => {
     return `
-      <module-page-grid-resize>
+      <module-page-grid-resize preview>
         ${withSlot("header", header)}
         ${withSlot("main", main)}
       </module-page-grid-resize>

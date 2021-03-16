@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import "@elements/module/memory/edit/steps/step1/sidebar/empty";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/empty";
 import {MODE} from "@elements/module/memory/_common/types.ts";
 
 export default {
-    title: "Module / Memory / Edit / Steps / Step1 / Sidebar"
+    title: "Module / Memory / Edit / Steps / Sections / Sidebar / Step1"
 }
 
 interface Args {
