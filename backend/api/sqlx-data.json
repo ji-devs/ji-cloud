@@ -1199,6 +1199,18 @@
       ]
     }
   },
+  "6a2fcbea5b62e0a5c0eb65c28769c1b3e70e3376f664d5ad84c864aaef8f0548": {
+    "query": "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
     "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
     "describe": {
@@ -1263,26 +1275,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "6e9ddec29bedae0e67d90df9bdcc8287010eb241f6a7f6ffa6e97b2c620a9c21": {
-    "query": "select variant as \"kind: AnimationKind\" from animation where id = $1 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "kind: AnimationKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
     }
   },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
@@ -1394,6 +1386,54 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "80654c3db008ade154df99e954f3f0b7fdbf067d374dd3df1d8babf9e7a21371": {
+    "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case variant\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation\nleft join global_animation_upload on animation_id = id\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind!: MediaKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at!",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "uploaded_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "library!: MediaLibrary",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     }
   },
@@ -1702,6 +1742,26 @@
       ]
     }
   },
+  "9e3fc9a239cb6ad98628e2f2bf16be1ab3d6db751bb97bedaaf004500f6bcffc": {
+    "query": "select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "9fc35349eacb6647e398e2756c8229e73c6b7fbef00988de47589866241487db": {
     "query": "update image_upload set processed_at = now(), processing_result = false where image_id = $1",
     "describe": {
@@ -1779,6 +1839,18 @@
   },
   "a65d6faacf645998fcfcb81b52a3832b543dbd604ad8d4f23cb8a72c20514a09": {
     "query": "delete from module where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a88c0449faed385cbc111b4e25068a8dd76a2118de2b5615e6315af23f8ce946": {
+    "query": "update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1",
     "describe": {
       "columns": [],
       "parameters": {
@@ -1923,6 +1995,18 @@
         null,
         false
       ]
+    }
+  },
+  "b4f3858831e1685ac7bf663ebddc340a804437258fce9803fd079c084b38e470": {
+    "query": "update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
@@ -2072,54 +2156,6 @@
         true,
         false,
         false
-      ]
-    }
-  },
-  "bfb753b0656c58a1e550bef6617394e6e57cbb94bfedc91224a85daa0d7c2b0d": {
-    "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nleft join image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    case variant\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nleft join user_image_upload on image_id = id\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id!",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind!: MediaKind",
-          "type_info": "Int2"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at!",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 4,
-          "name": "uploaded_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "library!: MediaLibrary",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
       ]
     }
   },
@@ -2297,6 +2333,30 @@
       ]
     }
   },
+  "da5039664635c5ac976a4c0b1cd3a9622a665be4f1a98187ff4c5e96f735500a": {
+    "query": "\nselect id,  variant as \"kind: AnimationKind\"\nfrom animation\ninner join global_animation_upload on animation.id = global_animation_upload.animation_id\nwhere uploaded_at is not null and processed_at >= uploaded_at is not true\nfor no key update of global_animation_upload\nfor share of animation\nskip locked\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "kind: AnimationKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "daa77824c0c1372877839ffbc0bd3b0d8b4a0a9754a5e98d1e0bd1e9c15640c7": {
     "query": "select exists(select 1 from user_image_upload where image_id = $1 for no key update) as \"exists!\"",
     "describe": {
@@ -2361,18 +2421,6 @@
       "nullable": [
         true
       ]
-    }
-  },
-  "deb684379042b0f339ef2d3bca47d627a7a6b8ac0c003f8d4a3c9c67f64dd1b7": {
-    "query": "update animation set uploaded_at = now() where id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
     }
   },
   "e13fed8948ad863f394fefbda8a3b5a002208ed80892e3a5751742eb6d938815": {

@@ -106,15 +106,6 @@ async fn upload(
 ) -> Result<NoContent, error::Upload> {
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
-        r#"select variant as "kind: AnimationKind" from animation where id = $1 for update"#,
-        id.0
-    )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::Upload::ResourceNotFound)?
-    .kind;
-
     let exists = sqlx::query!(
         r#"select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as "exists!""#,
         id.0

@@ -24,6 +24,7 @@ select id as "id!",
     uploaded_at,
     0::int2 as "library!: MediaLibrary" -- global
 from animation
+left join global_animation_upload on animation_id = id
 union all
 select id as "id!",
     -- PngStickerImage
