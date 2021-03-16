@@ -27,9 +27,7 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
 pub mod user {
-    use crate::{
-        db, error, extractor::TokenUser, image_ops::generate_images, s3, service::ServiceData,
-    };
+    use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
     use paperclip::actix::{
         api_v2_operation,
         web::{Bytes, Data, Json, Path},
@@ -42,7 +40,7 @@ pub mod user {
         domain::{
             image::{
                 user::{UserImage, UserImageListResponse, UserImageResponse},
-                ImageId, ImageKind,
+                ImageId,
             },
             CreateResponse,
         },
@@ -81,19 +79,13 @@ pub mod user {
         .await?
         .ok_or(error::Upload::ResourceNotFound)?;
 
-        let kind = ImageKind::Sticker;
-
-        let (original, resized, thumbnail) =
-            actix_web::web::block(move || -> Result<_, error::Upload> {
-                let original =
-                    image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-                Ok(generate_images(&original, kind)?)
-            })
-            .await
-            .map_err(error::Upload::blocking_error)?;
-
-        s3.upload_png_images(MediaLibrary::User, id.0, original, resized, thumbnail)
-            .await?;
+        s3.upload_media_for_processing(
+            bytes.to_vec(),
+            MediaLibrary::Global,
+            id.0,
+            FileKind::ImagePng(PngImageFile::Original),
+        )
+        .await?;
 
         sqlx::query!(
             "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
@@ -263,7 +255,7 @@ async fn upload(
     }
 
     // todo: ferry the data more efficently?
-    s3.upload_media(
+    s3.upload_media_for_processing(
         bytes.to_vec(),
         MediaLibrary::Global,
         id.0,

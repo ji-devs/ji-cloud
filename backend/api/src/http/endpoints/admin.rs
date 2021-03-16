@@ -176,6 +176,9 @@ async fn refresh_image_files(
 
     match library {
         MediaLibrary::Global => {
+            s3.back_copy_unprocessed_file(library, id, FileKind::ImagePng(PngImageFile::Original))
+                .await?;
+
             sqlx::query!("update image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
             .execute(&mut txn)
             .await?;
@@ -184,6 +187,9 @@ async fn refresh_image_files(
         }
 
         MediaLibrary::User => {
+            s3.back_copy_unprocessed_file(library, id, FileKind::ImagePng(PngImageFile::Original))
+                .await?;
+
             sqlx::query!("update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1", id)
             .execute(&mut txn)
             .await?;

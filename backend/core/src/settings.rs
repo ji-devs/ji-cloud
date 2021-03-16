@@ -161,7 +161,10 @@ pub struct S3Settings {
     pub endpoint: String,
 
     /// The s3 bucket that should be used for media.
-    pub bucket: String,
+    pub media_bucket: String,
+
+    /// The s3 bucket that should be used for media.
+    pub processing_bucket: String,
 
     /// What's the access key's id?
     pub access_key_id: String,
@@ -325,24 +328,37 @@ impl SettingsManager {
             None => self.get_varying_secret(keys::s3::ENDPOINT).await?,
         };
 
-        let bucket = match self.remote_target.s3_bucket() {
+        let media_bucket = match self.remote_target.s3_bucket() {
             Some(bucket) => Some(bucket.to_string()),
-            None => self.get_varying_secret(keys::s3::BUCKET).await?,
+            None => self.get_varying_secret(keys::s3::MEDIA_BUCKET).await?,
         };
+
+        let processing_bucket = self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?;
 
         let access_key_id = self.get_varying_secret(keys::s3::ACCESS_KEY).await?;
 
         let secret_access_key = self.get_varying_secret(keys::s3::SECRET).await?;
 
-        match (endpoint, bucket, access_key_id, secret_access_key) {
-            (Some(endpoint), Some(bucket), Some(access_key_id), Some(secret_access_key)) => {
-                Ok(Some(S3Settings {
-                    endpoint,
-                    bucket,
-                    access_key_id,
-                    secret_access_key,
-                }))
-            }
+        match (
+            endpoint,
+            media_bucket,
+            processing_bucket,
+            access_key_id,
+            secret_access_key,
+        ) {
+            (
+                Some(endpoint),
+                Some(media_bucket),
+                Some(processing_bucket),
+                Some(access_key_id),
+                Some(secret_access_key),
+            ) => Ok(Some(S3Settings {
+                endpoint,
+                media_bucket,
+                processing_bucket,
+                access_key_id,
+                secret_access_key,
+            })),
 
             _ => return Ok(None),
         }

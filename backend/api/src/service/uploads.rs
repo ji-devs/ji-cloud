@@ -1,4 +1,5 @@
 use shared::{
+    domain::animation::AnimationKind,
     domain::image::ImageKind,
     media::{FileKind, MediaLibrary, PngImageFile},
 };
@@ -32,7 +33,7 @@ skip locked
     };
 
     let file = s3
-        .download_media_file(
+        .download_media_for_processing(
             MediaLibrary::Global,
             row.id,
             FileKind::ImagePng(PngImageFile::Original),
@@ -75,7 +76,7 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.upload_png_images_resized_thumb(MediaLibrary::Global, row.id, resized, thumbnail)
+    s3.upload_png_images_copy_original(MediaLibrary::Global, row.id, resized, thumbnail)
         .await?;
 
     sqlx::query!("update image_upload set processed_at = now(), processing_result = true where image_id = $1", row.id).execute(&mut txn).await?;
@@ -111,7 +112,7 @@ skip locked
     };
 
     let file = s3
-        .download_media_file(
+        .download_media_for_processing(
             MediaLibrary::Global,
             row.id,
             FileKind::ImagePng(PngImageFile::Original),
@@ -155,10 +156,88 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.upload_png_images_resized_thumb(MediaLibrary::Global, row.id, resized, thumbnail)
+    s3.upload_png_images_copy_original(MediaLibrary::Global, row.id, resized, thumbnail)
         .await?;
 
     sqlx::query!("update user_image_upload set processed_at = now(), processing_result = true where image_id = $1", row.id).execute(&mut txn).await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
+pub async fn watch_animation(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Result<bool> {
+    let mut txn = db.begin().await?;
+
+    let row = sqlx::query!(
+        r#"
+select id,  variant as "kind: AnimationKind"
+from animation
+inner join global_animation_upload on animation.id = global_animation_upload.animation_id
+where uploaded_at is not null and processed_at >= uploaded_at is not true
+for no key update of global_animation_upload
+for share of animation
+skip locked
+"#
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    let row = match row {
+        Some(row) => row,
+        None => {
+            txn.rollback().await?;
+            return Ok(false);
+        }
+    };
+
+    if !matches!(row.kind, AnimationKind::Gif) {
+        return Err(anyhow::anyhow!("Unimplemented Animation Kind: {:?}", row.kind).into());
+    }
+
+    let file = s3
+        .download_media_for_processing(MediaLibrary::Global, row.id, FileKind::AnimationGif)
+        .await?;
+
+    let file = match file {
+        Some(it) => it,
+        None => {
+            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", row.id)
+                    .execute(&mut txn)
+                    .await?;
+
+            log::warn!("Animation wasn't uploaded properly before processing?");
+            txn.commit().await?;
+            return Ok(true);
+        }
+    };
+
+    let res = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
+        let _ = image::load_from_memory_with_format(&file, image::ImageFormat::Gif)
+            .or(Err(error::Upload::InvalidMedia))?;
+        Ok(())
+    })
+    .await
+    .unwrap();
+
+    match res {
+        Ok(()) => {}
+        Err(error::Upload::InvalidMedia) => {
+            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", row.id)
+                .execute(&mut txn)
+                .await?;
+
+            txn.commit().await?;
+            return Ok(true);
+        }
+        Err(error::Upload::InternalServerError(e)) => return Err(e),
+        Err(_) => unreachable!(),
+    };
+
+    s3.copy_processed_file(MediaLibrary::Global, row.id, FileKind::AnimationGif)
+        .await?;
+
+    sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1", row.id).execute(&mut txn).await?;
 
     txn.commit().await?;
 
