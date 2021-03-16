@@ -115,20 +115,20 @@ async fn upload(
     .ok_or(error::Upload::ResourceNotFound)?
     .kind;
 
-    if !matches!(kind, AnimationKind::Gif) {
-        return Err(anyhow::anyhow!("Unimplemented Animation Kind: {:?}", kind).into());
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as "exists!""#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?.exists;
+
+    if !exists {
+        return Err(error::Upload::ResourceNotFound);
     }
 
-    let validated: Bytes = actix_web::web::block(move || {
-        let _original = image::load_from_memory_with_format(&bytes, image::ImageFormat::Gif)
-            .or(Err(error::Upload::InvalidMedia));
-        Ok(bytes)
-    })
-    .await
-    .map_err(error::Upload::blocking_error)?;
-
-    s3.upload_media(
-        validated.to_vec(),
+    // todo: ferry the data more efficently?
+    s3.upload_media_for_processing(
+        bytes.to_vec(),
         MediaLibrary::Global,
         id.0,
         FileKind::AnimationGif,
@@ -136,7 +136,7 @@ async fn upload(
     .await?;
 
     sqlx::query!(
-        "update animation_metadata set uploaded_at = now() where id = $1",
+        "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1",
         id.0
     )
     .execute(&mut txn)

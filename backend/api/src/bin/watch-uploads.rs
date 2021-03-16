@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
         async move {
             loop {
                 let start = tokio::time::Instant::now();
-                log::info!("running watch_image loop");
+                log::debug!("running watch_image loop");
 
                 let delay_time =
                     match ji_cloud_api::service::uploads::watch_image(&db_pool, &s3).await {
@@ -74,9 +74,36 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
+    task::spawn({
+        let db_pool = db_pool.clone();
+        let s3 = s3.clone();
+        async move {
+            loop {
+                let start = tokio::time::Instant::now();
+                log::debug!("running watch_animation loop");
+
+                let delay_time =
+                    match ji_cloud_api::service::uploads::watch_animation(&db_pool, &s3).await {
+                        // there was an animation processed, delay for shorter.
+                        Ok(true) => tokio::time::Duration::from_secs(1),
+                        // Out of animations to process, wait longer.
+                        Ok(false) => tokio::time::Duration::from_secs(5),
+                        Err(e) => {
+                            log::error!("watch_animation task error: {:?}", e);
+
+                            continue;
+                        }
+                    };
+
+                // only process an animation at most every second (it probably takes longer than that to process one anyway)
+                tokio::time::delay_until(start + delay_time).await;
+            }
+        }
+    });
+
     loop {
         let start = tokio::time::Instant::now();
-        log::info!("running watch_user_image loop");
+        log::debug!("running watch_user_image loop");
 
         let delay_time = match ji_cloud_api::service::uploads::watch_user_image(&db_pool, &s3).await
         {

@@ -89,7 +89,7 @@ async fn upload(
     }
 
     // todo: ferry the data more efficently?
-    s3.upload_media(
+    s3.upload_media_for_processing(
         bytes.to_vec(),
         MediaLibrary::Global,
         id.0,
