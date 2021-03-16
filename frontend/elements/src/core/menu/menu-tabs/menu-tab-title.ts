@@ -53,7 +53,7 @@ export class _ extends LitElement {
 
         return html`
             ${kind === "" ? nothing : html`
-                <img-ui path="module/_common/sidebar/tab-${kind}-icon.svg"></img-ui>
+                <img-ui path="module/_common/widgets/sidebar/tab-${kind}-icon.svg"></img-ui>
             `}
             <div>${label}</div>
         `;
