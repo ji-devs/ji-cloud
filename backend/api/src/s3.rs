@@ -4,14 +4,17 @@ use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
     HttpClient, Region, RusotoError,
 };
-use rusoto_s3::{DeleteObjectRequest, GetObjectError, GetObjectRequest, PutObjectRequest, S3};
+use rusoto_s3::{
+    CopyObjectRequest, DeleteObjectRequest, GetObjectError, GetObjectRequest, PutObjectRequest, S3,
+};
 use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
 use tokio::io::AsyncReadExt;
 use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Client {
-    bucket: String,
+    media_bucket: String,
+    processing_bucket: String,
     client: rusoto_s3::S3Client,
 }
 
@@ -19,7 +22,8 @@ impl Client {
     pub fn new(s3_settings: S3Settings) -> anyhow::Result<Self> {
         let S3Settings {
             endpoint,
-            bucket,
+            media_bucket,
+            processing_bucket,
             access_key_id,
             secret_access_key,
         } = s3_settings;
@@ -39,7 +43,26 @@ impl Client {
         let client =
             rusoto_s3::S3Client::new_with(HttpClient::new()?, credentials_provider, region.clone());
 
-        Ok(Self { bucket, client })
+        Ok(Self {
+            media_bucket,
+            processing_bucket,
+            client,
+        })
+    }
+
+    pub async fn upload_png_images_copy_original(
+        &self,
+        library: MediaLibrary,
+        image: Uuid,
+        resized: Vec<u8>,
+        thumbnail: Vec<u8>,
+    ) -> anyhow::Result<()> {
+        futures::future::try_join(
+            self.copy_processed_file(library, image, FileKind::ImagePng(PngImageFile::Original)),
+            self.upload_png_images_resized_thumb(library, image, resized, thumbnail),
+        )
+        .await
+        .map(drop)
     }
 
     pub async fn upload_png_images_resized_thumb(
@@ -107,11 +130,32 @@ impl Client {
         self.client
             .delete_object(DeleteObjectRequest {
                 key,
-                bucket: self.bucket.clone(),
+                bucket: self.media_bucket.clone(),
                 ..DeleteObjectRequest::default()
             })
             .await
             .context("failed to delete object from s3")?;
+
+        Ok(())
+    }
+
+    async fn upload_media_to_bucket(
+        &self,
+        data: Vec<u8>,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+        bucket: String,
+    ) -> anyhow::Result<()> {
+        self.client
+            .put_object(PutObjectRequest {
+                bucket,
+                key: media::media_key(library, id, file_kind),
+                content_type: Some(file_kind.content_type().to_owned()),
+                body: Some(data.into()),
+                ..PutObjectRequest::default()
+            })
+            .await?;
 
         Ok(())
     }
@@ -123,16 +167,29 @@ impl Client {
         id: Uuid,
         file_kind: FileKind,
     ) -> anyhow::Result<()> {
-        self.client
-            .put_object(PutObjectRequest {
-                bucket: self.bucket.clone(),
-                key: media::media_key(library, id, file_kind),
-                content_type: Some(file_kind.content_type().to_owned()),
-                body: Some(data.into()),
-                ..PutObjectRequest::default()
-            })
-            .await?;
-        Ok(())
+        self.upload_media_to_bucket(data, library, id, file_kind, self.media_bucket.clone())
+            .await
+    }
+
+    pub async fn upload_media_for_processing(
+        &self,
+        data: Vec<u8>,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<()> {
+        self.upload_media_to_bucket(data, library, id, file_kind, self.processing_bucket.clone())
+            .await
+    }
+
+    pub async fn download_media_for_processing(
+        &self,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<Option<Vec<u8>>> {
+        self.download_media_file_from_bucket(self.processing_bucket.clone(), library, id, file_kind)
+            .await
     }
 
     pub async fn download_media_file(
@@ -141,10 +198,61 @@ impl Client {
         id: Uuid,
         file_kind: FileKind,
     ) -> anyhow::Result<Option<Vec<u8>>> {
+        self.download_media_file_from_bucket(self.media_bucket.clone(), library, id, file_kind)
+            .await
+    }
+
+    pub async fn copy_processed_file(
+        &self,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<()> {
+        let key = media::media_key(library, id, file_kind);
+        self.client
+            .copy_object(CopyObjectRequest {
+                bucket: self.media_bucket.clone(),
+                content_type: Some(file_kind.content_type().to_owned()),
+                copy_source: format!("{}/{}", self.processing_bucket, key),
+                key: key.clone(),
+                ..CopyObjectRequest::default()
+            })
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn back_copy_unprocessed_file(
+        &self,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<()> {
+        let key = media::media_key(library, id, file_kind);
+        self.client
+            .copy_object(CopyObjectRequest {
+                bucket: self.processing_bucket.clone(),
+                content_type: Some(file_kind.content_type().to_owned()),
+                copy_source: format!("{}/{}", self.media_bucket, key),
+                key: key.clone(),
+                ..CopyObjectRequest::default()
+            })
+            .await?;
+
+        Ok(())
+    }
+
+    async fn download_media_file_from_bucket(
+        &self,
+        bucket: String,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<Option<Vec<u8>>> {
         let resp = self
             .client
             .get_object(GetObjectRequest {
-                bucket: self.bucket.clone(),
+                bucket,
                 key: media::media_key(library, id, file_kind),
                 ..GetObjectRequest::default()
             })
