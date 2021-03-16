@@ -10,7 +10,10 @@ export type TitleKind = ""
     | 'image'
     | 'audio';
 
-const STR_LABEL_LOOKUP: any = {
+const STR_LABEL_LOOKUP: {
+    [key in TitleKind]: string;
+} = {
+    ['']: '',
     ['background-image']: 'Image',
     ['color']: 'Color',
     ['overlay']: 'Overlay',
@@ -42,18 +45,16 @@ export class _ extends LitElement {
     @property()
     kind: TitleKind = "";
 
-    @property()
-    customLabel: string = "";
+    @property({type: Boolean})
+    active: boolean = false;
 
     render() {
-        const { kind, customLabel } = this;
-
-        const label = customLabel !== "" ? customLabel
-            : STR_LABEL_LOOKUP[kind];
+        const label = STR_LABEL_LOOKUP[this.kind];
+        const iconUrl = `module/_common/widgets/sidebar/tab-${this.kind}-icon${this.active ? "-active" : ""}.svg`;
 
         return html`
-            ${kind === "" ? nothing : html`
-                <img-ui path="module/_common/sidebar/tab-${kind}-icon.svg"></img-ui>
+            ${this.kind === "" ? nothing : html`
+                <img-ui path="${iconUrl}"></img-ui>
             `}
             <div>${label}</div>
         `;

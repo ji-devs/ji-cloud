@@ -1,7 +1,7 @@
-import "@elements/widgets/color-select/color-select-item";
+import "@elements/module/_common/widgets/color-select/color-select-item";
 
 export default {
-    title: "Widgets / Color Select"
+    title: "Module / _common / Widgets / Sidebar / Color Select"
 }
 
 

@@ -13,7 +13,7 @@ export class _ extends LitElement {
                 padding: 3px;
             }
             :host([selected]) {
-                box-shadow: var(--Main_Blue) 0px 0px 0pt 3px;
+                box-shadow: var(--main-blue) 0px 0px 0pt 3px;
             }
             :host::before {
                 grid-row: 1;
@@ -23,7 +23,7 @@ export class _ extends LitElement {
                 width: 1px;
                 display: block;
                 margin: auto;
-                background: var(--Light_Gray_4);
+                background: var(--light-gray-4);
                 transform: rotate(45deg);
             }
             .color-item {
@@ -31,7 +31,7 @@ export class _ extends LitElement {
                 grid-column: 1;
                 z-index: 1;
                 border-radius: 50%;
-                border: solid 1px var(--Light_Gray_4);
+                border: solid 1px var(--light-gray-4);
             }
             .color-item:not([disabled]) {
                 cursor: pointer;

@@ -8,10 +8,11 @@ export class _ extends LitElement {
         .input-wrapper {
           position: relative;
           width: inherit;
-          height: 64px;
+          height: 66px;
           border: solid 1px #89b3ff;
           border-radius: 14px;
           padding: 8px 48px 8px 16px;
+          box-sizing: border-box;
         }
         .value, .placeholder {
           margin-top: 33px;

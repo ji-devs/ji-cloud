@@ -6,14 +6,17 @@ export class _ extends LitElement {
   static get styles() {
     return [
       css`
+        :host {
+          min-width: 200px;
+        }
         .wrapper {
           position: relative;
-          width: 200px;
-          height: 32px;
+          width: 100%;
+          height: 36px;
         }
         input {
           border: none;
-          width: 200px;
+          width: 100%;
           height: 32px;
           padding: 4px 40px 4px 16px;
           border-radius: 18px;

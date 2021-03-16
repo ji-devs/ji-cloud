@@ -15,7 +15,7 @@ export class _ extends LitElement {
             :host([active]) {
                 /* hard coded color?! Couldn't find color in zeplin */
                 background-color: #e9eff8;
-                color: var(--Main_Blue);
+                color: var(--main-blue);
             }
         `];
     }
