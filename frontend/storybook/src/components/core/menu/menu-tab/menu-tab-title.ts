@@ -8,10 +8,12 @@ export default {
 
 interface Args {
     kind: TitleKind,
+    active: boolean,
 }
 
 const DEFAULT_ARGS: Args = {
-    kind: 'text'
+    kind: 'text',
+    active: false,
 }
 
 export const MenuTabTitle = (props?:Partial<Args>) => {

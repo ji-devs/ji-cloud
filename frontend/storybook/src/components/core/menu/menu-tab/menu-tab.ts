@@ -20,7 +20,7 @@ export const MenuTab = (props?:Partial<Args>) => {
 
     return `
         <menu-tab ${argsToAttrs(props)}>
-            <menu-tab-title kind="text"></menu-tab-title>
+            <menu-tab-title kind="text" ${props.active ? "active" : ""}></menu-tab-title>
         </menu-tab>
     `;
 }

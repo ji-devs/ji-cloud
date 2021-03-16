@@ -21,7 +21,7 @@ export class _ extends LitElement {
             }
             hr {
                 width: 100%;
-                background: var(--Light_Gray_4);
+                background: var(--light-gray-4);
             }
             ::slotted([slot=add-color]) {
                 justify-self: start;

@@ -1,10 +1,10 @@
-import "@elements/widgets/color-select/color-select";
-import "@elements/widgets/color-select/color-select-item";
+import "@elements/module/_common/widgets/color-select/color-select";
+import "@elements/module/_common/widgets/color-select/color-select-item";
 import "@elements/core/inputs/color";
 import "@elements/core/buttons/text";
 
 export default {
-    title: "Widgets / Color Select"
+    title: "Module / _common / Widgets / Sidebar / Color Select"
 }
 
 interface Args {

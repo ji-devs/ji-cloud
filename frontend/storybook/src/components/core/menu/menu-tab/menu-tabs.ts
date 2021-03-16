@@ -22,7 +22,7 @@ export const MenuTabs = (props?:Partial<Args>) => {
                 <menu-tab-title kind="text"></menu-tab-title>
             </menu-tab>
             <menu-tab slot="tabs" active>
-                <menu-tab-title kind="image"></menu-tab-title>
+                <menu-tab-title kind="image" active></menu-tab-title>
             </menu-tab>
             <menu-tab slot="tabs">
                 <menu-tab-title kind="audio"></menu-tab-title>
