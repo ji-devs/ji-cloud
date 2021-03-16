@@ -9,19 +9,22 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
           :host {
-              width: 100%;
-              height: 100%;
               display: flex;
               justify-content: center;
-              align-items: center;
+          }
+          section {
+              margin: 80rem;
+              display: grid;
+              grid-template-columns: repeat(3, 350rem);
+              gap: 80rem;
           }
     `];
   }
 
   render() {
       return html`
-          <section class="empty">
-              Cards here..
+          <section>
+              <slot></slot> 
           </section>
       `
   }

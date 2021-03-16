@@ -1,5 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { colorStyles, colorValues } from "@elements/_styles/colors";
 
 @customElement("button-circle")
@@ -8,6 +7,12 @@ export class CircleButton extends LitElement {
     return [
       colorStyles,
       css`
+        :host([color=green]) {
+          --color: var(--Dark_Green_1);
+        }
+        :host([color=blue]) {
+          --color: var(--Main_Blue);
+        }
         main {
           cursor: pointer;
           display: flex;
@@ -18,73 +23,44 @@ export class CircleButton extends LitElement {
           width: 84px;
           color: #4a4a4a;
         }
-
         .circle {
           border-radius: 9999px;
           height: 48px;
           width: 48px;
           border-style: solid;
           border-width: 1px;
-          border-color: ${colorValues.grey};
+          border-color: var(--Light_Gray_1);
+          background-color: white;
           justify-content: center;
           align-items: center;
           display: flex;
-        }
-
-        .circle > * {
           text-align: center;
-          width: 100%;
         }
-
-        .circle.disabled {
-          background-color: white;
+        :host([color]) .circle {
+          border-color: var(--color);
+          background-color: var(--color);
+          color: #fff;
         }
-
-        .circle.active {
-          background-color: ${colorValues.blue};
-          border: 0;
-        }
-        .label-active {
-          color: ${colorValues.blue};
+        :host([color]) .label {
+          color: var(--color);
         }
       `,
     ];
   }
 
-  @property({ type: Boolean })
-  active: boolean = false;
-
-  @property({ type: Boolean })
-  disabled: boolean = false;
+  @property({ type: String, reflect: true })
+  color?: 'blue' | 'green';
 
   @property()
   label: string = "";
 
-  // Define the element's template
   render() {
-    const { active, disabled, label } = this;
-
-    const circleClasses = classMap({
-      circle: true,
-      active,
-      disabled,
-      inactive: !active,
-    });
-
-    const textClasses = classMap({
-      ["text-white"]: active,
-    });
-
-    const labelClasses = classMap({
-      ["label-active"]: active,
-    });
-
     return html`
       <main>
-        <div class="${circleClasses}">
-          <p class="${textClasses}"><slot></slot></p>
+        <div class="circle">
+          <slot></slot>
         </div>
-        <p class="${labelClasses}">${label}</p>
+        <p class="label">${this.label}</p>
       </main>
     `;
   }

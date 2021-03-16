@@ -8,6 +8,7 @@ export class _ extends LitElement {
         return [
             css`
             img {
+                display: inherit;
                 width: inherit;
                 height: inherit;
                 object-fit: inherit;

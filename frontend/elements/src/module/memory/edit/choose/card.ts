@@ -24,6 +24,10 @@ export class _ extends LitElement {
           align-items: center;
         }
 
+        section:hover {
+            background-color: #bed8ff;
+        }
+
 
         .label {
             margin-top: 64px;

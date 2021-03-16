@@ -5,15 +5,13 @@ export default {
   title: 'Core / Buttons',
 }
 interface Args {
-    active: boolean,
-    disabled: boolean,
+    color?: 'blue' | 'green';
     label: string,
     contents: string
 }
 
 const DEFAULT_ARGS:Args = {
-    active: false,
-    disabled: false,
+    color: "blue",
     label: "label here",
     contents: "1"
 }
@@ -26,3 +24,12 @@ export const Circle = (props?:Partial<Args>) => {
 }
 
 Circle.args = DEFAULT_ARGS;
+
+Circle.argTypes = {
+    color: {
+        control: {
+            type: 'inline-radio',
+            options: [undefined, "blue", "green"]
+        }
+    }
+}

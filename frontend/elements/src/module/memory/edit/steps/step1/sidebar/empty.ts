@@ -3,19 +3,37 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {MODE} from "@elements/module/memory/_common/types.ts";
 
+const STR_LABEL = html`Edit your words<br/>on the cards`;
+
 @customElement('step1-sidebar-empty')
 export class _ extends LitElement {
   static get styles() {
       return [css`
           :host {
-              display: block;
-              background-color: red;
-              height: 100%;
-              position: relative;
+              /*TODO - somehow take full height...*/
+              display: flex;
+              justify-content: center;
+              align-items: center;
           }
           img-ui {
+              margin-bottom: 24px;
 
-        }
+          }
+          .label {
+              font-size: 18px;
+              font-weight: 500;
+              line-height: 1.22;
+              text-align: center;
+              color: var(--dark-gray-6);
+              margin-left: -16px;
+            }
+
+          section {
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+              align-items: flex-start;
+          }
 
     `];
   }
@@ -29,6 +47,7 @@ export class _ extends LitElement {
       return html`
           <section>
               <img-ui path="module/memory/sidebar/jiggling-card-pointer.svg"></img-ui>
+              <div class="label">${STR_LABEL}</div>
           </section>
       `
   }

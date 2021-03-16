@@ -33,7 +33,7 @@ export const setResizeOnStyle = (style: CSSStyleDeclaration, info:ResizeInfo) =>
             //but it breaks in Safari iirc
             //style.setProperty('font-size', `calc(62.5% * ${scale})`);
    
-    const fontSize = 10 * scale;
+    const fontSize = 1 * scale;
     style.setProperty('font-size', `${fontSize}px`);
     style.setProperty('--scale', `${scale}`);
     style.setProperty('--x', `${x}px`);

@@ -1,29 +1,26 @@
-import {argsToAttrs} from "@utils/attributes";
-import {mapToString, arrayCount} from "@utils/array";
 import "@elements/widgets/nav/steps-nav";
-import "@elements/core/buttons/circle";
+import "@elements/widgets/nav/step-nav";
+import { argsToAttrs } from "@utils/attributes";
+
 export default {
     title: "Widgets / Nav"
 }
 
 interface Args {
-    count: number,
 }
 
 const DEFAULT_ARGS:Args = {
-    count: 4,
 }
 
 export const StepsNav = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {...navProps} = props;
-
     return `
-        <steps-nav ${argsToAttrs(navProps)}>
-            ${mapToString(arrayCount(navProps.count), i => {
-                return `<button-circle slot="slot-${i}" label="button ${i}">${i}</button-circle>`;
-            })}
+        <steps-nav ${argsToAttrs(props)}>
+            <step-nav number="1" label="Themes" completed></step-nav>
+            <step-nav number="2" label="Background" completed></step-nav>
+            <step-nav number="3" label="Content" active></step-nav>
+            <step-nav number="4" label="Preview"></step-nav>
         </steps-nav>
     `;
 }

@@ -16,6 +16,7 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use futures::future::ready;
 use crate::register::state::{Step};
+use zxcvbn::zxcvbn;
 
 pub fn register_email(state: Rc<State>) {
     state.clear_email_status();
@@ -91,7 +92,11 @@ pub fn register_google(state: Rc<State>) {
 
 pub fn update_password_strength(state: &Rc<State>) {
     let password:&str = &state.password.borrow();
-    state.password_strength.set(PasswordStrength::Strong);
-    //TODO...
+    if password.is_empty() {
+        state.password_strength.set(PasswordStrength::None);
+    } else {
+        let estimate = zxcvbn(password, &[]).unwrap_throw();
+        state.password_strength.set(estimate.into());
+    }
 
 }
