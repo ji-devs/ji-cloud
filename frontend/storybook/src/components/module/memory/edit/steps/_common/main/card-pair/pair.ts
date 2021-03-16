@@ -22,6 +22,7 @@ export const Pair = (props?:Partial<Args>) => {
 
     return `<main-card-pair ${argsToAttrs(props)} >
     ${Card({slot: "left"})} ${Card({slot: "right"})}
+
     <button-icon icon="circle-x-blue" slot="close"></button-icon> 
     </main-card-pair>`
 }

@@ -20,6 +20,7 @@ export class _ extends LitElement {
             height: 32px;
         }
             img-ui {
+                display: inherit;
                 width: inherit;
                 height: inherit;
                 object-fit: inherit;

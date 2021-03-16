@@ -21,21 +21,26 @@ export class _ extends LitElement {
           background-color: #deecff;
         }
 
-        slot[name=close]::slotted(button-icon) {
-            width: 32rem;
-            height: 32rem;
-            position: relative;
-            top: -16rem;
-            left: 333rem;
-        }
-        .close {
-            display: none;
-        }
         section.hover > .close {
             display: block;
         }
-        .cards {
 
+        .close {
+            display: none;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+        slot[name="close"]::slotted(*) {
+            position: absolute;
+            top: -16rem;
+            left: 333rem;
+            display: inline-block;
+            width: 32rem;
+            height: 32rem;
+        }
+        
+        .cards {
               position: relative;
               top: 24rem;
               left: 24rem;
@@ -76,11 +81,11 @@ export class _ extends LitElement {
 
       return html`
         <section class="${classMap({hover})}" @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}">
+              <div class="close"><slot name="close"></slot></div>
               <div class="cards">
                   <div class="right"><slot name="right"></slot></div>
                   <div class="left"><slot name="left"></slot></div>
               </div>
-              <div class="close"><slot name="close"></slot></div>
         </section>
         <div class="index">${index + 1}</div>
       `

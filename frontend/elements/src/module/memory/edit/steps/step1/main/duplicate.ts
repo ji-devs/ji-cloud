@@ -8,8 +8,12 @@ const STR_EMPTY = "No preview yet";
 export class _ extends LitElement {
   static get styles() {
       return [css`
+          :host {
+              display: flex;
+              justify-content: center;
+          }
           section {
-              margin-left: 80rem;
+              margin: 80rem;
               display: grid;
               grid-template-columns: repeat(3, 350rem);
               gap: 80rem;

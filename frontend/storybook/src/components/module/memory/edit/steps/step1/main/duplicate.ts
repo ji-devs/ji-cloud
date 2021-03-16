@@ -12,7 +12,7 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    nCards: 15
+    nCards: 6
 }
 
 export const Duplicate = (props?:Partial<Args>) => {
