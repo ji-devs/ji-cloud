@@ -1,16 +1,16 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/memory/edit/steps/_common/main/card-pair/card";
+import "@elements/module/memory/edit/steps/sections/main/card-pair/card";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/core/inputs/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 export default {
-    title: "Module / Memory / Edit / Steps / Main / Card-Pair"
+    title: "Module / Memory / Edit / Steps / Sections / Main / Card-Pair"
 }
 
 type CONTENT_MODE = "text" | "image" | "image-empty";
 type IO_MODE = "edit" | "preview";
 
-interface Args {
+export interface Args {
     ioMode: IO_MODE,
     contentMode: CONTENT_MODE,
     editTarget: boolean,

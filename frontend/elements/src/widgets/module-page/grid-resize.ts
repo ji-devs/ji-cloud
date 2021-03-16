@@ -2,7 +2,8 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import { nothing } from "lit-html";
 import { BgBlue } from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
-import {STAGE, STAGE_LEGACY} from "@project-config";
+import {classMap} from "lit-html/directives/class-map";
+import {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY} from "@project-config";
 
 @customElement('module-page-grid-resize')
 export class _ extends BgBlue {
@@ -48,7 +49,7 @@ export class _ extends BgBlue {
             overflow: auto;
         }
 
-        #grid {
+        .grid {
             display: grid;
 
             grid-template-areas:
@@ -56,6 +57,18 @@ export class _ extends BgBlue {
                         "sidebar fillLeft main fillRight"
                         "sidebar fillLeft footer fillRight";
             grid-template-columns: auto 40px 1fr 40px;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+            width: 100%;
+        }
+        .grid-preview {
+            display: grid;
+
+            grid-template-areas:
+                        "sidebar fillLeft header fillRight"
+                        "sidebar fillLeft main fillRight"
+                        "sidebar fillLeft footer fillRight";
+            grid-template-columns: auto 0 1fr 0;
             grid-template-rows: auto 1fr auto;
             height: 100%;
             width: 100%;
@@ -94,6 +107,8 @@ export class _ extends BgBlue {
     @property({ type: Boolean })
     scrollable: boolean = false;
 
+    @property({ type: Boolean, reflect: true })
+    preview: boolean = false;
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
 
@@ -102,7 +117,8 @@ export class _ extends BgBlue {
         const footer = shadowRoot.querySelector("footer") as HTMLElement;
 
         const [_, cancelResize] = startResizer({
-            stage: this.legacy ? STAGE_LEGACY : STAGE,
+            stage: this.legacy ? STAGE_LEGACY 
+                : this.preview ? STAGE_PLAYER : STAGE_EDIT,
             observeTargets: [sidebar, header, footer],
             adjustBounds: (bounds: DOMRect) => {
                 const sidebarBounds = sidebar.getBoundingClientRect();
@@ -135,12 +151,13 @@ export class _ extends BgBlue {
 
     // Define the element's template
     render() {
-        const { scrollable } = this;
+        const { scrollable, preview } = this;
 
         const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
 
+        const gridClass = preview ? "grid-preview" : "grid";
         return html`
-        <div id="grid">
+        <div class="${gridClass}">
         
             <aside>
                 <slot name="sidebar"></slot>

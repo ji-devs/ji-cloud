@@ -23,6 +23,7 @@ export interface ResizeInfo {
 }
 
 export const setResizeOnDocumentRoot = (info:ResizeInfo) => {
+    //sets on :root
     setResizeOnStyle(document.documentElement.style, info);
 }
 
@@ -128,8 +129,6 @@ export function startResizer({container, ignoreWindow, observeTargets, adjustBou
             contentWidth: width - (stage.paddingX * 2),
             contentHeight: height - (stage.paddingY * 2)
         };
-
-        console.log(info);
 
         if(!sizeEqual(info, lastInfo)) {
             onResize(info);

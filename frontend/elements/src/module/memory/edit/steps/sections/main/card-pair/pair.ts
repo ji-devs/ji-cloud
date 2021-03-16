@@ -57,6 +57,7 @@ export class _ extends LitElement {
               left: 136rem;
           }
           .index {
+                font-size: 14rem;
               text-align: center;
           }
     `];

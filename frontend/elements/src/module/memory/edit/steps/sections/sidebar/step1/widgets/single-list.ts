@@ -2,7 +2,6 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {arrayIndex} from "@utils/array";
-import "@elements/module/memory/edit/steps/step1/sidebar/widgets/single-list-input";
 
 @customElement('sidebar-widget-single-list')
 export class _ extends LitElement {
