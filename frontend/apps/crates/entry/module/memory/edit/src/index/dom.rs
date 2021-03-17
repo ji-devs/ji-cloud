@@ -8,7 +8,7 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use utils::events;
 use crate::data::raw::GameData as RawData;
-use super::{state::*, actions::*};
+use super::state::*;
 
 pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
 
@@ -29,7 +29,7 @@ pub struct PageRenderer {
 
 impl ModuleRenderer<State> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
-    type ChildrenSignal = impl SignalVec<Item = ModuleDom>;
+    type ChildrenSignal = impl SignalVec<Item = Dom>;
 
 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal {
@@ -56,53 +56,49 @@ impl ModuleRenderer<State> for PageRenderer {
     }
 }
 
+/*
+ * if game_mode is None, then it's the Choose page - and it's only main
+ * otherwise it's the Steps sections
+ */
 impl PageRenderer {
-    fn sidebar(state: Rc<crate::data::State>) -> Option<ModuleDom> {
+    fn sidebar(state: Rc<crate::data::State>) -> Option<Dom> {
         state.game_mode.get()
             .map(|game_mode| {
-                ModuleDom::Sidebar(Box::new(move |mixin:HtmlMixinPtr| {
-                    html!("div", {
-                        .apply(|dom| mixin(dom))
-                        .text("duplicate!")
-                    })
-                }))
+                crate::steps::sidebar::dom::SidebarDom::render(state)
             })
     }
 
-    fn header(state: Rc<crate::data::State>) -> Option<ModuleDom> { 
+    fn header(state: Rc<crate::data::State>) -> Option<Dom> { 
         state.game_mode.get()
             .map(|game_mode| {
-                ModuleDom::Header(Box::new(move |mixin:HtmlMixinPtr| {
-                    html!("div", {
-                        .apply(|dom| mixin(dom))
-                    })
-                }))
+                html!("div", { 
+                    .text("header here!")
+                    .property("slot", "header")
+                })
             })
     }
 
-    fn main(state: Rc<crate::data::State>) -> Option<ModuleDom> { 
-            Some(ModuleDom::Main(Box::new(move |mixin:HtmlMixinPtr| {
-                match state.game_mode.get() {
-                    None => {
-                        crate::choose::dom::ChooseDom::render(state)
-                    },
-                    Some(mode) => {
-                        html!("div", {
-                            .apply(|dom| mixin(dom))
-                        })
-                    }
-                }
-            })))
+    fn main(state: Rc<crate::data::State>) -> Option<Dom> { 
+        Some(match state.game_mode.get() {
+            None => {
+                crate::choose::dom::ChooseDom::render(state)
+            },
+            Some(mode) => {
+                html!("div", {
+                    .text("main here!")
+                    .property("slot", "main")
+                })
+            }
+        })
     }
 
-    fn footer(state: Rc<crate::data::State>) -> Option<ModuleDom> { 
+    fn footer(state: Rc<crate::data::State>) -> Option<Dom> { 
         state.game_mode.get()
             .map(|game_mode| {
-                ModuleDom::Footer(Box::new(move |mixin:HtmlMixinPtr| {
-                    html!("div", {
-                        .apply(|dom| mixin(dom))
-                    })
-                }))
+                html!("div", { 
+                    .text("footer here!")
+                    .property("slot", "footer")
+                })
             })
     }
 }

@@ -1,5 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list-input";
 import {mapToString, arrayCount} from "@utils/array";
 const STR_CLEAR = "Clear list";
 
@@ -9,28 +10,29 @@ export default {
 
 interface Args {
     nRows: number,
-    placeholder: boolean
+    placeholderCutoff: number
 }
 
 const DEFAULT_ARGS:Args = {
     nRows: 14,
-    placeholder: true 
+    placeholderCutoff: 6 
 }
 
 export const SingleList = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {nRows, placeholder} = props;
+    const {nRows, placeholderCutoff} = props;
 
     return `
     <sidebar-widget-single-list slot="input-widget">
     ${mapToString(arrayCount(nRows), row => {
 
-        const value = row < 6 
-            ? placeholder ? "placeholder='placeholder'" : "value='value'"
-            : "";
+        const is_placeholder = row < placeholderCutoff;
 
-        return`<sidebar-widget-single-list-input ${value}></sidebar-widget-single-list-input>`
+        const value = is_placeholder ? "placeholder" : "value";
+        const placeholder = is_placeholder ? "placeholder" : "";
+
+        return`<sidebar-widget-single-list-input value="${value}" ${placeholder}></sidebar-widget-single-list-input>`
     })}
     </sidebar-widget-single-list>`
 }
