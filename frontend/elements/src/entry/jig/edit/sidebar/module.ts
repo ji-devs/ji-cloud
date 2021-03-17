@@ -73,7 +73,7 @@ export class _ extends LitElement {
             }
 
             aside.selected {
-                background-color: var(--Main_Blue);
+                background-color: var(--main-blue);
             }
             aside {
               width: 8px;
@@ -87,7 +87,7 @@ export class _ extends LitElement {
               line-height: 1.5;
               letter-spacing: 0.6px;
               text-align: left;
-              color: var(--Main_Blue);
+              color: var(--main-blue);
             }
             .subtitle {
               font-size: 16px;

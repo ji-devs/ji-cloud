@@ -21,14 +21,14 @@ export class _ extends LitElement {
               font-weight: 900;
               letter-spacing: -0.4px;
               text-align: left;
-              color: var(--Orange);
+              color: var(--orange);
             }
             .subtitle {
               font-family: Poppins;
               font-size: 24px;
               letter-spacing: normal;
               text-align: left;
-              color: var(--Dark_Gray_6);
+              color: var(--dark-gray-6);
             }
             :host {
                 

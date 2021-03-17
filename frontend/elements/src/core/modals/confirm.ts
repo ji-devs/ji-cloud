@@ -30,7 +30,7 @@ export class _ extends BaseButton {
                     width: 100vw;
                     height: 100vh;
                     opacity: 0.8;
-                    background-color: var(--Light_Blue_3);
+                    background-color: var(--light-blue-3);
                 }
                 section {
                     width: 419px;
@@ -56,7 +56,7 @@ export class _ extends BaseButton {
                     padding: 0 32px; 32px; 32px;
                 }
                 .warning {
-                    color: var(--Dark_Red_2);
+                    color: var(--dark-red-2);
                 }
 
                 .divider {
@@ -83,7 +83,7 @@ export class _ extends BaseButton {
                   line-height: 1.5;
                   letter-spacing: normal;
                   text-align: left;
-                  color: var(--Dark_Gray_6);
+                  color: var(--dark-gray-6);
                 }
                 .options {
                     margin-top: 40px;
@@ -99,7 +99,7 @@ export class _ extends BaseButton {
                   line-height: 1.5;
                   letter-spacing: normal;
                   text-align: center;
-                  color: var(--Dark_Red_2);
+                  color: var(--dark-red-2);
                   cursor: pointer;
                 }
                 `];

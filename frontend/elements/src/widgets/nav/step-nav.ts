@@ -21,13 +21,13 @@ export class _ extends LitElement {
             .line::after {
                 content: '';
                 display: inline-block;
-                background-color: var(--Light_Gray_1);
+                background-color: var(--light-gray-1);
                 height: 2px;
                 width: calc(100% + 50px);
                 margin-left: -25px;
             }
             :host([completed]) .line::after {
-                background-color: var(--Dark_Green_1);
+                background-color: var(--dark-green-1);
             }
         `];
     }

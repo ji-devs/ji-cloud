@@ -11,7 +11,7 @@ export class _ extends LitElement {
               display: block;
           width: calc(100% - 4px);
           border-radius: 16px;
-          border: solid 2px var(--Light_Blue_4);
+          border: solid 2px var(--light-blue-4);
           background-color: var(--white);
           }
 
@@ -21,7 +21,7 @@ export class _ extends LitElement {
           }
 
           ::slotted(*:not(:last-child)) {
-              border-bottom: solid 1px var(--Light_Blue_4);
+              border-bottom: solid 1px var(--light-blue-4);
           }
         input {
             width: 460px; /*arbitrary amount to not go into rounded corners*/

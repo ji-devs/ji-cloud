@@ -21,7 +21,7 @@ export class _ extends LitElement {
               font-weight: 900;
               letter-spacing: -0.32px;
               text-align: left;
-              color: var(--Dark_Blue_4);
+              color: var(--dark-blue-4);
               margin-bottom: 56px;
         }
     `];

@@ -24,15 +24,15 @@ export class _ extends LitElement {
 
             section.thumbnail {
                 border: solid 2px #d8e7f9;
-                background-color: var(--Light_Blue_2);
+                background-color: var(--light-blue-2);
             }
             section.draft {
                 border: solid 2px #d8e7f9;
-                background-color: var(--Light_Blue_2);
+                background-color: var(--light-blue-2);
             }
             section.empty {
                 border: solid 0px #d8e7f9;
-                background-color: var(--Light_Blue_5);
+                background-color: var(--light-blue-5);
             }
             section.complete {
               border: solid 2px #c5e9d2;

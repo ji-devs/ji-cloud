@@ -38,7 +38,7 @@ export class _ extends LitElement {
           font-style: normal;
           letter-spacing: normal;
           text-align: center;
-          color: var(--Dark_Gray_6);
+          color: var(--dark-gray-6);
         }
     `];
   }
