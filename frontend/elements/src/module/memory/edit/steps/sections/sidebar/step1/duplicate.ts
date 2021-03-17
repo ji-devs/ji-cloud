@@ -29,7 +29,7 @@ export class _ extends LitElement {
               margin-bottom: 16px;
           font-size: 16px;
           text-align: center;
-          color: var(--Light_Blue_5);
+          color: var(--light-blue-5);
           }
 
 

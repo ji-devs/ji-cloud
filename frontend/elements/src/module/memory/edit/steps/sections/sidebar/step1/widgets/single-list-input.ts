@@ -21,7 +21,7 @@ export class _ extends LitElement {
         }
 
         input.placeholder {
-            color: var(--Light_Gray_4); 
+            color: var(--light-gray-4); 
         }
 
     `];

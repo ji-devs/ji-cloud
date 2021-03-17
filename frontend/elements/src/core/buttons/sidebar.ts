@@ -13,7 +13,7 @@ export class _ extends LitElement {
             cursor: pointer;
             display: inline-block;
               border-radius: 8px;
-              border: solid 1px var(--Light_Blue_5);
+              border: solid 1px var(--light-blue-5);
               background-color: var(--white);
         }
 
