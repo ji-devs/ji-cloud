@@ -10,7 +10,7 @@ export class _ extends LitElement {
         css`
             :host {
                 display: block;
-                background-color: var(--Light_Blue_3);
+                background-color: var(--light-blue-3);
                 width: 100vw;
                 height: 100vh;
             }

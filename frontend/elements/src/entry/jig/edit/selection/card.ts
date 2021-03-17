@@ -33,8 +33,8 @@ export class _ extends LitElement {
               line-height: 1.25;
               letter-spacing: normal;
               text-align: center;
-              color: var(--Dark_Gray_6);
-              background-color: var(--Light_Blue_2);
+              color: var(--dark-gray-6);
+              background-color: var(--light-blue-2);
             }
 
             .top {

@@ -8,10 +8,10 @@ export class CircleButton extends LitElement {
       colorStyles,
       css`
         :host([color=green]) {
-          --color: var(--Dark_Green_1);
+          --color: var(--dark-green-1);
         }
         :host([color=blue]) {
-          --color: var(--Main_Blue);
+          --color: var(--main-blue);
         }
         main {
           cursor: pointer;
@@ -29,7 +29,7 @@ export class CircleButton extends LitElement {
           width: 48px;
           border-style: solid;
           border-width: 1px;
-          border-color: var(--Light_Gray_1);
+          border-color: var(--light-gray-1);
           background-color: white;
           justify-content: center;
           align-items: center;

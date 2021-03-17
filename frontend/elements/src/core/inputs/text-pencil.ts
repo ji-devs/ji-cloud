@@ -10,7 +10,7 @@ export class _ extends LitElement {
       .wrapper {
         position: relative;
         border-radius: 8px;
-        border: solid 1px var(--Light_Blue_5);
+        border: solid 1px var(--light-blue-5);
       }
         input {
           width: calc(100% - 40px);
@@ -27,11 +27,11 @@ export class _ extends LitElement {
             line-height: 1.56;
             letter-spacing: normal;
             text-align: left;
-            color: var(--Dark_Gray_6);
+            color: var(--dark-gray-6);
         }
 
         .wrapper.editing {
-            border: solid 2px var(--Dark_Blue_3);
+            border: solid 2px var(--dark-blue-3);
         }
 
         .icon {
