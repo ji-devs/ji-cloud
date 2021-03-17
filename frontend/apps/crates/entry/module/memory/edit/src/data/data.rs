@@ -14,71 +14,19 @@ use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
 use crate::index::state::State as IndexState;
+use std::collections::HashSet;
 
 pub struct State {
     pub index: Rc<IndexState>,
     pub game_mode: Mutable<Option<GameMode>>,
     pub pairs: MutableVec<(Card, Card)>,
     pub step: Mutable<Step>,
+    pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<String>,
     pub first_text: RefCell<bool>,
     pub content_mode: Mutable<ContentMode>
 }
 
-
-#[derive(Debug, Clone)]
-pub struct Card {
-    pub mode: Mutable<CardMode>,
-    pub data: Mutable<Option<String>>,
-}
-
-impl Card {
-    pub fn new(mode:CardMode) -> Self {
-        Self {
-            mode: Mutable::new(mode),
-            data: Mutable::new(None),
-        }
-    }
-    pub fn new_with_data(mode:CardMode, data:String) -> Self {
-        Self {
-            mode: Mutable::new(mode),
-            data: Mutable::new(Some(data)),
-        }
-    }
-}
-impl From<raw::Card> for Card {
-    fn from(raw_card:raw::Card) -> Self {
-
-        let (mode, data) = match raw_card {
-            raw::Card::Text(x) => (CardMode::Text,Some(x)),
-            raw::Card::Image(x) => (CardMode::Image,x),
-            raw::Card::Audio(x) => (CardMode::Audio,x)
-        };
-
-        Self {
-           mode: Mutable::new(mode),
-           data: Mutable::new(data)
-        }
-    }
-}
-impl From<Card> for raw::Card {
-    fn from(card:Card) -> raw::Card {
-        
-        match card.mode.get_cloned() {
-            CardMode::Text => raw::Card::new_text(card.data.get_cloned().unwrap_or("".to_string())) ,
-            CardMode::Image => raw::Card::new_image(card.data.get_cloned()), 
-            CardMode::Audio => raw::Card::new_audio(card.data.get_cloned()), 
-        }
-
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum CardMode {
-    Text,
-    Image,
-    Audio
-}
 
 impl State {
     pub fn new(index: Rc<IndexState>, raw_data:Option<raw::GameData>) -> Self {
@@ -108,9 +56,28 @@ impl State {
             game_mode: Mutable::new(game_mode),
             pairs: MutableVec::new_with_values(pairs),
             step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
+            steps_completed: Mutable::new(HashSet::new()),
             theme_id: Mutable::new(theme_id),
             first_text: RefCell::new(true),
             content_mode: Mutable::new(debug::settings().content_mode)
+        }
+    }
+
+    pub fn pairs_len_signal(&self) -> impl Signal<Item = usize> {
+        self.pairs.signal_vec_cloned().len()
+    }
+
+    pub fn has_content_signal(&self) -> impl Signal<Item = bool> {
+        self.pairs_len_signal()
+            .map(|len| len > 0)
+    }
+
+    pub fn change_step(&self, next:Step) {
+        let prev = self.step.get();
+        self.step.set(next);
+        if prev != Step::Four {
+            let mut completed = self.steps_completed.lock_mut();
+            completed.insert(prev);
         }
     }
 
@@ -171,6 +138,63 @@ impl State {
         }
     }
 }
+
+
+#[derive(Debug, Clone)]
+pub struct Card {
+    pub mode: Mutable<CardMode>,
+    pub data: Mutable<Option<String>>,
+}
+
+impl Card {
+    pub fn new(mode:CardMode) -> Self {
+        Self {
+            mode: Mutable::new(mode),
+            data: Mutable::new(None),
+        }
+    }
+    pub fn new_with_data(mode:CardMode, data:String) -> Self {
+        Self {
+            mode: Mutable::new(mode),
+            data: Mutable::new(Some(data)),
+        }
+    }
+}
+impl From<raw::Card> for Card {
+    fn from(raw_card:raw::Card) -> Self {
+
+        let (mode, data) = match raw_card {
+            raw::Card::Text(x) => (CardMode::Text,Some(x)),
+            raw::Card::Image(x) => (CardMode::Image,x),
+            raw::Card::Audio(x) => (CardMode::Audio,x)
+        };
+
+        Self {
+           mode: Mutable::new(mode),
+           data: Mutable::new(data)
+        }
+    }
+}
+impl From<Card> for raw::Card {
+    fn from(card:Card) -> raw::Card {
+        
+        match card.mode.get_cloned() {
+            CardMode::Text => raw::Card::new_text(card.data.get_cloned().unwrap_or("".to_string())) ,
+            CardMode::Image => raw::Card::new_image(card.data.get_cloned()), 
+            CardMode::Audio => raw::Card::new_audio(card.data.get_cloned()), 
+        }
+
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum CardMode {
+    Text,
+    Image,
+    Audio
+}
+
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
     Duplicate,
@@ -249,10 +273,30 @@ impl From<(&CardMode, &CardMode)> for PairType {
 }
 
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Step {
     One,
     Two,
     Three,
     Four
+}
+
+impl Step {
+    pub fn label(&self) -> &'static str {
+        match self {
+            Step::One => crate::strings::steps_nav::STR_CONTENT,
+            Step::Two => crate::strings::steps_nav::STR_DESIGN,
+            Step::Three => crate::strings::steps_nav::STR_SETTINGS,
+            Step::Four => crate::strings::steps_nav::STR_PREVIEW,
+        }
+    }
+
+    pub fn number(&self) -> u8 {
+        match self {
+            Step::One => 1, 
+            Step::Two => 2, 
+            Step::Three => 3, 
+            Step::Four => 4 
+        }
+    }
 }

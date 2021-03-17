@@ -28,12 +28,18 @@ impl DebugSettings {
             image_search: None,
         }
     }
-    pub fn duplicate() -> DebugSettings {
+    pub fn duplicate(with_data: bool) -> DebugSettings {
         DebugSettings {
-            data: Some(raw::GameData::duplicate_debug(
-                crate::config::get_init_words_iter(),
-                crate::config::get_themes_cloned()[0].id.clone()
-            )),
+            data: Some(
+                if with_data {
+                    raw::GameData::duplicate_debug(
+                        crate::config::get_init_words_iter(),
+                        crate::config::get_themes_cloned()[0].id.clone()
+                    )
+                } else {
+                    raw::GameData::new_duplicate()
+                }
+            ),
             step: Some(Step::One), 
             content_mode: ContentMode::TextInit,
             image_search: None,
@@ -55,7 +61,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+            DebugSettings::duplicate(false)
         }
     } else {
         pub fn settings() -> DebugSettings {

@@ -53,7 +53,7 @@ export class _ extends BaseButton {
       }
 
       .grey{
-          background-color: var(--Light_Gray_4);
+          background-color: var(--light-gray-4);
           color: white;
       }
       

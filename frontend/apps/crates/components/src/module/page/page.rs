@@ -97,22 +97,11 @@ impl ModulePageKind {
 
 pub trait ModuleRenderer <State> {
     type PageKindSignal: Signal<Item = ModulePageKind>;
-    type ChildrenSignal: SignalVec<Item = ModuleDom>;
+    type ChildrenSignal: SignalVec<Item = Dom>;
 
     fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal;
 
     fn children_signal(state: Rc<State>, kind: ModulePageKind) -> Self::ChildrenSignal;
-}
-
-pub type DomFactory = Box<dyn FnOnce(HtmlMixinPtr) -> Dom>;
-
-pub type HtmlMixinPtr = fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>;
-
-pub enum ModuleDom {
-    Sidebar(DomFactory),
-    Header(DomFactory),
-    Main(DomFactory),
-    Footer(DomFactory),
 }
 
 // The page renderer
@@ -218,25 +207,7 @@ where
                             //in utils / global static
                             set_resize_info(event.data());
                         })
-                        .children_signal_vec(
-                            Renderer::children_signal(state.clone(), page_kind)
-                                .map(|module_dom| {
-                                    match module_dom {
-                                        ModuleDom::Sidebar(factory) => factory(|dom| {
-                                            dom.attribute("slot", "sidebar")
-                                        }),
-                                        ModuleDom::Header(factory) => factory(|dom| {
-                                            dom.attribute("slot", "header")
-                                        }),
-                                        ModuleDom::Main(factory) => factory(|dom| {
-                                            dom.attribute("slot", "main")
-                                        }),
-                                        ModuleDom::Footer(factory) => factory(|dom| {
-                                            dom.attribute("slot", "footer")
-                                        }),
-                                    }
-                                })
-                        )
+                        .children_signal_vec(Renderer::children_signal(state.clone(), page_kind))
                     });
 
                     Self::switch_body(dom); 

@@ -218,7 +218,7 @@ select id,
            from category
                     inner join image_category on category.id = image_category.category_id
            where image_category.image_id = image_metadata.id))                               as "category_names!",
-    (publish_at >= now() is true) as "is_published!",
+    (publish_at < now() is true) as "is_published!",
     is_premium
 from image_metadata
 where 

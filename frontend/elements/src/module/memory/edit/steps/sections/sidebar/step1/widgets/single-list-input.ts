@@ -20,8 +20,8 @@ export class _ extends LitElement {
           text-align: center; 
         }
 
-        input.placeholder {
-            color: var(--Light_Gray_4); 
+        :host([placeholder]) input {
+            color: var(--light-gray-4); 
         }
 
     `];
@@ -30,15 +30,14 @@ export class _ extends LitElement {
   @property()
   value:string = "";
 
-  @property()
-  placeholder:string = "";
-  render() {
-      const {placeholder, value} = this;
+  @property({type: Boolean, reflect: true})
+  placeholder:boolean = false;
 
-      const display = value === "" ? placeholder : value;
+  render() {
+      const {value} = this;
 
       return html`<div class="row">
-          <input class="${value === "" ? "placeholder" : ""}" type="text" value=${display}></input>
+          <input type="text" value=${value}></input>
       </div>`
   }
 }

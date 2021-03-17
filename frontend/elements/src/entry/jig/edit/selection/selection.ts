@@ -30,7 +30,7 @@ export class _ extends LitElement {
             line-height: 1.25;
             letter-spacing: normal;
             text-align: left;
-            color: var(--Dark_Blue_4);
+            color: var(--dark-blue-4);
         }
         .title2 {
             font-size: 24px;
@@ -40,7 +40,7 @@ export class _ extends LitElement {
             line-height: 1;
             letter-spacing: normal;
             text-align: left;
-            color: var(--Dark_Gray_6);
+            color: var(--dark-gray-6);
         }
         .title3 {
             margin-top: 8px;
