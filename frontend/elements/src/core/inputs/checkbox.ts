@@ -12,18 +12,12 @@ export class _ extends LitElement {
           align-items: baseline;
         }
         input {
-          margin-left: 2px;
           margin-right: 1px;
           display: inline-block;
         }
         span {
           margin-left: 12px;
           white-space: nowrap;
-        }
-        li {
-          list-style-type: none;
-          padding: 2px 16px 2px 4px;
-          word-wrap:none;
         }
         .errorwrapper {
           border: solid 1px #f00813;
@@ -36,7 +30,9 @@ export class _ extends LitElement {
           display: flex;
           align-items: center;
           height: 30px;
-          margin-left: -2px;
+        }
+        input {
+          margin: 0;
         }
       `,
     ];
@@ -69,12 +65,12 @@ export class _ extends LitElement {
 
     return html`
       <div>
-        <li class="${errorwrapper}">
+        <div class="${errorwrapper}">
           <label class="">
             <input type="checkbox" .checked=${checked} @change="${this.onChange}"/>
             <span class=""> ${label} </span>
           </label>
-        </li>
+        </div>
         ${isError ? html`<p class="error">${error}</p>` : nothing}
       </div>
     `;

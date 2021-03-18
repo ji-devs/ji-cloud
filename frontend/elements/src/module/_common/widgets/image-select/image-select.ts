@@ -1,6 +1,8 @@
 import { LitElement, html, css, customElement, property} from 'lit-element';
 import { nothing } from "lit-html";
 
+export type imageMode = 'image' | 'background';
+
 @customElement('image-select')
 export class _ extends LitElement {
 
@@ -11,6 +13,12 @@ export class _ extends LitElement {
                 flex-direction: column;
                 row-gap: 18px;
                 column-gap: 24px;
+            }
+            :host([imageMode=image]) {
+                --image-width: 118px;
+            }
+            :host([imageMode=background]) {
+                --image-width: 207px;
             }
             .top-row {
                 grid-column: 1 / -1;
@@ -23,22 +31,30 @@ export class _ extends LitElement {
                 font-weight: normal;
             }
             .search-row {
-                display: flex;
+                display: grid;
+                grid-template-columns: auto min-content;
                 align-items: center;
-                column-gap: 24px;
             }
             .search-row ::slotted([slot=search-input]) {
                 width: 100%;
             }
+            .search-row ::slotted([slot=filters]) {
+                grid-column: 2;
+                margin-left: 24px;
+            }
             .bottom-row {
-                display: flex;
+                display: grid;
+                grid-template-columns: min-content min-content;
                 justify-content: space-between;
                 align-items: center;
+            }
+            .bottom-row ::slotted([slot=upload]) {
+                grid-column: 2;
             }
             .image-wrapper {
                 grid-column: 1 / -1;
                 display: grid;
-                grid-template-columns: repeat(auto-fit, 118px);
+                grid-template-columns: repeat(auto-fit, var(--image-width));
                 grid-auto-rows: 118px;
                 gap: 15px;
                 justify-content: space-between;
@@ -53,6 +69,9 @@ export class _ extends LitElement {
 
     @property({type: String})
     label?: string;
+
+    @property({type: String, reflect: true})
+    imageMode: imageMode = "image";
 
     render() {
         return html`

@@ -22,11 +22,3 @@ export const AudioInputRecording = (props?: Partial<Args>) => {
 
 AudioInputRecording.args = DEFAULT_ARGS;
 
-AudioInputRecording.argTypes = {
-    kind: {
-        control: {
-            type: 'inline-radio',
-            options: ['record', 'success', 'upload']
-        }
-    }
-}
