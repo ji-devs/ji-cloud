@@ -11,7 +11,11 @@ use futures::TryStreamExt;
 use serde::Serialize;
 use shared::{
     domain::{
-        category::CategoryId, image::ImageId, meta::AffiliationId, meta::AgeRangeId, meta::StyleId,
+        category::CategoryId,
+        image::{ImageId, ImageKind},
+        meta::AffiliationId,
+        meta::AgeRangeId,
+        meta::StyleId,
     },
     media::MediaGroupKind,
 };
@@ -39,6 +43,7 @@ struct BatchImage<'a> {
     affiliation_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
+    media_subkind: &'a str,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
 }
@@ -197,6 +202,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
             r#"
 select id,
     name,
+    kind as "kind: ImageKind",
     description,
     array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as "affiliations!",
     array((select affiliation.display_name
@@ -242,6 +248,7 @@ for no key update skip locked;
 
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchMedia::Image(BatchImage {
+                media_subkind: &row.kind.to_str(),
                 name: &row.name,
                 description: &row.description,
                 styles: &row.styles,

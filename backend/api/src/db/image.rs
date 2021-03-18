@@ -168,6 +168,7 @@ pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
 r#"
 select id,
        name,
+       kind,
        description,
        is_premium,
        publish_at,
@@ -188,11 +189,13 @@ where id = $1
 pub fn list(
     db: &PgPool,
     is_published: Option<bool>,
+    kind: Option<ImageKind>,
     page: i32,
 ) -> BoxStream<'_, sqlx::Result<Image>> {
     sqlx::query_as(
 r#"
 select id,
+       kind,
        name,
        description,
        is_premium,
@@ -204,12 +207,15 @@ select id,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
 from image_metadata
-where publish_at < now() is not distinct from $1 or $1 is null
+where 
+    publish_at < now() is not distinct from $1 or $1 is null
+    and kind = $3 is not distinct from $3 or $3 is null
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#)
     .bind(is_published)
     .bind(page)
+    .bind(kind.map(|it| it as i16))
     .fetch(db)
 }
 
@@ -224,6 +230,7 @@ pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Im
     sqlx::query_as(
 r#"
 select id,
+       kind,
        name,
        description,
        is_premium,
