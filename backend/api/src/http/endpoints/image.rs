@@ -347,6 +347,7 @@ async fn browse(
     let images: Vec<_> = db::image::list(
         db.as_ref(),
         query.is_published,
+        query.kind,
         query.page.unwrap_or(0) as i32,
     )
     .err_into::<error::Server>()

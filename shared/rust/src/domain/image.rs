@@ -71,6 +71,15 @@ impl ImageKind {
             Self::Sticker => (1440, 810),
         }
     }
+
+    /// Returns self represented by a string
+    #[must_use]
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Canvas => "Canvas",
+            Self::Sticker => "Sticker",
+        }
+    }
 }
 
 /// Wrapper type around [`Uuid`], represents the ID of a image.
@@ -172,6 +181,11 @@ pub struct ImageSearchQuery {
     /// The query string.
     pub q: String,
 
+    /// Optionally filter by `kind`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<ImageKind>,
+
     /// The page number of the images to get.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -240,6 +254,11 @@ pub struct ImageBrowseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_published: Option<bool>,
 
+    /// Optionally filter by `kind`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<ImageKind>,
+
     /// The page number of the images to get.
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -284,6 +303,9 @@ pub struct Image {
     /// Whether or not the image is premium.
     pub is_premium: bool,
 
+    /// What kind of image this is.
+    pub kind: ImageKind,
+
     /// When the image should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
 
@@ -316,6 +338,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for Image {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
         let DbImage {
             id,
+            kind,
             name,
             description,
             is_premium,
@@ -330,6 +353,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for Image {
 
         Ok(Self {
             id,
+            kind,
             name,
             description,
             is_premium,
@@ -348,6 +372,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for Image {
 #[cfg(feature = "backend")]
 struct DbImage {
     pub id: ImageId,
+    pub kind: ImageKind,
     pub name: String,
     pub description: String,
     pub is_premium: bool,
