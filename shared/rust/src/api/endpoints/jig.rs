@@ -1,7 +1,10 @@
 use crate::{
     api::Method,
     domain::{
-        jig::{JigCreateRequest, JigId, JigResponse, JigUpdateRequest},
+        jig::{
+            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
+            JigUpdateRequest,
+        },
         CreateResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -16,6 +19,16 @@ impl ApiEndpoint for Get {
     type Res = JigResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}";
+    const METHOD: Method = Method::Get;
+}
+
+/// Browse jigs.
+pub struct Browse;
+impl ApiEndpoint for Browse {
+    type Req = JigBrowseQuery;
+    type Res = JigBrowseResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/browse";
     const METHOD: Method = Method::Get;
 }
 

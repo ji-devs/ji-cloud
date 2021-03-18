@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use chrono::{DateTime, Utc};
+use futures::TryStreamExt;
 use shared::domain::{
     jig::{Jig, JigId, LiteModule, ModuleId, ModuleKind},
     meta::ContentTypeId,
@@ -200,4 +201,74 @@ pub async fn delete(pool: &PgPool, id: JigId) -> anyhow::Result<()> {
         .await
         .map(drop)
         .map_err(Into::into)
+}
+
+pub async fn list(
+    pool: &sqlx::Pool<sqlx::Postgres>,
+    is_published: Option<bool>,
+    author_id: Option<Uuid>,
+    page: i32,
+) -> sqlx::Result<Vec<Jig>> {
+    sqlx::query!(
+        r#"
+select  
+    id as "id: JigId",
+    display_name,
+    creator_id,
+    author_id,
+    publish_at,
+    array(
+        select row (module_id, kind)
+        from jig_module
+        inner join module on module_id = module.id
+        where jig_id = jig.id
+        order by "index"
+    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as "content_types!: Vec<(ContentTypeId,)>"
+from jig
+where 
+    publish_at < now() is not distinct from $1 or $1 is null
+    and author_id is not distinct from $3 or $3 is null
+order by coalesce(updated_at, created_at) desc
+limit 20 offset 20 * $2
+"#, is_published,
+page,
+author_id,
+
+    )
+    .fetch(pool)
+    .map_ok(|row| Jig {
+        id: row.id,
+        display_name: row.display_name,
+        modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
+            id, kind
+        }).collect(),
+        content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
+        creator_id: row.creator_id,
+        author_id: row.author_id,
+        publish_at: row.publish_at,
+    })
+    .try_collect()
+    .await
+}
+
+pub async fn filtered_count(
+    db: &PgPool,
+    is_published: Option<bool>,
+    author_id: Option<Uuid>,
+) -> sqlx::Result<u64> {
+    sqlx::query!(
+        r#"
+select count(*) as "count!: i64"
+from jig
+where
+    publish_at < now() is not distinct from $1 or $1 is null
+    and author_id is not distinct from $2 or $2 is null
+"#,
+        is_published,
+        author_id,
+    )
+    .fetch_one(db)
+    .await
+    .map(|it| it.count as u64)
 }

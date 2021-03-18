@@ -1,7 +1,6 @@
 use http::StatusCode;
 use serde_json::json;
-use shared::domain::{animation::AnimationId, image::ImageId, CreateResponse};
-use uuid::Uuid;
+use shared::domain::{animation::AnimationId, CreateResponse};
 
 use crate::{
     fixture::Fixture,
