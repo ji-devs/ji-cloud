@@ -110,3 +110,29 @@ async fn get() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+// todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
+
+#[actix_rt::test]
+async fn browse_simple() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/browse", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
