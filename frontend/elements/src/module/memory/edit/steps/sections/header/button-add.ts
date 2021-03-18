@@ -2,15 +2,15 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import "@elements/module/_common/header";
-import {FlexButton} from "@elements/generic/buttons/flex";
+import {ButtonFlex} from "@elements/generic/buttons/flex";
 
 export type MODE = "pair";
 const STR_PAIR = "Add a pair";
 
 @customElement('header-button-add')
-export class _ extends FlexButton {
+export class _ extends ButtonFlex {
   static get styles() {
-      return [super.styles, css`
+      return [...super.styles, css`
           :host {
               margin: 16px 0; 
           }
