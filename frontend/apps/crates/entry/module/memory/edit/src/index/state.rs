@@ -12,12 +12,12 @@ use std::future::Future;
 use components::module::page::StateLoader;
 
 
-pub struct State {
+pub struct LocalState {
     pub data: Mutable<Option<raw::GameData>>,
     pub jig_id: String,
     pub module_id: String,
 }
-impl State {
+impl LocalState {
     pub fn new(jig_id: String, module_id: String, data: Option<raw::GameData>) -> Self {
         Self { 
             data: Mutable::new(data),
@@ -41,19 +41,19 @@ pub struct PageLoader {
     pub jig_id: String,
     pub module_id: String
 }
-impl StateLoader<RawData, State> for PageLoader {
-    type FutureState = impl Future<Output = Option<Rc<State>>>;
+impl StateLoader<RawData, LocalState> for PageLoader {
+    type FutureState = impl Future<Output = Option<Rc<LocalState>>>;
     fn load_state(&self) -> Self::FutureState{ 
         let jig_id = self.jig_id.clone();
         let module_id = self.module_id.clone();
         async move {
             let game_data = debug::settings().data;
-            let state = Rc::new(State::new(jig_id, module_id, game_data));
+            let state = Rc::new(LocalState::new(jig_id, module_id, game_data));
             Some(state)
         }
     }
 
-    fn derive_state(&self, data:RawData) -> Rc<State> { 
-        Rc::new(State::new(self.jig_id.clone(), self.module_id.clone(), Some(data)))
+    fn derive_state(&self, data:RawData) -> Rc<LocalState> { 
+        Rc::new(LocalState::new(self.jig_id.clone(), self.module_id.clone(), Some(data)))
     }
 }

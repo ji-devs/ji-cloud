@@ -7,15 +7,18 @@ use futures_signals::{
 };
 use wasm_bindgen::prelude::*;
 use utils::events;
-use crate::data::raw::GameData as RawData;
+use crate::{
+    data::{state::*, raw::GameData as RawData},
+    steps,
+    choose
+};
 use super::state::*;
-
-pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
+pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, LocalState>>;
 
 pub struct IndexDom {}
 impl IndexDom {
     pub fn render(jig_id: String, module_id: String) -> Page {
-        ModulePage::<PageRenderer, PageLoader, RawData, State>::render(
+        ModulePage::<PageRenderer, PageLoader, RawData, LocalState>::render(
             PageRenderer{},
             PageLoader{jig_id, module_id}
         )
@@ -27,20 +30,20 @@ impl IndexDom {
 pub struct PageRenderer { 
 }
 
-impl ModuleRenderer<State> for PageRenderer {
+impl ModuleRenderer<LocalState> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
     type ChildrenSignal = impl SignalVec<Item = Dom>;
 
 
-    fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal {
+    fn page_kind_signal(state: Rc<LocalState>) -> Self::PageKindSignal {
         state.page_kind_signal()
     }
 
-    fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
+    fn children_signal(state: Rc<LocalState>, kind:ModulePageKind) -> Self::ChildrenSignal {
         state.data
             .signal_cloned()
             .map(clone!(state => move |raw_data| {
-                let state = Rc::new(crate::data::State::new(state.clone(), raw_data));
+                let state = Rc::new(State::new(state.clone(), raw_data));
                 vec![
                     Self::sidebar(state.clone()),
                     Self::header(state.clone()),
@@ -61,44 +64,35 @@ impl ModuleRenderer<State> for PageRenderer {
  * otherwise it's the Steps sections
  */
 impl PageRenderer {
-    fn sidebar(state: Rc<crate::data::State>) -> Option<Dom> {
+    fn sidebar(state: Rc<State>) -> Option<Dom> {
         state.game_mode.get()
             .map(|game_mode| {
-                crate::steps::sidebar::dom::SidebarDom::render(state)
+                steps::sidebar::dom::SidebarDom::render(state)
             })
     }
 
-    fn header(state: Rc<crate::data::State>) -> Option<Dom> { 
+    fn header(state: Rc<State>) -> Option<Dom> { 
         state.game_mode.get()
             .map(|game_mode| {
-                html!("div", { 
-                    .text("header here!")
-                    .property("slot", "header")
-                })
+                steps::header::dom::HeaderDom::render(state)
             })
     }
 
-    fn main(state: Rc<crate::data::State>) -> Option<Dom> { 
+    fn main(state: Rc<State>) -> Option<Dom> { 
         Some(match state.game_mode.get() {
             None => {
-                crate::choose::dom::ChooseDom::render(state)
+                choose::dom::ChooseDom::render(state)
             },
             Some(mode) => {
-                html!("div", {
-                    .text("main here!")
-                    .property("slot", "main")
-                })
+                steps::main::dom::MainDom::render(state)
             }
         })
     }
 
-    fn footer(state: Rc<crate::data::State>) -> Option<Dom> { 
+    fn footer(state: Rc<State>) -> Option<Dom> { 
         state.game_mode.get()
             .map(|game_mode| {
-                html!("div", { 
-                    .text("footer here!")
-                    .property("slot", "footer")
-                })
+                steps::footer::dom::FooterDom::render(state)
             })
     }
 }

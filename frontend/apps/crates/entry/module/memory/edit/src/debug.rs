@@ -1,4 +1,4 @@
-use crate::data::*;
+use crate::data::state::*;
 use cfg_if::cfg_if;
 use futures_signals::{
     map_ref,
@@ -9,7 +9,7 @@ use futures_signals::{
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::*; 
+use crate::data::{raw, state::*};
 
 pub struct DebugSettings {
     pub data:Option<raw::GameData>,

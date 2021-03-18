@@ -2,6 +2,8 @@ import "@elements/core/carousel/multi";
 import "@elements/_sub-bundles/module-edit";
 import "@elements/module/memory/edit/choose/pages/landing";
 import "@elements/module/memory/edit/choose/card";
+import "@elements/module/memory/edit/steps/sections/header/header";
+import "@elements/module/memory/edit/steps/sections/header/button-add";
 import "@elements/module/memory/edit/steps/sections/main/main";
 import "@elements/module/memory/edit/steps/sections/main/card-pair/card";
 import "@elements/module/memory/edit/steps/sections/main/card-pair/pair";

@@ -1,5 +1,5 @@
 use dominator::{html, Dom, clone};
-use crate::data::*;
+use crate::data::state::*;
 use std::rc::Rc;
 use utils::events;
 use wasm_bindgen::prelude::*;
@@ -16,6 +16,27 @@ impl Step1Dom {
 
         let game_mode = state.game_mode.get().unwrap_throw();
 
+        state.is_empty_signal()
+            .map(clone!(state => move |is_empty| {
+                if is_empty {
+                    match game_mode {
+                        GameMode::Duplicate => {
+                            DuplicateDom::render(state.clone())
+                        },
+                        _ => {
+                            Vec::new()
+                        }
+                    }
+                } else {
+                    vec![
+                        html!("step1-sidebar-empty", {
+                            .property("slot", "content")
+                        })
+                    ]
+                }
+            }))
+            .to_signal_vec()
+        /*
         state.pairs.signal_vec_cloned()
             .to_signal_cloned()
             .map(clone!(state => move |pairs| {
@@ -31,10 +52,15 @@ impl Step1Dom {
                         }
                     }
                 } else {
-                    Vec::new()
+                    vec![
+                        html!("step1-sidebar-empty", {
+                            .property("slot", "content")
+                        })
+                    ]
                 }
             }))
             .to_signal_vec()
+            */
     }
 }
 

@@ -7,9 +7,13 @@ export default {
 
 
 interface Args {
+    undoable: boolean,
+    redoable: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
+    undoable: true, 
+    redoable: false,
 }
 
 export const HeaderController = (props?:Partial<Args>) => {

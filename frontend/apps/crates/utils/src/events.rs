@@ -8,6 +8,8 @@ pub use dominator::events::*;
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
 
+temp_make_event!(Reset, "reset" => web_sys::Event);
+
 temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);
 temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
 
@@ -69,6 +71,19 @@ impl CustomRoute {
     }
 }
 
+// Custom String - USE SPARINGLY, AND ONLY FOR OPAQUE STRINGS!
+#[derive(Deserialize, Debug)]
+pub struct CustomStringData {
+    pub value: String,
+}
+
+make_custom_event_serde!("custom-string", CustomString, CustomStringData);
+
+impl CustomString {
+    pub fn value(&self) -> String {
+        self.data().value
+    }
+}
 
 // Custom Search 
 #[derive(Deserialize, Debug)]

@@ -1,5 +1,5 @@
 use dominator::{html, Dom, clone};
-use crate::data::*;
+use crate::data::state::*;
 use std::rc::Rc;
 use utils::events;
 use wasm_bindgen::prelude::*;
@@ -8,13 +8,16 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{SignalVec, SignalVecExt},
 };
-use super::state::*;
-use crate::steps::sidebar::step_1::widgets::single_list::dom::SingleListDom;
+use crate::steps::sidebar::step_1::widgets::single_list::{
+    state::State as ListState,
+    dom::SingleListDom,
+};
 
 pub struct DuplicateDom {}
 impl DuplicateDom {
     pub fn render(state:Rc<State>) -> Vec<Dom> { 
-        let state = Rc::new(LocalState::new(state));
+
+        let list_state = Rc::new(ListState::new(14));
 
         vec![
             html!("step1-sidebar-duplicate", {
@@ -36,7 +39,7 @@ impl DuplicateDom {
                         .property("slot", "input-buttons")
                         .property("mode", "sefaria")
                     }),
-                    SingleListDom::render(state.list.clone())
+                    SingleListDom::render(list_state.clone())
                 ])
             }),
             html!("button-rect", {
@@ -45,6 +48,10 @@ impl DuplicateDom {
                 .property("iconAfter", "done")
                 .property("slot", "btn")
                 .text(crate::strings::STR_DONE)
+                .event(clone!(state, list_state => move |evt:events::Click| {
+                    state.replace_single_list(list_state.derive_list());
+                    
+                }))
             })
         ]
     }

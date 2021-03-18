@@ -15,13 +15,27 @@ pub struct State {
 type IsPlaceholder = bool;
 
 impl State {
-    pub fn new(list: Rc<MutableVec<Mutable<String>>>) -> Self {
+    pub fn new(max:usize) -> Self {
         Self {
-            list,
+            list: Rc::new(MutableVec::new_with_values(
+                    (0..max)
+                        .map(|_| Mutable::new(String::default()))
+                        .collect()
+            )),
             is_placeholder: Mutable::new(true)
         }
     }
 
+    pub fn derive_list(&self) -> Vec<String> {
+        self.list
+            .lock_ref()
+            .iter()
+            .map(|mutable_string| {
+                mutable_string.get_cloned()
+            })
+            .filter(|x| !x.is_empty())
+            .collect()
+    }
 
 }
 

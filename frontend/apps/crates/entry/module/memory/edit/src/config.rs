@@ -1,7 +1,7 @@
 use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
-use crate::data::Theme;
+use crate::data::state::Theme;
 
 macro_rules! config_path {
     ($e:tt) => { 

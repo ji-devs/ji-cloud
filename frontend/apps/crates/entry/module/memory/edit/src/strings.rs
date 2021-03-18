@@ -1,5 +1,6 @@
 pub const STR_DONE:&'static str = "Done";
 pub const STR_CLEAR:&'static str = "Clear";
+pub const STR_CONTINUE:&'static str = "Continue";
 
 pub mod steps_nav {
     pub const STR_CONTENT:&'static str = "Content";

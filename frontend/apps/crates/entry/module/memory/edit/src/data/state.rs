@@ -9,12 +9,13 @@ use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
-use super::raw;
+use super::{raw, history::History};
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
-use crate::index::state::State as IndexState;
+use crate::index::state::LocalState as IndexState;
 use std::collections::HashSet;
+use components::module::history::state::HistoryState;
 
 pub struct State {
     pub index: Rc<IndexState>,
@@ -24,7 +25,10 @@ pub struct State {
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<String>,
     pub first_text: RefCell<bool>,
-    pub content_mode: Mutable<ContentMode>
+    pub content_mode: Mutable<ContentMode>,
+    pub history: Rc<HistoryState<History>>,
+
+    pub is_empty: Mutable<bool>, //to avoid re-rendering things that only depend on this state change
 }
 
 
@@ -51,6 +55,8 @@ impl State {
             }
         };
 
+        let is_empty = pairs.is_empty();
+
         Self {
             index,
             game_mode: Mutable::new(game_mode),
@@ -59,10 +65,15 @@ impl State {
             steps_completed: Mutable::new(HashSet::new()),
             theme_id: Mutable::new(theme_id),
             first_text: RefCell::new(true),
-            content_mode: Mutable::new(debug::settings().content_mode)
+            content_mode: Mutable::new(debug::settings().content_mode),
+            history: Rc::new(HistoryState::new()),
+            is_empty: Mutable::new(is_empty)
         }
     }
 
+    pub fn is_empty_signal(&self) -> impl Signal<Item = bool> {
+        self.is_empty.signal()
+    }
     pub fn pairs_len_signal(&self) -> impl Signal<Item = usize> {
         self.pairs.signal_vec_cloned().len()
     }
@@ -72,14 +83,6 @@ impl State {
             .map(|len| len > 0)
     }
 
-    pub fn change_step(&self, next:Step) {
-        let prev = self.step.get();
-        self.step.set(next);
-        if prev != Step::Four {
-            let mut completed = self.steps_completed.lock_mut();
-            completed.insert(prev);
-        }
-    }
 
     pub fn to_raw(&self) -> raw::GameData {
         let game_mode = self.game_mode.get().unwrap_throw();
@@ -100,10 +103,6 @@ impl State {
         }
     }
 
-    pub fn change_mode(&self, mode: GameMode) {
-        self.game_mode.set(Some(mode));
-        self.pairs.lock_mut().clear();
-    }
 
     pub fn cards_edit_signal(&self) -> impl Signal<Item = bool> {
         map_ref! {
@@ -297,6 +296,22 @@ impl Step {
             Step::Two => 2, 
             Step::Three => 3, 
             Step::Four => 4 
+        }
+    }
+}
+
+
+#[derive(Copy, Clone, Debug)]
+pub enum Side {
+    Left,
+    Right,
+}
+
+impl Side {
+    pub fn slot_name(&self) -> &'static str {
+        match self {
+            Self::Left => "left",
+            Self::Right => "right",
         }
     }
 }

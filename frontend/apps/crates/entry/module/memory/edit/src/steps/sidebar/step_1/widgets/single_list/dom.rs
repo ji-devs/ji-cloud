@@ -11,8 +11,7 @@ use super::state::*;
 
 pub struct SingleListDom {}
 impl SingleListDom {
-    pub fn render(list: Rc<MutableVec<Mutable<String>>>) -> Dom { 
-        let state = Rc::new(State::new(list));
+    pub fn render(state: Rc<State>) -> Dom { 
 
         html!("sidebar-widget-single-list", {
             .property("slot", "input-widget")
@@ -40,6 +39,9 @@ impl SingleListDom {
                             .event(clone!(state => move |evt:events::Focus| {
                                 //log::info!("got focus!");
                                 state.is_placeholder.set_neq(false);
+                            }))
+                            .event(clone!(state => move |evt:events::CustomInput| {
+                                value.set_neq(evt.value());
                             }))
                         })
                     }))
