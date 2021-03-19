@@ -38,7 +38,7 @@ pub async fn create(
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
-    let module_ids = match module_ids.first() {
+    let module_ids = match dbg!(module_ids).first() {
         Some(_) => Cow::Borrowed(module_ids),
         None => Cow::Owned(vec![
             module_of_kind(&mut transaction, Some(ModuleKind::Cover)).await?,
