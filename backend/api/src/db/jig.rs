@@ -39,7 +39,27 @@ pub async fn create(
     let mut transaction = pool.begin().await?;
 
     let module_ids = match dbg!(module_ids).first() {
-        Some(_) => Cow::Borrowed(module_ids),
+        Some(id) => {
+            // todo: handle the 404.
+            let kind = sqlx::query!(
+                r#"select kind as "kind: ModuleKind" from module where id = $1"#,
+                id.0
+            )
+            .fetch_one(&mut transaction)
+            .await?
+            .kind;
+
+            if kind == Some(ModuleKind::Cover) {
+                Cow::Borrowed(module_ids)
+            } else {
+                let mut module_ids = module_ids.to_vec();
+                module_ids.insert(
+                    0,
+                    module_of_kind(&mut transaction, Some(ModuleKind::Cover)).await?,
+                );
+                Cow::Owned(module_ids)
+            }
+        }
         None => Cow::Owned(vec![
             module_of_kind(&mut transaction, Some(ModuleKind::Cover)).await?,
             module_of_kind(&mut transaction, None).await?,
@@ -170,6 +190,23 @@ where id = $1
     .await?;
 
     if let Some(module_ids) = modules {
+        if module_ids.len() < 1 {
+            todo!("422 here instead of panic.");
+        }
+
+        // todo: handle the 404.
+        let kind = sqlx::query!(
+            r#"select kind as "kind: ModuleKind" from module where id = $1"#,
+            id.0
+        )
+        .fetch_one(&mut transaction)
+        .await?
+        .kind;
+
+        if kind != Some(ModuleKind::Cover) {
+            todo!("422 here instead of panic.");
+        }
+
         sqlx::query!("delete from jig_module where jig_id = $1", id.0)
             .execute(&mut transaction)
             .await?;
