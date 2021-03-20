@@ -7,6 +7,8 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
+mod cover;
+
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User]).await;

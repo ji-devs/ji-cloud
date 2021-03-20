@@ -9,6 +9,7 @@ pub enum Fixture {
     Locale,
     Jig,
     Animation,
+    Modules,
 }
 
 impl Fixture {
@@ -25,6 +26,7 @@ impl Fixture {
             Self::Locale => include_str!("../../fixtures/7_locale.sql"),
             Self::Jig => include_str!("../../fixtures/8_jig.sql"),
             Self::Animation => include_str!("../../fixtures/9_animation.sql"),
+            Self::Modules => include_str!("../../fixtures/10_modules.sql"),
         }
     }
 }

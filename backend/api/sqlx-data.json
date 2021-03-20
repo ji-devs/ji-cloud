@@ -2712,6 +2712,26 @@
       ]
     }
   },
+  "f6fdff05a1c03b8d25defb34f67eecbab5067b9bf8165b2189f8fa4d4dbee477": {
+    "query": "select kind as \"kind: ModuleKind\" from module where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true
+      ]
+    }
+  },
   "f7803338a676de1c4fad713fa774406743480aea8ceb9a4b6ba8ec80b74f9b3d": {
     "query": "update image_metadata set last_synced_at = null",
     "describe": {

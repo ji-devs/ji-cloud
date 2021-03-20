@@ -100,7 +100,7 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The JIG's remaining modules.
+    /// The JIG's modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub modules: Option<Vec<ModuleId>>,
@@ -122,7 +122,7 @@ pub struct JigUpdateRequest {
     pub publish_at: Option<Option<Publish>>,
 }
 
-/// Query for [`Browse`](crate::api::endpoints::image::Browse).
+/// Query for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
