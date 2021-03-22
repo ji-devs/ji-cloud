@@ -1,0 +1,11 @@
+---
+source: tests/integration/jig/cover.rs
+expression: body.jig.modules
+
+---
+[
+  {
+    "id": "[id]",
+    "kind": "Cover"
+  }
+]

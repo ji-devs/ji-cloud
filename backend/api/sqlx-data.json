@@ -1485,6 +1485,64 @@
       ]
     }
   },
+  "819dd02cd32f5846bf466214bd6fe9213f7c454c5e1eae42999456097d1a69ee": {
+    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (module_id, kind)\n        from jig_module\n        inner join module on module_id = module.id\n        where jig_id = jig.id\n        order by \"index\"\n    ) as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere \n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $3 or $3 is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int4",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null
+      ]
+    }
+  },
   "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
     "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
     "describe": {
@@ -2077,6 +2135,27 @@
       ]
     }
   },
+  "c009451930f1de4e3602655e09687e8a6231870b72fcc37d87ba08744b2e8804": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nwhere\n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $2 or $2 is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                ",
     "describe": {
@@ -2630,6 +2709,26 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "f6fdff05a1c03b8d25defb34f67eecbab5067b9bf8165b2189f8fa4d4dbee477": {
+    "query": "select kind as \"kind: ModuleKind\" from module where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true
       ]
     }
   },

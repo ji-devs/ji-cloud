@@ -13,6 +13,8 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                     cursor: pointer;
+                    display: grid;
+                    place-content: center;
                 }
                 input {
                     display: none;

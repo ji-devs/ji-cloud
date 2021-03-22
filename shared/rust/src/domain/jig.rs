@@ -19,6 +19,19 @@ pub use module::{LiteModule, ModuleId, ModuleKind};
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigId(pub Uuid);
 
+/// Special parameter for allowing implicit `me` as a user.
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+pub enum UserOrMe {
+    /// We should use the user found in the session auth.
+    Me,
+
+    /// we should use the provided user.
+    User(Uuid),
+}
+
 /// Request to create a new JIG.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -45,7 +58,7 @@ pub struct JigCreateRequest {
 }
 
 /// The over-the-wire representation of a JIG.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Jig {
     /// The ID of the JIG.
@@ -71,7 +84,7 @@ pub struct Jig {
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigResponse {
     /// The requested JIG.
@@ -87,7 +100,7 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The JIG's remaining modules.
+    /// The JIG's modules.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub modules: Option<Vec<ModuleId>>,
@@ -107,6 +120,41 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub publish_at: Option<Option<Publish>>,
+}
+
+/// Query for [`Browse`](crate::api::endpoints::jig::Browse).
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub struct JigBrowseQuery {
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
+
+    /// Optionally filter by author id.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub author_id: Option<UserOrMe>,
+
+    /// The page number of the jigs to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+}
+/// Response for [`Browse`](crate::api::endpoints::jig::Browse).
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub struct JigBrowseResponse {
+    /// the jigs returned.
+    pub jigs: Vec<Jig>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of jigs found
+    pub total_image_count: u64,
 }
 
 into_uuid![JigId];
