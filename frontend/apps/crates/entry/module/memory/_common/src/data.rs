@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 pub struct GameData {
     pub mode: Mode,
     pub pairs: Vec<(Card, Card)>,
-    pub theme_id: String,
+    pub theme: String,
 }
 
 #[derive(Serialize, Deserialize,Clone, Debug)]
@@ -23,11 +23,11 @@ impl GameData {
         Self {
             mode: Mode::Duplicate,
             pairs: Vec::new(), 
-            theme_id: "".to_string()
+            theme: "".to_string()
         }
     }
 
-    pub fn duplicate_debug<I, S>(words:I, theme_id: String) -> Self 
+    pub fn duplicate_debug<I, S>(words:I, theme: String) -> Self 
         where I: Iterator<Item = S>,
               S: AsRef<str>
     {
@@ -36,13 +36,13 @@ impl GameData {
             pairs: words
                 .map(|word| {
                     let word = word.as_ref();
-                    (Card::new_text(word.to_string()), Card::new_text(word.to_string()))
+                    (Card::Text(Some(word.to_string())), Card::Text(Some(word.to_string())))
                 })
                 .collect(),
-            theme_id
+            theme
         }
     }
-    pub fn words_and_images_debug<I, S>(words:I, theme_id: String) -> Self 
+    pub fn words_and_images_debug<I, S>(words:I, theme: String) -> Self 
         where I: Iterator<Item = S>,
               S: AsRef<str>
     {
@@ -51,29 +51,17 @@ impl GameData {
             pairs: words
                 .map(|word| {
                     let word = word.as_ref();
-                    (Card::new_text(word.to_string()), Card::new_image(None))
+                    (Card::Text(Some(word.to_string())), Card::Image(None))
                 })
                 .collect(),
-            theme_id
+            theme
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Card {
-    Text(String),
+    Text(Option<String>),
     Image(Option<String>),
     Audio(Option<String>)
-}
-
-impl Card {
-    pub fn new_text(text:String) -> Self {
-        Card::Text(text)
-    }
-    pub fn new_image(src:Option<String>) -> Self {
-        Card::Image(src)
-    }
-    pub fn new_audio(src:Option<String>) -> Self {
-        Card::Audio(src)
-    }
 }

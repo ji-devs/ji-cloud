@@ -14,20 +14,35 @@ pub struct PairDom {}
 impl PairDom {
     pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, pair:(Card, Card)) -> Dom {
 
-        html!("main-card-pair", {
-            .property_signal("index", index.signal().map(|x| {
-                JsValue::from_f64(x.unwrap_or_default() as f64)
-            }))
-            .child(CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone()))
-            .child(CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Right, pair.1, pair.0))
-            .child(html!("button-icon", {
-                .property("slot", "close")
-                .property("icon", "circle-x-blue")
-                .event(clone!(state => move |evt:events::Click| {
-                    state.delete_pair(index.get().unwrap_or_default());
+        let left = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone());
+        let right = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Right, pair.1, pair.0);
+
+        if step == Step::One {
+            html!("main-card-pair", {
+                .property("hoverable", true)
+                .property_signal("index", index.signal().map(|x| {
+                    JsValue::from_f64(x.unwrap_or_default() as f64)
                 }))
-            }))
-        })
+                .child(left)
+                .child(right)
+                .child(html!("button-icon", {
+                    .property("slot", "close")
+                    .property("icon", "circle-x-blue")
+                    .event(clone!(state => move |evt:events::Click| {
+                        state.delete_pair(index.get().unwrap_or_default());
+                    }))
+                }))
+            })
+        } else {
+            html!("main-card-pair", {
+                .property("hoverable", false)
+                .property_signal("index", index.signal().map(|x| {
+                    JsValue::from_f64(x.unwrap_or_default() as f64)
+                }))
+                .child(left)
+                .child(right)
+            })
+        }
     }
 }
 
@@ -38,6 +53,9 @@ impl CardDom {
         let original_data = card.data.get_cloned();
         html!("main-card", {
             .property("slot", side.slot_name())
+            .property("flippable", step == Step::Two)
+            .property("editing", step == Step::One)
+            .property_signal("theme", state.theme.signal_cloned())
             .child({
                 html!("input-text-content", {
                     .property_signal(

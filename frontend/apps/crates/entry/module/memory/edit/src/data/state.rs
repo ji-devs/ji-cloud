@@ -23,7 +23,7 @@ pub struct State {
     pub pairs: MutableVec<(Card, Card)>,
     pub step: Mutable<Step>,
     pub steps_completed: Mutable<HashSet<Step>>,
-    pub theme_id: Mutable<String>,
+    pub theme: Mutable<String>,
     pub first_text: RefCell<bool>,
     pub content_mode: Mutable<ContentMode>,
     pub history: Rc<HistoryState<History>>,
@@ -37,8 +37,8 @@ impl State {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
-        let (pairs, theme_id) = {
-            if let Some(raw_data) = raw_data {
+        let (pairs, theme) = {
+            if let Some(raw_data) = &raw_data {
                 let pairs:Vec<(Card, Card)> = raw_data.pairs
                     .iter()
                     .map(|(left, right)| {
@@ -46,27 +46,28 @@ impl State {
                     })
                     .collect();
 
-                (pairs, raw_data.theme_id)
+                (pairs, raw_data.theme.clone())
             } else {
                 (
                     Vec::new(),
-                    crate::config::get_themes_cloned()[0].id.clone()
+                    crate::config::get_themes_cloned()[0].clone()
                 )
             }
         };
 
         let is_empty = pairs.is_empty();
 
+        let step = index.step.clone();
         Self {
             index,
             game_mode: Mutable::new(game_mode),
             pairs: MutableVec::new_with_values(pairs),
-            step: Mutable::new(debug::settings().step.unwrap_or(Step::One)),
+            step,
             steps_completed: Mutable::new(HashSet::new()),
-            theme_id: Mutable::new(theme_id),
+            theme: Mutable::new(theme),
             first_text: RefCell::new(true),
             content_mode: Mutable::new(debug::settings().content_mode),
-            history: Rc::new(HistoryState::new()),
+            history: Rc::new(HistoryState::new(History::new(raw_data))),
             is_empty: Mutable::new(is_empty)
         }
     }
@@ -99,7 +100,7 @@ impl State {
         raw::GameData {
             mode,
             pairs,
-            theme_id: self.theme_id.get_cloned()
+            theme: self.theme.get_cloned()
         }
     }
 
@@ -159,11 +160,12 @@ impl Card {
         }
     }
 }
+
 impl From<raw::Card> for Card {
     fn from(raw_card:raw::Card) -> Self {
 
         let (mode, data) = match raw_card {
-            raw::Card::Text(x) => (CardMode::Text,Some(x)),
+            raw::Card::Text(x) => (CardMode::Text,x),
             raw::Card::Image(x) => (CardMode::Image,x),
             raw::Card::Audio(x) => (CardMode::Audio,x)
         };
@@ -178,9 +180,9 @@ impl From<Card> for raw::Card {
     fn from(card:Card) -> raw::Card {
         
         match card.mode.get_cloned() {
-            CardMode::Text => raw::Card::new_text(card.data.get_cloned().unwrap_or("".to_string())) ,
-            CardMode::Image => raw::Card::new_image(card.data.get_cloned()), 
-            CardMode::Audio => raw::Card::new_audio(card.data.get_cloned()), 
+            CardMode::Text => raw::Card::Text(card.data.get_cloned()) ,
+            CardMode::Image => raw::Card::Image(card.data.get_cloned()), 
+            CardMode::Audio => raw::Card::Audio(card.data.get_cloned()), 
         }
 
     }
@@ -222,14 +224,6 @@ pub enum ContentMode {
     TextInit,
     TextDone,
     Images
-}
-
-
-#[derive(Deserialize, Clone)]
-pub struct Theme {
-    pub id: String,
-    pub content: String,
-    pub label: String
 }
 
 

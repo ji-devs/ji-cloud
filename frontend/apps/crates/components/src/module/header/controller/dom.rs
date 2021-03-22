@@ -10,7 +10,7 @@ pub struct ControllerDom {
 
 impl ControllerDom {
     pub fn render<T, F>(history: Rc<HistoryState<T>>, mut on_history_change: F) -> Dom 
-    where T: Clone + Default + 'static,
+    where T: Clone + 'static,
           F: FnMut(Option<T>) + 'static
     {
         html!("module-header-controller", {

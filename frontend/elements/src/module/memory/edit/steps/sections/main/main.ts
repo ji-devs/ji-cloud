@@ -14,10 +14,11 @@ export class _ extends LitElement {
               overflow-x: hidden;
           }
           section {
-              margin: 80rem;
-              display: grid;
-              grid-template-columns: repeat(3, 350rem);
-              gap: 80rem;
+              margin: 80px;
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+              gap: 80px;
           }
     `];
   }

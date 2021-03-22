@@ -1,6 +1,14 @@
 use super::raw::*;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct History {
-    pub pairs: Vec<(Card, Card)>
+    pub game_data: Option<GameData>
+}
+
+impl History {
+    pub fn new(game_data: Option<GameData>) -> Self {
+        Self {
+            game_data
+        }
+    }
 }

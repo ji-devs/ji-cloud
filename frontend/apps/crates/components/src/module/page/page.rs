@@ -67,13 +67,14 @@ pub enum ModulePageKind {
     GridPlain,
     GridResize,
     GridResizeScrollable,
+    GridResizePreview,
     Iframe,
 }
 
 impl ModulePageKind {
     pub fn is_resize(&self) -> bool {
         match self {
-            Self::GridResize | Self::GridResizeScrollable | Self::Iframe => true,
+            Self::GridResize | Self::GridResizeScrollable | Self::GridResizePreview | Self::Iframe => true,
             _ => false, 
         }
     }
@@ -84,10 +85,17 @@ impl ModulePageKind {
         }
     }
 
+    pub fn add_preview_attribute(&self) -> bool {
+        match self {
+            Self::GridResizePreview => true,
+            _ => false
+        }
+    }
     pub fn element_name(&self) -> &str {
         match self {
             Self::GridResize => "module-page-grid-resize",
             Self::GridResizeScrollable => "module-page-grid-resize",
+            Self::GridResizePreview => "module-page-grid-resize",
             Self::GridPlain => "module-page-grid-plain",
             Self::Iframe => "module-page-iframe",
             Self::Empty => "div"
@@ -202,6 +210,9 @@ where
                     let dom = html!(page_kind.element_name(), {
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                             dom.property("scrollable", true)
+                        })
+                        .apply_if(page_kind.add_preview_attribute(), |dom| {
+                            dom.property("preview", true)
                         })
                         .event(|event:ModuleResizeEvent| {
                             //in utils / global static

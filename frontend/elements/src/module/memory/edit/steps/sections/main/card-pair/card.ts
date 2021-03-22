@@ -19,13 +19,13 @@ export class _ extends LitElement {
           }
 
           section, ::slotted(img-ji), .back > img-ui {
-              width: 160rem;
-              height: 160rem;
+              width: 160px;
+              height: 160px;
           }
 
           ::slotted(img-ui) {
-              width: 56rem;
-              height: 56rem;
+              width: 56px;
+              height: 56px;
           }
 
           ::slotted(img-ji), ::slotted(img-ui) {
@@ -48,9 +48,9 @@ export class _ extends LitElement {
           }
 
           .front {
-              border-radius: 16rem;
+              border-radius: 16px;
               border-style: solid;
-              border-width: 3rem;
+              border-width: 3px;
 
               background-color: white;
           }

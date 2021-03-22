@@ -6,15 +6,15 @@ use futures_signals::{
     signal_vec::{SignalVecExt, MutableVec},
 };
 
-pub struct HistoryState<T: Clone + Default> {
+pub struct HistoryState<T: Clone> {
     history: MutableVec<T>,
     cursor: Mutable<usize>
 }
 
-impl <T: Clone + Default> HistoryState <T> {
-    pub fn new() -> Self {
+impl <T: Clone> HistoryState <T> {
+    pub fn new(init:T) -> Self {
         Self {
-            history: MutableVec::new_with_values(vec![T::default()]),
+            history: MutableVec::new_with_values(vec![init]),
             cursor: Mutable::new(0)
         }
     }
