@@ -1,7 +1,6 @@
-use http::StatusCode;
 use serde_json::json;
 use shared::domain::{
-    jig::{JigCreateRequest, JigId, JigResponse, ModuleKind},
+    jig::{JigId, JigResponse},
     CreateResponse,
 };
 

@@ -265,3 +265,21 @@ pub enum ChangePasswordRequest {
         force_logout: bool,
     },
 }
+
+/// Request for [`CreateColor`](crate::api::endpoints::user::CreateColor), [`UpdateColor`](crate::api::endpoints::user::UpdateColor)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct UserColorValueRequest {
+    /// the color to add/change to.
+    pub color: rgb::RGBA8,
+}
+
+/// Response for [`GetColors`](crate::api::endpoints::user::GetColors)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct UserColorResponse {
+    /// The user's colors.
+    pub colors: Vec<rgb::RGBA8>,
+}

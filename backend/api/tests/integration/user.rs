@@ -5,6 +5,8 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
+mod color;
+
 #[actix_rt::test]
 async fn get_profile() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User]).await;

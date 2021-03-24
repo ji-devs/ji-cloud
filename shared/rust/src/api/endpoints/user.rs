@@ -12,7 +12,12 @@ use crate::{
     error::EmptyError,
 };
 
+mod colors;
 mod profile;
+
+pub use colors::{
+    Create as CreateColor, Delete as DeleteColor, Get as GetColors, Update as UpdateColor,
+};
 
 pub use profile::{Get as Profile, Put as PutProfile};
 
@@ -124,6 +129,3 @@ impl ApiEndpoint for Delete {
     const PATH: &'static str = "/v1/user/me";
     const METHOD: Method = Method::Delete;
 }
-
-#[deprecated]
-pub use profile::Put as Register;
