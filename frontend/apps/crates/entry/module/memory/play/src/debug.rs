@@ -20,13 +20,10 @@ pub struct DebugSettings {
 impl DebugSettings {
     pub fn local() -> DebugSettings {
         DebugSettings {
-            data: None,
-            /*
             data: Some(raw::GameData::duplicate_debug(
                 crate::config::get_init_words_iter(),
-                crate::config::get_themes_cloned()[0].id.clone()
+                crate::config::get_themes_cloned()[1].clone()
             )),
-            */
             shuffle: false,
         }
     }
