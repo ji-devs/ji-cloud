@@ -74,6 +74,7 @@ impl State {
             found_pairs: RefCell::new(Vec::new()),
         }
     }
+
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -104,5 +105,5 @@ impl From<GameMode> for raw::Mode {
 pub enum FlipState {
     None,
     One(usize),
-    Two((usize, usize)),
+    Two(usize, usize),
 }
