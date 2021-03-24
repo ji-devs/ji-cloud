@@ -1,5 +1,9 @@
 use serde::{Serialize, Deserialize};
-
+use shared::{
+    domain::image::ImageId,
+    domain::audio::AudioId,
+    media::MediaLibrary
+};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameData {
     pub mode: Mode,
@@ -36,12 +40,13 @@ impl GameData {
             pairs: words
                 .map(|word| {
                     let word = word.as_ref();
-                    (Card::Text(Some(word.to_string())), Card::Text(Some(word.to_string())))
+                    (Card::Text(word.to_string()), Card::Text(word.to_string()))
                 })
                 .collect(),
             theme
         }
     }
+    /*
     pub fn words_and_images_debug<I, S>(words:I, theme: String) -> Self 
         where I: Iterator<Item = S>,
               S: AsRef<str>
@@ -51,17 +56,18 @@ impl GameData {
             pairs: words
                 .map(|word| {
                     let word = word.as_ref();
-                    (Card::Text(Some(word.to_string())), Card::Image(None))
+                    (Card::Text(word.to_string()), Card::Image(None))
                 })
                 .collect(),
             theme
         }
     }
+    */
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Card {
-    Text(Option<String>),
-    Image(Option<String>),
-    Audio(Option<String>)
+    Text(String),
+    Image(ImageId, MediaLibrary),
+    Audio(AudioId, MediaLibrary)
 }

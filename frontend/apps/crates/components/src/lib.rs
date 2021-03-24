@@ -5,5 +5,5 @@
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
 pub mod module;
-//pub mod image;
+pub mod image;
 pub mod color_select;

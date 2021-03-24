@@ -58,7 +58,7 @@ export class _ extends LitElement {
       return html`
           <section>
               <div class="label">${label}</div>  
-              <img-ui class="image" path="module/memory/choose/${mode}.png" alt="${label}"></img-ui>
+              <img-ui class="image" path="module/memory/edit/choose/${mode}.png" alt="${label}"></img-ui>
           </section>
       `
   }

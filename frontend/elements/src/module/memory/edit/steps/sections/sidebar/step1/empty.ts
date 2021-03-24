@@ -46,7 +46,7 @@ export class _ extends LitElement {
 
       return html`
           <section>
-              <img-ui path="module/memory/sidebar/jiggling-card-pointer.svg"></img-ui>
+              <img-ui path="module/memory/edit/sidebar/jiggling-card-pointer.svg"></img-ui>
               <div class="label">${STR_LABEL}</div>
           </section>
       `

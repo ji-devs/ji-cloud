@@ -62,8 +62,9 @@ pub enum MediaLibrary {
 }
 
 impl MediaLibrary {
+    /// returns `self` in a string representation.
     #[must_use]
-    const fn to_str(self) -> &'static str {
+    pub const fn to_str(self) -> &'static str {
         match self {
             Self::Global => "global",
             Self::User => "user",
