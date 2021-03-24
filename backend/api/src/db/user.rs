@@ -283,12 +283,7 @@ order by index
     // hack: do this in a way that maps the original stream instead of a vec (just a perf concern).
     Ok(colors
         .into_iter()
-        .map(|it| rgb::RGBA8 {
-            r: (it.color >> 24) as u8,
-            g: (it.color >> 16) as u8,
-            b: (it.color >> 8) as u8,
-            a: (it.color >> 0) as u8,
-        })
+        .map(|it| color_to_rgba(it.color))
         .collect())
 }
 
