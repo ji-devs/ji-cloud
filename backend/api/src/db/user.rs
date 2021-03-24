@@ -179,3 +179,146 @@ pub async fn update_metadata(
 
     Ok(())
 }
+
+fn rgba_to_i32(color: rgb::RGBA8) -> i32 {
+    i32::from_be_bytes(color.into())
+}
+
+fn color_to_rgba(color: i32) -> rgb::RGBA8 {
+    color.to_be_bytes().into()
+}
+
+pub async fn create_color(
+    db: &sqlx::PgPool,
+    user_id: Uuid,
+    color: rgb::RGBA8,
+) -> sqlx::Result<Vec<rgb::RGBA8>> {
+    let color = rgba_to_i32(color);
+
+    let colors = sqlx::query!(
+        r#"
+with cte as (
+    insert into user_color
+    (user_id, color, index)
+    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color
+), colors as (
+    select color
+    from user_color
+    where user_id = $1
+    order by index
+)
+select color as "color!" from colors
+union all
+select color as "color!" from cte
+    "#,
+        user_id,
+        color
+    )
+    .fetch_all(db)
+    .await?;
+
+    // hack: do this in a way that maps the original stream instead of a vec (just a perf concern).
+    Ok(colors
+        .into_iter()
+        .map(|it| color_to_rgba(it.color))
+        .collect())
+}
+
+pub async fn update_color(
+    db: &sqlx::PgPool,
+    user_id: Uuid,
+    index: u16,
+    color: rgb::RGBA8,
+) -> sqlx::Result<bool> {
+    let color = rgba_to_i32(color);
+
+    let mut txn = db.begin().await?;
+    let exists = sqlx::query!(
+        r#"
+select exists(
+        select 1
+        from user_color
+        where user_id = $1
+            and index = $2
+        for update
+) as "exists!""#,
+        user_id,
+        index as i16
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+
+    if !exists {
+        return Ok(false);
+    }
+
+    sqlx::query!(
+        "update user_color set color = $3 where user_id = $1 and index = $2",
+        user_id,
+        index as i16,
+        color
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
+pub async fn get_colors(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<rgb::RGBA8>> {
+    let colors = sqlx::query!(
+        r#"
+select color
+from user_color
+where user_id = $1
+order by index
+"#,
+        user_id
+    )
+    .fetch_all(db)
+    .await?;
+
+    // hack: do this in a way that maps the original stream instead of a vec (just a perf concern).
+    Ok(colors
+        .into_iter()
+        .map(|it| color_to_rgba(it.color))
+        .collect())
+}
+
+pub async fn delete_color(db: &sqlx::PgPool, user_id: Uuid, index: u16) -> sqlx::Result<()> {
+    let mut txn = db.begin().await?;
+    let _ = sqlx::query!(
+        r#"
+with delete as (
+        delete from user_color
+    where user_id = $1 and index = $2
+)
+select 1 as discard
+from user_color
+where user_id = $1 and index > $2
+for update
+"#,
+        user_id,
+        index as i16
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+update user_color
+set index = index - 1
+where index > $2 and user_id = $1
+"#,
+        user_id,
+        index as i16
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}

@@ -32,6 +32,26 @@
       ]
     }
   },
+  "085304fd00f042843830c03dab547f7547aad3b4f611d26beb5ec22b583686d8": {
+    "query": "\nselect color\nfrom user_color\nwhere user_id = $1\norder by index\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "color",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "09235acdd936537b2a819b15b7aed2df73de16cf7d6b685873f52e4b6d3a7a4d": {
     "query": "\ninsert into category (index, parent_id, name)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2)\nreturning index, id",
     "describe": {
@@ -1279,6 +1299,20 @@
       ]
     }
   },
+  "69b512127b70875985bb54e50242397b7e362535b1a338276778abde7b695787": {
+    "query": "update user_color set color = $3 where user_id = $1 and index = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
     "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
     "describe": {
@@ -1386,6 +1420,27 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "701de512b57a7bb90c579f09319277ac921dff5152c1fb8a2bc1d8bc0548504a": {
+    "query": "\nselect exists(\n        select 1\n        from user_color\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1864,6 +1919,27 @@
       ]
     }
   },
+  "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
+    "query": "\nwith delete as (\n        delete from user_color\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_color\nwhere user_id = $1 and index > $2\nfor update\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "discard",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -1934,6 +2010,19 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a87ea4169f26518cbf7f88c1777bd15bbf72f938d6352567cd549bbe970db5f2": {
+    "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
         ]
       },
       "nullable": []
@@ -2311,6 +2400,27 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
+    "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "color!",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },

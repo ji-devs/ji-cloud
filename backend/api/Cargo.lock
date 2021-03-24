@@ -1696,6 +1696,7 @@ dependencies = [
  "pin-project 1.0.5",
  "rand 0.8.3",
  "reqwest",
+ "rgb",
  "rusoto_core",
  "rusoto_s3",
  "sendgrid",
@@ -2736,6 +2737,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rgb"
+version = "0.8.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "287f3c3f8236abb92d8b7e36797f19159df4b58f0a658cc3fb6dd3004b1f3bd3"
+dependencies = [
+ "bytemuck",
+ "serde",
+]
+
+[[package]]
 name = "ring"
 version = "0.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3230,6 +3241,7 @@ dependencies = [
  "http",
  "http-serde",
  "paperclip",
+ "rgb",
  "serde",
  "serde_json",
  "sqlx",
