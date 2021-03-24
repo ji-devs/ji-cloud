@@ -4,7 +4,6 @@ use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
     jig::{JigId, ModuleId, ModuleKind}, 
     search::CreateSearchKeyResponse, 
-    session::CreateSessionOAuthResponse
 };
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
