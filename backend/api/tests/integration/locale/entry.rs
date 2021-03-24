@@ -1,5 +1,6 @@
 use http::StatusCode;
 
+use serde_json::json;
 use shared::domain::locale::{CreateEntryRequest, EntryStatus};
 
 use crate::{
@@ -67,6 +68,8 @@ async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 
@@ -148,4 +151,39 @@ async fn create() -> anyhow::Result<()> {
     Ok(())
 }
 
-// todo: update entry (various)
+#[actix_rt::test]
+async fn update_in_app() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .patch(&format!("http://0.0.0.0:{}/v1/locale/entry/3", port))
+        .json(&json! ({
+            "inApp": false,
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/locale/entry", port))
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}

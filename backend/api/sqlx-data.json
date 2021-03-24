@@ -803,6 +803,32 @@
       "nullable": []
     }
   },
+  "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
+    "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce($3, item_kind_id),\n    english = coalesce($4, english),\n    hebrew = coalesce($5, hebrew),\n    status = coalesce($6, status),\n    in_app = coalesce($7, in_app),\n    in_element = coalesce($8, in_element),\n    in_mock = coalesce($9, in_mock),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
     "query": "update category set name = $1 where id = $2",
     "describe": {
@@ -2470,32 +2496,6 @@
         null,
         null
       ]
-    }
-  },
-  "dc713784b032fea246bc93f78a1d6156e1e66d5eeb27a840a405450da93443f7": {
-    "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce(item_kind_id, $3),\n    english = coalesce(english, $4),\n    hebrew = coalesce(hebrew, $5),\n    status = coalesce(status, $6),\n    in_app = coalesce(in_app, $7),\n    in_element = coalesce(in_element, $8),\n    in_mock = coalesce(in_mock, $9),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Uuid",
-          "Uuid",
-          "Text",
-          "Text",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "deb684379042b0f339ef2d3bca47d627a7a6b8ac0c003f8d4a3c9c67f64dd1b7": {

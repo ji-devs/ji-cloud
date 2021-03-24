@@ -34,9 +34,9 @@ async fn forbidden(
 
     let body: ApiError<EmptyError> = resp.json().await?;
 
-    assert_eq!(body.code, StatusCode::FORBIDDEN);
-
     app.stop(false).await;
+
+    assert_eq!(body.code, StatusCode::FORBIDDEN);
 
     Ok(())
 }
