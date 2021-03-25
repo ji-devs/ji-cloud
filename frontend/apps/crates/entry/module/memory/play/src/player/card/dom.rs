@@ -1,4 +1,5 @@
-use dominator::{html, Dom, clone};
+use dominator::{html, Dom, clone, with_node};
+use web_sys::HtmlElement;
 use std::rc::Rc;
 use crate::data::state::*;
 use super::state::{State as CardState, Media};
@@ -17,8 +18,9 @@ impl CardDom {
         html!("play-card", {
             .property_signal("flipped", card.is_flipped(&state))
             .property("theme", &state.theme)
-            .style_signal("visibility", card.is_found().map(|is_found| {
-                if is_found {
+            .property("side", card.side.as_str())
+            .style_signal("visibility", card.is_found().map(|flag| {
+                if flag {
                     "hidden"
                 } else {
                     "visible"
@@ -30,7 +32,54 @@ impl CardDom {
                     actions::evaluate(state.clone(), id_1, id_2);
                 }
             }))
+            .after_inserted(clone!(card => move |elem| {
+                *card.main_elem.borrow_mut() = Some(elem);
+            }))
             
+            
+        })
+    }
+
+    pub fn render_sidebar(state: Rc<State>, card: Rc<CardState>) -> Dom {
+        let card_id = &card.id;
+
+        html!("play-card", {
+            .future(card.found_index.signal().for_each(clone!(state, card => move |found_index| {
+                if let Some(found_index) = found_index {
+                    actions::start_animation(&state, card.clone(), found_index);
+                }
+                async {}
+            })))
+            .property("side", card.side.as_str())
+            .style_signal("display", card.is_found().map(|flag| {
+                if flag {
+                    "block"
+                } else {
+                    "none"
+                }
+            }))
+            .property_signal("translateX", {
+                card.transform_signal().map(|t| match t {
+                    Some(t) => t.x,
+                    None => 0.0
+                })
+            }) 
+            .property_signal("translateY", {
+                card.transform_signal().map(|t| match t {
+                    Some(t) => t.y,
+                    None => 0.0
+                })
+            }) 
+            .property_signal("scale", {
+                card.transform_signal().map(|t| match t {
+                    Some(t) => t.scale,
+                    None => 1.0 
+                })
+            }) 
+            .property("flipped", true) 
+            .property("theme", &state.theme)
+            .property("transform", true)
+            .child(card.media_dom())
         })
     }
 }

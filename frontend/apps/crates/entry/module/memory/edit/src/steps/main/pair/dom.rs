@@ -50,41 +50,42 @@ struct CardDom {}
 
 impl CardDom {
     pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {
-        let original_data = card.data.get_cloned();
         html!("main-card", {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
             .property("editing", step == Step::One)
             .property_signal("theme", state.theme.signal_cloned())
             .child({
-                html!("input-text-content", {
-                    .property_signal(
-                        "value", 
-                        card.data
-                            .signal_cloned()
-                            .map(|value| value.unwrap_or_default())
-                    )
-                    .property("clickMode", "single")
-                    .event(clone!(state, index, other => move |evt:events::CustomInput| {
-                        let index = index.get().unwrap_or_default();
-                        let value = evt.value();
+                match card {
+                    Card::Text(data) => {
+                        let original_data = data.get_cloned();
+                        html!("input-text-content", {
+                            .property_signal("value", data.signal_cloned())
+                            .property("clickMode", "single")
+                            .event(clone!(state, index, other => move |evt:events::CustomInput| {
+                                let index = index.get().unwrap_or_default();
+                                let value = evt.value();
 
-                        if game_mode == GameMode::Duplicate {
-                            other.data.set(Some(value));
-                        }
-                    }))
-                    .event(clone!(state, index => move |evt:events::CustomChange| {
-                        let index = index.get().unwrap_or_default();
-                        let value = evt.value();
-                        state.replace_card_value(&card, index, side, value);
-                    }))
-                    .event(clone!(state, index, other, original_data => move |evt:events::Reset| {
-                        let index = index.get().unwrap_or_default();
-                        if game_mode == GameMode::Duplicate {
-                            other.data.set(original_data.clone());
-                        }
-                    }))
-                })
+                                if game_mode == GameMode::Duplicate {
+                                    other.as_text_mutable().set_neq(value);
+                                }
+                            }))
+                            .event(clone!(state, index => move |evt:events::CustomChange| {
+                                let index = index.get().unwrap_or_default();
+                                let value = evt.value();
+                                state.replace_card_text(index, side, value);
+                            }))
+                            .event(clone!(state, other, original_data => move |evt:events::Reset| {
+                                //Just need to change the linked pair
+                                //without affecting history
+                                if game_mode == GameMode::Duplicate {
+                                    other.as_text_mutable().set_neq(original_data.clone());
+                                }
+                            }))
+                        })
+                    },
+                    _ => unimplemented!("can't render other types yet!")
+                }
             })
         })
     }

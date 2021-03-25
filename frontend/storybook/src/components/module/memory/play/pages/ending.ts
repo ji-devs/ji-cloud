@@ -18,15 +18,15 @@ const DEFAULT_ARGS:Args = {
 }
 
 
-export const Landing = (props?:Partial<Args>) => {
+export const Ending = (props?:Partial<Args>) => {
     return `<module-page-iframe>
-    ${Player({...props, isEnding: false})}
+    ${Player({...props, isEnding: true})}
     </module-page-iframe>
     `
 }
 
-Landing.args = DEFAULT_ARGS
-Landing.argTypes = {
+Ending.args = DEFAULT_ARGS
+Ending.argTypes = {
     nCards: {
         control: {
             type: 'inline-radio',

@@ -15,6 +15,7 @@ pub const DEBUG_IMAGE_ID:&'static str ="6468777e-2008-11eb-a943-331f3eea16f5";
 pub struct DebugSettings {
     pub data:Option<raw::GameData>,
     pub shuffle: bool,
+    pub ending: bool,
 }
 
 impl DebugSettings {
@@ -25,12 +26,14 @@ impl DebugSettings {
                 crate::config::get_themes_cloned()[1].clone()
             )),
             shuffle: false,
+            ending: true,
         }
     }
     pub fn default() -> DebugSettings {
         DebugSettings {
             data: None,
             shuffle: true,
+            ending: false,
         }
     }
 }

@@ -1,6 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/memory/play/sections/header";
+import "@elements/module/memory/play/sections/ending";
 import {mapToString, arrayIndex} from "@utils/array";
+
 
 export default {
     title: "Module / Memory / Play / Sections"
@@ -12,11 +13,13 @@ interface Args {
 const DEFAULT_ARGS:Args = {
 }
 
-export const Header = (props?:Partial<Args>) => {
+export const Ending = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
+
     return `
-    <play-header slot="header"></play-header>`;
+    <play-ending ${argsToAttrs(props)} slot="main">
+    </play-ending>`;
 }
 
-Header.args = DEFAULT_ARGS;
+Ending.args = DEFAULT_ARGS;

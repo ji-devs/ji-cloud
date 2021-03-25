@@ -27,7 +27,7 @@ impl Step2Dom {
                             }
                         })))
                         .event(clone!(state => move |evt:events::Click| {
-                            state.theme.set_neq(theme.to_string());
+                            state.change_theme(theme.to_string());
                         }))
                     })
                   })

@@ -1,8 +1,13 @@
 use crate::data::state::{State as AppState, FlipState};
+use super::{
+    state::State as CardState,
+    animation::Animation
+};
 use gloo_timers::future::TimeoutFuture;
 use wasm_bindgen_futures::spawn_local;
 use std::rc::Rc;
-
+use web_sys::HtmlElement;
+use wasm_bindgen::prelude::*;
 
 pub fn card_click(state: Rc<AppState>, id: usize) -> Option<(usize, usize)> {
     let flip_state = &mut *state.flip_state.lock_mut();
@@ -42,4 +47,8 @@ pub fn evaluate(state: Rc<AppState>, id_1: usize, id_2: usize) {
         }
         state.flip_state.set(FlipState::None);
     })
+}
+
+pub fn start_animation(state: &AppState, card: Rc<CardState>, found_index: usize) {
+    card.animation.set(Some(Animation::new(state, card.main_elem.borrow().as_ref().unwrap_throw(), found_index, card.side)));
 }

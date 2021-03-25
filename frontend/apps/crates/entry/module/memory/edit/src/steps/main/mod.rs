@@ -1,2 +1,2 @@
 pub mod dom;
-pub mod card_pair;
+pub mod pair;
