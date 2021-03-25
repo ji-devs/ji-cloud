@@ -63,6 +63,7 @@ impl ImageMetaPage {
                                     categories: Vec::new(),
                                     is_premium: None,
                                     is_published: None,
+                                    kind: None,
                                 };
                                 let route:String = Route::Admin(AdminRoute::ImageSearch(Some(query))).into();
                                 dominator::routing::go_to_url(&route);

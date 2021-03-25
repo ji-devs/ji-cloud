@@ -4,7 +4,7 @@ const STR_FILTER = "Filter";
 const STR_SEARCH_IN = "Search in";
 const STR_IMAGE_STYLE = "Image style";
 
-@customElement('image-select-filters')
+@customElement('image-search-filters')
 export class _ extends LitElement {
 
     static get styles() {
@@ -29,7 +29,7 @@ export class _ extends LitElement {
                 align-items: center;
                 column-gap: 8px;
             }
-            :host([open]) .caret {
+            .caret {
                 transition: transform .2s;
             }
             :host([open]) .caret {
