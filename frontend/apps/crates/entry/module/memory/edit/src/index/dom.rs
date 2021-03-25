@@ -12,13 +12,13 @@ use crate::{
     steps,
     choose
 };
-use super::state::*;
-pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, LocalState>>;
+use super::loader::*;
+pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
 
 pub struct IndexDom {}
 impl IndexDom {
     pub fn render(jig_id: String, module_id: String) -> Page {
-        ModulePage::<PageRenderer, PageLoader, RawData, LocalState>::render(
+        ModulePage::<PageRenderer, PageLoader, RawData, State>::render(
             PageRenderer{},
             PageLoader{jig_id, module_id}
         )
@@ -30,26 +30,25 @@ impl IndexDom {
 pub struct PageRenderer { 
 }
 
-impl ModuleRenderer<LocalState> for PageRenderer {
+impl ModuleRenderer<State> for PageRenderer {
     type PageKindSignal = impl Signal<Item = ModulePageKind>;
     type ChildrenSignal = impl SignalVec<Item = Dom>;
 
 
-    fn page_kind_signal(state: Rc<LocalState>) -> Self::PageKindSignal {
+    fn page_kind_signal(state: Rc<State>) -> Self::PageKindSignal {
         state.page_kind_signal()
     }
 
-    fn children_signal(state: Rc<LocalState>, kind:ModulePageKind) -> Self::ChildrenSignal {
-        state.data
-            .signal_cloned()
-            .map(clone!(state => move |raw_data| {
-                log::info!("{:?}", kind);
-                let state = Rc::new(State::new(state.clone(), raw_data));
+    fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
+        log::info!("re-rendering children!");
+        state.game_mode
+            .signal()
+            .map(clone!(state => move |game_mode| {
                 vec![
-                    Self::sidebar(state.clone(), kind),
-                    Self::header(state.clone(), kind),
-                    Self::main(state.clone(), kind),
-                    Self::footer(state.clone(), kind),
+                    Self::sidebar(state.clone(), game_mode, kind),
+                    Self::header(state.clone(), game_mode, kind),
+                    Self::main(state.clone(), game_mode, kind),
+                    Self::footer(state.clone(), game_mode, kind),
                 ]
                 .into_iter()
                 .filter(|x| x.is_some())
@@ -65,30 +64,30 @@ impl ModuleRenderer<LocalState> for PageRenderer {
  * otherwise it's the Steps sections
  */
 impl PageRenderer {
-    fn sidebar(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> {
+    fn sidebar(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            state.game_mode.get()
+            game_mode
                 .map(|game_mode| {
                     steps::sidebar::dom::SidebarDom::render(state)
                 })
         }
     }
 
-    fn header(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
+    fn header(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             Some(steps::header::dom::HeaderPreviewDom::render(state))
         } else {
-            state.game_mode.get()
+            game_mode
                 .map(|game_mode| {
                     steps::header::dom::HeaderDom::render(state)
                 })
         }
     }
 
-    fn main(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
-        Some(match state.game_mode.get() {
+    fn main(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+        Some(match game_mode {
             None => {
                 choose::dom::ChooseDom::render(state)
             },
@@ -102,11 +101,11 @@ impl PageRenderer {
         })
     }
 
-    fn footer(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> { 
+    fn footer(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            state.game_mode.get()
+            game_mode
                 .map(|game_mode| {
                     steps::footer::dom::FooterDom::render(state)
                 })

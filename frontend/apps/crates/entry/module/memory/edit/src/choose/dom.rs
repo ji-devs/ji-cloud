@@ -12,7 +12,8 @@ impl ChooseDom {
                       html!("choose-card", {
                           .property("mode", "duplicate")
                             .event(clone!(state => move |evt:events::Click| {
-                                state.index.data.set(Some(raw::GameData::new_duplicate()));
+                                state.change_mode(GameMode::Duplicate);
+                                //state.set_from_raw(Some(raw::GameData::new_duplicate()));
                             }))
                       }),
                       html!("choose-card", {

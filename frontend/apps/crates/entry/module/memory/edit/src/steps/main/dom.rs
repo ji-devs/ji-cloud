@@ -8,7 +8,7 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
-use super::card_pair::dom::PairDom;
+use super::pair::dom::PairDom;
 
 pub struct MainDom {}
 impl MainDom {
@@ -17,15 +17,8 @@ impl MainDom {
         let game_mode = state.game_mode.get().unwrap_throw();
 
         html!("empty-fragment", {
-            //Top-level future listeners here affect other areas too
-            //it's just kept on main because it needs to be somewhere
-            //main makes sense and I'd prefer to not pollute index
-            .future(state.pairs.signal_vec_cloned().for_each(clone!(state => move |pairs| {
-                state.is_empty.set_neq(state.pairs.lock_ref().is_empty());
-                async {}
-            })))
             .property("slot", "main")
-            .child_signal(state.is_empty.signal().map(clone!(state => move |is_empty| {
+            .child_signal(state.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {
                         html!("module-main-empty")

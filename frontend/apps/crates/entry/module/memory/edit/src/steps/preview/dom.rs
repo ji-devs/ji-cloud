@@ -20,8 +20,8 @@ impl PreviewDom {
         let url = {
             let route:String = Route::Module(ModuleRoute::Play(
                     ModuleKind::Memory, 
-                    state.index.jig_id.clone(), 
-                    state.index.module_id.clone())
+                    state.jig_id.clone(), 
+                    state.module_id.clone())
                                             ).into();
 
             let url = unsafe {
@@ -46,7 +46,7 @@ impl PreviewDom {
 
                     if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                         //Iframe is ready and sent us a message, let's send one back!
-                        let data = state.to_raw(); 
+                        let data = state.history.get_current().game_data.unwrap_throw(); 
                         let msg:IframeInit<raw::GameData> = IframeInit::new(data); 
                         let window = elem.content_window().unwrap_throw();
                         window.post_message(&msg.into(), &url);

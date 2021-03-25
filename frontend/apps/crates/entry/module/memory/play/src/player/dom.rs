@@ -2,9 +2,12 @@ use dominator::{html, clone, Dom};
 use crate::data::state::*;
 use std::rc::Rc;
 use super::sections::{
-    header::dom::HeaderDom,
     main::dom::MainDom,
-    sidebar::dom::SidebarDom
+    sidebar::dom::SidebarDom,
+};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec::SignalVecExt
 };
 
 pub struct PlayerDom {}
@@ -14,7 +17,6 @@ impl PlayerDom {
         html!("play-container", {
             .property("slot", "main")
             .children(&mut [
-                HeaderDom::render(state.clone()),
                 MainDom::render(state.clone()),
                 SidebarDom::render(state.clone()),
             ])

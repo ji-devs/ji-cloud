@@ -4,18 +4,23 @@ use std::{
     cell::RefCell
 };
 use futures_signals::{
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
+    map_ref,
+    signal::{Mutable, SignalExt, Signal, self},
+    signal_vec::{MutableVec, SignalVecExt, SignalVec, self},
 };
 use rand::prelude::*;
 use shared::{
     domain::image::ImageId,
     media::MediaLibrary
 };
+use wasm_bindgen::UnwrapThrowExt;
 use crate::{
     index::state::LocalState as IndexState,
     player::card::state::{State as CardState, Side},
 };
+use std::future::Future;
+use futures::future::join_all;
+use gloo_timers::future::TimeoutFuture;
 
 pub struct State {
     pub index: Rc<IndexState>,
@@ -46,8 +51,8 @@ impl State {
                 let id_2 = index + 1;
                 index = id_2 + 1;
 
-                cards.push(Rc::new(CardState::new(card_1, id_1, id_2, Side::Left)));
-                cards.push(Rc::new(CardState::new(card_2, id_2, id_1, Side::Right)));
+                cards.push(Rc::new(CardState::new(card_1.into(), id_1, id_2, Side::Left)));
+                cards.push(Rc::new(CardState::new(card_2.into(), id_2, id_1, Side::Right)));
             }
 
             cards
@@ -73,6 +78,29 @@ impl State {
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
         }
+    }
+
+    pub fn all_cards_ended_future(&self) -> impl Future<Output = bool> {
+        let fut = join_all(
+            self.cards
+                .iter()
+                .map(|card| {
+                    card
+                        .ended_signal()
+                        .wait_for(true)
+                })
+        );
+
+        async move {
+            fut.await.into_iter().all(|ended| ended.unwrap_or(false))
+        }
+    }
+
+    pub fn all_cards_ended_signal(&self) -> impl Signal<Item = bool> {
+        signal::from_future(self.all_cards_ended_future())
+            .map(|s| s.unwrap_or(false))
+            .dedupe()
+            .throttle(|| TimeoutFuture::new(1_000))
     }
 
 }

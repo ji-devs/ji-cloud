@@ -1,8 +1,9 @@
-use super::{state::*, history::*, raw};
+use super::{state::*, history::History, raw};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use dominator::clone;
 use components::module::history::state::HistoryState;
+use futures_signals::signal::Mutable;
 
 impl State {
     pub fn add_card(&self) {
@@ -10,8 +11,8 @@ impl State {
         let raw_pair = match game_mode {
             GameMode::Duplicate => {
                 (
-                    raw::Card::Text(None),
-                    raw::Card::Text(None),
+                    raw::Card::Text("".to_string()),
+                    raw::Card::Text("".to_string()),
                 )
             },
             _ => unimplemented!("unknown!")
@@ -26,7 +27,16 @@ impl State {
 
         self.history.push_mix(move |history| {
             if let Some(game_data) = &mut history.game_data {
-                game_data.pairs.push(raw_pair);
+                game_data.pairs.push((raw_pair.0.into(), raw_pair.1.into()));
+            }
+        });
+    }
+
+    pub fn change_theme(&self, theme:String) {
+        self.theme.set_neq(theme.clone());
+        self.history.push_mix(move |history| {
+            if let Some(game_data) = &mut history.game_data {
+                game_data.theme = theme;
             }
         });
     }
@@ -41,11 +51,16 @@ impl State {
     }
 
     pub fn change_mode(&self, mode: GameMode) {
-        self.game_mode.set(Some(mode));
-        self.pairs.lock_mut().clear();
         self.history.push_mix(move |history| {
-
+            match mode {
+                GameMode::Duplicate => {
+                    history.game_data = Some(raw::GameData::new_duplicate());
+                },
+                _ => unimplemented!("TODO - change mode")
+            };
         });
+
+        self.set_from_history(Some(self.history.get_current()));
     }
 
 
@@ -60,8 +75,8 @@ impl State {
                         .into_iter()
                         .map(|word| {
                             (
-                                Card::new_with_data(CardMode::Text, word.clone()),
-                                Card::new_with_data(CardMode::Text, word),
+                                Card::new_text(word.clone()),
+                                Card::new_text(word),
                             )
                         })
                         .collect();
@@ -73,19 +88,24 @@ impl State {
 
     }
 
-    pub fn replace_card_value(&self, card:&Card, pair_index: usize, side: Side, value: String) {
-        card.data.set(Some(value.clone()));
+
+    pub fn replace_card_text(&self, pair_index: usize, side: Side, text: String) {
+
+        self.with_pair(pair_index, side, clone!(text => move |game_mode, card, other| {
+            if game_mode == GameMode::Duplicate {
+                other.as_text_mutable().set_neq(text.clone());
+            }
+            card.as_text_mutable().set_neq(text);
+        }));
+
         self.history.push_mix(|history| {
             if let Some(game_data) = &mut history.game_data {
-                let card = {
-                    let mut pair = &mut game_data.pairs[pair_index];
-
-                    match side {
-                        Side::Left => &mut pair.0,
-                        Side::Right => &mut pair.1
+                with_raw_pair(game_data, pair_index, side, clone!(text => move |game_mode, card, other| {
+                    if game_mode == GameMode::Duplicate {
+                        *other = raw::Card::Text(text.clone());
                     }
-                };
-                *card = raw::Card::Text(Some(value));
+                    *card = raw::Card::Text(text.clone());
+                }));
             }
         });
     }
@@ -99,7 +119,20 @@ impl State {
         });
     }
 
-    //internal only
+    fn with_pair<A, F: FnOnce(GameMode, &Card, &Card) -> A>(&self, pair_index: usize, main_side: Side, f: F) -> A {
+        let game_mode = self.game_mode.get().unwrap_throw();
+        let pair = self.pairs.lock_ref();
+        let pair = pair.get(pair_index).unwrap_throw();
+        match main_side {
+            Side::Left => {
+                f(game_mode, &pair.0, &pair.1)
+            },
+            Side::Right => {
+                f(game_mode, &pair.1, &pair.0)
+            }
+        }
+    }
+
     fn replace_pairs(&self, pairs:Vec<(Card, Card)>) {
         self.pairs.lock_mut().replace_cloned(pairs.clone());
         self.history.push_mix(move |last| {
@@ -117,19 +150,45 @@ impl State {
     pub fn set_from_history(&self, history:Option<History>) {
         match history {
             Some(history) => {
-                if let Some(game_data) = history.game_data {
-                    self.pairs.lock_mut().replace_cloned(
-                        game_data.pairs
-                            .into_iter()
-                            .map(|pair| (pair.0.into(), pair.1.into()))
-                            .collect()
-                    );
-                }
+                self.set_from_raw(history.game_data);
+            },
+            None => {
+                self.set_from_raw(None);
+            }
+        }
+    }
+    pub fn set_from_raw(&self, game_data:Option<raw::GameData>) {
+        match game_data {
+            Some(game_data) => {
+                self.pairs.lock_mut().replace_cloned(
+                    game_data.pairs
+                        .into_iter()
+                        .map(|pair| (pair.0.into(), pair.1.into()))
+                        .collect()
+                );
+                self.game_mode.set_neq(Some(game_data.mode));
+                self.theme.set_neq(game_data.theme);
             },
             None => {
                 self.pairs.lock_mut().clear();
+                self.game_mode.set_neq(None);
+                self.theme.set_neq("".to_string());
             }
         }
     }
 
+}
+
+//internal only
+fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::GameData, pair_index: usize, main_side: Side, f: F) -> A {
+    let game_mode = game_data.mode.clone();
+    let pair = game_data.pairs.get_mut(pair_index).unwrap_throw();
+    match main_side {
+        Side::Left => {
+            f(game_mode, &mut pair.0, &mut pair.1)
+        },
+        Side::Right => {
+            f(game_mode, &mut pair.1, &mut pair.0)
+        }
+    }
 }

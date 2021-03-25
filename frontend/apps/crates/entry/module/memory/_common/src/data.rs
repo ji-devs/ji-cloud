@@ -10,8 +10,14 @@ pub struct GameData {
     pub pairs: Vec<(Card, Card)>,
     pub theme: String,
 }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Card {
+    Text(String),
+    Image(Option<(ImageId, MediaLibrary)>),
+    Audio(Option<(AudioId, MediaLibrary)>)
+}
 
-#[derive(Serialize, Deserialize,Clone, Debug)]
+#[derive(Serialize, Deserialize,Clone, Copy, Debug, PartialEq)]
 pub enum Mode {
     Duplicate,
     WordsAndImages
@@ -65,9 +71,3 @@ impl GameData {
     */
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Card {
-    Text(String),
-    Image(ImageId, MediaLibrary),
-    Audio(AudioId, MediaLibrary)
-}

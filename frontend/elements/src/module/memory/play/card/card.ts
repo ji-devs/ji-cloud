@@ -4,6 +4,8 @@ import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/module/_common/theme";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 
+type SIDE = "left" | "right";
+
 @customElement('play-card')
 export class _ extends LitElement {
   static get styles() {
@@ -13,10 +15,19 @@ export class _ extends LitElement {
               position: absolute;
               top: 0;
               left: 0;
+              z-index: 1000;
+              transition-duration: 0s;
           }
 
           :host([transform]) {
-                  cursor: default;
+              cursor: default;
+          }
+
+          :host([side="right"]) > section {
+                  z-index: 1000;
+          }
+          :host([side="left"]) > section {
+                  z-index: 1001;
           }
           :host {
                   cursor: pointer;
@@ -86,6 +97,9 @@ export class _ extends LitElement {
   @property({type: Number})
   translateY:number = 0;
 
+  @property({reflect: true})
+  side:SIDE = "left";
+
   render() {
       const {theme, scale, transform, translateX, translateY} = this;
 
@@ -94,8 +108,8 @@ export class _ extends LitElement {
 
       return html`
           <section style="${style}">
-          <div class="front" style="${frontStyle}"><slot></slot></div>
-          <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
+              <div class="front" style="${frontStyle}"><slot></slot></div>
+              <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
           </section>
       `
   }

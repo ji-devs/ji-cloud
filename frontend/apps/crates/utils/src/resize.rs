@@ -10,6 +10,7 @@ use serde::Deserialize;
 use std::sync::{Mutex, MutexGuard};
 use futures_signals::signal::Mutable;
 use crate::math::transform_2d;
+use futures_signals::signal::Signal;
 
 static RESIZE_INFO: Lazy<Mutable<ResizeInfo>> = Lazy::new(|| Mutable::new(ResizeInfo::default()));
 // This event data is sent from the custom element
@@ -37,15 +38,17 @@ pub fn set_resize_info(info:ResizeInfo) {
     RESIZE_INFO.set(info);
 }
 
-pub fn get_resize_info() -> Mutable<ResizeInfo> {
-    RESIZE_INFO.clone()
+pub fn resize_info_signal() -> impl Signal<Item = ResizeInfo> {
+    RESIZE_INFO.signal_cloned()
 }
 
+pub fn get_resize_info() -> ResizeInfo {
+    RESIZE_INFO.get_cloned()
+}
 impl ResizeInfo {
     pub fn get_element_pos_rem(&self, element:&Element) -> (f64, f64) {
         let (x, y) = self.get_element_pos_px(element);
-        //10.0 gets us from px to rem - but also need to account for scale
-        let scale = 10.0 * self.scale; 
+        let scale = self.scale; 
         (x / scale, y / scale)
     }
 

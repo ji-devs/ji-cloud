@@ -33,6 +33,11 @@ impl <T: Clone> HistoryState <T> {
         }
     }
 
+    pub fn get_current(&self) -> T {
+        let mut cursor = self.cursor.lock_mut();
+        self.history.lock_ref().index(*cursor).clone()
+    }
+
     pub fn undo_unchecked(&self) -> Option<T> {
         let mut cursor = self.cursor.lock_mut();
         if *cursor > 0 {
