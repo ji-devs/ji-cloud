@@ -2,12 +2,12 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/images/ui";
 
 
-@customElement('image-select-style-option')
+@customElement('image-search-style-option')
 export class _ extends LitElement {
 
     static get styles() {
         return [css`
-            :host {
+            .wrapper {
                 display: flex;
                 justify-content: space-between;
                 cursor: pointer;
@@ -15,7 +15,7 @@ export class _ extends LitElement {
                 align-items: center;
                 line-height: 28px;
             }
-            :host(:hover) {
+            .wrapper:hover {
                 background-color: var(--light-blue-2);
             }
             .text {
@@ -31,10 +31,19 @@ export class _ extends LitElement {
     @property({type: String})
     label: string = "";
 
+    private toggleSelected() {
+        this.selected = !this.selected;
+        this.dispatchEvent(new CustomEvent("custom-toggle", {
+            detail: { value: this.selected },
+        }));
+    }
+
     render() {
         return html`
-            <span class="text">${this.label}</span>
-            ${ this.selected ? html`<img-ui path="module/_common/widgets/sidebar/image-select/filter-option-check.svg"></img-ui>` : '' }
+            <div class="wrapper" @click="${() => this.toggleSelected()}">
+                <span class="text">${this.label}</span>
+                ${ this.selected ? html`<img-ui path="module/_common/widgets/sidebar/image-select/filter-option-check.svg"></img-ui>` : '' }
+            </div>
         `;
     }
 }

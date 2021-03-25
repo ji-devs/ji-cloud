@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/images/ui";
 
 
-@customElement('image-select-upload')
+@customElement('image-search-upload')
 export class _ extends LitElement {
 
     static get styles() {
@@ -28,8 +28,8 @@ export class _ extends LitElement {
         if(e.target.files[0]) {
             const file = e.target.files[0];
             console.log(file);
-            this.dispatchEvent(new CustomEvent("custom-file-change", {
-                detail: { file },
+            this.dispatchEvent(new CustomEvent("custom-file", {
+                detail: file,
             }))
         }
     }

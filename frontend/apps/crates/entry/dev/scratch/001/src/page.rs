@@ -13,8 +13,7 @@ use dominator_helpers::{elem, with_data_id};
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use crate::templates;
-use components::module::page::*;
+use components::image_search::{self, state::ImageSearchOptions};
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
 
@@ -22,7 +21,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_steps() 
+        render_image_search()
     }
 }
 
@@ -64,8 +63,20 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
                 false
             }
         }))
-        .event(clone!(step, state => move |evt:events::Click| {
+        .event(clone!(step, state => move |evt: events::Click| {
             state.current_step.set(step);
+        }))
+    })
+}
+
+pub fn render_image_search() -> Dom {
+    html!("div", {
+        .style("padding", "30px")
+        .child(image_search::dom::render(ImageSearchOptions {
+            background_only: Some(false),
+            upload: Some(()),
+            filters: Some(()),
+            value: Mutable::new(None),
         }))
     })
 }

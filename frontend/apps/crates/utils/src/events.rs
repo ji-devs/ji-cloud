@@ -1,7 +1,9 @@
 use serde::Deserialize;
-use dominator_helpers::{temp_make_event, make_custom_event_serde};
+use dominator_helpers::{temp_make_event, make_custom_event_serde, make_custom_event};
+use web_sys::File;
 use super::resize::*;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 pub use dominator::events::*;
 
@@ -117,3 +119,23 @@ impl GoogleLocation {
     }
 }
 
+
+// #[derive(Deserialize, Debug)]
+// pub struct CustomFileData {
+//     pub file: File,
+// }
+
+// make_custom_event_serde!("custom-file", CustomFile, CustomFileData);
+
+// impl CustomFile {
+//     pub fn file(&self) -> File {
+//         self.file().file
+//     }
+// }
+make_custom_event!(CustomFile, "custom-file");
+
+impl CustomFile {
+    pub fn file(&self) -> web_sys::File {
+        self.detail().unchecked_into()
+    }
+}
