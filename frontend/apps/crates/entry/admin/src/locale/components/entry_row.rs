@@ -1,5 +1,8 @@
+use shared::domain::locale::EntryStatus;
 use url::Url;
-use crate::locale::state::{EntryStatus, ItemKind, Entry, State, Section, Column};
+use uuid::Uuid;
+use crate::locale::state::{DisplayableEntry, State, Section, Column};
+use crate::locale::actions::{AsStringExt, EnumOptionsExt};
 use web_sys::HtmlSelectElement;
 use std::rc::Rc;
 use std::clone::Clone;
@@ -7,8 +10,6 @@ use wasm_bindgen::prelude::*;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::SignalVecExt;
 use dominator::{Dom, html, clone, events, with_node};
-use std::str::FromStr;
-use strum::IntoEnumIterator;
 
 
 #[derive(Clone)]
@@ -25,7 +26,13 @@ impl EntryRow {
         }
     }
 
-    pub fn render(entry: Rc<Mutable<Entry>>, state: Rc<State>) -> Dom {
+    fn save_entry(state: Rc<State>, entry: DisplayableEntry) {
+        state.saving_loader.load(clone!(state => async move {
+            state.save_entry(&entry).await;
+        }))
+    }
+
+    pub fn render(entry: Rc<Mutable<DisplayableEntry>>, state: Rc<State>) -> Dom {
         html!("locale-row", {
             .property("slot", "rows")
             .children_signal_vec(state.visible_columns.signal_vec_cloned()
@@ -35,11 +42,13 @@ impl EntryRow {
                         Column::ID => {
                             html!("locale-cell", {
                                 .child(html!("input", {
-                                    .property("value", &entry_ref.id)
-                                    .event(clone!(entry => move |event: events::Input| {
-                                        let value: String = event.value().unwrap_throw();
+                                    .property("value", entry_ref.id)
+                                    .attribute("readonly", "")
+                                    .event(clone!(state, entry => move |event: events::Input| {
+                                        let value: u32 = event.value().unwrap_throw().parse().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.id = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -51,10 +60,11 @@ impl EntryRow {
                                         dom.property("value", &entry_ref.section.clone().unwrap())
                                     })
                                     .attribute("list", "sections")
-                                    .event(clone!(entry => move |event: events::Input| {
+                                    .event(clone!(state, entry => move |event: events::Input| {
                                         let value: Section = event.value().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.section = Some(value);
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                     .event(clone!(state => move |_: events::Change| {
                                         state.regenerate_section_options();
@@ -64,19 +74,40 @@ impl EntryRow {
                         },
                         Column::ItemKind => {
                             html!("locale-cell", {
-                                .child(html!("input", {
-                                    .apply_if(entry_ref.item_kind.is_some(), |dom| {
-                                        dom.property("value", &entry_ref.item_kind.clone().unwrap())
+                                .child(html!("select" => HtmlSelectElement, {
+                                    .with_node!(elem => {
+                                        .property("value", {
+                                            match entry_ref.item_kind_id {
+                                                Some(item_kind_id) => item_kind_id.to_string(),
+                                                None => String::new(),
+                                            }
+                                        })
+                                        .event(clone!(state, entry => move |_: events::Input| {
+                                            let value: String = elem.value();
+                                            let value = match Uuid::parse_str(&value) {
+                                                Ok(uuid) => Some(uuid),
+                                                Err(_) => None,
+                                            };
+                                            let mut entry = entry.lock_mut();
+                                            entry.item_kind_id = value;
+                                            Self::save_entry(state.clone(), entry.clone());
+                                        }))
+                                        .child(html!("option", {
+                                            .property("value", String::new())
+                                            .property("selected", entry_ref.item_kind_id.is_none())
+                                        }))
+                                        .children(
+                                            state.item_kind_options
+                                                .iter()
+                                                .map(|item_kind| {
+                                                    html!("option", {
+                                                        .property("text", &item_kind.name)
+                                                        .property("value", &item_kind.id.to_string())
+                                                        .property("selected", entry_ref.item_kind_id.is_some() && &entry_ref.item_kind_id.unwrap() == &item_kind.id)
+                                                    })
+                                                })
+                                        )
                                     })
-                                    .attribute("list", "item-kinds")
-                                    .event(clone!(entry => move |event: events::Input| {
-                                        let value: ItemKind = event.value().unwrap_throw();
-                                        let mut entry = entry.lock_mut();
-                                        entry.item_kind = Some(value);
-                                    }))
-                                    .event(clone!(state => move |_: events::Change| {
-                                        state.regenerate_item_kind_options();
-                                    }))
                                 }))
                             })
                         },
@@ -84,10 +115,11 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("textarea", {
                                     .text(&entry_ref.english)
-                                    .event(clone!(entry => move |event: events::Input| {
+                                    .event(clone!(state, entry => move |event: events::Input| {
                                         let value: String = event.value().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.english = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -96,10 +128,11 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("textarea", {
                                     .text(&entry_ref.hebrew)
-                                    .event(clone!(entry => move |event: events::Input| {
+                                    .event(clone!(state, entry => move |event: events::Input| {
                                         let value: String = event.value().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.hebrew = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -108,20 +141,23 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("select" => HtmlSelectElement, {
                                     .with_node!(elem => {
-                                        .event(clone!(entry => move |_event: events::Change| {
+                                        .event(clone!(state, entry => move |_event: events::Change| {
                                             let value: String = elem.value();
                                             let mut entry = entry.lock_mut();
-                                            entry.status = EntryStatus::from_str(&value).unwrap_throw();
+                                            entry.status = EntryStatus::from_str(&value); //.unwrap_throw();
+                                            Self::save_entry(state.clone(), entry.clone());
                                         }))
                                     })
                                     .children(
-                                        EntryStatus::iter().map(|o| {
-                                            html!("option", {
-                                                .property("text", o.to_string())
-                                                .property("value", o.to_string())
-                                                .property("selected", o == entry_ref.status)
+                                        EntryStatus::options()
+                                            .iter()
+                                            .map(|o| {
+                                                html!("option", {
+                                                    .property("text", o.to_string())
+                                                    .property("value", o.to_string())
+                                                    .property("selected", o == &entry_ref.status)
+                                                })
                                             })
-                                        })
                                     )
                                 }))
                             })
@@ -135,7 +171,7 @@ impl EntryRow {
                                         .apply_if(entry_ref.zeplin_reference.lock_ref().is_some(), |dom| {
                                             dom.property("value", &entry_ref.zeplin_reference.lock_ref().clone().unwrap().to_string())
                                         })
-                                        .event(clone!(entry => move |event: events::Input| {
+                                        .event(clone!(state, entry => move |event: events::Input| {
                                             let value: String = event.value().unwrap_throw();
                                             let value = Url::parse(&value);
 
@@ -144,6 +180,7 @@ impl EntryRow {
                                                 Ok(value) => zeplin_reference.set(Some(value)),
                                                 Err(_) => zeplin_reference.set(None),
                                             };
+                                            Self::save_entry(state.clone(), entry.lock_ref().clone());
                                         }))
                                     }))
                                 }))
@@ -153,10 +190,11 @@ impl EntryRow {
                             html!("locale-cell", {
                                 .child(html!("input", {
                                     .property("value", &entry_ref.comments)
-                                    .event(clone!(entry => move |event: events::Input| {
+                                    .event(clone!(state, entry => move |event: events::Input| {
                                         let value: String = event.value().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.comments = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -166,10 +204,11 @@ impl EntryRow {
                                 .child(html!("input", {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_app)
-                                    .event(clone!(entry => move |event: events::Change| {
+                                    .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.in_app = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -179,10 +218,11 @@ impl EntryRow {
                                 .child(html!("input", {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_element)
-                                    .event(clone!(entry => move |event: events::Change| {
+                                    .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.in_element = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -192,10 +232,11 @@ impl EntryRow {
                                 .child(html!("input", {
                                     .attribute("type", "checkbox")
                                     .property("checked", entry_ref.in_mock)
-                                    .event(clone!(entry => move |event: events::Change| {
+                                    .event(clone!(state, entry => move |event: events::Change| {
                                         let value: bool = event.checked().unwrap_throw();
                                         let mut entry = entry.lock_mut();
                                         entry.in_mock = value;
+                                        Self::save_entry(state.clone(), entry.clone());
                                     }))
                                 }))
                             })
@@ -218,7 +259,9 @@ impl EntryRow {
                                                 .property("slot", "second")
                                                 .text("Delete")
                                                 .event(clone!(state, entry => move |_event: events::Click| {
-                                                    state.remove_entry(&entry.lock_ref().id);
+                                                    state.loader.load(clone!(state, entry => async move {
+                                                        state.remove_entry(entry.lock_ref().id).await;
+                                                    }))
                                                 }))
                                             }),
                                         ])
@@ -226,15 +269,36 @@ impl EntryRow {
                                 )
                             })
                         }
+                        Column::Bundle => {
+                            html!("locale-cell", {
+                                .child(html!("select" => HtmlSelectElement, {
+                                    .with_node!(elem => {
+                                        .event(clone!(state, entry => move |_: events::Input| {
+                                            let value: String = elem.value();
+                                            let value = Uuid::parse_str(&value).unwrap_throw();
+                                            let mut entry = entry.lock_mut();
+                                            entry.bundle_id = value;
+                                            Self::save_entry(state.clone(), entry.clone());
+                                        }))
+                                        .children(
+                                            state.bundles
+                                                .lock_ref()
+                                                .iter()
+                                                .map(|(bundle, _)| {
+                                                    html!("option", {
+                                                        .property("text", &bundle.name)
+                                                        .property("value", &bundle.id.to_string())
+                                                        .property("selected", &entry_ref.bundle_id == &bundle.id)
+                                                    })
+                                                })
+                                        )
+                                    })
+                                }))
+                            })
+                        },
                     }
                 }))
             )
-            .event(clone!(state, entry => move |_event: events::Input| {
-                state.saving_loader.load(clone!(state, entry => async move {
-                    let entry = &entry.lock_ref().clone();
-                    state.save_entry(entry).await;
-                }))
-            }))
         })
     }
 }
