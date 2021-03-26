@@ -9,7 +9,7 @@ use uuid::Uuid;
 use paperclip::actix::Apiv2Schema;
 
 /// A bundle of [`Entry`]s
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Bundle {
@@ -33,7 +33,7 @@ pub struct ItemKind {
 }
 
 /// The status of a given [`Entry`]
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
