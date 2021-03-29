@@ -5,7 +5,7 @@ use crate::data::{
     raw,
 };
 use std::rc::Rc;
-use utils::{routes::*, events, settings::SETTINGS, iframe::IframeInit};
+use utils::{prelude::*, iframe::IframeInit}; 
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -45,10 +45,11 @@ impl PreviewDom {
                 .global_event(clone!(state, url => move |evt:Message| {
 
                     if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
+                        log::info!("sending iframe message!");
                         //Iframe is ready and sent us a message, let's send one back!
-                        let data = state.history.get_current().game_data.unwrap_throw(); 
+                        let data = state.history.get_current().game_data.unwrap_ji(); 
                         let msg:IframeInit<raw::GameData> = IframeInit::new(data); 
-                        let window = elem.content_window().unwrap_throw();
+                        let window = elem.content_window().unwrap_ji();
                         window.post_message(&msg.into(), &url);
                     } else {
                         log::info!("hmmm got other iframe message...");

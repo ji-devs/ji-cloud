@@ -9,6 +9,10 @@ if(!APP_NAME) {
     process.exit(1);
 }
 
+console.info(`*********************`);
+console.info(`** BUILDING ${APP_NAME} **`);
+console.info(`*********************`);
+
 const path = require('path');
 
 const watchPatterns = [

@@ -4,7 +4,7 @@ use crate::data::{
     state::*,
 };
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -18,7 +18,7 @@ pub struct HeaderDom {}
 impl HeaderDom {
     pub fn render(state:Rc<State>) -> Dom {
 
-        let game_mode = state.game_mode.get().unwrap_throw();
+        let game_mode = state.game_mode.get().unwrap_ji();
 
         html!("header-memory", {
             .property("slot", "header")

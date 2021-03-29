@@ -49,6 +49,7 @@ use utils::{
     iframe::*,
     resize::*,
     events::ModuleResizeEvent,
+    prelude::*,
 };
 use awsm_web::dom::resize::*;
 use std::future::Future;
@@ -171,17 +172,19 @@ where
     }
 
     fn render_iframe_wait(_self: Rc<Self>) {
-        //This div is just a placeholder to get messages
+        //This is just a placeholder to get messages
         //It'll be replaced when the iframe data arrives
-        let dom = html!("div", {
+        let dom = html!("empty-fragment", {
             .global_event(clone!(_self => move |evt:dominator_helpers::events::Message| {
                 //Get iframe data if we're supposed to
                 if let Ok(msg) = evt.try_serde_data::<IframeInit<RawData>>() {
+                    log::info!("got iframe data!");
+
                     if !_self.wait_iframe_data {
                         //log::warn!("weird... shouldn't have gotten iframe data!");
                         //log::warn!("{:?}", msg);
                     } else {
-                        let raw_data = msg.data.unwrap_throw();
+                        let raw_data = msg.data.expect_ji("couldn't decode iframe data");
                         let state = _self.loader.derive_state(raw_data);
                         Self::render_data(_self.clone(), state);
                     }
@@ -191,11 +194,15 @@ where
             }))
             .after_inserted(clone!(_self => move |elem| {
                 if _self.wait_iframe_data {
+                    let parent = web_sys::window()
+                        .unwrap_ji()
+                        .parent()
+                        .unwrap_ji()
+                        .unwrap_ji();
                     //On mount - send an empty IframeInit message to let the parent know we're ready
-                    let target = web_sys::window().unwrap_throw().parent().unwrap_throw().unwrap_throw();
                     let msg = IframeInit::empty();
 
-                    target.post_message(&msg.into(), "*");
+                    parent.post_message(&msg.into(), "*");
                 }
             }))
         });

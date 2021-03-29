@@ -6,7 +6,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt}
 };
 use wasm_bindgen::prelude::*;
-use utils::events;
+use utils::prelude::*;
 use crate::{
     data::{state::*, raw::GameData as RawData},
     steps,
@@ -52,7 +52,7 @@ impl ModuleRenderer<State> for PageRenderer {
                 ]
                 .into_iter()
                 .filter(|x| x.is_some())
-                .map(|x| x.unwrap_throw())
+                .map(|x| x.unwrap_ji())
                 .collect()
             }))
             .to_signal_vec()

@@ -1,6 +1,7 @@
 use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
+use utils::prelude::*;
 
 macro_rules! config_path {
     ($e:tt) => { 
@@ -36,9 +37,9 @@ struct ThemeChoices {
 }
 
 pub fn init() {
-    let json:InitWords = serde_json::from_str(include_str!(config_path!("module/memory/initial-words.json"))).unwrap_throw();
+    let json:InitWords = serde_json::from_str(include_str!(config_path!("module/memory/initial-words.json"))).unwrap_ji();
     INITIAL_WORDS.set(json.words);
-    let json:ThemeChoices = serde_json::from_str(include_str!(config_path!("themes.json"))).unwrap_throw();
+    let json:ThemeChoices = serde_json::from_str(include_str!(config_path!("themes.json"))).unwrap_ji();
     THEME_CHOICES.set(json.themes);
 }
 
@@ -46,21 +47,21 @@ pub fn get_init_words_cloned() -> Vec<String> {
     INITIAL_WORDS
         .get()
         .map(|x| x.clone())
-        .unwrap_throw()
+        .unwrap_ji()
 }
 
 
 pub fn get_init_words_iter() -> impl Iterator<Item = &'static String> {
     INITIAL_WORDS
         .get()
-        .unwrap_throw()
+        .unwrap_ji()
         .iter()
 }
 
 pub fn get_init_words_string() -> String { 
     INITIAL_WORDS
         .get()
-        .unwrap_throw()
+        .unwrap_ji()
         .iter()
         .fold(String::new(), |acc, curr| {
             if acc.is_empty() {
@@ -75,11 +76,11 @@ pub fn get_themes_cloned() -> Vec<String> {
     THEME_CHOICES 
         .get()
         .map(|x| x.clone())
-        .unwrap_throw()
+        .unwrap_ji()
 }
 pub fn get_themes_iter() -> impl Iterator<Item = &'static String> {
     THEME_CHOICES 
         .get()
-        .unwrap_throw()
+        .unwrap_ji()
         .iter()
 }

@@ -1,7 +1,7 @@
 use dominator::{html, Dom, clone};
 use crate::data::state::*;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -14,7 +14,7 @@ pub struct Step1Dom {}
 impl Step1Dom {
     pub fn render(state:Rc<State>, is_empty:bool) -> Vec<Dom> {
 
-        let game_mode = state.game_mode.get().unwrap_throw();
+        let game_mode = state.game_mode.get().unwrap_ji();
 
         if is_empty {
             match game_mode {

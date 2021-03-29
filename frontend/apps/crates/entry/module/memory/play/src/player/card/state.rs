@@ -11,6 +11,7 @@ use shared::{
     media::MediaLibrary
 };
 use wasm_bindgen::prelude::*;
+use utils::prelude::*;
 
 #[derive(Clone)]
 pub struct State {
@@ -90,11 +91,11 @@ impl From<&raw::Card> for Media {
         match card {
             raw::Card::Text(x) => Self::Text(x.to_string()),
             raw::Card::Image(x) => {
-                let (id, lib) = x.unwrap_throw();
+                let (id, lib) = x.unwrap_ji();
                 Self::Image(id, lib)
             },
             raw::Card::Audio(x) => {
-                let (id, lib) = x.unwrap_throw();
+                let (id, lib) = x.unwrap_ji();
                 Self::Audio(id, lib)
             },
         }

@@ -4,10 +4,11 @@ use wasm_bindgen::prelude::*;
 use dominator::clone;
 use components::module::history::state::HistoryState;
 use futures_signals::signal::Mutable;
+use utils::prelude::*;
 
 impl State {
     pub fn add_card(&self) {
-        let game_mode = self.game_mode.get().unwrap_throw();
+        let game_mode = self.game_mode.get().unwrap_ji();
         let raw_pair = match game_mode {
             GameMode::Duplicate => {
                 (
@@ -66,7 +67,7 @@ impl State {
 
 
     pub fn replace_single_list(&self, list: Vec<String>) {
-        let game_mode = self.game_mode.get().unwrap_throw();
+        let game_mode = self.game_mode.get().unwrap_ji();
 
         match game_mode {
             GameMode::Duplicate => {
@@ -120,9 +121,9 @@ impl State {
     }
 
     fn with_pair<A, F: FnOnce(GameMode, &Card, &Card) -> A>(&self, pair_index: usize, main_side: Side, f: F) -> A {
-        let game_mode = self.game_mode.get().unwrap_throw();
+        let game_mode = self.game_mode.get().unwrap_ji();
         let pair = self.pairs.lock_ref();
-        let pair = pair.get(pair_index).unwrap_throw();
+        let pair = pair.get(pair_index).unwrap_ji();
         match main_side {
             Side::Left => {
                 f(game_mode, &pair.0, &pair.1)
@@ -182,7 +183,7 @@ impl State {
 //internal only
 fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::GameData, pair_index: usize, main_side: Side, f: F) -> A {
     let game_mode = game_data.mode.clone();
-    let pair = game_data.pairs.get_mut(pair_index).unwrap_throw();
+    let pair = game_data.pairs.get_mut(pair_index).unwrap_ji();
     match main_side {
         Side::Left => {
             f(game_mode, &mut pair.0, &mut pair.1)

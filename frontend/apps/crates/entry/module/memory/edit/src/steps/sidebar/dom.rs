@@ -1,7 +1,7 @@
 use dominator::{html, Dom, clone};
 use crate::data::state::*;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use super::{
     nav::dom::StepsNavDom,
@@ -17,7 +17,7 @@ pub struct SidebarDom {}
 impl SidebarDom {
     pub fn render(state:Rc<State>) -> Dom {
 
-        let game_mode = state.game_mode.get().unwrap_throw();
+        let game_mode = state.game_mode.get().unwrap_ji();
 
         html!("module-sidebar", {
             .property("slot", "sidebar")
