@@ -8,14 +8,6 @@ pub fn get_jig() -> Jig {
         id: JigId(Uuid::from_u128(0)),
         display_name: Some("hello world".to_string()),
         //TODO - delete me: https://github.com/ji-devs/ji-cloud/issues/835
-        cover: LiteModule {
-            id: module_id,
-            kind: Some(ModuleKind::Cover)
-        },
-        ending: LiteModule {
-            id: module_id,
-            kind: Some(ModuleKind::Cover)
-        },
         modules: vec![
             LiteModule {
                 id: module_id,

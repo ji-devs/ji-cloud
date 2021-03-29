@@ -7,7 +7,10 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use crate::edit::dom::EditPage;
+use crate::{
+    edit::dom::EditPage,
+    gallery::dom::GalleryDom,
+};
 
 pub struct Router {
 }
@@ -28,7 +31,7 @@ impl Router {
                 match route {
                     Route::Jig(route) => {
                         match route {
-                            //JigRoute::Gallery => Some(GalleryPage::render(GalleryPage::new())),
+                            JigRoute::Gallery => Some(GalleryDom::render()),
                             JigRoute::Edit(jig_id, module_id) => Some(EditPage::render(jig_id, module_id)),
                             _ => None
                         }

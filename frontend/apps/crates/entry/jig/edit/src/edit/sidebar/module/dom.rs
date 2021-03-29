@@ -8,11 +8,10 @@ use super::{
     actions
 };
 use futures_signals::signal::SignalExt;
-use utils::events;
+use utils::prelude::*;
 use shared::domain::jig::{ModuleKind, LiteModule};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
-
 pub struct ModuleDom {
 }
 
@@ -66,7 +65,7 @@ impl ModuleDom {
                     .event(clone!(state => move |evt:events::Drop| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             if let Some(module_kind) = data_transfer.get_data("module_kind").ok() { 
-                                let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_throw();
+                                let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
                                 actions::assign_kind(state.clone(), kind);
                             }
                         }

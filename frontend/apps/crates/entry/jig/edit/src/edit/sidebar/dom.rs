@@ -20,7 +20,7 @@ use super::{
 };
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
-use utils::events;
+use utils::prelude::*;
 
 pub struct SidebarDom {
 }
@@ -45,7 +45,7 @@ impl SidebarDom {
                     if loading {
                         None
                     } else {
-                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_throw()))
+                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji()))
                     }
                 })))
             })
