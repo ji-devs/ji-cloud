@@ -1,11 +1,15 @@
+use shared::domain::locale::ItemKind;
 use utils::events;
+use uuid::Uuid;
+use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlSelectElement;
 use crate::locale::components::table_headers::TableHeaderDom;
 use crate::locale::components::entry_row::EntryRow;
 use crate::locale::components::select_columns;
+use crate::locale::actions::AsStringExt;
 use dominator::{Dom, html, clone, with_node};
-use std::rc::Rc;
-use super::super::state::*;
+use std::{collections::HashMap, rc::Rc};
+use super::super::state::{State, SortKind, SortOrder};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
 use futures_signals::map_ref;
@@ -17,6 +21,13 @@ pub struct LocaleOuterDom {
 }
 
 impl LocaleOuterDom {
+    pub fn get_item_kind_name_by_id(map: &Vec<ItemKind>, id: Option<Uuid>) -> String {
+        match id {
+            Some(id) => map.iter().find(|item_kind| item_kind.id == id).unwrap_throw().name.clone(),
+            None => String::new()
+        }
+    }
+
     pub fn render(state: Rc<State>) -> Dom {
         html!("empty-fragment", {
             .child(
@@ -37,10 +48,10 @@ impl LocaleOuterDom {
                                 }))
                             })
                             .children(
-                                state.bundles.iter().map(|(e, selected)| {
+                                state.bundles.lock_ref().iter().map(|(e, selected)| {
                                     html!("option", {
-                                        .property("text", e.to_string())
-                                        .property("value", e.to_string())
+                                        .property("text", e.name.to_string())
+                                        .property("value", e.id.to_string())
                                         .property("selected", selected.clone())
                                     })
                                 })
@@ -55,7 +66,7 @@ impl LocaleOuterDom {
                             // }))
                             .event(clone!(state => move |_event: events::Click| {
                                 state.loader.load(clone!(state => async move {
-                                    state.add_entry().await;
+                                    State::add_entry(state.clone()).await;
                                 }))
                             }))
                         }),
@@ -75,7 +86,11 @@ impl LocaleOuterDom {
                                         let b = b.lock_ref();
                                         let mut ord = match sort.column {
                                             SortKind::Section => a.section.cmp(&b.section),
-                                            SortKind::ItemKind => a.item_kind.cmp(&b.item_kind),
+                                            SortKind::ItemKind => {
+                                                let a = Self::get_item_kind_name_by_id(&state.item_kind_options, a.item_kind_id);
+                                                let b = Self::get_item_kind_name_by_id(&state.item_kind_options, b.item_kind_id);
+                                                a.cmp(&b)
+                                            }
                                             SortKind::English => a.english.cmp(&b.english),
                                             SortKind::Hebrew => a.hebrew.cmp(&b.hebrew),
                                             SortKind::Status => a.status.to_string().cmp(&b.status.to_string()),
@@ -100,10 +115,9 @@ impl LocaleOuterDom {
                                     let section = section.unwrap_or(String::new());
                                     *section_options.get(&section).unwrap()
                                 })),
-                                let in_item_kind = state.item_kind_options.signal_cloned().map(clone!(entry => move |item_kind_options| {
-                                    let item_kind = entry.lock_ref().item_kind.clone();
-                                    let item_kind = item_kind.unwrap_or(String::new());
-                                    *item_kind_options.get(&item_kind).unwrap()
+                                let in_item_kind = state.item_kind_filter.signal_cloned().map(clone!(entry => move |item_kind_filter| {
+                                    let item_kind_id = entry.lock_ref().item_kind_id.clone();
+                                    *item_kind_filter.get(&item_kind_id).unwrap()
                                 })),
                                 let in_status = state.status_options.signal_cloned().map(clone!(entry => move |status_options| {
                                     let status = entry.lock_ref().status.clone();

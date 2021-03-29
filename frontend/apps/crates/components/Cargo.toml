@@ -57,7 +57,7 @@ web-sys = { version = "0.3.46", features = [
     'History',
     'CustomEvent',
 ] }
-awsm_web = { version = "0.16.0", features = ["loaders", "serde_iso"] }
+awsm_web = { version = "0.16.0", features = ["loaders", "serde_iso", "dom"] }
 anyhow = "1.0.38"
 
 [features]
