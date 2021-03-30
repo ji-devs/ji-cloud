@@ -34,18 +34,18 @@ impl SidebarDom {
             if jig_id == JigId(Uuid::from_u128(0)) {
                 *jig.borrow_mut() = Some(debug::get_jig());
             } else {
-                actions::load_jig(jig_id, jig.clone());
+                actions::load_jig(jig_id, jig.clone()).await;
             }
         }));
 
-        Dom::with_state(loader, clone!(jig => move |loader| {
+        Dom::with_state(loader, clone!(jig, module_id => move |loader| {
             html!("empty-fragment", {
                 .property("slot", "sidebar")
-                .child_signal(loader.is_loading().map(clone!(jig => move |loading| {
+                .child_signal(loader.is_loading().map(clone!(jig, module_id => move |loading| {
                     if loading {
                         None
                     } else {
-                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji()))
+                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), module_id.clone()))
                     }
                 })))
             })
@@ -53,12 +53,13 @@ impl SidebarDom {
 
     }
 
-    fn render_loaded(jig: Jig) -> Dom {
-        let state = Rc::new(State::new(jig));
+    fn render_loaded(jig: Jig, module_id: Mutable<Option<ModuleId>>) -> Dom {
+        let state = Rc::new(State::new(jig, module_id));
 
 
         html!("empty-fragment", {
             .child(html!("jig-edit-sidebar", {
+                .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
                 .children_signal_vec(state.modules
                     .signal_vec_cloned()

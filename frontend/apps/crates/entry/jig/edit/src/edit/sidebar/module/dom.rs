@@ -59,7 +59,8 @@ impl ModuleDom {
                                 if state.module.kind.get().is_none() {
                                     evt.prevent_default();
                                 } 
-                            }                     }
+                            }
+                        }
 
                     }))
                     .event(clone!(state => move |evt:events::Drop| {
@@ -69,6 +70,9 @@ impl ModuleDom {
                                 actions::assign_kind(state.clone(), kind);
                             }
                         }
+                    }))
+                    .event(clone!(state => move |evt:events::Click| {
+                        actions::edit(state.clone());
                     }))
                 }))
                 .after_inserted(clone!(state => move |dom| {
@@ -84,7 +88,7 @@ impl ModuleDom {
                         .property("icon", "gears")
                         .property("slot", "add")
                         .event(clone!(state => move |evt:events::Click| {
-                            actions::add_module_after(state.clone())
+                            actions::add_empty_module_after(state.clone())
                         }))
                     }))
                 })

@@ -11,12 +11,16 @@ use crate::{
 };
 use std::future::Future;
 use components::module::page::StateLoader;
-
-
+use shared::{
+    api::endpoints::{ApiEndpoint, self, module::*},
+    error::{EmptyError, MetadataNotFound},
+    domain::jig::{*, module::*},
+};
+use utils::prelude::*;
 
 pub struct PageLoader { 
-    pub jig_id: String,
-    pub module_id: String
+    pub jig_id: JigId,
+    pub module_id: ModuleId 
 }
 impl StateLoader<RawData, State> for PageLoader {
     type FutureState = impl Future<Output = Option<Rc<State>>>;
@@ -25,7 +29,24 @@ impl StateLoader<RawData, State> for PageLoader {
         let jig_id = self.jig_id.clone();
         let module_id = self.module_id.clone();
         async move {
-            let game_data = debug::settings().data;
+            let game_data = match debug::settings().data {
+                None => {
+                    let path = Get::PATH.replace("{id}",&module_id.0.to_string());
+
+                    match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                        Ok(resp) => {
+                            resp.module.body.map(|value| {
+                                serde_json::from_value(value).unwrap_ji()
+                            })
+                        },
+                        Err(_) => {
+                            panic!("error loading module!")
+                        }
+                    }
+                },
+                Some(game_data) => game_data
+            };
+
             let state = Rc::new(State::new(jig_id, module_id, game_data));
             Some(state)
         }

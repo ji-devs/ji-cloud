@@ -45,10 +45,26 @@ pub fn create_jig(state: Rc<State>) {
         });
 
         match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(&Create::PATH, Create::METHOD, req).await {
-            Ok(_) => {
-                //will re-render from the top due to loaded_signal
+            Ok(resp) => {
+                state.jigs.lock_mut().push_cloned((resp.id, None));
             },
             Err(_) => {},
+        }
+    }));
+
+}
+
+
+pub fn delete_jig(state: Rc<State>, jig_id: JigId) {
+    state.loader.load(clone!(state => async move {
+        let path = Delete::PATH.replace("{id}",&jig_id.0.to_string());
+        match api_with_auth_empty::<EmptyError, ()>(&path, Delete::METHOD, None).await {
+            Ok(_) => {
+                state.jigs.lock_mut().retain(|(id, _)| {
+                    *id != jig_id
+                });
+            },
+            Err(_) => {}
         }
     }));
 

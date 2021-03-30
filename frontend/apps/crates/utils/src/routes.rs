@@ -11,7 +11,7 @@ use std::str::FromStr;
 use uuid::Uuid;
 use super::unwrap::*;
 
-pub type Id = String;
+pub type StringId = String;
 
 #[derive(Debug, Clone)]
 pub enum Route {
@@ -55,7 +55,7 @@ pub enum AdminRoute {
 
 #[derive(Debug, Clone)]
 pub enum LegacyRoute {
-    Play(Id, Option<Id>) 
+    Play(StringId, Option<StringId>) 
 }
 
 #[derive(Debug, Clone)]
@@ -73,14 +73,14 @@ pub enum JigPlayMode {
 
 #[derive(Debug, Clone)]
 pub enum ModuleRoute {
-    Edit(ModuleKind, Id, Id),
-    Play(ModuleKind, Id, Id),
+    Edit(ModuleKind, JigId, ModuleId),
+    Play(ModuleKind, JigId, ModuleId),
 }
 
 #[derive(Debug, Clone)]
 pub enum DevRoute {
-    Showcase(Id, String),
-    Scratch(Id, String),
+    Showcase(StringId, String),
+    Scratch(StringId, String),
 }
 
 //Just for serializing across local routes
@@ -193,8 +193,20 @@ impl Route {
                     
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
-            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
-            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
+            ["module", kind, "edit", jig_id, module_id] => {
+                Self::Module(ModuleRoute::Edit(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                        ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            },
+            ["module", kind, "play", jig_id, module_id] => {
+                Self::Module(ModuleRoute::Play(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                        ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            },
             ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
@@ -283,8 +295,8 @@ impl From<&Route> for String {
             },
             Route::Module(route) => {
                 match route {
-                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", kind.as_str(), jig_id, module_id),
-                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", kind.as_str(), jig_id, module_id),
+                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", kind.as_str(), jig_id.0.to_string(), module_id.0.to_string()),
+                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", kind.as_str(), jig_id.0.to_string(), module_id.0.to_string()),
                 }
             },
             Route::NotFound => "/404".to_string(),

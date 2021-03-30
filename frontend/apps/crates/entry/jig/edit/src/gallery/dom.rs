@@ -33,7 +33,7 @@ impl GalleryDom {
                         Some(html!("div", {.text("No jigs!")}))
                     } else {
                         Some(html!("ul", {
-                            .children_signal_vec(state.jigs.signal_vec_cloned().map(|(jig_id, name)| {
+                            .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |(jig_id, name)| {
                                 let route:String = Route::Jig(JigRoute::Edit(jig_id.clone(), None)).into();
                                 html!("li", {
                                     .child(html!("a", {
@@ -48,8 +48,15 @@ impl GalleryDom {
                                             })
                                         }))
                                     }))
+                                    .child(html!("button", {
+                                        .style("margin-left", "20px")
+                                        .text("delete")
+                                        .event(clone!(state, jig_id => move |evt:events::Click| {
+                                            actions::delete_jig(state.clone(), jig_id);
+                                        }))
+                                    }))
                                 })
-                            }))
+                            })))
                         }))
                     }
                 }

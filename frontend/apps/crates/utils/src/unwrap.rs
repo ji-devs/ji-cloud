@@ -9,10 +9,12 @@ use wasm_bindgen::prelude::*;
  */
 
 pub trait UnwrapJiExt<T>: Sized {
+    #[track_caller]
     fn unwrap_ji(self) -> T {
         self.expect_ji("`unwrap_ji` failed")
     }
 
+    #[track_caller]
     fn expect_ji(self, message: &str) -> T;
 }
 cfg_if! {

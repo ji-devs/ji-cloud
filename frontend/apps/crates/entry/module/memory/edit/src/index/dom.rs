@@ -8,16 +8,17 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use utils::prelude::*;
 use crate::{
-    data::{state::*, raw::GameData as RawData},
+    data::{state::*, actions, raw::GameData as RawData},
     steps,
     choose
 };
+use shared::domain::jig::{JigId, ModuleId};
 use super::loader::*;
 pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
 
 pub struct IndexDom {}
 impl IndexDom {
-    pub fn render(jig_id: String, module_id: String) -> Page {
+    pub fn render(jig_id: JigId, module_id: ModuleId) -> Page {
         ModulePage::<PageRenderer, PageLoader, RawData, State>::render(
             PageRenderer{},
             PageLoader{jig_id, module_id}
@@ -40,7 +41,6 @@ impl ModuleRenderer<State> for PageRenderer {
     }
 
     fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
-        log::info!("re-rendering children!");
         state.game_mode
             .signal()
             .map(clone!(state => move |game_mode| {
@@ -76,17 +76,29 @@ impl PageRenderer {
     }
 
     fn header(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
-        if kind == ModulePageKind::GridResizePreview {
-            Some(steps::header::dom::HeaderPreviewDom::render(state))
-        } else {
-            game_mode
-                .map(|game_mode| {
-                    steps::header::dom::HeaderDom::render(state)
-                })
-        }
+        Some(html!("empty-fragment", {
+            //Not sure where to put this really...
+            //anywhere would work I guess!
+            .future(state.to_save_signal().for_each(|value| {
+                async move {
+                    actions::save(value).await;
+                }
+            }))
+            .child(
+                if kind == ModulePageKind::GridResizePreview {
+                    steps::header::dom::HeaderPreviewDom::render(state)
+                } else {
+                    match game_mode {
+                        Some(game_mode) => steps::header::dom::HeaderDom::render(state),
+                        None => html!("empty-fragment")
+                    }
+                }
+            )
+        }))
     }
 
     fn main(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+
         Some(match game_mode {
             None => {
                 choose::dom::ChooseDom::render(state)

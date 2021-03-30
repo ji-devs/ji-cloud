@@ -12,10 +12,11 @@ use std::rc::Rc;
 use crate::data::{raw, state::*};
 
 pub struct DebugSettings {
-    pub data:Option<raw::GameData>,
+    pub data:Option<Option<raw::GameData>>,
     pub step:Option<Step>,
     //just used for words and images, but whatever
     pub image_search: Option<()>,
+    pub live_save: bool,
 }
 
 impl DebugSettings {
@@ -24,11 +25,12 @@ impl DebugSettings {
             data: None, 
             step: None, 
             image_search: None,
+            live_save: true,
         }
     }
     pub fn duplicate(with_data: bool) -> DebugSettings {
         DebugSettings {
-            data: Some(
+            data: Some(Some(
                 if with_data {
                     raw::GameData::duplicate_debug(
                         crate::config::get_init_words_iter(),
@@ -38,9 +40,10 @@ impl DebugSettings {
                 } else {
                     raw::GameData::new_duplicate()
                 }
-            ),
+            )),
             step: Some(Step::Four), 
             image_search: None,
+            live_save: false,
         }
     }
     /*
@@ -60,8 +63,8 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn settings() -> DebugSettings {
-            DebugSettings::duplicate(true)
-            //DebugSettings::default()
+            //DebugSettings::duplicate(true)
+            DebugSettings::default()
         }
     } else {
         pub fn settings() -> DebugSettings {

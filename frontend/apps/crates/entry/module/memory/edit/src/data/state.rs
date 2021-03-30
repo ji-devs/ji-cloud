@@ -16,12 +16,12 @@ use serde::Deserialize;
 use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
-
+use shared::domain::jig::{JigId, ModuleId};
 pub use super::card::state::*;
 
 pub struct State {
-    pub jig_id: String,
-    pub module_id: String,
+    pub jig_id: JigId,
+    pub module_id: ModuleId,
     pub step: Mutable<Step>,
     pub game_mode: Mutable<Option<GameMode>>,
     pub pairs: MutableVec<(Card, Card)>,
@@ -32,7 +32,7 @@ pub struct State {
 
 
 impl State {
-    pub fn new(jig_id: String, module_id: String, raw_data:Option<raw::GameData>) -> Self {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Self {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
@@ -69,12 +69,27 @@ impl State {
         }
     }
 
+    pub fn to_save_signal(&self) -> impl Signal<Item = Option<raw::GameData>> {
+        map_ref! {
+            let game_mode = self.game_mode.signal(),
+            let pairs = self.pairs.signal_vec_cloned().to_signal_cloned(),
+            let theme = self.theme.signal_cloned()
+            => {
+                None
+                /* TODO
+                game_mode.map(|game_mode| {
+
+                })
+                */
+            }
+        }
+    }
+
     pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
         map_ref! {
             let has_mode = self.game_mode.signal_ref(|mode| mode.is_some()),
             let step = self.step.signal()
             => {
-                log::info!("{:?}", *step);
                 if *has_mode {
                     if *step == Step::Four {
                         ModulePageKind::GridResizePreview

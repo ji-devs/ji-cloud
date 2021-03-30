@@ -180,6 +180,9 @@ impl State {
 
 }
 
+pub async fn save(data: Option<raw::GameData>) {
+    log::info!("TODO - SAVE!");
+}
 //internal only
 fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::GameData, pair_index: usize, main_side: Side, f: F) -> A {
     let game_mode = game_data.mode.clone();
