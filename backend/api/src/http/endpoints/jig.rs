@@ -15,8 +15,7 @@ use shared::{
 use sqlx::PgPool;
 
 use crate::{
-    db,
-    error::{self, UpdateWithMetadata},
+    db, error,
     extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
 };
 
@@ -63,9 +62,10 @@ async fn update(
     _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, UpdateWithMetadata> {
+) -> Result<NoContent, error::JigUpdate> {
     let req = req.map_or_else(Default::default, Json::into_inner);
-    let exists = db::jig::update(
+
+    db::jig::update(
         &*db,
         path.into_inner(),
         req.display_name.as_deref(),
@@ -74,12 +74,7 @@ async fn update(
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
-    .await
-    .map_err(db::meta::handle_metadata_err)?;
-
-    if !exists {
-        return Err(UpdateWithMetadata::ResourceNotFound);
-    }
+    .await?;
 
     Ok(NoContent)
 }

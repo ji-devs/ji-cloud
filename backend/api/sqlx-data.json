@@ -945,26 +945,6 @@
       "nullable": []
     }
   },
-  "47fb0f5546e32d096bbffdd9ffd5d17be73c08c132620e2a7fae90b87dd954e1": {
-    "query": "select exists(select 1 from jig where id = $1) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "4ece7de8525ff491823831df2bebf0d78e258fe95d1432e01ed0df448d04587f": {
     "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nvalues \n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    language = $6,\n    locale = $7,\n    timezone = $8,\n    opt_into_edu_resources = $9,\n    organization = $10,\n    location = $11\n",
     "describe": {
@@ -1131,6 +1111,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "592bc9d7ba082465064276d492d2d72320a0d4a100dc968dcc86ef023bc87c7a": {
+    "query": "select exists(select 1 from jig where id = $1 for update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {

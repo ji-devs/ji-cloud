@@ -215,6 +215,52 @@ impl Into<actix_web::Error> for UserNotFound {
     code = 403,
     code = 404,
     description = "Not Found: Resource Not Found",
+    code = 422,
+    code = 500
+)]
+pub enum JigUpdate {
+    InternalServerError(anyhow::Error),
+    ResourceNotFound,
+    Unprocessable,
+    MissingMetadata(MetadataNotFound),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for JigUpdate {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for JigUpdate {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
+            Self::InternalServerError(e) => ise(e),
+
+            Self::MissingMetadata(data) => ApiError {
+                code: http::StatusCode::UNPROCESSABLE_ENTITY,
+                message: "Metadata not Found".to_owned(),
+                extra: data,
+            }
+            .into(),
+
+            JigUpdate::Unprocessable => {
+                BasicError::new(http::StatusCode::UNPROCESSABLE_ENTITY).into()
+            }
+        }
+    }
+}
+
+#[api_v2_errors(
+    code = 400,
+    code = 401,
+    code = 403,
+    code = 404,
+    description = "Not Found: Resource Not Found",
     code = 500
 )]
 pub enum NotFound {
@@ -433,6 +479,17 @@ impl From<MetaWrapperError> for CreateWithMetadata {
 }
 
 impl From<MetaWrapperError> for UpdateWithMetadata {
+    fn from(e: MetaWrapperError) -> Self {
+        match e {
+            MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
+            MetaWrapperError::MissingMetadata { id, kind } => {
+                Self::MissingMetadata(MetadataNotFound { id, kind })
+            }
+        }
+    }
+}
+
+impl From<MetaWrapperError> for JigUpdate {
     fn from(e: MetaWrapperError) -> Self {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),

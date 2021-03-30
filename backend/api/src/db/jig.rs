@@ -9,6 +9,8 @@ use shared::domain::{
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
+use crate::error;
+
 // todo: move this to a `module` mod.
 async fn module_of_kind(
     conn: &mut PgConnection,
@@ -147,17 +149,17 @@ pub async fn update(
     modules: Option<&[ModuleId]>,
     content_types: Option<&[ContentTypeId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
-) -> sqlx::Result<bool> {
+) -> Result<(), error::JigUpdate> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
-        r#"select exists(select 1 from jig where id = $1) as "exists!""#,
+        r#"select exists(select 1 from jig where id = $1 for update) as "exists!""#,
         id.0
     )
     .fetch_one(&mut transaction)
     .await?
     .exists
     {
-        return Ok(false);
+        return Err(error::JigUpdate::ResourceNotFound);
     }
 
     if let Some(publish_at) = publish_at {
@@ -190,21 +192,22 @@ where id = $1
     .await?;
 
     if let Some(module_ids) = modules {
-        if module_ids.len() < 1 {
-            todo!("422 here instead of panic.");
-        }
+        let first_id = match module_ids.first() {
+            Some(id) => *id,
+            None => return Err(error::JigUpdate::Unprocessable),
+        };
 
-        // todo: handle the 404.
         let kind = sqlx::query!(
             r#"select kind as "kind: ModuleKind" from module where id = $1"#,
-            id.0
+            first_id.0
         )
-        .fetch_one(&mut transaction)
+        .fetch_optional(&mut transaction)
         .await?
+        .ok_or(error::JigUpdate::Unprocessable)?
         .kind;
 
         if kind != Some(ModuleKind::Cover) {
-            todo!("422 here instead of panic.");
+            return Err(error::JigUpdate::Unprocessable);
         }
 
         sqlx::query!("delete from jig_module where jig_id = $1", id.0)
@@ -224,12 +227,14 @@ where id = $1
     }
 
     if let Some(content_types) = content_types {
-        super::recycle_metadata(&mut transaction, "jig", id.0, content_types).await?;
+        super::recycle_metadata(&mut transaction, "jig", id.0, content_types)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
     }
 
     transaction.commit().await?;
 
-    Ok(true)
+    Ok(())
 }
 
 pub async fn delete(pool: &PgPool, id: JigId) -> anyhow::Result<()> {
