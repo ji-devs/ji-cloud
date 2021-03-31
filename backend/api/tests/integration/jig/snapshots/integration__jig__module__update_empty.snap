@@ -1,0 +1,12 @@
+---
+source: tests/integration/jig/module.rs
+expression: body
+
+---
+{
+  "module": {
+    "id": "5c8b6458-8840-11eb-8cf7-9bf404dc7386",
+    "kind": "Cover",
+    "body": null
+  }
+}
