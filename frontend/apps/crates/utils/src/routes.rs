@@ -169,7 +169,7 @@ impl Route {
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
             },
             ["admin"] => Self::Admin(AdminRoute::Landing),
-            ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
                     None
@@ -265,7 +265,7 @@ impl From<&Route> for String {
             },
             Route::Jig(route) => {
                 match route {
-                    JigRoute::Gallery => "/jig/gallery".to_string(),
+                    JigRoute::Gallery => "/jig/edit/gallery".to_string(),
                     JigRoute::Edit(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
                             format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())

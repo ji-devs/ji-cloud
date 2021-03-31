@@ -6,6 +6,11 @@ use components::module::history::state::HistoryState;
 use futures_signals::signal::Mutable;
 use utils::prelude::*;
 
+use shared::{
+    api::endpoints::{ApiEndpoint, self, module::*},
+    error::{EmptyError, MetadataNotFound},
+    domain::jig::{*, module::*},
+};
 impl State {
     pub fn add_card(&self) {
         let game_mode = self.game_mode.get().unwrap_ji();
@@ -180,9 +185,27 @@ impl State {
 
 }
 
-pub async fn save(data: Option<raw::GameData>) {
-    log::info!("TODO - SAVE!");
+pub fn save(state: Rc<State>, data: Option<raw::GameData>) {
+    let module_id = state.module_id.clone();
+
+    //Note - there's currently no way to save _after_ a mode is chosen...
+    if let Some(value) = data.map(|data| serde_json::to_value(&data).unwrap_ji()) {
+
+        state.save_loader.load(async move {
+            let path = Update::PATH.replace("{id}",&module_id.0.to_string());
+
+            let req = Some(ModuleUpdateRequest {
+                kind: None,
+                body: Some(value), 
+            });
+            api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
+        });
+        log::info!("SAVED!");
+    } else {
+        log::info!("SKIPPING SAVE - NO DATA!");
+    }
 }
+
 //internal only
 fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::GameData, pair_index: usize, main_side: Side, f: F) -> A {
     let game_mode = game_data.mode.clone();

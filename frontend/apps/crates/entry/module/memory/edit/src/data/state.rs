@@ -9,7 +9,7 @@ use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
-use super::{raw, history::{self, History}};
+use super::{actions, history::{self, History}, raw};
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
@@ -17,7 +17,9 @@ use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
 use shared::domain::jig::{JigId, ModuleId};
+use dominator_helpers::futures::AsyncLoader;
 pub use super::card::state::*;
+use wasm_bindgen_futures::spawn_local;
 
 pub struct State {
     pub jig_id: JigId,
@@ -28,11 +30,12 @@ pub struct State {
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme: Mutable<String>,
     pub history: Rc<HistoryState<History>>,
+    pub save_loader: AsyncLoader,
 }
 
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Self {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Rc<Self> {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
@@ -57,7 +60,7 @@ impl State {
         let is_empty = pairs.is_empty();
 
         let step = Mutable::new(debug::settings().step.unwrap_or(Step::One));
-        Self {
+        let _self = Rc::new(Self {
             jig_id,
             module_id,
             game_mode: Mutable::new(game_mode),
@@ -66,7 +69,21 @@ impl State {
             steps_completed: Mutable::new(HashSet::new()),
             theme: Mutable::new(theme),
             history: Rc::new(HistoryState::new(History::new(raw_data))),
-        }
+            save_loader: AsyncLoader::new()
+        });
+
+
+        //This leaks... we could keep another AsyncLoader around
+        //but I think that might create a permanent cycle
+        //either way we don't really care, this is effectively global
+        spawn_local( 
+            _self.to_save_signal().for_each(clone!(_self => move |value| {
+                actions::save(_self.clone(), value);
+                async {}
+            }))
+        );
+
+        _self
     }
 
     pub fn to_save_signal(&self) -> impl Signal<Item = Option<raw::GameData>> {
@@ -75,12 +92,20 @@ impl State {
             let pairs = self.pairs.signal_vec_cloned().to_signal_cloned(),
             let theme = self.theme.signal_cloned()
             => {
-                None
-                /* TODO
-                game_mode.map(|game_mode| {
+                game_mode.map(|mode| {
+                    let pairs:Vec<(raw::Card, raw::Card)> = pairs
+                        .iter()
+                        .map(|(left, right)| { 
+                            (left.clone().into(), right.clone().into())
+                        })
+                        .collect();
 
+                    raw::GameData {
+                        mode,
+                        pairs,
+                        theme: theme.clone(),
+                    }
                 })
-                */
             }
         }
     }

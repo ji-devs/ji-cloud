@@ -76,25 +76,11 @@ impl PageRenderer {
     }
 
     fn header(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
-        Some(html!("empty-fragment", {
-            //Not sure where to put this really...
-            //anywhere would work I guess!
-            .future(state.to_save_signal().for_each(|value| {
-                async move {
-                    actions::save(value).await;
-                }
-            }))
-            .child(
-                if kind == ModulePageKind::GridResizePreview {
-                    steps::header::dom::HeaderPreviewDom::render(state)
-                } else {
-                    match game_mode {
-                        Some(game_mode) => steps::header::dom::HeaderDom::render(state),
-                        None => html!("empty-fragment")
-                    }
-                }
-            )
-        }))
+        if kind == ModulePageKind::GridResizePreview {
+            Some(steps::header::dom::HeaderPreviewDom::render(state))
+        } else {
+            game_mode.map(|_| steps::header::dom::HeaderDom::render(state))
+        }
     }
 
     fn main(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {

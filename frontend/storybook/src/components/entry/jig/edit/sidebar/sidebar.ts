@@ -4,6 +4,7 @@ import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/sidebar/filler";
 import {mapToString, arrayIndex} from "@utils/array";
 import {Module} from "./module";
+import {Header} from "./header";
 
 export default {
     title: "Entry / Jig / Edit / Sidebar"
@@ -27,8 +28,8 @@ export const Sidebar = (props?:Partial<Args> & {slot?: string}) => {
     const {slot, menuIndex, dragIndex, nModules} = props;
 
     return `
-        <jig-edit-sidebar ${slot && `slot="${slot}"`}>
-        <jig-edit-sidebar-header slot="header"> </jig-edit-sidebar-header>
+    <jig-edit-sidebar ${slot && `slot="${slot}"`}>
+    ${Header()}
         ${mapToString(arrayIndex(nModules), index => {
             return Module({
                 module: index === 0 ? "cover" : "memory",
