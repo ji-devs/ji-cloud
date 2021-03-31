@@ -8,6 +8,7 @@ use crate::{
 };
 
 mod cover;
+mod module;
 
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {
@@ -83,8 +84,6 @@ async fn create_with_params() -> anyhow::Result<()> {
 
     Ok(())
 }
-
-// todo: update
 
 #[actix_rt::test]
 async fn update_module() -> anyhow::Result<()> {

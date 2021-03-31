@@ -344,6 +344,20 @@
       ]
     }
   },
+  "19594c11c01c4202a2fcad91d2842d6ef01d2b5c75af0c6fe507115d1ac2a954": {
+    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind),\n    updated_at = now()\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
     "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
     "describe": {
@@ -2285,28 +2299,6 @@
       "nullable": []
     }
   },
-  "c372a34b6b9e1b5ab8cb7488118c6d76b3213c212490d4ff30bed1efdddb68d7": {
-    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind)\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\nreturning true as \"exists!\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "c5711732b2fcd0f1e9241eecd1714cd91d2de836d9bcb7561317e8fbca447b30": {
     "query": "update image_metadata set uploaded_at = now(), updated_at = now() where id = $1",
     "describe": {
@@ -2819,6 +2811,26 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "f645d62b8e799680eb19f38eb55ce99b05332fba93a287388af43329773856f9": {
+    "query": "select exists(select 1 from module where id = $1 for update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
