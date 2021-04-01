@@ -19,11 +19,11 @@ pub trait ImageExt {
         self.id_str().to_string()
     }
     fn thumbnail_src(&self) -> String {
-        utils::path::library_image_id(*self.library_kind(), MediaVariant::Thumbnail, *self.id())
+        utils::path::image_lib_url(*self.library_kind(), MediaVariant::Thumbnail, *self.id())
     }
 
     fn full_src(&self) -> String {
-        utils::path::library_image_id(*self.library_kind(), MediaVariant::Resized, *self.id())
+        utils::path::image_lib_url(*self.library_kind(), MediaVariant::Resized, *self.id())
     }
 }
 
