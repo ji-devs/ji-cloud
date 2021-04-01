@@ -76,8 +76,8 @@ impl State {
         //This leaks... we could keep another AsyncLoader around
         //but I think that might create a permanent cycle
         //either way we don't really care, this is effectively global
-        spawn_local( 
-            _self.to_save_signal().for_each(clone!(_self => move |value| {
+        spawn_local(
+            _self.raw_signal().for_each(clone!(_self => move |value| {
                 actions::save(_self.clone(), value);
                 async {}
             }))
@@ -86,28 +86,51 @@ impl State {
         _self
     }
 
-    pub fn to_save_signal(&self) -> impl Signal<Item = Option<raw::GameData>> {
+    //only used for live-saving
+    pub fn raw_signal(&self) -> impl Signal<Item = Option<raw::GameData>> {
         map_ref! {
-            let game_mode = self.game_mode.signal(),
-            let pairs = self.pairs.signal_vec_cloned().to_signal_cloned(),
+            let mode = self.game_mode.signal(),
+            let pairs = self.raw_pairs_signal(),
             let theme = self.theme.signal_cloned()
             => {
-                game_mode.map(|mode| {
-                    let pairs:Vec<(raw::Card, raw::Card)> = pairs
-                        .iter()
-                        .map(|(left, right)| { 
-                            (left.clone().into(), right.clone().into())
+                match mode {
+                    Some(mode) => {
+                        Some(raw::GameData {
+                            mode: *mode,
+                            pairs: pairs.clone(),
+                            theme: theme.clone(),
                         })
-                        .collect();
-
-                    raw::GameData {
-                        mode,
-                        pairs,
-                        theme: theme.clone(),
+                    },
+                    _ => None {
                     }
-                })
+                }
             }
         }
+    }
+
+    //only used for live-saving
+    // the cards here are Mutables so to get the latest data
+    // we need to derive from the inner signal
+    // the inner signal itself is in an enum so we need dynamic dispatch
+    // (see Card::raw_signal)
+    pub fn raw_pairs_signal(&self) -> impl Signal<Item = Vec<(raw::Card, raw::Card)>> { 
+        self.pairs.signal_vec_cloned()
+            .map_signal(|pair| {
+                map_ref! {
+                    let card_0 = pair.0.raw_signal(),
+                    let card_1 = pair.1.raw_signal()
+                        => {
+                            (card_0.clone(), card_1.clone())
+                        }
+                }
+            })
+            .to_signal_map(|pairs| {
+                    pairs
+                        .iter()
+                        .map(|pair| (pair.0.clone(), pair.1.clone()))
+                        .collect()
+            })
+            
     }
 
     pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {

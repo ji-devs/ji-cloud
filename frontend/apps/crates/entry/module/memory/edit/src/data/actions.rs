@@ -1,3 +1,10 @@
+/*
+ * note that history actions are done imperatively
+ * usually via push_mix
+ * this is because, unlike live-saving, we need *every* action
+ * not just the latest eventual final state
+ */
+
 use super::{state::*, history::History, raw};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -163,7 +170,7 @@ impl State {
             }
         }
     }
-    pub fn set_from_raw(&self, game_data:Option<raw::GameData>) {
+    fn set_from_raw(&self, game_data:Option<raw::GameData>) {
         match game_data {
             Some(game_data) => {
                 self.pairs.lock_mut().replace_cloned(
@@ -188,7 +195,7 @@ impl State {
 pub fn save(state: Rc<State>, data: Option<raw::GameData>) {
     let module_id = state.module_id.clone();
 
-    //Note - there's currently no way to save _after_ a mode is chosen...
+    //Note - there's currently no way to save a None... 
     if let Some(value) = data.map(|data| serde_json::to_value(&data).unwrap_ji()) {
 
         state.save_loader.load(async move {

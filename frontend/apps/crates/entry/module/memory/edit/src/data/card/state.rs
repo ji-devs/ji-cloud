@@ -48,7 +48,18 @@ impl Card {
             _ => panic!("not an audio type!") 
         }
     }
+
+    //only used for live-saving
+    //TODO - get around dynamic dispatch?
+    pub fn raw_signal(&self) -> Box<dyn Signal<Item = raw::Card> + Unpin> {
+        match self {
+            Self::Text(m) => Box::new(m.signal_cloned().map(|x| raw::Card::Text(x))),
+            Self::Image(m) => Box::new(m.signal_cloned().map(|x| raw::Card::Image(x))),
+            Self::Audio(m) => Box::new(m.signal_cloned().map(|x| raw::Card::Audio(x))),
+        }
+    }
 }
+
 
 impl From<raw::Card> for Card {
     fn from(raw_card:raw::Card) -> Self {
