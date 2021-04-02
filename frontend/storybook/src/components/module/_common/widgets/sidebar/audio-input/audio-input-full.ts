@@ -2,6 +2,7 @@ import "@elements/module/_common/widgets/audio-input/audio-input";
 import { mode as AudioInputMode } from "@elements/module/_common/widgets/audio-input/audio-input";
 import "@elements/module/_common/widgets/audio-input/audio-input-recording";
 import "@elements/module/_common/widgets/audio-input/audio-input-action";
+import "@elements/module/_common/widgets/audio-input/audio-input-delete";
 import "@elements/module/_common/widgets/audio-input/audio-input-icon";
 import "@elements/core/progress-bar/progress-bar";
 import "@elements/core/inputs/file";
@@ -38,7 +39,7 @@ export const AudioInputFull = (props?: Partial<Args>) => {
                 Upload a file
             </label>
             ${ getMainContent(mode) }
-            ${ showDelete(mode) && `<button-text slot="delete" color="blue">Delete</button-text>` }
+            ${ showDelete(mode) && `<audio-input-delete slot="delete"></audio-input-delete>` }
             ${ getAction(mode) }
         </audio-input>
     `;
@@ -121,6 +122,7 @@ function getAction(previewMode: PreviewMode): string {
         case 'Playing Recorded File':
             return `<audio-input-action slot="main-action" kind="stop"></audio-input-action>`;
         case 'Upload / Browse':
+            return `<audio-input-action slot="main-action" kind="add-sound"></audio-input-action>`;
         case 'Uploading':
             return `<button-text slot="main-action">Cancel</button-text>`;
         case 'File Uploaded':

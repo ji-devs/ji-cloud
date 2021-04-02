@@ -13,7 +13,10 @@ use dominator_helpers::{elem, with_data_id};
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use components::image_search::{self, state::ImageSearchOptions};
+use components::{
+    image_search::{self, state::ImageSearchOptions},
+    audio_input::{self, state::AudioInputOptions}
+};
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
 
@@ -21,7 +24,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_image_search()
+        render_audio_input()
     }
 }
 
@@ -76,6 +79,16 @@ pub fn render_image_search() -> Dom {
             background_only: Some(false),
             upload: Some(()),
             filters: Some(()),
+            value: Mutable::new(None),
+        }))
+    })
+}
+
+
+pub fn render_audio_input() -> Dom {
+    html!("div", {
+        .style("padding", "30px")
+        .child(audio_input::dom::render(AudioInputOptions {
             value: Mutable::new(None),
         }))
     })
