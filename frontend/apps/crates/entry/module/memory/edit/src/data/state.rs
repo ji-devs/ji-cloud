@@ -1,3 +1,5 @@
+#![feature(type_alias_impl_trait)]
+#![feature(min_type_alias_impl_trait)]
 use futures_signals::{
     map_ref,
     signal::{Mutable, ReadOnlyMutable,  SignalExt, Signal},
@@ -21,6 +23,9 @@ use dominator_helpers::futures::AsyncLoader;
 pub use super::card::state::*;
 use wasm_bindgen_futures::spawn_local;
 
+//See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
+type HistoryChangeFn = impl Fn(Option<History>);
+type StateHistory = HistoryState<History, HistoryChangeFn>;
 pub struct State {
     pub jig_id: JigId,
     pub module_id: ModuleId,
@@ -29,8 +34,8 @@ pub struct State {
     pub pairs: MutableVec<(Card, Card)>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme: Mutable<String>,
-    pub history: Rc<HistoryState<History>>,
-    pub save_loader: AsyncLoader,
+    pub history: Rc<StateHistory>,
+    pub save_loader: Rc<AsyncLoader>,
 }
 
 
@@ -60,6 +65,11 @@ impl State {
         let is_empty = pairs.is_empty();
 
         let step = Mutable::new(debug::settings().step.unwrap_or(Step::One));
+        let save_loader = Rc::new(AsyncLoader::new());
+        let history = Rc::new(HistoryState::new(
+            History::new(raw_data),
+            Self::on_history_change(save_loader.clone(), module_id.clone()),
+        ));
         let _self = Rc::new(Self {
             jig_id,
             module_id,
@@ -68,70 +78,21 @@ impl State {
             step,
             steps_completed: Mutable::new(HashSet::new()),
             theme: Mutable::new(theme),
-            history: Rc::new(HistoryState::new(History::new(raw_data))),
-            save_loader: AsyncLoader::new()
+            history,
+            save_loader,
         });
 
-
-        //This leaks... we could keep another AsyncLoader around
-        //but I think that might create a permanent cycle
-        //either way we don't really care, this is effectively global
-        spawn_local(
-            _self.raw_signal().for_each(clone!(_self => move |value| {
-                actions::save(_self.clone(), value);
-                async {}
-            }))
-        );
 
         _self
     }
 
-    //only used for live-saving
-    pub fn raw_signal(&self) -> impl Signal<Item = Option<raw::GameData>> {
-        map_ref! {
-            let mode = self.game_mode.signal(),
-            let pairs = self.raw_pairs_signal(),
-            let theme = self.theme.signal_cloned()
-            => {
-                match mode {
-                    Some(mode) => {
-                        Some(raw::GameData {
-                            mode: *mode,
-                            pairs: pairs.clone(),
-                            theme: theme.clone(),
-                        })
-                    },
-                    _ => None {
-                    }
-                }
-            }
+    //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
+    fn on_history_change(save_loader: Rc<AsyncLoader>, module_id: ModuleId) -> HistoryChangeFn {
+        move |history| {
+            actions::save(save_loader.clone(), module_id, history.and_then(|history| history.game_data));
         }
     }
 
-    //only used for live-saving
-    // the cards here are Mutables so to get the latest data
-    // we need to derive from the inner signal
-    // the inner signal itself is in an enum so we need dynamic dispatch
-    // (see Card::raw_signal)
-    pub fn raw_pairs_signal(&self) -> impl Signal<Item = Vec<(raw::Card, raw::Card)>> { 
-        self.pairs.signal_vec_cloned()
-            .map_signal(|pair| {
-                map_ref! {
-                    let card_0 = pair.0.raw_signal(),
-                    let card_1 = pair.1.raw_signal()
-                        => {
-                            (card_0.clone(), card_1.clone())
-                        }
-                }
-            })
-            .to_signal_map(|pairs| {
-                    pairs
-                        .iter()
-                        .map(|pair| (pair.0.clone(), pair.1.clone()))
-                        .collect()
-            })
-            
-    }
 
     pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
         map_ref! {

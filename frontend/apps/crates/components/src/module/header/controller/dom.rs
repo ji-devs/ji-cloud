@@ -8,10 +8,12 @@ use crate::module::history::state::HistoryState;
 pub struct ControllerDom {
 }
 
+//TODO - move on_undoredo into HistoryState itself
 impl ControllerDom {
-    pub fn render<T, F>(history: Rc<HistoryState<T>>, mut on_history_change: F) -> Dom 
+    pub fn render<T, UR, F>(history: Rc<HistoryState<T, F>>, mut on_undoredo: UR) -> Dom 
     where T: Clone + 'static,
-          F: FnMut(Option<T>) + 'static
+          UR: FnMut(Option<T>) + 'static,
+          F: Fn(Option<T>) + 'static
     {
         html!("module-header-controller", {
             .property("slot", "controller")
@@ -19,13 +21,11 @@ impl ControllerDom {
             .property_signal("redoable", history.redoable())
             .event(clone!(history => move |evt:events::CustomString| {
                 match evt.value().as_ref() {
-                    //unchecked is ok because these events
-                    //only happen when the custom element allows
                     "undo" => {
-                        on_history_change(history.undo_unchecked());
+                        on_undoredo(history.undo());
                     },
                     "redo" => {
-                        on_history_change(history.redo_unchecked());
+                        on_undoredo(history.redo());
                     },
                     "preview" => {
                     }

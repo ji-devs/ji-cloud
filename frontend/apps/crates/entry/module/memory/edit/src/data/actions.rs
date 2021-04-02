@@ -1,8 +1,6 @@
 /*
  * note that history actions are done imperatively
- * usually via push_mix
- * this is because, unlike live-saving, we need *every* action
- * not just the latest eventual final state
+ * usually via push_modify
  */
 
 use super::{state::*, history::History, raw};
@@ -12,6 +10,7 @@ use dominator::clone;
 use components::module::history::state::HistoryState;
 use futures_signals::signal::Mutable;
 use utils::prelude::*;
+use dominator_helpers::futures::AsyncLoader;
 
 use shared::{
     api::endpoints::{ApiEndpoint, self, module::*},
@@ -38,7 +37,7 @@ impl State {
 
         self.pairs.lock_mut().push_cloned(pair);
 
-        self.history.push_mix(move |history| {
+        self.history.push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.pairs.push((raw_pair.0.into(), raw_pair.1.into()));
             }
@@ -47,7 +46,7 @@ impl State {
 
     pub fn change_theme(&self, theme:String) {
         self.theme.set_neq(theme.clone());
-        self.history.push_mix(move |history| {
+        self.history.push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.theme = theme;
             }
@@ -64,7 +63,7 @@ impl State {
     }
 
     pub fn change_mode(&self, mode: GameMode) {
-        self.history.push_mix(move |history| {
+        self.history.push_modify(move |history| {
             match mode {
                 GameMode::Duplicate => {
                     history.game_data = Some(raw::GameData::new_duplicate());
@@ -111,7 +110,7 @@ impl State {
             card.as_text_mutable().set_neq(text);
         }));
 
-        self.history.push_mix(|history| {
+        self.history.push_modify(|history| {
             if let Some(game_data) = &mut history.game_data {
                 with_raw_pair(game_data, pair_index, side, clone!(text => move |game_mode, card, other| {
                     if game_mode == GameMode::Duplicate {
@@ -125,7 +124,7 @@ impl State {
 
     pub fn delete_pair(&self, pair_index: usize) {
         self.pairs.lock_mut().remove(pair_index);
-        self.history.push_mix(|history| {
+        self.history.push_modify(|history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.pairs.remove(pair_index);
             }
@@ -148,7 +147,7 @@ impl State {
 
     fn replace_pairs(&self, pairs:Vec<(Card, Card)>) {
         self.pairs.lock_mut().replace_cloned(pairs.clone());
-        self.history.push_mix(move |last| {
+        self.history.push_modify(move |last| {
             if let Some(game_data) = &mut last.game_data {
                 game_data.pairs = 
                     pairs
@@ -170,6 +169,7 @@ impl State {
             }
         }
     }
+
     fn set_from_raw(&self, game_data:Option<raw::GameData>) {
         match game_data {
             Some(game_data) => {
@@ -188,17 +188,19 @@ impl State {
                 self.theme.set_neq("".to_string());
             }
         }
+
     }
 
 }
 
-pub fn save(state: Rc<State>, data: Option<raw::GameData>) {
-    let module_id = state.module_id.clone();
+pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::GameData>) {
+
 
     //Note - there's currently no way to save a None... 
     if let Some(value) = data.map(|data| serde_json::to_value(&data).unwrap_ji()) {
 
-        state.save_loader.load(async move {
+        save_loader.load(async move {
+            log::info!("SAVING...");
             let path = Update::PATH.replace("{id}",&module_id.0.to_string());
 
             let req = Some(ModuleUpdateRequest {
@@ -206,8 +208,8 @@ pub fn save(state: Rc<State>, data: Option<raw::GameData>) {
                 body: Some(value), 
             });
             api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
+            log::info!("SAVED!");
         });
-        log::info!("SAVED!");
     } else {
         log::info!("SKIPPING SAVE - NO DATA!");
     }
