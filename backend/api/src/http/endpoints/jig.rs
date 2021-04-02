@@ -43,6 +43,19 @@ async fn create(
     Ok(CreatedJson(CreateResponse { id }))
 }
 
+/// Clone a jig
+#[api_v2_operation]
+async fn clone(
+    db: Data<PgPool>,
+    auth: TokenUserWithScope<ScopeManageJig>,
+    parent: web::Path<JigId>,
+) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::NotFound> {
+    match db::jig::clone(&*db, parent.into_inner(), auth.claims.user_id).await? {
+        Some(id) => Ok(CreatedJson(CreateResponse { id })),
+        None => Err(error::NotFound::ResourceNotFound),
+    }
+}
+
 /// Delete a jig.
 #[api_v2_operation]
 async fn delete(
@@ -128,6 +141,7 @@ async fn browse(
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
+        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete));

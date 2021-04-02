@@ -128,6 +128,46 @@ async fn update_module() -> anyhow::Result<()> {
 }
 
 #[actix_rt::test]
+async fn clone() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .post(&format!(
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/clone",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::CREATED);
+
+    let CreateResponse { id: JigId(id) } = resp.json().await?;
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, id))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 

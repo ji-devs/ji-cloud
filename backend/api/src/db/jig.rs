@@ -314,3 +314,49 @@ where
     .await
     .map(|it| it.count as u64)
 }
+
+pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Option<JigId>> {
+    let mut txn = db.begin().await?;
+
+    let new_id = sqlx::query!(
+        r#"
+insert into jig (display_name, parents, creator_id, author_id)
+select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id from jig where id = $1
+returning id
+"#,
+        parent.0, user_id
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    let new_id = match new_id {
+        Some(it) => it.id,
+        None => return Ok(None),
+    };
+
+    sqlx::query!(
+        r#"
+with new_module_set as (
+    select kind, contents, uuid_generate_v1mc() as id, jig_module."index"
+    from jig_module
+    inner join module on module.id = module_id
+    where jig_id = $1
+), new_modules as (
+    insert into module (id, kind, contents)
+    select id, kind, contents 
+    from new_module_set
+)
+insert into jig_module (jig_id, module_id, "index")
+select $2 as jig_id, new_module_set.id as module_id, new_module_set."index"
+from new_module_set        
+"#,
+        parent.0,
+        new_id
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(Some(JigId(new_id)))
+}

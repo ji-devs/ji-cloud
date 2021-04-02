@@ -42,6 +42,16 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
+/// Clone a JIG.
+pub struct Clone;
+impl ApiEndpoint for Clone {
+    type Req = ();
+    type Res = CreateResponse<JigId>;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/clone";
+    const METHOD: Method = Method::Post;
+}
+
 /// Update a JIG.
 pub struct Update;
 impl ApiEndpoint for Update {

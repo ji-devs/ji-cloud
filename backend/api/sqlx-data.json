@@ -465,6 +465,19 @@
       ]
     }
   },
+  "1bac88038d15dd368ee2cff84039b102b249dfa058c61af107f07d4ed739b508": {
+    "query": "\nwith new_module_set as (\n    select kind, contents, uuid_generate_v1mc() as id, jig_module.\"index\"\n    from jig_module\n    inner join module on module.id = module_id\n    where jig_id = $1\n), new_modules as (\n    insert into module (id, kind, contents)\n    select id, kind, contents \n    from new_module_set\n)\ninsert into jig_module (jig_id, module_id, \"index\")\nselect $2 as jig_id, new_module_set.id as module_id, new_module_set.\"index\"\nfrom new_module_set        \n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb": {
     "query": "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
     "describe": {
@@ -2621,6 +2634,27 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "e457c9506c64d4b5455b631439224783685ebdded24c2e30affb3bf267a1d681": {
+    "query": "\ninsert into jig (display_name, parents, creator_id, author_id)\nselect display_name, array_append(parents, id), $2 as creator_id, $2 as author_id from jig where id = $1\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
