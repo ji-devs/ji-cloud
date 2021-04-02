@@ -31,7 +31,7 @@ export class _ extends LitElement {
     @property({type: Number})
     progress: number = 100;
 
-    @property()
+    @property({reflect: true})
     color: ProgressColor = 'blue';
 
     render() {

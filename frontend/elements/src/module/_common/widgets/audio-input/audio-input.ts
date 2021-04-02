@@ -51,7 +51,7 @@ export class _ extends LitElement {
                     padding: 0 26px;
                     display: grid;
                     align-items: center;
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: 1fr 2fr 1fr;
                 }
                 ::slotted([slot=main-action]) {
                     grid-column: 2;
