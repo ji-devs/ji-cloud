@@ -52,7 +52,7 @@ where id = $1 and (
         body,
         kind.map(|it| it as i16),
     )
-    .execute(pool)
+    .execute(&mut txn)
     .await?;
 
     txn.commit().await?;
