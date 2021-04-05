@@ -1,8 +1,11 @@
 use dominator::{html, Dom, clone};
 use crate::data::{raw, state::*};
 use std::rc::Rc;
-use utils::events;
+use std::cell::RefCell;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+use web_sys::HtmlElement;
+use js_sys::Reflect;
 use futures_signals::{
     map_ref,
     signal::{ReadOnlyMutable, SignalExt},
@@ -50,18 +53,24 @@ struct CardDom {}
 
 impl CardDom {
     pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {
+        let input_ref:Rc<RefCell<Option<HtmlElement>>> = Rc::new(RefCell::new(None));
+
         html!("main-card", {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
             .property("editing", step == Step::One)
             .property_signal("theme", state.theme.signal_cloned())
+            .event(clone!(input_ref => move |evt:events::Click| {
+                if let Some(input_ref) = input_ref.borrow().as_ref() {
+                    Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
+                }
+            }))
             .child({
                 match card {
                     Card::Text(data) => {
-                        let original_data = data.get_cloned();
-                        html!("input-text-content", {
+                        html!("input-textarea-content", {
                             .property_signal("value", data.signal_cloned())
-                            .property("clickMode", "single")
+                            .property("clickMode", "none")
                             .event(clone!(state, index, other => move |evt:events::CustomInput| {
                                 let index = index.get().unwrap_or_default();
                                 let value = evt.value();
@@ -75,12 +84,16 @@ impl CardDom {
                                 let value = evt.value();
                                 state.replace_card_text(index, side, value);
                             }))
-                            .event(clone!(state, other, original_data => move |evt:events::Reset| {
+                            .event(clone!(state, other => move |evt:events::Reset| {
                                 //Just need to change the linked pair
                                 //without affecting history
                                 if game_mode == GameMode::Duplicate {
-                                    other.as_text_mutable().set_neq(original_data.clone());
+                                    //other.as_text_mutable().set_neq(original_data.clone());
+                                    other.as_text_mutable().set_neq(data.get_cloned());
                                 }
+                            }))
+                            .after_inserted(clone!(input_ref => move |dom| {
+                                *input_ref.borrow_mut() = Some(dom);
                             }))
                         })
                     },

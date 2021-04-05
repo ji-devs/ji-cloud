@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 
-@customElement("input-textarea")
+@customElement("input-form-textarea")
 export class _ extends LitElement {
   static get styles() {
     return [

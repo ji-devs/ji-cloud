@@ -20,6 +20,7 @@ impl SingleListDom {
                     .enumerate()
                     .map(clone!(state => move |(index, value)| {
                         let index = index.get().unwrap_or_default();
+                        let mode = state.mode;
 
                         html!("sidebar-widget-single-list-input", {
                             .property_signal("value", {
@@ -28,7 +29,10 @@ impl SingleListDom {
                                     let is_placeholder = state.is_placeholder.signal()
                                         => move {
                                             if *is_placeholder {
-                                                get_placeholder_value(index)
+                                                match crate::config::get_init_word_ref(mode, index) {
+                                                    Some(s) => s.to_string(),
+                                                    None => "".to_string()
+                                                }
                                             } else {
                                                 value.clone()
                                             }
@@ -49,27 +53,3 @@ impl SingleListDom {
         })
     }
 }
-
-fn get_placeholder_value(index: usize) -> String {
-    match index {
-        0 => crate::strings::input_list::STR_0,
-        1 => crate::strings::input_list::STR_1,
-        2 => crate::strings::input_list::STR_2,
-        3 => crate::strings::input_list::STR_3,
-        4 => crate::strings::input_list::STR_4,
-        5 => crate::strings::input_list::STR_5,
-        _ => ""
-    }.to_string()
-}
-/*
-    <sidebar-widget-single-list slot="input-widget">
-    ${mapToString(arrayCount(nRows), row => {
-
-        const value = row < 6 
-            ? placeholder ? "placeholder='placeholder'" : "value='value'"
-            : "";
-
-        return`<sidebar-widget-single-list-input ${value}></sidebar-widget-single-list-input>`
-    })}
-    </sidebar-widget-single-list>`
-    */

@@ -29,7 +29,7 @@ impl StateLoader<RawData, State> for PageLoader {
         let jig_id = self.jig_id.clone();
         let module_id = self.module_id.clone();
         async move {
-            let game_data = match debug::settings().data {
+            let game_data = match debug::settings().data.as_ref() {
                 None => {
                     let path = Get::PATH.replace("{id}",&module_id.0.to_string());
 
@@ -44,7 +44,7 @@ impl StateLoader<RawData, State> for PageLoader {
                         }
                     }
                 },
-                Some(game_data) => game_data
+                Some(game_data) => game_data.clone()
             };
 
             let state = State::new(jig_id, module_id, game_data);

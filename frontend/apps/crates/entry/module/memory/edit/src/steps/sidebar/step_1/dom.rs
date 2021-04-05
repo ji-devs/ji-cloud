@@ -18,7 +18,7 @@ impl Step1Dom {
 
         if is_empty {
             match game_mode {
-                GameMode::Duplicate => {
+                GameMode::Duplicate | GameMode::Lettering => {
                     DuplicateDom::render(state.clone())
                 },
                 _ => {

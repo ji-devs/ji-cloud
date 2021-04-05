@@ -1,7 +1,7 @@
 use dominator::{html, Dom, clone};
 use crate::data::state::*;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -17,7 +17,8 @@ pub struct DuplicateDom {}
 impl DuplicateDom {
     pub fn render(state:Rc<State>) -> Vec<Dom> { 
 
-        let list_state = Rc::new(ListState::new(14));
+        let mode = state.game_mode.get_cloned().unwrap_ji();
+        let list_state = Rc::new(ListState::new(mode, 14));
 
         vec![
             html!("step1-sidebar-duplicate", {

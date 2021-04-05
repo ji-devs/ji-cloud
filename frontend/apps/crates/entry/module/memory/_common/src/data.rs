@@ -20,7 +20,13 @@ pub enum Card {
 #[derive(Serialize, Deserialize,Clone, Copy, Debug, PartialEq)]
 pub enum Mode {
     Duplicate,
-    WordsAndImages
+    WordsAndImages,
+    BeginsWith,
+    Lettering,
+    Riddles,
+    Opposites,
+    Synonymns,
+    Translate
 }
 
 impl GameData {
@@ -28,30 +34,30 @@ impl GameData {
         //TODO - load
         Err(())
     }
-    pub fn new_duplicate() -> Self 
+    pub fn new<I, S>(mode: Mode, theme: String, pairs: I) -> Self 
+        where 
+            I: IntoIterator<Item = (S, S)>,
+            S: AsRef<str>
     {
         Self {
-            mode: Mode::Duplicate,
-            pairs: Vec::new(), 
-            theme: "".to_string()
-        }
-    }
+            mode,
+            pairs: pairs 
+                .into_iter()
+                .map(|(word_1, word_2)| {
+                    let (word_1, word_2) = (word_1.as_ref(), word_2.as_ref());
 
-    pub fn duplicate_debug<I, S>(words:I, theme: String) -> Self 
-        where I: Iterator<Item = S>,
-              S: AsRef<str>
-    {
-        Self {
-            mode: Mode::Duplicate,
-            pairs: words
-                .map(|word| {
-                    let word = word.as_ref();
-                    (Card::Text(word.to_string()), Card::Text(word.to_string()))
+                    match mode {
+                        Mode::Duplicate | Mode::Lettering => {
+                            (Card::Text(word_1.to_string()), Card::Text(word_2.to_string()))
+                        },
+                        _ => unimplemented!("TODO")
+                    }
                 })
                 .collect(),
             theme
         }
     }
+
     /*
     pub fn words_and_images_debug<I, S>(words:I, theme: String) -> Self 
         where I: Iterator<Item = S>,

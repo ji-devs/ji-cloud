@@ -64,7 +64,11 @@ impl State {
 
         let is_empty = pairs.is_empty();
 
-        let step = Mutable::new(debug::settings().step.unwrap_or(Step::One));
+        let step = Mutable::new(match debug::settings().step.as_ref() {
+            Some(step) => step.clone(),
+            None => Step::One
+        });
+
         let save_loader = Rc::new(AsyncLoader::new());
         let history = Rc::new(HistoryState::new(
             History::new(raw_data),

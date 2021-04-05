@@ -66,7 +66,11 @@ impl State {
         self.history.push_modify(move |history| {
             match mode {
                 GameMode::Duplicate => {
-                    history.game_data = Some(raw::GameData::new_duplicate());
+                    history.game_data = Some(raw::GameData::new(
+                        mode,
+                        crate::config::get_themes_cloned()[0].clone(),
+                        Vec::<(&str, &str)>::new()
+                    ));
                 },
                 _ => unimplemented!("TODO - change mode")
             };
@@ -81,7 +85,7 @@ impl State {
         let game_mode = self.game_mode.get().unwrap_ji();
 
         match game_mode {
-            GameMode::Duplicate => {
+            GameMode::Duplicate | GameMode::Lettering => {
                 let pairs:Vec<(Card, Card)> =
                     list
                         .into_iter()
@@ -195,21 +199,24 @@ impl State {
 
 pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::GameData>) {
 
-
     //Note - there's currently no way to save a None... 
     if let Some(value) = data.map(|data| serde_json::to_value(&data).unwrap_ji()) {
 
-        save_loader.load(async move {
-            log::info!("SAVING...");
-            let path = Update::PATH.replace("{id}",&module_id.0.to_string());
+        if crate::debug::settings().live_save {
+            save_loader.load(async move {
+                log::info!("SAVING...");
+                let path = Update::PATH.replace("{id}",&module_id.0.to_string());
 
-            let req = Some(ModuleUpdateRequest {
-                kind: None,
-                body: Some(value), 
+                let req = Some(ModuleUpdateRequest {
+                    kind: None,
+                    body: Some(value), 
+                });
+                api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
+                log::info!("SAVED!");
             });
-            api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
-            log::info!("SAVED!");
-        });
+        } else {
+            //log::info!("SKIPPING SAVE - DEBUG!");
+        }
     } else {
         log::info!("SKIPPING SAVE - NO DATA!");
     }

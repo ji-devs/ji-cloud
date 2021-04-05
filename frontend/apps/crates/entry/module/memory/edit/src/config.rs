@@ -2,62 +2,71 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
+use crate::data::state::GameMode;
 
 macro_rules! config_path {
     ($e:tt) => { 
         concat!("../../../../../../../config/", $e)
     } 
 }
-pub static INITIAL_WORDS:OnceCell<Vec<String>> = OnceCell::new();
-pub static THEME_CHOICES:OnceCell<Vec<String>> = OnceCell::new();
-
-pub const THEME_EXAMPLE_TEXT_1:&'static str = "שמש";
-pub const THEME_EXAMPLE_TEXT_2:&'static str = "sun";
+static EDITOR_CONFIG:OnceCell<EditorConfig> = OnceCell::new();
 
 #[derive(Deserialize)]
-struct InitWords {
-    words: Vec<String>
+struct EditorConfig {
+    init: InitConfig 
 }
-
 #[derive(Deserialize)]
-struct ThemeChoices {
-    themes: Vec<String>
+struct InitConfig {
+    duplicate: Vec<String> 
 }
 
 pub fn init() {
-    let json:InitWords = serde_json::from_str(include_str!(config_path!("module/memory/initial-words.json"))).unwrap_ji();
-    INITIAL_WORDS.set(json.words);
+    EDITOR_CONFIG.set(serde_json::from_str(include_str!(config_path!("module/memory/editor.json"))).unwrap_ji());
     let json:ThemeChoices = serde_json::from_str(include_str!(config_path!("themes.json"))).unwrap_ji();
     THEME_CHOICES.set(json.themes);
 }
 
-pub fn get_init_words_cloned() -> Vec<String> {
-    INITIAL_WORDS
+pub fn get_init_word_ref(mode: GameMode, index: usize) -> Option<&'static str> {
+    EDITOR_CONFIG 
         .get()
-        .map(|x| x.clone())
-        .unwrap_ji()
-}
-
-
-pub fn get_init_words_iter() -> impl Iterator<Item = &'static String> {
-    INITIAL_WORDS
-        .get()
-        .unwrap_ji()
-        .iter()
-}
-
-pub fn get_init_words_string() -> String { 
-    INITIAL_WORDS
-        .get()
-        .unwrap_ji()
-        .iter()
-        .fold(String::new(), |acc, curr| {
-            if acc.is_empty() {
-                curr.to_string()
-            } else {
-                format!("{}\n{}", acc, curr)
+        .and_then(|config| {
+            match mode {
+                GameMode::Duplicate | GameMode::Lettering => {
+                    config.init.duplicate.get(index)
+                },
+                _ => unimplemented!("TODO")
             }
         })
+        .map(|s| s.as_ref())
+}
+
+pub fn get_init_words(mode: GameMode) -> Vec<(String, String)> {
+    EDITOR_CONFIG 
+        .get()
+        .map(|config| {
+            match mode {
+                GameMode::Duplicate | GameMode::Lettering => {
+                    config.init.duplicate
+                        .iter()
+                        .map(|word| {
+                            (word.to_string(), word.to_string())
+                        })
+                        .collect()
+                },
+                _ => unimplemented!("TODO")
+            }
+        })
+        .unwrap_ji()
+}
+
+
+static THEME_CHOICES:OnceCell<Vec<String>> = OnceCell::new();
+
+pub const THEME_EXAMPLE_TEXT_1:&'static str = "שמש";
+pub const THEME_EXAMPLE_TEXT_2:&'static str = "sun";
+#[derive(Deserialize)]
+struct ThemeChoices {
+    themes: Vec<String>
 }
 
 pub fn get_themes_cloned() -> Vec<String> { 

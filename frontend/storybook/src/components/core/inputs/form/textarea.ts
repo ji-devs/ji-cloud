@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/core/inputs/textarea";
+import "@elements/core/inputs/form/textarea";
 
 export default {
-    title: "Core / Inputs"
+    title: "Core / Inputs / Form"
 }
 
 interface Args {
@@ -29,7 +29,7 @@ export const TextArea = (props?:Partial<Args>) => {
 
     return `
         <div style="width:${width}px">
-            <input-textarea ${argsToAttrs(textProps)}></input-textarea>
+            <input-form-textarea ${argsToAttrs(textProps)}></input-form-textarea>
         </div>
     `;
 }

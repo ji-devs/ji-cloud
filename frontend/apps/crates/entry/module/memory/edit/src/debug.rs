@@ -6,11 +6,16 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::data::{raw, state::*};
+use once_cell::sync::OnceCell;
 
+pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
+
+#[derive(Debug)]
 pub struct DebugSettings {
     pub data:Option<Option<raw::GameData>>,
     pub step:Option<Step>,
@@ -28,48 +33,49 @@ impl DebugSettings {
             live_save: true,
         }
     }
-    pub fn duplicate(with_data: bool) -> DebugSettings {
+    pub fn debug(mode: Option<raw::Mode>, with_data: bool) -> DebugSettings {
         DebugSettings {
-            data: Some(Some(
-                if with_data {
-                    raw::GameData::duplicate_debug(
-                        crate::config::get_init_words_iter(),
-                        //vec!["foo"].iter(),
-                        crate::config::get_themes_cloned()[1].clone()
+            data: Some(
+                mode.map(|mode| {
+                    raw::GameData::new(
+                        mode, 
+                        crate::config::get_themes_cloned()[1].clone(),
+                        {
+                            if with_data {
+                                //vec![("foo", "foo")]
+                                crate::config::get_init_words(mode)
+                            } else {
+                                Vec::new()
+                            }
+                        }
                     )
-                } else {
-                    raw::GameData::new_duplicate()
-                }
-            )),
-            step: Some(Step::Four), 
+                })
+            ),
+            step: Some(Step::One), 
             image_search: None,
             live_save: false,
         }
     }
-    /*
-    pub fn words_and_images() -> DebugSettings {
-        DebugSettings {
-            data: Some(raw::GameData::words_and_images_debug(
-                crate::config::get_init_words_iter(),
-                crate::config::get_themes_cloned()[0].clone()
-            )),
-            step: Some(Step::Four), 
-            image_search: None,
-        }
-    }
-    */
 }
 
 cfg_if! {
     if #[cfg(feature = "local")] {
-        pub fn settings() -> DebugSettings {
-            //DebugSettings::duplicate(true)
-            DebugSettings::default()
+        pub fn init() {
+            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
+            //SETTINGS.set(DebugSettings::debug(Some(GameMode::Lettering), false)).unwrap_throw();
+            //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_throw();
+            //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_throw();
+        }
+
+        pub fn settings() -> &'static DebugSettings {
+            unsafe { SETTINGS.get_unchecked() }
         }
     } else {
-        pub fn settings() -> DebugSettings {
-            DebugSettings::default()
+        pub fn init() {
+            SETTINGS.set(DebugSettings::default()).unwrap_throw();
+        }
+        pub fn settings() -> &'static DebugSettings {
+            unsafe { SETTINGS.get_unchecked() }
         }
     }
 }
-

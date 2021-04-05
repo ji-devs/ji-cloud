@@ -1,5 +1,6 @@
 import "@elements/core/carousel/multi";
 import "@elements/_sub-bundles/module-edit";
+import "@elements/core/inputs/textarea-content";
 import "@elements/module/memory/edit/choose/pages/landing";
 import "@elements/module/memory/edit/choose/card";
 import "@elements/module/memory/edit/steps/sections/header/header";

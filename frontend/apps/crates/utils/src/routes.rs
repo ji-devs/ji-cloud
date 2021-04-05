@@ -193,6 +193,13 @@ impl Route {
                     
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
+            ["module", kind, "edit", "debug"] => {
+                Self::Module(ModuleRoute::Edit(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_u128(0)),
+                        ModuleId(Uuid::from_u128(0)),
+                ))
+            },
             ["module", kind, "edit", jig_id, module_id] => {
                 Self::Module(ModuleRoute::Edit(
                         ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
