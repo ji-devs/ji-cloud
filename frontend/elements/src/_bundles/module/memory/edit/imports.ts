@@ -12,5 +12,8 @@ import "@elements/module/memory/edit/steps/sections/sidebar/step1/empty";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/duplicate";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list-input";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-list";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-list-column";
+import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-list-input";
 import "@elements/module/memory/edit/steps/sections/sidebar/step2/option";
 import "@elements/module/memory/edit/steps/sections/sidebar/step2/container";
