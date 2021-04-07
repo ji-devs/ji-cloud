@@ -1,15 +1,29 @@
 use std::rc::Rc;
-use utils::fetch::{api_upload_file, api_with_auth};
+use utils::{path::audio_lib_url, prelude::*};
 use web_sys::File;
-use shared::{api::{ApiEndpoint, endpoints}, domain::{CreateResponse, audio::AudioId}, error::EmptyError};
+use shared::{
+    api::{ApiEndpoint, endpoints}, 
+    domain::{CreateResponse, audio::AudioId}, 
+    media::MediaLibrary,
+    error::EmptyError
+};
 use super::state::{AudioInputMode, State};
 
+impl <F: Fn(Option<AudioId>) + 'static> State <F> {
+    pub fn set_audio_id(&self, audio_id: Option<AudioId>) {
 
-pub async fn file_change(state: Rc<State>, file: File) {
+        self.audio_id.set_neq(audio_id);
+        if let Some(on_change) = &self.on_change {
+            (on_change)(audio_id);
+        }
+    }
+}
+
+pub async fn file_change<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
     let res = upload_file(file).await;
     if let Ok(audio_id) = res {
-        state.options.value.set(Some(audio_id));
+        state.set_audio_id(Some(audio_id));
         state.mode.set(AudioInputMode::Success);
     } else {
         log::error!("Error uploading audio file");

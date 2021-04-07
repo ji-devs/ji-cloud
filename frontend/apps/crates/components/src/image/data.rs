@@ -36,7 +36,7 @@ pub struct MetaImage {
 
 impl MetaImage {
     pub fn new_debug(id_str:&str, name:&str, library_kind: MediaLibraryKind) -> Self {
-        let id = uuid::Uuid::parse_str(&id_str).unwrap_throw();
+        let id = uuid::Uuid::parse_str(&id_str).unwrap_ji();
         let id = ImageId(id);
         let _id_string = id_str.to_string();
         let _library_kind = library_kind;
@@ -116,7 +116,7 @@ impl ImageExt for SimpleImage {
 impl From<(&str, MediaLibraryKind)> for SimpleImage {
     fn from((_id_str, _library_kind):(&str, MediaLibraryKind)) -> Self {
         let _id_string = _id_str.to_string();
-        let id = uuid::Uuid::parse_str(&_id_str).unwrap_throw();
+        let id = uuid::Uuid::parse_str(&_id_str).unwrap_ji();
         let _id = ImageId(id);
         Self {
             _id,
@@ -128,7 +128,7 @@ impl From<(&str, MediaLibraryKind)> for SimpleImage {
 impl From<(String, MediaLibraryKind)> for SimpleImage {
     fn from((_id_string, _library_kind):(String, MediaLibraryKind)) -> Self {
 
-        let id = uuid::Uuid::parse_str(&_id_string).unwrap_throw();
+        let id = uuid::Uuid::parse_str(&_id_string).unwrap_ji();
         let _id = ImageId(id);
         Self {
             _id,

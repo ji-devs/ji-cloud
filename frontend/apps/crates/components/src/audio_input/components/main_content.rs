@@ -6,37 +6,71 @@ use gloo_timers::future::IntervalStream;
 use utils::events;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::audio_input::state::{State, AudioInputMode};
-use super::{super::actions::file_change, play_progress};
+use shared::{domain::audio::AudioId, media::MediaLibrary};
+use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
+use super::{super::actions::file_change, player};
 
 
-pub fn render(state: Rc<State>) -> Dom {
-    let mode = state.mode.lock_ref();
-    match *mode {
-        AudioInputMode::Record => render_input_icon("record"),
-        AudioInputMode::Success => render_input_icon("success"),
-        AudioInputMode::Playing => render_player(state.clone()),
-        AudioInputMode::Uploading => render_uploading(),
-        AudioInputMode::Recording => {
-            html!("audio-input-recording", {
-                .property("slot", "main-content")
-            })
-        },
-        AudioInputMode::Upload => {
-            html!("input-file", {
-                .property("slot", "main-content")
-                .child(html!("audio-input-icon", {
-                    .property("kind", "upload")
-                }))
-                .event(clone!(state => move |evt: events::CustomFile| {
-                    let state = state.clone();
-                    spawn_local(async move {
-                        let file = evt.file();
-                        file_change(state.clone(), file).await;
-                    });
-                }))
-            })
-        },
+pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, mode:AudioInputMode, add_method: AudioInputAddMethod, audio_id: Option<AudioId>) -> Dom {
+    //TODO - clean all this up!
+    if let Some(audio_id) = audio_id {
+        match mode {
+            AudioInputMode::Record => render_input_icon("record"),
+            AudioInputMode::Success => render_input_icon("success"),
+            AudioInputMode::Playing => player::dom::render(state.clone(), audio_id),
+            AudioInputMode::Uploading => render_uploading(),
+            AudioInputMode::Recording => {
+                html!("audio-input-recording", {
+                    .property("slot", "main-content")
+                })
+            },
+            AudioInputMode::Upload => {
+                html!("input-file", {
+                    .property("slot", "main-content")
+                    .child(html!("audio-input-icon", {
+                        .property("kind", "upload")
+                    }))
+                    .event(clone!(state => move |evt: events::CustomFile| {
+                        let state = state.clone();
+                        spawn_local(async move {
+                            let file = evt.file();
+                            file_change(state.clone(), file).await;
+                        });
+                    }))
+                })
+            },
+        }
+    } else {
+        match mode {
+            AudioInputMode::Record => render_input_icon("record"),
+            AudioInputMode::Uploading => render_uploading(),
+            AudioInputMode::Recording => {
+                html!("audio-input-recording", {
+                    .property("slot", "main-content")
+                })
+            },
+            AudioInputMode::Upload => {
+                html!("input-file", {
+                    .property("slot", "main-content")
+                    .child(html!("audio-input-icon", {
+                        .property("kind", "upload")
+                    }))
+                    .event(clone!(state => move |evt: events::CustomFile| {
+                        let state = state.clone();
+                        spawn_local(async move {
+                            let file = evt.file();
+                            file_change(state.clone(), file).await;
+                        });
+                    }))
+                })
+            },
+            AudioInputMode::Success | AudioInputMode::Playing => {
+                match add_method {
+                    AudioInputAddMethod::Record => render_input_icon("record"),
+                    _ => unimplemented!("TODO: success or play in upload mode...")
+                }
+            }
+        }
     }
 }
 
@@ -69,8 +103,4 @@ fn render_uploading() -> Dom {
             progress as i32
         }))
     })
-}
-
-fn render_player(state: Rc<State>) -> Dom {
-    play_progress::render(state.clone())
 }

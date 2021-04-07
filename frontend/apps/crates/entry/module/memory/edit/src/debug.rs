@@ -40,6 +40,7 @@ impl DebugSettings {
                     raw::GameData::new(
                         mode, 
                         crate::config::get_themes_cloned()[1].clone(),
+                        raw::Instructions::new(),
                         {
                             if with_data {
                                 //vec![("foo", "foo")]
@@ -51,7 +52,7 @@ impl DebugSettings {
                     )
                 })
             ),
-            step: Some(Step::One), 
+            step: Some(Step::Three), 
             image_search: None,
             live_save: false,
         }
@@ -61,7 +62,8 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
-            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
+            SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), false)).unwrap_throw();
+            //SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(Some(GameMode::Lettering), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_throw();

@@ -18,11 +18,13 @@ use serde::Deserialize;
 use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
-use shared::domain::jig::{JigId, ModuleId};
+use shared::{domain::{
+    jig::{JigId, ModuleId},
+    audio::AudioId
+}, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;
 pub use super::card::state::*;
 use wasm_bindgen_futures::spawn_local;
-
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 type HistoryChangeFn = impl Fn(Option<History>);
 type StateHistory = HistoryState<History, HistoryChangeFn>;
@@ -34,10 +36,24 @@ pub struct State {
     pub pairs: MutableVec<(Card, Card)>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme: Mutable<String>,
+    pub instructions: Instructions,
     pub history: Rc<StateHistory>,
     pub save_loader: Rc<AsyncLoader>,
 }
 
+pub struct Instructions {
+    pub audio_id: Mutable<Option<AudioId>>,
+    pub text: Mutable<Option<String>>
+}
+
+impl Instructions {
+    pub fn new(raw_data: Option<&raw::GameData>) -> Self {
+        Self {
+            audio_id: Mutable::new(None),
+            text: Mutable::new(None),
+        }
+    }
+}
 
 impl State {
     pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Rc<Self> {
@@ -62,6 +78,8 @@ impl State {
             }
         };
 
+        let instructions = Instructions::new(raw_data.as_ref());
+
         let is_empty = pairs.is_empty();
 
         let step = Mutable::new(match debug::settings().step.as_ref() {
@@ -84,6 +102,7 @@ impl State {
             theme: Mutable::new(theme),
             history,
             save_loader,
+            instructions
         });
 
 

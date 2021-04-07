@@ -125,7 +125,7 @@ where
     pub fn stash_app(&self, canvas:HtmlCanvasElement) {
 
         let mut f = self.get_app.borrow_mut();
-        let app = f(canvas, self.raw_data.take().unwrap_throw());
+        let app = f(canvas, self.raw_data.take().unwrap_ji());
         *self.app.borrow_mut() = Some(app);
     }
     pub fn resize_app(&self, size:ResizeInfo) {

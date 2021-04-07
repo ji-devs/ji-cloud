@@ -1,0 +1,9 @@
+import "@elements/module/_common/widgets/image-search/image-select";
+import "@elements/module/_common/widgets/image-search/image-search-filters";
+import "@elements/module/_common/widgets/image-search/image-search-upload";
+import "@elements/module/_common/widgets/image-search/image-search-style-option";
+import "@elements/module/_common/widgets/image-search/image-search-filters";
+import "@elements/module/_common/widgets/image-search/image-search-style-option";
+import "@elements/core/inputs/search";
+import "@elements/core/inputs/checkbox";
+import "@elements/core/inputs/switch";

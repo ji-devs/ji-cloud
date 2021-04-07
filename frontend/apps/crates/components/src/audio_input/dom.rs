@@ -1,27 +1,46 @@
 use dominator::{Dom, clone, html};
-use futures_signals::signal::SignalExt;
+use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use super::{
     components::{main_content, add_method, delete, main_action},
     state::{AudioInputAddMethod, AudioInputMode, AudioInputOptions, State}
 };
+use utils::prelude::*;
+use shared::{domain::audio::AudioId, media::MediaLibrary};
 
 
-pub fn render(audio_input_options: AudioInputOptions) -> Dom {
-    let state: Rc<State> = State::new(audio_input_options);
-
+pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, slot: Option<&str>) -> Dom {
     html!("audio-input", {
+        .apply_if(slot.is_some(), move |dom| {
+            dom.property("slot", slot.unwrap_ji())
+        })
         .property_signal("mode", state.mode.signal_cloned().map(|mode| get_element_mode(mode)))
         .children(&mut [
             add_method::render(state.clone(), AudioInputAddMethod::Record),
             add_method::render(state.clone(), AudioInputAddMethod::Upload),
             delete::render(state.clone()),
         ])
-        .child(html!("empty-fragment", {
-            .property("slot", "main-action")
-            .child_signal(state.mode.signal_cloned().map(clone!(state => move |_| Some(main_action::render(state.clone())))))
-        }))
-        .child_signal(state.mode.signal_cloned().map(clone!(state => move |_| Some(main_content::render(state.clone())))))
+        .children_signal_vec({
+            let sig = map_ref! {
+                let mode = state.mode.signal_cloned(),
+                let add_method = state.add_method.signal_cloned(),
+                let audio_id = state.audio_id.signal_cloned()
+                    => (*mode, *add_method, *audio_id)
+            };
+
+            sig.map(clone!(state => move |(mode, add_method, audio_id)| {
+                vec![
+                    html!("empty-fragment", {
+                        .property("slot", "main-action")
+                        .child(main_action::render(state.clone(), mode, add_method, audio_id))
+                    }),
+                    main_content::render(state.clone(), mode, add_method, audio_id),
+                ]
+            }))
+            .to_signal_vec()
+
+
+        })
     })
 }
 

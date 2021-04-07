@@ -66,6 +66,7 @@ export class _ extends LitElement {
       this.hover = this.visible = false;
     }
   }
+
   updated(changed:any) {
         if(typeof changed.get("visible") === "boolean") {
             const {visible} = this;

@@ -13,10 +13,15 @@ use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 
 use shared::{
-    api::endpoints::{ApiEndpoint, self, module::*},
+    api::endpoints::{ApiEndpoint, self, module::*}, 
+    domain::{
+        audio::AudioId, 
+        jig::{*, module::*}
+    }, 
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::*},
+    media::MediaLibrary
 };
+
 impl State {
     pub fn add_card(&self) {
         let game_mode = self.game_mode.get().unwrap_ji();
@@ -69,6 +74,7 @@ impl State {
                     history.game_data = Some(raw::GameData::new(
                         mode,
                         crate::config::get_themes_cloned()[0].clone(),
+                        raw::Instructions::new(), 
                         Vec::<(&str, &str)>::new()
                     ));
                 },
@@ -126,6 +132,25 @@ impl State {
         });
     }
 
+    pub fn change_instructions_text(&self, text: Option<String>) {
+        self.instructions.text.set_neq(text.clone());
+        self.history.push_modify(move |history| {
+            if let Some(game_data) = &mut history.game_data {
+                game_data.instructions.text = text;
+            }
+        });
+    }
+
+    pub fn change_instructions_audio(&self, audio_id: Option<AudioId>) {
+        log::info!("CHANGING INSTRUCTIONS AUDIO!!!!");
+        self.instructions.audio_id.set_neq(audio_id.clone());
+
+        self.history.push_modify(move |history| {
+            if let Some(game_data) = &mut history.game_data {
+                game_data.instructions.audio_id = audio_id;
+            }
+        });
+    }
     pub fn delete_pair(&self, pair_index: usize) {
         self.pairs.lock_mut().remove(pair_index);
         self.history.push_modify(|history| {
@@ -185,11 +210,15 @@ impl State {
                 );
                 self.game_mode.set_neq(Some(game_data.mode));
                 self.theme.set_neq(game_data.theme);
+                self.instructions.audio_id.set_neq(game_data.instructions.audio_id);
+                self.instructions.text.set_neq(game_data.instructions.text);
             },
             None => {
                 self.pairs.lock_mut().clear();
                 self.game_mode.set_neq(None);
                 self.theme.set_neq("".to_string());
+                self.instructions.audio_id.set_neq(None);
+                self.instructions.text.set_neq(None);
             }
         }
 

@@ -6,10 +6,26 @@ use shared::{
 };
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameData {
+    pub instructions: Instructions,
     pub mode: Mode,
     pub pairs: Vec<(Card, Card)>,
     pub theme: String,
 }
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Instructions {
+    pub text: Option<String>,
+    pub audio_id: Option<AudioId>,
+}
+
+impl Instructions {
+    pub fn new() -> Self {
+        Self { 
+            text: None,
+            audio_id: None,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Card {
     Text(String),
@@ -30,17 +46,14 @@ pub enum Mode {
 }
 
 impl GameData {
-    pub async fn load(jig_id:String, module_id:String) -> Result<Self, ()> {
-        //TODO - load
-        Err(())
-    }
-    pub fn new<I, S>(mode: Mode, theme: String, pairs: I) -> Self 
+    pub fn new<I, S>(mode: Mode, theme: String, instructions: Instructions, pairs: I) -> Self 
         where 
             I: IntoIterator<Item = (S, S)>,
             S: AsRef<str>
     {
         Self {
             mode,
+            instructions,
             pairs: pairs 
                 .into_iter()
                 .map(|(word_1, word_2)| {

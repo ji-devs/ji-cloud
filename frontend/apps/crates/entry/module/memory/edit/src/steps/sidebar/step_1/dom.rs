@@ -8,7 +8,11 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::{SignalVec, SignalVecExt},
 };
-use super::duplicate::dom::DuplicateDom;
+use super::{
+    duplicate::dom::DuplicateDom,
+    words_images::dom::WordsAndImagesDom,
+};
+
 
 pub struct Step1Dom {}
 impl Step1Dom {
@@ -20,6 +24,9 @@ impl Step1Dom {
             match game_mode {
                 GameMode::Duplicate | GameMode::Lettering => {
                     DuplicateDom::render(state.clone())
+                },
+                GameMode::WordsAndImages => {
+                    WordsAndImagesDom::render(state.clone())
                 },
                 _ => {
                     Vec::new()

@@ -1,6 +1,6 @@
 use dominator_helpers::futures::AsyncLoader;
 use dominator::{Dom, html, clone};
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use std::{borrow::BorrowMut, cell::RefCell, rc::Rc};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
@@ -11,38 +11,42 @@ use super::{
 
 pub const IMAGE_SEARCH_DATA_TRANSFER: &'static str = "image-search";
 
-pub fn render(image_search_options: ImageSearchOptions) -> Dom {
+pub fn render(opts: ImageSearchOptions, slot: Option<&str>) -> Dom {
     let mut state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
 
-    let loader = AsyncLoader::new();
-    loader.load(clone!(state => async move {
-        state.replace(Some(State::new(image_search_options).await));
+    let init_loader = AsyncLoader::new();
+    init_loader.load(clone!(state => async move {
+        state.replace(Some(State::new(opts).await));
     }));
 
-    Dom::with_state(loader, move |loader| {
+
+    Dom::with_state(init_loader, move |init_loader| {
         html!("empty-fragment", {
-            .child_signal(loader.is_loading().map(move |loading| {
-                if loading {
-                    Some(html!("window-loader-block", {
+            .apply_if(slot.is_some(), move |dom| {
+                dom.property("slot", slot.unwrap_ji())
+            })
+            .children_signal_vec(init_loader.is_loading().map(move |init_loading| {
+                if init_loading {
+                    vec![html!("window-loader-block", {
                         .property("visible", true)
-                    }))
+                    })]
                 } else {
-                    let state: State = state.borrow_mut().take().unwrap_throw();
-                    Some(render_loaded(Rc::new(state)))
+                    let state: State = state.borrow_mut().take().unwrap_ji();
+                    render_loaded(Rc::new(state))
                 }
-            }))
+            }).to_signal_vec())
         })
     })
 }
 
 
-pub fn render_loaded(state: Rc<State>) -> Dom {
+pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
     state.loader.load(clone!(state => async move {
         search(state);
     }));
 
-    html!("empty-fragment", {
-        .child(html!("image-select", {
+    vec![
+        html!("image-select", {
             .property("label", "Select background")
             .children(render_controls(state.clone()))
             .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
@@ -63,10 +67,10 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
                     }))
                 })
             })))
-        }))
-        .child(html!("window-loader-block", {
+        }),
+        html!("window-loader-block", {
             .property_signal("visible", state.loader.is_loading())
-        }))
+        })
         // .child(html!("img-ji", {
         //     .style("position", "fixed")
         //     .style("right", "0")
@@ -80,7 +84,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         //         }
         //     }))
         // }))
-    })
+    ]
 }
 
 fn render_controls(state: Rc<State>) -> Vec<Dom> {

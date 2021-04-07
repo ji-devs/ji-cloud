@@ -5,7 +5,7 @@ use dominator_helpers::futures::AsyncLoader;
 use shared::domain::{image::*, meta::*};
 use wasm_bindgen::UnwrapThrowExt;
 use super::actions::{get_background_id, get_styles};
-
+use utils::prelude::*;
 
 pub const BACKGROUND_NAME: &'static str = "Background";
 
@@ -27,7 +27,7 @@ impl State {
         let styles = get_styles().await;
         let mut selected_styles = HashSet::new();
 
-        if image_search_options.background_only.is_some() && image_search_options.background_only.unwrap_throw() {
+        if image_search_options.background_only.is_some() && image_search_options.background_only.unwrap_ji() {
             let style_id = get_background_id(&styles);
             selected_styles.insert(style_id);
         }
@@ -50,7 +50,7 @@ impl State {
 // if some: control is visible and the some value is the default, if none: the control is not visible
 pub struct ImageSearchOptions {
     pub background_only: Option<bool>,
-    pub upload: Option<()>,
-    pub filters: Option<()>,
-    pub value: Mutable<Option<ImageId>>
+    pub upload: Option<()>, // NOTE: make this a bool? - David
+    pub filters: Option<()>, // NOTE: make this a bool? - David
+    pub value: Mutable<Option<ImageId>>,
 }

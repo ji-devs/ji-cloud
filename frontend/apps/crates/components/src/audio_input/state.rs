@@ -1,5 +1,5 @@
-use std::rc::Rc;
-use utils::path::audio_lib_url;
+use std::{rc::Rc, cell::RefCell};
+use utils::{prelude::*, path::audio_lib_url};
 use wasm_bindgen::{JsCast, prelude::*};
 use dominator::clone;
 use futures::future::ready;
@@ -10,7 +10,7 @@ use wasm_bindgen_futures::spawn_local;
 use super::recorder::AudioRecorder;
 
 
-#[derive(Clone)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AudioInputMode {
     Record,
     Recording,
@@ -20,51 +20,40 @@ pub enum AudioInputMode {
     Playing,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum AudioInputAddMethod {
     Record,
     Upload,
 }
 
-pub struct State {
-    pub options: AudioInputOptions,
+pub struct State <F: Fn(Option<AudioId>)> {
+    //on_change is called imperatively for every update
+    //for example, to push to history
+    pub on_change: Option<F>,
+    //audio_id is a mutable for affecting DOM
+    //intermediate updates can be skipped
+    pub audio_id: Mutable<Option<AudioId>>,
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
-    pub player: HtmlAudioElement,
     pub recorder: AudioRecorder,
 }
 
-impl State {
-    pub fn new(options: AudioInputOptions) -> Rc<Self> {
-        let state = Rc::new(Self {
-            options,
+impl <F: Fn(Option<AudioId>) + 'static> State <F> {
+    pub fn new(options: AudioInputOptions<F>) -> Self {
+        let audio_id = options.audio_id.unwrap_or(Mutable::new(None));
+
+        Self {
+            on_change: options.on_change,
+            audio_id,
             mode: Mutable::new(AudioInputMode::Record),
-            player: HtmlAudioElement::new().unwrap(),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),
-        });
-
-        Self::wire_up_player(state.clone());
-
-        state
+        }
     }
 
-    fn wire_up_player(state: Rc<State>) {
-        let closure = Closure::wrap(Box::new(clone!(state => move |_: web_sys::Event| {
-            state.mode.set(AudioInputMode::Success);
-        })) as Box<dyn FnMut(_)>);
-        state.player.add_event_listener_with_callback("ended", closure.as_ref().unchecked_ref()).unwrap();
-        closure.forget();
-        spawn_local(state.options.value.signal_cloned().for_each(clone!(state => move |audio_id| {
-            match audio_id {
-                Some(audio_id) => state.player.set_src(&audio_lib_url(MediaLibrary::User, audio_id)),
-                None => state.player.set_src(""),
-            };
-            ready(())
-        })));
-    }
 }
 
-pub struct AudioInputOptions {
-    pub value: Mutable<Option<AudioId>>
+pub struct AudioInputOptions <F: Fn(Option<AudioId>)> {
+    pub on_change: Option<F>,
+    pub audio_id: Option<Mutable<Option<AudioId>>>,
 }

@@ -1,17 +1,15 @@
 use std::rc::Rc;
-
 use dominator::{Dom, clone, html};
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen_futures::spawn_local;
-
+use shared::{domain::audio::AudioId, media::MediaLibrary};
 use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
 use super::super::actions::file_change;
 
 
 
-pub fn render(state: Rc<State>) -> Dom {
-    let mode = state.mode.lock_ref();
-    if let AudioInputMode::Uploading = *mode {
+pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, mode:AudioInputMode, add_method: AudioInputAddMethod, audio_id: Option<AudioId>) -> Dom {
+    if let AudioInputMode::Uploading = mode {
         html!("button-text", {
             .property("slot", "main-action")
             .text("Cancel")
@@ -23,22 +21,38 @@ pub fn render(state: Rc<State>) -> Dom {
         html!("audio-input-action", {
             .property("slot", "main-action")
             .property("kind", {
-                match *mode {
-                    AudioInputMode::Record => String::from("record"),
-                    AudioInputMode::Recording => String::from("stop"),
-                    AudioInputMode::Upload => String::from("add-sound"),
-                    AudioInputMode::Success => String::from("play"),
-                    AudioInputMode::Playing => String::from("stop"),
-                    AudioInputMode::Uploading => panic!("Imposible"),
+                //TODO - clean all this up!
+                if let Some(audio_id) = audio_id {
+                    match mode {
+                        AudioInputMode::Record => String::from("record"),
+                        AudioInputMode::Recording => String::from("stop"),
+                        AudioInputMode::Upload => String::from("add-sound"),
+                        AudioInputMode::Success => String::from("play"),
+                        AudioInputMode::Playing => String::from("stop"),
+                        AudioInputMode::Uploading => panic!("Imposible"),
+                    }
+                } else {
+                    match mode {
+                        AudioInputMode::Record => String::from("record"),
+                        AudioInputMode::Recording => String::from("stop"),
+                        AudioInputMode::Upload => String::from("add-sound"),
+                        AudioInputMode::Uploading => panic!("Imposible"),
+
+                        AudioInputMode::Success | AudioInputMode::Playing => {
+                            match add_method {
+                                AudioInputAddMethod::Record => String::from("record"),
+                                _ => unimplemented!("TODO: success or play in upload mode...")
+                            }
+                        }
+                    }
                 }
             })
             .event(clone!(state => move |_: events::Click| {
-                let mut mode = state.mode.lock_mut();
-                match *mode {
+                match mode {
                     AudioInputMode::Record => {
                         spawn_local(clone!(state => async move {
                             state.recorder.start().await;
-                            state.mode.set(AudioInputMode::Recording);
+                            state.mode.set_neq(AudioInputMode::Recording);
                         }));
                     },
                     AudioInputMode::Recording => {
@@ -48,21 +62,14 @@ pub fn render(state: Rc<State>) -> Dom {
                         }));
                     },
                     AudioInputMode::Upload => {
-                        *mode = AudioInputMode::Record;
+                        state.mode.set_neq(AudioInputMode::Record);
                         state.add_method.set(AudioInputAddMethod::Record);
                     },
                     AudioInputMode::Success => {
-                        spawn_local(clone!(state => async move {
-                            let play_promise = state.player.play().unwrap();
-                            let _ = wasm_bindgen_futures::JsFuture::from(play_promise).await;
-                            state.mode.set(AudioInputMode::Playing);
-                        }));
+                        state.mode.set(AudioInputMode::Playing);
                     },
                     AudioInputMode::Playing => {
-                        spawn_local(clone!(state => async move {
-                            let _ = state.player.pause().unwrap();
-                            state.mode.set(AudioInputMode::Success);
-                        }));
+                        state.mode.set_neq(AudioInputMode::Success);
                     },
                     AudioInputMode::Uploading => panic!("Should not be posible"),
                 };

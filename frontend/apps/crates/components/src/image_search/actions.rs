@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use dominator::{clone};
 use shared::{api::{ApiEndpoint, endpoints}, domain::{image::*, meta::*}, error::{EmptyError, MetadataNotFound}};
-use utils::fetch::{api_upload_file, api_with_auth};
+use utils::prelude::*;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::File;
 use super::state::{BACKGROUND_NAME, State};
@@ -12,14 +12,14 @@ pub async fn get_styles() -> Vec<Style> {
         endpoints::meta::Get::METHOD,
         None
     ).await;
-    res.unwrap_throw().styles
+    res.unwrap_ji().styles
 }
 
 pub fn get_background_id(styles: &Vec<Style>) -> StyleId {
     styles
         .iter()
         .find(|s| s.display_name == BACKGROUND_NAME)
-        .unwrap_throw()
+        .expect_ji(&format!("set \"{}\" in the database!", BACKGROUND_NAME))
         .id
         .clone()
 }

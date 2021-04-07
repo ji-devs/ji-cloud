@@ -7,6 +7,7 @@ use super::{
     nav::dom::StepsNavDom,
     step_1::dom::Step1Dom,
     step_2::dom::Step2Dom,
+    step_3::dom::Step3Dom,
 };
 use futures_signals::{
     map_ref,
@@ -31,9 +32,13 @@ impl SidebarDom {
                                 match step {
                                     Step::One => Step1Dom::render(state.clone(), is_empty),
                                     Step::Two => Step2Dom::render(state.clone()),
+                                    Step::Three => Step3Dom::render(state.clone()),
+                                    Step::Four => panic!("NO SIDEBAR FOR STEP 4!")
+                                    /*
                                     _ => {
                                         vec![html!("empty-fragment")]
                                     }
+                                    */
                                 }
                             }))
                             .to_signal_vec()
