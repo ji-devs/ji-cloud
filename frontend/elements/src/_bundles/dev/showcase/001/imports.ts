@@ -1,3 +1,3 @@
-import "@elements/module-page/grid-plain";
-import "@elements/module-page/grid-resize";
-import "@elements/module-page/iframe";
+import "@elements/widgets/module-page/iframe";
+import "@elements/widgets/module-page/grid-plain";
+import "@elements/widgets/module-page/grid-resize";

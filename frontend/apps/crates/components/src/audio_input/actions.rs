@@ -10,12 +10,25 @@ use shared::{
 use super::state::{AudioInputMode, State};
 
 impl <F: Fn(Option<AudioId>) + 'static> State <F> {
-    pub fn set_audio_id(&self, audio_id: Option<AudioId>) {
-
+    //Internal only, prevents callback cycles
+    pub(super) fn set_audio_id(&self, audio_id: Option<AudioId>) {
+        //Change the mutable for affecting all DOM rendering stuff
+        //with _eventual consistency_
         self.audio_id.set_neq(audio_id);
+
+        //Call the callback for precise unskipped updates
         if let Some(on_change) = &self.on_change {
             (on_change)(audio_id);
         }
+    }
+
+
+    //Intended for externally forcing the state
+    //e.g. for undo/redo compatability
+    pub fn set_audio_id_ext(&self, audio_id: Option<AudioId>) {
+        //TODO - decide if we should imperatively force the player state here
+        //or rather handle it via match patterns and guards only
+        self.audio_id.set_neq(audio_id);
     }
 }
 

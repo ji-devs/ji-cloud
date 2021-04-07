@@ -15,8 +15,9 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
     image_search::{self, state::ImageSearchOptions},
-    audio_input::{self, state::AudioInputOptions}
+    audio_input::{self, options::AudioInputOptions, state::State as AudioState}
 };
+use shared::domain::audio::AudioId;
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
 
@@ -73,23 +74,32 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
 }
 
 pub fn render_image_search() -> Dom {
-    html!("div", {
-        .style("padding", "30px")
-        .child(image_search::dom::render(ImageSearchOptions {
+    let opts = ImageSearchOptions {
             background_only: Some(false),
             upload: Some(()),
             filters: Some(()),
             value: Mutable::new(None),
-        }))
+    };
+
+    html!("div", {
+        .style("padding", "30px")
+        .child(image_search::dom::render(opts, None))
     })
 }
 
 
 pub fn render_audio_input() -> Dom {
+    let opts:AudioInputOptions<_> = AudioInputOptions {
+        //ummm... this is a lie... I guess... but w/e
+        //in the usual case of supplying a Some the real type is inferred
+        on_change: None as Option<Box<dyn Fn(Option<AudioId>)>>,
+        audio_id: None,
+    };
+
+    let state = Rc::new(AudioState::new(opts));
+
     html!("div", {
         .style("padding", "30px")
-        .child(audio_input::dom::render(AudioInputOptions {
-            value: Mutable::new(None),
-        }))
+        .child(audio_input::dom::render(state, None))
     })
 }

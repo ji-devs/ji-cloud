@@ -8,7 +8,7 @@ use shared::{domain::audio::AudioId, media::MediaLibrary};
 use web_sys::HtmlAudioElement;
 use wasm_bindgen_futures::spawn_local;
 use super::recorder::AudioRecorder;
-
+use super::options::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AudioInputMode {
@@ -39,11 +39,11 @@ pub struct State <F: Fn(Option<AudioId>)> {
 }
 
 impl <F: Fn(Option<AudioId>) + 'static> State <F> {
-    pub fn new(options: AudioInputOptions<F>) -> Self {
-        let audio_id = options.audio_id.unwrap_or(Mutable::new(None));
+    pub fn new(opts: AudioInputOptions<F>) -> Self {
+        let audio_id = Mutable::new(opts.audio_id); 
 
         Self {
-            on_change: options.on_change,
+            on_change: opts.on_change,
             audio_id,
             mode: Mutable::new(AudioInputMode::Record),
             recorder: AudioRecorder::new(),
@@ -53,7 +53,3 @@ impl <F: Fn(Option<AudioId>) + 'static> State <F> {
 
 }
 
-pub struct AudioInputOptions <F: Fn(Option<AudioId>)> {
-    pub on_change: Option<F>,
-    pub audio_id: Option<Mutable<Option<AudioId>>>,
-}

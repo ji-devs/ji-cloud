@@ -3,13 +3,15 @@ use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use std::rc::Rc;
 use super::{
     components::{main_content, add_method, delete, main_action},
-    state::{AudioInputAddMethod, AudioInputMode, AudioInputOptions, State}
+    state::*,
+    options::*,
 };
 use utils::prelude::*;
 use shared::{domain::audio::AudioId, media::MediaLibrary};
 
 
 pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, slot: Option<&str>) -> Dom {
+
     html!("audio-input", {
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
