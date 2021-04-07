@@ -61,6 +61,7 @@ web-sys = { version = "0.3.46", features = [
 awsm_web = { version = "0.16.0", features = ["loaders", "serde_iso", "dom"] }
 anyhow = "1.0.38"
 gloo-timers = "0.2.1"
+rgb = "0.8.27"
 
 [features]
 quiet = []

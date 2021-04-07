@@ -15,5 +15,6 @@ pub mod events;
 pub mod api_helpers;
 pub mod prelude;
 pub mod unwrap;
+pub mod themes;
 
 pub(crate) mod strings;

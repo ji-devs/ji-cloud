@@ -1,3 +1,16 @@
 {
-  "themes": ["", "chalkboard", "happy-brush"]
+    "chalkboard": {
+        "colors": [
+            "0xFF0000",
+            "0x00FF00"
+        ]
+    },
+    "happy_brush": {
+        "colors": [
+            "0xbbccf1",
+            "0xe6e6e1",
+            "0x808081",
+            "0x1a1a11"
+        ]
+    }
 }
