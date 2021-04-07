@@ -17,3 +17,10 @@ import "@elements/module/_common/widgets/audio-input/audio-input-action";
 import "@elements/module/_common/widgets/audio-input/audio-input-delete";
 import "@elements/module/_common/widgets/audio-input/audio-input-icon";
 import "@elements/module/_common/widgets/audio-input/audio-input-recording";
+
+import "@elements/module/_common/widgets/color-select/color-select";
+import "@elements/module/_common/widgets/color-select/color-select-section";
+import "@elements/module/_common/widgets/color-select/color-select-item";
+import "@elements/core/inputs/color";
+import "@elements/core/buttons/icon";
+

@@ -496,6 +496,7 @@ dependencies = [
  "js-sys",
  "log",
  "once_cell",
+ "rgb",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
@@ -1521,9 +1522,9 @@ dependencies = [
 
 [[package]]
 name = "rgb"
-version = "0.8.25"
+version = "0.8.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "287f3c3f8236abb92d8b7e36797f19159df4b58f0a658cc3fb6dd3004b1f3bd3"
+checksum = "8fddb3b23626145d1776addfc307e1a1851f60ef6ca64f376bcb889697144cf0"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1964,6 +1965,7 @@ dependencies = [
  "js-sys",
  "log",
  "once_cell",
+ "rgb",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

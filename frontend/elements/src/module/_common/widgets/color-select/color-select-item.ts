@@ -1,4 +1,5 @@
-import { LitElement, html, css, customElement, property} from 'lit-element';
+import { LitElement, html, css, customElement, property } from 'lit-element';
+import { nothing } from 'lit-html';
 
 @customElement('color-select-item')
 export class _ extends LitElement {
@@ -11,8 +12,13 @@ export class _ extends LitElement {
                 border-radius: 50%;
                 display: inline-grid;
                 padding: 3px;
+                position: relative;
+                cursor: pointer;
             }
-            :host([selected]) {
+            :host(:focus) {
+                outline: none;
+            }
+            :host([selected]), :host(.deleting) {
                 box-shadow: var(--main-blue) 0px 0px 0pt 3px;
             }
             :host::before {
@@ -33,8 +39,14 @@ export class _ extends LitElement {
                 border-radius: 50%;
                 border: solid 1px var(--light-gray-4);
             }
-            .color-item:not([disabled]) {
-                cursor: pointer;
+            ::slotted(button-icon) {
+                display: none;
+                position: absolute;
+                top: -8px;
+                right: -8px;
+            }
+            :host(.deleting) ::slotted(button-icon) {
+                display: inline-block;
             }
         `];
     }
@@ -46,14 +58,30 @@ export class _ extends LitElement {
     selected: boolean = false;
 
     @property({type: Boolean, reflect: true})
-    disabled: boolean = false;
+    deletable: boolean = false;
+
+    private onRightClick(e: MouseEvent) {
+        if (!this.deletable) return;
+
+        e.preventDefault();
+        this.classList.add("deleting");
+        this.tabIndex = -1;
+        this.focus();
+
+        this.addEventListener("focusout", () => {
+            this.classList.remove("deleting");
+        });
+    }
 
     render() {
         return html`
             <div
                 class="color-item"
-                style="background-color: ${!this.disabled ? this.color : "#fff"}"
-            ></div>
+                style="background-color: ${this.color}"
+                @contextmenu="${(e: any) => this.onRightClick(e)}"
+            >
+                ${ this.deletable ? html`<slot name="delete-button"></slot>` : nothing }
+            </div>
         `;
     }
 }

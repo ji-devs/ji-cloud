@@ -15,17 +15,19 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
     image_search::{self, state::ImageSearchOptions},
-    audio_input::{self, options::AudioInputOptions, state::State as AudioState}
+    audio_input::{self, options::AudioInputOptions, state::State as AudioState},
+    color_select::{self, state::ColorSelectConfig}
 };
 use shared::domain::audio::AudioId;
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
+use utils::{prelude::*, themes::ThemeId};
 
 pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_audio_input()
+        render_color_select()
     }
 }
 
@@ -101,5 +103,16 @@ pub fn render_audio_input() -> Dom {
     html!("div", {
         .style("padding", "30px")
         .child(audio_input::dom::render(state, None))
+    })
+}
+
+
+pub fn render_color_select() -> Dom {
+    html!("div", {
+        .style("padding", "30px")
+        .child(color_select::dom::render(ColorSelectConfig {
+            theme: Some(ThemeId::HappyBrush),
+            // theme: None,
+        }))
     })
 }
