@@ -58,9 +58,9 @@ pub struct AudioDom {}
 impl AudioDom {
     pub fn render(state: Rc<State>) -> Dom {
         let opts = AudioInputOptions {
-            on_change: Some(clone!(state => move |audio_id| {
+            on_change: Some(Box::new(clone!(state => move |audio_id| {
                 state.change_instructions_audio(audio_id);
-            })),
+            }))),
             audio_id: state.instructions.audio_id.get_cloned(),
         };
 

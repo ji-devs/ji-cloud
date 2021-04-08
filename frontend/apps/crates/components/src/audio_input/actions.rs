@@ -9,7 +9,7 @@ use shared::{
 };
 use super::state::{AudioInputMode, State};
 
-impl <F: Fn(Option<AudioId>) + 'static> State <F> {
+impl State {
     //Internal only, prevents callback cycles
     pub(super) fn set_audio_id(&self, audio_id: Option<AudioId>) {
         //Change the mutable for affecting all DOM rendering stuff
@@ -32,7 +32,7 @@ impl <F: Fn(Option<AudioId>) + 'static> State <F> {
     }
 }
 
-pub async fn file_change<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, file: File) {
+pub async fn file_change(state: Rc<State>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
     let res = upload_file(file).await;
     if let Ok(audio_id) = res {

@@ -11,7 +11,7 @@ use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
 use super::{super::actions::file_change, player};
 
 
-pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, mode:AudioInputMode, add_method: AudioInputAddMethod, audio_id: Option<AudioId>) -> Dom {
+pub fn render(state: Rc<State>, mode:AudioInputMode, add_method: AudioInputAddMethod, audio_id: Option<AudioId>) -> Dom {
     //TODO - clean all this up!
     if let Some(audio_id) = audio_id {
         match mode {

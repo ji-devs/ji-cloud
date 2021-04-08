@@ -8,7 +8,7 @@ use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
 
 
 
-pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>) -> Dom {
+pub fn render(state: Rc<State>) -> Dom {
     html!("audio-input-delete", {
         .property("slot", "delete")
         .visible_signal(state.mode.signal_cloned().map(|mode| {

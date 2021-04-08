@@ -10,7 +10,7 @@ use utils::prelude::*;
 use shared::{domain::audio::AudioId, media::MediaLibrary};
 
 
-pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, slot: Option<&str>) -> Dom {
+pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 
     html!("audio-input", {
         .apply_if(slot.is_some(), move |dom| {

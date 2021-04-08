@@ -11,7 +11,7 @@ pub const STR_OPTION_RECORD: &'static str = "Record";
 pub const STR_OPTION_UPLOAD: &'static str = "Upload a file";
 
 
-pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, add_method: AudioInputAddMethod) -> Dom {
+pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
     html!("label", {
         .property("slot", "options")
         .child(html!("input", {

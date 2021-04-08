@@ -26,10 +26,10 @@ pub enum AudioInputAddMethod {
     Upload,
 }
 
-pub struct State <F: Fn(Option<AudioId>)> {
+pub struct State {
     //on_change is called imperatively for every update
     //for example, to push to history
-    pub on_change: Option<F>,
+    pub on_change: Option<Box<dyn Fn(Option<AudioId>)>>,
     //audio_id is a mutable for affecting DOM
     //intermediate updates can be skipped
     pub audio_id: Mutable<Option<AudioId>>,
@@ -38,8 +38,8 @@ pub struct State <F: Fn(Option<AudioId>)> {
     pub recorder: AudioRecorder,
 }
 
-impl <F: Fn(Option<AudioId>) + 'static> State <F> {
-    pub fn new(opts: AudioInputOptions<F>) -> Self {
+impl State {
+    pub fn new(opts: AudioInputOptions) -> Self {
         let audio_id = Mutable::new(opts.audio_id); 
 
         Self {

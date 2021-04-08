@@ -7,7 +7,7 @@ use shared::{domain::audio::AudioId, media::MediaLibrary};
 use crate::audio_input::state::State;
 use web_sys::HtmlAudioElement;
 
-pub fn render<F: Fn(Option<AudioId>) + 'static>(state: Rc<State<F>>, audio_id: AudioId) -> Dom {
+pub fn render(state: Rc<State>, audio_id: AudioId) -> Dom {
     let current_time = Mutable::new(0);
     html!("progress-bar", {
         .property("slot", "main-content")
