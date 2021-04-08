@@ -6,10 +6,10 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use crate::data::state::GameMode;
+use crate::data::state::{State as AppState, GameMode};
 
 pub struct State {
-    pub mode: GameMode,
+    pub app: Rc<AppState>,
     pub list: Rc<MutableVec<Mutable<String>>>,
     pub is_placeholder: Mutable<bool>
 }
@@ -17,9 +17,9 @@ pub struct State {
 type IsPlaceholder = bool;
 
 impl State {
-    pub fn new(mode: GameMode, max:usize) -> Self {
+    pub fn new(app: Rc<AppState>, max:usize) -> Self {
         Self {
-            mode,
+            app,
             list: Rc::new(MutableVec::new_with_values(
                     (0..max)
                         .map(|_| Mutable::new(String::default()))

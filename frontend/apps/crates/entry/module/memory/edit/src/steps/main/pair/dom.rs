@@ -59,7 +59,7 @@ impl CardDom {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
             .property("editing", step == Step::One)
-            .property_signal("theme", state.theme.signal_cloned())
+            .property_signal("theme", state.theme_id_str_signal())
             .event(clone!(input_ref => move |evt:events::Click| {
                 if let Some(input_ref) = input_ref.borrow().as_ref() {
                     Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));

@@ -4,12 +4,14 @@ use shared::{
     domain::audio::AudioId,
     media::MediaLibrary
 };
+use utils::prelude::*;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameData {
     pub instructions: Instructions,
     pub mode: Mode,
     pub pairs: Vec<(Card, Card)>,
-    pub theme: String,
+    pub theme_id: ThemeId,
 }
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Instructions {
@@ -46,7 +48,7 @@ pub enum Mode {
 }
 
 impl GameData {
-    pub fn new<I, S>(mode: Mode, theme: String, instructions: Instructions, pairs: I) -> Self 
+    pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self 
         where 
             I: IntoIterator<Item = (S, S)>,
             S: AsRef<str>
@@ -67,7 +69,7 @@ impl GameData {
                     }
                 })
                 .collect(),
-            theme
+            theme_id,
         }
     }
 

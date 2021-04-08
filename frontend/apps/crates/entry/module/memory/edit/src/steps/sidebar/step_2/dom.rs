@@ -1,7 +1,7 @@
 use dominator::{html, Dom, clone};
 use crate::data::state::*;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -15,19 +15,19 @@ impl Step2Dom {
         vec![
             html!("step2-sidebar-container", {
                 .property("slot", "content")
-                .children(crate::config::get_themes_iter()
-                  .map(|theme| {
+                .children(THEME_IDS.iter().copied()
+                  .map(|theme_id| {
                     html!("step2-sidebar-option", {
-                        .property("theme", theme)
-                        .property_signal("state", state.theme.signal_ref(clone!(theme => move |curr_theme| {
-                            if curr_theme == &theme {
+                        .property("theme", theme_id.as_str_id())
+                        .property_signal("state", state.theme_id.signal().map(clone!(theme_id => move |curr_theme_id| {
+                            if curr_theme_id == theme_id {
                                 "selected"
                             } else {
                                 "idle"
                             }
                         })))
                         .event(clone!(state => move |evt:events::Click| {
-                            state.change_theme(theme.to_string());
+                            state.change_theme_id(theme_id);
                         }))
                     })
                   })

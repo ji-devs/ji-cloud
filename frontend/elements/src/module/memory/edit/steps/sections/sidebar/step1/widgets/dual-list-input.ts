@@ -7,22 +7,19 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
           :host {
-                width: 492px;
               display: flex;
               justify-content: center;
               width: 100%;
           }
         textarea {
-            width: 460px; /*arbitrary amount to not go into rounded corners*/
           outline: none;
           border: none;
           font-size: 16px;
           text-align: center; 
           resize: none;
-          background-color: red;
         }
 
-        :host([placeholder]) input {
+        :host([placeholder]) textarea {
             color: var(--light-gray-4); 
         }
 

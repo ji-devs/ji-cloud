@@ -49,11 +49,11 @@ impl State {
         });
     }
 
-    pub fn change_theme(&self, theme:String) {
-        self.theme.set_neq(theme.clone());
+    pub fn change_theme_id(&self, theme_id:ThemeId) {
+        self.theme_id.set_neq(theme_id);
         self.history.push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
-                game_data.theme = theme;
+                game_data.theme_id = theme_id;
             }
         });
     }
@@ -69,17 +69,12 @@ impl State {
 
     pub fn change_mode(&self, mode: GameMode) {
         self.history.push_modify(move |history| {
-            match mode {
-                GameMode::Duplicate => {
-                    history.game_data = Some(raw::GameData::new(
-                        mode,
-                        crate::config::get_themes_cloned()[0].clone(),
-                        raw::Instructions::new(), 
-                        Vec::<(&str, &str)>::new()
-                    ));
-                },
-                _ => unimplemented!("TODO - change mode")
-            };
+            history.game_data = Some(raw::GameData::new(
+                mode,
+                ThemeId::None, 
+                raw::Instructions::new(), 
+                Vec::<(&str, &str)>::new()
+            ));
         });
 
         self.set_from_history(Some(self.history.get_current()));
@@ -209,14 +204,14 @@ impl State {
                         .collect()
                 );
                 self.game_mode.set_neq(Some(game_data.mode));
-                self.theme.set_neq(game_data.theme);
+                self.theme_id.set_neq(game_data.theme_id);
                 self.instructions.audio_id.set_neq(game_data.instructions.audio_id);
                 self.instructions.text.set_neq(game_data.instructions.text);
             },
             None => {
                 self.pairs.lock_mut().clear();
                 self.game_mode.set_neq(None);
-                self.theme.set_neq("".to_string());
+                self.theme_id.set_neq(ThemeId::None);
                 self.instructions.audio_id.set_neq(None);
                 self.instructions.text.set_neq(None);
             }

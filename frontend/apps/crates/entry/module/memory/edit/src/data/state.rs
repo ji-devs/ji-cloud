@@ -25,6 +25,8 @@ use shared::{domain::{
 use dominator_helpers::futures::AsyncLoader;
 pub use super::card::state::*;
 use wasm_bindgen_futures::spawn_local;
+use utils::prelude::*;
+
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 type HistoryChangeFn = impl Fn(Option<History>);
 type StateHistory = HistoryState<History, HistoryChangeFn>;
@@ -35,7 +37,7 @@ pub struct State {
     pub game_mode: Mutable<Option<GameMode>>,
     pub pairs: MutableVec<(Card, Card)>,
     pub steps_completed: Mutable<HashSet<Step>>,
-    pub theme: Mutable<String>,
+    pub theme_id: Mutable<ThemeId>,
     pub instructions: Instructions,
     pub history: Rc<StateHistory>,
     pub save_loader: Rc<AsyncLoader>,
@@ -60,7 +62,7 @@ impl State {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
-        let (pairs, theme) = {
+        let (pairs, theme_id) = {
             if let Some(raw_data) = &raw_data {
                 let pairs:Vec<(Card, Card)> = raw_data.pairs
                     .iter()
@@ -69,11 +71,11 @@ impl State {
                     })
                     .collect();
 
-                (pairs, raw_data.theme.clone())
+                (pairs, raw_data.theme_id)
             } else {
                 (
                     Vec::new(),
-                    crate::config::get_themes_cloned()[0].clone()
+                    ThemeId::None, 
                 )
             }
         };
@@ -99,7 +101,7 @@ impl State {
             pairs: MutableVec::new_with_values(pairs),
             step,
             steps_completed: Mutable::new(HashSet::new()),
-            theme: Mutable::new(theme),
+            theme_id: Mutable::new(theme_id),
             history,
             save_loader,
             instructions
@@ -107,6 +109,9 @@ impl State {
 
 
         _self
+    }
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
+        self.theme_id.signal_ref(|id| id.as_str_id())
     }
 
     //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom

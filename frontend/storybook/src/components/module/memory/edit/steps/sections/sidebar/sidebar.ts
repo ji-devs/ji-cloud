@@ -8,6 +8,8 @@ import "@elements/module/_common/sidebar";
 import {MODE} from "@elements/module/memory/_common/types.ts";
 import {Empty as Step1Empty} from "./step1/empty";
 import {Duplicate as Step1Duplicate} from "./step1/duplicate";
+import {WordsAndImages as Step1WordsAndImages} from "./step1/words-and-images";
+import {Translate as Step1Translate} from "./step1/translate";
 import {Container as Step2} from "./step2/container";
 import {ThemeKind} from "~/components/module/_common/theme";
 export default {
@@ -18,7 +20,6 @@ const STR_CONTENT = "Content";
 const STR_DESIGN = "Design";
 const STR_SETTINGS = "Settings";
 const STR_PREVIEW = "Preview";
-const STR_DONE = "Done";
 
 interface Args {
     activeStep: number,
@@ -56,7 +57,6 @@ export const Sidebar = (props?:Partial<Args>) => {
             <step-nav number="4" label="${STR_PREVIEW}" ${stepState(4)}></step-nav>
         </steps-nav>
                 ${getContents(activeStep, mode, empty, theme)}
-                ${getButton(activeStep, mode, empty)}
                 
         </module-sidebar>
     `;
@@ -65,26 +65,20 @@ export const Sidebar = (props?:Partial<Args>) => {
 Sidebar.args = DEFAULT_ARGS;
 
 function getContents(step: number, mode: MODE, empty: boolean, theme: ThemeKind) {
-    switch(mode) {
-        case "duplicate": {
-            switch(step) {
-                case 1: {
-                    if(empty) {
-                        return Step1Empty({mode});
-                    } else {
-                        return Step1Duplicate();
-                    }
+    switch(step) {
+        case 1: {
+            if(empty) {
+                return Step1Empty({mode});
+            } else {
+                switch(mode) {
+                    case "duplicate": return Step1Duplicate();
+                    case "words-images": return Step1WordsAndImages();
+                    case "translate": return Step1Translate();
+                    default: return "";
                 }
-                case 2: return Step2({theme});
-                default: return ""
             }
         }
-        default: return ""
+        case 2: return Step2({theme});
+        default: return "";
     }
-}
-
-function getButton(step: number, mode: MODE, empty: boolean) {
-    return empty 
-        ? "" 
-        : `<button-rect color="grey" size="small" iconAfter="done" slot="btn">${STR_DONE}</button-rect>`
 }

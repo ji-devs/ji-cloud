@@ -1,6 +1,6 @@
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -12,15 +12,42 @@ use super::state::*;
 pub struct SingleListDom {}
 impl SingleListDom {
     pub fn render(state: Rc<State>) -> Dom { 
-
         html!("sidebar-widget-single-list", {
-            .property("slot", "input-widget")
+            .children(&mut [
+
+                html!("button-text", {
+                    .property("slot", "clear")
+                    .text(crate::strings::STR_CLEAR)
+                }),
+                html!("button-sidebar", {
+                    .property("slot", "input-buttons")
+                    .property("mode", "keyboard")
+                }),
+                html!("button-sidebar", {
+                    .property("slot", "input-buttons")
+                    .property("mode", "dicta")
+                }),
+                html!("button-sidebar", {
+                    .property("slot", "input-buttons")
+                    .property("mode", "sefaria")
+                }),
+                html!("button-rect", {
+                    .property("color", "grey")
+                    .property("size", "small")
+                    .property("iconAfter", "done")
+                    .property("slot", "done-btn")
+                    .text(crate::strings::STR_DONE)
+                    .event(clone!(state => move |evt:events::Click| {
+                        state.app.replace_single_list(state.derive_list());
+                    }))
+                }),
+            ])
             .children_signal_vec(
                 state.list.signal_vec_cloned()
                     .enumerate()
                     .map(clone!(state => move |(index, value)| {
                         let index = index.get().unwrap_or_default();
-                        let mode = state.mode;
+                        let mode = state.app.game_mode.get_cloned().unwrap_ji();
 
                         html!("sidebar-widget-single-list-input", {
                             .property_signal("value", {

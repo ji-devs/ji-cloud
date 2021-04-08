@@ -9,11 +9,6 @@ export type SIDE = "left" | "right";
 export class _ extends LitElement {
   static get styles() {
       return [css`
-          :host {
-              display: block;
-          width: calc(100% - 4px);
-          }
-
 
           :host([side="left"]) > header {
               border-top-left-radius: 16px;
@@ -46,7 +41,6 @@ export class _ extends LitElement {
               border-bottom: solid 1px var(--light-blue-4);
           }
         input {
-            width: 460px; /*arbitrary amount to not go into rounded corners*/
           outline: none;
           border: none;
           font-size: 16px;

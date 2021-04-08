@@ -15,45 +15,13 @@ use crate::steps::sidebar::step_1::widgets::single_list::{
 
 pub struct DuplicateDom {}
 impl DuplicateDom {
-    pub fn render(state:Rc<State>) -> Vec<Dom> { 
+    pub fn render(state:Rc<State>) -> Dom { 
 
-        let mode = state.game_mode.get_cloned().unwrap_ji();
-        let list_state = Rc::new(ListState::new(mode, 14));
+        let list_state = Rc::new(ListState::new(state, 14));
 
-        vec![
-            html!("step1-sidebar-duplicate", {
-                .property("slot", "content")
-                .children(&mut [
-                    html!("button-text", {
-                        .property("slot", "clear")
-                        .text(crate::strings::STR_CLEAR)
-                    }),
-                    html!("button-sidebar", {
-                        .property("slot", "input-buttons")
-                        .property("mode", "keyboard")
-                    }),
-                    html!("button-sidebar", {
-                        .property("slot", "input-buttons")
-                        .property("mode", "dicta")
-                    }),
-                    html!("button-sidebar", {
-                        .property("slot", "input-buttons")
-                        .property("mode", "sefaria")
-                    }),
-                    SingleListDom::render(list_state.clone())
-                ])
-            }),
-            html!("button-rect", {
-                .property("color", "grey")
-                .property("size", "small")
-                .property("iconAfter", "done")
-                .property("slot", "btn")
-                .text(crate::strings::STR_DONE)
-                .event(clone!(state, list_state => move |evt:events::Click| {
-                    state.replace_single_list(list_state.derive_list());
-                    
-                }))
-            })
-        ]
+        html!("module-sidebar-body", {
+            .property("slot", "content")
+            .child(SingleListDom::render(list_state.clone()))
+        })
     }
 }

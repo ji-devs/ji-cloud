@@ -1,5 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import {SingleList} from "./widgets/single-list";
+import {DualList} from "./widgets/dual-list";
 
 const STR_CLEAR = "Clear list";
 
@@ -13,15 +13,15 @@ interface Args {
 const DEFAULT_ARGS:Args = {
 }
 
-export const Duplicate = (props?:Partial<Args>) => {
+export const Translate = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
 
     return `
         <module-sidebar-body slot="content">
-            ${SingleList()}
+            ${DualList()}
         </module-sidebar-body>
             `
 }
 
-Duplicate.args = DEFAULT_ARGS;
+Translate.args = DEFAULT_ARGS;

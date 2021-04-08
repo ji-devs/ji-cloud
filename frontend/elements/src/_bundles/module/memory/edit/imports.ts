@@ -9,7 +9,6 @@ import "@elements/module/memory/edit/steps/sections/main/main";
 import "@elements/module/memory/edit/steps/sections/main/card-pair/card";
 import "@elements/module/memory/edit/steps/sections/main/card-pair/pair";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/empty";
-import "@elements/module/memory/edit/steps/sections/sidebar/step1/duplicate";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/single-list-input";
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-list";

@@ -4,7 +4,7 @@ import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-l
 import "@elements/module/memory/edit/steps/sections/sidebar/step1/widgets/dual-list-input";
 import {mapToString, arrayCount} from "@utils/array";
 const STR_CLEAR = "Clear list";
-
+const STR_DONE = "Done";
 export default {
     title: "Module / Memory / Edit / Steps / Sections / Sidebar / Step1 / Widgets"
 }
@@ -32,7 +32,12 @@ export const DualList = (props?:Partial<Args>) => {
     const {nRows, nLines, placeholderCutoff, leftHeader, rightHeader} = props;
 
     return `
-    <sidebar-widget-dual-list slot="input-widget">
+    <sidebar-widget-dual-list>
+        <button-text slot="clear">${STR_CLEAR}</button-text>
+        <button-sidebar slot="input-buttons" mode="keyboard"></button-sidebar>
+        <button-sidebar slot="input-buttons" mode="dicta"></button-sidebar>
+        <button-sidebar slot="input-buttons" mode="sefaria"></button-sidebar>
+        <button-rect color="grey" size="small" iconAfter="done" slot="done-btn">${STR_DONE}</button-rect>
         <sidebar-widget-dual-list-column side="left" header="${leftHeader}">
             ${mapToString(arrayCount(nRows), row => {
 
