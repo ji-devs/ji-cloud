@@ -11,6 +11,7 @@ import "@elements/core/menu/menu-tabs/menu-tabs";
 import "@elements/core/menu/menu-tabs/menu-tab";
 import "@elements/core/menu/menu-tabs/menu-tab-title";
 import "@elements/core/inputs/text-content";
+import "@elements/core/inputs/form/textarea";
 import "@elements/widgets/module-page/grid-resize";
 import "@elements/widgets/nav/steps-nav";
 import "@elements/widgets/nav/step-nav";

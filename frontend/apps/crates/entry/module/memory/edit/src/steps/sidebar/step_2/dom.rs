@@ -13,25 +13,27 @@ pub struct Step2Dom {}
 impl Step2Dom {
     pub fn render(state:Rc<State>) -> Vec<Dom> {
         vec![
-            html!("step2-sidebar-container", {
+            html!("module-sidebar-body", {
                 .property("slot", "content")
-                .children(THEME_IDS.iter().copied()
-                  .map(|theme_id| {
-                    html!("step2-sidebar-option", {
-                        .property("theme", theme_id.as_str_id())
-                        .property_signal("state", state.theme_id.signal().map(clone!(theme_id => move |curr_theme_id| {
-                            if curr_theme_id == theme_id {
-                                "selected"
-                            } else {
-                                "idle"
-                            }
-                        })))
-                        .event(clone!(state => move |evt:events::Click| {
-                            state.change_theme_id(theme_id);
-                        }))
-                    })
-                  })
-                )
+                .child(html!("step2-sidebar-container", {
+                    .children(THEME_IDS.iter().copied()
+                      .map(|theme_id| {
+                        html!("step2-sidebar-option", {
+                            .property("theme", theme_id.as_str_id())
+                            .property_signal("state", state.theme_id.signal().map(clone!(theme_id => move |curr_theme_id| {
+                                if curr_theme_id == theme_id {
+                                    "selected"
+                                } else {
+                                    "idle"
+                                }
+                            })))
+                            .event(clone!(state => move |evt:events::Click| {
+                                state.change_theme_id(theme_id);
+                            }))
+                        })
+                      })
+                    )
+                }))
             })
         ]
     }

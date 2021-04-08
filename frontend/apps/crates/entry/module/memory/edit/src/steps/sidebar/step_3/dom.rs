@@ -19,22 +19,41 @@ pub struct Step3Dom {}
 impl Step3Dom {
     pub fn render(state: Rc<State>) -> Vec<Dom> {
         vec![
-            AudioDom::render(state.clone()),
-            html!("button-rect", {
-                .property("color", "grey")
-                .property("size", "small")
-                .property("iconAfter", "done")
-                .property("slot", "btn")
-                .text(crate::strings::STR_DONE)
-                .event(clone!(state => move |evt:events::Click| {
-                    //state.replace_single_list(list_state.derive_list());
-                    
-                }))
-            })
+            html!("module-sidebar-body", {
+                .property("slot", "content")
+                .children(&mut [
+                    TextDom::render(state.clone()),
+                    AudioDom::render(state.clone()),
+                ])
+            }),
         ]
     }
 }
 
+pub struct TextDom {}
+impl TextDom {
+    pub fn render(state: Rc<State>) -> Dom {
+        html!("input-form-textarea", {
+            .property_signal("value", state.instructions.text.signal_cloned().map(|text| {
+                match text {
+                    None => "".to_string(),
+                    Some(text) => text
+                }
+            }))
+            .property("label", crate::strings::STR_INSTRUCTIONS_LABEL)
+            .property("placeholder", crate::strings::STR_INSTRUCTIONS_PLACEHOLDER)
+            .property("rows", 4)
+            //Input saves every character
+            //Change also pushes history
+            .event(clone!(state => move |evt:events::CustomInput| {
+                state.change_instructions_text(evt.value(), false);
+            }))
+            .event(clone!(state => move |evt:events::CustomChange| {
+                state.change_instructions_text(evt.value(), true);
+            }))
+        })
+    }
+}
 pub struct AudioDom {}
 impl AudioDom {
     pub fn render(state: Rc<State>) -> Dom {
@@ -58,7 +77,6 @@ impl AudioDom {
                         async {}
                     }))
             )
-            .property("slot", "content")
             .child(render_audio_input(audio_state, None))
         })
     }

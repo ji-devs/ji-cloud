@@ -103,8 +103,9 @@ export class _ extends LitElement {
               placeholder="${placeholder}"
               aria-label="${ariaLabel}"
                 @input="${this.onInput}"
-                @change="${this.onChange}"
-            >${value}</textarea>
+              @change="${this.onChange}"
+              .value="${value}"
+            ></textarea>
           </div>
         </label>
       </div>

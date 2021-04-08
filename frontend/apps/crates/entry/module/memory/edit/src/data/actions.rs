@@ -174,13 +174,17 @@ impl State {
         });
     }
 
-    pub fn change_instructions_text(&self, text: Option<String>) {
+    pub fn change_instructions_text(&self, text: String, push_history:bool) {
+        let text = if text.is_empty() { None } else { Some(text) };
+
         self.instructions.text.set_neq(text.clone());
-        self.history.push_modify(move |history| {
-            if let Some(game_data) = &mut history.game_data {
-                game_data.instructions.text = text;
-            }
-        });
+        if(push_history) {
+            self.history.push_modify(move |history| {
+                if let Some(game_data) = &mut history.game_data {
+                    game_data.instructions.text = text;
+                }
+            });
+        }
     }
 
     pub fn change_instructions_audio(&self, audio_id: Option<AudioId>) {

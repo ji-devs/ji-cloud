@@ -12,6 +12,7 @@ export class _ extends LitElement {
           border: solid 1px #89b3ff;
           margin-top: 40px;
           padding: 8px 16px;
+          background-color: white;
         }
         label {
           padding-left: 8px;
@@ -74,6 +75,22 @@ export class _ extends LitElement {
   @property({ type: Number })
   rows: number = 10;
 
+  onInput() {
+      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        this.dispatchEvent(
+            new CustomEvent("custom-input", {
+                detail: { value: input.value},
+            })
+        );
+  }
+  onBlur() {
+      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        this.dispatchEvent(
+            new CustomEvent("custom-change", {
+                detail: { value: input.value},
+            })
+        );
+  }
   render() {
     const { label, value, rows, placeholder } = this;
 
@@ -82,7 +99,7 @@ export class _ extends LitElement {
         <label for="name" class="">
           <span class="text-jibuttonBlue">${label}</span>
           <div class="textarea-wrapper">
-            <textarea rows="${rows}" type="text" placeholder="${placeholder}">${value}</textarea>
+            <textarea rows="${rows}" id="input" type="text" placeholder="${placeholder}" @blur="${this.onBlur}" @input="${this.onInput}" .value="${value}"></textarea>
           </div>
         </label>
       </div>
