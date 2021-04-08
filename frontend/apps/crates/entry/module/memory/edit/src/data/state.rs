@@ -58,7 +58,7 @@ impl Instructions {
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Rc<Self> {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Self {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
@@ -94,7 +94,7 @@ impl State {
             History::new(raw_data),
             Self::on_history_change(save_loader.clone(), module_id.clone()),
         ));
-        let _self = Rc::new(Self {
+        Self {
             jig_id,
             module_id,
             game_mode: Mutable::new(game_mode),
@@ -105,10 +105,7 @@ impl State {
             history,
             save_loader,
             instructions
-        });
-
-
-        _self
+        }
     }
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal_ref(|id| id.as_str_id())

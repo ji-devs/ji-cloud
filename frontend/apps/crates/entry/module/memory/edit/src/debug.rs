@@ -69,11 +69,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
-            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
-            //SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), false)).unwrap_throw();
-            //SETTINGS.set(DebugSettings::debug(Some(GameMode::Lettering), false)).unwrap_throw();
-            //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_throw();
-            //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_throw();
+            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
         }
 
         pub fn settings() -> &'static DebugSettings {
@@ -81,7 +77,7 @@ cfg_if! {
         }
     } else {
         pub fn init() {
-            SETTINGS.set(DebugSettings::default()).unwrap_throw();
+            SETTINGS.set(DebugSettings::default()).unwrap_ji();
         }
         pub fn settings() -> &'static DebugSettings {
             unsafe { SETTINGS.get_unchecked() }

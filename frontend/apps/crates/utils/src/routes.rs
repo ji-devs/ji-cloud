@@ -207,6 +207,13 @@ impl Route {
                         ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
             },
+            ["module", kind, "play", "debug"] => {
+                Self::Module(ModuleRoute::Play(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_u128(0)),
+                        ModuleId(Uuid::from_u128(0)),
+                ))
+            },
             ["module", kind, "play", jig_id, module_id] => {
                 Self::Module(ModuleRoute::Play(
                         ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 

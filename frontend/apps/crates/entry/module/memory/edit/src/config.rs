@@ -51,6 +51,7 @@ pub fn get_dual_list_init_word(row: usize, col: usize) -> Option<&'static str> {
         })
         .map(|s| s.as_ref())
 }
+
 pub fn get_debug_pairs(mode: GameMode) -> Vec<(String, String)> {
     EDITOR_CONFIG 
         .get()

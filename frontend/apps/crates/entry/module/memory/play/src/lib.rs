@@ -26,8 +26,7 @@ use web_sys::{window, Element};
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
-    config::init();
-
+    debug::init();
     router::render();
 }
 

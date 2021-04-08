@@ -10,31 +10,35 @@ use futures_signals::{
 };
 use rand::prelude::*;
 use shared::{
-    domain::image::ImageId,
+    domain::{
+        image::ImageId,
+        jig::{JigId, ModuleId}
+    },
     media::MediaLibrary
 };
 use wasm_bindgen::UnwrapThrowExt;
 use crate::{
-    index::state::LocalState as IndexState,
     player::card::state::{State as CardState, Side},
 };
 use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
+use utils::prelude::*;
 
 pub struct State {
-    pub index: Rc<IndexState>,
+    pub jig_id: JigId,
+    pub module_id: ModuleId,
     pub mode: GameMode,
     pub pair_lookup: Vec<usize>,
     pub original_pairs: Vec<(raw::Card, raw::Card)>,
     pub cards: Vec<Rc<CardState>>,
-    pub theme: String,
+    pub theme_id: ThemeId,
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
 }
 
 impl State {
-    pub fn new(index: Rc<IndexState>, raw_data:raw::GameData) -> Self {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::GameData) -> Self {
         let mode:GameMode = raw_data.mode.into();
 
         let n_cards = raw_data.pairs.len() * 2;
@@ -69,12 +73,13 @@ impl State {
         }
 
         Self {
-            index,
+            jig_id,
+            module_id,
             mode,
             pair_lookup,
             original_pairs: raw_data.pairs,
             cards,
-            theme: raw_data.theme,
+            theme_id: raw_data.theme_id,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
         }
@@ -105,29 +110,7 @@ impl State {
 
 }
 
-#[derive(Clone, Copy, PartialEq)]
-pub enum GameMode {
-    Duplicate,
-    WordsAndImages
-}
-
-impl From<raw::Mode> for GameMode {
-    fn from(raw_mode:raw::Mode) -> Self {
-        match raw_mode {
-            raw::Mode::Duplicate => Self::Duplicate,
-            raw::Mode::WordsAndImages => Self::WordsAndImages,
-        }
-    }
-}
-
-impl From<GameMode> for raw::Mode {
-    fn from(game_mode:GameMode) -> raw::Mode {
-        match game_mode {
-            GameMode::Duplicate => raw::Mode::Duplicate,
-            GameMode::WordsAndImages => raw::Mode::WordsAndImages,
-        }
-    }
-}
+pub type GameMode = raw::Mode;
 
 #[derive(Debug, Clone)]
 pub enum FlipState {

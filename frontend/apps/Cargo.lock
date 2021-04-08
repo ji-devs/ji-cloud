@@ -98,9 +98,11 @@ dependencies = [
 name = "app-memory-common"
 version = "0.1.0"
 dependencies = [
+ "once_cell",
  "serde",
  "shared",
  "utils",
+ "wasm-bindgen",
 ]
 
 [[package]]

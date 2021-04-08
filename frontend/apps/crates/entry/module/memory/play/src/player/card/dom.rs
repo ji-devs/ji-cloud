@@ -3,10 +3,11 @@ use web_sys::HtmlElement;
 use std::rc::Rc;
 use crate::data::state::*;
 use super::state::{State as CardState, Media};
-use utils::events;
+use utils::prelude::*;
 use components::image::element::ImageJi;
 use super::actions;
 use futures_signals::signal::SignalExt;
+use wasm_bindgen::prelude::*;
 
 pub struct CardDom {
 }
@@ -17,7 +18,7 @@ impl CardDom {
 
         html!("play-card", {
             .property_signal("flipped", card.is_flipped(&state))
-            .property("theme", &state.theme)
+            .property("theme", state.theme_id.as_str_id())
             .property("side", card.side.as_str())
             .style_signal("visibility", card.is_found().map(|flag| {
                 if flag {
@@ -77,7 +78,7 @@ impl CardDom {
                 })
             }) 
             .property("flipped", true) 
-            .property("theme", &state.theme)
+            .property("theme", state.theme_id.as_str_id())
             .property("transform", true)
             .child(card.media_dom())
         })

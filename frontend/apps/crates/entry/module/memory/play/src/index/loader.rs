@@ -7,7 +7,7 @@ use futures_signals::{
 use std::rc::Rc;
 use crate::{
     debug,
-    data::{raw, state::{Step, State}, raw::GameData as RawData},
+    data::{raw, state::{State}, raw::GameData as RawData},
 };
 use std::future::Future;
 use components::module::page::StateLoader;
@@ -38,6 +38,7 @@ impl StateLoader<RawData, State> for PageLoader {
                             resp.module.body.map(|value| {
                                 serde_json::from_value(value).unwrap_ji()
                             })
+                            .unwrap_ji()
                         },
                         Err(_) => {
                             panic!("error loading module!")
@@ -53,6 +54,6 @@ impl StateLoader<RawData, State> for PageLoader {
     }
 
     fn derive_state(&self, data:RawData) -> Rc<State> { 
-        Rc::new(State::new(self.jig_id.clone(), self.module_id.clone(), Some(data)))
+        Rc::new(State::new(self.jig_id.clone(), self.module_id.clone(), data))
     }
 }
