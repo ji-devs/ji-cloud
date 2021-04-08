@@ -10,11 +10,9 @@ expression: body
       "display_name": null,
       "modules": [
         {
-          "id": "0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
           "kind": "Cover"
         },
         {
-          "id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
           "kind": null
         }
       ],

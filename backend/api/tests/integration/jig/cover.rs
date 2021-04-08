@@ -42,7 +42,7 @@ async fn create_default() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_with_cover() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Modules]).await;
+    let app = initialize_server(&[Fixture::User]).await;
 
     let port = app.port();
 
@@ -52,7 +52,7 @@ async fn create_with_cover() -> anyhow::Result<()> {
         .post(&format!("http://0.0.0.0:{}/v1/jig", port))
         .json(&json! {{
             "display_name": (),
-            "modules": ["5c8b6458-8840-11eb-8cf7-9bf404dc7386"],
+            "modules": [{"kind": "Cover", "body": ()}],
             "content_types": [],
             "publish_at": (),
 
@@ -80,7 +80,7 @@ async fn create_with_cover() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_with_non_cover() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Modules]).await;
+    let app = initialize_server(&[Fixture::User]).await;
 
     let port = app.port();
 
@@ -90,7 +90,7 @@ async fn create_with_non_cover() -> anyhow::Result<()> {
         .post(&format!("http://0.0.0.0:{}/v1/jig", port))
         .json(&json! {{
             "display_name": (),
-            "modules": ["6dcd7cc4-8840-11eb-8cf7-3728f6dd85ce"],
+            "modules": [{"kind": (), "body": ()}],
             "content_types": [],
             "publish_at": (),
 

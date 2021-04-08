@@ -135,15 +135,6 @@ impl Scope for ScopeManageJig {
 }
 
 #[derive(Apiv2Schema)]
-pub struct ScopeManageModule;
-
-impl Scope for ScopeManageModule {
-    fn scope() -> UserScope {
-        UserScope::ManageModule
-    }
-}
-
-#[derive(Apiv2Schema)]
 pub struct ScopeAdmin;
 
 impl Scope for ScopeAdmin {

@@ -3,68 +3,49 @@ use std::borrow::Cow;
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
-    jig::{Jig, JigId, LiteModule, ModuleId, ModuleKind},
+    jig::{Jig, JigId, LiteModule, Module, ModuleKind},
     meta::ContentTypeId,
 };
-use sqlx::{PgConnection, PgPool};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error;
 
-// todo: move this to a `module` mod.
-async fn module_of_kind(
-    conn: &mut PgConnection,
-    kind: Option<ModuleKind>,
-) -> sqlx::Result<ModuleId> {
-    sqlx::query!(
-        r#"
-insert into module (kind)
-values ($1)
-returning id as "id: ModuleId"
-"#,
-        kind.map(|it| it as i16)
-    )
-    .fetch_one(&mut *conn)
-    .await
-    .map(|it| it.id)
-    .map_err(Into::into)
-}
-
 pub async fn create(
     pool: &PgPool,
     display_name: Option<&str>,
-    module_ids: &[ModuleId],
+    modules: &[Module],
     content_types: &[ContentTypeId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
-    let module_ids = match dbg!(module_ids).first() {
-        Some(id) => {
-            // todo: handle the 404.
-            let kind = sqlx::query!(
-                r#"select kind as "kind: ModuleKind" from module where id = $1"#,
-                id.0
-            )
-            .fetch_one(&mut transaction)
-            .await?
-            .kind;
-
-            if kind == Some(ModuleKind::Cover) {
-                Cow::Borrowed(module_ids)
+    let modules = match modules.first() {
+        Some(module) => {
+            if module.kind == Some(ModuleKind::Cover) {
+                Cow::Borrowed(modules)
             } else {
-                let mut module_ids = module_ids.to_vec();
-                module_ids.insert(
+                let mut modules = modules.to_vec();
+                modules.insert(
                     0,
-                    module_of_kind(&mut transaction, Some(ModuleKind::Cover)).await?,
+                    Module {
+                        kind: Some(ModuleKind::Cover),
+                        body: None,
+                    },
                 );
-                Cow::Owned(module_ids)
+                Cow::Owned(modules)
             }
         }
         None => Cow::Owned(vec![
-            module_of_kind(&mut transaction, Some(ModuleKind::Cover)).await?,
-            module_of_kind(&mut transaction, None).await?,
+            Module {
+                kind: Some(ModuleKind::Cover),
+                body: None,
+            },
+            Module {
+                kind: None,
+                body: None,
+            },
         ]),
     };
 
@@ -85,14 +66,15 @@ returning id
     super::recycle_metadata(&mut transaction, "jig", jig.id, content_types).await?;
 
     // todo: batch
-    for (idx, module_id) in module_ids.iter().enumerate() {
+    for (idx, module) in modules.iter().enumerate() {
         sqlx::query!(
             r#"
-insert into jig_module (jig_id, "index", module_id)
-values ($1, $2, $3)"#,
+insert into jig_module (jig_id, "index", kind, contents)
+values ($1, $2, $3, $4)"#,
             jig.id,
             idx as i16,
-            module_id.0
+            module.kind.map(|it| it as i16),
+            module.body,
         )
         .execute(&mut transaction)
         .await?;
@@ -113,12 +95,11 @@ select
     author_id,
     publish_at,
     array(
-        select row (module_id, kind)
+        select row (kind)
         from jig_module
-        inner join module on module_id = module.id
         where jig_id = $1
         order by "index"
-    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    ) as "modules!: Vec<(Option<ModuleKind>,)>",
     array(select row(content_type_id) from jig_content_type where jig_id = $1) as "content_types!: Vec<(ContentTypeId,)>"
 from jig
 where id = $1"#,
@@ -129,8 +110,8 @@ where id = $1"#,
     .map(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
-            id, kind
+        modules: row.modules.into_iter().map(|(kind,)| LiteModule {
+            kind
         }).collect(),
         content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
@@ -146,10 +127,9 @@ pub async fn update(
     id: JigId,
     display_name: Option<&str>,
     author_id: Option<Uuid>,
-    modules: Option<&[ModuleId]>,
     content_types: Option<&[ContentTypeId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
-) -> Result<(), error::JigUpdate> {
+) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
         r#"select exists(select 1 from jig where id = $1 for update) as "exists!""#,
@@ -159,7 +139,7 @@ pub async fn update(
     .await?
     .exists
     {
-        return Err(error::JigUpdate::ResourceNotFound);
+        return Err(error::UpdateWithMetadata::ResourceNotFound);
     }
 
     if let Some(publish_at) = publish_at {
@@ -190,41 +170,6 @@ where id = $1
     )
     .execute(&mut transaction)
     .await?;
-
-    if let Some(module_ids) = modules {
-        let first_id = match module_ids.first() {
-            Some(id) => *id,
-            None => return Err(error::JigUpdate::Unprocessable),
-        };
-
-        let kind = sqlx::query!(
-            r#"select kind as "kind: ModuleKind" from module where id = $1"#,
-            first_id.0
-        )
-        .fetch_optional(&mut transaction)
-        .await?
-        .ok_or(error::JigUpdate::Unprocessable)?
-        .kind;
-
-        if kind != Some(ModuleKind::Cover) {
-            return Err(error::JigUpdate::Unprocessable);
-        }
-
-        sqlx::query!("delete from jig_module where jig_id = $1", id.0)
-            .execute(&mut transaction)
-            .await?;
-
-        for (idx, module_id) in module_ids.iter().enumerate() {
-            sqlx::query!(
-                r#"insert into jig_module (jig_id, "index", module_id) values ($1, $2, $3)"#,
-                id.0,
-                idx as i16,
-                module_id.0
-            )
-            .execute(&mut transaction)
-            .await?;
-        }
-    }
 
     if let Some(content_types) = content_types {
         super::recycle_metadata(&mut transaction, "jig", id.0, content_types)
@@ -260,12 +205,11 @@ select
     author_id,
     publish_at,
     array(
-        select row (module_id, kind)
+        select row (kind)
         from jig_module
-        inner join module on module_id = module.id
         where jig_id = jig.id
         order by "index"
-    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    ) as "modules!: Vec<(Option<ModuleKind>,)>",
     array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as "content_types!: Vec<(ContentTypeId,)>"
 from jig
 where 
@@ -282,8 +226,8 @@ author_id,
     .map_ok(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
-            id, kind
+        modules: row.modules.into_iter().map(|(kind,)| LiteModule {
+             kind
         }).collect(),
         content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
@@ -336,19 +280,9 @@ returning id
 
     sqlx::query!(
         r#"
-with new_module_set as (
-    select kind, contents, uuid_generate_v1mc() as id, jig_module."index"
-    from jig_module
-    inner join module on module.id = module_id
-    where jig_id = $1
-), new_modules as (
-    insert into module (id, kind, contents)
-    select id, kind, contents 
-    from new_module_set
-)
-insert into jig_module (jig_id, module_id, "index")
-select $2 as jig_id, new_module_set.id as module_id, new_module_set."index"
-from new_module_set        
+insert into jig_module ("index", jig_id, kind, contents)
+select "index", $2 as "jig_id", kind, contents
+from jig_module where jig_id = $1
 "#,
         parent.0,
         new_id

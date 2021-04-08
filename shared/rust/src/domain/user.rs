@@ -11,6 +11,8 @@ use paperclip::actix::Apiv2Schema;
 use super::meta::{AffiliationId, AgeRangeId, SubjectId};
 
 /// Represents a user's permissions.
+///
+/// Note: 5 was "ManageModule", and has been deleted, but cannot be replaced(?)
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[non_exhaustive]
 #[repr(i16)]
@@ -28,9 +30,6 @@ pub enum UserScope {
     /// The user can create/delete/modify jigs.
     ManageJig = 4,
 
-    /// The user can create/delete/modify modules.
-    ManageModule = 5,
-
     /// The user can create/delete/modify animations.
     ManageAnimation = 6,
 
@@ -47,7 +46,6 @@ impl TryFrom<i16> for UserScope {
             2 => Ok(Self::ManageCategory),
             3 => Ok(Self::ManageImage),
             4 => Ok(Self::ManageJig),
-            5 => Ok(Self::ManageModule),
             6 => Ok(Self::ManageAnimation),
             7 => Ok(Self::ManageEntry),
             _ => anyhow::bail!("Scope {} is invalid"),

@@ -75,7 +75,7 @@ async fn update(
     _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, error::JigUpdate> {
+) -> Result<NoContent, error::UpdateWithMetadata> {
     let req = req.map_or_else(Default::default, Json::into_inner);
 
     db::jig::update(
@@ -83,7 +83,6 @@ async fn update(
         path.into_inner(),
         req.display_name.as_deref(),
         req.author_id,
-        req.modules.as_deref(),
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )

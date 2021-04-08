@@ -9,11 +9,9 @@ expression: body
     "display_name": null,
     "modules": [
       {
-        "id": "[id]",
         "kind": "Cover"
       },
       {
-        "id": "[id]",
         "kind": null
       }
     ],

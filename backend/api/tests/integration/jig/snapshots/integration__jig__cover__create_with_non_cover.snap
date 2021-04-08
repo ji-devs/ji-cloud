@@ -5,11 +5,9 @@ expression: body.jig.modules
 ---
 [
   {
-    "id": "[id]",
     "kind": "Cover"
   },
   {
-    "id": "[id]",
-    "kind": "TappingBoard"
+    "kind": null
   }
 ]

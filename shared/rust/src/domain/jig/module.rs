@@ -4,14 +4,6 @@
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use uuid::Uuid;
-
-/// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", sqlx(transparent))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ModuleId(pub Uuid);
 
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
@@ -82,20 +74,14 @@ impl FromStr for ModuleKind {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct LiteModule {
-    /// The module's ID.
-    pub id: ModuleId,
-
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 }
 
 /// Over the wire representation of a module.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Module {
-    /// The module's ID.
-    pub id: ModuleId,
-
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 
@@ -112,6 +98,14 @@ pub struct ModuleCreateRequest {
 
     /// The module's json contents.
     pub body: Option<serde_json::Value>,
+}
+
+/// Request to create a new `Module`.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ModuleCreateResponse {
+    /// Where in the parent jig this module is situated.
+    pub index: u16,
 }
 
 /// Response for successfully finding a module
@@ -132,6 +126,9 @@ pub struct ModuleUpdateRequest {
 
     /// The module's json contents.
     pub body: Option<serde_json::Value>,
-}
 
-into_uuid![ModuleId];
+    /// Where to move this module to in the parent.
+    ///
+    /// Numbers larger than the parent jig's module count will move it to the *end*.
+    pub reinsert_at: Option<u16>,
+}

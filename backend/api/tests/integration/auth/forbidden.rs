@@ -143,13 +143,18 @@ async fn jig_delete() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn module_post() -> anyhow::Result<()> {
-    forbidden("v1/module", None, Method::POST).await
+    forbidden(
+        "v1/jig/00000000-0000-0000-0000-000000000000/module",
+        None,
+        Method::POST,
+    )
+    .await
 }
 
 #[actix_rt::test]
 async fn module_patch() -> anyhow::Result<()> {
     forbidden(
-        "v1/module/00000000-0000-0000-0000-000000000000",
+        "v1/jig/00000000-0000-0000-0000-000000000000/module/0",
         None,
         Method::PATCH,
     )
@@ -159,7 +164,7 @@ async fn module_patch() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn module_delete() -> anyhow::Result<()> {
     forbidden(
-        "v1/module/00000000-0000-0000-0000-000000000000",
+        "v1/jig/00000000-0000-0000-0000-000000000000/module/0",
         None,
         Method::DELETE,
     )
