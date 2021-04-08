@@ -59,7 +59,7 @@ impl DebugSettings {
                     )
                 })
             ),
-            step: Some(Step::Four), 
+            step: Some(Step::One), 
             live_save: false,
             content_tab: Some(DebugContentTab::Text),
         }
@@ -69,6 +69,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
+            //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
             SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
         }
 

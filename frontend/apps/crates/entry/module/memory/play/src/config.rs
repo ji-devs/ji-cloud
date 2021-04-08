@@ -22,7 +22,13 @@ pub const DEST_ROT_RIGHT:f64 = -20.0;
 pub fn get_debug_pairs(mode: GameMode) -> Vec<(String, String)> {
     match mode {
         GameMode::Duplicate | GameMode::Lettering => {
-            vec![("hello", "world")]
+            vec![
+                ("hello", "world"),
+                ("hello", "world"),
+                ("hello", "world"),
+                ("hello", "world"),
+                ("hello", "world"),
+            ]
                 .iter()
                 .map(|(w1, w2)| (w1.to_string(), w2.to_string()))
                 .collect()
