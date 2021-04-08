@@ -23,5 +23,6 @@ export default {
 			cargoArgs: ["--features", "release"],
             debug: false,
         }),
+		nodeResolve(),
     ],
 };

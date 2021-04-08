@@ -24,5 +24,6 @@ export default {
 			cargoArgs: ["--features", "sandbox"],
             debug: false,
         }),
+		nodeResolve(),
     ],
 };
