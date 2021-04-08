@@ -14,6 +14,11 @@ export class _ extends LitElement {
                     padding: 14px 24px;
                     column-gap: 24px;
                 }
+                :host(:focus-within) {
+                    border: solid 2px var(--dark-blue-3);
+                    /* removing one pixel to account for thicker border */
+                    padding: 13px 23px;
+                }
                 button {
                     padding: 0px;
                     background-color: transparent;
@@ -36,7 +41,7 @@ export class _ extends LitElement {
                     font-weight: normal;
                     font-stretch: normal;
                     font-style: normal;
-                    width: 20px;
+                    width: 30px;
                     flex-grow: 1;
                 }
                 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
@@ -60,7 +65,7 @@ export class _ extends LitElement {
 
     private changed() {
         this.dispatchEvent(new CustomEvent("custom-change", {
-            detail: { value: this.value },
+            detail: { value: this.value.toString() }, // custom change expect a string
         }))
     }
 
@@ -81,7 +86,13 @@ export class _ extends LitElement {
     private onInput = (e: InputEvent) => {
         let newValue = (e.target as HTMLInputElement).valueAsNumber;
         if(!Number.isNaN(newValue)) {
-            this.value = newValue;
+            if (newValue > this.max) // too high
+                this.value = this.max;
+            else if (newValue < this.min) // to low
+                this.value = this.min;
+            else
+                this.value = newValue;
+
             this.changed();
         }
     }
@@ -89,7 +100,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <button @click="${this.decrement}">-</button>
-            <input type="number" @input="${this.onInput}" value="${ this.value }">
+            <input type="number" @input="${this.onInput}" .value="${ this.value.toString() }">
             <button @click="${this.increment}">+</button>
         `;
     }

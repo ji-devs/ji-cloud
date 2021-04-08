@@ -18,7 +18,7 @@ const STR_THEME_COLORS_LABEL: &'static str = "Theme colors";
 const STR_USER_COLORS_LABEL: &'static str = "My colors";
 
 
-pub fn render(config: ColorSelectConfig) -> Dom {
+pub fn render(config: ColorSelectConfig, slot: Option<&str>) -> Dom {
     let state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
 
     let init_loader = AsyncLoader::new();
@@ -28,6 +28,9 @@ pub fn render(config: ColorSelectConfig) -> Dom {
 
     Dom::with_state(init_loader, move |init_loader| {
         html!("empty-fragment", {
+            .apply_if(slot.is_some(), move |dom| {
+                dom.property("slot", slot.unwrap_ji())
+            })
             .child_signal(init_loader.is_loading().map(move |loading| {
                 if loading {
                     Some(html!("window-loader-block", {

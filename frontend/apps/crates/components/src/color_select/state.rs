@@ -36,7 +36,7 @@ static SYSTEM_COLORS: &'static [&str] = &[
 
 
 pub struct State {
-    pub value: Mutable<Option<RGBA8>>,
+    pub value: Rc<Mutable<Option<RGBA8>>>,
     pub system_colors: Rc<Vec<RGBA8>>,
     pub theme_colors: Rc<Option<Vec<RGBA8>>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
@@ -46,7 +46,7 @@ impl State {
     pub async fn new(config: ColorSelectConfig) -> Self {
         let user_colors = get_user_colors().await.unwrap_ji();
         Self {
-            value: Mutable::new(None),
+            value: config.value.clone(),
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
             theme_colors: Rc::new(match config.theme {
                 // Some(ThemeId) => Some(THEME_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
@@ -60,4 +60,5 @@ impl State {
 
 pub struct ColorSelectConfig {
     pub theme: Option<ThemeId>,
+    pub value: Rc<Mutable<Option<RGBA8>>>,
 }
