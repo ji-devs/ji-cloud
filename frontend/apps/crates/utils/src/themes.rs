@@ -2,33 +2,102 @@ use once_cell::sync::OnceCell;
 use rgb::RGBA8;
 use serde::{
     de::{self, Deserializer},
+    Serialize,
     Deserialize,
 };
 use std::{fmt, marker::PhantomData};
 
 use crate::unwrap::UnwrapJiExt;
 
-static THEMES: OnceCell<Themes> = OnceCell::new();
+pub const THEME_IDS:[ThemeId;3] = [
+    ThemeId::None,
+    ThemeId::Chalkboard, 
+    ThemeId::HappyBrush
+];
 
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum ThemeId {
+    None,
+    Chalkboard,
+    HappyBrush,
+}
+
+
+impl ThemeId {
+
+    pub fn get_colors(self) -> &'static [RGBA8] {
+        self.map_theme(|theme| theme.colors.as_slice())
+    }
+
+    //TODO - tie to Localization
+    pub fn display_name(self) -> &'static str {
+        match self {
+            Self::None => "",
+            Self::Chalkboard => "Chalkboard", 
+            Self::HappyBrush => "Happy Brush", 
+        }
+    }
+
+    pub fn as_str_id(self) -> &'static str {
+        match self {
+            Self::None => "",
+            Self::Chalkboard => "chalkboard", 
+            Self::HappyBrush => "happy-brush", 
+        }
+    }
+
+    //It's safe to just call this whenever, it will lazily init the config
+    fn map_theme<F, A>(self, mapper:F) -> A 
+    where
+        F: FnOnce(&'static Theme) -> A
+    {
+        match THEMES.get() {
+            None => {
+                init_config();
+                self.map_theme(mapper)
+            }
+            Some(themes) => {
+                mapper(match self {
+                    Self::None => &themes.none,
+                    Self::Chalkboard => &themes.chalkboard,
+                    Self::HappyBrush => &themes.happy_brush,
+                })
+            }
+        }
+    }
+
+}
+
+//These are for storing the config statically
+//access is via the public ThemeId getters
 #[derive(Debug, Deserialize)]
 struct Themes {
+    #[serde(rename="")]
+    pub none: Theme,
     pub chalkboard: Theme,
     pub happy_brush: Theme,
 }
+
 #[derive(Debug, Deserialize)]
 struct Theme {
     #[serde(deserialize_with = "hex_to_rgba8")]
     pub colors: Vec<RGBA8>,
 }
+//Set lazily, first time as-needed
+static THEMES: OnceCell<Themes> = OnceCell::new();
 
-pub fn init() {
-    let themes: Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect("Invalid Themes");
+fn init_config() {
+    let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect("Invalid Themes");
 
     THEMES.set(themes).unwrap_ji()
 }
 
-
-pub fn hex_to_rgba8<'de, D>(deserializer: D) -> Result<Vec<RGBA8>, D::Error>
+//Deserializes the colors from Vec<String> to Vec<RGBA8>
+//currently assumes all the strings are in the format 0xRRGGBB
+//in the future we can enhance that to support more string types
+//without breaking the api
+fn hex_to_rgba8<'de, D>(deserializer: D) -> Result<Vec<RGBA8>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -67,23 +136,4 @@ where
     deserializer.deserialize_any(ColorVec(PhantomData))
 }
 
-pub enum ThemeId {
-    Chalkboard,
-    HappyBrush,
-}
-impl ThemeId {
-    pub fn get_colors(&self) -> &'static [RGBA8] {
 
-        if THEMES.get().is_none() {
-            init();
-        }
-
-        THEMES
-            .get()
-            .map(|themes| match self {
-                Self::Chalkboard => themes.chalkboard.colors.as_slice(),
-                Self::HappyBrush => themes.happy_brush.colors.as_slice(),
-            })
-            .unwrap_ji()
-    }
-}

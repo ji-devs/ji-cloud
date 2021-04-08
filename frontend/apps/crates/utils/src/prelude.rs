@@ -4,4 +4,5 @@ pub use crate::{
     fetch::*,
     routes::*,
     settings::SETTINGS,
+    themes::*,
 };
