@@ -1,4 +1,5 @@
 #![feature(type_alias_impl_trait)]
+#![feature(min_type_alias_impl_trait)]
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
@@ -6,38 +7,27 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-mod templates;
 mod router;
-mod pages;
-mod data;
 mod debug;
+mod data;
 mod config;
+mod player;
+mod index;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
 
-/*
-mod page;
-mod pages;
-mod header;
-*/
+
+
+
 #[wasm_bindgen(start)]
 pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
-    crate::config::init();
-    //init dom stuff
-
-    let router = router::Router::new();
-    dominator::append_dom(&dominator::body(), router.render());
-    /*
-
-    let page = page::Page::new();
-
-    dominator::append_dom(&dominator::body(), page.render());
-	*/
+    debug::init();
+    router::render();
 }
 
 
@@ -58,4 +48,5 @@ cfg_if! {
         }
     }
 }
+
 

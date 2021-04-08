@@ -1,6 +1,7 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
+import nodeResolve from "@rollup/plugin-node-resolve";
 
 let {APP_NAME, APP_PORT} = process.env;
 
@@ -8,6 +9,10 @@ if(!APP_NAME) {
     console.error("INVALID APP_NAME!");
     process.exit(1);
 }
+
+console.info(`*********************`);
+console.info(`** BUILDING ${APP_NAME} **`);
+console.info(`*********************`);
 
 const path = require('path');
 
@@ -41,6 +46,7 @@ export default {
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
+        nodeResolve(),
 
         serve({
             contentBase: `dist/${APP_NAME}`,

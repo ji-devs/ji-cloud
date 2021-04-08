@@ -12,23 +12,26 @@ use super::{
     dragging::state::State as DragState
 };
 use utils::{drag::Drag, math::PointI32};
-use dominator_helpers::signals::OptionSignal;
+use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use shared::domain::jig::{Jig, LiteModule, JigId, ModuleId, ModuleKind};
 use web_sys::DomRect;
 use wasm_bindgen::prelude::*;
 
 pub struct State {
     pub jig_id: JigId,
+    pub module_id: Mutable<Option<ModuleId>>,
     pub name: Mutable<Option<String>>,
     pub modules: MutableVec<Rc<Module>>,
     pub drag: Mutable<Option<Rc<DragState>>>,
-    pub drag_target_index: Mutable<Option<usize>>
+    pub drag_target_index: Mutable<Option<usize>>,
+    pub loader: AsyncLoader,
 }
 
 impl State {
-    pub fn new(jig:Jig) -> Self {
+    pub fn new(jig:Jig, module_id: Mutable<Option<ModuleId>>) -> Self {
         Self {
             jig_id: jig.id,
+            module_id,
             name: Mutable::new(jig.display_name),
             modules: MutableVec::new_with_values(
                 jig.modules
@@ -38,6 +41,7 @@ impl State {
             ),
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
+            loader: AsyncLoader::new(),
         }
 
     }

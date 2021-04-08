@@ -45,7 +45,7 @@ AudioInput.argTypes = {
     mode: {
         control: {
             type: 'inline-radio',
-            options: ['default', 'active', 'success']
+            options: ['default', 'active', 'success', 'done']
         }
     }
 }

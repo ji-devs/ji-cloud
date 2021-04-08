@@ -1,4 +1,5 @@
 #![feature(type_alias_impl_trait)]
+#![feature(min_type_alias_impl_trait)]
 
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
@@ -31,6 +32,7 @@ pub fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
     config::init();
+    debug::init();
 
     router::render();
 }

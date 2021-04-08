@@ -1,5 +1,8 @@
 use dominator::{html, Dom, clone};
-use crate::data::*;
+use crate::data::{
+    actions,
+    state::*,
+};
 use std::rc::Rc;
 use utils::events;
 use wasm_bindgen::prelude::*;

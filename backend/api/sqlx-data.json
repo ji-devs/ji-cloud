@@ -1,95 +1,5 @@
 {
   "db": "PostgreSQL",
-  "0141837507f9cee8a34eb54590155f6ce8f1bf322a024a2dc701795bf8989a66": {
-    "query": "\nselect id,\n    name,\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n    array((select style.display_name\n           from style\n                    inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "affiliations!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 4,
-          "name": "affiliation_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "styles!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "style_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "age_ranges!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 8,
-          "name": "age_range_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 9,
-          "name": "categories!",
-          "type_info": "UuidArray"
-        },
-        {
-          "ordinal": 10,
-          "name": "category_names!",
-          "type_info": "TextArray"
-        },
-        {
-          "ordinal": 11,
-          "name": "is_published!",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 12,
-          "name": "is_premium",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false
-      ]
-    }
-  },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "query": "delete from web_media_library_url where media_url = $1",
     "describe": {
@@ -119,6 +29,26 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "085304fd00f042843830c03dab547f7547aad3b4f611d26beb5ec22b583686d8": {
+    "query": "\nselect color\nfrom user_color\nwhere user_id = $1\norder by index\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "color",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -414,6 +344,20 @@
       ]
     }
   },
+  "19594c11c01c4202a2fcad91d2842d6ef01d2b5c75af0c6fe507115d1ac2a954": {
+    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind),\n    updated_at = now()\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
     "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
     "describe": {
@@ -519,6 +463,19 @@
         true,
         true
       ]
+    }
+  },
+  "1bac88038d15dd368ee2cff84039b102b249dfa058c61af107f07d4ed739b508": {
+    "query": "\nwith new_module_set as (\n    select kind, contents, uuid_generate_v1mc() as id, jig_module.\"index\"\n    from jig_module\n    inner join module on module.id = module_id\n    where jig_id = $1\n), new_modules as (\n    insert into module (id, kind, contents)\n    select id, kind, contents \n    from new_module_set\n)\ninsert into jig_module (jig_id, module_id, \"index\")\nselect $2 as jig_id, new_module_set.id as module_id, new_module_set.\"index\"\nfrom new_module_set        \n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb": {
@@ -873,6 +830,32 @@
       "nullable": []
     }
   },
+  "399f537a8091d51635c2cd32bf16449c26317d1f56c576064968a2bfd57953e0": {
+    "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce($3, item_kind_id),\n    english = coalesce($4, english),\n    hebrew = coalesce($5, hebrew),\n    status = coalesce($6, status),\n    in_app = coalesce($7, in_app),\n    in_element = coalesce($8, in_element),\n    in_mock = coalesce($9, in_mock),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "39a8d9f6b645305b1a6282c110154c481dcdd211fabf7944655438c13b55511c": {
     "query": "update category set name = $1 where id = $2",
     "describe": {
@@ -989,26 +972,6 @@
       "nullable": []
     }
   },
-  "47fb0f5546e32d096bbffdd9ffd5d17be73c08c132620e2a7fae90b87dd954e1": {
-    "query": "select exists(select 1 from jig where id = $1) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "4ece7de8525ff491823831df2bebf0d78e258fe95d1432e01ed0df448d04587f": {
     "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) \nvalues \n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    language = $6,\n    locale = $7,\n    timezone = $8,\n    opt_into_edu_resources = $9,\n    organization = $10,\n    location = $11\n",
     "describe": {
@@ -1045,6 +1008,102 @@
       "nullable": []
     }
   },
+  "55180f407a0a24436fed3a2751e7d4765d4408f66d6deb445f519dd675748250": {
+    "query": "\nselect id,\n    name,\n    kind as \"kind: ImageKind\",\n    description,\n    array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n    array((select affiliation.display_name\n           from affiliation\n                    inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n           where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n    array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n    array((select style.display_name\n           from style\n                    inner join image_style on style.id = image_style.style_id\n           where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n    array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n    array((select age_range.display_name\n           from age_range\n                    inner join image_age_range on age_range.id = image_age_range.age_range_id\n           where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n    array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n    array((select name\n           from category\n                    inner join image_category on category.id = image_category.category_id\n           where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n    (publish_at < now() is true) as \"is_published!\",\n    is_premium\nfrom image_metadata\nwhere \n    last_synced_at is null or\n    (updated_at is not null and last_synced_at < updated_at) or\n    (publish_at < now() is true and last_synced_at < publish_at)\nlimit 100\nfor no key update skip locked;\n     ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ImageKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "affiliations!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "affiliation_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "styles!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "style_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 8,
+          "name": "age_ranges!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 9,
+          "name": "age_range_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 10,
+          "name": "categories!",
+          "type_info": "UuidArray"
+        },
+        {
+          "ordinal": 11,
+          "name": "category_names!",
+          "type_info": "TextArray"
+        },
+        {
+          "ordinal": 12,
+          "name": "is_published!",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 13,
+          "name": "is_premium",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false
+      ]
+    }
+  },
   "55d609c71baa210be4d5c6757fc0b960c3f7850bf93df7db5b5d867d24359cb6": {
     "query": "update image_metadata set uploaded_at = now() where id = $1",
     "describe": {
@@ -1079,6 +1138,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "592bc9d7ba082465064276d492d2d72320a0d4a100dc968dcc86ef023bc87c7a": {
+    "query": "select exists(select 1 from jig where id = $1 for update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "5c0933d2cb483f10abe3ba1d6cbdb98206ce46b06b7180c9c10abbaa726efb23": {
@@ -1273,6 +1352,20 @@
       ]
     }
   },
+  "69b512127b70875985bb54e50242397b7e362535b1a338276778abde7b695787": {
+    "query": "update user_color set color = $3 where user_id = $1 and index = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "6c014a25b393085067f53d03df2616cb161fe309c1c17b1a3054fdbced3bb123": {
     "query": "insert into jig_module (jig_id, \"index\", module_id) values ($1, $2, $3)",
     "describe": {
@@ -1383,6 +1476,27 @@
       ]
     }
   },
+  "701de512b57a7bb90c579f09319277ac921dff5152c1fb8a2bc1d8bc0548504a": {
+    "query": "\nselect exists(\n        select 1\n        from user_color\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "71ea3b30742734dc675123b8d517e0f7f6147f6865118707aa77333fdae87b38": {
     "query": "\nwith new_row as (\n    insert into \"settings\" default values on conflict(singleton) do nothing returning algolia_index_version    \n)\nselect algolia_index_version as \"algolia_index_version!\" from new_row\nunion\nselect algolia_index_version as \"algolia_index_version!\" from \"settings\"\n",
     "describe": {
@@ -1476,6 +1590,64 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "819dd02cd32f5846bf466214bd6fe9213f7c454c5e1eae42999456097d1a69ee": {
+    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (module_id, kind)\n        from jig_module\n        inner join module on module_id = module.id\n        where jig_id = jig.id\n        order by \"index\"\n    ) as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere \n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $3 or $3 is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int4",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null
       ]
     }
   },
@@ -1800,6 +1972,27 @@
       ]
     }
   },
+  "974e49b8fa518e9402ae2494147cd25953503851952b4ba97d635a2aeb5bd729": {
+    "query": "\nwith delete as (\n        delete from user_color\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_color\nwhere user_id = $1 and index > $2\nfor update\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "discard",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -1870,6 +2063,19 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a87ea4169f26518cbf7f88c1777bd15bbf72f938d6352567cd549bbe970db5f2": {
+    "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
         ]
       },
       "nullable": []
@@ -2071,6 +2277,27 @@
       ]
     }
   },
+  "c009451930f1de4e3602655e09687e8a6231870b72fcc37d87ba08744b2e8804": {
+    "query": "\nselect count(*) as \"count!: i64\"\nfrom jig\nwhere\n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $2 or $2 is null\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac": {
     "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                ",
     "describe": {
@@ -2083,28 +2310,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "c372a34b6b9e1b5ab8cb7488118c6d76b3213c212490d4ff30bed1efdddb68d7": {
-    "query": "\nupdate module\nset contents = coalesce($2, contents),\n    kind = coalesce($3, kind)\nwhere id = $1 and (\n    ($2::jsonb is not null and $2 is distinct from contents) or\n    ($3::int2 is not null and $3 is distinct from kind)\n)\nreturning true as \"exists!\"\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "c5711732b2fcd0f1e9241eecd1714cd91d2de836d9bcb7561317e8fbca447b30": {
@@ -2229,6 +2434,27 @@
       ]
     }
   },
+  "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
+    "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "color!",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "d6d463c1ab277fa41b23c16f3a507d56238f9e486698790ad36e23141214a984": {
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       0::int8                                                            as \"jig_count!\"\nfrom category\nwhere parent_id is null\norder by index\n ",
     "describe": {
@@ -2275,32 +2501,6 @@
         null,
         null
       ]
-    }
-  },
-  "dc713784b032fea246bc93f78a1d6156e1e66d5eeb27a840a405450da93443f7": {
-    "query": "\nupdate locale_entry\nset\n    bundle_id = coalesce(bundle_id, $2),\n    item_kind_id = coalesce(item_kind_id, $3),\n    english = coalesce(english, $4),\n    hebrew = coalesce(hebrew, $5),\n    status = coalesce(status, $6),\n    in_app = coalesce(in_app, $7),\n    in_element = coalesce(in_element, $8),\n    in_mock = coalesce(in_mock, $9),\n    section = case when $10 then $11 else section end,\n    zeplin_reference = case when $12 then $13 else zeplin_reference end,\n    comments = case when $14 then $15 else comments end\nwhere id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Uuid",
-          "Uuid",
-          "Text",
-          "Text",
-          "Int2",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "deb684379042b0f339ef2d3bca47d627a7a6b8ac0c003f8d4a3c9c67f64dd1b7": {
@@ -2434,6 +2634,27 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "e457c9506c64d4b5455b631439224783685ebdded24c2e30affb3bf267a1d681": {
+    "query": "\ninsert into jig (display_name, parents, creator_id, author_id)\nselect display_name, array_append(parents, id), $2 as creator_id, $2 as author_id from jig where id = $1\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -2624,6 +2845,46 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "f645d62b8e799680eb19f38eb55ce99b05332fba93a287388af43329773856f9": {
+    "query": "select exists(select 1 from module where id = $1 for update) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "f6fdff05a1c03b8d25defb34f67eecbab5067b9bf8165b2189f8fa4d4dbee477": {
+    "query": "select kind as \"kind: ModuleKind\" from module where id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        true
       ]
     }
   },

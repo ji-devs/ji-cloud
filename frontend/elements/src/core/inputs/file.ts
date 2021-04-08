@@ -13,6 +13,8 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                     cursor: pointer;
+                    display: grid;
+                    place-content: center;
                 }
                 input {
                     display: none;
@@ -42,9 +44,8 @@ export class _ extends LitElement {
     }
 
     private newFile(file: File) {
-        console.log(file);
-        this.dispatchEvent(new CustomEvent("custom-file-change", {
-            detail: { file },
+        this.dispatchEvent(new CustomEvent("custom-file", {
+            detail: file,
         }))
     }
 

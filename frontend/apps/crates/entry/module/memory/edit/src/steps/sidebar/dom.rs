@@ -1,22 +1,24 @@
 use dominator::{html, Dom, clone};
-use crate::data::*;
+use crate::data::state::*;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use super::{
     nav::dom::StepsNavDom,
     step_1::dom::Step1Dom,
+    step_2::dom::Step2Dom,
+    step_3::dom::Step3Dom,
 };
 use futures_signals::{
     map_ref,
-    signal::SignalExt
+    signal::SignalExt,
 };
 
 pub struct SidebarDom {}
 impl SidebarDom {
     pub fn render(state:Rc<State>) -> Dom {
 
-        let game_mode = state.game_mode.get().unwrap_throw();
+        let game_mode = state.game_mode.get().unwrap_ji();
 
         html!("module-sidebar", {
             .property("slot", "sidebar")
@@ -25,12 +27,16 @@ impl SidebarDom {
                 state.step
                     .signal()
                     .switch_signal_vec(clone!(state => move |step| {
-                        match step {
-                            Step::One => Step1Dom::render(state.clone()),
-                            _ => {
-                                unimplemented!("can't handle step 2 yet!"); 
-                            }
-                        }
+                        state.is_empty_signal()
+                            .map(clone!(state => move |is_empty| {
+                                match step {
+                                    Step::One => vec![Step1Dom::render(state.clone(), !is_empty)],
+                                    Step::Two => Step2Dom::render(state.clone()),
+                                    Step::Three => Step3Dom::render(state.clone()),
+                                    Step::Four => vec![html!("empty-fragment")]
+                                }
+                            }))
+                            .to_signal_vec()
                     }))
             )
         })

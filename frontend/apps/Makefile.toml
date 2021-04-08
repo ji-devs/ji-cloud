@@ -75,20 +75,24 @@ set_env APP_NAME ${1}
 cm_run_task build-local-iframe
 '''
 
-[tasks.local-main-nomedia]
+[tasks.local-main-apponly]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-local-main-nomedia
+cm_run_task build-local-main-apponly
 '''
 
-[tasks.local-iframe-nomedia]
+[tasks.local-iframe-apponly]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-local-iframe-nomedia
+cm_run_task build-local-iframe-apponly
 '''
 
+[tasks.local-mediaserver]
+script_runner = "@shell"
+script = ["npm run local-media-server"]
+cwd = "../build-utils"
 #######################
 ## BUILD - SANDBOX ##
 #######################
@@ -123,7 +127,7 @@ run_task = {name = [
     "local-build-elements",
     "local-port-main",
     "local-prep-files",
-    "local-start",
+    "local-watch-all",
 ]}
 
 [tasks.build-local-iframe]
@@ -131,23 +135,24 @@ run_task = {name = [
     "local-build-elements",
     "local-port-iframe",
     "local-prep-files",
-    "local-start",
+    "local-watch-all",
 ]}
 
-[tasks.build-local-main-nomedia]
+
+[tasks.build-local-main-apponly]
 run_task = {name = [
     "local-build-elements",
     "local-port-main",
     "local-prep-files",
-    "local-watch-app",
+    "local-watch-apponly",
 ]}
 
-[tasks.bild-local-iframe-nomedia]
+[tasks.build-local-iframe-apponly]
 run_task = {name = [
     "local-build-elements",
     "local-port-iframe",
     "local-prep-files",
-    "local-watch-app",
+    "local-watch-apponly",
 ]}
 
 [tasks.local-prep-files]
@@ -160,17 +165,24 @@ script_runner = "@shell"
 script = ["npm run build:local"]
 cwd = "../elements"
 
-[tasks.local-start]
+[tasks.clean-elements]
+script_runner = "@shell"
+script = ["npm run clean"]
+cwd = "../elements"
+
+[tasks.local-watch-all]
 run_task = { name = [
-    "local-start-mediaserver",
+    "local-mediaserver",
     "local-watch-elements",
     "local-watch-app",
 ], fork = true, parallel = true }
 
-[tasks.local-start-mediaserver]
-script_runner = "@shell"
-script = ["npm run local-media-server"]
-cwd = "../build-utils"
+[tasks.local-watch-apponly]
+run_task = { name = [
+    "local-watch-elements",
+    "local-watch-app",
+], fork = true, parallel = true }
+
 
 [tasks.local-watch-elements]
 script_runner = "@shell"

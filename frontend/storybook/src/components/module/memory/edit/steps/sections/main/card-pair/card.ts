@@ -3,6 +3,7 @@ import "@elements/module/memory/edit/steps/sections/main/card-pair/card";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/core/inputs/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
+import "@elements/core/inputs/textarea-content";
 export default {
     title: "Module / Memory / Edit / Steps / Sections / Main / Card-Pair"
 }
@@ -18,8 +19,8 @@ export interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    ioMode: "preview",
-    contentMode: "image-empty",
+    ioMode: "edit",
+    contentMode: "text",
     theme: "chalkboard",
     editTarget: true
 }
@@ -47,7 +48,7 @@ function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE) {
     const editing = ioMode === "edit"; 
     if(contentMode === "text") {
         const value = "hello";
-        return `<input-text-content value="${value}" ${editing}></input-text-content>`;
+        return `<input-textarea-content value="${value}" ${editing}></input-textarea-content>`;
     } else if(contentMode === "image") {
         return MockJiImage({size: "thumb"})
     } else if(contentMode === "image-empty") {

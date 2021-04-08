@@ -1,11 +1,15 @@
 use crate::locale::state::{Column, SortKind, State};
-use crate::locale::state::{ItemKind, Section};
+use crate::locale::state::Section;
+use crate::locale::actions::AsStringExt;
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
-use std::collections::BTreeMap;
+use shared::domain::locale::ItemKind;
+use uuid::Uuid;
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
+use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 use utils::events;
-use web_sys::HtmlSelectElement;
+use web_sys::{HtmlOptionElement, HtmlSelectElement};
 
 pub struct TableHeaderDom {}
 
@@ -68,22 +72,35 @@ impl TableHeaderDom {
                                             .property("slot", "actions")
                                             .attribute("multiple", "")
                                             .style("width", "100px")
-                                            .children_signal_vec(state.item_kind_options.signal_cloned()
-                                                .map(|item_kind_options: BTreeMap<ItemKind, bool>| {
-                                                    item_kind_options.iter().map(|(item_kind_option, visible): (&ItemKind, &bool)| {
-                                                        html!("option", {
-                                                            .property("value", item_kind_option)
-                                                            .property("selected", *visible)
-                                                            .text(&item_kind_option)
-                                                        })
-                                                    }).collect()
+                                            .child(html!("option", {
+                                                .property("value", "")
+                                                .property("selected", *state.item_kind_filter.lock_ref().get(&None).unwrap_throw())
+                                            }))
+                                            .children(state
+                                                .item_kind_options
+                                                .iter()
+                                                .map(|item_kind: &ItemKind| {
+                                                    html!("option", {
+                                                        .property("value", &item_kind.id.to_string())
+                                                        .property("selected", *state.item_kind_filter.lock_ref().get(&Some(item_kind.id)).unwrap_throw())
+                                                        .text(&item_kind.name)
+                                                    })
                                                 })
-                                                .to_signal_vec())
+                                            )
                                             .event(clone!(state => move |_event: events::Change| {
                                                 let options = elem.options();
-                                                let mut item_kind_options = state.item_kind_options.lock_mut();
+                                                let mut item_kind_filter = state.item_kind_filter.lock_mut();
+                                                for i in 0..options.length() {
 
-                                                State::filter_change(&options, &mut item_kind_options);
+                                                    let option: HtmlOptionElement = options.get_with_index(i).unwrap().dyn_into::<HtmlOptionElement>().unwrap();
+                                                    let value = option.value();
+                                                    let value = match Uuid::parse_str(&value) {
+                                                        Ok(uuid) => Some(uuid),
+                                                        Err(_) => None,
+                                                    };
+                                                    item_kind_filter.insert(value, option.selected());
+
+                                                }
                                             }))
                                         })
                                     }),
@@ -134,8 +151,8 @@ impl TableHeaderDom {
 
                                                 state.status_options.lock_ref().iter().map(|(o, selected)| {
                                                     html!("option", {
-                                                        .property("text", o.to_string())
-                                                        .property("value", o.to_string())
+                                                        .property("text", &o.to_string())
+                                                        .property("value", &o.to_string())
                                                         .property("selected", *selected)
                                                     })
                                                 })
@@ -144,7 +161,7 @@ impl TableHeaderDom {
                                                 let options = elem.options();
                                                 let mut status_options = state.status_options.lock_mut();
 
-                                                State::filter_change(&options, &mut status_options);
+                                                State::filter_change_str_ext(&options, &mut status_options);
                                             }))
                                         })
                                     }),
@@ -196,7 +213,12 @@ impl TableHeaderDom {
                         Column::Actions => {
                             html!("locale-cell-header", {
                             })
-                        }
+                        },
+                        Column::Bundle => {
+                            html!("locale-cell-header", {
+                                .property("label", Column::Bundle.to_string())
+                            })
+                        },
                     }
                 }))
             )

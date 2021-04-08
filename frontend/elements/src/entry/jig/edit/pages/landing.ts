@@ -12,6 +12,9 @@ export class _ extends LitElement {
         section {
             display: flex;
         }
+        .main {
+            width: 100%;
+        }
         `,
     ];
   }
@@ -22,7 +25,7 @@ export class _ extends LitElement {
         <bg-jig>
           <section>
               <div><slot name="sidebar"></slot></div>
-              <div><slot name="selection"></slot></div>
+              <div class="main"><slot name="main"></slot></div>
           </section>
         </bg-jig>
     `;

@@ -7,10 +7,10 @@ use shared::{
     api::{ApiEndpoint, endpoints},
     domain::{
         meta::{AgeRangeId, AffiliationId},
-        auth::RegisterRequest,
-        session::CreateSessionSuccess,
+        user::PutProfileRequest,
+        session::NewSessionResponse,
     },
-    error::auth::RegisterError
+    error::EmptyError,
 };
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
@@ -42,7 +42,7 @@ pub fn submit(state: Rc<State>) {
     let step_2 = state.step_2.clone();
     let step_1 = step_2.step_1;
 
-    let req = RegisterRequest {
+    let req = PutProfileRequest {
         username: step_1.username,
         over_18: true,
         given_name: step_1.firstname,
@@ -62,7 +62,7 @@ pub fn submit(state: Rc<State>) {
 
 
     state.register_loader.load(clone!(state => async move {
-        let resp:Result<CreateSessionSuccess, RegisterError> = api_with_auth(&endpoints::user::Register::PATH, endpoints::user::Register::METHOD, Some(req)).await;
+        let resp:Result<NewSessionResponse, EmptyError> = api_with_auth(&endpoints::user::PutProfile::PATH, endpoints::user::PutProfile::METHOD, Some(req)).await;
 
         match resp {
             Ok(resp) => {

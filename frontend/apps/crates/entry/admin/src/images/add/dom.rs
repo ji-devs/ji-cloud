@@ -1,6 +1,6 @@
 use dominator::{html, Dom, clone};
 use shared::domain::image::{ImageId, ImageSearchQuery};
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement, File};
 use std::rc::Rc;
 use super::{actions, state::*};
 use utils::{routes::*, events};
@@ -32,6 +32,7 @@ impl ImageAddPage {
                     categories: Vec::new(),
                     is_premium: None,
                     is_published: None,
+                    kind: None,
                 };
                 let route:String = Route::Admin(AdminRoute::ImageSearch(Some(query))).into();
                 dominator::routing::go_to_url(&route);

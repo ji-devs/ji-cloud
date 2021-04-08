@@ -19,6 +19,8 @@ async fn unauthorized(route: &str) -> anyhow::Result<()> {
 
     let body: ApiError<EmptyError> = resp.json().await?;
 
+    app.stop(false).await;
+
     assert_eq!(body.code, StatusCode::UNAUTHORIZED);
 
     Ok(())

@@ -39,15 +39,19 @@ pub async fn redirect(service_kind: GetOAuthUrlServiceKind, url_kind: OAuthUrlKi
 }
 pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
     
-    if let Ok(resp) = api_no_auth_with_credentials::<CreateSessionOAuthResponse, EmptyError, _>(&CreateOAuth::PATH, CreateOAuth::METHOD, Some(req)).await {
+    if let Ok(resp) = api_no_auth_with_credentials::<CreateSessionResponse, EmptyError, _>(&CreateOAuth::PATH, CreateOAuth::METHOD, Some(req)).await {
 
         match resp {
-            CreateSessionOAuthResponse::Login {csrf} => {
+            CreateSessionResponse::Login(resp) => {
+                let csrf = resp.csrf;
+
                 storage::save_csrf_token(&csrf);
                 let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
                 dominator::routing::go_to_url(&route);
             },
-            CreateSessionOAuthResponse::CreateUser {csrf} => {
+            CreateSessionResponse::Register(resp) => {
+                let csrf = resp.csrf;
+
                 match url_kind {
                     OAuthUrlKind::Register => {
                         storage::save_csrf_token(&csrf);

@@ -45,16 +45,46 @@ export class _ extends LitElement {
     `];
   }
 
+    onUndo() {
+        const {undoable} = this;
+        if(undoable) {
+            this.dispatchEvent(new CustomEvent("custom-string", {
+                detail: { value: "undo"},
+            }))
+        }
+    }
+    onRedo() {
+        const {redoable} = this;
+        if(redoable) {
+            this.dispatchEvent(new CustomEvent("custom-string", {
+                detail: { value: "redo"},
+            }))
+        }
+    }
+    onPreview() {
+        this.dispatchEvent(new CustomEvent("custom-string", {
+            detail: { value: "preview"},
+        }))
+    }
+  @property({type: Boolean, reflect: true})
+  undoable:boolean = false;
+
+  @property({type: Boolean, reflect: true})
+  redoable:boolean = false;
+
   render() {
 
+      const {undoable, redoable} = this;
+      const undoButton = undoable ? "undo" : "undo-disabled";
+      const redoButton = redoable ? "redo" : "redo-disabled";
       return html`
           <section>
               <div class="arrows">
-                  <img-ui path="module/_common/header/undo.svg"></img-ui>
-                  <img-ui path="module/_common/header/redo.svg"></img-ui>
+                  <img-ui @click=${this.onUndo} path="module/_common/header/${undoButton}.svg"></img-ui>
+                  <img-ui @click=${this.onRedo} path="module/_common/header/${redoButton}.svg"></img-ui>
               </div>
               <div class="divider"></div>
-              <div class="preview">
+              <div class="preview" @click=${this.onPreview}>
                   <img-ui path="module/_common/header/play.svg"></img-ui>
                   <div class="preview-label">${STR_PREVIEW}</div>
               </div>

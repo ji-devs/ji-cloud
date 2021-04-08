@@ -5,38 +5,42 @@ export class _ extends LitElement {
 
     static get styles() {
         return [css`
-            :host {
-                display: grid;
-                grid-template-rows: 30px min-content 1px 30px;
-                row-gap: 30px;
-            }
             h2 {
                 margin: 0;
+                font-size: 18px;
+                color: var(--dark-gray-6);
+                font-weight: 500;
+                grid-column: 1 / -1;
             }
-            .items {
+            :host {
                 display: grid;
-                grid-template-columns: repeat(6, auto);
-                justify-content: space-around;
-                grid-gap: 16px;
+                grid-template-columns: 1fr auto 1fr;
+                row-gap: 32px;
+            }
+            .sections {
+                grid-column: 2;
+                display: grid;
+                row-gap: 32px;
             }
             hr {
                 width: 100%;
                 background: var(--light-gray-4);
+                grid-column: 1 / -1;
             }
             ::slotted([slot=add-color]) {
-                justify-self: start;
+                grid-column: 2;
             }
         `];
     }
 
-    @property({type: String})
-    label?: string;
+    @property()
+    label: string = "";
 
     render() {
         return html`
-            <h2>Select color</h2>
-            <div class="items">
-                <slot name="items"></slot>
+            <h2>${this.label}</h2>
+            <div class="sections">
+                <slot name="sections"></slot>
             </div>
             <hr>
             <slot name="add-color"></slot>

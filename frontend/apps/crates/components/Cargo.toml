@@ -21,7 +21,7 @@ strum_macros = "0.20.1"
 log = "0.4.13"
 serde_json = "1.0.61"
 cfg-if = "1.0.0"
-wasm-bindgen = "0.2.69"
+wasm-bindgen = { version = "0.2.69", features = ["serde-serialize"] }
 js-sys = "0.3.46"
 wasm-bindgen-futures = "0.4.19"
 serde-wasm-bindgen = "0.1.3"
@@ -56,9 +56,12 @@ web-sys = { version = "0.3.46", features = [
     'HtmlCanvasElement',
     'History',
     'CustomEvent',
+    'HtmlAudioElement',
 ] }
-awsm_web = { version = "0.16.0", features = ["loaders", "serde_iso"] }
+awsm_web = { version = "0.16.0", features = ["loaders", "serde_iso", "dom"] }
 anyhow = "1.0.38"
+gloo-timers = "0.2.1"
+rgb = "0.8.27"
 
 [features]
 quiet = []

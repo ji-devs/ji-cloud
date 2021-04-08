@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type mode = 'default' | 'active' | 'success';
+export type mode = 'default' | 'active' | 'success' | 'done';
 
 @customElement("audio-input")
 export class _ extends LitElement {
@@ -36,11 +36,22 @@ export class _ extends LitElement {
                     background-color: var(--green-2);
                     border-style: solid;
                 }
+                :host([mode=done]) .main-content {
+                    border-color: var(--green-4);
+                    border-style: solid;
+                }
+                ::slotted(progress-bar[slot=main-content]) {
+                    width: 272px;
+                }
+                ::slotted(input-file[slot=main-content]) {
+                    height: 100%;
+                    width: 100%;
+                }
                 .actions {
                     padding: 0 26px;
                     display: grid;
                     align-items: center;
-                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-columns: 1fr 2fr 1fr;
                 }
                 ::slotted([slot=main-action]) {
                     grid-column: 2;

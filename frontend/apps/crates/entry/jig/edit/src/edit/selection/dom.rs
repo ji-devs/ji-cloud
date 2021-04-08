@@ -21,7 +21,7 @@ pub struct SelectionDom {
 impl SelectionDom {
     pub fn render() -> Dom {
         html!("jig-edit-selection", {
-            .property("slot", "selection")
+            .property("slot", "main")
             .children(
                 MODULE_KINDS
                     .iter()

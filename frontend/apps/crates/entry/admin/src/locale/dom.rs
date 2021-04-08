@@ -28,8 +28,8 @@ impl LocalePage {
                             .property("visible", true)
                         }))
                     } else {
-                        let thingy: Rc<State> = state.lock_ref().clone().unwrap();
-                        Some(LocaleOuterDom::render(thingy))
+                        let state: Rc<State> = state.lock_ref().clone().unwrap();
+                        Some(LocaleOuterDom::render(state))
                     }
                 }))
             })

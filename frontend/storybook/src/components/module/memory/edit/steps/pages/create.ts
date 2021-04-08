@@ -20,8 +20,8 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    mode: "duplicate",
-    nCards: 6,
+    mode: "translate",
+    nCards: 0,
     step: 1,
     theme: "chalkboard",
 }
@@ -79,7 +79,7 @@ Create.argTypes = {
     mode: {
         control: {
             type: 'inline-radio',
-            options: ["duplicate", "words-images", "begins", "lettering"]
+            options: ["duplicate", "words-images", "translate", "begins", "lettering"]
         }
     },
     theme: ThemeControl

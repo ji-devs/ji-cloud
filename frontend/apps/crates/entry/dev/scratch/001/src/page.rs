@@ -13,16 +13,21 @@ use dominator_helpers::{elem, with_data_id};
 use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
-use crate::templates;
-use components::module::page::*;
+use components::{
+    image_search::{self, state::ImageSearchOptions},
+    audio_input::{self, options::AudioInputOptions, state::State as AudioState},
+    color_select::{self, state::ColorSelectConfig}
+};
+use shared::domain::audio::AudioId;
 use std::pin::Pin;
 use web_sys::{HtmlElement, Element, HtmlInputElement, HtmlTemplateElement, DocumentFragment, Document};
+use utils::{prelude::*, themes::ThemeId};
 
 pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_steps() 
+        render_color_select()
     }
 }
 
@@ -64,8 +69,50 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
                 false
             }
         }))
-        .event(clone!(step, state => move |evt:events::Click| {
+        .event(clone!(step, state => move |evt: events::Click| {
             state.current_step.set(step);
+        }))
+    })
+}
+
+pub fn render_image_search() -> Dom {
+    let opts = ImageSearchOptions {
+            background_only: Some(false),
+            upload: Some(()),
+            filters: Some(()),
+            value: Mutable::new(None),
+    };
+
+    html!("div", {
+        .style("padding", "30px")
+        .child(image_search::dom::render(opts, None))
+    })
+}
+
+
+pub fn render_audio_input() -> Dom {
+    let opts:AudioInputOptions<_> = AudioInputOptions {
+        //ummm... this is a lie... I guess... but w/e
+        //in the usual case of supplying a Some the real type is inferred
+        on_change: None as Option<Box<dyn Fn(Option<AudioId>)>>,
+        audio_id: None,
+    };
+
+    let state = Rc::new(AudioState::new(opts));
+
+    html!("div", {
+        .style("padding", "30px")
+        .child(audio_input::dom::render(state, None))
+    })
+}
+
+
+pub fn render_color_select() -> Dom {
+    html!("div", {
+        .style("padding", "30px")
+        .child(color_select::dom::render(ColorSelectConfig {
+            theme: Some(ThemeId::HappyBrush),
+            // theme: None,
         }))
     })
 }

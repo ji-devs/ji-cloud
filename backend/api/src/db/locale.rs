@@ -33,13 +33,13 @@ pub async fn update_entry(
 update locale_entry
 set
     bundle_id = coalesce(bundle_id, $2),
-    item_kind_id = coalesce(item_kind_id, $3),
-    english = coalesce(english, $4),
-    hebrew = coalesce(hebrew, $5),
-    status = coalesce(status, $6),
-    in_app = coalesce(in_app, $7),
-    in_element = coalesce(in_element, $8),
-    in_mock = coalesce(in_mock, $9),
+    item_kind_id = coalesce($3, item_kind_id),
+    english = coalesce($4, english),
+    hebrew = coalesce($5, hebrew),
+    status = coalesce($6, status),
+    in_app = coalesce($7, in_app),
+    in_element = coalesce($8, in_element),
+    in_mock = coalesce($9, in_mock),
     section = case when $10 then $11 else section end,
     zeplin_reference = case when $12 then $13 else zeplin_reference end,
     comments = case when $14 then $15 else comments end

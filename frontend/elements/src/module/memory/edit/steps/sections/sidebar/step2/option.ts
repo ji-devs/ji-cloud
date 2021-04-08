@@ -54,10 +54,14 @@ export class _ extends LitElement {
             box-sizing: border-box;
           width: 112px;
           height: 112px;
-          border-radius: 16px;
           box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.06);
-          border: solid 3px #fa632f;
-          background-color: var(--white);
+          
+          }
+
+          .left {
+            border: solid 3px #fa632f;
+            border-radius: 16px;
+            background-color: var(--white);
           }
 
           .label {
@@ -75,7 +79,7 @@ export class _ extends LitElement {
         img-ui {
           width: 109px;
           height: 109px;
-            object-fit: fill;
+            object-fit: cover;
         }
 
 

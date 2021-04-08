@@ -23,25 +23,41 @@ pub async fn update(
     kind: Option<ModuleKind>,
     body: Option<&serde_json::Value>,
 ) -> anyhow::Result<bool> {
+    let mut txn = pool.begin().await?;
+
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from module where id = $1 for update) as "exists!""#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+
+    if !exists {
+        return Ok(false);
+    }
+
     sqlx::query!(
         r#"
 update module
 set contents = coalesce($2, contents),
-    kind = coalesce($3, kind)
+    kind = coalesce($3, kind),
+    updated_at = now()
 where id = $1 and (
     ($2::jsonb is not null and $2 is distinct from contents) or
     ($3::int2 is not null and $3 is distinct from kind)
 )
-returning true as "exists!"
 "#,
         id.0,
         body,
         kind.map(|it| it as i16),
     )
-    .fetch_optional(pool)
-    .await
-    .map(|it| it.map_or(false, |it| it.exists))
-    .map_err(Into::into)
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(true)
 }
 
 pub async fn get(pool: &PgPool, id: ModuleId) -> anyhow::Result<Option<Module>> {

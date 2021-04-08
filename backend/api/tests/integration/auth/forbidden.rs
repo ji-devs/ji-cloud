@@ -34,9 +34,9 @@ async fn forbidden(
 
     let body: ApiError<EmptyError> = resp.json().await?;
 
-    assert_eq!(body.code, StatusCode::FORBIDDEN);
-
     app.stop(false).await;
+
+    assert_eq!(body.code, StatusCode::FORBIDDEN);
 
     Ok(())
 }
@@ -122,6 +122,15 @@ async fn jig_patch() -> anyhow::Result<()> {
     .await
 }
 
+#[actix_rt::test]
+async fn jig_clone() -> anyhow::Result<()> {
+    forbidden(
+        "v1/jig/00000000-0000-0000-0000-000000000000/clone",
+        None,
+        Method::POST,
+    )
+    .await
+}
 #[actix_rt::test]
 async fn jig_delete() -> anyhow::Result<()> {
     forbidden(

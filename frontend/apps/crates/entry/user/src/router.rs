@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal}
 };
 use dominator::{Dom, html};
-use shared::domain::session::{CreateSessionOAuthResponse, OAuthUrlKind};
+use shared::domain::session::{CreateSessionResponse, OAuthUrlKind};
 use crate::{
     register::dom::RegisterPage,
     register::pages::complete::dom::CompletePage as RegisterCompletePage,

@@ -22,8 +22,7 @@ export class _ extends LitElement {
               letter-spacing: -0.32px;
               text-align: left;
               color: var(--dark-blue-4);
-              margin-bottom: 56px;
-        }
+          }
     `];
   }
 
@@ -39,7 +38,8 @@ export class _ extends LitElement {
                       <slot name="controller"></slot>
                       <img-ui path="module/_common/header/jiggling-gear.png"></img-ui>
                   </div>
-              <div class="title">${title}</label>
+                  <div class="title">${title}</div>
+                  <slot></slot>
           </section>
       `
   }

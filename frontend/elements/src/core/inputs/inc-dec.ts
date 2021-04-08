@@ -1,6 +1,4 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import "@elements/core/buttons/button-collection/button-collection";
-import "@elements/core/buttons/button-collection/button-collection-item";
 
 
 @customElement("input-inc-dec")
@@ -8,6 +6,45 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: flex;
+                    border: solid 1px var(--light-blue-5);
+                    border-radius: 14px;
+                    justify-content: space-evenly;
+                    padding: 14px 24px;
+                    column-gap: 24px;
+                }
+                button {
+                    padding: 0px;
+                    background-color: transparent;
+                    border: 0px;
+                    font-size: 26px;
+                    font-weight: 100;
+                    line-height: 1em;
+                    height: 36px;
+                    width: 36px;
+                    color: var(--light-blue-5);
+                    cursor: pointer;
+                }
+                input {
+                    -moz-appearance: textfield;
+                    border: 0;
+                    padding: 0;
+                    text-align: center;
+                    font-family: Poppins;
+                    font-size: 18px;
+                    font-weight: normal;
+                    font-stretch: normal;
+                    font-style: normal;
+                    width: 20px;
+                    flex-grow: 1;
+                }
+                input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+                    display: none;
+                }
+                input:focus {
+                    outline: 0;
+                }
             `,
         ];
     }
@@ -41,13 +78,19 @@ export class _ extends LitElement {
         }
     }
 
+    private onInput = (e: InputEvent) => {
+        let newValue = (e.target as HTMLInputElement).valueAsNumber;
+        if(!Number.isNaN(newValue)) {
+            this.value = newValue;
+            this.changed();
+        }
+    }
+
     render() {
         return html`
-            <button-collection>
-                <button-collection-item @click="${this.increment}">+</button-collection-item>
-                <button-collection-item>${ this.value }</button-collection-item>
-                <button-collection-item @click="${this.decrement}">-</button-collection-item>
-            </button-collection>
+            <button @click="${this.decrement}">-</button>
+            <input type="number" @input="${this.onInput}" value="${ this.value }">
+            <button @click="${this.increment}">+</button>
         `;
     }
 }

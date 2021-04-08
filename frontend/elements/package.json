@@ -9,7 +9,7 @@
     "build:release": "npm run build:tsc && rollup --config rollup.release.js",
     "build:sandbox": "npm run build:tsc && rollup --config rollup.sandbox.js",
     "build:local": "npm run build:tsc && rollup --config rollup.local.js",
-    "build:tsc": "npm run clean && tsc",
+    "build:tsc": "tsc",
     "watch": "npm-run-all -p watch:tsc watch:rollup",
     "watch:tsc": "tsc --watch",
     "watch:jest": "jest --watchAll",

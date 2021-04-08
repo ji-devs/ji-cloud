@@ -9,6 +9,7 @@ expression: body
     "name": "test",
     "description": "testest",
     "is_premium": false,
+    "kind": "Canvas",
     "publish_at": null,
     "styles": [
       "6389eaa0-de76-11ea-b7ab-0399bcf84df2",

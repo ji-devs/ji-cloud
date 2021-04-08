@@ -28,6 +28,7 @@ impl MenuDom {
                 .property("slot", "lines")
                 .property("icon", "edit")
                 .event(clone!(state => move |evt:events::Click| {
+                    actions::edit(state.module.clone());
                     state.close_menu();
                 }))
             })

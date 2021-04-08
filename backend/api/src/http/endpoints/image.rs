@@ -347,6 +347,7 @@ async fn browse(
     let images: Vec<_> = db::image::list(
         db.as_ref(),
         query.is_published,
+        query.kind,
         query.page.unwrap_or(0) as i32,
     )
     .err_into::<error::Server>()
@@ -455,14 +456,14 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
             .route(image::Upload::METHOD.route().to(upload)),
     )
+    .route(
+        image::Browse::PATH,
+        image::Browse::METHOD.route().to(browse),
+    )
     .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
         image::Search::PATH,
         image::Search::METHOD.route().to(search),
-    )
-    .route(
-        image::Browse::PATH,
-        image::Browse::METHOD.route().to(browse),
     )
     .route(
         image::UpdateMetadata::PATH,

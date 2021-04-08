@@ -74,6 +74,14 @@ fn set_attributes_for_faceting_v3<'a>(
     client: &'a super::Inner,
     index: &'a str,
 ) -> BoxFuture<'a, anyhow::Result<()>> {
+    // superceeded by `set_attributes_for_faceting_v4`
+    empty(client, index)
+}
+
+fn set_attributes_for_faceting_v4<'a>(
+    client: &'a super::Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
     let settings = SetSettings {
         searchable_attributes: None,
         attributes_for_faceting: Some(vec![
@@ -82,6 +90,7 @@ fn set_attributes_for_faceting_v3<'a>(
             FacetAttribute::filter_only(Attribute("affiliations".to_owned())),
             FacetAttribute::filter_only(Attribute("categories".to_owned())),
             FacetAttribute::filter_only(Attribute("media_kind".to_owned())),
+            FacetAttribute::filter_only(Attribute("media_subkind".to_owned())),
         ]),
     };
 
@@ -109,6 +118,7 @@ pub const INDEXING_MIGRATIONS: &[(ResyncKind, MigrateFunction)] = &[
     (ResyncKind::Complete, empty),
     (ResyncKind::Complete, set_attributes_for_faceting_v2),
     (ResyncKind::Complete, set_attributes_for_faceting_v3),
+    (ResyncKind::Complete, set_attributes_for_faceting_v4),
 ];
 
 pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;

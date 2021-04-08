@@ -9,6 +9,8 @@ pub enum Fixture {
     Locale,
     Jig,
     Animation,
+    Modules,
+    UserColors,
 }
 
 impl Fixture {
@@ -16,15 +18,15 @@ impl Fixture {
         match self {
             Self::User => include_str!("../../fixtures/1_user.sql"),
             Self::MetaKinds => include_str!("../../fixtures/2_meta_kinds.sql"),
-            Self::CategoryOrdering => {
-                include_str!("../../fixtures/3_category_ordering.sql")
-            }
+            Self::CategoryOrdering => include_str!("../../fixtures/3_category_ordering.sql"),
             Self::CategoryNesting => include_str!("../../fixtures/4_category_nesting.sql"),
             Self::Image => include_str!("../../fixtures/5_image.sql"),
             Self::UserNoPerms => include_str!("../../fixtures/6_user_no_perms.sql"),
             Self::Locale => include_str!("../../fixtures/7_locale.sql"),
             Self::Jig => include_str!("../../fixtures/8_jig.sql"),
             Self::Animation => include_str!("../../fixtures/9_animation.sql"),
+            Self::Modules => include_str!("../../fixtures/10_modules.sql"),
+            Self::UserColors => include_str!("../../fixtures/11_user_color.sql"),
         }
     }
 }

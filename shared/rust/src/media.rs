@@ -46,7 +46,7 @@ pub enum PngImageFile {
 }
 
 /// Media Libraries
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 #[repr(i16)]
@@ -62,8 +62,9 @@ pub enum MediaLibrary {
 }
 
 impl MediaLibrary {
+    /// returns `self` in a string representation.
     #[must_use]
-    const fn to_str(self) -> &'static str {
+    pub const fn to_str(self) -> &'static str {
         match self {
             Self::Global => "global",
             Self::User => "user",

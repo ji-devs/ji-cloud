@@ -93,26 +93,3 @@ impl fmt::Debug for CreateSessionOAuthRequest {
         }
     }
 }
-
-/// Response for successfully creating a session / signing in, via oauth.
-/// Note: This response *also* includes a cookie.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[deprecated(note = "use CreateSessionResponse")]
-#[non_exhaustive]
-pub enum CreateSessionOAuthResponse {
-    /// Successfully logged in.
-    #[serde(rename = "login")]
-    Login {
-        /// A transparent CSRF token to use for this Session.
-        csrf: String,
-    },
-
-    /// Failed to log in; a token for creating a user has been returned.
-    #[serde(rename = "register")]
-    CreateUser {
-        /// A transparent CSRF token to use for this Session.
-        csrf: String,
-    },
-}

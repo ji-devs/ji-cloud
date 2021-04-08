@@ -12,6 +12,8 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 
+export type CLICK_MODE = "single" | "double";
+
 @customElement("input-text-content")
 export class _ extends LitElement {
   static get styles() {
@@ -54,19 +56,29 @@ export class _ extends LitElement {
   @property({ type: Boolean })
   editing: boolean = false;
 
+  @property()
+  clickMode: CLICK_MODE = "double";
+
   onKey(evt: KeyboardEvent) {
     let { key } = evt;
     key = key.toLowerCase();
     if (key === "escape") {
         const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
         input.value = this.value;
-      this.editing = false;
+        this.editing = false;
+        this.dispatchEvent(new Event("reset"));
     } else if(key === "enter") {
         this.dispatchChange();
     }
   }
 
   onInput() {
+      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+        this.dispatchEvent(
+            new CustomEvent("custom-input", {
+                detail: { value: input.value},
+            })
+        );
       this.resizeInput();
   }
 
@@ -140,11 +152,22 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { value, editing } = this;
+    const { value, editing, clickMode} = this;
 
     return html`
         <input class="${classMap({visible: editing})}" id="input" type="text" @input="${this.onInput}" @keyup="${this.onKey}" value="${value}"></input>
-        <span class="${classMap({visible: !editing})}" @dblclick=${() => this.editing = true}>${value}</span>
+        <span class="${classMap({visible: !editing})}"
+              @dblclick=${() => {
+                if(clickMode === "double") {
+                    this.editing = true
+                }
+              }}
+              @click=${() => {
+                if(clickMode === "single") {
+                    this.editing = true
+                }
+              }}
+              >${value}</span>
         <span id="measure">${value}</span>
         `;
   }

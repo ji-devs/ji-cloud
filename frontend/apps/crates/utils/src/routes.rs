@@ -4,14 +4,14 @@ use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
     jig::{JigId, ModuleId, ModuleKind}, 
     search::CreateSearchKeyResponse, 
-    session::CreateSessionOAuthResponse
 };
 use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
 use std::str::FromStr;
 use uuid::Uuid;
+use super::unwrap::*;
 
-pub type Id = String;
+pub type StringId = String;
 
 #[derive(Debug, Clone)]
 pub enum Route {
@@ -55,7 +55,7 @@ pub enum AdminRoute {
 
 #[derive(Debug, Clone)]
 pub enum LegacyRoute {
-    Play(Id, Option<Id>) 
+    Play(StringId, Option<StringId>) 
 }
 
 #[derive(Debug, Clone)]
@@ -73,14 +73,14 @@ pub enum JigPlayMode {
 
 #[derive(Debug, Clone)]
 pub enum ModuleRoute {
-    Edit(ModuleKind, Id, Id),
-    Play(ModuleKind, Id, Id),
+    Edit(ModuleKind, JigId, ModuleId),
+    Play(ModuleKind, JigId, ModuleId),
 }
 
 #[derive(Debug, Clone)]
 pub enum DevRoute {
-    Showcase(Id, String),
-    Scratch(Id, String),
+    Showcase(StringId, String),
+    Scratch(StringId, String),
 }
 
 //Just for serializing across local routes
@@ -97,13 +97,13 @@ pub type OauthCode = String;
 
 impl Route {
     pub fn redirect(self) {
-        let location = web_sys::window().unwrap_throw().location();
+        let location = web_sys::window().unwrap_ji().location();
         let s:String = self.into();
-        location.set_href(&s).unwrap_throw();
+        location.set_href(&s).unwrap_ji();
     }
 
     pub fn replace_state(self) {
-        let history = web_sys::window().unwrap_throw().history().unwrap_throw();
+        let history = web_sys::window().unwrap_ji().history().unwrap_ji();
         let url:String = self.into();
         history.replace_state_with_url(&JsValue::NULL, "", Some(&url));
     }
@@ -113,7 +113,7 @@ impl Route {
 	}
 	
     pub fn from_url(url:&str) -> Self {
-        let url = Url::new(&url).unwrap_throw();
+        let url = Url::new(&url).unwrap_ji();
         let paths = url.pathname();
         let paths = paths.split("/").into_iter().skip(1).collect::<Vec<_>>();
         let paths = paths.as_slice();
@@ -157,7 +157,7 @@ impl Route {
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
             ["admin", "image-search"] => {
                 if let Some(search) = json_query {
-                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_throw();
+                    let search:ImageSearchQuery = serde_json::from_str(&search).unwrap_ji();
                     Self::Admin(AdminRoute::ImageSearch(Some(search)))
                 } else {
                     Self::Admin(AdminRoute::ImageSearch(None))
@@ -165,36 +165,62 @@ impl Route {
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
             ["admin", "image-meta", id, flag] => {
-                let id = ImageId(Uuid::from_str(id).unwrap_throw());
-                Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_throw()))
+                let id = ImageId(Uuid::from_str(id).unwrap_ji());
+                Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
             },
             ["admin"] => Self::Admin(AdminRoute::Landing),
-            ["jig", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
                     None
             )),
             ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
-                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None
             )),
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
-                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
             ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
-                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     None
             )),
             ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(
-                    JigId(Uuid::from_str(jig_id).unwrap_throw()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_throw()))
+                    JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
                     
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
-            ["module", kind, "edit", jig_id, module_id] => Self::Module(ModuleRoute::Edit(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
-            ["module", kind, "play", jig_id, module_id] => Self::Module(ModuleRoute::Play(ModuleKind::from_str(kind).expect_throw("unknown module kind!"), jig_id.to_string(), module_id.to_string())),
+            ["module", kind, "edit", "debug"] => {
+                Self::Module(ModuleRoute::Edit(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_u128(0)),
+                        ModuleId(Uuid::from_u128(0)),
+                ))
+            },
+            ["module", kind, "edit", jig_id, module_id] => {
+                Self::Module(ModuleRoute::Edit(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                        ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            },
+            ["module", kind, "play", "debug"] => {
+                Self::Module(ModuleRoute::Play(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_u128(0)),
+                        ModuleId(Uuid::from_u128(0)),
+                ))
+            },
+            ["module", kind, "play", jig_id, module_id] => {
+                Self::Module(ModuleRoute::Play(
+                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                        ModuleId(Uuid::from_str(module_id).unwrap_ji()),
+                ))
+            },
             ["no-auth"] => Self::NoAuth,
 
             _ => Self::NotFound
@@ -240,9 +266,9 @@ impl From<&Route> for String {
                         match search {
                             None => "/admin/image-search".to_string(),
                             Some(search) => {
-                                let data = serde_json::to_string(&search).unwrap_throw();
+                                let data = serde_json::to_string(&search).unwrap_ji();
                                 let query = JsonQuery { data };
-                                let query = serde_qs::to_string(&query).unwrap_throw();
+                                let query = serde_qs::to_string(&query).unwrap_ji();
                                 format!("/admin/image-search?{}", query)
                             }
                         }
@@ -253,7 +279,7 @@ impl From<&Route> for String {
             },
             Route::Jig(route) => {
                 match route {
-                    JigRoute::Gallery => "/jig/gallery".to_string(),
+                    JigRoute::Gallery => "/jig/edit/gallery".to_string(),
                     JigRoute::Edit(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
                             format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
@@ -283,8 +309,8 @@ impl From<&Route> for String {
             },
             Route::Module(route) => {
                 match route {
-                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", kind.as_str(), jig_id, module_id),
-                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", kind.as_str(), jig_id, module_id),
+                    ModuleRoute::Edit(kind, jig_id, module_id) => format!("/module/{}/edit/{}/{}", kind.as_str(), jig_id.0.to_string(), module_id.0.to_string()),
+                    ModuleRoute::Play(kind, jig_id, module_id) => format!("/module/{}/play/{}/{}", kind.as_str(), jig_id.0.to_string(), module_id.0.to_string()),
                 }
             },
             Route::NotFound => "/404".to_string(),

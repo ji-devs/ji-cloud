@@ -6,7 +6,6 @@ import "@elements/core/inputs/text-pencil";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/text";
 
-const STR_MY_JIGS = "See my JIGs";
 
 @customElement("jig-edit-sidebar-header")
 export class _ extends LitElement {
@@ -20,7 +19,7 @@ export class _ extends LitElement {
           gap: 0px 0px;
           grid-template-areas:
             ". close"
-            "logo link"
+            "logo gallery"
             "input input";
       }
 
@@ -33,8 +32,8 @@ export class _ extends LitElement {
         grid-area: logo;
       }
 
-      .link {
-        grid-area: link;
+      .gallery {
+        grid-area: gallery;
         justify-self: end;
         align-self: end;
       }
@@ -51,10 +50,10 @@ export class _ extends LitElement {
   render() {
 
     return html`
-        <button-icon class="close" icon="x"></button-icon>
+        <div class="close"><slot name="close"></slot></div>
         <img-ui class="logo" path="entry/jig/logo-jigzi.svg"></img-ui>
-        <button-text class="link" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
-        <input-text-pencil class="input"></input-text-pencil>
+        <div class="gallery"><slot name="gallery"></slot></div>
+        <div class="input"><slot name="input"></slot></div>
     `;
   }
 }

@@ -1,7 +1,10 @@
 use crate::{
     api::Method,
     domain::{
-        jig::{JigCreateRequest, JigId, JigResponse, JigUpdateRequest},
+        jig::{
+            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
+            JigUpdateRequest,
+        },
         CreateResponse,
     },
     error::{EmptyError, MetadataNotFound},
@@ -19,6 +22,16 @@ impl ApiEndpoint for Get {
     const METHOD: Method = Method::Get;
 }
 
+/// Browse jigs.
+pub struct Browse;
+impl ApiEndpoint for Browse {
+    type Req = JigBrowseQuery;
+    type Res = JigBrowseResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/browse";
+    const METHOD: Method = Method::Get;
+}
+
 /// Create a JIG.
 pub struct Create;
 impl ApiEndpoint for Create {
@@ -26,6 +39,16 @@ impl ApiEndpoint for Create {
     type Res = CreateResponse<JigId>;
     type Err = MetadataNotFound;
     const PATH: &'static str = "/v1/jig";
+    const METHOD: Method = Method::Post;
+}
+
+/// Clone a JIG.
+pub struct Clone;
+impl ApiEndpoint for Clone {
+    type Req = ();
+    type Res = CreateResponse<JigId>;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/{id}/clone";
     const METHOD: Method = Method::Post;
 }
 

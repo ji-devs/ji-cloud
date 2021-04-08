@@ -1,4 +1,5 @@
 import "@elements/module/_common/widgets/color-select/color-select-item";
+import { argsToAttrs } from "@utils/attributes";
 
 export default {
     title: "Module / _common / Widgets / Sidebar / Color Select"
@@ -7,17 +8,23 @@ export default {
 
 interface Args {
     color: string,
+    deletable: boolean,
+    selected: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
     color: "pink",
+    deletable: true,
+    selected: false,
 }
 
 export const colorSelectItem = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <color-select-item color="${props.color}"></color-select-item>
+        <color-select-item ${argsToAttrs(props)}>${
+            props.deletable && `<button-icon slot="delete-button" icon="circle-x-blue"></button-icon>`
+        }</color-select-item>
     `;
 }
 

@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    pages::{module_grid, index, renderer_demo}
+    pages::{index}
 };
 
 use utils::routes::{Route, DevRoute};
@@ -13,8 +13,8 @@ pub struct Router {
 
 enum PageKind {
     Index(Rc<index::Page>),
-    Grid(module_grid::dom::Page), //?page=grid
-    Renderer(renderer_demo::page::Page), //?page=renderer
+    //Grid(module_grid::dom::Page), //?page=grid
+    //Renderer(renderer_demo::page::Page), //?page=renderer
 }
 
 impl Router {
@@ -32,9 +32,10 @@ impl Router {
                     *_self.page.borrow_mut() =
                         page_str(route)
                             .and_then(|page| match page.as_ref() {
-                                "grid" => Some(PageKind::Grid(module_grid::dom::render())),
-                                "renderer" => Some(PageKind::Renderer(renderer_demo::page::Page::render())),
-                                _ => Some(PageKind::Index(index::Page::render()))
+                                //DEPRECATED (fix module page stuff): 
+                                //"grid" => Some(PageKind::Grid(module_grid::dom::render())),
+                                //"renderer" => Some(PageKind::Renderer(renderer_demo::page::Page::render())),
+                                "" | _ => Some(PageKind::Index(index::Page::render()))
                             });
 
                     async {}

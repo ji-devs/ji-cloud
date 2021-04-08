@@ -30,7 +30,7 @@ export const Landing = (props?:Partial<Args>) => {
             slot: "sidebar"
         })}
         ${ModuleSelection({
-            slot: "selection"
+            slot: "main"
         })}
         </jig-edit-page>
     `;

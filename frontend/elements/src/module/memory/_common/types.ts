@@ -1,1 +1,1 @@
-export type MODE = "duplicate" | "words-images" | "begins" | "lettering";
+export type MODE = "duplicate" | "words-images" | "translate" | "begins" | "lettering";

@@ -7,6 +7,7 @@ on:
     - 'config/**'
     - 'shared/**'
     - 'frontend/apps/crates/core/**'
+    - 'frontend/apps/crates/entry/module/memory/_common/**'
     - 'frontend/apps/crates/entry/module/memory/play/**'
     - 'frontend/apps/config/module/memory/**'
 

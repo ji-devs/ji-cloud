@@ -1,4 +1,6 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
+import nodeResolve from "@rollup/plugin-node-resolve";
+
 const {URL_FRONTEND_RELEASE} = require("../../config/typescript");
 
 let {APP_NAME} = process.env;
@@ -23,5 +25,6 @@ export default {
 			cargoArgs: ["--features", "release"],
             debug: false,
         }),
+		nodeResolve(),
     ],
 };

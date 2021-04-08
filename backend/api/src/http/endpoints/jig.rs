@@ -1,3 +1,4 @@
+use actix_web::web::Query;
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
@@ -7,15 +8,14 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
-        jig::{JigCreateRequest, JigId, JigResponse},
+        jig::{JigBrowseResponse, JigCreateRequest, JigId, JigResponse, UserOrMe},
         CreateResponse,
     },
 };
 use sqlx::PgPool;
 
 use crate::{
-    db,
-    error::{self, UpdateWithMetadata},
+    db, error,
     extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
 };
 
@@ -43,6 +43,19 @@ async fn create(
     Ok(CreatedJson(CreateResponse { id }))
 }
 
+/// Clone a jig
+#[api_v2_operation]
+async fn clone(
+    db: Data<PgPool>,
+    auth: TokenUserWithScope<ScopeManageJig>,
+    parent: web::Path<JigId>,
+) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::NotFound> {
+    match db::jig::clone(&*db, parent.into_inner(), auth.claims.user_id).await? {
+        Some(id) => Ok(CreatedJson(CreateResponse { id })),
+        None => Err(error::NotFound::ResourceNotFound),
+    }
+}
+
 /// Delete a jig.
 #[api_v2_operation]
 async fn delete(
@@ -62,9 +75,10 @@ async fn update(
     _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, UpdateWithMetadata> {
+) -> Result<NoContent, error::JigUpdate> {
     let req = req.map_or_else(Default::default, Json::into_inner);
-    let exists = db::jig::update(
+
+    db::jig::update(
         &*db,
         path.into_inner(),
         req.display_name.as_deref(),
@@ -73,12 +87,7 @@ async fn update(
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
-    .await
-    .map_err(db::meta::handle_metadata_err)?;
-
-    if !exists {
-        return Err(UpdateWithMetadata::ResourceNotFound);
-    }
+    .await?;
 
     Ok(NoContent)
 }
@@ -97,8 +106,42 @@ async fn get(
     Ok(Json(JigResponse { jig }))
 }
 
+#[api_v2_operation]
+async fn browse(
+    db: Data<PgPool>,
+    claims: TokenUserWithScope<ScopeManageJig>,
+    query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Server> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let author_id = query.author_id.map(|it| match it {
+        UserOrMe::Me => claims.claims.user_id,
+        UserOrMe::User(id) => id,
+    });
+
+    let jigs = db::jig::list(
+        db.as_ref(),
+        query.is_published,
+        author_id,
+        query.page.unwrap_or(0) as i32,
+    )
+    .await?;
+
+    let total_count = db::jig::filtered_count(db.as_ref(), query.is_published, author_id).await?;
+
+    let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
+
+    Ok(Json(JigBrowseResponse {
+        jigs,
+        pages,
+        total_image_count: total_count,
+    }))
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
-    cfg.route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
+    cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
+        .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
+        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete));

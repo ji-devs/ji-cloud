@@ -9,12 +9,12 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
         section, .index{
-          width: 350rem; 
+          width: 350px; 
         }
 
         section {
           border-radius: 24rem;
-          height: 236rem;
+          height: 236px;
         }
 
         section.hover {
@@ -33,17 +33,17 @@ export class _ extends LitElement {
         }
         slot[name="close"]::slotted(*) {
             position: absolute;
-            top: -16rem;
-            left: 333rem;
+            top: -16px;
+            left: 333px;
             display: inline-block;
-            width: 32rem;
-            height: 32rem;
+            width: 32px;
+            height: 32px;
         }
         
         .cards {
               position: relative;
-              top: 24rem;
-              left: 24rem;
+              top: 24px;
+              left: 24px;
           }
           .left {
               position: absolute;
@@ -53,22 +53,26 @@ export class _ extends LitElement {
 
           .right {
               position: absolute;
-              top: 16rem;
-              left: 136rem;
+              top: 16px;
+              left: 136px;
           }
           .index {
-                font-size: 14rem;
+                font-size: 14px;
               text-align: center;
           }
     `];
   }
 
   onEnter() {
-    this.hover = true;
+      if(this.hoverable) {
+          this.hover = true;
+      }
   }
 
   onLeave() {
-    this.hover = false;
+      if(this.hoverable) {
+          this.hover = false;
+      }
   }
 
   @property({type: Boolean})
@@ -76,6 +80,10 @@ export class _ extends LitElement {
 
   @property({type: Number})
   index:number = 0;
+
+  @property({type: Boolean})
+  hoverable:boolean = false;
+
   render() {
       const {hover, index} = this;
 

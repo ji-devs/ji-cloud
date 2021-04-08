@@ -22,8 +22,8 @@ use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
         user::{
-            ChangePassword, Create, Delete, Profile, PutProfile, ResetPassword, UserLookup,
-            VerifyEmail,
+            ChangePassword, Create, CreateColor, Delete, DeleteColor, GetColors, Profile,
+            PutProfile, ResetPassword, UpdateColor, UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
@@ -34,6 +34,8 @@ use shared::{
 };
 use sqlx::{Acquire, PgConnection, PgPool};
 use uuid::Uuid;
+
+mod color;
 
 async fn send_verification_email(
     txn: &mut PgConnection,
@@ -513,5 +515,18 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         )
         .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
         .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
-        .route(Delete::PATH, Delete::METHOD.route().to(delete));
+        .route(Delete::PATH, Delete::METHOD.route().to(delete))
+        .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
+        .route(
+            UpdateColor::PATH,
+            UpdateColor::METHOD.route().to(color::update),
+        )
+        .route(
+            CreateColor::PATH,
+            CreateColor::METHOD.route().to(color::create),
+        )
+        .route(
+            DeleteColor::PATH,
+            DeleteColor::METHOD.route().to(color::delete),
+        );
 }

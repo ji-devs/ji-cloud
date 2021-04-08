@@ -28,13 +28,8 @@ export class _ extends LitElement {
               overflow-y: auto;
           }
 
-          .content, .btn {
-              width: 492px;
-          }
-          .btn {
-              display: flex;
-              justify-content: flex-end;
-              padding-bottom: 40px;
+          .content {
+              width: 100%;
           }
     `];
   }
@@ -47,9 +42,6 @@ export class _ extends LitElement {
           <article>
               <div class="content">
                   <slot name="content"></slot>
-              </div>
-              <div class="btn">
-                  <slot name="btn"></slot>
               </div>
           </article>
 

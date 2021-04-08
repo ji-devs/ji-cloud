@@ -12,11 +12,12 @@ export class _ extends LitElement {
               justify-content: center;
               width: 100%;
           }
-        input {
+          input {
+              height: 40px;
             width: 460px; /*arbitrary amount to not go into rounded corners*/
           outline: none;
           border: none;
-          font-size: 16px;
+          font-size: 24px;
           text-align: center; 
         }
 
@@ -27,6 +28,22 @@ export class _ extends LitElement {
     `];
   }
 
+  onInput(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-input", {
+      detail: { value },
+    }))
+  }
+  onChange(evt:InputEvent) {
+    const {value} = (evt.target as any);
+    this.value = value;
+
+    this.dispatchEvent(new CustomEvent("custom-change", {
+      detail: { value },
+    }))
+  }
   @property()
   value:string = "";
 
@@ -37,7 +54,8 @@ export class _ extends LitElement {
       const {value} = this;
 
       return html`<div class="row">
-          <input type="text" value=${value}></input>
+          <input type="text" value=${value} @input="${this.onInput}" @change="${this.onChange}" >
+          </input>
       </div>`
   }
 }
