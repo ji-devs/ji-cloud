@@ -9,6 +9,16 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: inline-block;
+                    border-radius: 50%;
+                }
+                :host(:hover) {
+                    background-color: var(--light-blue-1);
+                }
+                :host([active]) {
+                    background-color: var(--main-blue);
+                }
             `,
         ];
     }
@@ -16,10 +26,14 @@ export class _ extends LitElement {
     @property()
     type: ControlType = 'h1';
 
+    @property({type: Boolean, reflect: true})
+    active = false;
+
     render() {
+        const path = `module/_common/widgets/sidebar/text-editor-controls/${ this.type }${ this.active ? '-active' : '' }.svg`;
         return html`
             <button-collection-item>
-                <img-ui path="module/_common/widgets/sidebar/text-editor-controls/${ this.type }.svg"></img-ui>
+                <img-ui path="${path}"></img-ui>
             </button-collection-item>
         `;
     }

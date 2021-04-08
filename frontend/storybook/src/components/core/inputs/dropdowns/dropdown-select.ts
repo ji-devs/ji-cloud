@@ -9,11 +9,9 @@ export default {
 
 interface Args {
     label: string,
-    error: string,
     value: string,
     placeholder: string,
     open: boolean,
-    maxChildrenHeight: number,
     //Just used for demo
     count: number,
     width: number,
@@ -21,12 +19,10 @@ interface Args {
 
 const DEFAULT_ARGS:Args = {
     label: "hello",
-    value: "world",
+    value: "",
     placeholder: "select something",
-    error: "",
     open: true,
-    count: 3,
-    maxChildrenHeight: 400,
+    count: 7,
     width: 300,
 }
 

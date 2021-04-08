@@ -2,6 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/_common/widgets/text-editor-controls/text-editor-controls";
 import "@elements/module/_common/widgets/text-editor-controls/text-editor-control";
 import "@elements/core/buttons/button-collection/button-collection";
+import "@elements/core/buttons/sidebar";
 import "@elements/core/inputs/dropdowns/dropdown-select";
 import "@elements/core/inputs/inc-dec";
 import "@elements/core/lists/li-check";
