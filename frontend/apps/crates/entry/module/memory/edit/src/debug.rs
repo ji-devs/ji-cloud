@@ -59,7 +59,7 @@ impl DebugSettings {
                     )
                 })
             ),
-            step: Some(Step::One), 
+            step: Some(Step::Four), 
             live_save: false,
             content_tab: Some(DebugContentTab::Text),
         }

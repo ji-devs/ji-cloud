@@ -33,12 +33,7 @@ impl SidebarDom {
                                     Step::One => vec![Step1Dom::render(state.clone(), !is_empty)],
                                     Step::Two => Step2Dom::render(state.clone()),
                                     Step::Three => Step3Dom::render(state.clone()),
-                                    Step::Four => panic!("NO SIDEBAR FOR STEP 4!")
-                                    /*
-                                    _ => {
-                                        vec![html!("empty-fragment")]
-                                    }
-                                    */
+                                    Step::Four => vec![html!("empty-fragment")]
                                 }
                             }))
                             .to_signal_vec()
