@@ -11,7 +11,7 @@ use futures_signals::{
     signal::{ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-
+use components::image_search::types::*;
 
 pub struct PairDom {}
 impl PairDom {
@@ -97,21 +97,46 @@ impl CardDom {
                             }))
                         })
                     },
+                    Card::Image(data) => {
+                        html!("empty-fragment", {
+                            .child_signal(data.signal_cloned().map(clone!(state => move |data| {
+                                Some(match data {
+                                    None => {
+                                        html!("img-ui", {
+                                            .property("path", "core/_common/image-empty.svg")
+                                            .event_preventable(clone!(state => move |evt:events::DragOver| {
+                                                if let Some(data_transfer) = evt.data_transfer() {
+                                                    if data_transfer.types().index_of(&JsValue::from_str(IMAGE_SEARCH_DATA_TRANSFER), 0) != -1 {
+                                                        evt.prevent_default();
+                                                    }
+                                                }
+
+                                            }))
+                                            .event(clone!(state, index => move |evt:events::Drop| {
+                                                if let Some(data_transfer) = evt.data_transfer() {
+                                                    if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() { 
+                                                        let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
+                                                        let index = index.get().unwrap_or_default();
+                                                        state.replace_card_image(index, side, (data.id, data.lib));
+                                                    }
+                                                }
+                                            }))
+                                        })
+                                    },
+                                    Some(data) => {
+                                        html!("img-ji", {
+                                            .property("size", "full")
+                                            .property("id", data.0.0.to_string())
+                                            .property("lib", data.1.to_str())
+                                        })
+                                    }
+                                })
+                            })))
+                        })
+                    },
                     _ => unimplemented!("can't render other types yet!")
                 }
             })
         })
     }
 }
-
-/*
-    const editing = ioMode === "edit"; 
-    if(contentMode === "text") {
-        const value = "hello";
-        return `<input-text-content value="${value}" ${editing}></input-text-content>`;
-    } else if(contentMode === "image") {
-        return MockJiImage({size: "thumb"})
-    } else if(contentMode === "image-empty") {
-        return `<img-ui path="core/_common/image-empty.svg"></img-ui>`
-    }
-    */

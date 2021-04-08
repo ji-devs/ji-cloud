@@ -9,7 +9,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use super::{
-    duplicate::dom::DuplicateDom,
+    words::dom::WordsDom,
     words_images::dom::WordsAndImagesDom,
 };
 
@@ -20,22 +20,19 @@ impl Step1Dom {
 
         let game_mode = state.game_mode.get().unwrap_ji();
 
-        if is_empty {
-            match game_mode {
-                GameMode::Duplicate | GameMode::Lettering => {
-                    DuplicateDom::render(state.clone())
-                },
-                GameMode::WordsAndImages => {
-                    WordsAndImagesDom::render(state.clone())
-                },
-                _ => {
-                    html!("empty-fragment")
-                }
+        match game_mode {
+            GameMode::WordsAndImages => {
+                WordsAndImagesDom::render(state.clone(), is_empty)
+            },
+            _ => {
+                let is_dual = {
+                    match game_mode {
+                        GameMode::Duplicate | GameMode::Lettering => false,
+                        _ => true
+                    }
+                };
+                WordsDom::render(state.clone(), is_empty, is_dual)
             }
-        } else {
-            html!("step1-sidebar-empty", {
-                .property("slot", "content")
-            })
         }
     }
 }

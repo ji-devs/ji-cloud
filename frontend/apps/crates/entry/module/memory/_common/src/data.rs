@@ -65,6 +65,9 @@ impl GameData {
                         Mode::Duplicate | Mode::Lettering => {
                             (Card::Text(word_1.to_string()), Card::Text(word_2.to_string()))
                         },
+                        Mode::WordsAndImages => {
+                            (Card::Text(word_1.to_string()), Card::Image(None))
+                        },
                         _ => unimplemented!("TODO")
                     }
                 })

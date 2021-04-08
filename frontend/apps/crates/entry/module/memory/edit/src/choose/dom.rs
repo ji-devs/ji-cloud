@@ -11,16 +11,21 @@ impl ChooseDom {
             .children(&mut [
                       html!("choose-card", {
                           .property("mode", "duplicate")
-                            .event(clone!(state => move |evt:events::Click| {
-                                state.change_mode(GameMode::Duplicate);
-                                //state.set_from_raw(Some(raw::GameData::new_duplicate()));
-                            }))
+                          .event(clone!(state => move |evt:events::Click| {
+                              state.change_mode(GameMode::Duplicate);
+                          }))
                       }),
                       html!("choose-card", {
                           .property("mode", "words-images")
+                          .event(clone!(state => move |evt:events::Click| {
+                              state.change_mode(GameMode::WordsAndImages);
+                          }))
                       }),
                       html!("choose-card", {
                           .property("mode", "begins")
+                          .event(clone!(state => move |evt:events::Click| {
+                              state.change_mode(GameMode::BeginsWith);
+                          }))
                       }),
                       html!("choose-card", {
                           .property("mode", "lettering")

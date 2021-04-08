@@ -56,7 +56,7 @@ impl SingleListDom {
                                     let is_placeholder = state.is_placeholder.signal()
                                         => move {
                                             if *is_placeholder {
-                                                match crate::config::get_init_word_ref(mode, index) {
+                                                match crate::config::get_single_list_init_word(index) {
                                                     Some(s) => s.to_string(),
                                                     None => "".to_string()
                                                 }

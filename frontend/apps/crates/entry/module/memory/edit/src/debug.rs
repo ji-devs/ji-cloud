@@ -51,7 +51,7 @@ impl DebugSettings {
                         {
                             if with_data {
                                 //vec![("foo", "foo")]
-                                crate::config::get_init_words(mode)
+                                crate::config::get_debug_pairs(mode)
                             } else {
                                 Vec::new()
                             }
@@ -69,10 +69,10 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
+            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), false)).unwrap_throw();
-            //SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(Some(GameMode::Lettering), false)).unwrap_throw();
-            SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_throw();
+            //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_throw();
             //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_throw();
         }
 

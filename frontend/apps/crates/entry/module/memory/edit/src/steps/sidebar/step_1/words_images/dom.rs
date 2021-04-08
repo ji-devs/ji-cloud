@@ -20,7 +20,7 @@ use crate::steps::sidebar::step_1::widgets::single_list::{
 
 pub struct WordsAndImagesDom {}
 impl WordsAndImagesDom {
-    pub fn render(app: Rc<AppState>) -> Dom {
+    pub fn render(app: Rc<AppState>, is_empty: bool) -> Dom {
         let state = Rc::new(State::new(app));
 
         html!("menu-tabs", {
@@ -52,9 +52,15 @@ impl WordsAndImagesDom {
                 }),
                 html!("module-sidebar-body", {
                     .property("slot", "body")
-                    .child_signal(state.tab.signal().map(clone!(state => move |tab| {
+                    .child_signal(state.tab.signal().map(clone!(state, is_empty => move |tab| {
                         Some(match tab {
-                            Tab::Text => TextInputDom::render(state.clone()),
+                            Tab::Text => {
+                                if is_empty {
+                                    html!("step1-sidebar-empty")
+                                } else {
+                                    TextInputDom::render(state.clone())
+                                }
+                            },
                             Tab::Images => ImageSearchDom::render(state.clone()),
                         })
                     })))

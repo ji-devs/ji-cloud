@@ -15,6 +15,7 @@ use dominator_helpers::futures::AsyncLoader;
 use shared::{
     api::endpoints::{ApiEndpoint, self, module::*}, 
     domain::{
+        image::ImageId,
         audio::AudioId, 
         jig::{*, module::*}
     }, 
@@ -26,13 +27,18 @@ impl State {
     pub fn add_card(&self) {
         let game_mode = self.game_mode.get().unwrap_ji();
         let raw_pair = match game_mode {
-            GameMode::Duplicate => {
+            GameMode::WordsAndImages => {
+                (
+                    raw::Card::Text("".to_string()),
+                    raw::Card::Image(None)
+                )
+            },
+            _ => {
                 (
                     raw::Card::Text("".to_string()),
                     raw::Card::Text("".to_string()),
                 )
             },
-            _ => unimplemented!("unknown!")
         };
 
         let pair:(Card, Card) = (
@@ -100,12 +106,39 @@ impl State {
                 self.replace_pairs(pairs);
 
             },
+            GameMode::WordsAndImages => {
+                let pairs:Vec<(Card, Card)> =
+                    list
+                        .into_iter()
+                        .map(|word| {
+                            (
+                                Card::new_text(word),
+                                Card::new_image(None)
+                            )
+                        })
+                        .collect();
+                self.replace_pairs(pairs);
+
+            },
             _ => unimplemented!("can't replace single list in this mode!")
         }
 
     }
 
 
+    pub fn replace_dual_list(&self, list: Vec<(String, String)>) {
+        let pairs:Vec<(Card, Card)> =
+            list
+                .into_iter()
+                .map(|(word_1, word_2)| {
+                    (
+                        Card::new_text(word_1),
+                        Card::new_text(word_2),
+                    )
+                })
+                .collect();
+        self.replace_pairs(pairs);
+    }
     pub fn replace_card_text(&self, pair_index: usize, side: Side, text: String) {
 
         self.with_pair(pair_index, side, clone!(text => move |game_mode, card, other| {
@@ -122,6 +155,20 @@ impl State {
                         *other = raw::Card::Text(text.clone());
                     }
                     *card = raw::Card::Text(text.clone());
+                }));
+            }
+        });
+    }
+
+    pub fn replace_card_image(&self, pair_index: usize, side: Side, data: (ImageId, MediaLibrary)) {
+        self.with_pair(pair_index, side, clone!(data => move |game_mode, card, other| {
+            card.as_image_mutable().set_neq(Some(data));
+        }));
+
+        self.history.push_modify(|history| {
+            if let Some(game_data) = &mut history.game_data {
+                with_raw_pair(game_data, pair_index, side, clone!(data => move |game_mode, card, other| {
+                    *card = raw::Card::Image(Some(data));
                 }));
             }
         });

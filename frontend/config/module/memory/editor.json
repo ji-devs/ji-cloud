@@ -1,12 +1,17 @@
 {
     "init": {
-        "duplicate": [
+        "single_list_words": [
             "שמש", 
             "Sun", 
             "יָרֵחַ", 
             "Moon", 
             "כּוֹכָב", 
             "Star"
+        ],
+		"dual_list_words": [
+            ["שמש", "Sun"], 
+            ["יָרֵחַ", "Moon"], 
+            ["כּוֹכָב", "Star"]
         ]
     }
 }
