@@ -1,3 +1,4 @@
 pub mod dom;
+pub mod types;
 pub mod state;
-pub mod actions;
+pub(super) mod actions;

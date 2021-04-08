@@ -6,10 +6,10 @@ use std::{borrow::BorrowMut, cell::RefCell, rc::Rc};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use super::{
     state::{ImageSearchOptions, State, BACKGROUND_NAME},
-    actions::{get_background_id, search, upload_file}
+    actions::{get_background_id, search, upload_file},
+    types::*,
 };
-
-pub const IMAGE_SEARCH_DATA_TRANSFER: &'static str = "image-search";
+use shared::media::MediaLibrary;
 
 pub fn render(opts: ImageSearchOptions, slot: Option<&str>) -> Dom {
     let mut state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
@@ -59,7 +59,12 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     }))
                     .event(clone!(state, image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
-                            let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &image.id.0.to_string());
+                            let data = ImageDataTransfer {
+                                id: image.id.clone(), 
+                                lib: MediaLibrary::Global
+                            };
+                            let json = serde_json::to_string(&data).unwrap_ji();
+                            let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
                             data_transfer.set_drop_effect("all");
                         } else {
                             log::error!("no data transfer - use a real computer!!!");
