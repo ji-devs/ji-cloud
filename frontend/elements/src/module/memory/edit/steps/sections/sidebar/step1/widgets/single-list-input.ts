@@ -12,11 +12,12 @@ export class _ extends LitElement {
               justify-content: center;
               width: 100%;
           }
-        input {
+          input {
+              height: 40px;
             width: 460px; /*arbitrary amount to not go into rounded corners*/
           outline: none;
           border: none;
-          font-size: 16px;
+          font-size: 24px;
           text-align: center; 
         }
 
