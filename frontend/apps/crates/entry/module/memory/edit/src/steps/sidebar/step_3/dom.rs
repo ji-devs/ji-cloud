@@ -35,7 +35,6 @@ impl TextDom {
     pub fn render(state: Rc<State>) -> Dom {
         html!("input-form-textarea", {
             .property_signal("value", state.instructions.text.signal_cloned().map(|text| {
-                log::info!("{:?}", text);
                 match text {
                     None => "".to_string(),
                     Some(text) => text

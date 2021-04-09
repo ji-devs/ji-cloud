@@ -28,6 +28,8 @@ impl StateLoader<RawData, State> for PageLoader {
     fn load_state(&self) -> Self::FutureState { 
         let jig_id = self.jig_id.clone();
         let module_id = self.module_id.clone();
+        crate::debug::init(jig_id.clone(), module_id.clone());
+
         async move {
             let game_data = match debug::settings().data.as_ref() {
                 None => {

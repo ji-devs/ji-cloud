@@ -13,6 +13,8 @@ use std::rc::Rc;
 use crate::data::{raw, state::*};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
+use shared::domain::jig::{JigId, ModuleId};
+use uuid::Uuid;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -60,29 +62,21 @@ impl DebugSettings {
                 })
             ),
             step: Some(Step::One), 
-            live_save: true,
+            live_save: false,
             content_tab: Some(DebugContentTab::Text),
         }
     }
 }
 
-cfg_if! {
-    if #[cfg(feature = "local")] {
-        pub fn init() {
-            SETTINGS.set(DebugSettings::default()).unwrap_ji();
-            //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
-            //SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
-        }
-
-        pub fn settings() -> &'static DebugSettings {
-            unsafe { SETTINGS.get_unchecked() }
-        }
+pub fn init(jig_id: JigId, module_id: ModuleId) {
+    if jig_id == JigId(Uuid::from_u128(0)) {
+        //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
     } else {
-        pub fn init() {
-            SETTINGS.set(DebugSettings::default()).unwrap_ji();
-        }
-        pub fn settings() -> &'static DebugSettings {
-            unsafe { SETTINGS.get_unchecked() }
-        }
+        SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
+}
+
+pub fn settings() -> &'static DebugSettings {
+    unsafe { SETTINGS.get_unchecked() }
 }

@@ -179,11 +179,15 @@ impl State {
 
         self.instructions.text.set_neq(text.clone());
         if(push_history) {
-            self.history.push_modify(move |history| {
+            self.history.push_modify(clone!(text => move |history| {
                 if let Some(game_data) = &mut history.game_data {
                     game_data.instructions.text = text;
                 }
-            });
+            }));
+        } else {
+            self.save_without_history(|game_data| {
+                game_data.instructions.text = text;
+            })
         }
     }
 
@@ -206,6 +210,20 @@ impl State {
         });
     }
 
+    //Usually saving goes through the history mechanism. when it doesn't this can be used
+    //It pulls from the latest history in order to mixin
+    fn save_without_history(&self, f: impl FnOnce(&mut raw::GameData)) {
+        save(
+            self.save_loader.clone(), 
+            self.module_id.clone(), 
+            self.history.get_current()
+                .game_data
+                .map(|mut game_data| {
+                    f(&mut game_data);
+                    game_data
+                })
+        );
+    }
     fn with_pair<A, F: FnOnce(GameMode, &Card, &Card) -> A>(&self, pair_index: usize, main_side: Side, f: F) -> A {
         let game_mode = self.game_mode.get().unwrap_ji();
         let pair = self.pairs.lock_ref();
