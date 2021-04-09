@@ -1,23 +1,16 @@
-use std::{rc::Rc, cell::RefCell};
-use utils::{prelude::*, path::audio_lib_url};
-use wasm_bindgen::{JsCast, prelude::*};
-use dominator::clone;
-use futures::future::ready;
-use futures_signals::signal::{Mutable, SignalExt};
-use shared::{domain::audio::AudioId, media::MediaLibrary};
-use web_sys::HtmlAudioElement;
-use wasm_bindgen_futures::spawn_local;
+use futures_signals::signal::{Mutable};
+use shared::{domain::audio::AudioId};
 use super::recorder::AudioRecorder;
 use super::options::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AudioInputMode {
-    Record,
+    Playing(AudioId),
+    Stopped(AudioId),
+    Empty,
     Recording,
-    Upload,
     Uploading,
-    Success,
-    Playing,
+    // Paused(AudioId, Timecode) we don't have a design for this but might be useful
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -32,7 +25,6 @@ pub struct State {
     pub on_change: Option<Box<dyn Fn(Option<AudioId>)>>,
     //audio_id is a mutable for affecting DOM
     //intermediate updates can be skipped
-    pub audio_id: Mutable<Option<AudioId>>,
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
@@ -40,16 +32,16 @@ pub struct State {
 
 impl State {
     pub fn new(opts: AudioInputOptions) -> Self {
-        let audio_id = Mutable::new(opts.audio_id); 
+        let mode = match opts.audio_id {
+            Some(audio_id) => AudioInputMode::Stopped(audio_id),
+            None => AudioInputMode::Empty,
+        };
 
         Self {
             on_change: opts.on_change,
-            audio_id,
-            mode: Mutable::new(AudioInputMode::Record),
+            mode: Mutable::new(mode),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),
         }
     }
-
 }
-

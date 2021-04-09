@@ -3,8 +3,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::signal::SignalExt;
 use utils::events;
-use shared::{domain::audio::AudioId, media::MediaLibrary};
-use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
+use crate::audio_input::state::{State, AudioInputAddMethod};
 
 
 pub const STR_OPTION_RECORD: &'static str = "Record";
@@ -33,10 +32,9 @@ pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
         })
         .event(clone!(state => move |_: events::Change| {
             state.add_method.set(add_method.clone());
-            match add_method {
-                AudioInputAddMethod::Record => state.mode.set(AudioInputMode::Record),
-                AudioInputAddMethod::Upload => state.mode.set(AudioInputMode::Upload),
-            }
+
+            // might not be ideal when there's no audio_id already
+            state.set_audio_id(None);
         }))
     })
 }
