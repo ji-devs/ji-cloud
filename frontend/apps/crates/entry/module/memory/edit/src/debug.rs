@@ -59,8 +59,8 @@ impl DebugSettings {
                     )
                 })
             ),
-            step: Some(Step::Three), 
-            live_save: false,
+            step: Some(Step::One), 
+            live_save: true,
             content_tab: Some(DebugContentTab::Text),
         }
     }
@@ -69,8 +69,9 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
+            SETTINGS.set(DebugSettings::default()).unwrap_ji();
             //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
-            SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
+            //SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
         }
 
         pub fn settings() -> &'static DebugSettings {

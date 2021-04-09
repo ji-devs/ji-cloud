@@ -51,8 +51,12 @@ pub struct Instructions {
 impl Instructions {
     pub fn new(raw_data: Option<&raw::GameData>) -> Self {
         Self {
-            audio_id: Mutable::new(None),
-            text: Mutable::new(None),
+            audio_id: Mutable::new(
+                raw_data.and_then(|data| data.instructions.audio_id.clone())
+            ),
+            text: Mutable::new(
+                raw_data.and_then(|data| data.instructions.text.clone())
+            ),
         }
     }
 }
