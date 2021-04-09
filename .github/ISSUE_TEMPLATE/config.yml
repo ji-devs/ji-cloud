@@ -5,11 +5,15 @@ blank_issues_enabled: true
 contact_links:
   - name: Legacy Player
     about: create a Legacy Player issue
-    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20functionality
+    
+  - name: Memory Game (David)
+    about: create a Memory Game issue
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Memory+Game&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20functionality
     
   - name: Login and Registration (David)
     about: create a Legacy Player issue
-    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Login/Registration&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20app%20dev
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Login/Registration&projects=ji-devs/ji-cloud/3&frontend%20-%20functionality
     
   - name: Localization
     about: create a Strings Util issue
