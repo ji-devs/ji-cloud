@@ -15,22 +15,22 @@ use shared::{
 };
 use sqlx::PgPool;
 
-use crate::{
-    db, error,
-    extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
-};
+use crate::{db, error, extractor::TokenUser};
 
 /// Create a new module.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    _auth: TokenUserWithScope<ScopeManageJig>,
+    auth: TokenUser,
     parent: Path<JigId>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Server> {
-    let parent = parent.into_inner();
+) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Auth> {
+    let parent_id = parent.into_inner();
+
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
-    let index = db::module::create(&*db, parent, req.kind, req.body.as_ref()).await?;
+    let index = db::module::create(&*db, parent_id, req.kind, req.body.as_ref()).await?;
 
     Ok(Json(ModuleCreateResponse { index }))
 }
@@ -39,10 +39,12 @@ async fn create(
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageJig>,
+    auth: TokenUser,
     path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::Delete> {
     let (parent_id, module) = path.into_inner();
+
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     db::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
 
@@ -53,11 +55,13 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageJig>,
+    auth: TokenUser,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
     path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::NotFound> {
     let (parent_id, module) = path.into_inner();
+
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::module::update(

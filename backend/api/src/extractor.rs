@@ -126,11 +126,11 @@ impl Scope for ScopeManageImage {
 }
 
 #[derive(Apiv2Schema)]
-pub struct ScopeManageJig;
+pub struct ScopeAdminJig;
 
-impl Scope for ScopeManageJig {
+impl Scope for ScopeAdminJig {
     fn scope() -> UserScope {
-        UserScope::ManageJig
+        UserScope::AdminJig
     }
 }
 

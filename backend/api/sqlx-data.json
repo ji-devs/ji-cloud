@@ -304,6 +304,29 @@
       ]
     }
   },
+  "137a46c39e9037a81b12017740d3aba9c8a9971f2ee4d71cb83f3f82d50057a3": {
+    "query": "\nselect exists (\n    select 1 from user_scope where user_id = $1 and scope = any($2)\n) or (\n    exists (select 1 from user_scope where user_id = $1 and scope = $3) and\n    not exists (select 1 from jig where jig.id = $4 and jig.author_id <> $1)\n) as \"authed!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "authed!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "15cc54d43c6d2d1ca17afefdd7a789f667e85088f95de2455483e8110d957428": {
     "query": "select kind as \"kind: ImageKind\" from image_metadata where id = $1 for update",
     "describe": {
@@ -1740,6 +1763,27 @@
       ]
     }
   },
+  "87c78754f010d2cd7d18cc1024071cfd6d00983eb0d01153d7b4ad368ba20f71": {
+    "query": "\nselect exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as \"authed!\"\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "authed!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "88c75cf29cb55aa0924802949ef5a5eed9dd3257e58d34329aeaf45c3fa28a63": {
     "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
     "describe": {
@@ -2256,6 +2300,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "c0503b4756010f70f84bfc842758cc356568bcb7324b0c0a8454f49511300942": {
+    "query": "insert into user_scope (user_id, scope) values ($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac": {

@@ -3,6 +3,7 @@ use futures::TryStreamExt;
 use shared::domain::{
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
     meta::ContentTypeId,
+    user::UserScope,
 };
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -263,4 +264,50 @@ from jig_module where jig_id = $1
     txn.commit().await?;
 
     Ok(Some(JigId(new_id)))
+}
+
+pub async fn authz(db: &PgPool, user_id: Uuid, jig_id: Option<JigId>) -> Result<(), error::Auth> {
+    let authed = match jig_id {
+        None => {
+            sqlx::query!(
+                r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
+"#,
+                user_id,
+                &[
+                    UserScope::Admin as i16,
+                    UserScope::AdminJig as i16,
+                    UserScope::ManageSelfJig as i16,
+                ][..],
+            )
+            .fetch_one(db)
+            .await?
+            .authed
+        }
+        Some(id) => {
+            sqlx::query!(
+                r#"
+select exists (
+    select 1 from user_scope where user_id = $1 and scope = any($2)
+) or (
+    exists (select 1 from user_scope where user_id = $1 and scope = $3) and
+    not exists (select 1 from jig where jig.id = $4 and jig.author_id <> $1)
+) as "authed!"
+"#,
+                user_id,
+                &[UserScope::Admin as i16, UserScope::AdminJig as i16,][..],
+                UserScope::ManageSelfJig as i16,
+                id.0
+            )
+            .fetch_one(db)
+            .await?
+            .authed
+        }
+    };
+
+    if !authed {
+        return Err(error::Auth::Forbidden);
+    }
+
+    Ok(())
 }
