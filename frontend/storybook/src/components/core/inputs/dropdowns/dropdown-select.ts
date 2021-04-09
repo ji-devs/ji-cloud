@@ -18,9 +18,9 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    label: "hello",
+    label: "Label",
     value: "",
-    placeholder: "select something",
+    placeholder: "Select something",
     open: true,
     count: 7,
     width: 300,

@@ -15,6 +15,7 @@ export class _ extends LitElement {
                     padding: 8px 16px;
                     display: grid;
                     grid-template-columns: 1fr min-content;
+                    grid-auto-rows: 24px;
                     column-gap: 2px;
                     font-size: 16px;
                     line-height: 1.5;
