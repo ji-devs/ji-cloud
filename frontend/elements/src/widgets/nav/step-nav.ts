@@ -38,7 +38,7 @@ export class _ extends LitElement {
     @property({type: String})
     label: string = "";
 
-    @property({type: Boolean})
+    @property({type: Boolean, reflect: true})
     completed: boolean = false;
 
     @property({type: Boolean})
