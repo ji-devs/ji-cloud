@@ -23,7 +23,7 @@ export const TextEditorControls = (props?:Partial<Args>) => {
 
     return `
         <text-editor-controls ${argsToAttrs(props)} style="width: 492px">
-            <dropdown-select slot="font">
+            <dropdown-select slot="font" label="Font" value="Arial">
                 <li-check selected>Options</li-check>
             </dropdown-select>
             <button-collection slot="type">
@@ -32,7 +32,7 @@ export const TextEditorControls = (props?:Partial<Args>) => {
                 <text-editor-control type="p1"></text-editor-control>
                 <text-editor-control type="p2"></text-editor-control>
             </button-collection>
-            <dropdown-select slot="weight">
+            <dropdown-select slot="weight" label="Weight" value="Normal">
                 <li-check selected>Options</li-check>
             </dropdown-select>
             <input-inc-dec slot="font-size"></input-inc-dec>
