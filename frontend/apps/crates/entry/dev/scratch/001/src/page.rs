@@ -28,7 +28,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_text_editor_controls()
+        render_audio_input()
     }
 }
 
@@ -92,10 +92,13 @@ pub fn render_image_search() -> Dom {
 
 
 pub fn render_audio_input() -> Dom {
-    let opts:AudioInputOptions<_> = AudioInputOptions {
+    let opts:AudioInputOptions = AudioInputOptions {
         //ummm... this is a lie... I guess... but w/e
         //in the usual case of supplying a Some the real type is inferred
-        on_change: None as Option<Box<dyn Fn(Option<AudioId>)>>,
+        // on_change: None,
+        on_change: Some(Box::new(|h| {
+            log::info!("Audio chagne: {:?}", h);
+        })),
         audio_id: None,
     };
 
@@ -103,7 +106,20 @@ pub fn render_audio_input() -> Dom {
 
     html!("div", {
         .style("padding", "30px")
-        .child(audio_input::dom::render(state, None))
+        .child(audio_input::dom::render(state.clone(), None))
+        .child(html!("button", {
+            .text("Set to Some")
+            .event(clone!(state => move |_: events::Click| {
+                let uuid = uuid::Uuid::parse_str("30a326ec-991f-11eb-afad-7717bd5f5028").unwrap_ji();
+                state.set_audio_id_ext(Some(AudioId(uuid)));
+            }))
+        }))
+        .child(html!("button", {
+            .text("Set to None")
+            .event(clone!(state => move |_: events::Click| {
+                state.set_audio_id_ext(None);
+            }))
+        }))
     })
 }
 

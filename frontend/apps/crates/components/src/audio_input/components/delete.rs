@@ -3,9 +3,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::signal::SignalExt;
 use utils::events;
-use shared::{domain::audio::AudioId, media::MediaLibrary};
-use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
-
+use crate::audio_input::state::{State, AudioInputMode};
 
 
 pub fn render(state: Rc<State>) -> Dom {
@@ -13,16 +11,12 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "delete")
         .visible_signal(state.mode.signal_cloned().map(|mode| {
             match mode {
-                AudioInputMode::Record | AudioInputMode::Recording | AudioInputMode::Upload | AudioInputMode::Uploading => false,
-                AudioInputMode::Success | AudioInputMode::Playing => true,
+                AudioInputMode::Empty | AudioInputMode::Recording | AudioInputMode::Uploading => false,
+                AudioInputMode::Stopped(_) | AudioInputMode::Playing(_) => true,
             }
         }))
         .event(clone!(state => move |_: events::Click| {
             state.set_audio_id(None);
-            match state.add_method.lock_ref().clone() {
-                AudioInputAddMethod::Record => state.mode.set(AudioInputMode::Record),
-                AudioInputAddMethod::Upload => state.mode.set(AudioInputMode::Upload),
-            };
         }))
     })
 }
