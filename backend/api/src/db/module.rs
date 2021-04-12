@@ -1,7 +1,7 @@
 use std::cmp;
 
 use shared::domain::jig::{
-    module::{Module, ModuleKind},
+    module::{Module, ModuleId, ModuleIdOrIndex, ModuleKind},
     JigId,
 };
 use sqlx::PgPool;
@@ -31,27 +31,28 @@ returning "index"
 pub async fn update(
     pool: &PgPool,
     parent_id: JigId,
-    index: u16,
+    lookup: ModuleIdOrIndex,
     kind: Option<ModuleKind>,
     body: Option<&serde_json::Value>,
     new_index: Option<u16>,
 ) -> anyhow::Result<bool> {
+    let (id, index) = (lookup.id(), lookup.index());
+
     let mut txn = pool.begin().await?;
 
-    let index = index as i16;
-
-    let exists = sqlx::query!(
-        r#"select exists(select 1 from jig_module where jig_id = $1 and index = $2 for update) as "exists!""#,
+    let index = sqlx::query!(
+        r#"select index from jig_module where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)"#,
         parent_id.0,
-        index,
+        id.map(|it| it.0),
+        index.map(|it| it as i16)
     )
-    .fetch_one(&mut txn)
-    .await?
-    .exists;
+    .fetch_optional(&mut txn)
+    .await?;
 
-    if !exists {
-        return Ok(false);
-    }
+    let index = match index {
+        Some(it) => it.index,
+        None => return Ok(false),
+    };
 
     sqlx::query!(
         r#"
@@ -124,24 +125,40 @@ where jig_id = $1 and index between $2 and $3
     Ok(true)
 }
 
-pub async fn get(pool: &PgPool, parent: JigId, index: u16) -> anyhow::Result<Option<Module>> {
+pub async fn get(
+    pool: &PgPool,
+    parent: JigId,
+    lookup: ModuleIdOrIndex,
+) -> sqlx::Result<Option<Module>> {
+    let (id, index) = (lookup.id(), lookup.index());
+
     sqlx::query_as!(
         Module,
-        r#"select contents as "body", kind as "kind: ModuleKind" from jig_module where jig_id = $1 and index = $2"#,
-        parent.0, index as i16
+        r#"
+select 
+    id as "id: ModuleId",
+    contents as "body",
+    kind as "kind: ModuleKind"
+from jig_module
+where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)
+"#,
+        parent.0,
+        id.map(|it| it.0),
+        index.map(|it| it as i16)
     )
     .fetch_optional(pool)
     .await
-    .map_err(Into::into)
 }
 
-pub async fn delete(pool: &PgPool, parent: JigId, index: u16) -> anyhow::Result<()> {
+pub async fn delete(pool: &PgPool, parent: JigId, lookup: ModuleIdOrIndex) -> anyhow::Result<()> {
+    let (id, index) = (lookup.id(), lookup.index());
     let mut txn = pool.begin().await?;
 
     let idx = sqlx::query!(
-        "delete from jig_module where jig_id = $1 and index = $2 returning index",
+        "delete from jig_module where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3) returning index",
         parent.0,
-        index as i16
+        id.map(|it| it.0),
+        index.map(|it| it as i16),
     )
     .fetch_optional(&mut txn)
     .await?

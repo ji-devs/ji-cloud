@@ -22,7 +22,7 @@ impl ApiEndpoint for Get {
     type Req = ();
     type Res = ModuleResponse;
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{index}";
+    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
     const METHOD: Method = Method::Get;
 }
 
@@ -64,7 +64,7 @@ impl ApiEndpoint for Update {
     type Req = ModuleUpdateRequest;
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{index}";
+    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
     const METHOD: Method = Method::Patch;
 }
 
@@ -86,6 +86,6 @@ impl ApiEndpoint for Delete {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/module/{index}";
+    const PATH: &'static str = "/v1/jig/{id}/module/{module_id}";
     const METHOD: Method = Method::Delete;
 }

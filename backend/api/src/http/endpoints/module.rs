@@ -1,3 +1,4 @@
+use actix_web::Either;
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, Path, ServiceConfig},
@@ -6,7 +7,9 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
     domain::jig::{
-        module::{ModuleCreateRequest, ModuleCreateResponse, ModuleResponse},
+        module::{
+            ModuleCreateRequest, ModuleCreateResponse, ModuleId, ModuleIdOrIndex, ModuleResponse,
+        },
         JigId,
     },
 };
@@ -37,10 +40,11 @@ async fn create(
 async fn delete(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageJig>,
-    path: web::Path<(JigId, u16)>,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::Delete> {
-    let (parent, index) = path.into_inner();
-    db::module::delete(&*db, parent, index).await?;
+    let (parent_id, module) = path.into_inner();
+
+    db::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
 
     Ok(NoContent)
 }
@@ -51,14 +55,15 @@ async fn update(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeManageJig>,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
-    path: web::Path<(JigId, u16)>,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::NotFound> {
-    let (parent_id, index) = path.into_inner();
+    let (parent_id, module) = path.into_inner();
+
     let req = req.map_or_else(Default::default, Json::into_inner);
     let exists = db::module::update(
         &*db,
         parent_id,
-        index,
+        ModuleIdOrIndex::Id(module),
         req.kind,
         req.body.as_ref(),
         req.reinsert_at,
@@ -77,10 +82,11 @@ async fn update(
 async fn get(
     db: Data<PgPool>,
     _claims: TokenUser,
-    path: web::Path<(JigId, u16)>,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let (parent, index) = path.into_inner();
-    let module = db::module::get(&db, parent, index)
+    let (parent_id, module) = path.into_inner();
+
+    let module = db::module::get(&db, parent_id, ModuleIdOrIndex::Id(module))
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 

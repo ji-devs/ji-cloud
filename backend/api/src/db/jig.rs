@@ -1,9 +1,7 @@
-use std::borrow::Cow;
-
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
-    jig::{Jig, JigId, LiteModule, Module, ModuleKind},
+    jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
     meta::ContentTypeId,
 };
 use sqlx::PgPool;
@@ -14,40 +12,11 @@ use crate::error;
 pub async fn create(
     pool: &PgPool,
     display_name: Option<&str>,
-    modules: &[Module],
     content_types: &[ContentTypeId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
-
-    let modules = match modules.first() {
-        Some(module) => {
-            if module.kind == Some(ModuleKind::Cover) {
-                Cow::Borrowed(modules)
-            } else {
-                let mut modules = modules.to_vec();
-                modules.insert(
-                    0,
-                    Module {
-                        kind: Some(ModuleKind::Cover),
-                        body: None,
-                    },
-                );
-                Cow::Owned(modules)
-            }
-        }
-        None => Cow::Owned(vec![
-            Module {
-                kind: Some(ModuleKind::Cover),
-                body: None,
-            },
-            Module {
-                kind: None,
-                body: None,
-            },
-        ]),
-    };
 
     let jig = sqlx::query!(
         r#"
@@ -65,16 +34,17 @@ returning id
 
     super::recycle_metadata(&mut transaction, "jig", jig.id, content_types).await?;
 
+    let default_module_kinds = [Some(ModuleKind::Cover), None];
+
     // todo: batch
-    for (idx, module) in modules.iter().enumerate() {
+    for (idx, kind) in default_module_kinds.iter().enumerate() {
         sqlx::query!(
             r#"
-insert into jig_module (jig_id, "index", kind, contents)
-values ($1, $2, $3, $4)"#,
+insert into jig_module (jig_id, "index", kind)
+values ($1, $2, $3)"#,
             jig.id,
             idx as i16,
-            module.kind.map(|it| it as i16),
-            module.body,
+            kind.map(|it| it as i16),
         )
         .execute(&mut transaction)
         .await?;
@@ -95,11 +65,11 @@ select
     author_id,
     publish_at,
     array(
-        select row (kind)
+        select row (id, kind)
         from jig_module
         where jig_id = $1
         order by "index"
-    ) as "modules!: Vec<(Option<ModuleKind>,)>",
+    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
     array(select row(content_type_id) from jig_content_type where jig_id = $1) as "content_types!: Vec<(ContentTypeId,)>"
 from jig
 where id = $1"#,
@@ -110,8 +80,8 @@ where id = $1"#,
     .map(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(kind,)| LiteModule {
-            kind
+        modules: row.modules.into_iter().map(|(id, kind,)| LiteModule {
+            id, kind
         }).collect(),
         content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
@@ -205,11 +175,11 @@ select
     author_id,
     publish_at,
     array(
-        select row (kind)
+        select row (id, kind)
         from jig_module
         where jig_id = jig.id
         order by "index"
-    ) as "modules!: Vec<(Option<ModuleKind>,)>",
+    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
     array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as "content_types!: Vec<(ContentTypeId,)>"
 from jig
 where 
@@ -226,8 +196,8 @@ author_id,
     .map_ok(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(kind,)| LiteModule {
-             kind
+        modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
+             id, kind
         }).collect(),
         content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,

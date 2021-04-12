@@ -16,7 +16,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
             port
         ))
         .login()
@@ -28,7 +28,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
             port
         ))
         .login()
@@ -55,7 +55,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
             port
         ))
         .login()
@@ -68,7 +68,7 @@ async fn update_contents() -> anyhow::Result<()> {
 
     let resp = client
         .get(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/module/0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
             port
         ))
         .login()

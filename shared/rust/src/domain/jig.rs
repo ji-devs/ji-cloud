@@ -41,11 +41,6 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The JIG's modules.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
-    pub modules: Vec<Module>,
-
     /// The types of content this JIG contains.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]

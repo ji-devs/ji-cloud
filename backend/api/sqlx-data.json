@@ -597,27 +597,6 @@
       "nullable": []
     }
   },
-  "2e73c3019ff2f6aca40031da519bf5aa8fefffcd74961046cc06c12751f22be4": {
-    "query": "delete from jig_module where jig_id = $1 and index = $2 returning index",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "index",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -926,33 +905,6 @@
       ]
     }
   },
-  "443719647a283209ed248071dbe2f11e02acd3959d7fb58a199ade6fb912ab95": {
-    "query": "select contents as \"body\", kind as \"kind: ModuleKind\" from jig_module where jig_id = $1 and index = $2",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        true,
-        true
-      ]
-    }
-  },
   "44559bdf72e9071b9dd849039e4ae6ccf90281a3e751b1bd2ff5ecf18132e53e": {
     "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
     "describe": {
@@ -989,62 +941,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "506b5eabb43f7f00f6ce71898387aef6c2112d5ffdff2581f5ae61364acdf123": {
-    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (kind)\n        from jig_module\n        where jig_id = $1\n        order by \"index\"\n    ) as \"modules!: Vec<(Option<ModuleKind>,)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = $1) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "publish_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "modules!: Vec<(Option<ModuleKind>,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "content_types!: Vec<(ContentTypeId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null
-      ]
     }
   },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
@@ -1401,6 +1297,28 @@
       "nullable": []
     }
   },
+  "6a5c310d04f0191c505fbd36421cea1fac0dee024fdf7b750692671f6f9f8555": {
+    "query": "delete from jig_module where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3) returning index",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "6db1735f61450670c2ca115000a413f3b2eb9d4874eeec7e749f6243b2db5f7d": {
     "query": "select user_id from user_email where email = $1::text",
     "describe": {
@@ -1441,6 +1359,28 @@
       ]
     }
   },
+  "6dcfdaef00e74c8841a7ef441acebc555925c6e18d4c784433c9c3c830271292": {
+    "query": "select index from jig_module where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "6e14fd81f9b05e1260861cad9304f7ed204ab4271f61d752c4060c598a5c405a": {
     "query": "update user_image_library set uploaded_at = now(), updated_at = now() where id = $1",
     "describe": {
@@ -1470,27 +1410,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "6f41a30ae390fae1d16d79ee16b7d4f9ddfc7af6c63db61dc919ae5e21ef2ec8": {
-    "query": "select exists(select 1 from jig_module where jig_id = $1 and index = $2 for update) as \"exists!\"",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -1818,6 +1737,40 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "88c75cf29cb55aa0924802949ef5a5eed9dd3257e58d34329aeaf45c3fa28a63": {
+    "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true
       ]
     }
   },
@@ -2180,64 +2133,6 @@
       "nullable": []
     }
   },
-  "bda39390eb44675da49fef674bb21c20c6d3a5c4e8352ecb96fdf35e66307c77": {
-    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (kind)\n        from jig_module\n        where jig_id = jig.id\n        order by \"index\"\n    ) as \"modules!: Vec<(Option<ModuleKind>,)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere \n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $3 or $3 is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $2\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: JigId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "creator_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "author_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "publish_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 5,
-          "name": "modules!: Vec<(Option<ModuleKind>,)>",
-          "type_info": "RecordArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "content_types!: Vec<(ContentTypeId,)>",
-          "type_info": "RecordArray"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Int4",
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        true,
-        true,
-        true,
-        null,
-        null
-      ]
-    }
-  },
   "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
     "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
     "describe": {
@@ -2409,6 +2304,62 @@
       ]
     }
   },
+  "c94941473319b827d2e7dd3fddd55b209e73626a09f0c043d3f1bfcb80acfc0e": {
+    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (id, kind)\n        from jig_module\n        where jig_id = $1\n        order by \"index\"\n    ) as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = $1) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null
+      ]
+    }
+  },
   "c9871e12739d5ae1acd8e3026e00ed927a54f717d5e5cd12f78456b99a7aa23b": {
     "query": "delete from session where user_id = $1",
     "describe": {
@@ -2416,6 +2367,20 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "cd3a4a69bc8662f348daee68c9584bb105bb704737d64a3911bd823598bfc6bb": {
+    "query": "\ninsert into jig_module (jig_id, \"index\", kind)\nvalues ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2"
         ]
       },
       "nullable": []
@@ -2785,21 +2750,6 @@
       ]
     }
   },
-  "e84b872096758317f1b40bf74ff81fafb5eb0b45a17137bdb67780f427e39011": {
-    "query": "\ninsert into jig_module (jig_id, \"index\", kind, contents)\nvalues ($1, $2, $3, $4)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6": {
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)",
     "describe": {
@@ -3100,6 +3050,64 @@
       },
       "nullable": [
         true
+      ]
+    }
+  },
+  "fceee10d5b8ca7142ea97be861a04a5afea966b3333e37b8580f8f6b9c794783": {
+    "query": "\nselect  \n    id as \"id: JigId\",\n    display_name,\n    creator_id,\n    author_id,\n    publish_at,\n    array(\n        select row (id, kind)\n        from jig_module\n        where jig_id = jig.id\n        order by \"index\"\n    ) as \"modules!: Vec<(ModuleId, Option<ModuleKind>)>\",\n    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as \"content_types!: Vec<(ContentTypeId,)>\"\nfrom jig\nwhere \n    publish_at < now() is not distinct from $1 or $1 is null\n    and author_id is not distinct from $3 or $3 is null\norder by coalesce(updated_at, created_at) desc\nlimit 20 offset 20 * $2\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "creator_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "author_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "publish_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 5,
+          "name": "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+          "type_info": "RecordArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "content_types!: Vec<(ContentTypeId,)>",
+          "type_info": "RecordArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int4",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        null,
+        null
       ]
     }
   },

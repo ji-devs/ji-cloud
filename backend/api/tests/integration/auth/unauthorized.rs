@@ -38,7 +38,10 @@ async fn get_jig() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_module() -> anyhow::Result<()> {
-    unauthorized("v1/jig/00000000-0000-0000-0000-000000000000/module/0").await
+    unauthorized(
+        "v1/jig/00000000-0000-0000-0000-000000000000/module/00000000-0000-0000-0000-000000000000",
+    )
+    .await
 }
 
 #[actix_rt::test]

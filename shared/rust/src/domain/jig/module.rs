@@ -4,6 +4,43 @@
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use uuid::Uuid;
+
+/// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ModuleId(pub Uuid);
+
+/// Which way of finding a module to use when looking it up.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(untagged)]
+pub enum ModuleIdOrIndex {
+    /// By offset into its parent jig
+    Index(u16),
+    /// By id
+    Id(ModuleId),
+}
+
+impl ModuleIdOrIndex {
+    /// Returns [`Some`] if `self` is `Self::Id`, [`None`] otherwise.
+    pub fn id(self) -> Option<ModuleId> {
+        match self {
+            ModuleIdOrIndex::Id(id) => Some(id),
+            ModuleIdOrIndex::Index(_) => None,
+        }
+    }
+
+    /// Returns [`Some`] if `self` is `Self::Index`, [`None`] otherwise.
+    pub fn index(self) -> Option<u16> {
+        match self {
+            ModuleIdOrIndex::Id(_) => None,
+            ModuleIdOrIndex::Index(index) => Some(index),
+        }
+    }
+}
 
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
@@ -74,6 +111,9 @@ impl FromStr for ModuleKind {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct LiteModule {
+    /// The module's ID.
+    pub id: ModuleId,
+
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 }
@@ -82,6 +122,9 @@ pub struct LiteModule {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Module {
+    /// The module's ID.
+    pub id: ModuleId,
+
     /// Which kind of module this is.
     pub kind: Option<ModuleKind>,
 

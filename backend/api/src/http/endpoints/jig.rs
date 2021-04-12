@@ -32,7 +32,6 @@ async fn create(
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
-        &req.modules,
         &req.content_types,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
