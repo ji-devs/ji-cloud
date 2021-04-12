@@ -28,8 +28,11 @@ export class _ extends LitElement {
     `];
   }
 
+
   onInput(evt:InputEvent) {
-    const {value} = (evt.target as any);
+      const {value} = (evt.target as any);
+
+      //TODO - limit by grapheme cluster count
     this.value = value;
 
     this.dispatchEvent(new CustomEvent("custom-input", {
@@ -38,6 +41,7 @@ export class _ extends LitElement {
   }
   onChange(evt:InputEvent) {
     const {value} = (evt.target as any);
+      //TODO - limit by grapheme cluster count
     this.value = value;
 
     this.dispatchEvent(new CustomEvent("custom-change", {
@@ -52,6 +56,8 @@ export class _ extends LitElement {
 
   render() {
       const {value} = this;
+
+      console.log(value);
 
       return html`<div class="row">
           <input type="text" .value=${value} @input="${this.onInput}" @change="${this.onChange}" >

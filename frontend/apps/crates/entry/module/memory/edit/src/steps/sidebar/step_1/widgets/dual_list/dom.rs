@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use super::state::*;
-
+use unicode_segmentation::UnicodeSegmentation;
 pub struct DualListDom {}
 impl DualListDom {
     pub fn render(state: Rc<State>) -> Dom { 

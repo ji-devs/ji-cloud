@@ -72,6 +72,7 @@ gloo = "0.2.1"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 itertools = "0.10.0"
 async-trait = "0.1.48"
+unicode-segmentation = "1.7.1"
 
 [features]
 default = ["wee_alloc"]

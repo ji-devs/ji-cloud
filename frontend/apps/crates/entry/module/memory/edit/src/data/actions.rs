@@ -11,6 +11,7 @@ use components::module::history::state::HistoryState;
 use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
+use unicode_segmentation::UnicodeSegmentation;
 
 pub type HistoryChangeFn = impl Fn(Option<History>);
 pub type HistoryUndoRedoFn = impl Fn(Option<History>);
@@ -214,6 +215,22 @@ impl State {
     }
 
 
+    //TODO - move this to a separate library to be used on the JS side
+    pub fn limit_text(&self, max_len: usize, text:String) -> String {
+        let len = text.graphemes(true).count();
+
+        if len > max_len {
+            let cutoff_grapheme_byte = text
+                .grapheme_indices(true)
+                .nth(max_len)
+                .unwrap_ji()
+                .0;
+
+            text[..cutoff_grapheme_byte].to_string()
+        } else {
+            text
+        }
+    }
 
     //Usually saving goes through the history mechanism. when it doesn't this can be used
     //It pulls from the latest history in order to mixin
