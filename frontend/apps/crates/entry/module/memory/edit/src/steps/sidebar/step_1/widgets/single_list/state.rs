@@ -11,7 +11,7 @@ use crate::data::state::{State as AppState, GameMode};
 pub struct State {
     pub app: Rc<AppState>,
     pub list: Rc<MutableVec<Mutable<String>>>,
-    pub is_placeholder: Mutable<bool>
+    pub is_placeholder: Mutable<bool>,
 }
 
 type IsPlaceholder = bool;
@@ -40,5 +40,12 @@ impl State {
             .collect()
     }
 
+    pub fn clear(&self) {
+        for mutable_string in self.list.lock_ref().iter() {
+            mutable_string.set(String::default());
+        }
+
+        self.is_placeholder.set_neq(true);
+    }
 }
 

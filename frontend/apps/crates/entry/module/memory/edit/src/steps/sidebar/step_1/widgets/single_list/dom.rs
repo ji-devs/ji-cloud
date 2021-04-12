@@ -18,6 +18,9 @@ impl SingleListDom {
                 html!("button-text", {
                     .property("slot", "clear")
                     .text(crate::strings::STR_CLEAR)
+                    .event(clone!(state => move |evt:events::Click| {
+                        state.clear();
+                    }))
                 }),
                 html!("button-sidebar", {
                     .property("slot", "input-buttons")

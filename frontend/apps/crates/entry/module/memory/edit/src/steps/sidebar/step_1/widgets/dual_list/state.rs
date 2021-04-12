@@ -56,6 +56,16 @@ impl State {
             )
             .collect()
     }
+    pub fn clear(&self) {
+        for mutable_string in self.left.lock_ref().iter() {
+            mutable_string.set(String::default());
+        }
+        for mutable_string in self.right.lock_ref().iter() {
+            mutable_string.set(String::default());
+        }
+
+        self.is_placeholder.set_neq(true);
+    }
 
 }
 
