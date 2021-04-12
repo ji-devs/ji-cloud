@@ -1,12 +1,12 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
 
-export type Kind = '_somthing_' | 'matching' | 'flashcards' | 'print' | 'continue'; // TODO: fix _somthing_
+export type Kind = '1of3' | 'matching' | 'flashcards' | 'print' | 'continue';
 
 const STR_LABEL_LOOKUP: {
     [key in Kind]: string
 } = {
-    ['_somthing_']: '_somthing_',
+    ['1of3']: '1 of 3',
     ['matching']: 'Matching',
     ['flashcards']: 'Flashcards',
     ['print']: 'Print the cards',
@@ -37,6 +37,7 @@ export class _ extends LitElement {
                 text-align: center;
                 transition: color .3s;
                 line-height: 1.5;
+                font-weight: 600;
             }
             :host(:hover) .label {
                 color: var(--main-blue);
@@ -45,12 +46,14 @@ export class _ extends LitElement {
     }
 
     @property()
-    kind: Kind = "_somthing_";
+    kind: Kind = "1of3";
 
     render() {
+        const path = `module/_common/post-preview/${this.kind}${this.kind === 'continue' ? '.png' : '.svg'}`;
+
         return html`
             <div class="circle">
-                <img-ui path="module/_common/post-preview/${this.kind}.svg"></img-ui>
+                <img-ui path="${path}"></img-ui>
             </div>
             <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
         `;
