@@ -6,20 +6,28 @@ use futures_signals::{
     signal_vec::{SignalVecExt, MutableVec},
 };
 
-pub struct HistoryState<T: Clone, F: Fn(Option<T>)> {
-    on_change: F,
+pub struct HistoryState<T, ON_CHANGE, ON_UNDOREDO> 
+where
+    T: Clone,
+    ON_CHANGE: Fn(Option<T>),
+    ON_UNDOREDO: Fn(Option<T>),
+{
+    on_change: ON_CHANGE,
+    on_undoredo: ON_UNDOREDO,
     history: MutableVec<T>,
     cursor: Mutable<usize>
 }
 
-impl <T, F> HistoryState <T, F> 
+impl <T, ON_CHANGE, ON_UNDOREDO> HistoryState <T, ON_CHANGE, ON_UNDOREDO> 
 where
-    T: Clone,
-    F: Fn(Option<T>)
+    T: Clone + 'static,
+    ON_CHANGE: Fn(Option<T>) + 'static,
+    ON_UNDOREDO: Fn(Option<T>) + 'static,
 {
-    pub fn new(init:T, on_change: F) -> Self {
+    pub fn new(init:T, on_change: ON_CHANGE, on_undoredo: ON_UNDOREDO) -> Self {
         Self {
             on_change,
+            on_undoredo,
             history: MutableVec::new_with_values(vec![init]),
             cursor: Mutable::new(0)
         }
@@ -48,7 +56,7 @@ where
     // Setters, and they call self.on_change()
     // undo and redo also return the value
     // so that it can differentiate between an update and a pop
-    pub fn undo(&self) -> Option<T> {
+    pub fn undo(&self) {
         let mut cursor = self.cursor.lock_mut();
         let value = {
             if *cursor > 0 {
@@ -60,9 +68,9 @@ where
         };
 
         (self.on_change)(value.clone());
-        value
+        (self.on_undoredo)(value);
     }
-    pub fn redo(&self) -> Option<T> {
+    pub fn redo(&self) {
         let mut cursor = self.cursor.lock_mut();
         let len = self.history.lock_ref().len();
         let value = {
@@ -74,7 +82,7 @@ where
             }
         };
         (self.on_change)(value.clone());
-        value
+        (self.on_undoredo)(value);
     }
 
     pub fn push(&self, value:T) {

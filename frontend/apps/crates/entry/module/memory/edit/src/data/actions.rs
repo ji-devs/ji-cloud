@@ -12,6 +12,8 @@ use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 
+pub type HistoryChangeFn = impl Fn(Option<History>);
+pub type HistoryUndoRedoFn = impl Fn(Option<History>);
 use shared::{
     api::endpoints::{ApiEndpoint, self, module::*}, 
     domain::{
@@ -48,7 +50,7 @@ impl State {
 
         self.pairs.lock_mut().push_cloned(pair);
 
-        self.history.push_modify(move |history| {
+        self.get_history().push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.pairs.push((raw_pair.0.into(), raw_pair.1.into()));
             }
@@ -57,7 +59,7 @@ impl State {
 
     pub fn change_theme_id(&self, theme_id:ThemeId) {
         self.theme_id.set_neq(theme_id);
-        self.history.push_modify(move |history| {
+        self.get_history().push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.theme_id = theme_id;
             }
@@ -74,16 +76,17 @@ impl State {
     }
 
     pub fn change_mode(&self, mode: GameMode) {
-        self.history.push_modify(move |history| {
-            history.game_data = Some(raw::GameData::new(
-                mode,
-                ThemeId::None, 
-                raw::Instructions::new(), 
-                Vec::<(&str, &str)>::new()
-            ));
-        });
+        let game_data = Some(raw::GameData::new(
+            mode,
+            ThemeId::None, 
+            raw::Instructions::new(), 
+            Vec::<(&str, &str)>::new()
+        ));
+        self.get_history().push_modify(clone!(game_data => move |history| {
+            history.game_data = game_data;
+        }));
 
-        self.set_from_history(Some(self.history.get_current()));
+        self.set_from_raw(game_data);
     }
 
 
@@ -148,7 +151,7 @@ impl State {
             card.as_text_mutable().set_neq(text);
         }));
 
-        self.history.push_modify(|history| {
+        self.get_history().push_modify(|history| {
             if let Some(game_data) = &mut history.game_data {
                 with_raw_pair(game_data, pair_index, side, clone!(text => move |game_mode, card, other| {
                     if game_mode == GameMode::Duplicate {
@@ -165,7 +168,7 @@ impl State {
             card.as_image_mutable().set_neq(Some(data));
         }));
 
-        self.history.push_modify(|history| {
+        self.get_history().push_modify(|history| {
             if let Some(game_data) = &mut history.game_data {
                 with_raw_pair(game_data, pair_index, side, clone!(data => move |game_mode, card, other| {
                     *card = raw::Card::Image(Some(data));
@@ -179,7 +182,7 @@ impl State {
 
         self.instructions.text.set_neq(text.clone());
         if(push_history) {
-            self.history.push_modify(clone!(text => move |history| {
+            self.get_history().push_modify(clone!(text => move |history| {
                 if let Some(game_data) = &mut history.game_data {
                     game_data.instructions.text = text;
                 }
@@ -195,7 +198,7 @@ impl State {
         log::info!("CHANGING INSTRUCTIONS AUDIO!!!!");
         self.instructions.audio_id.set_neq(audio_id.clone());
 
-        self.history.push_modify(move |history| {
+        self.get_history().push_modify(move |history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.instructions.audio_id = audio_id;
             }
@@ -203,12 +206,14 @@ impl State {
     }
     pub fn delete_pair(&self, pair_index: usize) {
         self.pairs.lock_mut().remove(pair_index);
-        self.history.push_modify(|history| {
+        self.get_history().push_modify(|history| {
             if let Some(game_data) = &mut history.game_data {
                 game_data.pairs.remove(pair_index);
             }
         });
     }
+
+
 
     //Usually saving goes through the history mechanism. when it doesn't this can be used
     //It pulls from the latest history in order to mixin
@@ -216,7 +221,7 @@ impl State {
         save(
             self.save_loader.clone(), 
             self.module_id.clone(), 
-            self.history.get_current()
+            self.get_history().get_current()
                 .game_data
                 .map(|mut game_data| {
                     f(&mut game_data);
@@ -240,7 +245,7 @@ impl State {
 
     fn replace_pairs(&self, pairs:Vec<(Card, Card)>) {
         self.pairs.lock_mut().replace_cloned(pairs.clone());
-        self.history.push_modify(move |last| {
+        self.get_history().push_modify(move |last| {
             if let Some(game_data) = &mut last.game_data {
                 game_data.pairs = 
                     pairs
@@ -251,17 +256,6 @@ impl State {
         });
     }
 
-    //Doesn't update history of course
-    pub fn set_from_history(&self, history:Option<History>) {
-        match history {
-            Some(history) => {
-                self.set_from_raw(history.game_data);
-            },
-            None => {
-                self.set_from_raw(None);
-            }
-        }
-    }
 
     fn set_from_raw(&self, game_data:Option<raw::GameData>) {
         match game_data {
@@ -299,6 +293,25 @@ impl State {
 
 }
 
+pub fn history_on_change(state: Rc<State>) -> HistoryChangeFn {
+    move |history:Option<History>| {
+        save(state.save_loader.clone(), state.module_id.clone(), history.and_then(|history| history.game_data));
+    }
+}
+//Does not update history or save
+//Saving happens like any other onchange
+pub fn history_on_undoredo(state: Rc<State>) -> HistoryUndoRedoFn {
+    move |history:Option<History>| {
+        match history {
+            Some(history) => {
+                state.set_from_raw(history.game_data);
+            },
+            None => {
+                state.set_from_raw(None);
+            }
+        }
+    }
+}
 pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::GameData>) {
 
     //Note - there's currently no way to save a None... 

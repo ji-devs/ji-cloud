@@ -23,9 +23,9 @@ impl HeaderDom {
         html!("header-memory", {
             .property("slot", "header")
             .child(ControllerDom::render(
-                state.history.clone(),
-                clone!(state => move |history| {
-                    state.set_from_history(history);
+                state.get_history(),
+                clone!(state => move || {
+                    log::info!("TODO - SWITCH TO PREVIEW MODE!");
                 })
             ))
             .child(html!("header-button-add", {

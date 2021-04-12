@@ -49,12 +49,12 @@ impl StateLoader<RawData, State> for PageLoader {
                 Some(game_data) => game_data.clone()
             };
 
-            let state = Rc::new(State::new(jig_id, module_id, game_data));
+            let state = State::new(jig_id, module_id, game_data);
             Some(state)
         }
     }
 
     fn derive_state(&self, data:RawData) -> Rc<State> { 
-        Rc::new(State::new(self.jig_id.clone(), self.module_id.clone(), Some(data)))
+        State::new(self.jig_id.clone(), self.module_id.clone(), Some(data))
     }
 }

@@ -10,10 +10,12 @@ pub struct ControllerDom {
 
 //TODO - move on_undoredo into HistoryState itself
 impl ControllerDom {
-    pub fn render<T, UR, F>(history: Rc<HistoryState<T, F>>, mut on_undoredo: UR) -> Dom 
-    where T: Clone + 'static,
-          UR: FnMut(Option<T>) + 'static,
-          F: Fn(Option<T>) + 'static
+    pub fn render<T, ON_CHANGE, ON_UNDOREDO, ON_PREVIEW>(history: Rc<HistoryState<T, ON_CHANGE, ON_UNDOREDO>>, on_preview: ON_PREVIEW) -> Dom 
+    where
+        T: Clone + 'static,
+        ON_CHANGE: Fn(Option<T>) + 'static,
+        ON_UNDOREDO: Fn(Option<T>) + 'static,
+        ON_PREVIEW: Fn() + 'static,
     {
         html!("module-header-controller", {
             .property("slot", "controller")
@@ -22,12 +24,13 @@ impl ControllerDom {
             .event(clone!(history => move |evt:events::CustomString| {
                 match evt.value().as_ref() {
                     "undo" => {
-                        on_undoredo(history.undo());
+                        history.undo();
                     },
                     "redo" => {
-                        on_undoredo(history.redo());
+                        history.redo();
                     },
                     "preview" => {
+                        on_preview();
                     }
                     _ => {}
                 };

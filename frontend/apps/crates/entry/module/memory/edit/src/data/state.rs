@@ -26,10 +26,18 @@ use dominator_helpers::futures::AsyncLoader;
 pub use super::card::state::*;
 use wasm_bindgen_futures::spawn_local;
 use utils::prelude::*;
-
+use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
-type HistoryChangeFn = impl Fn(Option<History>);
-type StateHistory = HistoryState<History, HistoryChangeFn>;
+//
+//Basically, the type of these callbacks are closures created from *inside*
+//Since we don't have the actual type here on the *outside* we can't define it
+//However, we do know something about the type - namely, that it will *exist*
+//Hence, the so-called "existential" type
+//
+//For this to be true it must actually be defined eventually though
+//so that the compiler can kinda figure it out and fill the type in backwards
+pub type HistoryStateImpl = HistoryState<History, HistoryChangeFn, HistoryUndoRedoFn>;
+
 pub struct State {
     pub jig_id: JigId,
     pub module_id: ModuleId,
@@ -39,8 +47,8 @@ pub struct State {
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Instructions,
-    pub history: Rc<StateHistory>,
     pub save_loader: Rc<AsyncLoader>,
+    history: RefCell<Option<Rc<HistoryStateImpl>>>,
 }
 
 pub struct Instructions {
@@ -62,7 +70,7 @@ impl Instructions {
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Self {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Rc<Self> {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 
@@ -94,11 +102,9 @@ impl State {
         });
 
         let save_loader = Rc::new(AsyncLoader::new());
-        let history = Rc::new(HistoryState::new(
-            History::new(raw_data),
-            Self::on_history_change(save_loader.clone(), module_id.clone()),
-        ));
-        Self {
+
+
+        let _self = Rc::new(Self {
             jig_id,
             module_id,
             game_mode: Mutable::new(game_mode),
@@ -106,21 +112,29 @@ impl State {
             step,
             steps_completed: Mutable::new(HashSet::new()),
             theme_id: Mutable::new(theme_id),
-            history,
+            history: RefCell::new(None),
             save_loader,
             instructions
-        }
+        });
+
+        let history = Rc::new(HistoryState::new(
+            History::new(raw_data),
+            actions::history_on_change(_self.clone()),
+            actions::history_on_undoredo(_self.clone()),
+        ));
+
+        *_self.history.borrow_mut() = Some(history);
+
+        _self
+    }
+
+    pub fn get_history(&self) -> Rc<HistoryStateImpl> {
+        self.history.borrow().as_ref().unwrap_ji().clone()
     }
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
         self.theme_id.signal_ref(|id| id.as_str_id())
     }
 
-    //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
-    fn on_history_change(save_loader: Rc<AsyncLoader>, module_id: ModuleId) -> HistoryChangeFn {
-        move |history| {
-            actions::save(save_loader.clone(), module_id, history.and_then(|history| history.game_data));
-        }
-    }
 
 
     pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
