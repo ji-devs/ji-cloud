@@ -288,6 +288,15 @@ impl State {
 
     }
 
+    pub fn next_step(&self) {
+        self.step.replace_with(|step| match step {
+            Step::One => Step::Two,
+            Step::Two => Step::Three,
+            Step::Three => Step::Four,
+            Step::Four => unimplemented!("nothing after step 4!")
+        });
+    }
+
 }
 
 pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::GameData>) {

@@ -7,6 +7,7 @@ use futures_signals::{
     map_ref,
     signal::SignalExt
 };
+use utils::prelude::*;
 
 pub struct FooterDom {}
 impl FooterDom {
@@ -22,6 +23,9 @@ impl FooterDom {
                 .property("iconAfter", "arrow")
                 .property("slot", "btn")
                 .text(crate::strings::STR_CONTINUE)
+                .event(clone!(state => move |evt:events::Click| {
+                    state.next_step();
+                }))
             }))
                 
         })
