@@ -5,8 +5,12 @@ import {MODE} from "@elements/module/memory/_common/types.ts";
 
 const STR_DUPLICATE = "Duplicate";
 const STR_WORDS_IMAGES = "Words & Images";
-const STR_BEGINS = "What begins with...";
+const STR_BEGINS_WITH = "What begins with...";
 const STR_LETTERING = "Lettering";
+const STR_RIDDLES = "Riddles";
+const STR_OPPOSITES = "Opposites";
+const STR_SYNONYMNS = "Synonymns";
+const STR_TRANSLATE = "Translate";
 
 @customElement('choose-card')
 export class _ extends LitElement {
@@ -51,8 +55,12 @@ export class _ extends LitElement {
 
       const label = mode === "duplicate" ? STR_DUPLICATE
         : mode === "words-images" ? STR_WORDS_IMAGES
-        : mode === "begins" ? STR_BEGINS
+        : mode === "begins-with" ? STR_BEGINS_WITH
         : mode === "lettering" ? STR_LETTERING
+        : mode === "riddles" ? STR_RIDDLES
+        : mode === "opposites" ? STR_OPPOSITES
+        : mode === "synonymns" ? STR_SYNONYMNS
+        : mode === "translate" ? STR_TRANSLATE
             : "";
 
       return html`

@@ -18,7 +18,7 @@ export const Landing = (props?:Partial<Args>) => {
     <choose-page>
         <choose-card mode="duplicate"></choose-card>
         <choose-card mode="words-images"></choose-card>
-        <choose-card mode="begins"></choose-card>
+        <choose-card mode="begins-with"></choose-card>
         <choose-card mode="lettering"></choose-card>
         </choose-page>
     `;

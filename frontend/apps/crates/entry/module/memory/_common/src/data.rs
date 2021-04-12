@@ -35,6 +35,8 @@ pub enum Card {
     Audio(Option<(AudioId, MediaLibrary)>)
 }
 
+
+
 #[derive(Serialize, Deserialize,Clone, Copy, Debug, PartialEq)]
 pub enum Mode {
     Duplicate,
@@ -45,6 +47,22 @@ pub enum Mode {
     Opposites,
     Synonymns,
     Translate
+}
+
+impl Mode {
+    //Must match the element stings in types.ts
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Duplicate => "duplicate",
+            Self::WordsAndImages=> "words-images",
+            Self::BeginsWith => "begins-with",
+            Self::Lettering => "lettering",
+            Self::Riddles => "riddles",
+            Self::Opposites => "opposites",
+            Self::Synonymns => "synonymns",
+            Self::Translate => "translate",
+        }
+    }
 }
 
 impl GameData {

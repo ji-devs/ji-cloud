@@ -125,34 +125,3 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
         )
     })
 }
-/*
-    <sidebar-widget-dual-list>
-        <button-text slot="clear">${STR_CLEAR}</button-text>
-        <button-sidebar slot="input-buttons" mode="keyboard"></button-sidebar>
-        <button-sidebar slot="input-buttons" mode="dicta"></button-sidebar>
-        <button-sidebar slot="input-buttons" mode="sefaria"></button-sidebar>
-        <button-rect color="grey" size="small" iconAfter="done" slot="done-btn">${STR_DONE}</button-rect>
-        <sidebar-widget-dual-list-column side="left" header="${leftHeader}">
-            ${mapToString(arrayCount(nRows), row => {
-
-                const is_placeholder = row < placeholderCutoff;
-
-                const value = is_placeholder ? "placeholder" : "value";
-                const placeholder = is_placeholder ? "placeholder" : "";
-
-                return`<sidebar-widget-dual-list-input value="${value}" nLines="${nLines}" ${placeholder}></sidebar-widget-dual-list-input>`
-            })}
-        </sidebar-widget-dual-list-column>
-        <sidebar-widget-dual-list-column side="right" header="${rightHeader}">
-            ${mapToString(arrayCount(nRows), row => {
-
-                const is_placeholder = row < placeholderCutoff;
-
-                const value = is_placeholder ? "placeholder" : "value";
-                const placeholder = is_placeholder ? "placeholder" : "";
-
-                return`<sidebar-widget-dual-list-input value="${value}" nLines="${nLines}" ${placeholder}></sidebar-widget-dual-list-input>`
-            })}
-        </sidebar-widget-dual-list-column>
-    </sidebar-widget-dual-list>`
-    */
