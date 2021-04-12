@@ -63,15 +63,16 @@ impl DebugSettings {
             ),
             step: Some(Step::One), 
             live_save: false,
-            content_tab: Some(DebugContentTab::Text),
+            content_tab: Some(DebugContentTab::Images),
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), true)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), true)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

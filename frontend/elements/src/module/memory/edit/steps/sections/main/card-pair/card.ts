@@ -14,10 +14,22 @@ export class _ extends LitElement {
               transform-style: preserve-3d;
           }
 
-          section.editing .front {
-              border-style: dashed
+          :host([dragOver]) section.editing .front {
+              border-style: dashed;
+              border-radius: 16px;
+              border-width: 3px;
+              background-color: var(--light-blue-1);
           }
 
+          section.editing .front {
+              border-style: solid; 
+              border-radius: 16px;
+              border-width: 1px;
+          }
+
+          .front {
+              background-color: white;
+          }
           section, ::slotted(img-ji), .back > img-ui {
               width: 160px;
               height: 160px;
@@ -47,13 +59,8 @@ export class _ extends LitElement {
                   backface-visibility: hidden;
           }
 
-          .front {
-              border-radius: 16px;
-              border-style: solid;
-              border-width: 3px;
+              
 
-              background-color: white;
-          }
 
           .back {
               transform: rotateY(180deg);
@@ -63,6 +70,9 @@ export class _ extends LitElement {
             }
     `];
   }
+
+  @property({type: Boolean, reflect: true})
+  dragOver:boolean = false;
 
   @property({type: Boolean})
   flippable:boolean = false;

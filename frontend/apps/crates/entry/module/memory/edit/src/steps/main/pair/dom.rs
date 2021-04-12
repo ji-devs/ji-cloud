@@ -8,7 +8,7 @@ use web_sys::HtmlElement;
 use js_sys::Reflect;
 use futures_signals::{
     map_ref,
-    signal::{ReadOnlyMutable, SignalExt},
+    signal::{Mutable, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
 use components::image_search::types::*;
@@ -55,14 +55,18 @@ impl CardDom {
     pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {
         let input_ref:Rc<RefCell<Option<HtmlElement>>> = Rc::new(RefCell::new(None));
 
+        let editing_active:Mutable<bool> = Mutable::new(false);
+
         html!("main-card", {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
             .property("editing", step == Step::One)
+            .property_signal("dragOver", editing_active.signal())
             .property_signal("theme", state.theme_id_str_signal())
-            .event(clone!(input_ref => move |evt:events::Click| {
+            .event(clone!(input_ref, editing_active => move |evt:events::Click| {
                 if let Some(input_ref) = input_ref.borrow().as_ref() {
                     Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
+                    editing_active.set_neq(true);
                 }
             }))
             .child({
@@ -84,6 +88,9 @@ impl CardDom {
                                 let value = evt.value();
                                 state.replace_card_text(index, side, value);
                             }))
+                            .event(clone!(editing_active => move |evt:events::CustomToggle| {
+                                editing_active.set_neq(evt.value());
+                            }))
                             .event(clone!(state, other => move |evt:events::Reset| {
                                 //Just need to change the linked pair
                                 //without affecting history
@@ -91,6 +98,7 @@ impl CardDom {
                                     //other.as_text_mutable().set_neq(original_data.clone());
                                     other.as_text_mutable().set_neq(data.get_cloned());
                                 }
+
                             }))
                             .after_inserted(clone!(input_ref => move |dom| {
                                 *input_ref.borrow_mut() = Some(dom);
@@ -99,20 +107,24 @@ impl CardDom {
                     },
                     Card::Image(data) => {
                         html!("empty-fragment", {
-                            .child_signal(data.signal_cloned().map(clone!(state => move |data| {
+                            .child_signal(data.signal_cloned().map(clone!(state, editing_active => move |data| {
                                 Some(match data {
                                     None => {
                                         html!("img-ui", {
                                             .property("path", "core/_common/image-empty.svg")
-                                            .event_preventable(clone!(state => move |evt:events::DragOver| {
+                                            .event_preventable(clone!(state, editing_active => move |evt:events::DragOver| {
                                                 if let Some(data_transfer) = evt.data_transfer() {
                                                     if data_transfer.types().index_of(&JsValue::from_str(IMAGE_SEARCH_DATA_TRANSFER), 0) != -1 {
                                                         evt.prevent_default();
+                                                        editing_active.set_neq(true);
                                                     }
                                                 }
 
                                             }))
-                                            .event(clone!(state, index => move |evt:events::Drop| {
+                                            .event(clone!(editing_active => move |evt:events::DragLeave| {
+                                                editing_active.set_neq(false);
+                                            }))
+                                            .event(clone!(state, index, editing_active => move |evt:events::Drop| {
                                                 if let Some(data_transfer) = evt.data_transfer() {
                                                     if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() { 
                                                         let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
@@ -120,6 +132,7 @@ impl CardDom {
                                                         state.replace_card_image(index, side, (data.id, data.lib));
                                                     }
                                                 }
+                                                editing_active.set_neq(false);
                                             }))
                                         })
                                     },

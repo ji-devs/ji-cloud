@@ -16,13 +16,15 @@ export interface Args {
     contentMode: CONTENT_MODE,
     editTarget: boolean,
     theme: ThemeKind,
+    dragOver: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
     ioMode: "edit",
     contentMode: "text",
     theme: "chalkboard",
-    editTarget: true
+    editTarget: true,
+    dragOver: false 
 }
 
 export const Card= (props?:Partial<Args> & {slot?: string}) => {

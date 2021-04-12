@@ -59,13 +59,19 @@ export class _ extends LitElement {
   @property()
   clickMode: CLICK_MODE = "double";
 
+  toggleEditing = (value: boolean) => {
+    this.editing = value;
+    this.dispatchEvent(new CustomEvent("custom-toggle", {
+      detail: { value },
+    }));
+  }
   onKey(evt: KeyboardEvent) {
     let { key } = evt;
     key = key.toLowerCase();
     if (key === "escape") {
         const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
         input.value = this.value;
-        this.editing = false;
+        this.toggleEditing(false);
         this.dispatchEvent(new Event("reset"));
     } else if(key === "enter") {
         //not for textarea...
@@ -159,7 +165,7 @@ export class _ extends LitElement {
             })
         );
 
-      this.editing = false;
+      this.toggleEditing(false);
   }
 
   render() {
@@ -169,13 +175,13 @@ export class _ extends LitElement {
         <textarea class="${classMap({visible: editing})}" id="input" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></textarea>
         <span id="show" class="${classMap({visible: !editing})}"
               @dblclick=${() => {
-                if(clickMode === "double") {
-                    this.editing = true
-                }
+                  if(clickMode === "double") {
+                    this.toggleEditing(true);
+                    }
               }}
               @click=${() => {
                 if(clickMode === "single") {
-                    this.editing = true
+                    this.toggleEditing(true);
                 }
               }}
               >${value}</span>
