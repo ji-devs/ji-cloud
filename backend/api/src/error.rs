@@ -13,6 +13,28 @@ pub use oauth::{GoogleOAuth, OAuth};
 #[allow(clippy::clippy::module_name_repetitions)]
 pub type BasicError = ApiError<EmptyError>;
 
+#[non_exhaustive]
+#[api_v2_errors(code = 401, code = 403, code = 404, code = 500)]
+pub enum Auth {
+    InternalServerError(anyhow::Error),
+    Forbidden,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Auth {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Auth {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
 pub fn ise(e: anyhow::Error) -> actix_web::Error {
     let mut resp = HttpResponse::InternalServerError();
     resp.extensions_mut().insert(e);
@@ -24,6 +46,7 @@ pub fn ise(e: anyhow::Error) -> actix_web::Error {
 #[api_v2_errors(code = 401, code = 403, code = 404, code = 500)]
 pub enum Delete {
     Conflict,
+    Forbidden,
     InternalServerError(anyhow::Error),
 }
 
@@ -33,10 +56,20 @@ impl<T: Into<anyhow::Error>> From<T> for Delete {
     }
 }
 
+impl From<Auth> for Delete {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
+}
+
 impl Into<actix_web::Error> for Delete {
     fn into(self) -> actix_web::Error {
         match self {
             Self::Conflict => BasicError::new(http::StatusCode::CONFLICT).into(),
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
         }
     }
@@ -215,57 +248,21 @@ impl Into<actix_web::Error> for UserNotFound {
     code = 403,
     code = 404,
     description = "Not Found: Resource Not Found",
-    code = 422,
-    code = 500
-)]
-pub enum JigUpdate {
-    InternalServerError(anyhow::Error),
-    ResourceNotFound,
-    Unprocessable,
-    MissingMetadata(MetadataNotFound),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for JigUpdate {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for JigUpdate {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::ResourceNotFound => BasicError::with_message(
-                http::StatusCode::NOT_FOUND,
-                "Resource Not Found".to_owned(),
-            )
-            .into(),
-            Self::InternalServerError(e) => ise(e),
-
-            Self::MissingMetadata(data) => ApiError {
-                code: http::StatusCode::UNPROCESSABLE_ENTITY,
-                message: "Metadata not Found".to_owned(),
-                extra: data,
-            }
-            .into(),
-
-            JigUpdate::Unprocessable => {
-                BasicError::new(http::StatusCode::UNPROCESSABLE_ENTITY).into()
-            }
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 400,
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: Resource Not Found",
     code = 500
 )]
 pub enum NotFound {
     ResourceNotFound,
+    Forbidden,
     InternalServerError(anyhow::Error),
+}
+
+impl From<Auth> for NotFound {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
 }
 
 impl<T: Into<anyhow::Error>> From<T> for NotFound {
@@ -282,6 +279,7 @@ impl Into<actix_web::Error> for NotFound {
                 "Resource Not Found".to_owned(),
             )
             .into(),
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
         }
     }
@@ -402,7 +400,17 @@ impl Into<actix_web::Error> for Upload {
 )]
 pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
+    Forbidden,
     MissingMetadata(MetadataNotFound),
+}
+
+impl From<Auth> for CreateWithMetadata {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
 }
 
 impl<T: Into<anyhow::Error>> From<T> for CreateWithMetadata {
@@ -420,6 +428,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
                 extra: data,
             }
             .into(),
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
         }
     }
@@ -439,6 +448,16 @@ pub enum UpdateWithMetadata {
     ResourceNotFound,
     InternalServerError(anyhow::Error),
     MissingMetadata(MetadataNotFound),
+    Forbidden,
+}
+
+impl From<Auth> for UpdateWithMetadata {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
 }
 
 impl<T: Into<anyhow::Error>> From<T> for UpdateWithMetadata {
@@ -462,6 +481,9 @@ impl Into<actix_web::Error> for UpdateWithMetadata {
                 "Resource Not Found".to_owned(),
             )
             .into(),
+
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+
             Self::InternalServerError(e) => ise(e),
         }
     }
@@ -479,17 +501,6 @@ impl From<MetaWrapperError> for CreateWithMetadata {
 }
 
 impl From<MetaWrapperError> for UpdateWithMetadata {
-    fn from(e: MetaWrapperError) -> Self {
-        match e {
-            MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),
-            MetaWrapperError::MissingMetadata { id, kind } => {
-                Self::MissingMetadata(MetadataNotFound { id, kind })
-            }
-        }
-    }
-}
-
-impl From<MetaWrapperError> for JigUpdate {
     fn from(e: MetaWrapperError) -> Self {
         match e {
             MetaWrapperError::Sqlx(e) => Self::InternalServerError(e.into()),

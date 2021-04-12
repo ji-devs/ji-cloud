@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 // avoid breaking Changes
-pub use module::{LiteModule, ModuleId, ModuleKind};
+pub use module::{LiteModule, Module, ModuleKind};
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -40,11 +40,6 @@ pub struct JigCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
-
-    /// The JIG's remaining modules.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[serde(default)]
-    pub modules: Vec<ModuleId>,
 
     /// The types of content this JIG contains.
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -99,11 +94,6 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
-
-    /// The JIG's modules.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub modules: Option<Vec<ModuleId>>,
 
     /// The types of content this JIG contains.
     #[serde(skip_serializing_if = "Option::is_none")]

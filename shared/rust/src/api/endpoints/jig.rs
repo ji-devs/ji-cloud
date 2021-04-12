@@ -12,6 +12,9 @@ use crate::{
 
 use super::ApiEndpoint;
 
+/// Endpoints for jig modules.
+pub mod module;
+
 /// Get a JIG by ID.
 pub struct Get;
 impl ApiEndpoint for Get {

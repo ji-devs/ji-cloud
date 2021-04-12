@@ -1,43 +1,52 @@
+use actix_web::Either;
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Data, Json, ServiceConfig},
+    web::{self, Data, Json, Path, ServiceConfig},
     NoContent,
 };
 use shared::{
-    api::{endpoints::module, ApiEndpoint},
-    domain::{
-        jig::module::{ModuleCreateRequest, ModuleId, ModuleResponse},
-        CreateResponse,
+    api::{endpoints::jig::module, ApiEndpoint},
+    domain::jig::{
+        module::{
+            ModuleCreateRequest, ModuleCreateResponse, ModuleId, ModuleIdOrIndex, ModuleResponse,
+        },
+        JigId,
     },
 };
 use sqlx::PgPool;
 
-use crate::{
-    db, error,
-    extractor::{ScopeManageModule, TokenUser, TokenUserWithScope},
-};
+use crate::{db, error, extractor::TokenUser};
 
 /// Create a new module.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    _auth: TokenUserWithScope<ScopeManageModule>,
+    auth: TokenUser,
+    parent: Path<JigId>,
     req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
-) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Server> {
-    let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
-    let id = db::module::create(&*db, req.kind, req.body.as_ref()).await?;
+) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Auth> {
+    let parent_id = parent.into_inner();
 
-    Ok(Json(CreateResponse { id }))
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+
+    let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
+    let index = db::module::create(&*db, parent_id, req.kind, req.body.as_ref()).await?;
+
+    Ok(Json(ModuleCreateResponse { index }))
 }
 
 /// Delete a module.
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageModule>,
-    path: web::Path<ModuleId>,
+    auth: TokenUser,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::Delete> {
-    db::module::delete(&*db, path.into_inner()).await?;
+    let (parent_id, module) = path.into_inner();
+
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+
+    db::module::delete(&*db, parent_id, ModuleIdOrIndex::Id(module)).await?;
 
     Ok(NoContent)
 }
@@ -46,12 +55,24 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageModule>,
+    auth: TokenUser,
     req: Option<Json<<module::Update as ApiEndpoint>::Req>>,
-    path: web::Path<ModuleId>,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<NoContent, error::NotFound> {
+    let (parent_id, module) = path.into_inner();
+
+    db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
+
     let req = req.map_or_else(Default::default, Json::into_inner);
-    let exists = db::module::update(&*db, path.into_inner(), req.kind, req.body.as_ref()).await?;
+    let exists = db::module::update(
+        &*db,
+        parent_id,
+        ModuleIdOrIndex::Id(module),
+        req.kind,
+        req.body.as_ref(),
+        req.reinsert_at,
+    )
+    .await?;
 
     if !exists {
         return Err(error::NotFound::ResourceNotFound);
@@ -65,9 +86,11 @@ async fn update(
 async fn get(
     db: Data<PgPool>,
     _claims: TokenUser,
-    path: web::Path<ModuleId>,
+    path: web::Path<(JigId, ModuleId)>,
 ) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
-    let module = db::module::get(&db, path.into_inner())
+    let (parent_id, module) = path.into_inner();
+
+    let module = db::module::get(&db, parent_id, ModuleIdOrIndex::Id(module))
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 

@@ -16,23 +16,24 @@ use sqlx::PgPool;
 
 use crate::{
     db, error,
-    extractor::{ScopeManageJig, TokenUser, TokenUserWithScope},
+    extractor::{ScopeAdminJig, TokenUser, TokenUserWithScope},
 };
 
 /// Create a jig.
 #[api_v2_operation]
 async fn create(
     db: Data<PgPool>,
-    auth: TokenUserWithScope<ScopeManageJig>,
+    auth: TokenUser,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
+    db::jig::authz(&*db, auth.0.user_id, None).await?;
+
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
-    let creator_id = auth.claims.user_id;
+    let creator_id = auth.0.user_id;
 
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
-        &req.modules,
         &req.content_types,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
@@ -47,10 +48,12 @@ async fn create(
 #[api_v2_operation]
 async fn clone(
     db: Data<PgPool>,
-    auth: TokenUserWithScope<ScopeManageJig>,
+    claims: TokenUser,
     parent: web::Path<JigId>,
 ) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::NotFound> {
-    match db::jig::clone(&*db, parent.into_inner(), auth.claims.user_id).await? {
+    db::jig::authz(&*db, claims.0.user_id, None).await?;
+
+    match db::jig::clone(&*db, parent.into_inner(), claims.0.user_id).await? {
         Some(id) => Ok(CreatedJson(CreateResponse { id })),
         None => Err(error::NotFound::ResourceNotFound),
     }
@@ -60,10 +63,14 @@ async fn clone(
 #[api_v2_operation]
 async fn delete(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageJig>,
+    claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<NoContent, error::Delete> {
-    db::jig::delete(&*db, path.into_inner()).await?;
+    let id = path.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+
+    db::jig::delete(&*db, id).await?;
 
     Ok(NoContent)
 }
@@ -72,18 +79,21 @@ async fn delete(
 #[api_v2_operation]
 async fn update(
     db: Data<PgPool>,
-    _claims: TokenUserWithScope<ScopeManageJig>,
+    claims: TokenUser,
     req: Option<Json<<jig::Update as ApiEndpoint>::Req>>,
     path: web::Path<JigId>,
-) -> Result<NoContent, error::JigUpdate> {
+) -> Result<NoContent, error::UpdateWithMetadata> {
+    let id = path.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
+
     let req = req.map_or_else(Default::default, Json::into_inner);
 
     db::jig::update(
         &*db,
-        path.into_inner(),
+        id,
         req.display_name.as_deref(),
         req.author_id,
-        req.modules.as_deref(),
         req.content_types.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
@@ -109,7 +119,7 @@ async fn get(
 #[api_v2_operation]
 async fn browse(
     db: Data<PgPool>,
-    claims: TokenUserWithScope<ScopeManageJig>,
+    claims: TokenUserWithScope<ScopeAdminJig>,
     query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Server> {
     let query = query.map_or_else(Default::default, Query::into_inner);

@@ -144,6 +144,14 @@ set
         e => e.into(),
     })?;
 
+    sqlx::query!(
+        "insert into user_scope (user_id, scope) values ($1, $2)",
+        user_id,
+        UserScope::ManageSelfJig as i16
+    )
+    .execute(&mut *txn)
+    .await?;
+
     update_metadata(
         txn,
         user_id,

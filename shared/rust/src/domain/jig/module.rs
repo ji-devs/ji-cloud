@@ -13,6 +13,35 @@ use uuid::Uuid;
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleId(pub Uuid);
 
+/// Which way of finding a module to use when looking it up.
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(untagged)]
+pub enum ModuleIdOrIndex {
+    /// By offset into its parent jig
+    Index(u16),
+    /// By id
+    Id(ModuleId),
+}
+
+impl ModuleIdOrIndex {
+    /// Returns [`Some`] if `self` is `Self::Id`, [`None`] otherwise.
+    pub fn id(self) -> Option<ModuleId> {
+        match self {
+            ModuleIdOrIndex::Id(id) => Some(id),
+            ModuleIdOrIndex::Index(_) => None,
+        }
+    }
+
+    /// Returns [`Some`] if `self` is `Self::Index`, [`None`] otherwise.
+    pub fn index(self) -> Option<u16> {
+        match self {
+            ModuleIdOrIndex::Id(_) => None,
+            ModuleIdOrIndex::Index(index) => Some(index),
+        }
+    }
+}
+
 /// Represents the various kinds of data a module can represent.
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -90,7 +119,7 @@ pub struct LiteModule {
 }
 
 /// Over the wire representation of a module.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Module {
     /// The module's ID.
@@ -114,6 +143,14 @@ pub struct ModuleCreateRequest {
     pub body: Option<serde_json::Value>,
 }
 
+/// Request to create a new `Module`.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ModuleCreateResponse {
+    /// Where in the parent jig this module is situated.
+    pub index: u16,
+}
+
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -132,6 +169,9 @@ pub struct ModuleUpdateRequest {
 
     /// The module's json contents.
     pub body: Option<serde_json::Value>,
-}
 
-into_uuid![ModuleId];
+    /// Where to move this module to in the parent.
+    ///
+    /// Numbers larger than the parent jig's module count will move it to the *end*.
+    pub reinsert_at: Option<u16>,
+}
