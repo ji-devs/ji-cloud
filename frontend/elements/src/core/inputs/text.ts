@@ -137,10 +137,10 @@ export class _ extends LitElement {
     return html`
       <div class="input-wrapper ${errorwrapper}">
         <input
-          placeholder="${placeholder}"
+          .placeholder="${placeholder}"
           type="${inputType}"
           class=""
-          value="${value}"
+          .value="${value}"
           @input="${this.onInput}"
         @change="${this.onChange}"
         />

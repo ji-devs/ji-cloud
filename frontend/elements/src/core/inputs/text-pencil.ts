@@ -84,10 +84,10 @@ export class _ extends LitElement {
     return html`
         <div class="${wrapperClasses}">
         <input
-          placeholder="${placeholder}"
+          .placeholder="${placeholder}"
           type="text"
           class="${inputClasses}"
-          value="${value}"
+          .value="${value}"
           @input="${this.onInput}"
 
           @focus ="${this.onFocus}"

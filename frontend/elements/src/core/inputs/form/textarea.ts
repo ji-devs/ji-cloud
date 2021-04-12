@@ -99,7 +99,7 @@ export class _ extends LitElement {
         <label for="name" class="">
           <span class="text-jibuttonBlue">${label}</span>
           <div class="textarea-wrapper">
-            <textarea rows="${rows}" id="input" type="text" placeholder="${placeholder}" @blur="${this.onBlur}" @input="${this.onInput}" .value="${value}"></textarea>
+            <textarea rows="${rows}" id="input" type="text" .placeholder="${placeholder}" @blur="${this.onBlur}" @input="${this.onInput}" .value="${value}"></textarea>
           </div>
         </label>
       </div>

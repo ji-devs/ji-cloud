@@ -52,7 +52,7 @@ export class _ extends LitElement {
       const {value} = this;
 
       return html`<div class="row">
-          <textarea @input="${this.onInput}" @change="${this.onChange}" >${value}</textarea>
+          <textarea @input="${this.onInput}" @change="${this.onChange}" .value="${value}" ></textarea>
       </div>`
   }
 }

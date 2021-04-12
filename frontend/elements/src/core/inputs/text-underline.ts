@@ -77,8 +77,8 @@ export class _ extends LitElement {
             <input
               class=""
               type="text"
-              placeholder="${placeholder}"
-              value="${value}"
+              .placeholder="${placeholder}"
+              .value="${value}"
                 @input="${this.onInput}"
                 @change="${this.onChange}"
             />

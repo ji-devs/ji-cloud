@@ -54,7 +54,7 @@ export class _ extends LitElement {
       const {value} = this;
 
       return html`<div class="row">
-          <input type="text" value=${value} @input="${this.onInput}" @change="${this.onChange}" >
+          <input type="text" .value=${value} @input="${this.onInput}" @change="${this.onChange}" >
           </input>
       </div>`
   }

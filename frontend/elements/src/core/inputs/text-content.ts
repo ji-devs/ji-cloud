@@ -155,7 +155,7 @@ export class _ extends LitElement {
     const { value, editing, clickMode} = this;
 
     return html`
-        <input class="${classMap({visible: editing})}" id="input" type="text" @input="${this.onInput}" @keyup="${this.onKey}" value="${value}"></input>
+        <input class="${classMap({visible: editing})}" id="input" type="text" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></input>
         <span class="${classMap({visible: !editing})}"
               @dblclick=${() => {
                 if(clickMode === "double") {

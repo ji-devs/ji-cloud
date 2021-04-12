@@ -100,7 +100,7 @@ export class _ extends LitElement {
               rows="${rows}"
               contenteditable="true"
               type="text"
-              placeholder="${placeholder}"
+              .placeholder="${placeholder}"
               aria-label="${ariaLabel}"
                 @input="${this.onInput}"
               @change="${this.onChange}"
