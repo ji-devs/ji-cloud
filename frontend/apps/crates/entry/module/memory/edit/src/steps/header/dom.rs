@@ -25,7 +25,7 @@ impl HeaderDom {
             .child(ControllerDom::render(
                 state.get_history(),
                 clone!(state => move || {
-                    log::info!("TODO - SWITCH TO PREVIEW MODE!");
+                    state.change_step(Step::Four);
                 })
             ))
             .child(html!("header-button-add", {
