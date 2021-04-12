@@ -17,12 +17,15 @@ export class _ extends LitElement {
                 padding-left: 50px;
                 padding-right: 50px;
             }
-            article {
+            .content {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
                 height: 100%;
                 overflow-y: auto;
+            }
+            .content ::slotted(*) {
+                min-height: 100%;
             }
         `];
     }
