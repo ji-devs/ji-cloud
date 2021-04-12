@@ -8,6 +8,7 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
+                grid-template-rows: 51px 1fr;
             }
             .body {
                 /* hard coded color?! Couldn't find color in zeplin */

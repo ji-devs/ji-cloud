@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { imageLib } from "@utils/path";
+import { imageLib, MediaLibOptions, MediaSizeOptions } from "@utils/path";
 import {sameOrigin} from "@utils/image";
 
 @customElement("img-ji")
@@ -23,10 +23,10 @@ export class _ extends LitElement {
     cacheBust:boolean = false;
 
     @property()
-    lib: "global" | "user" | "web" = "global";
+    lib: MediaLibOptions = "global";
 
     @property()
-    size: "original" | "full" | "thumb" = "full";
+    size: MediaSizeOptions = "full";
 
     //use with cacheBust true to force reloading when id changes to the same thing
     @property({hasChanged: () => true})

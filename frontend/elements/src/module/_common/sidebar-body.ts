@@ -10,6 +10,8 @@ export class _ extends LitElement {
                 display: block;
                 width: 492px;
                 margin: 0 auto;
+                /* also set height to allow descendants to take full height, feels hacky */
+                height: 100%;
                 min-height: 100%;
             }
         `];

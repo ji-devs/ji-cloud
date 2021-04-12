@@ -1,3 +1,4 @@
+import { moduleKinds, ModuleKind } from "@elements/entry/jig/module-types";
 import "@elements/module/_common/post-preview/post-preview";
 import "@elements/module/_common/post-preview/post-preview-action";
 import { argsToAttrs } from "@utils/attributes";
@@ -7,9 +8,11 @@ export default {
 }
 
 interface Args {
+    module: ModuleKind;
 }
 
 const DEFAULT_ARGS:Args = {
+    module: "memory",
 }
 
 export const PostPreview = (props?:Partial<Args>) => {
@@ -17,9 +20,7 @@ export const PostPreview = (props?:Partial<Args>) => {
 
     return `
         <post-preview ${argsToAttrs(props)}>
-            <p slot="message">Your memory game is ready!</p>
-            <p slot="message">It’s now part of your JIG.</p>
-            <post-preview-action slot="action-_somthing_" kind="_somthing_"></post-preview-action>
+            <post-preview-action slot="action-1of3" kind="1of3"></post-preview-action>
             <post-preview-action slot="action-matching" kind="matching"></post-preview-action>
             <post-preview-action slot="action-flashcards" kind="flashcards"></post-preview-action>
             <post-preview-action slot="action-print" kind="print"></post-preview-action>
@@ -29,3 +30,11 @@ export const PostPreview = (props?:Partial<Args>) => {
 }
 
 PostPreview.args = DEFAULT_ARGS;
+PostPreview.argTypes = {
+    module: {
+        control: {
+            type: 'inline-radio',
+            options: ["cover", "flashcards", "matching", "memory", "poster", "tapping-board", "tracing", "video", "visual-quiz"],
+        }
+    }
+}
