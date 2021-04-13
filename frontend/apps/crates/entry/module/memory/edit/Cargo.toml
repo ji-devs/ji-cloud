@@ -8,9 +8,6 @@ readme = "README.md"
 license = "MIT"
 edition = "2018"
 
-[profile.release]
-lto = true
-
 [lib]
 crate-type = ["cdylib"]
 

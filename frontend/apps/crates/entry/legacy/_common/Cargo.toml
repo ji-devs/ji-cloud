@@ -8,9 +8,6 @@ readme = "README.md"
 license = "MIT"
 edition = "2018"
 
-[profile.release]
-lto = true
-
 
 [dependencies]
 log = "^0.4"

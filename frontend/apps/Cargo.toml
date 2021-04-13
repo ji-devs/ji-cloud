@@ -18,3 +18,6 @@ members = [
     "crates/entry/module/poster/edit",
     "crates/entry/module/poster/play",
 ]
+
+[profile.release]
+lto = true
