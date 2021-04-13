@@ -1,7 +1,8 @@
 use crate::{
     api::Method,
-    domain::jig::module::{
-        ModuleCreateRequest, ModuleCreateResponse, ModuleResponse, ModuleUpdateRequest,
+    domain::{
+        jig::module::{ModuleCreateRequest, ModuleId, ModuleResponse, ModuleUpdateRequest},
+        CreateResponse,
     },
     error::EmptyError,
 };
@@ -40,7 +41,7 @@ impl ApiEndpoint for Get {
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = ModuleCreateRequest;
-    type Res = ModuleCreateResponse;
+    type Res = CreateResponse<ModuleId>;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/module";
     const METHOD: Method = Method::Post;

@@ -143,14 +143,6 @@ pub struct ModuleCreateRequest {
     pub body: Option<serde_json::Value>,
 }
 
-/// Request to create a new `Module`.
-#[derive(Serialize, Deserialize, Debug, Default)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ModuleCreateResponse {
-    /// Where in the parent jig this module is situated.
-    pub index: u16,
-}
-
 /// Response for successfully finding a module
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -173,5 +165,7 @@ pub struct ModuleUpdateRequest {
     /// Where to move this module to in the parent.
     ///
     /// Numbers larger than the parent jig's module count will move it to the *end*.
-    pub reinsert_at: Option<u16>,
+    pub index: Option<u16>,
 }
+
+into_uuid![ModuleId];
