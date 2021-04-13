@@ -3,7 +3,7 @@ import "@elements/module/memory/play/sections/main";
 import {Card} from "../card"; 
 import {mapToString, arrayIndex} from "@utils/array";
 
-export const N_CARD_OPTIONS = [8,10,12,14,16,18,20,22,24,26,28];
+const N_CARD_OPTIONS = [8,10,12,14,16,18,20,22,24,26,28];
 
 export default {
     title: "Module / Memory / Play / Sections"

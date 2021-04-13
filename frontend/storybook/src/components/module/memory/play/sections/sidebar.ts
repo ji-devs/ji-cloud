@@ -1,10 +1,11 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/memory/play/sections/sidebar";
 import {mapToString, arrayIndex} from "@utils/array";
-import {N_CARD_OPTIONS} from "./main";
 import {Card} from "../card";
 
-const N_PAIR_OPTIONS = N_CARD_OPTIONS.map(nCards => nCards/2);
+const N_PAIR_OPTIONS = 
+    [8,10,12,14,16,18,20,22,24,26,28]
+    .map(nCards => nCards/2);
 
 export default {
     title: "Module / Memory / Play / Sections"
