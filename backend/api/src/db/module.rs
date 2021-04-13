@@ -11,12 +11,12 @@ pub async fn create(
     parent: JigId,
     kind: Option<ModuleKind>,
     body: Option<&serde_json::Value>,
-) -> anyhow::Result<u16> {
+) -> anyhow::Result<(ModuleId, u16)> {
     sqlx::query!(
         r#"
 insert into jig_module (jig_id, kind, contents, index)
 values ($1, $2, $3, (select count(*) from jig_module where jig_id = $1))
-returning "index"
+returning id, "index"
 "#,
         parent.0,
         kind.map(|it| it as i16),
@@ -24,7 +24,7 @@ returning "index"
     )
     .fetch_one(pool)
     .await
-    .map(|it| it.index as u16)
+    .map(|it| (ModuleId(it.id), it.index as u16))
     .map_err(Into::into)
 }
 
