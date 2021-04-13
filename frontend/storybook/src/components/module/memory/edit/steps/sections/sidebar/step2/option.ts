@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/module/memory/edit/steps/sections/sidebar/step2/option";
 import {STATE} from "@elements/module/memory/edit/steps/sections/sidebar/step2/option";
-import {MODE} from "@elements/module/memory/_common/types.ts";
+import {MODE} from "@elements/module/memory/_common/types";
 import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
 export default {
     title: "Module / Memory / Edit / Steps / Sections / Sidebar / Step2"

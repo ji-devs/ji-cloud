@@ -2,7 +2,7 @@ use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
-    jig::{JigId, ModuleId, ModuleKind}, 
+    jig::{JigId, module::ModuleId, ModuleKind}, 
     search::CreateSearchKeyResponse, 
 };
 use crate::firebase::FirebaseUserInfo;

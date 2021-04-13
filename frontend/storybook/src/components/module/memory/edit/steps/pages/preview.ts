@@ -1,7 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/widgets/module-page/grid-resize";
 import {Player} from "~/components/module/memory/play/player";
-import {MODE} from "@elements/module/memory/_common/types.ts";
+import {MODE} from "@elements/module/memory/_common/types";
 import "@elements/module/_common/preview-header";
 import {Args as CardArgs} from "~/components/module/memory/edit/steps/sections/main/card-pair/card";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";

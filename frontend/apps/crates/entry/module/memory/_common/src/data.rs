@@ -50,7 +50,7 @@ pub enum Mode {
 }
 
 impl Mode {
-    //Must match the element stings in types.ts
+    //Must match the element stings in types
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Duplicate => "duplicate",

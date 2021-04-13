@@ -5,7 +5,7 @@ import "@elements/widgets/nav/steps-nav";
 import "@elements/widgets/nav/step-nav";
 import "@elements/core/buttons/rectangle";
 import "@elements/module/_common/sidebar";
-import {MODE} from "@elements/module/memory/_common/types.ts";
+import {MODE} from "@elements/module/memory/_common/types";
 import {Empty as Step1Empty} from "./step1/empty";
 import {Duplicate as Step1Duplicate} from "./step1/duplicate";
 import {WordsAndImages as Step1WordsAndImages} from "./step1/words-and-images";

@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {MODE} from "@elements/module/memory/_common/types.ts";
+import {MODE} from "@elements/module/memory/_common/types";
 
 const STR_DUPLICATE = "Duplicate";
 const STR_WORDS_IMAGES = "Words & Images";

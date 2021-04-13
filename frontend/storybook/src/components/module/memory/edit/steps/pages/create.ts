@@ -4,7 +4,7 @@ import {Main} from "~/components/module/memory/edit/steps/sections/main/main";
 import {Sidebar} from "~/components/module/memory/edit/steps/sections/sidebar/sidebar";
 import {Header} from "~/components/module/memory/edit/steps/sections/header";
 import {Footer} from "~/components/module/_common/footer";
-import {MODE} from "@elements/module/memory/_common/types.ts";
+import {MODE} from "@elements/module/memory/_common/types";
 import {Args as CardArgs} from "~/components/module/memory/edit/steps/sections/main/card-pair/card";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 export default {
