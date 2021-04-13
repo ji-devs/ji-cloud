@@ -19,7 +19,7 @@ use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
 use shared::{domain::{
-    jig::{JigId, ModuleId},
+    jig::{JigId, module::ModuleId},
     audio::AudioId
 }, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;

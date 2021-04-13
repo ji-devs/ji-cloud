@@ -12,7 +12,7 @@ use crate::{
     steps,
     choose
 };
-use shared::domain::jig::{JigId, ModuleId};
+use shared::domain::jig::{JigId, module::ModuleId};
 use super::loader::*;
 pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
 

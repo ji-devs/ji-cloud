@@ -16,7 +16,7 @@ use unicode_segmentation::UnicodeSegmentation;
 pub type HistoryChangeFn = impl Fn(Option<History>);
 pub type HistoryUndoRedoFn = impl Fn(Option<History>);
 use shared::{
-    api::endpoints::{ApiEndpoint, self, module::*}, 
+    api::endpoints::{ApiEndpoint, self, jig::module::*}, 
     domain::{
         image::ImageId,
         audio::AudioId, 
@@ -341,6 +341,7 @@ pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw:
 
                 let req = Some(ModuleUpdateRequest {
                     kind: None,
+                    reinsert_at: None,
                     body: Some(value), 
                 });
                 api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
