@@ -11,6 +11,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
+import { live } from "lit-html/directives/live";
 
 export type CLICK_MODE = "single" | "double" | "none";
 
@@ -56,6 +57,12 @@ export class _ extends LitElement {
   @property({ type: Boolean })
   editing: boolean = false;
 
+  @property({type: Number})
+  constrainWidth:number = 0;
+
+  @property({type: Number})
+  constrainHeight:number = 0;
+
   @property()
   clickMode: CLICK_MODE = "double";
 
@@ -79,14 +86,25 @@ export class _ extends LitElement {
     }
   }
 
+  lastMeasuredWidth: number = 0;
+  lastMeasuredHeight: number = 0;
   onInput() {
+      const {constrainWidth, constrainHeight} = this;
       const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+      this.resizeInput();
+      if(constrainWidth && constrainHeight) {
+          while(this.lastMeasuredWidth >= constrainWidth || this.lastMeasuredHeight >= constrainHeight) {
+              const {value} = input;
+            input.value = value.substring(0, value.length-1); 
+            this.resizeInput();
+          }
+      }
+      
         this.dispatchEvent(
             new CustomEvent("custom-input", {
                 detail: { value: input.value},
             })
         );
-      this.resizeInput();
   }
 
   resizeInput = () => {
@@ -94,7 +112,7 @@ export class _ extends LitElement {
       const measure = this.shadowRoot?.getElementById("measure") as HTMLInputElement;
 
 
-      measure.textContent = this.getValue() as string;
+      measure.textContent = input.value as string;
 
       const lastChar = input.value.charAt(input.value.length-1);
       const rect = measure.getBoundingClientRect();
@@ -108,6 +126,9 @@ export class _ extends LitElement {
 
       input.style.width = `${width}px`;
       input.style.height= `${height}px`;
+
+      this.lastMeasuredWidth = width;
+      this.lastMeasuredHeight = height;
   }
 
   onGlobalMouseDown = (evt: MouseEvent) => {
@@ -145,20 +166,9 @@ export class _ extends LitElement {
      window.removeEventListener("mousedown", this.onGlobalMouseDown);
   }
 
-  getValue = () => {
-      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
-      if(input == null) {
-          console.warn("input should never be null!");
-          return undefined;
-      } else {
-          const {value} = input;
-          return value;
-      }
-
-      
-  }
   dispatchChange = () => {
-      const value = this.getValue();
+      const input = this.shadowRoot?.getElementById("input") as HTMLInputElement;
+      const value = input.value; 
         this.dispatchEvent(
             new CustomEvent("custom-change", {
                 detail: { value},

@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use dominator_helpers::{temp_make_event, make_custom_event_serde, make_custom_event};
-use web_sys::File;
+use web_sys::{File, DomRect};
 use super::resize::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -19,6 +19,17 @@ temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);
 temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
+
+// Custom Bounds 
+#[derive(Deserialize, Debug)]
+pub struct CustomBoundsData {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+make_custom_event_serde!("custom-bounds", CustomBounds, CustomBoundsData);
 
 // Custom Change 
 #[derive(Deserialize, Debug)]

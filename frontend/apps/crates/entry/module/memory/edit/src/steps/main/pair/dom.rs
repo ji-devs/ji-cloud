@@ -75,6 +75,8 @@ impl CardDom {
                         html!("input-textarea-content", {
                             .property_signal("value", data.signal_cloned())
                             .property("clickMode", "none")
+                            .property("constrainWidth", crate::config::CARD_TEXT_LIMIT_WIDTH)
+                            .property("constrainHeight", crate::config::CARD_TEXT_LIMIT_HEIGHT)
                             .event(clone!(state, index, other => move |evt:events::CustomInput| {
                                 let index = index.get().unwrap_or_default();
                                 let value = evt.value();
