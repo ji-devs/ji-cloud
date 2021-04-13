@@ -12,7 +12,7 @@ use rand::prelude::*;
 use shared::{
     domain::{
         image::ImageId,
-        jig::{JigId, ModuleId}
+        jig::{JigId, module::ModuleId}
     },
     media::MediaLibrary
 };

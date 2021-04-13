@@ -12,7 +12,7 @@ use crate::{
 use std::future::Future;
 use components::module::page::StateLoader;
 use shared::{
-    api::endpoints::{ApiEndpoint, self, module::*},
+    api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
     domain::jig::{*, module::*},
 };

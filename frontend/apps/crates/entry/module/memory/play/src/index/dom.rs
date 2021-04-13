@@ -11,7 +11,7 @@ use crate::{
     data::{state::State, raw::GameData as RawData},
 };
 use super::loader::*;
-use shared::domain::jig::{JigId, ModuleId};
+use shared::domain::jig::{JigId, module::ModuleId};
 use crate::player::dom::PlayerDom;
 
 pub type Page = Rc<ModulePage<PageRenderer, PageLoader, RawData, State>>;
