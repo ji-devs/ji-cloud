@@ -30,11 +30,11 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
         let req = Some(ModuleUpdateRequest {
             kind: Some(kind),
-            body: None
+            ..ModuleUpdateRequest::default()
         });
 
-        let path = endpoints::module::Update::PATH.replace("{id}",&state.module.id.0.to_string());
-        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::module::Update::METHOD, req).await {
+        let path = endpoints::jig::module::Update::PATH.replace("{id}",&state.module.id.0.to_string());
+        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, req).await {
             Ok(_) => {
                 state.module.kind.set_neq(Some(kind));
             },
@@ -47,8 +47,8 @@ pub fn delete(state:Rc<State>) {
     let index = state.index;
 
     state.sidebar.loader.load(clone!(state => async move {
-        let path = endpoints::module::Delete::PATH.replace("{id}",&state.module.id.0.to_string());
-        match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::module::Delete::METHOD, None).await {
+        let path = endpoints::jig::module::Delete::PATH.replace("{id}",&state.module.id.0.to_string());
+        match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::module::Delete::METHOD, None).await {
             Ok(_) => {
                 state.sidebar.modules.lock_mut().remove(index);
                 update_module_list(state.clone()).await;
@@ -65,7 +65,7 @@ pub fn add_empty_module_after(state:Rc<State>) {
             body: None
         });
 
-        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&endpoints::module::Create::PATH, endpoints::module::Create::METHOD, req).await {
+        match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&endpoints::jig::module::Create::PATH, endpoints::jig::module::Create::METHOD, req).await {
             Ok(resp) => {
                 let id = resp.id;
                 let index = state.index+1;

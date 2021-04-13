@@ -13,7 +13,7 @@ use super::{
 };
 use utils::{drag::Drag, math::PointI32};
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
-use shared::domain::jig::{Jig, LiteModule, JigId, ModuleId, ModuleKind};
+use shared::domain::jig::{Jig, LiteModule, JigId, module::ModuleId, ModuleKind};
 use web_sys::DomRect;
 use wasm_bindgen::prelude::*;
 

@@ -7,7 +7,7 @@ use futures_signals::{
 };
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::{Jig, JigId, ModuleId};
+use shared::domain::jig::{Jig, JigId, module::ModuleId};
 use super::{
     {actions, debug},
     header::dom::HeaderDom,

@@ -1,4 +1,4 @@
-use shared::domain::jig::{LiteModule, ModuleId, ModuleKind};
+use shared::domain::jig::{LiteModule, module::ModuleId, ModuleKind};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::edit::sidebar::state::State as SidebarState;

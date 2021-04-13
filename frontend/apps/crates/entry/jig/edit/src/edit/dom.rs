@@ -5,7 +5,7 @@ use super::{
     selection::dom::SelectionDom,
     iframe::dom::IframeDom,
 };
-use shared::domain::jig::{JigId, ModuleId};
+use shared::domain::jig::{JigId, module::ModuleId};
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 

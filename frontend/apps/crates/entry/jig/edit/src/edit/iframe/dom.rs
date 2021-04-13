@@ -1,5 +1,5 @@
 use dominator::{html, clone, Dom};
-use shared::domain::jig::{JigId, ModuleId, module::ModuleKind};
+use shared::domain::jig::{JigId, module::ModuleId, module::ModuleKind};
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{

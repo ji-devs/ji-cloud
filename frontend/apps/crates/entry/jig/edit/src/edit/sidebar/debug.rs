@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, LiteModule, ModuleId, ModuleKind};
+use shared::domain::jig::{Jig, JigId, LiteModule, module::ModuleId, ModuleKind};
 use uuid::Uuid;
 use cfg_if::cfg_if;
 

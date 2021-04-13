@@ -1,6 +1,6 @@
 use futures_signals::signal_vec::MutableVec;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::jig::{Jig, LiteModule, JigId, ModuleId, ModuleKind};
+use shared::domain::jig::{Jig, LiteModule, JigId, module::ModuleId, ModuleKind};
 use std::rc::Rc;
 use crate::edit::sidebar::module::state::{Module, State as ModuleState};
 use utils::drag::Drag;

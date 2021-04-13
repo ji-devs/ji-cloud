@@ -3,7 +3,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
-use shared::domain::jig::{JigId, ModuleId};
+use shared::domain::jig::{JigId, module::ModuleId};
 use utils::prelude::*;
 use super::{actions, state::*};
 use std::rc::Rc;
