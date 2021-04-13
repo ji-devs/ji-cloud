@@ -39,7 +39,6 @@ pub fn create_jig(state: Rc<State>) {
         
         let req = Some(JigCreateRequest {
             display_name: None,
-            modules: Vec::new(),
             content_types: Vec::new(),
             publish_at: None,
         });
