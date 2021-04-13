@@ -13,7 +13,7 @@ use std::rc::Rc;
 use crate::data::{raw, state::*};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
-use shared::domain::jig::{JigId, ModuleId};
+use shared::domain::jig::{JigId, module::ModuleId};
 use uuid::Uuid;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();

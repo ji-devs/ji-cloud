@@ -214,8 +214,6 @@ impl State {
         });
     }
 
-
-    //TODO - move this to a separate library to be used on the JS side
     pub fn limit_text(&self, max_len: usize, text:String) -> String {
         let len = text.graphemes(true).count();
 

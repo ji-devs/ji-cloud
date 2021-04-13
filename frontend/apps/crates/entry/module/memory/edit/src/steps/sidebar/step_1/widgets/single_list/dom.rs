@@ -49,35 +49,44 @@ impl SingleListDom {
                 state.list.signal_vec_cloned()
                     .enumerate()
                     .map(clone!(state => move |(index, value)| {
-                        let index = index.get().unwrap_or_default();
-                        let mode = state.app.game_mode.get_cloned().unwrap_ji();
+                        //couldn't get it to compile by moving this into an Rc at a higher level
+                        //but closures should be cheap in a JS VM anyway :P
+                        let constrain_cb = Closure::wrap(Box::new(clone!(state => move |text:String| {
+                            state.app.limit_text(crate::config::SINGLE_LIST_CHAR_LIMIT, text)
+                        })) as Box<dyn FnMut(String) -> String>);
 
-                        html!("sidebar-widget-single-list-input", {
-                            .property_signal("value", {
-                                map_ref! {
-                                    let value = value.signal_cloned(),
-                                    let is_placeholder = state.is_placeholder.signal()
-                                        => move {
-                                            if *is_placeholder {
-                                                match crate::config::get_single_list_init_word(index) {
-                                                    Some(s) => s.to_string(),
-                                                    None => "".to_string()
+                        Dom::with_state(constrain_cb, clone!(state => move |constrain_cb| {
+                            let index = index.get().unwrap_or_default();
+                            let mode = state.app.game_mode.get_cloned().unwrap_ji();
+
+                            html!("sidebar-widget-single-list-input", {
+                                .property_signal("value", {
+                                    map_ref! {
+                                        let value = value.signal_cloned(),
+                                        let is_placeholder = state.is_placeholder.signal()
+                                            => move {
+                                                if *is_placeholder {
+                                                    match crate::config::get_single_list_init_word(index) {
+                                                        Some(s) => s.to_string(),
+                                                        None => "".to_string()
+                                                    }
+                                                } else {
+                                                    value.clone()
                                                 }
-                                            } else {
-                                                value.clone()
                                             }
-                                        }
-                                }
+                                    }
+                                })
+                                .property("constrain", constrain_cb.as_ref())
+                                .property_signal("placeholder", state.is_placeholder.signal())
+                                .event(clone!(state => move |evt:events::Focus| {
+                                    //log::info!("got focus!");
+                                    state.is_placeholder.set_neq(false);
+                                }))
+                                .event(clone!(state => move |evt:events::CustomInput| {
+                                    value.set_neq(evt.value());
+                                }))
                             })
-                            .property_signal("placeholder", state.is_placeholder.signal())
-                            .event(clone!(state => move |evt:events::Focus| {
-                                //log::info!("got focus!");
-                                state.is_placeholder.set_neq(false);
-                            }))
-                            .event(clone!(state => move |evt:events::CustomInput| {
-                                value.set_neq(evt.value());
-                            }))
-                        })
+                        }))
                     }))
             )
         })

@@ -21,14 +21,14 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
-
 /*
 mod page;
 mod pages;
 mod header;
 */
+
 #[wasm_bindgen(start)]
-pub fn main_js() {
+pub async fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
     config::init();

@@ -4,6 +4,9 @@ use serde::Deserialize;
 use utils::prelude::*;
 use crate::data::state::GameMode;
 
+pub static DUAL_LIST_CHAR_LIMIT:usize = 30;
+pub static SINGLE_LIST_CHAR_LIMIT:usize = 30;
+
 macro_rules! config_path {
     ($e:tt) => { 
         concat!("../../../../../../../config/", $e)
