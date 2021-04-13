@@ -1,4 +1,3 @@
-use actix_web::Either;
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json, Path, ServiceConfig},
@@ -6,11 +5,12 @@ use paperclip::actix::{
 };
 use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
-    domain::jig::{
-        module::{
-            ModuleCreateRequest, ModuleCreateResponse, ModuleId, ModuleIdOrIndex, ModuleResponse,
+    domain::{
+        jig::{
+            module::{ModuleCreateRequest, ModuleId, ModuleIdOrIndex, ModuleResponse},
+            JigId,
         },
-        JigId,
+        CreateResponse,
     },
 };
 use sqlx::PgPool;
@@ -30,9 +30,9 @@ async fn create(
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
-    let index = db::module::create(&*db, parent_id, req.kind, req.body.as_ref()).await?;
+    let (id, _index) = db::module::create(&*db, parent_id, req.kind, req.body.as_ref()).await?;
 
-    Ok(Json(ModuleCreateResponse { index }))
+    Ok(Json(CreateResponse { id }))
 }
 
 /// Delete a module.
@@ -70,7 +70,7 @@ async fn update(
         ModuleIdOrIndex::Id(module),
         req.kind,
         req.body.as_ref(),
-        req.reinsert_at,
+        req.index,
     )
     .await?;
 
