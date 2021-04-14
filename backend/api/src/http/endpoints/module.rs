@@ -30,7 +30,7 @@ async fn create(
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
     let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
-    let (id, _index) = db::module::create(&*db, parent_id, req.kind, req.body.as_ref()).await?;
+    let (id, _index) = db::module::create(&*db, parent_id, req.body.as_ref()).await?;
 
     Ok(Json(CreateResponse { id }))
 }
@@ -68,7 +68,6 @@ async fn update(
         &*db,
         parent_id,
         ModuleIdOrIndex::Id(module),
-        req.kind,
         req.body.as_ref(),
         req.index,
     )

@@ -1,7 +1,7 @@
 use std::cmp;
 
 use shared::domain::jig::{
-    module::{Module, ModuleId, ModuleIdOrIndex, ModuleKind},
+    module::{Module, ModuleBody, ModuleBodyResponse, ModuleId, ModuleIdOrIndex, ModuleKind},
     JigId,
 };
 use sqlx::PgPool;
@@ -9,9 +9,21 @@ use sqlx::PgPool;
 pub async fn create(
     pool: &PgPool,
     parent: JigId,
-    kind: Option<ModuleKind>,
-    body: Option<&serde_json::Value>,
+    body: Option<&ModuleBody>,
 ) -> anyhow::Result<(ModuleId, u16)> {
+    // note: should convert `unknowns` to <insert known here> if possible.
+    let (kind, body) = match body {
+        Some(it) => {
+            log::warn!(
+                "Converting known body into unknown body: {}",
+                it.kind().as_str()
+            );
+
+            (Some(it.kind()), Some(it.body_to_json()?))
+        }
+        None => (None, None),
+    };
+
     sqlx::query!(
         r#"
 insert into jig_module (jig_id, kind, contents, index)
@@ -20,7 +32,7 @@ returning id, "index"
 "#,
         parent.0,
         kind.map(|it| it as i16),
-        body
+        body.as_deref(),
     )
     .fetch_one(pool)
     .await
@@ -32,11 +44,24 @@ pub async fn update(
     pool: &PgPool,
     parent_id: JigId,
     lookup: ModuleIdOrIndex,
-    kind: Option<ModuleKind>,
-    body: Option<&serde_json::Value>,
+    body: Option<&ModuleBody>,
     new_index: Option<u16>,
 ) -> anyhow::Result<bool> {
     let (id, index) = (lookup.id(), lookup.index());
+
+    // todo: merge with above.
+    // note: should convert `unknowns` to <insert known here> if possible.
+    let (kind, body) = match dbg!(body) {
+        Some(it) => {
+            log::warn!(
+                "Converting known body into unknown body: {}",
+                it.kind().as_str()
+            );
+
+            (Some(it.kind()), Some(it.body_to_json()?))
+        }
+        None => (None, None),
+    };
 
     let mut txn = pool.begin().await?;
 
@@ -67,7 +92,7 @@ where jig_id = $1 and index = $2 and (
 "#,
         parent_id.0,
         index,
-        body,
+        body.as_deref(),
         kind.map(|it| it as i16),
     )
     .execute(&mut txn)
@@ -125,6 +150,18 @@ where jig_id = $1 and index between $2 and $3
     Ok(true)
 }
 
+fn transform_response_kind(
+    contents: Option<serde_json::Value>,
+    kind: Option<ModuleKind>,
+) -> Option<ModuleBodyResponse> {
+    match (kind, contents) {
+        (None, _) => None,
+        (Some(ModuleKind::Cover), body) => Some(ModuleBodyResponse::Cover(body)),
+        (Some(_), None) => None,
+        (Some(kind), Some(body)) => Some(ModuleBodyResponse::Unknown { kind, body }),
+    }
+}
+
 pub async fn get(
     pool: &PgPool,
     parent: JigId,
@@ -132,8 +169,7 @@ pub async fn get(
 ) -> sqlx::Result<Option<Module>> {
     let (id, index) = (lookup.id(), lookup.index());
 
-    sqlx::query_as!(
-        Module,
+    let module = sqlx::query!(
         r#"
 select 
     id as "id: ModuleId",
@@ -147,7 +183,15 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
         index.map(|it| it as i16)
     )
     .fetch_optional(pool)
-    .await
+    .await?;
+
+    match module {
+        Some(it) => Ok(Some(Module {
+            id: it.id,
+            body: transform_response_kind(it.body, it.kind),
+        })),
+        None => Ok(None),
+    }
 }
 
 pub async fn delete(pool: &PgPool, parent: JigId, lookup: ModuleIdOrIndex) -> anyhow::Result<()> {
