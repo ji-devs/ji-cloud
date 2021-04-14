@@ -92,6 +92,7 @@ export class _ extends LitElement {
 
     @property()
     cancelLabel:string = "";
+
     render() {
         const {header, confirmLabel, cancelLabel, target, maxWidth, placement, offsetSkidding, offsetDistance} = this;
 
