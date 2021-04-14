@@ -5,6 +5,7 @@
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
 pub mod module;
+pub mod tooltip;
 pub mod image;
 pub mod color_select;
 pub mod image_search;

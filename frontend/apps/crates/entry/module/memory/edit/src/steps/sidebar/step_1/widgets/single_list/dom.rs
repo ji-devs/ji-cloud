@@ -8,6 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use super::state::*;
+use components::tooltip::dom::{TooltipDom, Placement};
 
 pub struct SingleListDom {}
 impl SingleListDom {
@@ -48,11 +49,7 @@ impl SingleListDom {
                 html!("empty-fragment", {
                     .child_signal(state.error_element_ref.signal_ref(|elem| {
                         elem.as_ref().map(|elem| {
-                            html!("tooltip-error", {
-                                .property("body", "Body message here")
-                                .property("target", elem)
-                                .property("placement", "left")
-                            })
+                            TooltipDom::render_error(elem, Placement::Left, "Error here!")
                         })
                     }))
                 })
