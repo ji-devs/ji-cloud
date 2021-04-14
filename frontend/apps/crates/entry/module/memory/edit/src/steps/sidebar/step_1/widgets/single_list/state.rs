@@ -7,11 +7,13 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use crate::data::state::{State as AppState, GameMode};
+use web_sys::HtmlElement;
 
 pub struct State {
     pub app: Rc<AppState>,
     pub list: Rc<MutableVec<Mutable<String>>>,
     pub is_placeholder: Mutable<bool>,
+    pub error_element_ref: Mutable<Option<HtmlElement>>
 }
 
 type IsPlaceholder = bool;
@@ -25,7 +27,8 @@ impl State {
                         .map(|_| Mutable::new(String::default()))
                         .collect()
             )),
-            is_placeholder: Mutable::new(true)
+            is_placeholder: Mutable::new(true),
+            error_element_ref: Mutable::new(None),
         }
     }
 

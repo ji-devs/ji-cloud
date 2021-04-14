@@ -71,7 +71,7 @@ impl DebugSettings {
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
         //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
-        SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), true)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), true)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), false)).unwrap_ji();
     } else {

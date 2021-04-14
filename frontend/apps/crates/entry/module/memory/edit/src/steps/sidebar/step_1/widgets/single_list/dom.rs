@@ -12,6 +12,7 @@ use super::state::*;
 pub struct SingleListDom {}
 impl SingleListDom {
     pub fn render(state: Rc<State>) -> Dom { 
+
         html!("sidebar-widget-single-list", {
             .children(&mut [
 
@@ -44,6 +45,17 @@ impl SingleListDom {
                         state.app.replace_single_list(state.derive_list());
                     }))
                 }),
+                html!("empty-fragment", {
+                    .child_signal(state.error_element_ref.signal_ref(|elem| {
+                        elem.as_ref().map(|elem| {
+                            html!("tooltip-error", {
+                                .property("body", "Body message here")
+                                .property("target", elem)
+                                .property("placement", "left")
+                            })
+                        })
+                    }))
+                })
             ])
             .children_signal_vec(
                 state.list.signal_vec_cloned()
@@ -84,6 +96,12 @@ impl SingleListDom {
                                 }))
                                 .event(clone!(state => move |evt:events::CustomInput| {
                                     value.set_neq(evt.value());
+                                }))
+                                .after_inserted(clone!(index, state => move |elem| {
+                                    if index == 2 {
+                                        state.error_element_ref.set_neq(Some(elem));
+                                    }
+
                                 }))
                             })
                         }))
