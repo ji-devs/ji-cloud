@@ -1,29 +1,28 @@
+use crate::{
+    domain::{audio::AudioId, image::ImageId, jig::module::theme::ThemeId},
+    media::MediaLibrary,
+};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
-use uuid::Uuid;
-use crate::{
-    media::MediaLibrary,
-    domain::{
-        audio::AudioId,
-        image::ImageId,
-        jig::module::theme::ThemeId
-    }
-};
 
-/// The body for [`Memory`](super::ModuleKind::Memory) modules.
+/// A pair of cards
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[serde(rename_all = "camelCase")]
+pub struct CardPair(Card, Card);
+
+/// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     pub instructions: Instructions,
     pub mode: Mode,
-    pub pairs: Vec<(Card, Card)>,
+    pub pairs: Vec<CardPair>,
     pub theme_id: ThemeId,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Instructions {
     pub text: Option<String>,
     pub audio_id: Option<AudioId>,
@@ -31,7 +30,7 @@ pub struct Instructions {
 
 impl Instructions {
     pub fn new() -> Self {
-        Self { 
+        Self {
             text: None,
             audio_id: None,
         }
@@ -39,15 +38,15 @@ impl Instructions {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Card {
     Text(String),
     Image(Option<(ImageId, MediaLibrary)>),
-    Audio(Option<(AudioId, MediaLibrary)>)
+    Audio(Option<(AudioId, MediaLibrary)>),
 }
 
-
-
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Mode {
     Duplicate,
     WordsAndImages,
@@ -56,7 +55,7 @@ pub enum Mode {
     Riddles,
     Opposites,
     Synonymns,
-    Translate
+    Translate,
 }
 
 impl Mode {
@@ -64,7 +63,7 @@ impl Mode {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Duplicate => "duplicate",
-            Self::WordsAndImages=> "words-images",
+            Self::WordsAndImages => "words-images",
             Self::BeginsWith => "begins-with",
             Self::Lettering => "lettering",
             Self::Riddles => "riddles",
@@ -76,26 +75,27 @@ impl Mode {
 }
 
 impl ModuleData {
-    pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self 
-        where 
-            I: IntoIterator<Item = (S, S)>,
-            S: AsRef<str>
+    pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self
+    where
+        I: IntoIterator<Item = (S, S)>,
+        S: AsRef<str>,
     {
         Self {
             mode,
             instructions,
-            pairs: pairs 
+            pairs: pairs
                 .into_iter()
                 .map(|(word_1, word_2)| {
                     let (word_1, word_2) = (word_1.as_ref(), word_2.as_ref());
 
                     match mode {
                         Mode::WordsAndImages => {
-                            (Card::Text(word_1.to_string()), Card::Image(None))
-                        },
-                        _ => {
-                            (Card::Text(word_1.to_string()), Card::Text(word_2.to_string()))
-                        },
+                            CardPair(Card::Text(word_1.to_string()), Card::Image(None))
+                        }
+                        _ => CardPair(
+                            Card::Text(word_1.to_string()),
+                            Card::Text(word_2.to_string()),
+                        ),
                     }
                 })
                 .collect(),
@@ -103,4 +103,3 @@ impl ModuleData {
         }
     }
 }
-
