@@ -77,7 +77,7 @@ impl State {
     }
 
     pub fn change_mode(&self, mode: GameMode) {
-        let game_data = Some(raw::GameData::new(
+        let game_data = Some(raw::ModuleData::new(
             mode,
             ThemeId::None, 
             raw::Instructions::new(), 
@@ -232,7 +232,7 @@ impl State {
 
     //Usually saving goes through the history mechanism. when it doesn't this can be used
     //It pulls from the latest history in order to mixin
-    fn save_without_history(&self, f: impl FnOnce(&mut raw::GameData)) {
+    fn save_without_history(&self, f: impl FnOnce(&mut raw::ModuleData)) {
         save(
             self.save_loader.clone(), 
             self.module_id.clone(), 
@@ -272,7 +272,7 @@ impl State {
     }
 
 
-    fn set_from_raw(&self, game_data:Option<raw::GameData>) {
+    fn set_from_raw(&self, game_data:Option<raw::ModuleData>) {
         match game_data {
             Some(game_data) => {
                 self.pairs.lock_mut().replace_cloned(
@@ -327,34 +327,36 @@ pub fn history_on_undoredo(state: Rc<State>) -> HistoryUndoRedoFn {
         }
     }
 }
-pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::GameData>) {
+pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: Option<raw::ModuleData>) {
 
     //Note - there's currently no way to save a None... 
-    if let Some(value) = data.map(|data| serde_json::to_value(&data).unwrap_ji()) {
+    match data {
+        Some(data) => {
+            if crate::debug::settings().live_save {
+                save_loader.load(async move {
+                    let body = shared::domain::jig::module::ModuleBody::MemoryGame(data);
+                    log::info!("SAVING...");
+                    let path = Update::PATH.replace("{id}",&module_id.0.to_string());
 
-        if crate::debug::settings().live_save {
-            save_loader.load(async move {
-                log::info!("SAVING...");
-                let path = Update::PATH.replace("{id}",&module_id.0.to_string());
-
-                let req = Some(ModuleUpdateRequest {
-                    kind: None,
-                    reinsert_at: None,
-                    body: Some(value), 
+                    let req = Some(ModuleUpdateRequest {
+                        index: None,
+                        body: Some(body), 
+                    });
+                    api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
+                    log::info!("SAVED!");
                 });
-                api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
-                log::info!("SAVED!");
-            });
-        } else {
-            //log::info!("SKIPPING SAVE - DEBUG!");
+            } else {
+                //log::info!("SKIPPING SAVE - DEBUG!");
+            }
+        },
+        None => {
+            log::info!("SKIPPING SAVE - NO DATA!");
         }
-    } else {
-        log::info!("SKIPPING SAVE - NO DATA!");
     }
 }
 
 //internal only
-fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::GameData, pair_index: usize, main_side: Side, f: F) -> A {
+fn with_raw_pair<A, F: FnOnce(raw::Mode, &mut raw::Card, &mut raw::Card) -> A>(game_data: &mut raw::ModuleData, pair_index: usize, main_side: Side, f: F) -> A {
     let game_mode = game_data.mode.clone();
     let pair = game_data.pairs.get_mut(pair_index).unwrap_ji();
     match main_side {

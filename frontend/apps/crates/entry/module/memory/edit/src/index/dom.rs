@@ -8,7 +8,7 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use utils::prelude::*;
 use crate::{
-    data::{state::*, actions, raw::GameData as RawData},
+    data::{state::*, actions, raw::ModuleData as RawData},
     steps,
     choose
 };

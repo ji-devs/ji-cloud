@@ -7,7 +7,7 @@ use futures_signals::{
 use std::rc::Rc;
 use crate::{
     debug,
-    data::{raw, state::{State}, raw::GameData as RawData},
+    data::{raw, state::{State}, raw::ModuleData as RawData},
 };
 use std::future::Future;
 use components::module::page::StateLoader;
@@ -34,11 +34,15 @@ impl StateLoader<RawData, State> for PageLoader {
                     let path = Get::PATH.replace("{id}",&module_id.0.to_string());
 
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+
                         Ok(resp) => {
-                            resp.module.body.map(|value| {
-                                serde_json::from_value(value).unwrap_ji()
+                            resp.module.body.map(|resp| {
+                                match resp {
+                                    ModuleBodyResponse::MemoryGame(body) => body,
+                                    _ => panic!("wrong module body kind!!")
+                                }
                             })
-                            .unwrap_ji()
+                            .expect_ji("module data must exist for player!")
                         },
                         Err(_) => {
                             panic!("error loading module!")

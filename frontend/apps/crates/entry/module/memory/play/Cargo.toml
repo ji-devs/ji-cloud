@@ -17,7 +17,6 @@ crate-type = ["cdylib"]
 rand = "0.8.3"
 getrandom = { version = "0.2", features = ["js"] }
 gloo-timers = { version = "0.2.1", features = ["futures"] }
-app-memory-common = {path = "../_common"}
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}

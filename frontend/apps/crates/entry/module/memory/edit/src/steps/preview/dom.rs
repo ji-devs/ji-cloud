@@ -48,7 +48,7 @@ impl PreviewDom {
                         log::info!("sending iframe message!");
                         //Iframe is ready and sent us a message, let's send one back!
                         let data = state.get_history().get_current().game_data.unwrap_ji(); 
-                        let msg:IframeInit<raw::GameData> = IframeInit::new(data); 
+                        let msg:IframeInit<raw::ModuleData> = IframeInit::new(data); 
                         let window = elem.content_window().unwrap_ji();
                         window.post_message(&msg.into(), &url);
                     } else {

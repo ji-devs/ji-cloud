@@ -6,9 +6,13 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
-mod body;
+/// Module bodies
+pub mod body;
 
-pub use body::{Body as ModuleBody, BodyResponse as ModuleBodyResponse, MemoryGameBody};
+/// Module themes
+pub mod theme;
+
+pub use body::{Body as ModuleBody, BodyResponse as ModuleBodyResponse};
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]

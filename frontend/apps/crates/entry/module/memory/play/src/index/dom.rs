@@ -8,7 +8,7 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use utils::events;
 use crate::{
-    data::{state::State, raw::GameData as RawData},
+    data::{state::State, raw::ModuleData as RawData},
 };
 use super::loader::*;
 use shared::domain::jig::{JigId, module::ModuleId};

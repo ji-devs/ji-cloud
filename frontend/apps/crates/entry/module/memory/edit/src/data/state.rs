@@ -57,7 +57,7 @@ pub struct Instructions {
 }
 
 impl Instructions {
-    pub fn new(raw_data: Option<&raw::GameData>) -> Self {
+    pub fn new(raw_data: Option<&raw::ModuleData>) -> Self {
         Self {
             audio_id: Mutable::new(
                 raw_data.and_then(|data| data.instructions.audio_id.clone())
@@ -70,7 +70,7 @@ impl Instructions {
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::GameData>) -> Rc<Self> {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::ModuleData>) -> Rc<Self> {
 
         let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
 

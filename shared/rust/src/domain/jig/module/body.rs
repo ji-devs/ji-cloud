@@ -4,14 +4,18 @@ use std::borrow::Cow;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
+/// Memory Game
+#[allow(missing_docs)]
+pub mod memory;
+
 /// Body kinds for Modules.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Body {
     /// Module is a memory game, and has a memory game's body.
-    MemoryGame(MemoryGameBody),
+    MemoryGame(memory::ModuleData),
 
     /// Module kind is "unknown" - We don't have a special case for this module.
     Unknown {
@@ -43,13 +47,13 @@ impl Body {
 /// Specialized version of `Body` that includes `Cover` as nullable.
 ///
 /// Note: This will likely be removed as soon as possible.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum BodyResponse {
     /// Module is a memory game, and has a memory game's body.
-    MemoryGame(MemoryGameBody),
+    MemoryGame(memory::ModuleData),
 
     /// Module kind is a [`Cover`](super::ModuleKind::Cover).
     ///
@@ -77,8 +81,3 @@ impl BodyResponse {
     }
 }
 
-/// The body for [`Memory`](super::ModuleKind::Memory) modules.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[serde(rename_all = "camelCase")]
-pub struct MemoryGameBody;

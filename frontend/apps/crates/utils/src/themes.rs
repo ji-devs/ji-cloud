@@ -6,8 +6,8 @@ use serde::{
     Deserialize,
 };
 use std::{fmt, marker::PhantomData};
-
 use crate::unwrap::UnwrapJiExt;
+pub use shared::domain::jig::module::theme::ThemeId;
 
 pub const THEME_IDS:[ThemeId;3] = [
     ThemeId::None,
@@ -16,22 +16,27 @@ pub const THEME_IDS:[ThemeId;3] = [
 ];
 
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
-pub enum ThemeId {
-    None,
-    Chalkboard,
-    HappyBrush,
+pub trait ThemeIdExt {
+    fn get_colors(self) -> &'static [RGBA8];
+
+    fn display_name(self) -> &'static str;
+
+    fn as_str_id(self) -> &'static str;
+
+    //It's safe to just call this whenever, it will lazily init the config
+    fn map_theme<F, A>(self, mapper:F) -> A
+    where
+        F: FnOnce(&'static Theme) -> A;
 }
 
+impl ThemeIdExt for ThemeId {
 
-impl ThemeId {
-
-    pub fn get_colors(self) -> &'static [RGBA8] {
+    fn get_colors(self) -> &'static [RGBA8] {
         self.map_theme(|theme| theme.colors.as_slice())
     }
 
     //TODO - tie to Localization
-    pub fn display_name(self) -> &'static str {
+    fn display_name(self) -> &'static str {
         match self {
             Self::None => "",
             Self::Chalkboard => "Chalkboard", 
@@ -39,7 +44,7 @@ impl ThemeId {
         }
     }
 
-    pub fn as_str_id(self) -> &'static str {
+    fn as_str_id(self) -> &'static str {
         match self {
             Self::None => "",
             Self::Chalkboard => "chalkboard", 
@@ -80,7 +85,7 @@ struct Themes {
 }
 
 #[derive(Debug, Deserialize)]
-struct Theme {
+pub struct Theme {
     #[serde(deserialize_with = "hex_to_rgba8")]
     pub colors: Vec<RGBA8>,
 }

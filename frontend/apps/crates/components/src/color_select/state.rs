@@ -2,7 +2,7 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
-use utils::{prelude::*, themes::ThemeId};
+use utils::prelude::*;
 
 use super::actions::{get_user_colors, hex_to_rgba8};
 

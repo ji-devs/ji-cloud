@@ -17,7 +17,7 @@ pub const DEBUG_IMAGE_ID:&'static str ="6468777e-2008-11eb-a943-331f3eea16f5";
 
 #[derive(Debug)]
 pub struct DebugSettings {
-    pub data:Option<raw::GameData>,
+    pub data:Option<raw::ModuleData>,
     pub shuffle: bool,
     pub ending: bool,
 }
@@ -26,7 +26,7 @@ impl DebugSettings {
     pub fn debug(mode: raw::Mode) -> DebugSettings {
         DebugSettings {
             data: Some(
-                    raw::GameData::new(
+                    raw::ModuleData::new(
                         mode, 
                         ThemeId::Chalkboard, 
                         raw::Instructions::new(),

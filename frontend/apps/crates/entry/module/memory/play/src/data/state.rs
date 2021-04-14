@@ -38,7 +38,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::GameData) -> Self {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Self {
         let mode:GameMode = raw_data.mode.into();
 
         let n_cards = raw_data.pairs.len() * 2;

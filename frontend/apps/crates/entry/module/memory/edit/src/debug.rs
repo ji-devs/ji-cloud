@@ -20,7 +20,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 #[derive(Debug)]
 pub struct DebugSettings {
-    pub data:Option<Option<raw::GameData>>,
+    pub data:Option<Option<raw::ModuleData>>,
     pub step:Option<Step>,
     pub live_save: bool,
     pub content_tab: Option<DebugContentTab>,
@@ -46,7 +46,7 @@ impl DebugSettings {
         DebugSettings {
             data: Some(
                 mode.map(|mode| {
-                    raw::GameData::new(
+                    raw::ModuleData::new(
                         mode, 
                         ThemeId::Chalkboard, 
                         raw::Instructions::new(),

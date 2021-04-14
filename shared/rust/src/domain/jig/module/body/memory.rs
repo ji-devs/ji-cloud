@@ -1,19 +1,29 @@
-use serde::{Serialize, Deserialize};
-use shared::{
-    domain::image::ImageId,
-    domain::audio::AudioId,
-    media::MediaLibrary
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use uuid::Uuid;
+use crate::{
+    media::MediaLibrary,
+    domain::{
+        audio::AudioId,
+        image::ImageId,
+        jig::module::theme::ThemeId
+    }
 };
-use utils::prelude::*;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct GameData {
+/// The body for [`Memory`](super::ModuleKind::Memory) modules.
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[serde(rename_all = "camelCase")]
+pub struct ModuleData {
     pub instructions: Instructions,
     pub mode: Mode,
     pub pairs: Vec<(Card, Card)>,
     pub theme_id: ThemeId,
 }
-#[derive(Serialize, Deserialize, Clone, Debug)]
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Instructions {
     pub text: Option<String>,
     pub audio_id: Option<AudioId>,
@@ -28,7 +38,7 @@ impl Instructions {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum Card {
     Text(String),
     Image(Option<(ImageId, MediaLibrary)>),
@@ -37,7 +47,7 @@ pub enum Card {
 
 
 
-#[derive(Serialize, Deserialize,Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum Mode {
     Duplicate,
     WordsAndImages,
@@ -50,7 +60,7 @@ pub enum Mode {
 }
 
 impl Mode {
-    //Must match the element stings in types
+    //Must match the element strings in types
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Duplicate => "duplicate",
@@ -65,7 +75,7 @@ impl Mode {
     }
 }
 
-impl GameData {
+impl ModuleData {
     pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self 
         where 
             I: IntoIterator<Item = (S, S)>,
@@ -93,23 +103,5 @@ impl GameData {
             theme_id,
         }
     }
-
-    /*
-    pub fn words_and_images_debug<I, S>(words:I, theme: String) -> Self 
-        where I: Iterator<Item = S>,
-              S: AsRef<str>
-    {
-        Self {
-            mode: Mode::WordsAndImages,
-            pairs: words
-                .map(|word| {
-                    let word = word.as_ref();
-                    (Card::Text(word.to_string()), Card::Image(None))
-                })
-                .collect(),
-            theme
-        }
-    }
-    */
 }
 
