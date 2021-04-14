@@ -1,7 +1,7 @@
 use dominator::{Dom, html, clone};
 use futures_signals::signal_vec::SignalVecExt;
 use std::rc::Rc;
-use utils::events;
+use utils::prelude::*;
 use futures_signals::signal::SignalExt;
 use crate::module::history::state::HistoryState;
 use web_sys::HtmlElement;
@@ -51,11 +51,35 @@ impl Placement {
 }
 //TODO - move on_undoredo into HistoryState itself
 impl TooltipDom {
-    pub fn render_error(elem:&HtmlElement, placement:Placement, body:&str) -> Dom {
+    pub fn render_error(elem:&HtmlElement, placement:Placement, slot: Option<&str>, body:&str, on_close: Option<Rc<impl Fn() + 'static>>) -> Dom {
         html!("tooltip-error", {
-            .property("body", body)
+            .text(body)
+            .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+            .property("maxWidth", 182)
             .property("target", elem)
             .property("placement", placement.as_str())
+            .event(clone!(on_close => move |evt:events::Close| {
+                if let Some(on_close) = &on_close {
+                    on_close();
+                }
+            }))
+        })
+    }
+    pub fn render_confirm(elem:&HtmlElement, placement:Placement, slot: Option<&str>, header:&str, confirm_label:&str, cancel_label:&str, on_confirm: Rc<impl Fn() + 'static>, on_cancel: Rc<impl Fn() + 'static>) -> Dom {
+        html!("tooltip-confirm", {
+            .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+            .property("header", header)
+            .property("confirmLabel", confirm_label)
+            .property("cancelLabel", cancel_label)
+            .property("maxWidth", 332)
+            .property("target", elem)
+            .property("placement", placement.as_str())
+            .event(clone!(on_confirm => move |evt:events::Accept| {
+                on_confirm();
+            }))
+            .event(clone!(on_cancel => move |evt:events::Close| {
+                on_cancel();
+            }))
         })
     }
 }

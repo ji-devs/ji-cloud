@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone};
+use dominator::{html, Dom, clone, with_node};
 use crate::data::{raw, state::*};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -12,6 +12,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use components::image_search::types::*;
+use components::tooltip::dom::{TooltipDom, Placement};
 
 pub struct PairDom {}
 impl PairDom {
@@ -19,6 +20,8 @@ impl PairDom {
 
         let left = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone());
         let right = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Right, pair.1, pair.0);
+
+        let delete_elem_ref:Mutable<Option<HtmlElement>> = Mutable::new(None);
 
         if step == Step::One {
             html!("main-card-pair", {
@@ -28,13 +31,34 @@ impl PairDom {
                 }))
                 .child(left)
                 .child(right)
-                .child(html!("button-icon", {
+                .child(html!("button-icon" => HtmlElement, {
                     .property("slot", "close")
                     .property("icon", "circle-x-blue")
-                    .event(clone!(state => move |evt:events::Click| {
-                        state.delete_pair(index.get().unwrap_or_default());
-                    }))
+                    .with_node!(elem => {
+                        .event(clone!(delete_elem_ref => move |evt:events::Click| {
+                            delete_elem_ref.set_neq(Some(elem.clone()))
+                        }))
+                    })
                 }))
+                .child_signal(delete_elem_ref.signal_cloned().map(clone!(state, delete_elem_ref, index => move |elem| {
+                    elem.as_ref().map(|elem| {
+                        TooltipDom::render_confirm(
+                            &elem, 
+                            Placement::Right, 
+                            Some("error"), 
+                            crate::strings::confirm::STR_DELETE_PAIR_HEADER,
+                            crate::strings::confirm::STR_DELETE_PAIR_CONFIRM,
+                            crate::strings::confirm::STR_DELETE_PAIR_CANCEL,
+                            Rc::new(clone!(state, delete_elem_ref, index => move || {
+                                state.delete_pair(index.get().unwrap_or_default());
+                                delete_elem_ref.set_neq(None);
+                            })),
+                            Rc::new(clone!(state, delete_elem_ref, index => move || {
+                                delete_elem_ref.set_neq(None);
+                            }))
+                        )
+                    })
+                })))
             })
         } else {
             html!("main-card-pair", {

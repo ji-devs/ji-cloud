@@ -11,6 +11,9 @@ export class _ extends LitElement {
                 :host {
                     display: inline-block;
                     box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);
+                    --arrow-size: 24px;
+                    --arrow-offset: -12px;
+                    z-index: 1000; /* is still restricted by shadow dom? */
                 }
 
                 :host([color="beige"]) {
@@ -22,13 +25,13 @@ export class _ extends LitElement {
                 }
                 
                 .content {
-                    padding: 10px;
+                    padding: 24px;
                 }
                 #arrow,
                 #arrow::before {
                   position: absolute;
-                  width: 8px;
-                  height: 8px;
+                  width: var(--arrow-size);
+                  height: var(--arrow-size);
                   background: inherit;
                 }
 
@@ -43,19 +46,19 @@ export class _ extends LitElement {
                 }
 
                 :host([data-popper-placement^='top'])  #arrow {
-                  bottom: -4px;
+                  bottom: var(--arrow-offset);
                 }
 
                 :host([data-popper-placement^='bottom'])  #arrow {
-                  top: -4px;
+                  top: var(--arrow-offset);
                 }
 
                 :host([data-popper-placement^='left'])  #arrow {
-                  right: -4px;
+                  right: var(--arrow-offset);
                 }
 
                 :host([data-popper-placement^='right'])  #arrow {
-                  left: -4px;
+                  left: var(--arrow-offset);
                 }
             `
         ];
@@ -89,7 +92,13 @@ export class _ extends LitElement {
                     {
                       name: "arrow",
                       options: {
-                        element: this.shadowRoot?.getElementById("arrow")
+                          element: this.shadowRoot?.getElementById("arrow"),
+                      }
+                    },
+                    {
+                      name: "offset",
+                      options: {
+                          offset: [this.offsetSkidding, this.offsetDistance],
                       }
                     }
                   ]
@@ -109,15 +118,21 @@ export class _ extends LitElement {
         this.killPopper();
     }
 
+    @property({type: Number})
+    offsetSkidding:number = 0;
+
+    @property({type: Number})
+    offsetDistance:number = 0;
+
     @property({reflect: true})
     color:COLOR = "beige";
 
     @property()
     target:Element | VirtualElement | undefined;
 
-
     @property()
     placement:Placement = "left";
+
     render() {
         return html`
             <div class="content"><slot></slot></div>

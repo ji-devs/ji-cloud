@@ -54,12 +54,14 @@ export class _ extends LitElement {
               <slot name="input-buttons"></slot>
           </div>
           <div class="lists">
-              <slot></slot>
+              <slot name="left"></slot>
+              <slot name="right"></slot>
           </div>
           <div class="input-footer">${STR_INPUT_FOOTER}</div>
           <div class="done-btn">
               <slot name="done-btn"></slot>
           </div>
+          <slot name="error"></slot>
       `
   }
 }

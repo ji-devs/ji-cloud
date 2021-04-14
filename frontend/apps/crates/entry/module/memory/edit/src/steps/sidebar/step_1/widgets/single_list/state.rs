@@ -13,8 +13,24 @@ pub struct State {
     pub app: Rc<AppState>,
     pub list: Rc<MutableVec<Mutable<String>>>,
     pub is_placeholder: Mutable<bool>,
-    pub error_element_ref: Mutable<Option<HtmlElement>>
+    pub error_element_ref: Mutable<Option<HtmlElement>>,
+    pub error: Mutable<Option<Error>>
 }
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum Error {
+    NumWords
+}
+
+impl Error {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::NumWords => crate::strings::error::STR_SINGLE_LIST_NUM_WORDS
+        }
+    }
+}
+
+
 
 type IsPlaceholder = bool;
 
@@ -29,18 +45,40 @@ impl State {
             )),
             is_placeholder: Mutable::new(true),
             error_element_ref: Mutable::new(None),
+            error: Mutable::new(None),
         }
     }
 
-    pub fn derive_list(&self) -> Vec<String> {
-        self.list
-            .lock_ref()
+    pub fn error_signal(&self) -> impl Signal<Item = Option<(Error, HtmlElement)>> {
+        map_ref! {
+            let err = self.error.signal(),
+            let elem = self.error_element_ref.signal_cloned()
+                => {
+                    match (err, elem) {
+                        (Some(err), Some(elem)) => Some((*err, elem.clone())),
+                        _ => None
+                    }
+                }
+        }
+    }
+
+    pub fn derive_list(&self) -> Result<Vec<String>, Error> {
+        let lock = self.list.lock_ref();
+
+
+        let list:Vec<String> = lock
             .iter()
             .map(|mutable_string| {
                 mutable_string.get_cloned()
             })
             .filter(|x| !x.is_empty())
-            .collect()
+            .collect();
+
+        if list.len() < 2 {
+            Err(Error::NumWords)
+        } else {
+            Ok(list)
+        }
     }
 
     pub fn clear(&self) {

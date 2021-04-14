@@ -13,6 +13,8 @@ temp_make_event!(Ended, "ended" => web_sys::Event);
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
 
+temp_make_event!(Accept, "accept" => web_sys::Event);
+
 temp_make_event!(Reset, "reset" => web_sys::Event);
 
 temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);

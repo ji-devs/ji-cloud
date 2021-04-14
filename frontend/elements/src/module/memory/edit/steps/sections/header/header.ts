@@ -3,7 +3,6 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import "@elements/module/_common/header";
 
-const STR_TITLE = "Create a Memory Game";
 @customElement('header-memory')
 export class _ extends LitElement {
   static get styles() {
@@ -14,7 +13,7 @@ export class _ extends LitElement {
 
   render() {
       return html`
-          <module-header slot="header" title="${STR_TITLE}">
+          <module-header slot="header" moduleKind="memory">
             <empty-fragment slot="controller">
                 <slot name="controller"></slot>
             </empty-fragment>

@@ -97,6 +97,7 @@ export class _ extends LitElement {
               </div>
         </section>
         <div class="index">${index + 1}</div>
+        <slot name="error"></slot>
       `
   }
 }

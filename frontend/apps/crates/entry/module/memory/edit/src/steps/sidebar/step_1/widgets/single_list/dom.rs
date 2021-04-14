@@ -43,15 +43,24 @@ impl SingleListDom {
                     .property("slot", "done-btn")
                     .text(crate::strings::STR_DONE)
                     .event(clone!(state => move |evt:events::Click| {
-                        state.app.replace_single_list(state.derive_list());
+                        match state.derive_list() {
+                            Ok(list) => {
+                                state.app.replace_single_list(list);
+                            },
+                            Err(err) => {
+                                state.error.set_neq(Some(err));
+                            }
+                        }
                     }))
                 }),
                 html!("empty-fragment", {
-                    .child_signal(state.error_element_ref.signal_ref(|elem| {
-                        elem.as_ref().map(|elem| {
-                            TooltipDom::render_error(elem, Placement::Left, "Error here!")
+                    .child_signal(state.error_signal().map(clone!(state => move |tuple| {
+                        tuple.map(|(err, elem)| {
+                            TooltipDom::render_error(&elem, Placement::Left, None, err.as_str(), Some(Rc::new(clone!(state => move || {
+                                state.error.set_neq(None);
+                            }))))
                         })
-                    }))
+                    })))
                 })
             ])
             .children_signal_vec(

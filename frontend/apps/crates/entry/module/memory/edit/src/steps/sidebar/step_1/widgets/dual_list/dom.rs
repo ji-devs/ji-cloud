@@ -7,6 +7,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
+use components::tooltip::dom::{TooltipDom, Placement};
 use super::state::*;
 use unicode_segmentation::UnicodeSegmentation;
 pub struct DualListDom {}
@@ -41,8 +42,25 @@ impl DualListDom {
                     .property("slot", "done-btn")
                     .text(crate::strings::STR_DONE)
                     .event(clone!(state => move |evt:events::Click| {
-                        state.app.replace_dual_list(state.derive_list());
+                        match state.derive_list() {
+                            Ok(list) => {
+                                state.app.replace_dual_list(list);
+                            },
+                            Err(err) => {
+                                state.error.set_neq(Some(err));
+                            }
+                        }
                     }))
+                }),
+                html!("empty-fragment", {
+                    .property("slot", "error")
+                    .child_signal(state.error_signal().map(clone!(state => move |tuple| {
+                        tuple.map(|(err, elem)| {
+                            TooltipDom::render_error(&elem, Placement::Right, None, err.as_str(), Some(Rc::new(clone!(state => move || {
+                                state.error.set_neq(None);
+                            }))))
+                        })
+                    })))
                 }),
                 render_column(state.clone(), ColumnSide::Left),
                 render_column(state.clone(), ColumnSide::Right),
@@ -86,6 +104,7 @@ impl ColumnSide {
 
 fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
     html!("sidebar-widget-dual-list-column", {
+        .property("slot", side.side_prop())
         .property("side", side.side_prop())
         .property("header", side.header())
         .children_signal_vec(
@@ -126,6 +145,12 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                             }))
                             .event(clone!(state => move |evt:events::CustomInput| {
                                 value.set_neq(evt.value());
+                            }))
+                            .after_inserted(clone!(index, state, side => move |elem| {
+                                if side == ColumnSide::Right && row == 2 {
+                                    state.error_element_ref.set_neq(Some(elem));
+                                }
+
                             }))
                         })
                     }))

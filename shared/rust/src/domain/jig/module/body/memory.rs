@@ -90,13 +90,12 @@ impl ModuleData {
                     let (word_1, word_2) = (word_1.as_ref(), word_2.as_ref());
 
                     match mode {
-                        Mode::Duplicate | Mode::Lettering => {
-                            (Card::Text(word_1.to_string()), Card::Text(word_2.to_string()))
-                        },
                         Mode::WordsAndImages => {
                             (Card::Text(word_1.to_string()), Card::Image(None))
                         },
-                        _ => unimplemented!("TODO")
+                        _ => {
+                            (Card::Text(word_1.to_string()), Card::Text(word_2.to_string()))
+                        },
                     }
                 })
                 .collect(),
