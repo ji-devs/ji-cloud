@@ -6,6 +6,10 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
+mod body;
+
+pub use body::{Body as ModuleBody, BodyResponse as ModuleBodyResponse, MemoryGameBody};
+
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -48,23 +52,32 @@ impl ModuleIdOrIndex {
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum ModuleKind {
-    /// This is a sortof special module, every jig has one and it can't be deleted
+    /// This is a sort of special module, every jig has one and it can't be deleted
     Cover = 0,
 
     /// Flashcards
     Flashcards = 1,
+
     /// Matching
     Matching = 2,
+
     /// Memory Game
+    ///
+    /// Relates to [`MemoryGameBody`]
     Memory = 3,
+
     /// Poster
     Poster = 4,
+
     /// Tapping Board
     TappingBoard = 5,
+
     /// Tracing
     Tracing = 6,
+
     /// Video
     Video = 7,
+
     /// Visual Quiz
     VisualQuiz = 8,
 }
@@ -125,22 +138,16 @@ pub struct Module {
     /// The module's ID.
     pub id: ModuleId,
 
-    /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
-
-    /// The module's json contents.
-    pub body: Option<serde_json::Value>,
+    /// The module's body.
+    pub body: Option<ModuleBodyResponse>,
 }
 
 /// Request to create a new `Module`.
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleCreateRequest {
-    /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
-
-    /// The module's json contents.
-    pub body: Option<serde_json::Value>,
+    /// The module's body.
+    pub body: Option<ModuleBody>,
 }
 
 /// Response for successfully finding a module
@@ -156,11 +163,8 @@ pub struct ModuleResponse {
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleUpdateRequest {
-    /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
-
-    /// The module's json contents.
-    pub body: Option<serde_json::Value>,
+    /// The module's body.
+    pub body: Option<ModuleBody>,
 
     /// Where to move this module to in the parent.
     ///
