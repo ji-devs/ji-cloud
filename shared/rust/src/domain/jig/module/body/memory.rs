@@ -9,19 +9,19 @@ use serde::{Deserialize, Serialize};
 /// A pair of cards
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CardPair(Card, Card);
+pub struct CardPair(pub Card, pub Card);
 
 /// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     pub instructions: Instructions,
-    pub mode: Mode,
+    pub mode: Option<Mode>,
     pub pairs: Vec<CardPair>,
     pub theme_id: ThemeId,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Instructions {
     pub text: Option<String>,
@@ -81,7 +81,7 @@ impl ModuleData {
         S: AsRef<str>,
     {
         Self {
-            mode,
+            mode: Some(mode),
             instructions,
             pairs: pairs
                 .into_iter()

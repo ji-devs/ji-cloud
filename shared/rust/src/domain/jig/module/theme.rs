@@ -14,3 +14,9 @@ pub enum ThemeId {
     /// Orangeish theme
     HappyBrush,
 }
+
+impl Default for ThemeId {
+    fn default() -> Self {
+        Self::None
+    }
+}
