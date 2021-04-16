@@ -17,6 +17,15 @@ export class _ extends BgBlue {
             padding: 0;
             margin: 0;
         }
+        
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0; 
+            display: block;
+            z-index: 1000;
+        }
+
 
         #outer {
             width: 100%;
@@ -96,6 +105,7 @@ export class _ extends BgBlue {
                     </div>
                 </div>
             </main>
+            <div id="overlay"><slot name="overlay"></slot></div>
     `;
     }
 }

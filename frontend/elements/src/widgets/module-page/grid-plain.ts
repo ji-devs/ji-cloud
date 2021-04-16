@@ -13,6 +13,14 @@ export class _ extends BgBlue {
             display: block;
         }
 
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0; 
+            display: block;
+            z-index: 1000;
+        }
+
         #grid {
             display: grid;
 
@@ -62,6 +70,7 @@ export class _ extends BgBlue {
 
             <footer><slot name="footer"></slot></footer>
         </div>
+        <div id="overlay"><slot name="overlay"></slot></div>
     `;
   }
 }

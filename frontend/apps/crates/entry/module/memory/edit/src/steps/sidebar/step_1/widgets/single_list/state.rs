@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 use dominator::clone;
 use futures_signals::{
@@ -13,8 +14,7 @@ pub struct State {
     pub app: Rc<AppState>,
     pub list: Rc<MutableVec<Mutable<String>>>,
     pub is_placeholder: Mutable<bool>,
-    pub error_element_ref: Mutable<Option<HtmlElement>>,
-    pub error: Mutable<Option<Error>>
+    pub error_element_ref: RefCell<Option<HtmlElement>>,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -31,7 +31,6 @@ impl Error {
 }
 
 
-
 type IsPlaceholder = bool;
 
 impl State {
@@ -44,21 +43,7 @@ impl State {
                         .collect()
             )),
             is_placeholder: Mutable::new(true),
-            error_element_ref: Mutable::new(None),
-            error: Mutable::new(None),
-        }
-    }
-
-    pub fn error_signal(&self) -> impl Signal<Item = Option<(Error, HtmlElement)>> {
-        map_ref! {
-            let err = self.error.signal(),
-            let elem = self.error_element_ref.signal_cloned()
-                => {
-                    match (err, elem) {
-                        (Some(err), Some(elem)) => Some((*err, elem.clone())),
-                        _ => None
-                    }
-                }
+            error_element_ref: RefCell::new(None),
         }
     }
 

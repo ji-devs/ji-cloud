@@ -8,7 +8,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use super::state::*;
-use components::tooltip::dom::{TooltipDom, Placement};
+use components::tooltip::types::*;
 
 pub struct SingleListDom {}
 impl SingleListDom {
@@ -48,19 +48,21 @@ impl SingleListDom {
                                 state.app.replace_single_list(list);
                             },
                             Err(err) => {
-                                state.error.set_neq(Some(err));
+                                log::info!("why not rendering...");
+                                state.app.overlay.tooltips.list_error.set(Some(
+                                    TooltipData::Error(TooltipError {
+                                        elem: state.error_element_ref.borrow().as_ref().unwrap_ji().clone(), 
+                                        placement: Placement::Right, 
+                                        slot: None,
+                                        body: crate::strings::error::STR_SINGLE_LIST_NUM_WORDS.to_string(),
+                                        on_close: Some(Rc::new(Box::new(clone!(state => move || {
+                                            state.app.overlay.tooltips.list_error.set(None); 
+                                        })))),
+                                    })
+                                ));
                             }
                         }
                     }))
-                }),
-                html!("empty-fragment", {
-                    .child_signal(state.error_signal().map(clone!(state => move |tuple| {
-                        tuple.map(|(err, elem)| {
-                            TooltipDom::render_error(&elem, Placement::Left, None, err.as_str(), Some(Rc::new(clone!(state => move || {
-                                state.error.set_neq(None);
-                            }))))
-                        })
-                    })))
                 })
             ])
             .children_signal_vec(
@@ -105,7 +107,7 @@ impl SingleListDom {
                                 }))
                                 .after_inserted(clone!(index, state => move |elem| {
                                     if index == 2 {
-                                        state.error_element_ref.set_neq(Some(elem));
+                                        *state.error_element_ref.borrow_mut() = Some(elem);
                                     }
 
                                 }))

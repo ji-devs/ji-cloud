@@ -24,6 +24,14 @@ export class _ extends BgBlue {
             height: 100%;
         }
 
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0; 
+            display: block;
+            z-index: 1000;
+        }
+
         #container {
             position: absolute;
             top: var(--y);
@@ -181,6 +189,7 @@ export class _ extends BgBlue {
                 <slot name="footer"></slot>
             </footer>
         </div>
+        <div id="overlay"><slot name="overlay"></slot></div>
     `;
     }
 }

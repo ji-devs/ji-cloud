@@ -12,7 +12,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use components::image_search::types::*;
-use components::tooltip::dom::{TooltipDom, Placement};
+use components::tooltip::types::*;
 
 pub struct PairDom {}
 impl PairDom {
@@ -20,8 +20,6 @@ impl PairDom {
 
         let left = CardDom::render(state.clone(), mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone());
         let right = CardDom::render(state.clone(), mode, step, index.clone(), Side::Right, pair.1, pair.0);
-
-        let delete_elem_ref:Mutable<Option<HtmlElement>> = Mutable::new(None);
 
         if step == Step::One {
             html!("main-card-pair", {
@@ -35,30 +33,27 @@ impl PairDom {
                     .property("slot", "close")
                     .property("icon", "circle-x-blue")
                     .with_node!(elem => {
-                        .event(clone!(delete_elem_ref => move |evt:events::Click| {
-                            delete_elem_ref.set_neq(Some(elem.clone()))
-                        }))
+                        .event(move |evt:events::Click| {
+                            state.overlay.tooltips.delete.set(Some(
+                                TooltipData::Confirm(TooltipConfirm {
+                                    elem: elem.clone(), 
+                                    placement: Placement::Right, 
+                                    slot: None,
+                                    header: crate::strings::confirm::STR_DELETE_PAIR_HEADER.to_string(),
+                                    confirm_label: crate::strings::confirm::STR_DELETE_PAIR_CONFIRM.to_string(),
+                                    cancel_label: crate::strings::confirm::STR_DELETE_PAIR_CANCEL.to_string(),
+                                    on_confirm: Rc::new(Box::new(clone!(state, index => move || {
+                                        state.delete_pair(index.get().unwrap_or_default());
+                                        state.overlay.tooltips.delete.set(None); 
+                                    }))),
+                                    on_cancel: Rc::new(Box::new(clone!(state, index => move || {
+                                        state.overlay.tooltips.delete.set(None); 
+                                    })))
+                                })
+                            ));
+                        })
                     })
                 }))
-                .child_signal(delete_elem_ref.signal_cloned().map(clone!(state, delete_elem_ref, index => move |elem| {
-                    elem.as_ref().map(|elem| {
-                        TooltipDom::render_confirm(
-                            &elem, 
-                            Placement::Right, 
-                            Some("error"), 
-                            crate::strings::confirm::STR_DELETE_PAIR_HEADER,
-                            crate::strings::confirm::STR_DELETE_PAIR_CONFIRM,
-                            crate::strings::confirm::STR_DELETE_PAIR_CANCEL,
-                            Rc::new(clone!(state, delete_elem_ref, index => move || {
-                                state.delete_pair(index.get().unwrap_or_default());
-                                delete_elem_ref.set_neq(None);
-                            })),
-                            Rc::new(clone!(state, delete_elem_ref, index => move || {
-                                delete_elem_ref.set_neq(None);
-                            }))
-                        )
-                    })
-                })))
             })
         } else {
             html!("main-card-pair", {

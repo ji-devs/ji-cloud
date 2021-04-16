@@ -16,6 +16,7 @@ import "@elements/core/tooltips/info";
 import "@elements/core/tooltips/confirm";
 import "@elements/core/tooltips/error";
 import "@elements/widgets/module-page/grid-resize";
+import "@elements/widgets/module-page/grid-plain";
 import "@elements/widgets/nav/steps-nav";
 import "@elements/widgets/nav/step-nav";
 import "@elements/module/_common/footer";

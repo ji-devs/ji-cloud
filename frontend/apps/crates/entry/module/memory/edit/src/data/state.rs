@@ -27,6 +27,7 @@ pub use super::card::state::*;
 use wasm_bindgen_futures::spawn_local;
 use utils::prelude::*;
 use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
+use crate::overlay::state::State as OverlayState;
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 //
 //Basically, the type of these callbacks are closures created from *inside*
@@ -48,6 +49,7 @@ pub struct State {
     pub theme_id: Mutable<ThemeId>,
     pub instructions: Instructions,
     pub save_loader: Rc<AsyncLoader>,
+    pub overlay: OverlayState,
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
 }
 
@@ -101,7 +103,8 @@ impl State {
             theme_id: Mutable::new(theme_id),
             history: RefCell::new(None),
             save_loader,
-            instructions
+            instructions,
+            overlay: OverlayState::new()
         });
 
         let history = Rc::new(HistoryState::new(

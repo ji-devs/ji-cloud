@@ -10,7 +10,8 @@ use utils::prelude::*;
 use crate::{
     data::{state::*, actions, raw::ModuleData as RawData},
     steps,
-    choose
+    choose,
+    overlay,
 };
 use shared::domain::jig::{JigId, module::ModuleId};
 use super::loader::*;
@@ -49,6 +50,7 @@ impl ModuleRenderer<State> for PageRenderer {
                     Self::header(state.clone(), mode, kind),
                     Self::main(state.clone(), mode, kind),
                     Self::footer(state.clone(), mode, kind),
+                    Self::overlay(state.clone(), mode, kind),
                 ]
                 .into_iter()
                 .filter(|x| x.is_some())
@@ -108,5 +110,8 @@ impl PageRenderer {
                     steps::footer::dom::FooterDom::render(state)
                 })
         }
+    }
+    fn overlay(state: Rc<State>, mode: Option<Mode>, kind: ModulePageKind) -> Option<Dom> {
+        Some(overlay::dom::OverlayDom::render(state))
     }
 }

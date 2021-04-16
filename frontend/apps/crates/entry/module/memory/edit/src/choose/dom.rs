@@ -8,6 +8,7 @@ impl ChooseDom {
     pub fn render(state:Rc<State>) -> Dom {
 
         html!("choose-page", {
+            .property("slot", "main")
             .children(
                 [
                     Mode::Duplicate,
