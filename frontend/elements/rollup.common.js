@@ -3,6 +3,9 @@ import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 import alias from '@rollup/plugin-alias';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
+import typescript from "rollup-plugin-typescript2";
+import commonjs from "@rollup/plugin-commonjs";
+
 const path = require('path');
 
 const filesizeConfig = {
@@ -21,9 +24,50 @@ export function createConfig(target) {
     const { APP_NAME } = process.env;
     const bundleName = (APP_NAME == null) ? "kitchen-sink" : APP_NAME;
 
-    const input = `./.ts-output/frontend/elements/src/_bundles/${bundleName}/imports.js`;
+    const input = `./src/_bundles/${bundleName}/imports.ts`;
     const file = `./dist/${bundleName}/custom-elements.js`;
     console.info(`BUNDLING ${bundleName} for ${target}`);
+
+    let plugins = [
+        // alias({
+        //     entries: {
+        //         "@utils": path.resolve(projectRootDir, "./.ts-output/frontend/ts-utils"),
+        //         "@frontend-config": path.resolve(projectRootDir, "../config"),
+        //         "@project-config": path.resolve(projectRootDir, "./.ts-output/config/typescript/src/lib"),
+        //         "@elements": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src"),
+        //         "@bundles": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src/_bundles")
+        //     }
+        // }),
+
+        resolve(),
+
+        commonjs(),
+
+        //minifyHTML(),
+
+        typescript({
+            tsconfigOverride: {
+                include: [input]
+            }
+        }),
+
+        filesize(filesizeConfig),
+
+        injectProcessEnv({ 
+            NODE_ENV: target === "local" ? 'development' : 'production',
+            DEPLOY_TARGET: target,
+        }),
+    ];
+
+    if (target === "production") {
+        plugins.push(
+            terser({
+                output: {
+                    comments: false
+                }
+            })
+        );
+    }
 
     return {
         input,
@@ -41,29 +85,6 @@ export function createConfig(target) {
         //But it's pretty small
         //external: ['lit-html', 'lit-element'],
 
-        plugins: [
-
-            injectProcessEnv({ 
-                NODE_ENV: target === "local" ? 'development' : 'production',
-                DEPLOY_TARGET: target,
-            }),
-            alias({
-                entries: {
-                    "@utils": path.resolve(projectRootDir, "./.ts-output/frontend/ts-utils"),
-                    "@frontend-config": path.resolve(projectRootDir, "../config"),
-                    "@project-config": path.resolve(projectRootDir, "./.ts-output/config/typescript/src/lib"),
-                    "@elements": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src"),
-                    "@bundles": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src/_bundles")
-                }
-            }),
-            resolve(),
-            //minifyHTML(),
-            filesize(filesizeConfig),
-            terser({
-                output: {
-                    comments: false
-                }
-            }),
-        ],
+        plugins,
     }
 };
