@@ -6,7 +6,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use crate::data::state::{State as AppState, GameMode};
+use crate::data::state::{State as AppState, Mode};
 use web_sys::HtmlElement;
 
 pub struct State {

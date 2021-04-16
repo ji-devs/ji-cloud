@@ -119,7 +119,7 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
 
                     Dom::with_state(constrain_cb, clone!(state => move |constrain_cb| {
                         let row = index.get().unwrap_or_default();
-                        let mode = state.app.game_mode.get_cloned().unwrap_ji();
+                        let mode = state.app.mode.get_cloned().unwrap_ji();
                         html!("sidebar-widget-dual-list-input", {
                             .property_signal("value", {
                                 map_ref! {

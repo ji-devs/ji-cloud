@@ -11,7 +11,7 @@ use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::debug;
-use super::{actions, history::{self, History}, raw};
+use super::{actions, raw};
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
@@ -36,13 +36,13 @@ use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 //
 //For this to be true it must actually be defined eventually though
 //so that the compiler can kinda figure it out and fill the type in backwards
-pub type HistoryStateImpl = HistoryState<History, HistoryChangeFn, HistoryUndoRedoFn>;
+pub type HistoryStateImpl = HistoryState<raw::ModuleData, HistoryChangeFn, HistoryUndoRedoFn>;
 
 pub struct State {
     pub jig_id: JigId,
     pub module_id: ModuleId,
     pub step: Mutable<Step>,
-    pub game_mode: Mutable<Option<GameMode>>,
+    pub mode: Mutable<Option<Mode>>,
     pub pairs: MutableVec<(Card, Card)>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<ThemeId>,
@@ -57,42 +57,29 @@ pub struct Instructions {
 }
 
 impl Instructions {
-    pub fn new(raw_data: Option<&raw::ModuleData>) -> Self {
+    pub fn new(raw_data: &raw::ModuleData) -> Self {
         Self {
-            audio_id: Mutable::new(
-                raw_data.and_then(|data| data.instructions.audio_id.clone())
-            ),
-            text: Mutable::new(
-                raw_data.and_then(|data| data.instructions.text.clone())
-            ),
+            audio_id: Mutable::new(raw_data.instructions.audio_id.clone()),
+            text: Mutable::new(raw_data.instructions.text.clone())
         }
     }
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:Option<raw::ModuleData>) -> Rc<Self> {
+    pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Rc<Self> {
 
-        let game_mode:Option<GameMode> = raw_data.as_ref().map(|data| data.mode.clone().into());
+        let mode:Option<Mode> = raw_data.mode;
 
-        let (pairs, theme_id) = {
-            if let Some(raw_data) = &raw_data {
-                let pairs:Vec<(Card, Card)> = raw_data.pairs
-                    .iter()
-                    .map(|(left, right)| {
-                        (left.clone().into(), right.clone().into())
-                    })
-                    .collect();
+        let pairs:Vec<(Card, Card)> = raw_data.pairs
+            .iter()
+            .map(|pair| {
+                (pair.0.clone().into(), pair.1.clone().into())
+            })
+            .collect();
 
-                (pairs, raw_data.theme_id)
-            } else {
-                (
-                    Vec::new(),
-                    ThemeId::None, 
-                )
-            }
-        };
+        let theme_id = raw_data.theme_id;
 
-        let instructions = Instructions::new(raw_data.as_ref());
+        let instructions = Instructions::new(&raw_data);
 
         let is_empty = pairs.is_empty();
 
@@ -107,7 +94,7 @@ impl State {
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            game_mode: Mutable::new(game_mode),
+            mode: Mutable::new(mode),
             pairs: MutableVec::new_with_values(pairs),
             step,
             steps_completed: Mutable::new(HashSet::new()),
@@ -118,7 +105,7 @@ impl State {
         });
 
         let history = Rc::new(HistoryState::new(
-            History::new(raw_data),
+            raw_data,
             actions::history_on_change(_self.clone()),
             actions::history_on_undoredo(_self.clone()),
         ));
@@ -139,7 +126,7 @@ impl State {
 
     pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
         map_ref! {
-            let has_mode = self.game_mode.signal_ref(|mode| mode.is_some()),
+            let has_mode = self.mode.signal_ref(|mode| mode.is_some()),
             let step = self.step.signal()
             => {
                 if *has_mode {
@@ -169,7 +156,7 @@ impl State {
 
 }
 
-pub type GameMode = raw::Mode;
+pub type Mode = raw::Mode;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Step {

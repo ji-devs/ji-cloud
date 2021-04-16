@@ -75,7 +75,7 @@ impl SingleListDom {
 
                         Dom::with_state(constrain_cb, clone!(state => move |constrain_cb| {
                             let index = index.get().unwrap_or_default();
-                            let mode = state.app.game_mode.get_cloned().unwrap_ji();
+                            let mode = state.app.mode.get_cloned().unwrap_ji();
 
                             html!("sidebar-widget-single-list-input", {
                                 .property_signal("value", {

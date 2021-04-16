@@ -16,10 +16,10 @@ use components::tooltip::dom::{TooltipDom, Placement};
 
 pub struct PairDom {}
 impl PairDom {
-    pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, pair:(Card, Card)) -> Dom {
+    pub fn render(state:Rc<State>, mode: Mode, step: Step, index: ReadOnlyMutable<Option<usize>>, pair:(Card, Card)) -> Dom {
 
-        let left = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone());
-        let right = CardDom::render(state.clone(), game_mode, step, index.clone(), Side::Right, pair.1, pair.0);
+        let left = CardDom::render(state.clone(), mode, step, index.clone(), Side::Left, pair.0.clone(), pair.1.clone());
+        let right = CardDom::render(state.clone(), mode, step, index.clone(), Side::Right, pair.1, pair.0);
 
         let delete_elem_ref:Mutable<Option<HtmlElement>> = Mutable::new(None);
 
@@ -76,7 +76,7 @@ impl PairDom {
 struct CardDom {}
 
 impl CardDom {
-    pub fn render(state:Rc<State>, game_mode: GameMode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {
+    pub fn render(state:Rc<State>, mode: Mode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {
         let input_ref:Rc<RefCell<Option<HtmlElement>>> = Rc::new(RefCell::new(None));
 
         let editing_active:Mutable<bool> = Mutable::new(false);
@@ -105,7 +105,7 @@ impl CardDom {
                                 let index = index.get().unwrap_or_default();
                                 let value = evt.value();
 
-                                if game_mode == GameMode::Duplicate {
+                                if mode == Mode::Duplicate {
                                     other.as_text_mutable().set_neq(value);
                                 }
                             }))
@@ -120,7 +120,7 @@ impl CardDom {
                             .event(clone!(state, other => move |evt:events::Reset| {
                                 //Just need to change the linked pair
                                 //without affecting history
-                                if game_mode == GameMode::Duplicate {
+                                if mode == Mode::Duplicate {
                                     //other.as_text_mutable().set_neq(original_data.clone());
                                     other.as_text_mutable().set_neq(data.get_cloned());
                                 }

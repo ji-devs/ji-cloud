@@ -37,12 +37,11 @@ impl StateLoader<RawData, State> for PageLoader {
 
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
-                            resp.module.body.map(|resp| {
-                                match resp {
-                                    ModuleBodyResponse::MemoryGame(body) => body,
-                                    _ => panic!("wrong module body kind!!")
-                                }
-                            })
+                            let body = resp.module.body.unwrap_ji();
+                            match body {
+                                ModuleBodyResponse::MemoryGame(body) => body,
+                                _ => panic!("wrong module body kind!!")
+                            }
                         },
                         Err(_) => {
                             panic!("error loading module!")
@@ -58,6 +57,6 @@ impl StateLoader<RawData, State> for PageLoader {
     }
 
     fn derive_state(&self, data:RawData) -> Rc<State> { 
-        State::new(self.jig_id.clone(), self.module_id.clone(), Some(data))
+        State::new(self.jig_id.clone(), self.module_id.clone(), data)
     }
 }

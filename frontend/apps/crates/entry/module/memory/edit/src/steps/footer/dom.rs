@@ -13,7 +13,7 @@ pub struct FooterDom {}
 impl FooterDom {
     pub fn render(state:Rc<State>) -> Dom {
 
-        let game_mode = state.game_mode.get().unwrap_ji();
+        let mode = state.mode.get().unwrap_ji();
 
         html!("module-footer", {
             .property("slot", "footer")

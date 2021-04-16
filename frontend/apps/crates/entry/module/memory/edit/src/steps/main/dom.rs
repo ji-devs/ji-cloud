@@ -14,7 +14,7 @@ pub struct MainDom {}
 impl MainDom {
     pub fn render(state:Rc<State>) -> Dom {
 
-        let game_mode = state.game_mode.get().unwrap_ji();
+        let mode = state.mode.get().unwrap_ji();
 
         html!("empty-fragment", {
             .property("slot", "main")
@@ -31,7 +31,7 @@ impl MainDom {
                                             .signal_vec_cloned()
                                             .enumerate()
                                             .map(clone!(state => move |(index, pair)| {
-                                                PairDom::render(state.clone(), game_mode, step, index, pair)
+                                                PairDom::render(state.clone(), mode, step, index, pair)
                                             }))
                                     }))
                             })

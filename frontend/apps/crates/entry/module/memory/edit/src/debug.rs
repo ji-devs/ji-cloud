@@ -20,7 +20,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 #[derive(Debug)]
 pub struct DebugSettings {
-    pub data:Option<Option<raw::ModuleData>>,
+    pub data:Option<raw::ModuleData>,
     pub step:Option<Step>,
     pub live_save: bool,
     pub content_tab: Option<DebugContentTab>,
@@ -45,21 +45,21 @@ impl DebugSettings {
     pub fn debug(mode: Option<raw::Mode>, with_data: bool) -> DebugSettings {
         DebugSettings {
             data: Some(
-                mode.map(|mode| {
+                if with_data {
+                    let mode = mode.unwrap_ji();
                     raw::ModuleData::new(
                         mode, 
                         ThemeId::Chalkboard, 
                         raw::Instructions::new(),
-                        {
-                            if with_data {
-                                //vec![("foo", "foo")]
-                                crate::config::get_debug_pairs(mode)
-                            } else {
-                                Vec::new()
-                            }
-                        }
+                        crate::config::get_debug_pairs(mode)
                     )
-                })
+                } else {
+                    raw::ModuleData{
+                        mode,
+                        theme_id: ThemeId::Chalkboard,
+                        ..raw::ModuleData::default()
+                    }
+                }
             ),
             step: Some(Step::One), 
             live_save: false,
@@ -70,10 +70,10 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(GameMode::Duplicate), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(GameMode::WordsAndImages), true)).unwrap_ji();
-        SETTINGS.set(DebugSettings::debug(Some(GameMode::BeginsWith), true)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(Mode::Duplicate), false)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(Mode::WordsAndImages), true)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(Mode::BeginsWith), true)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

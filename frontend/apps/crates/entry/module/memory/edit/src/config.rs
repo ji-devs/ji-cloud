@@ -2,7 +2,7 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
-use crate::data::state::GameMode;
+use crate::data::state::Mode;
 
 pub static DUAL_LIST_CHAR_LIMIT:usize = 30;
 pub static SINGLE_LIST_CHAR_LIMIT:usize = 30;
@@ -57,12 +57,12 @@ pub fn get_dual_list_init_word(row: usize, col: usize) -> Option<&'static str> {
         .map(|s| s.as_ref())
 }
 
-pub fn get_debug_pairs(mode: GameMode) -> Vec<(String, String)> {
+pub fn get_debug_pairs(mode: Mode) -> Vec<(String, String)> {
     EDITOR_CONFIG 
         .get()
         .map(|config| {
             match mode {
-                GameMode::Duplicate | GameMode::Lettering => {
+                Mode::Duplicate | Mode::Lettering => {
                     config.init.single_list_words
                         .iter()
                         .map(|word| {
@@ -70,7 +70,7 @@ pub fn get_debug_pairs(mode: GameMode) -> Vec<(String, String)> {
                         })
                         .collect()
                 },
-                GameMode::WordsAndImages => {
+                Mode::WordsAndImages => {
                     config.init.single_list_words
                         .iter()
                         .map(|word| {

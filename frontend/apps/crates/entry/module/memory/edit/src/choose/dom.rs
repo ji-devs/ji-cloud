@@ -10,14 +10,14 @@ impl ChooseDom {
         html!("choose-page", {
             .children(
                 [
-                    GameMode::Duplicate,
-                    GameMode::WordsAndImages,
-                    GameMode::BeginsWith,
-                    GameMode::Lettering,
-                    GameMode::Riddles,
-                    GameMode::Opposites,
-                    GameMode::Synonymns,
-                    GameMode::Translate
+                    Mode::Duplicate,
+                    Mode::WordsAndImages,
+                    Mode::BeginsWith,
+                    Mode::Lettering,
+                    Mode::Riddles,
+                    Mode::Opposites,
+                    Mode::Synonymns,
+                    Mode::Translate
                 ]
                 .into_iter()
                 .map(|mode| {

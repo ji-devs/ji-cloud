@@ -41,14 +41,14 @@ impl ModuleRenderer<State> for PageRenderer {
     }
 
     fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
-        state.game_mode
+        state.mode
             .signal()
-            .map(clone!(state => move |game_mode| {
+            .map(clone!(state => move |mode| {
                 vec![
-                    Self::sidebar(state.clone(), game_mode, kind),
-                    Self::header(state.clone(), game_mode, kind),
-                    Self::main(state.clone(), game_mode, kind),
-                    Self::footer(state.clone(), game_mode, kind),
+                    Self::sidebar(state.clone(), mode, kind),
+                    Self::header(state.clone(), mode, kind),
+                    Self::main(state.clone(), mode, kind),
+                    Self::footer(state.clone(), mode, kind),
                 ]
                 .into_iter()
                 .filter(|x| x.is_some())
@@ -60,32 +60,32 @@ impl ModuleRenderer<State> for PageRenderer {
 }
 
 /*
- * if game_mode is None, then it's the Choose page - and it's only main
+ * if mode is None, then it's the Choose page - and it's only main
  * otherwise it's the Steps sections
  */
 impl PageRenderer {
-    fn sidebar(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+    fn sidebar(state: Rc<State>, mode: Option<Mode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            game_mode
-                .map(|game_mode| {
+            mode
+                .map(|mode| {
                     steps::sidebar::dom::SidebarDom::render(state)
                 })
         }
     }
 
-    fn header(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+    fn header(state: Rc<State>, mode: Option<Mode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             Some(steps::header::dom::HeaderPreviewDom::render(state))
         } else {
-            game_mode.map(|_| steps::header::dom::HeaderDom::render(state))
+            mode.map(|_| steps::header::dom::HeaderDom::render(state))
         }
     }
 
-    fn main(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+    fn main(state: Rc<State>, mode: Option<Mode>, kind: ModulePageKind) -> Option<Dom> {
 
-        Some(match game_mode {
+        Some(match mode {
             None => {
                 choose::dom::ChooseDom::render(state)
             },
@@ -99,12 +99,12 @@ impl PageRenderer {
         })
     }
 
-    fn footer(state: Rc<State>, game_mode: Option<GameMode>, kind: ModulePageKind) -> Option<Dom> {
+    fn footer(state: Rc<State>, mode: Option<Mode>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            game_mode
-                .map(|game_mode| {
+            mode
+                .map(|mode| {
                     steps::footer::dom::FooterDom::render(state)
                 })
         }
