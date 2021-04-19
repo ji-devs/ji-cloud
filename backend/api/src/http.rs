@@ -204,6 +204,9 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
+            .configure(
+                |cfg| -> () { cfg.route("/", shared::api::Method::Get.route().to(no_content_response)); }
+            )
             .with_json_spec_at("/spec.json")
             .build()
     });
@@ -236,6 +239,11 @@ fn default_route() -> HttpResponse {
         http::StatusCode::NOT_FOUND,
         "Route not found".to_owned(),
     ))
+}
+
+fn no_content_response() -> HttpResponse {
+    actix_web::HttpResponse::build(http::StatusCode::NO_CONTENT)
+        .finish()
 }
 
 fn bad_request_handler() -> actix_web::Error {

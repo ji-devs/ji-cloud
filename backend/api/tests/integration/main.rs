@@ -19,7 +19,7 @@ async fn pass() -> anyhow::Result<()> {
 
     let resp = reqwest::get(&format!("http://0.0.0.0:{}", port)).await?;
 
-    assert_eq!(resp.status(), http::StatusCode::NOT_FOUND);
+    assert_eq!(resp.status(), http::StatusCode::NO_CONTENT);
 
     Ok(())
 }
