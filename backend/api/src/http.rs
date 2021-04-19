@@ -204,9 +204,7 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
-            .configure(
-                |cfg| -> () { cfg.route("/", shared::api::Method::Get.route().to(no_content_response)); }
-            )
+            .route("/", paperclip::actix::web::get().to(|| NoContent))
             .with_json_spec_at("/spec.json")
             .build()
     });
@@ -241,11 +239,9 @@ fn default_route() -> HttpResponse {
     ))
 }
 
-fn no_content_response() -> HttpResponse {
-    actix_web::HttpResponse::build(http::StatusCode::NO_CONTENT)
-        .finish()
+fn no_content_response() -> NoContent {
+    NoContent
 }
-
 fn bad_request_handler() -> actix_web::Error {
     BasicError::new(http::StatusCode::BAD_REQUEST).into()
 }
