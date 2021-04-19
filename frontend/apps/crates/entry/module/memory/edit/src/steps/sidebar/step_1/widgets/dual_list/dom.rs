@@ -10,6 +10,8 @@ use futures_signals::{
 use components::tooltip::types::*;
 use super::state::*;
 use unicode_segmentation::UnicodeSegmentation;
+use crate::data::state::Mode;
+
 pub struct DualListDom {}
 impl DualListDom {
     pub fn render(state: Rc<State>) -> Dom { 
@@ -71,7 +73,7 @@ impl DualListDom {
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-enum ColumnSide {
+pub enum ColumnSide {
     Left,
     Right
 }
@@ -89,12 +91,7 @@ impl ColumnSide {
             Self::Right => 1, 
         }
     }
-    fn header(&self) -> &'static str {
-        match self {
-            Self::Left => "LEFT",
-            Self::Right => "RIGHT",
-        }
-    }
+
     fn mutable(&self, state:&State) -> Rc<MutableVec<Mutable<String>>> {
         match self {
             Self::Left => state.left.clone(),
@@ -104,10 +101,12 @@ impl ColumnSide {
 }
 
 fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
+    let mode = state.app.mode.get().unwrap_ji();
+
     html!("sidebar-widget-dual-list-column", {
         .property("slot", side.side_prop())
         .property("side", side.side_prop())
-        .property("header", side.header())
+        .property("header", crate::strings::STR_HEADER(side, mode)) 
         .children_signal_vec(
             side.mutable(&state).signal_vec_cloned()
                 .enumerate()
@@ -121,7 +120,12 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                     Dom::with_state(constrain_cb, clone!(state => move |constrain_cb| {
                         let row = index.get().unwrap_or_default();
                         let mode = state.app.mode.get_cloned().unwrap_ji();
+                        let rows = match mode {
+                            Mode::Riddles => 2,
+                            _ => 1
+                        };
                         html!("sidebar-widget-dual-list-input", {
+                            .property("rows", rows)
                             .property_signal("value", {
                                 map_ref! {
                                     let value = value.signal_cloned(),

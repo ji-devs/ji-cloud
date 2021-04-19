@@ -55,11 +55,14 @@ export class _ extends LitElement {
   @property({type: Boolean, reflect: true})
   placeholder:boolean = false;
 
+  @property({type: Number})
+  rows:number = 1;
+
   render() {
-      const {value} = this;
+      const {value, rows} = this;
 
       return html`<div class="row">
-          <textarea @input="${this.onInput}" @change="${this.onChange}" .value="${live(value)}" ></textarea>
+          <textarea @input="${this.onInput}" @change="${this.onChange}" .value="${live(value)}" rows="${rows}"></textarea>
       </div>`
   }
 }
