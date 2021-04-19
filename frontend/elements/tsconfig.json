@@ -7,7 +7,8 @@
         "@frontend-config/*": ["../config/*"],
         "@project-config": ["../../config/typescript/src/lib"],
         "@elements/*": ["./src/*"],
-        "@bundles/*": ["./src/_bundles/*"]
+        "@bundles/*": ["./src/_bundles/*"],
+        "tslib": ["./node_modules/tslib/tslib.d.ts"]
     },
     "target": "es2017",
     "module": "es2015",
