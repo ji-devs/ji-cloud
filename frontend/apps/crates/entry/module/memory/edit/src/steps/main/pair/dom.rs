@@ -93,6 +93,25 @@ impl CardDom {
                     Card::Text(data) => {
                         html!("input-textarea-content", {
                             .property_signal("value", data.signal_cloned())
+                            .property_signal("fontSize", {
+                                let sig = map_ref!{
+                                    let value = data.signal_cloned(),
+                                    let theme = state.theme_id.signal_cloned()
+                                        => {
+                                            (value.len(), *theme)
+                                        }
+                                };
+
+                                sig.map(|(len, theme_id)| {
+                                    format!("{}px", 40)
+                                })
+                            })
+                            .property_signal("fontFamily", state.theme_id.signal_cloned().map(|theme_id| {
+                                format!("var(--theme-{}-font-family)", theme_id.as_str_id())
+                            }))
+                            .property_signal("color", state.theme_id.signal_cloned().map(|theme_id| {
+                                format!("var(--theme-{}-color)", theme_id.as_str_id())
+                            }))
                             .property("clickMode", "none")
                             .property("constrainWidth", crate::config::CARD_TEXT_LIMIT_WIDTH)
                             .property("constrainHeight", crate::config::CARD_TEXT_LIMIT_HEIGHT)

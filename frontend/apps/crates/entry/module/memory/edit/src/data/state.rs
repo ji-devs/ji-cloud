@@ -197,7 +197,14 @@ pub enum Side {
 }
 
 impl Side {
-    pub fn slot_name(&self) -> &'static str {
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::Left => "left",
+            Self::Right => "right",
+        }
+    }
+
+    pub const fn slot_name(&self) -> &'static str {
         match self {
             Self::Left => "left",
             Self::Right => "right",

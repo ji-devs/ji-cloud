@@ -3,6 +3,8 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/module/_common/theme";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
+import {MODE} from "@elements/module/memory/_common/types";
+import { styleMap } from 'lit-html/directives/style-map';
 
 @customElement('main-card')
 export class _ extends LitElement {
@@ -21,7 +23,7 @@ export class _ extends LitElement {
               background-color: var(--light-blue-1);
           }
 
-          section.editing .front {
+          .front {
               border-style: solid; 
               border-radius: 16px;
               border-width: 1px;
@@ -83,14 +85,18 @@ export class _ extends LitElement {
   @property({type: Boolean})
   editing: boolean = false;
 
+
   render() {
       const {flippable, theme, editing} = this;
 
-      const style = `border-color: var(--theme-${theme}-border-color)`;
+
+      const frontStyle = styleMap({
+          borderColor: `var(--theme-${theme}-border-color)`,
+      });
 
       return html`
           <section class="${classMap({flippable, editing})}" >
-          <div class="front" style="${style}"><slot></slot></div>
+          <div class="front" style=${frontStyle}><slot></slot></div>
           <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
           </section>
       `
