@@ -33,6 +33,7 @@ export class _ extends LitElement {
               font-weight: 300;
               letter-spacing: -0.18px;
               color: #383838;
+              width: 304px;
             }
             .noshow {
               font-size: 16px;

@@ -66,12 +66,12 @@ export class _ extends LitElement {
   }
 }
 
-function renderTooltip(moduleKind:ModuleKind, imgRef:HTMLElement) {
+function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
     const body = STR_TOOLTIP_BODY[moduleKind];
     if(!body) {
         return nothing;
     }
 
     const showId = `header-intro-${moduleKind}`;
-    return html`<tooltip-info placement="bottom-end" .target=${imgRef} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
+    return html`<tooltip-info placement="bottom-end" .target=${targetRef} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
 }

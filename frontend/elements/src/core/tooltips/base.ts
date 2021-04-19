@@ -12,7 +12,7 @@ export class _ extends LitElement {
                     display: inline-block;
                     box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);
                     --arrow-size: 24px;
-                    --arrow-offset: -12px;
+                    --arrow-offset: -10px;
                     z-index: 1000; /* is still restricted by shadow dom? */
                 }
 
@@ -58,7 +58,7 @@ export class _ extends LitElement {
                 }
 
                 :host([data-popper-placement^='right'])  #arrow {
-                  left: var(--arrow-offset);
+                  right: var(--arrow-offset);
                 }
             `
         ];
@@ -93,6 +93,7 @@ export class _ extends LitElement {
                       name: "arrow",
                       options: {
                           element: this.shadowRoot?.getElementById("arrow"),
+                          padding: 12,
                       }
                     },
                     {
