@@ -50,6 +50,7 @@ pub struct State {
     pub instructions: Instructions,
     pub save_loader: Rc<AsyncLoader>,
     pub overlay: OverlayState,
+    pub image_card_click_callback: RefCell<Option<Box<dyn Fn()>>>,
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
 }
 
@@ -104,6 +105,7 @@ impl State {
             history: RefCell::new(None),
             save_loader,
             instructions,
+            image_card_click_callback: RefCell::new(None),
             overlay: OverlayState::new()
         });
 

@@ -2,6 +2,7 @@ use crate::data::state::State as AppState;
 use crate::debug::DebugContentTab;
 use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
+use dominator::clone;
 
 #[derive(Clone)]
 pub struct State {
@@ -31,11 +32,20 @@ impl From<Option<DebugContentTab>> for Tab {
 
 impl State {
     pub fn new(app: Rc<AppState>) -> Self {
+        let tab = Mutable::new(crate::debug::settings().content_tab.into());
+
+        *app.image_card_click_callback.borrow_mut() = Some(Box::new(clone!(tab => move || {
+            tab.set(Tab::Images);
+        })));
         Self {
             app,
-            tab: Mutable::new(crate::debug::settings().content_tab.into())
+            tab,
         }
     }
 }
 
-
+impl Drop for State {
+    fn drop(&mut self) {
+        *self.app.image_card_click_callback.borrow_mut() = None; 
+    }
+}

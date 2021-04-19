@@ -76,16 +76,28 @@ impl CardDom {
 
         let editing_active:Mutable<bool> = Mutable::new(false);
 
+        let is_image = match card {
+            Card::Image(_) => true,
+            _ => false,
+        };
+
         html!("main-card", {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
             .property("editing", step == Step::One)
             .property_signal("dragOver", editing_active.signal())
             .property_signal("theme", state.theme_id_str_signal())
-            .event(clone!(input_ref, editing_active => move |evt:events::Click| {
+
+            .event(clone!(state, input_ref, editing_active, is_image => move |evt:events::Click| {
                 if let Some(input_ref) = input_ref.borrow().as_ref() {
                     Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
                     editing_active.set_neq(true);
+                }
+
+                if is_image {
+                    if let Some(cb) = state.image_card_click_callback.borrow().as_ref() {
+                        (cb)();
+                    }
                 }
             }))
             .child({
