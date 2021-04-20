@@ -7,7 +7,6 @@ import "@elements/entry/jig/publish/resources";
 import "@elements/core/titles/ji";
 import "@elements/widgets/tags/icon";
 import { Rectangle } from "~/components/core/buttons/rectangle";
-import { Top } from "~/components/widgets/tooltips/tooltip-top";
 import { PillClose } from "~/components/core/pills/pill-close";
 
 export default {

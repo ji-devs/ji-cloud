@@ -9,13 +9,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec, self},
 };
 use rand::prelude::*;
-use shared::{
-    domain::{
-        image::ImageId,
-        jig::{JigId, module::ModuleId}
-    },
-    media::MediaLibrary
-};
+use shared::{domain::{image::ImageId, jig::{JigId, module::{ModuleId, body::memory::CardPair}}}, media::MediaLibrary};
 use wasm_bindgen::UnwrapThrowExt;
 use crate::{
     player::card::state::{State as CardState, Side},
@@ -28,9 +22,9 @@ use utils::prelude::*;
 pub struct State {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub mode: GameMode,
+    pub mode: Mode,
     pub pair_lookup: Vec<usize>,
-    pub original_pairs: Vec<(raw::Card, raw::Card)>,
+    pub original_pairs: Vec<CardPair>,
     pub cards: Vec<Rc<CardState>>,
     pub theme_id: ThemeId,
     pub flip_state: Mutable<FlipState>,
@@ -39,7 +33,6 @@ pub struct State {
 
 impl State {
     pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Self {
-        let mode:GameMode = raw_data.mode.into();
 
         let n_cards = raw_data.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
@@ -50,7 +43,9 @@ impl State {
             let mut cards:Vec<Rc<CardState>> = Vec::with_capacity(n_cards);
             let mut index:usize = 0;
 
-            for (card_1, card_2) in pairs.iter() {
+            for pair in pairs.iter() {
+                let (card_1, card_2) = (&pair.0, &pair.1);
+
                 let id_1 = index; 
                 let id_2 = index + 1;
                 index = id_2 + 1;
@@ -75,7 +70,7 @@ impl State {
         Self {
             jig_id,
             module_id,
-            mode,
+            mode: raw_data.mode.unwrap_ji(),
             pair_lookup,
             original_pairs: raw_data.pairs,
             cards,
@@ -110,7 +105,7 @@ impl State {
 
 }
 
-pub type GameMode = raw::Mode;
+pub type Mode = raw::Mode;
 
 #[derive(Debug, Clone)]
 pub enum FlipState {

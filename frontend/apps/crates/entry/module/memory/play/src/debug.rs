@@ -30,7 +30,7 @@ impl DebugSettings {
                         mode, 
                         ThemeId::Chalkboard, 
                         raw::Instructions::new(),
-                        crate::config::get_debug_pairs(mode)
+                        crate::config::get_debug_pairs(mode, 3)
                     )
             ),
             shuffle: false,
@@ -50,7 +50,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
-            SETTINGS.set(DebugSettings::debug(GameMode::Duplicate)).unwrap_ji();
+            SETTINGS.set(DebugSettings::debug(Mode::Duplicate)).unwrap_ji();
         }
 
         pub fn settings() -> &'static DebugSettings {

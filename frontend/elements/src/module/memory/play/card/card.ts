@@ -39,8 +39,8 @@ export class _ extends LitElement {
           }
 
           section, ::slotted(img-ji), .back > img-ui {
-              width: calc(168rem * (1920/1719));
-              height: calc(168rem * (1920/1719));
+              width: 188rem;
+              height: 188rem;
           }
 
           ::slotted(img-ji), ::slotted(img-ui) {
