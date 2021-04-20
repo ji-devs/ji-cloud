@@ -18,7 +18,7 @@ use core::{
     settings::RuntimeSettings,
 };
 use futures::Future;
-use paperclip::actix::OpenApiExt;
+use paperclip::actix::{OpenApiExt, NoContent, api_v2_operation};
 use sqlx::postgres::PgPool;
 use std::{net::TcpListener, sync::Arc};
 
@@ -204,7 +204,7 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
-            .route("/", paperclip::actix::web::get().to(|| NoContent))
+            .route("/", paperclip::actix::web::get().to(no_content_response))
             .with_json_spec_at("/spec.json")
             .build()
     });
@@ -239,9 +239,11 @@ fn default_route() -> HttpResponse {
     ))
 }
 
-fn no_content_response() -> NoContent {
+#[api_v2_operation]
+async fn no_content_response() -> NoContent {
     NoContent
 }
+
 fn bad_request_handler() -> actix_web::Error {
     BasicError::new(http::StatusCode::BAD_REQUEST).into()
 }
