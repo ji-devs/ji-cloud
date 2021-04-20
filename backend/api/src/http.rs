@@ -18,7 +18,7 @@ use core::{
     settings::RuntimeSettings,
 };
 use futures::Future;
-use paperclip::actix::{OpenApiExt, NoContent, api_v2_operation};
+use paperclip::actix::{api_v2_operation, NoContent, OpenApiExt};
 use sqlx::postgres::PgPool;
 use std::{net::TcpListener, sync::Arc};
 
