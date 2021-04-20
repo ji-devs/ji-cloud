@@ -17,7 +17,7 @@ use components::{
     image_search::{self, state::ImageSearchOptions},
     audio_input::{self, options::AudioInputOptions, state::State as AudioState},
     color_select::{self, state::ColorSelectConfig},
-    text_editor_controls,
+    text::text_editor_controls,
 };
 use shared::domain::audio::AudioId;
 use std::pin::Pin;
