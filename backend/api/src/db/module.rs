@@ -1,26 +1,18 @@
-use std::cmp;
-
+use anyhow::Context;
 use shared::domain::jig::{
-    module::{Module, ModuleBody, ModuleBodyResponse, ModuleId, ModuleIdOrIndex, ModuleKind},
+    module::{Module, ModuleBody, ModuleId, ModuleIdOrIndex, ModuleKind},
     JigId,
 };
 use sqlx::PgPool;
+use std::cmp;
 
 pub async fn create(
     pool: &PgPool,
     parent: JigId,
     body: Option<&ModuleBody>,
 ) -> anyhow::Result<(ModuleId, u16)> {
-    // note: should convert `unknowns` to <insert known here> if possible.
-    let (kind, body) = match body {
-        Some(it) => {
-            log::warn!(
-                "Converting known body into unknown body: {}",
-                it.kind().as_str()
-            );
-
-            (Some(it.kind()), Some(it.body_to_json()?))
-        }
+    let (kind, body) = match body.map(map_module_contents).transpose()? {
+        Some((kind, body)) => (Some(kind), Some(body)),
         None => (None, None),
     };
 
@@ -32,7 +24,7 @@ returning id, "index"
 "#,
         parent.0,
         kind.map(|it| it as i16),
-        body.as_deref(),
+        body,
     )
     .fetch_one(pool)
     .await
@@ -49,17 +41,8 @@ pub async fn update(
 ) -> anyhow::Result<bool> {
     let (id, index) = (lookup.id(), lookup.index());
 
-    // todo: merge with above.
-    // note: should convert `unknowns` to <insert known here> if possible.
-    let (kind, body) = match dbg!(body) {
-        Some(it) => {
-            log::warn!(
-                "Converting known body into unknown body: {}",
-                it.kind().as_str()
-            );
-
-            (Some(it.kind()), Some(it.body_to_json()?))
-        }
+    let (kind, body) = match body.map(map_module_contents).transpose()? {
+        Some((kind, body)) => (Some(kind), Some(body)),
         None => (None, None),
     };
 
@@ -83,16 +66,12 @@ pub async fn update(
         r#"
 update jig_module
 set contents = coalesce($3, contents),
-    kind = coalesce($4, kind),
-    updated_at = now()
-where jig_id = $1 and index = $2 and (
-    ($3::jsonb is not null and $3 is distinct from contents) or
-    ($4::int2 is not null and $4 is distinct from kind)
-)
+    kind = coalesce($4, kind)
+where jig_id = $1 and index = $2
 "#,
         parent_id.0,
         index,
-        body.as_deref(),
+        body.as_ref(),
         kind.map(|it| it as i16),
     )
     .execute(&mut txn)
@@ -150,15 +129,26 @@ where jig_id = $1 and index between $2 and $3
     Ok(true)
 }
 
+fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_json::Value)> {
+    let kind = body.kind();
+
+    let body = match body {
+        ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
+        _ => anyhow::bail!("Unimplemented body kind: {}", kind.as_str()),
+    };
+
+    Ok((kind, body))
+}
+
 fn transform_response_kind(
-    contents: Option<serde_json::Value>,
-    kind: Option<ModuleKind>,
-) -> Option<ModuleBodyResponse> {
-    match (kind, contents) {
-        (None, _) => None,
-        (Some(ModuleKind::Cover), body) => Some(ModuleBodyResponse::Cover(body)),
-        (Some(_), None) => None,
-        (Some(kind), Some(body)) => Some(ModuleBodyResponse::Unknown { kind, body }),
+    contents: serde_json::Value,
+    kind: ModuleKind,
+) -> anyhow::Result<ModuleBody> {
+    match kind {
+        ModuleKind::Cover => Ok(ModuleBody::Cover),
+        ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
+
+        _ => anyhow::bail!("Unimplemented response kind"),
     }
 }
 
@@ -166,7 +156,7 @@ pub async fn get(
     pool: &PgPool,
     parent: JigId,
     lookup: ModuleIdOrIndex,
-) -> sqlx::Result<Option<Module>> {
+) -> anyhow::Result<Option<Module>> {
     let (id, index) = (lookup.id(), lookup.index());
 
     let module = sqlx::query!(
@@ -185,10 +175,17 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
     .fetch_optional(pool)
     .await?;
 
+    let map_response = |body, kind| Some(transform_response_kind(body?, kind?));
+
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
-            body: transform_response_kind(it.body, it.kind),
+            body: map_response(it.body, it.kind)
+                .transpose()
+                .context(anyhow::anyhow!(
+                    "failed to transform module of kind {:?}",
+                    it.kind
+                ))?,
         })),
         None => Ok(None),
     }

@@ -35,17 +35,21 @@ returning id
 
     super::recycle_metadata(&mut transaction, "jig", jig.id, content_types).await?;
 
-    let default_module_kinds = [Some(ModuleKind::Cover), None];
+    let default_modules = [
+        (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
+        (None, None),
+    ];
 
     // todo: batch
-    for (idx, kind) in default_module_kinds.iter().enumerate() {
+    for (idx, (kind, contents)) in default_modules.iter().enumerate() {
         sqlx::query!(
             r#"
-insert into jig_module (jig_id, "index", kind)
-values ($1, $2, $3)"#,
+insert into jig_module (jig_id, "index", kind, contents)
+values ($1, $2, $3, $4)"#,
             jig.id,
             idx as i16,
             kind.map(|it| it as i16),
+            contents.as_ref()
         )
         .execute(&mut transaction)
         .await?;
