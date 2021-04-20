@@ -6,8 +6,6 @@ expression: body
 {
   "module": {
     "id": "0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
-    "body": {
-      "cover": null
-    }
+    "body": "cover"
   }
 }

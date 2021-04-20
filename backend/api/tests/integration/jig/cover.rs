@@ -1,44 +1,10 @@
 use serde_json::json;
-use shared::domain::{
-    jig::{JigId, JigResponse},
-    CreateResponse,
-};
+use shared::domain::jig::JigResponse;
 
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
-
-#[actix_rt::test]
-async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
-
-    let port = app.port();
-
-    let client = reqwest::Client::new();
-
-    let resp = client
-        .post(&format!("http://0.0.0.0:{}/v1/jig", port))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
-
-    let body: CreateResponse<JigId> = resp.json().await?;
-
-    let resp = client
-        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, body.id.0))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
-
-    let body: JigResponse = resp.json().await?;
-
-    insta::assert_json_snapshot!(body.jig.modules, {"[].id" => "[id]"});
-
-    Ok(())
-}
 
 #[actix_rt::test]
 async fn update_no_modules_changes() -> anyhow::Result<()> {

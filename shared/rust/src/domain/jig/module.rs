@@ -12,7 +12,7 @@ pub mod body;
 /// Module themes
 pub mod theme;
 
-pub use body::{Body as ModuleBody, BodyResponse as ModuleBodyResponse};
+pub use body::Body as ModuleBody;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -143,7 +143,7 @@ pub struct Module {
     pub id: ModuleId,
 
     /// The module's body.
-    pub body: Option<ModuleBodyResponse>,
+    pub body: Option<ModuleBody>,
 }
 
 /// Request to create a new `Module`.
