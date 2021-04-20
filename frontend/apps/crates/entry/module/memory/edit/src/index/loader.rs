@@ -33,7 +33,10 @@ impl StateLoader<RawData, State> for PageLoader {
         async move {
             let game_data = match debug::settings().data.as_ref() {
                 None => {
-                    let path = Get::PATH.replace("{id}",&module_id.0.to_string());
+
+                    let path = Get::PATH
+                        .replace("{id}",&jig_id.0.to_string())
+                        .replace("{module_id}",&module_id.0.to_string());
 
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
