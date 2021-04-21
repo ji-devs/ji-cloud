@@ -16,8 +16,8 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     domain::jig::{*, module::*},
 };
-use utils::prelude::*;
-
+use utils::{settings::SETTINGS, prelude::*};
+use components::font_loader::{FontLoader, Font};
 pub struct PageLoader { 
     pub jig_id: JigId,
     pub module_id: ModuleId 
@@ -53,6 +53,8 @@ impl StateLoader<RawData, State> for PageLoader {
                 },
                 Some(game_data) => game_data.clone()
             };
+
+            FontLoader::new().load_all().await;
 
             let state = State::new(jig_id, module_id, game_data);
             Some(state)

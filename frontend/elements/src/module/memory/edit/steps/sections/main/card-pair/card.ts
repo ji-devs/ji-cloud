@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind} from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 import {MODE} from "@elements/module/memory/_common/types";
 import { styleMap } from 'lit-html/directives/style-map';
@@ -91,7 +91,7 @@ export class _ extends LitElement {
 
 
       const frontStyle = styleMap({
-          borderColor: `var(--theme-${theme}-border-color)`,
+          borderColor: `var(--theme-${theme}-color-2)`,
       });
 
       return html`

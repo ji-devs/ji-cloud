@@ -95,9 +95,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-memory-common"
+version = "0.1.0"
+dependencies = [
+ "components",
+ "config",
+ "shared",
+ "utils",
+]
+
+[[package]]
 name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
+ "app-memory-common",
  "async-trait",
  "awsm_web 0.16.0",
  "cfg-if 1.0.0",

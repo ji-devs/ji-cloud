@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
 import { mediaUi } from "@utils/path";
-import {ThemeKind} from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
 import {playerBackPath} from "@elements/module/memory/_common/helpers";
 
 const bgImage = mediaUi('module/memory/play/bg.png');

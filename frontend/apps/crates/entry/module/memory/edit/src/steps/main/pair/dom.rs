@@ -81,6 +81,7 @@ impl CardDom {
             _ => false,
         };
 
+        let mode = state.mode.get().unwrap_ji();
         html!("main-card", {
             .property("slot", side.slot_name())
             .property("flippable", step == Step::Two)
@@ -118,11 +119,12 @@ impl CardDom {
                                     format!("{}px", 40)
                                 })
                             })
-                            .property_signal("fontFamily", state.theme_id.signal_cloned().map(|theme_id| {
-                                format!("var(--theme-{}-font-family)", theme_id.as_str_id())
-                            }))
+                            .property_signal("fontFamily", state.theme_id.signal_cloned().map(clone!(side, mode => move |theme_id| {
+                                let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, side.into());
+                                theme_id.css_var_font_family(font_family)
+                            })))
                             .property_signal("color", state.theme_id.signal_cloned().map(|theme_id| {
-                                format!("var(--theme-{}-color)", theme_id.as_str_id())
+                                theme_id.css_var_color(1)
                             }))
                             .property("clickMode", "none")
                             .property("constrainWidth", crate::config::CARD_TEXT_LIMIT_WIDTH)

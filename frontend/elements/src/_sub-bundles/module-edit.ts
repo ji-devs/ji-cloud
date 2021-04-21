@@ -1,3 +1,4 @@
+import "@elements/_themes/themes";
 import "@elements/_sub-bundles/components/image_search/imports";
 import "@elements/_sub-bundles/components/audio_input/imports";
 import "@elements/core/images/ji";
@@ -25,5 +26,4 @@ import "@elements/module/_common/main-empty";
 import "@elements/module/_common/preview-header";
 import "@elements/module/_common/sidebar";
 import "@elements/module/_common/sidebar-body";
-import "@elements/module/_common/theme";
 import "@elements/module/_common/widgets/header-controller";

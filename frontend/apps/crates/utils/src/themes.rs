@@ -27,9 +27,22 @@ pub trait ThemeIdExt {
     fn map_theme<F, A>(self, mapper:F) -> A
     where
         F: FnOnce(&'static Theme) -> A;
+
+
+    fn css_var_font_family(self, num: usize) -> String;
+
+    fn css_var_color(self, num: usize) -> String;
 }
 
 impl ThemeIdExt for ThemeId {
+
+    fn css_var_font_family(self, num: usize) -> String {
+        format!("var(--theme-{}-font-family-{})", self.as_str_id(), num)
+    }
+
+    fn css_var_color(self, num: usize) -> String {
+        format!("var(--theme-{}-color-{})", self.as_str_id(), num)
+    }
 
     fn get_colors(self) -> &'static [RGBA8] {
         self.map_theme(|theme| theme.colors.as_slice())

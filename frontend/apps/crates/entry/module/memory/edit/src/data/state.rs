@@ -198,6 +198,14 @@ pub enum Side {
     Right,
 }
 
+impl From<Side> for app_memory_common::lookup::Side {
+    fn from(side: Side) -> Self {
+        match side {
+            Side::Left => app_memory_common::lookup::Side::Left,
+            Side::Right => app_memory_common::lookup::Side::Right,
+        }
+    }
+}
 impl Side {
     pub const fn as_str(&self) -> &'static str {
         match self {

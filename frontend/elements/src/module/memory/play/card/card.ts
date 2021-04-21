@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind} from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 
 type SIDE = "left" | "right";

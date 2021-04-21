@@ -65,6 +65,7 @@ pub fn get_debug_pairs(mode: Mode) -> Vec<(String, String)> {
                 Mode::Duplicate | Mode::Lettering => {
                     config.init.single_list_words
                         .iter()
+                        .skip(1)
                         .map(|word| {
                             (word.to_string(), word.to_string())
                         })

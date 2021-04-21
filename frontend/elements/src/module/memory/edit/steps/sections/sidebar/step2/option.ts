@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {MODE} from "@elements/module/memory/_common/types";
-import {ThemeKind} from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 
 export type STATE = "idle" | "hover" | "selected";
@@ -106,7 +106,7 @@ export class _ extends LitElement {
   render() {
       const {theme, state} = this;
 
-      const style = `border-color: var(--theme-${theme}-border-color)`;
+      const style = `border-color: var(--theme-${theme}-color-2)`;
 
       const text = state === "hover" ? STR_SAMPLE_HEBREW : STR_SAMPLE_ENGLISH;
 

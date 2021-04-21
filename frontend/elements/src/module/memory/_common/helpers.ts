@@ -1,4 +1,4 @@
-import {ThemeKind, THEMES} from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
 
 export const cardBackPath = (theme:ThemeKind):string => {
     return theme === "" 
