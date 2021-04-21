@@ -1,5 +1,5 @@
-import {ThemeKind} from "@elements/module/_common/theme";
-export * from "@elements/module/_common/theme";
+import {ThemeKind} from "@elements/_themes/themes";
+export * from "@elements/_themes/themes";
 
 //TODO - import from config instead
 export const ThemeKinds:Array<ThemeKind> = ["", "chalkboard", "happy-brush"];
