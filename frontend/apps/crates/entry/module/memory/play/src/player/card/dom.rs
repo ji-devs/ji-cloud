@@ -27,7 +27,7 @@ impl CardDom {
                     "visible"
                 }
             }))
-            .child(card.media_dom())
+            .child(card.media_dom(state.mode, state.theme_id))
             .event(clone!(state, card_id => move |evt:events::Click| {
                 if let Some((id_1, id_2)) = actions::card_click(state.clone(), card_id) {
                     actions::evaluate(state.clone(), id_1, id_2);
@@ -80,17 +80,29 @@ impl CardDom {
             .property("flipped", true) 
             .property("theme", state.theme_id.as_str_id())
             .property("transform", true)
-            .child(card.media_dom())
+            .child(card.media_dom(state.mode, state.theme_id))
         })
     }
 }
 
 impl CardState {
-    pub fn media_dom(&self) -> Dom {
+    pub fn media_dom(&self, mode: Mode, theme_id: ThemeId) -> Dom {
         match &self.media {
             Media::Text(s) => {
                 html!("card-text", {
                     .property("value", s)
+                    .property("fontSize", {
+                        let font_size = app_memory_common::lookup::get_card_font_size(s.len(), theme_id);
+                        format!("{}rem", font_size)
+                    })
+                    .property("fontFamily", {
+                        let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, self.side.into());
+                        theme_id.css_var_font_family(font_family)
+                    })
+                    .property("color", { 
+                        theme_id.css_var_color(1)
+                    })
+                    
                 })
             },
             Media::Image(id, lib) => {
@@ -102,3 +114,27 @@ impl CardState {
         }
     }
 }
+
+/*
+                            .property_signal("fontSize", {
+                                let sig = map_ref!{
+                                    let value = data.signal_cloned(),
+                                    let theme = state.theme_id.signal_cloned()
+                                        => {
+                                            (value.len(), *theme)
+                                        }
+                                };
+
+                                sig.map(|(len, theme_id)| {
+                                    let font_size = app_memory_common::lookup::get_card_font_size(len, theme_id);
+                                    format!("{}px", font_size)
+                                })
+                            })
+                            .property_signal("fontFamily", state.theme_id.signal_cloned().map(clone!(side, mode => move |theme_id| {
+                                let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, side.into());
+                                theme_id.css_var_font_family(font_family)
+                            })))
+                            .property_signal("color", state.theme_id.signal_cloned().map(|theme_id| {
+                                theme_id.css_var_color(1)
+                            }))
+                            */

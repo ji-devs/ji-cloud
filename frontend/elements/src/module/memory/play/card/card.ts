@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
+import { styleMap } from 'lit-html/directives/style-map';
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 
 type SIDE = "left" | "right";
@@ -67,7 +68,6 @@ export class _ extends LitElement {
               border-style: solid;
               border-width: 3px;
 
-              background-color: white;
           }
 
           .back {
@@ -103,12 +103,16 @@ export class _ extends LitElement {
   render() {
       const {theme, scale, transform, translateX, translateY} = this;
 
-      const frontStyle = `border-color: var(--theme-${theme}-border-color)`;
+      const frontStyle = styleMap({
+          borderColor: `var(--theme-${theme}-color-2)`,
+          backgroundColor: `var(--theme-${theme}-color-3)`,
+      });
+
       const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
 
       return html`
           <section style="${style}">
-              <div class="front" style="${frontStyle}"><slot></slot></div>
+              <div class="front" style=${frontStyle}><slot></slot></div>
               <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
           </section>
       `

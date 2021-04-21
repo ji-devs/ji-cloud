@@ -21,13 +21,11 @@ export const THEMES:Record<ThemeKind, Theme> = {
         fontFamily3: "", 
         color1: "black",
         color2: "black",
-        color3: "black",
+        color3: "white",
     },
     chalkboard: {
         fontFamily1: `"Shesek - Regular", "Architects Daughter - Regular"`,
         fontFamily2: `"Frank Ruhl Libre - Medium", "Architects Daughter - Regular"`,
-        //
-        //fontFamily2: `"Comic Sans MS", "Comic Sans", cursive`,
         fontFamily3: `"Shesek - Regular", "Roboto Slab - Regular"`,
         color1: "#272727",
         color2: "#AFCBF4",

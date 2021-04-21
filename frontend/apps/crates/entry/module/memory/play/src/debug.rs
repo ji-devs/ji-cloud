@@ -26,18 +26,17 @@ impl DebugSettings {
     pub fn debug(mode: raw::Mode) -> DebugSettings {
         DebugSettings {
             data: Some(
-                    raw::ModuleData::new(
-                        mode, 
-                        ThemeId::Chalkboard, 
-                        raw::Instructions::new(),
-                        crate::config::get_debug_pairs(mode, 3)
-                    )
+                raw::ModuleData::new(
+                    mode, 
+                    ThemeId::Chalkboard, 
+                    raw::Instructions::new(),
+                    crate::config::get_debug_pairs(mode, 3)
+                )
             ),
             shuffle: false,
             ending: true,
         }
     }
-
 
     pub fn default() -> DebugSettings {
         DebugSettings {
@@ -50,7 +49,7 @@ impl DebugSettings {
 cfg_if! {
     if #[cfg(feature = "local")] {
         pub fn init() {
-            SETTINGS.set(DebugSettings::debug(Mode::Duplicate)).unwrap_ji();
+            SETTINGS.set(DebugSettings::debug(Mode::Lettering)).unwrap_ji();
         }
 
         pub fn settings() -> &'static DebugSettings {

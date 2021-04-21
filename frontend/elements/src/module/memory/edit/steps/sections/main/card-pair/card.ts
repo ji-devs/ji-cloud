@@ -29,9 +29,6 @@ export class _ extends LitElement {
               border-width: 1px;
           }
 
-          .front {
-              background-color: white;
-          }
           section, ::slotted(img-ji), .back > img-ui {
               width: 160px;
               height: 160px;
@@ -92,6 +89,7 @@ export class _ extends LitElement {
 
       const frontStyle = styleMap({
           borderColor: `var(--theme-${theme}-color-2)`,
+          backgroundColor: `var(--theme-${theme}-color-3)`,
       });
 
       return html`

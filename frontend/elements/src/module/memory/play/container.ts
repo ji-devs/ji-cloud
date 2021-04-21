@@ -3,7 +3,6 @@ import { mediaUi } from "@utils/path";
 import {ThemeKind} from "@elements/_themes/themes";
 import {playerBackPath} from "@elements/module/memory/_common/helpers";
 
-const bgImage = mediaUi('module/memory/play/bg.png');
 
 @customElement("play-container")
 export class _ extends LitElement {
@@ -16,7 +15,6 @@ export class _ extends LitElement {
                     column-gap: calc(56rem * (1920/1719));
                     width: 100%;
                     height: 100%;
-                    background-image: url("${unsafeCSS(bgImage)}");
                     background-size: cover;
                 }
             `,
@@ -28,7 +26,10 @@ export class _ extends LitElement {
     render() {
         const {theme} = this;
 
-        const style = `background-image: url("${playerBackPath(theme)}");`;
+        const style = `background-image: url("${mediaUi(playerBackPath(theme))}");`;
+
+        console.log(style);
+
         return html`
             <section style="${style}">
                 <slot name="sidebar"></slot>

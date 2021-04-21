@@ -116,7 +116,8 @@ impl CardDom {
                                 };
 
                                 sig.map(|(len, theme_id)| {
-                                    format!("{}px", 40)
+                                    let font_size = app_memory_common::lookup::get_card_font_size(len, theme_id);
+                                    format!("{}px", font_size)
                                 })
                             })
                             .property_signal("fontFamily", state.theme_id.signal_cloned().map(clone!(side, mode => move |theme_id| {

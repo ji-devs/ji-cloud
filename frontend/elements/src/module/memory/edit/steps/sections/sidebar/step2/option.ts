@@ -5,7 +5,7 @@ import {MODE} from "@elements/module/memory/_common/types";
 import {ThemeKind} from "@elements/_themes/themes";
 import {cardBackPath} from "@elements/module/memory/_common/helpers";
 
-export type STATE = "idle" | "hover" | "selected";
+export type STATE = "idle" | "selected";
 
 const STR_SAMPLE_HEBREW = "אבא";
 const STR_SAMPLE_ENGLISH = "Mom";
@@ -22,7 +22,7 @@ export class _ extends LitElement {
             box-sizing: border-box;
         }
 
-        :host([state="hover"]) section {
+        section.hover {
             border: solid 3px var(--light-blue-4);
         }
 
@@ -92,26 +92,26 @@ export class _ extends LitElement {
   @property({reflect: true})
   state:STATE= "idle";
 
-  prevState:STATE | undefined = undefined;
+  @property({type: Boolean})
+  hover:boolean = false;
 
   onEnter() {
-    this.prevState = this.state;
-    this.state = "hover"; 
+    this.hover = true;
   }
 
   onLeave() {
-    this.state = this.prevState as STATE;
+    this.hover = false;
   }
 
   render() {
-      const {theme, state} = this;
+      const {theme, state, hover} = this;
 
       const style = `border-color: var(--theme-${theme}-color-2)`;
 
-      const text = state === "hover" ? STR_SAMPLE_HEBREW : STR_SAMPLE_ENGLISH;
+      const text = hover ? STR_SAMPLE_HEBREW : STR_SAMPLE_ENGLISH;
 
       return html`
-        <section @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
+        <section class="${classMap({hover})}" @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
               <div class="content">
                   <div class="right" style="${style}"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
                   <div class="left" style="${style}"><span>${text}</span></div>

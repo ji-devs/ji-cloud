@@ -7,6 +7,6 @@ export const cardBackPath = (theme:ThemeKind):string => {
 }
 export const playerBackPath = (theme:ThemeKind):string => {
     return theme === "" 
-        ? `module/memory/play/bg.png`
-        : `module/memory/play/bg-${theme}.png`;
+        ? `theme/memory/_default/bg.png`
+        : `theme/memory/${theme}/bg.png`;
 }

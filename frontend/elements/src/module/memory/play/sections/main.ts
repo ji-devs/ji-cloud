@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
 import {classMap} from "lit-html/directives/class-map";
-import { mediaUi } from "@utils/path";
 
 @customElement("play-main")
 export class _ extends LitElement {
@@ -14,6 +13,7 @@ export class _ extends LitElement {
                     align-items: center;
                     justify-content: center;
                 }
+
                 section {
                     display: grid;
                     width: 100%;
@@ -86,8 +86,6 @@ export class _ extends LitElement {
             case 26: classes["last-26"] = true; break;
             default: break;
         }
-
-
 
         return html`
             <section class=${classMap(classes)}>

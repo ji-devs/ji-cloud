@@ -1,8 +1,6 @@
 /*
  * FontLoader is intended to be created and then held at a top-level
- * calling the loader will concurrently load the fonts up to LOAD_BATCH_SIZE at a time
- * it's okay to call the loader with the same font multiple times, it'll just skip it the second
- * time (the queue is updated immediately, doesn't wait for loading to succeed/fail)
+ * though it's okay to call the loader with the same font multiple times, it'll just skip it the second
  *
  * error handling is non-existant atm
  */
@@ -51,7 +49,8 @@ impl Font {
         };
 
         let unicode_range = match self {
-            Self::ShesekRegular | Self::FrankRuhlMedium => Some("todo"),
+            //Hebrew
+            Self::ShesekRegular | Self::FrankRuhlMedium => Some("U+0590-05FF, U+FB1D-FB4F"),
             _ => None
         };
 
@@ -65,22 +64,23 @@ impl Font {
 }
 
 #[wasm_bindgen(inline_js=r#"
-export function load_font(name, url, format, unicode_range) {
+export function add_font(name, url, format, unicode_range) {
+    let descriptors = {};
+    if(unicode_range && unicode_range != "") {
+        descriptors.unicodeRange = unicode_range;
+    }
+    const face = new FontFace(name, `url(${url}) format('${format}')`, descriptors);
+    document.fonts.add(face);
+}
 
-    console.log(`url(${url}) format('${format}')`);
-
-    return new FontFace(name, `url(${url}) format('${format}')`)
-        .load()
-        .then(face => {
-            console.log(face);
-            console.log("loaded", `"${name}"`, "from", url);
-	        document.fonts.add(loaded_face);
-        })
+export function fonts_ready() {
+    return document.fonts.ready.then(() => console.log("fonts are ready!"));
 }
 "#)]
 
 extern "C" {
-    fn load_font(name: &str, url:String, format:&str, unicode_range: &str) -> Promise;
+    fn add_font(name: &str, url:String, format:&str, unicode_range: &str);
+    fn fonts_ready() -> Promise;
 }
 
 pub struct FontLoader {
@@ -107,19 +107,11 @@ impl FontLoader {
 
         for font in fonts.iter() {
             self.has_queued.insert(*font);
-        }
-        let mut futures = FuturesUnordered::new();
-
-        //See: https://users.rust-lang.org/t/awaiting-futuresunordered/49295/5
-        //Idea is we try to have a saturated queue of futures
-        while let Some(font) = fonts.pop() {
-            while futures.len() >= LOAD_BATCH_SIZE {
-                futures.next().await;
-            }
             let LoaderInfo {name, url, unicode_range, format}  = font.get_loader_info();
-            let next_future = JsFuture::from(load_font(name, url, format, unicode_range.unwrap_or_default()));
-            futures.push(next_future);
+            add_font(name, url, format, unicode_range.unwrap_or_default());
         }
-        while let Some(_) = futures.next().await {}
+
+        JsFuture::from(fonts_ready()).await;
+
     }
 }

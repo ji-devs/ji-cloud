@@ -9,6 +9,10 @@ pub enum Side {
 }
 
 
+pub fn get_card_font_size(length: usize, theme_id: ThemeId) -> usize {
+    //Todo - evaluate this...
+    40
+}
 pub fn get_card_font_family(theme_id: ThemeId, mode: Mode, side: Side) -> usize {
     match mode {
         Mode::Lettering => {

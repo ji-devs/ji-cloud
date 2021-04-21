@@ -9,6 +9,8 @@ use crate::{
     debug,
     data::{raw, state::{State}, raw::ModuleData as RawData},
 };
+
+use components::font_loader::{FontLoader, Font};
 use std::future::Future;
 use components::module::page::StateLoader;
 use shared::{
@@ -17,6 +19,7 @@ use shared::{
     domain::jig::{*, module::{*, body::Body}},
 };
 use utils::prelude::*;
+
 
 pub struct PageLoader { 
     pub jig_id: JigId,
@@ -51,6 +54,9 @@ impl StateLoader<RawData, State> for PageLoader {
                 },
                 Some(game_data) => game_data.clone()
             };
+            
+            //TODO - just load the fonts for this theme
+            FontLoader::new().load_all().await;
 
             let state = Rc::new(State::new(jig_id, module_id, game_data));
             Some(state)
