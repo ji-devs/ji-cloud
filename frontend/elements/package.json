@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "tsc && jest",
     "build:release": "rollup --config rollup.release.js",
     "build:sandbox": "rollup --config rollup.sandbox.js",
     "build:local": "rollup --config rollup.local.js",
-    "foo": "cross-env APP_NAME=dev/scratch/001 rollup --config rollup.local.js",
     "watch:test": "jest --watchAll",
     "watch": "rollup --config rollup.local.js --watch",
     "clean": "rimraf ./dist"
