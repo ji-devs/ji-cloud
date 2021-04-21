@@ -6,13 +6,15 @@ use serde::{Deserialize, Serialize};
 /// See the frontend extension trait for more info
 #[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
     /// No theme id set (a.k.a. default)
-    None,
+    None = 0,
     /// Blueish theme
-    Chalkboard,
+    Chalkboard = 1,
     /// Orangeish theme
-    HappyBrush,
+    HappyBrush = 2,
 }
 
 impl Default for ThemeId {

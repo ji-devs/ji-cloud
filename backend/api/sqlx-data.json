@@ -1790,6 +1790,21 @@
       ]
     }
   },
+  "88331edb09a66dd64923f8bf0b5b7ff0546436cb615dd8611cc41707002a0a1e": {
+    "query": "\nupdate jig_module\nset contents = coalesce($3, contents),\n    kind = coalesce($4, kind)\nwhere jig_id = $1 and index = $2\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "88c75cf29cb55aa0924802949ef5a5eed9dd3257e58d34329aeaf45c3fa28a63": {
     "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
     "describe": {
@@ -2168,21 +2183,6 @@
       ]
     }
   },
-  "bd0af491170716e6b07d40528e76f24fe2d999d1d39a5579dbc3f7d3b0131377": {
-    "query": "\nupdate jig_module\nset contents = coalesce($3, contents),\n    kind = coalesce($4, kind),\n    updated_at = now()\nwhere jig_id = $1 and index = $2 and (\n    ($3::jsonb is not null and $3 is distinct from contents) or\n    ($4::int2 is not null and $4 is distinct from kind)\n)\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb",
-          "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "bdedb2c9dea3363859d3dbe22b6665efda3bf686a9c1eca1ffc9fb298de68d6f": {
     "query": "\n            select id as \"id: AgeRangeId\", display_name, created_at, updated_at from age_range\n            order by index\n        ",
     "describe": {
@@ -2430,20 +2430,6 @@
       "parameters": {
         "Left": [
           "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "cd3a4a69bc8662f348daee68c9584bb105bb704737d64a3911bd823598bfc6bb": {
-    "query": "\ninsert into jig_module (jig_id, \"index\", kind)\nvalues ($1, $2, $3)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Int2"
         ]
       },
       "nullable": []
@@ -2811,6 +2797,21 @@
         false,
         false
       ]
+    }
+  },
+  "e84b872096758317f1b40bf74ff81fafb5eb0b45a17137bdb67780f427e39011": {
+    "query": "\ninsert into jig_module (jig_id, \"index\", kind, contents)\nvalues ($1, $2, $3, $4)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
     }
   },
   "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6": {

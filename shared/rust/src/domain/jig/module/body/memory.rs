@@ -47,15 +47,17 @@ pub enum Card {
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum Mode {
-    Duplicate,
-    WordsAndImages,
-    BeginsWith,
-    Lettering,
-    Riddles,
-    Opposites,
-    Synonymns,
-    Translate,
+    Duplicate = 0,
+    WordsAndImages = 1,
+    BeginsWith = 2,
+    Lettering = 3,
+    Riddles = 4,
+    Opposites = 5,
+    Synonymns = 6,
+    Translate = 7,
 }
 
 impl Mode {
