@@ -1,9 +1,2 @@
-CI - 001
+CI - 002
 
-TODO:
-
-* Dual list
-* Grid map
-* Lettering separate font
-* Images
-* Audio / Instructions
