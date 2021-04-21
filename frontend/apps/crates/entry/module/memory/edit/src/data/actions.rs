@@ -225,6 +225,7 @@ impl State {
 
         save(
             self.save_loader.clone(), 
+            self.jig_id.clone(), 
             self.module_id.clone(), 
             data
         );
@@ -293,7 +294,7 @@ impl State {
 
 pub fn history_on_change(state: Rc<State>) -> HistoryChangeFn {
     move |game_data:Option<raw::ModuleData>| {
-        save(state.save_loader.clone(), state.module_id.clone(), game_data.unwrap_or_default());
+        save(state.save_loader.clone(), state.jig_id.clone(), state.module_id.clone(), game_data.unwrap_or_default());
     }
 }
 //Does not update history or save
@@ -303,12 +304,14 @@ pub fn history_on_undoredo(state: Rc<State>) -> HistoryUndoRedoFn {
         state.set_from_raw(game_data.unwrap_or_default());
     }
 }
-pub fn save(save_loader: Rc<AsyncLoader>, module_id: ModuleId, data: raw::ModuleData) {
+pub fn save(save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId, data: raw::ModuleData) {
     if crate::debug::settings().live_save {
         save_loader.load(async move {
             let body = shared::domain::jig::module::ModuleBody::MemoryGame(data);
             log::info!("SAVING...");
-            let path = Update::PATH.replace("{id}",&module_id.0.to_string());
+            let path = Update::PATH
+                .replace("{id}",&jig_id.0.to_string())
+                .replace("{module_id}",&module_id.0.to_string());
 
             let req = Some(ModuleUpdateRequest {
                 index: None,
