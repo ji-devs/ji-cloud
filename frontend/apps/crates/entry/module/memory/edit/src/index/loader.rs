@@ -14,7 +14,7 @@ use components::module::page::StateLoader;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::*},
+    domain::jig::{*, module::{*, body::Body}},
 };
 use utils::{settings::SETTINGS, prelude::*};
 use components::font_loader::{FontLoader, Font};
@@ -42,7 +42,7 @@ impl StateLoader<RawData, State> for PageLoader {
                         Ok(resp) => {
                             let body = resp.module.body.unwrap_ji();
                             match body {
-                                ModuleBodyResponse::MemoryGame(body) => body,
+                                Body::MemoryGame(body) => body,
                                 _ => panic!("wrong module body kind!!")
                             }
                         },

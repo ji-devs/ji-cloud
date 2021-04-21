@@ -1,7 +1,7 @@
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::*},
+    domain::jig::{JigId, module::*},
 };
 use std::rc::Rc;
 use std::cell::RefCell;

@@ -14,7 +14,7 @@ use components::module::page::StateLoader;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::*},
+    domain::jig::{*, module::{*, body::Body}},
 };
 use utils::prelude::*;
 
@@ -38,7 +38,7 @@ impl StateLoader<RawData, State> for PageLoader {
                         Ok(resp) => {
                             resp.module.body.map(|resp| {
                                 match resp {
-                                    ModuleBodyResponse::MemoryGame(body) => body,
+                                    Body::MemoryGame(body) => body,
                                     _ => panic!("wrong module body kind!!")
                                 }
                             })
