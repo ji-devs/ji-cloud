@@ -79,6 +79,7 @@ async fn image_post() -> anyhow::Result<()> {
                 "age_ranges": [],
                 "affiliations": [],
                 "categories": [],
+                "tags": [],
                 "kind": "Canvas",
         })),
         Method::POST,

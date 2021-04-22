@@ -18,6 +18,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
     let age_ranges = db::meta::get_age_ranges(&db).await?;
     let subjects = db::meta::get_subjects(&db).await?;
     let content_types = db::meta::get_content_types(&db).await?;
+    let image_tags = db::meta::get_image_tags(&db).await?;
 
     Ok(Json(MetadataResponse {
         styles,
@@ -25,6 +26,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
         age_ranges,
         subjects,
         content_types,
+        image_tags,
     }))
 }
 

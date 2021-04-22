@@ -13,6 +13,7 @@ async fn create(
     age_ranges: &[Uuid],
     affiliations: &[Uuid],
     categories: &[Uuid],
+    tags: &[Uuid],
 ) -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::MetaKinds]).await;
 
@@ -32,6 +33,7 @@ async fn create(
             "age_ranges": age_ranges,
             "affiliations": affiliations,
             "categories": categories,
+            "tags": tags,
             "kind": "Canvas",
         }))
         .send()
@@ -49,7 +51,7 @@ async fn create(
 
 #[actix_rt::test]
 async fn create_no_meta() -> anyhow::Result<()> {
-    create(&[], &[], &[], &[]).await
+    create(&[], &[], &[], &[], &[]).await
 }
 
 #[actix_rt::test]
@@ -59,6 +61,7 @@ async fn create_with_styles() -> anyhow::Result<()> {
             "6389eaa0-de76-11ea-b7ab-0399bcf84df2".parse()?,
             "6389ff7c-de76-11ea-b7ab-9b5661dd4f70".parse()?,
         ],
+        &[],
         &[],
         &[],
         &[],
@@ -73,6 +76,7 @@ async fn create_with_meta() -> anyhow::Result<()> {
         &["f3722790-de76-11ea-b7ab-77b45e9af3ef".parse()?],
         &["c0cd4446-de76-11ea-b7ab-93987e8aa112".parse()?],
         &[],
+        &["5e72c62e-a3a4-11eb-96e7-c78c34eb32ee".parse()?],
     )
     .await
 }
@@ -96,6 +100,7 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
             "age_ranges": [],
             "affiliations": [],
             "categories": [],
+            "tags": [],
             "kind": "Canvas",
             kind: [id],
         }))
@@ -129,6 +134,11 @@ async fn create_with_age_range_error() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn create_with_category_error() -> anyhow::Result<()> {
     create_error("categories", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
+}
+
+#[actix_rt::test]
+async fn create_with_tags_error() -> anyhow::Result<()> {
+    create_error("tags", "6389eaa0-de76-11ea-b7ab-0399bcf84df2").await
 }
 
 #[actix_rt::test]
@@ -215,4 +225,9 @@ async fn update_is_premium() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn update_styles() -> anyhow::Result<()> {
     update(&json!({"styles": ["6389eaa0-de76-11ea-b7ab-0399bcf84df2", "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"]})).await
+}
+
+#[actix_rt::test]
+async fn update_tags() -> anyhow::Result<()> {
+    update(&json!({"tags": ["591a2a64-a3a4-11eb-96e7-6bc0e819bc5f", "5b032222-a3a4-11eb-96e7-dbc5742f1640"]})).await
 }

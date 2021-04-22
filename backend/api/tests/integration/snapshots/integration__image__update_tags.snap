@@ -12,7 +12,10 @@ expression: body
     "kind": "Canvas",
     "publish_at": null,
     "styles": [],
-    "tags": [],
+    "tags": [
+      "591a2a64-a3a4-11eb-96e7-6bc0e819bc5f",
+      "5b032222-a3a4-11eb-96e7-dbc5742f1640"
+    ],
     "age_ranges": [],
     "affiliations": [],
     "categories": [],

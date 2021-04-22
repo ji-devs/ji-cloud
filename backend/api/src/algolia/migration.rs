@@ -40,28 +40,9 @@ fn set_searchable_fields_v2<'a>(
     client: &'a super::Inner,
     index: &'a str,
 ) -> BoxFuture<'a, anyhow::Result<()>> {
-    let settings = SetSettings {
-        searchable_attributes: Some(
-            SearchableAttributes::build()
-                .single(Attribute("name".to_owned()))
-                .single(Attribute("description".to_owned()))
-                .multi(vec![
-                    Attribute("category_names".to_owned()),
-                    Attribute("style_names".to_owned()),
-                    Attribute("age_range_names".to_owned()),
-                    Attribute("affiliation_names".to_owned()),
-                ])
-                .finish(),
-        ),
-        attributes_for_faceting: None,
-    };
-
-    Box::pin(async move {
-        client.set_settings(index, &settings).await?;
-        Ok(())
-    })
+    // superceeded by `set_searchable_fields_v3`
+    empty(client, index)
 }
-
 fn set_attributes_for_faceting_v2<'a>(
     client: &'a super::Inner,
     index: &'a str,
@@ -82,6 +63,42 @@ fn set_attributes_for_faceting_v4<'a>(
     client: &'a super::Inner,
     index: &'a str,
 ) -> BoxFuture<'a, anyhow::Result<()>> {
+    // superceeded by `set_attributes_for_faceting_v5`
+    empty(client, index)
+}
+
+fn set_searchable_fields_v3<'a>(
+    client: &'a super::Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    let settings = SetSettings {
+        searchable_attributes: Some(
+            SearchableAttributes::build()
+                .single(Attribute("name".to_owned()))
+                .single(Attribute("description".to_owned()))
+                .multi(vec![
+                    Attribute("category_names".to_owned()),
+                    Attribute("style_names".to_owned()),
+                    Attribute("age_range_names".to_owned()),
+                    Attribute("affiliation_names".to_owned()),
+                    Attribute("image_tag_names".to_owned()),
+                ])
+                .finish(),
+        ),
+        attributes_for_faceting: None,
+    };
+
+    Box::pin(async move {
+        client.set_settings(index, &settings).await?;
+        Ok(())
+    })
+}
+
+fn set_attributes_for_faceting_v5<'a>(
+    client: &'a super::Inner,
+    index: &'a str,
+) -> BoxFuture<'a, anyhow::Result<()>> {
+    // superceeded by `set_attributes_for_faceting_v5`
     let settings = SetSettings {
         searchable_attributes: None,
         attributes_for_faceting: Some(vec![
@@ -119,6 +136,8 @@ pub const INDEXING_MIGRATIONS: &[(ResyncKind, MigrateFunction)] = &[
     (ResyncKind::Complete, set_attributes_for_faceting_v2),
     (ResyncKind::Complete, set_attributes_for_faceting_v3),
     (ResyncKind::Complete, set_attributes_for_faceting_v4),
+    (ResyncKind::None, set_searchable_fields_v3),
+    (ResyncKind::None, set_attributes_for_faceting_v5),
 ];
 
 pub const INDEX_VERSION: i16 = INDEXING_MIGRATIONS.len() as i16;
