@@ -33,3 +33,5 @@ import "@elements/core/inputs/inc-dec";
 import "@elements/core/lists/li-check";
 import "@elements/core/buttons/sidebar";
 import "@elements/core/overlays/anchored-overlay";
+
+import "@elements/core/wysiwyg/wysiwyg-base";

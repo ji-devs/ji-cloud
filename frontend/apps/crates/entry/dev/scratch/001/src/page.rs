@@ -17,7 +17,7 @@ use components::{
     image_search::{self, state::ImageSearchOptions},
     audio_input::{self, options::AudioInputOptions, state::State as AudioState},
     color_select::{self, state::ColorSelectConfig},
-    text_editor_controls,
+    text_editor,
 };
 use shared::domain::audio::AudioId;
 use std::pin::Pin;
@@ -28,7 +28,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_audio_input()
+        render_text()
     }
 }
 
@@ -136,49 +136,71 @@ pub fn render_color_select() -> Dom {
 }
 
 
-pub fn render_text_editor_controls() -> Dom {
-    let state = text_editor_controls::state::State::new();
+pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom {
     html!("div", {
         .style("padding", "10px")
         .style("width", "492px")
+        .child(text_editor::dom::render_controls(state.clone()))
+        .child(html!("br"))
+        .child(html!("br"))
+        .child(html!("br"))
         .child(html!("dl", {
             .children(&mut [
                 html!("dt", {.text("Font")}),
-                html!("dd", {.text_signal(state.font.signal_cloned().map(|font| font.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.font.to_string()))}),
 
                 html!("dt", {.text("Element")}),
-                html!("dd", {.text_signal(state.element.signal_cloned().map(|element| element.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.element.to_string()))}),
 
                 html!("dt", {.text("Weight")}),
-                html!("dd", {.text_signal(state.weight.signal_cloned().map(|weight| weight.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.weight.to_string()))}),
 
                 html!("dt", {.text("Align")}),
-                html!("dd", {.text_signal(state.align.signal_cloned().map(|align| format!("{:?}", align)))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.align)))}),
 
                 html!("dt", {.text("Font size")}),
-                html!("dd", {.text_signal(state.font_size.signal_cloned().map(|font_size| font_size.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.font_size.to_string()))}),
 
                 html!("dt", {.text("Highlight color")}),
-                html!("dd", {.text_signal(state.highlight_color.signal_cloned().map(|highlight_color| format!("{:?}", highlight_color)))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.highlight_color)))}),
 
                 html!("dt", {.text("Color")}),
-                html!("dd", {.text_signal(state.color.signal_cloned().map(|color| format!("{:?}", color)))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.color)))}),
 
                 html!("dt", {.text("Bold")}),
-                html!("dd", {.text_signal(state.bold.signal_cloned().map(|bold| bold.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.bold.to_string()))}),
 
                 html!("dt", {.text("Italic")}),
-                html!("dd", {.text_signal(state.italic.signal_cloned().map(|italic| italic.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.italic.to_string()))}),
 
                 html!("dt", {.text("Underline")}),
-                html!("dd", {.text_signal(state.underline.signal_cloned().map(|underline| underline.to_string()))}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.underline.to_string()))}),
             ])
         }))
-        .child(html!("br"))
-        .child(html!("br"))
-        .child(html!("br"))
-        .child(text_editor_controls::dom::render(
-            state.clone()
-        ))
+    })
+}
+
+pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
+    html!("div", {
+        .style("display", "block")
+        .style("border", "green dashed 1px")
+        .style("box-sizing", "border-box")
+        .style("align-self", "baseline")
+        .child(text_editor::dom::render_wysiwyg(state))
+    })
+    
+}
+
+fn render_text() -> Dom {
+    // let state = text_editor::state::State::new_with_on_change(|v| log::info!("{:?}", v));
+    let state = text_editor::state::State::new();
+    html!("div", {
+        .style("display", "grid")
+        .style("grid-template-columns", "auto 1fr")
+
+        .children(&mut [
+            render_text_editor_controls(state.clone()),
+            render_wysiwyg(state.clone()),
+        ])
     })
 }

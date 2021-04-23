@@ -10,5 +10,5 @@ pub mod image;
 pub mod color_select;
 pub mod image_search;
 pub mod audio_input;
-pub mod text_editor_controls;
+pub mod text_editor;
 pub mod font_loader;
