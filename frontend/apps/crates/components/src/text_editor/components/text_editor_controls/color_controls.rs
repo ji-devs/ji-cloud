@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use dominator::{Dom, html, clone};
-use super::super::state::State;
+use super::super::super::state::State;
 use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
@@ -19,8 +19,8 @@ pub fn render(state: Rc<State>) -> Dom {
 
     spawn_local(select_value.signal_cloned().for_each(clone!(state, select_for => move |color| {
         match select_for.lock_ref().as_ref() {
-            Some(ColorSelectFor::Highlight) => {state.highlight_color.set(color)},
-            Some(ColorSelectFor::Text) => {state.color.set(color)},
+            Some(ColorSelectFor::Highlight) => {state.set_highlight_color(color)},
+            Some(ColorSelectFor::Text) => {state.set_color(color)},
             None => {}
         };
         ready(())
@@ -41,16 +41,15 @@ pub fn render(state: Rc<State>) -> Dom {
                     html!("text-editor-control", {
                         .property("type", "color")
                         .event(clone!(state, select_for, select_value => move |_: events::Click| {
-                            log::info!("open color please");
                             select_for.set(Some(ColorSelectFor::Highlight));
-                            select_value.set(state.highlight_color.lock_ref().clone());
+                            select_value.set(state.controls.lock_ref().color.clone());
                         }))
                     }),
                     html!("text-editor-control", {
                         .property("type", "marker-color")
                         .event(clone!(state, select_for, select_value => move |_: events::Click| {
                             select_for.set(Some(ColorSelectFor::Text));
-                            select_value.set(state.color.lock_ref().clone());
+                            select_value.set(state.controls.lock_ref().color.clone());
                         }))
                     }),
                 ])
