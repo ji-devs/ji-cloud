@@ -50,14 +50,13 @@ export class _ extends LitElement {
     private _color = getDefault('color');
     public set color(v: Color | undefined) {
         this.reFocus();
-        console.log(v);
-        
         this.backbone.setValue("color", v);
         this._color = v;
     }
 
     private _highlightColor = getDefault('highlightColor');
     public set highlightColor(v: Color | undefined) {
+        this.reFocus();
         this.backbone.setValue("highlightColor", v);
         this._highlightColor = v;
     }
@@ -152,18 +151,6 @@ export class _ extends LitElement {
             }));
         }
         this.value = newValue;
-    }
-
-    private __checkForControlsChange<K extends keyof ControllerState>(key: K) {
-        const node = getKeyType(key) === "leaf" ? this.backbone.getSelectedLeaf() : this.backbone.getSelectedElement();
-        const thisKey = (this as any)['_' + key];
-        const _this = this as any; // doing this just to get type any
-
-        const nodeValue = (node as any)?.[key] || getDefault(key);
-        if(_this[thisKey] != nodeValue) {
-            _this[thisKey] = nodeValue;
-            this.controlsChange(key, nodeValue);
-        }
     }
 
     private checkForControlsChange() {

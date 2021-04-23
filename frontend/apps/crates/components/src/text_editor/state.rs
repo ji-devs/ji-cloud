@@ -5,7 +5,6 @@ use futures_signals::signal::Mutable;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 use js_sys::Reflect;
-use rgb::RGBA8;
 
 use super::wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string};
 use super::super::color_select::actions::{hex_to_rgba8, rgba8_to_hex};
@@ -112,13 +111,13 @@ impl State {
             );
         }
     }
-    pub fn set_color(&self, color: Option<RGBA8>) {
+    pub fn set_color(&self, color: Option<String>) {
         let mut controls = self.controls.lock_mut();
         controls.color = color;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let js_value = match controls.color {
-                Some(color) => JsValue::from_str(&rgba8_to_hex(&color)),
+            let js_value = match &controls.color {
+                Some(color) => JsValue::from_str(&color),
                 None => JsValue::UNDEFINED,
             };
             Reflect::set(
@@ -128,14 +127,13 @@ impl State {
             );
         }
     }
-    pub fn set_highlight_color
-    (&self, highlight_color: Option<RGBA8>) {
+    pub fn set_highlight_color(&self, highlight_color: Option<String>) {
         let mut controls = self.controls.lock_mut();
         controls.highlight_color = highlight_color;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let js_value = match controls.color {
-                Some(color) => JsValue::from_str(&rgba8_to_hex(&color)),
+            let js_value = match &controls.highlight_color {
+                Some(color) => JsValue::from_str(&color),
                 None => JsValue::UNDEFINED,
             };
             Reflect::set(
