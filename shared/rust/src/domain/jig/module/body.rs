@@ -6,6 +6,10 @@ use serde::{Deserialize, Serialize};
 #[allow(missing_docs)]
 pub mod memory;
 
+/// Poster 
+#[allow(missing_docs)]
+pub mod poster;
+
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -14,6 +18,9 @@ pub mod memory;
 pub enum Body {
     /// Module is a memory game, and has a memory game's body.
     MemoryGame(memory::ModuleData),
+
+    /// Module is a poster, and has a poster's body.
+    Poster(poster::ModuleData),
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
@@ -27,6 +34,7 @@ impl Body {
         match self {
             Self::Cover => super::ModuleKind::Cover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
+            Self::Poster(_) => super::ModuleKind::Poster,
         }
     }
 }

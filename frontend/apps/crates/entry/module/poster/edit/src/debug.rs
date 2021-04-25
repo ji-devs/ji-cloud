@@ -1,4 +1,4 @@
-use crate::data::*;
+use crate::data::state::*;
 use cfg_if::cfg_if;
 use futures_signals::{
     map_ref,
@@ -6,54 +6,72 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
     CancelableFutureHandle, 
 };
-use shared::media::MediaLibraryKind;
-
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::*; 
-use components::image::{
-    search::ImageSearchWidgetDebug, 
-    data::*
-};
+use crate::data::{raw, state::*};
+use once_cell::sync::OnceCell;
+use utils::prelude::*;
+use shared::domain::jig::{JigId, module::ModuleId};
+use uuid::Uuid;
 
-pub const DEBUG_STEP:usize = 1;
-pub const DEBUG_THEME_INDEX:usize = 0;
+pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-
+#[derive(Debug)]
 pub struct DebugSettings {
-    pub poster:Option<raw::Poster>,
-    pub tool: Tool,
-    pub image_search: Option<ImageSearchWidgetDebug>,
+    pub data:Option<raw::ModuleData>,
+    pub step:Option<Step>,
+    pub live_save: bool,
+    pub content_tab: Option<DebugContentTab>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DebugContentTab {
+    Text,
+    Images
 }
 
 
 impl DebugSettings {
-    pub fn default() -> Self {
-        Self {
-            poster: None, 
-            tool: Tool::Layout,
-            image_search: None,
+    pub fn default() -> DebugSettings {
+        DebugSettings {
+            data: None, 
+            step: None, 
+            live_save: true,
+            content_tab: None,
         }
     }
-    pub fn images() -> Self {
-        Self {
-            poster: None, 
-            tool: Tool::Images,
-            image_search: Some(ImageSearchWidgetDebug::new()),
+    pub fn debug(with_data: bool) -> DebugSettings {
+        DebugSettings {
+            data: Some(
+                if with_data {
+                    raw::ModuleData::new(
+                        ThemeId::Chalkboard, 
+                        raw::Instructions::new(),
+                    )
+                } else {
+                    raw::ModuleData{
+                        theme_id: ThemeId::Chalkboard,
+                        ..raw::ModuleData::default()
+                    }
+                }
+            ),
+            step: Some(Step::One), 
+            live_save: false,
+            content_tab: Some(DebugContentTab::Text),
         }
     }
-
 }
 
-cfg_if! {
-    if #[cfg(feature = "local")] {
-        pub fn settings() -> DebugSettings {
-            DebugSettings::default()
-        }
+pub fn init(jig_id: JigId, module_id: ModuleId) {
+    if jig_id == JigId(Uuid::from_u128(0)) {
+        SETTINGS.set(DebugSettings::debug(true)).unwrap_ji();
     } else {
-        pub fn settings() -> DebugSettings {
-            DebugSettings::default()
-        }
+        SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
 }
 
+pub fn settings() -> &'static DebugSettings {
+    unsafe { SETTINGS.get_unchecked() }
+}

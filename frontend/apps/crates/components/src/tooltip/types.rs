@@ -3,9 +3,6 @@ use std::rc::Rc;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Placement {
-    Auto,
-    AutoStart,
-    AutoEnd,
     Top,
     TopStart,
     TopEnd,
@@ -23,9 +20,6 @@ pub enum Placement {
 impl Placement {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Auto => "auto",
-            Self::AutoStart => "auto-start",
-            Self::AutoEnd=> "auto-end",
             Self::Top => "top",
             Self::TopStart => "top-start",
             Self::TopEnd=> "top-end",
@@ -54,6 +48,7 @@ pub struct TooltipError {
     pub placement:Placement, 
     pub slot: Option<String>, 
     pub body: String, 
+    pub max_width: Option<f64>,
     pub on_close: Option<Rc<Box<dyn Fn()>>>
 }
 
@@ -65,6 +60,7 @@ pub struct TooltipConfirm {
     pub header: String,
     pub confirm_label: String,
     pub cancel_label: String,
+    pub max_width: Option<f64>,
     pub on_confirm: Rc<Box<dyn Fn()>>,
     pub on_cancel: Rc<Box<dyn Fn()>>
 }

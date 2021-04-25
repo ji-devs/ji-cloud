@@ -24,6 +24,7 @@ impl PairDom {
         if step == Step::One {
             html!("main-card-pair", {
                 .property("hoverable", true)
+                .property_signal("hoverLock", state.overlay.tooltips.delete.signal_ref(|x| x.is_some()))
                 .property_signal("index", index.signal().map(|x| {
                     JsValue::from_f64(x.unwrap_or_default() as f64)
                 }))
@@ -39,6 +40,7 @@ impl PairDom {
                                     elem: elem.clone(), 
                                     placement: Placement::Right, 
                                     slot: None,
+                                    max_width: Some(180.0),
                                     header: crate::strings::confirm::STR_DELETE_PAIR_HEADER.to_string(),
                                     confirm_label: crate::strings::confirm::STR_DELETE_PAIR_CONFIRM.to_string(),
                                     cancel_label: crate::strings::confirm::STR_DELETE_PAIR_CANCEL.to_string(),

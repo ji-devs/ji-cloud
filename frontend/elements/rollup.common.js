@@ -54,7 +54,7 @@ export function createConfig(target) {
         filesize(filesizeConfig),
 
         injectProcessEnv({ 
-            NODE_ENV: target === "local" ? 'development' : 'production',
+			NODE_ENV: target === "local" ? 'development' : 'production',
             DEPLOY_TARGET: target,
         }),
     ];

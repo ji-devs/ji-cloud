@@ -1,7 +1,8 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import { createPopper, Placement, VirtualElement, Instance as PopperInstance} from '@popperjs/core';
-export { Placement} from '@popperjs/core';
-export type COLOR = "beige" | "red";
+
+//these are used for calculations and set statically for CSS
+//making them properties would be a nice improvement
+const ARROW_SIZE = 24;
 
 @customElement("tooltip-base")
 export class _ extends LitElement {
@@ -9,11 +10,12 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
+                    position: fixed;
+                    left: 0;
+                    top: 0;
                     display: inline-block;
-                    box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);
-                    --arrow-size: 24px;
-                    --arrow-offset: -10px;
-                    z-index: 1000; /* is still restricted by shadow dom? */
+                    z-index: 1000;
+                    /*box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);*/
                 }
 
                 :host([color="beige"]) {
@@ -23,43 +25,19 @@ export class _ extends LitElement {
                 :host([color="red"]) {
                     background-color: var(--light-red-1);
                 }
+
                 
                 .content {
                     padding: 24px;
                 }
-                #arrow,
-                #arrow::before {
-                  position: absolute;
-                  width: var(--arrow-size);
-                  height: var(--arrow-size);
-                  background: inherit;
-                }
-
                 #arrow {
-                  visibility: hidden;
+                    position: absolute;
+                    left: 0; top: 0;
+                    width: ${css`${ARROW_SIZE}px`}; 
+                    height: ${css`${ARROW_SIZE}px`}; 
+                    background: inherit;
                 }
 
-                #arrow::before {
-                  visibility: visible;
-                  content: '';
-                  transform: rotate(45deg);
-                }
-
-                :host([data-popper-placement^='top'])  #arrow {
-                  bottom: var(--arrow-offset);
-                }
-
-                :host([data-popper-placement^='bottom'])  #arrow {
-                  top: var(--arrow-offset);
-                }
-
-                :host([data-popper-placement^='left'])  #arrow {
-                  right: var(--arrow-offset);
-                }
-
-                :host([data-popper-placement^='right'])  #arrow {
-                  right: var(--arrow-offset);
-                }
             `
         ];
     }
@@ -69,76 +47,264 @@ export class _ extends LitElement {
       return this;
       }
      */
-    popperInstance:PopperInstance | undefined;
+    instance:TooltipInstance | undefined;
 
     firstUpdated(_changed:any) {
-        this.bindPopper();
-        //TODO - instantiate popper...
+        this.bindInstance();
     }
 
     updated(changed:any) {
         if(typeof changed.get("target") === "boolean") {
-            this.bindPopper();
+            this.bindInstance();
         }
     }
 
-    bindPopper = () => {
+    bindInstance= () => {
         if(this.target) {
-            this.killPopper();
+            this.killInstance();
 
-            this.popperInstance = createPopper(this.target, this, {
+            const target = typeof this.target === "string" ? document.getElementById(this.target) // todo recurse for shadow dom?
+                : typeof this.target === "function" ? this.target()
+                : this.target;
+
+            if(!target) {
+                throw new Error("invalid tooltip target!");
+            }
+
+            this.instance = createInstance({
+                target,
+                tooltip: this,
                 placement: this.placement,
-                modifiers: [
-                    {
-                      name: "arrow",
-                      options: {
-                          element: this.shadowRoot?.getElementById("arrow"),
-                          padding: 12,
-                      }
-                    },
-                    {
-                      name: "offset",
-                      options: {
-                          offset: [this.offsetSkidding, this.offsetDistance],
-                      }
-                    }
-                  ]
+                margin: this.margin,
+                arrow: {
+                    element: this.shadowRoot?.getElementById("arrow") as Element,
+                    offset: this.arrowOffset,
+                }
             });
+        } else {
+            console.info("no tooltip target set in prop");
         }
     }
 
-    killPopper = () => {
-        if(this.popperInstance != undefined) {
-            this.popperInstance.destroy();
+    killInstance = () => {
+        if(this.instance != undefined) {
+            this.instance.destroy();
+            this.instance = undefined;
         }
-        this.popperInstance = undefined;
-
     }
 
     disconnectedCallback() {
-        this.killPopper();
+        this.killInstance();
     }
 
-    @property({type: Number})
-    offsetSkidding:number = 0;
-
-    @property({type: Number})
-    offsetDistance:number = 0;
 
     @property({reflect: true})
     color:COLOR = "beige";
 
     @property()
-    target:Element | VirtualElement | undefined;
+    target:ElementTarget | undefined;
 
     @property()
     placement:Placement = "left";
 
+    @property({type: Number})
+    margin:number = 0;
+
+    @property({type: Number})
+    arrowOffset:number = 0;
+
     render() {
         return html`
             <div class="content"><slot></slot></div>
-            <div id="arrow" data-popper-arrow></div>
-
+            <div id="arrow"></div>
         `;
     }
 }
+
+
+function createInstance({target, tooltip, placement, container, arrow, ...opts}:Opts):TooltipInstance {
+    
+    const splitIndex = placement.indexOf("-");
+    
+    type Side = "top" | "bottom" | "right" | "left";
+    const side:Side = 
+        splitIndex === -1 ? placement : placement.substr(0, splitIndex) as any;
+
+    type Align = "middle" | "start" | "end";
+    const align:Align = 
+        splitIndex === -1 ? "middle" : placement.substr(splitIndex+1) as any;
+
+    const recalc = () => {
+        const targetRect = target.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+
+        //cheat the margin to account for arrow size
+        const margin = opts.margin + ARROW_SIZE;
+
+        let x:number = targetRect.x;
+        let y:number = targetRect.y;
+        if(side === "top") {
+            y -= (tooltipRect.height + margin);
+        } else if(side === "bottom") {
+            y += (targetRect.height + margin);
+        } else if(side === "right") {
+            x += (targetRect.width + margin);
+        } else if(side === "left") {
+            x -= (tooltipRect.width + margin);
+        }
+
+        if(align == "middle") {
+            if(side === "bottom" || side === "top") {
+                x = targetRect.left + ((targetRect.width - tooltipRect.width)/2);
+            } else {
+                y = targetRect.top + ((targetRect.height- tooltipRect.height)/2);
+            }
+        } else if(align == "start") {
+            if(side === "bottom" || side === "top") {
+                x = targetRect.left;
+            } else {
+                y = targetRect.top;
+            }
+        } else if(align == "end") {
+            if(side === "bottom" || side === "top") {
+                x = (targetRect.right - tooltipRect.width);
+            } else {
+                y = (targetRect.bottom - tooltipRect.height);
+            }
+        }
+
+        if(container) {
+            //TODO - handle all the edge cases
+            //nudge if it goes outside the container
+            //use the margin regardless of the axis, why not
+            const containerRect = container === window
+                ? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+                : (container as Element).getBoundingClientRect();
+
+            if((x + tooltipRect.width) > containerRect.right) {
+                x = containerRect.right - (tooltipRect.width + margin);
+            }
+            if((y + tooltipRect.height) > containerRect.bottom) {
+                y = containerRect.bottom - (tooltipRect.height + margin);
+            }
+            if(x < containerRect.left) {
+                x = containerRect.left + margin;
+            }
+            if(y < containerRect.top) {
+                y = containerRect.bottom - (tooltipRect.height + margin);
+            }
+        }
+
+        let style:CSSStyleDeclaration = (tooltip as any).style;
+
+        style.setProperty('top', `${y}px`);
+        style.setProperty('left', `${x}px`);
+
+
+        //Now the tooltip itself is properly positioned, accounting for drift
+        //Place the arrow...
+
+        style = (arrow.element as any).style;
+
+        const halfHeight = ARROW_SIZE/2;
+        const halfWidth = ARROW_SIZE/2;
+
+        //get the piece of the square which will stick out after rotation
+        //see https://stackoverflow.com/questions/57619285/calculate-how-much-smaller-a-square-would-have-to-be-to-fit-after-rotated-45-deg
+        const rot = 45;
+        const diff = Math.sin(rot * (Math.PI / 180)) * halfWidth;
+            
+        const offset = align === "middle"
+            ? arrow.offset 
+            : arrow.offset + (diff / 2);
+
+        if(side === "top") {
+            y = tooltipRect.height - halfHeight;
+        } else if(side === "bottom") {
+            y = -halfHeight;
+        } else if(side === "right") {
+            x = -halfWidth;
+        } else if(side === "left") {
+            x = tooltipRect.width - halfWidth;
+        }
+
+        if(align == "middle") {
+            if(side === "bottom" || side === "top") {
+                x = (tooltipRect.width / 2) - (halfWidth + offset); 
+            } else {
+                y = (tooltipRect.height / 2) - (halfHeight + offset); 
+            }
+        } else if(align == "start") {
+            if(side === "bottom" || side === "top") {
+                x = offset;
+            } else {
+                y = offset; 
+            }
+        } else if(align == "end") {
+            if(side === "bottom" || side === "top") {
+                x = tooltipRect.width - (ARROW_SIZE + offset); 
+            } else {
+                y = tooltipRect.height - (ARROW_SIZE + offset); 
+            }
+        }
+
+        style.transform = `translate(${x}px, ${y}px) rotate(45deg)`;
+        style.transformOrigin = "center center";
+    }
+    // @ts-ignore
+    const observer = new ResizeObserver(recalc);
+    observer.observe(target);
+    observer.observe(tooltip);
+
+
+    window.addEventListener("resize", recalc);
+
+    const destroy = () => {
+        observer.disconnect();
+        window.removeEventListener("resize", recalc);
+    }
+
+    recalc();
+
+    return {
+        destroy
+    }
+}
+
+interface Opts {
+    target: Element,
+    tooltip: Element,
+    placement: Placement,
+    margin: number,
+    container?: Element | Window,
+    arrow: Arrow
+}
+
+interface Arrow {
+    offset: number,
+    element: Element
+}
+
+interface TooltipInstance {
+    destroy: () => any
+}
+
+export type ElementTarget = Element | string | (() => Element);
+
+export type COLOR = "beige" | "red";
+
+//match it in tooltip/types.rs on the rust side
+export type Placement = 
+    "top"
+    | "top-start"
+    | "top-end"
+    | "bottom"
+    | "bottom-start"
+    | "bottom-end"
+    | "right"
+    | "right-start"
+    | "right-end"
+    | "left"
+    | "left-start"
+    | "left-end";

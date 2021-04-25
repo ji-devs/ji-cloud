@@ -54,6 +54,7 @@ impl DualListDom {
                                     TooltipData::Error(TooltipError {
                                         elem: state.error_element_ref.borrow().as_ref().unwrap_ji().clone(), 
                                         placement: Placement::Right, 
+                                        max_width: Some(185.0),
                                         slot: None,
                                         body: crate::strings::error::STR_SINGLE_LIST_NUM_WORDS.to_string(),
                                         on_close: Some(Rc::new(Box::new(clone!(state => move || {

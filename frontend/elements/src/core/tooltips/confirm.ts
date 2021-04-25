@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
-import { createPopper, Placement, VirtualElement } from '@popperjs/core';
 import { styleMap } from 'lit-html/directives/style-map';
 import "@elements/core/buttons/icon";
 import "./base";
+import {COLOR, Placement, ElementTarget} from "./base";
 
 @customElement("tooltip-confirm")
 export class _ extends LitElement {
@@ -72,18 +72,6 @@ export class _ extends LitElement {
     @property({type: Number})
     maxWidth:number = -1;
 
-    @property({type: Number})
-    offsetSkidding:number = 0;
-
-    @property({type: Number})
-    offsetDistance:number = 24; //account for arrow
-
-    @property()
-    target:Element | VirtualElement | undefined;
-
-    @property()
-    placement:Placement = "right";
-
     @property()
     header:string = "";
 
@@ -93,8 +81,24 @@ export class _ extends LitElement {
     @property()
     cancelLabel:string = "";
 
+    //pass through
+    @property({reflect: true})
+    color:COLOR = "red";
+
+    @property()
+    target:ElementTarget | undefined;
+
+    @property()
+    placement:Placement = "left";
+
+    @property({type: Number})
+    margin:number = 0;
+
+    @property({type: Number})
+    arrowOffset:number = 0;
+
     render() {
-        const {header, confirmLabel, cancelLabel, target, maxWidth, placement, offsetSkidding, offsetDistance} = this;
+        const {header, confirmLabel, cancelLabel, target, maxWidth, placement, color, arrowOffset, margin} = this;
 
         let bodyStyles:any = {
         };
@@ -104,7 +108,7 @@ export class _ extends LitElement {
         }
         return html`
 
-            <tooltip-base id="tooltip" color="red" .target=${target} .placement=${placement} .offsetSkidding=${offsetSkidding} .offsetDistance=${offsetDistance}>
+            <tooltip-base id="tooltip" color=${color} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
                 <article>
                     <img-ui path="core/tooltips/alert.svg"></img-ui>
                     <div class="body" style="${styleMap(bodyStyles)}">

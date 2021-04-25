@@ -185,7 +185,10 @@ dependencies = [
 name = "app-poster-common"
 version = "0.1.0"
 dependencies = [
- "serde",
+ "components",
+ "config",
+ "shared",
+ "utils",
 ]
 
 [[package]]
@@ -194,7 +197,7 @@ version = "0.1.0"
 dependencies = [
  "app-poster-common",
  "async-trait",
- "awsm_web 0.6.7",
+ "awsm_web 0.16.0",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -205,15 +208,16 @@ dependencies = [
  "futures",
  "futures-signals",
  "gloo",
- "htmlescape",
- "itertools 0.9.0",
+ "gloo-timers",
+ "itertools 0.10.0",
  "js-sys",
  "log",
+ "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
  "shared",
- "simple-html-template",
+ "unicode-segmentation",
  "url",
  "utils",
  "uuid",
@@ -230,7 +234,7 @@ version = "0.1.0"
 dependencies = [
  "app-poster-common",
  "async-trait",
- "awsm_web 0.6.7",
+ "awsm_web 0.16.0",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -240,13 +244,15 @@ dependencies = [
  "dominator_helpers",
  "futures",
  "futures-signals",
+ "getrandom 0.2.2",
  "gloo",
  "gloo-timers",
  "htmlescape",
- "itertools 0.9.0",
+ "itertools 0.10.0",
  "js-sys",
  "log",
- "rand 0.7.3",
+ "once_cell",
+ "rand 0.8.3",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
@@ -811,7 +817,6 @@ dependencies = [
  "cfg-if 0.1.10",
  "libc",
  "wasi 0.9.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]

@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
-import { createPopper, Placement, VirtualElement } from '@popperjs/core';
 import { styleMap } from 'lit-html/directives/style-map';
 import "@elements/core/buttons/icon";
 import "./base";
+import {COLOR, Placement, ElementTarget} from "./base";
 
 @customElement("tooltip-error")
 export class _ extends LitElement {
@@ -12,7 +12,17 @@ export class _ extends LitElement {
             css`
             :host {
               font-family: Poppins;
+              box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);
+                    display: inline-block;
             }
+
+                :host([color="beige"]) {
+                    border: solid 2px var(--light-orange-2);
+                    background-color: var(--light-orange-1);
+                }
+                :host([color="red"]) {
+                    background-color: var(--light-red-1);
+                }
             .body {
                 font-size: 16px;
                 color: var(--dark-gray-6);
@@ -44,20 +54,24 @@ export class _ extends LitElement {
     @property({type: Number})
     maxWidth:number = -1;
 
-    @property({type: Number})
-    offsetSkidding:number = 0;
-
-    @property({type: Number})
-    offsetDistance:number = 24; //account for arrow
+    //pass through
+    @property({reflect: true})
+    color:COLOR = "red";
 
     @property()
-    target:Element | VirtualElement | undefined;
+    target:ElementTarget | undefined;
 
     @property()
-    placement:Placement = "right";
+    placement:Placement = "left";
+
+    @property({type: Number})
+    margin:number = 0;
+
+    @property({type: Number})
+    arrowOffset:number = 0;
 
     render() {
-        const {target, maxWidth, placement, offsetSkidding, offsetDistance} = this;
+        const {target, maxWidth, placement, color, margin, arrowOffset} = this;
 
         let bodyStyles:any = {
         };
@@ -67,7 +81,7 @@ export class _ extends LitElement {
         }
         return html`
 
-            <tooltip-base id="tooltip" color="red" .target=${target} .placement=${placement} .offsetSkidding=${offsetSkidding} .offsetDistance=${offsetDistance}>
+            <tooltip-base id="tooltip" color=${color} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
                 <article>
                     <img-ui path="core/tooltips/alert.svg"></img-ui>
                     <div class="body" style="${styleMap(bodyStyles)}"><slot></slot></div>

@@ -1,8 +1,8 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
-import { createPopper, Placement, VirtualElement } from '@popperjs/core';
 import "@elements/core/buttons/icon";
 import "./base";
+import {COLOR, Placement, ElementTarget} from "./base";
 
 const STR_NO_SHOW_AGAIN = "Don't show again";
 
@@ -52,17 +52,6 @@ export class _ extends LitElement {
     @property({type: Boolean})
     closed:boolean = false;
 
-    @property({type: Number})
-    offsetSkidding:number = 0;
-
-    @property({type: Number})
-    offsetDistance:number = 24; //account for arrow
-
-    @property()
-    target:Element | VirtualElement | undefined;
-
-    @property()
-    placement:Placement = "left";
 
     @property()
     title:string = "";
@@ -76,8 +65,25 @@ export class _ extends LitElement {
     @property({type: Boolean})
     closeable:boolean = false;
 
+
+    //pass through
+    @property({reflect: true})
+    color:COLOR = "beige";
+
+    @property()
+    target:ElementTarget | undefined;
+
+    @property()
+    placement:Placement = "bottom";
+
+    @property({type: Number})
+    margin:number = 0;
+
+    @property({type: Number})
+    arrowOffset:number = 0;
+
     render() {
-        const {closed, title, body, showId, target, placement, closeable, offsetSkidding, offsetDistance} = this;
+        const {closed, title, body, showId, target, placement, closeable, color, margin, arrowOffset} = this;
 
         if(closed) {
             return nothing;
@@ -91,7 +97,7 @@ export class _ extends LitElement {
         }
 
         return html`
-            <tooltip-base color="beige" .target=${target} placement=${placement} .offsetSkidding=${offsetSkidding} .offsetDistance=${offsetDistance}>
+            <tooltip-base id="tooltip" color=${color} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
                 <section class="content">
                     ${closeable ? renderClose(this.onClose) : nothing}
                     ${title !== "" ? html`<div class="title">${title}</div>` : nothing}

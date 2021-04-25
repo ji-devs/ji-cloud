@@ -63,6 +63,21 @@ export class _ extends LitElement {
     `];
   }
 
+  updated(changed:any) {
+      if(typeof changed.get("hoverLock") === "boolean") {
+          if(!this.hoverLock) {
+              this.hover = false;
+          }
+      }
+
+      if(typeof changed.get("hover") === "boolean") {
+          const {hoverLock} = this;
+          if(hoverLock) {
+              this.hover = true;
+          }
+      }
+  }
+
   onEnter() {
       if(this.hoverable) {
           this.hover = true;
@@ -84,8 +99,11 @@ export class _ extends LitElement {
   @property({type: Boolean})
   hoverable:boolean = false;
 
+  @property({type: Boolean})
+  hoverLock:boolean = false;
+
   render() {
-      const {hover, index} = this;
+      let {hover, index} = this;
 
 
       return html`

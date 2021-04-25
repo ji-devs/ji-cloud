@@ -52,6 +52,7 @@ impl SingleListDom {
                                 state.app.overlay.tooltips.list_error.set(Some(
                                     TooltipData::Error(TooltipError {
                                         elem: state.error_element_ref.borrow().as_ref().unwrap_ji().clone(), 
+                                        max_width: Some(185.0),
                                         placement: Placement::Right, 
                                         slot: None,
                                         body: crate::strings::error::STR_SINGLE_LIST_NUM_WORDS.to_string(),

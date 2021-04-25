@@ -41,7 +41,7 @@ export class _ extends LitElement {
 
   imgRef:HTMLElement | undefined;
 
-  //instead of firstUpdated since Popper needs the size of the image to position correctly
+  //instead of firstUpdated since tooltip needs the size of the image to position correctly
   onImageLoaded() {
       this.imgRef = this.shadowRoot?.getElementById("gear-img") as HTMLElement;
       this.requestUpdate();
@@ -73,5 +73,5 @@ function renderTooltip(moduleKind:ModuleKind, targetRef:HTMLElement) {
     }
 
     const showId = `header-intro-${moduleKind}`;
-    return html`<tooltip-info placement="bottom-end" .target=${targetRef} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
+    return html`<tooltip-info placement="bottom-end" .target=${targetRef} .arrowOffset=${35} title="${STR_TOOLTIP_GETTING_STARTED}" body="${body}" showId="${showId}" closeable></tooltip-info>`
 }

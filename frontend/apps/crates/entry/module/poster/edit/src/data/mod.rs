@@ -1,3 +1,4 @@
-mod data;
-pub use app_poster_common::data as raw;
-pub use data::*;
+pub mod state;
+pub mod actions;
+
+pub use shared::domain::jig::module::body::poster as raw; 

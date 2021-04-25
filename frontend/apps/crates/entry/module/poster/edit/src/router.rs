@@ -7,30 +7,33 @@ use futures_signals::{
     map_ref,
     signal::{Mutable, SignalExt, Signal}
 };
-use dominator::{Dom, html};
-use crate::pages::editor;
+use dominator::{Dom, html, clone};
+use dominator_helpers::futures::AsyncLoader;
+use std::cell::RefCell;
+use crate::index::dom::{IndexDom, Page};
+
 pub struct Router {
+    loader: AsyncLoader,
+    page: RefCell<Option<Page>>
 }
 
-impl Router {
-    pub fn new() -> Self {
-        Self { }
-    }
 
-    fn signal() -> impl Signal<Item = Route> {
+pub fn render() {
+    let _self = Rc::new(Router {
+        loader: AsyncLoader::new(),
+        page: RefCell::new(None)
+    });
+
+    _self.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
-    }
-
-    fn dom_signal() -> impl Signal<Item = Option<Dom>> {
-        Self::signal()
-            .map(|route| {
-                match route {
+            .for_each(clone!(_self => move |route| {
+                *_self.page.borrow_mut() = match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::Poster => Some(editor::render(jig_id, module_id)),
+                                    ModuleKind::Poster => Some(IndexDom::render(jig_id, module_id)),
                                     _ => None
                                 }
                             }
@@ -38,11 +41,8 @@ impl Router {
                         }
                     },
                     _ => None
-                }
-            })
-    }
-    
-    pub fn render(&self) -> Dom {
-        html!("main", { .child_signal(Self::dom_signal()) } )
-    }
+                };
+                async {}
+            }))
+    );
 }
