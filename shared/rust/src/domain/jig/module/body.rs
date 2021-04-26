@@ -1,3 +1,7 @@
+use crate::{
+    domain::audio::AudioId,
+    media::MediaLibrary,
+};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
@@ -37,4 +41,45 @@ impl Body {
             Self::Poster(_) => super::ModuleKind::Poster,
         }
     }
+}
+
+/// Theme Ids. Used in various modules
+/// See the frontend extension trait for more info
+#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+pub enum ThemeId {
+    /// No theme id set (a.k.a. default)
+    None = 0,
+    /// Blueish theme
+    Chalkboard = 1,
+    /// Orangeish theme
+    HappyBrush = 2,
+}
+
+impl Default for ThemeId {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Audio
+pub struct Audio {
+    /// The Audio Id
+    pub id: AudioId, 
+    /// The Media Library
+    pub lib: MediaLibrary
+}
+
+/// Instructions
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct Instructions {
+    /// Text displayed in banner
+    pub text: Option<String>,
+    /// Audio played on module start
+    pub audio: Option<Audio>,
 }
