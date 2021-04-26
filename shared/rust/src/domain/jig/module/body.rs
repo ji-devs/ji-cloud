@@ -1,7 +1,4 @@
-use crate::{
-    domain::audio::AudioId,
-    media::MediaLibrary,
-};
+use crate::{domain::audio::AudioId, media::MediaLibrary};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
@@ -10,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[allow(missing_docs)]
 pub mod memory;
 
-/// Poster 
+/// Poster
 #[allow(missing_docs)]
 pub mod poster;
 
@@ -69,9 +66,9 @@ impl Default for ThemeId {
 /// Audio
 pub struct Audio {
     /// The Audio Id
-    pub id: AudioId, 
+    pub id: AudioId,
     /// The Media Library
-    pub lib: MediaLibrary
+    pub lib: MediaLibrary,
 }
 
 /// Instructions

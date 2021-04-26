@@ -1,4 +1,4 @@
-use crate::domain::jig::module::body::{ThemeId, Instructions};
+use crate::domain::jig::module::body::{Instructions, ThemeId};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
