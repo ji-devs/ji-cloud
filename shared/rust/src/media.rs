@@ -46,7 +46,7 @@ pub enum PngImageFile {
 }
 
 /// Media Libraries
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
 #[repr(i16)]

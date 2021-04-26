@@ -64,7 +64,7 @@ impl Default for ThemeId {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Audio
 pub struct Audio {
