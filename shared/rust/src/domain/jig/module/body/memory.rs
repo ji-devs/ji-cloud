@@ -19,37 +19,77 @@ pub struct CardPair(pub Card, pub Card);
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
+    /// The instructions for the module.
     pub instructions: Instructions,
+
+    /// The mode the module uses.
     pub mode: Option<Mode>,
+
+    /// The pairs of cards that make up the module.
     pub pairs: Vec<CardPair>,
+
+    /// The ID of the module's theme.
     pub theme_id: ThemeId,
 }
 
+/// An individual card.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Card {
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Text(String),
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Image(Option<(ImageId, MediaLibrary)>),
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Audio(Option<(AudioId, MediaLibrary)>),
 }
 
+/// What mode the module runs in.
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum Mode {
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Duplicate = 0,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     WordsAndImages = 1,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     BeginsWith = 2,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Lettering = 3,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Riddles = 4,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Opposites = 5,
+
+    // todo(@dakom): document this
+    #[allow(missing_docs)]
     Synonymns = 6,
+
+    /// Translate from one language to another.
     Translate = 7,
 }
 
 impl Mode {
     //Must match the element strings in types
+    /// Converts `self` to a [`str`].
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Duplicate => "duplicate",
@@ -65,6 +105,7 @@ impl Mode {
 }
 
 impl ModuleData {
+    /// Instantiates a new module with the given `mode`, `theme_id`, `instructions`, and pairs of text cards.
     pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self
     where
         I: IntoIterator<Item = (S, S)>,
