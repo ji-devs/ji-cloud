@@ -157,6 +157,20 @@ impl State {
             .dedupe()
     }
 
+    pub fn step_ready_signal(&self) -> impl Signal<Item = bool> {
+        map_ref! {
+            let pairs_len = self.pairs_len_signal(),
+            let step = self.step.signal()
+                => {
+                    if *pairs_len >= 2 {
+                        true
+                    } else {
+                        false
+                    }
+                }
+        }
+    }
+
 
 
 }
