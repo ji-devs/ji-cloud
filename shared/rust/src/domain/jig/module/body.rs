@@ -1,17 +1,12 @@
-use crate::{
-    domain::audio::AudioId,
-    media::MediaLibrary,
-};
+use crate::{domain::audio::AudioId, media::MediaLibrary};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-/// Memory Game
-#[allow(missing_docs)]
+/// Memory Game Body.
 pub mod memory;
 
-/// Poster 
-#[allow(missing_docs)]
+/// Poster Body.
 pub mod poster;
 
 /// Body kinds for Modules.
@@ -69,17 +64,18 @@ impl Default for ThemeId {
 /// Audio
 pub struct Audio {
     /// The Audio Id
-    pub id: AudioId, 
+    pub id: AudioId,
     /// The Media Library
-    pub lib: MediaLibrary
+    pub lib: MediaLibrary,
 }
 
-/// Instructions
+/// Instructions for a module.
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Instructions {
     /// Text displayed in banner
     pub text: Option<String>,
+
     /// Audio played on module start
     pub audio: Option<Audio>,
 }

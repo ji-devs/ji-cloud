@@ -9,9 +9,6 @@ use uuid::Uuid;
 /// Module bodies
 pub mod body;
 
-/// Module themes
-pub mod theme;
-
 pub use body::Body as ModuleBody;
 
 /// Wrapper type around [`Uuid`](Uuid), represents the ID of a module.
