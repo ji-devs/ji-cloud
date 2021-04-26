@@ -10,7 +10,7 @@ expression: body
       "memoryGame": {
         "instructions": {
           "text": null,
-          "audio_id": null
+          "audio": null
         },
         "mode": null,
         "pairs": [],
