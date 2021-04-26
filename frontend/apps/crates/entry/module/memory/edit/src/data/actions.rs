@@ -206,6 +206,13 @@ impl State {
         });
     }
 
+    pub fn clear_all(&self) {
+        self.pairs.lock_mut().clear();
+        self.get_history().push_modify(|game_data| {
+            game_data.pairs.clear();
+        });
+    }
+
     pub fn limit_text(&self, max_len: usize, text:String) -> String {
         let len = text.graphemes(true).count();
 

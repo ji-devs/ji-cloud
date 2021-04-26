@@ -16,7 +16,8 @@ use crate::steps::sidebar::step_1::widgets::{
     single_list::{
         state::State as SingleListState,
         dom::SingleListDom,
-    }
+    },
+    empty::dom::EmptyDom
 };
 
 pub struct WordsDom {}
@@ -28,7 +29,7 @@ impl WordsDom {
             .property("slot", "content")
             .child({
                 if is_empty {
-                    html!("step1-sidebar-empty")
+                    EmptyDom::render(state)
                 } else {
                     if is_dual {
                         let list_state = Rc::new(DualListState::new(state, 14));

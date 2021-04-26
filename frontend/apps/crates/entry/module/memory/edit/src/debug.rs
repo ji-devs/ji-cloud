@@ -71,13 +71,13 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(Some(Mode::Lettering), false)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(Mode::Lettering), true)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::BeginsWith), false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::Riddles), false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::Duplicate), true)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::Duplicate), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::WordsAndImages), true)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(Mode::WordsAndImages), true)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::BeginsWith), false)).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(Some(Mode::Riddles), false)).unwrap_ji();
     } else {

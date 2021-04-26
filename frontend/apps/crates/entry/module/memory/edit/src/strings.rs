@@ -7,6 +7,8 @@ pub const STR_DONE:&'static str = "Done";
 pub const STR_CLEAR:&'static str = "Clear";
 pub const STR_CONTINUE:&'static str = "Continue";
 
+pub const STR_CREATE_NEW_LIST:&'static str = "Create new list";
+
 pub const STR_INSTRUCTIONS_LABEL:&'static str = "Written instructions";
 pub const STR_INSTRUCTIONS_PLACEHOLDER:&'static str = "Type instructions";
 

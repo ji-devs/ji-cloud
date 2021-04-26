@@ -11,6 +11,7 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: flex;
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 height: 100%;
@@ -35,6 +36,14 @@ export class _ extends LitElement {
                 align-items: flex-start;
             }
 
+            .clear {
+                margin-top: 88px;
+                align-self: flex-end;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
         `];
     }
 
@@ -49,6 +58,7 @@ export class _ extends LitElement {
                 <img-ui path="module/memory/edit/sidebar/jiggling-card-pointer.svg"></img-ui>
                 <div class="label">${STR_LABEL}</div>
             </section>
+            <div class="clear"><slot name="clear"></slot></div>
         `
     }
 }

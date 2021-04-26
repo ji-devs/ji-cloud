@@ -17,6 +17,7 @@ use crate::steps::sidebar::step_1::widgets::single_list::{
     state::State as ListState,
     dom::SingleListDom,
 };
+use crate::steps::sidebar::step_1::widgets::empty::dom::EmptyDom;
 
 pub struct WordsAndImagesDom {}
 impl WordsAndImagesDom {
@@ -56,7 +57,7 @@ impl WordsAndImagesDom {
                         Some(match tab {
                             Tab::Text => {
                                 if is_empty {
-                                    html!("step1-sidebar-empty")
+                                    EmptyDom::render(state.app.clone())
                                 } else {
                                     TextInputDom::render(state.clone())
                                 }
