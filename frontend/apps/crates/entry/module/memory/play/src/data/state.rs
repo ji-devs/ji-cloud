@@ -9,7 +9,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec, self},
 };
 use rand::prelude::*;
-use shared::{domain::{image::ImageId, jig::{JigId, module::{ModuleId, body::memory::CardPair}}}, media::MediaLibrary};
+use shared::{domain::{image::ImageId, jig::{JigId, module::{ModuleId, body::Instructions, body::memory::CardPair}}}, media::MediaLibrary};
 use wasm_bindgen::UnwrapThrowExt;
 use crate::{
     player::card::state::{State as CardState, Side},
@@ -18,6 +18,7 @@ use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use utils::prelude::*;
+use components::instructions::InstructionsPlayer;
 
 pub struct State {
     pub jig_id: JigId,
@@ -29,6 +30,7 @@ pub struct State {
     pub theme_id: ThemeId,
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
+    pub instructions_player: InstructionsPlayer,
 }
 
 impl State {
@@ -77,6 +79,7 @@ impl State {
             theme_id: raw_data.theme_id,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
+            instructions_player: InstructionsPlayer::new(raw_data.instructions), 
         }
     }
 

@@ -10,6 +10,7 @@ use std::rc::Rc;
 use crate::data::{state::*, raw};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
+use shared::domain::jig::module::body::Instructions;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -29,7 +30,7 @@ impl DebugSettings {
                 raw::ModuleData::new(
                     mode, 
                     ThemeId::Chalkboard, 
-                    raw::Instructions::new(),
+                    Instructions::default(),
                     crate::config::get_debug_pairs(mode, 3)
                 )
             ),

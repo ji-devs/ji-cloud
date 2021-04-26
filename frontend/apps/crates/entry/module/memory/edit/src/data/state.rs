@@ -19,7 +19,7 @@ use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
 use shared::{domain::{
-    jig::{JigId, module::ModuleId},
+    jig::{JigId, module::{body::Audio, ModuleId}},
     audio::AudioId
 }, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;
@@ -55,14 +55,14 @@ pub struct State {
 }
 
 pub struct Instructions {
-    pub audio_id: Mutable<Option<AudioId>>,
+    pub audio: Mutable<Option<Audio>>,
     pub text: Mutable<Option<String>>
 }
 
 impl Instructions {
     pub fn new(raw_data: &raw::ModuleData) -> Self {
         Self {
-            audio_id: Mutable::new(raw_data.instructions.audio_id.clone()),
+            audio: Mutable::new(raw_data.instructions.audio.clone()),
             text: Mutable::new(raw_data.instructions.text.clone())
         }
     }

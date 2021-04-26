@@ -15,6 +15,7 @@ use once_cell::sync::OnceCell;
 use utils::prelude::*;
 use shared::domain::jig::{JigId, module::ModuleId};
 use uuid::Uuid;
+use shared::domain::jig::module::body::Instructions as RawInstructions;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -50,7 +51,7 @@ impl DebugSettings {
                     raw::ModuleData::new(
                         mode, 
                         ThemeId::Chalkboard, 
-                        raw::Instructions::new(),
+                        RawInstructions::default(),
                         crate::config::get_debug_pairs(mode)
                     )
                 } else {

@@ -12,7 +12,7 @@ use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 use unicode_segmentation::UnicodeSegmentation;
-
+use shared::domain::jig::module::body::{Audio, Instructions as RawInstructions};
 pub type HistoryChangeFn = impl Fn(Option<raw::ModuleData>);
 pub type HistoryUndoRedoFn = impl Fn(Option<raw::ModuleData>);
 use shared::{
@@ -76,7 +76,7 @@ impl State {
         let game_data = raw::ModuleData::new(
             mode,
             ThemeId::None, 
-            raw::Instructions::new(), 
+            RawInstructions::default(), 
             Vec::<(&str, &str)>::new()
         );
 
@@ -188,10 +188,15 @@ impl State {
 
     pub fn change_instructions_audio(&self, audio_id: Option<AudioId>) {
         log::info!("CHANGING INSTRUCTIONS AUDIO!!!!");
-        self.instructions.audio_id.set_neq(audio_id.clone());
+        let audio:Option<Audio> = audio_id.map(|id| Audio {
+            id,
+            lib: MediaLibrary::User
+        });
+
+        self.instructions.audio.set_neq(audio.clone());
 
         self.get_history().push_modify(move |game_data| {
-            game_data.instructions.audio_id = audio_id;
+            game_data.instructions.audio = audio;
         });
     }
     pub fn delete_pair(&self, pair_index: usize) {
@@ -267,14 +272,14 @@ impl State {
                 );
                 self.mode.set_neq(Some(mode));
                 self.theme_id.set_neq(game_data.theme_id);
-                self.instructions.audio_id.set_neq(game_data.instructions.audio_id);
+                self.instructions.audio.set_neq(game_data.instructions.audio);
                 self.instructions.text.set_neq(game_data.instructions.text);
             },
             None => {
                 self.pairs.lock_mut().clear();
                 self.mode.set_neq(None);
                 self.theme_id.set_neq(ThemeId::None);
-                self.instructions.audio_id.set_neq(None);
+                self.instructions.audio.set_neq(None);
                 self.instructions.text.set_neq(None);
             }
         }

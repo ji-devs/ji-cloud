@@ -1,7 +1,4 @@
-use shared::domain::jig::module::{
-    theme::ThemeId,
-    body::memory::*,
-};
+use shared::domain::jig::module::body::{ThemeId, memory::*};
 
 pub enum Side {
     Left,

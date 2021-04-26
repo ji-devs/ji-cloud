@@ -61,19 +61,19 @@ impl AudioDom {
             on_change: Some(Box::new(clone!(state => move |audio_id| {
                 state.change_instructions_audio(audio_id);
             }))),
-            audio_id: state.instructions.audio_id.get_cloned(),
+            audio_id: state.instructions.audio.get_cloned().map(|audio| audio.id),
         };
 
         let audio_state = Rc::new(AudioState::new(opts)); 
 
         html!("empty-fragment", {
-            .future(state.instructions.audio_id
-                    .signal()
+            .future(state.instructions.audio
+                    .signal_cloned()
                     .to_stream()
                     .skip(1)
-                    .for_each(clone!(audio_state => move |audio_id| {
+                    .for_each(clone!(audio_state => move |audio| {
                         //This just happens when history is changed really
-                        audio_state.set_audio_id_ext(audio_id);
+                        audio_state.set_audio_id_ext(audio.map(|audio| audio.id));
                         async {}
                     }))
             )

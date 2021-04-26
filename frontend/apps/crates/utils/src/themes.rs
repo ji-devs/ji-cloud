@@ -7,7 +7,7 @@ use serde::{
 };
 use std::{fmt, marker::PhantomData};
 use crate::unwrap::UnwrapJiExt;
-pub use shared::domain::jig::module::theme::ThemeId;
+pub use shared::domain::jig::module::body::ThemeId;
 
 pub const THEME_IDS:[ThemeId;3] = [
     ThemeId::None,

@@ -40,6 +40,7 @@ export const THEMES:Record<ThemeKind, Theme> = {
         color3: "#FFF3ED",
     },
 };
+
 function setRootVars() {
     const style = document.documentElement.style;
 

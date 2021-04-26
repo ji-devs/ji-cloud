@@ -11,17 +11,22 @@ use futures_signals::{
 };
 use utils::prelude::*;
 
-pub struct PlayerDom {}
+pub struct PlayerDom { }
 
 impl PlayerDom {
     pub fn render(state: Rc<State>) -> Dom {
-        html!("play-container", {
+        html!("empty-fragment", {
             .property("slot", "main")
-            .property("theme", state.theme_id.as_str_id())
-            .children(&mut [
-                MainDom::render(state.clone()),
-                SidebarDom::render(state.clone()),
-            ])
+            .child(state.instructions_player.render())
+            .child(
+                html!("play-container", {
+                    .property("theme", state.theme_id.as_str_id())
+                    .children(&mut [
+                        MainDom::render(state.clone()),
+                        SidebarDom::render(state.clone()),
+                    ])
+                })
+            )
         })
     }
 }
