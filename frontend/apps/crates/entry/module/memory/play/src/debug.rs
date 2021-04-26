@@ -10,6 +10,8 @@ use std::rc::Rc;
 use crate::data::{state::*, raw};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
+use shared::domain::jig::{JigId, module::ModuleId};
+use uuid::Uuid;
 use shared::domain::jig::module::body::Instructions;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
@@ -47,21 +49,15 @@ impl DebugSettings {
         }
     }
 }
-cfg_if! {
-    if #[cfg(feature = "local")] {
-        pub fn init() {
-            SETTINGS.set(DebugSettings::debug(Mode::Lettering)).unwrap_ji();
-        }
 
-        pub fn settings() -> &'static DebugSettings {
-            unsafe { SETTINGS.get_unchecked() }
-        }
+
+pub fn init(jig_id: JigId, module_id: ModuleId) {
+    if jig_id == JigId(Uuid::from_u128(0)) {
+        SETTINGS.set(DebugSettings::debug(Mode::Lettering)).unwrap_ji();
     } else {
-        pub fn init() {
-            SETTINGS.set(DebugSettings::default()).unwrap_ji();
-        }
-        pub fn settings() -> &'static DebugSettings {
-            unsafe { SETTINGS.get_unchecked() }
-        }
+        SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
+}
+pub fn settings() -> &'static DebugSettings {
+    unsafe { SETTINGS.get_unchecked() }
 }

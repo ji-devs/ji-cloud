@@ -19,9 +19,9 @@ config = {path = "../../../../../../config/rust"}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-wasm-bindgen = { version = "0.2.70", features = ["nightly"] }
-js-sys = "0.3.47"
-web-sys = { version = "0.3.47", features = [
+wasm-bindgen = { version = "0.2.73", features = ["nightly"] }
+js-sys = "0.3.50"
+web-sys = { version = "0.3.50", features = [
     'Url',
     'Request',
     'RequestInit',
@@ -48,22 +48,22 @@ web-sys = { version = "0.3.47", features = [
     'File',
     'DomRect'
 ] }
-wasm-bindgen-futures = "0.4.20"
+wasm-bindgen-futures = "0.4.23"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.14"
-futures-signals = "0.3.16"
+futures-signals = "0.3.19"
 dominator_helpers = "0.6.0"
-serde = { version = "1.0.123", features = ["derive"] }
+serde = { version = "1.0.125", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
-serde_json = "1.0.62"
-futures = "0.3.12"
+serde_json = "1.0.64"
+futures = "0.3.14"
 log = "0.4.14"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.16.0", features = ["dom", "loaders"] }
+awsm_web = { version = "0.17.2", features = ["dom", "loaders"] }
 discard = "1.0.4"
 uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
-url = "2.2.0"
+url = "2.2.1"
 gloo = "0.2.1"
 itertools = "0.10.0"
 

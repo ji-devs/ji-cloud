@@ -14,3 +14,4 @@ pub mod text_editor;
 pub mod font_loader;
 pub mod instructions;
 pub mod animation;
+pub mod audio_player;

@@ -17,7 +17,7 @@ impl PlayerDom {
     pub fn render(state: Rc<State>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
-            .child(state.instructions_player.render())
+            .child(state.instructions.render(&state.audio_ctx))
             .child(
                 html!("play-container", {
                     .property("theme", state.theme_id.as_str_id())

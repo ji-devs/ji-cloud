@@ -19,6 +19,7 @@ use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use utils::prelude::*;
 use components::instructions::InstructionsPlayer;
+use web_sys::AudioContext;
 
 pub struct State {
     pub jig_id: JigId,
@@ -30,11 +31,14 @@ pub struct State {
     pub theme_id: ThemeId,
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
-    pub instructions_player: InstructionsPlayer,
+    pub instructions: InstructionsPlayer,
+    pub audio_ctx: AudioContext
 }
 
 impl State {
     pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Self {
+
+        let audio_ctx = AudioContext::new().unwrap_ji();
 
         let n_cards = raw_data.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
@@ -79,7 +83,8 @@ impl State {
             theme_id: raw_data.theme_id,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
-            instructions_player: InstructionsPlayer::new(raw_data.instructions), 
+            instructions: InstructionsPlayer::new(raw_data.instructions), 
+            audio_ctx,
         }
     }
 

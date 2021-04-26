@@ -17,19 +17,19 @@ crate-type = ["cdylib"]
 
 app-poster-common = {path = "../_common"}
 rand = "0.8.3"
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { version = "0.2.2", features = ["js"] }
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}
 config = {path = "../../../../../../../config/rust"}
-async-trait = "0.1.48"
+async-trait = "0.1.50"
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
-wasm-bindgen = { version = "0.2.72", features = ["nightly"] }
-js-sys = "0.3.49"
-web-sys = { version = "0.3.49", features = [
+wasm-bindgen = { version = "0.2.73", features = ["nightly"] }
+js-sys = "0.3.50"
+web-sys = { version = "0.3.50", features = [
     'Url',
     'Request',
     'RequestInit',
@@ -56,19 +56,19 @@ web-sys = { version = "0.3.49", features = [
     'DomRect',
 ] }
 once_cell = "1.7.2"
-wasm-bindgen-futures = "0.4.22"
+wasm-bindgen-futures = "0.4.23"
 simple-html-template = { version = "0.2.4", features = ["wasm"] }
 htmlescape = "0.3.1"
 dominator = "0.5.14"
-futures-signals = "0.3.17"
+futures-signals = "0.3.19"
 dominator_helpers = "0.6.0"
-serde = { version = "1.0.124", features = ["derive"] }
+serde = { version = "1.0.125", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
 serde_json = "1.0.64"
-futures = "0.3.13"
+futures = "0.3.14"
 log = "0.4.14"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.16.0", features = ["dom"] }
+awsm_web = { version = "0.17.2", features = ["dom"] }
 discard = "1.0.4"
 uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
 url = "2.2.1"
