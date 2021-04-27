@@ -43,7 +43,9 @@ export class _ extends LitElement {
               width: 150px;
               height: 150px;
               object-fit: contain;
+
           }
+          
 
           section.flippable:hover {
               transform: rotateY(180deg);

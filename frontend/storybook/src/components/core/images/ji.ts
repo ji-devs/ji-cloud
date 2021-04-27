@@ -20,8 +20,8 @@ const DEFAULT_ARGS:Args = {
 export const Ji = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
   const {size, slot, slotStr} = injectSlotStr(props);
-
-  return `<img-ji lib="mock" size="${size}" id="image.png" ${slotStr}></img-ji>`
+  //return `<img-ji lib="mock" size="${size}" id="image.png" ${slotStr}></img-ji>`
+  return `<img-ji lib="mock" size="full" id="tall.png" ${slotStr}></img-ji>`
 }
 
 Ji.argTypes = {

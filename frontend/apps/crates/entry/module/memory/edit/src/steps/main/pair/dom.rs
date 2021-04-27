@@ -8,9 +8,10 @@ use web_sys::HtmlElement;
 use js_sys::Reflect;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, ReadOnlyMutable, SignalExt},
+    signal::{self, Mutable, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
+use dominator_helpers::signals::EitherSignal;
 use components::image_search::types::*;
 use components::tooltip::types::*;
 
@@ -104,68 +105,69 @@ impl CardDom {
                     }
                 }
             }))
-            .child({
+            .child_signal({
                 match card {
                     Card::Text(data) => {
-                        html!("input-textarea-content", {
-                            .property_signal("value", data.signal_cloned())
-                            .property_signal("fontSize", {
-                                let sig = map_ref!{
-                                    let value = data.signal_cloned(),
-                                    let theme = state.theme_id.signal_cloned()
-                                        => {
-                                            (value.len(), *theme)
-                                        }
-                                };
+                        EitherSignal::Left(signal::always(Some(
+                            html!("input-textarea-content", {
+                                .property_signal("value", data.signal_cloned())
+                                .property_signal("fontSize", {
+                                    let sig = map_ref!{
+                                        let value = data.signal_cloned(),
+                                        let theme = state.theme_id.signal_cloned()
+                                            => {
+                                                (value.len(), *theme)
+                                            }
+                                    };
 
-                                sig.map(|(len, theme_id)| {
-                                    let font_size = app_memory_common::lookup::get_card_font_size(len, theme_id);
-                                    format!("{}px", font_size)
+                                    sig.map(|(len, theme_id)| {
+                                        let font_size = app_memory_common::lookup::get_card_font_size(len, theme_id);
+                                        format!("{}px", font_size)
+                                    })
                                 })
+                                .property_signal("fontFamily", state.theme_id.signal_cloned().map(clone!(side, mode => move |theme_id| {
+                                    let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, side.into());
+                                    theme_id.css_var_font_family(font_family)
+                                })))
+                                .property_signal("color", state.theme_id.signal_cloned().map(|theme_id| {
+                                    theme_id.css_var_color(1)
+                                }))
+                                .property("clickMode", "none")
+                                .property("constrainWidth", crate::config::CARD_TEXT_LIMIT_WIDTH)
+                                .property("constrainHeight", crate::config::CARD_TEXT_LIMIT_HEIGHT)
+                                .event(clone!(state, index, other => move |evt:events::CustomInput| {
+                                    let index = index.get().unwrap_or_default();
+                                    let value = evt.value();
+
+                                    if mode == Mode::Duplicate {
+                                        other.as_text_mutable().set_neq(value);
+                                    }
+                                }))
+                                .event(clone!(state, index => move |evt:events::CustomChange| {
+                                    let index = index.get().unwrap_or_default();
+                                    let value = evt.value();
+                                    state.replace_card_text(index, side, value);
+                                }))
+                                .event(clone!(editing_active => move |evt:events::CustomToggle| {
+                                    editing_active.set_neq(evt.value());
+                                }))
+                                .event(clone!(state, other => move |evt:events::Reset| {
+                                    //Just need to change the linked pair
+                                    //without affecting history
+                                    if mode == Mode::Duplicate {
+                                        //other.as_text_mutable().set_neq(original_data.clone());
+                                        other.as_text_mutable().set_neq(data.get_cloned());
+                                    }
+
+                                }))
+                                .after_inserted(clone!(input_ref => move |dom| {
+                                    *input_ref.borrow_mut() = Some(dom);
+                                }))
                             })
-                            .property_signal("fontFamily", state.theme_id.signal_cloned().map(clone!(side, mode => move |theme_id| {
-                                let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, side.into());
-                                theme_id.css_var_font_family(font_family)
-                            })))
-                            .property_signal("color", state.theme_id.signal_cloned().map(|theme_id| {
-                                theme_id.css_var_color(1)
-                            }))
-                            .property("clickMode", "none")
-                            .property("constrainWidth", crate::config::CARD_TEXT_LIMIT_WIDTH)
-                            .property("constrainHeight", crate::config::CARD_TEXT_LIMIT_HEIGHT)
-                            .event(clone!(state, index, other => move |evt:events::CustomInput| {
-                                let index = index.get().unwrap_or_default();
-                                let value = evt.value();
-
-                                if mode == Mode::Duplicate {
-                                    other.as_text_mutable().set_neq(value);
-                                }
-                            }))
-                            .event(clone!(state, index => move |evt:events::CustomChange| {
-                                let index = index.get().unwrap_or_default();
-                                let value = evt.value();
-                                state.replace_card_text(index, side, value);
-                            }))
-                            .event(clone!(editing_active => move |evt:events::CustomToggle| {
-                                editing_active.set_neq(evt.value());
-                            }))
-                            .event(clone!(state, other => move |evt:events::Reset| {
-                                //Just need to change the linked pair
-                                //without affecting history
-                                if mode == Mode::Duplicate {
-                                    //other.as_text_mutable().set_neq(original_data.clone());
-                                    other.as_text_mutable().set_neq(data.get_cloned());
-                                }
-
-                            }))
-                            .after_inserted(clone!(input_ref => move |dom| {
-                                *input_ref.borrow_mut() = Some(dom);
-                            }))
-                        })
+                        )))
                     },
                     Card::Image(data) => {
-                        html!("empty-fragment", {
-                            .child_signal(data.signal_cloned().map(clone!(state, editing_active => move |data| {
+                        EitherSignal::Right(data.signal_cloned().map(clone!(state, editing_active => move |data| {
                                 Some(match data {
                                     None => {
                                         html!("img-ui", {
@@ -202,12 +204,28 @@ impl CardDom {
                                         })
                                     }
                                 })
+                        })))
+                    },
+                    _ => unimplemented!("no audio cards")
+                }
+            })
+
+            /*
+            .child({
+                match card {
+                    Card::Text(data) => {
+                    },
+                    Card::Image(data) => {
+                        html!("empty-fragment", {
+
+                            .child_signal(data.signal_cloned().map(clone!(state, editing_active => move |data| {
                             })))
                         })
                     },
                     _ => unimplemented!("can't render other types yet!")
                 }
             })
+            */
         })
     }
 }
