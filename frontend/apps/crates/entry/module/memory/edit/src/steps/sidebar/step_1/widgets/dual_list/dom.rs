@@ -55,6 +55,7 @@ impl DualListDom {
                                         elem: state.error_element_ref.borrow().as_ref().unwrap_ji().clone(), 
                                         placement: Placement::Right, 
                                         max_width: Some(185.0),
+                                        move_strategy: MoveStrategy::None,
                                         slot: None,
                                         body: crate::strings::error::STR_SINGLE_LIST_NUM_WORDS.to_string(),
                                         on_close: Some(Rc::new(Box::new(clone!(state => move || {

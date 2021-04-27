@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-
+import {nothing} from "lit-html";
 //these are used for calculations and set statically for CSS
 //making them properties would be a nice improvement
 const ARROW_SIZE = 24;
@@ -76,6 +76,8 @@ export class _ extends LitElement {
                 tooltip: this,
                 placement: this.placement,
                 margin: this.margin,
+                moveStrategy: this.moveStrategy,
+                container: this.container,
                 arrow: {
                     element: this.shadowRoot?.getElementById("arrow") as Element,
                     offset: this.arrowOffset,
@@ -98,6 +100,12 @@ export class _ extends LitElement {
     }
 
 
+    @property()
+    container:Element | Window = window;
+
+    @property()
+    moveStrategy:MoveStrategy = "";
+
     @property({reflect: true})
     color:COLOR = "beige";
 
@@ -113,7 +121,15 @@ export class _ extends LitElement {
     @property({type: Number})
     arrowOffset:number = 0;
 
+    @property({type: Boolean})
+    closed:boolean = false;
+
     render() {
+        const {closed} = this;
+
+        if(closed) {
+            return nothing;
+        }
         return html`
             <div class="content"><slot></slot></div>
             <div id="arrow"></div>
@@ -122,20 +138,28 @@ export class _ extends LitElement {
 }
 
 
-function createInstance({target, tooltip, placement, container, arrow, ...opts}:Opts):TooltipInstance {
-    
-    const splitIndex = placement.indexOf("-");
-    
-    type Side = "top" | "bottom" | "right" | "left";
-    const side:Side = 
-        splitIndex === -1 ? placement : placement.substr(0, splitIndex) as any;
+function createInstance(opts:Opts):TooltipInstance {
+    let lastTargetRect:DOMRect | undefined;
+    const _recalc = (opts:Opts, recurseDepth: number) => {
+        if(recurseDepth === 0) {
+            return;
+        }
+        const {target, tooltip, placement, container, arrow} = opts;
 
-    type Align = "middle" | "start" | "end";
-    const align:Align = 
-        splitIndex === -1 ? "middle" : placement.substr(splitIndex+1) as any;
+        const splitIndex = placement.indexOf("-");
+        
+        type Side = "top" | "bottom" | "right" | "left";
+        const side:Side = 
+            splitIndex === -1 ? placement : placement.substr(0, splitIndex) as any;
 
-    const recalc = () => {
+        type Align = "middle" | "start" | "end";
+        const align:Align = 
+            splitIndex === -1 ? "middle" : placement.substr(splitIndex+1) as any;
+
         const targetRect = target.getBoundingClientRect();
+        //can help mitigate resize vs. move
+        //but very confusing 
+        //lastTargetRect = targetRect; //why not
         const tooltipRect = tooltip.getBoundingClientRect();
 
 
@@ -174,26 +198,37 @@ function createInstance({target, tooltip, placement, container, arrow, ...opts}:
             }
         }
 
-        if(container) {
-            //TODO - handle all the edge cases
-            //nudge if it goes outside the container
-            //use the margin regardless of the axis, why not
-            const containerRect = container === window
-                ? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
-                : (container as Element).getBoundingClientRect();
+        //TODO - handle all the edge cases
+        //nudge if it goes outside the container
+        //use the margin regardless of the axis, why not
+        const containerRect = !container || container === window
+            ? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+            : (container as Element).getBoundingClientRect();
 
-            if((x + tooltipRect.width) > containerRect.right) {
-                x = containerRect.right - (tooltipRect.width + margin);
-            }
-            if((y + tooltipRect.height) > containerRect.bottom) {
-                y = containerRect.bottom - (tooltipRect.height + margin);
-            }
-            if(x < containerRect.left) {
-                x = containerRect.left + margin;
-            }
-            if(y < containerRect.top) {
-                y = containerRect.bottom - (tooltipRect.height + margin);
-            }
+        let newSide:string = "";
+
+        if((x + tooltipRect.width) > containerRect.right) {
+            newSide = "left";
+        }
+        if((y + tooltipRect.height) > containerRect.bottom) {
+            newSide = "top";
+        }
+        if(x < containerRect.left) {
+            newSide = "right";
+        }
+        if(y < containerRect.top) {
+            newSide = "bottom";
+        }
+
+        if(newSide !== "") {
+            _recalc(
+                {
+                    ...opts,
+                    placement: `${newSide}-${align}` as Placement
+                },
+                recurseDepth-1
+            );
+            return;
         }
 
         let style:CSSStyleDeclaration = (tooltip as any).style;
@@ -252,15 +287,46 @@ function createInstance({target, tooltip, placement, container, arrow, ...opts}:
         style.transform = `translate(${x}px, ${y}px) rotate(45deg)`;
         style.transformOrigin = "center center";
     }
+
+    const recalc = () => _recalc(opts, 3);
     // @ts-ignore
     const observer = new ResizeObserver(recalc);
-    observer.observe(target);
-    observer.observe(tooltip);
+    observer.observe(opts.target);
+    observer.observe(opts.tooltip);
+
+
+    //very inefficient, but ResizeObserver doesn't take this into account
+    let rafId:number | undefined;
+    const {moveStrategy, tooltip} = opts;
+    if(moveStrategy !== "") {
+        const checkPosition = () => {
+
+            const targetRect = opts.target.getBoundingClientRect();
+            if(lastTargetRect !== undefined) {
+                if(targetRect.x !== lastTargetRect.x || targetRect.y !== lastTargetRect.y) {
+                    console.log(moveStrategy);
+                    if(moveStrategy === "track") {
+                        recalc();
+                    } else if(moveStrategy === "destroy") {
+                        destroy();
+                        (tooltip as any).closed = true;
+                    }
+                }
+            }
+            lastTargetRect = targetRect;
+            rafId = requestAnimationFrame(checkPosition);
+        }
+
+        rafId = requestAnimationFrame(checkPosition);
+    }
 
 
     window.addEventListener("resize", recalc);
 
     const destroy = () => {
+        if(rafId != undefined) {
+            cancelAnimationFrame(rafId)
+        }
         observer.disconnect();
         window.removeEventListener("resize", recalc);
     }
@@ -277,9 +343,12 @@ interface Opts {
     tooltip: Element,
     placement: Placement,
     margin: number,
-    container?: Element | Window,
+    container: Element | Window,
+    moveStrategy: MoveStrategy,
     arrow: Arrow
 }
+
+export type MoveStrategy = "" | "destroy" | "track";
 
 interface Arrow {
     offset: number,

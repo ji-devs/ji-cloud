@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {nothing} from "lit-html";
 import "@elements/core/buttons/icon";
 import "./base";
-import {COLOR, Placement, ElementTarget} from "./base";
+import {COLOR, Placement, ElementTarget, MoveStrategy} from "./base";
 
 const STR_NO_SHOW_AGAIN = "Don't show again";
 
@@ -67,6 +67,12 @@ export class _ extends LitElement {
 
 
     //pass through
+    @property()
+    container:Element | Window = window;
+
+    @property()
+    moveStrategy:MoveStrategy = "";
+
     @property({reflect: true})
     color:COLOR = "beige";
 
@@ -83,7 +89,7 @@ export class _ extends LitElement {
     arrowOffset:number = 0;
 
     render() {
-        const {closed, title, body, showId, target, placement, closeable, color, margin, arrowOffset} = this;
+        const {container, moveStrategy, closed, title, body, showId, target, placement, closeable, color, margin, arrowOffset} = this;
 
         if(closed) {
             return nothing;
@@ -97,7 +103,7 @@ export class _ extends LitElement {
         }
 
         return html`
-            <tooltip-base id="tooltip" color=${color} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
+            <tooltip-base id="tooltip" color=${color} .closed=${closed} .container=${container} .moveStrategy=${moveStrategy} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
                 <section class="content">
                     ${closeable ? renderClose(this.onClose) : nothing}
                     ${title !== "" ? html`<div class="title">${title}</div>` : nothing}

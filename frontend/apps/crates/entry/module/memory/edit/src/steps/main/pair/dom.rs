@@ -39,6 +39,7 @@ impl PairDom {
                                 TooltipData::Confirm(TooltipConfirm {
                                     elem: elem.clone(), 
                                     placement: Placement::Right, 
+                                    move_strategy: MoveStrategy::Destroy,
                                     slot: None,
                                     max_width: Some(180.0),
                                     header: crate::strings::confirm::STR_DELETE_PAIR_HEADER.to_string(),

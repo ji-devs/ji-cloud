@@ -55,6 +55,7 @@ impl SingleListDom {
                                         max_width: Some(185.0),
                                         placement: Placement::Right, 
                                         slot: None,
+                                        move_strategy: MoveStrategy::None,
                                         body: crate::strings::error::STR_SINGLE_LIST_NUM_WORDS.to_string(),
                                         on_close: Some(Rc::new(Box::new(clone!(state => move || {
                                             state.app.overlay.tooltips.list_error.set(None); 

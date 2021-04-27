@@ -3,7 +3,7 @@ import {nothing} from "lit-html";
 import { styleMap } from 'lit-html/directives/style-map';
 import "@elements/core/buttons/icon";
 import "./base";
-import {COLOR, Placement, ElementTarget} from "./base";
+import {COLOR, Placement, ElementTarget, MoveStrategy} from "./base";
 
 @customElement("tooltip-confirm")
 export class _ extends LitElement {
@@ -82,6 +82,12 @@ export class _ extends LitElement {
     cancelLabel:string = "";
 
     //pass through
+    @property()
+    container:Element | Window = window;
+
+    @property()
+    moveStrategy:MoveStrategy = "";
+
     @property({reflect: true})
     color:COLOR = "red";
 
@@ -98,7 +104,7 @@ export class _ extends LitElement {
     arrowOffset:number = 0;
 
     render() {
-        const {header, confirmLabel, cancelLabel, target, maxWidth, placement, color, arrowOffset, margin} = this;
+        const {container, moveStrategy, header, confirmLabel, cancelLabel, target, maxWidth, placement, color, arrowOffset, margin} = this;
 
         let bodyStyles:any = {
         };
@@ -108,7 +114,7 @@ export class _ extends LitElement {
         }
         return html`
 
-            <tooltip-base id="tooltip" color=${color} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
+            <tooltip-base id="tooltip" color=${color} .container=${container} .moveStrategy=${moveStrategy} .target=${target} .placement=${placement} margin=${margin} arrowOffset=${arrowOffset}>
                 <article>
                     <img-ui path="core/tooltips/alert.svg"></img-ui>
                     <div class="body" style="${styleMap(bodyStyles)}">
