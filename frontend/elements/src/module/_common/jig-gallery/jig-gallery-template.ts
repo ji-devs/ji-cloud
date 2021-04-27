@@ -4,11 +4,22 @@ import { styles } from './styles';
 
 export type Kind = 'vocabulary' | 'parsha';
 
-const STR_LABEL_LOOKUP: {
-    [key in Kind]: string
+interface KindInfo {
+    label: string;
+    ages: string;
+}
+
+const STR_INFO_LOOKUP: {
+    [key in Kind]: KindInfo
 } = {
-    ['vocabulary']: 'Teach New Vocabulary',
-    ['parsha']: 'Teach New Parsha',
+    ['vocabulary']: {
+        label: 'Teach New Vocabulary',
+        ages: '5-8',
+    },
+    ['parsha']: {
+        label: 'Teach New Parsha',
+        ages: '3-5',
+    },
 };
 
 @customElement('jig-gallery-template')
@@ -59,18 +70,17 @@ export class _ extends LitElement {
     @property()
     kind: Kind = "vocabulary";
 
-    @property()
-    ages: string = "";
-
     render() {
+        const info = STR_INFO_LOOKUP[this.kind];
+
         return html`
             <div class="top-section">
                 <img-ui path="module/_common/jig-gallery/template-${this.kind}.svg"></img-ui>
-                <span class="label">${STR_LABEL_LOOKUP[this.kind]}</span>
+                <span class="label">${info.label}</span>
             </div>
             <span class="ages">
                 <img-ui path="module/_common/jig-gallery/age-icon.svg"></img-ui>
-                ${this.ages}
+                ${info.ages}
             </span>
         `;
     }

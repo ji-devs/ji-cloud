@@ -9,12 +9,10 @@ export default {
 
 interface Args {
     kind: Kind;
-    ages: string;
 }
 
 const DEFAULT_ARGS:Args = {
     kind: "vocabulary",
-    ages: "3-6",
 }
 
 export const JigGalleryTemplate = (props?:Partial<Args>) => {

@@ -25,12 +25,15 @@ export const JigGallery = (props?:Partial<Args>) => {
 
     return `
         <jig-gallery ${argsToAttrs(props)}>
-            <jig-gallery-create slot="craete-jig"></jig-gallery-create>
+            <jig-gallery-create slot="create-jig"></jig-gallery-create>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="vocabulary"></jig-gallery-template>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="parsha"></jig-gallery-template>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="vocabulary"></jig-gallery-template>
-            <button-text slot="see-all-templates-button">See all templates</button-text>
-            <button-text slot="filters-button">Show all my JIGs</button-text>
+            <dropdown-select slot="filters" value="Show all my JIGs">
+                <li-check selected>Show all my JIGs</li-check>
+                <li-check>Show published Jigs</li-check>
+                <li-check>Show drafts</li-check>
+            </dropdown-select>
             <input-search slot="search-input"></input-search>
             ${mapToString(arrayCount(props.recentCount), recent)}
         </jig-gallery>

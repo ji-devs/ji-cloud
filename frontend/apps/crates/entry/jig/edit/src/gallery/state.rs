@@ -1,31 +1,31 @@
-use shared::domain::jig::JigId;
+use std::rc::Rc;
+
+use shared::domain::jig::Jig;
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, Signal, SignalExt},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
-};
+use futures_signals::{signal::Mutable, signal_vec::MutableVec};
+use strum_macros::{EnumIter, Display, EnumString};
+
+pub const TEMPLATE_KINDS: &[&str] = &["vocabulary", "parsha", "parsha", "vocabulary", "parsha", "parsha"];
+
+#[derive(Debug, Clone, PartialEq, EnumIter, Display, EnumString)]
+pub enum VisibleJigs {
+    All,
+    Published,
+    Draft,
+}
+
 pub struct State {
     pub loader: AsyncLoader,
-    pub jigs: MutableVec<(JigId, Option<String>)> 
+    pub jigs: MutableVec<Jig>,
+    pub visible_jigs: Rc<Mutable<VisibleJigs>>,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
             loader: AsyncLoader::new(),
-            jigs: MutableVec::new()
-        }
-    }
-
-    //is loaded and number of children
-    pub fn loaded_signal(&self) -> impl Signal<Item = (bool, usize)> {
-        map_ref! {
-            let is_loading = self.loader.is_loading(),
-            let n_loaded = self.jigs.signal_vec_cloned().len()
-                => {
-                    (*is_loading, *n_loaded)
-                }
+            jigs: MutableVec::new(),
+            visible_jigs: Rc::new(Mutable::new(VisibleJigs::All)),
         }
     }
 }
