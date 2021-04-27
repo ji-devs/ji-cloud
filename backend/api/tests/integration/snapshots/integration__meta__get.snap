@@ -84,22 +84,22 @@ expression: body
       "updated_at": null
     }
   ],
-  "content_types": [
+  "goals": [
     {
       "id": "533898ea-3367-11eb-a473-8f2df3b13671",
-      "display_name": "A",
+      "display_name": "Lesson Component",
       "created_at": "2020-11-30T23:54:39.198381Z",
       "updated_at": null
     },
     {
       "id": "533899b2-3367-11eb-a473-ef2577a4de84",
-      "display_name": "B",
+      "display_name": "Full Lesson",
       "created_at": "2020-11-30T23:54:39.198381Z",
       "updated_at": null
     },
     {
       "id": "53389a20-3367-11eb-a473-bbdc8773362a",
-      "display_name": "C",
+      "display_name": "Assessment",
       "created_at": "2020-11-30T23:54:39.198381Z",
       "updated_at": null
     }

@@ -12,7 +12,7 @@ pub(crate) mod user;
 use config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, ContentTypeId, StyleId, SubjectId, TagId},
+    meta::{AffiliationId, AgeRangeId, GoalId, StyleId, SubjectId, TagId},
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
@@ -56,8 +56,8 @@ impl Metadata for SubjectId {
     const TABLE: &'static str = "subject";
 }
 
-impl Metadata for ContentTypeId {
-    const TABLE: &'static str = "content_type";
+impl Metadata for GoalId {
+    const TABLE: &'static str = "goal";
 }
 
 async fn recycle_metadata<'a, T: Metadata>(

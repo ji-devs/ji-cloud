@@ -1,9 +1,5 @@
 use crate::{
-    db::{
-        self,
-        meta::{handle_metadata_err, MetaWrapperError},
-        nul_if_empty,
-    },
+    db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
     image_ops::generate_images,
@@ -19,17 +15,13 @@ use paperclip::actix::{
 };
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{
-        image::{
-            CreateResponse, Image, ImageBrowseResponse, ImageId, ImageKind, ImageResponse,
-            ImageSearchResponse, ImageUpdateRequest,
-        },
-        meta::MetaKind,
+    domain::image::{
+        CreateResponse, Image, ImageBrowseResponse, ImageId, ImageKind, ImageResponse,
+        ImageSearchResponse, ImageUpdateRequest,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
-use uuid::Uuid;
 
 pub mod user {
     use crate::{
