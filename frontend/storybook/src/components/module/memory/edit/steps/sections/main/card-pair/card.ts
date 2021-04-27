@@ -3,7 +3,6 @@ import "@elements/module/memory/edit/steps/sections/main/card-pair/card";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/core/inputs/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
-import "@elements/core/images/fragment";
 import "@elements/core/inputs/textarea-content";
 export default {
     title: "Module / Memory / Edit / Steps / Sections / Main / Card-Pair"
