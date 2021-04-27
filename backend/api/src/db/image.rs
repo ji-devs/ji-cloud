@@ -1,10 +1,10 @@
-use super::recycle_metadata;
+use super::{recycle_metadata, recycle_tags};
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
     image::{Image, ImageId, ImageKind},
-    meta::{AffiliationId, AgeRangeId, StyleId},
+    meta::{AffiliationId, AgeRangeId, StyleId, TagId},
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
@@ -87,6 +87,7 @@ pub async fn update_metadata(
     age_ranges: Option<&[AgeRangeId]>,
     styles: Option<&[StyleId]>,
     categories: Option<&[CategoryId]>,
+    tags: Option<&[TagId]>,
 ) -> sqlx::Result<()> {
     const TABLE: &str = "image";
 
@@ -100,6 +101,10 @@ pub async fn update_metadata(
 
     if let Some(styles) = styles {
         recycle_metadata(&mut *conn, TABLE, image.0, styles).await?;
+    }
+
+    if let Some(tags) = tags {
+        recycle_tags(&mut *conn, TABLE, image.0, tags).await?;
     }
 
     if let Some(categories) = categories {
@@ -177,7 +182,8 @@ select id,
        array((select row (category_id) from image_category where image_id = id))       as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
 from image_metadata
 where id = $1
 "#)
@@ -205,7 +211,8 @@ select id,
        array((select row (category_id) from image_category where image_id = id))       as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
 from image_metadata
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -240,7 +247,8 @@ select id,
        array((select row (category_id) from image_category where image_id = id))       as categories,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
 from image_metadata
 inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -252,7 +260,16 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     let mut conn = db.begin().await?;
 
     // first, clear any metadata it might have.
-    update_metadata(&mut conn, image, Some(&[]), Some(&[]), Some(&[]), Some(&[])).await?;
+    update_metadata(
+        &mut conn,
+        image,
+        Some(&[]),
+        Some(&[]),
+        Some(&[]),
+        Some(&[]),
+        Some(&[]),
+    )
+    .await?;
 
     // then drop.
     sqlx::query!("delete from image_metadata where id = $1", image.0)
