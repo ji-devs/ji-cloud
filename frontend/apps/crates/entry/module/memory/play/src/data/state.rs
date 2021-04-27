@@ -18,7 +18,7 @@ use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
 use utils::prelude::*;
-use components::instructions::InstructionsPlayer;
+use components::instructions::player::InstructionsPlayer;
 use web_sys::AudioContext;
 
 pub struct State {
