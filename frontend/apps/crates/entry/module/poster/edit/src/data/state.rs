@@ -48,20 +48,6 @@ pub struct State {
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
 }
 
-pub struct Instructions {
-    pub audio_id: Mutable<Option<AudioId>>,
-    pub text: Mutable<Option<String>>
-}
-
-impl Instructions {
-    pub fn new(raw_data: &raw::ModuleData) -> Self {
-        Self {
-            audio_id: Mutable::new(raw_data.instructions.audio_id.clone()),
-            text: Mutable::new(raw_data.instructions.text.clone())
-        }
-    }
-}
-
 impl State {
     pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Rc<Self> {
         let step = Mutable::new(match debug::settings().step.as_ref() {
