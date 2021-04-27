@@ -1,10 +1,13 @@
-import { LitElement, html, css, customElement, property, unsafeCSS } from 'lit-element';
+import { LitElement, html, css, customElement, property, unsafeCSS, internalProperty } from 'lit-element';
 import "@elements/core/images/ui";
 import { mediaUi } from '@utils/path';
+import { classMap } from 'lit-html/directives/class-map';
 
 const STR_CREATE_JIG = "Create a New JIG";
 const STR_TEMPLATE_PARAGRAPH = "We have created lesson plans you can use for teaching. Create Jig from one of these templates to easily address all your student’s learning needs!";
 const STR_RECENT = "My Recent JIGs";
+const STR_SEE_ALL_TEMPLATES = "See all templates";
+const STR_SEE_LESS_TEMPLATES = "See less templates";
 
 @customElement('jig-gallery')
 export class _ extends LitElement {
@@ -12,16 +15,22 @@ export class _ extends LitElement {
         return [css`
             :host {
                 display: grid;
+                min-height: 100vh;
+                grid-template-rows: 0px auto 0px 1fr;;
             }
             .width-holder {
                 max-width: 1720px;
                 margin: 0 auto;
             }
-            .main-layer {
-                grid-column: 1;
-                grid-row: 1;
-                display: grid;
-                grid-template-rows: 455px auto;
+            .novel-row-1 {
+                z-index: 1;
+            }
+            .novel-row-1 .width-holder {
+                padding-left: 698px;
+            }
+            .novel-img-1 {
+                height: 125px;
+                width: 125px;
             }
             .top-section {
                 background-color: var(--light-blue-3);
@@ -30,8 +39,7 @@ export class _ extends LitElement {
                 grid-column: 1 / -1;
                 padding: 100px;
                 display: grid;
-                grid-template-columns: auto auto;
-                grid-template-rows: min-content min-content;
+                grid-template-columns: auto 1fr;
                 justify-content: space-between;
             }
             .create-jig-header {
@@ -48,16 +56,70 @@ export class _ extends LitElement {
                 max-width: 540px;
             }
             .new-jig-section {
-                grid-row: 1 / -1;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, 230px);
+                gap: 32px;
+                justify-content: end;
+            }
+            .new-jig-section-width-holder {
                 grid-column: 2;
                 display: grid;
                 grid-template-rows: auto auto;
                 row-gap: 56px;
-                justify-items: center;
+            }
+            .new-jig-items-wrapper {
+                max-height: 185px;
+                overflow-y: hidden;
+                padding: 10px;
+                width: 100%;
+                display: grid;
+                grid-template-columns: inherit;
+                gap: inherit;
+                grid-column: 1 / -1;
+            }
+            .all-templates-visible .new-jig-items-wrapper {
+                max-height: initial;
             }
             .new-jig-items {
+                grid-column: 1 / -1;
+                justify-content: flex-end;
+                display: grid;
+                grid-template-columns: inherit;
+                gap: inherit;
+                grid-column: 1 / -1;
+            }
+            .see-all-templates-button {
+                grid-column: 1 / -1;
+                text-align: center;
+                padding-left: 10px; /* bad */
+            }
+            .see-all-templates-button span {
                 display: flex;
-                column-gap: 32px;
+                justify-content: center;
+                gap: 8px;
+            }
+            .see-all-templates-button img-ui {
+                height: 22px;
+                transition: transform .3s;
+            }
+            .all-templates-visible .see-all-templates-button img-ui {
+                transform: rotate(180deg);
+            }
+            .novel-row-2 {
+                z-index: 1;
+                margin-top: -140px;
+                pointer-events: none;
+            }
+            .novel-row-2 .width-holder {
+                padding-left: 473px;
+            }
+            .novel-img-2 {
+                height: 225px;
+                width: 225px;
+            }
+            .novel-img-3 {
+                height: 145px;
+                width: 145px;
             }
             .bottom-section {
                 grid-column: 1 / -1;
@@ -81,41 +143,15 @@ export class _ extends LitElement {
                 font-weight: 800;
                 margin: 0;
             }
-            ::slotted([slot=filters-button]) {
+            ::slotted([slot=filters]) {
                 justify-self: end;
+                min-width: 300px;
             }
             .recent-items {
                 display: grid;
                 grid-template-columns: repeat(auto-fill, 230px);
-                gap: 64px;
+                gap: 34px;
                 justify-content: space-between;
-            }
-            .novel-layer {
-                grid-column: 1;
-                grid-row: 1;
-            }
-            .novel-layer .width-holder {
-                display: grid;
-                grid-template-rows: auto 210px auto 130px auto 1fr;
-                grid-template-columns: 473px 225px 8px 145px 1fr;
-            }
-            .novel-img-1 {
-                height: 125px;
-                width: 125px;
-                grid-row: 1;
-                grid-column: 4;
-            }
-            .novel-img-2 {
-                height: 225px;
-                width: 225px;
-                grid-row: 3 / span 2;
-                grid-column: 2;
-            }
-            .novel-img-3 {
-                height: 145px;
-                width: 145px;
-                grid-row: 4 / span 2;
-                grid-column: 4;
             }
       `];
     }
@@ -123,44 +159,62 @@ export class _ extends LitElement {
     @property()
     title: string = "";
 
+    @internalProperty()
+    private allTemplatesVisible = false;
+
     render() {
         return html`
-            <div class="main-layer">
-                <section class="top-section">
-                    <div class="width-holder">
-                        <h1 class="create-jig-header">${STR_CREATE_JIG}</h1>
-                        <p class="template-paragraph">${STR_TEMPLATE_PARAGRAPH}</p>
-                        <div class="new-jig-section">
-                            <div class="new-jig-items">
-                                <slot name="craete-jig"></slot>
-                                <slot name="jig-templates"></slot>
-                            </div>
-                            <div class="see-all-templates-button">
-                                <slot name="see-all-templates-button"></slot>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section class="bottom-section">
-                    <div class="width-holder">
-                        <div class="recent-top-line">
-                            <h2 class="recent-header">${STR_RECENT}</h2>
-                            <slot class="filters-button" name="filters-button"></slot>
-                            <slot class="search-input" name="search-input"></slot>
-                        </div>
-                        <div class="recent-items">
-                            <slot name="recent-items"></slot>
-                        </div>
-                    </div>
-                </section>
-            </div>
-            <div class="novel-layer">
+            <div class="novel-row-1">
                 <div class="width-holder">
                     <img-ui class="novel-img-1" path="module/_common/jig-gallery/novel-img-1.png"></img-ui>
+                </div>
+            </div>
+            <section class="top-section">
+                <div class="width-holder">
+                    <div class="text-side">
+                        <h1 class="create-jig-header">${STR_CREATE_JIG}</h1>
+                        <p class="template-paragraph">${STR_TEMPLATE_PARAGRAPH}</p>
+                    </div>
+                    <div class="new-jig-section ${classMap({"all-templates-visible": this.allTemplatesVisible})}">
+                        <div class="new-jig-items-wrapper">
+                            <div class="new-jig-items">
+                                <slot name="create-jig"></slot>
+                                <slot name="jig-templates"></slot>
+                            </div>
+                        </div>
+                        <div class="see-all-templates-button">
+                            <button-text
+                                color="blue"
+                                weight="bold"
+                                @click="${() => this.allTemplatesVisible = !this.allTemplatesVisible}"
+                            >
+                                <span>
+                                    ${ this.allTemplatesVisible ? STR_SEE_LESS_TEMPLATES : STR_SEE_ALL_TEMPLATES }
+                                    <img-ui path="core/_common/chevron-down-blue.svg"></img-ui>
+                                </span>
+                            </button-text>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="novel-row-2">
+                <div class="width-holder">
                     <img-ui class="novel-img-2" path="module/_common/jig-gallery/novel-img-2.png"></img-ui>
                     <img-ui class="novel-img-3" path="module/_common/jig-gallery/novel-img-3.png"></img-ui>
                 </div>
             </div>
+            <section class="bottom-section">
+                <div class="width-holder">
+                    <div class="recent-top-line">
+                        <h2 class="recent-header">${STR_RECENT}</h2>
+                        <slot class="filters" name="filters"></slot>
+                        <slot class="search-input" name="search-input"></slot>
+                    </div>
+                    <div class="recent-items">
+                        <slot name="recent-items"></slot>
+                    </div>
+                </div>
+            </section>
         `;
     }
 }
