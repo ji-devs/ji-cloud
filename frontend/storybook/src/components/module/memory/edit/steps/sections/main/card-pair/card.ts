@@ -21,7 +21,7 @@ export interface Args {
 
 const DEFAULT_ARGS:Args = {
     ioMode: "edit",
-    contentMode: "text",
+    contentMode: "image",
     theme: "chalkboard",
     editTarget: true,
     dragOver: false 

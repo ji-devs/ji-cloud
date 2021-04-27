@@ -64,7 +64,7 @@ impl DebugSettings {
             ),
             step: Some(Step::One), 
             live_save: false,
-            content_tab: Some(DebugContentTab::Text),
+            content_tab: Some(DebugContentTab::Images),
         }
     }
 }

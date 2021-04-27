@@ -29,7 +29,7 @@ export class _ extends LitElement {
               border-width: 1px;
           }
 
-          section, ::slotted(img-ji), .back > img-ui {
+          section, .back > img-ui {
               width: 160px;
               height: 160px;
           }
@@ -39,9 +39,11 @@ export class _ extends LitElement {
               height: 56px;
           }
 
-          ::slotted(img-ji), ::slotted(img-ui) {
-                object-fit: contain;
-            }
+          ::slotted(img-ji) {
+              width: 150px;
+              height: 150px;
+              object-fit: contain;
+          }
 
           section.flippable:hover {
               transform: rotateY(180deg);

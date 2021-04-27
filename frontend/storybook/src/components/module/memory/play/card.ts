@@ -27,8 +27,8 @@ const DEFAULT_ARGS:Args = {
     translateY: 0,
     transform: false,
     theme: "chalkboard",
-    flipped: false,
-    contentMode: "text",
+    flipped: true,
+    contentMode: "image",
 }
 
 export const Card = (props?:Partial<Args>) => {

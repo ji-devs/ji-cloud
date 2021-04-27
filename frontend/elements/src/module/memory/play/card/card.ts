@@ -39,11 +39,15 @@ export class _ extends LitElement {
               transform: rotateY(180deg);
           }
 
-          section, ::slotted(img-ji), .back > img-ui {
+          section, .back > img-ui {
               width: 188rem;
               height: 188rem;
           }
-
+          
+          ::slotted(img-ji) {
+            width: 178rem;
+            height: 178rem;
+          }
           ::slotted(img-ji), ::slotted(img-ui) {
                 object-fit: contain;
             }
