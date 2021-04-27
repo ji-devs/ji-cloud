@@ -18,12 +18,12 @@ expression: body
           "kind": null
         }
       ],
-      "content_types": [],
+      "goals": [],
       "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
       "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
       "publish_at": null
     }
   ],
   "pages": 1,
-  "totalImageCount": 1
+  "totalJigCount": 1
 }

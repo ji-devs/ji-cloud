@@ -35,12 +35,12 @@ pub struct AffiliationId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SubjectId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents [`ContentType::id`].
+/// Wrapper type around [`Uuid`], represents [`Goal::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ContentTypeId(pub Uuid);
+pub struct GoalId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Tag::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -49,14 +49,7 @@ pub struct ContentTypeId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct TagId(pub Uuid);
 
-into_uuid!(
-    StyleId,
-    AffiliationId,
-    AgeRangeId,
-    SubjectId,
-    ContentTypeId,
-    TagId
-);
+into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId, GoalId, TagId);
 
 /// Represents a style.
 #[derive(Serialize, Deserialize, Debug)]
@@ -126,20 +119,20 @@ pub struct Subject {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Represents a content-type.
+/// Represents a goal.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ContentType {
-    /// The id of the content-type.
-    pub id: ContentTypeId,
+pub struct Goal {
+    /// The id of the goal.
+    pub id: GoalId,
 
-    /// The content-type's name.
+    /// The goal's name.
     pub display_name: String,
 
-    /// When the content-type was created.
+    /// When the goal was created.
     pub created_at: DateTime<Utc>,
 
-    /// When the content-type was last updated.
+    /// When the goal was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -176,8 +169,8 @@ pub struct MetadataResponse {
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
 
-    /// All content types
-    pub content_types: Vec<ContentType>,
+    /// All goals.
+    pub goals: Vec<Goal>,
 
     /// All tags for images.
     pub image_tags: Vec<Tag>,
@@ -202,8 +195,8 @@ pub enum MetaKind {
     /// [`Subject`]
     Subject,
 
-    /// [`ContentType`]
-    ContentType,
+    /// [`Goal`]
+    Goal,
 
     /// [`Tag`]
     Tag,

@@ -1,6 +1,6 @@
 use shared::domain::meta::{
-    Affiliation, AffiliationId, AgeRange, AgeRangeId, ContentType, ContentTypeId, MetaKind, Style,
-    StyleId, Subject, SubjectId, Tag, TagId,
+    Affiliation, AffiliationId, AgeRange, AgeRangeId, Goal, GoalId, MetaKind, Style, StyleId,
+    Subject, SubjectId, Tag, TagId,
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -53,13 +53,13 @@ pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
     .await
 }
 
-pub async fn get_content_types(db: &PgPool) -> sqlx::Result<Vec<ContentType>> {
+pub async fn get_goals(db: &PgPool) -> sqlx::Result<Vec<Goal>> {
     sqlx::query_as!(
-        ContentType,
+        Goal,
         r#"
-            select content_type_id as "id: ContentTypeId", display_name, created_at, updated_at from "content_type"
-            order by index
-        "#
+select id as "id: GoalId", display_name, created_at, updated_at from "goal"
+order by index
+"#
     )
     .fetch_all(db)
     .await
@@ -106,7 +106,7 @@ pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         Some("image_age_range_age_range_id_fkey") => MetaKind::AgeRange,
         Some("image_style_style_id_fkey") => MetaKind::Style,
         Some("image_category_category_id_fkey") => MetaKind::Category,
-        Some("jig_content_type_content_type_id_fkey") => MetaKind::ContentType,
+        Some("jig_goal_goal_id_fkey") => MetaKind::Goal,
         Some("image_tag_join_tag_id_fkey") => MetaKind::Tag,
 
         _ => return MetaWrapperError::Sqlx(err),

@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
-    meta::ContentTypeId,
+    meta::GoalId,
     user::UserScope,
 };
 use sqlx::PgPool;
@@ -13,7 +13,7 @@ use crate::error;
 pub async fn create(
     pool: &PgPool,
     display_name: Option<&str>,
-    content_types: &[ContentTypeId],
+    goals: &[GoalId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
 ) -> sqlx::Result<JigId> {
@@ -33,7 +33,7 @@ returning id
     .fetch_one(&mut transaction)
     .await?;
 
-    super::recycle_metadata(&mut transaction, "jig", jig.id, content_types).await?;
+    super::recycle_metadata(&mut transaction, "jig", jig.id, goals).await?;
 
     let default_modules = [
         (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
@@ -75,7 +75,7 @@ select
         where jig_id = $1
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(content_type_id) from jig_content_type where jig_id = $1) as "content_types!: Vec<(ContentTypeId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -85,10 +85,12 @@ where id = $1"#,
     .map(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(id, kind,)| LiteModule {
-            id, kind
-        }).collect(),
-        content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
+        modules: row
+            .modules
+            .into_iter()
+            .map(|(id, kind)| LiteModule { id, kind })
+            .collect(),
+        goals: row.goals.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
@@ -102,7 +104,7 @@ pub async fn update(
     id: JigId,
     display_name: Option<&str>,
     author_id: Option<Uuid>,
-    content_types: Option<&[ContentTypeId]>,
+    goals: Option<&[GoalId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
@@ -146,8 +148,8 @@ where id = $1
     .execute(&mut transaction)
     .await?;
 
-    if let Some(content_types) = content_types {
-        super::recycle_metadata(&mut transaction, "jig", id.0, content_types)
+    if let Some(goals) = goals {
+        super::recycle_metadata(&mut transaction, "jig", id.0, goals)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
@@ -185,26 +187,28 @@ select
         where jig_id = jig.id
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(content_type_id) from jig_content_type where jig_id = jig.id) as "content_types!: Vec<(ContentTypeId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>"
 from jig
 where 
     publish_at < now() is not distinct from $1 or $1 is null
     and author_id is not distinct from $3 or $3 is null
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
-"#, is_published,
-page,
-author_id,
-
+"#,
+        is_published,
+        page,
+        author_id,
     )
     .fetch(pool)
     .map_ok(|row| Jig {
         id: row.id,
         display_name: row.display_name,
-        modules: row.modules.into_iter().map(|(id, kind)| LiteModule {
-             id, kind
-        }).collect(),
-        content_types: row.content_types.into_iter().map(|(it,)| it).collect(),
+        modules: row
+            .modules
+            .into_iter()
+            .map(|(id, kind)| LiteModule { id, kind })
+            .collect(),
+        goals: row.goals.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,

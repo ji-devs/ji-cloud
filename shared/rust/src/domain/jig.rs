@@ -2,7 +2,7 @@
 
 pub mod module;
 
-use super::{meta::ContentTypeId, Publish};
+use super::{meta::GoalId, Publish};
 use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -41,10 +41,10 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The types of content this JIG contains.
+    /// The goals of this jig.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
-    pub content_types: Vec<ContentTypeId>,
+    pub goals: Vec<GoalId>,
 
     /// When the JIG should be considered published (if at all).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -65,8 +65,8 @@ pub struct Jig {
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,
 
-    /// The types of content this JIG contains.
-    pub content_types: Vec<ContentTypeId>,
+    /// The goals of this jig.
+    pub goals: Vec<GoalId>,
 
     /// The ID of the JIG's original creator ([`None`] if unknown).
     pub creator_id: Option<Uuid>,
@@ -95,10 +95,10 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub display_name: Option<String>,
 
-    /// The types of content this JIG contains.
+    /// The goals of this jig.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub content_types: Option<Vec<ContentTypeId>>,
+    pub goals: Option<Vec<GoalId>>,
 
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -144,7 +144,7 @@ pub struct JigBrowseResponse {
     pub pages: u32,
 
     /// The total number of jigs found
-    pub total_image_count: u64,
+    pub total_jig_count: u64,
 }
 
 into_uuid![JigId];
