@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
+import { nothing } from "lit-html";
 import "@elements/core/overlays/anchored-overlay";
 
 @customElement("dropdown-select")
@@ -15,7 +16,6 @@ export class _ extends LitElement {
                     padding: 8px 16px;
                     display: grid;
                     grid-template-columns: 1fr min-content;
-                    grid-auto-rows: 24px;
                     column-gap: 2px;
                     font-size: 16px;
                     line-height: 1.5;
@@ -41,7 +41,6 @@ export class _ extends LitElement {
                 }
                 .input .value {
                     grid-column: 1;
-                    grid-row: 2;
                     color: var(--dark-gray-6);
                 }
                 .input .placeholder {
@@ -75,7 +74,7 @@ export class _ extends LitElement {
     }
 
     @property()
-    label: string = "";
+    label?: string;
 
     @property()
     value: string = "";
@@ -101,13 +100,13 @@ export class _ extends LitElement {
                 positionX="left-in"
             >
                 <div slot="anchor" class="input" @click=${() => this.toggleOpen()}>
-                    <span class="label">${this.label}</span>
+                    ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
                     ${ this.value ? (
                         html`<span class="value">${this.value}</span>`
                     ) : (
                         html`<span class="placeholder">${this.placeholder}</span>`
                     )}
-                    <img-ui class="icon" path="core/inputs/chevron-down-blue.svg"></img-ui>
+                    <img-ui class="icon" path="core/_common/chevron-down-blue.svg"></img-ui>
                 </div>
                 <slot slot="overlay"></slot>
             </anchored-overlay>

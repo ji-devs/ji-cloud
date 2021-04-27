@@ -1,9 +1,10 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property, internalProperty } from 'lit-element';
 import { nothing } from 'lit-html';
 import '@elements/core/images/ui';
 import '@elements/core/menu/kebab';
 import '@elements/core/menu/menu-line';
 import { styles } from './styles';
+import { classMap } from 'lit-html/directives/class-map';
 
 const STR_DRAFT = "Draft";
 
@@ -13,8 +14,9 @@ export class _ extends LitElement {
         return [
             styles,
             css`
-                :host {
-                    cursor: pointer;
+                a {
+                    text-decoration: none;
+                    color: var(--dark-gray-5);
                 }
                 .draft {
                     padding: 6px 8px;
@@ -23,7 +25,6 @@ export class _ extends LitElement {
                     background-color: #ffea79;
                     grid-column: 2;
                     height: 32px;
-                    color: var(--dark-gray-5);
                     font-size: 14px;
                     font-weight: 600;
                     line-height: 1.5;
@@ -55,7 +56,7 @@ export class _ extends LitElement {
                     grid-column: 2;
                     grid-row: 2;
                 }
-                :host(:hover) .menu {
+                :host(:hover) .menu, .menu.menu-open {
                     display: block;
                 }
                 .bottom-section {
@@ -93,30 +94,43 @@ export class _ extends LitElement {
     @property()
     lastEdited: string = "";
 
+    @property()
+    href: string = "";
+
+    @internalProperty()
+    menuOpen = false;
+
     render() {
         return html`
-            ${ this.draft ? (
-                html`<div class="draft">
-                    <img-ui path="module/_common/jig-gallery/draft-icon.svg"></img-ui>
-                    <span>${STR_DRAFT}</span>
-                </div>`
-            ) : nothing }
-            <div class="card">
-                <div class="top-section">
-                    <img-ui path="${this.img}"></img-ui>
-                    <menu-kebab class="menu">
-                        <slot name="menu-content" slot="menu-content"></slot>
-                    </menu-kebab>
+            <a href="${this.href}">
+                ${ this.draft ? (
+                    html`<div class="draft">
+                        <img-ui path="module/_common/jig-gallery/draft-icon.svg"></img-ui>
+                        <span>${STR_DRAFT}</span>
+                    </div>`
+                ) : nothing }
+                <div class="card">
+                    <div class="top-section">
+                        <img-ui path="${this.img}"></img-ui>
+                        <menu-kebab
+                            class="menu ${classMap({"menu-open": this.menuOpen})}"
+                            @open="${() => this.menuOpen = true}"
+                            @close="${() => this.menuOpen = false}"
+                            @click="${(e: Event) => e.preventDefault()}"
+                        >
+                            <slot name="menu-content" slot="menu-content"></slot>
+                        </menu-kebab>
+                    </div>
+                    <div class="bottom-section">
+                        <span class="label main-text">${this.label}</span>
+                        <span class="ages">
+                            <img-ui path="module/_common/jig-gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
+                            ${this.ages}
+                        </span>
+                        <span class="last-edited">${this.lastEdited}</span>
+                    </div>
                 </div>
-                <div class="bottom-section">
-                    <span class="label main-text">${this.label}</span>
-                    <span class="ages">
-                        <img-ui path="module/_common/jig-gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
-                        ${this.ages}
-                    </span>
-                    <span class="last-edited">${this.lastEdited}</span>
-                </div>
-            </div>
+            </a>
         `;
     }
 }

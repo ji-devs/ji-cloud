@@ -8,6 +8,7 @@ export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
+                border: solid 4px var(--dark-blue-1);
                 display: inline-grid;
                 box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.16);
                 border-radius: 16px;
