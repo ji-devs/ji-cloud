@@ -12,6 +12,7 @@ expression: body
     "kind": "Canvas",
     "publish_at": null,
     "styles": [],
+    "tags": [],
     "age_ranges": [],
     "affiliations": [],
     "categories": [],

@@ -2,7 +2,7 @@
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, StyleId},
+    meta::{AffiliationId, AgeRangeId, StyleId, TagId},
     Publish,
 };
 use chrono::{DateTime, Utc};
@@ -119,6 +119,9 @@ pub struct ImageCreateRequest {
     /// The image's affiliations.
     pub affiliations: Vec<AffiliationId>,
 
+    /// The image's tags.
+    pub tags: Vec<TagId>,
+
     /// The image's categories.
     pub categories: Vec<CategoryId>,
 
@@ -172,6 +175,10 @@ pub struct ImageUpdateRequest {
     /// If `Some` replace the image's categories with these.
     #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
+
+    /// If `Some` replace the image's tags with these.
+    #[serde(default)]
+    pub tags: Option<Vec<TagId>>,
 }
 
 /// Search for images via the given query string.
@@ -218,6 +225,13 @@ pub struct ImageSearchQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub categories: Vec<CategoryId>,
+
+    /// Optionally filter by `tags`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<TagId>,
 
     /// Optionally filter by `is_premium`
     #[serde(default)]
@@ -312,6 +326,9 @@ pub struct Image {
     /// The styles associated with the image.
     pub styles: Vec<StyleId>,
 
+    /// The tags associated with the image.
+    pub tags: Vec<TagId>,
+
     /// The age ranges associated with the image.
     pub age_ranges: Vec<AgeRangeId>,
 
@@ -347,6 +364,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for Image {
             age_ranges,
             affiliations,
             categories,
+            tags,
             created_at,
             updated_at,
         } = DbImage::from_row(row)?;
@@ -362,6 +380,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for Image {
             age_ranges: age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: affiliations.into_iter().map(|(it,)| it).collect(),
             categories: categories.into_iter().map(|(it,)| it).collect(),
+            tags: tags.into_iter().map(|(it,)| it).collect(),
             created_at,
             updated_at,
         })
@@ -381,6 +400,7 @@ struct DbImage {
     pub age_ranges: Vec<(AgeRangeId,)>,
     pub affiliations: Vec<(AffiliationId,)>,
     pub categories: Vec<(CategoryId,)>,
+    pub tags: Vec<(TagId,)>,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }

@@ -1,5 +1,9 @@
 use crate::{
-    db::{self, meta::MetaWrapperError, nul_if_empty},
+    db::{
+        self,
+        meta::{handle_metadata_err, MetaWrapperError},
+        nul_if_empty,
+    },
     error::{self, ServiceKind},
     extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
     image_ops::generate_images,
@@ -162,48 +166,6 @@ pub mod user {
     }
 }
 
-// attempts to grab a uuid out of a string in the shape:
-// Key (<key>)=(<uuid>)<postfix>
-fn extract_uuid(s: &str) -> Option<Uuid> {
-    // <uuid>)<postfix)
-    let s = s.split('(').nth(2)?;
-    let s = &s[0..s.find(')')?];
-    s.parse().ok()
-}
-
-fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
-    let db_err = match &err {
-        sqlx::Error::Database(e) => e.downcast_ref::<PgDatabaseError>(),
-        _ => return MetaWrapperError::Sqlx(err),
-    };
-
-    let id = db_err.detail().and_then(extract_uuid);
-
-    match db_err.constraint() {
-        Some("image_affiliation_affiliation_id_fkey") => MetaWrapperError::MissingMetadata {
-            id,
-            kind: MetaKind::Affiliation,
-        },
-
-        Some("image_age_range_age_range_id_fkey") => MetaWrapperError::MissingMetadata {
-            id,
-            kind: MetaKind::AgeRange,
-        },
-
-        Some("image_style_style_id_fkey") => MetaWrapperError::MissingMetadata {
-            id,
-            kind: MetaKind::Style,
-        },
-
-        Some("image_category_category_id_fkey") => MetaWrapperError::MissingMetadata {
-            id,
-            kind: MetaKind::Category,
-        },
-
-        _ => MetaWrapperError::Sqlx(err),
-    }
-}
-
 /// Create an image in the global image library.
 #[api_v2_operation]
 async fn create(
@@ -232,6 +194,7 @@ async fn create(
         nul_if_empty(&req.age_ranges),
         nul_if_empty(&req.styles),
         nul_if_empty(&req.categories),
+        nul_if_empty(&req.tags),
     )
     .await
     .map_err(handle_metadata_err)?;
@@ -319,6 +282,7 @@ async fn search(
             &query.age_ranges,
             &query.affiliations,
             &query.categories,
+            &query.tags,
         )
         .await?
         .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
@@ -399,6 +363,7 @@ async fn update(
         req.age_ranges.as_deref(),
         req.styles.as_deref(),
         req.categories.as_deref(),
+        req.tags.as_deref(),
     )
     .await
     .map_err(handle_metadata_err)?;
