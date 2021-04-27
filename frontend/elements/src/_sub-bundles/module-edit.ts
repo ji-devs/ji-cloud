@@ -21,6 +21,7 @@ import "@elements/widgets/module-page/grid-plain";
 import "@elements/widgets/nav/steps-nav";
 import "@elements/widgets/nav/step-nav";
 import "@elements/module/_common/footer";
+import "@elements/module/_common/footer-continue-button";
 import "@elements/module/_common/header";
 import "@elements/module/_common/main-empty";
 import "@elements/module/_common/preview-header";
