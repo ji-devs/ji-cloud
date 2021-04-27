@@ -15,7 +15,7 @@ use shared::{
         image::{ImageId, ImageKind},
         meta::AffiliationId,
         meta::AgeRangeId,
-        meta::StyleId,
+        meta::{StyleId, TagId},
     },
     media::MediaGroupKind,
 };
@@ -43,6 +43,8 @@ struct BatchImage<'a> {
     affiliation_names: &'a [String],
     categories: &'a [Uuid],
     category_names: &'a [String],
+    image_tags: &'a [Uuid],
+    image_tag_names: &'a [String],
     media_subkind: &'a str,
     #[serde(rename = "_tags")]
     tags: Vec<&'static str>,
@@ -224,6 +226,11 @@ select id,
            from category
                     inner join image_category on category.id = image_category.category_id
            where image_category.image_id = image_metadata.id))                               as "category_names!",
+    array((select tag_id from image_tag_join where image_id = image_metadata.id))       as "tags!",
+    array((select name
+           from image_tag
+                    inner join image_tag_join on image_tag.id = image_tag_join.tag_id
+           where image_tag_join.image_id = image_metadata.id))                               as "tag_names!",
     (publish_at < now() is true) as "is_published!",
     is_premium
 from image_metadata
@@ -257,6 +264,8 @@ for no key update skip locked;
                 age_range_names: &row.age_range_names,
                 affiliations: &row.affiliations,
                 affiliation_names: &row.affiliation_names,
+                image_tags: &row.tags,
+                image_tag_names: &row.tag_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
                 tags
@@ -380,6 +389,7 @@ impl Client {
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],
+        tags: &[TagId],
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut filters = algolia::filter::AndFilter {
             filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
@@ -403,6 +413,7 @@ impl Client {
         filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
         filters_for_ids(&mut filters.filters, "affiliations", affiliations);
         filters_for_ids(&mut filters.filters, "categories", categories);
+        filters_for_ids(&mut filters.filters, "image_tags", tags);
 
         let results: SearchResponse = self
             .inner

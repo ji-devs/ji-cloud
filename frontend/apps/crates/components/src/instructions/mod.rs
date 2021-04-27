@@ -1,2 +1,2 @@
-mod player;
-pub use player::*;
+pub mod player;
+pub mod editor;

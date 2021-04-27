@@ -12,7 +12,7 @@ use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 use unicode_segmentation::UnicodeSegmentation;
-use shared::domain::jig::module::body::{Audio, Instructions as RawInstructions};
+use shared::domain::jig::module::body::{Audio, Instructions};
 pub type HistoryChangeFn = impl Fn(Option<raw::ModuleData>);
 pub type HistoryUndoRedoFn = impl Fn(Option<raw::ModuleData>);
 use shared::{
@@ -76,7 +76,7 @@ impl State {
         let game_data = raw::ModuleData::new(
             mode,
             ThemeId::None, 
-            RawInstructions::default(), 
+            Instructions::default(), 
             Vec::<(&str, &str)>::new()
         );
 
@@ -171,34 +171,7 @@ impl State {
         });
     }
 
-    pub fn change_instructions_text(&self, text: String, push_history:bool) {
-        let text = if text.is_empty() { None } else { Some(text) };
 
-        self.instructions.text.set_neq(text.clone());
-        if(push_history) {
-            self.get_history().push_modify(clone!(text => move |game_data| {
-                game_data.instructions.text = text;
-            }));
-        } else {
-            self.save_without_history(|game_data| {
-                game_data.instructions.text = text;
-            })
-        }
-    }
-
-    pub fn change_instructions_audio(&self, audio_id: Option<AudioId>) {
-        log::info!("CHANGING INSTRUCTIONS AUDIO!!!!");
-        let audio:Option<Audio> = audio_id.map(|id| Audio {
-            id,
-            lib: MediaLibrary::User
-        });
-
-        self.instructions.audio.set_neq(audio.clone());
-
-        self.get_history().push_modify(move |game_data| {
-            game_data.instructions.audio = audio;
-        });
-    }
     pub fn delete_pair(&self, pair_index: usize) {
         self.pairs.lock_mut().remove(pair_index);
         self.get_history().push_modify(|game_data| {
@@ -229,6 +202,17 @@ impl State {
         }
     }
 
+    pub fn save_instructions(&self, instructions: Instructions, also_history:bool) {
+        if(also_history) {
+            self.get_history().push_modify(|game_data| {
+                game_data.instructions = instructions;
+            });
+        } else {
+            self.save_without_history(|game_data| {
+                game_data.instructions = instructions;
+            })
+        }
+    }
     //Usually saving goes through the history mechanism. when it doesn't this can be used
     //It pulls from the latest history in order to mixin
     fn save_without_history(&self, f: impl FnOnce(&mut raw::ModuleData)) {
@@ -279,15 +263,13 @@ impl State {
                 );
                 self.mode.set_neq(Some(mode));
                 self.theme_id.set_neq(game_data.theme_id);
-                self.instructions.audio.set_neq(game_data.instructions.audio);
-                self.instructions.text.set_neq(game_data.instructions.text);
+                self.instructions.set(game_data.instructions);
             },
             None => {
                 self.pairs.lock_mut().clear();
                 self.mode.set_neq(None);
                 self.theme_id.set_neq(ThemeId::None);
-                self.instructions.audio.set_neq(None);
-                self.instructions.text.set_neq(None);
+                self.instructions.set(Instructions::default());
             }
         }
 

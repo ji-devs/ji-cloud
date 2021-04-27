@@ -6,6 +6,10 @@ contact_links:
   - name: Legacy Player
     about: create a Legacy Player issue
     url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=Legacy+Player&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20functionality
+
+  - name: General Modules (David)
+    about: create a General Modules issue
+    url: https://github.com/ji-devs/ji-cloud/issues/new?assignees=dakom&milestone=General+Modules&projects=ji-devs/ji-cloud/3&labels=frontend%20-%20functionality
     
   - name: Poster (David)
     about: create a Memory Game issue

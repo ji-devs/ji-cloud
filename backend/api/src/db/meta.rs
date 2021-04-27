@@ -1,6 +1,6 @@
 use shared::domain::meta::{
     Affiliation, AffiliationId, AgeRange, AgeRangeId, ContentType, ContentTypeId, MetaKind, Style,
-    StyleId, Subject, SubjectId,
+    StyleId, Subject, SubjectId, Tag, TagId,
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
@@ -65,6 +65,18 @@ pub async fn get_content_types(db: &PgPool) -> sqlx::Result<Vec<ContentType>> {
     .await
 }
 
+pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        r#"
+        select id as "id: TagId", display_name, created_at, updated_at from "image_tag"
+        order by index
+    "#
+    )
+    .fetch_all(db)
+    .await
+}
+
 // attempts to grab a uuid out of a string in the shape:
 // Key (<key>)=(<uuid>)<postfix>
 fn extract_uuid(s: &str) -> Option<Uuid> {
@@ -95,6 +107,7 @@ pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
         Some("image_style_style_id_fkey") => MetaKind::Style,
         Some("image_category_category_id_fkey") => MetaKind::Category,
         Some("jig_content_type_content_type_id_fkey") => MetaKind::ContentType,
+        Some("image_tag_join_tag_id_fkey") => MetaKind::Tag,
 
         _ => return MetaWrapperError::Sqlx(err),
     };

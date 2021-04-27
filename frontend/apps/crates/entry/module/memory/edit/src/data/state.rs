@@ -19,7 +19,7 @@ use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
 use shared::{domain::{
-    jig::{JigId, module::{body::Audio, ModuleId}},
+    jig::{JigId, module::{body::{Audio, Instructions}, ModuleId}},
     audio::AudioId
 }, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;
@@ -47,25 +47,11 @@ pub struct State {
     pub pairs: MutableVec<(Card, Card)>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Instructions,
+    pub instructions: Mutable<Instructions>,
     pub save_loader: Rc<AsyncLoader>,
     pub overlay: OverlayState,
     pub image_card_click_callback: RefCell<Option<Box<dyn Fn()>>>,
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
-}
-
-pub struct Instructions {
-    pub audio: Mutable<Option<Audio>>,
-    pub text: Mutable<Option<String>>
-}
-
-impl Instructions {
-    pub fn new(raw_data: &raw::ModuleData) -> Self {
-        Self {
-            audio: Mutable::new(raw_data.instructions.audio.clone()),
-            text: Mutable::new(raw_data.instructions.text.clone())
-        }
-    }
 }
 
 impl State {
@@ -82,7 +68,7 @@ impl State {
 
         let theme_id = raw_data.theme_id;
 
-        let instructions = Instructions::new(&raw_data);
+        let instructions = Mutable::new(raw_data.instructions.clone());
 
         let is_empty = pairs.is_empty();
 

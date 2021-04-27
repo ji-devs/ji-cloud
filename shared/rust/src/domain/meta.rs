@@ -42,7 +42,21 @@ pub struct SubjectId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ContentTypeId(pub Uuid);
 
-into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId, ContentTypeId);
+/// Wrapper type around [`Uuid`], represents [`Tag::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct TagId(pub Uuid);
+
+into_uuid!(
+    StyleId,
+    AffiliationId,
+    AgeRangeId,
+    SubjectId,
+    ContentTypeId,
+    TagId
+);
 
 /// Represents a style.
 #[derive(Serialize, Deserialize, Debug)]
@@ -129,6 +143,23 @@ pub struct ContentType {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+/// Represents a tag.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct Tag {
+    /// The id of the tag.
+    pub id: TagId,
+
+    /// The tag's name.
+    pub display_name: String,
+
+    /// When the tag was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the tag was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
 /// Response for fetching all metadata.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -147,6 +178,9 @@ pub struct MetadataResponse {
 
     /// All content types
     pub content_types: Vec<ContentType>,
+
+    /// All tags for images.
+    pub image_tags: Vec<Tag>,
 }
 
 /// Metadata kinds.
@@ -170,4 +204,7 @@ pub enum MetaKind {
 
     /// [`ContentType`]
     ContentType,
+
+    /// [`Tag`]
+    Tag,
 }

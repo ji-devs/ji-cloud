@@ -11,6 +11,7 @@ interface Args {
     img: string;
     ages: string;
     lastEdited: string;
+    href: string
 }
 
 const DEFAULT_ARGS:Args = {
@@ -19,6 +20,7 @@ const DEFAULT_ARGS:Args = {
     img: "mock/resized/jig-gallery.jpg",
     ages: "5-8",
     lastEdited: "3 W ago",
+    href: "https://google.com",
 }
 
 export const JigGalleryRecent = (props?:Partial<Args>) => {
