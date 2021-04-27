@@ -1,1 +1,1 @@
-export type ModuleKind = "memory";
+export type ModuleKind = "memory" | "poster";

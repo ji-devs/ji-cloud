@@ -12,7 +12,7 @@ use futures_signals::signal::Mutable;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 use unicode_segmentation::UnicodeSegmentation;
-
+use shared::domain::jig::module::body::{Audio, Instructions};
 pub type HistoryChangeFn = impl Fn(Option<raw::ModuleData>);
 pub type HistoryUndoRedoFn = impl Fn(Option<raw::ModuleData>);
 use shared::{
@@ -27,12 +27,31 @@ use shared::{
 };
 
 impl State {
+    pub fn change_theme_id(&self, theme_id:ThemeId) {
+        self.theme_id.set_neq(theme_id);
+        self.get_history().push_modify(move |game_data| {
+            game_data.theme_id = theme_id;
+        });
+    }
+
     pub fn change_step(&self, next:Step) {
         let prev = self.step.get();
         self.step.set(next);
         if prev != Step::Four {
             let mut completed = self.steps_completed.lock_mut();
             completed.insert(prev);
+        }
+    }
+
+    pub fn save_instructions(&self, instructions: Instructions, also_history:bool) {
+        if(also_history) {
+            self.get_history().push_modify(|game_data| {
+                game_data.instructions = instructions;
+            });
+        } else {
+            self.save_without_history(|game_data| {
+                game_data.instructions = instructions;
+            })
         }
     }
     //Usually saving goes through the history mechanism. when it doesn't this can be used
@@ -51,8 +70,7 @@ impl State {
 
     fn set_from_raw(&self, game_data:raw::ModuleData) {
         self.theme_id.set_neq(game_data.theme_id);
-        self.instructions.audio_id.set_neq(game_data.instructions.audio_id);
-        self.instructions.text.set_neq(game_data.instructions.text);
+        self.instructions.set(game_data.instructions);
     }
 
     pub fn next_step(&self) {
@@ -63,6 +81,7 @@ impl State {
             Step::Four => unimplemented!("nothing after step 4!")
         });
     }
+
 }
 
 pub fn history_on_change(state: Rc<State>) -> HistoryChangeFn {

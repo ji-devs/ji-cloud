@@ -3,17 +3,20 @@ use crate::data::state::*;
 use std::rc::Rc;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
+use super::{
+    nav::dom::StepsNavDom,
+    step_1::dom::Step1Dom,
+    step_2::dom::Step2Dom,
+    step_3::dom::Step3Dom,
+};
 use futures_signals::{
     map_ref,
     signal::SignalExt,
 };
-use crate::steps::nav::dom::StepsNavDom;
 
-pub struct SidebarDom {
-}
-
+pub struct SidebarDom {}
 impl SidebarDom {
-    pub fn render(state: Rc<State>) -> Dom {
+    pub fn render(state:Rc<State>) -> Dom {
         html!("module-sidebar", {
             .property("slot", "sidebar")
             .child(StepsNavDom::render(state.clone()))
@@ -22,14 +25,12 @@ impl SidebarDom {
                     .signal()
                     .map(clone!(state => move |step| {
                         vec![
-                            html!("module-sidebar-body", {
-                                .property("slot", "content")
-                                .children(&mut [
-                                    html!("div", {
-                                        .text(&format!("STEP {:?} HERE", step))
-                                    })
-                                ])
-                            }),
+                            match step {
+                                Step::One => Step1Dom::render(state.clone()),
+                                Step::Two => Step2Dom::render(state.clone()),
+                                Step::Three => Step3Dom::render(state.clone()),
+                                Step::Four => html!("empty-fragment")
+                            }
                         ]
                     }))
                     .to_signal_vec()

@@ -45,6 +45,7 @@ impl HeaderPreviewDom {
 
         html!("module-preview-header", {
             .property("slot", "header")
+            .property("moduleKind", "poster")
             .child(StepsNavDom::render(state.clone()))
             .child(html!("button-rect", {
                 .property("slot", "btn")

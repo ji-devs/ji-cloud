@@ -1,15 +1,19 @@
-use dominator::{Dom, clone, html};
+use dominator::{html, Dom, clone};
+use crate::data::state::*;
 use std::rc::Rc;
-use crate::data::state::State;
+use utils::prelude::*;
+use wasm_bindgen::prelude::*;
+use futures_signals::{
+    map_ref,
+    signal::SignalExt,
+    signal_vec::SignalVecExt,
+};
 
-pub struct MainDom {
-}
-
+pub struct MainDom {}
 impl MainDom {
-    pub fn render(state: Rc<State>) -> Dom {
-        html!("div", { 
+    pub fn render(state:Rc<State>) -> Dom {
+        html!("empty-fragment", {
             .property("slot", "main")
-            .text("main")
         })
     }
 }

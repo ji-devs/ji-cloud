@@ -19,13 +19,14 @@ use components::module::page::ModulePageKind;
 use std::collections::HashSet;
 use components::module::history::state::HistoryState;
 use shared::{domain::{
-    jig::{JigId, module::ModuleId},
+    jig::{JigId, module::{body::{Audio, Instructions}, ModuleId}},
     audio::AudioId
 }, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
 use utils::prelude::*;
 use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
+use crate::overlay::state::State as OverlayState;
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 //
 //Basically, the type of these callbacks are closures created from *inside*
@@ -40,31 +41,41 @@ pub type HistoryStateImpl = HistoryState<raw::ModuleData, HistoryChangeFn, Histo
 pub struct State {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub theme_id: Mutable<ThemeId>,
-    pub instructions: Instructions,
-    pub save_loader: Rc<AsyncLoader>,
     pub step: Mutable<Step>,
     pub steps_completed: Mutable<HashSet<Step>>,
+    pub theme_id: Mutable<ThemeId>,
+    pub instructions: Mutable<Instructions>,
+    pub save_loader: Rc<AsyncLoader>,
+    pub overlay: OverlayState,
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
 }
 
 impl State {
     pub fn new(jig_id: JigId, module_id: ModuleId, raw_data:raw::ModuleData) -> Rc<Self> {
+
+
+        let theme_id = raw_data.theme_id;
+
+        let instructions = Mutable::new(raw_data.instructions.clone());
+
         let step = Mutable::new(match debug::settings().step.as_ref() {
             Some(step) => step.clone(),
             None => Step::One
         });
 
+        let save_loader = Rc::new(AsyncLoader::new());
+
 
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            theme_id: Mutable::new(raw_data.theme_id),
-            instructions: Instructions::new(&raw_data),
-            save_loader: Rc::new(AsyncLoader::new()),
             step,
             steps_completed: Mutable::new(HashSet::new()),
+            theme_id: Mutable::new(theme_id),
             history: RefCell::new(None),
+            save_loader,
+            instructions,
+            overlay: OverlayState::new()
         });
 
         let history = Rc::new(HistoryState::new(
@@ -85,8 +96,9 @@ impl State {
         self.theme_id.signal_ref(|id| id.as_str_id())
     }
 
-    pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
 
+
+    pub fn page_kind_signal(&self) -> impl Signal<Item = ModulePageKind> {
         self.step.signal()
             .map(|step| {
                 if step == Step::Four {
@@ -96,6 +108,14 @@ impl State {
                 }
             })
     }
+
+
+    pub fn step_ready_signal(&self) -> impl Signal<Item = bool> {
+        self.step.signal().map(|step| true)
+    }
+
+
+
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -125,3 +145,4 @@ impl Step {
         }
     }
 }
+

@@ -1,13 +1,12 @@
 use dominator::{html, Dom, clone};
-use crate::data::state::*;
-use std::rc::Rc;
-use utils::prelude::*;
-use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::SignalExt,
+use crate::data::{
+    actions,
+    state::*,
 };
-
+use std::rc::Rc;
+use utils::events;
+use wasm_bindgen::prelude::*;
+use futures_signals::signal::SignalExt;
 
 pub struct StepsNavDom {}
 impl StepsNavDom {

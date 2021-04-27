@@ -15,7 +15,7 @@ mod strings;
 mod data;
 mod index;
 mod steps;
-mod preview;
+mod overlay;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

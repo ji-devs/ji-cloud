@@ -9,6 +9,8 @@ use wasm_bindgen::prelude::*;
 use utils::prelude::*;
 use crate::{
     data::{state::*, actions, raw::ModuleData as RawData},
+    steps,
+    overlay,
 };
 use shared::domain::jig::{JigId, module::ModuleId};
 use super::loader::*;
@@ -39,17 +41,18 @@ impl ModuleRenderer<State> for PageRenderer {
     }
 
     fn children_signal(state: Rc<State>, kind:ModulePageKind) -> Self::ChildrenSignal {
-        signal_vec::always(vec![
+        signal_vec::always(
+                vec![
                     Self::sidebar(state.clone(), kind),
                     Self::header(state.clone(), kind),
                     Self::main(state.clone(), kind),
                     Self::footer(state.clone(), kind),
                     Self::overlay(state.clone(), kind),
-        ]
-        .into_iter()
-        .filter(|x| x.is_some())
-        .map(|x| x.unwrap_ji())
-        .collect()
+                ]
+                .into_iter()
+                .filter(|x| x.is_some())
+                .map(|x| x.unwrap_ji())
+                .collect()
         )
     }
 }
@@ -63,34 +66,37 @@ impl PageRenderer {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            Some(crate::steps::sidebar::dom::SidebarDom::render(state))
+            Some(steps::sidebar::dom::SidebarDom::render(state))
         }
     }
 
     fn header(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
-            Some(crate::preview::header::dom::HeaderDom::render(state))
+            Some(steps::header::dom::HeaderPreviewDom::render(state))
         } else {
-            Some(crate::steps::header::dom::HeaderDom::render(state))
+            Some(steps::header::dom::HeaderDom::render(state))
         }
     }
 
     fn main(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> {
-        if kind == ModulePageKind::GridResizePreview {
-            Some(crate::preview::main::dom::MainDom::render(state))
-        } else {
-            Some(crate::steps::main::dom::MainDom::render(state))
-        }
+
+        Some(
+                if kind == ModulePageKind::GridResizePreview {
+                    steps::preview::dom::PreviewDom::render(state)
+                } else {
+                    steps::main::dom::MainDom::render(state)
+                }
+        )
     }
 
     fn footer(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> {
         if kind == ModulePageKind::GridResizePreview {
             None
         } else {
-            Some(crate::steps::footer::dom::FooterDom::render(state))
+            Some(steps::footer::dom::FooterDom::render(state))
         }
     }
     fn overlay(state: Rc<State>, kind: ModulePageKind) -> Option<Dom> {
-        None
+        Some(overlay::dom::OverlayDom::render(state))
     }
 }

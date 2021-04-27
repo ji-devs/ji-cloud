@@ -9,7 +9,8 @@ const STR_TOOLTIP_CONTINUE = "Click to continue";
 const STR_TOOLTIP_GETTING_STARTED = "Time to play!";
 
 const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    memory: "Here’s your memory game for you to play. Want to change something? Just go back and edit!"
+    memory: "Here’s your memory game for you to play. Want to change something? Just go back and edit!",
+    poster: "Here’s your poster for you to play. Want to change something? Just go back and edit!"
 };
 
 @customElement('module-preview-header')

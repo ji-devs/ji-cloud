@@ -1,15 +1,52 @@
-use dominator::{Dom, clone, html};
+use dominator::{html, Dom, clone};
+use crate::data::{
+    actions,
+    state::*,
+};
 use std::rc::Rc;
-use crate::data::state::State;
+use utils::prelude::*;
+use wasm_bindgen::prelude::*;
+use futures_signals::{
+    map_ref,
+    signal::SignalExt
+};
+use crate::steps::sidebar::nav::dom::StepsNavDom;
 
-pub struct HeaderDom {
+use components::module::header::controller::dom::ControllerDom;
+
+pub struct HeaderDom {}
+impl HeaderDom {
+    pub fn render(state:Rc<State>) -> Dom {
+        html!("module-header", {
+            .property("slot", "header")
+            .property("moduleKind", "poster")
+            .child(ControllerDom::render(
+                state.get_history(),
+                clone!(state => move || {
+                    state.change_step(Step::Four);
+                })
+            ))
+        })
+    }
 }
 
-impl HeaderDom {
-    pub fn render(state: Rc<State>) -> Dom {
-        html!("div", { 
+pub struct HeaderPreviewDom {}
+impl HeaderPreviewDom {
+    pub fn render(state:Rc<State>) -> Dom {
+
+
+        html!("module-preview-header", {
             .property("slot", "header")
-            .text("header")
+            .property("moduleKind", "poster")
+            .child(StepsNavDom::render(state.clone()))
+            .child(html!("button-rect", {
+                .property("slot", "btn")
+                .property("size", "small")
+                .property("iconAfter", "arrow")
+                .text(crate::strings::STR_DONE)
+                .event(clone!(state => move |evt:events::Click| {
+                }))
+            }))
         })
     }
 }

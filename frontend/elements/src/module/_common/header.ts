@@ -5,12 +5,14 @@ import "@elements/core/tooltips/info";
 import {ModuleKind} from "@elements/module/_common/types";
 
 const STR_TITLE:{[key in ModuleKind]:string} = {
-    memory: "Memory Game"
+    memory: "Memory Game",
+    poster: "Poster"
 };
 const STR_TOOLTIP_GETTING_STARTED = "Getting started";
 
 const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    memory: "Add your words to the list on the left. You can either type the words or paste them in."
+    memory: "Add your words to the list on the left. You can either type the words or paste them in.",
+    poster: "Poster intro here"
 };
 
 @customElement('module-header')
@@ -49,6 +51,7 @@ export class _ extends LitElement {
 
   render() {
       const {imgRef, moduleKind} = this;
+      console.log(moduleKind);
 
       const title = STR_TITLE[moduleKind];
 

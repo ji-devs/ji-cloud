@@ -15,6 +15,7 @@ use once_cell::sync::OnceCell;
 use utils::prelude::*;
 use shared::domain::jig::{JigId, module::ModuleId};
 use uuid::Uuid;
+use shared::domain::jig::module::body::Instructions as RawInstructions;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -48,7 +49,7 @@ impl DebugSettings {
                 if with_data {
                     raw::ModuleData::new(
                         ThemeId::Chalkboard, 
-                        raw::Instructions::new(),
+                        RawInstructions::default(),
                     )
                 } else {
                     raw::ModuleData{
@@ -59,7 +60,7 @@ impl DebugSettings {
             ),
             step: Some(Step::One), 
             live_save: false,
-            content_tab: Some(DebugContentTab::Text),
+            content_tab: Some(DebugContentTab::Images),
         }
     }
 }

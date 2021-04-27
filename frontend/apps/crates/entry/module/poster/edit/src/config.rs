@@ -3,6 +3,10 @@ use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
 
+pub static DUAL_LIST_CHAR_LIMIT:usize = 30;
+pub static SINGLE_LIST_CHAR_LIMIT:usize = 30;
+pub static CARD_TEXT_LIMIT_WIDTH:f64 = 150.0;
+pub static CARD_TEXT_LIMIT_HEIGHT:f64 = 150.0;
 
 macro_rules! config_path {
     ($e:tt) => { 

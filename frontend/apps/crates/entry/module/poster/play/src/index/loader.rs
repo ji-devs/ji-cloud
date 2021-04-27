@@ -31,17 +31,23 @@ impl StateLoader<RawData, State> for PageLoader {
     fn load_state(&self) -> Self::FutureState { 
         let jig_id = self.jig_id.clone();
         let module_id = self.module_id.clone();
+
+        debug::init(jig_id.clone(), module_id.clone());
+
         async move {
             let game_data = match debug::settings().data.as_ref() {
                 None => {
-                    let path = Get::PATH.replace("{id}",&module_id.0.to_string());
+
+                    let path = Get::PATH
+                        .replace("{id}",&jig_id.0.to_string())
+                        .replace("{module_id}",&module_id.0.to_string());
 
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
 
                         Ok(resp) => {
                             resp.module.body.map(|resp| {
                                 match resp {
-                                    Body::MemoryGame(body) => body,
+                                    Body::Poster(body) => body,
                                     _ => panic!("wrong module body kind!!")
                                 }
                             })
