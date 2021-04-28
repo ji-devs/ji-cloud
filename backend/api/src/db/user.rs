@@ -330,3 +330,134 @@ where index > $2 and user_id = $1
 
     Ok(())
 }
+
+pub async fn create_font(
+    db: &sqlx::PgPool,
+    user_id: Uuid,
+    font_name: String,
+) -> sqlx::Result<Vec<String>> {
+    let font_names = sqlx::query!(
+        r#"
+with cte as (
+    insert into user_font
+    (user_id, font_name, index)
+    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning font_name
+), font_names as (
+    select font_name
+    from user_font
+    where user_id = $1
+    order by index
+)
+select font_name as "font_name!" from font_names
+union all
+select font_name as "font_name!" from cte
+        "#,
+        user_id,
+        font_name
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(font_names.into_iter().map(|it| it.font_name).collect())
+}
+
+pub async fn update_font(
+    db: &sqlx::PgPool,
+    user_id: Uuid,
+    index: u16,
+    font_name: String,
+) -> sqlx::Result<bool> {
+    let mut txn = db.begin().await?;
+
+    let exists = sqlx::query!(
+        r#"
+select exists(
+        select 1
+        from user_font
+        where user_id = $1
+            and index = $2
+        for update
+) as "exists!"
+        "#,
+        user_id,
+        index as i16
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+
+    if !exists {
+        return Ok(false);
+    }
+
+    sqlx::query!(
+        r#"
+update user_font 
+    set font_name = $3
+    where user_id = $1
+    and index = $2
+        "#,
+        user_id,
+        index as i16,
+        font_name
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(true)
+}
+
+pub async fn get_fonts(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<String>> {
+    let font_names = sqlx::query!(
+        r#"
+select font_name
+from user_font
+where user_id = $1
+order by index
+        "#,
+        user_id
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(font_names.into_iter().map(|it| it.font_name).collect())
+}
+
+pub async fn delete_font(db: &sqlx::PgPool, user_id: Uuid, index: u16) -> sqlx::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let _ = sqlx::query!(
+        r#"
+with delete as (
+        delete from user_font
+    where user_id = $1 and index = $2
+)
+select 1 as discard
+from user_font
+where user_id = $1 and index > $2
+for update
+        "#,
+        user_id,
+        index as i16
+    )
+    .fetch_optional(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+update user_font
+set index = index - 1
+where index > $2 and user_id = $1
+        "#,
+        user_id,
+        index as i16
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}

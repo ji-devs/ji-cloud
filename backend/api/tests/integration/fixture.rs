@@ -10,6 +10,7 @@ pub enum Fixture {
     Jig,
     Animation,
     UserColors,
+    UserFonts,
 }
 
 impl Fixture {
@@ -25,6 +26,7 @@ impl Fixture {
             Self::Jig => include_str!("../../fixtures/8_jig.sql"),
             Self::Animation => include_str!("../../fixtures/9_animation.sql"),
             Self::UserColors => include_str!("../../fixtures/11_user_color.sql"),
+            Self::UserFonts => include_str!("../../fixtures/12_user_font.sql"),
         }
     }
 }

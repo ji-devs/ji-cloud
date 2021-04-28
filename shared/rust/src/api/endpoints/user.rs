@@ -13,10 +13,15 @@ use crate::{
 };
 
 mod colors;
+mod fonts;
 mod profile;
 
 pub use colors::{
     Create as CreateColor, Delete as DeleteColor, Get as GetColors, Update as UpdateColor,
+};
+
+pub use fonts::{
+    Create as CreateFont, Delete as DeleteFont, Get as GetFonts, Update as UpdateFont,
 };
 
 pub use profile::{Get as Profile, Put as PutProfile};

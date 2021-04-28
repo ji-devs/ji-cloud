@@ -22,8 +22,9 @@ use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
         user::{
-            ChangePassword, Create, CreateColor, Delete, DeleteColor, GetColors, Profile,
-            PutProfile, ResetPassword, UpdateColor, UserLookup, VerifyEmail,
+            ChangePassword, Create, CreateColor, CreateFont, Delete, DeleteColor, DeleteFont,
+            GetColors, GetFonts, Profile, PutProfile, ResetPassword, UpdateColor, UpdateFont,
+            UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
@@ -36,6 +37,7 @@ use sqlx::{Acquire, PgConnection, PgPool};
 use uuid::Uuid;
 
 mod color;
+mod font;
 
 async fn send_verification_email(
     txn: &mut PgConnection,
@@ -528,5 +530,18 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         .route(
             DeleteColor::PATH,
             DeleteColor::METHOD.route().to(color::delete),
+        )
+        .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
+        .route(
+            UpdateFont::PATH,
+            UpdateFont::METHOD.route().to(font::update),
+        )
+        .route(
+            CreateFont::PATH,
+            CreateFont::METHOD.route().to(font::create),
+        )
+        .route(
+            DeleteFont::PATH,
+            DeleteFont::METHOD.route().to(font::delete),
         );
 }

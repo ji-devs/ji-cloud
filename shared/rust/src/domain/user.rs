@@ -285,3 +285,21 @@ pub struct UserColorResponse {
     /// The user's colors.
     pub colors: Vec<rgb::RGBA8>,
 }
+
+/// Request for [`CreateFont`]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct UserFontNameRequest {
+    /// Name of the font to add/change.
+    pub font_name: String,
+}
+
+/// Response for [`CreateFont`]
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct UserFontResponse {
+    /// Names of the user's fonts.
+    pub fonts: Vec<String>,
+}
