@@ -2,6 +2,8 @@
 
 pub mod module;
 
+use std::{fmt, str::FromStr};
+
 use super::{meta::GoalId, Publish};
 use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
@@ -20,16 +22,58 @@ pub use module::{LiteModule, Module, ModuleKind};
 pub struct JigId(pub Uuid);
 
 /// Special parameter for allowing implicit `me` as a user.
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[serde(rename_all = "camelCase")]
-#[serde(untagged)]
 pub enum UserOrMe {
     /// We should use the user found in the session auth.
     Me,
 
     /// we should use the provided user.
     User(Uuid),
+}
+
+impl serde::Serialize for UserOrMe {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self {
+            UserOrMe::Me => serializer.serialize_str("me"),
+            UserOrMe::User(id) => serializer.collect_str(&id.to_hyphenated()),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for UserOrMe {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = UserOrMe;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("`me` or `<uuid>`")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                if value == "me" {
+                    Ok(UserOrMe::Me)
+                } else {
+                    Uuid::from_str(value)
+                        .map(UserOrMe::User)
+                        .map_err(|e| E::custom(format!("failed to parse id: {}", e)))
+                }
+            }
+        }
+
+        deserializer.deserialize_str(Visitor)
+    }
 }
 
 /// Request to create a new JIG.
