@@ -63,6 +63,16 @@ impl InstructionsEditor {
     fn render_text(&self) -> Dom {
         let Self {instructions, save} = self;
 
+        fn change_text(save: &Rc<Box<dyn Fn(Instructions, bool)>>, instructions: &Mutable<Instructions>, text: String, push_history:bool) {
+            let mut lock = instructions.lock_mut();
+
+            if text == "" {
+                lock.text = None;
+            } else {
+                lock.text = Some(text);
+            }
+            save(lock.clone(), push_history);
+        }
         html!("input-form-textarea", {
             .property_signal("value", self.text_signal())
             .property("label", STR_INSTRUCTIONS_LABEL)
@@ -71,24 +81,10 @@ impl InstructionsEditor {
             //Input saves every character
             //Change also pushes history
             .event(clone!(save, instructions => move |evt:events::CustomInput| {
-                let mut instructions = instructions.get_cloned();
-                let text = evt.value();
-                if text == "" {
-                    instructions.text = None;
-                } else {
-                    instructions.text = Some(text);
-                }
-                save(instructions, false);
+                change_text(&save, &instructions, evt.value(), false);
             }))
             .event(clone!(save, instructions => move |evt:events::CustomChange| {
-                let mut instructions = instructions.get_cloned();
-                let text = evt.value();
-                if text == "" {
-                    instructions.text = None;
-                } else {
-                    instructions.text = Some(text);
-                }
-                save(instructions, true);
+                change_text(&save, &instructions, evt.value(), true);
             }))
         })
     }
@@ -97,15 +93,15 @@ impl InstructionsEditor {
 
         let opts = AudioInputOptions {
             on_change: Some(Box::new(clone!(instructions, save => move |audio_id| {
-                let mut instructions = instructions.get_cloned();
-                instructions.audio = audio_id.map(|id| {
+                let mut lock = instructions.lock_mut();
+                lock.audio = audio_id.map(|id| {
                     Audio {
                         id,
                         lib: MediaLibrary::User
                     }
                 });
 
-                save(instructions, true); 
+                save(lock.clone(), true); 
             }))),
 
             audio_id: self.instructions.get_cloned().audio.map(|audio| audio.id),
