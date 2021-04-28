@@ -147,13 +147,14 @@ async fn get() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body);
 
     Ok(())
 }
 
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
-
 #[actix_rt::test]
 async fn browse_simple() -> anyhow::Result<()> {
     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
@@ -172,6 +173,38 @@ async fn browse_simple() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
+
+// todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
+#[actix_rt::test]
+async fn browse_own_simple() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!(
+            "http://0.0.0.0:{}/v1/jig/browse?authorId=me",
+            port
+        ))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 

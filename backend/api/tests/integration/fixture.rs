@@ -11,6 +11,7 @@ pub enum Fixture {
     Animation,
     UserColors,
     UserFonts,
+    UserDefaultPerms,
 }
 
 impl Fixture {
@@ -27,6 +28,7 @@ impl Fixture {
             Self::Animation => include_str!("../../fixtures/9_animation.sql"),
             Self::UserColors => include_str!("../../fixtures/11_user_color.sql"),
             Self::UserFonts => include_str!("../../fixtures/12_user_font.sql"),
+            Self::UserDefaultPerms => include_str!("../../fixtures/13_user_default_perms.sql"),
         }
     }
 }

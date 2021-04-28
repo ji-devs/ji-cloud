@@ -274,6 +274,39 @@ from jig_module where jig_id = $1
     Ok(Some(JigId(new_id)))
 }
 
+pub async fn authz_list(
+    db: &PgPool,
+    user_id: Uuid,
+    author_id: Option<Uuid>,
+) -> Result<(), error::Auth> {
+    let scopes: &[_] = if author_id == Some(user_id) {
+        &[
+            UserScope::Admin as i16,
+            UserScope::AdminJig as i16,
+            UserScope::ManageSelfJig as i16,
+        ][..]
+    } else {
+        &[UserScope::Admin as i16, UserScope::AdminJig as i16][..]
+    };
+
+    let authed = sqlx::query!(
+        r#"
+select exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as "authed!"
+"#,
+        user_id,
+        scopes,
+    )
+    .fetch_one(db)
+    .await?
+    .authed;
+
+    if !authed {
+        return Err(error::Auth::Forbidden);
+    }
+
+    Ok(())
+}
+
 pub async fn authz(db: &PgPool, user_id: Uuid, jig_id: Option<JigId>) -> Result<(), error::Auth> {
     let authed = match jig_id {
         None => {

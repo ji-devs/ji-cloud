@@ -119,15 +119,17 @@ async fn get(
 #[api_v2_operation]
 async fn browse(
     db: Data<PgPool>,
-    claims: TokenUserWithScope<ScopeAdminJig>,
+    claims: TokenUser,
     query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
-) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Server> {
+) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Auth> {
     let query = query.map_or_else(Default::default, Query::into_inner);
 
     let author_id = query.author_id.map(|it| match it {
-        UserOrMe::Me => claims.claims.user_id,
+        UserOrMe::Me => claims.0.user_id,
         UserOrMe::User(id) => id,
     });
+
+    db::jig::authz_list(&*db, claims.0.user_id, author_id).await?;
 
     let jigs = db::jig::list(
         db.as_ref(),
