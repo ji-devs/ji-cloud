@@ -17,7 +17,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
     let subjects = db::meta::get_subjects(&db).await?;
-    let content_types = db::meta::get_content_types(&db).await?;
+    let goals = db::meta::get_goals(&db).await?;
     let image_tags = db::meta::get_image_tags(&db).await?;
 
     Ok(Json(MetadataResponse {
@@ -25,7 +25,7 @@ async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error:
         affiliations,
         age_ranges,
         subjects,
-        content_types,
+        goals,
         image_tags,
     }))
 }

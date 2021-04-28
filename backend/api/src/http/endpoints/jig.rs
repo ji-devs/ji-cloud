@@ -34,7 +34,7 @@ async fn create(
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
-        &req.content_types,
+        &req.goals,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
     )
@@ -94,7 +94,7 @@ async fn update(
         id,
         req.display_name.as_deref(),
         req.author_id,
-        req.content_types.as_deref(),
+        req.goals.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
     )
     .await?;
@@ -144,7 +144,7 @@ async fn browse(
     Ok(Json(JigBrowseResponse {
         jigs,
         pages,
-        total_image_count: total_count,
+        total_jig_count: total_count,
     }))
 }
 
