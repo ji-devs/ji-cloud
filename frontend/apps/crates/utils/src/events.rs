@@ -158,3 +158,19 @@ impl CustomFile {
         self.detail().unchecked_into()
     }
 }
+
+// Image Load 
+#[derive(Deserialize, Debug)]
+pub struct ImageLoadData {
+    pub width: f64,
+    pub height: f64,
+}
+
+make_custom_event_serde!("image-load", ImageLoad, ImageLoadData);
+
+impl ImageLoad {
+    pub fn size(&self) -> (f64, f64) {
+        let ImageLoadData { width, height} = self.data();
+        (width, height)
+    }
+}

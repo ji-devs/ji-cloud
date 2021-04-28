@@ -15,9 +15,10 @@ pub const THEME_IDS:[ThemeId;3] = [
     ThemeId::HappyBrush
 ];
 
-
 pub trait ThemeIdExt {
     fn get_colors(self) -> &'static [RGBA8];
+
+    fn get_fonts(self) -> &'static [String];
 
     fn display_name(self) -> &'static str;
 
@@ -32,6 +33,7 @@ pub trait ThemeIdExt {
     fn css_var_font_family(self, num: usize) -> String;
 
     fn css_var_color(self, num: usize) -> String;
+
 }
 
 impl ThemeIdExt for ThemeId {
@@ -46,6 +48,10 @@ impl ThemeIdExt for ThemeId {
 
     fn get_colors(self) -> &'static [RGBA8] {
         self.map_theme(|theme| theme.colors.as_slice())
+    }
+
+    fn get_fonts(self) -> &'static [String] {
+        self.map_theme(|theme| theme.fonts.as_slice())
     }
 
     //TODO - tie to Localization
@@ -99,9 +105,14 @@ struct Themes {
 
 #[derive(Debug, Deserialize)]
 pub struct Theme {
+    /// 3 values for now
     #[serde(deserialize_with = "hex_to_rgba8")]
     pub colors: Vec<RGBA8>,
+
+    /// 3 values for now
+    pub fonts: Vec<String> 
 }
+
 //Set lazily, first time as-needed
 static THEMES: OnceCell<Themes> = OnceCell::new();
 

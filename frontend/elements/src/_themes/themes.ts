@@ -14,6 +14,8 @@ export type FontFamily = {
 
 export type ThemeKind = "" | "chalkboard" | "happy-brush"
 
+//TODO - import the config JSON via typescript / rollup
+//to match themes.rs
 export const THEMES:Record<ThemeKind, Theme> = {
     [""]: {
         fontFamily1: "_sans",
