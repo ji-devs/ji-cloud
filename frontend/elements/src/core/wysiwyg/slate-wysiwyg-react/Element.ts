@@ -20,15 +20,5 @@ function getStyles(props: CustomElement) {
 export function Element(props: RenderElementProps): ReactElement {
     const styles = getStyles(props.element);
 
-    switch (props.element.element) {
-        case ElementType.H1:
-            return React.createElement("h1", {style: styles, ...props});
-        case ElementType.H2:
-            return React.createElement("h2", {style: styles, ...props});
-        case ElementType.P2:
-            return React.createElement("p", {p2:"", style: styles, ...props});
-        default: // ElementType.P1:
-            return React.createElement("p", {p1:"", style: styles, ...props});
-    }
-
+    return React.createElement("p", {style: styles, ...props});
 }

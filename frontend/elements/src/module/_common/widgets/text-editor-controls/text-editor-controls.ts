@@ -15,14 +15,17 @@ export class _ extends LitElement {
                     column-gap: 22px;
                     justify-content: space-between;
                 }
-                .first, .second {
-                    grid-template-columns: 296px 174px;
+                .first {
+                    grid-template-columns: 214px 105px 125px;
+                }
+                .second {
+                    grid-template-columns: 1fr 1fr;
                 }
                 .third {
                     grid-template-columns: 136px 90px 216px;
                 }
                 .fourth {
-                    grid-template-columns: 214px 105px 125px;
+                    grid-template-columns: 1fr 1fr;
                 }
             `,
         ];
@@ -30,11 +33,12 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="row first">
-                <slot name="font"></slot>
-                <slot name="type"></slot>
+                <slot name="hebrew-keyboard"></slot>
+                <slot name="dicta"></slot>
+                <slot name="sefaria"></slot>
             </div>
             <div class="row second">
-                <slot name="weight"></slot>
+                <slot name="element"></slot>
                 <slot name="font-size"></slot>
             </div>
             <div class="row third">
@@ -43,9 +47,8 @@ export class _ extends LitElement {
                 <slot name="justify"></slot>
             </div>
             <div class="row fourth">
-                <slot name="hewbrew-keyboard"></slot>
-                <slot name="dicta"></slot>
-                <slot name="sefaria"></slot>
+                <slot name="font"></slot>
+                <slot name="weight"></slot>
             </div>
         `;
     }

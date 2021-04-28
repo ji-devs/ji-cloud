@@ -167,9 +167,6 @@ pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom 
                 html!("dt", {.text("Color")}),
                 html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.color)))}),
 
-                html!("dt", {.text("Bold")}),
-                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.bold.to_string()))}),
-
                 html!("dt", {.text("Italic")}),
                 html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| controls.italic.to_string()))}),
 
@@ -192,8 +189,14 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
 }
 
 fn render_text() -> Dom {
-    // let state = text_editor::state::State::new_with_on_change(|v| log::info!("{:?}", v));
-    let state = text_editor::state::State::new();
+    let value =  "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+
+    let state = text_editor::state::State::new(
+        ThemeId::HappyBrush,
+        None,
+        // Some(String::from(value)),
+        |v| log::info!("{:?}", v)
+    );
     html!("div", {
         .style("display", "grid")
         .style("grid-template-columns", "auto 1fr")

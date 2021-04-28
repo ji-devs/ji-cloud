@@ -3,13 +3,33 @@ use std::rc::Rc;
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
 use strum::IntoEnumIterator;
-use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight};
+use crate::text_editor::font_css_converter::font_to_css;
+
+use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
 use super::super::super::state::State;
 use super::color_controls;
 
 const STR_WEIGHT_LABEL: &'static str = "Weight";
 const STR_FONT_LABEL: &'static str = "Font";
 
+const STR_WEIGHT_200: &'static str = "Light";
+const STR_WEIGHT_400: &'static str = "Regular";
+const STR_WEIGHT_700: &'static str = "Bold";
+const STR_WEIGHT_900: &'static str = "Bolder";
+const STR_WEIGHT_CUSTOM: &'static str = "Custom";
+
+
+const WEIGHT_OPTIONS: &'static [u16] = &[200, 400, 700, 900];
+
+fn readable_weight(weight: Weight) -> &'static str {
+    match weight {
+        200 => STR_WEIGHT_200,
+        400 => STR_WEIGHT_400,
+        700 => STR_WEIGHT_700,
+        900 => STR_WEIGHT_900,
+        _ => STR_WEIGHT_CUSTOM,
+    }
+}
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("text-editor-controls", {
@@ -18,10 +38,11 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "font")
                 .property("label", STR_FONT_LABEL)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| controls.font.to_string()))
-                .children(Font::iter().map(|font| render_font_option(state.clone(), font)))
+                // .style_signal("font-family", state.controls.signal_cloned().map(|controls| format!("'{}'", controls.font.to_string())))
+                .children(state.fonts.iter().map(|font| render_font_option(state.clone(), font)))
             }),
             html!("button-collection", {
-                .property("slot", "type")
+                .property("slot", "element")
                 .children(ElementType::iter()
                     .map(|element| render_element_option(state.clone(), element))
                 )
@@ -29,8 +50,8 @@ pub fn render(state: Rc<State>) -> Dom {
             html!("dropdown-select", {
                 .property("slot", "weight")
                 .property("label", STR_WEIGHT_LABEL)
-                .property_signal("value", state.controls.signal_cloned().map(|controls| controls.weight.to_string()))
-                .children(Weight::iter().map(|weight| render_weight_option(state.clone(), weight)))
+                .property_signal("value", state.controls.signal_cloned().map(|controls| readable_weight(controls.weight)))
+                .children(WEIGHT_OPTIONS.iter().map(|weight| render_weight_option(state.clone(), *weight)))
             }),
             html!("input-inc-dec", {
                 .property("slot", "font-size")
@@ -51,7 +72,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     html!("text-editor-control", {
                         .property("type", "bold")
                         .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.bold
+                            controls.weight == BOLD_WEIGHT
                         }))
                         .event(clone!(state => move |_: events::Click| {
                             state.toggle_bold();
@@ -90,7 +111,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             controls.indent_count > 0
                         }))
                         .event(clone!(state => move |_: events::Click| {
-                            let mut count: u8 = state.controls.lock_ref().indent_count + 1;
+                            let count: u8 = state.controls.lock_ref().indent_count + 1;
                             state.set_indent_count(count);
                         }))
                     }),
@@ -110,7 +131,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 ])
             }),
             html!("button-sidebar", {
-                .property("slot", "hewbrew-keyboard")
+                .property("slot", "hebrew-keyboard")
                 .property("mode", "keyboard")
             }),
             html!("button-sidebar", {
@@ -164,6 +185,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
 
 fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
     html!("li-check", {
+        .style("font-weight", weight.to_string())
         .property_signal("selected", state.controls.signal_cloned().map(clone!(state, weight => move |controls| {
             if controls.weight == weight {
                 true
@@ -171,15 +193,16 @@ fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
                 false
             }
         })))
-        .text(&weight.to_string())
+        .text(readable_weight(weight))
         .event(clone!(state, weight => move |_: events::Click| {
-            state.set_weight(weight.clone());
+            state.set_weight(weight);
         }))
     })
 }
 
-fn render_font_option(state: Rc<State>, font: Font) -> Dom {
+fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
     html!("li-check", {
+        .style("font-family", font_to_css(font))
         .property_signal("selected", state.controls.signal_cloned().map(clone!(state, font => move |controls| {
             if controls.font == font {
                 true

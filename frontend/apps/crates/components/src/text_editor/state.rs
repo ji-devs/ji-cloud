@@ -2,37 +2,105 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 use futures_signals::signal::Mutable;
+use utils::themes::{ThemeId, ThemeIdExt};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use js_sys::Reflect;
+use strum::IntoEnumIterator;
 
-use super::wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string};
-use super::super::color_select::actions::{hex_to_rgba8, rgba8_to_hex};
+use super::{
+    font_css_converter::font_to_css,
+    theme_element_styles::get_theme_element_styles, 
+    wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT}
+};
+use super::super::font_loader::{FontLoader, Font as StaticFont};
 
 pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
+    pub fonts: Vec<String>,
     pub on_change: Option<fn(s: &str)>,
+    pub value: Option<String>,
+    pub theme_id: ThemeId,
 }
 
 impl State {
-    pub fn new() -> Rc<Self> {
+    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: fn(s: &str)) -> Rc<Self> {
         Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
-            on_change: None,
+            fonts: Self::get_fonts(theme_id),
+            on_change: Some(on_change),
+            value,
+            theme_id
         })
     }
 
-    pub fn new_with_on_change(func: fn(s: &str)) -> Rc<Self> {
-        Rc::new(Self {
-            controls: Mutable::new(ControlsState::new()),
-            wysiwyg_ref: Rc::new(RefCell::new(None)),
-            on_change: Some(func),
-        })
+    fn get_fonts(theme: ThemeId) -> Vec<String> {
+        // load all fonts in background
+        spawn_local(async {
+            FontLoader::new().load_all().await;
+        });
+
+        let mut fonts: Vec<String> = Vec::from(theme.get_fonts());
+        let mut static_fonts: Vec<String> = StaticFont::iter().map(|font| {
+            String::from(font.get_font_name())
+        }).collect();
+        fonts.append(&mut static_fonts);
+        fonts
     }
 
     pub fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
+        let key = enum_variant_to_string(&ControlsChange::Element(ElementType::P1)) + &String::from("Default");
+        let _ = Reflect::set(
+            &wysiwyg_ref,
+            &JsValue::from_str(&key),
+            &JsValue::from_str(&ElementType::P1.to_string())
+        );
+
+        let (font, color, font_size) = get_theme_element_styles(&self.theme_id, &ElementType::P1);
+
+        let key = enum_variant_to_string(&ControlsChange::FontSize(0)) + &String::from("Default");
+        let _ = Reflect::set(
+            &wysiwyg_ref,
+            &JsValue::from_str(&key),
+            &JsValue::from_f64(font_size as f64)
+        );
+        let key = enum_variant_to_string(&ControlsChange::Font(String::new())) + &String::from("Default");
+        let _ = Reflect::set(
+            &wysiwyg_ref,
+            &JsValue::from_str(&key),
+            &JsValue::from_str(&font_to_css(&font))
+        );
+        let key = enum_variant_to_string(&ControlsChange::Color(None)) + &String::from("Default");
+        let _ = Reflect::set(
+            &wysiwyg_ref,
+            &JsValue::from_str(&key),
+            &JsValue::from_str(&color)
+        );
+
+        match &self.value {
+            Some(value) => {
+                let _ = Reflect::set(
+                    &wysiwyg_ref,
+                    &JsValue::from_str("valueAsString"),
+                    &JsValue::from_str(&value)
+                );
+            },
+            None => {
+                let base_value = Reflect::get(
+                    &wysiwyg_ref,
+                    &JsValue::from_str("baseValue")
+                ).unwrap();
+                let _ = Reflect::set(
+                    &wysiwyg_ref,
+                    &JsValue::from_str("value"),
+                    &base_value
+                );
+            },
+        };
+
         *self.wysiwyg_ref.borrow_mut() = Some(wysiwyg_ref);
     }
 
@@ -40,13 +108,17 @@ impl State {
     // Suggestion: might be a good idea to remove all this and just have the event listener trigger the update to the element and have the change propagate up.
     pub fn toggle_bold(&self) {
         let mut controls = self.controls.lock_mut();
-        controls.bold = !controls.bold;
+        controls.weight = if controls.weight == BOLD_WEIGHT {
+            REGULAR_WEIGHT
+        } else {
+            BOLD_WEIGHT
+        };
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Bold(false))),
-                &JsValue::from_bool(controls.bold)
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Weight(0))),
+                &JsValue::from_f64(controls.weight as f64)
             );
         }
     }
@@ -55,7 +127,7 @@ impl State {
         controls.italic = !controls.italic;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Italic(false))),
                 &JsValue::from_bool(controls.italic));
@@ -67,7 +139,7 @@ impl State {
         controls.underline = !controls.underline;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Underline(false))),
                 &JsValue::from_bool(controls.underline));
@@ -79,7 +151,7 @@ impl State {
         controls.align = align;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Align(Align::Left))),
                 &JsValue::from_str(&controls.align.to_string())
@@ -92,7 +164,7 @@ impl State {
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
             // &JsValue::from_f64 might be replace with something that converts u8 directly 
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::FontSize(0))),
                 &JsValue::from_f64(controls.font_size as f64)
@@ -104,7 +176,7 @@ impl State {
         controls.indent_count = indent_count;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::IndentCount(0))),
                 &JsValue::from_f64(controls.indent_count as f64)
@@ -120,7 +192,7 @@ impl State {
                 Some(color) => JsValue::from_str(&color),
                 None => JsValue::UNDEFINED,
             };
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Color(None))),
                 &js_value
@@ -136,24 +208,22 @@ impl State {
                 Some(color) => JsValue::from_str(&color),
                 None => JsValue::UNDEFINED,
             };
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::HighlightColor(None))),
                 &js_value
             );
         }
     }
-    pub fn set_font
-    (&self, font: Font) {
+    pub fn set_font(&self, font: Font) {
         let mut controls = self.controls.lock_mut();
         controls.font = font;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Font(Font::Arial))),
-                &JsValue::from_str(&controls.font.to_string())
-                // &JsValue::from_str(&enum_variant_to_string(&controls.font))
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Font(String::new()))),
+                &JsValue::from_str(&font_to_css(&controls.font.to_string()))
             );
         }
     }
@@ -161,12 +231,35 @@ impl State {
         let mut controls = self.controls.lock_mut();
         controls.element = element;
 
+        let element_styles = get_theme_element_styles(&self.theme_id, &controls.element);
+        controls.font = element_styles.0;
+        controls.color = Some(element_styles.1);
+        controls.font_size = element_styles.2;
+
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
                 &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Element(ElementType::P1))),
                 &JsValue::from_str(&controls.element.to_string())
-                // &JsValue::from_str(&enum_variant_to_string(&controls.element))
+            );
+            let js_color = match &controls.color {
+                Some(color) => JsValue::from_str(&color),
+                None => JsValue::UNDEFINED,
+            };
+            let _ = Reflect::set(
+                wysiwyg_ref,
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Color(None))),
+                &js_color
+            );
+            let _ = Reflect::set(
+                wysiwyg_ref,
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::FontSize(0))),
+                &JsValue::from_f64(controls.font_size as f64)
+            );
+            let _ = Reflect::set(
+                wysiwyg_ref,
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Font(String::new()))),
+                &JsValue::from_str(&font_to_css(&controls.font.to_string()))
             );
         }
     }
@@ -175,11 +268,10 @@ impl State {
         controls.weight = weight;
 
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            Reflect::set(
+            let _ = Reflect::set(
                 wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Weight(Weight::Normal))),
-                &JsValue::from_str(&controls.weight.to_string())
-                // &JsValue::from_str(&enum_variant_to_string(&controls.weight))
+                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Weight(0))),
+                &JsValue::from_f64(controls.weight as f64)
             );
         }
     }
