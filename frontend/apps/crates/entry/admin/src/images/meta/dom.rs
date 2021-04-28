@@ -58,6 +58,7 @@ impl ImageMetaPage {
                                     q,
                                     page: None, 
                                     styles: Vec::new(),
+                                    tags: Vec::new(),
                                     age_ranges: Vec::new(),
                                     affiliations: Vec::new(),
                                     categories: Vec::new(),

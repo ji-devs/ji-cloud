@@ -33,6 +33,7 @@ pub fn on_file(state: Rc<State>, file: File) {
             description: "".to_string(),
             is_premium: false,
             publish_at: None,
+            tags: Vec::new(),
             styles: Vec::new(),
             age_ranges: Vec::new(),
             affiliations: Vec::new(),
