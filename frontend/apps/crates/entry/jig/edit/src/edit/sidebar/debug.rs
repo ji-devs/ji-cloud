@@ -26,7 +26,7 @@ pub fn get_jig() -> Jig {
                 kind: Some(ModuleKind::TappingBoard)
             },
         ],
-        content_types: Vec::new(),
+        goals: Vec::new(),
         creator_id: None,
         author_id: None,
         publish_at: None,
