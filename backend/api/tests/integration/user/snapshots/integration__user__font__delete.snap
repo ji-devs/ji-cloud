@@ -1,0 +1,13 @@
+---
+source: tests/integration/user/font.rs
+expression: body
+
+---
+{
+  "fonts": [
+    "ShesekRegular",
+    "ArchitectsDaughterRegular",
+    "RobotoSlabRegular",
+    "CaveatMedium"
+  ]
+}

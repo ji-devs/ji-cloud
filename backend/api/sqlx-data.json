@@ -598,6 +598,26 @@
       "nullable": []
     }
   },
+  "2bd84d9adf22276059675bc42cb1bd8491124d832dc67ad735c8e69ced0af204": {
+    "query": "\nselect font_name\nfrom user_font\nwhere user_id = $1\norder by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "font_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -906,6 +926,19 @@
       ]
     }
   },
+  "43fe8702f219dcd783e0f253f7dfe3c1786829a7dc2d043a8e79eb3deaf061e9": {
+    "query": "\nupdate user_font\nset index = index - 1\nwhere index > $2 and user_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "44559bdf72e9071b9dd849039e4ae6ccf90281a3e751b1bd2ff5ecf18132e53e": {
     "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask) values ($1, $2, $3, $4, $5)",
     "describe": {
@@ -947,6 +980,27 @@
       "nullable": [
         false,
         false
+      ]
+    }
+  },
+  "4b59765bf5f97002c95e723a2d831e75df863ce1f73be3c0cc7714aee57b54a7": {
+    "query": "\nselect exists(\n        select 1\n        from user_font\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1283,6 +1337,27 @@
         false,
         false,
         true
+      ]
+    }
+  },
+  "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
+    "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "discard",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -2135,6 +2210,20 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "b32a4604427bb9a4fa12f3f8e672499f9a44d1bf576834e99afb8535d5fc5f61": {
+    "query": "\nupdate user_font \n    set font_name = $3\n    where user_id = $1\n    and index = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
@@ -3187,6 +3276,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "fe7e4d90cd3e6bf8ef26b421d1bc8f40045bcee6141874a87bd426a06d099e3f": {
+    "query": "\nwith cte as (\n    insert into user_font\n    (user_id, font_name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning font_name\n), font_names as (\n    select font_name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect font_name as \"font_name!\" from font_names\nunion all\nselect font_name as \"font_name!\" from cte\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "font_name!",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   }
 }

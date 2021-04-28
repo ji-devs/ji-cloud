@@ -6,6 +6,7 @@ use crate::{
 };
 
 mod color;
+mod font;
 
 #[actix_rt::test]
 async fn get_profile() -> anyhow::Result<()> {
