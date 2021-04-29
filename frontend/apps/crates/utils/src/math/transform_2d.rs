@@ -1,4 +1,21 @@
+
+
 // 2d matrix math taken from glmatrix: http://glmatrix.net/docs/mat2d.js.html
+
+pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
+    let out:[f64;6] = [
+        mat[0],
+        mat[1],
+        mat[4],
+        mat[5],
+        mat[8],
+        mat[9],
+    ];
+
+    log::info!("{:?}", out);
+    out
+}
+
 pub fn translate_mut(transform:&mut [f64;6], x:f64, y: f64) {
     let a = transform;
     let a0 = a[0];

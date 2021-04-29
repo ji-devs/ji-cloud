@@ -13,11 +13,21 @@ use std::rc::Rc;
 use crate::data::{raw, state::*};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
-use shared::domain::jig::{JigId, module::ModuleId};
 use uuid::Uuid;
-use shared::domain::jig::module::body::Instructions as RawInstructions;
+use shared::{
+    domain::{
+        jig::{
+            module::body::{Sprite, Instructions},
+            JigId, module::ModuleId
+        },
+        image::ImageId,
+        audio::AudioId
+    },
+    media::MediaLibrary
+};
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
+const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
 
 #[derive(Debug)]
 pub struct DebugSettings {
@@ -47,13 +57,18 @@ impl DebugSettings {
         DebugSettings {
             data: Some(
                 if with_data {
-                    raw::ModuleData::new(
-                        ThemeId::Chalkboard, 
-                        RawInstructions::default(),
-                    )
+                    raw::ModuleData{
+                        theme_id: ThemeId::Chalkboard, 
+                        instructions: Instructions::default(),
+                        stickers: vec![
+                            Sprite::new(ImageId(Uuid::parse_str(STRING_UUID).unwrap_ji()), MediaLibrary::Global)
+                        ],
+                        ..raw::ModuleData::default()
+                    }
                 } else {
                     raw::ModuleData{
-                        theme_id: ThemeId::Chalkboard,
+                        theme_id: ThemeId::Chalkboard, 
+                        instructions: Instructions::default(),
                         ..raw::ModuleData::default()
                     }
                 }

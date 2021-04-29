@@ -138,19 +138,6 @@ impl GoogleLocation {
     }
 }
 
-
-// #[derive(Deserialize, Debug)]
-// pub struct CustomFileData {
-//     pub file: File,
-// }
-
-// make_custom_event_serde!("custom-file", CustomFile, CustomFileData);
-
-// impl CustomFile {
-//     pub fn file(&self) -> File {
-//         self.file().file
-//     }
-// }
 make_custom_event!(CustomFile, "custom-file");
 
 impl CustomFile {
@@ -174,3 +161,5 @@ impl ImageLoad {
         (width, height)
     }
 }
+
+

@@ -166,7 +166,7 @@ impl Drag {
         self.mouse_x.store(mouse.x, SeqCst);
         self.mouse_y.store(mouse.y, SeqCst);
     }
-    pub fn update(&self, x:i32, y:i32) -> Option<PointI32> {
+    pub fn update(&self, x:i32, y:i32) -> Option<(PointI32, PointI32)> {
 
         let prev_mouse = self.get_mouse();
         let next_mouse = PointI32::new(x, y);
@@ -175,7 +175,7 @@ impl Drag {
             DragState::Waiting(wait) => {
                 wait.accum += diff;
                 let next_state = {
-                    if wait.accum.x > MOVE_THRESHHOLD || wait.accum.y > MOVE_THRESHHOLD {
+                    if wait.accum.x.abs() > MOVE_THRESHHOLD || wait.accum.y.abs() > MOVE_THRESHHOLD {
                         self.pos.set(PointI32::new(
                             next_mouse.x - wait.anchor.x as i32, 
                             next_mouse.y - wait.anchor.y as i32
@@ -206,6 +206,6 @@ impl Drag {
             self.pos.set(next_pos);
         }
 
-        next_pos
+        next_pos.map(|next_pos| (next_pos, diff))
     }
 }

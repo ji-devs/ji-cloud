@@ -15,3 +15,4 @@ pub mod font_loader;
 pub mod instructions;
 pub mod animation;
 pub mod audio_player;
+pub mod transform;

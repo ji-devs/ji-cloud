@@ -8,12 +8,14 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
+use super::stickers::dom::StickersDom;
 
 pub struct MainDom {}
 impl MainDom {
     pub fn render(state:Rc<State>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
+            .child(StickersDom::render(state))
         })
     }
 }

@@ -1,4 +1,4 @@
-use crate::domain::jig::module::body::{Instructions, ThemeId};
+use crate::domain::jig::module::body::{Instructions, ThemeId, Sprite};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
@@ -12,14 +12,7 @@ pub struct ModuleData {
 
     /// The ID of the module's theme.
     pub theme_id: ThemeId,
-}
 
-impl ModuleData {
-    /// Create a new Poster with the given theme and instructions.
-    pub fn new(theme_id: ThemeId, instructions: Instructions) -> Self {
-        Self {
-            instructions,
-            theme_id,
-        }
-    }
+    /// Stickers 
+    pub stickers: Vec<Sprite>,
 }

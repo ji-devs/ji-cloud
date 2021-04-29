@@ -1,4 +1,4 @@
-use crate::{domain::audio::AudioId, media::MediaLibrary};
+use crate::{domain::{image::ImageId, audio::AudioId}, media::MediaLibrary};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
@@ -78,4 +78,64 @@ pub struct Instructions {
 
     /// Audio played on module start
     pub audio: Option<Audio>,
+}
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Sprites are a combo of image + transform
+pub struct Sprite {
+    /// The Image Id
+    pub id: ImageId,
+    /// The MediaLibrary
+    pub lib: MediaLibrary,
+    /// The Transform 
+    pub transform: Transform,
+}
+
+impl Sprite {
+    /// Create a new Sprite
+    pub fn new(id: ImageId, lib: MediaLibrary) -> Self {
+        Self {
+            id,
+            lib,
+            transform: Transform::new()
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Vector of 3 floats
+pub struct Vec3(pub [f64;3]);
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Vector of 4 floats, also used as a Quaternion
+pub struct Vec4(pub [f64;4]);
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Visual Transform 
+pub struct Transform {
+    /// Translation
+    pub translation: Vec3, 
+    /// Rotation Quaternion 
+    pub rotation: Vec4, 
+    /// Scale for each axis
+    pub scale: Vec3, 
+    /// Origin 
+    pub origin: Vec3, 
+}
+
+impl Transform {
+    /// Create a new Transform 
+    pub fn new() -> Self {
+        Self {
+            translation: Vec3([0.0, 0.0, 0.0]),
+            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
+            scale: Vec3([1.0, 1.0, 1.0]),
+            origin: Vec3([0.0, 0.0, 0.0]),
+        }
+    }
 }

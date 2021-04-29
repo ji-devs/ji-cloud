@@ -28,3 +28,4 @@ import "@elements/module/_common/preview-header";
 import "@elements/module/_common/sidebar";
 import "@elements/module/_common/sidebar-body";
 import "@elements/module/_common/widgets/header-controller";
+import "@elements/module/_common/widgets/transform/box";

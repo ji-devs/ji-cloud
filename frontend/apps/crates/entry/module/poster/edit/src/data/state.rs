@@ -26,7 +26,10 @@ use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
 use utils::prelude::*;
 use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
-use crate::overlay::state::State as OverlayState;
+use crate::{
+    steps::main::stickers::state::Stickers,
+    overlay::state::State as OverlayState,
+};
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 //
 //Basically, the type of these callbacks are closures created from *inside*
@@ -39,6 +42,7 @@ use crate::overlay::state::State as OverlayState;
 pub type HistoryStateImpl = HistoryState<raw::ModuleData, HistoryChangeFn, HistoryUndoRedoFn>;
 
 pub struct State {
+    //Common state stuff
     pub jig_id: JigId,
     pub module_id: ModuleId,
     pub step: Mutable<Step>,
@@ -48,6 +52,9 @@ pub struct State {
     pub save_loader: Rc<AsyncLoader>,
     pub overlay: OverlayState,
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
+
+    //Poster-specific
+    pub stickers: Stickers, 
 }
 
 impl State {
@@ -75,7 +82,9 @@ impl State {
             history: RefCell::new(None),
             save_loader,
             instructions,
-            overlay: OverlayState::new()
+            overlay: OverlayState::new(),
+
+            stickers: Stickers::new(raw_data.stickers.clone())
         });
 
         let history = Rc::new(HistoryState::new(
@@ -104,7 +113,7 @@ impl State {
                 if step == Step::Four {
                     ModulePageKind::GridResizePreview
                 } else {
-                    ModulePageKind::GridResizeScrollable
+                    ModulePageKind::GridResize
                 }
             })
     }
