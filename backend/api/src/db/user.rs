@@ -334,38 +334,38 @@ where index > $2 and user_id = $1
 pub async fn create_font(
     db: &sqlx::PgPool,
     user_id: Uuid,
-    font_name: String,
+    name: String,
 ) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
         r#"
 with cte as (
     insert into user_font
-    (user_id, font_name, index)
-    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning font_name
-), font_names as (
-    select font_name
+    (user_id, name, index)
+    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning name
+), names as (
+    select name
     from user_font
     where user_id = $1
     order by index
 )
-select font_name as "font_name!" from font_names
+select name as "name!" from names
 union all
-select font_name as "font_name!" from cte
+select name as "name!" from cte
         "#,
         user_id,
-        font_name
+        name
     )
     .fetch_all(db)
     .await?;
 
-    Ok(font_names.into_iter().map(|it| it.font_name).collect())
+    Ok(font_names.into_iter().map(|it| it.name).collect())
 }
 
 pub async fn update_font(
     db: &sqlx::PgPool,
     user_id: Uuid,
     index: u16,
-    font_name: String,
+    name: String,
 ) -> sqlx::Result<bool> {
     let mut txn = db.begin().await?;
 
@@ -393,13 +393,13 @@ select exists(
     sqlx::query!(
         r#"
 update user_font 
-    set font_name = $3
+    set name = $3
     where user_id = $1
     and index = $2
         "#,
         user_id,
         index as i16,
-        font_name
+        name
     )
     .execute(&mut txn)
     .await?;
@@ -412,7 +412,7 @@ update user_font
 pub async fn get_fonts(db: &sqlx::PgPool, user_id: Uuid) -> sqlx::Result<Vec<String>> {
     let font_names = sqlx::query!(
         r#"
-select font_name
+select name
 from user_font
 where user_id = $1
 order by index
@@ -422,7 +422,7 @@ order by index
     .fetch_all(db)
     .await?;
 
-    Ok(font_names.into_iter().map(|it| it.font_name).collect())
+    Ok(font_names.into_iter().map(|it| it.name).collect())
 }
 
 pub async fn delete_font(db: &sqlx::PgPool, user_id: Uuid, index: u16) -> sqlx::Result<()> {
