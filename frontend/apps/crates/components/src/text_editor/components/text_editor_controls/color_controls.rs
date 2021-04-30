@@ -6,7 +6,7 @@ use utils::prelude::*;
 use futures_signals::signal::SignalExt;
 use wasm_bindgen_futures::spawn_local;
 use futures::future::ready;
-use rgb::{RGB8, RGBA8};
+use rgb::RGBA8;
 use crate::color_select::{
     self,
     state::ColorSelectConfig,
@@ -65,7 +65,7 @@ pub fn render(state: Rc<State>) -> Dom {
             .child(html!("text-editor-controls-overlay-shadow", {
                 .property("slot", "overlay")
                 .child(color_select::dom::render(ColorSelectConfig {
-                    theme: None,
+                    theme: Some(state.theme_id),
                     value: select_value.clone()
                 }, None))
             }))

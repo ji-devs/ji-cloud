@@ -39,13 +39,16 @@ export class _ extends LitElement {
                 :host([open]) .label {
                     color: var(--dark-blue-3);
                 }
-                .input .value {
+                .input .value, .input .placeholder {
                     grid-column: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .input .value {
                     color: var(--dark-gray-6);
                 }
                 .input .placeholder {
-                    grid-column: 1;
-                    grid-row: 2;
                     color: var(--light-gray-4);
                 }
                 .input .icon {
@@ -102,7 +105,7 @@ export class _ extends LitElement {
                 <div slot="anchor" class="input" @click=${() => this.toggleOpen()}>
                     ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
                     ${ this.value ? (
-                        html`<span class="value">${this.value}</span>`
+                        html`<span class="value" title="${this.value}">${this.value}</span>`
                     ) : (
                         html`<span class="placeholder">${this.placeholder}</span>`
                     )}

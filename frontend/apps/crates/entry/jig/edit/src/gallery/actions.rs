@@ -36,7 +36,7 @@ pub fn create_jig(state: Rc<State>) {
         
         let req = Some(JigCreateRequest {
             display_name: None,
-            content_types: Vec::new(),
+            goals: Vec::new(),
             publish_at: None,
         });
 
@@ -55,7 +55,7 @@ pub fn copy_jig(state: Rc<State>, jig: &Jig) {
     let cloned = jig.clone();
     let req = Some(JigCreateRequest {
         display_name: cloned.display_name.clone(),
-        content_types: cloned.content_types.clone(),
+        goals: cloned.goals.clone(),
         publish_at: None,
     });
 
@@ -66,7 +66,7 @@ pub fn copy_jig(state: Rc<State>, jig: &Jig) {
                     id: resp.id,
                     display_name: cloned.display_name.clone(),
                     modules: Vec::new(),
-                    content_types: cloned.content_types.clone(),
+                    goals: cloned.goals.clone(),
                     creator_id: None,
                     author_id: None,
                     publish_at: None,

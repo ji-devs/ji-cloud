@@ -10,7 +10,6 @@ export type CustomElement = {
 }
 export type CustomText = {
     text: string;
-    bold: boolean;
     underline: boolean;
     italic: boolean;
     color: Color;
@@ -39,7 +38,7 @@ export class EditorBackbone {
 
     public readonly keyMaps = new Map([
         ['u', () => this.toggleMark('underline')],
-        ['b', () => this.toggleMark('bold')],
+        // ['b', () => this.toggleMark('bold')],
         ['i', () => this.toggleMark('italic')],
     ]);
 

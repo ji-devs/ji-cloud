@@ -12,6 +12,8 @@ use futures::stream::{FuturesUnordered, StreamExt};
 use wasm_bindgen_futures::JsFuture;
 use utils::{path, prelude::*};
 
+use strum_macros::EnumIter;
+
 const LOAD_BATCH_SIZE:usize = 10;
 
 const ALL_FONTS:[Font;5] = [
@@ -22,7 +24,7 @@ const ALL_FONTS:[Font;5] = [
     Font::CaveatMedium,
 ];
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, EnumIter)]
 pub enum Font {
     ShesekRegular,
     FrankRuhlMedium,
@@ -41,11 +43,11 @@ struct LoaderInfo {
 impl Font {
     fn get_loader_info(self) -> LoaderInfo {
         let (name, filepath, format) = match self {
-            Self::ShesekRegular => ("Shesek - Regular", "shesek-regular-fm.woff2", "woff2"),
-            Self::FrankRuhlMedium => ("Frank Ruhl Libre - Medium", "Frank_Ruhl_Libre/FrankRuhlLibre-Medium.ttf", "truetype"),
-            Self::ArchitectsDaughterRegular => ("Architects Daughter - Regular", "Architects_Daughter/ArchitectsDaughter-Regular.ttf", "truetype"),
-            Self::RobotoSlabRegular => ("Roboto Slab - Regular", "Roboto_Slab/static/RobotoSlab-Regular.ttf", "truetype"),
-            Self::CaveatMedium=> ("Caveat - Medium", "Caveat/static/Caveat-Medium.ttf", "truetype"),
+            Self::ShesekRegular => (self.get_font_name(), "shesek-regular-fm.woff2", "woff2"),
+            Self::FrankRuhlMedium => (self.get_font_name(), "Frank_Ruhl_Libre/FrankRuhlLibre-Medium.ttf", "truetype"),
+            Self::ArchitectsDaughterRegular => (self.get_font_name(), "Architects_Daughter/ArchitectsDaughter-Regular.ttf", "truetype"),
+            Self::RobotoSlabRegular => (self.get_font_name(), "Roboto_Slab/static/RobotoSlab-Regular.ttf", "truetype"),
+            Self::CaveatMedium=> (self.get_font_name(), "Caveat/static/Caveat-Medium.ttf", "truetype"),
         };
 
         let unicode_range = match self {
@@ -59,6 +61,16 @@ impl Font {
             url: path::ui(&format!("fonts/{}", filepath)),
             format, 
             unicode_range
+        }
+    }
+
+    pub fn get_font_name(self) -> &'static str {
+        match self {
+            Self::ShesekRegular => "Shesek - Regular",
+            Self::FrankRuhlMedium => "Frank Ruhl Libre - Medium",
+            Self::ArchitectsDaughterRegular => "Architects Daughter - Regular",
+            Self::RobotoSlabRegular => "Roboto Slab - Regular",
+            Self::CaveatMedium => "Caveat - Medium",
         }
     }
 }

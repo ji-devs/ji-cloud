@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -13,21 +13,11 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                h1, h2, p {
+                p {
                     margin: 0;
-                    font-weight: normal;
-                }
-                h1 {
-                    font-size: 34px;
-                }
-                h2 {
-                    font-size: 23px;
-                }
-                p[p1] {
-                    font-size: 16px;
-                }
-                p[p2] {
-                    font-size: 14px;
+                    font-size: ${unsafeCSS(getDefault('fontSize'))};
+                    font-family: ${unsafeCSS(getDefault('font'))};
+                    font-weight: ${unsafeCSS(getDefault('weight'))};
                 }
             `,
         ];
@@ -79,12 +69,6 @@ export class _ extends LitElement {
         this._fontSize = v;
     }
 
-    private _bold = getDefault('bold');
-    public set bold(v: boolean) {
-        this.backbone.setValue("bold", v);
-        this._bold = v;
-    }
-
     private _italic = getDefault('italic');
     public set italic(v: boolean) {
         this.backbone.setValue("italic", v);
@@ -107,17 +91,32 @@ export class _ extends LitElement {
     @query("#editorRoot")
     editorRoot!: HTMLElement;
 
-    private static baseValue: any[] = [
-        {
-            element: ElementType.P1,
-            children: [{ text: '' }],
-        },
-    ];
+    elementDefault?: ElementType;
+    fontDefault?: Font;
+    fontSizeDefault?: FontSize;
+    colorDefault?: Color;
 
-    private value: Descendant[] = _.baseValue;
+    private get baseValue(): Descendant[] {
+        let v = [
+            {
+                children: [{
+                    text: ''
+                }],
+            },
+        ] as any;
+
+        if(this.elementDefault) v[0].element = this.elementDefault;
+        if(this.fontDefault) v[0].children[0].font = this.fontDefault;
+        if(this.fontSizeDefault) v[0].children[0].fontSize = this.fontSizeDefault;
+        if(this.colorDefault) v[0].children[0].color = this.colorDefault;
+
+        return v;
+    }
+
+    private value: Descendant[] = this.baseValue;
 
     public set valueAsString(v: string) {
-        if (!v) this.value = _.baseValue;
+        if (!v) this.value = this.baseValue;
         else this.value = JSON.parse(v);
         this.reactRender();
     }
@@ -135,7 +134,7 @@ export class _ extends LitElement {
             }
         }));
     }
-    
+
     private change(value: Descendant[]) {
         this.checkForControlsChange();
         this.checkForValueChangeChange(value);
@@ -159,11 +158,6 @@ export class _ extends LitElement {
         if(this._fontSize != leafFontSize) {
             this._fontSize = leafFontSize;
             this.controlsChange("fontSize", leafFontSize);
-        }
-        const leafBold = leaf?.bold || getDefault('bold');
-        if(this._bold != leafBold) {
-            this._bold = leafBold;
-            this.controlsChange("bold", leafBold);
         }
         const leafItalic = leaf?.italic || getDefault('italic');
         if(this._italic != leafItalic) {
@@ -221,7 +215,6 @@ export class _ extends LitElement {
     private _blurSelection?: BaseSelection;
     private onBlur() {
         this._blurSelection = this.backbone.editor.selection;
-        console.log(this._blurSelection);
     }
 
     private reFocus() {

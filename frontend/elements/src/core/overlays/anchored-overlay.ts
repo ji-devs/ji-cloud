@@ -24,6 +24,7 @@ export class _ extends LitElement {
                     display: none;
                     position: absolute;
                     background-color: #ffffff;
+                    z-index: 1;
                 }
                 :host([open]) .backdrop, :host([open]) .overlay {
                     display: block;

@@ -8,20 +8,25 @@
 	
     "chalkboard": {
         "colors": [
-            "0xFF0000",
-            "0x00FF00"
+            "0x272727",
+            "0xAFCBF4",
+            "0xD8E7FA"
         ],
 		"fonts": [
+            "Shesek - Regular, Architects Daughter - Regular",
+            "Shesek - Regular, Roboto Slab - Regular",
+            "Frank Ruhl Libre - Medium, Architects Daughter - Regular"
 		]
     },
     "happy_brush": {
         "colors": [
-            "0xbbccf1",
-            "0xe6e6e1",
-            "0x808081",
-            "0x1a1a11"
+            "0x272727",
+            "0xFF6639",
+            "0xFFF3ED"
         ],
 		"fonts": [
+            "Frank Ruhl Libre - Medium, Roboto Slab - Medium",
+            "Shesek - Regular, Caveat - Medium"
 		]
     }
 }

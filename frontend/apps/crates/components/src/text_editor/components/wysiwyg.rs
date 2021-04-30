@@ -1,7 +1,8 @@
 use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::SignalExt};
 use std::rc::Rc;
 use utils::prelude::*;
+use crate::text_editor::font_css_converter::font_from_css;
+
 use super::super::{
     wysiwyg_types::{WysiwygControlsChange, ControlsChange},
     state::State,
@@ -18,7 +19,7 @@ pub fn render(state: Rc<State>) -> Dom {
             match value {
                 ControlsChange::Font(font) => {
                     let mut controls = state.controls.lock_mut();
-                    controls.font = font;
+                    controls.font = font_from_css(&font);
                 },
                 ControlsChange::Element(element_type) => {
                     let mut controls = state.controls.lock_mut();
@@ -28,10 +29,6 @@ pub fn render(state: Rc<State>) -> Dom {
                     let mut controls = state.controls.lock_mut();
                     controls.weight = weight;
                 },
-                ControlsChange::Bold(bold) => {
-                    let mut controls = state.controls.lock_mut();
-                    controls.bold = bold;
-                }
                 ControlsChange::Italic(italic) => {
                     let mut controls = state.controls.lock_mut();
                     controls.italic = italic;

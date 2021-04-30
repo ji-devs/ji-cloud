@@ -4,8 +4,7 @@
 export type Color = string;
 export type FontSize = number;
 export type IndentCount = number;
-
-export type Font = "arial" | "roboto" | "open-sans";
+export type Font = string;
 
 export enum ElementType {
     H1 = "H1",
@@ -13,12 +12,7 @@ export enum ElementType {
     P1 = "P1",
     P2 = "P2",
 }
-export enum Weight {
-    Bolder = "Bolder",
-    Bold = "Bold",
-    Normal = "Normal",
-    Lighter = "Lighter",
-}
+export type Weight = number;
 export enum Align {
     Left = "Left",
     Center = "Center",
@@ -33,19 +27,17 @@ export interface ControllerState {
     fontSize: FontSize,
     color?: Color,
     highlightColor?: Color,
-    bold: boolean,
     italic: boolean,
     underline: boolean,
     indentCount: IndentCount;
 }
 
 export const defaultState: ControllerState = {
-    font: 'arial',
+    font: '"Roboto Slab - Regular"',
     element: ElementType.P1,
-    weight: Weight.Normal,
+    weight: 400,
     align: Align.Left,
-    fontSize: 10,
-    bold: false,
+    fontSize: 16,
     italic: false,
     underline: false,
     indentCount: 0,

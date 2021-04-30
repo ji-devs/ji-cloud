@@ -48,7 +48,6 @@ pub fn render(config: ColorSelectConfig, slot: Option<&str>) -> Dom {
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
     html!("color-select", {
-        .child(render_static_section(state.clone(), state.system_colors.as_ref(), STR_SYSTEM_COLORS_LABEL))
         .apply(|dom| {
             match state.theme_colors.as_ref() {
                 Some(colors) => dom.child(
@@ -57,6 +56,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
                 None => dom,
             }
         })
+        .child(render_static_section(state.clone(), state.system_colors.as_ref(), STR_SYSTEM_COLORS_LABEL))
         .child(render_add_color(state.clone()))
         .child_signal(state.user_colors.signal_vec_cloned().to_signal_cloned().map(clone!(state => move |user_colors| {
             if user_colors.len() > 0 {
