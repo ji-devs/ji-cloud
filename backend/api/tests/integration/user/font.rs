@@ -40,7 +40,7 @@ async fn update() -> anyhow::Result<()> {
 
     let resp = client
         .patch(&format!("http://0.0.0.0:{}/v1/user/me/font/3", port))
-        .json(&json!({ "font_name": "ArialBlackRegular" }))
+        .json(&json!({ "name": "ArialBlackRegular" }))
         .login()
         .send()
         .await?
@@ -107,7 +107,7 @@ async fn create() -> anyhow::Result<()> {
 
     let resp = client
         .post(&format!("http://0.0.0.0:{}/v1/user/me/font", port))
-        .json(&json!({ "font_name": "ComputerModernRegular" }))
+        .json(&json!({ "name": "ComputerModernRegular" }))
         .login()
         .send()
         .await?

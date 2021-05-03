@@ -286,20 +286,18 @@ pub struct UserColorResponse {
     pub colors: Vec<rgb::RGBA8>,
 }
 
-/// Request for [`CreateFont`]
+/// Request for [`CreateFont`](crate::api::endpoints::user::CreateFont), [`UpdateFont`](crate::api::endpoints::user::UpdateFont)
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserFontNameRequest {
     /// Name of the font to add/change.
-    pub font_name: String,
+    pub name: String,
 }
 
-/// Response for [`CreateFont`]
+/// Response for [`GetFonts`](crate::api::endpoints::user::GetFonts)
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[cfg_attr(feature = "backend", openapi(empty))]
 pub struct UserFontResponse {
     /// Names of the user's fonts.
-    pub fonts: Vec<String>,
+    pub names: Vec<String>,
 }

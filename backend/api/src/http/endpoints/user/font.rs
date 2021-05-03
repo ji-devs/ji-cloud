@@ -22,8 +22,8 @@ pub async fn create(
 ) -> Result<CreatedJson<<CreateFont as ApiEndpoint>::Res>, error::Server> {
     let user_id = claims.0.user_id;
 
-    let fonts = db::user::create_font(db.as_ref(), user_id, req.into_inner().font_name).await?;
-    Ok(CreatedJson(UserFontResponse { fonts }))
+    let names = db::user::create_font(db.as_ref(), user_id, req.into_inner().name).await?;
+    Ok(CreatedJson(UserFontResponse { names }))
 }
 
 #[api_v2_operation]
@@ -35,8 +35,7 @@ pub async fn update(
 ) -> Result<NoContent, error::NotFound> {
     let user_id = claims.0.user_id;
 
-    let exists =
-        db::user::update_font(db.as_ref(), user_id, *index, req.into_inner().font_name).await?;
+    let exists = db::user::update_font(db.as_ref(), user_id, *index, req.into_inner().name).await?;
 
     if !exists {
         return Err(error::NotFound::ResourceNotFound);
@@ -52,8 +51,8 @@ pub async fn get(
 ) -> Result<Json<<GetFonts as ApiEndpoint>::Res>, error::Server> {
     let user_id = claims.0.user_id;
 
-    let fonts = db::user::get_fonts(db.as_ref(), user_id).await?;
-    Ok(Json(UserFontResponse { fonts }))
+    let names = db::user::get_fonts(db.as_ref(), user_id).await?;
+    Ok(Json(UserFontResponse { names }))
 }
 
 #[api_v2_operation]

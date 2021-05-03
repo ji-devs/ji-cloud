@@ -4,7 +4,7 @@ expression: body
 
 ---
 {
-  "fonts": [
+  "names": [
     "ShesekRegular",
     "ArchitectsDaughterRegular",
     "RobotoSlabRegular",
