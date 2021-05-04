@@ -16,19 +16,21 @@ pub async fn create(
     goals: &[GoalId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
+    language: &str,
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
     let jig = sqlx::query!(
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at)
-values ($1, $2, $2, $3)
+    (display_name, creator_id, author_id, publish_at, language)
+values ($1, $2, $2, $3, $4)
 returning id
 "#,
         display_name,
         creator_id,
-        publish_at
+        publish_at,
+        language,
     )
     .fetch_one(&mut transaction)
     .await?;
@@ -69,6 +71,7 @@ select
     creator_id,
     author_id,
     publish_at,
+    language,
     array(
         select row (id, kind)
         from jig_module
@@ -85,6 +88,7 @@ where id = $1"#,
     .map(|row| Jig {
         id: row.id,
         display_name: row.display_name,
+        language: row.language,
         modules: row
             .modules
             .into_iter()
@@ -106,6 +110,7 @@ pub async fn update(
     author_id: Option<Uuid>,
     goals: Option<&[GoalId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
+    language: Option<&str>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -137,13 +142,16 @@ where id = $1 and $2 is distinct from publish_at"#,
 update jig
 set display_name  = coalesce($2, display_name),
     author_id  = coalesce($3, author_id),
+    language  = coalesce($4, language),
     updated_at  = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
-       ($3::uuid is not null and $3 is distinct from author_id))"#,
+       ($3::uuid is not null and $3 is distinct from author_id) or
+       ($4::text is not null and $4 is distinct from language))"#,
         id.0,
         display_name,
-        author_id
+        author_id,
+        language
     )
     .execute(&mut transaction)
     .await?;
@@ -181,6 +189,7 @@ select
     creator_id,
     author_id,
     publish_at,
+    language,
     array(
         select row (id, kind)
         from jig_module
@@ -203,6 +212,7 @@ limit 20 offset 20 * $2
     .map_ok(|row| Jig {
         id: row.id,
         display_name: row.display_name,
+        language: row.language,
         modules: row
             .modules
             .into_iter()
@@ -243,8 +253,8 @@ pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Op
 
     let new_id = sqlx::query!(
         r#"
-insert into jig (display_name, parents, creator_id, author_id)
-select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id from jig where id = $1
+insert into jig (display_name, parents, creator_id, author_id, language)
+select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language from jig where id = $1
 returning id
 "#,
         parent.0, user_id

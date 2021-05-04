@@ -15,7 +15,7 @@ select id                                                                 as "id
        created_at,
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       0::int8                                                            as "jig_count!"
+       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!"
 from category
 where parent_id is null
 order by index
@@ -44,7 +44,7 @@ select id                                                                 as "id
        created_at,
        updated_at,
        (select count(*)::int8 from image_category where category_id = id) as "image_count!",
-       0::int8                                                            as "jig_count!"
+       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!"
 
 from category
          inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
@@ -84,7 +84,7 @@ select id,
        created_at,
        updated_at,
        (select count(*) from image_category where category_id = id)::int8 as "image_count!",
-       0::int8                                                            as "jig_count!"
+       (select count(*) from jig_category where category_id = id)::int8 as "jig_count!"
 from category
 "#
     )
@@ -179,7 +179,7 @@ async fn update_slow(
 
     let category_info = sqlx::query!(
         r#"
-select parent_id, index from category where id = $1
+select parent_id, index from category where id = $1 for update
     "#,
         id
     )

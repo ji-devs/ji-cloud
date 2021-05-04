@@ -14,10 +14,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
-use crate::{
-    db, error,
-    extractor::{ScopeAdminJig, TokenUser, TokenUserWithScope},
-};
+use crate::{db, error, extractor::TokenUser};
 
 /// Create a jig.
 #[api_v2_operation]
@@ -37,6 +34,7 @@ async fn create(
         &req.goals,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
+        &req.language,
     )
     .await
     .map_err(db::meta::handle_metadata_err)?;
@@ -96,6 +94,7 @@ async fn update(
         req.author_id,
         req.goals.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
+        req.language.as_deref(),
     )
     .await?;
 

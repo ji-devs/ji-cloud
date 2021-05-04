@@ -90,6 +90,11 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub goals: Vec<GoalId>,
 
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    pub language: String,
+
     /// When the JIG should be considered published (if at all).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -118,6 +123,11 @@ pub struct Jig {
     /// The current author
     pub author_id: Option<Uuid>,
 
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    pub language: String,
+
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
 }
@@ -138,6 +148,13 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
+
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub language: Option<String>,
 
     /// The goals of this jig.
     #[serde(skip_serializing_if = "Option::is_none")]
