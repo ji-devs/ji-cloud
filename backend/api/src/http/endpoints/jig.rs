@@ -14,10 +14,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
-use crate::{
-    db, error,
-    extractor::{ScopeAdminJig, TokenUser, TokenUserWithScope},
-};
+use crate::{db, error, extractor::TokenUser};
 
 /// Create a jig.
 #[api_v2_operation]
@@ -26,17 +23,33 @@ async fn create(
     auth: TokenUser,
     req: Option<Json<<jig::Create as ApiEndpoint>::Req>>,
 ) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::CreateWithMetadata> {
-    db::jig::authz(&*db, auth.0.user_id, None).await?;
+    let db = db.as_ref();
+    db::jig::authz(db, auth.0.user_id, None).await?;
 
     let req = req.map_or_else(JigCreateRequest::default, Json::into_inner);
     let creator_id = auth.0.user_id;
+
+    let language = match req.language {
+        Some(lang) => lang,
+        None => {
+            sqlx::query!(
+                "select language from user_profile where user_id = $1",
+                auth.0.user_id
+            )
+            .fetch_one(db)
+            .await?
+            .language
+        }
+    };
 
     let id = db::jig::create(
         &*db,
         req.display_name.as_deref(),
         &req.goals,
+        &req.categories,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
+        &language,
     )
     .await
     .map_err(db::meta::handle_metadata_err)?;
@@ -95,7 +108,9 @@ async fn update(
         req.display_name.as_deref(),
         req.author_id,
         req.goals.as_deref(),
+        req.categories.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
+        req.language.as_deref(),
     )
     .await?;
 

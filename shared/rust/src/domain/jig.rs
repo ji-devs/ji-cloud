@@ -4,7 +4,7 @@ pub mod module;
 
 use std::{fmt, str::FromStr};
 
-use super::{meta::GoalId, Publish};
+use super::{category::CategoryId, meta::GoalId, Publish};
 use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -90,6 +90,18 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub goals: Vec<GoalId>,
 
+    /// The language the jig uses.
+    ///
+    /// If None, uses the user's language.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    pub language: Option<String>,
+
+    /// The jig's categories.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub categories: Vec<CategoryId>,
+
     /// When the JIG should be considered published (if at all).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
@@ -118,6 +130,14 @@ pub struct Jig {
     /// The current author
     pub author_id: Option<Uuid>,
 
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    pub language: String,
+
+    /// The jig's categories.
+    pub categories: Vec<CategoryId>,
+
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
 }
@@ -138,6 +158,18 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub display_name: Option<String>,
+
+    /// The language the jig uses.
+    ///
+    /// NOTE: in the format `en`, `eng`, `en-US`, `eng-US` or `eng-USA`. To be replaced with a struct that enforces this.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub language: Option<String>,
+
+    /// the jig's categories.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub categories: Option<Vec<CategoryId>>,
 
     /// The goals of this jig.
     #[serde(skip_serializing_if = "Option::is_none")]

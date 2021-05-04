@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
+    category::CategoryId,
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
     meta::GoalId,
     user::UserScope,
@@ -14,26 +15,30 @@ pub async fn create(
     pool: &PgPool,
     display_name: Option<&str>,
     goals: &[GoalId],
+    categories: &[CategoryId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
+    language: &str,
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
     let jig = sqlx::query!(
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at)
-values ($1, $2, $2, $3)
+    (display_name, creator_id, author_id, publish_at, language)
+values ($1, $2, $2, $3, $4)
 returning id
 "#,
         display_name,
         creator_id,
-        publish_at
+        publish_at,
+        language,
     )
     .fetch_one(&mut transaction)
     .await?;
 
     super::recycle_metadata(&mut transaction, "jig", jig.id, goals).await?;
+    super::recycle_metadata(&mut transaction, "jig", jig.id, categories).await?;
 
     let default_modules = [
         (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
@@ -69,13 +74,15 @@ select
     creator_id,
     author_id,
     publish_at,
+    language,
     array(
         select row (id, kind)
         from jig_module
         where jig_id = $1
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
+    array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -85,12 +92,14 @@ where id = $1"#,
     .map(|row| Jig {
         id: row.id,
         display_name: row.display_name,
+        language: row.language,
         modules: row
             .modules
             .into_iter()
             .map(|(id, kind)| LiteModule { id, kind })
             .collect(),
         goals: row.goals.into_iter().map(|(it,)| it).collect(),
+        categories: row.categories.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
@@ -105,7 +114,9 @@ pub async fn update(
     display_name: Option<&str>,
     author_id: Option<Uuid>,
     goals: Option<&[GoalId]>,
+    categories: Option<&[CategoryId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
+    language: Option<&str>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -137,19 +148,28 @@ where id = $1 and $2 is distinct from publish_at"#,
 update jig
 set display_name  = coalesce($2, display_name),
     author_id  = coalesce($3, author_id),
+    language  = coalesce($4, language),
     updated_at  = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
-       ($3::uuid is not null and $3 is distinct from author_id))"#,
+       ($3::uuid is not null and $3 is distinct from author_id) or
+       ($4::text is not null and $4 is distinct from language))"#,
         id.0,
         display_name,
-        author_id
+        author_id,
+        language
     )
     .execute(&mut transaction)
     .await?;
 
     if let Some(goals) = goals {
         super::recycle_metadata(&mut transaction, "jig", id.0, goals)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
+    }
+
+    if let Some(categories) = categories {
+        super::recycle_metadata(&mut transaction, "jig", id.0, categories)
             .await
             .map_err(super::meta::handle_metadata_err)?;
     }
@@ -181,13 +201,15 @@ select
     creator_id,
     author_id,
     publish_at,
+    language,
     array(
         select row (id, kind)
         from jig_module
         where jig_id = jig.id
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
+    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>"    
 from jig
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -203,12 +225,14 @@ limit 20 offset 20 * $2
     .map_ok(|row| Jig {
         id: row.id,
         display_name: row.display_name,
+        language: row.language,
         modules: row
             .modules
             .into_iter()
             .map(|(id, kind)| LiteModule { id, kind })
             .collect(),
         goals: row.goals.into_iter().map(|(it,)| it).collect(),
+        categories: row.categories.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
@@ -243,8 +267,8 @@ pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Op
 
     let new_id = sqlx::query!(
         r#"
-insert into jig (display_name, parents, creator_id, author_id)
-select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id from jig where id = $1
+insert into jig (display_name, parents, creator_id, author_id, language)
+select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language from jig where id = $1
 returning id
 "#,
         parent.0, user_id

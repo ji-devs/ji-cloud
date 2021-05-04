@@ -16,7 +16,7 @@ select distinct id as "id!",
        created_at,
        updated_at,
        (select count(*) from image_category where category_id = id)::int8 as "image_count!",
-       0::int8                                                            as "jig_count!"
+       (select count(*)::int8 from jig_category where category_id = id) as "jig_count!"
 
 from path
          inner join category using (id);
