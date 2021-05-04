@@ -22,6 +22,7 @@ expression: body
       "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
       "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
       "language": "en",
+      "categories": [],
       "publish_at": null
     }
   ],

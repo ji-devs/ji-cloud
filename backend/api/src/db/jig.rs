@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
+    category::CategoryId,
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
     meta::GoalId,
     user::UserScope,
@@ -14,6 +15,7 @@ pub async fn create(
     pool: &PgPool,
     display_name: Option<&str>,
     goals: &[GoalId],
+    categories: &[CategoryId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
     language: &str,
@@ -36,6 +38,7 @@ returning id
     .await?;
 
     super::recycle_metadata(&mut transaction, "jig", jig.id, goals).await?;
+    super::recycle_metadata(&mut transaction, "jig", jig.id, categories).await?;
 
     let default_modules = [
         (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
@@ -78,7 +81,8 @@ select
         where jig_id = $1
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
+    array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -95,6 +99,7 @@ where id = $1"#,
             .map(|(id, kind)| LiteModule { id, kind })
             .collect(),
         goals: row.goals.into_iter().map(|(it,)| it).collect(),
+        categories: row.categories.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
@@ -109,6 +114,7 @@ pub async fn update(
     display_name: Option<&str>,
     author_id: Option<Uuid>,
     goals: Option<&[GoalId]>,
+    categories: Option<&[CategoryId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
     language: Option<&str>,
 ) -> Result<(), error::UpdateWithMetadata> {
@@ -162,6 +168,12 @@ where id = $1
             .map_err(super::meta::handle_metadata_err)?;
     }
 
+    if let Some(categories) = categories {
+        super::recycle_metadata(&mut transaction, "jig", id.0, categories)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
+    }
+
     transaction.commit().await?;
 
     Ok(())
@@ -196,7 +208,8 @@ select
         where jig_id = jig.id
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
-    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>"
+    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
+    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>"    
 from jig
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -219,6 +232,7 @@ limit 20 offset 20 * $2
             .map(|(id, kind)| LiteModule { id, kind })
             .collect(),
         goals: row.goals.into_iter().map(|(it,)| it).collect(),
+        categories: row.categories.into_iter().map(|(it,)| it).collect(),
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
