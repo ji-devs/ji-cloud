@@ -690,26 +690,6 @@
       "nullable": []
     }
   },
-  "2bd84d9adf22276059675bc42cb1bd8491124d832dc67ad735c8e69ced0af204": {
-    "query": "\nselect font_name\nfrom user_font\nwhere user_id = $1\norder by index\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "font_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -2041,6 +2021,27 @@
       "nullable": []
     }
   },
+  "8f373a91b6dab0b7b89a03f5479b2ebe6dd2657bc06ebbe3aca37b1bac312f0e": {
+    "query": "\nwith cte as (\n    insert into user_font\n    (user_id, name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning name\n), names as (\n    select name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect name as \"name!\" from names\nunion all\nselect name as \"name!\" from cte\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name!",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "91ee22dc378de1a25690f2bc695064afe6472aef6b1f985562bded864f95ef8e": {
     "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nunion all\nselect id as \"id!\",\n    case variant\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
     "describe": {
@@ -2316,20 +2317,6 @@
       ]
     }
   },
-  "b32a4604427bb9a4fa12f3f8e672499f9a44d1bf576834e99afb8535d5fc5f61": {
-    "query": "\nupdate user_font \n    set font_name = $3\n    where user_id = $1\n    and index = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "b73bc1e83d2008fc5b9cc7e9a6c9a6b67b136c45a41e39a8929b554dc5c98485": {
     "query": "update \"settings\" set algolia_index_version = $1",
     "describe": {
@@ -2353,6 +2340,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "ba59bad8a7aef54f3ee9054118d79bbb2be4ce0371960a979ea74feced71d8e2": {
+    "query": "\nselect name\nfrom user_font\nwhere user_id = $1\norder by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "bb5a9faaff748e864bcb9fb956585e7577313b263dbf2fe0e146a8c48af134c9": {
@@ -2903,6 +2910,20 @@
       "nullable": []
     }
   },
+  "e3385b6d93728cc62d0995e839f0148aaba5e572c06049512a4f31d44f03c269": {
+    "query": "\nupdate user_font \n    set name = $3\n    where user_id = $1\n    and index = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "e3d429cb70f383b9088a61bd28fca38365ac88aa817d1e6825397e77f0a20bef": {
     "query": "\nupdate jig_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere jig_id = $1 and index between $3 and $2\n",
     "describe": {
@@ -3324,27 +3345,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "fe7e4d90cd3e6bf8ef26b421d1bc8f40045bcee6141874a87bd426a06d099e3f": {
-    "query": "\nwith cte as (\n    insert into user_font\n    (user_id, font_name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning font_name\n), font_names as (\n    select font_name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect font_name as \"font_name!\" from font_names\nunion all\nselect font_name as \"font_name!\" from cte\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "font_name!",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   }
 }

@@ -38,7 +38,7 @@ impl ApiEndpoint for Update {
     const METHOD: Method = Method::Patch;
 }
 
-/// Delete a user color.
+/// Delete a user font.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
