@@ -1588,6 +1588,7 @@ dependencies = [
  "simple-html-template",
  "strum",
  "strum_macros",
+ "thiserror",
  "url",
  "uuid",
  "wasm-bindgen",

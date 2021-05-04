@@ -19,11 +19,22 @@ impl TransformDom {
             .style("display", "block")
             .style_signal("transform", state.matrix_string_signal().map(|x| x))
             .property("unit", "rem")
+            .style_signal("width", state.width_signal().map(|x| format!("{}rem", x)))
+            .style_signal("height", state.height_signal().map(|x| format!("{}rem", x)))
             .property_signal("width", state.width_signal())
             .property_signal("height", state.height_signal())
             .event(clone!(state => move |evt:super::events::Move| {
-                let (x, y) = evt.pos();
-                state.start_tracking_action(Action::Move, x as i32, y as i32);
+                let data = evt.data();
+                state.start_tracking_action(Action::Move, data.x as i32, data.y as i32);
+            }))
+            .event(clone!(state => move |evt:super::events::Rotate| {
+                let data = evt.data();
+                state.start_tracking_action(Action::Rotate, data.x as i32, data.y as i32);
+            }))
+            .event(clone!(state => move |evt:super::events::Resize| {
+                let data = evt.data();
+                let scale_from = data.scale_from();
+                state.start_tracking_action(Action::Scale(scale_from, false), data.x as i32, data.y as i32);
             }))
             .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
                 state.mouse_up(evt.x() as i32, evt.y() as i32);

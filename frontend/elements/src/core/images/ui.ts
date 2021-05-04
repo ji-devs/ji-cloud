@@ -12,13 +12,18 @@ export class _ extends LitElement {
                 width: inherit;
                 height: inherit;
                 object-fit: inherit;
+
             }
+
             `,
         ];
     }
 
       @property()
       path: string = "";
+
+      @property({type: Boolean})
+      draggable: boolean = true; 
 
     onLoad(evt: Event) {
         const img = evt.currentTarget as HTMLImageElement;
@@ -36,14 +41,14 @@ export class _ extends LitElement {
 
 
     render() {
-    const { path } = this;
+    const { path, draggable } = this;
 
     const src = mediaUi(path);
 
         if (sameOrigin(src)) {
-            return html`<img .src="${src}" @load="${this.onLoad}" ></img>`;
+            return html`<img .draggable=${draggable} .src="${src}" @load="${this.onLoad}" ></img>`;
         } else {
-            return html`<img .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
+            return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
             }
     }
 }

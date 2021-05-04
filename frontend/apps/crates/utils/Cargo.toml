@@ -10,6 +10,7 @@ edition = "2018"
 shared = {path = "../../../../shared/rust"}
 config = {path = "../../../../config/rust"}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
+thiserror = "1.0"
 futures = "0.3.14"
 itertools = "0.10.0"
 async-trait = "0.1.50"

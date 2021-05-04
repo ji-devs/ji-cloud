@@ -9,7 +9,6 @@ use std::sync::atomic::{Ordering, AtomicI32};
 use serde::Deserialize;
 use std::sync::{Mutex, MutexGuard};
 use futures_signals::signal::Mutable;
-use crate::math::transform_2d;
 use futures_signals::signal::Signal;
 
 static RESIZE_INFO: Lazy<Mutable<ResizeInfo>> = Lazy::new(|| Mutable::new(ResizeInfo::default()));
@@ -53,6 +52,7 @@ impl ResizeInfo {
     }
 
     pub fn get_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
+
         //need to offset it by content space
         let x = x - (self.x + self.content_x);
         let y = y - (self.y + self.content_y);
