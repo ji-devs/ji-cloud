@@ -23,14 +23,14 @@ impl TransformState {
         match action {
             Action::Rotate => {
                 *self.rot_stash.borrow_mut() = Some(InitRotation {
-                    vec_to_center: self.calc_vec_to_center(x, y)
+                    vec_to_center: self.center_to_point_vec(x, y)
                 });
             },
-            Action::Scale(_, _) => {
+            Action::Scale(from, _) => {
 
 
                 *self.scale_stash.borrow_mut() = Some(InitScale {
-                    vec_to_center: self.calc_vec_to_center(x, y),
+                    vec_to_tp: self.center_to_tp_vec(from),
                     transform: self.transform.get_cloned(),
                 });
             }
@@ -47,16 +47,19 @@ impl TransformState {
                 if let Some(action) = self.action.borrow().as_ref() {
                     match action {
                         Action::Move => {
+                            //moving is just translating by the drag amount
+                            //as normalized coordinates
                             let resize_info = get_resize_info();
                             let (pos_x, pos_y) = resize_info.get_pos_normalized(pos.x as f64, pos.y as f64);
-                            //log::info!("{} {} -> {} {}", pos.x, pos.y, pos_x, pos_y);
                             let mut transform = self.transform.lock_mut();
                             transform.set_translation_2d(pos_x, pos_y);
                         },
 
                         Action::Rotate => {
+                            //rotation is calculated by taking a vector to the current cursor
+                            //and getting the angle between that and a vector from the previous cursor
                             let resize_info = get_resize_info();
-                            let new_vec = self.calc_vec_to_center(pos.x, pos.y);
+                            let new_vec = self.center_to_point_vec(pos.x, pos.y);
                             let old_vec = self.rot_stash.borrow().as_ref().unwrap_ji().vec_to_center.clone();
                             let mut transform = self.transform.lock_mut();
 
@@ -74,46 +77,46 @@ impl TransformState {
                             }
                         },
 
+                        //maintain isn't being used yet
+                        //it's a placeholder for opting in/out of dual-side scaling
                         Action::Scale(from, maintain) => {
 
-                            /*
-                             *
-                             * TODO - scratch all this and rewrite by some math
-                             * that takes into account the vector through the transform point
-                             *
-                             * current system breaks when:
-                             *
-                             * 1. Doing a stretch and then corner scale
-                             * 2. Doing a rotation and then a stretch
-                             */
+                            //scaling is done by way of specific transform points
 
-                            let new_vec = self.calc_vec_to_center(pos.x, pos.y);
-                            let orig_vec = self.orig_tp_to_center(*from);
+                            //get a vector from the center through the transform point
+                            let orig_vec = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp.clone();
+                            //let orig_vec = self.center_to_tp_vec(*from);
 
+                            //get a vector from the center to the cursor
+                            let new_vec = self.center_to_point_vec(pos.x, pos.y);
+
+                            //get the amount that our cursor vector is 
+                            //along the length of the tp vector 
+                            let proj_len = math::vec2::project(&new_vec, &orig_vec);
+                            let orig_len = math::vec2::len(&orig_vec);
+
+
+                            //as a percentage
+                            let perc = proj_len / orig_len; 
+
+                            //log::info!("orig_len: {}, proj_len: {}, perc: {}", orig_len, proj_len, perc);
                             let mut transform = self.transform.lock_mut();
 
                             match from {
                                 ScaleFrom::Left | ScaleFrom::Right => {
-                                    let perc_x = (new_vec[0] - orig_vec[0]) / orig_vec[0];
-                                    transform.set_scale_x(1.0 + perc_x);
+                                    transform.set_scale_x(perc);
                                 },
                                 ScaleFrom::Top | ScaleFrom::Bottom => {
-                                    let perc_y = (new_vec[1] - orig_vec[1]) / orig_vec[1];
-                                    transform.set_scale_y(1.0 + perc_y);
+                                    transform.set_scale_y(perc);
                                 },
                                 _ => {
-                                    let new_len = math::vec2::len(&new_vec);
-                                    let orig_len = math::vec2::len(&orig_vec);
 
-                                    let perc = ((new_len - orig_len) / orig_len);
-                                    
-                                    let init = self.scale_stash.borrow_mut();
-                                    let init = init.as_ref().unwrap_ji();
+                                    //FIXME: maintain proportional scale even when a side is stretched
+                                    //this starts working but breaks
+                                    //let init_scale = self.scale_stash.borrow().as_ref().unwrap_ji().transform.scale.0.clone(); 
+                                    //transform.set_scale_2d(init_scale[0] - (1.0 - perc), init_scale[1] - (1.0 - perc));
 
-                                    let init_scale = init.transform.scale.0;
-
-                                    transform.set_scale_2d(1.0 + perc, 1.0 + perc);
-
+                                    transform.set_scale_2d(perc, perc);
                                 }
                             }
 
@@ -125,13 +128,14 @@ impl TransformState {
         }
     }
 
-    fn orig_tp_to_center(&self, from: ScaleFrom) -> [f64;2] {
+    fn center_to_tp_vec(&self, from: ScaleFrom) -> [f64;2] {
         let resize_info = get_resize_info();
 
         let (width, height) = self.size.get_cloned().unwrap_ji();
 
         let (width, height) = (width * resize_info.scale, height * resize_info.scale);
-        
+       
+        //first get the vector from the center to the unmodified coordinates
         let v = match from {
             ScaleFrom::Right => [width/2.0, 0.0],
             ScaleFrom::Left => [-width/2.0, 0.0],
@@ -143,12 +147,19 @@ impl TransformState {
             ScaleFrom::BottomRight=> [width/2.0, height/2.0],
         };
 
+        //then modify it by the current transform
         let q = &self.transform.lock_ref().rotation.0;
+        let s = &self.transform.lock_ref().scale.0;
 
-        math::vec2::rotate_by_quat(&v, q)
+        //FIXME: this scale was part of an attempt to fix the proportional FIXME above
+        //instead, it breaks things
+        //let v = math::vec2::scale(&v, s);
+        let v = math::vec2::rotate_by_quat(&v, q);
+
+        v
     }
 
-    fn calc_vec_to_center(&self, viewport_x: i32, viewport_y: i32) -> [f64;2] {
+    fn center_to_point_vec(&self, viewport_x: i32, viewport_y: i32) -> [f64;2] {
 
         let resize_info = get_resize_info();
         let (center_x, center_y) = self.get_center(&resize_info);

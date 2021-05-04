@@ -22,7 +22,7 @@ pub struct InitRotation {
     pub vec_to_center: [f64;2],
 }
 pub struct InitScale {
-    pub vec_to_center: [f64;2],
+    pub vec_to_tp: [f64;2],
     pub transform: Transform,
 }
 
