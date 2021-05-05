@@ -3,7 +3,7 @@ use crate::{
     domain::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
-            JigUpdateRequest,
+            JigSearchQuery, JigSearchResponse, JigUpdateRequest,
         },
         CreateResponse,
     },
@@ -32,6 +32,16 @@ impl ApiEndpoint for Browse {
     type Res = JigBrowseResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/browse";
+    const METHOD: Method = Method::Get;
+}
+
+/// Search for jigs.
+pub struct Search;
+impl ApiEndpoint for Search {
+    type Req = JigSearchQuery;
+    type Res = JigSearchResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig";
     const METHOD: Method = Method::Get;
 }
 

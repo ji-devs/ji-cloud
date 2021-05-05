@@ -190,6 +190,10 @@ pub struct AlgoliaSettings {
     /// If [`None`], indexing and searching will be disabled.
     pub media_index: Option<String>,
 
+    /// The index to use for operations relating to jigs on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub jig_index: Option<String>,
+
     /// The key to use for the *frontend* for the algolia client.
     /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
@@ -403,6 +407,8 @@ impl SettingsManager {
 
         let media_index = self.get_varying_secret(keys::algolia::MEDIA_INDEX).await?;
 
+        let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
+
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
             .await?;
@@ -426,6 +432,7 @@ impl SettingsManager {
             backend_search_key,
             management_key,
             media_index,
+            jig_index,
             frontend_search_key,
         }))
     }

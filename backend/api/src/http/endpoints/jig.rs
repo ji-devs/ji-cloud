@@ -8,13 +8,21 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
-        jig::{JigBrowseResponse, JigCreateRequest, JigId, JigResponse, UserOrMe},
+        jig::{
+            Jig, JigBrowseResponse, JigCreateRequest, JigId, JigResponse, JigSearchResponse,
+            UserOrMe,
+        },
         CreateResponse,
     },
 };
 use sqlx::PgPool;
 
-use crate::{db, error, extractor::TokenUser};
+use crate::{
+    db,
+    error::{self, ServiceKind},
+    extractor::TokenUser,
+    service::ServiceData,
+};
 
 /// Create a jig.
 #[api_v2_operation]
@@ -78,12 +86,15 @@ async fn delete(
     db: Data<PgPool>,
     claims: TokenUser,
     path: web::Path<JigId>,
+    algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<NoContent, error::Delete> {
     let id = path.into_inner();
 
     db::jig::authz(&*db, claims.0.user_id, Some(id)).await?;
 
     db::jig::delete(&*db, id).await?;
+
+    algolia.delete_jig(id).await;
 
     Ok(NoContent)
 }
@@ -165,11 +176,49 @@ async fn browse(
     }))
 }
 
+/// Search for jigs.
+#[api_v2_operation]
+async fn search(
+    db: Data<PgPool>,
+    algolia: ServiceData<crate::algolia::Client>,
+    _claims: TokenUser,
+    query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
+) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let (ids, pages, total_hits) = algolia
+        .search_jig(
+            &query.q,
+            query.page,
+            query.is_published,
+            &query.age_ranges,
+            &query.affiliations,
+            &query.categories,
+            &query.goals,
+            query.author,
+        )
+        .await?
+        .ok_or_else(|| error::Service::DisabledService(ServiceKind::Algolia))?;
+
+    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids)
+        .await?
+        .into_iter()
+        .map(|jig: Jig| JigResponse { jig })
+        .collect();
+
+    Ok(Json(JigSearchResponse {
+        jigs,
+        pages,
+        total_image_count: total_hits,
+    }))
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
         .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
+        .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
         .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete));
 }

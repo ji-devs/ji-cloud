@@ -4,7 +4,11 @@ pub mod module;
 
 use std::{fmt, str::FromStr};
 
-use super::{category::CategoryId, meta::GoalId, Publish};
+use super::{
+    category::CategoryId,
+    meta::{AffiliationId, AgeRangeId, GoalId},
+    Publish,
+};
 use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -221,6 +225,75 @@ pub struct JigBrowseResponse {
 
     /// The total number of jigs found
     pub total_jig_count: u64,
+}
+
+/// Search for images via the given query string.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigSearchQuery {
+    /// The query string.
+    pub q: String,
+
+    /// The page number of the jigs to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// Optionally filter by `age_ranges`
+    ///
+    /// Note: Currently does nothing
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// Optionally filter by `affiliations`
+    ///
+    /// Note: Currently does nothing
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub affiliations: Vec<AffiliationId>,
+
+    /// Optionally filter by `categories`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub categories: Vec<CategoryId>,
+
+    /// Optionally filter by `goals`
+    #[serde(default)]
+    #[serde(serialize_with = "super::csv_encode_uuids")]
+    #[serde(deserialize_with = "super::from_csv")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub goals: Vec<GoalId>,
+
+    /// Optionally filter by `is_published`
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_published: Option<bool>,
+
+    /// Optionally filter by the author
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub author: Option<Uuid>,
+}
+
+/// Response for successful search.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigSearchResponse {
+    /// the jigs returned.
+    pub jigs: Vec<JigResponse>,
+
+    /// The number of pages found.
+    pub pages: u32,
+
+    /// The total number of jigs found
+    pub total_image_count: u64,
 }
 
 into_uuid![JigId];

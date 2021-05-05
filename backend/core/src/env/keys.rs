@@ -79,13 +79,18 @@ pub mod algolia {
     /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
     pub const MEDIA_INDEX: &str = "ALGOLIA_MEDIA_INDEX";
 
-    /// The key the backend uses for managing- indexing- `MEDIA_INDEX`.
-    /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs and access to `MEDIA_INDEX`.
+    /// The index to use for indexing and backend searches.
+    /// Is optional. If missing, *jig* indexing will be disabled,
+    /// search related routes will return a "501 - Not Implemented" and a warning will be emitted.
+    pub const JIG_INDEX: &str = "ALGOLIA_JIG_INDEX";
+
+    /// The key the backend uses for managing- indexing- [`MEDIA_INDEX`] and [`JIG_INDEX`].
+    /// Needs the `addObject`, `deleteObject`, `settings`, and `editSettings` ACLs, access to `MEDIA_INDEX`, and `JIG_INDEX`.
     /// Is optional. If missing, indexing will be disabled, and a warning will be logged.
     pub const MANAGEMENT_KEY: &str = "ALGOLIA_MANAGEMENT_KEY";
 
-    /// The key that the backend uses for searching `MEDIA_INDEX`.
-    /// Needs the `search` ACL with access to `MEDIA_INDEX`.
+    /// The key that the backend uses for searching [`MEDIA_INDEX`] and [`JIG_INDEX`].
+    /// Needs the `search` ACL with access to `MEDIA_INDEX` and `JIG_INDEX`.
     /// Is optional. If missing, searching will be disabled, attempting
     /// to use search related routes will return a "501 - Not Implemented" and a warning will be logged.
     pub const BACKEND_SEARCH_KEY: &str = "ALGOLIA_BACKEND_SEARCH_KEY";

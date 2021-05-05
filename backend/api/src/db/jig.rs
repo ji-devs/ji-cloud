@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use futures::TryStreamExt;
+use futures::{stream::BoxStream, TryStreamExt};
 use shared::domain::{
     category::CategoryId,
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
@@ -63,6 +63,52 @@ values ($1, $2, $3, $4)"#,
     transaction.commit().await?;
 
     Ok(JigId(jig.id))
+}
+
+pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
+    let v = sqlx::query!(
+r#"
+select  
+    id as "id: JigId",
+    display_name,
+    creator_id,
+    author_id,
+    publish_at,
+    language,
+    array(
+        select row (id, kind)
+        from jig_module
+        where jig_id = jig.id
+        order by "index"
+    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
+    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>"
+from jig
+inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+order by t.ord
+"#, ids)
+    .fetch_all(db).await?;
+
+    let v = v
+        .into_iter()
+        .map(|row| Jig {
+            id: row.id,
+            display_name: row.display_name,
+            modules: row
+                .modules
+                .into_iter()
+                .map(|(id, kind)| LiteModule { id, kind })
+                .collect(),
+            goals: row.goals.into_iter().map(|(goal,)| goal).collect(),
+            creator_id: row.creator_id,
+            author_id: row.author_id,
+            language: row.language,
+            categories: row.categories.into_iter().map(|(it,)| it).collect(),
+            publish_at: row.publish_at,
+        })
+        .collect();
+
+    Ok(v)
 }
 
 pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
