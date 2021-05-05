@@ -1,26 +1,18 @@
-import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
+import { LitElement, html, customElement, query } from 'lit-element';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 
 import { BaseSelection, Descendant, Transforms } from 'slate';
-import { Align, Color, ControllerState, ElementType, Font, FontSize, getDefault, getKeyType, Weight } from './wysiwyg-types';
+import { Align, Color, ControllerState, ElementType, Font, FontSize, getDefault, Weight } from './wysiwyg-types';
 import { EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
+import { baseStyles } from './styles';
 
 @customElement("wysiwyg-base")
 export class _ extends LitElement {
 
     static get styles() {
-        return [
-            css`
-                p {
-                    margin: 0;
-                    font-size: ${unsafeCSS(getDefault('fontSize'))};
-                    font-family: ${unsafeCSS(getDefault('font'))};
-                    font-weight: ${unsafeCSS(getDefault('weight'))};
-                }
-            `,
-        ];
+        return baseStyles;
     }
 
     private _font = getDefault('font');
@@ -142,10 +134,11 @@ export class _ extends LitElement {
 
     private checkForValueChangeChange(newValue: Descendant[]) {
         const valueAsString = this.valueAsString;
-        if(valueAsString !== JSON.stringify(newValue)) {
+        const newValueAsString = JSON.stringify(newValue);
+        if(valueAsString !== newValueAsString) {
             this.dispatchEvent(new CustomEvent("custom-change", {
                 detail: {
-                    value: valueAsString
+                    value: newValueAsString
                 }
             }));
         }

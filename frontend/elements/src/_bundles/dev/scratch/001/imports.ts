@@ -35,3 +35,4 @@ import "@elements/core/buttons/sidebar";
 import "@elements/core/overlays/anchored-overlay";
 
 import "@elements/core/wysiwyg/wysiwyg-base";
+import "@elements/core/wysiwyg/wysiwyg-output-renderer";

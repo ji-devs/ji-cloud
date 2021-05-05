@@ -138,6 +138,7 @@ pub fn render_color_select() -> Dom {
 
 pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom {
     html!("div", {
+        .style("grid-row", "1 / -1")
         .style("padding", "10px")
         .style("width", "492px")
         .child(text_editor::dom::render_controls(state.clone()))
@@ -187,23 +188,42 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
     })
     
 }
+pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>) -> Dom {
+    html!("div", {
+        .style("display", "block")
+        .style("border", "red solid 1px")
+        .style("box-sizing", "border-box")
+        .child(html!("wysiwyg-output-renderer", {
+            .property_signal("valueAsString", value.signal_cloned())
+        }))
+    })
+}
 
 fn render_text() -> Dom {
-    let value =  "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+    let value = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]".to_string();
+    let value = Some(value);
+    // let value = None;
+
+    let value_change = Rc::new(Mutable::new(value.clone()));
 
     let state = text_editor::state::State::new(
         ThemeId::HappyBrush,
-        None,
-        // Some(String::from(value)),
-        |v| log::info!("{:?}", v)
+        value,
+        Box::new(clone!(value_change => move |v| {
+            value_change.set(Some(v.to_string()));
+            log::info!("{:?}", v);
+        }))
     );
+
     html!("div", {
         .style("display", "grid")
         .style("grid-template-columns", "auto 1fr")
+        .style("grid-template-rows", "auto auto")
 
         .children(&mut [
             render_text_editor_controls(state.clone()),
             render_wysiwyg(state.clone()),
+            render_wysiwyg_output(value_change.clone()),
         ])
     })
 }
