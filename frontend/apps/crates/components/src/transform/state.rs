@@ -15,6 +15,7 @@ pub struct TransformState {
     pub action: RefCell<Option<Action>>,
     pub rot_stash: RefCell<Option<InitRotation>>,
     pub scale_stash: RefCell<Option<InitScale>>,
+    pub alt_pressed: RefCell<bool>,
     pub size: Mutable<Option<(f64, f64)>>,
 }
 
@@ -22,8 +23,8 @@ pub struct InitRotation {
     pub vec_to_point: [f64;2],
 }
 pub struct InitScale {
-    pub vec_to_tp_x: [f64;2],
-    pub vec_to_tp_y: [f64;2],
+    pub basis_vec_x: [f64;2],
+    pub basis_vec_y: [f64;2],
     pub vec_to_point: [f64;2],
     pub scale: (f64, f64) 
 }
@@ -38,6 +39,7 @@ impl TransformState {
             action: RefCell::new(None),
             rot_stash: RefCell::new(None),
             scale_stash: RefCell::new(None),
+            alt_pressed: RefCell::new(false)
         }
     }
 
@@ -86,10 +88,10 @@ impl TransformState {
 pub enum Action {
     Move,
     Rotate,
-    Scale(ScaleFrom, Maintain)
+    Scale(ScaleFrom, LockAspect)
 }
 
-pub type Maintain = bool;
+pub type LockAspect = bool;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScaleFrom {

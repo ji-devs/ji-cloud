@@ -3,6 +3,12 @@ use utils::drag::Drag;
 use std::rc::Rc;
 use utils::{prelude::*, resize::get_resize_info, math};
 
+
+//really this should be a min size, depends on the artwork
+//but this will do for now
+//the idea is we can't let them scale down so much that the controls look weird / dissapear
+const MIN_SCALE_PERC:f64 = 0.1;
+
 impl TransformState {
     pub fn start_tracking_action(&self, action: Action, x: i32, y:i32) {
         *self.action.borrow_mut() = Some(action);
@@ -29,11 +35,11 @@ impl TransformState {
             Action::Scale(from, _) => {
 
 
-                let (vec_to_tp_x, vec_to_tp_y) = self.center_to_tp_vecs(from);
+                let (basis_vec_x, basis_vec_y) = self.get_basis_vectors(from);
 
                 *self.scale_stash.borrow_mut() = Some(InitScale {
-                    vec_to_tp_x,
-                    vec_to_tp_y,
+                    basis_vec_x,
+                    basis_vec_y,
                     vec_to_point: self.center_to_point_vec(x, y),
                     scale: self.transform.lock_ref().get_scale_2d()
                 });
@@ -81,20 +87,18 @@ impl TransformState {
                             }
                         },
 
-                        //maintain isn't being used yet
-                        //it's a placeholder for opting in/out of dual-side scaling
-                        Action::Scale(from, maintain) => {
-
-                            //hard coded for now
-                            let free_form = match from {
-                                ScaleFrom::Left | ScaleFrom::Right | ScaleFrom::Top | ScaleFrom::Bottom => {
-                                    true 
-                                },
-                                _ => false 
-                            };
+                        Action::Scale(from, lock_aspect) => {
 
                             //get a vector from the center to the cursor
                             let curr_point_vec = self.center_to_point_vec(pos.x, pos.y);
+
+                            let scale_stash = self.scale_stash.borrow();
+                            let scale_stash = scale_stash.as_ref().unwrap_ji();
+
+                            let (init_x, init_y) = scale_stash.scale;
+                            let init_vec = &scale_stash.vec_to_point;
+                            
+                            let mut transform = self.transform.lock_mut();
 
                             let get_curr_perc = |v: &[f64]| {
                                 //get the amount that our cursor vector is 
@@ -103,68 +107,42 @@ impl TransformState {
                                 let orig_len = math::vec2::len(v);
 
                                 //as a percentage
-                                let perc = proj_len / orig_len;
-
-                                let curr_len = math::vec2::len(&curr_point_vec);
-                                log::info!("curr_len: {}, orig_len: {}, proj_len: {}, perc: {}", curr_len, orig_len, proj_len, perc);
-
-                                perc
+                                proj_len / orig_len
                             };
 
-                            if free_form {
-                                //when doing free-form transformations, 
-                                //we can take an optimal and very clean approach of just comparing
-                                //to the original basis vectors
+                            let perc = get_curr_perc(init_vec);
+                            let scale_x = init_x * perc;
+                            let scale_y = init_y * perc;
 
-                                //get a vector from the center through the transform point
-                                let orig_vx = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp_x.clone();
-                                let orig_vy = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp_y.clone();
-                                //let orig_vec = self.center_to_tp_vec(*from);
-
-                                let mut transform = self.transform.lock_mut();
-
-                                match from {
-                                    ScaleFrom::Left | ScaleFrom::Right => {
-                                        let perc = get_curr_perc(&orig_vx);
-                                        transform.set_scale_x(perc);
-                                    },
-                                    ScaleFrom::Top | ScaleFrom::Bottom => {
-                                        let perc = get_curr_perc(&orig_vy);
-                                        transform.set_scale_y(perc);
-                                    },
-                                    _ => {
-                                        let perc_x = get_curr_perc(&orig_vx);
-                                        let perc_y = get_curr_perc(&orig_vy);
-                                        transform.set_scale_2d(perc_x, perc_y);
+                            match from {
+                                ScaleFrom::Left | ScaleFrom::Right => {
+                                    if perc >= MIN_SCALE_PERC {
+                                        transform.set_scale_x(scale_x);
                                     }
-                                }
-                            } else {
-                                match from {
-                                    ScaleFrom::Left | ScaleFrom::Right => {
-                                        //proportional scaling from side?
-                                    },
-                                    ScaleFrom::Top | ScaleFrom::Bottom => {
-                                        //proportional scaling from top-bottom?
-                                    },
-                                    _ => {
-                                        //For locked aspect ratio, we can't just compare to the
-                                        //original basis vectors
-                                        //rather, we need to dynamically track a new vector
-                                        let scale_stash = self.scale_stash.borrow();
-                                        let scale_stash = scale_stash.as_ref().unwrap_ji();
-
-                                        let (init_x, init_y) = scale_stash.scale;
-                                        let init_vec = &scale_stash.vec_to_point;
-
-                                        let mut transform = self.transform.lock_mut();
-
-                                        let perc = get_curr_perc(init_vec);
-
-                                        transform.set_scale_2d(init_x * perc, init_y * perc);
+                                },
+                                ScaleFrom::Top | ScaleFrom::Bottom => {
+                                    if perc >= MIN_SCALE_PERC {
+                                        transform.set_scale_y(scale_y);
+                                    }
+                                },
+                                _ => {
+                                    if !*lock_aspect {
+                                        //when doing free-form transformations, 
+                                        //we need to compare to the original basis vectors
+                                        let basis_vec_x = self.scale_stash.borrow().as_ref().unwrap_ji().basis_vec_x.clone();
+                                        let basis_vec_y = self.scale_stash.borrow().as_ref().unwrap_ji().basis_vec_y.clone();
+                                        let perc_x = get_curr_perc(&basis_vec_x);
+                                        let perc_y = get_curr_perc(&basis_vec_y);
+                                        if perc_x >= MIN_SCALE_PERC && perc_y >= MIN_SCALE_PERC {
+                                            transform.set_scale_2d(perc_x, perc_y);
+                                        }
+                                    } else {
+                                        if scale_x >= MIN_SCALE_PERC && scale_y >= MIN_SCALE_PERC {
+                                            transform.set_scale_2d(scale_x, scale_y);
+                                        }
                                     }
                                 }
                             }
-
                         },
                     }
                 }
@@ -173,7 +151,7 @@ impl TransformState {
         }
     }
 
-    fn center_to_tp_vecs(&self, from: ScaleFrom) -> ([f64;2], [f64;2]) {
+    fn get_basis_vectors(&self, from: ScaleFrom) -> ([f64;2], [f64;2]) {
         let resize_info = get_resize_info();
 
         let (width, height) = self.size.get_cloned().unwrap_ji();
@@ -194,12 +172,6 @@ impl TransformState {
             _ => [0.0, 0.0]
         };
 
-        let vd = match from {
-            ScaleFrom::BottomRight => {
-                [width/2.0, height/2.0]
-            },
-            _ => [0.0, 0.0]
-        };
         //then modify it by the current transform
         let q = &self.transform.lock_ref().rotation.0;
 
