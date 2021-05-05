@@ -19,11 +19,13 @@ pub struct TransformState {
 }
 
 pub struct InitRotation {
-    pub vec_to_center: [f64;2],
+    pub vec_to_point: [f64;2],
 }
 pub struct InitScale {
-    pub vec_to_tp: [f64;2],
-    pub transform: Transform,
+    pub vec_to_tp_x: [f64;2],
+    pub vec_to_tp_y: [f64;2],
+    pub vec_to_point: [f64;2],
+    pub scale: (f64, f64) 
 }
 
 impl TransformState {

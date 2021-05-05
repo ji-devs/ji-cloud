@@ -23,15 +23,19 @@ impl TransformState {
         match action {
             Action::Rotate => {
                 *self.rot_stash.borrow_mut() = Some(InitRotation {
-                    vec_to_center: self.center_to_point_vec(x, y)
+                    vec_to_point: self.center_to_point_vec(x, y)
                 });
             },
             Action::Scale(from, _) => {
 
 
+                let (vec_to_tp_x, vec_to_tp_y) = self.center_to_tp_vecs(from);
+
                 *self.scale_stash.borrow_mut() = Some(InitScale {
-                    vec_to_tp: self.center_to_tp_vec(from),
-                    transform: self.transform.get_cloned(),
+                    vec_to_tp_x,
+                    vec_to_tp_y,
+                    vec_to_point: self.center_to_point_vec(x, y),
+                    scale: self.transform.lock_ref().get_scale_2d()
                 });
             }
             _ => {}
@@ -56,11 +60,11 @@ impl TransformState {
                         },
 
                         Action::Rotate => {
-                            //rotation is calculated by taking a vector to the current cursor
-                            //and getting the angle between that and a vector from the previous cursor
+                            //rotation is calculated by taking a vector from center to the current cursor
+                            //and getting the angle between that and the same thing from last move 
                             let resize_info = get_resize_info();
                             let new_vec = self.center_to_point_vec(pos.x, pos.y);
-                            let old_vec = self.rot_stash.borrow().as_ref().unwrap_ji().vec_to_center.clone();
+                            let old_vec = self.rot_stash.borrow().as_ref().unwrap_ji().vec_to_point.clone();
                             let mut transform = self.transform.lock_mut();
 
                             let mut angle = math::vec2::angle(&old_vec, &new_vec);
@@ -72,7 +76,7 @@ impl TransformState {
                                 transform.rotate_z(angle);
 
                                 *self.rot_stash.borrow_mut() = Some(InitRotation {
-                                    vec_to_center: new_vec
+                                    vec_to_point: new_vec
                                 });
                             }
                         },
@@ -81,42 +85,83 @@ impl TransformState {
                         //it's a placeholder for opting in/out of dual-side scaling
                         Action::Scale(from, maintain) => {
 
-                            //scaling is done by way of specific transform points
-
-                            //get a vector from the center through the transform point
-                            let orig_vec = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp.clone();
-                            //let orig_vec = self.center_to_tp_vec(*from);
+                            //hard coded for now
+                            let free_form = match from {
+                                ScaleFrom::Left | ScaleFrom::Right | ScaleFrom::Top | ScaleFrom::Bottom => {
+                                    true 
+                                },
+                                _ => false 
+                            };
 
                             //get a vector from the center to the cursor
-                            let new_vec = self.center_to_point_vec(pos.x, pos.y);
+                            let curr_point_vec = self.center_to_point_vec(pos.x, pos.y);
 
-                            //get the amount that our cursor vector is 
-                            //along the length of the tp vector 
-                            let proj_len = math::vec2::project(&new_vec, &orig_vec);
-                            let orig_len = math::vec2::len(&orig_vec);
+                            let get_curr_perc = |v: &[f64]| {
+                                //get the amount that our cursor vector is 
+                                //along the length of the comparison vector 
+                                let proj_len = math::vec2::project(&curr_point_vec, v);
+                                let orig_len = math::vec2::len(v);
 
+                                //as a percentage
+                                let perc = proj_len / orig_len;
 
-                            //as a percentage
-                            let perc = proj_len / orig_len; 
+                                let curr_len = math::vec2::len(&curr_point_vec);
+                                log::info!("curr_len: {}, orig_len: {}, proj_len: {}, perc: {}", curr_len, orig_len, proj_len, perc);
 
-                            //log::info!("orig_len: {}, proj_len: {}, perc: {}", orig_len, proj_len, perc);
-                            let mut transform = self.transform.lock_mut();
+                                perc
+                            };
 
-                            match from {
-                                ScaleFrom::Left | ScaleFrom::Right => {
-                                    transform.set_scale_x(perc);
-                                },
-                                ScaleFrom::Top | ScaleFrom::Bottom => {
-                                    transform.set_scale_y(perc);
-                                },
-                                _ => {
+                            if free_form {
+                                //when doing free-form transformations, 
+                                //we can take an optimal and very clean approach of just comparing
+                                //to the original basis vectors
 
-                                    //FIXME: maintain proportional scale even when a side is stretched
-                                    //this starts working but breaks
-                                    //let init_scale = self.scale_stash.borrow().as_ref().unwrap_ji().transform.scale.0.clone(); 
-                                    //transform.set_scale_2d(init_scale[0] - (1.0 - perc), init_scale[1] - (1.0 - perc));
+                                //get a vector from the center through the transform point
+                                let orig_vx = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp_x.clone();
+                                let orig_vy = self.scale_stash.borrow().as_ref().unwrap_ji().vec_to_tp_y.clone();
+                                //let orig_vec = self.center_to_tp_vec(*from);
 
-                                    transform.set_scale_2d(perc, perc);
+                                let mut transform = self.transform.lock_mut();
+
+                                match from {
+                                    ScaleFrom::Left | ScaleFrom::Right => {
+                                        let perc = get_curr_perc(&orig_vx);
+                                        transform.set_scale_x(perc);
+                                    },
+                                    ScaleFrom::Top | ScaleFrom::Bottom => {
+                                        let perc = get_curr_perc(&orig_vy);
+                                        transform.set_scale_y(perc);
+                                    },
+                                    _ => {
+                                        let perc_x = get_curr_perc(&orig_vx);
+                                        let perc_y = get_curr_perc(&orig_vy);
+                                        transform.set_scale_2d(perc_x, perc_y);
+                                    }
+                                }
+                            } else {
+                                match from {
+                                    ScaleFrom::Left | ScaleFrom::Right => {
+                                        //proportional scaling from side?
+                                    },
+                                    ScaleFrom::Top | ScaleFrom::Bottom => {
+                                        //proportional scaling from top-bottom?
+                                    },
+                                    _ => {
+                                        //For locked aspect ratio, we can't just compare to the
+                                        //original basis vectors
+                                        //rather, we need to dynamically track a new vector
+                                        let scale_stash = self.scale_stash.borrow();
+                                        let scale_stash = scale_stash.as_ref().unwrap_ji();
+
+                                        let (init_x, init_y) = scale_stash.scale;
+                                        let init_vec = &scale_stash.vec_to_point;
+
+                                        let mut transform = self.transform.lock_mut();
+
+                                        let perc = get_curr_perc(init_vec);
+
+                                        transform.set_scale_2d(init_x * perc, init_y * perc);
+                                    }
                                 }
                             }
 
@@ -128,7 +173,7 @@ impl TransformState {
         }
     }
 
-    fn center_to_tp_vec(&self, from: ScaleFrom) -> [f64;2] {
+    fn center_to_tp_vecs(&self, from: ScaleFrom) -> ([f64;2], [f64;2]) {
         let resize_info = get_resize_info();
 
         let (width, height) = self.size.get_cloned().unwrap_ji();
@@ -136,27 +181,32 @@ impl TransformState {
         let (width, height) = (width * resize_info.scale, height * resize_info.scale);
        
         //first get the vector from the center to the unmodified coordinates
-        let v = match from {
-            ScaleFrom::Right => [width/2.0, 0.0],
-            ScaleFrom::Left => [-width/2.0, 0.0],
-            ScaleFrom::Top => [0.0, -height/2.0],
-            ScaleFrom::Bottom => [0.0, height/2.0],
-            ScaleFrom::TopLeft=> [-width/2.0, -height/2.0],
-            ScaleFrom::TopRight=> [width/2.0, -height/2.0],
-            ScaleFrom::BottomLeft=> [-width/2.0, height/2.0],
-            ScaleFrom::BottomRight=> [width/2.0, height/2.0],
+        let vx = match from {
+            ScaleFrom::Right | ScaleFrom::TopRight | ScaleFrom::BottomRight => [width/2.0, 0.0],
+
+            ScaleFrom::Left | ScaleFrom::TopLeft | ScaleFrom::BottomLeft => [-width/2.0, 0.0],
+            _ => [0.0, 0.0]
         };
 
+        let vy = match from {
+            ScaleFrom::Top | ScaleFrom::TopRight | ScaleFrom::TopLeft => [0.0, -height/2.0],
+            ScaleFrom::Bottom | ScaleFrom::BottomRight | ScaleFrom::BottomLeft => [0.0, height/2.0],
+            _ => [0.0, 0.0]
+        };
+
+        let vd = match from {
+            ScaleFrom::BottomRight => {
+                [width/2.0, height/2.0]
+            },
+            _ => [0.0, 0.0]
+        };
         //then modify it by the current transform
         let q = &self.transform.lock_ref().rotation.0;
-        let s = &self.transform.lock_ref().scale.0;
 
-        //FIXME: this scale was part of an attempt to fix the proportional FIXME above
-        //instead, it breaks things
-        //let v = math::vec2::scale(&v, s);
-        let v = math::vec2::rotate_by_quat(&v, q);
+        let vx = math::vec2::rotate_by_quat(&vx, q);
+        let vy = math::vec2::rotate_by_quat(&vy, q);
 
-        v
+        (vx, vy)
     }
 
     fn center_to_point_vec(&self, viewport_x: i32, viewport_y: i32) -> [f64;2] {
