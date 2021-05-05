@@ -16,32 +16,39 @@ use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
 use shared::domain::jig::{Jig, LiteModule, JigId, module::ModuleId, ModuleKind};
 use web_sys::DomRect;
 use wasm_bindgen::prelude::*;
+use chrono::{DateTime, Utc};
 
 pub struct State {
-    pub jig_id: JigId,
+    pub jig: Jig,
     pub module_id: Mutable<Option<ModuleId>>,
     pub name: Mutable<Option<String>>,
+    pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Module>>,
+    pub collapsed: Mutable<bool>,
+    pub settings_shown: Mutable<bool>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
     pub loader: AsyncLoader,
 }
 
 impl State {
-    pub fn new(jig:Jig, module_id: Mutable<Option<ModuleId>>) -> Self {
+    pub fn new(jig: Jig, module_id: Mutable<Option<ModuleId>>) -> Self {
         Self {
-            jig_id: jig.id,
             module_id,
-            name: Mutable::new(jig.display_name),
+            name: Mutable::new(jig.display_name.clone()),
+            publish_at: Mutable::new(jig.publish_at.clone()),
             modules: MutableVec::new_with_values(
                 jig.modules
-                    .into_iter()
-                    .map(|module| Rc::new(module.into()))
+                    .iter()
+                    .map(|module| Rc::new(module.clone().into()))
                     .collect()
             ),
+            collapsed: Mutable::new(false),
+            settings_shown: Mutable::new(false),
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
             loader: AsyncLoader::new(),
+            jig,
         }
 
     }
