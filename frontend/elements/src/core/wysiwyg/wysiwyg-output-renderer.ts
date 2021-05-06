@@ -33,7 +33,7 @@ export class _ extends LitElement {
     private renderLeaf(leaf: CustomText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
         return html`<span style=${styleMap(styles)}>
-            ${ leaf.text }
+            ${ leaf.text === "" ? html`<br>` : leaf.text }
         </span>`;
     }
 

@@ -10,6 +10,7 @@ import { baseStyles } from './styles';
 
 @customElement("wysiwyg-base")
 export class _ extends LitElement {
+    componentRef?: EditorComponent;
 
     static get styles() {
         return baseStyles;
@@ -107,10 +108,15 @@ export class _ extends LitElement {
 
     private value: Descendant[] = this.baseValue;
 
+    public resetValue() {
+        this.value = JSON.parse(JSON.stringify(this.baseValue));
+        this.componentRef?.setValue(this.value);
+    }
+
     public set valueAsString(v: string) {
         if (!v) this.value = this.baseValue;
         else this.value = JSON.parse(v);
-        this.reactRender();
+        this.componentRef?.setValue(this.value);
     }
     public get valueAsString(): string {
         return JSON.stringify(this.value);
@@ -217,7 +223,7 @@ export class _ extends LitElement {
     }
 
     private reactRender() {
-        ReactDOM.render(
+        this.componentRef = ReactDOM.render(
             React.createElement(
                 EditorComponent,
                 {

@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use futures_signals::signal::Mutable;
 use utils::themes::{ThemeId, ThemeIdExt};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use js_sys::Reflect;
@@ -21,7 +22,7 @@ pub struct State {
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Vec<String>,
     pub on_change: Option<Box<dyn Fn(&str)>>,
-    pub value: Option<String>,
+    pub value: RefCell<Option<String>>,
     pub theme_id: ThemeId,
 }
 
@@ -32,9 +33,36 @@ impl State {
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Self::get_fonts(theme_id),
             on_change: Some(on_change),
-            value,
+            value: RefCell::new(value),
             theme_id
         })
+    }
+
+    pub fn set_value(&self, value: Option<String>) {
+        self.value.replace(value);
+        if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.borrow() {
+            self.update_wysiwyg_value(&wysiwyg_ref);
+        }
+    }
+
+    fn update_wysiwyg_value(&self, wysiwyg_ref: &HtmlElement) {
+        match &*self.value.borrow() {
+            Some(value) => {
+                let _ = Reflect::set(
+                    &wysiwyg_ref,
+                    &JsValue::from_str("valueAsString"),
+                    &JsValue::from_str(&value)
+                );
+            },
+            None => {
+                let reset_value_method = Reflect::get(
+                    &wysiwyg_ref,
+                    &JsValue::from_str("resetValue")
+                ).unwrap();
+                let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
+                reset_value_method.call0(&wysiwyg_ref);
+            },
+        };
     }
 
     fn get_fonts(theme: ThemeId) -> Vec<String> {
@@ -51,7 +79,7 @@ impl State {
         fonts
     }
 
-    pub fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
+    pub(super) fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
         let key = enum_variant_to_string(&ControlsChange::Element(ElementType::P1)) + &String::from("Default");
         let _ = Reflect::set(
             &wysiwyg_ref,
@@ -80,33 +108,14 @@ impl State {
             &JsValue::from_str(&color)
         );
 
-        match &self.value {
-            Some(value) => {
-                let _ = Reflect::set(
-                    &wysiwyg_ref,
-                    &JsValue::from_str("valueAsString"),
-                    &JsValue::from_str(&value)
-                );
-            },
-            None => {
-                let base_value = Reflect::get(
-                    &wysiwyg_ref,
-                    &JsValue::from_str("baseValue")
-                ).unwrap();
-                let _ = Reflect::set(
-                    &wysiwyg_ref,
-                    &JsValue::from_str("value"),
-                    &base_value
-                );
-            },
-        };
+        self.update_wysiwyg_value(&wysiwyg_ref);
 
         *self.wysiwyg_ref.borrow_mut() = Some(wysiwyg_ref);
     }
 
     // Suggestion: maybe replace all there functions with one that just takes a controls change.
     // Suggestion: might be a good idea to remove all this and just have the event listener trigger the update to the element and have the change propagate up.
-    pub fn toggle_bold(&self) {
+    pub(super) fn toggle_bold(&self) {
         let mut controls = self.controls.lock_mut();
         controls.weight = if controls.weight == BOLD_WEIGHT {
             REGULAR_WEIGHT
@@ -122,7 +131,7 @@ impl State {
             );
         }
     }
-    pub fn toggle_italic(&self) {
+    pub(super) fn toggle_italic(&self) {
         let mut controls = self.controls.lock_mut();
         controls.italic = !controls.italic;
 
@@ -134,7 +143,7 @@ impl State {
         }
    
     }
-    pub fn toggle_underline(&self) {
+    pub(super) fn toggle_underline(&self) {
         let mut controls = self.controls.lock_mut();
         controls.underline = !controls.underline;
 
@@ -146,7 +155,7 @@ impl State {
         }
    
     }
-    pub fn set_align(&self, align: Align) {
+    pub(super) fn set_align(&self, align: Align) {
         let mut controls = self.controls.lock_mut();
         controls.align = align;
 
@@ -158,7 +167,7 @@ impl State {
             );
         }
     }
-    pub fn set_font_size(&self, font_size: u8) {
+    pub(super) fn set_font_size(&self, font_size: u8) {
         let mut controls = self.controls.lock_mut();
         controls.font_size = font_size;
 
@@ -171,7 +180,7 @@ impl State {
             );
         }
     }
-    pub fn set_indent_count(&self, indent_count: u8) {
+    pub(super) fn set_indent_count(&self, indent_count: u8) {
         let mut controls = self.controls.lock_mut();
         controls.indent_count = indent_count;
 
@@ -183,7 +192,7 @@ impl State {
             );
         }
     }
-    pub fn set_color(&self, color: Option<String>) {
+    pub(super) fn set_color(&self, color: Option<String>) {
         let mut controls = self.controls.lock_mut();
         controls.color = color;
 
@@ -199,7 +208,7 @@ impl State {
             );
         }
     }
-    pub fn set_highlight_color(&self, highlight_color: Option<String>) {
+    pub(super) fn set_highlight_color(&self, highlight_color: Option<String>) {
         let mut controls = self.controls.lock_mut();
         controls.highlight_color = highlight_color;
 
@@ -215,7 +224,7 @@ impl State {
             );
         }
     }
-    pub fn set_font(&self, font: Font) {
+    pub(super) fn set_font(&self, font: Font) {
         let mut controls = self.controls.lock_mut();
         controls.font = font;
 
@@ -227,7 +236,7 @@ impl State {
             );
         }
     }
-    pub fn set_element(&self, element: ElementType) {
+    pub(super) fn set_element(&self, element: ElementType) {
         let mut controls = self.controls.lock_mut();
         controls.element = element;
 
@@ -263,7 +272,7 @@ impl State {
             );
         }
     }
-    pub fn set_weight(&self, weight: Weight) {
+    pub(super) fn set_weight(&self, weight: Weight) {
         let mut controls = self.controls.lock_mut();
         controls.weight = weight;
 

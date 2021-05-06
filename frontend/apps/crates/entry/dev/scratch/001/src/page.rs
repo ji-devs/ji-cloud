@@ -190,10 +190,10 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
 }
 pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>) -> Dom {
     html!("div", {
-        .style("display", "block")
-        .style("border", "red solid 1px")
-        .style("box-sizing", "border-box")
         .child(html!("wysiwyg-output-renderer", {
+            .style("border", "red solid 1px")
+            .style("display", "block")
+            .style("box-sizing", "border-box")
             .property_signal("valueAsString", value.signal_cloned())
         }))
     })
@@ -208,7 +208,7 @@ fn render_text() -> Dom {
 
     let state = text_editor::state::State::new(
         ThemeId::HappyBrush,
-        value,
+        value.clone(),
         Box::new(clone!(value_change => move |v| {
             value_change.set(Some(v.to_string()));
             log::info!("{:?}", v);
@@ -224,6 +224,13 @@ fn render_text() -> Dom {
             render_text_editor_controls(state.clone()),
             render_wysiwyg(state.clone()),
             render_wysiwyg_output(value_change.clone()),
+            html!("button", {
+                .text("Set back to default value")
+                .event(clone!(state, value_change, value => move |_: events::Click| {
+                    state.set_value(value.clone());
+                    value_change.set(value.clone());
+                }))
+            })
         ])
     })
 }
