@@ -94,6 +94,16 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub goals: Vec<GoalId>,
 
+    /// This jig's age ranges.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// This jig's affiliations.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
+    pub affiliations: Vec<AffiliationId>,
+
     /// The language the jig uses.
     ///
     /// If None, uses the user's language.
@@ -124,6 +134,12 @@ pub struct Jig {
 
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,
+
+    /// This jig's age ranges.
+    pub age_ranges: Vec<AgeRangeId>,
+
+    /// This jig's affiliations.
+    pub affiliations: Vec<AffiliationId>,
 
     /// The goals of this jig.
     pub goals: Vec<GoalId>,
@@ -170,7 +186,7 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub language: Option<String>,
 
-    /// the jig's categories.
+    /// The jig's categories.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub categories: Option<Vec<CategoryId>>,
@@ -179,6 +195,16 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub goals: Option<Vec<GoalId>>,
+
+    /// The jig's age ranges.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub age_ranges: Option<Vec<AgeRangeId>>,
+
+    /// The jig's affiliations.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub affiliations: Option<Vec<AffiliationId>>,
 
     /// The current author
     #[serde(skip_serializing_if = "Option::is_none")]

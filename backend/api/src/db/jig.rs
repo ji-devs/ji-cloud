@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
-use futures::{stream::BoxStream, TryStreamExt};
+use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
     jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
-    meta::GoalId,
+    meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
 };
 use sqlx::PgPool;
@@ -16,6 +16,8 @@ pub async fn create(
     display_name: Option<&str>,
     goals: &[GoalId],
     categories: &[CategoryId],
+    age_ranges: &[AgeRangeId],
+    affiliations: &[AffiliationId],
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
     language: &str,
@@ -39,6 +41,8 @@ returning id
 
     super::recycle_metadata(&mut transaction, "jig", jig.id, goals).await?;
     super::recycle_metadata(&mut transaction, "jig", jig.id, categories).await?;
+    super::recycle_metadata(&mut transaction, "jig", jig.id, age_ranges).await?;
+    super::recycle_metadata(&mut transaction, "jig", jig.id, affiliations).await?;
 
     let default_modules = [
         (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
@@ -82,7 +86,9 @@ select
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>"
+    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
+    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
 from jig
 inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -105,6 +111,8 @@ order by t.ord
             language: row.language,
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             publish_at: row.publish_at,
+            age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+            affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
         })
         .collect();
 
@@ -128,7 +136,9 @@ select
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
     array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>"
+    array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>",
+    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -149,7 +159,9 @@ where id = $1"#,
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
-    });
+        age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+        affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+});
 
     Ok(jig)
 }
@@ -161,6 +173,8 @@ pub async fn update(
     author_id: Option<Uuid>,
     goals: Option<&[GoalId]>,
     categories: Option<&[CategoryId]>,
+    age_ranges: Option<&[AgeRangeId]>,
+    affiliations: Option<&[AffiliationId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
     language: Option<&str>,
 ) -> Result<(), error::UpdateWithMetadata> {
@@ -220,6 +234,18 @@ where id = $1
             .map_err(super::meta::handle_metadata_err)?;
     }
 
+    if let Some(affiliations) = affiliations {
+        super::recycle_metadata(&mut transaction, "jig", id.0, affiliations)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
+    }
+
+    if let Some(age_ranges) = age_ranges {
+        super::recycle_metadata(&mut transaction, "jig", id.0, age_ranges)
+            .await
+            .map_err(super::meta::handle_metadata_err)?;
+    }
+
     transaction.commit().await?;
 
     Ok(())
@@ -255,7 +281,9 @@ select
         order by "index"
     ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
-    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>"    
+    array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
+    array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
 from jig
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -282,6 +310,8 @@ limit 20 offset 20 * $2
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
+        age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
+        affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
     })
     .try_collect()
     .await
@@ -335,6 +365,50 @@ from jig_module where jig_id = $1
 "#,
         parent.0,
         new_id
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_affiliation(jig_id, affiliation_id)
+select $1, affiliation_id from jig_affiliation where jig_id = $2
+"#,
+        new_id,
+        parent.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_category(jig_id, category_id)
+select $1, category_id from jig_category where jig_id = $2
+"#,
+        new_id,
+        parent.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_goal(jig_id, goal_id)
+select $1, goal_id from jig_goal where jig_id = $2
+"#,
+        new_id,
+        parent.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_age_range(jig_id, age_range_id)
+select $1, age_range_id from jig_age_range where jig_id = $2
+"#,
+        new_id,
+        parent.0
     )
     .execute(&mut txn)
     .await?;

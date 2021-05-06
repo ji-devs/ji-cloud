@@ -55,6 +55,8 @@ async fn create(
         req.display_name.as_deref(),
         &req.goals,
         &req.categories,
+        &req.age_ranges,
+        &req.affiliations,
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
         &language,
@@ -120,6 +122,8 @@ async fn update(
         req.author_id,
         req.goals.as_deref(),
         req.categories.as_deref(),
+        req.age_ranges.as_deref(),
+        req.affiliations.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
         req.language.as_deref(),
     )

@@ -35,12 +35,12 @@ const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
 #[derive(Serialize)]
 struct BatchJig<'a> {
-    name: &'a str,
+    name: Option<&'a str>,
     // language: &'a str,
-    // age_ranges: &'a [Uuid],
-    // age_range_names: &'a [String],
-    // affiliations: &'a [Uuid],
-    // affiliation_names: &'a [String],
+    age_ranges: &'a [Uuid],
+    age_range_names: &'a [String],
+    affiliations: &'a [Uuid],
+    affiliation_names: &'a [String],
     goals: &'a [Uuid],
     goal_names: &'a [String],
     categories: &'a [Uuid],
@@ -169,7 +169,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
         for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
-            updater(&self.inner, &self.media_index)
+            updater(&self.inner, &self.media_index, &self.jig_index)
                 .await
                 .with_context(|| {
                     anyhow::anyhow!(
@@ -255,16 +255,16 @@ select algolia_index_version as "algolia_index_version!" from "settings"
             r#"
 select id,
     display_name as "name",
---    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as "affiliations!",
---    array((select affiliation.display_name
---           from affiliation
---                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id
---           where jig_affiliation.jig_id = jig.id))                            as "affiliation_names!",
---    array((select age_range_id from jig_age_range where jig_id = jig.id))     as "age_ranges!",
---    array((select age_range.display_name
---           from age_range
---                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id
---           where jig_age_range.jig_id = jig.id))                              as "age_range_names!",
+    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as "affiliations!",
+    array((select affiliation.display_name
+           from affiliation
+                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id
+           where jig_affiliation.jig_id = jig.id))                            as "affiliation_names!",
+    array((select age_range_id from jig_age_range where jig_id = jig.id))     as "age_ranges!",
+    array((select age_range.display_name
+           from age_range
+                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id
+           where jig_age_range.jig_id = jig.id))                              as "age_range_names!",
     array((select goal_id from jig_goal where jig_id = jig.id))     as "goals!",
     array((select goal.display_name
            from goal
@@ -299,9 +299,13 @@ for no key update skip locked;
 
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchJig {
-                name: row.name.as_deref().unwrap_or(""),
+                name: row.name.as_deref(),
                 goals: &row.goals,
                 goal_names: &row.goal_names,
+                age_ranges: &row.age_ranges,
+                age_range_names: &row.age_range_names,
+                affiliations: &row.affiliations,
+                affiliation_names: &row.affiliation_names,
                 categories: &row.categories,
                 category_names: &row.category_names,
                 author: row.author,
