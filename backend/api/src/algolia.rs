@@ -13,9 +13,10 @@ use shared::{
     domain::{
         category::CategoryId,
         image::{ImageId, ImageKind},
+        jig::JigId,
         meta::AffiliationId,
         meta::AgeRangeId,
-        meta::{StyleId, TagId},
+        meta::{GoalId, StyleId, TagId},
     },
     media::MediaGroupKind,
 };
@@ -30,6 +31,24 @@ mod migration;
 
 const PREMIUM_TAG: &'static str = "premium";
 const PUBLISHED_TAG: &'static str = "published";
+const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
+
+#[derive(Serialize)]
+struct BatchJig<'a> {
+    name: Option<&'a str>,
+    // language: &'a str,
+    age_ranges: &'a [Uuid],
+    age_range_names: &'a [String],
+    affiliations: &'a [Uuid],
+    affiliation_names: &'a [String],
+    goals: &'a [Uuid],
+    goal_names: &'a [String],
+    categories: &'a [Uuid],
+    category_names: &'a [String],
+    author: Option<Uuid>,
+    #[serde(rename = "_tags")]
+    tags: Vec<&'static str>,
+}
 
 #[derive(Serialize)]
 struct BatchImage<'a> {
@@ -60,14 +79,21 @@ enum BatchMedia<'a> {
 pub struct Manager {
     pub db: PgPool,
     pub inner: Inner,
-    pub index: String,
+    pub media_index: String,
+    pub jig_index: String,
 }
 
 impl Manager {
     pub fn new(settings: Option<AlgoliaSettings>, db: PgPool) -> anyhow::Result<Option<Self>> {
-        let (app_id, key, index) = match settings {
-            Some(settings) => match (settings.management_key, settings.media_index) {
-                (Some(key), Some(index)) => (settings.application_id, key, index),
+        let (app_id, key, media_index, jig_index) = match settings {
+            Some(settings) => match (
+                settings.management_key,
+                settings.media_index,
+                settings.jig_index,
+            ) {
+                (Some(key), Some(media_index), Some(jig_index)) => {
+                    (settings.application_id, key, media_index, jig_index)
+                }
                 _ => return Ok(None),
             },
             None => return Ok(None),
@@ -75,21 +101,31 @@ impl Manager {
 
         Ok(Some(Self {
             inner: Inner::new(AppId::new(app_id), ApiKey(key))?,
-            index,
+            media_index,
+            jig_index,
             db,
         }))
     }
 
     #[must_use]
     pub fn spawn(self) -> JoinHandle<()> {
+        // todo: be less hacky
+
+        let mut turn_modulus: usize = 0;
+
         tokio::task::spawn(async move {
             loop {
                 let iteration_start = Instant::now();
 
-                let res = self
-                    .update_images()
-                    .await
-                    .context("update images task errored");
+                let res = if turn_modulus % 2 == 0 {
+                    self.update_images()
+                        .await
+                        .context("update images task errored")
+                } else {
+                    self.update_jigs().await.context("update jigs task errored")
+                };
+
+                turn_modulus = (turn_modulus + 1) % 2;
 
                 match res {
                     Ok(true) => {}
@@ -133,12 +169,14 @@ select algolia_index_version as "algolia_index_version!" from "settings"
         let migrations_to_run = &migration::INDEXING_MIGRATIONS[(algolia_version as usize)..];
 
         for (idx, (_, updater)) in migrations_to_run.iter().enumerate() {
-            updater(&self.inner, &self.index).await.with_context(|| {
-                anyhow::anyhow!(
-                    "error while running algolia updater #{}",
-                    idx + (algolia_version as usize) + 1
-                )
-            })?;
+            updater(&self.inner, &self.media_index, &self.jig_index)
+                .await
+                .with_context(|| {
+                    anyhow::anyhow!(
+                        "error while running algolia updater #{}",
+                        idx + (algolia_version as usize) + 1
+                    )
+                })?;
         }
 
         // currently this can only be "no resync" or "complete resync" but eventually
@@ -173,7 +211,7 @@ select algolia_index_version as "algolia_index_version!" from "settings"
     }
 
     async fn batch_media(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
-        let resp = self.inner.batch(&self.index, &batch).await?;
+        let resp = self.inner.batch(&self.media_index, &batch).await?;
 
         let ids: Result<Vec<_>, _> = resp
             .object_ids
@@ -182,6 +220,128 @@ select algolia_index_version as "algolia_index_version!" from "settings"
             .collect();
 
         Ok(ids?)
+    }
+
+    async fn batch_jigs(&self, batch: BatchWriteRequests) -> anyhow::Result<Vec<Uuid>> {
+        let resp = self.inner.batch(&self.jig_index, &batch).await?;
+
+        let ids: Result<Vec<_>, _> = resp
+            .object_ids
+            .into_iter()
+            .map(|id| Uuid::parse_str(&id))
+            .collect();
+
+        Ok(ids?)
+    }
+
+    // todo: be less hacky about this
+    async fn update_jigs(&self) -> anyhow::Result<bool> {
+        let mut txn = self.db.begin().await?;
+
+        let is_outdated = sqlx::query!(
+            r#"select algolia_index_version != $1 as "outdated!" from settings"#,
+            migration::INDEX_VERSION
+        )
+        .fetch_one(&mut txn)
+        .await?
+        .outdated;
+
+        if is_outdated {
+            return Ok(false);
+        }
+
+        // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
+        let requests: Vec<_> = sqlx::query!(
+            r#"
+select id,
+    display_name as "name",
+    array((select affiliation_id from jig_affiliation where jig_id = jig.id)) as "affiliations!",
+    array((select affiliation.display_name
+           from affiliation
+                    inner join jig_affiliation on affiliation.id = jig_affiliation.affiliation_id
+           where jig_affiliation.jig_id = jig.id))                            as "affiliation_names!",
+    array((select age_range_id from jig_age_range where jig_id = jig.id))     as "age_ranges!",
+    array((select age_range.display_name
+           from age_range
+                    inner join jig_age_range on age_range.id = jig_age_range.age_range_id
+           where jig_age_range.jig_id = jig.id))                              as "age_range_names!",
+    array((select goal_id from jig_goal where jig_id = jig.id))     as "goals!",
+    array((select goal.display_name
+           from goal
+                    inner join jig_goal on goal.id = jig_goal.goal_id
+           where jig_goal.jig_id = jig.id))                              as "goal_names!",
+    array((select category_id from jig_category where jig_id = jig.id))       as "categories!",
+    array((select name
+           from category
+                    inner join jig_category on category.id = jig_category.category_id
+           where jig_category.jig_id = jig.id))                               as "category_names!",
+    (publish_at < now() is true) as "is_published!",
+    author_id as "author"
+from jig
+where 
+    last_synced_at is null or
+    (updated_at is not null and last_synced_at < updated_at) or
+    (publish_at < now() is true and last_synced_at < publish_at)
+limit 100
+for no key update skip locked;
+     "#
+        )
+        .fetch(&mut txn)
+        .map_ok(|row| {
+            let mut tags = Vec::new();
+            if row.is_published {
+                tags.push(PUBLISHED_TAG);
+            }
+
+            if row.author.is_some() {
+                tags.push(HAS_AUTHOR_TAG);
+            }
+
+            algolia::request::BatchWriteRequest::UpdateObject {
+            body: match serde_json::to_value(&BatchJig {
+                name: row.name.as_deref(),
+                goals: &row.goals,
+                goal_names: &row.goal_names,
+                age_ranges: &row.age_ranges,
+                age_range_names: &row.age_range_names,
+                affiliations: &row.affiliations,
+                affiliation_names: &row.affiliation_names,
+                categories: &row.categories,
+                category_names: &row.category_names,
+                author: row.author,
+                tags
+            })
+            .expect("failed to serialize BatchImage to json")
+            {
+                serde_json::Value::Object(map) => map,
+                _ => panic!("failed to serialize BatchImage to json map"),
+            },
+            object_id: row.id.to_string(),
+        }})
+        .try_collect()
+        .await?;
+
+        if requests.is_empty() {
+            return Ok(true);
+        }
+
+        log::debug!("Updating a batch of {} jigs(s)", requests.len());
+
+        let request = algolia::request::BatchWriteRequests { requests };
+        let ids = self.batch_jigs(request).await?;
+
+        log::debug!("Updated a batch of {} jigs(s)", ids.len());
+
+        sqlx::query!(
+            "update jig set last_synced_at = now() where id = any($1)",
+            &ids
+        )
+        .execute(&mut txn)
+        .await?;
+
+        txn.commit().await?;
+
+        Ok(true)
     }
 
     async fn update_images(&self) -> anyhow::Result<bool> {
@@ -359,7 +519,8 @@ fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter>
 #[derive(Clone)]
 pub struct Client {
     inner: Inner,
-    index: String,
+    media_index: String,
+    jig_index: String,
 }
 
 impl Client {
@@ -367,12 +528,22 @@ impl Client {
         if let Some(settings) = settings {
             let app_id = algolia::AppId::new(settings.application_id);
 
-            let (inner, index) = match (settings.backend_search_key, settings.media_index) {
-                (Some(key), Some(index)) => (Inner::new(app_id, ApiKey(key))?, index),
+            let (inner, media_index, jig_index) = match (
+                settings.backend_search_key,
+                settings.media_index,
+                settings.jig_index,
+            ) {
+                (Some(key), Some(media_index), Some(jig_index)) => {
+                    (Inner::new(app_id, ApiKey(key))?, media_index, jig_index)
+                }
                 _ => return Ok(None),
             };
 
-            Ok(Some(Self { inner, index }))
+            Ok(Some(Self {
+                inner,
+                media_index,
+                jig_index,
+            }))
         } else {
             Ok(None)
         }
@@ -418,7 +589,7 @@ impl Client {
         let results: SearchResponse = self
             .inner
             .search(
-                &self.index,
+                &self.media_index,
                 SearchQuery {
                     query: Some(query),
                     page,
@@ -453,7 +624,93 @@ impl Client {
 
     pub async fn try_delete_image(&self, ImageId(id): ImageId) -> anyhow::Result<()> {
         self.inner
-            .delete_object(&self.index, &id.to_string())
+            .delete_object(&self.media_index, &id.to_string())
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn search_jig(
+        &self,
+        query: &str,
+        page: Option<u32>,
+        is_published: Option<bool>,
+        age_ranges: &[AgeRangeId],
+        affiliations: &[AffiliationId],
+        categories: &[CategoryId],
+        goals: &[GoalId],
+        author: Option<Uuid>,
+    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+        let mut filters = algolia::filter::AndFilter {
+            filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
+        };
+
+        if let Some(author) = author {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: TagFilter(HAS_AUTHOR_TAG.to_owned()),
+                invert: false,
+            }));
+
+            filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "author".to_owned(),
+                    value: author.to_string(),
+                },
+                invert: false,
+            }))
+        }
+
+        if let Some(is_published) = is_published {
+            filters.filters.push(Box::new(CommonFilter {
+                filter: TagFilter(PUBLISHED_TAG.to_owned()),
+                invert: !is_published,
+            }))
+        }
+
+        filters_for_ids(&mut filters.filters, "age_ranges", age_ranges);
+        filters_for_ids(&mut filters.filters, "affiliations", affiliations);
+        filters_for_ids(&mut filters.filters, "categories", categories);
+        filters_for_ids(&mut filters.filters, "goals", goals);
+
+        let results: SearchResponse = self
+            .inner
+            .search(
+                &self.jig_index,
+                SearchQuery {
+                    query: Some(query),
+                    page,
+                    get_ranking_info: true,
+                    filters: Some(filters),
+                    hits_per_page: None,
+                },
+            )
+            .await?;
+
+        let pages = results.page_count.try_into()?;
+        let total_hits = results.hit_count as u64;
+
+        let results = results
+            .hits
+            .into_iter()
+            .map(|hit| hit.object_id.parse())
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some((results, pages, total_hits)))
+    }
+
+    pub async fn delete_jig(&self, id: JigId) {
+        if let Err(e) = self.try_delete_jig(id).await {
+            log::warn!(
+                "failed to delete jig with id {} from algolia: {}",
+                id.0.to_hyphenated(),
+                e
+            );
+        }
+    }
+
+    pub async fn try_delete_jig(&self, JigId(id): JigId) -> anyhow::Result<()> {
+        self.inner
+            .delete_object(&self.jig_index, &id.to_string())
             .await?;
 
         Ok(())

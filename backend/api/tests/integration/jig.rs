@@ -34,28 +34,28 @@ async fn create_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[actix_rt::test]
-async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+// #[actix_rt::test]
+// async fn delete() -> anyhow::Result<()> {
+//     let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
 
-    let port = app.port();
+//     let port = app.port();
 
-    let client = reqwest::Client::new();
+//     let client = reqwest::Client::new();
 
-    let resp = client
-        .delete(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008",
-            port
-        ))
-        .login()
-        .send()
-        .await?
-        .error_for_status()?;
+//     let resp = client
+//         .delete(&format!(
+//             "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008",
+//             port
+//         ))
+//         .login()
+//         .send()
+//         .await?
+//         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+//     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 #[actix_rt::test]
 async fn create_with_params() -> anyhow::Result<()> {

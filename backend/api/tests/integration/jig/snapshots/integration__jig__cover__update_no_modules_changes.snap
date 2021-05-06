@@ -16,6 +16,8 @@ expression: body.jig
       "kind": null
     }
   ],
+  "age_ranges": [],
+  "affiliations": [],
   "goals": [],
   "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
   "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
