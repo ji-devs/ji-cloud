@@ -7,12 +7,26 @@ use uuid::Uuid;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 
-/// Wrapper type around [`Uuid`], represents [`Style::id`].
+/// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct StyleId(pub Uuid);
+pub struct ImageStyleId(pub Uuid);
+
+/// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationStyleId(pub Uuid);
+
+/// Wrapper type around [`Uuid`], represents [`AudioStyle::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AudioStyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -49,22 +63,47 @@ pub struct GoalId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct TagId(pub Uuid);
 
-into_uuid!(StyleId, AffiliationId, AgeRangeId, SubjectId, GoalId, TagId);
+into_uuid!(
+    ImageStyleId,
+    AnimationStyleId,
+    AffiliationId,
+    AgeRangeId,
+    SubjectId,
+    GoalId,
+    TagId
+);
 
-/// Represents a style.
+/// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct Style {
-    /// The id of the style.
-    pub id: StyleId,
+pub struct ImageStyle {
+    /// The id of the image style.
+    pub id: ImageStyleId,
 
-    /// The style's name.
+    /// The image style's name.
     pub display_name: String,
 
-    /// When the style was created.
+    /// When the image style was created.
     pub created_at: DateTime<Utc>,
 
-    /// When the style was last updated.
+    /// When the image style was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Represents an animation style.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationStyle {
+    /// The id of the animation style.
+    pub id: AnimationStyleId,
+
+    /// The animation style's name.
+    pub display_name: String,
+
+    /// When the animation style was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the animation style was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -157,8 +196,14 @@ pub struct Tag {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct MetadataResponse {
-    /// All styles the server has.
-    pub styles: Vec<Style>,
+    /// All image styles the server has.
+    pub image_styles: Vec<ImageStyle>,
+
+    /// All animation styles the server has.
+    pub animation_styles: Vec<AnimationStyle>,
+
+    /// All audio...
+    // TODO
 
     /// All age ranges the server has.
     pub age_ranges: Vec<AgeRange>,
@@ -183,8 +228,11 @@ pub enum MetaKind {
     /// [`Affiliation`]
     Affiliation,
 
-    /// [`Style`]
-    Style,
+    /// [`ImageStyle`]
+    ImageStyle,
+
+    /// [`AnimationStyle`]
+    AnimationStyle,
 
     /// [`AgeRange`]
     AgeRange,

@@ -27,3 +27,8 @@ insert into "image_tag" (id, display_name, index, created_at)
 values ('591a2a64-a3a4-11eb-96e7-6bc0e819bc5f', 'A', 0, '2021-04-22 19:53:37.997394+00'),
        ('5b032222-a3a4-11eb-96e7-dbc5742f1640', 'B', 1, '2021-04-22 19:53:37.997394+00'),
        ('5e72c62e-a3a4-11eb-96e7-c78c34eb32ee', 'C', 2, '2021-04-22 19:53:37.997394+00');
+
+insert into "animation_tag" (id, display_name, index, created_at)
+values ('73f5daac-adec-11eb-ab06-5b9996c1d1a8', 'A', 0, '2021-05-05 21:45:56.665492+00'),
+       ('73f5dd4a-adec-11eb-ab06-c39d2dbeb51f', 'B', 1, '2021-05-05 21:45:56.665492+00'),
+       ('73f5df70-adec-11eb-ab06-97bd72e72a36', 'C', 2, '2021-05-05 21:45:56.665492+00'); 

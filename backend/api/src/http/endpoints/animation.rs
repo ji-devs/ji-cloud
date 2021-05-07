@@ -74,7 +74,7 @@ async fn create(
         req.is_premium,
         req.is_looping,
         req.publish_at.map(DateTime::<Utc>::from),
-        req.variant,
+        req.kind,
     )
     .await?;
 
@@ -107,7 +107,7 @@ async fn upload(
     let mut txn = db.begin().await?;
 
     let kind = sqlx::query!(
-        r#"select variant as "kind: AnimationKind" from animation where id = $1 for update"#,
+        r#"select kind as "kind: AnimationKind" from animation_metadata where id = $1 for update"#,
         id.0
     )
     .fetch_optional(&mut txn)
@@ -136,7 +136,7 @@ async fn upload(
     .await?;
 
     sqlx::query!(
-        "update animation set uploaded_at = now() where id = $1",
+        "update animation_metadata set uploaded_at = now() where id = $1",
         id.0
     )
     .execute(&mut txn)

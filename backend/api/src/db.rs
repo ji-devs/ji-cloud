@@ -12,7 +12,7 @@ pub(crate) mod user;
 use config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, GoalId, StyleId, SubjectId, TagId},
+    meta::{AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, SubjectId, TagId},
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
@@ -40,7 +40,11 @@ impl Metadata for AffiliationId {
     const TABLE: &'static str = "affiliation";
 }
 
-impl Metadata for StyleId {
+impl Metadata for ImageStyleId {
+    const TABLE: &'static str = "style";
+}
+
+impl Metadata for AnimationStyleId {
     const TABLE: &'static str = "style";
 }
 
@@ -93,6 +97,8 @@ async fn recycle_metadata<'a, T: Metadata>(
 fn generate_metadata_insert(base_table: &str, meta_kind: &str, binds: usize) -> String {
     debug_assert_ne!(binds, 0);
     debug_assert_ne!(binds, i16::MAX as usize);
+
+    log::error!("{}", meta_kind);
 
     let mut s = format!(
         "insert into {0}_{1} ({0}_id, {1}_id) values($1, $2)",

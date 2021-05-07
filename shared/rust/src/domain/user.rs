@@ -38,6 +38,9 @@ pub enum UserScope {
 
     /// The user can create/modify/delete jigs of their own.
     ManageSelfJig = 8,
+
+    /// The User can create/delete/modify audio files of their own.
+    ManageAudio = 9,
 }
 
 impl TryFrom<i16> for UserScope {
@@ -52,6 +55,7 @@ impl TryFrom<i16> for UserScope {
             6 => Ok(Self::ManageAnimation),
             7 => Ok(Self::ManageEntry),
             8 => Ok(Self::ManageSelfJig),
+            9 => Ok(Self::ManageAudio),
             _ => anyhow::bail!("Scope {} is invalid"),
         }
     }

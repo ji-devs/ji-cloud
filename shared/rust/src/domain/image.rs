@@ -2,7 +2,7 @@
 
 use super::{
     category::CategoryId,
-    meta::{AffiliationId, AgeRangeId, StyleId, TagId},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
     Publish,
 };
 use chrono::{DateTime, Utc};
@@ -111,7 +111,7 @@ pub struct ImageCreateRequest {
     pub publish_at: Option<Publish>,
 
     /// The image's styles.
-    pub styles: Vec<StyleId>,
+    pub styles: Vec<ImageStyleId>,
 
     /// The image's age ranges.
     pub age_ranges: Vec<AgeRangeId>,
@@ -162,7 +162,7 @@ pub struct ImageUpdateRequest {
 
     /// If `Some` replace the image's styles with these.
     #[serde(default)]
-    pub styles: Option<Vec<StyleId>>,
+    pub styles: Option<Vec<ImageStyleId>>,
 
     /// If `Some` replace the image's age ranges with these.
     #[serde(default)]
@@ -198,12 +198,12 @@ pub struct ImageSearchQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 
-    /// Optionally filter by `styles`
+    /// Optionally filter by `image_styles`
     #[serde(default)]
     #[serde(serialize_with = "super::csv_encode_uuids")]
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub styles: Vec<StyleId>,
+    pub styles: Vec<ImageStyleId>,
 
     /// Optionally filter by `age_ranges`
     #[serde(default)]
@@ -298,13 +298,13 @@ pub struct ImageBrowseResponse {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageResponse {
     /// The image metadata.
-    pub metadata: Image,
+    pub metadata: ImageMetadata,
 }
 
 /// Over the wire representation of an image's metadata.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct Image {
+pub struct ImageMetadata {
     /// The image's ID.
     pub id: ImageId,
 
@@ -324,7 +324,7 @@ pub struct Image {
     pub publish_at: Option<DateTime<Utc>>,
 
     /// The styles associated with the image.
-    pub styles: Vec<StyleId>,
+    pub styles: Vec<ImageStyleId>,
 
     /// The tags associated with the image.
     pub tags: Vec<TagId>,
@@ -351,7 +351,7 @@ pub type CreateResponse = super::CreateResponse<ImageId>;
 // HACK: we can't get `Vec<_>` directly from the DB, so we have to work around it for now.
 // see: https://github.com/launchbadge/sqlx/issues/298
 #[cfg(feature = "backend")]
-impl<'r> sqlx::FromRow<'r, PgRow> for Image {
+impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
         let DbImage {
             id,
@@ -396,7 +396,7 @@ struct DbImage {
     pub description: String,
     pub is_premium: bool,
     pub publish_at: Option<DateTime<Utc>>,
-    pub styles: Vec<(StyleId,)>,
+    pub styles: Vec<(ImageStyleId,)>,
     pub age_ranges: Vec<(AgeRangeId,)>,
     pub affiliations: Vec<(AffiliationId,)>,
     pub categories: Vec<(CategoryId,)>,

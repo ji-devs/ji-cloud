@@ -160,6 +160,14 @@ impl Scope for ScopeManageManageEntry {
         UserScope::ManageEntry
     }
 }
+#[derive(Apiv2Schema)]
+pub struct ScopeManageAudio;
+
+impl Scope for ScopeManageAudio {
+    fn scope() -> UserScope {
+        UserScope::ManageAudio
+    }
+}
 
 #[derive(Apiv2Security)]
 #[openapi(

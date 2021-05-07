@@ -3,8 +3,8 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{Image, ImageId, ImageKind},
-    meta::{AffiliationId, AgeRangeId, StyleId, TagId},
+    image::{ImageId, ImageKind, ImageMetadata},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
@@ -85,7 +85,7 @@ pub async fn update_metadata(
     image: ImageId,
     affiliations: Option<&[AffiliationId]>,
     age_ranges: Option<&[AgeRangeId]>,
-    styles: Option<&[StyleId]>,
+    styles: Option<&[ImageStyleId]>,
     categories: Option<&[CategoryId]>,
     tags: Option<&[TagId]>,
 ) -> sqlx::Result<()> {
@@ -168,7 +168,7 @@ where id = $1
     Ok(true)
 }
 
-pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
+pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
@@ -179,11 +179,11 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))       as categories,
-       array((select row (style_id) from image_style where image_id = id))             as styles,
-       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
+       array((select row (category_id) from image_category where image_id = id))                as categories,
+       array((select row (style_id) from image_style where image_id = id))                      as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))              as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id))          as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id))                     as tags
 from image_metadata
 where id = $1
 "#)
@@ -197,7 +197,7 @@ pub fn list(
     is_published: Option<bool>,
     kind: Option<ImageKind>,
     page: i32,
-) -> BoxStream<'_, sqlx::Result<Image>> {
+) -> BoxStream<'_, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
@@ -208,11 +208,11 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))       as categories,
-       array((select row (style_id) from image_style where image_id = id))             as styles,
-       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
+       array((select row (category_id) from image_category where image_id = id))                as categories,
+       array((select row (style_id) from image_style where image_id = id))                      as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))              as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id))          as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id))                     as tags
 from image_metadata
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -233,7 +233,7 @@ pub async fn filtered_count(db: &PgPool, is_published: Option<bool>) -> sqlx::Re
         .map(|it| it.count as u64)
 }
 
-pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Image>> {
+pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,

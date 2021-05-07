@@ -7,7 +7,15 @@ use crate::{
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[
+        Fixture::User,
+        Fixture::Animation,
+        Fixture::Image,
+        Fixture::MetaKinds,
+        Fixture::MetaImage,
+        Fixture::MetaAnimation,
+    ])
+    .await;
 
     let port = app.port();
 

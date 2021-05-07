@@ -23,7 +23,8 @@ async fn create() -> anyhow::Result<()> {
             "description": "testest",
             "is_premium": false,
             "publish_at": (),
-            "variant": "Gif",
+            "styles": [],
+            "kind": "Gif",
             "is_looping": false,
         }))
         .send()
@@ -41,7 +42,13 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Animation]).await;
+    let app = initialize_server(&[
+        Fixture::User,
+        Fixture::Animation,
+        Fixture::MetaKinds,
+        Fixture::MetaAnimation,
+    ])
+    .await;
 
     let port = app.port();
 
