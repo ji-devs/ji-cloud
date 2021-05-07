@@ -13,20 +13,22 @@ use sqlx::PgPool;
 /// Get a list of all available metadata of all kinds (sans categories)
 #[api_v2_operation]
 async fn get(db: Data<PgPool>) -> Result<Json<<Get as ApiEndpoint>::Res>, error::Server> {
-    let styles = db::meta::get_style(&db).await?;
     let affiliations = db::meta::get_affiliations(&db).await?;
     let age_ranges = db::meta::get_age_ranges(&db).await?;
     let subjects = db::meta::get_subjects(&db).await?;
     let goals = db::meta::get_goals(&db).await?;
     let image_tags = db::meta::get_image_tags(&db).await?;
+    let image_styles = db::meta::get_image_styles(&db).await?;
+    let animation_styles = db::meta::get_animation_styles(&db).await?;
 
     Ok(Json(MetadataResponse {
-        styles,
         affiliations,
         age_ranges,
         subjects,
         goals,
         image_tags,
+        image_styles,
+        animation_styles,
     }))
 }
 

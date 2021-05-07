@@ -182,8 +182,9 @@ async fn animation_post() -> anyhow::Result<()> {
             "description": "testest",
             "is_premium": false,
             "publish_at": (),
+            "styles": [],
             "is_looping": false,
-            "variant": "Gif",
+            "kind": "Gif",
         })),
         Method::POST,
     )

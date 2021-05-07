@@ -16,7 +16,7 @@ use shared::{
         jig::JigId,
         meta::AffiliationId,
         meta::AgeRangeId,
-        meta::{GoalId, StyleId, TagId},
+        meta::{GoalId, ImageStyleId, TagId},
     },
     media::MediaGroupKind,
 };
@@ -278,7 +278,7 @@ select id,
     (publish_at < now() is true) as "is_published!",
     author_id as "author"
 from jig
-where 
+where
     last_synced_at is null or
     (updated_at is not null and last_synced_at < updated_at) or
     (publish_at < now() is true and last_synced_at < publish_at)
@@ -371,10 +371,10 @@ select id,
            from affiliation
                     inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id
            where image_affiliation.image_id = image_metadata.id))                            as "affiliation_names!",
-    array((select style_id from image_style where image_id = image_metadata.id))             as "styles!",
-    array((select style.display_name
-           from style
-                    inner join image_style on style.id = image_style.style_id
+           array((select style_id from image_style where image_id = image_metadata.id))             as "styles!",
+           array((select style.display_name
+                  from style
+                           inner join image_style on style.id = image_style.style_id
            where image_style.image_id = image_metadata.id))                                  as "style_names!",
     array((select age_range_id from image_age_range where image_id = image_metadata.id))     as "age_ranges!",
     array((select age_range.display_name
@@ -556,7 +556,7 @@ impl Client {
         page: Option<u32>,
         is_premium: Option<bool>,
         is_published: Option<bool>,
-        styles: &[StyleId],
+        styles: &[ImageStyleId],
         age_ranges: &[AgeRangeId],
         affiliations: &[AffiliationId],
         categories: &[CategoryId],

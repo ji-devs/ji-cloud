@@ -15,7 +15,7 @@ async fn create(
     categories: &[Uuid],
     tags: &[Uuid],
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
 
     let port = app.port();
 
@@ -143,7 +143,13 @@ async fn create_with_tags_error() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image]).await;
+    let app = initialize_server(&[
+        Fixture::User,
+        Fixture::MetaKinds,
+        Fixture::Image,
+        Fixture::MetaImage,
+    ])
+    .await;
 
     let port = app.port();
 

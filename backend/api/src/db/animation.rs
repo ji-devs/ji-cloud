@@ -6,12 +6,12 @@ pub async fn delete(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<
     let mut conn = db.begin().await?;
 
     let res = sqlx::query!(
-        r#"delete from animation where id = $1 returning variant as "variant: AnimationKind""#,
+        r#"delete from animation_metadata where id = $1 returning kind as "kind: AnimationKind""#,
         animation.0
     )
     .fetch_optional(&mut conn)
     .await?
-    .map(|it| it.variant);
+    .map(|it| it.kind);
     conn.commit().await?;
 
     Ok(res)
@@ -24,18 +24,18 @@ pub async fn create(
     is_premium: bool,
     is_looping: bool,
     publish_at: Option<DateTime<Utc>>,
-    variant: AnimationKind,
+    kind: AnimationKind,
 ) -> sqlx::Result<AnimationId> {
     let id: AnimationId = sqlx::query!(
         r#"
-insert into animation (name, description, is_premium, publish_at, variant, looping) values ($1, $2, $3, $4, $5, $6)
+insert into animation_metadata (name, description, is_premium, publish_at, kind, looping) values ($1, $2, $3, $4, $5, $6)
 returning id as "id: AnimationId"
         "#,
         name,
         description,
         is_premium,
         publish_at,
-        variant as i16,
+        kind as i16,
         is_looping,
     )
     .fetch_one(conn)
@@ -46,23 +46,22 @@ returning id as "id: AnimationId"
 }
 
 pub async fn get_one(db: &PgPool, id: AnimationId) -> sqlx::Result<Option<AnimationMetadata>> {
-    sqlx::query_as!(
-        AnimationMetadata,
+    sqlx::query_as(
         r#"
-select id as "id: AnimationId",
-       name,
-       description,
-       is_premium,
-       publish_at,
-       created_at,
-       updated_at,
-       variant as "kind: AnimationKind",
-       looping as is_looping
-from animation
+select  id,
+        name,
+        description,
+        is_premium,
+        publish_at,
+        created_at,
+        updated_at,
+        kind,
+        looping         as is_looping,
+        array((select row (style_id) from animation_style where animation_id = animation_metadata.id)) as styles
+from animation_metadata
 where id = $1
-"#,
-        id.0
-    )
+"#)
+    .bind(id)
     .fetch_optional(db)
     .await
 }

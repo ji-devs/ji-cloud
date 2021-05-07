@@ -16,7 +16,7 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::image::{
-        CreateResponse, Image, ImageBrowseResponse, ImageId, ImageKind, ImageResponse,
+        CreateResponse, ImageBrowseResponse, ImageId, ImageKind, ImageMetadata, ImageResponse,
         ImageSearchResponse, ImageUpdateRequest,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
@@ -168,6 +168,8 @@ async fn create(
 {
     let req = req.into_inner();
 
+    log::error!("HEY");
+
     let mut txn = db.begin().await?;
     let id = db::image::create(
         &mut txn,
@@ -281,7 +283,7 @@ async fn search(
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<error::Service>()
-        .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
+        .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;
 
@@ -307,7 +309,7 @@ async fn browse(
         query.page.unwrap_or(0) as i32,
     )
     .err_into::<error::Server>()
-    .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
+    .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
     .try_collect()
     .await?;
 

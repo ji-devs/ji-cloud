@@ -12,7 +12,7 @@ select id as "id!",
 from image_metadata
 union all
 select id as "id!",
-    case variant
+    case kind
         -- GifAnimation
         when 0 then 1
         -- SpritesheetAnimation
@@ -22,7 +22,7 @@ select id as "id!",
     updated_at,
     uploaded_at,
     0::int2 as "library!: MediaLibrary" -- global
-from animation
+from animation_metadata
 union all
 select id as "id!",
     -- PngStickerImage

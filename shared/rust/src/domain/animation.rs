@@ -1,14 +1,15 @@
 //! Types for animations.
 
+use super::{meta::AnimationStyleId, Publish};
 use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "backend")]
+use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
-use super::Publish;
-
-/// Animation Variants
+/// Animation Kinds
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
@@ -38,7 +39,7 @@ impl AnimationKind {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationId(pub Uuid);
 
-/// Response for getting a single audio file.
+/// Response for getting a single animation file.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AnimationResponse {
@@ -65,6 +66,9 @@ pub struct AnimationMetadata {
     /// When the animation should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
 
+    /// The styles associated with the animation.
+    pub styles: Vec<AnimationStyleId>,
+
     /// What kind of animation this is.
     pub kind: AnimationKind,
 
@@ -75,6 +79,53 @@ pub struct AnimationMetadata {
     pub created_at: DateTime<Utc>,
 
     /// When the animation was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+// HACK: can't get `Vec<_>` directly from the DB. See `[crate::domain::image::ImageMetadata]`
+#[cfg(feature = "backend")]
+impl<'r> sqlx::FromRow<'r, PgRow> for AnimationMetadata {
+    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error> {
+        let DbAnimation {
+            id,
+            kind,
+            name,
+            description,
+            is_premium,
+            publish_at,
+            styles,
+            is_looping,
+            created_at,
+            updated_at,
+        } = DbAnimation::from_row(row)?;
+
+        Ok(Self {
+            id,
+            kind,
+            name,
+            description,
+            is_premium,
+            publish_at,
+            styles: styles.into_iter().map(|(it,)| it).collect(),
+            is_looping,
+            created_at,
+            updated_at,
+        })
+    }
+}
+
+#[cfg_attr(feature = "backend", derive(sqlx::FromRow))]
+#[cfg(feature = "backend")]
+struct DbAnimation {
+    pub id: AnimationId,
+    pub kind: AnimationKind,
+    pub name: String,
+    pub description: String,
+    pub is_premium: bool,
+    pub publish_at: Option<DateTime<Utc>>,
+    pub styles: Vec<(AnimationStyleId,)>,
+    pub is_looping: bool,
+    pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -97,8 +148,11 @@ pub struct AnimationCreateRequest {
     /// If [`Some`] publish the animation according to the `Publish`. Otherwise, don't publish it.
     pub publish_at: Option<Publish>,
 
+    /// The styles associated with the animation.
+    pub styles: Vec<AnimationStyleId>,
+
     /// What kind of animation this is.
-    pub variant: AnimationKind,
+    pub kind: AnimationKind,
 
     /// Should the animation loop?
     pub is_looping: bool,
