@@ -94,5 +94,10 @@ impl ResizeInfo {
      
         self.get_pos_px(elem_x, elem_y)
     }
+
+    pub fn unscaled_size(&self) -> (f64, f64) { 
+        let unscale = (1.0 / self.scale);
+        (self.width * unscale, self.height * unscale)
+    }
 }
 

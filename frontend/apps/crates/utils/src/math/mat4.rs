@@ -324,6 +324,34 @@ impl Matrix4 {
         clone.invert_mut()?;
         Ok(clone)
     }
+
+    pub fn transform_vec2(&self, v:&[f64]) -> [f64;2] {
+
+        let m = self.0;
+
+        let x = v[0];
+        let y = v[1];
+        [
+            m[0] * x + m[4] * y + m[12],
+            m[1] * x + m[5] * y + m[13]
+        ]
+    }
+
+    pub fn transform_vec3(&self, v:&[f64]) -> [f64;3] {
+        let m = self.0;
+        let x = v[0];
+        let y = v[1];
+        let z = v[2];
+
+
+        let w = m[3] * x + m[7] * y + m[11] * z + m[15];
+        let w = if w == 0.0 { 1.0 } else { w };
+        [
+            (m[0] * x + m[4] * y + m[8] * z + m[12]) / w,
+            (m[1] * x + m[5] * y + m[9] * z + m[13]) / w,
+            (m[2] * x + m[6] * y + m[10] * z + m[14]) / w,
+        ]
+    }
 }
 
 impl From<&[f64]> for Matrix4 {

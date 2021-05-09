@@ -60,7 +60,7 @@ impl InstructionsEditor {
         })
     }
 
-    fn render_text(&self) -> Dom {
+    pub fn render_text(&self) -> Dom {
         let Self {instructions, save} = self;
 
         fn change_text(save: &Rc<Box<dyn Fn(Instructions, bool)>>, instructions: &Mutable<Instructions>, text: String, push_history:bool) {
@@ -88,7 +88,8 @@ impl InstructionsEditor {
             }))
         })
     }
-    fn render_audio(&self) -> Dom {
+
+    pub fn render_audio(&self) -> Dom {
         let Self {instructions, save} = self;
 
         let opts = AudioInputOptions {

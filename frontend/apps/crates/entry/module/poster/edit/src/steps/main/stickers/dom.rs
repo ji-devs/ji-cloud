@@ -5,7 +5,7 @@ use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::SignalExt,
+    signal::{ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::jig::module::body::{Sprite, Transform};
@@ -14,22 +14,10 @@ use components::transform::{
     dom::TransformDom,
 };
 
-pub struct StickersDom {}
-impl StickersDom {
-    pub fn render(state:Rc<State>) -> Dom {
-        html!("empty-fragment", {
-            .children_signal_vec(
-                state.stickers.list.signal_vec_cloned().map(clone!(state => move |sticker| {
-                    StickerDom::render(state.clone(), sticker)
-                }))
-            )
-        })
-    }
-}
 
 pub struct StickerDom {}
 impl StickerDom {
-    pub fn render(state:Rc<State>, sticker: Rc<Sticker>) -> Dom {
+    pub fn render(state:Rc<State>, index: ReadOnlyMutable<Option<usize>>, sticker: Rc<Sticker>) -> Dom {
         //sticker.transform.lock_mut().scale.0 = [0.5, 0.5, 0.5];
         html!("empty-fragment", {
             .child(
@@ -50,7 +38,13 @@ impl StickerDom {
                     }))
                 })
             )
-            .child(TransformDom::render(sticker.transform.clone()))
+            .child_signal(state.renderables.selected_signal(index.clone()).map(clone!(sticker => move |selected| {
+                if selected {
+                    Some(TransformDom::render(sticker.transform.clone()))
+                } else {
+                    None
+                }
+            })))
         })
     }
 }

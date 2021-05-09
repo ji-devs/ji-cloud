@@ -9,9 +9,6 @@ use shared::{domain::{image::ImageId, jig::module::body::{Sprite, Transform}}, m
 use components::transform::{
     state::TransformState,
 };
-pub struct Stickers {
-    pub list: MutableVec<Rc<Sticker>>
-}
 
 #[derive(Clone)]
 pub struct Sticker {
@@ -21,7 +18,8 @@ pub struct Sticker {
 }
 
 impl Sticker {
-    pub fn new(sprite:Sprite) -> Self {
+    pub fn new(sprite:&Sprite) -> Self {
+        let sprite = sprite.clone();
         Self {
             id: sprite.id,
             lib: sprite.lib,
@@ -53,16 +51,3 @@ impl Sticker {
     }
 }
 
-impl Stickers {
-    pub fn new(raw:Vec<Sprite>) -> Self {
-        Self {
-            list: MutableVec::new_with_values(
-                raw.
-                    into_iter()
-                    .map(Sticker::new)
-                    .map(Rc::new)
-                    .collect()
-            )
-        }
-    }
-}

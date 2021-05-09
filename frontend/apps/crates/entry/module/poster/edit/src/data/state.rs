@@ -15,11 +15,13 @@ use super::{actions, raw};
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::Deserialize;
-use components::module::page::ModulePageKind;
 use std::collections::HashSet;
-use components::module::history::state::HistoryState;
+use components::{
+    module::{page::ModulePageKind, history::state::HistoryState},
+    text_editor::state::State as TextEditorState
+};
 use shared::{domain::{
-    jig::{JigId, module::{body::{Audio, Instructions}, ModuleId}},
+    jig::{JigId, module::{body::{Audio, Instructions, ThemeOrImage}, ModuleId}},
     audio::AudioId
 }, media::MediaLibrary};
 use dominator_helpers::futures::AsyncLoader;
@@ -27,9 +29,11 @@ use wasm_bindgen_futures::spawn_local;
 use utils::prelude::*;
 use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
 use crate::{
-    steps::main::stickers::state::Stickers,
+    steps::main::renderables::state::Renderables,
     overlay::state::State as OverlayState,
 };
+
+
 //See: https://users.rust-lang.org/t/eli5-existential/57780/16?u=dakom
 //
 //Basically, the type of these callbacks are closures created from *inside*
@@ -54,7 +58,10 @@ pub struct State {
     history: RefCell<Option<Rc<HistoryStateImpl>>>,
 
     //Poster-specific
-    pub stickers: Stickers, 
+    pub bg: Mutable<Option<ThemeOrImage>>, 
+    pub fg: Mutable<Option<ThemeOrImage>>, 
+    pub renderables: Renderables, 
+    pub text_editor: Rc<TextEditorState>,
 }
 
 impl State {
@@ -73,6 +80,13 @@ impl State {
         let save_loader = Rc::new(AsyncLoader::new());
 
 
+        let _self_for_text:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
+        let on_text_change = Box::new(clone!(_self_for_text => move |value:&str| {
+            if let Some(_self) = _self_for_text.borrow().as_ref() {
+                _self.change_text(value.to_string());
+            }
+        }));
+
         let _self = Rc::new(Self {
             jig_id,
             module_id,
@@ -84,8 +98,14 @@ impl State {
             instructions,
             overlay: OverlayState::new(),
 
-            stickers: Stickers::new(raw_data.stickers.clone())
+            bg: Mutable::new(raw_data.bg.clone()),
+            fg: Mutable::new(raw_data.fg.clone()),
+            renderables: Renderables::new(&raw_data.renderables),
+            text_editor: TextEditorState::new(theme_id, None, on_text_change)
+
         });
+
+        *_self_for_text.borrow_mut() = Some(_self.clone());
 
         let history = Rc::new(HistoryState::new(
             raw_data,
@@ -95,6 +115,9 @@ impl State {
 
         *_self.history.borrow_mut() = Some(history);
 
+        if let Some(index) = crate::debug::settings().selected_index {
+            _self.select_renderable(index);
+        }
         _self
     }
 
@@ -138,9 +161,9 @@ pub enum Step {
 impl Step {
     pub fn label(&self) -> &'static str {
         match self {
-            Step::One => crate::strings::steps_nav::STR_CONTENT,
-            Step::Two => crate::strings::steps_nav::STR_DESIGN,
-            Step::Three => crate::strings::steps_nav::STR_SETTINGS,
+            Step::One => crate::strings::steps_nav::STR_THEMES,
+            Step::Two => crate::strings::steps_nav::STR_BACKGROUND,
+            Step::Three => crate::strings::steps_nav::STR_CONTENT,
             Step::Four => crate::strings::steps_nav::STR_PREVIEW,
         }
     }

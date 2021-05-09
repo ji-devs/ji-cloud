@@ -19,10 +19,10 @@ impl TransformDom {
             .style("display", "block")
             .style_signal("transform", state.matrix_string_signal())
             .property("unit", "rem")
-            .style_signal("width", state.width_signal().map(|x| format!("{}rem", x)))
-            .style_signal("height", state.height_signal().map(|x| format!("{}rem", x)))
-            .property_signal("width", state.width_signal())
-            .property_signal("height", state.height_signal())
+            .style_signal("width", state.native_width_signal().map(|x| format!("{}rem", x)))
+            .style_signal("height", state.native_height_signal().map(|x| format!("{}rem", x)))
+            .property_signal("width", state.native_width_signal())
+            .property_signal("height", state.native_height_signal())
             .event(clone!(state => move |evt:super::events::Move| {
                 let data = evt.data();
                 state.start_tracking_action(Action::Move, data.x as i32, data.y as i32);

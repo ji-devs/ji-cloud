@@ -25,8 +25,15 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
 };
+use crate::steps::main::renderables::state::Renderable;
+
+use super::state::*;
+
 
 impl State {
+
+
+
     pub fn change_theme_id(&self, theme_id:ThemeId) {
         self.theme_id.set_neq(theme_id);
         self.get_history().push_modify(move |game_data| {
@@ -82,6 +89,42 @@ impl State {
         });
     }
 
+
+    /// Poster specific
+    pub fn select_renderable(&self, index:usize) {
+        self.renderables.selected_index.set(Some(index));
+
+
+        if let Some(item) = self.renderables.get(index) {
+            match item {
+                Renderable::Text(text) => {
+                    let value = text.value.get_cloned();
+
+                    /*
+                    if value.is_empty() {
+                        self.text_editor.value.set(None);
+                    } else {
+                        self.text_editor.value.set(Some(value));
+                    }
+                    */
+
+                },
+                _ => {
+                }
+            }
+        }
+
+    }
+
+    pub fn change_text(&self, value:String) {
+        if let Some(text) = self.renderables.get_current_as_text() {
+            text.set_value(value);
+        }
+    }
+
+    pub fn deselect_renderable(&self) {
+        self.renderables.selected_index.set(None);
+    }
 }
 
 pub fn history_on_change(state: Rc<State>) -> HistoryChangeFn {

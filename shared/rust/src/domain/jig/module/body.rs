@@ -85,6 +85,55 @@ pub struct Instructions {
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Renderables are things that can be rendered 
+pub enum Renderable {
+    /// Sprites
+    Sprite(Sprite),
+    /// Text
+    Text(Text)
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Text are serialized text things 
+pub struct Text {
+    /// the raw text 
+    pub value: String,
+    /// The Transform
+    pub transform: Transform,
+}
+impl Text {
+    /// Create a new Text 
+    pub fn new(value:String) -> Self {
+        Self {
+            value,
+            transform: Transform::default(),
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Theme or Image... images :/ 
+pub enum ThemeOrImage {
+    /// Theme-based
+    Theme(ThemeId),
+    /// Any other image
+    Image(Image),
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Images need id and lib 
+pub struct Image {
+    /// The Image Id
+    pub id: ImageId,
+    /// The MediaLibrary
+    pub lib: MediaLibrary,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Sprites are a combo of image + transform
 pub struct Sprite {
     /// The Image Id
@@ -101,7 +150,7 @@ impl Sprite {
         Self {
             id,
             lib,
-            transform: Transform::new(),
+            transform: Transform::default(),
         }
     }
 }
@@ -130,9 +179,9 @@ pub struct Transform {
     pub origin: Vec3,
 }
 
-impl Transform {
+impl Default for Transform {
     /// Create a new Transform
-    pub fn new() -> Self {
+    fn default() -> Self {
         Self {
             translation: Vec3([0.0, 0.0, 0.0]),
             rotation: Vec4([0.0, 0.0, 0.0, 1.0]),

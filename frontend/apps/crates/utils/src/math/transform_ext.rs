@@ -2,8 +2,14 @@
  * There are some general math functions here
  * But the "normalization" is special for our needs
  * It uses a ResizeInfo to go back and forth
- * In this sense, while "normalization" does map some values to the 0->1 range
+ * While "normalization" does map some values to the 0->1 range
  * It's more about having a screen-size-agnostic storage format
+ *
+ * The Transform itself shouldn't do any math, it's only a
+ * storage format
+ *
+ * Heavy lifting of math should be done by getting the inner slices
+ * or Matrix4, and handing that off to math utils (native or 3rd party)
  */
 
 use crate::resize::ResizeInfo;
@@ -11,8 +17,7 @@ use shared::domain::jig::module::body::{Vec3, Vec4, Transform};
 use super::mat4::Matrix4;
 
 pub trait TransformExt {
-    // everything from this point onwards is totally screen-space-agnostic
-    fn to_screen_mat4(&self, resize_info: &ResizeInfo) -> Matrix4; 
+    fn to_mat4(&self) -> Matrix4;
 
     /// rotate around the z axis, in radians
     fn rotate_z(&mut self, angle:f64);
@@ -28,6 +33,15 @@ pub trait TransformExt {
     fn set_scale_x(&mut self, x: f64);
     fn set_scale_y(&mut self, y: f64);
 
+    fn set_scale_identity(&mut self);
+    fn set_translation_identity(&mut self);
+    fn set_rotation_identity(&mut self);
+
+    fn denormalize_translation(&mut self, resize_info: &ResizeInfo);
+
+    fn map<A>(&self, f: impl FnOnce(&Self) -> A) -> A {
+        f(&self)
+    }
 }
 
 pub trait RenderableMatrix {
@@ -59,6 +73,22 @@ impl RenderableMatrix for [f64;16] {
     }
 }
 impl TransformExt for Transform {
+
+            //translation: Vec3([0.0, 0.0, 0.0]),
+            //rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
+            //scale: Vec3([1.0, 1.0, 1.0]),
+            //origin: Vec3([0.0, 0.0, 0.0]),
+
+    fn set_scale_identity(&mut self) {
+        self.scale.0 = [1.0, 1.0, 1.0];
+    }
+    fn set_translation_identity(&mut self) {
+        self.translation.0 = [0.0, 0.0, 0.0];
+    }
+    fn set_rotation_identity(&mut self) {
+        self.rotation.0 = [0.0, 0.0, 0.0, 1.0];
+    }
+
     fn rotate_z(&mut self, mut rad:f64) {
         let quat = &mut self.rotation.0;
         rad *= 0.5;
@@ -108,24 +138,28 @@ impl TransformExt for Transform {
         scale[1] = y;
     }
 
-    /// Return the Transform as a 4x4 Matrix
-    /// Takes into account that coordinates are normalized
-    fn to_screen_mat4(&self, resize_info: &ResizeInfo) -> Matrix4 {
+    /// Takes into account that translation coordinates are normalized
+    fn denormalize_translation(&mut self, resize_info: &ResizeInfo) {
 
 
-        let mut translation = self.translation.0;
-        let mut rotation = self.rotation.0;
-        let mut scale = self.scale.0;
-        let mut origin = self.origin.0;
+        let mut translation = &mut self.translation.0;
+        let mut rotation = &mut self.rotation.0;
+        let mut scale = &mut self.scale.0;
+        let mut origin = &mut self.origin.0;
 
         let (tx, ty) = resize_info.get_pos_denormalized(translation[0], translation[1]);
+
 
         translation[0] = tx; 
         translation[1] = ty; 
 
-        //scale[0] *= resize_info.scale;
-        //scale[1] *= resize_info.scale;
-
-        Matrix4::new_from_trs_origin(&translation, &rotation, &scale, &origin)
+    }
+    fn to_mat4(&self) -> Matrix4 {
+        Matrix4::new_from_trs_origin(
+            &self.translation.0, 
+            &self.rotation.0, 
+            &self.scale.0,
+            &self.origin.0
+        )
     }
 }

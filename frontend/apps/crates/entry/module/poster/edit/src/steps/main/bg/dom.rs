@@ -8,14 +8,15 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
-use super::renderables::dom::RenderablesDom;
+use shared::domain::jig::module::body::{Sprite, Transform};
 
-pub struct MainDom {}
-impl MainDom {
+pub struct BgDom {}
+impl BgDom {
     pub fn render(state:Rc<State>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
-            .child(RenderablesDom::render(state))
+            .child_signal(state.bg.signal_cloned().map(|bg| {
+                None
+            }))
         })
     }
 }
