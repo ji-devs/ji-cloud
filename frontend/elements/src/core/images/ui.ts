@@ -12,7 +12,7 @@ export class _ extends LitElement {
                 width: inherit;
                 height: inherit;
                 object-fit: inherit;
-
+                object-position: inherit;
             }
 
             `,

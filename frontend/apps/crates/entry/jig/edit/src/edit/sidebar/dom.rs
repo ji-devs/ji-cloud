@@ -59,8 +59,24 @@ impl SidebarDom {
 
         html!("empty-fragment", {
             .child(html!("jig-edit-sidebar", {
+                .property_signal("collapsed", state.collapsed.signal())
+                .property_signal("isModulePage", state.module_id.signal_cloned().map(|module_id| module_id.is_none()))
                 .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
+                .child(html!("jig-edit-sidebar-publish", {
+                    .property("slot", "publish")
+                    .property_signal("publish", state.publish_at.signal_cloned().map(|publish_at| {
+                        publish_at.is_some()
+                    }))
+                    .property_signal("collapsed", state.collapsed.signal())
+                    .child(html!("menu-kebab", {
+                        .property("slot", "menu")
+                        .child(html!("menu-line", {
+                            .property("slot", "menu-content")
+                            .property("icon", "edit")
+                        }))
+                    }))
+                }))
                 .children_signal_vec(state.modules
                     .signal_vec_cloned()
                     .enumerate()
