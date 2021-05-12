@@ -30,6 +30,10 @@ pub fn get_jig() -> Jig {
         creator_id: None,
         author_id: None,
         publish_at: None,
+        affiliations: Vec::new(),
+        age_ranges: Vec::new(),
+        categories: Vec::new(),
+        language: String::new(),
     }
 
 }

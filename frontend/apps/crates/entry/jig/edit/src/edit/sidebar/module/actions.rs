@@ -10,6 +10,13 @@ use crate::edit::sidebar::dragging::state::State as DragState;
 use dominator::clone;
 use std::convert::TryInto;
 
+pub async fn update_module(jig_id: &JigId, module_id: &ModuleId, req: ModuleUpdateRequest) -> Result<(), EmptyError> {
+    let path = endpoints::jig::module::Update::PATH
+        .replace("{id}", &jig_id.0.to_string())
+        .replace("{module_id}", &module_id.0.to_string());
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, Some(req)).await
+}
+
 pub fn mouse_down(state: Rc<State>, x: i32, y:i32) {
     state.sidebar.drag.set(Some(Rc::new(DragState::new(state.clone(), x, y))));
 }
@@ -18,8 +25,9 @@ pub fn edit(state: Rc<State>) {
     let module_id = state.module.id;
     state.sidebar.module_id.set_neq(Some(module_id));
 
-    let jig_id = state.sidebar.jig_id;
+    let jig_id = state.sidebar.jig.id;
     let url:String = Route::Jig(JigRoute::Edit(jig_id, Some(module_id))).into();
+    // dominator::routing::go_to_url(&url);
     log::info!("{}", url);
 
     /* this will cause a full refresh - but preserves history
@@ -33,15 +41,12 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
             ModuleKind::Memory => Some(body::Body::MemoryGame(body::memory::ModuleData::default())),
             _ => None
         };
-        let req = Some(ModuleUpdateRequest {
+        let req = ModuleUpdateRequest {
             body,
             ..ModuleUpdateRequest::default()
-        });
+        };
 
-        let path = endpoints::jig::module::Update::PATH
-            .replace("{id}",&state.sidebar.jig_id.0.to_string())
-            .replace("{module_id}",&state.module.id.0.to_string());
-        match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, req).await {
+        match update_module(&state.sidebar.jig.id, &state.module.id, req).await {
             Ok(_) => {
                 state.module.kind.set_neq(Some(kind));
             },
@@ -55,7 +60,7 @@ pub fn delete(state:Rc<State>) {
 
     state.sidebar.loader.load(clone!(state => async move {
         let path = endpoints::jig::module::Delete::PATH
-            .replace("{id}",&state.sidebar.jig_id.0.to_string())
+            .replace("{id}",&state.sidebar.jig.id.0.to_string())
             .replace("{module_id}",&state.module.id.0.to_string());
         match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::module::Delete::METHOD, None).await {
             Ok(_) => {
@@ -71,24 +76,19 @@ pub fn add_empty_module_after(state:Rc<State>) {
         let req = Some(ModuleCreateRequest {
             body: None
         });
-        let path = endpoints::jig::module::Create::PATH.replace("{id}",&state.sidebar.jig_id.0.to_string());
+        let path = endpoints::jig::module::Create::PATH.replace("{id}",&state.sidebar.jig.id.0.to_string());
 
         match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, req).await {
             Ok(resp) => {
                 let id = resp.id;
                 let index = state.index+1;
                 state.sidebar.modules.lock_mut().insert_cloned(index, Rc::new(Module::new(id)));
-                let req = Some(ModuleUpdateRequest {
+                let req = ModuleUpdateRequest {
                     body: None,
                     index: Some(index.try_into().unwrap_ji()),
-                });
+                };
 
-                let path = endpoints::jig::module::Update::PATH
-                    .replace("{id}",&state.sidebar.jig_id.0.to_string())
-                    .replace("{module_id}",&id.0.to_string());
-        
-
-                match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, req).await {
+                match update_module(&state.sidebar.jig.id, &id, req).await {
                     Ok(_) => {
                     },
                     Err(_) => {},
@@ -119,15 +119,12 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
             }
         } {
             state.sidebar.modules.lock_mut().move_from_to(state.index, target);
-            let req = Some(ModuleUpdateRequest {
+            let req = ModuleUpdateRequest {
                 body: None,
                 index: Some(target.try_into().unwrap_ji()),
-            });
+            };
 
-            let path = endpoints::jig::module::Update::PATH
-                .replace("{id}",&state.sidebar.jig_id.0.to_string())
-                .replace("{module_id}",&state.module.id.0.to_string());
-            match api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, req).await {
+            match update_module(&state.sidebar.jig.id, &state.module.id, req).await {
                 Ok(_) => {
                 },
                 Err(_) => {},

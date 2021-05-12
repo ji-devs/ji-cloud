@@ -34,11 +34,7 @@ pub fn load_jigs(state: Rc<State>) {
 pub fn create_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         
-        let req = Some(JigCreateRequest {
-            display_name: None,
-            goals: Vec::new(),
-            publish_at: None,
-        });
+        let req = Some(JigCreateRequest::default());
 
         match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(&Create::PATH, Create::METHOD, req).await {
             Ok(resp) => {
@@ -57,6 +53,12 @@ pub fn copy_jig(state: Rc<State>, jig: &Jig) {
         display_name: cloned.display_name.clone(),
         goals: cloned.goals.clone(),
         publish_at: None,
+
+        
+        affiliations: Vec::new(),
+        age_ranges: Vec::new(),
+        categories: Vec::new(),
+        language: None,
     });
 
     state.loader.load(clone!(state => async move {
@@ -70,6 +72,12 @@ pub fn copy_jig(state: Rc<State>, jig: &Jig) {
                     creator_id: None,
                     author_id: None,
                     publish_at: None,
+
+
+                    affiliations: Vec::new(),
+                    age_ranges: Vec::new(),
+                    categories: Vec::new(),
+                    language: String::new(),
                 };
 
                 state.jigs.lock_mut().push_cloned(jig);

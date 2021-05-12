@@ -22,9 +22,9 @@ interface Args {
     menuOpen: boolean,
     showAdvancedMenu: boolean,
     makeDemoRoomAtTop: boolean,
-    lastModule: boolean,
     showAdd: boolean,
     dragging: boolean,
+    collapsed: boolean,
     dragX: number,
     dragY: number,
 }
@@ -38,9 +38,9 @@ const DEFAULT_ARGS:Args = {
     menuOpen: false,
     showAdvancedMenu: false,
     makeDemoRoomAtTop: true,
-    lastModule: false,
     showAdd: true,
     dragging: false,
+    collapsed: false,
     dragX: 0,
     dragY: 0,
 }
@@ -52,7 +52,7 @@ type InternalExtra = {
 export const Module = (props?:Partial<Args> & InternalExtra) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     
-    const {state, slot, dragX, dragY, showAdd, thumbnail, lastModule, showAdvancedMenu, rawIndex, makeDemoRoomAtTop, menuOpen, ...rest} = props;
+    const {state, slot, dragX, dragY, showAdd, thumbnail, showAdvancedMenu, rawIndex, makeDemoRoomAtTop, menuOpen, ...rest} = props;
     const moduleProps:any = rest;
 
     const windowProps = {
@@ -70,27 +70,27 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
         : "";
 
     return `
-    <div style="${makeDemoRoomAtTop && `position: absolute; top: 200px;`}" ${slot && `slot="${slot}"`}>
-        <jig-edit-sidebar-module style="${style}" ${argsToAttrs(moduleProps)} ${lastModule && "lastBottomDecoration"}>
-            <jig-edit-sidebar-module-window ${argsToAttrs(windowProps)} slot="window"></jig-edit-sidebar-module-window>
-            ${renderMenu(menuOpen, showAdvancedMenu)} 
-            ${showAdd && `<button-icon icon="gears" slot="add"></button-icon>`}
+        <div style="${makeDemoRoomAtTop && `position: absolute; top: 200px;`}" ${slot && `slot="${slot}"`}>
+            <jig-edit-sidebar-module style="${style}" ${argsToAttrs(moduleProps)}>
+                <jig-edit-sidebar-module-window ${argsToAttrs(windowProps)} slot="window"></jig-edit-sidebar-module-window>
+                ${renderMenu(menuOpen, showAdvancedMenu)} 
+                ${showAdd && `<button-icon icon="gears" slot="add"></button-icon>`}
             </jig-edit-sidebar-module>
         </div>`;
 }
 
 function renderMenu(visible: boolean, showAdvanced:boolean) {
     return `
-    <menu-kebab ${visible && "visible"} slot="menu">
-        <jig-edit-sidebar-module-menu slot="menu-content" ${showAdvanced && "advanced"}>
-        <menu-line slot="lines" icon="edit"></menu-line>
-        <menu-line slot="lines" icon="move-up"></menu-line>
-        <menu-line slot="lines" icon="move-down"></menu-line>
-        <menu-line slot="lines" icon="duplicate"></menu-line>
-        <menu-line slot="lines" icon="delete"></menu-line>
-        <menu-line slot="advanced" icon="copy" customLabel="${STR_CUSTOM_COPY}"></menu-line>
-        </jig-edit-sidebar-module-menu>
-    </menu-kebab>
+        <menu-kebab ${visible && "visible"} slot="menu">
+            <jig-edit-sidebar-module-menu slot="menu-content" ${showAdvanced && "advanced"}>
+            <menu-line slot="lines" icon="edit"></menu-line>
+            <menu-line slot="lines" icon="move-up"></menu-line>
+            <menu-line slot="lines" icon="move-down"></menu-line>
+            <menu-line slot="lines" icon="duplicate"></menu-line>
+            <menu-line slot="lines" icon="delete"></menu-line>
+            <menu-line slot="advanced" icon="copy" customLabel="${STR_CUSTOM_COPY}"></menu-line>
+            </jig-edit-sidebar-module-menu>
+        </menu-kebab>
     `;
     //
 }

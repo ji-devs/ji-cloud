@@ -46,9 +46,11 @@ impl ModuleDom {
                 })
                 .property_signal("module", state.kind_str_signal())
                 .property("index", index as u32)
+                .property_signal("collapsed", state.sidebar.collapsed.signal())
                 .property("lastBottomDecoration", index == total_len-1)
                 .event(clone!(state => move |evt:events::MouseDown| {
-                    actions::mouse_down(state.clone(), evt.x(), evt.y());
+                    // TODO:
+                    // actions::mouse_down(state.clone(), evt.x(), evt.y());
                 }))
                 .child(html!("jig-edit-sidebar-module-window", {
                     .property("slot", "window")
@@ -83,15 +85,13 @@ impl ModuleDom {
                     *state.elem.borrow_mut() = None; 
                 }))
                 .child(MenuDom::render(state.clone()))
-                .apply_if(index < total_len-1, |dom| {
-                    dom.child(html!("button-icon", {
-                        .property("icon", "gears")
-                        .property("slot", "add")
-                        .event(clone!(state => move |evt:events::Click| {
-                            actions::add_empty_module_after(state.clone())
-                        }))
+                .child(html!("button-icon", {
+                    .property("icon", "gears")
+                    .property("slot", "add")
+                    .event(clone!(state => move |evt:events::Click| {
+                        actions::add_empty_module_after(state.clone())
                     }))
-                })
+                }))
             }))
         })
     }
