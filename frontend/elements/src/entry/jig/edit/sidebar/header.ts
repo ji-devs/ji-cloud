@@ -15,6 +15,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     padding: 20px;
+                    padding-bottom: 0;
                     display: block;
 
                     transition-timing-function: linear;
@@ -28,18 +29,12 @@ export class _ extends LitElement {
                 .close-wrapper {
                     display: flex;
                     justify-content: flex-end;
+                    margin-right: -20px;
+                    transition-property: margin-top;
+                    height: 14px;
+                }
+                :host([collapsed]) .close-wrapper {
                     margin-right: -10px;
-                }
-                .close {
-                    height: 20px;
-                    width: 20px;
-                    cursor: pointer;
-                    border-radius: 50%;
-                    display: inline-grid;
-                    place-content: center;
-                }
-                .close:hover, .close:active {
-                    background-color: var(--main-blue);
                 }
                 :host([isModulePage]) .close {
                     opacity: 0;
@@ -54,8 +49,6 @@ export class _ extends LitElement {
                 }
                 ::slotted([slot=close]) {
                     transition: transform .3s;
-                    width: 14px;
-                    height: 14px;
                 }
                 .logo-nav-wrapper {
                     margin-top: 16px;
@@ -87,16 +80,8 @@ export class _ extends LitElement {
                     align-items: center;
                     column-gap: 12px;
                 }
-                nav ::slotted([slot=settings]) {
-                    height: 32px;
-                }
-                /* will probably need to be replaced */
-                /* nav ::slotted(img-ui) { */
-                nav ::slotted([slot=settings]), nav ::slotted([slot=modules]) {
-                    filter: opacity(0.6);
-                }
                 .input {
-                    margin-top: 23px;
+                    margin: 23px 0;
                     width: 100%;
                 }
             `,
@@ -111,7 +96,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="close-wrapper">
+            <div class="close-wrapper collapsing-phase">
                 <div class="close collapsing-phase">
                     <slot name="close"></slot>
                 </div>

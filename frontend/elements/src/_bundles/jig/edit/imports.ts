@@ -1,5 +1,4 @@
 import "@elements/entry/jig/edit/sidebar/sidebar";
-import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/pages/landing";
 import "@elements/entry/jig/edit/selection/card";
 import "@elements/entry/jig/edit/selection/selection";
@@ -9,6 +8,9 @@ import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/sidebar/module";
 import "@elements/entry/jig/edit/sidebar/publish";
 import "@elements/entry/jig/edit/sidebar/filler";
+import "@elements/entry/jig/edit/sidebar/close-button";
+import "@elements/entry/jig/edit/sidebar/action-button";
+import "@elements/entry/jig/edit/sidebar/preview-button";
 import "@elements/entry/jig/_common/bg";
 import "@elements/core/inputs/search";
 import "@elements/core/inputs/dropdowns/dropdown-select";

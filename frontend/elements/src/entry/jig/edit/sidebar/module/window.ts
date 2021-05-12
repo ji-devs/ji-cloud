@@ -68,7 +68,7 @@ export class _ extends LitElement {
     state: ModuleState = "draft";
 
     @property()
-    activeModuleKind: ModuleKind = "memory";
+    activeModuleKind: ModuleKind = "cover";
 
     @property()
     publishedThumbnail: string = "";

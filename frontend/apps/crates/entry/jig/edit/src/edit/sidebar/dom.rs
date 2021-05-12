@@ -18,6 +18,7 @@ use super::{
     },
     state::*,
 };
+use super::menu::{dom as MenuDom, state::State as MenuState};
 use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use utils::prelude::*;
@@ -69,13 +70,18 @@ impl SidebarDom {
                         publish_at.is_some()
                     }))
                     .property_signal("collapsed", state.collapsed.signal())
-                    .child(html!("menu-kebab", {
-                        .property("slot", "menu")
-                        .child(html!("menu-line", {
-                            .property("slot", "menu-content")
-                            .property("icon", "edit")
-                        }))
-                    }))
+                    .apply(|dom| {
+                        let menu_state = Rc::new(MenuState::new());
+                        dom.child(MenuDom::render(
+                            menu_state.clone(),
+                            vec![
+                                MenuDom::item_edit_settings(menu_state.clone(), state.clone()),
+                                // TODO:
+                                // MenuDom::item_copy(menu_state.clone()),
+                                MenuDom::item_paste(menu_state.clone(), state.clone()),
+                            ]
+                        ))
+                    })
                 }))
                 .children_signal_vec(state.modules
                     .signal_vec_cloned()
