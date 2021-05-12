@@ -28,7 +28,27 @@ pub fn load_jigs(state: Rc<State>) {
             Err(_) => {},
         }
     }));
+}
 
+pub fn search_jigs(state: Rc<State>, q: String) {
+    state.loader.load(clone!(state => async move {
+        let req = Some(JigSearchQuery {
+            q,
+            ..Default::default()
+        });
+
+        match api_with_auth::<JigSearchResponse, EmptyError, _>(&Search::PATH, Search::METHOD, req).await {
+            Ok(resp) => {
+                state.jigs.lock_mut().replace_cloned(
+                    resp.jigs
+                        .into_iter()
+                        .map(|jr| jr.jig)
+                        .collect()
+                    );
+            },
+            Err(_) => {},
+        }
+    }));
 }
 
 pub fn create_jig(state: Rc<State>) {
