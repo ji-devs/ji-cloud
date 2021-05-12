@@ -98,7 +98,7 @@ impl GalleryDom {
                             .property("icon", "duplicate")
                             .text(STR_DUPLICATE)
                             .event(clone!(state, jig => move |_: events::Click| {
-                                actions::copy_jig(state.clone(), &jig);
+                                actions::copy_jig(state.clone(), &jig.id);
                             }))
                         }),
                         html!("menu-line", {

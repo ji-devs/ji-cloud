@@ -67,40 +67,21 @@ pub fn create_jig(state: Rc<State>) {
 
 }
 
-pub fn copy_jig(state: Rc<State>, jig: &Jig) {
-    let cloned = jig.clone();
-    let req = Some(JigCreateRequest {
-        display_name: cloned.display_name.clone(),
-        goals: cloned.goals.clone(),
-        publish_at: None,
-
-        
-        affiliations: Vec::new(),
-        age_ranges: Vec::new(),
-        categories: Vec::new(),
-        language: None,
-    });
+pub fn copy_jig(state: Rc<State>, jig_id: &JigId) {
+    let path = Clone::PATH.replace("{id}", &jig_id.0.to_string());
 
     state.loader.load(clone!(state => async move {
-        match api_with_auth::<CreateResponse<JigId>, MetadataNotFound, _>(&Create::PATH, Create::METHOD, req).await {
+        match api_with_auth::<CreateResponse<JigId>, EmptyError, ()>(&path, Clone::METHOD, None).await {
             Ok(resp) => {
-                let jig = Jig {
-                    id: resp.id,
-                    display_name: cloned.display_name.clone(),
-                    modules: Vec::new(),
-                    goals: cloned.goals.clone(),
-                    creator_id: None,
-                    author_id: None,
-                    publish_at: None,
 
-
-                    affiliations: Vec::new(),
-                    age_ranges: Vec::new(),
-                    categories: Vec::new(),
-                    language: String::new(),
+                let path = Get::PATH.replace("{id}", &resp.id.0.to_string());
+                match api_with_auth::<JigResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                    Ok(resp) => {
+                        state.jigs.lock_mut().push_cloned(resp.jig);
+                    },
+                    Err(_) => {},
                 };
 
-                state.jigs.lock_mut().push_cloned(jig);
             },
             Err(_) => {},
         };
