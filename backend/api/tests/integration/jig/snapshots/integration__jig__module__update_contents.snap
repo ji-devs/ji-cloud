@@ -16,6 +16,7 @@ expression: body
         "pairs": [],
         "theme_id": "None"
       }
-    }
+    },
+    "is_complete": true
   }
 }

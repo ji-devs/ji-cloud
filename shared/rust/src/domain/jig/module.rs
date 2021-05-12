@@ -141,6 +141,9 @@ pub struct Module {
 
     /// The module's body.
     pub body: Option<ModuleBody>,
+
+    /// Whether the module is complete or not.
+    pub is_complete: bool,
 }
 
 /// Request to create a new `Module`.
@@ -171,6 +174,9 @@ pub struct ModuleUpdateRequest {
     ///
     /// Numbers larger than the parent jig's module count will move it to the *end*.
     pub index: Option<u16>,
+
+    /// Whether the module is complete or not.
+    pub is_complete: Option<bool>,
 }
 
 into_uuid![ModuleId];
