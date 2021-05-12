@@ -18,9 +18,8 @@ impl HeaderDom {
             .property_signal("collapsed", sidebar_state.collapsed.signal())
             .property_signal("isModulePage", sidebar_state.module_id.signal_cloned().map(|module_id| module_id.is_none()))
             .children(&mut [
-                html!("img-ui", {
+                html!("jig-edit-sidebar-close-button", {
                     .property("slot", "close")
-                    .property("path", "entry/jig/collapse.svg")
                     .event(clone!(sidebar_state => move |_: events::Click| {
                         let mut collapsed = sidebar_state.collapsed.lock_mut();
                         *collapsed = !*collapsed;
@@ -45,9 +44,9 @@ impl HeaderDom {
                     .event(clone!(sidebar_state => move |_: events::Close| {
                         sidebar_state.settings_shown.set(false);
                     }))
-                    .child(html!("img-ui", {
+                    .child(html!("jig-edit-sidebar-action-button", {
                         .property("slot", "anchor")
-                        .property("path", "entry/jig/settings.svg")
+                        .property("kind", "settings")
                         .event(clone!(sidebar_state => move |_: events::Click| {
                             let mut settings_shown = sidebar_state.settings_shown.lock_mut();
                             *settings_shown = !*settings_shown;
@@ -60,9 +59,9 @@ impl HeaderDom {
                         .text("Settings")
                     }))
                 }),
-                html!("img-ui", {
+                html!("jig-edit-sidebar-action-button", {
                     .property("slot", "modules")
-                    .property("path", "entry/jig/modules.svg")
+                    .property("kind", "modules")
                     .event(clone!(sidebar_state => move |_:events::Click| {
                         sidebar_state.module_id.set_neq(None);
                         let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), None)).into();
@@ -78,6 +77,12 @@ impl HeaderDom {
                     .event(clone!(sidebar_state => move |e: events::CustomInput| {
                         let value = e.value();
                         sidebar_actions::update_display_name(sidebar_state.clone(), value);
+                    }))
+                }),
+                html!("jig-edit-sidebar-preview-button", {
+                    .property("slot", "preview")
+                    .event(clone!(sidebar_state => move |_: events::Click| {
+                        log::info!("Preview");
                     }))
                 }),
             ])
