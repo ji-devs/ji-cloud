@@ -38,6 +38,7 @@ pub async fn update(
     lookup: ModuleIdOrIndex,
     body: Option<&ModuleBody>,
     new_index: Option<u16>,
+    is_complete: Option<bool>,
 ) -> anyhow::Result<bool> {
     let (id, index) = (lookup.id(), lookup.index());
 
@@ -66,13 +67,15 @@ pub async fn update(
         r#"
 update jig_module
 set contents = coalesce($3, contents),
-    kind = coalesce($4, kind)
+    kind = coalesce($4, kind),
+    is_complete = coalesce($5, is_complete)
 where jig_id = $1 and index = $2
 "#,
         parent_id.0,
         index,
         body.as_ref(),
         kind.map(|it| it as i16),
+        is_complete,
     )
     .execute(&mut txn)
     .await?;
@@ -164,7 +167,8 @@ pub async fn get(
 select 
     id as "id: ModuleId",
     contents as "body",
-    kind as "kind: ModuleKind"
+    kind as "kind: ModuleKind",
+    is_complete as "is_complete"
 from jig_module
 where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)
 "#,
@@ -186,6 +190,7 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
                     "failed to transform module of kind {:?}",
                     it.kind
                 ))?,
+            is_complete: it.is_complete,
         })),
         None => Ok(None),
     }

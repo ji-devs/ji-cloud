@@ -555,6 +555,46 @@
       ]
     }
   },
+  "1faa63098267504c5bf0c38977e850dc649dd5e357d7bfe6f893eeb03aafff5f": {
+    "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\",\n    is_complete as \"is_complete\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ModuleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "body",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 2,
+          "name": "kind: ModuleKind",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 3,
+          "name": "is_complete",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "1fecc2613bdeb1cb5ef0e88661eb5a43f995623a28c26cf77cb01e50a7c9ebb7": {
     "query": "select exists(select 1 from \"user_scope\" where user_id = $1 and (scope = $2 or scope = $3)) as \"exists!\"",
     "describe": {
@@ -1106,6 +1146,22 @@
           "Int2",
           "Int2",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "51b5e589811bbe7936757b7247f31485244a2b0f027b6e5ec5a8be1f68bdd24f": {
+    "query": "\nupdate jig_module\nset contents = coalesce($3, contents),\n    kind = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere jig_id = $1 and index = $2\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Jsonb",
+          "Int2",
+          "Bool"
         ]
       },
       "nullable": []
@@ -2027,55 +2083,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "88331edb09a66dd64923f8bf0b5b7ff0546436cb615dd8611cc41707002a0a1e": {
-    "query": "\nupdate jig_module\nset contents = coalesce($3, contents),\n    kind = coalesce($4, kind)\nwhere jig_id = $1 and index = $2\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2",
-          "Jsonb",
-          "Int2"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "88c75cf29cb55aa0924802949ef5a5eed9dd3257e58d34329aeaf45c3fa28a63": {
-    "query": "\nselect \n    id as \"id: ModuleId\",\n    contents as \"body\",\n    kind as \"kind: ModuleKind\"\nfrom jig_module\nwhere jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ModuleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "body",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 2,
-          "name": "kind: ModuleKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        true
       ]
     }
   },

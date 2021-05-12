@@ -62,6 +62,7 @@ async fn update_contents() -> anyhow::Result<()> {
         .login()
         .json(&ModuleUpdateRequest {
             body: Some(ModuleBody::MemoryGame(Default::default())),
+            is_complete: Some(true),
             ..ModuleUpdateRequest::default()
         })
         .send()

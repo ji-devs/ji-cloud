@@ -70,6 +70,7 @@ async fn update(
         ModuleIdOrIndex::Id(module),
         req.body.as_ref(),
         req.index,
+        req.is_complete,
     )
     .await?;
 
