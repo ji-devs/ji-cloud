@@ -32,26 +32,37 @@ MenuLine.argTypes = {
             type: 'inline-radio',
             options: [
                 "", 
-                "copy", 
-                "delete", 
-                "duplicate", 
-                "edit", 
-                "move-down", 
-                "move-up", 
-                "paste", 
-                "print", 
-                "reuse", 
-                "move-forward", 
-                "move-backward", 
-                "flip-horizontal", 
+                "copy",
+                "paste",
+                "delete",
+                "duplicate",
+                "edit",
+                "move-down",
+                "move-up",
+                "print",
+                "reuse",
+                //all stickers
+                "move-forward",
+                "move-backward",
+                "flip-horizontal",
                 "flip-vertical",
+                //bg only
+                "change-background-color",
+                "change-background-image",
+                "remove-background-image",
+                "remove-overlay",
+                //image only
                 "crop",
                 "remove-white",
                 "make-background",
                 "play",
                 "record-sound",
-                "upload-sound"
+                "upload-sound",
+                //module publish
+                "use-content-as",
             ]
         }
     },
 }
+
+
