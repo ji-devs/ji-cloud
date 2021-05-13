@@ -41,7 +41,7 @@ export const Publish = (props?:Partial<Args> & InternalExtra) => {
 function renderMenu(visible: boolean, showAdvanced:boolean) {
     return `
         <menu-kebab ${visible && "visible"} slot="menu">
-            <jig-edit-sidebar-module-menu slot="menu-content" ${showAdvanced && "advanced"}>
+            <jig-edit-sidebar-module-menu ${showAdvanced && "advanced"}>
                 <menu-line slot="lines" icon="edit"></menu-line>
                 <menu-line slot="advanced" icon="copy" customLabel="Copy to another JIG"></menu-line>
                 <menu-line slot="advanced" icon="copy" customLabel="Paste from another JIG"></menu-line>

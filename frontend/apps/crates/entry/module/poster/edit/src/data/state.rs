@@ -60,7 +60,7 @@ pub struct State {
     //Poster-specific
     pub bg: Mutable<Option<ThemeOrImage>>, 
     pub fg: Mutable<Option<ThemeOrImage>>, 
-    pub renderables: Renderables, 
+    pub renderables: Rc<Renderables>, 
     pub text_editor: Rc<TextEditorState>,
 }
 
@@ -100,10 +100,14 @@ impl State {
 
             bg: Mutable::new(raw_data.bg.clone()),
             fg: Mutable::new(raw_data.fg.clone()),
-            renderables: Renderables::new(&raw_data.renderables),
+            renderables: Rc::new(Renderables::new(&raw_data.renderables,None)),
             text_editor: TextEditorState::new(theme_id, None, on_text_change)
 
         });
+
+        *_self.renderables.on_updated.borrow_mut() = Some(Box::new(clone!(_self => move |renderables| {
+           _self.replace_renderables(renderables); 
+        })));
 
         *_self_for_text.borrow_mut() = Some(_self.clone());
 

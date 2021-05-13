@@ -37,7 +37,7 @@ use wasm_bindgen::JsCast;
 use futures_signals::{
     map_ref,
     signal::{Mutable,ReadOnlyMutable, SignalExt, Signal, always},
-    signal_vec::{MutableVec, SignalVec, SignalVecExt},
+    signal_vec::{self, MutableVec, SignalVec, SignalVecExt},
     CancelableFutureHandle, 
 };
 use web_sys::{Url, HtmlElement, Element, HtmlInputElement};
@@ -214,6 +214,8 @@ where
         _self.async_switcher.load(
             Renderer::page_kind_signal(state.clone())
                 .for_each(clone!(state => move |page_kind| {
+                    let has_resized_once = Mutable::new(false);
+
                     let dom = html!(page_kind.element_name(), {
                         .apply_if(page_kind.add_scrollable_attribute(), |dom| {
                             dom.property("scrollable", true)
@@ -221,11 +223,15 @@ where
                         .apply_if(page_kind.add_preview_attribute(), |dom| {
                             dom.property("preview", true)
                         })
-                        .event(|event:ModuleResizeEvent| {
+                        .event(clone!(has_resized_once => move |event:ModuleResizeEvent| {
                             //in utils / global static
                             set_resize_info(event.data());
-                        })
-                        .children_signal_vec(Renderer::children_signal(state.clone(), page_kind))
+                            has_resized_once.set_neq(true);
+                        }))
+                        .children_signal_vec(has_resized_once.signal_cloned().switch_signal_vec(clone!(state, page_kind => move |has_resized_once| {
+                            Renderer::children_signal(state.clone(), page_kind)
+                                .filter(clone!(has_resized_once => move |_| has_resized_once))
+                        })))
                     });
 
                     Self::switch_body(dom); 

@@ -2,71 +2,132 @@ import { LitElement, svg, html, css, customElement, property } from 'lit-element
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 
-type CirclePos = 
+type DotPos = 
     "tl" | "t" | "tr"
     | "l" | "r"
     | "bl" | "b" | "br"
     
 
+const dotIds:Array<DotPos> = ["tl", "t", "tr", "l", "r", "bl", "b", "br"];
+
+const MENU_BUTTON_RADIUS = 32/2;
+const DOT_RADIUS = 10;
+
+//If changing this, also update the CSS for .rectLine 
+const RECT_STROKE_SIZE = 3;
+
+const ROT_LINE_DISTANCE = 30;
+const ROT_BUTTON_SIZE = 64;
+
+//If changing this, also update the CSS for #rotLine
+const ROT_STROKE_SIZE = 2;
+
 @customElement('transform-box')
 export class _ extends LitElement {
   static get styles() {
       return [css`
-          svg, img-ui {
+          svg, img-ui, #menu-btn {
               position: absolute;
               top: 0;
               left: 0;
-              z-index: 1;
           }
+
 
 
           #rotLine {
             stroke: var(--main-blue);
-            stroke-width: 1;
+            stroke-width: 2;
           }
 
           #rotButton {
               cursor: pointer;
           }
 
-          #rect {
-              cursor: move;
-            fill-opacity: 0;
+          .rectLine {
             stroke: var(--main-blue);
             stroke-width: 3;
             stroke-dasharray: 4px;
           }
+          #fillRect {
+              cursor: move;
+            fill-opacity: 0;
+          }
 
-          .circle {
+          .dot {
               position: absolute;
               top: 0;
               left: 0;
-            fill: var(--main-blue);
+              fill: var(--main-blue);
           }
 
-          .circle.tl {
+          .dot.tl {
               cursor: se-resize;
           }
-          .circle.tr {
+          .dot.tr {
               cursor: ne-resize;
           }
-          .circle.bl {
+          .dot.bl {
               cursor: sw-resize;
           }
-          .circle.br {
+          .dot.br {
               cursor: se-resize;
           }
 
-          .circle.t, circle.b {
+          .dot.t, .dot.b {
               cursor: n-resize;
           }
-          .circle.l, circle.r {
+          .dot.l, .dot.r {
               cursor: e-resize;
           }
     `];
   }
 
-  onResizeStart(pos:CirclePos, evt:MouseEvent) {
+  firstUpdated(_changedProperties:any) {
+      this.updateMenuButtonLocation();
+  }
+
+  updated(changed:any) {
+        if (typeof changed.get("menuButtonVisible") === "boolean") {
+            const { menuButtonVisible } = this;
+            if(menuButtonVisible) {
+                this.updateMenuButtonLocation();
+            }
+        }
+  }
+
+  @property()
+  menuButtonDot:DotPos = "tr";
+
+  updateMenuButtonLocation = () => {
+      
+      type ToBeat = {id: DotPos, domRect: DOMRect};
+      let toBeat:ToBeat = (null as unknown as ToBeat);
+
+      dotIds.forEach((id, index) => {
+          const ref = this.shadowRoot?.getElementById(`dot-${id}`);
+          if(ref != null) {
+              const domRect = ref.getBoundingClientRect();
+              if(index === 0) {
+                  toBeat = {id, domRect};
+              } else {
+                  if(domRect.y === toBeat.domRect.y) {
+                      if(domRect.x > toBeat.domRect.x) {
+                          toBeat = {id, domRect};
+                      }
+                  } else if(domRect.y < toBeat.domRect.y) {
+                      toBeat = {id, domRect};
+                  }
+              }
+          }
+      });
+
+      if(toBeat != null) {
+          this.menuButtonDot = toBeat.id;
+      }
+
+  }
+
+  onResizeStart(pos:DotPos, evt:MouseEvent) {
     this.dispatchEvent(new CustomEvent("transform-resize-start", {
         detail: {
             pos,
@@ -94,97 +155,141 @@ export class _ extends LitElement {
     }));
   }
 
+  onRectDoubleClick(evt:MouseEvent) {
+    this.dispatchEvent(new CustomEvent("transform-rect-dblclick", {
+        detail: {
+            x: evt.clientX,
+            y: evt.clientY,
+        }
+    }));
+  }
+
+  @property({type: Boolean})
+  menuButtonVisible:boolean = false;
+
+  @property({type: Boolean})
+  active:boolean = false;
+
+  @property({type: Boolean})
+  rectHidden:boolean = false;
+
   @property({type: Number})
   width:number = 0;
 
   @property({type: Number})
   height:number = 0;
 
-  @property({type: Number})
-  radius:number = 10;
-
-  @property({type: Number})
-  rotLineDistance:number = 30;
-
-  @property()
-  unit:"px" | "rem" = "px";
-  
   render() {
-      const {width, height, radius, unit, rotLineDistance} = this;
+      const {width, height, rectHidden, active, menuButtonVisible, menuButtonDot} = this;
 
-      const withUnit = (value:number) => `${value}${unit}`;
+      const dotPositions:Record<DotPos, [number, number]> = {
+            "tl": [0, 0],
+            "t": [width / 2, 0],
+            "tr": [width, 0],
+            "l": [0, height / 2],
+            "bl": [0, height],
+            "b": [width / 2, height],
+            "br": [width, height],
+            "r": [width, height  / 2],
+      };
 
+      const renderRect = () => {
 
-      const renderMain= () => {
-          const padWidth = width + (radius * 2);
-          const padHeight = height+ (radius * 2);
-          const circlePositions:Record<CirclePos, [number, number]> = {
-                "tl": [radius, radius],
-                "t": [padWidth / 2, radius],
-                "tr": [padWidth - radius, radius],
-                "l": [radius, padHeight / 2],
-                "bl": [radius, padHeight - radius],
-                "b": [padWidth / 2, padHeight - radius],
-                "br": [padWidth - radius, padHeight - radius],
-                "r": [padWidth - radius, padHeight  / 2],
-          };
-          const renderCircle = (pos:CirclePos) => {
-              const [x, y] = circlePositions[pos];
-                
+          //account for stroke
+          const boxWidth = width + (RECT_STROKE_SIZE * 2); 
+          const boxHeight = height + (RECT_STROKE_SIZE * 2);
+
+          const svgs = rectHidden ? [] : 
+              [
+                  svg`<svg width="${boxWidth}px" height="${boxHeight}px">
+                    <rect id="fillRect" x="${RECT_STROKE_SIZE}px" y="${RECT_STROKE_SIZE}px" width="${width}px" height="${height}px" @mousedown=${this.onMoveStart} @dblclick=${this.onRectDoubleClick} />
+                    </svg>`
+          ];
+
+          svgs.push(
+              //top
+              svg`<svg width="${width}px" height="${RECT_STROKE_SIZE}px" style="left: ${-RECT_STROKE_SIZE}px; top: ${-RECT_STROKE_SIZE}px;">
+                    <line class="rectLine" x1="0" y1="${RECT_STROKE_SIZE/2}px" x2="${width}px" y2="${RECT_STROKE_SIZE/2}px" />
+                </svg>
+                `
+          );
+
+          svgs.push(
+              //bottom
+                svg`<svg width="${width}px" height="${RECT_STROKE_SIZE}px" style="left: ${-RECT_STROKE_SIZE}px; top: ${height}px;">
+                    <line class="rectLine" x1="0" y1="${RECT_STROKE_SIZE/2}px" x2="${width}px" y2="${RECT_STROKE_SIZE/2}px" />
+                </svg>
+                `
+          );
+          svgs.push(
+              //left
+                svg`<svg width="${RECT_STROKE_SIZE}px" height="${height}px" style="left: ${-RECT_STROKE_SIZE}px; top: ${-RECT_STROKE_SIZE}px;">
+                    <line class="rectLine" y1="0" x1="${RECT_STROKE_SIZE/2}px" y2="${width}px" x2="${RECT_STROKE_SIZE/2}px" />
+                </svg>
+                `
+          );
+
+          svgs.push(
+              //right
+                svg`<svg width="${RECT_STROKE_SIZE}px" height="${height}px" style="left: ${width}px; top: ${-RECT_STROKE_SIZE}px;">
+                    <line class="rectLine" y1="0" x1="${RECT_STROKE_SIZE/2}px" y2="${width}px" x2="${RECT_STROKE_SIZE/2}px" />
+                </svg>
+                `
+          );
+          return svgs;
+      }
+
+      const renderDots = () => {
+          const diameter = DOT_RADIUS * 2;
+
+          const renderDot = (pos:DotPos) => {
+              const [x, y] = dotPositions[pos];
+
               return svg`
-              <circle class="circle ${pos}" cx="${withUnit(x)}" cy="${withUnit(y)}" r="${withUnit(radius)}" @mousedown=${(evt:MouseEvent) => this.onResizeStart(pos, evt)} />
+                <svg id="dot-${pos}" width="${diameter}px" height="${diameter}px" style="left: calc(${x}px - ${DOT_RADIUS}px); top: calc(${y}px - ${DOT_RADIUS}px);">
+                    <circle class="dot ${pos}" cx="${DOT_RADIUS}px" cy="${DOT_RADIUS}px" r="${DOT_RADIUS}px" @mousedown=${(evt:MouseEvent) => this.onResizeStart(pos, evt)} />
+                </svg>
               `;
           }
-
-          const circleIds:Array<CirclePos> = ["tl", "t", "tr", "l", "r", "bl", "b", "br"];
-
-          return svg`<svg width="${withUnit(padWidth)}" height="${withUnit(padHeight)}" style="left: ${withUnit(-radius)}; top: ${withUnit(-radius)}">
-
-                <rect id="rect" x="${withUnit(radius)}" y="${withUnit(radius)}" width="${withUnit(width)}" height="${withUnit(height)}" @mousedown=${this.onMoveStart} />
-            ${circleIds.map(renderCircle)}
-          </svg>`
+          return dotIds.map(renderDot);
       }
 
       const renderRot = () => {
+          const middle_x = (width/2);
           const renderRotLine= () => {
-              const lineWidth = 2;
-
-              const lineHeight = rotLineDistance;
 
               return svg`
-                <svg width="${withUnit(lineWidth)}" height="${withUnit(lineHeight)}" style="left: ${withUnit(width/2)}; top: ${withUnit(-(radius + lineHeight))}">
-                    <line id="rotLine" x1="0" y1="0" x2="0" y2="${withUnit(lineHeight)}" />
+              <svg width="${ROT_STROKE_SIZE}rem" height="${ROT_LINE_DISTANCE}rem" style="left: calc(${middle_x}px - (${ROT_STROKE_SIZE}rem)/2); top: calc(${RECT_STROKE_SIZE - DOT_RADIUS}px - ${ROT_LINE_DISTANCE}rem);">
+                <line id="rotLine" x1="${ROT_STROKE_SIZE/2}rem" x2="${ROT_STROKE_SIZE/2}rem" y1="0" y2="${ROT_LINE_DISTANCE}rem" />
                 </svg>
                 `;
           }
           const renderRotButton = () => {
-              const lineHeight = rotLineDistance;
-
-              const BUTTON_SIZE = 64;
-
-              let style = `width: ${withUnit(BUTTON_SIZE)};`;
-              style += ` height: ${withUnit(BUTTON_SIZE)};`;
-              style += `left: ${withUnit((width - BUTTON_SIZE)/2)};`;
-              style += ` top: ${withUnit(-(radius + lineHeight + BUTTON_SIZE))};`;
+              let style = `width: ${ROT_BUTTON_SIZE}rem;`;
+              style += ` height: ${ROT_BUTTON_SIZE}rem;`;
+              style += `left: calc(${middle_x}px - (${ROT_BUTTON_SIZE}rem)/2);`;
+              style += ` top: calc(${RECT_STROKE_SIZE}px - ${ROT_LINE_DISTANCE + ROT_BUTTON_SIZE}rem);`; 
 
               return html`<img-ui .draggable=${false} id="rotButton" path="core/buttons/icon/rotate.svg" style="${style}" @mousedown=${this.onRotateStart}></img-ui>`
-              /*
-              return svg`
-
-              <svg id="rotButton" width="${withUnit(32)}" height="${withUnit(32)}" style="left: ${withUnit((width - 32)/2)}; top: ${withUnit(-(radius + lineHeight + 32))}" @mousedown=${this.onRotateStart}>
-                <g id="Ellipse_393" fill="#fff" stroke="#5590fc" transform="translate(1 1)">
-                        <circle cx="15" cy="15" r="15" stroke="none"/>
-                        <circle cx="15" cy="15" r="14.5" class="cls-1"/>
-                    </g>
-                    <path id="Path_123370" fill="#5590fc" stroke="#5590fc" stroke-width="0.2px" d="M539.175 676.16a.391.391 0 0 0-.494.239 6.541 6.541 0 0 1-1.119 1.984 6.722 6.722 0 0 1-8.752 1.414 6.52 6.52 0 0 1-1.228-1.04 6.72 6.72 0 0 1-.979-7.677 5.694 5.694 0 0 1 .521-.8c.09-.112.562-.721.778-.927a6.5 6.5 0 0 1 8.934-.01l-3.522.748a.385.385 0 0 0 .082.764.441.441 0 0 0 .077-.009l4.346-.923a.391.391 0 0 0 .231-.146c0-.005 0-.013.008-.018a.384.384 0 0 0 .06-.13v-.011a.392.392 0 0 0 .012-.112l-.332-4.43a.385.385 0 0 0-.132-.264.394.394 0 0 0-.281-.092.388.388 0 0 0-.357.413l.268 3.585a7.256 7.256 0 0 0-9.819-.026l-.1.095a7.491 7.491 0 0 0-1.436 1.9 7.255 7.255 0 0 0 1.67 9.2l.108.087c.073.058.15.105.224.16.059.045.121.085.18.128.079.055.156.114.237.165a7.382 7.382 0 0 0 .68.407.373.373 0 0 0 .12.029 7.5 7.5 0 0 0 9-2 7.32 7.32 0 0 0 1.251-2.215.385.385 0 0 0-.241-.49z" transform="translate(-516.98 -657.662)"/>
-                </svg>
-                `;
-               */
           }
 
           return html`${renderRotLine()} ${renderRotButton()}`
       }
 
-      return html`${renderMain()} ${renderRot()}`;
+      const renderMenuButton = () => {
+
+          const [x, y] = dotPositions[menuButtonDot];
+
+          let style = `left: calc(${x}px - ${MENU_BUTTON_RADIUS}px);` 
+          style += ` top: calc(${y}px - ${MENU_BUTTON_RADIUS}px);`;
+
+          return menuButtonVisible 
+              ? html`<div id="menu-btn" style="${style}"><slot name="menu-btn"></slot></div>`
+              : nothing;
+      }
+
+      return active 
+          ? html`<slot></slot>${renderRect()} ${renderDots()} ${renderRot()} ${renderMenuButton()}` 
+          : html`<slot></slot>`;
   }
 }

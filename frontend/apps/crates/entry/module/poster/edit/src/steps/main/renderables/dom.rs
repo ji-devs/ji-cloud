@@ -13,7 +13,7 @@ use super::state::*;
 use components::transform::{
     dom::TransformDom,
 };
-use crate::steps::main::{
+use super::{ 
     stickers::dom::StickerDom,
     text::dom::TextDom
 };

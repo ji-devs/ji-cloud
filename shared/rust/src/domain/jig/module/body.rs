@@ -102,15 +102,6 @@ pub struct Text {
     /// The Transform
     pub transform: Transform,
 }
-impl Text {
-    /// Create a new Text 
-    pub fn new(value:String) -> Self {
-        Self {
-            value,
-            transform: Transform::default(),
-        }
-    }
-}
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -144,16 +135,6 @@ pub struct Sprite {
     pub transform: Transform,
 }
 
-impl Sprite {
-    /// Create a new Sprite
-    pub fn new(id: ImageId, lib: MediaLibrary) -> Self {
-        Self {
-            id,
-            lib,
-            transform: Transform::default(),
-        }
-    }
-}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -177,16 +158,4 @@ pub struct Transform {
     pub scale: Vec3,
     /// Origin
     pub origin: Vec3,
-}
-
-impl Default for Transform {
-    /// Create a new Transform
-    fn default() -> Self {
-        Self {
-            translation: Vec3([0.0, 0.0, 0.0]),
-            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
-            scale: Vec3([1.0, 1.0, 1.0]),
-            origin: Vec3([0.0, 0.0, 0.0]),
-        }
-    }
 }

@@ -72,7 +72,6 @@ impl SidebarDom {
                     .child(html!("menu-kebab", {
                         .property("slot", "menu")
                         .child(html!("menu-line", {
-                            .property("slot", "menu-content")
                             .property("icon", "edit")
                         }))
                     }))

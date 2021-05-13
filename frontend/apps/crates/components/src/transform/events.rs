@@ -6,6 +6,14 @@ use wasm_bindgen::JsCast;
 use super::state::ScaleFrom;
 
 #[derive(Deserialize, Debug)]
+pub struct RectDblClickData {
+    pub x: f64,
+    pub y: f64,
+}
+
+make_custom_event_serde!("transform-rect-dblclick", RectDblClick, RectDblClickData);
+
+#[derive(Deserialize, Debug)]
 pub struct MoveData {
     pub x: f64,
     pub y: f64,

@@ -10,16 +10,20 @@ use utils::{
     resize::{resize_info_signal, ResizeInfo},
     math::{self, BoundsF64}
 };
+use web_sys::HtmlElement;
 
 pub struct TransformState {
-    pub visible: Mutable<bool>,
-    pub transform: Mutable<Transform>,
-    pub drag: Mutable<Option<Drag>>, 
-    pub action: RefCell<Option<Action>>,
-    pub rot_stash: RefCell<Option<InitRotation>>,
-    pub scale_stash: RefCell<Option<InitScale>>,
-    pub alt_pressed: RefCell<bool>,
     pub size: Mutable<Option<(f64, f64)>>,
+    pub hide_on_dbl_click: RefCell<bool>,
+    pub menu_pos: Mutable<Option<(f64, f64)>>, 
+    pub(super) transform: Mutable<Transform>,
+    pub(super) drag: Mutable<Option<Drag>>, 
+    pub(super) action: RefCell<Option<Action>>,
+    pub(super) rot_stash: RefCell<Option<InitRotation>>,
+    pub(super) scale_stash: RefCell<Option<InitScale>>,
+    pub(super) alt_pressed: RefCell<bool>,
+    pub(super) rect_hidden: Mutable<bool>, 
+    pub(super) menu_button_visible: Mutable<bool>,
 }
 
 pub struct InitRotation {
@@ -35,14 +39,34 @@ pub struct InitScale {
 impl TransformState {
     pub fn new(transform:Transform, size: Option<(f64, f64)>) -> Self {
         Self {
-            visible: Mutable::new(true),
+            rect_hidden: Mutable::new(false),
             size: Mutable::new(size),
             transform: Mutable::new(transform),
             drag: Mutable::new(None),
             action: RefCell::new(None),
             rot_stash: RefCell::new(None),
             scale_stash: RefCell::new(None),
-            alt_pressed: RefCell::new(false)
+            hide_on_dbl_click: RefCell::new(false),
+            alt_pressed: RefCell::new(false),
+            menu_button_visible: Mutable::new(true),
+            menu_pos: Mutable::new(None),
+        }
+    }
+
+    pub fn menu_pos_signal(
+        &self, 
+        active_signal: impl Signal<Item = bool>
+    ) -> impl Signal<Item = Option<(f64, f64)>> {
+        map_ref! {
+            let active = active_signal,
+            let pos = self.menu_pos.signal_cloned()
+                => {
+                    if !*active {
+                        None
+                    } else {
+                        *pos
+                    }
+                }
         }
     }
 
@@ -148,6 +172,23 @@ impl TransformState {
 
 
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
+    //but set the rotation and translation to identity
+    pub fn scale_matrix_string_signal(&self) -> impl Signal<Item = String> {
+        map_ref! {
+            let resize_info = resize_info_signal(),
+            let transform = self.transform.signal_cloned()
+            => {
+                transform
+                    .map(|t| {
+                        let mut t = t.clone();
+                        t.set_rotation_identity();
+                        t.set_translation_identity();
+                        t.to_mat4().as_matrix_string()
+                    })
+            }
+        }
+    }
+    //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the scale and translation to identity
     pub fn rotation_matrix_string_signal(&self) -> impl Signal<Item = String> {
         map_ref! {
@@ -159,6 +200,22 @@ impl TransformState {
                         let mut t = t.clone();
                         t.set_scale_identity();
                         t.set_translation_identity();
+                        t.to_mat4().as_matrix_string()
+                    })
+            }
+        }
+    }
+    pub fn invert_rotation_matrix_string_signal(&self) -> impl Signal<Item = String> {
+        map_ref! {
+            let resize_info = resize_info_signal(),
+            let transform = self.transform.signal_cloned()
+            => {
+                transform
+                    .map(|t| {
+                        let mut t = t.clone();
+                        t.set_scale_identity();
+                        t.set_translation_identity();
+                        t.rotation.0 = math::quat::invert(&t.rotation.0);
                         t.to_mat4().as_matrix_string()
                     })
             }

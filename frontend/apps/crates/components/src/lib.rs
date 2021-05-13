@@ -16,3 +16,4 @@ pub mod instructions;
 pub mod animation;
 pub mod audio_player;
 pub mod transform;
+pub mod renderables;

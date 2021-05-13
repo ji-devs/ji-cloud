@@ -82,7 +82,7 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
 function renderMenu(visible: boolean, showAdvanced:boolean) {
     return `
         <menu-kebab ${visible && "visible"} slot="menu">
-            <jig-edit-sidebar-module-menu slot="menu-content" ${showAdvanced && "advanced"}>
+            <jig-edit-sidebar-module-menu ${showAdvanced && "advanced"}>
             <menu-line slot="lines" icon="edit"></menu-line>
             <menu-line slot="lines" icon="move-up"></menu-line>
             <menu-line slot="lines" icon="move-down"></menu-line>

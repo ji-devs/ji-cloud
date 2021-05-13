@@ -184,7 +184,7 @@ export class _ extends LitElement {
     dragging: boolean = false;
 
     @property({type: Boolean, reflect: true})
-    collapsed: boolean = true;
+    collapsed: boolean = false;
 
     render() {
         const {selected, index, dragging, module} = this;

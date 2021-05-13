@@ -5,19 +5,22 @@ use futures_signals::{
 };
 
 use std::rc::Rc;
+use std::cell::RefCell;
 use shared::domain::jig::module::body::Renderable as RawRenderable;
-use crate::steps::main::{
+use super::{
     stickers::state::Sticker,
     text::state::Text
 };
 
-pub struct Renderables {
+pub struct Renderables
+{
     pub list: MutableVec<Renderable>,
-    pub selected_index: Mutable<Option<usize>>
+    pub selected_index: Mutable<Option<usize>>,
+    pub on_updated: RefCell<Option<Box<dyn Fn(Vec<RawRenderable>)>>>,
 }
 
 impl Renderables {
-    pub fn new(raw:&[RawRenderable]) -> Self {
+    pub fn new(raw:&[RawRenderable], on_updated: Option<Box<dyn Fn(Vec<RawRenderable>)>>) -> Self {
     
         let list = MutableVec::new_with_values(
                     raw.
@@ -32,6 +35,7 @@ impl Renderables {
         Self {
             list,
             selected_index: Mutable::new(None),
+            on_updated: RefCell::new(on_updated),
         }
     }
 

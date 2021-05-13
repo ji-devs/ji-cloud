@@ -69,6 +69,13 @@ impl ResizeInfo {
         (x, y)
     }
 
+    pub fn get_size_normalized(&self, width: f64, height: f64) -> (f64, f64) {
+        log::info!("{}, {}", self.width, self.height);
+        let (full_width, full_height) = self.full_size();
+
+        (width / full_width, height / full_height)
+    }
+
     //"rem" really means consistent, 
     //i.e. relative to our reference artboard size
     //but we typically express that as css rem units so...
@@ -95,7 +102,7 @@ impl ResizeInfo {
         self.get_pos_px(elem_x, elem_y)
     }
 
-    pub fn unscaled_size(&self) -> (f64, f64) { 
+    pub fn full_size(&self) -> (f64, f64) { 
         let unscale = (1.0 / self.scale);
         (self.width * unscale, self.height * unscale)
     }

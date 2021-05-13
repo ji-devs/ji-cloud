@@ -19,6 +19,9 @@ use super::mat4::Matrix4;
 pub trait TransformExt {
     fn to_mat4(&self) -> Matrix4;
 
+    /// Create a new Transform
+    fn identity() -> Self;
+
     /// rotate around the z axis, in radians
     fn rotate_z(&mut self, angle:f64);
 
@@ -78,6 +81,17 @@ impl TransformExt for Transform {
             //rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
             //scale: Vec3([1.0, 1.0, 1.0]),
             //origin: Vec3([0.0, 0.0, 0.0]),
+
+
+    /// Create a new Transform
+    fn identity() -> Self {
+        Self {
+            translation: Vec3([0.0, 0.0, 0.0]),
+            rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
+            scale: Vec3([1.0, 1.0, 1.0]),
+            origin: Vec3([0.0, 0.0, 0.0]),
+        }
+    }
 
     fn set_scale_identity(&mut self) {
         self.scale.0 = [1.0, 1.0, 1.0];

@@ -26,7 +26,7 @@ use shared::{
     media::MediaLibrary
 };
 use crate::steps::main::renderables::state::Renderable;
-
+use shared::domain::jig::module::body::Renderable as RawRenderable;
 use super::state::*;
 
 
@@ -91,6 +91,20 @@ impl State {
 
 
     /// Poster specific
+    ///
+
+    //Just for pushing history/save
+    //the actual modifications are in renderables actions
+    //because we want to be able to use that everywhere
+    pub fn replace_renderables(&self, renderables:Vec<RawRenderable>) {
+
+        log::info!("TODO - replace renderables!");
+        /*
+        self.get_history().push_modify(|game_data| {
+            game_data.pairs.remove(pair_index);
+        });
+        */
+    }
     pub fn select_renderable(&self, index:usize) {
         self.renderables.selected_index.set(Some(index));
 

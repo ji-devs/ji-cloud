@@ -2,7 +2,8 @@ use super::state::*;
 use utils::drag::Drag;
 use std::rc::Rc;
 use utils::{prelude::*, resize::get_resize_info, math};
-
+use shared::domain::jig::module::body::Transform;
+use gloo_timers::callback::Timeout;
 
 //really this should be a min size, depends on the artwork
 //but this will do for now
@@ -10,11 +11,35 @@ use utils::{prelude::*, resize::get_resize_info, math};
 const MIN_SCALE_PERC:f64 = 0.1;
 
 impl TransformState {
+
+    pub fn set_to_center(&self) {
+        let transform = &mut self.transform.lock_mut();
+        let resize_info = get_resize_info();
+        let (width, height) = self.size.get_cloned().unwrap_ji();
+        let (width, height) = resize_info.get_size_normalized(width, height);
+
+
+        let x = 0.5 - (width / 2.0); 
+        let y = 0.5 - (height / 2.0); 
+
+        transform.set_translation_2d(x, y);
+    }
+
+
+    pub fn stop_tracking_action(&self, x: i32, y:i32) {
+        if let Some(drag) = self.drag.replace(None) {
+            *self.action.borrow_mut() = None;
+            self.menu_button_visible.set_neq(true); 
+        }
+    }
     pub fn start_tracking_action(&self, action: Action, x: i32, y:i32) {
         *self.action.borrow_mut() = Some(action);
 
+        self.menu_button_visible.set_neq(false); 
         let (anchor_x, anchor_y) = match action {
             Action::Move => {
+
+
                 let resize_info = get_resize_info();
                 let (screen_x, screen_y) = resize_info.get_pos_px(x as f64, y as f64);
 
@@ -191,10 +216,5 @@ impl TransformState {
 
     }
 
-    pub fn mouse_up(&self, x: i32, y:i32) {
-        if let Some(drag) = self.drag.replace(None) {
-            
-        }
-    }
 }
 

@@ -25,17 +25,20 @@ export const Box = (props?:Partial<Args>) => {
 
     let style = positionStyle;
 
-    let contentStyle = positionStyle; 
+    let contentStyle = ``; 
     contentStyle += ` display: flex;`
     contentStyle += ` width: ${width}px;`;
     contentStyle += ` height: ${height}px;`;
     contentStyle += ` justify-content: center;`;
     contentStyle += ` align-items: center;`;
     return `
-    <transform-box style="${style}" width="${width}" height="${height}" ${argsToAttrs(boxProps)}></transform-box>
-    <div style="${contentStyle}">
+    <transform-box menuButtonVisible active style="${style}" width="${width}" height="${height}" ${argsToAttrs(boxProps)}>
+        <div style="${contentStyle}">
         Contents Here
-    </div>
+
+        </div>
+        <button-icon slot="menu-btn" id="button" icon="circle-kebab-grey"></button-icon>
+    </transform-box>
     `;
 }
 

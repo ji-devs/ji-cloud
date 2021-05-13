@@ -118,7 +118,7 @@ export class _ extends LitElement {
                             @close="${() => this.menuOpen = false}"
                             @click="${(e: Event) => e.preventDefault()}"
                         >
-                            <slot name="menu-content" slot="menu-content"></slot>
+                            <slot name="menu-content"></slot>
                         </menu-kebab>
                     </div>
                     <div class="bottom-section">

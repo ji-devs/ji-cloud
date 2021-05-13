@@ -5,9 +5,10 @@ use futures_signals::{
 };
 use std::rc::Rc;
 use shared::{domain::{image::ImageId, jig::module::body::{Sprite, Transform}}, media::MediaLibrary};
-
-use components::transform::{
-    state::TransformState,
+use std::cell::RefCell;
+use components::{
+    transform::state::TransformState,
+    renderables::sprite::*,
 };
 
 #[derive(Clone)]
@@ -15,6 +16,7 @@ pub struct Sticker {
     pub id: ImageId,
     pub lib: MediaLibrary,
     pub transform: Rc<TransformState>,
+    pub is_new: RefCell<bool>,
 }
 
 impl Sticker {
@@ -24,6 +26,7 @@ impl Sticker {
             id: sprite.id,
             lib: sprite.lib,
             transform: Rc::new(TransformState::new(sprite.transform, None)),
+            is_new: RefCell::new(true),
         }
     }
 

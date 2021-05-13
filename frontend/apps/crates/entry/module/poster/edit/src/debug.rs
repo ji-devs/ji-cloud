@@ -29,6 +29,7 @@ use shared::{
     },
     media::MediaLibrary
 };
+use components::renderables::{sprite::*, text::*};
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -43,6 +44,8 @@ pub struct DebugSettings {
     pub live_save: bool,
     pub bg_tab: Option<BgTab>,
     pub content_tab: Option<ContentTab>,
+    pub text_select_nonedit: bool,
+    pub text_mock_box: bool 
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -60,6 +63,9 @@ impl DebugSettings {
             live_save: true,
             bg_tab: None,
             content_tab: None,
+            text_select_nonedit: false,
+            text_mock_box: false
+
         }
     }
     pub fn debug(init_data: Option<Vec<InitData>>, selected_index: Option<usize>) -> DebugSettings {
@@ -90,13 +96,17 @@ impl DebugSettings {
             live_save: false,
             bg_tab: Some(BgTab::Color),
             content_tab: Some(ContentTab::Audio),
+            text_select_nonedit: false,
+            text_mock_box: false, 
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text]), Some(0))).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text]), None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text]), Some(0))).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text, InitData::Sticker]), None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
