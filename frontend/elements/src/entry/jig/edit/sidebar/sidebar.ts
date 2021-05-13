@@ -85,7 +85,7 @@ export class _ extends LitElement {
                 }
                 .cover-module {
                     /* Allow room for jiggling head */
-                    margin-top: 200px;
+                    margin-top: 180px;
                 }
                 :host([collapsed]) .cover-module {
                     margin-top: 2px;

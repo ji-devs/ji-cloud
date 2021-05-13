@@ -1,8 +1,4 @@
-use shared::{
-    api::endpoints::{ApiEndpoint, self},
-    error::{EmptyError, MetadataNotFound},
-    domain::{CreateResponse, jig::*},
-};
+use shared::{api::endpoints::{ApiEndpoint, self}, domain::jig::{Jig, JigId, JigResponse, JigUpdateRequest, module::ModuleId}, error::EmptyError};
 use std::rc::Rc;
 use std::cell::RefCell;
 use dominator::clone;
@@ -47,5 +43,12 @@ pub fn update_display_name(state: Rc<State>, value: String) {
             Ok(_) => {},
             Err(_) => {},
         }
+    }));
+}
+
+pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
+    state.loader.load(clone!(state, module_id => async move {
+        let module = super::module_cloner::clone_module(&state.jig.id, &module_id, &state.jig.id).await.unwrap_ji();
+        state.modules.lock_mut().push_cloned(Rc::new(module));
     }));
 }

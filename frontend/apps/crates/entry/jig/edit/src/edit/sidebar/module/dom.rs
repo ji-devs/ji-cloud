@@ -4,9 +4,9 @@ use std::rc::Rc;
 use crate::edit::sidebar::state::State as SidebarState;
 use super::{
     state::*,
-    menu::dom::MenuDom,
     actions
 };
+use super::super::menu::{dom as MenuDom, state::State as MenuState};
 use futures_signals::signal::SignalExt;
 use utils::prelude::*;
 use shared::domain::jig::{ModuleKind, LiteModule};
@@ -17,7 +17,7 @@ pub struct ModuleDom {
 
 impl ModuleDom {
     pub fn render(sidebar_state: Rc<SidebarState>, index: usize, drag_target_index: Option<usize>, total_len:usize, module: Rc<Module>) -> Dom {
-        let state = Rc::new(State::new(sidebar_state, index, total_len, module));
+        let state = Rc::new(State::new(sidebar_state.clone(), index, total_len, module.clone()));
 
         let is_filler = Some(index) == drag_target_index;
 
@@ -55,6 +55,12 @@ impl ModuleDom {
                 .child(html!("jig-edit-sidebar-module-window", {
                     .property("slot", "window")
                     .property_signal("state", state.window_state_signal())
+                    .property_signal("activeModuleKind", state.kind_signal().map(|kind| {
+                        match kind {
+                            Some(kind) => kind.as_str(),
+                            None => ""
+                        }
+                    }))
                     .event_preventable(clone!(state => move |evt:events::DragOver| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
@@ -84,7 +90,35 @@ impl ModuleDom {
                 .after_removed(clone!(state => move |dom| {
                     *state.elem.borrow_mut() = None; 
                 }))
-                .child(MenuDom::render(state.clone()))
+                .apply(clone!(state, sidebar_state, module => move |dom| {
+                    let menu_state = Rc::new(MenuState::new());
+                    let menu_items = match index {
+                        0 => {
+                            vec![
+                                MenuDom::item_edit(menu_state.clone(), state.clone()),
+                                // TODO:
+                                // MenuDom::item_copy(menu_state.clone()),
+                                MenuDom::item_paste(menu_state.clone(), sidebar_state.clone()),
+                            ]
+                        },
+                        _ => {
+                            vec![
+                                MenuDom::item_edit(menu_state.clone(), state.clone()),
+                                MenuDom::item_move_up(menu_state.clone(), state.clone()),
+                                MenuDom::item_move_down(menu_state.clone(), state.clone()),
+                                MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id),
+                                MenuDom::item_delete(menu_state.clone(), state.clone()),
+                                MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id),
+                                MenuDom::item_duplicate_as(menu_state.clone()),
+                            ]
+                        }
+                    };
+
+                    dom.child(MenuDom::render(
+                        menu_state.clone(),
+                        menu_items
+                    ))
+                }))
                 .child(html!("button-icon", {
                     .property("icon", "gears")
                     .property("slot", "add")

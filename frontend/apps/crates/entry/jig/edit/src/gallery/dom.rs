@@ -48,8 +48,13 @@ impl GalleryDom {
             .child(html!("input-search", {
                 .property("slot", "search-input")
                 .property("placeholder", STR_SEARCH)
-                .event(clone!(state => move |_: events::Click| {
-                    actions::load_jigs(state.clone());
+                .event(clone!(state => move |evt: events::CustomSearch| {
+                    let value = evt.query();
+                    if !value.is_empty() {
+                        actions::search_jigs(state.clone(), value);
+                    } else {
+                        actions::load_jigs(state.clone());
+                    }
                 }))
             }))
             .child(html!("dropdown-select", {
@@ -93,7 +98,7 @@ impl GalleryDom {
                             .property("icon", "duplicate")
                             .text(STR_DUPLICATE)
                             .event(clone!(state, jig => move |_: events::Click| {
-                                actions::copy_jig(state.clone(), &jig);
+                                actions::copy_jig(state.clone(), &jig.id);
                             }))
                         }),
                         html!("menu-line", {

@@ -2,7 +2,7 @@ use shared::domain::jig::{LiteModule, module::ModuleId, ModuleKind};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::edit::sidebar::state::State as SidebarState;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::{map_ref, signal::{Mutable, Signal, SignalExt}};
 use utils::drag::Drag;
 use web_sys::HtmlElement;
 use dominator::clone;
@@ -41,12 +41,29 @@ impl State {
         })
     }
     pub fn window_state_signal(&self) -> impl Signal<Item = &'static str> {
-        self.kind_signal().map(|kind| {
-            match kind {
-                Some(kind) => "draft",
-                None => "empty"
-            }
-        })
+        let this_module_id = self.module.id.clone();
+
+        // TODO: add done state
+        map_ref! {
+            let kind = self.kind_signal(),
+            let publish_at = self.sidebar.publish_at.signal_cloned(),
+            let active_module_id = self.sidebar.module_id.signal_cloned()
+                => move {
+                    if publish_at.is_some() {
+                        return "published";
+                    };
+                    match kind {
+                        None => return "empty",
+                        Some(_) => {
+                            if active_module_id.is_some() && active_module_id.unwrap() == this_module_id {
+                                return "active";
+                            } else {
+                                return "draft";
+                            };
+                        }
+                    };
+                }
+        }
     }
 
     pub fn drag_overlap_signal(_self:Rc<Self>) -> impl Signal<Item = bool> {

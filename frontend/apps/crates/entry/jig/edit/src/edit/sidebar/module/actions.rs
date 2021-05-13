@@ -24,6 +24,7 @@ pub fn mouse_down(state: Rc<State>, x: i32, y:i32) {
 pub fn edit(state: Rc<State>) {
     let module_id = state.module.id;
     state.sidebar.module_id.set_neq(Some(module_id));
+    state.sidebar.collapsed.set(true);
 
     let jig_id = state.sidebar.jig.id;
     let url:String = Route::Jig(JigRoute::Edit(jig_id, Some(module_id))).into();
@@ -49,6 +50,8 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
         match update_module(&state.sidebar.jig.id, &state.module.id, req).await {
             Ok(_) => {
                 state.module.kind.set_neq(Some(kind));
+                state.sidebar.module_id.set(Some(state.module.id));
+                state.sidebar.collapsed.set(true);
             },
             Err(_) => {},
         }
