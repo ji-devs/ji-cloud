@@ -24,6 +24,18 @@ const STR_LABEL_LOOKUP:any = {
     ["paste"]: "Paste",
     ["print"]: "Print",
     ["reuse"]: "Reuse",
+    //all stickers
+    ["move-forward"]: "Move forward",
+    ["move-backward"]: "Send backward",
+    ["flip-horizontal"]: "Flip horizontal",
+    ["flip-vertical"]: "Flip vertical",
+    //image only
+    ["crop"]: "Crop",
+    ["remove-white"]: "Remove white",
+    ["make-background"]: "Make background",
+    ["play"]: "Play",
+    ["record-sound"]: "Record sound",
+    ["upload-sound"]: "Upload sound",
 };
 
 @customElement('menu-line')

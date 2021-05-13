@@ -30,7 +30,28 @@ MenuLine.argTypes = {
     icon: {
         control: {
             type: 'inline-radio',
-            options: ["", "copy", "delete", "duplicate", "edit", "move-down", "move-up", "paste", "print", "reuse"] 
+            options: [
+                "", 
+                "copy", 
+                "delete", 
+                "duplicate", 
+                "edit", 
+                "move-down", 
+                "move-up", 
+                "paste", 
+                "print", 
+                "reuse", 
+                "move-forward", 
+                "move-backward", 
+                "flip-horizontal", 
+                "flip-vertical",
+                "crop",
+                "remove-white",
+                "make-background",
+                "play",
+                "record-sound",
+                "upload-sound"
+            ]
         }
     },
 }
