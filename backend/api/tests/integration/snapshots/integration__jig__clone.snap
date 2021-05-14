@@ -24,6 +24,7 @@ expression: body
     "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
     "language": "en",
     "categories": [],
-    "publish_at": null
+    "publish_at": null,
+    "additional_resources": []
   }
 }

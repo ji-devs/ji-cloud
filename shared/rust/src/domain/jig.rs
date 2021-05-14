@@ -1,5 +1,6 @@
 //! Types for JIGs.
 
+pub mod additional_resource;
 pub mod module;
 
 use std::{fmt, str::FromStr};
@@ -17,6 +18,8 @@ use uuid::Uuid;
 
 // avoid breaking Changes
 pub use module::{LiteModule, Module, ModuleKind};
+
+pub use additional_resource::AdditionalResourceId;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -160,6 +163,9 @@ pub struct Jig {
 
     /// When the JIG should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
+
+    /// Additional resources of this JIG.
+    pub additional_resources: Vec<AdditionalResourceId>,
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
@@ -216,6 +222,11 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub publish_at: Option<Option<Publish>>,
+
+    /// Additional resources of this JIG.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub additional_resources: Option<Vec<AdditionalResourceId>>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).

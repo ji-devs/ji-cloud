@@ -7,6 +7,7 @@ use crate::{
     helpers::{initialize_server, LoginExt},
 };
 
+mod additional_resource;
 mod cover;
 mod module;
 

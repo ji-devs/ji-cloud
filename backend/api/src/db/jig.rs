@@ -2,7 +2,10 @@ use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
-    jig::{module::ModuleId, Jig, JigId, LiteModule, ModuleKind},
+    jig::{
+        additional_resource::AdditionalResourceId, module::ModuleId, Jig, JigId, LiteModule,
+        ModuleKind,
+    },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
 };
@@ -88,7 +91,8 @@ select
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
+    array(select row(id) from jig_additional_resource where jig_id = jig.id) as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
 inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
@@ -113,6 +117,11 @@ order by t.ord
             publish_at: row.publish_at,
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+            additional_resources: row
+                .additional_resources
+                .into_iter()
+                .map(|(it,)| it)
+                .collect(),
         })
         .collect();
 
@@ -138,7 +147,8 @@ select
     array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
+    array(select row(id) from jig_additional_resource where jig_id = $1) as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
 where id = $1"#,
         id.0
@@ -161,6 +171,7 @@ where id = $1"#,
         publish_at: row.publish_at,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+        additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
 });
 
     Ok(jig)
@@ -283,7 +294,8 @@ select
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
-    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>"
+    array(select row(age_range_id) from jig_age_range where jig_id = jig.id) as "age_ranges!: Vec<(AgeRangeId,)>",
+    array(select row(id) from jig_additional_resource where jig_id = jig.id) as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
 where 
     publish_at < now() is not distinct from $1 or $1 is null
@@ -312,6 +324,7 @@ limit 20 offset 20 * $2
         publish_at: row.publish_at,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
+        additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
     })
     .try_collect()
     .await

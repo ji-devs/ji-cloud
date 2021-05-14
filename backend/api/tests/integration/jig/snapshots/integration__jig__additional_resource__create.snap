@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig/additional_resource.rs
+expression: body
+
+---
+{
+  "id": "[id]"
+}
