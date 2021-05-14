@@ -1,3 +1,4 @@
+pub(crate) mod additional_resource;
 pub(crate) mod animation;
 pub(crate) mod audio;
 pub(crate) mod category;

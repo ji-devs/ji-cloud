@@ -15,6 +15,9 @@ use super::ApiEndpoint;
 /// Endpoints for jig modules.
 pub mod module;
 
+/// Endpoints for JIG additional resources.
+pub mod additional_resource;
+
 /// Get a JIG by ID.
 pub struct Get;
 impl ApiEndpoint for Get {

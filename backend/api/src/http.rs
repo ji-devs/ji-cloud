@@ -204,6 +204,7 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
+            .configure(endpoints::additional_resource::configure)
             .route("/", paperclip::actix::web::get().to(no_content_response))
             .with_json_spec_at("/spec.json")
             .build()

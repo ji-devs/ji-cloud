@@ -25,7 +25,11 @@ expression: body
       "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
       "language": "en",
       "categories": [],
-      "publish_at": null
+      "publish_at": null,
+      "additional_resources": [
+        "41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
+        "7a227007-b957-4601-bf15-87a6b86da672"
+      ]
     }
   ],
   "pages": 1,
