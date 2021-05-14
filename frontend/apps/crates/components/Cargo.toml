@@ -64,7 +64,7 @@ gloo-timers = "0.2.1"
 rgb = "0.8.27"
 
 [features]
-quiet = []
+quiet = ["utils/quiet"]
 local = ["quiet"]
 release = []
 sandbox = []
