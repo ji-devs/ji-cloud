@@ -11,31 +11,20 @@ use super::{
 };
 use shared::media::MediaLibrary;
 
-pub fn render(opts: ImageSearchOptions, slot: Option<&str>) -> Dom {
-    let mut state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
-
-    let init_loader = AsyncLoader::new();
-    init_loader.load(clone!(state => async move {
-        state.replace(Some(State::new(opts).await));
-    }));
-
-
-    Dom::with_state(init_loader, move |init_loader| {
-        html!("empty-fragment", {
-            .apply_if(slot.is_some(), move |dom| {
-                dom.property("slot", slot.unwrap_ji())
-            })
-            .children_signal_vec(init_loader.is_loading().map(move |init_loading| {
-                if init_loading {
-                    vec![html!("window-loader-block", {
-                        .property("visible", true)
-                    })]
-                } else {
-                    let state: State = state.borrow_mut().take().unwrap_ji();
-                    render_loaded(Rc::new(state))
-                }
-            }).to_signal_vec())
+pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
+    html!("empty-fragment", {
+        .apply_if(slot.is_some(), move |dom| {
+            dom.property("slot", slot.unwrap_ji())
         })
+        .children_signal_vec(state.init_loader.is_loading().map(clone!(state => move |init_loading| {
+            if init_loading {
+                vec![html!("window-loader-block", {
+                    .property("visible", true)
+                })]
+            } else {
+                render_loaded(state.clone())
+            }
+        })).to_signal_vec())
     })
 }
 
@@ -55,12 +44,17 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     .property("size", "thumb")
                     .property("id", image.id.0.to_string())
                     .event(clone!(state, image => move |_: events::Click| {
-                        state.options.value.set(Some(image.id))
+                        state.options.value.set(Some(image.id));
+                        if let Some(on_image_select) = state.on_image_select.borrow().as_ref() {
+                            //TODO - this should change if the library has changed
+                            on_image_select(image.id.clone(), MediaLibrary::Global);
+                        }
                     }))
                     .event(clone!(state, image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             let data = ImageDataTransfer {
                                 id: image.id.clone(), 
+                                //TODO - this should change if the library has changed
                                 lib: MediaLibrary::Global
                             };
                             let json = serde_json::to_string(&data).unwrap_ji();
@@ -102,7 +96,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
             .property("slot", "only-background-checkbox")
             .property("checked", options.background_only.unwrap())
             .event(clone!(state => move |e: events::CustomToggle| {
-                let style_id = get_background_id(&state.styles);
+                let style_id = get_background_id(&state.styles.borrow().as_ref().unwrap_ji());
                 match e.value() {
                     true => state.selected_styles.as_ref().borrow_mut().insert(style_id),
                     false => state.selected_styles.as_ref().borrow_mut().remove(&style_id),
@@ -168,6 +162,9 @@ fn render_filters(state: Rc<State>) -> Dom {
         .children(
             state
                 .styles
+                .borrow()
+                .as_ref()
+                .unwrap_ji()
                 .iter()
                 .filter(|style| style.display_name != BACKGROUND_NAME)
                 .map(clone!(state => move |style| {

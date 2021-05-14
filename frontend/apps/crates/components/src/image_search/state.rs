@@ -1,8 +1,9 @@
 use std::{cell::RefCell, collections::{HashSet}, rc::Rc};
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
+use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
-use shared::domain::{image::*, meta::*};
+use shared::{media::MediaLibrary, domain::{image::*, meta::*}};
 use wasm_bindgen::UnwrapThrowExt;
 use super::actions::{get_background_id, get_styles};
 use utils::prelude::*;
@@ -14,34 +15,44 @@ pub struct State {
     pub image_list: MutableVec<Image>,
     pub search: Mutable<Option<String>>,
     pub options: ImageSearchOptions,
+    pub init_loader: AsyncLoader,
     pub loader: AsyncLoader,
 
     pub query: Mutable<String>,
     pub page: Mutable<Option<u32>>,
-    pub styles: Vec<Style>,
+    pub styles: Rc<RefCell<Option<Vec<Style>>>>,
     pub selected_styles: Rc<RefCell<HashSet<StyleId>>>,
+    pub on_image_select: RefCell<Option<Box<dyn Fn(ImageId, MediaLibrary)>>>,
 }
 
 impl State {
-    pub async fn new(image_search_options: ImageSearchOptions) -> Self {
-        let styles = get_styles().await;
+    pub fn new(image_search_options: ImageSearchOptions, on_image_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>) -> Self {
+        let styles = Rc::new(RefCell::new(None));
         let mut selected_styles = HashSet::new();
 
         if image_search_options.background_only.is_some() && image_search_options.background_only.unwrap_ji() {
-            let style_id = get_background_id(&styles);
-            selected_styles.insert(style_id);
+            //TODO - replace with tag system
+            //let style_id = get_background_id(&styles);
+            //selected_styles.insert(style_id);
         }
+
+        let init_loader = AsyncLoader::new();
+        init_loader.load(clone!(styles => async move {
+            *styles.borrow_mut() = Some(get_styles().await);
+        }));
 
         Self {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
             image_list: MutableVec::new(),
+            init_loader,
             loader: AsyncLoader::new(),
             selected_styles: Rc::new(RefCell::new(selected_styles)),
 
             query: Mutable::new(String::new()),
             page: Mutable::new(None),
             styles,
+            on_image_select: RefCell::new(on_image_select),
         }
     }
 }
