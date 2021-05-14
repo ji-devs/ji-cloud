@@ -61,7 +61,7 @@ pub fn render(state: Rc<State>) -> Dom {
         }))
         .event(clone!(state => move |e: events::CustomChange| {
             let value = e.value();
-            if let Some(on_change) = &state.on_change {
+            if let Some(on_change) = &state.on_change.borrow().as_ref() {
                 on_change(&value);
             }
         }))

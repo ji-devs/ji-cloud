@@ -21,18 +21,18 @@ pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Vec<String>,
-    pub on_change: Option<Box<dyn Fn(&str)>>,
+    pub on_change: RefCell<Option<Box<dyn Fn(&str)>>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: ThemeId,
 }
 
 impl State {
-    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Box<dyn Fn(&str)>) -> Rc<Self> {
+    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Option<Box<dyn Fn(&str)>>) -> Rc<Self> {
         Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Self::get_fonts(theme_id),
-            on_change: Some(on_change),
+            on_change: RefCell::new(on_change),
             value: RefCell::new(value),
             theme_id
         })
