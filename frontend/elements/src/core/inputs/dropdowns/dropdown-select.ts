@@ -24,11 +24,16 @@ export class _ extends LitElement {
                     background-color: #fff;
                 }
                 :host([open]) .input {
-                    border: solid 2px var(--dark-blue-3);
+                    border-color: var(--dark-blue-3);
+                    border-width: 2px;
                     /* removing one pixel to account for thicker border */
                     padding: 7px 15px;
                     position: relative;
                     z-index: 2;
+                }
+                :host([error]) .input {
+                    border-color: var(--red-alert);
+                    background-color: var(--light-red-alert);
                 }
                 .input .label {
                     grid-column: 1;
@@ -84,6 +89,9 @@ export class _ extends LitElement {
 
     @property()
     placeholder: string = "";
+
+    @property({type: Boolean, reflect: true})
+    error: boolean = false;
 
     @property({ type: Boolean, reflect: true })
     open: boolean = false;

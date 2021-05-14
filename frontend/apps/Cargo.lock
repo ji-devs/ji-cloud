@@ -62,6 +62,7 @@ dependencies = [
  "awsm_web",
  "cfg-if 1.0.0",
  "chrono",
+ "components",
  "config",
  "console_error_panic_hook",
  "discard",

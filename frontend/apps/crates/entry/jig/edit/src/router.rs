@@ -10,6 +10,7 @@ use dominator::{Dom, html};
 use crate::{
     edit::dom::EditPage,
     gallery::dom::GalleryDom,
+    publish::dom as PublishDom
 };
 
 pub struct Router {
@@ -32,6 +33,7 @@ impl Router {
                     Route::Jig(route) => {
                         match route {
                             JigRoute::Gallery => Some(GalleryDom::render()),
+                            JigRoute::Publish(jig_id) => Some(PublishDom::render(jig_id)),
                             JigRoute::Edit(jig_id, module_id) => Some(EditPage::render(jig_id, module_id)),
                             _ => None
                         }

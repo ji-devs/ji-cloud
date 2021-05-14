@@ -69,6 +69,7 @@ itertools = "0.10.0"
 strum = "0.20.0"
 strum_macros = "0.20.1"
 chrono = "0.4.19"
+components = {path = "../../../components"}
 
 [features]
 default = ["wee_alloc"]

@@ -12,6 +12,7 @@ interface Args {
     value: string,
     placeholder: string,
     open: boolean,
+    error: boolean,
     //Just used for demo
     count: number,
     width: number,
@@ -22,6 +23,7 @@ const DEFAULT_ARGS:Args = {
     value: "",
     placeholder: "Select something",
     open: true,
+    error: true,
     count: 7,
     width: 300,
 }
@@ -34,6 +36,9 @@ export const DropdownSelect = (props?:Partial<Args>) => {
     return `
         <div style="width: ${width}px">
             <dropdown-select ${argsToAttrs(dropdownProps)}>
+                <li-check selected>Selected option</li-check>
+                <li-check-collection>Collection</li-check-collection>
+                <li-check-collection open>Open collection</li-check-collection>
                 ${mapToString(arrayCount(count), i => {
                     return `<li-check>item ${i}</li-check>`;
                 })}

@@ -1,0 +1,65 @@
+use std::rc::Rc;
+use dominator::{Dom, clone, html};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use shared::domain::meta::AgeRange;
+use utils::{events, unwrap::UnwrapJiExt};
+
+use crate::publish::state::State;
+
+const STR_AGE_LABEL: &'static str = "Age";
+const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";
+
+pub fn render(state: Rc<State>) -> Dom {
+    html!("dropdown-select", {
+        .property("slot", "age")
+        .property("label", STR_AGE_LABEL)
+        .property("placeholder", STR_AGE_PLACEHOLDER)
+        .property_signal("value", age_value_signal(state.clone()))
+        .children_signal_vec(state.ages.signal_cloned().map(clone!(state => move |ages| {
+            match ages {
+                None => vec![],
+                Some(ages) => {
+                    ages.iter().map(|age| {
+                        render_age(&age, state.clone())
+                    }).collect()
+                },
+            }
+            
+        })).to_signal_vec())
+    })
+}
+
+fn render_age(age: &AgeRange, state: Rc<State>) -> Dom {
+    let age_id = age.id.clone();
+    html!("li-check", {
+        .text(&age.display_name)
+        .property_signal("selected", state.jig.age_ranges.signal_cloned().map(clone!(age_id => move |ages| {
+            ages.contains(&age_id)
+        })))
+        .event(clone!(state => move |_: events::Click| {
+            let mut ages = state.jig.age_ranges.lock_mut();
+            if ages.contains(&age_id) {
+                ages.remove(&age_id);
+            } else {
+                ages.insert(age_id); 
+            }
+        }))
+    })
+}
+
+fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+    map_ref! {
+        let selected_ages = state.jig.age_ranges.signal_cloned(),
+        let available_ages = state.ages.signal_cloned() => {
+            let mut output = vec![];
+            if let Some(available_ages) = available_ages {
+                selected_ages.iter().for_each(|age_id| {
+                    let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
+                    output.push(age.display_name.clone());
+                })
+            }
+            output.join(", ")
+        }
+        
+    }
+}

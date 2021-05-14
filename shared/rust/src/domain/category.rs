@@ -20,7 +20,7 @@ pub struct CategoryId(pub Uuid);
 
 into_uuid!(CategoryId);
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The response returned when a request for categories is successful.
 pub struct CategoryResponse {
@@ -28,7 +28,7 @@ pub struct CategoryResponse {
     pub categories: Vec<Category>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 /// The over-the-wire representation of a category.
 pub struct Category {
     /// The category's id.

@@ -7,15 +7,10 @@ export class _ extends LitElement {
     return [
       css`
         .wrapper {
-          margin-bottom: 16px;
           border-radius: 14px;
           border: solid 1px #89b3ff;
-          margin-top: 40px;
-          padding: 8px 16px;
+          padding: 8px 8px 8px 16px;
           background-color: white;
-        }
-        label {
-          padding-left: 8px;
         }
         span {
           color: #5590fc;
@@ -54,10 +49,26 @@ export class _ extends LitElement {
           outline: none;
           background: transparent;
           appearance: none;
-          padding-left: 8px;
           font-family: Poppins;
           font-size: 16px;
           border: none;
+          padding: 0;
+          padding-right: 8px;
+          scrollbar-width: thin;
+          scrollbar-color: #e7f0fe transparent;
+        }
+        textarea::-webkit-scrollbar-track
+        {
+          background-color: #fff;
+        }
+        textarea::-webkit-scrollbar
+        {
+          width: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb
+        {
+          border-radius: 4px;
+          background-color: #e7f0fe;
         }
       `,
     ];

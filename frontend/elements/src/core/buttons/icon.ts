@@ -11,13 +11,15 @@ export class _ extends LitElement {
       css`
         :host {
           cursor: pointer;
+          width: 32px;
+          height: 32px;
         }
         .box32 {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 32px;
-            height: 32px;
+            width: inherit;
+            height: inherit;
         }
             img-ui {
                 display: inherit;

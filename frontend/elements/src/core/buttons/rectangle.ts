@@ -6,7 +6,7 @@ import {BaseButton} from "@elements/_styles/buttons";
 export type Color = "grey" | "red" | "blue" | "white" | "green" | "whiteblue";
 export type Size = "small" | "medium" | "large" | "x-large";
 
-export type IconAfter = "arrow" | "done";
+export type IconAfter = "arrow" | "done" | "rocket";
 export type IconBefore = "magnifier" | "share" | "create" | "play" | "plus";
 
 @customElement("button-rect")
@@ -144,7 +144,8 @@ export class _ extends BaseButton {
         : iconBefore === "plus" ? getPlus(color)
         : nothing;
     const iconAfterPath = iconAfter === "arrow" ? getArrow(color) 
-        : iconAfter === "done" ? "core/buttons/rect/done-check.svg"
+      : iconAfter === "done" ? "core/buttons/rect/done-check.svg"
+      : iconAfter === "rocket" ? "core/buttons/rect/rocket.svg"
         : "";
 
     return html`

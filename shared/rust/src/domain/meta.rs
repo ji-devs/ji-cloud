@@ -69,7 +69,7 @@ pub struct Style {
 }
 
 /// Represents a age range.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRange {
     /// The id of the age range.
@@ -120,7 +120,7 @@ pub struct Subject {
 }
 
 /// Represents a goal.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Goal {
     /// The id of the goal.

@@ -61,6 +61,7 @@ pub enum LegacyRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
+    Publish(JigId),
     Edit(JigId, Option<ModuleId>),
     Play(JigId, Option<ModuleId>) 
 }
@@ -170,6 +171,9 @@ impl Route {
             },
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", "publish", jig_id] => Self::Jig(JigRoute::Publish(
+                JigId(Uuid::from_str(jig_id).unwrap_ji())
+            )),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
                     None
@@ -280,6 +284,9 @@ impl From<&Route> for String {
             Route::Jig(route) => {
                 match route {
                     JigRoute::Gallery => "/jig/edit/gallery".to_string(),
+                    JigRoute::Publish(jig_id) => {
+                        format!("/jig/edit/publish/{}", jig_id.0.to_string())
+                    }
                     JigRoute::Edit(jig_id, module_id) => {
                         if let Some(module_id) = module_id {
                             format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
