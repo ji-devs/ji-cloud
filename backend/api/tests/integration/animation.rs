@@ -35,6 +35,8 @@ async fn create() -> anyhow::Result<()> {
 
     let body: CreateResponse<AnimationId> = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
@@ -67,6 +69,8 @@ async fn get_metadata() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 

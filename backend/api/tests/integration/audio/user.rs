@@ -25,6 +25,8 @@ async fn create_returns_created() -> anyhow::Result<()> {
 
     let body: CreateResponse<AudioId> = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
