@@ -17,6 +17,8 @@ async fn create_401_no_auth() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
 
+    app.stop(false).await;
+
     Ok(())
 }
 
@@ -41,6 +43,8 @@ async fn create_basic() -> anyhow::Result<()> {
     body.as_object()
         .expect("body wasn't a object")
         .contains_key("csrf");
+
+    app.stop(false).await;
 
     Ok(())
 }

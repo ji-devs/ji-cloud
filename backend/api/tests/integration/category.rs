@@ -33,6 +33,8 @@ async fn create() -> anyhow::Result<()> {
 
     let _body: NewCategoryResponse = resp.json().await?;
 
+    app.stop(false).await;
+
     Ok(())
 }
 
@@ -54,6 +56,8 @@ async fn get() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 
@@ -78,6 +82,8 @@ async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()>
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 
@@ -191,6 +197,8 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -227,6 +235,8 @@ async fn delete() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -262,6 +272,8 @@ async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 

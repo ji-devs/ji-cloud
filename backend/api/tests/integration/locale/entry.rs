@@ -146,6 +146,8 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())

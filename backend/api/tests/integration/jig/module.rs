@@ -41,6 +41,8 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -83,6 +85,8 @@ async fn update_contents() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 

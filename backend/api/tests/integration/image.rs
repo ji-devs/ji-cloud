@@ -44,6 +44,8 @@ async fn create(
 
     let body: CreateResponse<ImageId> = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
@@ -111,6 +113,8 @@ async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body);
 
     Ok(())
@@ -163,6 +167,8 @@ async fn get_metadata() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -206,6 +212,8 @@ async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 

@@ -21,5 +21,7 @@ async fn pass() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), http::StatusCode::NO_CONTENT);
 
+    app.stop(false).await;
+
     Ok(())
 }

@@ -40,6 +40,8 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     let body: JigResponse = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body.jig, {".**.updated_at" => "[updated_at]"});
 
     Ok(())
