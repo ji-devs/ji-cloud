@@ -54,6 +54,157 @@ returning id as "id: ImageId"
     }
 }
 
+pub mod tag {
+    use crate::error;
+    use paperclip::actix::NoContent;
+    use shared::domain::meta::TagId;
+    use sqlx::{PgConnection, PgPool};
+
+    pub async fn create(db: &PgPool, display_name: &str) -> sqlx::Result<(TagId, i16)> {
+        let res = sqlx::query!(
+            r#"
+insert into image_tag (index, display_name)
+values ((select count(*)::int8 from image_tag), $1)
+returning id, index
+            "#,
+            display_name,
+        )
+        .fetch_one(db)
+        .await?;
+
+        Ok((TagId(res.id), res.index))
+    }
+
+    async fn update_index(
+        txn: &mut PgConnection,
+        id: TagId,
+        old_index: i16,
+        new_index: i16,
+    ) -> sqlx::Result<()> {
+        // assert_ne!(old_index, new_index); // should never be reached
+
+        match old_index < new_index {
+            true => {
+                sqlx::query!(
+                    r#"
+update image_tag
+    set index = index - 1
+where index > $1 and index <= $2
+                    "#,
+                    old_index,
+                    new_index,
+                )
+                .execute(&mut *txn)
+                .await?;
+            }
+            false => {
+                sqlx::query!(
+                    r#"
+update image_tag
+    set index = index + 1
+where index >= $2 and index < $1
+                    "#,
+                    old_index,
+                    new_index,
+                )
+                .execute(&mut *txn)
+                .await?;
+            }
+        };
+
+        sqlx::query!(
+            r#"update image_tag set index = least((select count(*)::int2 from image_tag where id is distinct from $2), $1) where id = $2"#,
+            new_index,
+            id.0,
+        )
+        .execute(&mut *txn)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn update(
+        db: &PgPool,
+        id: TagId,
+        display_name: Option<&str>,
+        index: Option<i16>,
+    ) -> Result<NoContent, error::UpdateWithMetadata> {
+        let mut txn = db.begin().await?;
+
+        let res = sqlx::query!(
+            r#"select index as "index: i16" from image_tag where id = $1 for update"#,
+            id.0
+        )
+        .fetch_optional(&mut txn)
+        .await?;
+
+        if res.is_none() {
+            return Err(error::UpdateWithMetadata::ResourceNotFound);
+        }
+
+        if let Some(new_index) = index {
+            let old_index = res.unwrap().index;
+            if old_index != new_index {
+                update_index(&mut txn, id, old_index, new_index).await?
+            }
+        }
+
+        if let Some(display_name) = display_name {
+            sqlx::query!(
+                r#"update image_tag set display_name = $2 where id = $1"#,
+                id.0,
+                display_name,
+            )
+            .execute(&mut txn)
+            .await?;
+        }
+
+        txn.commit().await?;
+
+        Ok(NoContent)
+    }
+
+    pub async fn delete(db: &PgPool, id: TagId) -> sqlx::Result<()> {
+        let mut txn = db.begin().await?;
+
+        let res = sqlx::query!(
+            // TODO verify row locks
+            r#"
+with del as (
+    delete from image_tag
+        where id = $1
+        returning index
+),
+     lock as (
+         select 1 as discard
+         from image_tag,
+              del
+         where image_tag.index > del.index
+             for update
+     )
+select index as "index: i16"
+from del
+        "#,
+            id.0,
+        )
+        .fetch_optional(&mut txn)
+        .await?;
+
+        if let Some(res) = res {
+            sqlx::query!(
+                r#"update image_tag set index = index - 1 where index > $1"#,
+                res.index,
+            )
+            .execute(&mut txn)
+            .await?;
+        }
+
+        txn.commit().await?;
+
+        Ok(())
+    }
+}
+
 pub async fn create(
     conn: &mut PgConnection,
     name: &str,
