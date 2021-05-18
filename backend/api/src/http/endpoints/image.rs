@@ -158,6 +158,66 @@ pub mod user {
     }
 }
 
+/// Manage image tags
+pub mod tag {
+    use crate::{
+        db, error,
+        extractor::{ScopeAdmin, TokenUserWithScope},
+    };
+    use paperclip::actix::web::Path;
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Data, Json},
+        CreatedJson, NoContent,
+    };
+    use shared::{
+        api::{endpoints, ApiEndpoint},
+        domain::{image::tag::ImageTagResponse, meta::TagId},
+    };
+    use sqlx::PgPool;
+
+    #[api_v2_operation]
+    pub(super) async fn create(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        req: Json<<endpoints::image::tag::Create as ApiEndpoint>::Req>,
+    ) -> Result<CreatedJson<<endpoints::image::tag::Create as ApiEndpoint>::Res>, error::Server>
+    {
+        let (id, index): (TagId, i16) =
+            db::image::tag::create(db.as_ref(), req.display_name.as_str()).await?;
+
+        Ok(CreatedJson(ImageTagResponse { id, index }))
+    }
+
+    #[api_v2_operation]
+    pub(super) async fn update(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        id: Path<TagId>,
+        req: Json<<endpoints::image::tag::Update as ApiEndpoint>::Req>,
+    ) -> Result<NoContent, error::UpdateWithMetadata> {
+        let req = req.into_inner();
+
+        let id = id.into_inner();
+
+        let _resp =
+            db::image::tag::update(db.as_ref(), id, req.display_name.as_deref(), req.index).await?;
+
+        Ok(NoContent)
+    }
+
+    #[api_v2_operation]
+    pub(super) async fn delete(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        req: Path<TagId>,
+    ) -> Result<NoContent, error::Server> {
+        db::image::tag::delete(db.as_ref(), req.into_inner()).await?;
+
+        Ok(NoContent)
+    }
+}
+
 /// Create an image in the global image library.
 #[api_v2_operation]
 async fn create(
@@ -449,5 +509,17 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::user::List::PATH,
         image::user::List::METHOD.route().to(self::user::list),
+    )
+    .route(
+        image::tag::Create::PATH,
+        image::tag::Create::METHOD.route().to(self::tag::create),
+    )
+    .route(
+        image::tag::Update::PATH,
+        image::tag::Update::METHOD.route().to(self::tag::update),
+    )
+    .route(
+        image::tag::Delete::PATH,
+        image::tag::Delete::METHOD.route().to(self::tag::delete),
     );
 }

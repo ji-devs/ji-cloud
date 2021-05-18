@@ -47,6 +47,48 @@ pub mod user {
     }
 }
 
+/// Types to manage image tags.
+pub mod tag {
+    use crate::domain::meta::TagId;
+    #[cfg(feature = "backend")]
+    use paperclip::actix::Apiv2Schema;
+    use serde::{Deserialize, Serialize};
+
+    /// Request to create an image tag.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+    pub struct ImageTagCreateRequest {
+        /// Display name of the image tag.
+        pub display_name: String,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+    /// Response returned when a new category is created.
+    pub struct ImageTagResponse {
+        /// The index of the image tag.
+        pub index: i16,
+
+        /// The id of the image tag.
+        pub id: TagId,
+    }
+
+    /// Request to update an image tag.
+    #[derive(Serialize, Deserialize, Debug)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+    pub struct ImageTagUpdateRequest {
+        /// Display name of the image tag. `None` means no change to be made.
+        pub display_name: Option<String>,
+
+        /// If [`Some`] move to _before_ the category with the given index (ie, 0 moves to the start).
+        /// If index to be updated to is greater than the number of tags in the database, then the
+        /// tag will be moved to the end.
+        ///
+        /// If `index` is [`None`] then it will not be updated.
+        pub index: Option<i16>,
+    }
+}
+
 /// Represents different kinds of images (which affects how the size is stored in the db)
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]

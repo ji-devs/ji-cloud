@@ -75,6 +75,81 @@ pub mod user {
     }
 }
 
+/// Routes to manage image tags
+pub mod tag {
+    use super::super::ApiEndpoint;
+    use crate::{
+        api::Method,
+        domain::{
+            image::tag::{ImageTagCreateRequest, ImageTagResponse, ImageTagUpdateRequest},
+            meta::TagId,
+        },
+        error::EmptyError,
+    };
+
+    /// Create an image tag.
+    ///
+    /// # Authorization
+    /// Standard + [`UserScope::Admin`](crate::domain::user::UserScope)
+    ///
+    /// # Errors
+    /// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+    ///
+    /// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+    pub struct Create;
+    impl ApiEndpoint for Create {
+        type Req = ImageTagCreateRequest;
+        type Res = ImageTagResponse;
+        type Err = EmptyError;
+        const PATH: &'static str = "/v1/image/tag";
+        const METHOD: Method = Method::Post;
+    }
+
+    /// Update an image tag.
+    ///
+    /// # Authorization
+    /// Standard + [`UserScope::Admin`](crate::domain::user::UserScope)
+    ///
+    /// # Errors
+    /// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+    ///
+    /// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+    ///
+    /// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+    ///
+    /// [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
+    pub struct Update;
+    impl ApiEndpoint for Update {
+        type Req = ImageTagUpdateRequest;
+        type Res = ();
+        type Err = EmptyError;
+        const PATH: &'static str = "/v1/image/tag/{id}";
+        const METHOD: Method = Method::Patch;
+    }
+
+    /// Delete an image tag.
+    ///
+    /// # Authorization
+    /// Standard + [`UserScope::Admin`](crate::domain::user::UserScope)
+    ///
+    /// # Errors
+    /// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+    ///
+    /// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+    ///
+    /// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+    ///
+    /// [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
+    pub struct Delete;
+    impl ApiEndpoint for Delete {
+        type Req = ();
+        type Res = ();
+        type Err = EmptyError;
+        const PATH: &'static str = "/v1/image/tag/{id}";
+        const METHOD: Method = Method::Delete;
+    }
+}
+
 /// Get an image by ID.
 pub struct Get;
 impl ApiEndpoint for Get {
