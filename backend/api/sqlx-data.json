@@ -752,6 +752,18 @@
       "nullable": []
     }
   },
+  "27ff07808ffad46d7b97d0a2231cec4589638206dc246ef5c47c2deab79f8cc9": {
+    "query": "update image_tag set index = index - 1 where index > $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "2968c111bb7c6cd6a2974b52a5b80e4cf7fd4264cc519edcd68b2b6779a4ca2b": {
     "query": "delete from user_image_library where id = $1",
     "describe": {
@@ -759,6 +771,19 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "299185ccb6209375e98ddd1b401cdeac216322c5cc136884ba655186945c1e1a": {
+    "query": "update image_tag set display_name = $2 where id = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
         ]
       },
       "nullable": []
@@ -948,6 +973,26 @@
       ]
     }
   },
+  "3715fc01bfe3e9f664372dbef2e3fb748934bae3e7829476fdf180b0847d557a": {
+    "query": "\nwith del as (\n    delete from image_tag\n        where id = $1\n        returning index\n),\n     lock as (\n         select 1 as discard\n         from image_tag,\n              del\n         where image_tag.index > del.index\n             for update\n     )\nselect index as \"index: i16\"\nfrom del\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: i16",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "38431cddc4ee0d5bdcce450ac435121e74ffc0bd11939774a86ba70156e5ebb4": {
     "query": "select id as \"id!\",\n    case kind\n        -- PngCanvasImage\n        when 0 then 3\n        -- PngStickerImage\n        when 1 then 0\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom image_metadata\nunion all\nselect id as \"id!\",\n    case kind\n        -- GifAnimation\n        when 0 then 1\n        -- SpritesheetAnimation\n        when 1 then 2\n    end::int2 \"kind!: MediaKind\", \n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    0::int2 as \"library!: MediaLibrary\" -- global\nfrom animation_metadata\nunion all\nselect id as \"id!\",\n    -- PngStickerImage\n    0::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_image_library\nunion all\nselect id as \"id!\",\n    -- Mp3Audio\n    4::int2 as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    1::int2 as \"library!: MediaLibrary\" -- user\nfrom user_audio_library\nunion all\nselect id as \"id!\",\n    kind as \"kind!: MediaKind\",\n    created_at as \"created_at!\",\n    updated_at,\n    uploaded_at,\n    2::int2 as \"library!: MediaLibrary\" -- web\nfrom web_media_library\n",
     "describe": {
@@ -1042,6 +1087,19 @@
         "Left": [
           "Text",
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "3b7ed13a23c3a2dc33c33364c71db91c2206fb1de0cf823536f98081804277af": {
+    "query": "\nupdate image_tag\n    set index = index - 1\nwhere index > $1 and index <= $2\n                    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2"
         ]
       },
       "nullable": []
@@ -1557,6 +1615,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "6a709f65180509b529316338027b7e889a30d6fedd20e14868b8692f67f90f3c": {
+    "query": "update image_tag set index = least((select count(*)::int2 from image_tag where id is distinct from $2), $1) where id = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "6c4f45accd9f8fafcb6f26bf5a4fe6ec2c1a082585573cc3e1ead7ad9ac0fbee": {
@@ -2081,6 +2152,26 @@
       ]
     }
   },
+  "8dcf93a380fda73f0d9cddbf11ccef862e85073ae7f058b7c1319447af780506": {
+    "query": "select index as \"index: i16\" from image_tag where id = $1 for update",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: i16",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b": {
     "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2) on conflict (media_id, media_url) do nothing",
     "describe": {
@@ -2319,6 +2410,19 @@
         false,
         true
       ]
+    }
+  },
+  "94b54fe0199e6ea157633ce7a0a7522a0191330da892dd36f9347d7e69ab399c": {
+    "query": "\nupdate image_tag\n    set index = index + 1\nwhere index >= $2 and index < $1\n                    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
@@ -3237,6 +3341,32 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "e27ff3ab873482fe3ddf4446f97836be9cbb5adb6d671eec5802c53dc54e0b66": {
+    "query": "\ninsert into image_tag (index, display_name)\nvalues ((select count(*)::int8 from image_tag), $1)\nreturning id, index\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
     }
   },
   "e3385b6d93728cc62d0995e839f0148aaba5e572c06049512a4f31d44f03c269": {
