@@ -6,25 +6,25 @@ use futures_signals::{
     signal_vec::{SignalVecExt, MutableVec},
 };
 
-pub struct HistoryState<T, ON_CHANGE, ON_UNDOREDO> 
+pub struct HistoryState<T, OnChangeFn, OnUndoRedoFn> 
 where
     T: Clone,
-    ON_CHANGE: Fn(Option<T>),
-    ON_UNDOREDO: Fn(Option<T>),
+    OnChangeFn: Fn(T),
+    OnUndoRedoFn: Fn(T),
 {
-    on_change: ON_CHANGE,
-    on_undoredo: ON_UNDOREDO,
+    on_change: OnChangeFn,
+    on_undoredo: OnUndoRedoFn,
     history: MutableVec<T>,
     cursor: Mutable<usize>
 }
 
-impl <T, ON_CHANGE, ON_UNDOREDO> HistoryState <T, ON_CHANGE, ON_UNDOREDO> 
+impl <T, OnChangeFn, OnUndoRedoFn> HistoryState <T, OnChangeFn, OnUndoRedoFn> 
 where
     T: Clone + 'static,
-    ON_CHANGE: Fn(Option<T>) + 'static,
-    ON_UNDOREDO: Fn(Option<T>) + 'static,
+    OnChangeFn: Fn(T) + 'static,
+    OnUndoRedoFn: Fn(T) + 'static,
 {
-    pub fn new(init:T, on_change: ON_CHANGE, on_undoredo: ON_UNDOREDO) -> Self {
+    pub fn new(init:T, on_change: OnChangeFn, on_undoredo: OnUndoRedoFn) -> Self {
         Self {
             on_change,
             on_undoredo,
@@ -58,31 +58,23 @@ where
     // so that it can differentiate between an update and a pop
     pub fn undo(&self) {
         let mut cursor = self.cursor.lock_mut();
-        let value = {
-            if *cursor > 0 {
-                *cursor -= 1;
-                Some(self.history.lock_ref().index(*cursor).clone())
-            } else {
-                None
-            }
-        };
+        if *cursor > 0 {
+            *cursor -= 1;
+            let value = self.history.lock_ref().index(*cursor).clone();
+            (self.on_change)(value.clone());
+            (self.on_undoredo)(value);
+        } 
 
-        (self.on_change)(value.clone());
-        (self.on_undoredo)(value);
     }
     pub fn redo(&self) {
         let mut cursor = self.cursor.lock_mut();
         let len = self.history.lock_ref().len();
-        let value = {
-            if *cursor < len-1 {
-                *cursor += 1;
-                Some(self.history.lock_ref().index(*cursor).clone())
-            } else {
-                None
-            }
-        };
-        (self.on_change)(value.clone());
-        (self.on_undoredo)(value);
+        if *cursor < len-1 {
+            *cursor += 1;
+            let value = self.history.lock_ref().index(*cursor).clone();
+            (self.on_change)(value.clone());
+            (self.on_undoredo)(value);
+        }
     }
 
     pub fn push(&self, value:T) {
@@ -99,7 +91,7 @@ where
 
         *cursor += 1;
 
-        (self.on_change)(Some(value));
+        (self.on_change)(value);
     }
 
     /// Helper to push new state more easily.

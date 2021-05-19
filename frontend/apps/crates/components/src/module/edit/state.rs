@@ -123,7 +123,7 @@ where
     ) -> Rc<Self>
     where
         InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
-        InitFromRawFn: Fn(RawData, IsHistory, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
+        InitFromRawFn: Fn(RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
 
@@ -174,7 +174,7 @@ where
 
             *_self.history.borrow_mut() = Some(history.clone());
 
-            if let Some(base) = init_from_raw(raw, false, history.clone()) {
+            if let Some(base) = init_from_raw(raw, false, None, history.clone()) {
                 Self::change_phase_steps(_self.clone(), base);
             } else {
                 Self::change_phase_choose(_self.clone(), init_from_mode);

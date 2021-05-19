@@ -10,12 +10,12 @@ pub struct ControllerDom {
 
 //TODO - move on_undoredo into HistoryState itself
 impl ControllerDom {
-    pub fn render<T, ON_CHANGE, ON_UNDOREDO, ON_PREVIEW>(history: Rc<HistoryState<T, ON_CHANGE, ON_UNDOREDO>>, on_preview: ON_PREVIEW) -> Dom 
+    pub fn render<T, OnChangeFn, OnUndoRedoFn, OnPreviewFn>(history: Rc<HistoryState<T, OnChangeFn, OnUndoRedoFn>>, on_preview: OnPreviewFn) -> Dom 
     where
         T: Clone + 'static,
-        ON_CHANGE: Fn(Option<T>) + 'static,
-        ON_UNDOREDO: Fn(Option<T>) + 'static,
-        ON_PREVIEW: Fn() + 'static,
+        OnChangeFn: Fn(T) + 'static,
+        OnUndoRedoFn: Fn(T) + 'static,
+        OnPreviewFn: Fn() + 'static,
     {
         html!("module-header-controller", {
             .property("slot", "controller")

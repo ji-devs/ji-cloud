@@ -29,7 +29,12 @@ pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> Step
     }
 }
 
-pub fn init_from_raw(raw:RawData, is_history: bool, history: Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
+pub fn init_from_raw(
+    raw:RawData, 
+    is_history: bool, 
+    current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
+    history: Rc<HistoryStateImpl<RawData>>
+) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
     raw.content.map(|content| {
         //TODO - create from raw
         let step = Mutable::new(Step::default());
