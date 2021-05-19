@@ -19,6 +19,7 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
+use router::Router;
 /*
 mod page;
 mod pages;
@@ -31,7 +32,11 @@ pub async fn main_js() {
     let settings = utils::settings::init();
     config::init();
 
-    router::render();
+    let router = Rc::new(Router::new());
+
+    router::render(router.clone());
+
+    std::mem::forget(Box::new(router));
 }
 
 

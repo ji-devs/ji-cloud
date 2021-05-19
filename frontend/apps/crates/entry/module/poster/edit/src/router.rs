@@ -15,29 +15,34 @@ use super::state::{AppState, create_state};
 
 pub struct Router {
     loader: AsyncLoader,
-    state: RefCell<Option<Rc<AppState>>>
+    app: RefCell<Option<Rc<AppState>>>
+}
+
+impl Router {
+    pub fn new() -> Self {
+        Self {
+            loader: AsyncLoader::new(),
+            app: RefCell::new(None)
+        }
+    }
 }
 
 
-pub fn render() {
-    let _self = Rc::new(Router {
-        loader: AsyncLoader::new(),
-        state: RefCell::new(None)
-    });
+pub fn render(state: Rc<Router>) {
 
-    _self.clone().loader.load(
+    state.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
-            .for_each(clone!(_self => move |route| {
+            .for_each(clone!(state => move |route| {
                 match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
                                     ModuleKind::Poster => {
-                                        let state = create_state(jig_id, module_id);
-                                        render_page_body(state.clone());
-                                        *_self.state.borrow_mut() = Some(state);
+                                        let app = create_state(jig_id, module_id);
+                                        render_page_body(app.clone());
+                                        *state.app.borrow_mut() = Some(app);
                                     }
                                     _ => {}
                                 }
