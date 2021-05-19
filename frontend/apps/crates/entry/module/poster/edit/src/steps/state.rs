@@ -1,18 +1,62 @@
 use components::module::edit::*;
 use std::rc::Rc;
-use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode as RawMode, Content as RawContent, ModuleData as RawData}}};
+use shared::domain::jig::{
+    JigId, 
+    module::{
+        ModuleId, 
+        body::{
+            Backgrounds as RawBackgrounds, 
+            poster::{Mode as RawMode, Content as RawContent, ModuleData as RawData}
+        }
+    }
+};
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
+use utils::prelude::*;
+use components::{
+    text_editor::state::State as TextEditorState,
+    stickers::state::Stickers,
+    backgrounds::state::Backgrounds,
+};
 
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
-    pub step: ReadOnlyMutable<Step>
+    pub step: ReadOnlyMutable<Step>,
+    pub theme_id: Mutable<ThemeId>,
+
+    // Poster-specific
+    pub backgrounds: Rc<Backgrounds>, 
+    pub stickers: Rc<Stickers>, 
+    pub text_editor: Rc<TextEditorState>,
 }
 
 impl Base {
-    pub fn new(history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>) -> Self {
+    pub fn new(history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Self {
+
+        let theme_id = match raw {
+            None => ThemeId::None,
+            Some(raw) => raw.theme_id
+        };
+        
+        let text_editor = TextEditorState::new(theme_id, None, None);
+
+        let backgrounds = Rc::new(Backgrounds::new(
+                raw.map(|content| &content.backgrounds),
+                None
+        ));
+
+        let stickers = Rc::new(Stickers::new(
+                raw.map(|content| content.stickers.as_ref()),
+                text_editor.clone(),
+                None
+        ));
+
         Self {
             history,
-            step
+            step,
+            theme_id: Mutable::new(theme_id),
+            text_editor,
+            backgrounds,
+            stickers
         }
     }
 }
@@ -58,9 +102,9 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         match self {
-            Self::One => crate::strings::steps_nav::STR_DESIGN,
-            Self::Two => crate::strings::steps_nav::STR_CONTENT,
-            Self::Three => crate::strings::steps_nav::STR_SETTINGS,
+            Self::One => crate::strings::steps_nav::STR_THEMES,
+            Self::Two => crate::strings::steps_nav::STR_BACKGROUND,
+            Self::Three => crate::strings::steps_nav::STR_CONTENT,
             Self::Four => crate::strings::steps_nav::STR_PREVIEW,
         }
     }

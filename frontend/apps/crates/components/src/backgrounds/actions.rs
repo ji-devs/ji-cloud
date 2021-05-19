@@ -3,7 +3,7 @@ use futures_signals::{
     signal_vec::{SignalVecExt, SignalVec, MutableVec},
     signal::{Signal, SignalExt, Mutable, ReadOnlyMutable},
 };
-use super::*; 
+use super::state::*; 
 use shared::domain::jig::module::body::Background;
 
 pub enum Layer {

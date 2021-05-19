@@ -8,8 +8,8 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use super::{
-    super::Sprite,
-    super::super::Stickers
+    super::state::Sprite,
+    super::super::state::Stickers
 };
 
 pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {

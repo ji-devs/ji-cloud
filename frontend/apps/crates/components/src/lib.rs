@@ -31,5 +31,5 @@ pub mod audio_player;
 pub mod transform;
 #[cfg(feature = "stickers")]
 pub mod stickers;
-#[cfg(feature = "background")]
+#[cfg(feature = "backgrounds")]
 pub mod backgrounds;

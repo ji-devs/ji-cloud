@@ -1,4 +1,4 @@
-use super::Text;
+use super::state::Text;
 
 impl Text {
     pub fn set_value(&self, value: String) {

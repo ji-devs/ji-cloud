@@ -15,7 +15,10 @@ use uuid::Uuid;
 use shared::{
     domain::{
         jig::{
-            module::body::{Sprite, Instructions},
+            module::body::{
+                Sprite, Instructions, Sticker, Text,
+                poster::{Content, Mode as RawMode, ModuleData as RawData}
+            },
             JigId, module::ModuleId
         },
         image::ImageId,
@@ -23,39 +26,49 @@ use shared::{
     },
     media::MediaLibrary
 };
-use shared::domain::jig::module::body::poster::{Content, Mode as RawMode, ModuleData as RawData};
+use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::state::Mode;
 use crate::steps::state::Step;
-
+use crate::steps::sidebar::step_2::state::TabKind as BgTabKind;
+use crate::steps::sidebar::step_3::state::TabKind as ContentTabKind;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-#[derive(Debug)]
+const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
+const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+
+#[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data:Option<RawData>,
     pub step:Option<Step>,
     pub skip_save: bool,
+    pub bg_tab: Option<BgTabKind>,
+    pub content_tab: Option<ContentTabKind>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum InitData {
+    Text,
+    Sprite,
+}
 
 impl DebugSettings {
-    pub fn default() -> DebugSettings {
-        DebugSettings {
-            data: None, 
-            step: None, 
-            skip_save: false,
-        }
-    }
-    pub fn debug(with_data: bool) -> DebugSettings {
+    pub fn debug(init_data: Option<Vec<InitData>>, selected_index: Option<usize>) -> DebugSettings {
         DebugSettings {
             //debug always has to have some data
             //otherwise it will fail at load time
             data: Some(
-                if with_data {
+                if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
                             mode: RawMode::Poster,
                             theme_id: ThemeId::Chalkboard, 
                             instructions: Instructions::default(),
+                            stickers: init_data.iter().map(|init| {
+                                match init {
+                                    InitData::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                    InitData::Sprite => Sticker::Sprite(Sprite::new(ImageId(Uuid::parse_str(STRING_UUID).unwrap_ji()), MediaLibrary::Global))
+                                }
+                            }).collect(),
                             ..Content::default()
                         })
                     }
@@ -65,15 +78,18 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::One),
+            step: Some(Step::Two),
             skip_save: true,
+            bg_tab: Some(BgTabKind::Color),
+            content_tab: Some(ContentTabKind::Image),
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(true)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text, InitData::Sprite]), None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None, None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

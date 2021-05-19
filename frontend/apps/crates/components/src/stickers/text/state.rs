@@ -1,8 +1,3 @@
-pub mod dom;
-pub mod actions;
-pub mod menu;
-pub mod ext;
-
 use futures_signals::{
     map_ref,
     signal::{Mutable, Signal, SignalExt},

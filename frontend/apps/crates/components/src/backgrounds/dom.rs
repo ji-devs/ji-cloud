@@ -7,18 +7,15 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
-use super::Backgrounds;
+use super::state::*;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
 }
 
-pub struct BackgroundsDom {}
-impl BackgroundsDom {
-    pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
-        let debug_opts = debug_opts.unwrap_or_default();
+pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
+    let debug_opts = debug_opts.unwrap_or_default();
 
-        html!("empty-fragment", {
-        })
-    }
+    html!("empty-fragment", {
+    })
 }

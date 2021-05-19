@@ -11,11 +11,12 @@ use super::{
 };
 use crate::state::Mode;
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
+use utils::prelude::*;
 
 pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
     let step = Mutable::new(Step::default());
-    let base = Rc::new(Base::new(history, step.read_only()));
+    let base = Rc::new(Base::new(history, step.read_only(), None));
     
     StepsInit {
         step,
@@ -32,7 +33,7 @@ pub fn init_from_raw(raw:RawData, is_history: bool, history: Rc<HistoryStateImpl
     raw.content.map(|content| {
         //TODO - create from raw
         let step = Mutable::new(Step::default());
-        let base = Rc::new(Base::new(history, step.read_only()));
+        let base = Rc::new(Base::new(history, step.read_only(), Some(&content)));
         
         let mut init = StepsInit {
             step,
@@ -58,6 +59,16 @@ impl Base {
     pub fn stub_action(&self) {
         self.history.push_modify(move |raw| {
             
+        });
+    }
+
+    pub fn change_theme_id(&self, theme_id: ThemeId) {
+        self.theme_id.set_neq(theme_id);
+
+        self.history.push_modify(move |raw| {
+            if let Some(content) = &mut raw.content {
+                content.theme_id = theme_id;
+            }
         });
     }
 }

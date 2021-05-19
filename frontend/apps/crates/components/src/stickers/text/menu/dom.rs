@@ -9,8 +9,8 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::{Sprite, Transform};
 use super::{
-    super::Text,
-    super::super::Stickers
+    super::state::Text,
+    super::super::state::Stickers
 };
 
 pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {

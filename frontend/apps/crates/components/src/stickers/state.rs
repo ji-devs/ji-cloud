@@ -1,8 +1,3 @@
-pub mod dom;
-pub mod sprite;
-pub mod text;
-pub mod actions;
-
 use futures_signals::{
     map_ref,
     signal_vec::{SignalVecExt, SignalVec, MutableVec},
@@ -12,8 +7,10 @@ use futures_signals::{
 use std::rc::Rc;
 use std::cell::RefCell;
 use shared::domain::jig::module::body::Sticker as RawSticker;
-use sprite::Sprite;
-use text::Text;
+use super::{
+    sprite::state::Sprite,
+    text::state::Text
+};
 use crate::text_editor::state::State as TextEditorState;
 
 pub struct Stickers 
@@ -32,17 +29,24 @@ pub enum Sticker {
 }
 
 impl Stickers {
-    pub fn new(raw:&[RawSticker], text_editor: Rc<TextEditorState>, on_change: Option<Box<dyn Fn(Vec<RawSticker>)>>) -> Self {
-    
-        let list = MutableVec::new_with_values(
-                    raw.
-                        into_iter()
-                        .map(|x| match x {
-                            RawSticker::Sprite(sprite) => Sticker::Sprite(Rc::new(Sprite::new(sprite))),
-                            RawSticker::Text(text) => Sticker::Text(Rc::new(Text::new(text_editor.clone(), text)))
-                        })
-                        .collect()
-        );
+    pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, on_change: Option<Box<dyn Fn(Vec<RawSticker>)>>) -> Self {
+   
+
+        let list = {
+            if let Some(raw) = raw {
+                MutableVec::new_with_values(
+                            raw.
+                                into_iter()
+                                .map(|x| match x {
+                                    RawSticker::Sprite(sprite) => Sticker::Sprite(Rc::new(Sprite::new(sprite))),
+                                    RawSticker::Text(text) => Sticker::Text(Rc::new(Text::new(text_editor.clone(), text)))
+                                })
+                                .collect()
+                )
+            } else {
+                MutableVec::new()
+            }
+        };
 
         Self {
             list,

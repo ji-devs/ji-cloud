@@ -1,4 +1,4 @@
-use super::*; 
+use super::state::*; 
 
 impl Stickers {
     pub fn delete_index(&self, index: usize) {
