@@ -17,12 +17,12 @@ use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 
 
-impl <Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     RawData: BodyExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -31,14 +31,14 @@ where
 {
     pub fn change_phase_choose<InitFromModeFn>(_self: Rc<Self>, init_from_mode: InitFromModeFn) 
     where
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay> + 'static,
+        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + 'static,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
             _self.clone(),
             init_from_mode,
         )))));
     }
-    pub fn change_phase_steps(_self: Rc<Self>, steps_init: StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay>) -> Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>> {
+    pub fn change_phase_steps(_self: Rc<Self>, steps_init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>) -> Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
         let steps = Rc::new(Steps::new(
             _self.clone(),
             steps_init 
@@ -55,8 +55,8 @@ where
         init_from_mode: InitFromModeFn,
     ) -> Box<dyn Fn(Option<RawData>)> 
     where
-        InitFromRawFn: Fn(RawData, IsHistory, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
+        InitFromRawFn: Fn(RawData, IsHistory, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
+        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
     {
         Box::new(move |raw_data:Option<RawData>| {
             match raw_data {

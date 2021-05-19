@@ -94,7 +94,7 @@ all= [
     "color_select", 
     "font_loader", 
     "image", 
-    "image_search", 
+    # "image_search", 
     "instructions", 
     "module", 
     "stickers", 

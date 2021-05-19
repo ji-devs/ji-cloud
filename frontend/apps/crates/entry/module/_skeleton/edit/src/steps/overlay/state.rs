@@ -1,12 +1,16 @@
 use components::module::edit::*;
+use super::super::state::Base;
+use std::rc::Rc;
 
 pub struct Overlay {
+    pub base: Rc<Base>
 }
 
 
 impl Overlay {
-    pub fn new() -> Self {
+    pub fn new(base: Rc<Base>) -> Self {
         Self {
+            base 
         }
     }
 }

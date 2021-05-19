@@ -15,17 +15,17 @@ use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::BodyExt}};
 use utils::{prelude::*, iframe::IframeInit}; 
 use dominator_helpers::events::Message;
 
-pub fn render<RawData, Step, Sections, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
     history: Rc<HistoryStateImpl<RawData>>,
-    state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Vec<Dom>
 where
     RawData: BodyExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -48,13 +48,13 @@ where
     }
 }
 
-pub fn render_preview_header<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render_preview_header<Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind,
-    state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -76,17 +76,17 @@ where
         })
 }
 
-pub fn render_preview_main<RawData, Step, Sections, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render_preview_main<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind, 
     jig_id: JigId, 
     module_id: ModuleId, 
     history: Rc<HistoryStateImpl<RawData>>, 
-    state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
     RawData: BodyExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -130,26 +130,23 @@ where
             })
         })
 }
-pub fn render_main<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_main<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    html!("empty-fragment", {
-        .property("slot", "main")
-        .child(Main::render(state.main.clone()))
-    })
+    add_slot_to_dom(Main::render(state.main.clone()), "main")
 }
 
-pub fn render_sidebar<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_sidebar<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -159,15 +156,15 @@ where
     html!("module-sidebar", {
         .property("slot", "sidebar")
         .child(super::nav::dom::render(state.clone()))
-        .child(Sidebar::render(state.sidebar.clone()))
+        .child(add_slot_to_dom(Sidebar::render(state.sidebar.clone()), "content"))
     })
 }
 
-pub fn render_header<RawData, Step, Sections, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -187,10 +184,10 @@ where
     })
 }
 
-pub fn render_footer<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_footer<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -210,10 +207,10 @@ where
     })
 }
 
-pub fn render_overlay<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_overlay<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -221,4 +218,12 @@ where
     Overlay: OverlayExt + 'static,
 {
     Overlay::render(state.overlay.clone())
+}
+
+fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom {
+    //there might be a better way, like Dom->DomBuilder->Dom
+    html!("empty-fragment", {
+        .property("slot", slot)
+        .child(dom)
+    })
 }

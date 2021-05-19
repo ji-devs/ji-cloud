@@ -9,10 +9,10 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
 
-pub fn render<Step, Sections, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,

@@ -36,19 +36,19 @@ use shared::{
 };
 use utils::{settings::SETTINGS, prelude::*};
 
-pub struct GenericState <Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> 
+pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     RawData: BodyExt + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub phase: Mutable<Rc<Phase<Mode, Step, Sections, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub phase: Mutable<Rc<Phase<Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) is_preview: Mutable<bool>,
     pub(super) raw_loader: AsyncLoader,
@@ -58,11 +58,11 @@ where
     pub(super) page_body_switcher: AsyncLoader,
 }
 
-pub enum Phase <Mode, Step, Sections, Main, Sidebar, Header, Footer, Overlay> 
+pub enum Phase <Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -71,7 +71,7 @@ where
 {
     Init,
     Choose(Rc<Choose<Mode>>),
-    Steps(Rc<Steps<Step, Sections, Main, Sidebar, Header, Footer, Overlay>>),
+    Steps(Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
 #[derive(Debug, Clone)]
@@ -104,11 +104,11 @@ impl <RawData> StateOpts<RawData> {
 
 pub type IsHistory = bool;
 
-impl <Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -122,8 +122,8 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
-        InitFromRawFn: Fn(RawData, IsHistory, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
+        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
+        InitFromRawFn: Fn(RawData, IsHistory, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
 
@@ -174,8 +174,8 @@ where
 
             *_self.history.borrow_mut() = Some(history.clone());
 
-            if let Some(sections) = init_from_raw(raw, false, history.clone()) {
-                Self::change_phase_steps(_self.clone(), sections);
+            if let Some(base) = init_from_raw(raw, false, history.clone()) {
+                Self::change_phase_steps(_self.clone(), base);
             } else {
                 Self::change_phase_choose(_self.clone(), init_from_mode);
             }

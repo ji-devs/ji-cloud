@@ -38,21 +38,21 @@ impl <Mode> Choose <Mode>
 where
     Mode: ModeExt + 'static,
 {
-    pub fn new<Step, RawData, InitFromModeFn, Sections, Main, Sidebar, Header, Footer, Overlay>(
-        app: Rc<GenericState<Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay>>, 
+    pub fn new<Step, RawData, InitFromModeFn, Base, Main, Sidebar, Header, Footer, Overlay>(
+        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init_from_mode: InitFromModeFn,
     ) -> Self 
     where
         Mode: ModeExt + 'static,
         Step: StepExt + 'static,
         RawData: BodyExt + 'static, 
-        Sections: SectionsExt<Step> + 'static,
+        Base: BaseExt<Step> + 'static,
         Main: MainExt + 'static,
         Sidebar: SidebarExt + 'static,
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay> + 'static,
+        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + 'static,
 
     {
         Self {

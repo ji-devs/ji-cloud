@@ -14,10 +14,10 @@ use super::super::{
 };
 use shared::domain::jig::module::body::BodyExt;
 
-pub struct Steps <Step, Sections, Main, Sidebar, Header, Footer, Overlay> 
+pub struct Steps <Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -26,7 +26,7 @@ where
 {
     pub preview_step_reactor: AsyncLoader,
     pub step: Mutable<Step>,
-    pub sections: Rc<Sections>,
+    pub base: Rc<Base>,
     pub main: Rc<Main>,
     pub sidebar: Rc<Sidebar>,
     pub header: Rc<Header>,
@@ -35,41 +35,18 @@ where
     pub steps_completed: Mutable<HashSet<Step>>,
 }
 
-pub trait DomRenderable {
-    fn render(state: Rc<Self>) -> Dom;
-}
-
-pub trait SectionsExt<Step: StepExt> {
-    fn allowed_step_change(&self, from:Step, to: Step) -> bool;
-}
-
-pub trait MainExt: DomRenderable {
-}
-
-pub trait SidebarExt: DomRenderable {
-}
-
-pub trait HeaderExt: DomRenderable {
-}
-
-pub trait FooterExt: DomRenderable {
-}
-
-pub trait OverlayExt: DomRenderable {
-}
-
-pub struct StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay> 
+pub struct StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub step: Option<Step>,
-    pub sections: Rc<Sections>,
+    pub step: Mutable<Step>,
+    pub base: Rc<Base>,
     pub main: Main,
     pub sidebar: Sidebar,
     pub header: Header,
@@ -88,11 +65,35 @@ pub trait StepExt : Copy + Default + PartialEq + Eq + Hash {
     }
 }
 
+pub trait DomRenderable {
+    fn render(state: Rc<Self>) -> Dom;
+}
 
-impl <Step, Sections, Main, Sidebar, Header, Footer, Overlay> Steps <Step, Sections, Main, Sidebar, Header, Footer, Overlay> 
+pub trait BaseExt<Step: StepExt> {
+    fn allowed_step_change(&self, from:Step, to: Step) -> bool;
+}
+
+pub trait MainExt: DomRenderable {
+}
+
+pub trait SidebarExt: DomRenderable {
+}
+
+pub trait HeaderExt: DomRenderable {
+}
+
+pub trait FooterExt: DomRenderable {
+}
+
+pub trait OverlayExt: DomRenderable {
+}
+
+
+
+impl <Step, Base, Main, Sidebar, Header, Footer, Overlay> Steps <Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -100,17 +101,16 @@ where
     Overlay: OverlayExt + 'static,
 {
     pub fn new<Mode, RawData>(
-        app: Rc<GenericState<Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay>>, 
-        init: StepsInit<Step, Sections, Main, Sidebar, Header, Footer, Overlay>
+        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
+        init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>
     ) -> Self 
     where
         Mode: ModeExt + 'static,
         RawData: BodyExt + 'static, 
     {
-        let step = Mutable::new(init.step.unwrap_or_default()); 
 
         let preview_step_reactor = AsyncLoader::new();
-        preview_step_reactor.load(step.signal().for_each(clone!(app => move |step| {
+        preview_step_reactor.load(init.step.signal().for_each(clone!(app => move |step| {
             if step.is_preview() {
                 app.is_preview.set_neq(true);
             } else {
@@ -120,8 +120,8 @@ where
         })));
 
         Self {
-            step,
-            sections: init.sections,
+            step: init.step,
+            base: init.base,
             main: Rc::new(init.main),
             sidebar: Rc::new(init.sidebar),
             header: Rc::new(init.header),

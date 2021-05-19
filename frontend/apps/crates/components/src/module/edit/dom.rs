@@ -33,9 +33,9 @@ use super::choose::state::ModeExt;
 use super::steps::state::*;
 use shared::domain::jig::module::body::BodyExt;
 
-pub fn render_page_body<Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Sections, Main, Sidebar, Header, Footer, Overlay>>)
+pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>)
 where
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,

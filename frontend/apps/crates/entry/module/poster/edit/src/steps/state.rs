@@ -1,21 +1,23 @@
 use components::module::edit::*;
 use std::rc::Rc;
 use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode as RawMode, Content as RawContent, ModuleData as RawData}}};
+use futures_signals::signal::{ReadOnlyMutable, Mutable};
 
-
-pub struct Sections {
-    pub history: Rc<HistoryStateImpl<RawData>>
+pub struct Base {
+    pub history: Rc<HistoryStateImpl<RawData>>,
+    pub step: ReadOnlyMutable<Step>
 }
 
-impl Sections {
-    pub fn new(history: Rc<HistoryStateImpl<RawData>>) -> Self {
+impl Base {
+    pub fn new(history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>) -> Self {
         Self {
-            history
+            history,
+            step
         }
     }
 }
 
-impl SectionsExt<Step> for Sections {
+impl BaseExt<Step> for Base {
     fn allowed_step_change(&self, from:Step, to:Step) -> bool {
         true
     }

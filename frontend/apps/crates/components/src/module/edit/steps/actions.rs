@@ -7,10 +7,10 @@ use futures_signals::{
 };
 
 
-impl <Step, Sections, Main, Sidebar, Header, Footer, Overlay> Steps <Step, Sections, Main, Sidebar, Header, Footer, Overlay> 
+impl <Step, Base, Main, Sidebar, Header, Footer, Overlay> Steps <Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Step: StepExt + 'static,
-    Sections: SectionsExt<Step> + 'static,
+    Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
     Header: HeaderExt + 'static,
@@ -25,7 +25,7 @@ where
     pub fn try_change_step(&self, to: Step) {
         let from = self.step.get();
 
-        if self.sections.allowed_step_change(from, to) {
+        if self.base.allowed_step_change(from, to) {
             if !from.is_preview() {
                 self.steps_completed.lock_mut().insert(from);
             }
@@ -33,13 +33,13 @@ where
         }
     }
     pub fn next_step_allowed_signal(&self) -> impl Signal<Item = Option<bool>> {
-        let sections = self.sections.clone();
+        let base = self.base.clone();
 
         self.step.signal()
-            .map(clone!(sections => move |from| {
+            .map(clone!(base => move |from| {
                 from.next()
                     .map(|to| {
-                        sections.allowed_step_change(from, to)
+                        base.allowed_step_change(from, to)
                     })
             }))
     }
