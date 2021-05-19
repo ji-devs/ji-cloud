@@ -7,16 +7,15 @@ use futures_signals::signal::SignalExt;
 impl DomRenderable for Sidebar {
     fn render(state: Rc<Sidebar>) -> Dom {
         html!("div", {
-            .text_signal(state.step_state.signal_cloned().map(|step_state| {
-                if let Some(step_state) = step_state.as_ref() {
-                    match step_state.as_ref() {
-                        StepState::One => "step 1 here!",
-                        StepState::Two => "step 2 here!",
-                        StepState::Three => "step 3 here!",
-                    }
-                } else {
-                    "nothing!"
-                }
+            .child_signal(state.step_state.signal_cloned().map(|step_state| {
+                step_state
+                    .map(|step_state| {
+                        match step_state {
+                            StepState::One(one) => super::step_1::dom::render(one),
+                            StepState::Two(two) => super::step_2::dom::render(two),
+                            StepState::Three(three) => super::step_3::dom::render(three),
+                        }
+                    })
             }))
         })
     }
