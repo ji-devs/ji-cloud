@@ -1,5 +1,7 @@
-pub mod sidebar;
-pub mod header;
 pub mod footer;
+pub mod header;
 pub mod main;
-pub mod preview;
+pub mod overlay;
+pub mod sidebar;
+pub mod state;
+pub mod actions;

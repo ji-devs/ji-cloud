@@ -33,7 +33,7 @@ pub fn render() {
                         match route {
                             ModuleRoute::Play(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::Skeleton => Some(IndexDom::render(jig_id, module_id)),
+                                    ModuleKind::Poster => Some(IndexDom::render(jig_id, module_id)),
                                     _ => None
                                 }
                             }

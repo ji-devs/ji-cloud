@@ -47,7 +47,7 @@ impl StateLoader<RawData, State> for PageLoader {
                         Ok(resp) => {
                             resp.module.body.map(|resp| {
                                 match resp {
-                                    Body::Skeleton(body) => body,
+                                    Body::Poster(body) => body,
                                     _ => panic!("wrong module body kind!!")
                                 }
                             })

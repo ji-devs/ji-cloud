@@ -10,37 +10,42 @@ use futures_signals::{
 use dominator::{Dom, html, clone};
 use dominator_helpers::futures::AsyncLoader;
 use std::cell::RefCell;
-use crate::index::dom::{IndexDom, Page};
+use components::module::edit::dom::render_page_body;
+use super::state::{AppState, create_state};
 
 pub struct Router {
     loader: AsyncLoader,
-    page: RefCell<Option<Page>>
+    state: RefCell<Option<Rc<AppState>>>
 }
 
 
 pub fn render() {
     let _self = Rc::new(Router {
         loader: AsyncLoader::new(),
-        page: RefCell::new(None)
+        state: RefCell::new(None)
     });
 
     _self.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
             .for_each(clone!(_self => move |route| {
-                *_self.page.borrow_mut() = match route {
+                match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Edit(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::Skeleton => Some(IndexDom::render(jig_id, module_id)),
-                                    _ => None
+                                    ModuleKind::Poster => {
+                                        let state = create_state(jig_id, module_id);
+                                        render_page_body(state.clone());
+                                        *_self.state.borrow_mut() = Some(state);
+                                    }
+                                    _ => {}
                                 }
                             }
-                            _ => None
+                            _ => {}
                         }
                     },
-                    _ => None
+                    _ => {}
                 };
                 async {}
             }))

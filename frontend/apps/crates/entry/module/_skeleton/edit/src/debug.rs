@@ -1,4 +1,3 @@
-use crate::data::state::*;
 use cfg_if::cfg_if;
 use futures_signals::{
     map_ref,
@@ -10,7 +9,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::{raw, state::*};
 use once_cell::sync::OnceCell;
 use utils::prelude::*;
 use uuid::Uuid;
@@ -25,21 +23,17 @@ use shared::{
     },
     media::MediaLibrary
 };
+use shared::domain::jig::module::body::poster::{Content, Mode as RawMode, ModuleData as RawData};
+use crate::state::Mode;
+use crate::steps::state::Step;
 
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 #[derive(Debug)]
 pub struct DebugSettings {
-    pub data:Option<raw::ModuleData>,
+    pub data:Option<RawData>,
     pub step:Option<Step>,
-    pub live_save: bool,
-    pub content_tab: Option<DebugContentTab>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DebugContentTab {
-    Text,
-    Images
+    pub skip_save: bool,
 }
 
 
@@ -48,32 +42,31 @@ impl DebugSettings {
         DebugSettings {
             data: None, 
             step: None, 
-            live_save: true,
-            content_tab: None,
+            skip_save: false,
         }
     }
     pub fn debug(with_data: bool) -> DebugSettings {
         DebugSettings {
+            //debug always has to have some data
+            //otherwise it will fail at load time
             data: Some(
                 if with_data {
-                    raw::ModuleData{
-                        theme_id: ThemeId::Chalkboard, 
-                        instructions: Instructions::default(),
-                        ..raw::ModuleData::default()
+                    RawData{
+                        content: Some(Content {
+                            mode: RawMode::Poster,
+                            theme_id: ThemeId::Chalkboard, 
+                            instructions: Instructions::default(),
+                            ..Content::default()
+                        })
                     }
                 } else {
-                    raw::ModuleData{
-                        theme_id: ThemeId::Chalkboard, 
-                        instructions: Instructions::default(),
-                        ..raw::ModuleData::default()
+                    RawData{
+                        content: None                    
                     }
                 }
-
-
             ),
-            step: Some(Step::One), 
-            live_save: false,
-            content_tab: Some(DebugContentTab::Images),
+            step: Some(Step::One),
+            skip_save: true,
         }
     }
 }

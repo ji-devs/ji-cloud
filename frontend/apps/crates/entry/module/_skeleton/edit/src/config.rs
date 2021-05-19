@@ -20,6 +20,6 @@ struct EditorConfig {
 }
 
 pub fn init() {
-    EDITOR_CONFIG.set(serde_json::from_str(include_str!(config_path!("module/skeleton/editor.json"))).unwrap_ji());
+    EDITOR_CONFIG.set(serde_json::from_str(include_str!(config_path!("module/poster/editor.json"))).unwrap_ji());
 }
 

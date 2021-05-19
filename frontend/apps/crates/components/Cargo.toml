@@ -57,6 +57,7 @@ web-sys = { version = "0.3.50", features = [
     'History',
     'CustomEvent',
     'HtmlAudioElement',
+    'HtmlIFrameElement',
 ] }
 awsm_web = { version = "0.17.2", features = ["loaders", "serde_iso", "dom", "audio"] }
 anyhow = "1.0.40"
@@ -68,3 +69,36 @@ quiet = ["utils/quiet"]
 local = ["quiet"]
 release = []
 sandbox = []
+
+animation = []
+audio_input = []
+audio_player = []
+backgrounds = []
+color_select = []
+font_loader = []
+image = []
+image_search = []
+instructions = []
+module = []
+stickers = []
+text_editor = []
+tooltip = []
+transform = []
+
+default = ["all"]
+all= [
+    "animation", 
+    "audio_input", 
+    "audio_player", 
+    "backgrounds", 
+    "color_select", 
+    "font_loader", 
+    "image", 
+    "image_search", 
+    "instructions", 
+    "module", 
+    "stickers", 
+    "text_editor", 
+    "tooltip", 
+    "transform"
+]

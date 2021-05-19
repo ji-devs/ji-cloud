@@ -32,6 +32,8 @@ import "@elements/module/_common/sidebar";
 import "@elements/module/_common/sidebar-body";
 import "@elements/module/_common/widgets/header-controller";
 import "@elements/module/_common/widgets/transform/box";
+import "@elements/module/_common/widgets/choose-mode/choose-mode";
+import "@elements/module/_common/widgets/choose-mode/option";
 
 //wysiwyg text editor
 import "@elements/module/_common/widgets/text-editor-controls/text-editor-controls";

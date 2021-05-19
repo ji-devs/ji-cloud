@@ -51,7 +51,6 @@ export class _ extends LitElement {
 
   render() {
       const {imgRef, moduleKind} = this;
-      console.log(moduleKind);
 
       const title = STR_TITLE[moduleKind];
 

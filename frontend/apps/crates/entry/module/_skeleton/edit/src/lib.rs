@@ -12,10 +12,8 @@ mod router;
 mod debug;
 mod config;
 mod strings;
-mod data;
-mod index;
+mod state;
 mod steps;
-mod overlay;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

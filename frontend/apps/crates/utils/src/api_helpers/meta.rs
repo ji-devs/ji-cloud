@@ -7,7 +7,7 @@ type Id = String;
 #[derive(Debug, Clone)]
 pub struct MetaOptions {
     pub subjects: Vec<(Id, String)>,
-    pub styles: Vec<(Id, String)>,
+    pub image_styles: Vec<(Id, String)>,
     pub age_ranges: Vec<(Id, String)>,
     pub affiliations: Vec<(Id, String)>,
 }
@@ -32,8 +32,8 @@ impl MetaOptions {
                                 (id, label)
                             })
                             .collect(),
-                    styles: 
-                        res.styles
+                    image_styles: 
+                        res.image_styles
                             .into_iter()
                             .map(|style| {
                                 let label = style.display_name; 

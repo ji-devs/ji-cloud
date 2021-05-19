@@ -1,5 +1,5 @@
 [package]
-name = "app-skeleton-edit"
+name = "app-poster-edit"
 version = "0.1.0"
 description = "App"
 authors = ["David Komer <david.komer@gmail.com>"]
@@ -13,7 +13,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 once_cell = "1.7.2"
-app-skeleton-common = {path = "../_common"}
+app-poster-common = {path = "../_common"}
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}

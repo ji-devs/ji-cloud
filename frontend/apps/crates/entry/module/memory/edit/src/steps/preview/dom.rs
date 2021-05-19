@@ -5,13 +5,13 @@ use crate::data::{
     raw,
 };
 use std::rc::Rc;
-use utils::{prelude::*, iframe::IframeInit}; 
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
     signal::SignalExt
 };
 use shared::domain::jig::ModuleKind;
+use utils::{prelude::*, iframe::IframeInit}; 
 use dominator_helpers::events::Message;
 
 pub struct PreviewDom {}

@@ -2,9 +2,10 @@ use crate::{
     domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
 };
+use std::convert::TryFrom;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Memory Game Body.
 pub mod memory;
@@ -28,6 +29,19 @@ pub enum Body {
     ///
     /// This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
     Cover,
+}
+
+/// Extension trait for interop
+/// impl on inner body data
+pub trait BodyExt: TryFrom<Body> + Serialize + DeserializeOwned + Clone {
+    /// get self as a Body
+    fn as_body(&self) -> Body;
+
+    /// is complete
+    fn is_complete(&self) -> bool;
+
+    /// get the kind from the type itself
+    fn kind() -> super::ModuleKind;
 }
 
 impl Body {
@@ -83,10 +97,35 @@ pub struct Instructions {
     pub audio: Option<Audio>,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Background 
+/// although it's simply a list of layers
+/// the number of layers is predefined
+/// and has special meaning from a UI perspective
+pub struct Backgrounds {
+    /// Layer 1
+    pub layer_1: Option<Background>,
+    /// Layer 2
+    pub layer_2: Option<Background>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Background 
+pub enum Background {
+    /// Color 
+    Color(rgb::RGBA8),
+    /// Theme-based
+    Theme(ThemeId),
+    /// Any other image
+    Image(Image),
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Renderables are things that can be rendered 
-pub enum Renderable {
+/// Stickers are things that can be rendered and transformed
+pub enum Sticker {
     /// Sprites
     Sprite(Sprite),
     /// Text
@@ -103,15 +142,6 @@ pub struct Text {
     pub transform: Transform,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Theme or Image... images :/ 
-pub enum ThemeOrImage {
-    /// Theme-based
-    Theme(ThemeId),
-    /// Any other image
-    Image(Image),
-}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

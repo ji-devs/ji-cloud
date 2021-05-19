@@ -1,4 +1,5 @@
-use crate::domain::jig::module::body::{Instructions, Renderable, Image, ThemeOrImage, Sprite, ThemeId};
+use crate::domain::jig::module::{ModuleKind, body::{BodyExt, Body, Instructions, Sticker, Backgrounds, ThemeId}};
+use std::convert::TryFrom;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
@@ -7,19 +8,75 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
+    /// The content
+    pub content: Option<Content>,
+}
+
+impl BodyExt for ModuleData {
+    fn as_body(&self) -> Body {
+        Body::Poster(self.clone())
+    }
+
+    fn is_complete(&self) -> bool {
+        self.content.is_some()
+    }
+
+    fn kind() -> ModuleKind {
+        ModuleKind::Poster
+    }
+}
+
+impl TryFrom<Body> for ModuleData {
+    type Error = &'static str;
+
+    fn try_from(body:Body) -> Result<Self, Self::Error> {
+        match body {
+            Body::Poster(data) => Ok(data),
+            _ => Err("cannot convert body to poster!")
+        }
+    }
+}
+
+/// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct Content {
+    /// The mode
+    pub mode: Mode,
+
     /// The instructions for the module.
     pub instructions: Instructions,
 
     /// The ID of the module's theme.
     pub theme_id: ThemeId,
 
-    /// The background of the module's theme.
-    pub bg: Option<ThemeOrImage>,
+    /// Backgrounds
+    pub backgrounds: Backgrounds,
 
-    /// The background of the module's theme.
-    pub fg: Option<ThemeOrImage>,
-
-    /// Renderables 
-    pub renderables: Vec<Renderable>,
+    /// Stickers
+    pub stickers: Vec<Sticker>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// The mode
+pub enum Mode {
+    /// Printables
+    Printables,
+    /// TalkingPictures
+    TalkingPictures,
+    /// Comics
+    Comics,
+    /// Timeline
+    Timeline,
+    /// Family Tree
+    FamilyTree,
+    /// Poster
+    Poster
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Self::Poster
+    }
+}

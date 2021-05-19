@@ -70,7 +70,6 @@ impl ResizeInfo {
     }
 
     pub fn get_size_normalized(&self, width: f64, height: f64) -> (f64, f64) {
-        log::info!("{}, {}", self.width, self.height);
         let (full_width, full_height) = self.full_size();
 
         (width / full_width, height / full_height)

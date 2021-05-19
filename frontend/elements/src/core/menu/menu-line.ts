@@ -35,7 +35,7 @@ const STR_LABEL_LOOKUP:any = {
     ["remove-background-image"]: "Remove background image",
     ["remove-overlay"]: "Remove overlay",
     //image only
-    ["crop"]: "Crop",
+    ["crop"]: "Crop (coming soon!)",
     ["remove-white"]: "Remove white",
     ["make-background"]: "Make background",
     ["play"]: "Play",

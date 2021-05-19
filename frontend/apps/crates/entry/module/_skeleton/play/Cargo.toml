@@ -1,5 +1,5 @@
 [package]
-name = "app-skeleton-play"
+name = "app-poster-play"
 version = "0.1.0"
 description = "App"
 authors = ["David Komer <david.komer@gmail.com>"]
@@ -15,7 +15,7 @@ crate-type = ["cdylib"]
 [dependencies]
 # Common deps
 
-app-skeleton-common = {path = "../_common"}
+app-poster-common = {path = "../_common"}
 rand = "0.8.3"
 getrandom = { version = "0.2.2", features = ["js"] }
 gloo-timers = { version = "0.2.1", features = ["futures"] }

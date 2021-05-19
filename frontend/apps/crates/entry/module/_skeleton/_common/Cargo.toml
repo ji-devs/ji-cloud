@@ -1,5 +1,5 @@
 [package]
-name = "app-skeleton-common"
+name = "app-poster-common"
 version = "0.1.0"
 authors = ["David Komer <david.komer@gmail.com>"]
 edition = "2018"
