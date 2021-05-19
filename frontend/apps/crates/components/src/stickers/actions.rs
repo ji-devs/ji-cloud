@@ -1,4 +1,5 @@
 use super::state::*; 
+use shared::domain::jig::module::body::{Sticker, Text, Sprite, Transform};
 
 impl Stickers {
     pub fn delete_index(&self, index: usize) {
@@ -27,10 +28,15 @@ impl Stickers {
     }
 
     // Internal - saving/history is done on the module level
-    fn call_change(&self) {
+    pub fn call_change(&self) {
         if let Some(on_change) = self.on_change.borrow().as_ref() {
-            //TODO - get vec of raw renderables
-            on_change(vec![]);
+            let raw:Vec<Sticker> = 
+                self.list.lock_ref()
+                    .iter()
+                    .map(|sticker| sticker.to_raw())
+                    .collect();
+
+            on_change(raw);
         }
     }
 }

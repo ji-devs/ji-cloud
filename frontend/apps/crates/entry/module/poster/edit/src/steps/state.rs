@@ -17,6 +17,7 @@ use components::{
     stickers::state::Stickers,
     backgrounds::state::Backgrounds,
 };
+use dominator::clone;
 
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
@@ -30,7 +31,7 @@ pub struct Base {
 }
 
 impl Base {
-    pub fn new(history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Self {
+    pub fn new(is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Self {
 
         let theme_id = match raw {
             None => ThemeId::None,
@@ -44,11 +45,17 @@ impl Base {
                 None
         ));
 
-        let stickers = Rc::new(Stickers::new(
+        let stickers = Stickers::new(
                 raw.map(|content| content.stickers.as_ref()),
                 text_editor.clone(),
-                None
-        ));
+                Some(clone!(history => move |raw_stickers| {
+                    history.push_modify(|raw| {
+                        if let Some(content) = &mut raw.content {
+                            content.stickers = raw_stickers;
+                        }
+                    });
+                }))
+        );
 
         Self {
             history,

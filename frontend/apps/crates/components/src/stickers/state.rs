@@ -12,6 +12,7 @@ use super::{
     text::state::Text
 };
 use crate::text_editor::state::State as TextEditorState;
+use dominator::clone;
 
 pub struct Stickers 
 {
@@ -28,31 +29,59 @@ pub enum Sticker {
     Text(Rc<Text>)
 }
 
-impl Stickers {
-    pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, on_change: Option<Box<dyn Fn(Vec<RawSticker>)>>) -> Self {
-   
-
-        let list = {
-            if let Some(raw) = raw {
-                MutableVec::new_with_values(
-                            raw.
-                                into_iter()
-                                .map(|x| match x {
-                                    RawSticker::Sprite(sprite) => Sticker::Sprite(Rc::new(Sprite::new(sprite))),
-                                    RawSticker::Text(text) => Sticker::Text(Rc::new(Text::new(text_editor.clone(), text)))
-                                })
-                                .collect()
-                )
-            } else {
-                MutableVec::new()
-            }
-        };
-
-        Self {
-            list,
-            selected_index: Mutable::new(None),
-            on_change: RefCell::new(on_change),
+impl Sticker {
+    pub fn to_raw(&self) -> RawSticker {
+        match self {
+            Self::Sprite(sprite) => RawSticker::Sprite(sprite.to_raw()),
+            Self::Text(text) => RawSticker::Text(text.to_raw()),
         }
+    }
+}
+
+impl Stickers {
+    pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, on_change: Option<impl Fn(Vec<RawSticker>) + 'static>) -> Rc<Self> {
+  
+        let _self = Rc::new(Self{
+            list: MutableVec::new(),
+            selected_index: Mutable::new(None),
+            on_change: RefCell::new(match on_change {
+                //map doesn't work for som reason
+                None => None,
+                Some(f) => Some(Box::new(f))
+            })
+        });
+
+
+
+        if let Some(raw) = raw {
+            _self.list.lock_mut().replace_cloned( 
+                        raw.
+                            into_iter()
+                            .map(|x| match x {
+                                RawSticker::Sprite(sprite) => Sticker::Sprite(Rc::new(
+                                    Sprite::new(
+                                        sprite,
+                                        Some(clone!(_self => move |_| {
+                                            _self.call_change();
+                                        }))
+                                    )
+                                )),
+                                RawSticker::Text(text) => Sticker::Text(Rc::new(
+                                        Text::new(
+                                            text_editor.clone(), 
+                                            text,
+                                            Some(clone!(_self => move |_| {
+                                                _self.call_change();
+                                            }))
+                                        )
+                                ))
+                            })
+                            .collect()
+            );
+        }
+
+        _self
+
     }
 
     pub fn get_current(&self) -> Option<Sticker> {

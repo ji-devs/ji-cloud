@@ -9,6 +9,7 @@ use utils::prelude::*;
 pub trait TextExt {
     fn new(value: String) -> Self;
 }
+
 impl TextExt for Text {
     /// Create a new Text 
     fn new(value:String) -> Self {
@@ -18,3 +19,4 @@ impl TextExt for Text {
         }
     }
 }
+

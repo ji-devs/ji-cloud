@@ -30,6 +30,9 @@ pub struct DebugOptions {
 //therefore it's a child of the transform
 //the transform box itself is only rotated, everything else is done by internal math
 //however the text shouldn't really scale either, so we just take the width/height
+//due to all this, we can't just pin the coordinate system to the top/left with rems
+//or use the transform directly as-is (other than for rotation)
+//like we did with sprites
 pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>, debug_opts: Option<DebugOptions>) -> Dom {
 
 
@@ -37,10 +40,8 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
 
     let get_active_signal = || { stickers.selected_signal(index.clone()) };
     text.transform.size.set(Some((300.0, 300.0)));
-    if *text.is_new.borrow() {
-        text.transform.set_to_center();
-    }
-    
+
+
     TransformDom::render_child(
         text.transform.clone(),
         clone!(stickers, index, text => move || super::menu::dom::render(stickers.clone(), index.clone(), text.clone())),

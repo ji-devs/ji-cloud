@@ -12,6 +12,10 @@ use utils::{
 };
 use web_sys::HtmlElement;
 
+//If coordinates should be from the center of the stage
+//instead of top-left
+const COORDS_IN_CENTER:bool = true;
+
 pub struct TransformState {
     pub size: Mutable<Option<(f64, f64)>>,
     pub hide_on_dbl_click: RefCell<bool>,
@@ -24,6 +28,7 @@ pub struct TransformState {
     pub(super) alt_pressed: RefCell<bool>,
     pub(super) rect_hidden: Mutable<bool>, 
     pub(super) menu_button_visible: Mutable<bool>,
+    pub(super) on_action_finished: Option<Box<dyn Fn(Transform)>>,
 }
 
 pub struct InitRotation {
@@ -37,7 +42,7 @@ pub struct InitScale {
 }
 
 impl TransformState {
-    pub fn new(transform:Transform, size: Option<(f64, f64)>) -> Self {
+    pub fn new(transform:Transform, size: Option<(f64, f64)>, on_action_finished: Option<impl Fn(Transform) + 'static>) -> Self {
         Self {
             rect_hidden: Mutable::new(false),
             size: Mutable::new(size),
@@ -50,7 +55,54 @@ impl TransformState {
             alt_pressed: RefCell::new(false),
             menu_button_visible: Mutable::new(true),
             menu_pos: Mutable::new(None),
+            //map doesn't work for some reason..
+            on_action_finished: match on_action_finished {
+                Some(on_action_finished) => Some(Box::new(on_action_finished)),
+                None => None
+            }
         }
+    }
+
+    pub fn left_center_rem_signal(&self) -> impl Signal<Item = String> {
+        self.center_rem_signal()
+            .map(|center| {
+                match center {
+                    None => "0".to_string(),
+                    Some(center) => format!("{}rem", center.0)
+                }
+            })
+    }
+    pub fn top_center_rem_signal(&self) -> impl Signal<Item = String> {
+        self.center_rem_signal()
+            .map(|center| {
+                match center {
+                    None => "0".to_string(),
+                    Some(center) => format!("{}rem", center.1)
+                }
+            })
+    }
+
+    fn center_rem_signal(&self) -> impl Signal<Item = Option<(f64, f64)>> {
+        map_ref! {
+            let resize_info = resize_info_signal(),
+            let size = self.size.signal_cloned()
+                => {
+                    size.map(|(width, height)| {
+                        let (full_width, full_height) = resize_info.full_size();
+                        
+                        (
+                            (full_width - width) / 2.0,
+                            (full_height - height) / 2.0,
+                        )
+
+                    })
+                }
+        }
+    }
+
+
+    pub fn get_inner_clone(&self) -> Transform {
+        self.transform.get_cloned()
     }
 
     pub fn menu_pos_signal(
@@ -76,10 +128,11 @@ impl TransformState {
             let resize_info = resize_info_signal(),
             let transform = self.transform.signal_cloned(),
             let size = self.size.signal_cloned()
-            => {
+            => move {
+                
 
                 if let Some(size) = size {
-                    let (x, y) = transform
+                    let (mut x, mut y) = transform
                         .map(|t| {
                             let mut t = t.clone();
                             t.set_rotation_identity();
@@ -92,15 +145,22 @@ impl TransformState {
 
                     //Uhhh.... I don't know... it works though
                     //change at your own risk!
-                    let screen_width = native_width * resize_info.scale;
-                    let transform_width = screen_width * scale_x;
-                    let x = x - ((transform_width - screen_width)/2.0);
-                    let width = transform_width; 
+                    let rel_width = native_width * resize_info.scale;
+                    let width = rel_width * scale_x;
 
-                    let screen_height = native_height * resize_info.scale;
-                    let transform_height = screen_height * scale_y;
-                    let y = y - ((transform_height - screen_height)/2.0);
-                    let height = transform_height; 
+                    let rel_height = native_height * resize_info.scale;
+                    let height = rel_height * scale_y;
+
+                    x -= ((width - rel_width)/2.0);
+                    y -= ((height - rel_height)/2.0);
+
+                    //only if we want to put it at center
+                    if COORDS_IN_CENTER {
+                        let center_x = (resize_info.width - rel_width)/2.0;
+                        let center_y = (resize_info.height - rel_height)/2.0;
+                        x += center_x;
+                        y += center_y;
+                    }
 
                     BoundsF64 {
                         x,
@@ -227,9 +287,15 @@ impl TransformState {
         let (pos_x, pos_y) = resize_info.get_pos_denormalized(transform.translation.0[0], transform.translation.0[1]);
         let size = self.size.get_cloned().unwrap_ji();
 
-        let (size_x, size_y) = (size.0 * resize_info.scale, size.1 * resize_info.scale);
-        let mid_x = pos_x + (size_x / 2.0);
-        let mid_y = pos_y + (size_y / 2.0);
+        let (width, height) = (size.0 * resize_info.scale, size.1 * resize_info.scale);
+        let mut mid_x = pos_x + (width / 2.0);
+        let mut mid_y = pos_y + (height / 2.0);
+
+
+        if COORDS_IN_CENTER {
+            mid_x += ((resize_info.width - width)/2.0);
+            mid_y += ((resize_info.height - height)/2.0);
+        }
 
         (mid_x, mid_y)
     }

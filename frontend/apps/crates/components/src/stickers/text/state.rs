@@ -16,21 +16,25 @@ use crate::{
 pub struct Text {
     pub value: Mutable<String>,
     pub transform: Rc<TransformState>,
-    pub is_new: RefCell<bool>,
     pub editor: Rc<TextEditorState>,
 }
 
 impl Text {
-    pub fn new(editor: Rc<TextEditorState>, text:&RawText) -> Self {
+    pub fn new(editor: Rc<TextEditorState>, text:&RawText, on_transform_finished: Option<impl Fn(Transform) + 'static>) -> Self {
         let text = text.clone();
         Self {
             value: Mutable::new(text.value),
-            transform: Rc::new(TransformState::new(text.transform, None)),
-            is_new: RefCell::new(true),
+            transform: Rc::new(TransformState::new(text.transform, None, on_transform_finished)),
             editor,
         }
     }
 
+    pub fn to_raw(&self) -> RawText {
+        RawText {
+            value: self.value.get_cloned(),
+            transform: self.transform.get_inner_clone()
+        }
+    }
 }
 
 

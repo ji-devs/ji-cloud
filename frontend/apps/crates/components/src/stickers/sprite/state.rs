@@ -7,23 +7,30 @@ use std::rc::Rc;
 use shared::{domain::{image::ImageId, jig::module::body::{Sprite as RawSprite, Transform}}, media::MediaLibrary};
 use std::cell::RefCell;
 use crate::transform::state::TransformState;
+use utils::resize::resize_info_signal;
 
 #[derive(Clone)]
 pub struct Sprite {
     pub id: ImageId,
     pub lib: MediaLibrary,
     pub transform: Rc<TransformState>,
-    pub is_new: RefCell<bool>,
 }
 
 impl Sprite {
-    pub fn new(raw:&RawSprite) -> Self {
+    pub fn new(raw:&RawSprite, on_transform_finished: Option<impl Fn(Transform) + 'static>) -> Self {
         let raw = raw.clone();
         Self {
             id: raw.id,
             lib: raw.lib,
-            transform: Rc::new(TransformState::new(raw.transform, None)),
-            is_new: RefCell::new(true),
+            transform: Rc::new(TransformState::new(raw.transform, None, on_transform_finished)),
+        }
+    }
+
+    pub fn to_raw(&self) -> RawSprite {
+        RawSprite {
+            id: self.id,
+            lib: self.lib,
+            transform: self.transform.get_inner_clone()
         }
     }
 

@@ -52,6 +52,8 @@ impl TransformDom {
 
                     .style("position", "absolute")
                     .style_signal("transform", state.rotation_matrix_string_signal())
+                    //.style_signal("top", state.top_center_rem_signal())
+                    //.style_signal("left", state.left_center_rem_signal())
                     .style_signal("top", state.y_px_signal().map(|x| format!("{}px", x)))
                     .style_signal("left", state.x_px_signal().map(|x| format!("{}px", x)))
                     .style_signal("width", state.width_px_signal().map(|x| format!("{}px", x)))

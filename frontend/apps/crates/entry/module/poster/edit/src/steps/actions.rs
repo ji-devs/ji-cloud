@@ -16,7 +16,7 @@ use utils::prelude::*;
 pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
     let step = Mutable::new(Step::default());
-    let base = Rc::new(Base::new(history, step.read_only(), None));
+    let base = Rc::new(Base::new(false, history, step.read_only(), None));
     
     StepsInit {
         step,
@@ -33,7 +33,7 @@ pub fn init_from_raw(raw:RawData, is_history: bool, history: Rc<HistoryStateImpl
     raw.content.map(|content| {
         //TODO - create from raw
         let step = Mutable::new(Step::default());
-        let base = Rc::new(Base::new(history, step.read_only(), Some(&content)));
+        let base = Rc::new(Base::new(is_history, history, step.read_only(), Some(&content)));
         
         let mut init = StepsInit {
             step,

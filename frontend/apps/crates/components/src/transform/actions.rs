@@ -23,11 +23,17 @@ impl TransformState {
         let y = 0.5 - (height / 2.0); 
 
         transform.set_translation_2d(x, y);
+
     }
 
 
     pub fn stop_tracking_action(&self, x: i32, y:i32) {
         if let Some(drag) = self.drag.replace(None) {
+            if self.action.borrow().is_some() {
+                if let Some(on_action_finished) = &self.on_action_finished {
+                    on_action_finished(self.transform.get_cloned());
+                }
+            }
             *self.action.borrow_mut() = None;
             self.menu_button_visible.set_neq(true); 
         }
