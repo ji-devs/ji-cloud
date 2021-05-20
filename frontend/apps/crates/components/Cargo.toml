@@ -58,8 +58,9 @@ web-sys = { version = "0.3.50", features = [
     'CustomEvent',
     'HtmlAudioElement',
     'HtmlIFrameElement',
+    'CanvasRenderingContext2d',
 ] }
-awsm_web = { version = "0.17.2", features = ["loaders", "serde_iso", "dom", "audio"] }
+awsm_web = { version = "0.17.2", features = ["loaders", "serde_iso", "dom", "audio", "canvas"] }
 anyhow = "1.0.40"
 gloo-timers = "0.2.1"
 rgb = "0.8.27"
@@ -84,6 +85,7 @@ stickers = []
 text_editor = []
 tooltip = []
 transform = []
+traces = []
 
 default = ["all"]
 all= [
@@ -100,5 +102,6 @@ all= [
     "stickers", 
     "text_editor", 
     "tooltip", 
-    "transform"
+    "transform",
+    "traces"
 ]

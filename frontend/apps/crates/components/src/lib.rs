@@ -33,3 +33,5 @@ pub mod transform;
 pub mod stickers;
 #[cfg(feature = "backgrounds")]
 pub mod backgrounds;
+#[cfg(feature = "traces")]
+pub mod traces;

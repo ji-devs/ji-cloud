@@ -17,6 +17,9 @@ members = [
 	"crates/entry/module/poster/_common",
     "crates/entry/module/poster/edit",
     "crates/entry/module/poster/play",
+	"crates/entry/module/tapping-board/_common",
+    "crates/entry/module/tapping-board/edit",
+    "crates/entry/module/tapping-board/play",
 ]
 
 [profile.release]

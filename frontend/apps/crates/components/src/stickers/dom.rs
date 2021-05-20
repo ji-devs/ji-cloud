@@ -12,6 +12,7 @@ use super::{
     sprite,
     text,
 };
+use shared::domain::jig::module::body::Sticker as RawSticker;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
@@ -32,6 +33,21 @@ pub fn render(stickers:Rc<Stickers>, debug_opts: Option<DebugOptions>) -> Dom {
                     Sticker::Text(text) => text::dom::render(stickers.clone(), index, text, debug_opts.text.clone()),
                 }
             }))
+        )
+    })
+}
+pub fn render_raw(stickers:&[RawSticker]) -> Dom {
+    html!("empty-fragment", {
+        .children(
+            stickers
+                .iter()
+                .map(|sticker| {
+                    match sticker {
+                        RawSticker::Sprite(sprite) => sprite::dom::render_raw(sprite),
+                        RawSticker::Text(text) => text::dom::render_raw(text),
+                    }
+                })
+                .collect::<Vec<Dom>>()
         )
     })
 }

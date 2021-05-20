@@ -1,18 +1,18 @@
 use dominator::{html, Dom, DomBuilder, clone};
 use std::{borrow::BorrowMut, rc::Rc};
-use utils::prelude::*;
+use utils::{prelude::*, math::transform_signals};
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{self, Signal, ReadOnlyMutable, SignalExt},
+    signal::{self, always, Signal, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::module::body::{Sprite, Transform};
+use shared::domain::jig::module::body::{Text as RawText, Transform};
 use crate::{
     transform::{
         dom::TransformDom,
         events::Move as TransformMove,
-        state::{TransformState, Action as TransformAction},
+        state::{COORDS_IN_CENTER, TransformState, Action as TransformAction},
     },
     text_editor::dom::render_wysiwyg,
 };
@@ -21,6 +21,9 @@ use super::{
     super::state::Stickers
 };
 use web_sys::HtmlElement;
+
+const BASE_WIDTH:f64 = 300.0;
+const BASE_HEIGHT:f64 = 300.0;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
@@ -39,7 +42,7 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
     let debug_opts = debug_opts.unwrap_or_default();
 
     let get_active_signal = || { stickers.selected_signal(index.clone()) };
-    text.transform.size.set(Some((300.0, 300.0)));
+    text.transform.size.set(Some((BASE_WIDTH, BASE_HEIGHT)));
 
 
     TransformDom::render_child(
@@ -95,4 +98,41 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
                     }
             }
     })))
+}
+pub fn render_raw(text: &RawText) -> Dom {
+
+    let size = Some((BASE_WIDTH, BASE_HEIGHT));
+
+    let width_signal = transform_signals::width_px(
+        COORDS_IN_CENTER, 
+        always(text.transform.clone()), 
+        always(size.clone())
+    );
+    let height_signal = transform_signals::height_px(
+        COORDS_IN_CENTER, 
+        always(text.transform.clone()), 
+        always(size.clone())
+    );
+    let x_signal = transform_signals::x_px(
+        COORDS_IN_CENTER, 
+        always(text.transform.clone()), 
+        always(size.clone())
+    );
+    let y_signal = transform_signals::y_px(
+        COORDS_IN_CENTER, 
+        always(text.transform.clone()), 
+        always(size.clone())
+    );
+
+    html!("wysiwyg-output-renderer", {
+        .property("valueAsString", &text.value)
+        .style("display", "block")
+        .style("position", "absolute")
+        .style("position", "absolute")
+        .style("transform", text.transform.rotation_matrix_string())
+        .style_signal("width", width_signal.map(|x| format!("{}px", x)))
+        .style_signal("height", height_signal.map(|x| format!("{}px", x)))
+        .style_signal("left", x_signal.map(|x| format!("{}px", x)))
+        .style_signal("top", y_signal.map(|x| format!("{}px", x)))
+    })
 }

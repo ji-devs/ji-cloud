@@ -1,10 +1,11 @@
 mod point;
 mod rect;
-mod bounds;
+pub mod bounds;
 pub mod vec2;
 pub mod mat_2d;
 pub mod mat4;
 pub mod transform_ext;
+pub mod transform_signals;
 pub mod quat;
 
 pub use point::*;

@@ -34,27 +34,36 @@ impl Sprite {
         }
     }
 
+    pub fn width_signal(&self) -> impl Signal<Item = String> {
+        width_signal(self.transform.size.signal_cloned())
+    }
+    pub fn height_signal(&self) -> impl Signal<Item = String> {
+        height_signal(self.transform.size.signal_cloned())
+    }
+
+
     pub fn loaded_signal(&self) -> impl Signal<Item = bool> {
         self.transform.size.signal_cloned().map(|size| size.is_some())
     }
 
-    pub fn width_signal(&self) -> impl Signal<Item = String> {
-        self.transform.size.signal_cloned().map(|size| {
-            match size {
-                None => "0".to_string(),
-                Some(size) => format!("{}rem", size.0)
-            }
-            
-        })
-    }
-
-    pub fn height_signal(&self) -> impl Signal<Item = String> {
-        self.transform.size.signal_cloned().map(|size| {
-            match size {
-                None => "0".to_string(),
-                Some(size) => format!("{}rem", size.1)
-            }
-        })
-    }
 }
 
+pub fn width_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| {
+        match size {
+            None => "0".to_string(),
+            Some(size) => format!("{}rem", size.0)
+        }
+        
+    })
+}
+
+pub fn height_signal(size: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+    size.map(|size| {
+        match size {
+            None => "0".to_string(),
+            Some(size) => format!("{}rem", size.1)
+        }
+        
+    })
+}

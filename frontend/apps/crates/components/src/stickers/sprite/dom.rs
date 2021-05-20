@@ -1,17 +1,18 @@
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, math::{bounds, transform_signals}};
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{always, Signal, ReadOnlyMutable, SignalExt},
+    signal::{always, Signal, Mutable, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
 use super::{
-    state::Sprite,
+    state::{Sprite, width_signal, height_signal},
     super::state::Stickers
 };
 use crate::transform::dom::TransformDom;
+use shared::domain::jig::module::body::{Sprite as RawSprite, Transform};
 
 //For stickers, just let the transform affect it directly
 //that means it's not a child of the transform, they're independent
@@ -27,10 +28,10 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
                 .style_signal("width", sprite.width_signal())
                 .style_signal("height", sprite.height_signal())
                 // We can just let the full transform take effect
-                .style_signal("transform", sprite.transform.matrix_string_signal())
+                .style_signal("transform", sprite.transform.denormalize_matrix_string_signal())
                 // And pin the coordinate system to the center regardless of screen size
-                .style_signal("top", sprite.transform.top_center_rem_signal())
-                .style_signal("left", sprite.transform.left_center_rem_signal())
+                .style_signal("top", bounds::top_center_rem_signal(sprite.transform.size.signal()))
+                .style_signal("left", bounds::left_center_rem_signal(sprite.transform.size.signal()))
                 .style("display", "block")
                 .style("position", "absolute")
                 .property("id", sprite.id.0.to_string())
@@ -64,5 +65,28 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
             }
         })))
 
+    })
+}
+
+
+pub fn render_raw(sprite: &RawSprite) -> Dom {
+
+    let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);
+
+    html!("img-ji", {
+        .style("display", "block")
+        .style("position", "absolute")
+        .visible_signal(size.signal_ref(|size| size.is_some()))
+        .style_signal("width", width_signal(size.signal_cloned()))
+        .style_signal("height", height_signal(size.signal_cloned()))
+        .style_signal("top", bounds::top_center_rem_signal(size.signal()))
+        .style_signal("left", bounds::left_center_rem_signal(size.signal()))
+        .style_signal("transform", transform_signals::denormalize_matrix_string(always(sprite.transform.clone())))
+        .property("id", sprite.id.0.to_string())
+        .property("lib", sprite.lib.to_str())
+        .property("size", "full")
+        .event(clone!(sprite => move |evt:events::ImageLoad| {
+            size.set(Some(evt.size()));
+        }))
     })
 }

@@ -4,17 +4,17 @@ use futures_signals::{
 };
 use dominator::clone;
 use shared::domain::jig::module::body::Transform;
-use utils::{prelude::*, drag::Drag};
+use utils::{prelude::*, drag::Drag, math::bounds};
 use std::cell::RefCell;
 use utils::{
     resize::{resize_info_signal, ResizeInfo},
-    math::{self, BoundsF64}
+    math::{self, BoundsF64, transform_signals}
 };
 use web_sys::HtmlElement;
 
 //If coordinates should be from the center of the stage
 //instead of top-left
-const COORDS_IN_CENTER:bool = true;
+pub const COORDS_IN_CENTER:bool = true;
 
 pub struct TransformState {
     pub size: Mutable<Option<(f64, f64)>>,
@@ -63,46 +63,12 @@ impl TransformState {
         }
     }
 
-    pub fn left_center_rem_signal(&self) -> impl Signal<Item = String> {
-        self.center_rem_signal()
-            .map(|center| {
-                match center {
-                    None => "0".to_string(),
-                    Some(center) => format!("{}rem", center.0)
-                }
-            })
-    }
-    pub fn top_center_rem_signal(&self) -> impl Signal<Item = String> {
-        self.center_rem_signal()
-            .map(|center| {
-                match center {
-                    None => "0".to_string(),
-                    Some(center) => format!("{}rem", center.1)
-                }
-            })
-    }
-
-    fn center_rem_signal(&self) -> impl Signal<Item = Option<(f64, f64)>> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let size = self.size.signal_cloned()
-                => {
-                    size.map(|(width, height)| {
-                        let (full_width, full_height) = resize_info.full_size();
-                        
-                        (
-                            (full_width - width) / 2.0,
-                            (full_height - height) / 2.0,
-                        )
-
-                    })
-                }
-        }
-    }
-
 
     pub fn get_inner_clone(&self) -> Transform {
         self.transform.get_cloned()
+    }
+    pub fn get_inner_signal_cloned(&self) -> impl Signal<Item = Transform> {
+        self.transform.signal_cloned()
     }
 
     pub fn menu_pos_signal(
@@ -122,82 +88,20 @@ impl TransformState {
         }
     }
 
-    //Gives us the bounds of the box itself without rotation
-    pub fn bounds_px_signal(&self) -> impl Signal<Item = BoundsF64> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let transform = self.transform.signal_cloned(),
-            let size = self.size.signal_cloned()
-            => move {
-                
-
-                if let Some(size) = size {
-                    let (mut x, mut y) = transform
-                        .map(|t| {
-                            let mut t = t.clone();
-                            t.set_rotation_identity();
-                            t.denormalize_translation(resize_info);
-                            t.get_translation_2d()
-                        });
-
-                    let (scale_x, scale_y) =  transform.get_scale_2d(); 
-                    let (native_width, native_height) = *size;
-
-                    //Uhhh.... I don't know... it works though
-                    //change at your own risk!
-                    let rel_width = native_width * resize_info.scale;
-                    let width = rel_width * scale_x;
-
-                    let rel_height = native_height * resize_info.scale;
-                    let height = rel_height * scale_y;
-
-                    x -= ((width - rel_width)/2.0);
-                    y -= ((height - rel_height)/2.0);
-
-                    //only if we want to put it at center
-                    if COORDS_IN_CENTER {
-                        let center_x = (resize_info.width - rel_width)/2.0;
-                        let center_y = (resize_info.height - rel_height)/2.0;
-                        x += center_x;
-                        y += center_y;
-                    }
-
-                    BoundsF64 {
-                        x,
-                        y,
-                        width,
-                        height,
-                        invert_y: false
-                    }
-                } else {
-                    BoundsF64 {
-                        x: 0.0,
-                        y: 0.0,
-                        width: 0.0,
-                        height: 0.0,
-                        invert_y: false
-                    }
-                }
-            }
-        }
-    }
 
     pub fn x_px_signal(&self) -> impl Signal<Item = f64> {
-        self.bounds_px_signal().map(|bounds| {
-            //log::info!("{}", bounds.x);
-            bounds.x
-        })
-    }
-    pub fn y_px_signal(&self) -> impl Signal<Item = f64> {
-        self.bounds_px_signal().map(|bounds| bounds.y)
-    }
-    pub fn width_px_signal(&self) -> impl Signal<Item = f64> {
-        self.bounds_px_signal().map(|bounds| bounds.width)
-    }
-    pub fn height_px_signal(&self) -> impl Signal<Item = f64> {
-        self.bounds_px_signal().map(|bounds| bounds.height)
+        transform_signals::x_px(COORDS_IN_CENTER, self.transform.signal_cloned(), self.size.signal_cloned())
     }
 
+    pub fn y_px_signal(&self) -> impl Signal<Item = f64> {
+        transform_signals::y_px(COORDS_IN_CENTER, self.transform.signal_cloned(), self.size.signal_cloned())
+    }
+    pub fn width_px_signal(&self) -> impl Signal<Item = f64> {
+        transform_signals::width_px(COORDS_IN_CENTER, self.transform.signal_cloned(), self.size.signal_cloned())
+    }
+    pub fn height_px_signal(&self) -> impl Signal<Item = f64> {
+        transform_signals::height_px(COORDS_IN_CENTER, self.transform.signal_cloned(), self.size.signal_cloned())
+    }
     pub fn native_width_signal(&self) -> impl Signal<Item = f64> {
         self.size.signal_cloned().map(|size| {
             match size {
@@ -215,72 +119,25 @@ impl TransformState {
         })
     }
 
-    pub fn matrix_string_signal(&self) -> impl Signal<Item = String> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let transform = self.transform.signal_cloned()
-            => {
-                transform
-                    .map(|t| {
-                        let mut t = t.clone();
-                        t.denormalize_translation(resize_info);
-                        t.to_mat4().as_matrix_string()
-                    })
-            }
-        }
+    pub fn denormalize_matrix_string_signal(&self) -> impl Signal<Item = String> {
+        transform_signals::denormalize_matrix_string(self.transform.signal_cloned())
     }
 
 
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the rotation and translation to identity
     pub fn scale_matrix_string_signal(&self) -> impl Signal<Item = String> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let transform = self.transform.signal_cloned()
-            => {
-                transform
-                    .map(|t| {
-                        let mut t = t.clone();
-                        t.set_rotation_identity();
-                        t.set_translation_identity();
-                        t.to_mat4().as_matrix_string()
-                    })
-            }
-        }
+        transform_signals::scale_matrix_string(self.transform.signal_cloned())
     }
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the scale and translation to identity
     pub fn rotation_matrix_string_signal(&self) -> impl Signal<Item = String> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let transform = self.transform.signal_cloned()
-            => {
-                transform
-                    .map(|t| {
-                        let mut t = t.clone();
-                        t.set_scale_identity();
-                        t.set_translation_identity();
-                        t.to_mat4().as_matrix_string()
-                    })
-            }
-        }
+        transform_signals::rotation_matrix_string(self.transform.signal_cloned())
     }
     pub fn invert_rotation_matrix_string_signal(&self) -> impl Signal<Item = String> {
-        map_ref! {
-            let resize_info = resize_info_signal(),
-            let transform = self.transform.signal_cloned()
-            => {
-                transform
-                    .map(|t| {
-                        let mut t = t.clone();
-                        t.set_scale_identity();
-                        t.set_translation_identity();
-                        t.rotation.0 = math::quat::invert(&t.rotation.0);
-                        t.to_mat4().as_matrix_string()
-                    })
-            }
-        }
+        transform_signals::invert_rotation_matrix_string(self.transform.signal_cloned())
     }
+
     pub fn get_center(&self, resize_info:&ResizeInfo) -> (f64, f64) {
         let transform = self.transform.lock_ref();
 

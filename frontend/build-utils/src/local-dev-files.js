@@ -18,6 +18,8 @@ const ALLOWED_APP_NAMES = [
 	"module/memory/play",
 	"module/poster/edit",
 	"module/poster/play",
+	"module/tapping-board/edit",
+	"module/tapping-board/play",
 	"dev/scratch/001",
 	"dev/showcase/001",
 ]

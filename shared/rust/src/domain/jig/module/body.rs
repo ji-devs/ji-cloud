@@ -13,6 +13,9 @@ pub mod memory;
 /// Poster Body.
 pub mod poster;
 
+/// Tapping Board Body.
+pub mod tapping_board;
+
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -24,6 +27,9 @@ pub enum Body {
 
     /// Module is a poster, and has a poster's body.
     Poster(poster::ModuleData),
+
+    /// Module is a tapping board, and has a tapping board's body.
+    TappingBoard(tapping_board::ModuleData),
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
@@ -51,6 +57,7 @@ impl Body {
             Self::Cover => super::ModuleKind::Cover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
             Self::Poster(_) => super::ModuleKind::Poster,
+            Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
         }
     }
 }
@@ -188,4 +195,29 @@ pub struct Transform {
     pub scale: Vec3,
     /// Origin
     pub origin: Vec3,
+}
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Trace 
+pub struct Trace {
+    /// The Transform
+    pub transform: Transform,
+    /// Path points 
+    pub path: Vec<PathPoint>, 
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Path point
+pub enum PathPoint {
+    /// x, y
+    MoveTo(f64, f64),
+    /// x, y
+    LineTo(f64, f64),
+    /// cpx, cpy, x, y 
+    QuadCurveTo(f64, f64, f64, f64),
+    /// cp1x, c1py, cp2x, cp2y, x, y 
+    BezierCurveTo(f64, f64, f64, f64, f64, f64),
 }

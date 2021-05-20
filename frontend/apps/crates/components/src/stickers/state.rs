@@ -39,6 +39,14 @@ impl Sticker {
 }
 
 impl Stickers {
+    pub fn to_raw(&self) -> Vec<RawSticker> {
+        self.list
+            .lock_ref()
+            .iter()
+            .map(|sticker| sticker.to_raw())
+            .collect()
+    }
+
     pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, on_change: Option<impl Fn(Vec<RawSticker>) + 'static>) -> Rc<Self> {
   
         let _self = Rc::new(Self{

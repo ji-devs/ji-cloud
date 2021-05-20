@@ -42,6 +42,11 @@ pub trait TransformExt {
 
     fn denormalize_translation(&mut self, resize_info: &ResizeInfo);
 
+    fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String;
+    fn scale_matrix_string(&self) -> String;
+    fn rotation_matrix_string(&self) -> String;
+    fn invert_rotation_matrix_string(&self) -> String;
+
     fn map<A>(&self, f: impl FnOnce(&Self) -> A) -> A {
         f(&self)
     }
@@ -83,6 +88,35 @@ impl TransformExt for Transform {
             //origin: Vec3([0.0, 0.0, 0.0]),
 
 
+    fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String {
+        let mut t = self.clone();
+        t.denormalize_translation(resize_info);
+        t.to_mat4().as_matrix_string()
+    }
+
+    //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
+    //but set the rotation and translation to identity
+    fn scale_matrix_string(&self) -> String {
+        let mut t = self.clone();
+        t.set_rotation_identity();
+        t.set_translation_identity();
+        t.to_mat4().as_matrix_string()
+    }
+    //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
+    //but set the scale and translation to identity
+    fn rotation_matrix_string(&self) -> String {
+        let mut t = self.clone();
+        t.set_scale_identity();
+        t.set_translation_identity();
+        t.to_mat4().as_matrix_string()
+    }
+    fn invert_rotation_matrix_string(&self) -> String {
+        let mut t = self.clone();
+        t.set_scale_identity();
+        t.set_translation_identity();
+        t.rotation.0 = super::quat::invert(&t.rotation.0);
+        t.to_mat4().as_matrix_string()
+    }
     /// Create a new Transform
     fn identity() -> Self {
         Self {
