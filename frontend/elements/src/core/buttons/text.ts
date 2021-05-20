@@ -12,6 +12,9 @@ export class _ extends BaseButton {
   static get styles() {
     return [
       css`
+        :host {
+          display: inline-block;
+        }
         div {
           cursor: pointer;
         }
