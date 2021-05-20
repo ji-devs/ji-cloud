@@ -60,7 +60,7 @@ impl State {
                     &JsValue::from_str("resetValue")
                 ).unwrap();
                 let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
-                reset_value_method.call0(&wysiwyg_ref);
+                let _ = reset_value_method.call0(&wysiwyg_ref);
             },
         };
     }

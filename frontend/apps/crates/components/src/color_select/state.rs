@@ -4,7 +4,7 @@ use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
 use utils::prelude::*;
 
-use super::actions::{get_user_colors, hex_to_rgba8};
+use super::actions::hex_to_rgba8;
 
 
 static SYSTEM_COLORS: &'static [&str] = &[
@@ -43,22 +43,15 @@ pub struct State {
 }
 
 impl State {
-    pub async fn new(config: ColorSelectConfig) -> Self {
-        let user_colors = get_user_colors().await.unwrap_ji();
+    pub fn new(theme: Option<ThemeId>, value: Rc<Mutable<Option<RGBA8>>>) -> Self {
         Self {
-            value: config.value.clone(),
+            value,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-            theme_colors: Rc::new(match config.theme {
-                // Some(ThemeId) => Some(THEME_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
+            theme_colors: Rc::new(match theme {
                 Some(theme_id) => Some(theme_id.get_colors().iter().map(|c| c.clone()).collect()),
                 None => None,
             }),
-            user_colors: Rc::new(MutableVec::new_with_values(user_colors)),
+            user_colors: Rc::new(MutableVec::new()),
         }
     }
-}
-
-pub struct ColorSelectConfig {
-    pub theme: Option<ThemeId>,
-    pub value: Rc<Mutable<Option<RGBA8>>>,
 }

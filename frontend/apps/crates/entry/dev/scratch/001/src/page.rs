@@ -14,9 +14,9 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
-    image_search::{self, state::ImageSearchOptions},
+    // image_search::{self, state::ImageSearchOptions},
     audio_input::{self, options::AudioInputOptions, state::State as AudioState},
-    color_select::{self, state::ColorSelectConfig},
+    color_select,
     text_editor,
 };
 use shared::domain::audio::AudioId;
@@ -76,19 +76,19 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
     })
 }
 
-pub fn render_image_search() -> Dom {
-    let opts = ImageSearchOptions {
-            background_only: Some(false),
-            upload: Some(()),
-            filters: Some(()),
-            value: Mutable::new(None),
-    };
+// pub fn render_image_search() -> Dom {
+//     let opts = ImageSearchOptions {
+//             background_only: Some(false),
+//             upload: Some(()),
+//             filters: Some(()),
+//             value: Mutable::new(None),
+//     };
 
-    html!("div", {
-        .style("padding", "30px")
-        .child(image_search::dom::render(opts, None))
-    })
-}
+//     html!("div", {
+//         .style("padding", "30px")
+//         .child(image_search::dom::render(opts, None))
+//     })
+// }
 
 
 pub fn render_audio_input() -> Dom {
@@ -125,13 +125,16 @@ pub fn render_audio_input() -> Dom {
 
 
 pub fn render_color_select() -> Dom {
+    let state = color_select::state::State::new(
+        Some(ThemeId::HappyBrush),
+        Rc::new(Mutable::new(None))
+        );
     html!("div", {
         .style("padding", "30px")
-        .child(color_select::dom::render(ColorSelectConfig {
-            theme: Some(ThemeId::HappyBrush),
-            // theme: None,
-            value: Rc::new(Mutable::new(None))
-        }, None))
+        .child(color_select::dom::render(
+            Rc::new(state),
+            None
+        ))
     })
 }
 
@@ -209,10 +212,10 @@ fn render_text() -> Dom {
     let state = text_editor::state::State::new(
         ThemeId::HappyBrush,
         value.clone(),
-        Box::new(clone!(value_change => move |v| {
+        Some(Box::new(clone!(value_change => move |v| {
             value_change.set(Some(v.to_string()));
             log::info!("{:?}", v);
-        }))
+        })))
     );
 
     html!("div", {

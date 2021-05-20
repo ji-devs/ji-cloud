@@ -2,13 +2,11 @@ use dominator::{Dom, html, clone};
 use futures_signals::signal_vec::SignalVecExt;
 use rgb::RGBA8;
 use std::rc::Rc;
-use std::cell::RefCell;
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
-use super::{
-    actions::{add_user_color, delete_user_color, rgba8_to_hex, hex_to_rgba8},
-    state::{ColorSelectConfig}
-};
+use crate::color_select::actions::get_user_colors;
+
+use super::actions::{add_user_color, delete_user_color, rgba8_to_hex, hex_to_rgba8};
 use super::state::State;
 use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
@@ -18,30 +16,26 @@ const STR_THEME_COLORS_LABEL: &'static str = "Theme colors";
 const STR_USER_COLORS_LABEL: &'static str = "My colors";
 
 
-pub fn render(config: ColorSelectConfig, slot: Option<&str>) -> Dom {
-    let state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
-
+pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     let init_loader = AsyncLoader::new();
     init_loader.load(clone!(state => async move {
-        state.replace(Some(State::new(config).await));
+        let user_colors = get_user_colors().await.unwrap_ji();
+        state.user_colors.lock_mut().replace_cloned(user_colors);
     }));
 
-    Dom::with_state(init_loader, move |init_loader| {
-        html!("empty-fragment", {
-            .apply_if(slot.is_some(), move |dom| {
-                dom.property("slot", slot.unwrap_ji())
-            })
-            .child_signal(init_loader.is_loading().map(move |loading| {
-                if loading {
-                    Some(html!("window-loader-block", {
-                        .property("visible", true)
-                    }))
-                } else {
-                    let state: State = state.borrow_mut().take().unwrap_ji();
-                    Some(render_loaded(Rc::new(state)))
-                }
-            }))
+    html!("empty-fragment", {
+        .apply_if(slot.is_some(), move |dom| {
+            dom.property("slot", slot.unwrap_ji())
         })
+        .child_signal(init_loader.is_loading().map(clone!(state => move |loading| {
+            if loading {
+                Some(html!("window-loader-block", {
+                    .property("visible", true)
+                }))
+            } else {
+                Some(render_loaded(state.clone()))
+            }
+        })))
     })
 }
 

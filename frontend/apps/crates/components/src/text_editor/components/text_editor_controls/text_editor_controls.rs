@@ -150,7 +150,7 @@ pub fn render(state: Rc<State>) -> Dom {
 fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
     html!("text-editor-control", {
         .property("type", element.to_string())
-        .property_signal("active", state.controls.signal_cloned().map(clone!(state, element => move |controls| {
+        .property_signal("active", state.controls.signal_cloned().map(clone!(element => move |controls| {
             if controls.element == element {
                 true
             } else {
@@ -170,7 +170,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
             Align::Center => "align-center",
             Align::Right => "align-right",
         })
-        .property_signal("active", state.controls.signal_cloned().map(clone!(state, align => move |controls| {
+        .property_signal("active", state.controls.signal_cloned().map(clone!(align => move |controls| {
             if controls.align == align {
                 true
             } else {
@@ -186,7 +186,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
 fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
     html!("li-check", {
         .style("font-weight", weight.to_string())
-        .property_signal("selected", state.controls.signal_cloned().map(clone!(state, weight => move |controls| {
+        .property_signal("selected", state.controls.signal_cloned().map(clone!(weight => move |controls| {
             if controls.weight == weight {
                 true
             } else {
@@ -203,7 +203,7 @@ fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
 fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
     html!("li-check", {
         .style("font-family", font_to_css(font))
-        .property_signal("selected", state.controls.signal_cloned().map(clone!(state, font => move |controls| {
+        .property_signal("selected", state.controls.signal_cloned().map(clone!(font => move |controls| {
             if controls.font == font {
                 true
             } else {

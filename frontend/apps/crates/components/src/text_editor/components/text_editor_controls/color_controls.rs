@@ -9,7 +9,6 @@ use futures::future::ready;
 use rgb::RGBA8;
 use crate::color_select::{
     self,
-    state::ColorSelectConfig,
     actions::{hex_to_rgba8, rgba8_to_hex},
 };
 
@@ -34,42 +33,43 @@ pub fn render(state: Rc<State>) -> Dom {
         ready(())
     })));
 
-    Dom::with_state(select_for, move |select_for| {
-        html!("anchored-overlay", {
-            .property("slot", "color")
-            .property("backdropColor", "transparent")
-            .property("positionY", "top-in")
-            .property_signal("open", select_for.signal_cloned().map(|select_for| select_for.is_some()))
-            .event(clone!(select_for => move |_: events::Close| {
-                select_for.set(None);
-            }))
-            .child(html!("button-collection", {
-                .property("slot", "anchor")
-                .children(&mut [
-                    html!("text-editor-control", {
-                        .property("type", "color")
-                        .event(clone!(state, select_for, select_value => move |_: events::Click| {
-                            select_for.set(Some(ColorSelectFor::Highlight));
-                            select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
-                        }))
-                    }),
-                    html!("text-editor-control", {
-                        .property("type", "marker-color")
-                        .event(clone!(state, select_for, select_value => move |_: events::Click| {
-                            select_for.set(Some(ColorSelectFor::Text));
-                            select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
-                        }))
-                    }),
-                ])
-            }))
-            .child(html!("text-editor-controls-overlay-shadow", {
-                .property("slot", "overlay")
-                .child(color_select::dom::render(ColorSelectConfig {
-                    theme: Some(state.theme_id),
-                    value: select_value.clone()
-                }, None))
-            }))
-        })
+    html!("anchored-overlay", {
+        .property("slot", "color")
+        .property("backdropColor", "transparent")
+        .property("positionY", "top-in")
+        .property_signal("open", select_for.signal_cloned().map(|select_for| select_for.is_some()))
+        .event(clone!(select_for => move |_: events::Close| {
+            select_for.set(None);
+        }))
+        .child(html!("button-collection", {
+            .property("slot", "anchor")
+            .children(&mut [
+                html!("text-editor-control", {
+                    .property("type", "color")
+                    .event(clone!(state, select_for, select_value => move |_: events::Click| {
+                        select_for.set(Some(ColorSelectFor::Highlight));
+                        select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
+                    }))
+                }),
+                html!("text-editor-control", {
+                    .property("type", "marker-color")
+                    .event(clone!(state, select_for, select_value => move |_: events::Click| {
+                        select_for.set(Some(ColorSelectFor::Text));
+                        select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
+                    }))
+                }),
+            ])
+        }))
+        .child(html!("text-editor-controls-overlay-shadow", {
+            .property("slot", "overlay")
+            .apply(|dom| {
+                let state = Rc::new(color_select::state::State::new(
+                    Some(state.theme_id),
+                    select_value.clone()
+                ));
+                dom.child(color_select::dom::render(state, None))
+            })
+        }))
     })
 }
 
