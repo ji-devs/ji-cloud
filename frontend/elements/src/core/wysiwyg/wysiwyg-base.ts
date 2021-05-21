@@ -222,6 +222,14 @@ export class _ extends LitElement {
         }
     }
 
+    public selectAll() {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(this.shadowRoot!.querySelector("[contenteditable=true]")!);
+        selection!.removeAllRanges();
+        selection!.addRange(range);
+    }
+
     private reactRender() {
         this.componentRef = ReactDOM.render(
             React.createElement(

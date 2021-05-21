@@ -45,6 +45,18 @@ impl State {
         }
     }
 
+    pub fn select_all(&self) {
+        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
+            let select_all_method = Reflect::get(
+                &wysiwyg_ref,
+                &JsValue::from_str("selectAll")
+            )
+                .unwrap();
+            let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap();
+            let _ = select_all_method.call0(&wysiwyg_ref);
+        }
+    }
+
     fn update_wysiwyg_value(&self, wysiwyg_ref: &HtmlElement) {
         match &*self.value.borrow() {
             Some(value) => {

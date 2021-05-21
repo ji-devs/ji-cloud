@@ -233,6 +233,12 @@ fn render_text() -> Dom {
                     state.set_value(value.clone());
                     value_change.set(value.clone());
                 }))
+            }),
+            html!("button", {
+                .text("Select all")
+                .event(clone!(state, value_change, value => move |_: events::Click| {
+                    state.select_all();
+                }))
             })
         ])
     })
