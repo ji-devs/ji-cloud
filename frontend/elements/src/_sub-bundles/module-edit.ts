@@ -48,3 +48,7 @@ import "@elements/core/overlays/anchored-overlay";
 
 import "@elements/core/wysiwyg/wysiwyg-base";
 import "@elements/core/wysiwyg/wysiwyg-output-renderer";
+
+
+//trace
+import "@elements/module/_common/widgets/trace/edit";

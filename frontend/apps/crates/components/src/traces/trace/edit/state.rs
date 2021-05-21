@@ -10,7 +10,7 @@ use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
 use super::{
-    super::trace::state::Trace
+    super::state::Trace
 };
 use utils::{
     prelude::*, 
@@ -23,8 +23,6 @@ pub struct Edit {
     pub index: Option<usize>,
     pub trace: Trace,
     pub drag: Mutable<Option<Drag>>,
-    pub canvas: Mutable<Option<Rc<HtmlCanvasElement>>>, 
-    pub ctx: Mutable<Option<Rc<CanvasRenderingContext2d>>>,
 }
 
 impl Edit {
@@ -39,8 +37,6 @@ impl Edit {
             index,
             trace,
             drag: Mutable::new(None),
-            canvas: Mutable::new(None),
-            ctx: Mutable::new(None),
         }
     }
 

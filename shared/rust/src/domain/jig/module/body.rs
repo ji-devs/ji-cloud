@@ -204,20 +204,18 @@ pub struct Transform {
 pub struct Trace {
     /// The Transform
     pub transform: Transform,
-    /// Path points 
-    pub path: Vec<PathPoint>, 
+    /// The Shape 
+    pub shape: TraceShape 
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Path point
-pub enum PathPoint {
-    /// x, y
-    MoveTo(f64, f64),
-    /// x, y
-    LineTo(f64, f64),
-    /// cpx, cpy, x, y 
-    QuadCurveTo(f64, f64, f64, f64),
-    /// cp1x, c1py, cp2x, cp2y, x, y 
-    BezierCurveTo(f64, f64, f64, f64, f64, f64),
+/// Trace shape
+pub enum TraceShape {
+    /// width and height
+    Rect(f64, f64),
+    /// radius 
+    Circle(f64),
+    /// points
+    Path(Vec<(f64, f64)>)
 }

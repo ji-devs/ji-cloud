@@ -60,6 +60,7 @@ impl Base {
         );
         let traces = Traces::new(
                 raw.map(|content| content.traces.as_ref()),
+                crate::debug::settings().traces.clone(),
                 Some(clone!(history => move |raw_traces| {
                     history.push_modify(|raw| {
                         if let Some(content) = &mut raw.content {

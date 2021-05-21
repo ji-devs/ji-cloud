@@ -1,6 +1,6 @@
 use super::{
     state::*,
-    edit::state::Edit
+    trace::edit::state::Edit
 };
 use std::rc::Rc;
 use shared::domain::jig::module::body::{Trace, Transform};
@@ -31,12 +31,9 @@ impl Traces {
         self.selected_index.set(None);
     }
 
-    pub fn start_new_trace(&self, x: i32, y:i32) {
+    pub fn start_new_trace(&self) {
         let edit = Edit::new(None, self.on_change_cb.borrow().as_ref().unwrap_ji().clone());
-        edit.start_draw(x, y);
-
         self.phase.set(Phase::Edit(Rc::new(edit)));
-
     }
     // Internal - saving/history is done on the module level
     pub fn call_change(&self) {

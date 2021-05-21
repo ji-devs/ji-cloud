@@ -6,7 +6,7 @@ use futures_signals::{
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Trace as RawTrace, PathPoint, Transform};
+use shared::domain::jig::module::body::{Trace as RawTrace, TraceShape, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
 use super::state::*;
@@ -26,13 +26,12 @@ impl Edit {
 
         let (norm_x, norm_y) = resize_info.get_pos_normalized(x as f64, y as f64);
 
-        self.trace.path.lock_mut().push_cloned(
-            PathPoint::MoveTo(norm_x, norm_y)
-        );
+        self.trace.shape.set(TraceShape::Path(vec![(norm_x, norm_y)]));
     }
     pub fn end_draw(&self, x: i32, y: i32) {
 
         if let Some(drag) = self.drag.replace(None) {
+            log::info!("TODO - calc bounds (for showing menu and pushing final SVG!");
         }
     }
     pub fn move_draw(&self, x: i32, y: i32) {
@@ -40,10 +39,17 @@ impl Edit {
         if let Some(drag) = &*self.drag.lock_ref() {
             if let Some(_) = drag.update(x, y) {
                 let resize_info = get_resize_info();
-                let (pos_x, pos_y) = resize_info.get_pos_normalized(x as f64, y as f64);
-                self.trace.path.lock_mut().push_cloned(
-                    PathPoint::LineTo(pos_x, pos_y)
-                );
+                let (norm_x, norm_y) = resize_info.get_pos_normalized(x as f64, y as f64);
+                let mut shape = self.trace.shape.lock_mut();
+                match &mut *shape {
+                    TraceShape::Path(path) => {
+                        path.push((norm_x, norm_y));
+                    }
+                    _ => {
+                        unimplemented!("don't know how to handle other shapes yet!!")
+                    }
+
+                }
             }
         }
     }

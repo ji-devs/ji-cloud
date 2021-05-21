@@ -32,6 +32,7 @@ use crate::steps::state::Step;
 use crate::steps::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::steps::sidebar::step_2::state::TabKind as ContentTabKind;
 use crate::steps::sidebar::step_3::state::TabKind as InteractionTabKind;
+use components::traces::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -45,6 +46,7 @@ pub struct DebugSettings {
     pub bg_tab: Option<BgTabKind>,
     pub content_tab: Option<ContentTabKind>,
     pub interaction_tab: Option<InteractionTabKind>,
+    pub traces: Option<TracesOptions>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -85,6 +87,9 @@ impl DebugSettings {
             bg_tab: Some(BgTabKind::Color),
             content_tab: Some(ContentTabKind::Image),
             interaction_tab: Some(InteractionTabKind::Text),
+            traces: Some(TracesOptions {
+                start_in_phase_draw: true
+            })
         }
     }
 }

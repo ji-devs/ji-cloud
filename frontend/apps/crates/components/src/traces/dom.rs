@@ -7,7 +7,7 @@ use futures_signals::{
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
-use super::state::*;
+use super::{state::*, trace::edit::state::*};
 use shared::domain::jig::module::body::Sticker as RawSticker;
 
 pub fn render_edit(state:Rc<Traces>) -> Dom {
@@ -17,17 +17,6 @@ pub fn render_edit(state:Rc<Traces>) -> Dom {
             Some(match phase {
                 Phase::DisplayAll => {
                     html!("empty-fragment", {
-                        .child(html!("div", {
-                            .style("position", "absolute")
-                            .style("left", "0")
-                            .style("top", "0")
-                            .style("width", "100%")
-                            .style("height", "100%")
-                            .style("background-color", "rgba(0, 0, 0, .5)")
-                            .event(clone!(state => move |evt:events::MouseDown| {
-                                state.start_new_trace(evt.x() as i32, evt.y() as i32);
-                            }))
-                        }))
                         .children_signal_vec(
                             state.list
                                 .signal_vec_cloned()
@@ -39,7 +28,7 @@ pub fn render_edit(state:Rc<Traces>) -> Dom {
                     })
                 },
                 Phase::Edit(edit) => {
-                    super::edit::dom::render(edit)
+                    super::trace::edit::dom::render(edit)
                 }
             })
         })))

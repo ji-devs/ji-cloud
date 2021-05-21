@@ -6,7 +6,7 @@ use futures_signals::{
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Trace as RawTrace, Transform, PathPoint};
+use shared::domain::jig::module::body::{Trace as RawTrace, Transform, TraceShape};
 use crate::transform::state::TransformState;
 use dominator::clone;
 use utils::prelude::*;
@@ -14,7 +14,7 @@ use utils::prelude::*;
 #[derive(Clone)]
 pub struct Trace {
     pub transform: Rc<TransformState>,
-    pub path: Rc<MutableVec<PathPoint>>,
+    pub shape: Mutable<TraceShape>,
 }
 
 
@@ -25,7 +25,7 @@ impl Trace {
             None => {
                 RawTrace {
                     transform: Transform::identity(),
-                    path: Vec::new(),
+                    shape: TraceShape::Path(Vec::new()) 
                 }
             }
         };
@@ -38,14 +38,14 @@ impl Trace {
                     on_change_cb();
                 })
             )),
-            path: Rc::new(MutableVec::new_with_values(raw.path)),
+            shape: Mutable::new(raw.shape) 
         }
     }
 
     pub fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.get_inner_clone(),
-            path: self.path.lock_ref().to_vec()
+            shape: self.shape.get_cloned()
         }
     }
 

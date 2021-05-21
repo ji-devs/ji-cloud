@@ -9,8 +9,7 @@ use std::cell::RefCell;
 use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
-use super::trace::state::*;
-use super::edit::state::Edit;
+use super::trace::{state::*, edit::state::Edit};
 use utils::prelude::*;
 
 pub struct Traces 
@@ -25,7 +24,12 @@ pub struct Traces
 #[derive(Clone)]
 pub enum Phase {
     DisplayAll,
-    Edit(Rc<Edit>)
+    Edit(Rc<Edit>),
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct DebugOptions {
+    pub start_in_phase_draw: bool, 
 }
 
 impl Traces {
@@ -37,8 +41,10 @@ impl Traces {
             .collect()
     }
 
-    pub fn new(raw:Option<&[RawTrace]>, on_change: Option<impl Fn(Vec<RawTrace>) + 'static>) -> Rc<Self> {
-  
+    pub fn new(raw:Option<&[RawTrace]>, debug_opts:Option<DebugOptions>, on_change: Option<impl Fn(Vec<RawTrace>) + 'static>) -> Rc<Self> {
+
+        let debug_opts = debug_opts.unwrap_or_default();
+
         let _self = Rc::new(Self{
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
@@ -66,6 +72,10 @@ impl Traces {
                             })
                             .collect()
             );
+        }
+
+        if debug_opts.start_in_phase_draw {
+            _self.start_new_trace();
         }
 
         _self

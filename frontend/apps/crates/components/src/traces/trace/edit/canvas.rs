@@ -8,14 +8,14 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use super::state::*;
-use shared::domain::jig::module::body::{PathPoint, Transform};
+use shared::domain::jig::module::body::{TraceShape, Transform};
 use web_sys::CanvasRenderingContext2d;
 use awsm_web::canvas::get_2d_context;
 
 pub fn render(
     ctx:&CanvasRenderingContext2d, 
     resize_info: &ResizeInfo, 
-    path: &[PathPoint],
+    shape: &TraceShape,
     transform: &Transform,
 ) {
 
@@ -25,7 +25,16 @@ pub fn render(
 
     ctx.set_fill_style(&JsValue::from_str("white"));
     ctx.set_stroke_style(&JsValue::from_str("blue"));
-    draw_path(ctx, resize_info, path, transform);
+
+    match shape {
+        TraceShape::Path(path) => {
+            draw_path(ctx, resize_info, path, transform);
+        }
+        _ => {
+            unimplemented!("don't know how to handle other shapes yet!!")
+        }
+
+    }
 
     //debug_draw_square(ctx, resize_info);
 
@@ -34,39 +43,26 @@ pub fn render(
 fn draw_path(
     ctx:&CanvasRenderingContext2d, 
     resize_info: &ResizeInfo, 
-    path: &[PathPoint],
+    path: &[(f64, f64)],
     transform: &Transform,
 ) {
     ctx.begin_path();
 
-    for point in path.iter() {
-        plot_point(ctx, resize_info, point.clone(), transform);
+    if let Some((x, y)) = path.first() {
+        let (x, y) = resize_info.get_pos_denormalized(*x, *y);
+        ctx.move_to(x, y);
     }
 
-    //close the loop?
-    /*
-    if let Some(point) = path.first() {
-        plot_point(ctx, resize_info, point.clone(), transform);
+    for (x, y) in &path[1..]  {
+        let (x, y) = resize_info.get_pos_denormalized(*x, *y);
+        ctx.line_to(x, y);
     }
-    */
+
     ctx.close_path();
     ctx.fill();
     ctx.stroke();
 }
 
-fn plot_point(ctx:&CanvasRenderingContext2d, resize_info:&ResizeInfo, point:PathPoint, transform:&Transform) {
-    match point {
-        PathPoint::MoveTo(x, y) => {
-            let (x, y) = resize_info.get_pos_denormalized(x, y);
-            ctx.move_to(x, y);
-        },
-        PathPoint::LineTo(x, y) => {
-            let (x, y) = resize_info.get_pos_denormalized(x, y);
-            ctx.line_to(x, y);
-        }
-        _ => {}
-    }
-}
 
 fn debug_draw_square(ctx:&CanvasRenderingContext2d, resize_info:&ResizeInfo) {
     let ResizeInfo {scale, width, height, ..} = resize_info;
