@@ -24,7 +24,7 @@ const DEFAULT_ARGS:Args = {
     placeholder: "Select something",
     open: true,
     error: true,
-    count: 7,
+    count: 10,
     width: 300,
 }
 
@@ -36,9 +36,6 @@ export const DropdownSelect = (props?:Partial<Args>) => {
     return `
         <div style="width: ${width}px">
             <dropdown-select ${argsToAttrs(dropdownProps)}>
-                <li-check selected>Selected option</li-check>
-                <li-check-collection>Collection</li-check-collection>
-                <li-check-collection open>Open collection</li-check-collection>
                 ${mapToString(arrayCount(count), i => {
                     return `<li-check>item ${i}</li-check>`;
                 })}
@@ -48,3 +45,32 @@ export const DropdownSelect = (props?:Partial<Args>) => {
 }
 
 DropdownSelect.args = DEFAULT_ARGS;
+
+
+export const DropdownSelectNested = (props?:Partial<Args>) => {
+    props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
+
+    const {count, width, ...dropdownProps} = props
+
+    return `
+        <div style="width: ${width}px">
+            <dropdown-select nested ${argsToAttrs(dropdownProps)}>
+                <li-check selected>Selected option</li-check>
+                <li-check-collection>
+                    <span slot="label">Label</span>
+                    ${mapToString(arrayCount(count), i => {
+                        return `<li-check slot="options">item ${i}</li-check>`;
+                    })}
+                </li-check-collection>
+                <li-check-collection open>
+                    <span slot="label">Label</span>
+                    ${mapToString(arrayCount(count), i => {
+                        return `<li-check slot="options">item ${i}</li-check>`;
+                    })}
+                </li-check-collection>
+            </dropdown-select>
+        </div>
+    `;
+}
+
+DropdownSelectNested.args = DEFAULT_ARGS;

@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property, query } from 'lit-element';
 
 export type PositionX = "left-out" | "right-out" | "left-in" | "right-in";
 export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in";
@@ -12,21 +12,13 @@ export class _ extends LitElement {
                     position: relative;
                     display: inline-block;
                 }
-                :host([backdrop]) .backdrop {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100vh;
-                    width: 100vw;
-                }
                 .overlay {
                     display: none;
                     position: absolute;
                     background-color: #ffffff;
                     z-index: 1;
                 }
-                :host([open]) .backdrop, :host([open]) .overlay {
+                :host([open]) .overlay {
                     display: block;
                 }
                 :host([positionY=top-out]) .overlay {
@@ -57,42 +49,43 @@ export class _ extends LitElement {
         ];
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener("mousedown", this.onGlobalMouseDown);
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
+    }
+    onGlobalMouseDown = (evt: MouseEvent) => {
+        if(!evt.composedPath().includes(this)) {
+            if (this.autoClose) {
+                this.open = false;
+            }
+            this.dispatchEvent(new Event("close"))
+        }
+    }
+
+    @query(".overlay")
+    overlay!: HTMLElement;
+
     @property({ reflect: true })
     positionY: PositionY = "top-out";
 
     @property({ reflect: true })
     positionX: PositionX = "right-out";
 
-    @property({ type: Boolean, reflect: true })
-    backdrop: boolean = true;
-
-    @property()
-    backdropColor = "#00000020";
-
     @property({ type: Boolean })
-    backdropClose: boolean = true;
+    autoClose: boolean = true;
 
     @property({ type: Boolean, reflect: true })
     open: boolean = false;
 
-    private backdropClick() {
-        if (this.backdropClose) {
-            this.open = false;
-            this.dispatchEvent(new CustomEvent("close"));
-        }
-    }
-
     render() {
         return html`
-            <style>
-                .backdrop {
-                    background-color: ${this.backdropColor};
-                }
-            </style>
             <div class="anchor">
                 <slot name="anchor"></slot>
             </div>
-            <div @click="${() => this.backdropClick()}" class="backdrop"></div>
             <div part="overlay" class="overlay">
                 <slot name="overlay"></slot>
             </div>
