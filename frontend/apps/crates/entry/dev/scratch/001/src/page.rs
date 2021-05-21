@@ -227,6 +227,9 @@ fn render_text() -> Dom {
             render_text_editor_controls(state.clone()),
             render_wysiwyg(state.clone()),
             render_wysiwyg_output(value_change.clone()),
+            html!("div", {
+                .style("display", "grid")
+                .children(&mut [
             html!("button", {
                 .text("Set back to default value")
                 .event(clone!(state, value_change, value => move |_: events::Click| {
@@ -236,9 +239,40 @@ fn render_text() -> Dom {
             }),
             html!("button", {
                 .text("Select all")
-                .event(clone!(state, value_change, value => move |_: events::Click| {
+                        .event(clone!(state => move |_: events::Click| {
                     state.select_all();
                 }))
+                    }),
+                    html!("div", {
+                        .children(&mut [
+                            html!("label", {
+                                .text("Happy brush")
+                                .child(
+                                    html!("input", {
+                                        .property("type", "radio")
+                                        .property("name", "them")
+                                        .property("checked", true)
+                                        .event(clone!(state => move |_: events::Change| {
+                                            state.set_theme(ThemeId::HappyBrush)
+                                        }))
+                                    })
+                                )
+                            }),
+                            html!("label", {
+                                .text("Chalkboard")
+                                .child(
+                                    html!("input", {
+                                        .property("type", "radio")
+                                        .property("name", "them")
+                                        .event(clone!(state => move |_: events::Change| {
+                                            state.set_theme(ThemeId::Chalkboard)
+                                        }))
+                                    })
+                                )
+                            }),
+                        ])
+                    })
+                ])
             })
         ])
     })
