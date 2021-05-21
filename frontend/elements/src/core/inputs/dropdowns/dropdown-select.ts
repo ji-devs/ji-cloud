@@ -104,9 +104,8 @@ export class _ extends LitElement {
         return html`
             <anchored-overlay
                 ?open="${this.open}"
-                backdrop
-                backdropColor="transparent"
                 @close="${() => this.open = false}"
+                ?autoClose="${false}"
                 positionY="bottom-out"
                 positionX="left-in"
             >

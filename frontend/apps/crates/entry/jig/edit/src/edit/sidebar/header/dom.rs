@@ -39,7 +39,6 @@ impl HeaderDom {
                     .property("slot", "settings")
                     .property("positionX", "right-out")
                     .property("positionY", "top-in")
-                    .property("backdropColor", "transparent")
                     .property_signal("open", sidebar_state.settings_shown.signal())
                     .event(clone!(sidebar_state => move |_: events::Close| {
                         sidebar_state.settings_shown.set(false);

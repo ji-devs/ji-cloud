@@ -5,14 +5,14 @@ export default {
 }
 
 interface Args {
-    backdrop: boolean;
+    autoClose: boolean;
     open: boolean;
     positionY: string,
     positionX: string,
 }
 
 const DEFAULT_ARGS:Args = {
-    backdrop: true,
+    autoClose: true,
     open: true,
     positionY: "top-in",
     positionX: "right-out",

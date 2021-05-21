@@ -35,7 +35,6 @@ pub fn render(state: Rc<State>) -> Dom {
 
     html!("anchored-overlay", {
         .property("slot", "color")
-        .property("backdropColor", "transparent")
         .property("positionY", "top-in")
         .property_signal("open", select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(select_for => move |_: events::Close| {
