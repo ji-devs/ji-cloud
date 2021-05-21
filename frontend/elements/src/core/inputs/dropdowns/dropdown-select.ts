@@ -73,9 +73,11 @@ export class _ extends LitElement {
                     border-radius: 14px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
                     background-color: #fff;
+                    z-index: 1;
+                }
+                :host(:not([nested])) anchored-overlay::part(overlay) {
                     max-height: 250px;
                     overflow: auto;
-                    z-index: 1;
                 }
             `,
         ];
@@ -95,6 +97,10 @@ export class _ extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     open: boolean = false;
+
+    // when nested is enabled overflow is disabled since the nested items are overflowing the container, there might be ways to get around this issue
+    @property({ type: Boolean, reflect: true })
+    nested: boolean = false;
 
     public toggleOpen() {
         this.open = !this.open;
