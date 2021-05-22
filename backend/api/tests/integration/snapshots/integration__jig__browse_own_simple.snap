@@ -29,7 +29,10 @@ expression: body
       "additional_resources": [
         "41b8d0b4-aaff-4942-88ba-1a32fecdbd23",
         "7a227007-b957-4601-bf15-87a6b86da672"
-      ]
+      ],
+      "description": "test description",
+      "last_edited": "[last_edited]",
+      "is_public": true
     }
   ],
   "pages": 1,

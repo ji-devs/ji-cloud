@@ -42,7 +42,7 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body.jig, {".**.updated_at" => "[updated_at]"});
+    insta::assert_json_snapshot!(body.jig, {".**.last_edited" => "[last_edited]"});
 
     Ok(())
 }

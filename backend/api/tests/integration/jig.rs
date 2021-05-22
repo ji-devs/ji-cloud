@@ -81,7 +81,7 @@ async fn create_with_params() -> anyhow::Result<()> {
 
     let body: CreateResponse<JigId> = resp.json().await?;
 
-    insta::assert_json_snapshot!(body, {".id" => "[id]"});
+    insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
 
     Ok(())
 }
@@ -121,7 +121,7 @@ async fn clone() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]"});
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".**.last_edited" => "[last_edited]"});
 
     Ok(())
 }
@@ -150,7 +150,7 @@ async fn get() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
 
     Ok(())
 }
@@ -177,7 +177,7 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
 
     Ok(())
 }
@@ -207,7 +207,7 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body);
+    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
 
     Ok(())
 }

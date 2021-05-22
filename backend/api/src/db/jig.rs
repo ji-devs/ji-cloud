@@ -81,7 +81,10 @@ select
     creator_id,
     author_id,
     publish_at,
+    updated_at,
     language,
+    description,
+    is_public,
     array(
         select row (id, kind)
         from jig_module
@@ -115,6 +118,9 @@ order by t.ord
             language: row.language,
             categories: row.categories.into_iter().map(|(it,)| it).collect(),
             publish_at: row.publish_at,
+            description: row.description,
+            last_edited: row.updated_at,
+            is_public: row.is_public,
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
             additional_resources: row
@@ -137,7 +143,10 @@ select
     creator_id,
     author_id,
     publish_at,
+    updated_at,
     language,
+    description,
+    is_public,
     array(
         select row (id, kind)
         from jig_module
@@ -169,10 +178,13 @@ where id = $1"#,
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
+        description: row.description,
+        last_edited: row.updated_at,
+        is_public: row.is_public,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
         additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
-});
+    });
 
     Ok(jig)
 }
@@ -284,7 +296,10 @@ select
     creator_id,
     author_id,
     publish_at,
+    updated_at,
     language,
+    description,
+    is_public,
     array(
         select row (id, kind)
         from jig_module
@@ -322,6 +337,9 @@ limit 20 offset 20 * $2
         creator_id: row.creator_id,
         author_id: row.author_id,
         publish_at: row.publish_at,
+        description: row.description,
+        last_edited: row.updated_at,
+        is_public: row.is_public,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
         additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
@@ -356,11 +374,14 @@ pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Op
 
     let new_id = sqlx::query!(
         r#"
-insert into jig (display_name, parents, creator_id, author_id, language)
-select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language from jig where id = $1
+insert into jig (display_name, parents, creator_id, author_id, language, description)
+select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language, description
+from jig
+where id = $1
 returning id
-"#,
-        parent.0, user_id
+        "#,
+        parent.0,
+        user_id
     )
     .fetch_optional(&mut txn)
     .await?;
