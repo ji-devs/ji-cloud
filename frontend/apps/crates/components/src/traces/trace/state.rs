@@ -49,5 +49,16 @@ impl Trace {
         }
     }
 
+    pub fn has_shape_signal(&self) -> impl Signal<Item = bool> {
+        self.shape.signal_ref(|shape| {
+            match shape {
+                TraceShape::Path(path) => {
+                    path.len() > 2
+                },
+                _ => false
+            }
+        })
+    }
+
 }
 

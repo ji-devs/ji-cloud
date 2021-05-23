@@ -22,8 +22,11 @@ static BG_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("fill-opacity", "0.5")
 });
 
-static FILL_CLASS: Lazy<String> = Lazy::new(|| class! {
+static MASK_RECT_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("fill", "white")
+});
+static MASK_SHAPE_CLASS: Lazy<String> = Lazy::new(|| class! {
+    .style("fill", "black")
 });
 pub fn render(state:Rc<Edit>) -> Dom {
     let trace_signal = map_ref! {
@@ -35,6 +38,7 @@ pub fn render(state:Rc<Edit>) -> Dom {
             }
     };
 
+
     svg!("svg", {
         .class(&*SVG_CLASS)
         .attribute_signal("width", resize_info_signal().map(|info| {
@@ -44,6 +48,13 @@ pub fn render(state:Rc<Edit>) -> Dom {
             format!("{}px", info.height)
         }))
         .child(svg!("rect", {
+            .attribute_signal("mask", state.trace.has_shape_signal().map(|has_shape| {
+                if has_shape {
+                    "url(#maskPath)"
+                } else {
+                    "none"
+                }
+            }))
             .attribute("x", "0")
             .attribute("y", "0")
             .attribute_signal("width", resize_info_signal().map(|info| {
@@ -58,23 +69,39 @@ pub fn render(state:Rc<Edit>) -> Dom {
             }))
         }))
 
-        .child_signal(trace_signal.map(|(resize_info, shape, transform)| {
-            match shape {
-                TraceShape::Path(path) => {
-                    Some(svg!("path", {
-                        .class(&*FILL_CLASS)
-                        .attribute("d", &path_to_string(
-                            &path
-                                .iter()
-                                .map(|(x, y)| {
-                                    resize_info.get_pos_denormalized(*x, *y)
-                                })
-                                .collect::<Vec<(f64, f64)>>()
-                        ))
+        .child(svg!("defs", {
+            .child(svg!("mask", {
+                .attribute("id", "maskPath")
+                .child(svg!("rect", {
+                    .attribute("x", "0")
+                    .attribute("y", "0")
+                    .attribute_signal("width", resize_info_signal().map(|info| {
+                        format!("{}px", info.width)
                     }))
-                }
-                _ => None
-            }
+                    .attribute_signal("height", resize_info_signal().map(|info| {
+                        format!("{}px", info.height)
+                    }))
+                    .class(&*MASK_RECT_CLASS)
+                }))
+                .child_signal(trace_signal.map(|(resize_info, shape, transform)| {
+                    match shape {
+                        TraceShape::Path(path) => {
+                            Some(svg!("path", {
+                                .class(&*MASK_SHAPE_CLASS)
+                                .attribute("d", &path_to_string(
+                                    &path
+                                        .iter()
+                                        .map(|(x, y)| {
+                                            resize_info.get_pos_denormalized(*x, *y)
+                                        })
+                                        .collect::<Vec<(f64, f64)>>()
+                                ))
+                            }))
+                        }
+                        _ => None
+                    }
+                }))
+            }))
         }))
         .global_event_preventable(clone!(state => move |evt:events::MouseUp| {
             state.end_draw(evt.x() as i32, evt.y() as i32);
