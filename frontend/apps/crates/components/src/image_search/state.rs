@@ -4,15 +4,14 @@ use futures_signals::signal_vec::MutableVec;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use shared::{media::MediaLibrary, domain::{image::*, meta::*}};
-use wasm_bindgen::UnwrapThrowExt;
-use super::actions::{get_background_id, get_styles};
+use super::actions::get_styles;
 use utils::prelude::*;
 
 pub const BACKGROUND_NAME: &'static str = "Background";
 
 
 pub struct State {
-    pub image_list: MutableVec<Image>,
+    pub image_list: MutableVec<ImageMetadata>,
     pub search: Mutable<Option<String>>,
     pub options: ImageSearchOptions,
     pub init_loader: AsyncLoader,
@@ -20,15 +19,15 @@ pub struct State {
 
     pub query: Mutable<String>,
     pub page: Mutable<Option<u32>>,
-    pub styles: Rc<RefCell<Option<Vec<Style>>>>,
-    pub selected_styles: Rc<RefCell<HashSet<StyleId>>>,
+    pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
+    pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
     pub on_image_select: RefCell<Option<Box<dyn Fn(ImageId, MediaLibrary)>>>,
 }
 
 impl State {
-    pub fn new(image_search_options: ImageSearchOptions, on_image_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>) -> Self {
+    pub fn new(image_search_options: ImageSearchOptions, on_image_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>) -> Rc<Self> {
         let styles = Rc::new(RefCell::new(None));
-        let mut selected_styles = HashSet::new();
+        let selected_styles = HashSet::new();
 
         if image_search_options.background_only.is_some() && image_search_options.background_only.unwrap_ji() {
             //TODO - replace with tag system
@@ -41,7 +40,7 @@ impl State {
             *styles.borrow_mut() = Some(get_styles().await);
         }));
 
-        Self {
+        Rc::new(Self {
             options: image_search_options,
             search: Mutable::new(Some(String::new())),
             image_list: MutableVec::new(),
@@ -53,7 +52,7 @@ impl State {
             page: Mutable::new(None),
             styles,
             on_image_select: RefCell::new(on_image_select),
-        }
+        })
     }
 }
 

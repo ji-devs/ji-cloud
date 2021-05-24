@@ -42,14 +42,17 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
     html!("color-select", {
-        .apply(|dom| {
-            match state.theme_colors.as_ref() {
-                Some(colors) => dom.child(
-                    render_static_section(state.clone(), colors, STR_THEME_COLORS_LABEL)
-                ),
-                None => dom,
-            }
-        })
+        .child(html!("empty-fragment", { // TODO: once we can have multiple child signals we wont need this
+            .property("slot", "sections")
+            .child_signal(state.theme_colors.signal_cloned().map(clone!(state => move |theme_colors| {
+                match theme_colors {
+                    None => None,
+                    Some(theme_colors) => {
+                        Some(render_static_section(state.clone(), &theme_colors, STR_THEME_COLORS_LABEL))
+                    }
+                }
+            })))
+        }))
         .child(render_static_section(state.clone(), state.system_colors.as_ref(), STR_SYSTEM_COLORS_LABEL))
         .child(render_add_color(state.clone()))
         .child_signal(state.user_colors.signal_vec_cloned().to_signal_cloned().map(clone!(state => move |user_colors| {

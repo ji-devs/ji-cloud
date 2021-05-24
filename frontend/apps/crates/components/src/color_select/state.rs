@@ -38,7 +38,7 @@ static SYSTEM_COLORS: &'static [&str] = &[
 pub struct State {
     pub value: Rc<Mutable<Option<RGBA8>>>,
     pub system_colors: Rc<Vec<RGBA8>>,
-    pub theme_colors: Rc<Option<Vec<RGBA8>>>,
+    pub theme_colors: Rc<Mutable<Option<Vec<RGBA8>>>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
 }
 
@@ -47,11 +47,19 @@ impl State {
         Self {
             value,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-            theme_colors: Rc::new(match theme {
-                Some(theme_id) => Some(theme_id.get_colors().iter().map(|c| c.clone()).collect()),
+            theme_colors: Rc::new(Mutable::new(match theme {
+                Some(theme_id) => Some(Self::get_theme_colors(theme_id)),
                 None => None,
-            }),
+            })),
             user_colors: Rc::new(MutableVec::new()),
         }
+    }
+
+    pub fn set_theme(&self, theme_id: ThemeId) {
+        self.theme_colors.set(Some(Self::get_theme_colors(theme_id)))
+    }
+
+    fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {
+        theme_id.get_colors().iter().map(|c| c.clone()).collect()
     }
 }

@@ -14,7 +14,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
-    // image_search::{self, state::ImageSearchOptions},
+    image_search::{self, state::ImageSearchOptions},
     audio_input::{self, options::AudioInputOptions, state::State as AudioState},
     color_select,
     text_editor,
@@ -76,19 +76,20 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
     })
 }
 
-// pub fn render_image_search() -> Dom {
-//     let opts = ImageSearchOptions {
-//             background_only: Some(false),
-//             upload: Some(()),
-//             filters: Some(()),
-//             value: Mutable::new(None),
-//     };
+pub fn render_image_search() -> Dom {
+    let opts = ImageSearchOptions {
+        background_only: Some(false),
+        upload: Some(()),
+        filters: Some(()),
+        value: Mutable::new(None),
+    };
+    let state = image_search::state::State::new(opts, None);
 
-//     html!("div", {
-//         .style("padding", "30px")
-//         .child(image_search::dom::render(opts, None))
-//     })
-// }
+    html!("div", {
+        .style("padding", "30px")
+        .child(image_search::dom::render(state, None))
+    })
+}
 
 
 pub fn render_audio_input() -> Dom {
@@ -215,7 +216,10 @@ fn render_text() -> Dom {
         Some(Box::new(clone!(value_change => move |v| {
             value_change.set(Some(v.to_string()));
             log::info!("{:?}", v);
-        })))
+        }))),
+        Some(Box::new(|| {
+            log::info!("On blur");
+        })),
     );
 
     html!("div", {
@@ -227,12 +231,52 @@ fn render_text() -> Dom {
             render_text_editor_controls(state.clone()),
             render_wysiwyg(state.clone()),
             render_wysiwyg_output(value_change.clone()),
-            html!("button", {
-                .text("Set back to default value")
-                .event(clone!(state, value_change, value => move |_: events::Click| {
-                    state.set_value(value.clone());
-                    value_change.set(value.clone());
-                }))
+            html!("div", {
+                .style("display", "grid")
+                .children(&mut [
+                    html!("button", {
+                        .text("Set back to default value")
+                        .event(clone!(state, value_change, value => move |_: events::Click| {
+                            state.set_value(value.clone());
+                            value_change.set(value.clone());
+                        }))
+                    }),
+                    html!("button", {
+                        .text("Select all")
+                        .event(clone!(state => move |_: events::Click| {
+                            state.select_all();
+                        }))
+                    }),
+                    html!("div", {
+                        .children(&mut [
+                            html!("label", {
+                                .text("Happy brush")
+                                .child(
+                                    html!("input", {
+                                        .property("type", "radio")
+                                        .property("name", "them")
+                                        .property("checked", true)
+                                        .event(clone!(state => move |_: events::Change| {
+                                            state.set_theme(ThemeId::HappyBrush)
+                                        }))
+                                    })
+                                )
+                            }),
+                            html!("label", {
+                                .text("Chalkboard")
+                                .child(
+                                    html!("input", {
+                                        .property("type", "radio")
+                                        .property("name", "them")
+                                        .event(clone!(state => move |_: events::Change| {
+                                            state.set_theme(ThemeId::Chalkboard)
+                                        }))
+                                    })
+                                )
+                            }),
+                        ])
+                    })
+                ])
             })
         ])
     })

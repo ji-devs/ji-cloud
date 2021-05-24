@@ -62,11 +62,17 @@ pub fn render(state: Rc<State>) -> Dom {
         .child(html!("text-editor-controls-overlay-shadow", {
             .property("slot", "overlay")
             .apply(|dom| {
-                let state = Rc::new(color_select::state::State::new(
-                    Some(state.theme_id),
+                let color_state = Rc::new(color_select::state::State::new(
+                    Some(state.theme_id.lock_ref().clone()),
                     select_value.clone()
                 ));
-                dom.child(color_select::dom::render(state, None))
+
+                spawn_local(state.theme_id.signal_cloned().for_each(clone!(color_state => move |theme_id| {
+                    color_state.set_theme(theme_id);
+                    ready(())
+                })));
+
+                dom.child(color_select::dom::render(color_state, None))
             })
         }))
     })

@@ -1,11 +1,9 @@
-use dominator_helpers::futures::AsyncLoader;
 use dominator::{Dom, html, clone};
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
-use std::{borrow::BorrowMut, cell::RefCell, rc::Rc};
+use std::rc::Rc;
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use super::{
-    state::{ImageSearchOptions, State, BACKGROUND_NAME},
+    state::{State, BACKGROUND_NAME},
     actions::{get_background_id, search, upload_file},
     types::*,
 };
@@ -50,7 +48,7 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                             on_image_select(image.id.clone(), MediaLibrary::Global);
                         }
                     }))
-                    .event(clone!(state, image => move |evt: events::DragStart| {
+                    .event(clone!(image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             let data = ImageDataTransfer {
                                 id: image.id.clone(), 

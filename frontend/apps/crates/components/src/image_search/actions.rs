@@ -2,20 +2,19 @@ use std::rc::Rc;
 use dominator::{clone};
 use shared::{api::{ApiEndpoint, endpoints}, domain::{image::*, meta::*}, error::{EmptyError, MetadataNotFound}};
 use utils::prelude::*;
-use wasm_bindgen::UnwrapThrowExt;
 use web_sys::File;
 use super::state::{BACKGROUND_NAME, State};
 
-pub async fn get_styles() -> Vec<Style> {
+pub async fn get_styles() -> Vec<ImageStyle> {
     let res = api_with_auth::<MetadataResponse, (), ()>(
         &endpoints::meta::Get::PATH,
         endpoints::meta::Get::METHOD,
         None
     ).await;
-    res.unwrap_ji().styles
+    res.unwrap_ji().image_styles
 }
 
-pub fn get_background_id(styles: &Vec<Style>) -> StyleId {
+pub fn get_background_id(styles: &Vec<ImageStyle>) -> ImageStyleId {
     styles
         .iter()
         .find(|s| s.display_name == BACKGROUND_NAME)
@@ -33,13 +32,8 @@ pub fn search(state: Rc<State>) {
             .iter()
             .map(|style_id| style_id.clone())
             .collect(),
-        tags: Vec::new(),
-        age_ranges: Vec::new(),
-        affiliations: Vec::new(),
-        categories: Vec::new(),
-        is_premium: None,
-        is_published: None,
         kind: Some(ImageKind::Sticker),
+        ..Default::default()
     };
     state.loader.load(clone!(state => async move {
         let res = api_with_auth::<ImageSearchResponse, EmptyError, _>(
