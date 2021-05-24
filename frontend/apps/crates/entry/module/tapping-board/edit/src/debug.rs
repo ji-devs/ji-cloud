@@ -32,7 +32,7 @@ use crate::steps::state::Step;
 use crate::steps::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::steps::sidebar::step_2::state::TabKind as ContentTabKind;
 use crate::steps::sidebar::step_3::state::TabKind as InteractionTabKind;
-use components::traces::state::DebugOptions as TracesOptions;
+use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";

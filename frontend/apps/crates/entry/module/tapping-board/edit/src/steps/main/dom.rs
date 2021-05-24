@@ -28,7 +28,7 @@ impl DomRenderable for Main {
                             vec![
                                 backgrounds::dom::render_raw(&raw_backgrounds),
                                 stickers::dom::render_raw(&raw_stickers),
-                                traces::dom::render_edit(traces)
+                                traces::edit::dom::render(traces)
                             ]
                         }
                     }

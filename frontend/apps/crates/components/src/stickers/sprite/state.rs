@@ -22,7 +22,7 @@ impl Sprite {
         Self {
             id: raw.id,
             lib: raw.lib,
-            transform: Rc::new(TransformState::new(raw.transform, None, on_transform_finished)),
+            transform: Rc::new(TransformState::new(raw.transform, None, true, on_transform_finished)),
         }
     }
 

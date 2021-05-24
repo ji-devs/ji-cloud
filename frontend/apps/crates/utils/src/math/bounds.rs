@@ -119,6 +119,16 @@ pub struct BoundsF64 {
 }
 
 impl BoundsF64 {
+    pub fn new() -> Self {
+        Self {
+            x: 0.0,
+            y: 0.0,
+            width: 0.0,
+            height: 0.0,
+            invert_y: false,
+        }
+    }
+
     pub fn top(&self) -> f64 {
         self.y
     }
@@ -134,6 +144,21 @@ impl BoundsF64 {
     }
     pub fn right(&self) -> f64 {
         self.x + self.width
+    }
+
+    pub fn middle_horizontal(&self) -> f64 {
+        self.x + (self.width/2.0)
+    }
+    pub fn middle_vertical(&self) -> f64 {
+        if self.invert_y {
+            self.y + (self.height/2.0)
+        } else {
+            self.y - (self.height/2.0)
+        }
+    }
+
+    pub fn middle(&self) -> (f64, f64) {
+        (self.middle_horizontal(), self.middle_vertical())
     }
 
     pub fn contains(&self, other:Self) -> bool {

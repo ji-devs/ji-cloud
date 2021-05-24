@@ -51,4 +51,4 @@ import "@elements/core/wysiwyg/wysiwyg-output-renderer";
 
 
 //trace
-import "@elements/module/_common/widgets/trace/edit";
+import "@elements/module/_common/widgets/trace/edit-menu";

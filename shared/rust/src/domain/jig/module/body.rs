@@ -215,7 +215,7 @@ pub enum TraceShape {
     /// width and height
     Rect(f64, f64),
     /// radius 
-    Circle(f64),
+    Ellipse(f64, f64),
     /// points
     Path(Vec<(f64, f64)>)
 }

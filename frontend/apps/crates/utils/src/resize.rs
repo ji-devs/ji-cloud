@@ -47,10 +47,13 @@ pub fn get_resize_info() -> ResizeInfo {
 
 
 impl ResizeInfo {
+
+    //given normalized coordinates, get the current relative value in pixels
     pub fn get_pos_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
         (x * self.width, y * self.height)
     }
 
+    //given absolute coordinates, get the coordinats within the viewport
     pub fn get_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
 
         //need to offset it by content space
@@ -60,6 +63,7 @@ impl ResizeInfo {
         (x, y)
     }
 
+    //given absolute coordinates, get normalized coordinates within the viewport
     pub fn get_pos_normalized(&self, x: f64, y: f64) -> (f64, f64) {
         let (x, y) = self.get_pos_px(x, y);
 
@@ -69,10 +73,22 @@ impl ResizeInfo {
         (x, y)
     }
 
+    //given the full size, get current relative size in px
+    pub fn get_size_px(&self, width: f64, height: f64) -> (f64, f64) {
+        (width * self.scale, height * self.scale)
+    }
+    //given original size, get the relative size compared to original full-size
     pub fn get_size_normalized(&self, width: f64, height: f64) -> (f64, f64) {
         let (full_width, full_height) = self.full_size();
 
         (width / full_width, height / full_height)
+    }
+
+    //given normalized coordinates, get the original full-size
+    pub fn get_size_full(&self, width: f64, height: f64) -> (f64, f64) {
+        let (full_width, full_height) = self.full_size();
+
+        (width * full_width, height * full_height)
     }
 
     //"rem" really means consistent, 

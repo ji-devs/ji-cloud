@@ -1,5 +1,5 @@
 use components::module::edit::MainExt;
-use components::traces::state::Traces;
+use components::traces::edit::state::Edit as TracesEdit;
 use crate::steps::state::{Step, Base};
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
@@ -38,7 +38,7 @@ impl Main {
 #[derive(Clone)]
 pub enum Phase {
     Layout,
-    Trace(Rc<Traces>)
+    Trace(Rc<TracesEdit>)
 }
 
 

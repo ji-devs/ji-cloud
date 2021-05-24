@@ -11,7 +11,7 @@ use super::{
     state::{Sprite, width_signal, height_signal},
     super::state::Stickers
 };
-use crate::transform::dom::TransformDom;
+use crate::transform;
 use shared::domain::jig::module::body::{Sprite as RawSprite, Transform};
 
 //For stickers, just let the transform affect it directly
@@ -56,9 +56,9 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
         )
         .child_signal(stickers.selected_signal(index.clone()).map(clone!(stickers, sprite, index => move |active| {
             if active {
-                Some(TransformDom::render(
+                Some(transform::dom::render(
                     sprite.transform.clone(),
-                    clone!(stickers, index, sprite => move || super::menu::dom::render(stickers.clone(), index.clone(), sprite.clone()))
+                    Some(clone!(stickers, index, sprite => move || super::menu::dom::render(stickers.clone(), index.clone(), sprite.clone())))
                 ))
             } else {
                 None

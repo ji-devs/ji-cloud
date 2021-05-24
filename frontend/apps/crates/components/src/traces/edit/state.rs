@@ -9,10 +9,16 @@ use std::cell::RefCell;
 use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
-use super::trace::{state::*, edit::state::Edit};
-use utils::prelude::*;
+use crate::traces::trace::state::Trace;
+use super::draw::state::*;
+use utils::{
+    prelude::*, 
+    drag::Drag,
+    resize::get_resize_info
+};
+use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d};
 
-pub struct Traces 
+pub struct Edit 
 {
     pub list: MutableVec<Rc<Trace>>,
     pub selected_index: Mutable<Option<usize>>,
@@ -23,16 +29,17 @@ pub struct Traces
 
 #[derive(Clone)]
 pub enum Phase {
-    DisplayAll,
-    Edit(Rc<Edit>),
+    All,
+    Draw(Rc<Draw>),
 }
+
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
     pub start_in_phase_draw: bool, 
 }
 
-impl Traces {
+impl Edit {
     pub fn to_raw(&self) -> Vec<RawTrace> {
         self.list
             .lock_ref()
@@ -53,7 +60,7 @@ impl Traces {
                 None => None,
                 Some(f) => Some(Box::new(f))
             },
-            phase: Mutable::new(Phase::DisplayAll),
+            phase: Mutable::new(Phase::All),
             on_change_cb: RefCell::new(None)
         });
 
@@ -75,7 +82,7 @@ impl Traces {
         }
 
         if debug_opts.start_in_phase_draw {
-            _self.start_new_trace();
+            Self::start_new_trace(_self.clone());
         }
 
         _self
@@ -110,3 +117,4 @@ impl Traces {
     }
 
 }
+

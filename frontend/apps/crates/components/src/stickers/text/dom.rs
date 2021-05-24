@@ -10,9 +10,9 @@ use futures_signals::{
 use shared::domain::jig::module::body::{Text as RawText, Transform};
 use crate::{
     transform::{
-        dom::TransformDom,
+        self, 
         events::Move as TransformMove,
-        state::{COORDS_IN_CENTER, TransformState, Action as TransformAction},
+        state::{TransformState, Action as TransformAction},
     },
     text_editor::dom::render_wysiwyg,
 };
@@ -45,9 +45,9 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
     text.transform.size.set(Some((BASE_WIDTH, BASE_HEIGHT)));
 
 
-    TransformDom::render_child(
+    transform::dom::render_child(
         text.transform.clone(),
-        clone!(stickers, index, text => move || super::menu::dom::render(stickers.clone(), index.clone(), text.clone())),
+        Some(clone!(stickers, index, text => move || super::menu::dom::render(stickers.clone(), index.clone(), text.clone()))),
         get_active_signal,
         get_active_signal().map(clone!(stickers, text, index => move |active| {
 
@@ -101,6 +101,8 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
 }
 pub fn render_raw(text: &RawText) -> Dom {
 
+    const COORDS_IN_CENTER:bool = true;
+
     let size = Some((BASE_WIDTH, BASE_HEIGHT));
 
     let width_signal = transform_signals::width_px(
@@ -127,7 +129,6 @@ pub fn render_raw(text: &RawText) -> Dom {
     html!("wysiwyg-output-renderer", {
         .property("valueAsString", &text.value)
         .style("display", "block")
-        .style("position", "absolute")
         .style("position", "absolute")
         .style("transform", text.transform.rotation_matrix_string())
         .style_signal("width", width_signal.map(|x| format!("{}px", x)))

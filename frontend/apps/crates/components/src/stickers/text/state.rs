@@ -24,7 +24,7 @@ impl Text {
         let text = text.clone();
         Self {
             value: Mutable::new(text.value),
-            transform: Rc::new(TransformState::new(text.transform, None, on_transform_finished)),
+            transform: Rc::new(TransformState::new(text.transform, None, true, on_transform_finished)),
             editor,
         }
     }

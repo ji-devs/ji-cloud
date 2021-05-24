@@ -23,7 +23,7 @@ const ROT_BUTTON_SIZE = 64;
 const ROT_STROKE_SIZE = 2;
 
 @customElement('transform-box')
-export class _ extends LitElement {
+export class TransformBox extends LitElement {
   static get styles() {
       return [css`
           svg, img-ui, #menu-btn {
@@ -125,6 +125,15 @@ export class _ extends LitElement {
           this.menuButtonDot = toBeat.id;
       }
 
+  }
+
+  getDotBounds = () => {
+      let ret = dotIds.map(id => 
+          this.shadowRoot?.getElementById(`dot-${id}`)?.getBoundingClientRect()
+                          );
+
+                          console.log(ret);
+                          return ret;
   }
 
   onResizeStart(pos:DotPos, evt:MouseEvent) {

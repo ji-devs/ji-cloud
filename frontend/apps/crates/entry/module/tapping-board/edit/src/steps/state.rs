@@ -16,7 +16,7 @@ use components::{
     text_editor::state::State as TextEditorState,
     stickers::state::Stickers,
     backgrounds::state::Backgrounds,
-    traces::state::Traces,
+    traces::edit::state::Edit as TracesEdit
 };
 use dominator::clone;
 
@@ -28,7 +28,7 @@ pub struct Base {
     // TappingBoard-specific
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
-    pub traces: Rc<Traces>, 
+    pub traces: Rc<TracesEdit>, 
     pub text_editor: Rc<TextEditorState>,
 }
 
@@ -58,7 +58,7 @@ impl Base {
                     });
                 }))
         );
-        let traces = Traces::new(
+        let traces = TracesEdit::new(
                 raw.map(|content| content.traces.as_ref()),
                 crate::debug::settings().traces.clone(),
                 Some(clone!(history => move |raw_traces| {
