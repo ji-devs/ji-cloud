@@ -65,5 +65,10 @@ pub fn render(state: Rc<State>) -> Dom {
                 on_change(&value);
             }
         }))
+        .event(clone!(state => move |e: events::CustomBlur| {
+            if let Some(on_blur) = &state.on_blur.borrow().as_ref() {
+                on_blur();
+            }
+        }))
     })
 }

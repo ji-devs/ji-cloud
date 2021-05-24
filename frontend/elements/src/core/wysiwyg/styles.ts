@@ -19,7 +19,7 @@ export function getElementStyles(props: CustomElement) {
     if(props.align === Align.Center) styles.textAlign = "center";
     else if(props.align === Align.Right) styles.textAlign = "right";
 
-    if(props.indentCount > 0) styles.textIndent = props.indentCount * TAB_SIZE;
+    if(props.indentCount > 0) styles.textIndent = (props.indentCount * TAB_SIZE) + 'px';
 
     return styles;
 }
@@ -30,7 +30,7 @@ export function getLeafStyles(text: CustomText) {
 
     if(text.underline) styles.textDecoration = "underline";
     if(text.italic) styles.fontStyle = "italic";
-    if(text.fontSize) styles.fontSize = text.fontSize;
+    if(text.fontSize) styles.fontSize = text.fontSize + 'px';
     if(text.color) styles.color = text.color;
     if(text.highlightColor) styles.backgroundColor = text.highlightColor;
     if(text.font) styles.fontFamily = text.font;

@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, FocusEvent } from "react";
 import { Descendant } from "slate";
 import { Editable, RenderElementProps, RenderLeafProps, Slate } from "slate-react";
 import { Leaf } from "./Leaf";
@@ -9,7 +9,7 @@ interface Props {
     backbone: EditorBackbone;
     value: Descendant[],
     onChange: (value: Descendant[]) => void;
-    onBlur: () => void,
+    onBlur: (e: FocusEvent) => void,
 }
 
 interface State {

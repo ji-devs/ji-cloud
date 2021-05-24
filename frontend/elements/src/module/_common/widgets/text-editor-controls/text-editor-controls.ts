@@ -30,6 +30,12 @@ export class _ extends LitElement {
             `,
         ];
     }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.setAttribute("tabindex", "0");
+    }
+
     render() {
         return html`
             <div class="row first">
