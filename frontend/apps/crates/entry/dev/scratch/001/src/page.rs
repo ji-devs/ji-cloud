@@ -28,7 +28,7 @@ pub struct Page { }
 
 impl Page {
     pub fn render() -> Dom {
-        render_image_search()
+        render_text()
     }
 }
 
@@ -216,7 +216,10 @@ fn render_text() -> Dom {
         Some(Box::new(clone!(value_change => move |v| {
             value_change.set(Some(v.to_string()));
             log::info!("{:?}", v);
-        })))
+        }))),
+        Some(Box::new(|| {
+            log::info!("On blur");
+        })),
     );
 
     html!("div", {

@@ -22,17 +22,19 @@ pub struct State {
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Mutable<Vec<String>>,
     pub on_change: RefCell<Option<Box<dyn Fn(&str)>>>,
+    pub on_blur: RefCell<Option<Box<dyn Fn()>>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: Mutable<ThemeId>,
 }
 
 impl State {
-    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Option<Box<dyn Fn(&str)>>) -> Rc<Self> {
+    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Option<Box<dyn Fn(&str)>>, on_blur: Option<Box<dyn Fn()>>, ) -> Rc<Self> {
         Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Mutable::new(Self::get_fonts(theme_id)),
             on_change: RefCell::new(on_change),
+            on_blur: RefCell::new(on_blur),
             value: RefCell::new(value),
             theme_id: Mutable::new(theme_id),
         })

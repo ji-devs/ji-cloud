@@ -212,8 +212,28 @@ export class _ extends LitElement {
     }
 
     private _blurSelection?: BaseSelection;
-    private onBlur() {
+    private onBlur(e: FocusEvent) {
         this._blurSelection = this.backbone.editor.selection;
+        if(!this.closestPassShadow(e.relatedTarget as Node, "text-editor-controls")) {
+            this.dispatchEvent(new Event("custom-blur"));
+        }
+    }
+
+    private closestPassShadow(node: Node | null, selector: string) : HTMLElement | null {
+        if (!node) {
+            return null;
+        }
+        if (node instanceof ShadowRoot) {
+            return this.closestPassShadow(node.host, selector);
+        }
+        if (node instanceof HTMLElement) {
+            if (node.matches(selector)) {
+                return node;
+            } else {
+                return this.closestPassShadow(node.parentNode, selector);
+            }
+        }
+        return this.closestPassShadow(node.parentNode, selector);
     }
 
     private reFocus() {
@@ -238,7 +258,7 @@ export class _ extends LitElement {
                     backbone: this.backbone,
                     value: this.value,
                     onChange: (e) => this.change(e),
-                    onBlur: () => this.onBlur(),
+                    onBlur: (e: any) => this.onBlur(e),
                 }
             ),
             this.editorRoot,
