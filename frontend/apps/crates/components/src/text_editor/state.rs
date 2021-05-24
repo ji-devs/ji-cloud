@@ -20,10 +20,10 @@ use super::super::font_loader::{FontLoader, Font as StaticFont};
 pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
-    pub fonts: Vec<String>,
+    pub fonts: Mutable<Vec<String>>,
     pub on_change: RefCell<Option<Box<dyn Fn(&str)>>>,
     pub value: RefCell<Option<String>>,
-    pub theme_id: ThemeId,
+    pub theme_id: Mutable<ThemeId>,
 }
 
 impl State {
@@ -31,10 +31,10 @@ impl State {
         Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
-            fonts: Self::get_fonts(theme_id),
+            fonts: Mutable::new(Self::get_fonts(theme_id)),
             on_change: RefCell::new(on_change),
             value: RefCell::new(value),
-            theme_id
+            theme_id: Mutable::new(theme_id),
         })
     }
 
@@ -42,6 +42,23 @@ impl State {
         self.value.replace(value);
         if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.borrow() {
             self.update_wysiwyg_value(&wysiwyg_ref);
+        }
+    }
+
+    pub fn set_theme(&self, theme_id: ThemeId) {
+        self.theme_id.set(theme_id.clone());
+        self.fonts.set(Self::get_fonts(theme_id));
+    }
+
+    pub fn select_all(&self) {
+        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
+            let select_all_method = Reflect::get(
+                &wysiwyg_ref,
+                &JsValue::from_str("selectAll")
+            )
+                .unwrap();
+            let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap();
+            let _ = select_all_method.call0(&wysiwyg_ref);
         }
     }
 
@@ -87,7 +104,7 @@ impl State {
             &JsValue::from_str(&ElementType::P1.to_string())
         );
 
-        let (font, color, font_size) = get_theme_element_styles(&self.theme_id, &ElementType::P1);
+        let (font, color, font_size) = get_theme_element_styles(&self.theme_id.lock_ref(), &ElementType::P1);
 
         let key = enum_variant_to_string(&ControlsChange::FontSize(0)) + &String::from("Default");
         let _ = Reflect::set(
@@ -240,7 +257,7 @@ impl State {
         let mut controls = self.controls.lock_mut();
         controls.element = element;
 
-        let element_styles = get_theme_element_styles(&self.theme_id, &controls.element);
+        let element_styles = get_theme_element_styles(&self.theme_id.lock_ref(), &controls.element);
         controls.font = element_styles.0;
         controls.color = Some(element_styles.1);
         controls.font_size = element_styles.2;

@@ -2,7 +2,7 @@ use futures_signals::signal::Mutable;
 use crate::locale::components::locale_outer::LocaleOuterDom;
 use dominator_helpers::futures::AsyncLoader;
 use dominator::{Dom, html, clone};
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 use super::state::*;
 use futures_signals::signal::SignalExt;
 
@@ -13,11 +13,11 @@ pub struct LocalePage {
 
 impl LocalePage {
     pub fn render() -> Dom {
-        let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
+        let state: Rc<RefCell<Option<State>>> = Rc::new(RefCell::new(None));
 
-        let loader = AsyncLoader::new();
+        let loader = Rc::new(AsyncLoader::new());
         loader.load(clone!(state => async move {
-            state.set(Some(Rc::new(State::new().await)));
+            state.replace(Some(State::new().await));
         }));
 
         Dom::with_state(loader, move |loader| {
@@ -28,7 +28,7 @@ impl LocalePage {
                             .property("visible", true)
                         }))
                     } else {
-                        let state: Rc<State> = state.lock_ref().clone().unwrap();
+                        let state: Rc<State> = Rc::new(k);
                         Some(LocaleOuterDom::render(state))
                     }
                 }))

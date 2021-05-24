@@ -1,7 +1,7 @@
 use dominator::{Dom, html, clone};
 use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::SignalExt;
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use strum::IntoEnumIterator;
 use crate::text_editor::font_css_converter::font_to_css;
 
@@ -39,7 +39,13 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("label", STR_FONT_LABEL)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| controls.font.to_string()))
                 // .style_signal("font-family", state.controls.signal_cloned().map(|controls| format!("'{}'", controls.font.to_string())))
-                .children(state.fonts.iter().map(|font| render_font_option(state.clone(), font)))
+                .children_signal_vec(
+                    state
+                        .fonts
+                        .signal_cloned()
+                        .to_signal_vec()
+                        .map(clone!(state => move |font| render_font_option(state.clone(), &font)))
+                )
             }),
             html!("button-collection", {
                 .property("slot", "element")
