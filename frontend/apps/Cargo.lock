@@ -56,6 +56,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-home"
+version = "0.1.0"
+dependencies = [
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "chrono",
+ "chrono-tz",
+ "components",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo-timers",
+ "htmlescape",
+ "js-sys",
+ "jsonwebtoken",
+ "log",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "simple-html-template",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "zxcvbn",
+]
+
+[[package]]
 name = "app-jig-edit"
 version = "0.1.0"
 dependencies = [

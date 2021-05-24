@@ -1,6 +1,6 @@
 import "@elements/entry/jig/publish/page";
 import "@elements/entry/jig/publish/sharing-caring";
-import "@elements/entry/home/TOSORT/image-thumbnail"; 
+// import "@elements/entry/home/TOSORT/image-thumbnail"; 
 import "@elements/core/inputs/form/textarea";
 import "@elements/core/inputs/switch";
 import "@elements/entry/jig/publish/resources";

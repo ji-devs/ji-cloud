@@ -125,7 +125,7 @@ pub struct AgeRange {
 }
 
 /// Represents an affiliation.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Affiliation {
     /// The id of the affiliation.
