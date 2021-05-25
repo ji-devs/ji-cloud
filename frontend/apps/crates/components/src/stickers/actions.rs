@@ -23,6 +23,12 @@ impl Stickers {
         }
     }
 
+    pub fn current_text_blur(&self) {
+        if let Some(text) = self.get_current_as_text() {
+            text.transform.rect_hidden.set_neq(false);
+        }
+    }
+
     pub fn deselect(&self) {
         self.selected_index.set(None);
     }

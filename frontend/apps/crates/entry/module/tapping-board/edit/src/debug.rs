@@ -82,7 +82,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Three),
+            step: Some(Step::Two),
             skip_save: true,
             bg_tab: Some(BgTabKind::Color),
             content_tab: Some(ContentTabKind::Image),

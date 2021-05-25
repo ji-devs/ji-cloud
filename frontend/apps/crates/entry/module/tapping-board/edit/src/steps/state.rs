@@ -19,6 +19,7 @@ use components::{
     traces::edit::state::Edit as TracesEdit
 };
 use dominator::clone;
+use std::cell::RefCell;
 
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
@@ -39,8 +40,14 @@ impl Base {
             None => ThemeId::None,
             Some(raw) => raw.theme_id
         };
-        
-        let text_editor = TextEditorState::new(theme_id, None, None);
+       
+        let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
+
+        let text_editor = TextEditorState::new(theme_id, None, None, Some(Box::new(clone!(stickers_ref => move || {
+            if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                stickers.current_text_blur();
+            }
+        }))));
 
         let backgrounds = Rc::new(Backgrounds::new(
                 raw.map(|content| &content.backgrounds),
@@ -58,6 +65,9 @@ impl Base {
                     });
                 }))
         );
+
+        *stickers_ref.borrow_mut() = Some(stickers.clone());
+
         let traces = TracesEdit::new(
                 raw.map(|content| content.traces.as_ref()),
                 crate::debug::settings().traces.clone(),
