@@ -168,8 +168,6 @@ async fn create(
 {
     let req = req.into_inner();
 
-    log::error!("HEY");
-
     let mut txn = db.begin().await?;
     let id = db::image::create(
         &mut txn,

@@ -1,6 +1,6 @@
-insert into jig (id, creator_id, author_id, created_at, language)
+insert into jig (id, creator_id, author_id, created_at, language, description, is_public)
 values
-    ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be', '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en');
+    ('0cc084bc-7c83-11eb-9f77-e3218dffb008', '1f241e1b-b537-493f-a230-075cb16315be', '1f241e1b-b537-493f-a230-075cb16315be', '2021-03-04 00:46:26.134651+00', 'en', 'test description', true);
 
 
 insert into jig_module (jig_id, id, index, kind, contents, created_at, is_complete)

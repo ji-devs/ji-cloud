@@ -122,6 +122,10 @@ pub struct JigCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub publish_at: Option<Publish>,
+
+    /// Description of the jig. Defaults to empty string.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
 }
 
 /// The over-the-wire representation of a JIG.
@@ -165,6 +169,16 @@ pub struct Jig {
 
     /// Additional resources of this JIG.
     pub additional_resources: Vec<AdditionalResourceId>,
+
+    /// Description of the jig.
+    pub description: Option<String>,
+
+    /// When the jig was last edited
+    pub last_edited: Option<DateTime<Utc>>,
+
+    /// Whether the jig is public or not.
+    pub is_public: bool,
+
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
@@ -226,6 +240,16 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub additional_resources: Option<Vec<AdditionalResourceId>>,
+
+    /// Description of the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub description: Option<String>,
+
+    /// Whether the jig is public or not.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub is_public: Option<bool>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
