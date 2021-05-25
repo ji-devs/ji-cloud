@@ -88,9 +88,8 @@ impl<'de> serde::Deserialize<'de> for UserOrMe {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigCreateRequest {
     /// The JIG's name.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub display_name: Option<String>,
+    pub display_name: String,
 
     /// The goals of this jig.
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -133,7 +132,7 @@ pub struct Jig {
     pub id: JigId,
 
     /// The JIG's name.
-    pub display_name: Option<String>,
+    pub display_name: String,
 
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,

@@ -52,7 +52,7 @@ async fn create(
 
     let id = db::jig::create(
         &*db,
-        req.display_name.as_deref(),
+        &req.display_name,
         &req.goals,
         &req.categories,
         &req.age_ranges,

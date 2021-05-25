@@ -16,7 +16,7 @@ use crate::error;
 
 pub async fn create(
     pool: &PgPool,
-    display_name: Option<&str>,
+    display_name: &str,
     goals: &[GoalId],
     categories: &[CategoryId],
     age_ranges: &[AgeRangeId],

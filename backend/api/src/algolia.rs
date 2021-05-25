@@ -35,7 +35,7 @@ const HAS_AUTHOR_TAG: &'static str = "hasAuthor";
 
 #[derive(Serialize)]
 struct BatchJig<'a> {
-    name: Option<&'a str>,
+    name: &'a str,
     // language: &'a str,
     age_ranges: &'a [Uuid],
     age_range_names: &'a [String],
@@ -299,7 +299,7 @@ for no key update skip locked;
 
             algolia::request::BatchWriteRequest::UpdateObject {
             body: match serde_json::to_value(&BatchJig {
-                name: row.name.as_deref(),
+                name: &row.name,
                 goals: &row.goals,
                 goal_names: &row.goal_names,
                 age_ranges: &row.age_ranges,
