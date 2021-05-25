@@ -19,5 +19,6 @@ use once_cell::sync::Lazy;
 use std::fmt::Write;
 
 pub fn render(state:Rc<Edit>) -> Dom { 
+    //TODO render all traces
     html!("div")
 }
