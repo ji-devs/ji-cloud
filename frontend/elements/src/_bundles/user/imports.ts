@@ -18,3 +18,4 @@ import "@elements/core/inputs/text";
 import "@elements/core/inputs/location";
 import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";
+import "@elements/core/window/window-loader-block";
