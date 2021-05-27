@@ -72,6 +72,9 @@ impl ResizeInfo {
 
         (x, y)
     }
+    pub fn get_size_denormalized(&self, width: f64, height: f64) -> (f64, f64) {
+        (width * self.width, height * self.height)
+    }
 
     //given the full size, get current relative size in px
     pub fn get_size_px(&self, width: f64, height: f64) -> (f64, f64) {

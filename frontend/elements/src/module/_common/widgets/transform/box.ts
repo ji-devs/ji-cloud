@@ -128,12 +128,7 @@ export class TransformBox extends LitElement {
   }
 
   getDotBounds = () => {
-      let ret = dotIds.map(id => 
-          this.shadowRoot?.getElementById(`dot-${id}`)?.getBoundingClientRect()
-                          );
-
-                          console.log(ret);
-                          return ret;
+      return dotIds.map(id => this.shadowRoot?.getElementById(`dot-${id}`)?.getBoundingClientRect());
   }
 
   onResizeStart(pos:DotPos, evt:MouseEvent) {

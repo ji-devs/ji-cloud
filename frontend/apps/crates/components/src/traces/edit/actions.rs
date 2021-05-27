@@ -11,9 +11,10 @@ use crate::transform::state::TransformState;
 use dominator::clone;
 use super::{
     state::*,
-    draw::state::*
+    draw::state::*,
+    all::trace::state::*,
 };
-use crate::traces::trace::state::*;
+use crate::traces::utils::TraceExt;
 use utils::{
     prelude::*, 
     drag::Drag,
@@ -23,6 +24,7 @@ use utils::{
 
 impl Edit {
     pub fn delete_index(&self, index: usize) {
+        self.selected_index.set(None);
         self.list.lock_mut().remove(index);
         self.call_change();
         /*
@@ -32,6 +34,25 @@ impl Edit {
         */
     }
 
+    pub fn duplicate(&self, index: usize) {
+        {
+            let mut list = self.list.lock_mut();
+            if let Some(trace) = list.get(index) {
+                let mut trace = trace.to_raw();
+                let mut translation = &mut trace.transform.translation.0;
+
+                //TODO - make the nudging random
+                translation[0] += 0.01;
+                translation[1] -= 0.01;
+                let resize_info = get_resize_info();
+                let trace = Rc::new(AllTrace::new(trace, &resize_info));
+
+                list.push_cloned(trace);
+                self.select_index(list.len()-1);
+            }
+        }
+        self.call_change();
+    }
 
     pub fn select_index(&self, index:usize) {
         self.selected_index.set(Some(index));
@@ -42,23 +63,42 @@ impl Edit {
         self.selected_index.set(None);
     }
 
-    pub fn start_new_trace(_self: Rc<Self>) {
-        let draw = Draw::new(clone!(_self => move |trace| {
-            //On finished
-            if let Some(trace) = trace {
-                let mut list = _self.list.lock_mut();
-                list.push_cloned(Rc::new(Trace::new(
-                    Some(trace.to_raw()),
-                    _self.on_change_cb.borrow().as_ref().unwrap_ji().clone()
-                )));
+    pub fn start_new_trace(_self: Rc<Self>, replace_index: Option<usize>, init: Option<(i32, i32)>) {
 
-                _self.select_index(list.len()-1);
+        _self.selected_index.set(replace_index); // a bit ugly but consistently deselects/selects
+
+        let init_trace = replace_index.and_then(|index| {
+            _self.list.lock_ref()
+                .get(index)
+                .map(|trace| trace.to_raw())
+        });
+
+        let draw = Draw::new(init_trace, clone!(_self => move |raw| {
+            //On finished
+            if let Some(raw) = raw {
+
+                let resize_info = get_resize_info();
+                let mut list = _self.list.lock_mut();
+                
+                let trace = Rc::new(AllTrace::new(raw, &resize_info));
+
+                match replace_index {
+                    None => {
+                        list.push_cloned(trace);
+                        _self.select_index(list.len()-1);
+                    },
+                    Some(index) => {
+                        list.set_cloned(index, trace);
+                    }
+                }
 
                 _self.phase.set(Phase::All);
-
-
             }
         }));
+
+        if let Some((x, y)) = init {
+            draw.start_draw(x, y);
+        }
         _self.phase.set(Phase::Draw(Rc::new(draw)));
     }
     // Internal - saving/history is done on the module level

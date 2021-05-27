@@ -4,7 +4,7 @@ import {nothing} from "lit-html";
 
 type TraceEditKind = "path" | "rect" | "circle";
 
-@customElement('trace-edit-menu')
+@customElement('trace-edit-reshape-menu')
 export class _ extends LitElement {
   static get styles() {
       return [css`

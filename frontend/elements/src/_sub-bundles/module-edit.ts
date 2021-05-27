@@ -52,4 +52,5 @@ import "@elements/core/wysiwyg/wysiwyg-output-renderer";
 
 
 //trace
-import "@elements/module/_common/widgets/trace/edit-menu";
+import "@elements/module/_common/widgets/trace/edit-reshape-menu";
+import "@elements/module/_common/widgets/trace/edit-select-box";

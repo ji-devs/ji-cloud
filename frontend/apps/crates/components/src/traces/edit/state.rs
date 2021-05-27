@@ -9,8 +9,11 @@ use std::cell::RefCell;
 use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
-use crate::traces::trace::state::Trace;
-use super::draw::state::*;
+use super::{
+    draw::state::*,
+    all::trace::state::*,
+};
+use crate::traces::utils::TraceExt;
 use utils::{
     prelude::*, 
     drag::Drag,
@@ -20,7 +23,7 @@ use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d};
 
 pub struct Edit 
 {
-    pub list: MutableVec<Rc<Trace>>,
+    pub list: MutableVec<Rc<AllTrace>>,
     pub selected_index: Mutable<Option<usize>>,
     pub on_change: Option<Box<dyn Fn(Vec<RawTrace>)>>,
     pub on_change_cb: RefCell<Option<Rc<Box<dyn Fn()>>>>, 
@@ -68,28 +71,26 @@ impl Edit {
 
 
         if let Some(raw) = raw {
+            let resize_info = get_resize_info();
             _self.list.lock_mut().replace_cloned( 
                         raw.
                             into_iter()
                             .map(|trace| {
-                                Rc::new(Trace::new(
-                                    Some(trace.clone()),
-                                    _self.on_change_cb.borrow().as_ref().unwrap_ji().clone()
-                                ))
+                                Rc::new(AllTrace::new(trace.clone(), &resize_info))
                             })
                             .collect()
             );
         }
 
         if debug_opts.start_in_phase_draw {
-            Self::start_new_trace(_self.clone());
+            Self::start_new_trace(_self.clone(), None, None);
         }
 
         _self
 
     }
 
-    pub fn get_current(&self) -> Option<Rc<Trace>> {
+    pub fn get_current(&self) -> Option<Rc<AllTrace>> {
         self
             .selected_index
             .get_cloned()
@@ -97,7 +98,7 @@ impl Edit {
     }
 
 
-    pub fn get(&self, index: usize) -> Option<Rc<Trace>> {
+    pub fn get(&self, index: usize) -> Option<Rc<AllTrace>> {
         self.list.lock_ref().get(index).map(|x| x.clone())
     }
 

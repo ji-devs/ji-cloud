@@ -25,19 +25,57 @@ static BG_CLASS: Lazy<String> = Lazy::new(|| class! {
 static MASK_RECT_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("fill", "white")
 });
-static MASK_SHAPE_CLASS: Lazy<String> = Lazy::new(|| class! {
+static SHAPE_MASK_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("fill", "black")
+    .style("cursor", "pointer")
 });
 
+static SHAPE_SHADOW_CLASS: Lazy<String> = Lazy::new(|| class! {
+    .style("fill", "blue")
+    .style("cursor", "pointer")
+});
 
-pub fn render<ChildrenMaskSignal, OnMouseDownFn, OnMouseUpFn, OnMouseMoveFn>(
+static SHAPE_TRANSPARENT_CLASS: Lazy<String> = Lazy::new(|| class! {
+    .style("fill-opacity", "0")
+    .style("cursor", "pointer")
+});
+
+pub struct ShapeStyle {
+    pub base: ShapeStyleBase
+}
+
+pub enum ShapeStyleBase {
+    Mask,
+    Shadow,
+    Transparent,
+}
+
+impl ShapeStyle {
+    pub fn new(base: ShapeStyleBase) -> Self {
+        Self {
+            base
+        }
+    }
+
+    pub fn class(&self) -> &'static str {
+        match self.base {
+            ShapeStyleBase::Mask => &SHAPE_MASK_CLASS,
+            ShapeStyleBase::Shadow => &SHAPE_SHADOW_CLASS,
+            ShapeStyleBase::Transparent => &SHAPE_TRANSPARENT_CLASS,
+        }
+    }
+}
+
+pub fn render_masks<ChildrenMaskSignal, ChildrenDrawSignal, OnMouseDownFn, OnMouseUpFn, OnMouseMoveFn>(
     children_mask: ChildrenMaskSignal,
+    children_draw: ChildrenDrawSignal,
     on_mouse_down:OnMouseDownFn,
     on_mouse_up:OnMouseUpFn,
     on_mouse_move:OnMouseMoveFn,
 ) -> Dom 
 where 
     ChildrenMaskSignal: SignalVec<Item = Dom> + 'static,
+    ChildrenDrawSignal: SignalVec<Item = Dom> + 'static,
     OnMouseDownFn: Fn(i32, i32) + Clone + 'static,
     OnMouseUpFn: Fn(i32, i32) + Clone + 'static,
     OnMouseMoveFn: Fn(i32, i32) + Clone + 'static,
@@ -83,6 +121,7 @@ where
                 .children_signal_vec(children_mask)
             }))
         }))
+        .children_signal_vec(children_draw)
 
         .global_event_preventable(clone!(on_mouse_up => move |evt:events::MouseUp| {
             on_mouse_up(evt.x() as i32, evt.y() as i32);
@@ -93,6 +132,27 @@ where
     })
 }
 
+/*
+pub fn render_simple<ChildrenSignal>(
+    children: ChildrenSignal,
+) -> Dom 
+where 
+    ChildrenSignal: SignalVec<Item = Dom> + 'static,
+
+{
+    svg!("svg", {
+        .class(&*SVG_CLASS)
+        .attribute_signal("width", resize_info_signal().map(|info| {
+            format!("{}px", info.width)
+        }))
+        .attribute_signal("height", resize_info_signal().map(|info| {
+            format!("{}px", info.height)
+        }))
+        .children_signal_vec(children)
+    })
+}
+*/
+
 fn apply_transform<A: AsRef<web_sys::Element>>(dom:DomBuilder<A>, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>) -> DomBuilder<A> {
     dom.apply_if(transform_size.is_some(), |dom| {
         let (transform, size) = transform_size.unwrap_ji();
@@ -102,7 +162,7 @@ fn apply_transform<A: AsRef<web_sys::Element>>(dom:DomBuilder<A>, resize_info: &
         dom.attribute("style", &style)
     })
 }
-pub fn render_path_signal(resize_info: ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &Mutable<Vec<(f64, f64)>>) -> Dom {
+pub fn render_path_signal(shape_style: &ShapeStyle, resize_info: ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &Mutable<Vec<(f64, f64)>>) -> Dom {
     let path_string = 
         points.signal_ref(clone!(resize_info => move |points| {
             if points.len() < 2 {
@@ -119,12 +179,12 @@ pub fn render_path_signal(resize_info: ResizeInfo, transform_size: Option<(&Tran
         }));
 
     svg!("path", {
-        .class(&*MASK_SHAPE_CLASS)
+        .class(shape_style.class())
         .attribute_signal("d", path_string)
         .apply(|dom| apply_transform(dom, &resize_info, transform_size))
     })
 }
-pub fn render_path(resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &[(f64, f64)]) -> Dom {
+pub fn render_path(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &[(f64, f64)], on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
     let path_string = {
         if points.len() < 2 {
             String::from("M 0 0")
@@ -140,37 +200,52 @@ pub fn render_path(resize_info: &ResizeInfo, transform_size: Option<(&Transform,
     };
 
     svg!("path", {
-        .class(&*MASK_SHAPE_CLASS)
+        .class(shape_style.class())
         .attribute("d", &path_string)
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
+        .event(clone!(on_select => move |evt:events::Click| {
+            if let Some(on_select) = &on_select {
+                (on_select)();
+            }
+        }))
     })
 }
 
 
-pub fn render_rect(resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, width: f64, height: f64) -> Dom {
+pub fn render_rect(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, width: f64, height: f64, on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
 
     let (width, height) = resize_info.get_pos_denormalized(width, height);
 
     svg!("rect", {
-        .class(&*MASK_SHAPE_CLASS)
+        .class(shape_style.class())
         .attribute("width", &format!("{}px", width))
         .attribute("height", &format!("{}px", height))
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
+        .event(clone!(on_select => move |evt:events::Click| {
+            if let Some(on_select) = &on_select {
+                (on_select)();
+            }
+        }))
     })
 
 }
 
-pub fn render_ellipse(resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, radius_x: f64, radius_y: f64) -> Dom {
+pub fn render_ellipse(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, radius_x: f64, radius_y: f64, on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
 
     let (radius_x, radius_y) = resize_info.get_pos_denormalized(radius_x, radius_y);
 
     svg!("ellipse", {
-        .class(&*MASK_SHAPE_CLASS)
+        .class(shape_style.class())
         .attribute("cx", &format!("{}px", radius_x))
         .attribute("cy", &format!("{}px", radius_y))
         .attribute("rx", &format!("{}px", radius_x))
         .attribute("ry", &format!("{}px", radius_y))
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
+        .event(clone!(on_select => move |evt:events::Click| {
+            if let Some(on_select) = &on_select {
+                (on_select)();
+            }
+        }))
     })
 
 }

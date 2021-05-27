@@ -12,23 +12,12 @@ use dominator::clone;
 use utils::{math::BoundsF64, prelude::*};
 
 #[derive(Clone)]
-pub struct Trace {
+pub struct DrawTrace {
     pub transform: Rc<TransformState>,
     pub shape: Mutable<TraceShape>,
 }
 
-#[derive(Clone)]
-pub enum TraceShape {
-    /// width and height
-    Rect(f64, f64),
-    /// radius 
-    Ellipse(f64, f64),
-    /// points - all rendered at once so no benefit to MutableVec
-    Path(Mutable<Vec<(f64, f64)>>)
-}
-
-
-impl Trace {
+impl DrawTrace {
     pub fn new(raw: Option<RawTrace>, on_change_cb: Rc<Box<dyn Fn()>>) -> Self {
         let raw = match raw {
             Some(raw) => raw,
@@ -52,92 +41,51 @@ impl Trace {
             shape: Mutable::new(raw.shape.into()) 
         }
     }
+}
 
-    pub fn to_raw(&self) -> RawTrace {
+impl crate::traces::utils::TraceExt for DrawTrace {
+    fn to_raw(&self) -> RawTrace {
         RawTrace {
             transform: self.transform.get_inner_clone(),
             shape: self.shape.get_cloned().into()
         }
     }
 
-    pub fn calc_bounds(&self, add_transform: bool) -> Option<BoundsF64> {
-        let mut bounds = match &*self.shape.lock_ref() {
+    fn calc_bounds(&self, add_offset : bool) -> Option<BoundsF64> {
+        use crate::traces::utils::{calc_bounds, ShapeRef};
+
+        let offset = if add_offset {
+            Some(self.transform.get_inner_clone().get_translation_2d())
+        } else {
+            None
+        };
+
+        match &*self.shape.lock_ref() {
             TraceShape::Path(path) => {
-                //Set to inverse of max values
-                let mut left:f64 = 1.0;
-                let mut right:f64 = 0.0;
-                let mut top:f64 = 1.0;
-                let mut bottom:f64 = 0.0;
-                for (x, y) in path.lock_ref().iter() {
-                    let x = *x;
-                    let y = *y;
-                    if x < left {
-                        left = x;
-                    }
-
-                    if x > right {
-                        right = x;
-                    }
-
-                    if y < top {
-                        top = y;
-                    }
-
-                    if y > bottom {
-                        bottom = y;
-                    }
-                }
-
-                let width = right - left;
-                let height = bottom - top;
-
-
-
-                if width > 0.0 && height > 0.0 {
-                    Some(BoundsF64 {
-                        x: left,
-                        y: top,
-                        width,
-                        height,
-                        invert_y: true 
-                    })
-                } else {
-                    None
-                }
+                calc_bounds(
+                    ShapeRef::Path(&path.lock_ref()), 
+                    offset 
+                )
             },
 
             TraceShape::Ellipse(radius_x, radius_y) => {
-                Some(BoundsF64 {
-                    x: 0.0,
-                    y: 0.0,
-                    width: radius_x * 2.0,
-                    height: radius_y * 2.0,
-                    invert_y: true
-                })
+                calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
             },
             TraceShape::Rect(width, height) => {
-                Some(BoundsF64 {
-                    x: 0.0,
-                    y: 0.0,
-                    width: *width,
-                    height: *height,
-                    invert_y: true
-                })
-            }
-        };
-
-        if add_transform {
-            if let Some(bounds) = bounds.as_mut() {
-                let transform = self.transform.get_inner_clone();
-                let (tx, ty) = transform.get_translation_2d();
-                bounds.x += tx;
-                bounds.y += ty;
+                calc_bounds(ShapeRef::Rect(*width, *height), offset)
             }
         }
 
-        bounds
-
     }
+}
+#[derive(Clone)]
+pub enum TraceShape {
+    /// width and height
+    Rect(f64, f64),
+    /// radius 
+    Ellipse(f64, f64),
+    /// points - all rendered at once so no benefit to MutableVec
+    Path(Mutable<Vec<(f64, f64)>>)
 }
 
 impl From<RawTraceShape> for TraceShape {

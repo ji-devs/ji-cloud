@@ -70,7 +70,7 @@ impl Base {
 
         let traces = TracesEdit::new(
                 raw.map(|content| content.traces.as_ref()),
-                crate::debug::settings().traces.clone(),
+                crate::debug::settings().trace_opts.clone(),
                 Some(clone!(history => move |raw_traces| {
                     history.push_modify(|raw| {
                         if let Some(content) = &mut raw.content {

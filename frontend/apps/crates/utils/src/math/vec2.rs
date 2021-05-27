@@ -18,7 +18,19 @@ pub fn angle(v1:&[f64], v2:&[f64]) -> f64 {
         cosine.acos()
     }
 }
+pub fn add(v1:&[f64], v2:&[f64]) -> [f64;2] {
+    [
+        v1[0] + v2[0],
+        v1[1] + v2[1]
+    ]
+}
 
+pub fn multiply(v1:&[f64], v2:&[f64]) -> [f64;2] {
+    [
+        v1[0] * v2[0],
+        v1[1] * v2[1]
+    ]
+}
 //technically the cross product is supposed to return a vector
 //but we're just interested in the value
 pub fn cross_value(v1:&[f64], v2:&[f64]) -> f64 {

@@ -119,6 +119,21 @@ pub struct BoundsF64 {
 }
 
 impl BoundsF64 {
+    pub fn new_from_dom_normalized(rect:&DomRect, resize_info:&ResizeInfo) -> Self {
+        let (x, y) = resize_info.get_pos_normalized(rect.x(), rect.y());
+        let (width, height) = (
+            rect.width() / resize_info.width, 
+            rect.height() / resize_info.height
+        ); 
+
+        Self {
+            x,
+            y,
+            width,
+            height,
+            invert_y: true
+        }
+    }
     pub fn new() -> Self {
         Self {
             x: 0.0,
@@ -177,6 +192,23 @@ impl BoundsF64 {
         };
 
         contains_horiz && contains_vert
+    }
+
+
+    pub fn denormalize(&self, resize_info: &ResizeInfo) -> Self {
+
+        let (x, y) = resize_info.get_pos_denormalized(self.x, self.y);
+
+        let (width, height) = resize_info.get_size_denormalized(self.width, self.height);
+
+
+        Self {
+            x,
+            y,
+            width,
+            height,
+            invert_y: self.invert_y 
+        }
     }
 }
 

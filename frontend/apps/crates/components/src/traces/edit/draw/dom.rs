@@ -7,16 +7,34 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use super::state::*;
-use crate::traces::{svg, trace::state::*};
+use super::{
+    state::*,
+    trace::state::*,
+};
+use crate::traces::{edit::{state::*, all::trace::state::*}, svg::{self, ShapeStyle, ShapeStyleBase}};
 
 use web_sys::HtmlCanvasElement;
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
 use crate::transform;
+pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom { 
 
-pub fn render(state:Rc<Draw>) -> Dom { 
+    let selected_index = edit_state.selected_index.get_cloned();
+
+    log::info!("{:?}", selected_index);
+
+    let shadow_traces:Vec<Rc<AllTrace>> = 
+        edit_state.list
+            .lock_ref()
+            .iter()
+            .enumerate()
+            .filter(|(idx, value)| {
+                Some(*idx) != selected_index 
+            })
+            .map(|(_, value)| value.clone())
+            .collect();
+
     let trace_signal = map_ref! {
         let resize_info = resize_info_signal(),
         let shape = state.trace.shape.signal_cloned(),
@@ -29,28 +47,52 @@ pub fn render(state:Rc<Draw>) -> Dom {
             }
     };
 
-    let children = 
-        trace_signal.map(clone!(state => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
-            if !display_trace {
-                svg::render_path(&resize_info, None, &draw_points)
-            } else {
-                let transform_size = size.map(|size| (&transform, size));
-                match shape {
+    let mask_children = 
+        trace_signal.map(clone!(state, shadow_traces => move |(resize_info, size, display_trace, draw_points, shape, transform)| {
 
-                    TraceShape::Path(path) => {
-                        svg::render_path_signal(resize_info.clone(), transform_size, &path)
-                    },
+            let mut elements:Vec<Dom> = Vec::new();
+            elements.push({
+                let style = ShapeStyle::new(ShapeStyleBase::Mask);
 
-                    TraceShape::Rect(width, height) => {
-                        svg::render_rect(&resize_info, transform_size, width, height)
-                    }
-                    TraceShape::Ellipse(radius_x, radius_y) => {
-                        svg::render_ellipse(&resize_info, transform_size, radius_x, radius_y)
+                if !display_trace {
+                    svg::render_path(&style, &resize_info, None, &draw_points, None::<fn()>)
+                } else {
+                    let transform_size = size.map(|size| (&transform, size));
+                    match shape {
+
+                        TraceShape::Path(path) => {
+                            svg::render_path_signal(&style, resize_info.clone(), transform_size, &path)
+                        },
+
+                        TraceShape::Rect(width, height) => {
+                            svg::render_rect(&style, &resize_info, transform_size, width, height, None::<fn()>)
+                        }
+                        TraceShape::Ellipse(radius_x, radius_y) => {
+                            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, None::<fn()>)
+                        }
                     }
                 }
+            });
+
+            for trace in shadow_traces.iter() {
+                let style = ShapeStyle::new(ShapeStyleBase::Mask);
+                elements.push(crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace, None::<fn()>))
             }
+
+            elements
         }))
-        .map(|dom| vec![dom])
+        .to_signal_vec();
+
+    let shadow_children = resize_info_signal()
+        .map(move |resize_info| {
+            shadow_traces
+                .iter()
+                .map(|trace| {
+                    let style = ShapeStyle::new(ShapeStyleBase::Shadow);
+                    crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace, None::<fn()>)
+                })
+                .collect::<Vec<Dom>>()
+        })
         .to_signal_vec();
 
     let menu_signal = map_ref! {
@@ -62,9 +104,11 @@ pub fn render(state:Rc<Draw>) -> Dom {
     };
 
     html!("empty-fragment", {
+        //.child(svg::render_simple(shadow_children))
         .child(
-            svg::render(
-                children,
+            svg::render_masks(
+                mask_children,
+                shadow_children,
                 clone!(state => move |x, y| {
                     state.start_draw(x, y);
                 }),

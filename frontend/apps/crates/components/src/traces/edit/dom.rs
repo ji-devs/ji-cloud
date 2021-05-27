@@ -8,6 +8,7 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use super::state::*;
+use super::all::trace::state::*;
 use web_sys::HtmlCanvasElement;
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
@@ -23,7 +24,7 @@ pub fn render(state:Rc<Edit>) -> Dom {
                     Some(super::all::dom::render(state.clone()))
                 },
                 Phase::Draw(draw) => {
-                    Some(super::draw::dom::render(draw.clone()))
+                    Some(super::draw::dom::render(draw.clone(), state.clone()))
                 }
             }
         })))

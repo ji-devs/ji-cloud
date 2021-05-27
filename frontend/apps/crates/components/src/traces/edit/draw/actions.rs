@@ -5,9 +5,10 @@ use crate::transform::state::TransformState;
 use dominator::clone;
 use super::{
     state::*,
-    menu::state::*
+    menu::state::*,
+    trace::state::*,
 };
-use crate::traces::trace::state::*;
+use crate::traces::utils::TraceExt;
 use utils::{
     prelude::*, 
     drag::Drag,
@@ -18,6 +19,8 @@ use utils::{
 impl Draw {
     /// 
     pub fn start_draw(&self, x: i32, y: i32) {
+
+        self.trace.transform.reset();
 
         let resize_info = get_resize_info();
         let (pos_x, pos_y) = resize_info.get_pos_px(x as f64, y as f64);
@@ -60,6 +63,7 @@ impl Draw {
         if let Some(bounds) = self.trace.calc_bounds(true) {
             let resize_info = get_resize_info();
             let (width, height) = resize_info.get_size_full(bounds.width, bounds.height);
+
 
             self.trace.transform.size.set(Some((width, height)));
             self.menu.set(Some(Menu::new(self.trace.clone())));
@@ -121,7 +125,7 @@ impl Draw {
     }
     pub fn done(&self) {
         if let Some(bounds) = self.trace.calc_bounds(true) {
-            (self.on_finished) (Some(self.trace.clone()));
+            (self.on_finished) (Some(self.trace.to_raw()));
         } else {
             (self.on_finished) (None);
         }

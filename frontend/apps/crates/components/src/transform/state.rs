@@ -73,6 +73,9 @@ impl TransformState {
         }
     }
 
+    pub fn reset(&self) {
+        self.transform.set(Transform::identity());
+    }
 
     pub fn get_inner_clone(&self) -> Transform {
         self.transform.get_cloned()

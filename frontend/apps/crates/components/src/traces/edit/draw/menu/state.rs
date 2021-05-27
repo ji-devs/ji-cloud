@@ -1,9 +1,9 @@
 use utils::{prelude::*, resize::ResizeInfo, math::BoundsF64};
-use crate::traces::trace::state::*;
+use crate::traces::edit::draw::trace::state::*;
 
 #[derive(Clone)]
 pub struct Menu {
-    pub trace: Trace 
+    pub trace: DrawTrace 
 }
 
 //in normalized units
@@ -13,7 +13,7 @@ const MENU_MARGIN: f64 = 0.01;
 const MENU_WIDTH: f64 = 217.0;
 
 impl Menu {
-    pub fn new(trace: Trace) -> Self {
+    pub fn new(trace: DrawTrace) -> Self {
         Self { trace }
     }
 
