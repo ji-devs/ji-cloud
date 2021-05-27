@@ -1,7 +1,7 @@
 use shared::domain::{
-    meta::{StyleId, AffiliationId, AgeRangeId},
+    meta::{ImageStyleId, AffiliationId, AgeRangeId},
     category::CategoryId,
-    image::{Image, ImageId, ImageSearchQuery},
+    image::{ImageId, ImageSearchQuery, ImageMetadata},
 };
 use futures_signals::signal::Mutable;
 use dominator_helpers::futures::AsyncLoader;
@@ -52,14 +52,14 @@ pub struct MutableImage {
     pub name: Mutable<String>,
     pub description: Mutable<String>,
     pub is_premium: Mutable<bool>,
-    pub styles: Mutable<HashSet<StyleId>>,
+    pub styles: Mutable<HashSet<ImageStyleId>>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
     pub categories: Mutable<HashSet<CategoryId>>,
 }
 
-impl From<Image> for MutableImage {
-    fn from(image:Image) -> Self {
+impl From<ImageMetadata> for MutableImage {
+    fn from(image:ImageMetadata) -> Self {
         Self {
             id: Mutable::new(image.id),
             name: Mutable::new(image.name),

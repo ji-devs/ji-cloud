@@ -36,7 +36,7 @@ impl State {
             ids
                 .iter()
                 .map(|id| {
-                    metadata.styles.iter().find(|hit| hit.id == *id)
+                    metadata.image_styles.iter().find(|hit| hit.id == *id)
                         .map(|hit| hit.display_name.to_string())
                         .unwrap_or_default()
                 })

@@ -18,7 +18,7 @@ impl Section1Dom {
         let state = Rc::new(State::new(meta_state, image, metadata));
 
         html!("image-meta-section-1", {
-            .children(state.metadata.styles.iter().map(|style| {
+            .children(state.metadata.image_styles.iter().map(|style| {
                 let id = style.id;
                 html!("input-checkbox", {
                     .property("slot", "styles")

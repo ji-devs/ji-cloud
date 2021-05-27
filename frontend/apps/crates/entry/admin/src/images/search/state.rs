@@ -2,7 +2,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt}
 };
-use shared::domain::image::{ImageSearchQuery, ImageSearchResponse, Image};
+use shared::domain::image::{ImageSearchQuery, ImageSearchResponse, ImageMetadata};
 use dominator_helpers::futures::AsyncLoader;
 use crate::strings;
 
@@ -27,7 +27,7 @@ impl State {
         self.query.signal_ref(|query| query.q.clone())
     }
 
-    pub fn images_signal_vec(&self) -> impl SignalVec<Item = Image> {
+    pub fn images_signal_vec(&self) -> impl SignalVec<Item = ImageMetadata> {
         self.response
             .signal_cloned()
             .map(|resp| {

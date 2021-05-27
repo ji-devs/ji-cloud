@@ -24,7 +24,7 @@ impl State {
         }
     }
 
-    pub fn style_selected(&self, id: StyleId) -> impl Signal<Item = bool> {
+    pub fn style_selected(&self, id: ImageStyleId) -> impl Signal<Item = bool> {
         self.image.styles.signal_ref(move |styles| styles.contains(&id))
     }
 

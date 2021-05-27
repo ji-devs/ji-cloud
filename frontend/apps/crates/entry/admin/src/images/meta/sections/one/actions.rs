@@ -11,7 +11,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
-pub fn toggle_style(state: Rc<State>, id: StyleId, flag: bool) {
+pub fn toggle_style(state: Rc<State>, id: ImageStyleId, flag: bool) {
     {
         let mut styles = state.image.styles.lock_mut();
         if flag {
