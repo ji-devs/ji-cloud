@@ -550,3 +550,44 @@ impl Into<actix_web::Error> for Register {
         }
     }
 }
+
+#[api_v2_errors(
+    code = 400,
+    code = 403,
+    code = 404,
+    description = "Not Found: Resource Not Found",
+    code = 409,
+    description = "Conflict: Another tag with the provided index already exists",
+    code = 500
+)]
+pub enum Tag {
+    TakenIndex,
+    ResourceNotFound,
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for Tag {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for Tag {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::TakenIndex => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "Tag index already taken".to_owned(),
+            )
+            .into(),
+
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
+
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}

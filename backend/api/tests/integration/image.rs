@@ -263,7 +263,7 @@ mod tag {
         let client = reqwest::Client::new();
 
         let resp = client
-            .post(&format!("http://0.0.0.0:{}/v1/image/tag", port,))
+            .post(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, 3))
             .json(&ImageTagCreateRequest {
                 display_name: "test name".to_owned(),
             })
@@ -283,7 +283,8 @@ mod tag {
         Ok(())
     }
 
-    async fn update(id: &str, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
+    #[actix_rt::test]
+    async fn create_conflict() -> anyhow::Result<()> {
         let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
 
         let port = app.port();
@@ -291,7 +292,58 @@ mod tag {
         let client = reqwest::Client::new();
 
         let resp = client
-            .patch(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, id,))
+            .post(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, 0))
+            .json(&ImageTagCreateRequest {
+                display_name: "test name".to_owned(),
+            })
+            .login()
+            .send()
+            .await?;
+
+        assert_eq!(resp.status(), StatusCode::CONFLICT);
+
+        app.stop(false).await;
+
+        Ok(())
+    }
+
+    #[actix_rt::test]
+    async fn list() -> anyhow::Result<()> {
+        let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+
+        let port = app.port();
+
+        let client = reqwest::Client::new();
+
+        log::info!("making request");
+
+        let resp = client
+            .get(&format!("http://0.0.0.0:{}/v1/image/tag/all", port,))
+            .login()
+            .send()
+            .await?
+            .error_for_status()?;
+
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let body: serde_json::Value = resp.json().await?;
+
+        insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
+
+        app.stop(false).await;
+
+        Ok(())
+    }
+
+    async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
+        let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+
+        let port = app.port();
+
+        let client = reqwest::Client::new();
+
+        let resp = client
+            .patch(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, index,))
             .json(&req)
             .login()
             .send()
@@ -300,7 +352,18 @@ mod tag {
 
         assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
-        // no get route, changes verified by inspecting database
+        let resp = client
+            .get(&format!("http://0.0.0.0:{}/v1/image/tag/all", port,))
+            .login()
+            .send()
+            .await?
+            .error_for_status()?;
+
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let body: serde_json::Value = resp.json().await?;
+
+        insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
 
         app.stop(false).await;
 
@@ -310,7 +373,7 @@ mod tag {
     #[actix_rt::test]
     async fn update_no_index() -> anyhow::Result<()> {
         update(
-            "5b032222-a3a4-11eb-96e7-dbc5742f1640",
+            0,
             ImageTagUpdateRequest {
                 display_name: Some("test".to_owned()),
                 index: None,
@@ -322,10 +385,10 @@ mod tag {
     #[actix_rt::test]
     async fn update_with_index() -> anyhow::Result<()> {
         update(
-            "5b032222-a3a4-11eb-96e7-dbc5742f1640",
+            1,
             ImageTagUpdateRequest {
                 display_name: Some("test".to_owned()),
-                index: Some(3),
+                index: Some(15),
             },
         )
         .await
@@ -334,7 +397,7 @@ mod tag {
     #[actix_rt::test]
     async fn update_none() -> anyhow::Result<()> {
         update(
-            "5b032222-a3a4-11eb-96e7-dbc5742f1640",
+            1,
             ImageTagUpdateRequest {
                 display_name: None,
                 index: None,
@@ -346,13 +409,51 @@ mod tag {
     #[actix_rt::test]
     async fn update_only_index() -> anyhow::Result<()> {
         update(
-            "5e72c62e-a3a4-11eb-96e7-c78c34eb32ee",
+            1,
             ImageTagUpdateRequest {
                 display_name: None,
-                index: Some(0),
+                index: Some(3),
             },
         )
         .await
+    }
+
+    #[actix_rt::test]
+    async fn update_conflict() -> anyhow::Result<()> {
+        let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+
+        let port = app.port();
+
+        let client = reqwest::Client::new();
+
+        let resp = client
+            .patch(&format!("http://0.0.0.0:{}/v1/image/tag/{}", port, 1))
+            .json(&ImageTagUpdateRequest {
+                display_name: None,
+                index: Some(0),
+            })
+            .login()
+            .send()
+            .await?;
+
+        assert_eq!(resp.status(), StatusCode::CONFLICT);
+
+        let resp = client
+            .get(&format!("http://0.0.0.0:{}/v1/image/tag/all", port,))
+            .login()
+            .send()
+            .await?
+            .error_for_status()?;
+
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let body: serde_json::Value = resp.json().await?;
+
+        insta::assert_json_snapshot!(body, { ".**.id" => "[id]" });
+
+        app.stop(false).await;
+
+        Ok(())
     }
 
     #[actix_rt::test]
@@ -364,10 +465,7 @@ mod tag {
         let client = reqwest::Client::new();
 
         let resp = client
-            .delete(&format!(
-                "http://0.0.0.0:{}/v1/image/tag/5b032222-a3a4-11eb-96e7-dbc5742f1640",
-                port,
-            ))
+            .delete(&format!("http://0.0.0.0:{}/v1/image/tag/2", port,))
             .login()
             .send()
             .await?

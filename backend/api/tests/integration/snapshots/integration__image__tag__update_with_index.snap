@@ -1,0 +1,24 @@
+---
+source: tests/integration/image.rs
+expression: body
+
+---
+{
+  "image_tags": [
+    {
+      "index": 0,
+      "display_name": "A",
+      "id": "[id]"
+    },
+    {
+      "index": 2,
+      "display_name": "C",
+      "id": "[id]"
+    },
+    {
+      "index": 15,
+      "display_name": "test",
+      "id": "[id]"
+    }
+  ]
+}

@@ -49,7 +49,7 @@ pub mod user {
 
 /// Types to manage image tags.
 pub mod tag {
-    use crate::domain::meta::TagId;
+    use crate::domain::meta::{Tag, TagId};
     #[cfg(feature = "backend")]
     use paperclip::actix::Apiv2Schema;
     use serde::{Deserialize, Serialize};
@@ -62,14 +62,25 @@ pub mod tag {
         pub display_name: String,
     }
 
+    /// Response returned to list all image tags.
     #[derive(Serialize, Deserialize)]
     #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    /// Response returned when a new category is created.
+    pub struct ImageTagListResponse {
+        /// Indexes and ids for all the image tags.
+        pub image_tags: Vec<ImageTagResponse>,
+    }
+
+    /// Response for a single tag.
+    #[derive(Serialize, Deserialize)]
+    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
     pub struct ImageTagResponse {
-        /// The index of the image tag.
+        /// The index of the image tag found.
         pub index: i16,
 
-        /// The id of the image tag.
+        /// The display name of the image tag found.
+        pub display_name: String,
+
+        /// The id of the image tag found.
         pub id: TagId,
     }
 
@@ -80,9 +91,8 @@ pub mod tag {
         /// Display name of the image tag. `None` means no change to be made.
         pub display_name: Option<String>,
 
-        /// If [`Some`] move to _before_ the category with the given index (ie, 0 moves to the start).
-        /// If index to be updated to is greater than the number of tags in the database, then the
-        /// tag will be moved to the end.
+        /// If [`Some`] attempt to move tag to the given index. If it is already occupied, do no
+        /// change the indexing.
         ///
         /// If `index` is [`None`] then it will not be updated.
         pub index: Option<i16>,

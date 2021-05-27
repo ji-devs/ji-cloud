@@ -56,150 +56,122 @@ returning id as "id: ImageId"
 
 pub mod tag {
     use crate::error;
+    use futures::stream::BoxStream;
     use paperclip::actix::NoContent;
-    use shared::domain::meta::TagId;
-    use sqlx::{PgConnection, PgPool};
+    use shared::domain::{image::tag::ImageTagResponse, meta::TagId};
+    use sqlx::postgres::PgDatabaseError;
+    use sqlx::PgPool;
 
-    pub async fn create(db: &PgPool, display_name: &str) -> sqlx::Result<(TagId, i16)> {
-        let res = sqlx::query!(
+    pub async fn list(db: &PgPool) -> sqlx::Result<Vec<ImageTagResponse>> {
+        sqlx::query_as!(
+            ImageTagResponse,
             r#"
-insert into image_tag (index, display_name)
-values ((select count(*)::int8 from image_tag), $1)
-returning id, index
-            "#,
-            display_name,
+select id as "id: TagId", display_name, index from "image_tag"
+order by index
+            "#
         )
-        .fetch_one(db)
-        .await?;
-
-        Ok((TagId(res.id), res.index))
+        .fetch_all(db)
+        .await
     }
 
-    async fn update_index(
-        txn: &mut PgConnection,
-        id: TagId,
-        old_index: i16,
-        new_index: i16,
-    ) -> sqlx::Result<()> {
-        // assert_ne!(old_index, new_index); // should never be reached
+    pub async fn create(
+        db: &PgPool,
+        index: i16,
+        display_name: &str,
+    ) -> Result<(i16, String, TagId), error::Tag> {
+        let mut txn = db.begin().await?;
 
-        match old_index < new_index {
-            true => {
-                sqlx::query!(
-                    r#"
-update image_tag
-    set index = index - 1
-where index > $1 and index <= $2
-                    "#,
-                    old_index,
-                    new_index,
-                )
-                .execute(&mut *txn)
-                .await?;
-            }
-            false => {
-                sqlx::query!(
-                    r#"
-update image_tag
-    set index = index + 1
-where index >= $2 and index < $1
-                    "#,
-                    old_index,
-                    new_index,
-                )
-                .execute(&mut *txn)
-                .await?;
-            }
-        };
-
-        sqlx::query!(
-            r#"update image_tag set index = least((select count(*)::int2 from image_tag where id is distinct from $2), $1) where id = $2"#,
-            new_index,
-            id.0,
+        let res = sqlx::query!(
+            // language=SQL
+            r#"
+insert into image_tag (index, display_name)
+values ($1, $2)
+returning id as "id: TagId", index as "index: i16", display_name
+            "#,
+            index,
+            display_name,
         )
-        .execute(&mut *txn)
+        .fetch_one(&mut txn)
         .await?;
 
-        Ok(())
+        txn.commit().await.map_err(|err| match err {
+            sqlx::Error::Database(err)
+                if err.downcast_ref::<PgDatabaseError>().constraint()
+                    == Some("image_tag_index_key") =>
+            {
+                log::info!("CONFLICT FOUND");
+                error::Tag::TakenIndex
+            }
+            e => e.into(),
+        })?;
+
+        Ok((res.index, res.display_name, res.id))
     }
 
     pub async fn update(
         db: &PgPool,
-        id: TagId,
+        curr_index: i16,
         display_name: Option<&str>,
-        index: Option<i16>,
-    ) -> Result<NoContent, error::UpdateWithMetadata> {
+        new_index: Option<i16>,
+    ) -> Result<NoContent, error::Tag> {
         let mut txn = db.begin().await?;
 
         let res = sqlx::query!(
-            r#"select index as "index: i16" from image_tag where id = $1 for update"#,
-            id.0
+            r#"select index as "index: i16" from image_tag where index = $1 for update"#,
+            curr_index
         )
         .fetch_optional(&mut txn)
         .await?;
 
         if res.is_none() {
-            return Err(error::UpdateWithMetadata::ResourceNotFound);
-        }
-
-        if let Some(new_index) = index {
-            let old_index = res.unwrap().index;
-            if old_index != new_index {
-                update_index(&mut txn, id, old_index, new_index).await?
-            }
+            txn.commit().await?;
+            return Err(error::Tag::ResourceNotFound);
         }
 
         if let Some(display_name) = display_name {
             sqlx::query!(
-                r#"update image_tag set display_name = $2 where id = $1"#,
-                id.0,
+                r#"update image_tag set display_name = $2 where index = $1"#,
+                curr_index,
                 display_name,
             )
             .execute(&mut txn)
             .await?;
         }
 
-        txn.commit().await?;
-
-        Ok(NoContent)
-    }
-
-    pub async fn delete(db: &PgPool, id: TagId) -> sqlx::Result<()> {
-        let mut txn = db.begin().await?;
-
-        let res = sqlx::query!(
-            // TODO verify row locks
-            r#"
-with del as (
-    delete from image_tag
-        where id = $1
-        returning index
-),
-     lock as (
-         select 1 as discard
-         from image_tag,
-              del
-         where image_tag.index > del.index
-             for update
-     )
-select index as "index: i16"
-from del
-        "#,
-            id.0,
-        )
-        .fetch_optional(&mut txn)
-        .await?;
-
-        if let Some(res) = res {
+        if let Some(new_index) = new_index {
             sqlx::query!(
-                r#"update image_tag set index = index - 1 where index > $1"#,
-                res.index,
+                r#"
+            update image_tag set index = $2 where index = $1
+            "#,
+                curr_index,
+                new_index
             )
             .execute(&mut txn)
             .await?;
         }
 
-        txn.commit().await?;
+        txn.commit().await.map_err(|err| match err {
+            sqlx::Error::Database(err)
+                if err.downcast_ref::<PgDatabaseError>().constraint()
+                    == Some("image_tag_index_key") =>
+            {
+                error::Tag::TakenIndex
+            }
+            e => e.into(),
+        })?;
+
+        Ok(NoContent)
+    }
+
+    pub async fn delete(db: &PgPool, index: i16) -> sqlx::Result<()> {
+        sqlx::query!(
+            r#"
+delete from image_tag where index = $1
+            "#,
+            index
+        )
+        .execute(db)
+        .await?;
 
         Ok(())
     }
