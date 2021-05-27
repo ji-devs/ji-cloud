@@ -179,6 +179,9 @@ pub struct Goal {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Tag {
+    /// Index of the tag.
+    pub index: i16,
+
     /// The id of the tag.
     pub id: TagId,
 

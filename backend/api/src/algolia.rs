@@ -506,6 +506,23 @@ fn filters_for_ids<T: Into<Uuid> + Copy>(
     }
 }
 
+// fn fitlers_for_int_ids<T: Into<i64> + Copy>(
+//     filters: &mut Vec<Box<dyn AndFilterable>>,
+//     facet_name: &str,
+//     ids: &[T],
+// ) {
+//     for id in ids.iter().copied() {
+//         let id: i64 = id.into();
+//         filters.push(Box::new(CommonFilter {
+//             filter: FacetFilter {
+//                 facet_name: facet_name.to_owned(),
+//                 value: id.to_string(),
+//             },
+//             invert: false,
+//         }))
+//     }
+// }
+
 fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter> {
     CommonFilter {
         filter: FacetFilter {
