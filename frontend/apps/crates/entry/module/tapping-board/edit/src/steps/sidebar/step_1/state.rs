@@ -4,6 +4,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
     image::search::state::{State as ImageSearchState, ImageSearchOptions},
+    color_select::state::{State as ColorPickerState},
 };
 pub struct Step1 {
     pub base: Rc<Base>,
@@ -19,7 +20,7 @@ impl Step1 {
             None => TabKind::Image
         };
 
-        let tab = Mutable::new(Tab::new(kind));
+        let tab = Mutable::new(Tab::new(base.clone(), kind));
 
         Self {
             base,
@@ -50,12 +51,12 @@ impl TabKind {
 pub enum Tab {
     //Image(Rc<ImageSearchState>),
     Image(Rc<ImageSearchState>),
-    Color(()),
-    Overlay(())
+    Color(Rc<ColorPickerState>),
+    Overlay(Rc<ImageSearchState>),
 }
 
 impl Tab {
-    pub fn new(kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
         match kind {
             TabKind::Image => {
                 let opts = ImageSearchOptions {
@@ -70,10 +71,20 @@ impl Tab {
                 Self::Image(Rc::new(state))
             },
             TabKind::Color => {
-                Self::Color(())
+                let state = ColorPickerState::new(None, None);
+                Self::Color(Rc::new(state))
             },
             TabKind::Overlay => {
-                Self::Overlay(())
+                let opts = ImageSearchOptions {
+                    background_only: Some(true),
+                    upload: true, 
+                    filters: true, 
+                };
+
+                let state = ImageSearchState::new(opts, Some(|id, lib| {
+                    log::info!("Image selected: {:?} {:?}", id, lib);
+                }));
+                Self::Overlay(Rc::new(state))
             }
         }
     }

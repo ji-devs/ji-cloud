@@ -109,7 +109,7 @@ impl DebugSettings {
             ),
             step: Some(Step::One),
             skip_save: true,
-            bg_tab: Some(BgTabKind::Image),
+            bg_tab: Some(BgTabKind::Color),
             content_tab: Some(ContentTabKind::Image),
             interaction_tab: Some(InteractionTabKind::Text),
             trace_opts: Some(TracesOptions {
