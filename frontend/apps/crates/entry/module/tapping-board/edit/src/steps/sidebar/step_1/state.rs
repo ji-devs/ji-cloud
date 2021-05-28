@@ -60,9 +60,8 @@ impl Tab {
             TabKind::Image => {
                 let opts = ImageSearchOptions {
                     background_only: Some(true),
-                    upload: Some(()), 
-                    filters: Some(()), 
-                    value: Mutable::new(None) 
+                    upload: true, 
+                    filters: true, 
                 };
 
                 let state = ImageSearchState::new(opts, Some(|id, lib| {

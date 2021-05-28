@@ -42,11 +42,8 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     .property("size", "thumb")
                     .property("id", image.id.0.to_string())
                     .event(clone!(state, image => move |_: events::Click| {
-                        state.options.value.set(Some(image.id));
-                        if let Some(on_image_select) = state.on_image_select.as_ref() {
-                            //TODO - this should change if the library has changed
-                            on_image_select(image.id.clone(), MediaLibrary::Global);
-                        }
+                        //TODO - this should change if the library has changed
+                        state.set_selected(image.id, MediaLibrary::Global);
                     }))
                     .event(clone!(image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
@@ -104,7 +101,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
         }));
     }
 
-    if options.upload.is_some() {
+    if options.upload {
         vec.push(html!("image-search-upload", {
             .property("slot", "upload")
             .property("label", "Upload")
@@ -117,7 +114,7 @@ fn render_controls(state: Rc<State>) -> Vec<Dom> {
         }));
     }
 
-    if options.filters.is_some() {
+    if options.filters {
         vec.push(render_filters(state.clone()));
     }
 

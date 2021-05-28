@@ -66,7 +66,6 @@ impl State {
 // if some: control is visible and the some value is the default, if none: the control is not visible
 pub struct ImageSearchOptions {
     pub background_only: Option<bool>,
-    pub upload: Option<()>, // NOTE: make this a bool? - David
-    pub filters: Option<()>, // NOTE: make this a bool? - David
-    pub value: Mutable<Option<ImageId>>,
+    pub upload: bool, 
+    pub filters: bool, 
 }

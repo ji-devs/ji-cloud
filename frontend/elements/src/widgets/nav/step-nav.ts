@@ -23,8 +23,8 @@ export class _ extends LitElement {
                 display: inline-block;
                 background-color: var(--light-gray-1);
                 height: 2px;
+                /* 50px matches the width of the circle-button */
                 width: calc(100% + 50px);
-                margin-left: -25px;
             }
             :host([completed]) .line::after {
                 background-color: var(--dark-green-1);

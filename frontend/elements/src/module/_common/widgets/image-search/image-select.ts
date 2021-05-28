@@ -63,6 +63,7 @@ export class _ extends LitElement {
             ::slotted([slot=images]) {
                 display: grid;
                 place-content: center;
+                cursor: pointer;
             }
         `];
     }

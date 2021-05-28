@@ -1,9 +1,17 @@
 use std::rc::Rc;
 use dominator::{clone};
-use shared::{api::{ApiEndpoint, endpoints}, domain::{image::*, meta::*}, error::{EmptyError, MetadataNotFound}};
+use shared::{api::{ApiEndpoint, endpoints}, domain::{image::*, meta::*}, error::{EmptyError, MetadataNotFound}, media::MediaLibrary};
 use utils::prelude::*;
 use web_sys::File;
 use super::state::{BACKGROUND_NAME, State};
+
+impl State {
+    pub fn set_selected(&self, id: ImageId, library: MediaLibrary) {
+        if let Some(on_image_select) = self.on_image_select.as_ref() {
+            on_image_select(id, library);
+        }
+    }
+}
 
 pub async fn get_styles() -> Vec<ImageStyle> {
     let res = api_with_auth::<MetadataResponse, (), ()>(
@@ -76,7 +84,7 @@ pub async fn upload_file(state: Rc<State>, file: File) {
             let path = endpoints::image::Upload::PATH.replace("{id}", &id.0.to_string());
             match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
                 Ok(_) => {
-                    state.options.value.set(Some(resp.id));
+                    state.set_selected(id, MediaLibrary::User); 
                 },
                 Err(_) => {
                     log::error!("error uploading!");
@@ -88,3 +96,5 @@ pub async fn upload_file(state: Rc<State>, file: File) {
         }
     }
 }
+
+

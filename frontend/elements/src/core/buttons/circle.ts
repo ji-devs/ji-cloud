@@ -18,9 +18,9 @@ export class CircleButton extends LitElement {
           display: flex;
           flex-direction: column;
           align-items: center;
-          margin-left: 8px;
-          margin-right: 8px;
-          width: 84px;
+
+          /* if you change this, also need to change step-nav .line::after */
+          width: 50px;
           color: #4a4a4a;
         }
         .circle {
