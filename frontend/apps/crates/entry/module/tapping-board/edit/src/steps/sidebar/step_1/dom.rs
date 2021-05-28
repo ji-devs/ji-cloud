@@ -3,6 +3,9 @@ use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
+use components::{
+    image::search::dom::render as render_image_search
+};
 
 pub fn render(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
@@ -15,8 +18,7 @@ pub fn render(state: Rc<Step1>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
                         Tab::Image(state) => {
-                            None
-                            //Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state.clone(), None))
                         },
                         _ => None,
                     }

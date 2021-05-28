@@ -107,9 +107,9 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Three),
+            step: Some(Step::One),
             skip_save: true,
-            bg_tab: Some(BgTabKind::Color),
+            bg_tab: Some(BgTabKind::Image),
             content_tab: Some(ContentTabKind::Image),
             interaction_tab: Some(InteractionTabKind::Text),
             trace_opts: Some(TracesOptions {

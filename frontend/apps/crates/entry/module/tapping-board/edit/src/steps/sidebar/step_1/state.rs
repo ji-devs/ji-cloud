@@ -2,7 +2,9 @@ use crate::steps::state::{Step, Base};
 use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
-
+use components::{
+    image::search::state::{State as ImageSearchState, ImageSearchOptions},
+};
 pub struct Step1 {
     pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
@@ -47,7 +49,7 @@ impl TabKind {
 #[derive(Clone)]
 pub enum Tab {
     //Image(Rc<ImageSearchState>),
-    Image(()),
+    Image(Rc<ImageSearchState>),
     Color(()),
     Overlay(())
 }
@@ -56,7 +58,17 @@ impl Tab {
     pub fn new(kind:TabKind) -> Self {
         match kind {
             TabKind::Image => {
-                Self::Image(())
+                let opts = ImageSearchOptions {
+                    background_only: Some(true),
+                    upload: Some(()), 
+                    filters: Some(()), 
+                    value: Mutable::new(None) 
+                };
+
+                let state = ImageSearchState::new(opts, Some(|id, lib| {
+                    log::info!("Image selected: {:?} {:?}", id, lib);
+                }));
+                Self::Image(Rc::new(state))
             },
             TabKind::Color => {
                 Self::Color(())
