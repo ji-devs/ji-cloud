@@ -20,8 +20,8 @@ enum ColorSelectFor {
 }
 
 pub fn render(state: Rc<State>) -> Dom {
-    let select_for: Rc<Mutable<Option<ColorSelectFor>>> = Rc::new(Mutable::new(None));
-    let select_value: Rc<Mutable<Option<RGBA8>>> = Rc::new(Mutable::new(None));
+    let select_for: Mutable<Option<ColorSelectFor>> = Mutable::new(None);
+    let select_value: Mutable<Option<RGBA8>> = Mutable::new(None);
 
     spawn_local(select_value.signal_cloned().for_each(clone!(state, select_for => move |color| {
         let color = rgba8_to_hex_optional(&color);
@@ -64,7 +64,7 @@ pub fn render(state: Rc<State>) -> Dom {
             .apply(|dom| {
                 let color_state = Rc::new(color_select::state::State::new(
                     Some(state.theme_id.lock_ref().clone()),
-                    select_value.clone()
+                    Some(select_value.clone())
                 ));
 
                 spawn_local(state.theme_id.signal_cloned().for_each(clone!(color_state => move |theme_id| {

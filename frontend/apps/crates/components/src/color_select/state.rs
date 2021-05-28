@@ -36,21 +36,21 @@ static SYSTEM_COLORS: &'static [&str] = &[
 
 
 pub struct State {
-    pub value: Rc<Mutable<Option<RGBA8>>>,
+    pub value: Mutable<Option<RGBA8>>,
     pub system_colors: Rc<Vec<RGBA8>>,
-    pub theme_colors: Rc<Mutable<Option<Vec<RGBA8>>>>,
+    pub theme_colors: Mutable<Option<Vec<RGBA8>>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
 }
 
 impl State {
-    pub fn new(theme: Option<ThemeId>, value: Rc<Mutable<Option<RGBA8>>>) -> Self {
+    pub fn new(theme: Option<ThemeId>, value: Option<Mutable<Option<RGBA8>>>) -> Self {
         Self {
-            value,
+            value: value.unwrap_or_else(|| Mutable::new(None)),
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-            theme_colors: Rc::new(Mutable::new(match theme {
+            theme_colors: Mutable::new(match theme {
                 Some(theme_id) => Some(Self::get_theme_colors(theme_id)),
                 None => None,
-            })),
+            }),
             user_colors: Rc::new(MutableVec::new()),
         }
     }
