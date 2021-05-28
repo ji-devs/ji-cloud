@@ -21,11 +21,11 @@ pub struct State {
     pub page: Mutable<Option<u32>>,
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
-    pub on_image_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>,
+    pub on_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>,
 }
 
 impl State {
-    pub fn new(image_search_options: ImageSearchOptions, on_image_select: Option<impl Fn(ImageId, MediaLibrary) + 'static>) -> Self {
+    pub fn new(image_search_options: ImageSearchOptions, on_select: Option<impl Fn(ImageId, MediaLibrary) + 'static>) -> Self {
         let styles = Rc::new(RefCell::new(None));
         let selected_styles = HashSet::new();
 
@@ -51,13 +51,7 @@ impl State {
             query: Mutable::new(String::new()),
             page: Mutable::new(None),
             styles,
-            on_image_select: {
-                //See: https://users.rust-lang.org/t/why-cant-i-map-box-new/60389
-                match on_image_select {
-                    Some(f) => Some(Box::new(f)),
-                    None => None
-                }
-            }
+            on_select: on_select.map(|f| Box::new(f) as _)
         }
     }
 }

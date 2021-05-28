@@ -2,6 +2,13 @@ use crate::steps::state::{Step, Base};
 use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
+use components::{
+    image::search::state::{State as ImageSearchState, ImageSearchOptions},
+    audio_input::{
+        options::AudioInputOptions,
+        state::State as AudioInputState
+    }
+};
 
 pub struct Step2 {
     pub base: Rc<Base>,
@@ -17,7 +24,7 @@ impl Step2 {
             None => TabKind::Text
         };
 
-        let tab = Mutable::new(Tab::new(kind));
+        let tab = Mutable::new(Tab::new(base.clone(), kind));
 
         Self {
             base,
@@ -46,30 +53,46 @@ impl TabKind {
 
 #[derive(Clone)]
 pub enum Tab {
-    //Image(Rc<ImageSearchState>),
-    Text(()),
-    Image(()),
-    Audio(())
+    Text, // uses top-level state since it must be toggled from main too
+    Image(Rc<ImageSearchState>),
+    Audio(Rc<AudioInputState>)
 }
 
 impl Tab {
-    pub fn new(kind:TabKind) -> Self {
+    pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
         match kind {
             TabKind::Text=> {
-                Self::Text(())
+                Self::Text
             },
             TabKind::Image=> {
-                Self::Image(())
+                let opts = ImageSearchOptions {
+                    background_only: Some(true),
+                    upload: true, 
+                    filters: true, 
+                };
+
+                let state = ImageSearchState::new(opts, Some(|id, lib| {
+                    log::info!("Image selected: {:?} {:?}", id, lib);
+                }));
+
+                Self::Image(Rc::new(state))
             },
             TabKind::Audio => {
-                Self::Audio(())
+                let opts = AudioInputOptions::default();
+
+                let state = AudioInputState::new(opts, Some(clone!(base => |audio| {
+                    if let Some((id, lib)) = audio {
+                        log::info!("Recorded audio: {:?} lib: {:?}", id, lib);
+                    }
+                })));
+                Self::Audio(Rc::new(state))
             }
         }
     }
 
     pub fn kind(&self) -> TabKind {
         match self {
-            Self::Text(_) => TabKind::Text,
+            Self::Text => TabKind::Text,
             Self::Image(_) => TabKind::Image,
             Self::Audio(_) => TabKind::Audio,
         }

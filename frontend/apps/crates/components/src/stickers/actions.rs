@@ -17,7 +17,7 @@ impl Stickers {
         self.selected_index.set(Some(index));
     }
 
-    pub fn current_text_change(&self, value:String) {
+    pub fn set_current_text_value(&self, value:String) {
         if let Some(text) = self.get_current_as_text() {
             text.set_value(value);
         }

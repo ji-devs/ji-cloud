@@ -50,6 +50,12 @@ import "@elements/core/overlays/anchored-overlay";
 import "@elements/core/wysiwyg/wysiwyg-base";
 import "@elements/core/wysiwyg/wysiwyg-output-renderer";
 
+//color select
+import "@elements/module/_common/widgets/color-select/color-select";
+import "@elements/module/_common/widgets/color-select/color-select-section";
+import "@elements/module/_common/widgets/color-select/color-select-item";
+import "@elements/core/inputs/color";
+
 
 //trace
 import "@elements/module/_common/widgets/trace/edit-reshape-menu";

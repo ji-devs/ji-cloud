@@ -27,7 +27,6 @@ const BASE_HEIGHT:f64 = 300.0;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
-    pub mock_box: bool
 }
 //For text, we need to be able to click into the text while the transform is active
 //therefore it's a child of the transform
@@ -62,44 +61,35 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
             }
 
             if active {
+
                 Some(html!("div", {
                     .style("display", "block")
                     .style("border", "green dashed 1px")
                     .style("box-sizing", "border-box")
                     .style("align-self", "baseline")
                     .apply(|dom| apply_transform(dom, &text.transform))
-
-                    //TODO - set text.rect_hidden to false when wysiwyg is blured
                     .child(render_wysiwyg(text.editor.clone()))
                 }))
             } else {
-                    if debug_opts.mock_box {
-                        Some(html!("div", {
-                            .text("Hello World!!!")
-                            .style("display", "block")
-                            .style("background-color", "red")
-                            .style("text-align", "center")
-                            .apply(|dom| apply_transform(dom, &text.transform))
-                        }))
-                    } else {
-                        Some(html!("wysiwyg-output-renderer", {
-                            .property_signal("valueAsString", text.value.signal_cloned())
-                            .style("cursor", "pointer") //TODO: move to element
-                            .apply(|dom| apply_transform(dom, &text.transform))
-                            .event(clone!(index, stickers, text => move |evt:events::Click| {
-                                if let Some(index) = index.get_cloned() {
-                                    let value = text.value.get_cloned();
+                Some(html!("wysiwyg-output-renderer", {
+                    .property_signal("valueAsString", text.value.signal_cloned())
+                    .style("cursor", "pointer")
+                    .apply(|dom| apply_transform(dom, &text.transform))
+                    .event(clone!(index, stickers, text => move |evt:events::Click| {
+                        if let Some(index) = index.get_cloned() {
+                            let value = text.value.get_cloned();
 
-                                    text.editor.set_value(if value.is_empty() { None } else { Some(value) });
-                                    stickers.select_index(index);
-                                }
-                            }))
-                        }))
-                    }
+                            text.editor.set_value(if value.is_empty() { None } else { Some(value) });
+                            stickers.select_index(index);
+                        }
+                    }))
+                }))
             }
     })))
 }
 pub fn render_raw(text: &RawText) -> Dom {
+
+    log::info!("RENDERING RAW!");
 
     const COORDS_IN_CENTER:bool = true;
 
@@ -128,7 +118,6 @@ pub fn render_raw(text: &RawText) -> Dom {
 
     html!("wysiwyg-output-renderer", {
         .property("valueAsString", &text.value)
-        .style("display", "block")
         .style("position", "absolute")
         .style("transform", text.transform.rotation_matrix_string())
         .style_signal("width", width_signal.map(|x| format!("{}px", x)))

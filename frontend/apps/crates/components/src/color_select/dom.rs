@@ -68,6 +68,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
 
 
 fn render_static_section(state: Rc<State>, color_options: &Vec<RGBA8>, label: &str) -> Dom {
+
     html!("color-select-section", {
         .property("slot", "sections")
         .property("label", label)
@@ -82,7 +83,7 @@ fn render_static_section(state: Rc<State>, color_options: &Vec<RGBA8>, label: &s
                     }
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    state.value.set(Some(color.clone()));
+                    state.set_selected(color.clone());
                 }))
             })
         }))
@@ -105,7 +106,7 @@ fn render_user_section(state: Rc<State>) -> Dom {
                     false
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    state.value.set(Some(color.clone()));
+                    state.set_selected(color.clone());
                 }))
                 .attribute("deletable", "")
                 .child(html!("button-icon", {

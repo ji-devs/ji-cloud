@@ -93,22 +93,20 @@ impl InstructionsEditor {
         let Self {instructions, save} = self;
 
         let opts = AudioInputOptions {
-            on_change: Some(Box::new(clone!(instructions, save => move |audio_id| {
-                let mut lock = instructions.lock_mut();
-                lock.audio = audio_id.map(|id| {
-                    Audio {
-                        id,
-                        lib: MediaLibrary::User
-                    }
-                });
-
-                save(lock.clone(), true); 
-            }))),
-
             audio_id: self.instructions.get_cloned().audio.map(|audio| audio.id),
         };
 
-        let audio_state = Rc::new(AudioState::new(opts)); 
+        let audio_state = Rc::new(AudioState::new(opts, Some(clone!(instructions, save => move |audio_id:Option<(AudioId, MediaLibrary)>| {
+            let mut lock = instructions.lock_mut();
+            lock.audio = audio_id.map(|(id, lib)| {
+                Audio {
+                    id,
+                    lib
+                }
+            });
+
+            save(lock.clone(), true); 
+        })))); 
 
         html!("empty-fragment", {
             .future(self.audio_signal()

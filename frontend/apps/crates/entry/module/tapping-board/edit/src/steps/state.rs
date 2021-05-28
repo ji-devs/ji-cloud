@@ -43,11 +43,18 @@ impl Base {
        
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
-        let text_editor = TextEditorState::new(theme_id, None, None, Some(Box::new(clone!(stickers_ref => move || {
-            if let Some(stickers) = stickers_ref.borrow().as_ref() {
-                stickers.current_text_blur();
-            }
-        }))));
+        let text_editor = TextEditorState::new(theme_id, None, 
+            Some(Box::new(clone!(stickers_ref => move |value| {
+                if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                    stickers.set_current_text_value(value.to_string());
+                }
+            }))),
+            Some(Box::new(clone!(stickers_ref => move || {
+                if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                    stickers.current_text_blur();
+                }
+            })))
+        );
 
         let backgrounds = Rc::new(Backgrounds::new(
                 raw.map(|content| &content.backgrounds),

@@ -9,71 +9,91 @@ use futures::future::ready;
 use rgb::RGBA8;
 use crate::color_select::{
     self,
+    state::State as ColorPickerState,
     actions::{hex_to_rgba8, rgba8_to_hex},
 };
 
+pub struct ColorState {
+    pub select_for: Mutable<Option<ColorSelectFor>>,
+    pub picker: Rc<ColorPickerState>,
+}
 
-#[derive(Clone)]
-enum ColorSelectFor {
+
+impl ColorState {
+    pub fn new(state:Rc<State>) -> Self {
+        let picker = Rc::new(ColorPickerState::new(
+            Some(state.theme_id.lock_ref().clone()),
+            None, 
+            Some(clone!(state => move |color| {
+                let color = rgba8_to_hex_optional(&Some(color));
+                let select_for = {
+                    state.color_state.borrow().as_ref().unwrap_ji().select_for.get()
+                };
+
+                match select_for {
+                    Some(ColorSelectFor::Highlight) => {state.set_highlight_color(color)},
+                    Some(ColorSelectFor::Text) => {state.set_color(color)},
+                    None => {}
+                };
+            }))
+        ));
+
+        Self {
+            select_for: Mutable::new(None),
+            picker,
+        }
+    }
+    
+}
+
+#[derive(Clone, Copy)]
+pub enum ColorSelectFor {
     Text,
     Highlight,
 }
 
 pub fn render(state: Rc<State>) -> Dom {
-    let select_for: Mutable<Option<ColorSelectFor>> = Mutable::new(None);
-    let select_value: Mutable<Option<RGBA8>> = Mutable::new(None);
-
-    spawn_local(select_value.signal_cloned().for_each(clone!(state, select_for => move |color| {
-        let color = rgba8_to_hex_optional(&color);
-        match select_for.lock_ref().as_ref() {
-            Some(ColorSelectFor::Highlight) => {state.set_highlight_color(color)},
-            Some(ColorSelectFor::Text) => {state.set_color(color)},
-            None => {}
-        };
-        ready(())
-    })));
+    let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {
+        .future(state.theme_id.signal_cloned().for_each(clone!(state, color_state => move |theme_id| {
+            color_state.picker.set_theme(theme_id);
+            ready(())
+        })))
         .property("slot", "color")
         .property("positionY", "top-in")
-        .property_signal("open", select_for.signal_cloned().map(|select_for| select_for.is_some()))
-        .event(clone!(select_for => move |_: events::Close| {
-            select_for.set(None);
+        .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
+        .event(clone!(color_state => move |_: events::Close| {
+            color_state.select_for.set(None);
         }))
         .child(html!("button-collection", {
             .property("slot", "anchor")
             .children(&mut [
                 html!("text-editor-control", {
                     .property("type", "color")
-                    .event(clone!(state, select_for, select_value => move |_: events::Click| {
-                        select_for.set(Some(ColorSelectFor::Highlight));
-                        select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
+                    .event(clone!(state, color_state => move |_: events::Click| {
+                        color_state.select_for.set(Some(ColorSelectFor::Highlight));
+                        let color = { state.controls.lock_ref().color.clone() };
+                        if let Some(color) = hex_to_rgba8_optional(&color) {
+                            color_state.picker.set_selected(color);
+                        }
                     }))
                 }),
                 html!("text-editor-control", {
                     .property("type", "marker-color")
-                    .event(clone!(state, select_for, select_value => move |_: events::Click| {
-                        select_for.set(Some(ColorSelectFor::Text));
-                        select_value.set(hex_to_rgba8_optional(&state.controls.lock_ref().color));
+                    .event(clone!(state, color_state => move |_: events::Click| {
+                        color_state.select_for.set(Some(ColorSelectFor::Text));
+                        let color = { state.controls.lock_ref().color.clone() };
+                        if let Some(color) = hex_to_rgba8_optional(&color) {
+                            color_state.picker.set_selected(color);
+                        }
                     }))
                 }),
             ])
         }))
         .child(html!("text-editor-controls-overlay-shadow", {
             .property("slot", "overlay")
-            .apply(|dom| {
-                let color_state = Rc::new(color_select::state::State::new(
-                    Some(state.theme_id.lock_ref().clone()),
-                    Some(select_value.clone())
-                ));
-
-                spawn_local(state.theme_id.signal_cloned().for_each(clone!(color_state => move |theme_id| {
-                    color_state.set_theme(theme_id);
-                    ready(())
-                })));
-
-                dom.child(color_select::dom::render(color_state, None))
-            })
+            .child(color_select::dom::render(color_state.picker.clone(), None))
         }))
     })
 }

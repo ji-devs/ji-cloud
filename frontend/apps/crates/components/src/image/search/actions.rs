@@ -7,8 +7,8 @@ use super::state::{BACKGROUND_NAME, State};
 
 impl State {
     pub fn set_selected(&self, id: ImageId, library: MediaLibrary) {
-        if let Some(on_image_select) = self.on_image_select.as_ref() {
-            on_image_select(id, library);
+        if let Some(on_select) = self.on_select.as_ref() {
+            on_select(id, library);
         }
     }
 }

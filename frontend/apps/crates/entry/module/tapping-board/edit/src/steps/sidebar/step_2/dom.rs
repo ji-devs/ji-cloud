@@ -3,6 +3,11 @@ use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
+use components::{
+    image::search::dom::render as render_image_search,
+    text_editor::dom::render_controls as render_text_editor,
+    audio_input::dom::render as render_audio_input,
+};
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
@@ -12,15 +17,19 @@ pub fn render(state: Rc<Step2>) -> Dom {
             render_tab(state.clone(), TabKind::Audio),
             html!("module-sidebar-body", {
                 .property("slot", "body")
-                .child_signal(state.tab.signal_cloned().map(|tab| {
+                .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
-                        Tab::Image(state) => {
-                            None
-                            //Some(render_image_search(state.clone(), None))
+                        Tab::Text => {
+                            Some(render_text_editor(state.base.text_editor.clone()))
                         },
-                        _ => None,
+                        Tab::Image(state) => {
+                            Some(render_image_search(state.clone(), None))
+                        },
+                        Tab::Audio(state) => {
+                            Some(render_audio_input(state.clone(), None))
+                        },
                     }
-                }))
+                })))
             })
         ])
     })
@@ -37,7 +46,7 @@ fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
             .property("kind", tab_kind.as_str())
         }))
         .event(clone!(state, tab_kind => move |evt:events::Click| {
-            state.tab.set(Tab::new(tab_kind));
+            state.tab.set(Tab::new(state.base.clone(), tab_kind));
         }))
     })
 }

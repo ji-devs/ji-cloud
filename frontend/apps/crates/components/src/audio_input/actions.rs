@@ -2,6 +2,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::File;
 use shared::{
+    media::MediaLibrary,
     api::{ApiEndpoint, endpoints}, 
     domain::{CreateResponse, audio::AudioId},
     error::EmptyError,
@@ -20,7 +21,7 @@ impl State {
 
         //Call the callback for precise unskipped updates
         if let Some(on_change) = &self.on_change {
-            (on_change)(audio_id);
+            (on_change) (audio_id.map(|id| (id, MediaLibrary::User)));
         }
     }
 

@@ -1,4 +1,4 @@
-import { LitElement, html, customElement, internalProperty } from 'lit-element';
+import { LitElement, html, css, customElement, internalProperty } from 'lit-element';
 import { CustomElement, CustomText } from './slate-wysiwyg-react/EditorBackbone';
 import { StyleInfo, styleMap } from 'lit-html/directives/style-map';
 import { baseStyles, getElementStyles, getLeafStyles } from './styles';
@@ -8,7 +8,15 @@ import { baseStyles, getElementStyles, getLeafStyles } from './styles';
 export class _ extends LitElement {
 
     static get styles() {
-        return baseStyles;
+        return [baseStyles, css`
+            :host {
+                display: block;
+                /* TO FIX:
+                    white-space: pre-wrap;
+                */
+                overflow-wrap: break-word;
+            }
+        `];
     }
 
     @internalProperty()

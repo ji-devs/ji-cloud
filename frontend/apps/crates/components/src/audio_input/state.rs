@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable};
-use shared::{domain::audio::AudioId};
+use shared::{media::MediaLibrary, domain::audio::AudioId};
 use super::recorder::AudioRecorder;
 use super::options::*;
 
@@ -22,7 +22,7 @@ pub enum AudioInputAddMethod {
 pub struct State {
     //on_change is called imperatively for every update
     //for example, to push to history
-    pub on_change: Option<Box<dyn Fn(Option<AudioId>)>>,
+    pub on_change: Option<Box<dyn Fn(Option<(AudioId, MediaLibrary)>)>>,
     //audio_id is a mutable for affecting DOM
     //intermediate updates can be skipped
     pub mode: Mutable<AudioInputMode>,
@@ -31,14 +31,14 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(opts: AudioInputOptions) -> Self {
+    pub fn new(opts: AudioInputOptions, on_change: Option<impl Fn(Option<(AudioId, MediaLibrary)>) + 'static>) -> Self {
         let mode = match opts.audio_id {
             Some(audio_id) => AudioInputMode::Stopped(audio_id),
             None => AudioInputMode::Empty,
         };
 
         Self {
-            on_change: opts.on_change,
+            on_change: on_change.map(|f| Box::new(f) as _), 
             mode: Mutable::new(mode),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),

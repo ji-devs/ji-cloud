@@ -9,9 +9,13 @@ use super::{
     overlay::state::Overlay,
     sidebar::state::Sidebar
 };
+use dominator::clone;
 use crate::state::Mode;
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
 use utils::prelude::*;
+use components::{
+    text_editor::state::State as TextEditorState,
+};
 
 pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
@@ -76,4 +80,5 @@ impl Base {
             }
         });
     }
+
 }

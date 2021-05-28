@@ -107,10 +107,10 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::One),
+            step: Some(Step::Two),
             skip_save: true,
             bg_tab: Some(BgTabKind::Color),
-            content_tab: Some(ContentTabKind::Image),
+            content_tab: Some(ContentTabKind::Audio),
             interaction_tab: Some(InteractionTabKind::Text),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false

@@ -6,6 +6,15 @@ use utils::prelude::*;
 
 use super::state::State;
 
+impl State {
+    pub fn set_selected(&self, value:RGBA8) {
+        if let Some(on_select) = self.on_select.as_ref() {
+            on_select(value.clone());
+        }
+        self.value.set(Some(value));
+    }
+
+}
 pub async fn get_user_colors() -> Result<Vec<RGBA8>, EmptyError> {
     let res = api_with_auth::<UserColorResponse, EmptyError, Option<()>>(
         &endpoints::user::GetColors::PATH,
@@ -28,7 +37,7 @@ pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyE
     ).await?;
 
     state.user_colors.lock_mut().push_cloned(color.clone());
-    state.value.set(Some(color));
+    state.set_selected(color);
 
     Ok(())
 }

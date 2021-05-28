@@ -16,6 +16,7 @@ use super::{
     wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT}
 };
 use super::super::font_loader::{FontLoader, Font as StaticFont};
+use super::components::text_editor_controls::color_controls::ColorState;
 
 pub struct State {
     pub controls: Mutable<ControlsState>,
@@ -25,11 +26,13 @@ pub struct State {
     pub on_blur: RefCell<Option<Box<dyn Fn()>>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: Mutable<ThemeId>,
+    pub color_state: RefCell<Option<Rc<ColorState>>>,
+
 }
 
 impl State {
     pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Option<Box<dyn Fn(&str)>>, on_blur: Option<Box<dyn Fn()>>, ) -> Rc<Self> {
-        Rc::new(Self {
+        let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Mutable::new(Self::get_fonts(theme_id)),
@@ -37,7 +40,12 @@ impl State {
             on_blur: RefCell::new(on_blur),
             value: RefCell::new(value),
             theme_id: Mutable::new(theme_id),
-        })
+            color_state: RefCell::new(None) 
+        });
+
+        *_self.color_state.borrow_mut() = Some(Rc::new(ColorState::new(_self.clone())));
+
+        _self
     }
 
     pub fn set_value(&self, value: Option<String>) {
@@ -48,7 +56,7 @@ impl State {
     }
 
     pub fn set_theme(&self, theme_id: ThemeId) {
-        self.theme_id.set(theme_id.clone());
+        self.theme_id.set_neq(theme_id.clone());
         self.fonts.set(Self::get_fonts(theme_id));
     }
 
