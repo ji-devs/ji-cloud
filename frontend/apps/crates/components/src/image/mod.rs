@@ -1,6 +1,3 @@
 pub mod element;
-/*
-pub mod data;
+#[cfg(feature = "image_search")]
 pub mod search;
-pub mod transform;
-*/

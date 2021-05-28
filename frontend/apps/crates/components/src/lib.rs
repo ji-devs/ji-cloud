@@ -5,16 +5,16 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 #![cfg_attr(feature = "quiet", allow(warnings))]
 
+/// image itself is always enabled
+/// but image_search is gated behind that
+pub mod image;
+
 #[cfg(feature = "module")]
 pub mod module;
 #[cfg(feature = "tooltip")]
 pub mod tooltip;
-#[cfg(feature = "image")]
-pub mod image;
 #[cfg(feature = "color_select")]
 pub mod color_select;
-#[cfg(feature = "image_search")]
-pub mod image_search;
 #[cfg(feature = "audio_input")]
 pub mod audio_input;
 #[cfg(feature = "text_editor")]

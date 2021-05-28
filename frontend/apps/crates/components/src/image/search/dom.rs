@@ -43,7 +43,7 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     .property("id", image.id.0.to_string())
                     .event(clone!(state, image => move |_: events::Click| {
                         state.options.value.set(Some(image.id));
-                        if let Some(on_image_select) = state.on_image_select.borrow().as_ref() {
+                        if let Some(on_image_select) = state.on_image_select.as_ref() {
                             //TODO - this should change if the library has changed
                             on_image_select(image.id.clone(), MediaLibrary::Global);
                         }
