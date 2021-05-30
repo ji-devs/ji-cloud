@@ -11,6 +11,7 @@ use wasm_bindgen::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::convert::{TryFrom, TryInto};
+use std::future::Future;
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::{Serialize, de::DeserializeOwned};
@@ -28,7 +29,6 @@ use super::{
     steps::state::*,
     choose::state::*,
 };
-
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
@@ -56,6 +56,7 @@ where
     pub(super) history: RefCell<Option<Rc<HistoryStateImpl<RawData>>>>,
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
+    pub(super) reset_from_history_loader: AsyncLoader,
 }
 
 pub enum Phase <Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
@@ -116,14 +117,16 @@ where
     Overlay: OverlayExt + 'static,
     RawData: BodyExt + 'static, 
 {
-    pub fn new<InitFromModeFn, InitFromRawFn>(
+    pub fn new<InitFromModeFn, InitFromModeOutput, InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
         init_from_mode: InitFromModeFn,
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
-        InitFromRawFn: Fn(RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        InitFromRawFn: Fn(JigId, ModuleId, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
 
@@ -137,6 +140,7 @@ where
             raw_loader: AsyncLoader::new(),
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
+            reset_from_history_loader: AsyncLoader::new(),
         });
 
 
@@ -174,7 +178,7 @@ where
 
             *_self.history.borrow_mut() = Some(history.clone());
 
-            if let Some(base) = init_from_raw(raw, false, None, history.clone()) {
+            if let Some(base) = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw, false, None, history.clone()).await {
                 Self::change_phase_steps(_self.clone(), base);
             } else {
                 Self::change_phase_choose(_self.clone(), init_from_mode);

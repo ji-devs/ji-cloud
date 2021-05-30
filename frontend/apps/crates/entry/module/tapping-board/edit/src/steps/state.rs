@@ -6,6 +6,7 @@ use shared::domain::jig::{
     module::{
         ModuleId, 
         body::{
+            ThemeChoice,
             Trace as RawTrace,
             Backgrounds as RawBackgrounds, 
             Audio,
@@ -36,8 +37,11 @@ use std::cell::RefCell;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub theme_id: Mutable<ThemeId>,
+    pub theme: Mutable<ThemeChoice>,
 
+    pub jig_id: JigId,
+    pub module_id: ModuleId,
+    pub jig_theme_id: ThemeId,
     // TappingBoard-specific
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
@@ -65,13 +69,20 @@ impl TraceMeta {
 }
 
 impl Base {
-    pub fn new(is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
+    pub async fn new(jig_id: JigId, module_id: ModuleId, is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
-        let theme_id = match raw {
-            None => ThemeId::None,
-            Some(raw) => raw.theme_id
+        let theme = match raw {
+            None => ThemeChoice::Jig,
+            Some(raw) => raw.theme
+        };
+      
+        let jig_theme_id = super::actions::load_theme_id_from_jig(jig_id).await;
+
+        let theme_id = match theme {
+            ThemeChoice::Jig => jig_theme_id,
+            ThemeChoice::Override(theme_id) => theme_id
         };
        
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
@@ -161,9 +172,12 @@ impl Base {
         );
 
         let _self = Rc::new(Self {
+            jig_id,
+            module_id,
+            jig_theme_id,
             history,
             step,
-            theme_id: Mutable::new(theme_id),
+            theme: Mutable::new(theme),
             text_editor,
             backgrounds,
             stickers,
@@ -176,6 +190,14 @@ impl Base {
 
         _self
     }
+
+    pub fn get_theme_id(&self) -> ThemeId {
+        match self.theme.get_cloned() {
+            ThemeChoice::Jig => self.jig_theme_id,
+            ThemeChoice::Override(theme_id) => theme_id
+        }
+    }
+
 }
 
 impl BaseExt<Step> for Base {

@@ -15,7 +15,8 @@ use super::steps::state::*;
 use super::choose::state::*;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
-
+use std::future::Future;
+use dominator::clone;
 
 impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
@@ -29,9 +30,10 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn change_phase_choose<InitFromModeFn>(_self: Rc<Self>, init_from_mode: InitFromModeFn) 
+    pub fn change_phase_choose<InitFromModeFn, InitFromModeOutput>(_self: Rc<Self>, init_from_mode: InitFromModeFn) 
     where
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
             _self.clone(),
@@ -49,14 +51,16 @@ where
         steps
     }
 
-    pub fn reset_from_history<InitFromRawFn, InitFromModeFn>(
+    pub fn reset_from_history<InitFromRawFn, InitFromRawOutput, InitFromModeFn, InitFromModeOutput>(
         _self: Rc<Self>,
         init_from_raw: InitFromRawFn,
         init_from_mode: InitFromModeFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> + Clone + 'static,
-        InitFromModeFn: Fn(Mode, Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> + Clone + 'static,
+        InitFromRawFn: Fn(JigId, ModuleId, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
             let curr_steps = match &*_self.phase.get_cloned() {
@@ -72,15 +76,17 @@ where
                 (curr.step.get_cloned(), curr.steps_completed.get_cloned())
             });
 
-            if let Some(steps) = init_from_raw(raw, true, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()) {
-                let steps = Self::change_phase_steps(_self.clone(), steps);
-                if let Some((step, steps_completed)) = preserve_steps {
-                    steps.step.set_neq(step);
-                    steps.steps_completed.set(steps_completed);
+            _self.reset_from_history_loader.load(clone!(_self, init_from_raw, init_from_mode => async move {
+                if let Some(steps) = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw, true, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await {
+                    let steps = Self::change_phase_steps(_self.clone(), steps);
+                    if let Some((step, steps_completed)) = preserve_steps {
+                        steps.step.set_neq(step);
+                        steps.steps_completed.set(steps_completed);
+                    }
+                } else {
+                    Self::change_phase_choose(_self.clone(), init_from_mode.clone());
                 }
-            } else {
-                Self::change_phase_choose(_self.clone(), init_from_mode.clone());
-            }
+            }));
         })
     }
 }

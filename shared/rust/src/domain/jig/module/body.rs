@@ -69,7 +69,7 @@ impl Body {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
-    /// No theme id set (a.k.a. default)
+    /// No theme id set (a.k.a. blank)
     None = 0,
     /// Blueish theme
     Chalkboard = 1,
@@ -80,6 +80,23 @@ pub enum ThemeId {
 impl Default for ThemeId {
     fn default() -> Self {
         Self::None
+    }
+}
+
+/// Theme choice, either jig or override
+#[derive(Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub enum ThemeChoice {
+    /// Use the jig's theme
+    Jig,
+
+    /// Override it with a per-module choice
+    Override(ThemeId)
+}
+
+impl Default for ThemeChoice {
+    fn default() -> Self {
+        Self::Jig
     }
 }
 

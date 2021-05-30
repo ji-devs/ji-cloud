@@ -16,6 +16,7 @@ use shared::{
     domain::{
         jig::{
             module::body::{
+                ThemeChoice,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
                 tapping_board::{Content, Mode as RawMode, ModuleData as RawData, TappingTrace}
             },
@@ -77,7 +78,7 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             mode: RawMode::Poster,
-                            theme_id: ThemeId::Chalkboard, 
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
                             stickers: init_data.stickers.iter().map(|init| {
                                 match init {
@@ -111,11 +112,11 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Three),
+            step: Some(Step::One),
             skip_save: true,
-            bg_tab: Some(BgTabKind::Color),
+            bg_tab: Some(BgTabKind::Image),
             content_tab: Some(ContentTabKind::Text),
-            interaction_tab: Some(InteractionTabKind::Text),
+            interaction_tab: Some(InteractionTabKind::Audio),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })
@@ -125,13 +126,15 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
+        /*
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![InitSticker::Text, InitSticker::Sprite],
             traces: vec![
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(None, None)).unwrap_ji();
+        */
+        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

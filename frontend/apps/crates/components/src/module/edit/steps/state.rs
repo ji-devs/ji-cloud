@@ -13,6 +13,7 @@ use super::super::{
     state::{Phase, GenericState}
 };
 use shared::domain::jig::module::body::BodyExt;
+use utils::prelude::*;
 
 pub struct Steps <Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where

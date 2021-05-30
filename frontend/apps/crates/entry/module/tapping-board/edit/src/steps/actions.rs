@@ -5,6 +5,7 @@ use shared::domain::jig::{
     module::{
         ModuleId, 
         body::{
+            ThemeChoice,
             Trace as RawTrace,
             Audio,
             tapping_board::{Mode as RawMode, TappingTrace, Content as RawContent, ModuleData as RawData}
@@ -27,10 +28,14 @@ use components::{
     text_editor::state::State as TextEditorState,
 };
 
-pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
+pub async fn load_theme_id_from_jig(jig_id: JigId) -> ThemeId {
+    //TODO
+    ThemeId::Chalkboard
+}
+pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
     let step = Mutable::new(Step::default());
-    let base = Base::new(false, history, step.read_only(), None);
+    let base = Base::new(jig_id, module_id, false, history, step.read_only(), None).await;
     
     StepsInit {
         step,
@@ -43,35 +48,40 @@ pub fn init_from_mode(mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> Step
     }
 }
 
-pub fn init_from_raw(
+pub async fn init_from_raw(
+    jig_id: JigId,
+    module_id: ModuleId,
     raw:RawData, 
     is_history: bool, 
     current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
     history: Rc<HistoryStateImpl<RawData>>
 ) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
-    raw.content.map(|content| {
-        //TODO - create from raw
-        let step = Mutable::new(Step::default());
-        let base = Base::new(is_history, history, step.read_only(), Some(&content));
-        
-        let mut init = StepsInit {
-            step,
-            base: base.clone(),
-            main: Rc::new(Main::new(base.clone())),
-            sidebar: Rc::new(Sidebar::new(base.clone())),
-            header: Rc::new(Header::new(base.clone())),
-            footer: Rc::new(Footer::new(base.clone())),
-            overlay: Rc::new(Overlay::new(base.clone())),
-        };
+    match raw.content {
+        None => None,
+        Some(content) => { 
+            //TODO - create from raw
+            let step = Mutable::new(Step::default());
+            let base = Base::new(jig_id, module_id, is_history, history, step.read_only(), Some(&content)).await;
+            
+            let mut init = StepsInit {
+                step,
+                base: base.clone(),
+                main: Rc::new(Main::new(base.clone())),
+                sidebar: Rc::new(Sidebar::new(base.clone())),
+                header: Rc::new(Header::new(base.clone())),
+                footer: Rc::new(Footer::new(base.clone())),
+                overlay: Rc::new(Overlay::new(base.clone())),
+            };
 
-        if !is_history {
-            if let Some(step) = crate::debug::settings().step {
-                init.step.set_neq(step);
+            if !is_history {
+                if let Some(step) = crate::debug::settings().step {
+                    init.step.set_neq(step);
+                }
             }
-        }
 
-        init
-    })
+            Some(init)
+        }
+    }
 }
 
 impl Base {
@@ -81,12 +91,12 @@ impl Base {
         });
     }
 
-    pub fn change_theme_id(&self, theme_id: ThemeId) {
-        self.theme_id.set_neq(theme_id);
+    pub fn change_theme(&self, theme: ThemeChoice) {
+        self.theme.set_neq(theme);
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.theme_id = theme_id;
+                content.theme = theme;
             }
         });
     }

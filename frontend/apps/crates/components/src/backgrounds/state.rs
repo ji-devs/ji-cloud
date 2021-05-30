@@ -38,7 +38,7 @@ impl Backgrounds {
     pub fn to_raw(&self) -> RawBackgrounds {
         RawBackgrounds {
             layer_1: self.layer_1.get_cloned(),
-            layer_2: self.layer_1.get_cloned(),
+            layer_2: self.layer_2.get_cloned(),
         }
     }
 }

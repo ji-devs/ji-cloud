@@ -59,7 +59,7 @@ pub enum Tab {
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
-        let theme_id = base.theme_id.get_cloned();
+        let theme_id = base.get_theme_id();
 
         match kind {
             TabKind::Image => {
