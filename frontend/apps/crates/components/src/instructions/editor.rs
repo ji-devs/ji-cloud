@@ -18,6 +18,7 @@ use crate::audio_input::{
     dom::render as render_audio_input,
     options::AudioInputOptions,
     state::State as AudioState,
+    callbacks::Callbacks as AudioCallbacks,
 };
 use futures::stream::StreamExt;
 
@@ -93,20 +94,23 @@ impl InstructionsEditor {
         let Self {instructions, save} = self;
 
         let opts = AudioInputOptions {
-            audio_id: self.instructions.get_cloned().audio.map(|audio| audio.id),
+            audio: self.instructions.get_cloned().audio
         };
 
-        let audio_state = Rc::new(AudioState::new(opts, Some(clone!(instructions, save => move |audio_id:Option<(AudioId, MediaLibrary)>| {
-            let mut lock = instructions.lock_mut();
-            lock.audio = audio_id.map(|(id, lib)| {
-                Audio {
-                    id,
-                    lib
-                }
-            });
+        let callbacks = AudioCallbacks::new(
+            Some(clone!(instructions, save => move |audio:Audio| {
+                let mut lock = instructions.lock_mut();
+                lock.audio = Some(audio); 
+                save(lock.clone(), true); 
+            })),
+            Some(clone!(instructions, save => move || {
+                let mut lock = instructions.lock_mut();
+                lock.audio = None; 
+                save(lock.clone(), true); 
+            }))
+        );
 
-            save(lock.clone(), true); 
-        })))); 
+        let audio_state = Rc::new(AudioState::new(opts, callbacks)); 
 
         html!("empty-fragment", {
             .future(self.audio_signal()
@@ -114,7 +118,7 @@ impl InstructionsEditor {
                     .skip(1)
                     .for_each(clone!(audio_state => move |audio| {
                         //This just happens when history is changed really
-                        audio_state.set_audio_id_ext(audio.map(|audio| audio.id));
+                        audio_state.set_audio_ext(audio);
                         async {}
                     }))
             )

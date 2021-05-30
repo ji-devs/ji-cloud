@@ -217,7 +217,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    Overlay::render(state.overlay.clone())
+    add_slot_to_dom(Overlay::render(state.overlay.clone()), "overlay")
 }
 
 fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom {

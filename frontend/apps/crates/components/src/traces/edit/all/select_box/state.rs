@@ -18,14 +18,12 @@ use super::{
 use crate::traces::utils::TraceExt;
 
 pub struct SelectBox {
-    pub bounds: Mutable<Option<BoundsF64>>,
     pub menu_pos: Mutable<Option<(f64, f64)>>,
 }
 
 impl SelectBox {
     pub fn new() -> Self {
         Self {
-            bounds: Mutable::new(None),
             menu_pos: Mutable::new(None),
         }
     }

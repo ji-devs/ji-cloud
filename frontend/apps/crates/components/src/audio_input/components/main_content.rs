@@ -12,7 +12,7 @@ use super::{super::actions::file_change, player};
 
 pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {
-        AudioInputMode::Playing(audio_id) => player::dom::render(state.clone(), audio_id),
+        AudioInputMode::Playing(audio) => player::dom::render(state.clone(), audio),
         AudioInputMode::Stopped(_) => render_input_icon("success"),
         AudioInputMode::Empty => render_start(state.clone(), add_method.clone()),
         AudioInputMode::Recording => render_recording(),

@@ -19,16 +19,18 @@ pub struct Fade {
     kind: FadeKind,
     animation: Rc<MutableAnimation>,
     hide_on_finished: bool,
+    on_finished: Option<Rc<Box<dyn Fn()>>>,
     delay: Option<f64>,
 }
 
 impl Fade {
-    pub fn new(kind: FadeKind, duration: f64, hide_on_finished: bool, delay: Option<f64>) -> Self {
+    pub fn new(kind: FadeKind, duration: f64, hide_on_finished: bool, delay: Option<f64>, on_finished: Option<impl Fn() + 'static>) -> Self {
         Self {
             kind,
             animation: Rc::new(MutableAnimation::new(duration)),
             hide_on_finished,
-            delay
+            delay,
+            on_finished: on_finished.map(|f| Rc::new(Box::new(f) as _)),
         }
     }
 
@@ -37,7 +39,9 @@ impl Fade {
         A: AsRef<HtmlElement> + AsRef<Element>
     {
 
-        let Self {kind, animation, hide_on_finished, delay} = self;
+        let Self {kind, animation, hide_on_finished, delay, ..} = self;
+
+        let on_finished = self.on_finished.clone();
 
         let value_signal = animation.signal()
             //TODO support configurable easing
@@ -50,7 +54,7 @@ impl Fade {
                 }
             }));
 
-        let visible_signal = animation.signal() 
+        let visible_signal = || animation.signal() 
             .map(|value| value != Percentage::new(1.0));
 
         dom
@@ -60,6 +64,14 @@ impl Fade {
                 }
                 animation.animate_to(Percentage::new(1.0));
             }))
+            .future(visible_signal().dedupe().for_each(clone!(on_finished => move |visible| {
+                if !visible {
+                    if let Some(on_finished) = &on_finished {
+                        (on_finished) ();
+                    }
+                }
+                async {}
+            })))
             .style_signal("opacity", 
                 value_signal
                 .map(|value| {
@@ -67,7 +79,7 @@ impl Fade {
                 })
             )
             .apply_if(self.hide_on_finished, |dom| {
-                dom.visible_signal(visible_signal)
+                dom.visible_signal(visible_signal())
             })
     }
 }

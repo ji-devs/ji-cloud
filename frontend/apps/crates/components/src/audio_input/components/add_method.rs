@@ -34,7 +34,7 @@ pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
             state.add_method.set(add_method.clone());
 
             // might not be ideal when there's no audio_id already
-            state.set_audio_id(None);
+            state.set_audio(None);
         }))
     })
 }

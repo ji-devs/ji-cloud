@@ -28,6 +28,12 @@ const BASE_HEIGHT:f64 = 300.0;
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
 }
+
+//TODO - fix this, toggle between wysyg and renderer
+//when that's done, then transform can be separated
+//and then layering will be properly fixed
+
+//Currently....
 //For text, we need to be able to click into the text while the transform is active
 //therefore it's a child of the transform
 //It's not enough to render only the lines of the SVG without the rect

@@ -1,6 +1,6 @@
 use dominator::{html, Dom, clone, svg, class};
 use std::rc::Rc;
-use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
+use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}, math::bounds::BoundsF64};
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
@@ -8,13 +8,13 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use crate::traces::{
-    svg::{self, ShapeStyle, ShapeStyleBase}, 
+    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks}, 
     edit::state::*
 };
 use super::trace::state::*;
 
 use shared::domain::jig::module::body::{Trace as RawTrace, Transform, TraceShape};
-use web_sys::HtmlCanvasElement;
+use web_sys::{SvgElement, HtmlCanvasElement};
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
@@ -27,7 +27,12 @@ pub fn render(state:Rc<Edit>) -> Dom {
                 .signal_vec_cloned()
                 .map(clone!(resize_info, state => move |trace| {
                     let style = ShapeStyle::new(ShapeStyleBase::Mask);
-                    render_trace(&style, &resize_info, &trace, None::<fn()>) 
+                    let callbacks = SvgCallbacks::new(
+                        None::<fn()>, 
+                        None::<fn(web_sys::SvgElement)>, 
+                        None::<fn(web_sys::SvgElement)>, 
+                    );
+                    render_trace(&style, &resize_info, &trace, callbacks)
                 }))
         }));
 
@@ -38,11 +43,23 @@ pub fn render(state:Rc<Edit>) -> Dom {
                 .enumerate()
                 .map(clone!(resize_info, state => move |(index, trace)| {
                     let style = ShapeStyle::new(ShapeStyleBase::Transparent);
-                    render_trace(&style, &resize_info, &trace, Some(clone!(state, index => move || {
-                        if let Some(index) = index.get_cloned() {
-                            state.select_index(index);
-                        }
-                    })))
+                    let callbacks = SvgCallbacks::new(
+                        Some(clone!(state, index => move || {
+                            if let Some(index) = index.get_cloned() {
+                                state.select_index(index);
+                            }
+                        })),
+                        Some(clone!(trace, resize_info => move |elem:SvgElement| {
+                            let rect = elem.get_bounding_client_rect();
+                            trace.bounds.set(Some(BoundsF64::new_from_dom_normalized(&rect, &resize_info)));
+                            *trace.elem.borrow_mut() = Some(elem);
+                        })),
+                        Some(clone!(trace => move |elem| {
+                            trace.bounds.set(None);
+                            *trace.elem.borrow_mut() = None; 
+                        })),
+                    );
+                    render_trace(&style, &resize_info, &trace, callbacks)
                 }))
         }));
     let menu_children = resize_info_signal()
@@ -60,7 +77,6 @@ pub fn render(state:Rc<Edit>) -> Dom {
                 mask_children,
                 click_children,
                 clone!(state => move |x, y| {
-                    //TODO - detect if area selected
                     Edit::start_new_trace(state.clone(), None, Some((x, y)));
                 }),
                 clone!(state => move |x, y| {
@@ -73,21 +89,21 @@ pub fn render(state:Rc<Edit>) -> Dom {
     })
 }
 
-pub fn render_trace(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&AllTrace, on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
+pub fn render_trace(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&AllTrace, callbacks: SvgCallbacks) -> Dom {
     let transform_size = Some((&trace.transform, trace.size.clone())); 
 
 
     match trace.shape {
 
         TraceShape::Path(ref path) => {
-            svg::render_path(&style, &resize_info, transform_size, &path, on_select)
+            svg::render_path(&style, &resize_info, transform_size, &path, callbacks)
         },
 
         TraceShape::Rect(width, height) => {
-            svg::render_rect(&style, &resize_info, transform_size, width, height, on_select)
+            svg::render_rect(&style, &resize_info, transform_size, width, height, callbacks)
         }
         TraceShape::Ellipse(radius_x, radius_y) => {
-            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, on_select)
+            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, callbacks)
         }
     }
 }

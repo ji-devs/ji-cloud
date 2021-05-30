@@ -47,11 +47,11 @@ where
 {
     pub step: Mutable<Step>,
     pub base: Rc<Base>,
-    pub main: Main,
-    pub sidebar: Sidebar,
-    pub header: Header,
-    pub footer: Footer,
-    pub overlay: Overlay,
+    pub main: Rc<Main>,
+    pub sidebar: Rc<Sidebar>,
+    pub header: Rc<Header>,
+    pub footer: Rc<Footer>,
+    pub overlay: Rc<Overlay>,
 }
 
 pub trait StepExt : Copy + Default + PartialEq + Eq + Hash {
@@ -122,11 +122,11 @@ where
         Self {
             step: init.step,
             base: init.base,
-            main: Rc::new(init.main),
-            sidebar: Rc::new(init.sidebar),
-            header: Rc::new(init.header),
-            footer: Rc::new(init.footer),
-            overlay: Rc::new(init.overlay),
+            main: init.main,
+            sidebar: init.sidebar,
+            header: init.header,
+            footer: init.footer,
+            overlay: init.overlay,
             preview_step_reactor,
             steps_completed: Mutable::new(HashSet::new())
         }

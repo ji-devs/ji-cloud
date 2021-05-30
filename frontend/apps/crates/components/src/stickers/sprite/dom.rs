@@ -30,8 +30,8 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
                 // We can just let the full transform take effect
                 .style_signal("transform", sprite.transform.denormalize_matrix_string_signal())
                 // And pin the coordinate system to the center regardless of screen size
-                .style_signal("top", bounds::top_center_rem_signal(sprite.transform.size.signal()))
-                .style_signal("left", bounds::left_center_rem_signal(sprite.transform.size.signal()))
+                .style_signal("top", bounds::size_height_center_rem_signal(sprite.transform.size.signal()))
+                .style_signal("left", bounds::size_width_center_rem_signal(sprite.transform.size.signal()))
                 .style("display", "block")
                 .style("position", "absolute")
                 .property("id", sprite.id.0.to_string())
@@ -79,8 +79,8 @@ pub fn render_raw(sprite: &RawSprite) -> Dom {
         .visible_signal(size.signal_ref(|size| size.is_some()))
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
-        .style_signal("top", bounds::top_center_rem_signal(size.signal()))
-        .style_signal("left", bounds::left_center_rem_signal(size.signal()))
+        .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))
+        .style_signal("left", bounds::size_width_center_rem_signal(size.signal()))
         .style_signal("transform", transform_signals::denormalize_matrix_string(always(sprite.transform.clone())))
         .property("id", sprite.id.0.to_string())
         .property("lib", sprite.lib.to_str())

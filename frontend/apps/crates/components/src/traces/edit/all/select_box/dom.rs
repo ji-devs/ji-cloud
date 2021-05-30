@@ -42,6 +42,9 @@ pub fn render(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &Al
     });
 
     html!("empty-fragment", {
+        /*
+         * Now using the real SVG path
+         * though it doesn't seem to make much of a difference
         .child({
             //First throw a dummy div over where the transform box would be
             //it's totally transparent, just to enable getting a DomRect easily
@@ -68,6 +71,7 @@ pub fn render(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &Al
                 }))
             })
         })
+        */
         //can get rid of this nesting with dominator update
         .child(html!("empty-fragment", {
             
@@ -94,7 +98,7 @@ pub fn render(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &Al
                     }))
             )
         }))
-        .child_signal(select_box.bounds.signal_cloned().map(clone!(resize_info, select_box => move |bounds| {
+        .child_signal(trace.bounds.signal_cloned().map(clone!(resize_info, select_box => move |bounds| {
             bounds.map(|bounds| {
                 //then draw our actual box
                 let bounds = bounds.denormalize(&resize_info);

@@ -24,7 +24,7 @@ pub fn render(state:Rc<Edit>) -> Dom {
                     Some(super::all::dom::render(state.clone()))
                 },
                 Phase::Draw(draw) => {
-                    Some(super::draw::dom::render(draw.clone(), state.clone()))
+                    Some(super::draw::dom::render(draw.clone(), state.list.lock_ref()))
                 }
             }
         })))

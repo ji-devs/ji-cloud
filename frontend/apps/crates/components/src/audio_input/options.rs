@@ -1,6 +1,6 @@
-use shared::{domain::audio::AudioId};
+use shared::domain::jig::module::body::Audio;
 
 #[derive(Default)]
 pub struct AudioInputOptions {
-    pub audio_id: Option<AudioId>, //initial audio id
+    pub audio: Option<Audio>, //initial audio
 }

@@ -10,7 +10,7 @@ use futures_signals::{
 use dominator::clone;
 use crate::{prelude::*, resize::resize_info_signal};
 
-pub fn left_center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+pub fn size_width_center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
     center_rem_signal(size_signal)
         .map(|center| {
             match center {
@@ -19,7 +19,7 @@ pub fn left_center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>
             }
         })
 }
-pub fn top_center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
+pub fn size_height_center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>>) -> impl Signal<Item = String> {
     center_rem_signal(size_signal)
         .map(|center| {
             match center {
@@ -50,7 +50,6 @@ pub fn center_rem(size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> Option<
 
     })
 }
-
 
 
 pub fn transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
@@ -209,6 +208,40 @@ impl BoundsF64 {
             height,
             invert_y: self.invert_y 
         }
+    }
+    pub fn denormalize_signal(&self) -> impl Signal<Item = Self> {
+
+        resize_info_signal().map({
+            let _self = self.clone();
+
+            move |resize_info| {
+                _self.denormalize(&resize_info)
+            }
+        })
+    }
+    pub fn denormalize_x_signal(&self) -> impl Signal<Item = f64> {
+        self.denormalize_signal().map(|bounds| bounds.x)
+    }
+    pub fn denormalize_y_signal(&self) -> impl Signal<Item = f64> {
+        self.denormalize_signal().map(|bounds| bounds.y)
+    }
+    pub fn denormalize_width_signal(&self) -> impl Signal<Item = f64> {
+        self.denormalize_signal().map(|bounds| bounds.width)
+    }
+    pub fn denormalize_height_signal(&self) -> impl Signal<Item = f64> {
+        self.denormalize_signal().map(|bounds| bounds.height)
+    }
+    pub fn denormalize_x_string_signal(&self) -> impl Signal<Item = String> {
+        self.denormalize_signal().map(|bounds| format!("{}px", bounds.x))
+    }
+    pub fn denormalize_y_string_signal(&self) -> impl Signal<Item = String> {
+        self.denormalize_signal().map(|bounds| format!("{}px", bounds.y))
+    }
+    pub fn denormalize_width_string_signal(&self) -> impl Signal<Item = String> {
+        self.denormalize_signal().map(|bounds| format!("{}px", bounds.width))
+    }
+    pub fn denormalize_height_string_signal(&self) -> impl Signal<Item = String> {
+        self.denormalize_signal().map(|bounds| format!("{}px", bounds.height))
     }
 }
 

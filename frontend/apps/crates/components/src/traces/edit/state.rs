@@ -12,6 +12,7 @@ use dominator::clone;
 use super::{
     draw::state::*,
     all::trace::state::*,
+    callbacks::*,
 };
 use crate::traces::utils::TraceExt;
 use utils::{
@@ -25,10 +26,10 @@ pub struct Edit
 {
     pub list: MutableVec<Rc<AllTrace>>,
     pub selected_index: Mutable<Option<usize>>,
-    pub on_change: Option<Box<dyn Fn(Vec<RawTrace>)>>,
-    pub on_change_cb: RefCell<Option<Rc<Box<dyn Fn()>>>>, 
     pub phase: Mutable<Phase>,
+    pub callbacks: Callbacks,
 }
+
 
 #[derive(Clone)]
 pub enum Phase {
@@ -51,23 +52,16 @@ impl Edit {
             .collect()
     }
 
-    pub fn new(raw:Option<&[RawTrace]>, debug_opts:Option<DebugOptions>, on_change: Option<impl Fn(Vec<RawTrace>) + 'static>) -> Rc<Self> {
+    pub fn new(raw:Option<&[RawTrace]>, debug_opts:Option<DebugOptions>, callbacks: Callbacks) -> Rc<Self> {
 
         let debug_opts = debug_opts.unwrap_or_default();
 
         let _self = Rc::new(Self{
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
-            on_change: match on_change {
-                //map doesn't work for som reason
-                None => None,
-                Some(f) => Some(Box::new(f))
-            },
             phase: Mutable::new(Phase::All),
-            on_change_cb: RefCell::new(None)
+            callbacks,
         });
-
-        *_self.on_change_cb.borrow_mut() = Some(Rc::new(Box::new(clone!(_self => move || _self.call_change()))));
 
 
         if let Some(raw) = raw {

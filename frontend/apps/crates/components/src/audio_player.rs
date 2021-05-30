@@ -3,6 +3,7 @@ use awsm_web::audio::AudioPlayer as AwsmAudio;
 use shared::{
     domain::audio::AudioId,
     media::MediaLibrary,
+    domain::jig::module::body::Audio,
 };
 use utils::{prelude::*, path::audio_lib_url};
 use std::rc::Rc;
@@ -15,12 +16,12 @@ pub struct AudioPlayer {
 }
 
 impl AudioPlayer {
-    pub fn play_oneshot(ctx: &AudioContext, lib: MediaLibrary, id: AudioId) -> Self {
-        Self::play_oneshot_callback(ctx, lib, id, None as Option<Box<dyn FnMut()>>)
+    pub fn play_oneshot(ctx: &AudioContext, audio: Audio) -> Self {
+        Self::play_oneshot_callback(ctx, audio, None as Option<Box<dyn FnMut()>>)
     }
 
-    pub fn play_oneshot_callback(ctx: &AudioContext, lib: MediaLibrary, id: AudioId, on_ended: Option<impl FnMut() + 'static>) -> Self {
-        let url = audio_lib_url(lib, id);
+    pub fn play_oneshot_callback(ctx: &AudioContext, audio: Audio, on_ended: Option<impl FnMut() + 'static>) -> Self {
+        let url = audio_lib_url(audio.lib, audio.id);
 
         log::info!("playing {}", url);
 

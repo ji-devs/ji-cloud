@@ -16,7 +16,7 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         }))
         .event(clone!(state => move |_: events::Click| {
-            state.set_audio_id(None);
+            state.set_audio(None);
         }))
     })
 }

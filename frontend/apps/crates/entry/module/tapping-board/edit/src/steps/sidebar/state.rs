@@ -38,7 +38,7 @@ impl Sidebar {
                 },
                 Step::Three => {
                     step_state.set(Some(StepState::Three(
-                        Rc::new(Step3::new(base.clone()))
+                        Step3::new(base.clone())
                     )));
                 },
                 Step::Four => {

@@ -1,26 +1,38 @@
 use components::module::edit::*;
+use web_sys::AudioContext;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
     module::{
         ModuleId, 
         body::{
+            Trace as RawTrace,
             Backgrounds as RawBackgrounds, 
+            Audio,
             tapping_board::{Mode as RawMode, Content as RawContent, ModuleData as RawData}
         }
     }
 };
-use futures_signals::signal::{ReadOnlyMutable, Mutable};
+use futures_signals::{
+    signal::{ReadOnlyMutable, Mutable},
+    signal_vec::MutableVec
+};
 use utils::prelude::*;
 use components::{
     text_editor::state::State as TextEditorState,
     stickers::state::Stickers,
     backgrounds::state::Backgrounds,
-    traces::edit::state::Edit as TracesEdit
+    traces::{
+        bubble::state::TraceBubble,
+        edit::{
+            state::Edit as TracesEdit, 
+            callbacks::Callbacks as TracesCallbacks
+        }
+    },
+    tooltip::state::State as TooltipState
 };
 use dominator::clone;
 use std::cell::RefCell;
-
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
@@ -29,12 +41,33 @@ pub struct Base {
     // TappingBoard-specific
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
-    pub traces: Rc<TracesEdit>, 
+    pub traces: Rc<TracesEdit>,
+    pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
+    pub audio_ctx: AudioContext
+}
+
+#[derive(Clone)]
+pub struct TraceMeta {
+    pub audio: Mutable<Option<Audio>>,
+    pub text: Mutable<Option<String>>,
+    pub bubble: Mutable<Option<Rc<TraceBubble>>>,
+}
+
+impl TraceMeta {
+    pub fn new(audio: Option<Audio>, text: Option<String>) -> Self {
+        Self {
+            audio: Mutable::new(audio),
+            text: Mutable::new(text),
+            bubble: Mutable::new(None)
+        }
+    }
 }
 
 impl Base {
-    pub fn new(is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Self {
+    pub fn new(is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
+
+        let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let theme_id = match raw {
             None => ThemeId::None,
@@ -80,27 +113,68 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
+        let raw_traces:Option<Vec<RawTrace>> = 
+            raw.map(|content| {
+                    content.traces
+                        .iter()
+                        .map(|trace_meta| {
+                            trace_meta.trace.clone()
+                        })
+                        .collect()
+            });
+
+
         let traces = TracesEdit::new(
-                raw.map(|content| content.traces.as_ref()),
+                raw_traces.as_ref().map(|x| x.as_slice()),
                 crate::debug::settings().trace_opts.clone(),
-                Some(clone!(history => move |raw_traces| {
-                    history.push_modify(|raw| {
-                        if let Some(content) = &mut raw.content {
-                            content.traces = raw_traces;
+                TracesCallbacks::new(
+                    Some(clone!(_self_ref => move |raw_trace| {
+                        if let Some(_self) = _self_ref.borrow().as_ref() {
+                            _self.on_trace_added(raw_trace);
                         }
-                    });
-                }))
+                    })),
+                    Some(clone!(_self_ref => move |index| {
+                        if let Some(_self) = _self_ref.borrow().as_ref() {
+                            _self.on_trace_deleted(index);
+                        }
+                    })),
+                    Some(clone!(_self_ref => move |index, raw_trace| {
+                        if let Some(_self) = _self_ref.borrow().as_ref() {
+                            _self.on_trace_changed(index, raw_trace);
+                        }
+                    })),
+                )
         );
 
-        Self {
+        let traces_meta = MutableVec::new_with_values(
+            raw.map(|content| {
+                    content.traces
+                        .iter()
+                        .map(|trace_meta| {
+                            TraceMeta::new(
+                                trace_meta.audio.clone(), 
+                                trace_meta.text.clone()
+                            )
+                        })
+                        .collect()
+            }).unwrap_or_default()
+        );
+
+        let _self = Rc::new(Self {
             history,
             step,
             theme_id: Mutable::new(theme_id),
             text_editor,
             backgrounds,
             stickers,
-            traces
-        }
+            traces,
+            traces_meta,
+            audio_ctx: AudioContext::new().unwrap_ji()
+        });
+
+        *_self_ref.borrow_mut() = Some(_self.clone());
+
+        _self
     }
 }
 

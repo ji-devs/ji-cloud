@@ -6,10 +6,12 @@ use components::{
     image::search::state::{State as ImageSearchState, ImageSearchOptions},
     audio_input::{
         options::AudioInputOptions,
-        state::State as AudioInputState
+        state::State as AudioInputState,
+        callbacks::Callbacks as AudioCallbacks,
     },
     stickers::state::Stickers,
 };
+use shared::domain::jig::module::body::Audio;
 
 pub struct Step2 {
     pub base: Rc<Base>,
@@ -39,7 +41,6 @@ impl Step2 {
 pub enum TabKind {
     Text,
     Image,
-    Audio 
 }
 
 impl TabKind {
@@ -47,7 +48,6 @@ impl TabKind {
         match self {
             Self::Text => "text",
             Self::Image => "image",
-            Self::Audio => "audio",
         }
     }
 }
@@ -56,7 +56,6 @@ impl TabKind {
 pub enum Tab {
     Text, // uses top-level state since it must be toggled from main too
     Image(Rc<ImageSearchState>),
-    Audio(Rc<AudioInputState>)
 }
 
 impl Tab {
@@ -77,16 +76,6 @@ impl Tab {
                 })));
 
                 Self::Image(Rc::new(state))
-            },
-            TabKind::Audio => {
-                let opts = AudioInputOptions::default();
-
-                let state = AudioInputState::new(opts, Some(clone!(base => |audio| {
-                    if let Some((id, lib)) = audio {
-                        log::info!("Recorded audio: {:?} lib: {:?}", id, lib);
-                    }
-                })));
-                Self::Audio(Rc::new(state))
             }
         }
     }
@@ -95,7 +84,6 @@ impl Tab {
         match self {
             Self::Text => TabKind::Text,
             Self::Image(_) => TabKind::Image,
-            Self::Audio(_) => TabKind::Audio,
         }
     }
 }

@@ -21,14 +21,22 @@ impl DomRenderable for Main {
                                 stickers::dom::render(state.base.stickers.clone(), None)
                             ]
                         },
-                        Phase::Trace(traces) => {
+                        Phase::Trace => {
                             let raw_backgrounds = state.base.backgrounds.to_raw();
                             let raw_stickers = state.base.stickers.to_raw();
 
                             vec![
                                 backgrounds::dom::render_raw(&raw_backgrounds),
                                 stickers::dom::render_raw(&raw_stickers),
-                                traces::edit::dom::render(traces)
+                                traces::edit::dom::render(state.base.traces.clone()),
+                                html!("empty-fragment", {
+                                    .children_signal_vec(
+                                        state.trace_bubbles()
+                                            .map(clone!(state => move |bubble| {
+                                                traces::bubble::dom::render(bubble, &state.base.audio_ctx)
+                                            }))
+                                    )
+                                })
                             ]
                         }
                     }

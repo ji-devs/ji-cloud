@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{ModuleKind, body::{BodyExt, Body, Instructions, Sticker, Trace, Backgrounds, ThemeId}};
+use crate::domain::jig::module::{ModuleKind, body::{BodyExt, Audio, Body, Instructions, Sticker, Trace, Backgrounds, ThemeId}};
 use std::convert::TryFrom;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -57,7 +57,21 @@ pub struct Content {
     pub stickers: Vec<Sticker>,
 
     /// Traces 
-    pub traces: Vec<Trace>,
+    pub traces: Vec<TappingTrace>,
+}
+
+/// Tapping board trace w/ metadata 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct TappingTrace {
+    /// the trace
+    pub trace: Trace,
+
+    /// audio
+    pub audio: Option<Audio>,
+
+    /// text 
+    pub text: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

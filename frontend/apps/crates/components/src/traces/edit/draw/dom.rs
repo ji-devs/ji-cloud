@@ -2,35 +2,26 @@ use dominator::{html, Dom, clone, svg, class};
 use std::rc::Rc;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::{Signal, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
-};
+use futures_signals::{map_ref, signal::{ReadOnlyMutable, Signal, SignalExt}, signal_vec::{MutableVecLockRef, SignalVec, SignalVecExt}};
 use super::{
     state::*,
     trace::state::*,
 };
-use crate::traces::{edit::{state::*, all::trace::state::*}, svg::{self, ShapeStyle, ShapeStyleBase}};
+use crate::traces::{edit::{state::*, all::trace::state::*}, svg::{self, SvgCallbacks, ShapeStyle, ShapeStyleBase}};
 
 use web_sys::HtmlCanvasElement;
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
 use crate::transform;
-pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom { 
-
-    let selected_index = edit_state.selected_index.get_cloned();
-
-    log::info!("{:?}", selected_index);
+pub fn render(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTrace>>) -> Dom { 
 
     let shadow_traces:Vec<Rc<AllTrace>> = 
-        edit_state.list
-            .lock_ref()
+        full_list
             .iter()
             .enumerate()
             .filter(|(idx, value)| {
-                Some(*idx) != selected_index 
+                Some(*idx) != state.init_index 
             })
             .map(|(_, value)| value.clone())
             .collect();
@@ -55,7 +46,7 @@ pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom {
                 let style = ShapeStyle::new(ShapeStyleBase::Mask);
 
                 if !display_trace {
-                    svg::render_path(&style, &resize_info, None, &draw_points, None::<fn()>)
+                    svg::render_path(&style, &resize_info, None, &draw_points, SvgCallbacks::none())
                 } else {
                     let transform_size = size.map(|size| (&transform, size));
                     match shape {
@@ -65,10 +56,10 @@ pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom {
                         },
 
                         TraceShape::Rect(width, height) => {
-                            svg::render_rect(&style, &resize_info, transform_size, width, height, None::<fn()>)
+                            svg::render_rect(&style, &resize_info, transform_size, width, height,SvgCallbacks::none())
                         }
                         TraceShape::Ellipse(radius_x, radius_y) => {
-                            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, None::<fn()>)
+                            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y,SvgCallbacks::none())
                         }
                     }
                 }
@@ -76,7 +67,7 @@ pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom {
 
             for trace in shadow_traces.iter() {
                 let style = ShapeStyle::new(ShapeStyleBase::Mask);
-                elements.push(crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace, None::<fn()>))
+                elements.push(crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace,SvgCallbacks::none()))
             }
 
             elements
@@ -89,7 +80,7 @@ pub fn render(state:Rc<Draw>, edit_state: Rc<Edit>) -> Dom {
                 .iter()
                 .map(|trace| {
                     let style = ShapeStyle::new(ShapeStyleBase::Shadow);
-                    crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace, None::<fn()>)
+                    crate::traces::edit::all::dom::render_trace(&style, &resize_info, trace,SvgCallbacks::none())
                 })
                 .collect::<Vec<Dom>>()
         })

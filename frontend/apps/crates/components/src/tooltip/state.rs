@@ -1,5 +1,20 @@
+use utils::math::BoundsF64;
 use web_sys::HtmlElement;
 use std::rc::Rc;
+
+pub struct State {
+    pub data: TooltipData,
+    pub target: TooltipTarget
+}
+
+impl State {
+    pub fn new(target: TooltipTarget, data: TooltipData) -> Self {
+        Self {
+            data,
+            target
+        }
+    }
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Placement {
@@ -37,6 +52,12 @@ impl Placement {
 }
 
 #[derive(Clone)]
+pub enum TooltipTarget {
+    Element(HtmlElement, MoveStrategy),
+    NormalizedBounds(BoundsF64),
+}
+
+#[derive(Clone)]
 pub enum TooltipData {
     Error(TooltipError),
     Confirm(TooltipConfirm),
@@ -44,18 +65,15 @@ pub enum TooltipData {
 
 #[derive(Clone)]
 pub struct TooltipError {
-    pub elem:HtmlElement, 
     pub placement:Placement, 
     pub slot: Option<String>, 
     pub body: String, 
     pub max_width: Option<f64>,
     pub on_close: Option<Rc<Box<dyn Fn()>>>,
-    pub move_strategy: MoveStrategy,
 }
 
 #[derive(Clone)]
 pub struct TooltipConfirm {
-    pub elem:HtmlElement, 
     pub placement:Placement, 
     pub slot: Option<String>, 
     pub header: String,
@@ -64,7 +82,6 @@ pub struct TooltipConfirm {
     pub max_width: Option<f64>,
     pub on_confirm: Rc<Box<dyn Fn()>>,
     pub on_cancel: Rc<Box<dyn Fn()>>,
-    pub move_strategy: MoveStrategy,
 }
 
 

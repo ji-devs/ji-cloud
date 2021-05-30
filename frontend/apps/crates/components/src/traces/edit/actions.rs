@@ -26,32 +26,56 @@ impl Edit {
     pub fn delete_index(&self, index: usize) {
         self.selected_index.set(None);
         self.list.lock_mut().remove(index);
-        self.call_change();
-        /*
-        self.get_history().push_modify(|game_data| {
-            game_data.pairs.remove(pair_index);
-        });
-        */
+        if let Some(on_delete) = self.callbacks.on_delete.as_ref() {
+            (on_delete) (index)
+        }
     }
 
     pub fn duplicate(&self, index: usize) {
+
+        let raw_trace = {
+            let mut raw_trace = self.list.lock_ref().get(index).unwrap_ji().to_raw();
+            let mut translation = &mut raw_trace.transform.translation.0;
+
+            //TODO - make the nudging random
+            translation[0] += 0.01;
+            translation[1] -= 0.01;
+
+            raw_trace
+        };
+
+        self.add(raw_trace);
+
+    }
+
+    pub fn add(&self, raw_trace: RawTrace) {
+        let resize_info = get_resize_info();
+        let trace = Rc::new(AllTrace::new(raw_trace.clone(), &resize_info));
+
         {
             let mut list = self.list.lock_mut();
-            if let Some(trace) = list.get(index) {
-                let mut trace = trace.to_raw();
-                let mut translation = &mut trace.transform.translation.0;
-
-                //TODO - make the nudging random
-                translation[0] += 0.01;
-                translation[1] -= 0.01;
-                let resize_info = get_resize_info();
-                let trace = Rc::new(AllTrace::new(trace, &resize_info));
-
-                list.push_cloned(trace);
-                self.select_index(list.len()-1);
-            }
+            list.push_cloned(trace);
+            self.select_index(list.len()-1);
         }
-        self.call_change();
+
+        if let Some(on_add) = self.callbacks.on_add.as_ref() {
+            (on_add) (raw_trace);
+        }
+    }
+
+    pub fn change(&self, index: usize, raw_trace: RawTrace) {
+        let resize_info = get_resize_info();
+        let trace = Rc::new(AllTrace::new(raw_trace.clone(), &resize_info));
+
+        {
+            let mut list = self.list.lock_mut();
+            list.set_cloned(index, trace);
+            self.select_index(index);
+        }
+
+        if let Some(on_change) = self.callbacks.on_change.as_ref() {
+            (on_change) (index, raw_trace);
+        }
     }
 
     pub fn select_index(&self, index:usize) {
@@ -63,57 +87,34 @@ impl Edit {
         self.selected_index.set(None);
     }
 
-    pub fn start_new_trace(_self: Rc<Self>, replace_index: Option<usize>, init: Option<(i32, i32)>) {
+    pub fn start_new_trace(_self: Rc<Self>, replace_index: Option<usize>, init_point: Option<(i32, i32)>) {
 
-        _self.selected_index.set(replace_index); // a bit ugly but consistently deselects/selects
+        _self.selected_index.set_neq(None);
 
-        let init_trace = replace_index.and_then(|index| {
+        let init_trace_index = replace_index.and_then(|index| {
             _self.list.lock_ref()
                 .get(index)
-                .map(|trace| trace.to_raw())
+                .map(|trace| (index, trace.to_raw()))
         });
 
-        let draw = Draw::new(init_trace, clone!(_self => move |raw| {
+        let draw = Draw::new(init_trace_index, clone!(_self => move |raw_trace| {
             //On finished
-            if let Some(raw) = raw {
-
-                let resize_info = get_resize_info();
-                let mut list = _self.list.lock_mut();
-                
-                let trace = Rc::new(AllTrace::new(raw, &resize_info));
-
+            if let Some(raw_trace) = raw_trace {
                 match replace_index {
-                    None => {
-                        list.push_cloned(trace);
-                        _self.select_index(list.len()-1);
-                    },
-                    Some(index) => {
-                        list.set_cloned(index, trace);
-                    }
+                    None => _self.add(raw_trace),
+                    Some(index) => _self.change(index, raw_trace)
                 }
+
 
                 _self.phase.set(Phase::All);
             }
         }));
 
-        if let Some((x, y)) = init {
+        if let Some((x, y)) = init_point {
             draw.start_draw(x, y);
         }
         _self.phase.set(Phase::Draw(Rc::new(draw)));
     }
-    // Internal - saving/history is done on the module level
-    pub fn call_change(&self) {
-        if let Some(on_change) = self.on_change.as_ref() {
-            let raw:Vec<RawTrace> = 
-                self.list.lock_ref()
-                    .iter()
-                    .map(|trace| trace.to_raw())
-                    .collect();
-
-            on_change(raw);
-        }
-    }
-
 
 }
 

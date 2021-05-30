@@ -14,7 +14,6 @@ pub fn render(state: Rc<Step2>) -> Dom {
         .children(&mut [
             render_tab(state.clone(), TabKind::Text),
             render_tab(state.clone(), TabKind::Image),
-            render_tab(state.clone(), TabKind::Audio),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
@@ -24,9 +23,6 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         },
                         Tab::Image(state) => {
                             Some(render_image_search(state.clone(), None))
-                        },
-                        Tab::Audio(state) => {
-                            Some(render_audio_input(state.clone(), None))
                         },
                     }
                 })))

@@ -32,7 +32,8 @@ impl InstructionsPlayer {
                 FadeKind::Out,
                 1000.0,
                 true,
-                Some(3000.0)
+                Some(3000.0),
+                None::<fn()>
             ),
             audio: RefCell::new(None),
         }
@@ -40,7 +41,7 @@ impl InstructionsPlayer {
 
     pub fn render(&self, ctx:&AudioContext) -> Dom {
         *self.audio.borrow_mut() = self.data.audio.as_ref().map(|audio| {
-            AudioPlayer::play_oneshot(ctx, audio.lib, audio.id)
+            AudioPlayer::play_oneshot(ctx, audio.clone())
         });
         html!("empty-fragment", {
             .apply_if(self.data.text.is_some(), |dom| {

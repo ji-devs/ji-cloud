@@ -12,12 +12,15 @@ use dominator::clone;
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
 use crate::traces::utils::TraceExt;
 use super::super::select_box::state::*;
+use web_sys::SvgElement;
 
 pub struct AllTrace {
     pub transform: Transform,
     pub shape: TraceShape,
     pub size: (f64, f64),
     pub select_box: Rc<SelectBox>,
+    pub elem: RefCell<Option<SvgElement>>,
+    pub bounds: Mutable<Option<BoundsF64>>,
 }
 
 impl AllTrace {
@@ -28,6 +31,8 @@ impl AllTrace {
             shape: raw.shape,
             size: (0.0, 0.0),
             select_box: Rc::new(SelectBox::new()), 
+            elem: RefCell::new(None),
+            bounds: Mutable::new(None),
         };
 
 

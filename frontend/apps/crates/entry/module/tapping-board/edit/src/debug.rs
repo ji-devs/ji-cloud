@@ -17,7 +17,7 @@ use shared::{
         jig::{
             module::body::{
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                tapping_board::{Content, Mode as RawMode, ModuleData as RawData}
+                tapping_board::{Content, Mode as RawMode, ModuleData as RawData, TappingTrace}
             },
             JigId, module::ModuleId
         },
@@ -86,16 +86,20 @@ impl DebugSettings {
                                 }
                             }).collect(),
                             traces: init_data.traces.iter().map(|init| {
-                                match init {
-                                    InitTrace::Ellipse(x, y, w, h) => {
-                                        let mut transform = Transform::identity();
-                                        transform.set_translation_2d(*x, *y);
-                                        Trace {
-                                            shape: TraceShape::Ellipse(*w, *h),
-                                            transform
+                                let trace = {
+                                    match init {
+                                        InitTrace::Ellipse(x, y, w, h) => {
+                                            let mut transform = Transform::identity();
+                                            transform.set_translation_2d(*x, *y);
+                                            Trace {
+                                                shape: TraceShape::Ellipse(*w, *h),
+                                                transform
+                                            }
                                         }
                                     }
-                                }
+                                };
+
+                                TappingTrace { trace, audio: None, text: None }
                             }).collect(),
                             //traces,
                             ..Content::default()
@@ -107,7 +111,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Two),
+            step: Some(Step::Three),
             skip_save: true,
             bg_tab: Some(BgTabKind::Color),
             content_tab: Some(ContentTabKind::Text),
@@ -124,7 +128,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![InitSticker::Text, InitSticker::Sprite],
             traces: vec![
-                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None, None)).unwrap_ji();

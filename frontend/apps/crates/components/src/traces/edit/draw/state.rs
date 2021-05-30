@@ -24,18 +24,24 @@ pub struct Draw {
     pub display_trace: Mutable<bool>,
     pub drag: Mutable<Option<Drag>>,
     pub menu: Mutable<Option<Menu>>,
-    pub on_finished: Box<dyn Fn(Option<RawTrace>)>
+    pub on_finished: Box<dyn Fn(Option<RawTrace>)>,
+    pub init_index: Option<usize>
 }
 
 impl Draw {
-    pub fn new(init: Option<RawTrace>, on_finished: impl Fn(Option<RawTrace>) + 'static) -> Self {
+    pub fn new(init: Option<(usize, RawTrace)>, on_finished: impl Fn(Option<RawTrace>) + 'static) -> Self {
 
         let draw_points = Mutable::new(Vec::new());
 
         let menu:Mutable<Option<Menu>> = Mutable::new(None);
 
+        let (init_index, init_trace, has_init) = match init {
+            Some((index, trace)) => (Some(index), Some(trace), true),
+            _ => (None, None, false)
+        };
+
         let _self = Self {
-            trace: DrawTrace::new(init.clone(), Rc::new(Box::new(clone!(menu => move || {
+            trace: DrawTrace::new(init_trace.clone(), Rc::new(Box::new(clone!(menu => move || {
                 //this will trigger menu re-positioning
                 if let Some(curr) = menu.get_cloned() {
                     menu.set(Some(curr));
@@ -46,9 +52,10 @@ impl Draw {
             draw_points,
             display_trace: Mutable::new(false),
             on_finished: Box::new(on_finished),
+            init_index
         };
 
-        if let Some(init) = init {
+        if has_init {
             _self.display_trace.set_neq(true);
             _self.recreate_deco();
         }

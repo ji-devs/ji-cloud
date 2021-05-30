@@ -302,9 +302,10 @@ function createInstance(opts:Opts):TooltipInstance {
         const checkPosition = () => {
 
             const targetRect = opts.target.getBoundingClientRect();
+            console.log(targetRect.y);
+
             if(lastTargetRect !== undefined) {
                 if(targetRect.x !== lastTargetRect.x || targetRect.y !== lastTargetRect.y) {
-                    console.log(moveStrategy);
                     if(moveStrategy === "track") {
                         recalc();
                     } else if(moveStrategy === "destroy") {

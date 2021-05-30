@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{Signal, Mutable, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, SvgElement};
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
@@ -162,6 +162,36 @@ fn apply_transform<A: AsRef<web_sys::Element>>(dom:DomBuilder<A>, resize_info: &
         dom.attribute("style", &style)
     })
 }
+
+pub struct SvgCallbacks {
+    pub on_select: Option<Box<dyn Fn()>>,
+    pub on_mount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
+    pub on_unmount: Option<Box<dyn Fn(web_sys::SvgElement)>>,
+}
+
+impl SvgCallbacks
+{
+    pub fn new(
+        on_select: Option<impl Fn() + 'static>,
+        on_mount: Option<impl Fn(web_sys::SvgElement) + 'static>,
+        on_unmount: Option<impl Fn(web_sys::SvgElement) + 'static>,
+    ) -> Self {
+        Self {
+            on_select: on_select.map(|f| Box::new(f) as _),
+            on_mount: on_mount.map(|f| Box::new(f) as _),
+            on_unmount: on_unmount.map(|f| Box::new(f) as _),
+        }
+    }
+
+    pub fn none() -> Self {
+        Self::new(
+            None::<fn()>, 
+            None::<fn(web_sys::SvgElement)>, 
+            None::<fn(web_sys::SvgElement)>, 
+        )
+    }
+}
+
 pub fn render_path_signal(shape_style: &ShapeStyle, resize_info: ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &Mutable<Vec<(f64, f64)>>) -> Dom {
     let path_string = 
         points.signal_ref(clone!(resize_info => move |points| {
@@ -184,7 +214,8 @@ pub fn render_path_signal(shape_style: &ShapeStyle, resize_info: ResizeInfo, tra
         .apply(|dom| apply_transform(dom, &resize_info, transform_size))
     })
 }
-pub fn render_path(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &[(f64, f64)], on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
+
+pub fn render_path(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, points: &[(f64, f64)], callbacks: SvgCallbacks) -> Dom {
     let path_string = {
         if points.len() < 2 {
             String::from("M 0 0")
@@ -199,40 +230,78 @@ pub fn render_path(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform
         }
     };
 
-    svg!("path", {
+    let callbacks = Rc::new(callbacks);
+
+    svg!("path" => SvgElement, {
         .class(shape_style.class())
         .attribute("d", &path_string)
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
-        .event(clone!(on_select => move |evt:events::Click| {
-            if let Some(on_select) = &on_select {
-                (on_select)();
-            }
-        }))
+        .apply_if(callbacks.on_select.is_some(), |dom| {
+            dom.event(clone!(callbacks => move |evt:events::Click| {
+                if let Some(on_select) = &callbacks.on_select {
+                    (on_select)();
+                }
+            }))
+        })
+        .apply_if(callbacks.on_mount.is_some(), |dom| {
+            dom.after_inserted(clone!(callbacks => move |elem| {
+                if let Some(on_mount) = &callbacks.on_mount {
+                    (on_mount)(elem);
+                }
+            }))
+        })
+        .apply_if(callbacks.on_unmount.is_some(), |dom| {
+            dom.after_removed(clone!(callbacks => move |elem| {
+                if let Some(on_unmount) = &callbacks.on_unmount {
+                    (on_unmount)(elem);
+                }
+            }))
+        })
     })
 }
 
 
-pub fn render_rect(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, width: f64, height: f64, on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
+pub fn render_rect(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, width: f64, height: f64, callbacks: SvgCallbacks) -> Dom {
 
     let (width, height) = resize_info.get_pos_denormalized(width, height);
+
+    let callbacks = Rc::new(callbacks);
 
     svg!("rect", {
         .class(shape_style.class())
         .attribute("width", &format!("{}px", width))
         .attribute("height", &format!("{}px", height))
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
-        .event(clone!(on_select => move |evt:events::Click| {
-            if let Some(on_select) = &on_select {
-                (on_select)();
-            }
-        }))
+        .apply_if(callbacks.on_select.is_some(), |dom| {
+            dom.event(clone!(callbacks => move |evt:events::Click| {
+                if let Some(on_select) = &callbacks.on_select {
+                    (on_select)();
+                }
+            }))
+        })
+        .apply_if(callbacks.on_mount.is_some(), |dom| {
+            dom.after_inserted(clone!(callbacks => move |elem| {
+                if let Some(on_mount) = &callbacks.on_mount {
+                    (on_mount)(elem);
+                }
+            }))
+        })
+        .apply_if(callbacks.on_unmount.is_some(), |dom| {
+            dom.after_removed(clone!(callbacks => move |elem| {
+                if let Some(on_unmount) = &callbacks.on_unmount {
+                    (on_unmount)(elem);
+                }
+            }))
+        })
     })
 
 }
 
-pub fn render_ellipse(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, radius_x: f64, radius_y: f64, on_select: Option<impl Fn() + Clone + 'static>) -> Dom {
+pub fn render_ellipse(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>, radius_x: f64, radius_y: f64, callbacks: SvgCallbacks) -> Dom {
 
     let (radius_x, radius_y) = resize_info.get_pos_denormalized(radius_x, radius_y);
+
+    let callbacks = Rc::new(callbacks);
 
     svg!("ellipse", {
         .class(shape_style.class())
@@ -241,11 +310,27 @@ pub fn render_ellipse(shape_style: &ShapeStyle, resize_info: &ResizeInfo, transf
         .attribute("rx", &format!("{}px", radius_x))
         .attribute("ry", &format!("{}px", radius_y))
         .apply(|dom| apply_transform(dom, resize_info, transform_size))
-        .event(clone!(on_select => move |evt:events::Click| {
-            if let Some(on_select) = &on_select {
-                (on_select)();
-            }
-        }))
+        .apply_if(callbacks.on_select.is_some(), |dom| {
+            dom.event(clone!(callbacks => move |evt:events::Click| {
+                if let Some(on_select) = &callbacks.on_select {
+                    (on_select)();
+                }
+            }))
+        })
+        .apply_if(callbacks.on_mount.is_some(), |dom| {
+            dom.after_inserted(clone!(callbacks => move |elem| {
+                if let Some(on_mount) = &callbacks.on_mount {
+                    (on_mount)(elem);
+                }
+            }))
+        })
+        .apply_if(callbacks.on_unmount.is_some(), |dom| {
+            dom.after_removed(clone!(callbacks => move |elem| {
+                if let Some(on_unmount) = &callbacks.on_unmount {
+                    (on_unmount)(elem);
+                }
+            }))
+        })
     })
 
 }

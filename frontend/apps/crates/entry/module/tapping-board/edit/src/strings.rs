@@ -22,3 +22,8 @@ pub mod mode {
     pub const STR_FAMILY_TREE_LABEL:&'static str = "Family Tree";
     pub const STR_POSTER_LABEL:&'static str = "TappingBoard";
 }
+
+pub mod step_3 {
+    pub const STR_LABEL:&'static str = "Text";
+    pub const STR_PLACEHOLDER:&'static str = "Type the text";
+}
