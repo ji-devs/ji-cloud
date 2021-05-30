@@ -19,7 +19,7 @@ pub fn render(state:Rc<Draw>, menu:Menu, resize_info:&ResizeInfo) -> Dom {
 
     html!("trace-edit-reshape-menu", {
 
-        .visible_signal(state.trace.transform.menu_button_visible.signal())
+        .visible_signal(state.trace.transform.is_transforming.signal().map(|x| !x))
         .style("left", format!("{}px", x))
         .style("top", format!("{}px", y))
         .children(&mut [

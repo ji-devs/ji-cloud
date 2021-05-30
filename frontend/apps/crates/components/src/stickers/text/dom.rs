@@ -30,6 +30,9 @@ pub struct DebugOptions {
 }
 //For text, we need to be able to click into the text while the transform is active
 //therefore it's a child of the transform
+//It's not enough to render only the lines of the SVG without the rect
+//since the element itself blocks (and the svg elements need pointer events)
+//
 //the transform box itself is only rotated, everything else is done by internal math
 //however the text shouldn't really scale either, so we just take the width/height
 //due to all this, we can't just pin the coordinate system to the top/left with rems
@@ -61,6 +64,8 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
             }
 
             if active {
+                let value = text.value.get_cloned();
+                text.editor.set_value(if value.is_empty() { None } else { Some(value) });
 
                 Some(html!("div", {
                     .style("display", "block")
@@ -88,9 +93,6 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
     })))
 }
 pub fn render_raw(text: &RawText) -> Dom {
-
-    log::info!("RENDERING RAW!");
-
     const COORDS_IN_CENTER:bool = true;
 
     let size = Some((BASE_WIDTH, BASE_HEIGHT));

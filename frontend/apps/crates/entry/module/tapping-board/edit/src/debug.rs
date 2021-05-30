@@ -36,7 +36,7 @@ use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -110,7 +110,7 @@ impl DebugSettings {
             step: Some(Step::Two),
             skip_save: true,
             bg_tab: Some(BgTabKind::Color),
-            content_tab: Some(ContentTabKind::Audio),
+            content_tab: Some(ContentTabKind::Text),
             interaction_tab: Some(InteractionTabKind::Text),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false

@@ -3,9 +3,11 @@ use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
+    backgrounds::actions::Layer,
     image::search::state::{State as ImageSearchState, ImageSearchOptions},
     color_select::state::{State as ColorPickerState},
 };
+use shared::domain::jig::module::body::{Background, Image};
 pub struct Step1 {
     pub base: Rc<Base>,
     pub tab: Mutable<Tab>,
@@ -67,15 +69,16 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(|id, lib| {
-                    log::info!("Image selected: {:?} {:?}", id, lib);
-                }));
+                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
+                    base.backgrounds.set_layer(Layer::One, Background::Image(Image { id, lib}));
+                })));
+
                 Self::Image(Rc::new(state))
             },
             TabKind::Color => {
-                let state = ColorPickerState::new(Some(theme_id), None, Some(|color| {
-                    log::info!("Color selected: {:?}", color);
-                }));
+                let state = ColorPickerState::new(Some(theme_id), None, Some(clone!(base => move |color| {
+                    base.backgrounds.set_layer(Layer::One, Background::Color(color));
+                })));
                 Self::Color(Rc::new(state))
             },
             TabKind::Overlay => {
@@ -85,9 +88,10 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(|id, lib| {
-                    log::info!("Image selected: {:?} {:?}", id, lib);
-                }));
+                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
+                    base.backgrounds.set_layer(Layer::Two, Background::Image(Image { id, lib}));
+                })));
+
                 Self::Overlay(Rc::new(state))
             }
         }

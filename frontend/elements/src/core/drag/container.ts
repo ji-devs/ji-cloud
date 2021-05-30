@@ -16,9 +16,10 @@ export class _ extends LitElement {
   static get styles() {
     return [css`
       :host {
-        position: absolute;
+        position: fixed;
         top: 0px;
         left: 0px;
+        z-index: 2;
         cursor: pointer;
       }
 

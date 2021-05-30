@@ -35,13 +35,13 @@ impl TransformState {
                 }
             }
             *self.action.borrow_mut() = None;
-            self.menu_button_visible.set_neq(true); 
+            self.is_transforming.set_neq(false); 
         }
     }
     pub fn start_tracking_action(&self, action: Action, x: i32, y:i32) {
         *self.action.borrow_mut() = Some(action);
 
-        self.menu_button_visible.set_neq(false); 
+        self.is_transforming.set_neq(true); 
         let (anchor_x, anchor_y) = match action {
             Action::Move => {
 

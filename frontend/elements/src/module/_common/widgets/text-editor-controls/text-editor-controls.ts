@@ -56,6 +56,9 @@ export class _ extends LitElement {
                 <slot name="font"></slot>
                 <slot name="weight"></slot>
             </div>
+            <div class="row">
+                <slot name="add"></slot>
+            </div>
         `;
     }
 }

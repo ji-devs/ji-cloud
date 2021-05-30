@@ -3,6 +3,7 @@ use std::rc::Rc;
 use utils::prelude::*;
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use strum::IntoEnumIterator;
+use crate::text_editor::config::STR_NEW_TEXT;
 use crate::text_editor::font_css_converter::font_to_css;
 
 use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
@@ -148,6 +149,17 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "sefaria")
                 .property("mode", "sefaria")
             }),
+            html!("button", {
+                .text("ADD")
+                .property("slot", "add")
+                .event(clone!(state => move |_: events::Click| {
+                    if let Some(on_new_text) = state.on_new_text.borrow().as_ref() {
+                        //TODO - this should create a slate value
+                        //with the current settings and only replace the text
+                        (on_new_text) (STR_NEW_TEXT);
+                    }
+                }))
+            })
         ])
     })
 }

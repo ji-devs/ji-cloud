@@ -22,6 +22,7 @@ pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Mutable<Vec<String>>,
+    pub on_new_text: RefCell<Option<Box<dyn Fn(&str)>>>,
     pub on_change: RefCell<Option<Box<dyn Fn(&str)>>>,
     pub on_blur: RefCell<Option<Box<dyn Fn()>>>,
     pub value: RefCell<Option<String>>,
@@ -31,13 +32,14 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(theme_id: ThemeId, value: Option<String>, on_change: Option<Box<dyn Fn(&str)>>, on_blur: Option<Box<dyn Fn()>>, ) -> Rc<Self> {
+    pub fn new(theme_id: ThemeId, value: Option<String>, on_new_text: Option<impl Fn(&str) + 'static>, on_change: Option<impl Fn(&str) + 'static>, on_blur: Option<impl Fn() + 'static>, ) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Mutable::new(Self::get_fonts(theme_id)),
-            on_change: RefCell::new(on_change),
-            on_blur: RefCell::new(on_blur),
+            on_new_text: RefCell::new(on_new_text.map(|f| Box::new(f) as _)),
+            on_change: RefCell::new(on_change.map(|f| Box::new(f) as _)),
+            on_blur: RefCell::new(on_blur.map(|f| Box::new(f) as _)),
             value: RefCell::new(value),
             theme_id: Mutable::new(theme_id),
             color_state: RefCell::new(None) 

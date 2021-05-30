@@ -65,17 +65,8 @@ where
                 .style_signal("width", state.width_px_signal().map(|x| format!("{}px", x)))
                 .style_signal("height", state.height_px_signal().map(|x| format!("{}px", x)))
                 .property_signal("active", get_active_signal())
-                .property_signal("menuButtonVisible", map_ref!{
-                    let menu_button_visible = state.menu_button_visible.signal(),
-                    let has_menu = always(get_menu_contents.is_some())
-                        => {
-                            if *menu_button_visible && *has_menu {
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                })
+                .property_signal("isTransforming", state.is_transforming.signal())
+                .property("hasMenu", get_menu_contents.is_some())
                 .property_signal("width", state.width_px_signal())
                 .property_signal("height", state.height_px_signal())
                 .property_signal("rectHidden", state.rect_hidden.signal())
@@ -128,9 +119,6 @@ where
                     get_menu_contents.as_ref().and_then(|get_menu_contents| {
                         pos.map(|pos| {
                             html!("drag-container", {
-                                .style("position", "fixed")
-                                .style("top", "0")
-                                .style("left", "0")
                                 .property("x", pos.0 + 32.0)
                                 .property("y", pos.1)
                                 .child(html!("menu-container", {

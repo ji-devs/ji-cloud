@@ -19,7 +19,7 @@ pub struct TransformState {
     pub hide_on_dbl_click: RefCell<bool>,
     pub menu_pos: Mutable<Option<(f64, f64)>>, 
     pub coords_in_center: bool,
-    pub menu_button_visible: Mutable<bool>,
+    pub is_transforming: Mutable<bool>,
     pub rect_hidden: Mutable<bool>, 
     pub(super) transform: Mutable<Transform>,
     pub(super) drag: Mutable<Option<Drag>>, 
@@ -62,7 +62,7 @@ impl TransformState {
             scale_stash: RefCell::new(None),
             hide_on_dbl_click: RefCell::new(false),
             alt_pressed: RefCell::new(false),
-            menu_button_visible: Mutable::new(true),
+            is_transforming: Mutable::new(false),
             menu_pos: Mutable::new(None),
             //map doesn't work for some reason..
             on_action_finished: match on_action_finished {

@@ -32,6 +32,18 @@ export class TransformBox extends LitElement {
               left: 0;
           }
 
+          /* TODO - figure out how to make just the transform itself
+             appear above all
+             not the child contents
+
+             currently breaks for text
+          */
+          :host {
+              position: absolute;
+              top: 0;
+              left: 0;
+              z-index: 1;
+          }
 
 
           #rotLine {
@@ -87,9 +99,9 @@ export class TransformBox extends LitElement {
   }
 
   updated(changed:any) {
-        if (typeof changed.get("menuButtonVisible") === "boolean") {
-            const { menuButtonVisible } = this;
-            if(menuButtonVisible) {
+        if (typeof changed.get("isTransforming") === "boolean") {
+            const { isTransforming } = this;
+            if(isTransforming ) {
                 this.updateMenuButtonLocation();
             }
         }
@@ -168,8 +180,11 @@ export class TransformBox extends LitElement {
     }));
   }
 
+  @property({type: Boolean, reflect: true})
+  isTransforming:boolean = false;
+
   @property({type: Boolean})
-  menuButtonVisible:boolean = false;
+  hasMenu:boolean = false;
 
   @property({type: Boolean})
   active:boolean = false;
@@ -184,7 +199,7 @@ export class TransformBox extends LitElement {
   height:number = 0;
 
   render() {
-      const {width, height, rectHidden, active, menuButtonVisible, menuButtonDot} = this;
+      const {width, height, rectHidden, active, isTransforming, hasMenu, menuButtonDot} = this;
 
       const dotPositions:Record<DotPos, [number, number]> = {
             "tl": [0, 0],
@@ -287,7 +302,7 @@ export class TransformBox extends LitElement {
           let style = `left: calc(${x}px - ${MENU_BUTTON_RADIUS}px);` 
           style += ` top: calc(${y}px - ${MENU_BUTTON_RADIUS}px);`;
 
-          return menuButtonVisible 
+          return !isTransforming && hasMenu
               ? html`<div id="menu-btn" style="${style}"><slot name="menu-btn"></slot></div>`
               : nothing;
       }

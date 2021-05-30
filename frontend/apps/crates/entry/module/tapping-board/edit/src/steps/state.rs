@@ -44,16 +44,21 @@ impl Base {
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(theme_id, None, 
-            Some(Box::new(clone!(stickers_ref => move |value| {
+            Some(clone!(stickers_ref => move |value:&str| {
+                if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                    Stickers::add_text(stickers.clone(), value.to_string());
+                }
+            })),
+            Some(clone!(stickers_ref => move |value:&str| {
                 if let Some(stickers) = stickers_ref.borrow().as_ref() {
                     stickers.set_current_text_value(value.to_string());
                 }
-            }))),
-            Some(Box::new(clone!(stickers_ref => move || {
+            })),
+            Some(clone!(stickers_ref => move || {
                 if let Some(stickers) = stickers_ref.borrow().as_ref() {
                     stickers.current_text_blur();
                 }
-            })))
+            }))
         );
 
         let backgrounds = Rc::new(Backgrounds::new(

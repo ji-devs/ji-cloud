@@ -7,7 +7,8 @@ use components::{
     audio_input::{
         options::AudioInputOptions,
         state::State as AudioInputState
-    }
+    },
+    stickers::state::Stickers,
 };
 
 pub struct Step2 {
@@ -71,9 +72,9 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(|id, lib| {
-                    log::info!("Image selected: {:?} {:?}", id, lib);
-                }));
+                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
+                    Stickers::add_sprite(base.stickers.clone(), id, lib);
+                })));
 
                 Self::Image(Rc::new(state))
             },

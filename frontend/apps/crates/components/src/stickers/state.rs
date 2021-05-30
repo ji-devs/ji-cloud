@@ -18,6 +18,7 @@ pub struct Stickers
 {
     pub list: MutableVec<Sticker>,
     pub selected_index: Mutable<Option<usize>>,
+    pub text_editor: Rc<TextEditorState>,
     pub on_change: RefCell<Option<Box<dyn Fn(Vec<RawSticker>)>>>,
 }
 
@@ -50,13 +51,10 @@ impl Stickers {
     pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, on_change: Option<impl Fn(Vec<RawSticker>) + 'static>) -> Rc<Self> {
   
         let _self = Rc::new(Self{
+            text_editor: text_editor.clone(),
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
-            on_change: RefCell::new(match on_change {
-                //map doesn't work for som reason
-                None => None,
-                Some(f) => Some(Box::new(f))
-            })
+            on_change: RefCell::new(on_change.map(|f| Box::new(f) as _))
         });
 
 
