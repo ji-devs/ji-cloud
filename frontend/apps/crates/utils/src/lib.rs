@@ -16,5 +16,6 @@ pub mod api_helpers;
 pub mod prelude;
 pub mod unwrap;
 pub mod themes;
+pub mod colors;
 
 pub(crate) mod strings;

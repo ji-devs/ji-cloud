@@ -2,7 +2,7 @@ use std::rc::Rc;
 use dominator::{Dom, html, clone};
 use super::super::super::state::State;
 use futures_signals::signal::Mutable;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
 use wasm_bindgen_futures::spawn_local;
 use futures::future::ready;
@@ -10,7 +10,6 @@ use rgb::RGBA8;
 use crate::color_select::{
     self,
     state::State as ColorPickerState,
-    actions::{hex_to_rgba8, rgba8_to_hex},
 };
 
 pub struct ColorState {

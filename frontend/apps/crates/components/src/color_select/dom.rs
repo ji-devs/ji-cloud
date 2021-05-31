@@ -2,11 +2,11 @@ use dominator::{Dom, html, clone};
 use futures_signals::signal_vec::SignalVecExt;
 use rgb::RGBA8;
 use std::rc::Rc;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
 use crate::color_select::actions::get_user_colors;
 
-use super::actions::{add_user_color, delete_user_color, rgba8_to_hex, hex_to_rgba8};
+use super::actions::{add_user_color, delete_user_color};
 use super::state::State;
 use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;

@@ -1,13 +1,12 @@
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use utils::{prelude::*, resize::resize_info_signal};
+use utils::{prelude::*, resize::resize_info_signal, colors::*};
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
     signal::SignalExt,
     signal_vec::SignalVecExt,
 };
-use crate::color_select::actions::rgba8_to_hex;
 
 use super::state::*;
 use shared::domain::jig::module::body::{Background, Backgrounds as RawBackgrounds};

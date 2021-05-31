@@ -2,9 +2,8 @@ use std::rc::Rc;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 
-use super::actions::hex_to_rgba8;
 
 
 static SYSTEM_COLORS: &'static [&str] = &[

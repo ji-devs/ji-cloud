@@ -1,6 +1,5 @@
-use utils::themes::{ThemeId, ThemeIdExt};
+use utils::{prelude::*, colors::*};
 
-use crate::color_select::actions::rgba8_to_hex;
 use super::wysiwyg_types::{ElementType, Font, FontSize, Color};
 
 pub fn get_theme_element_styles(theme_id: &ThemeId, element: &ElementType) -> (Font, Color, FontSize) {
