@@ -6,7 +6,7 @@ use futures_signals::{
 use std::rc::Rc;
 use shared::{domain::{image::ImageId, jig::module::body::{Sprite as RawSprite, Transform}}, media::MediaLibrary};
 use std::cell::RefCell;
-use crate::transform::state::TransformState;
+use crate::transform::state::{TransformState, TransformCallbacks};
 use utils::resize::resize_info_signal;
 
 #[derive(Clone)]
@@ -19,10 +19,14 @@ pub struct Sprite {
 impl Sprite {
     pub fn new(raw:&RawSprite, on_transform_finished: Option<impl Fn(Transform) + 'static>) -> Self {
         let raw = raw.clone();
+        let transform_callbacks = TransformCallbacks::new(
+            on_transform_finished,
+            None::<fn()>
+        );
         Self {
             id: raw.id,
             lib: raw.lib,
-            transform: Rc::new(TransformState::new(raw.transform, None, true, on_transform_finished)),
+            transform: Rc::new(TransformState::new(raw.transform, None, true, transform_callbacks)),
         }
     }
 

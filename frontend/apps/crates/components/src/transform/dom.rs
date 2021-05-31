@@ -15,21 +15,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 pub fn render(state: Rc<TransformState>, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
-    render_child(state, get_menu_contents, || always(true), always(None))
-}
-
-pub fn render_child<M, F, A>(
-    state: Rc<TransformState>, 
-    get_menu_contents: Option<M>, 
-    get_active_signal: F, 
-    child_signal: impl Signal<Item = Option<Dom>> + 'static
-) -> Dom 
-where
-    M: Fn() -> Dom + 'static,
-    F: Fn() -> A,
-    A: Signal<Item = bool> + 'static, 
-{
-
     html!("empty-fragment", {
         .child(
             html!("transform-box", {
@@ -53,7 +38,6 @@ where
                         }))
                     })
                 }))
-                .child_signal(child_signal)
                 .style("display", "block")
 
                 .style("position", "absolute")
@@ -62,16 +46,14 @@ where
                 .style_signal("left", state.x_px_signal().map(|x| format!("{}px", x)))
                 .style_signal("width", state.width_px_signal().map(|x| format!("{}px", x)))
                 .style_signal("height", state.height_px_signal().map(|x| format!("{}px", x)))
-                .property_signal("active", get_active_signal())
                 .property_signal("isTransforming", state.is_transforming.signal())
                 .property("hasMenu", get_menu_contents.is_some())
                 .property_signal("width", state.width_px_signal())
                 .property_signal("height", state.height_px_signal())
-                .property_signal("rectHidden", state.rect_hidden.signal())
                 .property_signal("screenScale", resize_info_signal().map(|resize| resize.scale)) 
                 .event(clone!(state => move |evt:super::events::RectDblClick| {
-                    if *state.hide_on_dbl_click.borrow() {
-                        state.rect_hidden.set_neq(true);
+                    if let Some(on_double_click) = &state.callbacks.on_double_click {
+                        (on_double_click) ();
                     }
                 }))
                 .event(clone!(state => move |evt:super::events::Move| {
@@ -112,7 +94,7 @@ where
         )
         .child_signal(
             state
-                .menu_pos_signal(get_active_signal())
+                .menu_pos.signal_cloned()
                 .map(clone!(state => move |pos| {
                     get_menu_contents.as_ref().and_then(|get_menu_contents| {
                         pos.map(|pos| {

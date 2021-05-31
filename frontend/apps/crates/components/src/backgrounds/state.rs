@@ -7,15 +7,16 @@ use futures_signals::{
 use std::rc::Rc;
 use std::cell::RefCell;
 use shared::domain::jig::module::body::{Background, Backgrounds as RawBackgrounds};
+use super::callbacks::Callbacks;
 
 pub struct Backgrounds 
 {
     pub layer_1: Mutable<Option<Background>>,
     pub layer_2: Mutable<Option<Background>>,
-    pub on_change: RefCell<Option<Box<dyn Fn(RawBackgrounds)>>>,
+    pub(super) callbacks: Callbacks,
 }
 impl Backgrounds {
-    pub fn new(raw:Option<&RawBackgrounds>, on_change: Option<Box<dyn Fn(RawBackgrounds)>>) -> Self {
+    pub fn new(raw:Option<&RawBackgrounds>, callbacks: Callbacks) -> Self {
    
         let (layer_1, layer_2) = {
             if let Some(raw) = raw {
@@ -31,7 +32,7 @@ impl Backgrounds {
         Self {
             layer_1,
             layer_2,
-            on_change: RefCell::new(on_change),
+            callbacks,
         }
     }
 

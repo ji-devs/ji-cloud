@@ -50,6 +50,12 @@ pub fn render(state:Rc<Draw>, menu:Menu, resize_info:&ResizeInfo) -> Dom {
                       state.done();
                   }))
               }),
+              html!("button", {
+                  .text("Cancel")
+                  .event(clone!(state => move |evt:events::Click| {
+                      state.cancel();
+                  }))
+              }),
         ])
     })
 

@@ -7,7 +7,7 @@ use futures_signals::{
 use std::rc::Rc;
 use std::cell::RefCell;
 use shared::domain::jig::module::body::{Trace as RawTrace, Transform, TraceShape as RawTraceShape};
-use crate::transform::state::TransformState;
+use crate::transform::state::{TransformState, TransformCallbacks};
 use dominator::clone;
 use utils::{math::BoundsF64, prelude::*};
 
@@ -34,9 +34,12 @@ impl DrawTrace {
                 raw.transform,
                 None, 
                 false,
-                Some(move |_| {
-                    on_change_cb();
-                })
+                TransformCallbacks::new(
+                    Some(move |_| {
+                        on_change_cb();
+                    }),
+                    None::<fn()>
+                )
             )),
             shape: Mutable::new(raw.shape.into()) 
         }

@@ -32,7 +32,7 @@ impl Backgrounds {
 
     // Internal - saving/history is done on the module level
     fn call_change(&self) {
-        if let Some(on_change) = self.on_change.borrow().as_ref() {
+        if let Some(on_change) = self.callbacks.on_change.as_ref() {
             (on_change) (self.to_raw());
         }
     }

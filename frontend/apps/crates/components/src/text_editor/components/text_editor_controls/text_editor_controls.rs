@@ -153,7 +153,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .text("ADD")
                 .property("slot", "add")
                 .event(clone!(state => move |_: events::Click| {
-                    if let Some(on_new_text) = state.on_new_text.borrow().as_ref() {
+                    if let Some(on_new_text) = state.callbacks.on_new_text.as_ref() {
                         //TODO - this should create a slate value
                         //with the current settings and only replace the text
                         (on_new_text) (STR_NEW_TEXT);

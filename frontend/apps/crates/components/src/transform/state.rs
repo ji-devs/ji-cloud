@@ -16,19 +16,34 @@ use wasm_bindgen::JsCast;
 
 pub struct TransformState {
     pub size: Mutable<Option<(f64, f64)>>,
-    pub hide_on_dbl_click: RefCell<bool>,
     pub menu_pos: Mutable<Option<(f64, f64)>>, 
     pub coords_in_center: bool,
     pub is_transforming: Mutable<bool>,
-    pub rect_hidden: Mutable<bool>, 
     pub(super) transform: Mutable<Transform>,
     pub(super) drag: Mutable<Option<Drag>>, 
     pub(super) action: RefCell<Option<Action>>,
     pub(super) rot_stash: RefCell<Option<InitRotation>>,
     pub(super) scale_stash: RefCell<Option<InitScale>>,
     pub(super) alt_pressed: RefCell<bool>,
-    pub(super) on_action_finished: Option<Box<dyn Fn(Transform)>>,
     pub(super) dom_ref: RefCell<Option<TransformBoxElement>>, 
+    pub(super) callbacks: TransformCallbacks,
+}
+
+pub struct TransformCallbacks {
+    pub on_action_finished: Option<Box<dyn Fn(Transform)>>,
+    pub on_double_click: Option<Box<dyn Fn()>>,
+}
+
+impl TransformCallbacks {
+    pub fn new(
+        on_action_finished: Option<impl Fn(Transform) + 'static>,
+        on_double_click: Option<impl Fn() + 'static>
+    ) -> Self {
+        Self {
+            on_action_finished: on_action_finished.map(|f| Box::new(f) as _),
+            on_double_click: on_double_click.map(|f| Box::new(f) as _),
+        }
+    }
 }
 
 pub struct InitRotation {
@@ -50,25 +65,19 @@ extern "C" {
 }
 
 impl TransformState {
-    pub fn new(transform:Transform, size: Option<(f64, f64)>, coords_in_center: bool, on_action_finished: Option<impl Fn(Transform) + 'static>) -> Self {
+    pub fn new(transform:Transform, size: Option<(f64, f64)>, coords_in_center: bool, callbacks: TransformCallbacks) -> Self {
         Self {
             coords_in_center,
-            rect_hidden: Mutable::new(false),
             size: Mutable::new(size),
             transform: Mutable::new(transform),
             drag: Mutable::new(None),
             action: RefCell::new(None),
             rot_stash: RefCell::new(None),
             scale_stash: RefCell::new(None),
-            hide_on_dbl_click: RefCell::new(false),
             alt_pressed: RefCell::new(false),
             is_transforming: Mutable::new(false),
             menu_pos: Mutable::new(None),
-            //map doesn't work for some reason..
-            on_action_finished: match on_action_finished {
-                Some(on_action_finished) => Some(Box::new(on_action_finished)),
-                None => None
-            },
+            callbacks,
             dom_ref: RefCell::new(None)
         }
     }
@@ -85,23 +94,6 @@ impl TransformState {
     }
     pub fn get_inner_mutable(&self) -> Mutable<Transform> {
         self.transform.clone()
-    }
-
-    pub fn menu_pos_signal(
-        &self, 
-        active_signal: impl Signal<Item = bool>
-    ) -> impl Signal<Item = Option<(f64, f64)>> {
-        map_ref! {
-            let active = active_signal,
-            let pos = self.menu_pos.signal_cloned()
-                => {
-                    if !*active {
-                        None
-                    } else {
-                        *pos
-                    }
-                }
-        }
     }
 
     /// this is very slow! only used in rare cases where we need

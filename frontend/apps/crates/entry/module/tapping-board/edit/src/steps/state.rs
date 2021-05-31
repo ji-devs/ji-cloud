@@ -20,9 +20,18 @@ use futures_signals::{
 };
 use utils::prelude::*;
 use components::{
-    text_editor::state::State as TextEditorState,
-    stickers::state::Stickers,
-    backgrounds::state::Backgrounds,
+    text_editor::{
+        state::State as TextEditorState,
+        callbacks::Callbacks as TextEditorCallbacks
+    },
+    stickers::{
+        state::Stickers,
+        callbacks::Callbacks as StickersCallbacks
+    },
+    backgrounds::{
+        state::Backgrounds,
+        callbacks::Callbacks as BackgroundsCallbacks,
+    },
     traces::{
         bubble::state::TraceBubble,
         edit::{
@@ -88,38 +97,53 @@ impl Base {
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(theme_id, None, 
-            Some(clone!(stickers_ref => move |value:&str| {
-                if let Some(stickers) = stickers_ref.borrow().as_ref() {
-                    Stickers::add_text(stickers.clone(), value.to_string());
-                }
-            })),
-            Some(clone!(stickers_ref => move |value:&str| {
-                if let Some(stickers) = stickers_ref.borrow().as_ref() {
-                    stickers.set_current_text_value(value.to_string());
-                }
-            })),
-            Some(clone!(stickers_ref => move || {
-                if let Some(stickers) = stickers_ref.borrow().as_ref() {
-                    stickers.current_text_blur();
-                }
-            }))
-        );
+            TextEditorCallbacks::new(
+                //New text
+                Some(clone!(stickers_ref => move |value:&str| {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                        Stickers::add_text(stickers.clone(), value.to_string());
+                    }
+                })),
+                //Text change
+                Some(clone!(stickers_ref => move |value:&str| {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                        stickers.set_current_text_value(value.to_string());
+                    }
+                })),
+                //Blur
+                Some(clone!(stickers_ref => move || {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                        stickers.stop_current_text_editing();
+                    }
+                }))
+        ));
+
 
         let backgrounds = Rc::new(Backgrounds::new(
                 raw.map(|content| &content.backgrounds),
-                None
+                BackgroundsCallbacks::new(
+                    Some(clone!(history => move |raw_bgs| {
+                        history.push_modify(|raw| {
+                            if let Some(content) = &mut raw.content {
+                                content.backgrounds = raw_bgs;
+                            }
+                        });
+                    }))
+                )
         ));
 
         let stickers = Stickers::new(
                 raw.map(|content| content.stickers.as_ref()),
                 text_editor.clone(),
-                Some(clone!(history => move |raw_stickers| {
-                    history.push_modify(|raw| {
-                        if let Some(content) = &mut raw.content {
-                            content.stickers = raw_stickers;
-                        }
-                    });
-                }))
+                StickersCallbacks::new(
+                    Some(clone!(history => move |raw_stickers| {
+                        history.push_modify(|raw| {
+                            if let Some(content) = &mut raw.content {
+                                content.stickers = raw_stickers;
+                            }
+                        });
+                    }))
+                )
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());

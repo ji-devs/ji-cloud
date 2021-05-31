@@ -87,7 +87,7 @@ impl Edit {
         self.selected_index.set(None);
     }
 
-    pub fn start_new_trace(_self: Rc<Self>, replace_index: Option<usize>, init_point: Option<(i32, i32)>) {
+    pub fn start_draw(_self: Rc<Self>, replace_index: Option<usize>, init_point: Option<(i32, i32)>) {
 
         _self.selected_index.set_neq(None);
 
@@ -104,10 +104,8 @@ impl Edit {
                     None => _self.add(raw_trace),
                     Some(index) => _self.change(index, raw_trace)
                 }
-
-
-                _self.phase.set(Phase::All);
             }
+            _self.phase.set(Phase::All);
         }));
 
         if let Some((x, y)) = init_point {

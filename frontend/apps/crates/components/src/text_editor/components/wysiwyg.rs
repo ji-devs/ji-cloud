@@ -61,12 +61,12 @@ pub fn render(state: Rc<State>) -> Dom {
         }))
         .event(clone!(state => move |e: events::CustomChange| {
             let value = e.value();
-            if let Some(on_change) = &state.on_change.borrow().as_ref() {
+            if let Some(on_change) = &state.callbacks.on_change.as_ref() {
                 on_change(&value);
             }
         }))
         .event(clone!(state => move |e: events::CustomBlur| {
-            if let Some(on_blur) = &state.on_blur.borrow().as_ref() {
+            if let Some(on_blur) = &state.callbacks.on_blur.as_ref() {
                 on_blur();
             }
         }))

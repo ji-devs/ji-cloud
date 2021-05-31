@@ -17,7 +17,7 @@ pub fn render(state:Rc<Edit>, index: ReadOnlyMutable<Option<usize>>) -> Dom {
                 .property("icon", "edit")
                 .event(clone!(state, index => move |evt:events::Click| {
                     if let Some(index) = index.get() {
-                        Edit::start_new_trace(state.clone(), Some(index), None);
+                        Edit::start_draw(state.clone(), Some(index), None);
                     }
                 }))
             }),

@@ -77,7 +77,7 @@ pub fn render(state:Rc<Edit>) -> Dom {
                 mask_children,
                 click_children,
                 clone!(state => move |x, y| {
-                    Edit::start_new_trace(state.clone(), None, Some((x, y)));
+                    Edit::start_draw(state.clone(), None, Some((x, y)));
                 }),
                 clone!(state => move |x, y| {
                 }),

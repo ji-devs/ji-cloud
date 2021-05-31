@@ -112,7 +112,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::One),
+            step: Some(Step::Two),
             skip_save: true,
             bg_tab: Some(BgTabKind::Image),
             content_tab: Some(ContentTabKind::Text),
@@ -126,15 +126,13 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        /*
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![InitSticker::Text, InitSticker::Sprite],
             traces: vec![
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        */
-        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

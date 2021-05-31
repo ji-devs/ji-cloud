@@ -131,4 +131,7 @@ impl Draw {
         }
 
     }
+    pub fn cancel(&self) {
+        (self.on_finished) (None);
+    }
 }

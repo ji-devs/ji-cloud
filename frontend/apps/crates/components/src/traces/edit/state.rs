@@ -77,7 +77,7 @@ impl Edit {
         }
 
         if debug_opts.start_in_phase_draw {
-            Self::start_new_trace(_self.clone(), None, None);
+            Self::start_draw(_self.clone(), None, None);
         }
 
         _self

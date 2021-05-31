@@ -17,29 +17,25 @@ use super::{
 };
 use super::super::font_loader::{FontLoader, Font as StaticFont};
 use super::components::text_editor_controls::color_controls::ColorState;
+use super::callbacks::Callbacks;
 
 pub struct State {
     pub controls: Mutable<ControlsState>,
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Mutable<Vec<String>>,
-    pub on_new_text: RefCell<Option<Box<dyn Fn(&str)>>>,
-    pub on_change: RefCell<Option<Box<dyn Fn(&str)>>>,
-    pub on_blur: RefCell<Option<Box<dyn Fn()>>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: Mutable<ThemeId>,
     pub color_state: RefCell<Option<Rc<ColorState>>>,
-
+    pub callbacks: Callbacks,
 }
 
 impl State {
-    pub fn new(theme_id: ThemeId, value: Option<String>, on_new_text: Option<impl Fn(&str) + 'static>, on_change: Option<impl Fn(&str) + 'static>, on_blur: Option<impl Fn() + 'static>, ) -> Rc<Self> {
+    pub fn new(theme_id: ThemeId, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
             fonts: Mutable::new(Self::get_fonts(theme_id)),
-            on_new_text: RefCell::new(on_new_text.map(|f| Box::new(f) as _)),
-            on_change: RefCell::new(on_change.map(|f| Box::new(f) as _)),
-            on_blur: RefCell::new(on_blur.map(|f| Box::new(f) as _)),
+            callbacks,
             value: RefCell::new(value),
             theme_id: Mutable::new(theme_id),
             color_state: RefCell::new(None) 

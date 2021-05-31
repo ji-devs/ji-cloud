@@ -186,12 +186,6 @@ export class TransformBox extends LitElement {
   @property({type: Boolean})
   hasMenu:boolean = false;
 
-  @property({type: Boolean})
-  active:boolean = false;
-
-  @property({type: Boolean})
-  rectHidden:boolean = false;
-
   @property({type: Number})
   width:number = 0;
 
@@ -199,7 +193,7 @@ export class TransformBox extends LitElement {
   height:number = 0;
 
   render() {
-      const {width, height, rectHidden, active, isTransforming, hasMenu, menuButtonDot} = this;
+      const {width, height, isTransforming, hasMenu, menuButtonDot} = this;
 
       const dotPositions:Record<DotPos, [number, number]> = {
             "tl": [0, 0],
@@ -218,8 +212,7 @@ export class TransformBox extends LitElement {
           const boxWidth = width + (RECT_STROKE_SIZE * 2); 
           const boxHeight = height + (RECT_STROKE_SIZE * 2);
 
-          const svgs = rectHidden ? [] : 
-              [
+          const svgs = [
                   svg`<svg width="${boxWidth}px" height="${boxHeight}px">
                     <rect id="fillRect" x="${RECT_STROKE_SIZE}px" y="${RECT_STROKE_SIZE}px" width="${width}px" height="${height}px" @mousedown=${this.onMoveStart} @dblclick=${this.onRectDoubleClick} />
                     </svg>`
@@ -307,8 +300,6 @@ export class TransformBox extends LitElement {
               : nothing;
       }
 
-      return active 
-          ? html`<slot></slot>${renderRect()} ${renderDots()} ${renderRot()} ${renderMenuButton()}` 
-          : html`<slot></slot>`;
+      return html`${renderRect()} ${renderDots()} ${renderRot()} ${renderMenuButton()}`;
   }
 }
