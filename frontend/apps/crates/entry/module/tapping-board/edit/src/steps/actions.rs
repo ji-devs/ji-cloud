@@ -8,6 +8,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Trace as RawTrace,
             Audio,
+            Instructions,
             tapping_board::{Mode as RawMode, TappingTrace, Content as RawContent, ModuleData as RawData}
         }
     }
@@ -85,11 +86,6 @@ pub async fn init_from_raw(
 }
 
 impl Base {
-    pub fn stub_action(&self) {
-        self.history.push_modify(move |raw| {
-            
-        });
-    }
 
     pub fn change_theme(&self, theme: ThemeChoice) {
         self.theme.set_neq(theme);

@@ -10,7 +10,14 @@ use shared::domain::jig::{
             Trace as RawTrace,
             Backgrounds as RawBackgrounds, 
             Audio,
-            tapping_board::{Mode as RawMode, Content as RawContent, ModuleData as RawData}
+            Instructions,
+            tapping_board::{
+                PlaySettings as RawPlaySettings, 
+                Hint, Next,
+                Mode as RawMode, 
+                Content as RawContent, 
+                ModuleData as RawData
+            }
         }
     }
 };
@@ -47,7 +54,7 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme: Mutable<ThemeChoice>,
-
+    pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     pub jig_theme_id: ThemeId,
@@ -57,7 +64,31 @@ pub struct Base {
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
-    pub audio_ctx: AudioContext
+    pub audio_ctx: AudioContext,
+    pub play_settings: Rc<PlaySettings>,
+}
+
+pub struct PlaySettings {
+    pub hint: Mutable<Hint>,
+    pub next: Mutable<Next>
+}
+
+impl PlaySettings {
+    pub fn new(raw:Option<RawPlaySettings>) -> Self {
+        let settings = raw.unwrap_or_default();
+
+        Self {
+            hint: Mutable::new(settings.hint),
+            next: Mutable::new(settings.next),
+        }
+    }
+
+    pub fn to_raw(&self) -> RawPlaySettings {
+        RawPlaySettings {
+            hint: self.hint.get_cloned(),
+            next: self.next.get_cloned(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -202,12 +233,14 @@ impl Base {
             history,
             step,
             theme: Mutable::new(theme),
+            instructions: Mutable::new(raw.map(|content| content.instructions.clone()).unwrap_or_default()),
             text_editor,
             backgrounds,
             stickers,
             traces,
             traces_meta,
-            audio_ctx: AudioContext::new().unwrap_ji()
+            audio_ctx: AudioContext::new().unwrap_ji(),
+            play_settings: Rc::new(PlaySettings::new(raw.map(|content| content.play_settings.clone())))
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -262,7 +295,7 @@ impl StepExt for Step {
             Self::Two => 2,
             Self::Three => 3,
             Self::Four => 4,
-            Self::Five => 4,
+            Self::Five => 5,
         }
     }
 

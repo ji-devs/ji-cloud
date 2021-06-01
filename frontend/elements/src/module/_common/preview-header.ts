@@ -26,6 +26,15 @@ export class _ extends LitElement {
               justify-content: space-between;
               align-items: center;
           }
+
+          .nav {
+            /* same as sidebar body */
+            padding-left: 50px;
+            padding-right: 50px;
+            width: 456px;
+
+            padding-top: 10px;
+          }
           .btn, .nav {
               z-index: 1;
           }

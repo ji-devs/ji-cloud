@@ -60,7 +60,7 @@ web-sys = { version = "0.3.50", features = [
     'HtmlIFrameElement',
     'CanvasRenderingContext2d',
 ] }
-awsm_web = { version = "0.17.2", features = ["loaders", "serde_iso", "dom", "audio", "canvas"] }
+awsm_web = { version = "0.17.4", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.40"
 gloo-timers = "0.2.1"
 rgb = "0.8.27"

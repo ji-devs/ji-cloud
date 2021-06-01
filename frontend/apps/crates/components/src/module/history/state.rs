@@ -6,27 +6,27 @@ use futures_signals::{
     signal_vec::{SignalVecExt, MutableVec},
 };
 
-pub struct HistoryState<T, OnChangeFn, OnUndoRedoFn> 
+pub struct HistoryState<T, OnSaveFn, OnUndoRedoFn> 
 where
     T: Clone,
-    OnChangeFn: Fn(T),
+    OnSaveFn: Fn(T),
     OnUndoRedoFn: Fn(T),
 {
-    on_change: OnChangeFn,
+    on_save: OnSaveFn,
     on_undoredo: OnUndoRedoFn,
     history: MutableVec<T>,
     cursor: Mutable<usize>
 }
 
-impl <T, OnChangeFn, OnUndoRedoFn> HistoryState <T, OnChangeFn, OnUndoRedoFn> 
+impl <T, OnSaveFn, OnUndoRedoFn> HistoryState <T, OnSaveFn, OnUndoRedoFn> 
 where
     T: Clone + 'static,
-    OnChangeFn: Fn(T) + 'static,
+    OnSaveFn: Fn(T) + 'static,
     OnUndoRedoFn: Fn(T) + 'static,
 {
-    pub fn new(init:T, on_change: OnChangeFn, on_undoredo: OnUndoRedoFn) -> Self {
+    pub fn new(init:T, on_save: OnSaveFn, on_undoredo: OnUndoRedoFn) -> Self {
         Self {
-            on_change,
+            on_save,
             on_undoredo,
             history: MutableVec::new_with_values(vec![init]),
             cursor: Mutable::new(0)
@@ -53,7 +53,7 @@ where
     }
 
 
-    // Setters, and they call self.on_change()
+    // Setters, and they call self.on_save()
     // undo and redo also return the value
     // so that it can differentiate between an update and a pop
     pub fn undo(&self) {
@@ -61,7 +61,7 @@ where
         if *cursor > 0 {
             *cursor -= 1;
             let value = self.history.lock_ref().index(*cursor).clone();
-            (self.on_change)(value.clone());
+            (self.on_save)(value.clone());
             (self.on_undoredo)(value);
         } 
 
@@ -72,7 +72,7 @@ where
         if *cursor < len-1 {
             *cursor += 1;
             let value = self.history.lock_ref().index(*cursor).clone();
-            (self.on_change)(value.clone());
+            (self.on_save)(value.clone());
             (self.on_undoredo)(value);
         }
     }
@@ -91,8 +91,9 @@ where
 
         *cursor += 1;
 
-        (self.on_change)(value);
+        (self.on_save)(value);
     }
+
 
     /// Helper to push new state more easily.
     /// Clones the current state
@@ -111,4 +112,11 @@ where
         self.push(value);
     }
 
+    /// Helper to save without pushing new state
+    pub fn save_current_modify<M: FnOnce(&mut T)>(&self, modify:M) {
+        let mut value = self.get_current();
+        modify(&mut value);
+
+        (self.on_save) (value);
+    }
 }

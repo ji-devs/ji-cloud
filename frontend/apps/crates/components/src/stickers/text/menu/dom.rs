@@ -18,26 +18,38 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
         .children(&mut [
             html!("menu-line", {
                 .property("icon", "duplicate")
-                .event(clone!(stickers, text => move |evt:events::Click| {
-                    log::info!("TODO!");
+                .event(clone!(stickers, index, text => move |evt:events::Click| {
+                    text.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        Stickers::duplicate(stickers.clone(), index);
+                    }
                 }))
             }),
             html!("menu-line", {
                 .property("icon", "move-forward")
-                .event(clone!(stickers, text => move |evt:events::Click| {
-                    log::info!("TODO!");
+                .event(clone!(stickers, index, text => move |evt:events::Click| {
+                    text.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_forward(index);
+                    }
                 }))
             }),
             html!("menu-line", {
                 .property("icon", "move-backward")
-                .event(clone!(stickers, text => move |evt:events::Click| {
-                    log::info!("TODO!");
+                .event(clone!(stickers, index, text => move |evt:events::Click| {
+                    text.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.move_backward(index);
+                    }
                 }))
             }),
             html!("menu-line", {
                 .property("icon", "delete")
                 .event(clone!(stickers, text => move |evt:events::Click| {
-                    log::info!("TODO!");
+                    text.transform.close_menu();
+                    if let Some(index) = index.get() {
+                        stickers.delete_index(index);
+                    }
                 }))
             }),
         ])

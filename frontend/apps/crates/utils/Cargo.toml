@@ -54,8 +54,12 @@ web-sys = { version = "0.3.50", features = [
     'HtmlImageElement',
     'History',
     'CustomEvent',
+    'HtmlCanvasElement',
+    'CanvasRenderingContext2d',
+    'ImageData',
+    'Blob'
 ] }
-awsm_web = { version = "0.17.2", features = ["loaders", "serde_iso"] }
+awsm_web = { version = "0.17.4", features = ["loaders", "image", "serde_iso"] }
 anyhow = "1.0.40"
 rgb = "0.8.27"
 

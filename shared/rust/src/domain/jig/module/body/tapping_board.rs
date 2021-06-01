@@ -4,12 +4,16 @@ use std::convert::TryFrom;
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
+mod play_settings;
+pub use play_settings::*;
+
 /// The body for [`TappingBoard`](crate::domain::jig::module::ModuleKind::TappingBoard) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
+
 }
 
 impl BodyExt for ModuleData {
@@ -58,6 +62,9 @@ pub struct Content {
 
     /// Traces 
     pub traces: Vec<TappingTrace>,
+
+    /// play settings
+    pub play_settings: PlaySettings
 }
 
 /// Tapping board trace w/ metadata 

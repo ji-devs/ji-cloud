@@ -3,7 +3,10 @@ use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
-    image::search::state::{State as ImageSearchState, ImageSearchOptions},
+    image::search::{
+        state::{State as ImageSearchState, ImageSearchOptions},
+        callbacks::Callbacks as ImageSearchCallbacks
+    },
     audio_input::{
         options::AudioInputOptions,
         state::State as AudioInputState,
@@ -11,7 +14,7 @@ use components::{
     },
     stickers::state::Stickers,
 };
-use shared::domain::jig::module::body::Audio;
+use shared::domain::jig::module::body::{Image, Audio};
 
 pub struct Step2 {
     pub base: Rc<Base>,
@@ -71,9 +74,12 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
-                    Stickers::add_sprite(base.stickers.clone(), id, lib);
-                })));
+                let callbacks = ImageSearchCallbacks::new(
+                    Some(clone!(base => move |image| {
+                        Stickers::add_sprite(base.stickers.clone(), image);
+                    }))
+                );
+                let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
             }

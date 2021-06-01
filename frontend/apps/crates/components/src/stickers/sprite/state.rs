@@ -4,17 +4,22 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use std::rc::Rc;
-use shared::{domain::{image::ImageId, jig::module::body::{Sprite as RawSprite, Transform}}, media::MediaLibrary};
+use shared::{domain::{image::ImageId, jig::module::body::{Image, SpriteEffect, Sprite as RawSprite, Transform}}, media::MediaLibrary};
 use std::cell::RefCell;
 use crate::transform::state::{TransformState, TransformCallbacks};
 use utils::resize::resize_info_signal;
 
 #[derive(Clone)]
 pub struct Sprite {
-    pub id: ImageId,
-    pub lib: MediaLibrary,
+    pub image: Mutable<Image>,
     pub transform: Rc<TransformState>,
+    pub src: Mutable<Option<String>>, //Updated dynamically based on effects
+    pub effects: Mutable<Vec<SpriteEffect>>,
+    pub flip_horizontal: Mutable<bool>,
+    pub flip_vertical: Mutable<bool>,
 }
+
+
 
 impl Sprite {
     pub fn new(raw:&RawSprite, on_transform_finished: Option<impl Fn(Transform) + 'static>) -> Self {
@@ -24,17 +29,22 @@ impl Sprite {
             None::<fn()>
         );
         Self {
-            id: raw.id,
-            lib: raw.lib,
+            image: Mutable::new(raw.image),
             transform: Rc::new(TransformState::new(raw.transform, None, true, transform_callbacks)),
+            src: Mutable::new(None),
+            effects: Mutable::new(raw.effects),
+            flip_horizontal: Mutable::new(raw.flip_horizontal),
+            flip_vertical: Mutable::new(raw.flip_vertical),
         }
     }
 
     pub fn to_raw(&self) -> RawSprite {
         RawSprite {
-            id: self.id,
-            lib: self.lib,
-            transform: self.transform.get_inner_clone()
+            image: self.image.get_cloned(),
+            transform: self.transform.get_inner_clone(),
+            effects: self.effects.get_cloned(),
+            flip_horizontal: self.flip_horizontal.get(),
+            flip_vertical: self.flip_vertical.get(),
         }
     }
 
@@ -45,9 +55,17 @@ impl Sprite {
         height_signal(self.transform.size.signal_cloned())
     }
 
+    pub fn inner_transform_signal(&self) -> impl Signal<Item = String> {
+        map_ref! {
+            let flip_horizontal = self.flip_horizontal.signal(),
+            let flip_vertical = self.flip_vertical.signal()
+                => {
+                    let x = if *flip_horizontal { -1 } else { 1 };
+                    let y = if *flip_vertical { -1 } else { 1 };
 
-    pub fn loaded_signal(&self) -> impl Signal<Item = bool> {
-        self.transform.size.signal_cloned().map(|size| size.is_some())
+                    format!("scaleX({}) scaleY({})", x, y)
+                }
+        }
     }
 
 }

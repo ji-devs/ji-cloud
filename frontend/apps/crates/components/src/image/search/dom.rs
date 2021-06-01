@@ -7,7 +7,7 @@ use super::{
     actions::{get_background_id, search, upload_file},
     types::*,
 };
-use shared::media::MediaLibrary;
+use shared::{domain::jig::module::body::Image, media::MediaLibrary};
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -43,7 +43,7 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     .property("id", image.id.0.to_string())
                     .event(clone!(state, image => move |_: events::Click| {
                         //TODO - this should change if the library has changed
-                        state.set_selected(image.id, MediaLibrary::Global);
+                        state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
                     }))
                     .event(clone!(image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {

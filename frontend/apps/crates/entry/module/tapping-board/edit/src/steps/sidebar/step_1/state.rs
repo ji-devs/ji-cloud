@@ -4,7 +4,10 @@ use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
     backgrounds::actions::Layer,
-    image::search::state::{State as ImageSearchState, ImageSearchOptions},
+    image::search::{
+        state::{State as ImageSearchState, ImageSearchOptions},
+        callbacks::Callbacks as ImageSearchCallbacks
+    },
     color_select::state::{State as ColorPickerState},
 };
 use shared::domain::jig::module::body::{Background, Image};
@@ -69,9 +72,12 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
-                    base.backgrounds.set_layer(Layer::One, Background::Image(Image { id, lib}));
-                })));
+                let callbacks = ImageSearchCallbacks::new(
+                    Some(clone!(base => move |image| {
+                        base.backgrounds.set_layer(Layer::One, Background::Image(image));
+                    }))
+                );
+                let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
             },
@@ -88,9 +94,12 @@ impl Tab {
                     filters: true, 
                 };
 
-                let state = ImageSearchState::new(opts, Some(clone!(base => move |id, lib| {
-                    base.backgrounds.set_layer(Layer::Two, Background::Image(Image { id, lib}));
-                })));
+                let callbacks = ImageSearchCallbacks::new(
+                    Some(clone!(base => move |image| {
+                        base.backgrounds.set_layer(Layer::Two, Background::Image(image));
+                    }))
+                );
+                let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Overlay(Rc::new(state))
             }

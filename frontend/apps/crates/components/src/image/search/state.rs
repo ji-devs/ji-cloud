@@ -6,6 +6,7 @@ use dominator_helpers::futures::AsyncLoader;
 use shared::{media::MediaLibrary, domain::{image::*, meta::*}};
 use super::actions::get_styles;
 use utils::prelude::*;
+use super::callbacks::Callbacks;
 
 pub const BACKGROUND_NAME: &'static str = "Background";
 
@@ -21,11 +22,11 @@ pub struct State {
     pub page: Mutable<Option<u32>>,
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
-    pub on_select: Option<Box<dyn Fn(ImageId, MediaLibrary)>>,
+    pub callbacks: Callbacks
 }
 
 impl State {
-    pub fn new(image_search_options: ImageSearchOptions, on_select: Option<impl Fn(ImageId, MediaLibrary) + 'static>) -> Self {
+    pub fn new(image_search_options: ImageSearchOptions, callbacks: Callbacks) -> Self {
         let styles = Rc::new(RefCell::new(None));
         let selected_styles = HashSet::new();
 
@@ -51,7 +52,7 @@ impl State {
             query: Mutable::new(String::new()),
             page: Mutable::new(None),
             styles,
-            on_select: on_select.map(|f| Box::new(f) as _)
+            callbacks,
         }
     }
 }

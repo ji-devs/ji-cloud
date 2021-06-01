@@ -100,25 +100,31 @@ where
 {
     move |raw_data:RawData| {
         if !skip_for_debug {
-            save_loader.load(async move {
-                let body = raw_data.as_body(); 
-                log::info!("SAVING...");
-                let path = Update::PATH
-                    .replace("{id}",&jig_id.0.to_string())
-                    .replace("{module_id}",&module_id.0.to_string());
-
-                let req = Some(ModuleUpdateRequest {
-                    is_complete: Some(raw_data.is_complete()),
-                    index: None,
-                    body: Some(body), 
-                });
-                api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
-                log::info!("SAVED!");
-            });
+            save(raw_data, save_loader.clone(), jig_id, module_id);
         }
     }
 }
 
+pub fn save<RawData>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
+where
+    RawData: BodyExt + 'static 
+{
+    save_loader.load(async move {
+        let body = raw_data.as_body(); 
+        log::info!("SAVING...");
+        let path = Update::PATH
+            .replace("{id}",&jig_id.0.to_string())
+            .replace("{module_id}",&module_id.0.to_string());
+
+        let req = Some(ModuleUpdateRequest {
+            is_complete: Some(raw_data.is_complete()),
+            index: None,
+            body: Some(body), 
+        });
+        api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
+        log::info!("SAVED!");
+    });
+}
 //doesn't compile, gotta box for now: https://github.com/rust-lang/rust/issues/65442
 //pub type HistoryUndoRedoFn<RawData> = impl Fn(Option<RawData>);
 //pub fn history_on_undo_redo<Main, Mode, RawData>(state:Rc<State<Main, Mode, RawData>>) -> HistoryUndoRedoFn<RawData> 

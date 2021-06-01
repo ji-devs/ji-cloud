@@ -10,13 +10,15 @@ use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
 use once_cell::sync::OnceCell;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 use uuid::Uuid;
 use shared::{
     domain::{
         jig::{
             module::body::{
+                Image,
                 ThemeChoice,
+                Background, Backgrounds,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
                 tapping_board::{Content, Mode as RawMode, ModuleData as RawData, TappingTrace}
             },
@@ -33,10 +35,14 @@ use crate::steps::state::Step;
 use crate::steps::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::steps::sidebar::step_2::state::TabKind as ContentTabKind;
 use crate::steps::sidebar::step_3::state::TabKind as InteractionTabKind;
+use crate::steps::sidebar::step_4::state::TabKind as SettingsTabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
+//const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
+const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
+
+
 pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
 
 #[derive(Debug, Default)]
@@ -47,6 +53,7 @@ pub struct DebugSettings {
     pub bg_tab: Option<BgTabKind>,
     pub content_tab: Option<ContentTabKind>,
     pub interaction_tab: Option<InteractionTabKind>,
+    pub settings_tab: Option<SettingsTabKind>,
     pub trace_opts: Option<TracesOptions>,
 }
 
@@ -83,7 +90,10 @@ impl DebugSettings {
                             stickers: init_data.stickers.iter().map(|init| {
                                 match init {
                                     InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
-                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(ImageId(Uuid::parse_str(STRING_UUID).unwrap_ji()), MediaLibrary::Global))
+                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
+                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                        lib: MediaLibrary::Global
+                                    }))
                                 }
                             }).collect(),
                             traces: init_data.traces.iter().map(|init| {
@@ -102,7 +112,10 @@ impl DebugSettings {
 
                                 TappingTrace { trace, audio: None, text: None }
                             }).collect(),
-                            //traces,
+                            backgrounds: Backgrounds {
+                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                layer_2: None,
+                            },
                             ..Content::default()
                         })
                     }
@@ -112,11 +125,12 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Two),
+            step: Some(Step::Five),
             skip_save: true,
             bg_tab: Some(BgTabKind::Image),
             content_tab: Some(ContentTabKind::Text),
             interaction_tab: Some(InteractionTabKind::Audio),
+            settings_tab: Some(SettingsTabKind::Instructions),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })
@@ -127,9 +141,11 @@ impl DebugSettings {
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
-            stickers: vec![InitSticker::Text, InitSticker::Sprite],
+            stickers: vec![
+                InitSticker::Text, InitSticker::Sprite
+            ],
             traces: vec![
-                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

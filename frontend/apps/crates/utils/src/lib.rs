@@ -17,5 +17,6 @@ pub mod prelude;
 pub mod unwrap;
 pub mod themes;
 pub mod colors;
+pub mod image_effects;
 
 pub(crate) mod strings;

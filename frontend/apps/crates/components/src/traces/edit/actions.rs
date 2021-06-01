@@ -35,11 +35,8 @@ impl Edit {
 
         let raw_trace = {
             let mut raw_trace = self.list.lock_ref().get(index).unwrap_ji().to_raw();
-            let mut translation = &mut raw_trace.transform.translation.0;
+            raw_trace.transform.nudge_for_duplicate();
 
-            //TODO - make the nudging random
-            translation[0] += 0.01;
-            translation[1] -= 0.01;
 
             raw_trace
         };

@@ -182,6 +182,10 @@ impl TransformState {
         }
     }
 
+    pub fn close_menu(&self) {
+        self.menu_pos.set(None);
+    }
+
     fn get_basis_vectors(&self, from: ScaleFrom) -> ([f64;2], [f64;2]) {
         let resize_info = get_resize_info();
 

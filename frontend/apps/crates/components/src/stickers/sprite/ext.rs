@@ -1,23 +1,19 @@
-use shared::{
-    domain::{
-        image::ImageId,
-        jig::module::body::{Sprite, Transform},
-    },
-    media::MediaLibrary
-};
+use shared::domain::jig::module::body::{Image, Sprite, Transform};
 use utils::prelude::*;
 
 pub trait SpriteExt {
-    fn new(id: ImageId, lib: MediaLibrary) -> Self;
+    fn new(image: Image) -> Self;
 }
 
 impl SpriteExt for Sprite {
     /// Create a new Sprite
-    fn new(id: ImageId, lib: MediaLibrary) -> Self {
+    fn new(image: Image) -> Self {
         Self {
-            id,
-            lib,
+            image,
             transform: Transform::identity(),
+            effects: Vec::new(),
+            flip_horizontal: false,
+            flip_vertical: false
         }
     }
 }

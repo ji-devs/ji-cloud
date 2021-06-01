@@ -181,14 +181,28 @@ pub struct Image {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Sprites are a combo of image + transform
 pub struct Sprite {
-    /// The Image Id
-    pub id: ImageId,
-    /// The MediaLibrary
-    pub lib: MediaLibrary,
+    /// The Image
+    pub image: Image,
     /// The Transform
     pub transform: Transform,
+    /// Effects 
+    pub effects: Vec<SpriteEffect>,
+
+    /// Flip horizontal
+    pub flip_horizontal: bool,
+
+    /// Flip vertical 
+    pub flip_vertical: bool,
 }
 
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Sprite Effects 
+pub enum SpriteEffect {
+    /// Remove White
+    RemoveWhite,
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

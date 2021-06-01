@@ -8,7 +8,9 @@ export type TitleKind = ""
     | 'overlay'
     | 'text'
     | 'image'
-    | 'audio';
+    | 'audio'
+    | 'play-settings'
+    | 'instructions';
 
 const STR_LABEL_LOOKUP: {
     [key in TitleKind]: string;
@@ -20,6 +22,8 @@ const STR_LABEL_LOOKUP: {
     ['text']: 'Text',
     ['image']: 'Image',
     ['audio']: 'Audio',
+    ['play-settings']: 'Play Settings',
+    ['instructions']: 'Instructions',
 };
 
 @customElement('menu-tab-title')

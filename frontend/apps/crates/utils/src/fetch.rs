@@ -16,8 +16,8 @@ use shared::domain::auth::CSRF_HEADER_NAME;
 use crate::storage::load_csrf_token; 
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_file_with_headers};
-use web_sys::File;
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
+use web_sys::{File, Blob};
 use super::settings::SETTINGS;
 
 #[derive(Debug)]
@@ -57,6 +57,20 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
     }
 }
 
+pub async fn api_upload_blob(endpoint:&str, blob:&Blob, method:Method) -> Result<(), ()> {
+
+    let (url, _) = api_get_query::<()>(endpoint, method, None);
+
+    let csrf = load_csrf_token().unwrap();
+
+    let res = fetch_upload_blob_with_headers(&url, blob, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap();
+    if res.ok() {
+        Ok(())
+    } else {
+        side_effect_error(res.status());
+        Err(())
+    }
+}
 pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), ()> {
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);

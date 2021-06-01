@@ -47,6 +47,8 @@ pub trait TransformExt {
     fn rotation_matrix_string(&self) -> String;
     fn invert_rotation_matrix_string(&self) -> String;
 
+    fn nudge_for_duplicate(&mut self);
+
     fn map<A>(&self, f: impl FnOnce(&Self) -> A) -> A {
         f(&self)
     }
@@ -87,6 +89,14 @@ impl TransformExt for Transform {
             //scale: Vec3([1.0, 1.0, 1.0]),
             //origin: Vec3([0.0, 0.0, 0.0]),
 
+
+    fn nudge_for_duplicate(&mut self) {
+        let translation = &mut self.translation.0;
+
+        //TODO - make the nudging random
+        translation[0] += 0.01;
+        translation[1] -= 0.01;
+    }
 
     fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String {
         let mut t = self.clone();
