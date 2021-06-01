@@ -105,9 +105,7 @@ where
             format!("{}?iframe_data=true", url)
         };
 
-        log::info!("{}", url);
 
-        //TODO - change to custom element / component
         html!("iframe" => web_sys::HtmlIFrameElement, {
             .property("slot", "main")
             .style("width", "100%")
@@ -116,9 +114,10 @@ where
             .with_node!(elem => {
                 .global_event(clone!(history , url => move |evt:Message| {
 
+                    //Wait until the iframe sends its empty message
+                    //Then send back the current raw data from history
                     if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                         log::info!("sending iframe message!");
-                        //Iframe is ready and sent us a message, let's send one back!
                         let data = history.get_current();
                         let msg:IframeInit<RawData> = IframeInit::new(data); 
                         let window = elem.content_window().unwrap_ji();

@@ -28,6 +28,7 @@
    one of "sidebar", "header", "main" or "footer"
  */
 
+/*
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::borrow::Borrow;
@@ -59,7 +60,7 @@ use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::load::StateLoader;
-
+*/
 
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -104,6 +105,7 @@ impl ModulePageKind {
     }
 }
 
+/*
 pub trait ModuleRenderer <State> {
     type PageKindSignal: Signal<Item = ModulePageKind>;
     type ChildrenSignal: SignalVec<Item = Dom>;
@@ -240,3 +242,4 @@ where
         );
     }
 }
+*/
