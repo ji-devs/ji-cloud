@@ -2,7 +2,7 @@ use crate::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        jig::module::body::{Instructions, ThemeId},
+        jig::module::body::{Instructions, ThemeChoice, ThemeId},
     },
     media::MediaLibrary,
 };
@@ -29,7 +29,7 @@ pub struct ModuleData {
     pub pairs: Vec<CardPair>,
 
     /// The ID of the module's theme.
-    pub theme_id: ThemeId,
+    pub theme: ThemeChoice,
 }
 
 /// An individual card.
@@ -106,7 +106,7 @@ impl Mode {
 
 impl ModuleData {
     /// Instantiates a new module with the given `mode`, `theme_id`, `instructions`, and pairs of text cards.
-    pub fn new<I, S>(mode: Mode, theme_id: ThemeId, instructions: Instructions, pairs: I) -> Self
+    pub fn new<I, S>(mode: Mode, theme: ThemeChoice, instructions: Instructions, pairs: I) -> Self
     where
         I: IntoIterator<Item = (S, S)>,
         S: AsRef<str>,
@@ -130,7 +130,7 @@ impl ModuleData {
                     }
                 })
                 .collect(),
-            theme_id,
+            theme,
         }
     }
 }
