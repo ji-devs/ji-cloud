@@ -1,6 +1,9 @@
 use http::StatusCode;
 
-use shared::domain::jig::module::{ModuleBody, ModuleUpdateRequest};
+use shared::domain::jig::module::{
+    body::{memory, ThemeChoice, ThemeId},
+    ModuleBody, ModuleUpdateRequest,
+};
 
 use crate::{
     fixture::Fixture,
@@ -63,8 +66,11 @@ async fn update_contents() -> anyhow::Result<()> {
         ))
         .login()
         .json(&ModuleUpdateRequest {
-            body: Some(ModuleBody::MemoryGame(Default::default())),
+            body: Some(
+                ModuleBody::MemoryGame(memory::ModuleData::default())
+            ),
             is_complete: Some(true),
+
             ..ModuleUpdateRequest::default()
         })
         .send()
