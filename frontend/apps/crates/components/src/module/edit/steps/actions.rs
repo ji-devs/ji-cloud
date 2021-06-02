@@ -32,15 +32,4 @@ where
             self.step.set_neq(to);
         }
     }
-    pub fn next_step_allowed_signal(&self) -> impl Signal<Item = Option<bool>> {
-        let base = self.base.clone();
-
-        self.step.signal()
-            .map(clone!(base => move |from| {
-                from.next()
-                    .map(|to| {
-                        base.allowed_step_change(from, to)
-                    })
-            }))
-    }
 }

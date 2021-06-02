@@ -7,15 +7,16 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
-use crate::data::state::{State as AppState, Mode};
 use web_sys::HtmlElement;
+use super::callbacks::Callbacks;
 
 pub struct State {
-    pub app: Rc<AppState>,
+    pub rows:u8,
     pub left: Rc<MutableVec<Mutable<String>>>,
     pub right: Rc<MutableVec<Mutable<String>>>,
     pub is_placeholder: Mutable<bool>,
     pub error_element_ref: RefCell<Option<HtmlElement>>,
+    pub callbacks: Callbacks,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -26,7 +27,7 @@ pub enum Error {
 impl Error {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::NumWords => crate::strings::error::STR_SINGLE_LIST_NUM_WORDS
+            Self::NumWords => super::strings::error::STR_NUM_WORDS
         }
     }
 }
@@ -34,9 +35,9 @@ impl Error {
 type IsPlaceholder = bool;
 
 impl State {
-    pub fn new(app: Rc<AppState>, max:usize) -> Self {
+    pub fn new(rows: u8, max:usize, callbacks: Callbacks) -> Self {
         Self {
-            app,
+            rows,
             left: Rc::new(MutableVec::new_with_values(
                     (0..max)
                         .map(|_| Mutable::new(String::default()))
@@ -49,6 +50,7 @@ impl State {
             )),
             is_placeholder: Mutable::new(true),
             error_element_ref: RefCell::new(None),
+            callbacks,
         }
     }
 
@@ -90,6 +92,11 @@ impl State {
         }
 
         self.is_placeholder.set_neq(true);
+    }
+
+    pub fn is_ready_signal(&self) -> impl Signal<Item = bool> {
+        //TODO - like derive_list?
+        futures_signals::signal::always(true)
     }
 
 }

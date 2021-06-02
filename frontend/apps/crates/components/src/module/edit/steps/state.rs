@@ -71,7 +71,15 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt<Step: StepExt> {
+    // using this in practice will likely require
+    // #![feature(min_type_alias_impl_trait)]
+    // and the implementor will have
+    // type NextStepAllowedSignal = impl Signal<Item = bool>
+    type NextStepAllowedSignal: Signal<Item = bool>;
+
     fn allowed_step_change(&self, from:Step, to: Step) -> bool;
+
+    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
 }
 
 pub trait MainExt: DomRenderable {

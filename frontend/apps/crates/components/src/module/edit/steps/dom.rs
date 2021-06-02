@@ -201,7 +201,7 @@ where
         .child(Footer::render(state.footer.clone()))
         .child(html!("module-footer-continue-button", {
             .property("slot", "btn")
-            .property_signal("enabled", state.next_step_allowed_signal())
+            .property_signal("enabled", state.base.next_step_allowed_signal())
             .event(clone!(state => move |evt:events::Next| {
                 state.try_next_step();
             }))

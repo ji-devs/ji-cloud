@@ -1,6 +1,7 @@
 use utils::math::BoundsF64;
 use web_sys::HtmlElement;
 use std::rc::Rc;
+use super::callbacks::*;
 
 pub struct State {
     pub data: TooltipData,
@@ -51,28 +52,25 @@ impl Placement {
     }
 }
 
-#[derive(Clone)]
 pub enum TooltipTarget {
     Element(HtmlElement, MoveStrategy),
     NormalizedBounds(BoundsF64),
 }
 
-#[derive(Clone)]
 pub enum TooltipData {
-    Error(TooltipError),
-    Confirm(TooltipConfirm),
+    Error(Rc<TooltipError>),
+    Confirm(Rc<TooltipConfirm>),
 }
 
-#[derive(Clone)]
+
 pub struct TooltipError {
     pub placement:Placement, 
     pub slot: Option<String>, 
     pub body: String, 
     pub max_width: Option<f64>,
-    pub on_close: Option<Rc<Box<dyn Fn()>>>,
+    pub callbacks: TooltipErrorCallbacks,
 }
 
-#[derive(Clone)]
 pub struct TooltipConfirm {
     pub placement:Placement, 
     pub slot: Option<String>, 
@@ -80,12 +78,11 @@ pub struct TooltipConfirm {
     pub confirm_label: String,
     pub cancel_label: String,
     pub max_width: Option<f64>,
-    pub on_confirm: Rc<Box<dyn Fn()>>,
-    pub on_cancel: Rc<Box<dyn Fn()>>,
+    pub callbacks: TooltipConfirmCallbacks,
 }
 
 
-#[derive(Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum MoveStrategy {
     None,
     Destroy,

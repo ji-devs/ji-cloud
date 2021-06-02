@@ -35,3 +35,5 @@ pub mod stickers;
 pub mod backgrounds;
 #[cfg(feature = "traces")]
 pub mod traces;
+#[cfg(feature = "lists")]
+pub mod lists;

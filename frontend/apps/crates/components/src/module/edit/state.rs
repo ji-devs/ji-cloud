@@ -15,7 +15,7 @@ use std::future::Future;
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::{Serialize, de::DeserializeOwned};
-use crate::module::page::ModulePageKind;
+use crate::module::prelude::*;
 use crate::module::history::state::HistoryState;
 use dominator_helpers::{
     signals::OptionSignal,

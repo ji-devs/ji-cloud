@@ -86,6 +86,7 @@ text_editor = []
 tooltip = []
 transform = []
 traces = []
+lists = []
 
 default = ["all"]
 all= [
@@ -103,5 +104,6 @@ all= [
     "text_editor", 
     "tooltip", 
     "transform",
-    "traces"
+    "traces",
+    "lists"
 ]
