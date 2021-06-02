@@ -2,7 +2,7 @@ use crate::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        jig::module::body::{Instructions, ThemeChoice, ThemeId},
+        jig::module::body::{BodyExt, Instructions, ThemeChoice},
     },
     media::MediaLibrary,
 };
@@ -10,10 +10,6 @@ use crate::{
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-/// A pair of cards
-#[derive(Clone, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct CardPair(pub Card, pub Card);
 
 /// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -31,6 +27,36 @@ pub struct ModuleData {
     /// The ID of the module's theme.
     pub theme: ThemeChoice,
 }
+
+impl BodyExt for ModuleData {
+    fn as_body(&self) -> Body {
+        Body::Memory(self.clone())
+    }
+
+    fn is_complete(&self) -> bool {
+        self.content.is_some()
+    }
+
+    fn kind() -> ModuleKind {
+        ModuleKind::Memory
+    }
+}
+
+impl TryFrom<Body> for ModuleData {
+    type Error = &'static str;
+
+    fn try_from(body:Body) -> Result<Self, Self::Error> {
+        match body {
+            Body::Memory(data) => Ok(data),
+            _ => Err("cannot convert body to memory game!")
+        }
+    }
+}
+
+/// A pair of cards
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct CardPair(pub Card, pub Card);
 
 /// An individual card.
 #[derive(Clone, Serialize, Deserialize, Debug)]

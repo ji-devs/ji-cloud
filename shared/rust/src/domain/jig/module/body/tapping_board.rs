@@ -1,4 +1,4 @@
-use crate::domain::jig::module::{ModuleKind, body::{BodyExt, ThemeChoice, Audio, Body, Instructions, Sticker, Trace, Backgrounds, ThemeId}};
+use crate::domain::jig::module::{ModuleKind, body::{BodyExt, ThemeChoice, Audio, Body, Instructions, Sticker, Trace, Backgrounds}};
 use std::convert::TryFrom;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
