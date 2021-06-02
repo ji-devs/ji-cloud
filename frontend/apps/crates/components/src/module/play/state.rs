@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::cell::RefCell;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
@@ -25,6 +26,7 @@ where
     Main: MainExt + 'static,
 {
     pub(super) phase: Mutable<Rc<Phase<RawData, Main>>>,
+    pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
@@ -66,6 +68,7 @@ pub struct StateOpts<RawData> {
     pub module_id: ModuleId,
     pub force_raw: Option<RawData>, 
     pub force_raw_even_in_iframe: bool,
+    pub skip_load_jig: bool
 }
 
 impl <RawData> StateOpts<RawData> {
@@ -75,6 +78,7 @@ impl <RawData> StateOpts<RawData> {
             module_id,
             force_raw: None,
             force_raw_even_in_iframe: false,
+            skip_load_jig: false,
         }
     }
 }
@@ -89,7 +93,7 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(JigId, ModuleId, RawData) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Main>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -97,6 +101,7 @@ where
 
         let _self = Rc::new(Self {
             opts,
+            jig: RefCell::new(None),
             phase: Mutable::new(Rc::new(Phase::Init)),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
@@ -104,6 +109,21 @@ where
 
         _self.raw_loader.load(clone!(_self => async move {
 
+            if !_self.opts.skip_load_jig {
+                *_self.jig.borrow_mut() = {
+
+                        let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+
+                        match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                            Ok(resp) => {
+                                Some(resp.jig)
+                            },
+                            Err(_) => {
+                                panic!("error loading jig!")
+                            },
+                        }
+                };
+            }
             let wait_iframe = should_get_iframe_data();
 
             let raw:Option<RawData> = _self.opts.force_raw.clone()
@@ -122,7 +142,13 @@ where
                         _self.phase.set(Rc::new(Phase::WaitingIframe(
                             Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
                                 _self.raw_loader.load(clone!(init_from_raw, _self => async move {
-                                    let main = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw).await;
+
+                                    let (jig_id, module_id, jig) = (
+                                        _self.opts.jig_id.clone(),
+                                        _self.opts.module_id.clone(),
+                                        _self.jig.borrow().clone()
+                                    );
+                                    let main = init_from_raw(jig_id, module_id, jig, raw).await;
 
                                     _self.phase.set(Rc::new(Phase::Playing(Rc::new(main))));
                                 }));
@@ -149,7 +175,13 @@ where
             };
 
             if let Some(raw) = raw {
-                let main = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw).await;
+
+                let (jig_id, module_id, jig) = (
+                    _self.opts.jig_id.clone(),
+                    _self.opts.module_id.clone(),
+                    _self.jig.borrow().clone()
+                );
+                let main = init_from_raw(jig_id, module_id, jig, raw).await;
 
                 _self.phase.set(Rc::new(Phase::Playing(Rc::new(main))));
             }

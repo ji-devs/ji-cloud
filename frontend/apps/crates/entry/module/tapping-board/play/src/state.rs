@@ -11,6 +11,7 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
 
     let mut opts = StateOpts::new( jig_id, module_id);
     opts.force_raw = crate::debug::settings().data.clone(); 
+    opts.skip_load_jig = crate::debug::settings().skip_load_jig;
 
     AppState::new(opts, Main::new)
 }

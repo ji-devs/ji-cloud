@@ -41,6 +41,7 @@ pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\
 #[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data:Option<RawData>,
+    pub skip_load_jig: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -111,6 +112,7 @@ impl DebugSettings {
                     }
                 }
             ),
+            skip_load_jig: true
         }
     }
 }
