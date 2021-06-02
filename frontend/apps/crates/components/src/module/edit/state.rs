@@ -49,6 +49,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     pub phase: Mutable<Rc<Phase<Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) is_preview: Mutable<bool>,
     pub(super) raw_loader: AsyncLoader,
@@ -78,6 +79,7 @@ where
 #[derive(Debug, Clone)]
 pub struct StateOpts<RawData> {
     pub skip_save_for_debug: bool,
+    pub skip_load_jig: bool,
     pub jig_id: JigId,
     pub module_id: ModuleId,
     //the step which is for previewing
@@ -89,6 +91,7 @@ impl <RawData> StateOpts<RawData> {
     pub fn new(jig_id: JigId, module_id: ModuleId) -> Self {
         Self {
             skip_save_for_debug: false,
+            skip_load_jig: false,
             jig_id,
             module_id,
             is_main_scrollable: true,
@@ -123,9 +126,9 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
         InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
-        InitFromRawFn: Fn(JigId, ModuleId, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -133,6 +136,7 @@ where
 
         let _self = Rc::new(Self {
             opts,
+            jig: RefCell::new(None),
             phase: Mutable::new(Rc::new(Phase::Init)), 
             is_preview: Mutable::new(false),
             history: RefCell::new(None),
@@ -145,6 +149,22 @@ where
 
 
         _self.raw_loader.load(clone!(_self => async move {
+            if !_self.opts.skip_load_jig {
+                *_self.jig.borrow_mut() = {
+
+                        let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+
+                        match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                            Ok(resp) => {
+                                Some(resp.jig)
+                            },
+                            Err(_) => {
+                                panic!("error loading jig!")
+                            },
+                        }
+                };
+            }
+
             let raw = {
                 if let Some(force_raw) = _self.opts.force_raw.clone() {
                     force_raw
@@ -178,7 +198,13 @@ where
 
             *_self.history.borrow_mut() = Some(history.clone());
 
-            if let Some(base) = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw, false, None, history.clone()).await {
+            let (jig_id, module_id, jig) = (
+                _self.opts.jig_id.clone(),
+                _self.opts.module_id.clone(),
+                _self.jig.borrow().clone()
+            );
+
+            if let Some(base) = init_from_raw(jig_id, module_id, jig, raw, false, None, history.clone()).await {
                 Self::change_phase_steps(_self.clone(), base);
             } else {
                 Self::change_phase_choose(_self.clone(), init_from_mode);

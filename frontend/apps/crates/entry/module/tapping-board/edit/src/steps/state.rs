@@ -3,6 +3,7 @@ use web_sys::AudioContext;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
+    Jig,
     module::{
         ModuleId, 
         body::{
@@ -57,7 +58,7 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig_theme_id: ThemeId,
+    pub jig: Option<Jig>,
     // TappingBoard-specific
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
@@ -109,7 +110,7 @@ impl TraceMeta {
 }
 
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
+    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
@@ -118,10 +119,11 @@ impl Base {
             Some(raw) => raw.theme
         };
       
-        let jig_theme_id = super::actions::load_theme_id_from_jig(jig_id).await;
-
         let theme_id = match theme {
-            ThemeChoice::Jig => jig_theme_id,
+            ThemeChoice::Jig => {
+                // jig.as_ref().unwrap_ji().theme_id.clone()
+                unimplemented!("waiting on jig settings")
+            },
             ThemeChoice::Override(theme_id) => theme_id
         };
        
@@ -229,7 +231,7 @@ impl Base {
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            jig_theme_id,
+            jig,
             history,
             step,
             theme: Mutable::new(theme),
@@ -250,7 +252,10 @@ impl Base {
 
     pub fn get_theme_id(&self) -> ThemeId {
         match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig_theme_id,
+            ThemeChoice::Jig => {
+                // self.jig.as_ref().unwrap_ji().theme_id.clone()
+                unimplemented!("waiting on jig settings")
+            },
             ThemeChoice::Override(theme_id) => theme_id
         }
     }

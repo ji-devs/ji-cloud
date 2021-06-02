@@ -2,6 +2,7 @@ use components::module::edit::*;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
+    Jig,
     module::{
         ModuleId, 
         body::{
@@ -29,14 +30,10 @@ use components::{
     text_editor::state::State as TextEditorState,
 };
 
-pub async fn load_theme_id_from_jig(jig_id: JigId) -> ThemeId {
-    //TODO
-    ThemeId::Chalkboard
-}
-pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
+pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
     let step = Mutable::new(Step::default());
-    let base = Base::new(jig_id, module_id, false, history, step.read_only(), None).await;
+    let base = Base::new(jig_id, module_id, jig, false, history, step.read_only(), None).await;
     
     StepsInit {
         step,
@@ -52,6 +49,7 @@ pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, mode:Mode, histo
 pub async fn init_from_raw(
     jig_id: JigId,
     module_id: ModuleId,
+    jig: Option<Jig>,
     raw:RawData, 
     is_history: bool, 
     current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
@@ -62,7 +60,7 @@ pub async fn init_from_raw(
         Some(content) => { 
             //TODO - create from raw
             let step = Mutable::new(Step::default());
-            let base = Base::new(jig_id, module_id, is_history, history, step.read_only(), Some(&content)).await;
+            let base = Base::new(jig_id, module_id, jig, is_history, history, step.read_only(), Some(&content)).await;
             
             let mut init = StepsInit {
                 step,

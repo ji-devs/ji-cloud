@@ -12,7 +12,7 @@ use super::super::{
     state::{Phase, GenericState},
     actions::*,
 };
-use shared::domain::jig::{JigId, module::{ModuleId, body::BodyExt}};
+use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::BodyExt}};
 use utils::prelude::*;
 
 pub trait ModeExt : Copy
@@ -54,7 +54,7 @@ where
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
         InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 
     {
@@ -65,7 +65,14 @@ where
             loader: loader.clone(),
             on_mode_change: Box::new(move |mode| {
                 loader.load(clone!(init_from_mode, app => async move {
-                    let steps_init = init_from_mode(app.opts.jig_id.clone(), app.opts.module_id.clone(), mode, app.history.borrow().as_ref().unwrap_ji().clone()).await;
+
+                    let (jig_id, module_id, jig) = (
+                        app.opts.jig_id.clone(),
+                        app.opts.module_id.clone(),
+                        app.jig.borrow().clone()
+                    );
+
+                    let steps_init = init_from_mode(jig_id, module_id, jig, mode, app.history.borrow().as_ref().unwrap_ji().clone()).await;
                     GenericState::change_phase_steps(app.clone(), steps_init);
                 }))
             }),

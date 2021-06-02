@@ -32,7 +32,7 @@ where
 {
     pub fn change_phase_choose<InitFromModeFn, InitFromModeOutput>(_self: Rc<Self>, init_from_mode: InitFromModeFn) 
     where
-        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
         InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
@@ -57,9 +57,9 @@ where
         init_from_mode: InitFromModeFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(JigId, ModuleId, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
-        InitFromModeFn: Fn(JigId, ModuleId, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
+        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
         InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
@@ -77,7 +77,13 @@ where
             });
 
             _self.reset_from_history_loader.load(clone!(_self, init_from_raw, init_from_mode => async move {
-                if let Some(steps) = init_from_raw(_self.opts.jig_id.clone(), _self.opts.module_id.clone(), raw, true, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await {
+
+                let (jig_id, module_id, jig) = (
+                    _self.opts.jig_id.clone(),
+                    _self.opts.module_id.clone(),
+                    _self.jig.borrow().clone()
+                );
+                if let Some(steps) = init_from_raw(jig_id, module_id, jig, raw, true, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await {
                     let steps = Self::change_phase_steps(_self.clone(), steps);
                     if let Some((step, steps_completed)) = preserve_steps {
                         steps.step.set_neq(step);

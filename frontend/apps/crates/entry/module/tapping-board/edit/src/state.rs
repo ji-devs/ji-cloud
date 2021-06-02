@@ -21,6 +21,7 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
     opts.force_raw = crate::debug::settings().data.clone(); 
     opts.is_main_scrollable = false;
     opts.skip_save_for_debug = crate::debug::settings().skip_save;
+    opts.skip_load_jig = crate::debug::settings().skip_load_jig;
 
     AppState::new(
         opts,

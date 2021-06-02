@@ -120,8 +120,11 @@ where
                         log::info!("sending iframe message!");
                         let data = history.get_current();
                         let msg:IframeInit<RawData> = IframeInit::new(data); 
-                        let window = elem.content_window().unwrap_ji();
-                        window.post_message(&msg.into(), &url);
+                        if let Some(window) = elem.content_window() {
+                            window.post_message(&msg.into(), &url);
+                        } else {
+                            log::info!("unable to get window for sending iframe msg!");
+                        }
                     } else {
                         log::info!("hmmm got other iframe message...");
                     }
