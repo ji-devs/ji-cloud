@@ -178,7 +178,6 @@ pub struct Jig {
 
     /// Whether the jig is public or not.
     pub is_public: bool,
-
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.

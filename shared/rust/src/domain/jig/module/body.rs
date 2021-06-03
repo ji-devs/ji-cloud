@@ -2,10 +2,10 @@ use crate::{
     domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
 };
-use std::convert::TryFrom;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::convert::TryFrom;
 
 /// Memory Game Body.
 pub mod memory;
@@ -91,7 +91,7 @@ pub enum ThemeChoice {
     Jig,
 
     /// Override it with a per-module choice
-    Override(ThemeId)
+    Override(ThemeId),
 }
 
 impl Default for ThemeChoice {
@@ -123,7 +123,7 @@ pub struct Instructions {
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Background 
+/// Background
 /// although it's simply a list of layers
 /// the number of layers is predefined
 /// and has special meaning from a UI perspective
@@ -136,9 +136,9 @@ pub struct Backgrounds {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Background 
+/// Background
 pub enum Background {
-    /// Color 
+    /// Color
     Color(rgb::RGBA8),
     /// Theme-based
     Theme(ThemeId),
@@ -153,23 +153,22 @@ pub enum Sticker {
     /// Sprites
     Sprite(Sprite),
     /// Text
-    Text(Text)
+    Text(Text),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Text are serialized text things 
+/// Text are serialized text things
 pub struct Text {
-    /// the raw text 
+    /// the raw text
     pub value: String,
     /// The Transform
     pub transform: Transform,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Images need id and lib 
+/// Images need id and lib
 pub struct Image {
     /// The Image Id
     pub id: ImageId,
@@ -185,20 +184,19 @@ pub struct Sprite {
     pub image: Image,
     /// The Transform
     pub transform: Transform,
-    /// Effects 
+    /// Effects
     pub effects: Vec<SpriteEffect>,
 
     /// Flip horizontal
     pub flip_horizontal: bool,
 
-    /// Flip vertical 
+    /// Flip vertical
     pub flip_vertical: bool,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Sprite Effects 
+/// Sprite Effects
 pub enum SpriteEffect {
     /// Remove White
     RemoveWhite,
@@ -228,15 +226,14 @@ pub struct Transform {
     pub origin: Vec3,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-/// Trace 
+/// Trace
 pub struct Trace {
     /// The Transform
     pub transform: Transform,
-    /// The Shape 
-    pub shape: TraceShape 
+    /// The Shape
+    pub shape: TraceShape,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
@@ -245,8 +242,8 @@ pub struct Trace {
 pub enum TraceShape {
     /// width and height
     Rect(f64, f64),
-    /// radius 
+    /// radius
     Ellipse(f64, f64),
     /// points
-    Path(Vec<(f64, f64)>)
+    Path(Vec<(f64, f64)>),
 }

@@ -2,24 +2,35 @@ use crate::{
     domain::{
         audio::AudioId,
         image::ImageId,
-        jig::module::body::{BodyExt, Instructions, ThemeChoice},
+        jig::module::{
+            body::{Body, BodyExt, Instructions, ThemeChoice},
+            ModuleKind,
+        },
     },
     media::MediaLibrary,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-
+use std::convert::TryFrom;
 
 /// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
+    /// The content
+    pub content: Option<Content>,
+}
+
+/// The content for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct Content {
     /// The instructions for the module.
     pub instructions: Instructions,
 
     /// The mode the module uses.
-    pub mode: Option<Mode>,
+    pub mode: Mode,
 
     /// The pairs of cards that make up the module.
     pub pairs: Vec<CardPair>,
@@ -30,7 +41,7 @@ pub struct ModuleData {
 
 impl BodyExt for ModuleData {
     fn as_body(&self) -> Body {
-        Body::Memory(self.clone())
+        Body::MemoryGame(self.clone())
     }
 
     fn is_complete(&self) -> bool {
@@ -45,10 +56,10 @@ impl BodyExt for ModuleData {
 impl TryFrom<Body> for ModuleData {
     type Error = &'static str;
 
-    fn try_from(body:Body) -> Result<Self, Self::Error> {
+    fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::Memory(data) => Ok(data),
-            _ => Err("cannot convert body to memory game!")
+            Body::MemoryGame(data) => Ok(data),
+            _ => Err("cannot convert body to memory game!"),
         }
     }
 }
@@ -113,50 +124,8 @@ pub enum Mode {
     Translate = 7,
 }
 
-impl Mode {
-    //Must match the element strings in types
-    /// Converts `self` to a [`str`].
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Duplicate => "duplicate",
-            Self::WordsAndImages => "words-images",
-            Self::BeginsWith => "begins-with",
-            Self::Lettering => "lettering",
-            Self::Riddles => "riddles",
-            Self::Opposites => "opposites",
-            Self::Synonymns => "synonymns",
-            Self::Translate => "translate",
-        }
-    }
-}
-
-impl ModuleData {
-    /// Instantiates a new module with the given `mode`, `theme_id`, `instructions`, and pairs of text cards.
-    pub fn new<I, S>(mode: Mode, theme: ThemeChoice, instructions: Instructions, pairs: I) -> Self
-    where
-        I: IntoIterator<Item = (S, S)>,
-        S: AsRef<str>,
-    {
-        Self {
-            mode: Some(mode),
-            instructions,
-            pairs: pairs
-                .into_iter()
-                .map(|(word_1, word_2)| {
-                    let (word_1, word_2) = (word_1.as_ref(), word_2.as_ref());
-
-                    match mode {
-                        Mode::WordsAndImages => {
-                            CardPair(Card::Text(word_1.to_string()), Card::Image(None))
-                        }
-                        _ => CardPair(
-                            Card::Text(word_1.to_string()),
-                            Card::Text(word_2.to_string()),
-                        ),
-                    }
-                })
-                .collect(),
-            theme,
-        }
+impl Default for Mode {
+    fn default() -> Self {
+        Self::Duplicate
     }
 }

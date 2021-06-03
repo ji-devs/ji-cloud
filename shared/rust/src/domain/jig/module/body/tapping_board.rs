@@ -1,8 +1,11 @@
-use crate::domain::jig::module::{ModuleKind, body::{BodyExt, ThemeChoice, Audio, Body, Instructions, Sticker, Trace, Backgrounds}};
-use std::convert::TryFrom;
+use crate::domain::jig::module::{
+    body::{Audio, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice, Trace},
+    ModuleKind,
+};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 
 mod play_settings;
 pub use play_settings::*;
@@ -13,7 +16,6 @@ pub use play_settings::*;
 pub struct ModuleData {
     /// The content
     pub content: Option<Content>,
-
 }
 
 impl BodyExt for ModuleData {
@@ -33,10 +35,10 @@ impl BodyExt for ModuleData {
 impl TryFrom<Body> for ModuleData {
     type Error = &'static str;
 
-    fn try_from(body:Body) -> Result<Self, Self::Error> {
+    fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
             Body::TappingBoard(data) => Ok(data),
-            _ => Err("cannot convert body to tapping board!")
+            _ => Err("cannot convert body to tapping board!"),
         }
     }
 }
@@ -60,14 +62,14 @@ pub struct Content {
     /// Stickers
     pub stickers: Vec<Sticker>,
 
-    /// Traces 
+    /// Traces
     pub traces: Vec<TappingTrace>,
 
     /// play settings
-    pub play_settings: PlaySettings
+    pub play_settings: PlaySettings,
 }
 
-/// Tapping board trace w/ metadata 
+/// Tapping board trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct TappingTrace {
@@ -77,7 +79,7 @@ pub struct TappingTrace {
     /// audio
     pub audio: Option<Audio>,
 
-    /// text 
+    /// text
     pub text: Option<String>,
 }
 
@@ -96,7 +98,7 @@ pub enum Mode {
     /// Family Tree
     FamilyTree,
     /// Poster
-    Poster
+    Poster,
 }
 
 impl Default for Mode {

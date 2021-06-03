@@ -1,8 +1,11 @@
-use crate::domain::jig::module::{ModuleKind, body::{BodyExt, Body, Instructions, Sticker, Backgrounds, ThemeId}};
-use std::convert::TryFrom;
+use crate::domain::jig::module::{
+    body::{Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeId},
+    ModuleKind,
+};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 
 /// The body for [`Poster`](crate::domain::jig::module::ModuleKind::Poster) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
@@ -29,10 +32,10 @@ impl BodyExt for ModuleData {
 impl TryFrom<Body> for ModuleData {
     type Error = &'static str;
 
-    fn try_from(body:Body) -> Result<Self, Self::Error> {
+    fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
             Body::Poster(data) => Ok(data),
-            _ => Err("cannot convert body to poster!")
+            _ => Err("cannot convert body to poster!"),
         }
     }
 }
@@ -72,7 +75,7 @@ pub enum Mode {
     /// Family Tree
     FamilyTree,
     /// Poster
-    Poster
+    Poster,
 }
 
 impl Default for Mode {

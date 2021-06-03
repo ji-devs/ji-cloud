@@ -10,20 +10,18 @@ pub struct PlaySettings {
     pub hint: Hint,
 
     /// next style
-    pub next: Next
+    pub next: Next,
 }
-
-
 
 /// Hint
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Hint {
-    /// None 
+    /// None
     None,
 
     /// Highlight
-    Highlight
+    Highlight,
 }
 
 impl Default for Hint {
@@ -32,14 +30,14 @@ impl Default for Hint {
     }
 }
 
-/// Next 
+/// Next
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Next {
-    /// Continue 
+    /// Continue
     Continue,
 
-    /// SelectAll 
+    /// SelectAll
     SelectAll,
 
     /// Select Some
