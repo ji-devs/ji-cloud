@@ -4,10 +4,7 @@ use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
-use shared::domain::jig::additional_resource::{
-    AdditionalResourceCreateRequest, AdditionalResourceUpdateRequest,
-};
-use url::Url;
+use shared::domain::jig::additional_resource::AdditionalResourceCreateRequest;
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
