@@ -39,8 +39,8 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("mode", "sefaria")
             }),
             html!("button-rect", {
-                .property_signal("color", state.is_ready_signal().map(|ready| {
-                    if ready {
+                .property_signal("color", state.is_valid_signal().map(|ready| {
+                    if ready.is_ok() {
                         "red"
                     } else {
                         "grey"

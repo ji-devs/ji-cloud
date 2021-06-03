@@ -37,8 +37,8 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("mode", "sefaria")
             }),
             html!("button-rect", {
-                .property_signal("color", state.is_ready_signal().map(|ready| {
-                    if ready {
+                .property_signal("color", state.is_valid_signal().map(|ready| {
+                    if ready.is_ok() {
                         "red"
                     } else {
                         "grey"
@@ -124,9 +124,8 @@ fn render_column(state: Rc<State>, side: ColumnSide) -> Dom {
                 .enumerate()
                 .map(clone!(state => move |(index, value)| {
                     let row = index.get().unwrap_or_default();
-                    let rows = state.rows; 
                     html!("sidebar-widget-dual-list-input", {
-                        .property("rows", rows)
+                        .property("rows", state.opts.cell_rows)
                         .property_signal("value", {
                             clone!(state => map_ref! {
                                 let value = value.signal_cloned(),
