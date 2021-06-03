@@ -1,31 +1,19 @@
-use dominator::{html, Dom, clone};
-use crate::data::state::*;
+use super::state::*;
 use std::rc::Rc;
+use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt},
-    signal_vec::{SignalVec, SignalVecExt},
+    signal::SignalExt
 };
-use components::instructions::editor::InstructionsEditor;
+use components::{
+    instructions::editor::dom::render as render_instructions,
+};
 
-use futures::stream::StreamExt;
+pub fn render(state: Rc<Step3>) -> Dom {
 
-pub struct Step3Dom {}
-impl Step3Dom {
-    pub fn render(state: Rc<State>) -> Vec<Dom> {
-        vec![
-            html!("module-sidebar-body", {
-                .property("slot", "content")
-                .child({
-                    let editor = InstructionsEditor::new(state.instructions.clone(), Box::new(clone!(state => move |instructions, also_history| {
-                        state.save_instructions(instructions, also_history);
-                    })));
-
-                    editor.render()
-                })
-            }),
-        ]
-    }
+    html!("module-sidebar-body", {
+        .property("slot", "body")
+        .child(render_instructions(state.instructions_editor.clone()))
+    })
 }

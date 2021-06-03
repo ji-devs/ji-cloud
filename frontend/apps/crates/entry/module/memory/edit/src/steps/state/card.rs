@@ -10,24 +10,20 @@ use shared::{
     domain::audio::AudioId,
     media::MediaLibrary
 };
-use crate::data::raw;
+use shared::domain::jig::module::body::{Image, memory as raw}; 
 
 #[derive(Debug, Clone)]
 pub enum Card {
     Text(Mutable<String>),
-    Image(Mutable<Option<(ImageId, MediaLibrary)>>),
-    Audio(Mutable<Option<(AudioId, MediaLibrary)>>)
+    Image(Mutable<Option<Image>>),
 }
 
 impl Card {
     pub fn new_text(data: String) -> Self {
         Self::Text(Mutable::new(data))
     }
-    pub fn new_image(data: Option<(ImageId, MediaLibrary)>) -> Self {
+    pub fn new_image(data: Option<Image>) -> Self {
         Self::Image(Mutable::new(data))
-    }
-    pub fn new_audio(data: Option<(AudioId, MediaLibrary)>) -> Self {
-        Self::Audio(Mutable::new(data))
     }
 
     pub fn as_text_mutable(&self) -> &Mutable<String> {
@@ -36,16 +32,10 @@ impl Card {
             _ => panic!("not a text type!") 
         }
     }
-    pub fn as_image_mutable(&self) -> &Mutable<Option<(ImageId, MediaLibrary)>> {
+    pub fn as_image_mutable(&self) -> &Mutable<Option<Image>> {
         match self {
             Self::Image(m) => m,
             _ => panic!("not an image type!") 
-        }
-    }
-    pub fn as_audio_mutable(&self) -> &Mutable<Option<(AudioId, MediaLibrary)>> {
-        match self {
-            Self::Audio(m) => m,
-            _ => panic!("not an audio type!") 
         }
     }
 
@@ -57,7 +47,6 @@ impl From<raw::Card> for Card {
         match raw_card {
             raw::Card::Text(x) => Card::new_text(x),
             raw::Card::Image(x) => Card::new_image(x),
-            raw::Card::Audio(x) => Card::new_audio(x),
         }
     }
 }
@@ -67,7 +56,6 @@ impl From<Card> for raw::Card {
         match card {
             Card::Text(x) => raw::Card::Text(x.get_cloned()),
             Card::Image(x) => raw::Card::Image(x.get_cloned()),
-            Card::Audio(x) => raw::Card::Audio(x.get_cloned()),
         }
     }
 }

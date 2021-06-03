@@ -1,40 +1,33 @@
-use dominator::{html, Dom, clone};
-use crate::data::state::*;
+use super::state::*;
 use std::rc::Rc;
+use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::SignalExt,
-    signal_vec::{SignalVec, SignalVecExt},
+use futures_signals::signal::SignalExt;
+use components::{
+    image::search::dom::render as render_image_search,
+    text_editor::dom::render_controls as render_text_editor,
+    audio_input::dom::render as render_audio_input,
 };
 
-pub struct Step2Dom {}
-impl Step2Dom {
-    pub fn render(state:Rc<State>) -> Vec<Dom> {
-        vec![
-            html!("module-sidebar-body", {
-                .property("slot", "content")
-                .child(html!("step2-sidebar-container", {
-                    .children(THEME_IDS.iter().copied()
-                      .map(|theme_id| {
-                        html!("step2-sidebar-option", {
-                            .property("theme", theme_id.as_str_id())
-                            .property_signal("state", state.theme_id.signal().map(clone!(theme_id => move |curr_theme_id| {
-                                if curr_theme_id == theme_id {
-                                    "selected"
-                                } else {
-                                    "idle"
-                                }
-                            })))
-                            .event(clone!(state => move |evt:events::Click| {
-                                state.change_theme_id(theme_id);
-                            }))
-                        })
-                      })
-                    )
+use shared::domain::jig::module::body::{ThemeChoice, ThemeId};
+pub fn render(state: Rc<Step2>) -> Dom {
+    html!("step2-sidebar-container", {
+        .children(THEME_IDS.iter().copied()
+          .map(|theme_id| {
+            html!("step2-sidebar-option", {
+                .property("theme", theme_id.as_str_id())
+                .property_signal("state", state.base.theme_id_signal().map(clone!(theme_id => move |curr_theme_id| {
+                    if curr_theme_id == theme_id {
+                        "selected"
+                    } else {
+                        "idle"
+                    }
+                })))
+                .event(clone!(state => move |evt:events::Click| {
+                    state.change_theme(ThemeChoice::Override(theme_id));
                 }))
             })
-        ]
-    }
+          })
+        )
+    })
 }

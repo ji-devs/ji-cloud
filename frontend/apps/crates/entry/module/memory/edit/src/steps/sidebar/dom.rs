@@ -1,44 +1,36 @@
-use dominator::{html, Dom, clone};
-use crate::data::state::*;
+use components::module::edit::*;
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use utils::prelude::*;
-use wasm_bindgen::prelude::*;
+use super::state::*;
+use futures_signals::signal::SignalExt;
+use crate::steps::state::Step;
+
 use super::{
-    nav::dom::StepsNavDom,
-    step_1::dom::Step1Dom,
-    step_2::dom::Step2Dom,
-    step_3::dom::Step3Dom,
+    step_1::{
+        dom::render as render_step_1,
+        state::Step1
+    },
+    step_2::{
+        dom::render as render_step_2,
+        state::Step2
+    },
+    step_3::{
+        dom::render as render_step_3,
+        state::Step3
+    },
 };
-use futures_signals::{
-    map_ref,
-    signal::SignalExt,
-};
 
-pub struct SidebarDom {}
-impl SidebarDom {
-    pub fn render(state:Rc<State>) -> Dom {
-
-        let mode = state.mode.get().unwrap_ji();
-
-        html!("module-sidebar", {
-            .property("slot", "sidebar")
-            .child(StepsNavDom::render(state.clone()))
-            .children_signal_vec(
-                state.step
-                    .signal()
-                    .switch_signal_vec(clone!(state => move |step| {
-                        state.is_empty_signal()
-                            .map(clone!(state => move |is_empty| {
-                                match step {
-                                    Step::One => vec![Step1Dom::render(state.clone(), !is_empty)],
-                                    Step::Two => Step2Dom::render(state.clone()),
-                                    Step::Three => Step3Dom::render(state.clone()),
-                                    Step::Four => vec![html!("empty-fragment")]
-                                }
-                            }))
-                            .to_signal_vec()
-                    }))
-            )
+impl DomRenderable for Sidebar {
+    fn render(state: Rc<Sidebar>) -> Dom {
+        html!("div", {
+            .child_signal(state.base.step.signal_cloned().map(clone!(state => move |step| {
+                match step {
+                    Step::One => Some(render_step_1(Step1::new(state.base.clone()))),
+                    Step::Two => Some(render_step_2(Step2::new(state.base.clone()))),
+                    Step::Three => Some(render_step_3(Step3::new(state.base.clone()))),
+                    _ => None
+                }
+            })))
         })
     }
 }

@@ -2,7 +2,11 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
-use crate::data::state::Mode;
+use crate::state::Mode;
+
+pub const MAX_LIST_WORDS:usize = 14;
+
+
 
 pub static DUAL_LIST_CHAR_LIMIT:usize = 30;
 pub static SINGLE_LIST_CHAR_LIMIT:usize = 30;
@@ -16,11 +20,11 @@ macro_rules! config_path {
 }
 static EDITOR_CONFIG:OnceCell<EditorConfig> = OnceCell::new();
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct EditorConfig {
     init: InitConfig 
 }
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct InitConfig {
     single_list_words: Vec<String>,
     dual_list_words: Vec<(String, String)>,
@@ -30,16 +34,16 @@ pub fn init() {
     EDITOR_CONFIG.set(serde_json::from_str(include_str!(config_path!("module/memory/editor.json"))).unwrap_ji());
 }
 
-pub fn get_single_list_init_word(index: usize) -> Option<&'static str> {
+pub fn get_single_list_init_word(index: usize) -> Option<String> {
     EDITOR_CONFIG 
         .get()
         .and_then(|config| {
             config.init.single_list_words.get(index)
         })
-        .map(|s| s.as_ref())
+        .map(|s| s.to_string())
 }
 
-pub fn get_dual_list_init_word(row: usize, col: usize) -> Option<&'static str> {
+pub fn get_dual_list_init_word(row: usize, col: usize) -> Option<String> {
     EDITOR_CONFIG 
         .get()
         .and_then(|config| {
@@ -54,7 +58,7 @@ pub fn get_dual_list_init_word(row: usize, col: usize) -> Option<&'static str> {
                     }
                 })
         })
-        .map(|s| s.as_ref())
+        .map(|s| s.to_string())
 }
 
 pub fn get_debug_pairs(mode: Mode) -> Vec<(String, String)> {

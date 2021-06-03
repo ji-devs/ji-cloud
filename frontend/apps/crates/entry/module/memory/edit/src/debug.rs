@@ -1,4 +1,3 @@
-use crate::data::state::*;
 use cfg_if::cfg_if;
 use futures_signals::{
     map_ref,
@@ -10,76 +9,108 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::data::{raw, state::*};
 use once_cell::sync::OnceCell;
-use utils::prelude::*;
-use shared::domain::jig::{JigId, module::ModuleId};
+use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::domain::jig::module::body::Instructions as RawInstructions;
-
+use shared::{
+    domain::{
+        jig::{
+            module::body::{
+                Image,
+                ThemeChoice,
+                Instructions,
+                memory::{Content, Mode as RawMode, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
+            },
+            JigId, module::ModuleId
+        },
+        image::ImageId,
+        audio::AudioId
+    },
+    media::MediaLibrary
+};
+use components::stickers::{sprite::ext::*, text::ext::*};
+use crate::{
+    state::Mode,
+    steps::{
+        state::Step,
+        sidebar::step_1::state::TabKind as Step1TabKind
+    }
+};
+use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-#[derive(Debug)]
+//const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
+const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
+
+
+pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+
+#[derive(Debug, Default)]
 pub struct DebugSettings {
-    pub data:Option<raw::ModuleData>,
+    pub data:Option<RawData>,
     pub step:Option<Step>,
-    pub live_save: bool,
-    pub content_tab: Option<DebugContentTab>,
+    pub skip_save: bool,
+    pub skip_load_jig: bool,
+    pub step1_tab: Option<Step1TabKind>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DebugContentTab {
-    Text,
-    Images
+#[derive(Debug, Default)]
+pub struct InitData {
+    pub with_pairs: bool
 }
-
-
 impl DebugSettings {
-    pub fn default() -> DebugSettings {
+    pub fn debug(init_data: Option<InitData>) -> DebugSettings {
         DebugSettings {
-            data: None, 
-            step: None, 
-            live_save: true,
-            content_tab: None,
-        }
-    }
-    pub fn debug(mode: Option<raw::Mode>, with_data: bool) -> DebugSettings {
-        DebugSettings {
+            //debug always has to have some data
+            //otherwise it will fail at load time
             data: Some(
-                if with_data {
-                    let mode = mode.unwrap_ji();
-                    raw::ModuleData::new(
-                        mode, 
-                        ThemeId::Chalkboard, 
-                        RawInstructions::default(),
-                        crate::config::get_debug_pairs(mode)
-                    )
+                if let Some(init_data) = init_data {
+                    let mode = RawMode::WordsAndImages;
+
+                    RawData{
+                        content: Some(Content {
+                            mode: mode,
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                            instructions: Instructions::default(),
+                            pairs: if init_data.with_pairs {
+                                crate::config::get_debug_pairs(mode.into())
+                                    .into_iter()
+                                    .map(|(word_1, word_2)| {
+                                        match mode {
+                                            RawMode::WordsAndImages => {
+                                                RawCardPair(RawCard::Text(word_1), RawCard::Image(None))
+                                            }
+                                            _ => RawCardPair(
+                                                RawCard::Text(word_1),
+                                                RawCard::Text(word_2),
+                                            ),
+                                        }
+                                    })
+                                    .collect()
+                            } else {
+                                Vec::new()
+                            },
+                            ..Content::default()
+                        })
+                    }
                 } else {
-                    raw::ModuleData{
-                        mode,
-                        theme_id: ThemeId::Chalkboard,
-                        ..raw::ModuleData::default()
+                    RawData{
+                        content: None                    
                     }
                 }
             ),
-            step: Some(Step::One), 
-            live_save: false,
-            content_tab: Some(DebugContentTab::Images),
+            step: Some(Step::Two),
+            skip_save: true,
+            skip_load_jig: true,
+            step1_tab: Some(Step1TabKind::Text),
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::Lettering), true)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::BeginsWith), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::Riddles), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::Duplicate), true)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(None, false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::Duplicate), false)).unwrap_ji();
-        SETTINGS.set(DebugSettings::debug(Some(Mode::WordsAndImages), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::BeginsWith), false)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(Some(Mode::Riddles), false)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(Some(InitData { with_pairs: true }))).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
