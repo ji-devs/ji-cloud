@@ -1,9 +1,6 @@
 use http::StatusCode;
 
-use shared::domain::jig::module::{
-    body::{memory, ThemeChoice, ThemeId},
-    ModuleBody, ModuleUpdateRequest,
-};
+use shared::domain::jig::module::{body::memory, ModuleBody, ModuleUpdateRequest};
 
 use crate::{
     fixture::Fixture,

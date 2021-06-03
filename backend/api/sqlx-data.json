@@ -656,6 +656,19 @@
       ]
     }
   },
+  "1e615fdd598c2e33192d23e3320cf6985e3d9a43ec58fbef8c24f92c79a66717": {
+    "query": "\nupdate user_recent_image\nset last_used = now()\nwhere user_id = $1 and image_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
     "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
     "describe": {
@@ -1171,6 +1184,19 @@
       "nullable": []
     }
   },
+  "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
+    "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "4878ce8469a9ea044ceb5804770c99b8d587b7589e7d8d679cc0a5b19c103d0b": {
     "query": "\ninsert into jig_module (jig_id, kind, contents, index)\nvalues ($1, $2, $3, (select count(*) from jig_module where jig_id = $1))\nreturning id, \"index\"\n",
     "describe": {
@@ -1486,6 +1512,39 @@
       ]
     }
   },
+  "63282a245bbfff4db34ea00a9f53cf8f6cbbd26ff4106d3b53f3edf3e48197d0": {
+    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "library: MediaLibrary",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "last_used: DateTime<Utc>",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
     "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        ",
     "describe": {
@@ -1725,6 +1784,40 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "6f2efac54ea432d33d9d1a74ef07c9fb09eb8082a80cf4d36784f480b7eb8bb9": {
+    "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "library: MediaLibrary",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "last_used: DateTime<Utc>",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
     }
   },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
@@ -2614,6 +2707,27 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "a927e1b316983d98397a454a3198b08fcd37cb54056c0a5e57c18bbfcaa0985c": {
+    "query": "\nselect exists(select 1 from user_recent_image where user_id = $1 and image_id = $2) as \"exists!\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "a9780ea48594dbed705b4df8442e7c58416785833da7e04ef32aa8a3bfcd0e21": {
