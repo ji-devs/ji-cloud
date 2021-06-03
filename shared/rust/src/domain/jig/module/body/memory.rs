@@ -1,9 +1,7 @@
 use crate::{
     domain::{
-        audio::AudioId,
-        image::ImageId,
         jig::module::{
-            body::{Body, BodyExt, Instructions, ThemeChoice},
+            body::{Image, Body, BodyExt, Instructions, ThemeChoice},
             ModuleKind,
         },
     },
@@ -79,11 +77,7 @@ pub enum Card {
 
     // todo(@dakom): document this
     #[allow(missing_docs)]
-    Image(Option<(ImageId, MediaLibrary)>),
-
-    // todo(@dakom): document this
-    #[allow(missing_docs)]
-    Audio(Option<(AudioId, MediaLibrary)>),
+    Image(Option<(Image)>),
 }
 
 /// What mode the module runs in.
