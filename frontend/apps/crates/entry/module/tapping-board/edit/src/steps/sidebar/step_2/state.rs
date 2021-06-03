@@ -23,7 +23,7 @@ pub struct Step2 {
 
 
 impl Step2 {
-    pub fn new(base: Rc<Base>) -> Self {
+    pub fn new(base: Rc<Base>) -> Rc<Self> {
 
         let kind = match crate::debug::settings().content_tab {
             Some(kind) => kind,
@@ -32,10 +32,10 @@ impl Step2 {
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
-        Self {
+        Rc::new(Self {
             base,
             tab
-        }
+        })
     }
 }
 

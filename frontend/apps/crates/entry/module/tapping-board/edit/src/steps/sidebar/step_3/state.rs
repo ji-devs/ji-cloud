@@ -2,6 +2,7 @@ use crate::steps::state::{Step, Base};
 use std::rc::Rc;
 use std::cell::RefCell;
 use futures_signals::{
+    map_ref,
     signal::{Mutable, Signal, SignalExt}
 };
 use dominator::clone;
@@ -20,9 +21,6 @@ use shared::domain::jig::module::body::Audio;
 
 pub struct Step3 {
     pub base: Rc<Base>,
-    pub tab: Mutable<Option<Tab>>,
-    pub tab_trace_index: RefCell<Option<usize>>,
-    pub selected_reactor: AsyncLoader,
 }
 
 
@@ -31,53 +29,54 @@ impl Step3 {
 
         let _self = Rc::new(Self {
             base,
-            tab: Mutable::new(None),
-            tab_trace_index: RefCell::new(None),
-            selected_reactor: AsyncLoader::new()
         });
 
-        //Need to re-create the tab body whenever
-        //selected trace has changed
-        //activate_tab() will validate and ensure no cycles
-        //(it's also used by manually changing tab)
-        _self.selected_reactor.load(
-            _self.trace_index_signal()
-                .for_each(clone!(_self => move |index| {
-                    match index {
-                        Some(index) => {
-                            let curr_kind = _self.tab.lock_ref().as_ref().map(|tab| tab.kind());
-                            let kind = match curr_kind {
-                                None => {
-                                    match crate::debug::settings().interaction_tab {
-                                        Some(kind) => kind,
-                                        None => TabKind::Text
-                                    }
-                                },
-                                Some(kind) => kind
-                            };
-
-                            _self.activate_tab(kind);
-                        },
-                        None => {
-                            _self.tab.set(None);
-                            *_self.tab_trace_index.borrow_mut() = None;
-                        }
-                    }
-
-                    async {}
-                }))
-        );
-
         _self
+    }
+
+    //The tab kind state is re-generated when selecting or deselecting a trace
+    pub fn selected_tab_signal(&self) -> impl Signal<Item = Mutable<Option<TabKind>>> {
+        self.trace_index_signal()
+            .map(|index| index.is_some())
+            .dedupe()
+            .map(|has_index| {
+                if has_index {
+                    let kind = match crate::debug::settings().interaction_tab {
+                        Some(kind) => kind,
+                        None => TabKind::Text
+                    };
+                    Mutable::new(Some(kind))
+                } else {
+                    Mutable::new(None)
+                }
+            })
+    }
+
+    //The tab signal is re-generated when either the tab is clicked (changing the kind_state)
+    //or a new trace is selected
+    pub fn tab_signal(&self, selected_tab_signal: impl Signal<Item = Option<TabKind>>) -> impl Signal<Item = Option<Tab>> {
+
+        let base = self.base.clone();
+
+        map_ref! {
+            let kind = selected_tab_signal,
+            let index = self.trace_index_signal()
+                => move {
+                    match (*kind, *index) {
+                        (Some(kind), Some(index)) => {
+                            Some(Tab::new(base.clone(), kind, index))
+                        },
+                        _ => None
+
+                    }
+                }
+        }
     }
 
     pub fn trace_index_signal(&self) -> impl Signal<Item = Option<usize>> {
         self.base.traces.selected_index.signal_cloned()
     }
 
-    pub fn has_tab_signal(&self) -> impl Signal<Item = bool> {
-        self.tab.signal_ref(|tab| tab.is_some())
-    }
 }
 
 

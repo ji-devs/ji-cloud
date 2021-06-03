@@ -7,7 +7,7 @@ use crate::steps::state::{Step, Base};
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{
-    signal::{Mutable, SignalExt},
+    signal::{Mutable, SignalExt, Signal},
     signal_vec::{SignalVec, SignalVecExt}
 };
 use utils::prelude::*;
@@ -15,30 +15,26 @@ use dominator::clone;
 
 pub struct Main {
     pub base: Rc<Base>,
-    pub step_reactor: AsyncLoader,
-    pub phase: Mutable<Phase>
 }
 
 impl Main {
     pub fn new(base: Rc<Base>) -> Self {
-        let step_reactor = AsyncLoader::new();
-
-        let phase = Mutable::new(Phase::Layout);
-
-        step_reactor.load(base.step.signal().for_each(clone!(base, phase => move |step| {
-            if step == Step::Three {
-                phase.set(Phase::Trace);
-            } else {
-                phase.set(Phase::Layout);
-            }
-            async {}
-        })));
-
         Self {
             base,
-            step_reactor,
-            phase,
         }
+    }
+
+    pub fn phase_signal(&self) -> impl Signal<Item = Phase> {
+        self.base.step.signal()
+            .map(|step| step == Step::Three)
+            .dedupe()
+            .map(|is_step_three| {
+                if is_step_three {
+                    Phase::Trace
+                } else {
+                    Phase::Layout
+                }
+            })
     }
 
     pub fn trace_bubbles(&self) -> impl SignalVec<Item = Rc<TraceBubble>> {
@@ -51,7 +47,7 @@ impl Main {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Phase {
     Layout,
     Trace

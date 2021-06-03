@@ -13,7 +13,7 @@ impl DomRenderable for Main {
         html!("empty-fragment", {
             .property("slot", "main")
             .children_signal_vec(
-                state.phase.signal_cloned().map(clone!(state => move |phase| {
+                state.phase_signal().map(clone!(state => move |phase| {
                     match phase {
                         Phase::Layout => {
                             vec![

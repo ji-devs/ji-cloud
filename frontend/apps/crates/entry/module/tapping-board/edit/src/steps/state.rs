@@ -23,7 +23,8 @@ use shared::domain::jig::{
     }
 };
 use futures_signals::{
-    signal::{ReadOnlyMutable, Mutable},
+    map_ref,
+    signal::{self, Signal, SignalExt, ReadOnlyMutable, Mutable},
     signal_vec::MutableVec
 };
 use utils::prelude::*;
@@ -262,11 +263,19 @@ impl Base {
 
 }
 
+
 impl BaseExt<Step> for Base {
+    type NextStepAllowedSignal = impl Signal<Item = bool>;
+
     fn allowed_step_change(&self, from:Step, to:Step) -> bool {
         true
     }
+
+    fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
+        signal::always(true)
+    }
 }
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Step {

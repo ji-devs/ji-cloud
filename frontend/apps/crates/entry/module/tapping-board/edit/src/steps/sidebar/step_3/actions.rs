@@ -7,31 +7,6 @@ use dominator::clone;
 
 impl Step3 {
 
-    //Will update if either kind or selected index changed 
-    pub fn activate_tab(&self, kind: TabKind) {
-
-        if let Some(index) = self.base.traces.selected_index.get_cloned() {
-            let mut go_ahead = false;
-
-            let curr_index = self.tab_trace_index.borrow().clone();
-            if Some(index) != curr_index {
-                go_ahead = true;
-            }
-            if let Some(curr_kind) = self.tab.lock_ref().as_ref().map(|tab| tab.kind()) {
-                if curr_kind != kind {
-                    go_ahead = true;
-                }
-            }
-
-            if go_ahead {
-                *self.tab_trace_index.borrow_mut() = Some(index);
-                self.tab.set(Some(Tab::new(self.base.clone(), kind, index)));
-            }
-
-        }
-
-    }
-
     pub fn start_preview(&self, index: usize) {
 
         let bounds = self
