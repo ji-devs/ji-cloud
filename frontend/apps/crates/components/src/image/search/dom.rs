@@ -48,9 +48,11 @@ pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
                     .event(clone!(image => move |evt: events::DragStart| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             let data = ImageDataTransfer {
-                                id: image.id.clone(), 
-                                //TODO - this should change if the library has changed
-                                lib: MediaLibrary::Global
+                                image: Image { 
+                                    id: image.id.clone(),
+                                    //TODO - this should change if the library has changed
+                                    lib: MediaLibrary::Global
+                                }
                             };
                             let json = serde_json::to_string(&data).unwrap_ji();
                             let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
