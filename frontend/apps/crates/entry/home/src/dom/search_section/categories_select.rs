@@ -1,25 +1,26 @@
 use std::rc::Rc;
 use dominator::{Dom, clone, events, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use futures_signals::signal::SignalExt;
 use shared::domain::category::Category;
 
 use crate::state::State;
 
 
 const STR_CATEGORIES_LABEL: &'static str = "Categories";
+const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more from the list";
 
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("dropdown-select", {
-        .property("slot", "catagories-select")
+        .property("slot", "categories")
         .property("label", STR_CATEGORIES_LABEL)
+        .property("label", STR_CATEGORIES_PLACEHOLDER)
         .property("nested", true)
         // .property_signal("value", category_value_signal(state.clone()))
         .children_signal_vec(state.search_options.categories.signal_cloned().map(clone!(state => move |categories| {
             render_categories(state.clone(), &categories)
         })).to_signal_vec())
     })
-    
 }
 
 fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {

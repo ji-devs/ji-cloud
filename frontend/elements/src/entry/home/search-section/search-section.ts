@@ -46,13 +46,17 @@ export class _ extends LitElement {
             .center-3 {
                 width: 1000px;
                 margin: 0 auto;
-                text-align: center;
+            }
+            .jigzi {
+                display: grid;
+                place-content: center;
             }
             h1 {
                 margin: 0;
                 font-size: 64px;
                 font-weight: 900;
                 color: #fff;
+                text-align: center;
             }
             h1 .creation {
                 color: var(--green-4);
@@ -61,6 +65,7 @@ export class _ extends LitElement {
                 color: var(--dark-gray-6);
                 font-size: 32px;
                 font-weight: 300;
+                text-align: center;
             }
             h4 .results-count {
                 font-weight: bold;

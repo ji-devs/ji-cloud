@@ -46,6 +46,7 @@ export class _ extends LitElement {
                 position: absolute;
                 /* add 32px for margin */
                 left: calc(100% + 32px);
+                text-align: center;
             }
         `];
     }

@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use dominator::{html, Dom, clone};
+use dominator::{html, Dom};
 
 use crate::state::Testimonial;
 
@@ -59,7 +59,7 @@ pub fn render(state: Rc<State>) -> Dom {
                                 .property("size", "large")
                                 .property("color", "red")
                                 .property("bold", "")
-                                .text("${STR_PLAY}")
+                                .text(STR_PLAY)
                             }),
                         ])
                     })

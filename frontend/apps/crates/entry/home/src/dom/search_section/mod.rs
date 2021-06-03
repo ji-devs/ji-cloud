@@ -3,6 +3,8 @@ use dominator::{html, Dom, clone};
 use utils::events;
 use futures_signals::signal::SignalExt;
 
+use crate::state::HomePageMode;
+
 use super::super::{
     state::State,
     actions::{fetch_metadata, search}
@@ -18,6 +20,15 @@ pub fn render(state: Rc<State>) -> Dom {
     fetch_metadata(state.clone());
 
     html!("home-search-section", {
+        .property_signal("mode", state.mode.signal_cloned().map(|mode| {
+            match mode {
+                HomePageMode::Home => "home",
+                HomePageMode::Search(_, _) => "results",
+            }
+        }))
+        .child(html!("home-search-section-help", {
+            .property("slot", "help")
+        }))
         .child(html!("home-search-bar", {
             .property("slot", "search-bar")
             .children(&mut [
@@ -86,19 +97,8 @@ pub fn render(state: Rc<State>) -> Dom {
                         search(Rc::clone(&state));
                     }))
                 }),
-                html!("button-text", {
-                    .property("slot", "advanced")
-                    .property("color", "white")
-                    .property("bold", true)
-                    .text("Search")
-                    .child(html!("br"))
-                    .text("Advanced")
-                    .event(clone!(state => move |_: events::Click| {
-                        search(Rc::clone(&state));
-                    }))
-                })
             ])
-            .children(advanced_search::render(state.clone()))
+            .child(advanced_search::render(state.clone()))
         }))
     })
 }
