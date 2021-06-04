@@ -1,4 +1,4 @@
-use std::{collections::HashSet, rc::Rc};
+use std::{collections::{HashMap, HashSet}, rc::Rc};
 
 use futures::join;
 use futures_signals::signal::Mutable;
@@ -15,6 +15,13 @@ use shared::{
     error::EmptyError
 };
 use utils::prelude::*;
+
+
+const STR_LANGUAGE_ENGLISH: &'static str = "English";
+const STR_LANGUAGE_HEBREW: &'static str = "Hebrew";
+
+
+pub type Language = (&'static str, &'static str);
 
 
 #[derive(Debug)]
@@ -58,7 +65,8 @@ pub struct SearchOptions {
     pub goals: Mutable<Vec<Goal>>,
     pub affiliations: Mutable<Vec<Affiliation>>,
     pub categories: Mutable<Vec<Category>>,
-    pub languages: Rc<Vec<String>>,
+    pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
+    pub languages: Rc<Vec<Language>>,
 }
 
 impl SearchOptions {
@@ -68,7 +76,11 @@ impl SearchOptions {
             goals: Mutable::new(vec![]),
             affiliations: Mutable::new(vec![]),
             categories: Mutable::new(vec![]),
-            languages: Rc::new(vec!["en".to_string(), "he".to_string(), "fr".to_string()]),
+            category_label_lookup: Mutable::new(HashMap::new()),
+            languages: Rc::new(vec![
+                ("en", STR_LANGUAGE_ENGLISH),
+                ("he", STR_LANGUAGE_HEBREW),
+            ]),
         }
     }
 
@@ -100,9 +112,19 @@ impl SearchOptions {
         match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(category::Get::PATH, category::Get::METHOD, Some(req)).await {
             Err(e) => Err(e),
             Ok(res) => {
+                let mut category_label_lookup = HashMap::new();
+                Self::get_categories_labels(&res.categories, &mut category_label_lookup);
+                self.category_label_lookup.set(category_label_lookup);
                 self.categories.set(res.categories);
                 Ok(())
             },
+        }
+    }
+
+    fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
+        for category in categories {
+            lookup.insert(category.id.clone(), category.name.clone());
+            Self::get_categories_labels(&category.children, lookup);
         }
     }
 }

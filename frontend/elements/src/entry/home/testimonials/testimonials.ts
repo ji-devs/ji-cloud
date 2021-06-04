@@ -34,12 +34,12 @@ export class _ extends LitElement {
             }
             .carousels {
                 display: grid;
-                grid-template-columns: 50% 50%;
+                grid-template-columns: 1fr 1fr;
                 column-gap: 90px;
+                justify-content: space-between;
             }
             .carousel {
-                height: 380px;
-                width: 800px;
+                min-height: 380px;
                 display: inline-grid;
             }
             .carousel home-testimonial-carousel {
@@ -47,6 +47,7 @@ export class _ extends LitElement {
                 grid-row: 1;
                 place-self: center;
                 z-index: 1;
+                padding: 10px 20px;
             }
             .carousel::after {
                 content: "";

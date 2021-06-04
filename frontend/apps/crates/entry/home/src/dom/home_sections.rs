@@ -1,17 +1,19 @@
 use std::rc::Rc;
-use dominator::{html, Dom};
+use dominator::{Dom, clone, html};
+use utils::events;
 
-use crate::state::Testimonial;
+use crate::{actions::search, state::Testimonial};
 
 use super::super::state::State;
 
 const STR_PLAY: &'static str = "Play Series";
+const STR_JIGS: &'static str = "JIGs";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("empty-fragment", {
         .children(&mut [
             html!("home-quick-search", {
-                .children(state.quick_searches.iter().map(|item| {
+                .children(state.quick_searches.iter().map(clone!(state => move|item| {
                     html!("home-quick-search-item", {
                         .children(&mut [
                             html!("img-ji", {
@@ -22,15 +24,20 @@ pub fn render(state: Rc<State>) -> Dom {
                             }),
                             html!("h4", {
                                 .property("slot", "title")
-                                .text(&item.title)
+                                .text(&item.search_term)
                             }),
                             html!("h5", {
                                 .property("slot", "subtitle")
-                                .text(&item.subtitle)
+                                .text(&item.jigs_count.to_string())
+                                .text(STR_JIGS)
                             }),
                         ])
+                        .event(clone!(state, item => move |_: events::Click| {
+                            state.search_selected.query.set(item.search_term.clone());
+                            search(Rc::clone(&state));
+                        }))
                     })
-                }))
+                })))
             }),
             html!("home-create"),
             html!("home-why-ji"),

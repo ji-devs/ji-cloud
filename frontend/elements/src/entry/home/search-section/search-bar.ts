@@ -39,7 +39,7 @@ export class _ extends LitElement {
             }
             ::slotted([slot=button]) {
                 /* cover .bar border */
-                margin: -1px -1px 0 0;
+                margin: -1px -2px 0 0;
                 height: 48px;
             }
             .advanced {

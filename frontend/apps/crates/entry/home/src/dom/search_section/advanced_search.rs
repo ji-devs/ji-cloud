@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use dominator::{html, Dom, clone};
-use futures_signals::signal::SignalExt;
-use utils::events;
+use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use utils::{events, unwrap::UnwrapJiExt};
 
 use super::categories_select;
 
@@ -37,6 +37,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "affiliation")
                 .property("label", STR_AFFILIATION_LABEL)
                 .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
+                .property_signal("value", affiliation_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.affiliations.signal_cloned().map(clone!(state => move|affiliations| {
                     affiliations.iter().map(|affiliation| {
                         html!("li-check", {
@@ -60,6 +61,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "goal")
                 .property("label", STR_GOAL_LABEL)
                 .property("placeholder", STR_GOAL_PLACEHOLDER)
+                .property_signal("value", goal_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.goals.signal_cloned().map(clone!(state => move|goals| {
                     goals.iter().map(|goal| {
                         html!("li-check", {
@@ -91,4 +93,34 @@ pub fn render(state: Rc<State>) -> Dom {
             })
         ])
     })
+}
+
+fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+    map_ref! {
+        let selected_goals = state.search_selected.goals.signal_cloned(),
+        let available_goals = state.search_options.goals.signal_cloned() => {
+            let mut output = vec![];
+            selected_goals.iter().for_each(|goal_id| {
+                let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
+                output.push(goal.display_name.clone());
+            });
+            output.join(", ")
+        }
+        
+    }
+}
+
+fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+    map_ref! {
+        let selected_affiliations = state.search_selected.affiliations.signal_cloned(),
+        let available_affiliations = state.search_options.affiliations.signal_cloned() => {
+            let mut output = vec![];
+            selected_affiliations.iter().for_each(|affiliation_id| {
+                let affiliation = available_affiliations.iter().find(|affiliation| affiliation.id == *affiliation_id).unwrap_ji();
+                output.push(affiliation.display_name.clone());
+            });
+            output.join(", ")
+        }
+        
+    }
 }

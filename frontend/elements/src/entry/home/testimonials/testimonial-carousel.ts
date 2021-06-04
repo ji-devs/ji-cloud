@@ -10,7 +10,7 @@ export class _ extends LitElement {
             :host {
                 display: grid;
                 grid-template-rows: repeat(2, auto);
-                grid-template-columns: auto 578px auto;
+                grid-template-columns: auto minmax(0, 1fr) auto;
                 column-gap: 32px;
                 row-gap: 40px;
             }

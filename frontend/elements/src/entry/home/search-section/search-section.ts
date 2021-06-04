@@ -29,6 +29,7 @@ export class _ extends LitElement {
                 display: grid;
                 grid-template-columns: 1fr auto;
                 justify-content: space-between;
+                align-items: center;
             }
             .center-1 {
                 grid-column: 1 / -1;

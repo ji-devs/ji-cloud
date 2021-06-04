@@ -4,6 +4,10 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 export class _ extends LitElement {
     static get styles() {
         return [css`
+            :host {
+                padding: 20px 0;
+            }
+
             .inside-wrapper {
                 margin: 0 24px;
                 height: 540px;

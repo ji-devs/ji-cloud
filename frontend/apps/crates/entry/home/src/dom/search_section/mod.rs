@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use dominator::{html, Dom, clone};
-use utils::events;
-use futures_signals::signal::SignalExt;
+use utils::{events, unwrap::UnwrapJiExt};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 
 use crate::state::HomePageMode;
 
@@ -14,6 +14,7 @@ use super::super::{
 mod categories_select;
 mod advanced_search;
 
+const STR_ALL_LANGUAGES: &'static str = "All languages";
 
 pub fn render(state: Rc<State>) -> Dom {
 
@@ -40,9 +41,9 @@ pub fn render(state: Rc<State>) -> Dom {
                         state.search_selected.query.set(v.unwrap_or_default())
                     }))
                 }),
-                html!("dropdown-select", {
+                html!("home-search-section-select", {
                     .property("slot", "age")
-                    .property("label", "_ ages _")
+                    .property_signal("value", age_value_signal(state.clone()))
                     .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
                         age_ranges.iter().map(|age_range| {
                             html!("li-check", {
@@ -61,28 +62,25 @@ pub fn render(state: Rc<State>) -> Dom {
                         }).collect()
                     })).to_signal_vec())
                 }),
-                html!("dropdown-select", {
+                html!("home-search-section-select", {
                     .property("slot", "language")
-                    .property("label", "_ languages _")
-                    .event(clone!(state => move |_: events::Click| {
-                        state.search_selected.language.set(Some("en".to_string()))
-                    }))
+                    .property_signal("value", language_value_signal(state.clone()))
                     .children(
                         state
                             .search_options
                             .languages
                             .iter()
-                            .map(|language| {
+                            .map(|(lang_id, lang_label)| {
                                 html!("li-check", {
-                                    .text(language)
-                                    .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(language => move |selected_language| {
+                                    .text(lang_label)
+                                    .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang_id => move |selected_language| {
                                         match selected_language {
-                                            Some(selected_language) => selected_language == language,
+                                            Some(selected_language) => selected_language == lang_id,
                                             None => false,
                                         }
                                     })))
-                                    .event(clone!(state, language => move |_: events::Click| {
-                                        state.search_selected.language.set(Some(language.clone()));
+                                    .event(clone!(state, lang_id => move |_: events::Click| {
+                                        state.search_selected.language.set(Some(lang_id.to_string()));
                                     }))
                                 })
                             })
@@ -101,4 +99,37 @@ pub fn render(state: Rc<State>) -> Dom {
             .child(advanced_search::render(state.clone()))
         }))
     })
+}
+
+
+fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
+    map_ref! {
+        let selected_ages = state.search_selected.age_ranges.signal_cloned(),
+        let available_ages = state.search_options.age_ranges.signal_cloned() => {
+            let mut output = vec![];
+            selected_ages.iter().for_each(|age_id| {
+                let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
+                output.push(age.display_name.clone());
+            });
+            output.join(", ")
+        }
+    }
+}
+
+fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
+    state.search_selected.language.signal_cloned().map(clone!(state => move |selected_language| {
+        let lang = state
+            .search_options
+            .languages
+            .iter()
+            .find(|(lang_code, _)| match &selected_language {
+                Some(selected_language) => lang_code == &selected_language,
+                None => false,
+            });
+
+        match lang {
+            Some(lang) => lang.1,
+            None => STR_ALL_LANGUAGES
+        }
+    }))
 }

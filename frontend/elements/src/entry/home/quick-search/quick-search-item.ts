@@ -39,12 +39,9 @@ export class _ extends LitElement {
         `];
     }
 
-    @property()
-    href: string = "";
-
     render() {
         return html`
-            <a href="${this.href}">
+            <a>
                 <div class="image-wrapper">
                     <slot name="image"></slot>
                 </div>

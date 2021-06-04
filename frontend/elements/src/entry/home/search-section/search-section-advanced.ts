@@ -25,9 +25,9 @@ export class _ extends LitElement {
                 background-image: url("${unsafeCSS(mediaUi("entry/home/search-section/advanced-bg.svg"))}");
                 background-repeat: no-repeat;
                 background-position: 100% 100%;
-
-                width: 1100px;
-                height: 700px;
+                background-size: 400px;
+                width: 1000px;
+                height: 600px;
                 box-sizing: border-box;
             }
             h2 {
@@ -38,7 +38,7 @@ export class _ extends LitElement {
             }
             .selects {
                 display: grid;
-                grid-template-columns: repeat(3, 296px);
+                grid-template-columns: repeat(3, 250px);
                 grid-gap: 32px;
             }
             .search-button-wrapper {

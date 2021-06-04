@@ -12,9 +12,8 @@ export class _ extends LitElement {
             }
             .width-holder {
                 padding: 0;
-
                 display: grid;
-                grid-template-columns: 900px auto;
+                grid-template-columns:  minmax(100px, 900px) auto;
             }
             .video-wrapper {
                 background-color: #fee595;

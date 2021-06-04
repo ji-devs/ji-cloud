@@ -18,7 +18,7 @@ export class _ extends LitElement {
             }
             .width-holder {
                 display: grid;
-                row-gap: 60px;
+                row-gap: 40px;
             }
             h2 {
                 text-align: center;
@@ -31,7 +31,6 @@ export class _ extends LitElement {
                 display: flex;
                 align-items: center;
                 column-gap: 26px;
-                width: 1920px;
                 justify-content: center;
             }
             .nav-button {
@@ -44,7 +43,6 @@ export class _ extends LitElement {
             }
             .points {
                 display: flex;
-                margin-top: 80px;
                 column-gap: 24px;
                 justify-content: center;
             }

@@ -37,7 +37,7 @@ export class CarouselSingle extends LitElement {
     }
 
     private getActivePage() : number {
-        return Math.floor(this.carousel.scrollLeft / this.clientWidth);
+        return Math.round(this.carousel.scrollLeft / this.clientWidth);
     }
 
     @property({ type: Number })

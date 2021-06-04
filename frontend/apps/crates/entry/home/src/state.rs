@@ -38,8 +38,8 @@ impl State {
         iter::repeat(QuickSearch {
             image_id: String::from("??"),
             image_lib: String::from("mock"),
-            title: String::from("Chanukah"),
-            subtitle: String::from("355 JIGs"),
+            search_term: String::from("Chanukah"),
+            jigs_count: 355 as u32,
         }).take(5).collect()
     }
 
@@ -84,8 +84,8 @@ pub enum HomePageMode {
 pub struct QuickSearch {
     pub image_id: String,
     pub image_lib: String, // is this always the same?
-    pub title: String,
-    pub subtitle: String,
+    pub search_term: String,
+    pub jigs_count: u32,
 }
 
 

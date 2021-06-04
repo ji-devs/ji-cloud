@@ -11,7 +11,7 @@ export class _ extends LitElement {
                 padding: 3px 12px;
                 font-size: 14px;
                 border-radius: 20px;
-                margin: 8px 8px 0 0;
+                margin: 0 8px 8px 0;
                 color: var(--light-blue-4);
             }
         `];

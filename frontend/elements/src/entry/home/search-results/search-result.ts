@@ -124,6 +124,10 @@ export class _ extends LitElement {
             .hover home-search-result-details:not(:last-child) {
                 border-bottom: solid 1px #3c7df0;
             }
+            ::slotted(home-search-result-details) {
+                border-bottom: solid 1px #3c7df0;
+                --closed-height: 36px;
+            }
             .hover h3 {
                 font-size: 16px;
                 font-weight: 600;
