@@ -18,7 +18,7 @@ pub struct ModuleData {
     pub content: Option<Content>,
 }
 
-impl BodyExt for ModuleData {
+impl BodyExt<Mode> for ModuleData {
     fn as_body(&self) -> Body {
         Body::TappingBoard(self.clone())
     }
@@ -29,6 +29,12 @@ impl BodyExt for ModuleData {
 
     fn kind() -> ModuleKind {
         ModuleKind::TappingBoard
+    }
+
+    fn new_mode(mode: Mode) -> Self {
+        ModuleData {
+            content: Some(Content::default())
+        }
     }
 }
 

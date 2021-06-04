@@ -33,7 +33,7 @@ use super::choose::state::ModeExt;
 use super::steps::state::*;
 use shared::domain::jig::module::body::BodyExt;
 
-pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>)
+pub fn render_page_body<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>)
 where
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -41,9 +41,10 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    Mode: ModeExt + 'static,
+    Mode: ModeExt<RawMode> + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt + 'static, 
+    RawData: BodyExt<RawMode> + 'static, 
+    RawMode: 'static, 
 {
     let sig = map_ref! {
         let phase = state.phase.signal_cloned(),

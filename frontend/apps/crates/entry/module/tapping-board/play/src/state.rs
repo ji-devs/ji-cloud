@@ -1,9 +1,9 @@
 use components::module::play::state::*;
-use super::main::state::*;
+use super::base::state::*;
 use std::rc::Rc;
 use shared::domain::jig::{JigId, module::{ModuleId, body::tapping_board::{Mode as RawMode, ModuleData as RawData}}};
 
-pub type AppState = GenericState<RawData, Main>;
+pub type AppState = GenericState<RawData, Base>;
 
 
 pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
@@ -13,6 +13,6 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
     opts.force_raw = crate::debug::settings().data.clone(); 
     opts.skip_load_jig = crate::debug::settings().skip_load_jig;
 
-    AppState::new(opts, Main::new)
+    AppState::new(opts, Base::new)
 }
 

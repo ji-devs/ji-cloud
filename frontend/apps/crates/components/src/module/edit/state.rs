@@ -17,6 +17,7 @@ use std::fmt::Write;
 use serde::{Serialize, de::DeserializeOwned};
 use crate::module::prelude::*;
 use crate::module::history::state::HistoryState;
+use crate::font_loader::{FontLoader, Font};
 use dominator_helpers::{
     signals::OptionSignal,
     futures::AsyncLoader,
@@ -35,11 +36,13 @@ use shared::{
     domain::jig::{*, module::{*, body::Body}},
 };
 use utils::{settings::SETTINGS, prelude::*};
+use std::marker::PhantomData;
 
-pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub struct GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    RawData: BodyExt + 'static,
-    Mode: ModeExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
+    Mode: ModeExt<RawMode> + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -48,7 +51,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub phase: Mutable<Rc<Phase<Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub phase: Mutable<Rc<Phase<Mode, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) is_preview: Mutable<bool>,
@@ -58,11 +61,13 @@ where
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) reset_from_history_loader: AsyncLoader,
+    phantom: PhantomData<RawMode>,
 }
 
-pub enum Phase <Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub enum Phase <Mode, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt + 'static,
+    Mode: ModeExt<RawMode> + 'static,
+    RawMode: 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -72,7 +77,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     Init,
-    Choose(Rc<Choose<Mode>>),
+    Choose(Rc<Choose<Mode, RawMode>>),
     Steps(Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
@@ -85,6 +90,7 @@ pub struct StateOpts<RawData> {
     //the step which is for previewing
     pub is_main_scrollable: bool,
     pub force_raw: Option<RawData>, 
+    pub load_fonts: bool,
 }
 
 impl <RawData> StateOpts<RawData> {
@@ -96,6 +102,7 @@ impl <RawData> StateOpts<RawData> {
             module_id,
             is_main_scrollable: true,
             force_raw: None,
+            load_fonts: true,
         }
     }
 }
@@ -108,9 +115,9 @@ impl <RawData> StateOpts<RawData> {
 
 pub type IsHistory = bool;
 
-impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt + 'static,
+    Mode: ModeExt<RawMode> + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -118,7 +125,8 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    RawData: BodyExt + 'static, 
+    RawData: BodyExt<RawMode> + 'static, 
+    RawMode: 'static, 
 {
     pub fn new<InitFromModeFn, InitFromModeOutput, InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
@@ -145,10 +153,15 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
+            phantom: PhantomData
         });
 
 
         _self.raw_loader.load(clone!(_self => async move {
+
+            if _self.opts.load_fonts {
+                FontLoader::new().load_all().await;
+            }
             if !_self.opts.skip_load_jig {
                 *_self.jig.borrow_mut() = {
 

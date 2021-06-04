@@ -109,13 +109,13 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn new<Mode, RawData>(
-        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
+    pub fn new<Mode, RawData, RawMode>(
+        app: Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>
     ) -> Self 
     where
-        Mode: ModeExt + 'static,
-        RawData: BodyExt + 'static, 
+        Mode: ModeExt<RawMode> + 'static,
+        RawData: BodyExt<RawMode> + 'static, 
     {
 
         let preview_step_reactor = AsyncLoader::new();

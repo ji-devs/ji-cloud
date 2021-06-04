@@ -18,41 +18,39 @@ use dominator_helpers::{
     signals::OptionSignal,
     futures::AsyncLoader,
 };
+use crate::font_loader::{FontLoader, Font};
 use utils::{settings::SETTINGS, prelude::*, iframe::*};
+use std::marker::PhantomData;
 
-pub struct GenericState <RawData, Main> 
+pub struct GenericState <RawData, RawMode, Base> 
 where
-    RawData: BodyExt + 'static,
-    Main: MainExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
+    Base: BaseExt + 'static,
 {
-    pub(super) phase: Mutable<Rc<Phase<RawData, Main>>>,
+    pub(super) phase: Mutable<Rc<Phase<RawData, Base>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
+    phantom: PhantomData<RawMode>,
 }
 
 pub trait DomRenderable {
     fn render(state: Rc<Self>) -> Dom;
 }
 
-pub trait MainExt: DomRenderable {
+pub trait BaseExt: DomRenderable {
 }
 
-pub enum Phase <RawData, Main> 
-where
-    RawData: BodyExt + 'static,
-    Main: MainExt + 'static,
+pub enum Phase <RawData, Base> 
 {
     Init,
     WaitingIframe(Rc<Box<dyn Fn(RawData)>>),
-    Playing(Rc<Main>),
+    Playing(Rc<Base>),
 }
 
-impl <RawData, Main> Phase <RawData, Main> 
-where
-    RawData: BodyExt + 'static,
-    Main: MainExt + 'static,
+impl <RawData, Base> Phase <RawData, Base> 
 {
     pub fn waiting_iframe(&self) -> bool {
         match self {
@@ -68,7 +66,8 @@ pub struct StateOpts<RawData> {
     pub module_id: ModuleId,
     pub force_raw: Option<RawData>, 
     pub force_raw_even_in_iframe: bool,
-    pub skip_load_jig: bool
+    pub skip_load_jig: bool,
+    pub load_fonts: bool,
 }
 
 impl <RawData> StateOpts<RawData> {
@@ -79,14 +78,16 @@ impl <RawData> StateOpts<RawData> {
             force_raw: None,
             force_raw_even_in_iframe: false,
             skip_load_jig: false,
+            load_fonts: true,
         }
     }
 }
 
-impl <RawData, Main> GenericState <RawData, Main> 
+impl <RawData, RawMode, Base> GenericState <RawData, RawMode, Base> 
 where
-    RawData: BodyExt + 'static,
-    Main: MainExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
+    Base: BaseExt + 'static,
 {
     pub fn new<InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
@@ -94,7 +95,7 @@ where
     ) -> Rc<Self>
     where
         InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = Main>,
+        InitFromRawOutput: Future<Output = Base>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
         
@@ -105,9 +106,14 @@ where
             phase: Mutable::new(Rc::new(Phase::Init)),
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
+            phantom: PhantomData
         });
 
         _self.raw_loader.load(clone!(_self => async move {
+
+            if _self.opts.load_fonts {
+                FontLoader::new().load_all().await;
+            }
 
             if !_self.opts.skip_load_jig {
                 *_self.jig.borrow_mut() = {
@@ -148,9 +154,9 @@ where
                                         _self.opts.module_id.clone(),
                                         _self.jig.borrow().clone()
                                     );
-                                    let main = init_from_raw(jig_id, module_id, jig, raw).await;
+                                    let base = init_from_raw(jig_id, module_id, jig, raw).await;
 
-                                    _self.phase.set(Rc::new(Phase::Playing(Rc::new(main))));
+                                    _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
                                 }));
                             })))
                         )));
@@ -181,9 +187,9 @@ where
                     _self.opts.module_id.clone(),
                     _self.jig.borrow().clone()
                 );
-                let main = init_from_raw(jig_id, module_id, jig, raw).await;
+                let base = init_from_raw(jig_id, module_id, jig, raw).await;
 
-                _self.phase.set(Rc::new(Phase::Playing(Rc::new(main))));
+                _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
             }
         }));
 

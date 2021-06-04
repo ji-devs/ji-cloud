@@ -15,7 +15,7 @@ use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::BodyExt}};
 use utils::{prelude::*, iframe::IframeInit}; 
 use dominator_helpers::events::Message;
 
-pub fn render<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
@@ -23,7 +23,8 @@ pub fn render<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Vec<Dom>
 where
-    RawData: BodyExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -76,7 +77,7 @@ where
         })
 }
 
-pub fn render_preview_main<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render_preview_main<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind, 
     jig_id: JigId, 
     module_id: ModuleId, 
@@ -84,7 +85,8 @@ pub fn render_preview_main<RawData, Step, Base, Main, Sidebar, Header, Footer, O
     state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
-    RawData: BodyExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -119,6 +121,7 @@ where
                     if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                         log::info!("sending iframe message!");
                         let data = history.get_current();
+
                         let msg:IframeInit<RawData> = IframeInit::new(data); 
                         if let Some(window) = elem.content_window() {
                             window.post_message(&msg.into(), &url);
@@ -162,9 +165,10 @@ where
     })
 }
 
-pub fn render_header<RawData, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
-    RawData: BodyExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,

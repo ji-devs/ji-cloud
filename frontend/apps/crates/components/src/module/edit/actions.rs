@@ -18,11 +18,12 @@ use dominator_helpers::futures::AsyncLoader;
 use std::future::Future;
 use dominator::clone;
 
-impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt + 'static,
+    Mode: ModeExt<RawMode> + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt + 'static,
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
@@ -97,23 +98,25 @@ where
     }
 }
 
-pub type HistoryStateImpl<RawData> = HistoryState<RawData, HistorySaveFn<RawData>, Box<dyn Fn(RawData)>>;
-pub type HistorySaveFn<RawData> = impl Fn(RawData);
+pub type HistoryStateImpl<RawData> = HistoryState<RawData, Box<dyn Fn(RawData)>, Box<dyn Fn(RawData)>>;
+//pub type HistorySaveFn<RawData> = impl Fn(RawData);
 
-pub fn save_history<RawData>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> HistorySaveFn<RawData> 
+pub fn save_history<RawData, RawMode>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
 where
-    RawData: BodyExt + 'static 
+    RawData: BodyExt<RawMode> + 'static,
+    RawMode: 'static 
 {
-    move |raw_data:RawData| {
+    Box::new(move |raw_data:RawData| {
         if !skip_for_debug {
             save(raw_data, save_loader.clone(), jig_id, module_id);
         }
-    }
+    })
 }
 
-pub fn save<RawData>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
+pub fn save<RawData, RawMode>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
 where
-    RawData: BodyExt + 'static 
+    RawData: BodyExt<RawMode> + 'static ,
+    RawMode: 'static 
 {
     save_loader.load(async move {
         let body = raw_data.as_body(); 

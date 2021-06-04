@@ -5,7 +5,7 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal},
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
-use std::rc::Rc;
+use std::{marker::PhantomData, rc::Rc};
 use std::future::Future;
 use super::super::{
     steps::state::*,
@@ -15,7 +15,7 @@ use super::super::{
 use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::BodyExt}};
 use utils::prelude::*;
 
-pub trait ModeExt : Copy
+pub trait ModeExt<RawMode> : Copy
 where
     Self: Sized
 {
@@ -24,30 +24,34 @@ where
     fn module() -> &'static str; 
     fn as_str_id(&self) -> &'static str;
     fn as_str_label(&self) -> &'static str;
+    fn to_raw(&self) -> RawMode;
 }
 
-pub struct Choose <Mode>
+pub struct Choose <Mode, RawMode>
 where
-    Mode: ModeExt + 'static
+    Mode: ModeExt<RawMode> + 'static,
+    RawMode: 'static
 {
     //getting rid of this Box is probably more headache than it's worth
     pub on_mode_change: Box<dyn Fn(Mode)>,
     pub loader: Rc<AsyncLoader>,
+    pub phantom: PhantomData<RawMode> 
 }
 
 
-impl <Mode> Choose <Mode> 
+impl <Mode, RawMode> Choose <Mode, RawMode> 
 where
-    Mode: ModeExt + 'static,
+    Mode: ModeExt<RawMode> + 'static,
+    RawMode: 'static
 {
     pub fn new<Step, RawData, InitFromModeFn, InitFromModeOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
-        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
+        app: Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init_from_mode: InitFromModeFn,
     ) -> Self 
     where
-        Mode: ModeExt + 'static,
+        Mode: ModeExt<RawMode> + 'static,
         Step: StepExt + 'static,
-        RawData: BodyExt + 'static, 
+        RawData: BodyExt<RawMode> + 'static, 
         Base: BaseExt<Step> + 'static,
         Main: MainExt + 'static,
         Sidebar: SidebarExt + 'static,
@@ -72,10 +76,16 @@ where
                         app.jig.borrow().clone()
                     );
 
-                    let steps_init = init_from_mode(jig_id, module_id, jig, mode, app.history.borrow().as_ref().unwrap_ji().clone()).await;
+                    let history = app.history.borrow().as_ref().unwrap_ji().clone();
+                    history.push_modify(|raw| {
+                        *raw = RawData::new_mode(mode.to_raw());
+                    });
+
+                    let steps_init = init_from_mode(jig_id, module_id, jig, mode, history).await;
                     GenericState::change_phase_steps(app.clone(), steps_init);
                 }))
             }),
+            phantom: PhantomData
         }
     }
 }

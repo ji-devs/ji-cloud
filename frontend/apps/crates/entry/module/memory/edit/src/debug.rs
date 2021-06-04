@@ -31,7 +31,7 @@ use shared::{
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::{
     state::Mode,
-    steps::{
+    base::{
         state::Step,
         sidebar::step_1::state::TabKind as Step1TabKind
     }

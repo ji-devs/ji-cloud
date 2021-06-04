@@ -3,11 +3,12 @@ use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
 
-pub fn render<Mode>(
-    state: Rc<Choose<Mode>>
+pub fn render<Mode, RawMode>(
+    state: Rc<Choose<Mode, RawMode>>
 ) -> Vec<Dom>
 where
-    Mode: ModeExt + 'static
+    Mode: ModeExt<RawMode> + 'static,
+    RawMode: 'static
 {
     vec![
         html!("choose-mode", {

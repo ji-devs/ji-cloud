@@ -6,6 +6,7 @@ use crate::{
 use paperclip::actix::Apiv2Schema;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::convert::TryFrom;
+use std::fmt::Debug;
 
 /// Memory Game Body.
 pub mod memory;
@@ -39,7 +40,7 @@ pub enum Body {
 
 /// Extension trait for interop
 /// impl on inner body data
-pub trait BodyExt: TryFrom<Body> + Serialize + DeserializeOwned + Clone {
+pub trait BodyExt<Mode>: TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug {
     /// get self as a Body
     fn as_body(&self) -> Body;
 
@@ -48,6 +49,10 @@ pub trait BodyExt: TryFrom<Body> + Serialize + DeserializeOwned + Clone {
 
     /// get the kind from the type itself
     fn kind() -> super::ModuleKind;
+
+    /// given a Mode, get a new Self
+    /// will usually populate an inner .content
+    fn new_mode(mode: Mode) -> Self;
 }
 
 impl Body {

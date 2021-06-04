@@ -37,7 +37,7 @@ pub struct Content {
     pub theme: ThemeChoice,
 }
 
-impl BodyExt for ModuleData {
+impl BodyExt<Mode> for ModuleData {
     fn as_body(&self) -> Body {
         Body::MemoryGame(self.clone())
     }
@@ -48,6 +48,12 @@ impl BodyExt for ModuleData {
 
     fn kind() -> ModuleKind {
         ModuleKind::Memory
+    }
+
+    fn new_mode(mode: Mode) -> Self {
+        ModuleData {
+            content: Some(Content::default())
+        }
     }
 }
 

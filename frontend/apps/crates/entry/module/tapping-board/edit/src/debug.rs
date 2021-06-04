@@ -31,11 +31,11 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::state::Mode;
-use crate::steps::state::Step;
-use crate::steps::sidebar::step_1::state::TabKind as BgTabKind;
-use crate::steps::sidebar::step_2::state::TabKind as ContentTabKind;
-use crate::steps::sidebar::step_3::state::TabKind as InteractionTabKind;
-use crate::steps::sidebar::step_4::state::TabKind as SettingsTabKind;
+use crate::base::state::Step;
+use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
+use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
+use crate::base::sidebar::step_3::state::TabKind as InteractionTabKind;
+use crate::base::sidebar::step_4::state::TabKind as SettingsTabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 

@@ -1,5 +1,5 @@
 use components::module::edit::*;
-use super::steps::{
+use super::base::{
     actions::{init_from_mode, init_from_raw},
     state::{Base,Step},
     footer::state::Footer,

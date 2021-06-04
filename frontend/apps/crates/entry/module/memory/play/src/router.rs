@@ -10,37 +10,47 @@ use futures_signals::{
 use dominator::{Dom, html, clone};
 use dominator_helpers::futures::AsyncLoader;
 use std::cell::RefCell;
-use crate::index::dom::{IndexDom, Page};
+use components::module::play::dom::render_page_body;
+use super::state::{AppState, create_state};
 
 pub struct Router {
     loader: AsyncLoader,
-    page: RefCell<Option<Page>>
+    app: RefCell<Option<Rc<AppState>>>
+}
+
+impl Router {
+    pub fn new() -> Self {
+        Self {
+            loader: AsyncLoader::new(),
+            app: RefCell::new(None)
+        }
+    }
 }
 
 
-pub fn render() {
-    let _self = Rc::new(Router {
-        loader: AsyncLoader::new(),
-        page: RefCell::new(None)
-    });
+pub fn render(state: Rc<Router>) {
 
-    _self.clone().loader.load(
+    state.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
-            .for_each(clone!(_self => move |route| {
-                *_self.page.borrow_mut() = match route {
+            .for_each(clone!(state => move |route| {
+                match route {
                     Route::Module(route) => {
                         match route {
                             ModuleRoute::Play(kind, jig_id, module_id) => {
                                 match kind {
-                                    ModuleKind::Memory => Some(IndexDom::render(jig_id, module_id)),
-                                    _ => None
+                                    ModuleKind::Memory => {
+                                        let app = create_state(jig_id, module_id);
+                                        render_page_body(app.clone());
+                                        *state.app.borrow_mut() = Some(app);
+                                    }
+                                    _ => {}
                                 }
                             }
-                            _ => None
+                            _ => {}
                         }
                     },
-                    _ => None
+                    _ => {}
                 };
                 async {}
             }))

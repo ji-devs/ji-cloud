@@ -31,10 +31,10 @@ use super::state::*;
 use crate::module::prelude::*;
 use shared::domain::jig::module::body::BodyExt;
 
-pub fn render_page_body<RawData, Main> (state:Rc<GenericState<RawData, Main>>)
+pub fn render_page_body<RawData, RawMode, Base> (state:Rc<GenericState<RawData, RawMode, Base>>)
 where
-    Main: MainExt + 'static,
-    RawData: BodyExt + 'static, 
+    Base: BaseExt + 'static,
+    RawData: BodyExt<RawMode> + 'static, 
 {
 
     let sig =
@@ -68,10 +68,10 @@ where
                                             Phase::WaitingIframe(on_raw) => {
                                                 vec![render_iframe_wait(state.clone(), on_raw.clone())]
                                             },
-                                            Phase::Playing(main) => {
+                                            Phase::Playing(base) => {
                                                 vec![
 
-                                                    add_slot_to_dom(Main::render(main.clone()), "main")
+                                                    add_slot_to_dom(Base::render(base.clone()), "main")
                                                 ]
                                             },
                                             Phase::Init => vec![]
@@ -97,10 +97,10 @@ where
 
 //This is just a placeholder to get messages
 //It'll be replaced when the iframe data arrives
-fn render_iframe_wait<RawData, Main> (state:Rc<GenericState<RawData, Main>>, on_raw: Rc<Box<dyn Fn(RawData)>>) -> Dom
+fn render_iframe_wait<RawData, RawMode, Base> (state:Rc<GenericState<RawData, RawMode, Base>>, on_raw: Rc<Box<dyn Fn(RawData)>>) -> Dom
 where
-    Main: MainExt + 'static,
-    RawData: BodyExt + 'static, 
+    Base: BaseExt + 'static,
+    RawData: BodyExt<RawMode> + 'static, 
 {
 
     html!("empty-fragment", {
