@@ -80,6 +80,15 @@ export class _ extends LitElement {
   @property({ type: Boolean })
   enabled: boolean = false;
 
+  private toggle(){
+    this.enabled = !this.enabled;
+    this.dispatchEvent(new CustomEvent("custom-toggle", {
+        detail: {
+            value: this.enabled
+        }
+    }));
+  }
+
   render() {
     const { label, enabled } = this;
 
@@ -87,7 +96,7 @@ export class _ extends LitElement {
     <div class="wrapper">
         <p>${label}</p>
         <div class="onoffswitch">
-            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" ?checked="${enabled}"></input>
+            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" ?checked="${enabled}" @change="${this.toggle}"></input>
             <label class="onoffswitch-label" for="myonoffswitch">
                 <span class="onoffswitch-inner"></span>
                 <span class="onoffswitch-switch"></span>

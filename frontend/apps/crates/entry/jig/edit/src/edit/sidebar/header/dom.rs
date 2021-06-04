@@ -70,9 +70,7 @@ impl HeaderDom {
                 html!("input-text-pencil", {
                     .property("slot", "input")
                     .property("placeholder", STR_SEARCH_PLACEHOLDER)
-                    .property_signal("value", sidebar_state.name.signal_cloned().map(|value| {
-                        value.unwrap_or(String::new())
-                    }))
+                    .property_signal("value", sidebar_state.name.signal_cloned())
                     .event(clone!(sidebar_state => move |e: events::CustomInput| {
                         let value = e.value();
                         sidebar_actions::update_display_name(sidebar_state.clone(), value);

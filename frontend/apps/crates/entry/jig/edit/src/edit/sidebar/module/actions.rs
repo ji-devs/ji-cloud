@@ -87,8 +87,8 @@ pub fn add_empty_module_after(state:Rc<State>) {
                 let index = state.index+1;
                 state.sidebar.modules.lock_mut().insert_cloned(index, Rc::new(Module::new(id)));
                 let req = ModuleUpdateRequest {
-                    body: None,
                     index: Some(index.try_into().unwrap_ji()),
+                    ..Default::default()
                 };
 
                 match update_module(&state.sidebar.jig.id, &id, req).await {
@@ -123,8 +123,8 @@ pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
         } {
             state.sidebar.modules.lock_mut().move_from_to(state.index, target);
             let req = ModuleUpdateRequest {
-                body: None,
                 index: Some(target.try_into().unwrap_ji()),
+                ..Default::default()
             };
 
             match update_module(&state.sidebar.jig.id, &state.module.id, req).await {

@@ -75,7 +75,7 @@ async fn load_categories() -> Result<Vec<Category>, EmptyError> {
 }
 
 pub fn save_jig(state: Rc<State>) {
-    if state.jig.display_name.lock_ref().is_none() {
+    if state.jig.display_name.lock_ref().is_empty() {
         state.submission_tried.set(true);
         return;
     };

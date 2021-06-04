@@ -21,7 +21,7 @@ use chrono::{DateTime, Utc};
 pub struct State {
     pub jig: Jig,
     pub module_id: Mutable<Option<ModuleId>>,
-    pub name: Mutable<Option<String>>,
+    pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Module>>,
     pub collapsed: Mutable<bool>,

@@ -17,10 +17,7 @@ use super::{
     state::*
 };
 use std::rc::Rc;
-use components::tooltip::{
-    dom::TooltipDom,
-    types::{TooltipData, TooltipError, MoveStrategy, Placement},
-};
+use components::tooltip::{callbacks::TooltipErrorCallbacks, dom::render as TooltipDom, state::{Placement, State as TooltipState, TooltipData, MoveStrategy, TooltipError, TooltipTarget}};
 
 const STR_PUBLISH_JIG: &'static str = "Publish JIG";
 const STR_PUBLIC_LABEL: &'static str = "My JIG is public";
@@ -55,14 +52,15 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-switch", {
                 .property("slot", "public")
                 .property("label", STR_PUBLIC_LABEL)
+                .event(clone!(state => move |evt: events::CustomToggle| {
+                    let value = evt.value();
+                    state.jig.is_public.set(value);
+                }))
             }),
             html!("input-text", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)
-                .property_signal("value", state.jig.display_name.signal_cloned().map(|v| match v {
-                    Some(v) => v,
-                    None => String::new(),
-                }))
+                .property_signal("value", state.jig.display_name.signal_cloned())
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -70,7 +68,7 @@ fn render_page(state: Rc<State>) -> Dom {
                             => (*submission_tried, value.clone())
                     })
                         .map(|(submission_tried, value)| {
-                            if submission_tried && value.is_none() {
+                            if submission_tried && value.is_empty() {
                                 String::from(" ")
                             } else {
                                 String::new()
@@ -79,18 +77,20 @@ fn render_page(state: Rc<State>) -> Dom {
                 })
                 .event(clone!(state => move |evt: events::CustomChange| {
                     let value = evt.value();
-                    let value = if value.is_empty() {
-                        None
-                    } else {
-                        Some(value)
-                    };
                     state.jig.display_name.set(value);
                 }))
             }),
             html!("input-form-textarea", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
-                .property("value", "This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.")
+                .property_signal("value", state.jig.description.signal_cloned().map(|v| match v {
+                    Some(v) => v,
+                    None => String::new(),
+                }))
+                .event(clone!(state => move |evt: events::CustomChange| {
+                    let value = evt.value();
+                    state.jig.description.set(Some(value));
+                }))
             }),
 
             AgeRender(state.clone()),
@@ -111,15 +111,17 @@ fn render_page(state: Rc<State>) -> Dom {
                     }))
                     .child_signal(state.submission_tried.signal().map(clone!(elem => move |submission_tried| {
                         if submission_tried {
-                            Some(TooltipDom::render(TooltipData::Error(TooltipError {
-                                elem: elem.clone(),
+                            let data = TooltipData::Error(Rc::new(TooltipError {
                                 placement: Placement::Bottom,
                                 slot: None,
                                 body: String::from(STR_MISSING_INFO_TOOLTIP),
                                 max_width: None,
-                                on_close: None,
-                                move_strategy: MoveStrategy::Track,
-                            })))
+                                callbacks: TooltipErrorCallbacks::new(Some(||{}))
+                            }));
+
+                            let target = TooltipTarget::Element(elem.clone(), MoveStrategy::Track);
+
+                            Some(TooltipDom(Rc::new(TooltipState::new(target, data))))
                         } else {
                             None
                         }
