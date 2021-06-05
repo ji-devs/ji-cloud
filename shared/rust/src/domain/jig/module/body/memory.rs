@@ -5,7 +5,6 @@ use crate::{
             ModuleKind,
         },
     },
-    media::MediaLibrary,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;

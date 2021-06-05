@@ -56,7 +56,6 @@ returning id as "id: ImageId"
 
 pub mod tag {
     use crate::error;
-    use futures::stream::BoxStream;
     use paperclip::actix::NoContent;
     use shared::domain::{image::tag::ImageTagResponse, meta::TagId};
     use sqlx::postgres::PgDatabaseError;

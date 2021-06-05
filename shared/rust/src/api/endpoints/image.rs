@@ -85,8 +85,6 @@ pub mod tag {
                 ImageTagCreateRequest, ImageTagListResponse, ImageTagResponse,
                 ImageTagUpdateRequest,
             },
-            meta::TagId,
-            CreateResponse,
         },
         error::EmptyError,
     };

@@ -49,7 +49,7 @@ pub mod user {
 
 /// Types to manage image tags.
 pub mod tag {
-    use crate::domain::meta::{Tag, TagId};
+    use crate::domain::meta::TagId;
     #[cfg(feature = "backend")]
     use paperclip::actix::Apiv2Schema;
     use serde::{Deserialize, Serialize};
