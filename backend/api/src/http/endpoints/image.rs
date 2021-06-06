@@ -158,6 +158,168 @@ pub mod user {
     }
 }
 
+/// Manage image tags
+pub mod tag {
+    use crate::{
+        db, error,
+        extractor::{ScopeAdmin, TokenUserWithScope},
+    };
+    use paperclip::actix::web::Path;
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Data, Json},
+        CreatedJson, NoContent,
+    };
+    use shared::domain::image::tag::ImageTagResponse;
+    use shared::{
+        api::{endpoints, ApiEndpoint},
+        domain::image::tag::ImageTagListResponse,
+    };
+    use sqlx::PgPool;
+
+    #[api_v2_operation]
+    pub(super) async fn list(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+    ) -> Result<Json<<endpoints::image::tag::List as ApiEndpoint>::Res>, error::NotFound> {
+        log::info!("reached List");
+
+        let image_tags = db::image::tag::list(db.as_ref()).await?;
+
+        Ok(Json(ImageTagListResponse { image_tags }))
+    }
+
+    #[api_v2_operation]
+    pub(super) async fn create(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        index: Path<i16>,
+        req: Json<<endpoints::image::tag::Create as ApiEndpoint>::Req>,
+    ) -> Result<CreatedJson<<endpoints::image::tag::Create as ApiEndpoint>::Res>, error::Tag> {
+        let res =
+            db::image::tag::create(db.as_ref(), index.into_inner(), req.display_name.as_str())
+                .await?;
+
+        Ok(CreatedJson(ImageTagResponse {
+            index: res.0,
+            display_name: res.1,
+            id: res.2,
+        }))
+    }
+
+    #[api_v2_operation]
+    pub(super) async fn update(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        index: Path<i16>,
+        req: Json<<endpoints::image::tag::Update as ApiEndpoint>::Req>,
+    ) -> Result<NoContent, error::Tag> {
+        let req = req.into_inner();
+
+        let _resp = db::image::tag::update(
+            db.as_ref(),
+            index.into_inner(),
+            req.display_name.as_deref(),
+            req.index,
+        )
+        .await?;
+
+        Ok(NoContent)
+    }
+
+    #[api_v2_operation]
+    pub(super) async fn delete(
+        db: Data<PgPool>,
+        _claims: TokenUserWithScope<ScopeAdmin>,
+        req: Path<i16>,
+    ) -> Result<NoContent, error::Tag> {
+        db::image::tag::delete(db.as_ref(), req.into_inner()).await?;
+
+        Ok(NoContent)
+    }
+}
+
+pub mod recent {
+    use crate::{db, error, extractor::TokenUser};
+    use chrono::{DateTime, Utc};
+    use paperclip::actix::{
+        api_v2_operation,
+        web::{Data, Json, Path, Query},
+        CreatedJson, NoContent,
+    };
+    use shared::{
+        api::{endpoints::image::recent, ApiEndpoint},
+        domain::image::{
+            recent::{UserRecentImageListResponse, UserRecentImageResponse},
+            ImageId,
+        },
+        media::MediaLibrary,
+    };
+    use sqlx::PgPool;
+
+    #[api_v2_operation]
+    pub(in super::super) async fn create(
+        db: Data<PgPool>,
+        claims: TokenUser,
+        req: Json<<recent::Create as ApiEndpoint>::Req>,
+    ) -> Result<CreatedJson<UserRecentImageResponse>, error::UserRecentImage> {
+        let req = req.into_inner();
+
+        let (id, library, last_used): (ImageId, MediaLibrary, DateTime<Utc>) =
+            db::image::recent::create(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
+
+        Ok(CreatedJson(UserRecentImageResponse {
+            id,
+            library,
+            last_used,
+        }))
+    }
+
+    #[api_v2_operation]
+    pub(in super::super) async fn update(
+        db: Data<PgPool>,
+        claims: TokenUser,
+        req: Path<ImageId>,
+    ) -> Result<NoContent, error::UserRecentImage> {
+        db::image::recent::update(db.as_ref(), claims.0.user_id, req.into_inner()).await?;
+
+        Ok(NoContent)
+    }
+
+    #[api_v2_operation]
+    pub(in super::super) async fn delete(
+        db: Data<PgPool>,
+        claims: TokenUser,
+        req: Path<ImageId>,
+    ) -> Result<NoContent, error::UserRecentImage> {
+        db::image::recent::delete(db.as_ref(), claims.0.user_id, req.into_inner()).await?;
+
+        Ok(NoContent)
+    }
+
+    #[api_v2_operation]
+    pub(in super::super) async fn list(
+        db: Data<PgPool>,
+        claims: TokenUser,
+        req: Option<Query<<recent::List as ApiEndpoint>::Req>>,
+    ) -> Result<Json<<recent::List as ApiEndpoint>::Res>, error::UserRecentImage> {
+        // Handle optional limit here.
+        // `None` becomes `limit null` in postgres query. This means no limit.
+        let limit = match req {
+            None => None,
+            Some(query) => {
+                let limit = query.into_inner().limit;
+                Some(limit as i64)
+            }
+        };
+
+        let images: Vec<UserRecentImageResponse> =
+            db::image::recent::list(db.as_ref(), claims.0.user_id, limit).await?;
+
+        Ok(Json(UserRecentImageListResponse { images }))
+    }
+}
+
 /// Create an image in the global image library.
 #[api_v2_operation]
 async fn create(
@@ -449,5 +611,43 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::user::List::PATH,
         image::user::List::METHOD.route().to(self::user::list),
+    )
+    .route(
+        image::tag::Create::PATH,
+        image::tag::Create::METHOD.route().to(self::tag::create),
+    )
+    .route(
+        image::tag::Update::PATH,
+        image::tag::Update::METHOD.route().to(self::tag::update),
+    )
+    .route(
+        image::tag::Delete::PATH,
+        image::tag::Delete::METHOD.route().to(self::tag::delete),
+    )
+    .route(
+        image::tag::List::PATH,
+        image::tag::List::METHOD.route().to(self::tag::list),
+    )
+    .route(
+        image::recent::Create::PATH,
+        image::recent::Create::METHOD
+            .route()
+            .to(self::recent::create),
+    )
+    .route(
+        image::recent::List::PATH,
+        image::recent::List::METHOD.route().to(self::recent::list),
+    )
+    .route(
+        image::recent::Update::PATH,
+        image::recent::Update::METHOD
+            .route()
+            .to(self::recent::update),
+    )
+    .route(
+        image::recent::Delete::PATH,
+        image::recent::Delete::METHOD
+            .route()
+            .to(self::recent::delete),
     );
 }

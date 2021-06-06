@@ -26,16 +26,10 @@ pub async fn update_jig(jig_id: &JigId, req: JigUpdateRequest) -> Result<(), Emp
 
 pub fn update_display_name(state: Rc<State>, value: String) {
     state.loader.load(clone!(state => async move {
-        let value = if value.is_empty() {
-            None
-        } else {
-            Some(value)
-        };
-
         state.name.set(value.clone());
 
         let req = JigUpdateRequest {
-            display_name: value,
+            display_name: Some(value),
             ..JigUpdateRequest::default()
         };
 

@@ -88,7 +88,7 @@ impl GalleryDom {
                     .property("slot", "recent-items")
                     .property("href", jig.id.0.to_string())
                     .property("draft", "")
-                    .property("label", jig.display_name.clone().unwrap_or_default())
+                    .property("label", jig.display_name.clone())
                     .property("img", "mock/resized/jig-gallery.jpg")
                     .property("ages", "5-8")
                     .property("lastedited", "3 W ago")

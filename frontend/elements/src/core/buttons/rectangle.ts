@@ -57,6 +57,10 @@ export class _ extends BaseButton {
           color: white;
       }
       
+      button {
+        height: inherit;
+        width: inherit;
+      }
       button:disabled{
         background: #a9b1b5;
         color: #e7edf0

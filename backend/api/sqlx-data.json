@@ -104,6 +104,19 @@
       ]
     }
   },
+  "07c23d4be4038602fadd286c040a438b0366a8308e634d0ef4f5325c7b07b225": {
+    "query": "\n            update image_tag set index = $2 where index = $1\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "07cf047f5e186c7593d52a658a6451521df4ac14b945c6a99b48f01c4db84cbb": {
     "query": "\nselect id                                                                 as \"id: CategoryId\",\n       name,\n       created_at,\n       updated_at,\n       (select count(*)::int8 from image_category where category_id = id) as \"image_count!\",\n       (select count(*)::int8 from jig_category where category_id = id) as \"jig_count!\"\n\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
     "describe": {
@@ -527,6 +540,26 @@
       ]
     }
   },
+  "1920891993d8927a88d3fc291f1b99e47d8826748b92810b34f1f637f07726ad": {
+    "query": "select index as \"index: i16\" from image_tag where index = $1 for update",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index: i16",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
     "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)",
     "describe": {
@@ -534,6 +567,19 @@
       "parameters": {
         "Left": [
           "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1a8b1e8b534e0c03972838146a54d715f11f647be57465718d61defdd7af242d": {
+    "query": "update image_tag set display_name = $2 where index = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2",
           "Text"
         ]
       },
@@ -608,6 +654,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "1e615fdd598c2e33192d23e3320cf6985e3d9a43ec58fbef8c24f92c79a66717": {
+    "query": "\nupdate user_recent_image\nset last_used = now()\nwhere user_id = $1 and image_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3": {
@@ -1125,6 +1184,19 @@
       "nullable": []
     }
   },
+  "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
+    "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "4878ce8469a9ea044ceb5804770c99b8d587b7589e7d8d679cc0a5b19c103d0b": {
     "query": "\ninsert into jig_module (jig_id, kind, contents, index)\nvalues ($1, $2, $3, (select count(*) from jig_module where jig_id = $1))\nreturning id, \"index\"\n",
     "describe": {
@@ -1440,6 +1512,39 @@
       ]
     }
   },
+  "63282a245bbfff4db34ea00a9f53cf8f6cbbd26ff4106d3b53f3edf3e48197d0": {
+    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "library: MediaLibrary",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "last_used: DateTime<Utc>",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "63a9ba01a124f3d9755abb0c3649bc0224d1ac27f4fe3fb52399cde83d266fd0": {
     "query": "\n            select subject_id as \"id: SubjectId\", display_name, created_at, updated_at from subject\n            order by index\n        ",
     "describe": {
@@ -1681,6 +1786,40 @@
       "nullable": []
     }
   },
+  "6f2efac54ea432d33d9d1a74ef07c9fb09eb8082a80cf4d36784f480b7eb8bb9": {
+    "query": "\ninsert into user_recent_image (user_id, image_id, media_library)\nvalues ($1, $2, $3)\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", last_used as \"last_used: DateTime<Utc>\";\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "library: MediaLibrary",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "last_used: DateTime<Utc>",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "6f88dced30ef38b92e48c5b78cda75cfc877dff08195c25609ad0f19ddff49cc": {
     "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, kind) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
     "describe": {
@@ -1810,6 +1949,36 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "7f13eff963b91007e55a4a80fc4e32b866781dab9548bb01db0d20a12cb664ed": {
+    "query": "\nselect id as \"id: TagId\", display_name, index from \"image_tag\"\norder by index\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: TagId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
         false
       ]
     }
@@ -2404,42 +2573,6 @@
       ]
     }
   },
-  "9454c3cafc861aecd11f2540d4801126fc5feb54291b3d37b7c98080ad449ecb": {
-    "query": "\n        select id as \"id: TagId\", display_name, created_at, updated_at from \"image_tag\"\n        order by index\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: TagId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
     "query": "select user_id from user_auth_basic where user_id <> $1 and email = $2 for update",
     "describe": {
@@ -2576,6 +2709,27 @@
       "nullable": []
     }
   },
+  "a927e1b316983d98397a454a3198b08fcd37cb54056c0a5e57c18bbfcaa0985c": {
+    "query": "\nselect exists(select 1 from user_recent_image where user_id = $1 and image_id = $2) as \"exists!\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "a9780ea48594dbed705b4df8442e7c58416785833da7e04ef32aa8a3bfcd0e21": {
     "query": "delete from user_auth_basic where user_id = $1",
     "describe": {
@@ -2583,6 +2737,18 @@
       "parameters": {
         "Left": [
           "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
+    "query": "\ndelete from image_tag where index = $1\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int2"
         ]
       },
       "nullable": []
@@ -3210,6 +3376,48 @@
       "nullable": []
     }
   },
+  "d24c286c6094e2009d400e4f366ffb3ba255c34bf4848598a30a63c2f1106889": {
+    "query": "\n        select id as \"id: TagId\", display_name, created_at, updated_at, index from \"image_tag\"\n        order by index\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: TagId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "index",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false
+      ]
+    }
+  },
   "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
     "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    ",
     "describe": {
@@ -3670,6 +3878,39 @@
         true,
         null,
         null
+      ]
+    }
+  },
+  "f952ba3dea24e228c56c46db14e1db511e5325d96026dfe1ba8cd06cb2864e62": {
+    "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning id as \"id: TagId\", index as \"index: i16\", display_name\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: TagId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "index: i16",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "display_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
       ]
     }
   },

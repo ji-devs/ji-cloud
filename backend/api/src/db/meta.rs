@@ -85,7 +85,7 @@ pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<Tag>> {
     sqlx::query_as!(
         Tag,
         r#"
-        select id as "id: TagId", display_name, created_at, updated_at from "image_tag"
+        select id as "id: TagId", display_name, created_at, updated_at, index from "image_tag"
         order by index
     "#
     )

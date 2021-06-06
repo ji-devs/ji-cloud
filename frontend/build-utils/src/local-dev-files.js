@@ -11,6 +11,7 @@ const {APP_NAME, DEV_AUTH, API_TOKEN, API_CSRF} = process.env;
 const ALLOWED_APP_NAMES = [
 	"user",
 	"admin",
+	"home",
 	"jig/edit",
 	"jig/play",
 	"legacy/play",

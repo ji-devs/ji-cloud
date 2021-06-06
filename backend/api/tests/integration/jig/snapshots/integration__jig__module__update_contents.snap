@@ -8,13 +8,7 @@ expression: body
     "id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
     "body": {
       "memoryGame": {
-        "instructions": {
-          "text": null,
-          "audio": null
-        },
-        "mode": null,
-        "pairs": [],
-        "theme_id": "None"
+        "content": null
       }
     },
     "is_complete": true
