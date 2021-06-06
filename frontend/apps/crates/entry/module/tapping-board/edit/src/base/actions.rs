@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
@@ -30,10 +30,28 @@ use components::{
     text_editor::state::State as TextEditorState,
 };
 
-pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, mode:Mode, history: Rc<HistoryStateImpl<RawData>>) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
+pub async fn init_from_raw(
+    jig_id: JigId,
+    module_id: ModuleId,
+    jig: Option<Jig>,
+    raw:RawData, 
+    init_source: InitSource, 
+    current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
+    history: Rc<HistoryStateImpl<RawData>>
+) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
-    let step = Mutable::new(Step::default());
-    let base = Base::new(jig_id, module_id, jig, false, history, step.read_only(), None).await;
+    let step = Mutable::new({
+        let mut step = Step::default();
+        if init_source == InitSource::ForceRaw { 
+            if let Some(debug_step) = crate::debug::settings().step {
+                step = debug_step;
+            } 
+        }
+
+        step
+    });
+
+    let base = Base::new(jig_id, module_id, jig, raw, step.read_only(), history).await;
     
     StepsInit {
         step,
@@ -46,55 +64,8 @@ pub async fn init_from_mode(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>
     }
 }
 
-pub async fn init_from_raw(
-    jig_id: JigId,
-    module_id: ModuleId,
-    jig: Option<Jig>,
-    raw:RawData, 
-    is_history: bool, 
-    current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
-    history: Rc<HistoryStateImpl<RawData>>
-) -> Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
-    match raw.content {
-        None => None,
-        Some(content) => { 
-            //TODO - create from raw
-            let step = Mutable::new(Step::default());
-            let base = Base::new(jig_id, module_id, jig, is_history, history, step.read_only(), Some(&content)).await;
-            
-            let mut init = StepsInit {
-                step,
-                base: base.clone(),
-                main: Rc::new(Main::new(base.clone())),
-                sidebar: Rc::new(Sidebar::new(base.clone())),
-                header: Rc::new(Header::new(base.clone())),
-                footer: Rc::new(Footer::new(base.clone())),
-                overlay: Rc::new(Overlay::new(base.clone())),
-            };
-
-            if !is_history {
-                if let Some(step) = crate::debug::settings().step {
-                    init.step.set_neq(step);
-                }
-            }
-
-            Some(init)
-        }
-    }
-}
 
 impl Base {
-
-    pub fn change_theme(&self, theme: ThemeChoice) {
-        self.theme.set_neq(theme);
-
-        self.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.theme = theme;
-            }
-        });
-    }
-
     /*
      * The traces themselves are managed by the component
      * Callbacks here are fired from there and need only to manage

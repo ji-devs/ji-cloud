@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use super::steps::{
     actions::{init_from_mode, init_from_raw},
     state::{Base,Step},

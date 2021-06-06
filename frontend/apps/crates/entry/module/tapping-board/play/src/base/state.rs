@@ -1,5 +1,5 @@
 use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::tapping_board::{Mode as RawMode, ModuleData as RawData}}};
-use components::module::play::state::BaseExt;
+use components::module::play::prelude::*;
 use utils::prelude::*;
 
 pub struct Base {
@@ -10,8 +10,7 @@ pub struct Base {
 }
 
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, ) -> Self {
-
+    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, init_source: InitSource) -> Self {
         Self {
             jig_id,
             module_id,

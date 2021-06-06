@@ -8,6 +8,7 @@ use futures_signals::{
 use std::{marker::PhantomData, rc::Rc};
 use std::future::Future;
 use super::super::{
+    state::*,
     steps::state::*,
     state::{Phase, GenericState},
     actions::*,
@@ -39,14 +40,15 @@ where
 }
 
 
+
 impl <Mode, RawMode> Choose <Mode, RawMode> 
 where
     Mode: ModeExt<RawMode> + 'static,
     RawMode: 'static
 {
-    pub fn new<Step, RawData, InitFromModeFn, InitFromModeOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
+    pub fn new<Step, RawData, InitFromRawFn, InitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
         app: Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>, 
-        init_from_mode: InitFromModeFn,
+        init_from_raw: InitFromRawFn,
     ) -> Self 
     where
         Mode: ModeExt<RawMode> + 'static,
@@ -58,8 +60,8 @@ where
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
-        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 
     {
 
@@ -68,21 +70,23 @@ where
         Self {
             loader: loader.clone(),
             on_mode_change: Box::new(move |mode| {
-                loader.load(clone!(init_from_mode, app => async move {
+                loader.load(clone!(init_from_raw, app => async move {
 
                     let (jig_id, module_id, jig) = (
                         app.opts.jig_id.clone(),
                         app.opts.module_id.clone(),
                         app.jig.borrow().clone()
                     );
-
+                    
+                    let raw = RawData::new_mode(mode.to_raw());
                     let history = app.history.borrow().as_ref().unwrap_ji().clone();
-                    history.push_modify(|raw| {
-                        *raw = RawData::new_mode(mode.to_raw());
-                    });
+                    history.push_modify(clone!(raw => |init| {
+                        *init = raw;
+                    }));
 
-                    let steps_init = init_from_mode(jig_id, module_id, jig, mode, history).await;
+                    let steps_init = init_from_raw(jig_id, module_id, jig, raw, InitSource::ChooseMode, None,history).await;
                     GenericState::change_phase_steps(app.clone(), steps_init);
+
                 }))
             }),
             phantom: PhantomData

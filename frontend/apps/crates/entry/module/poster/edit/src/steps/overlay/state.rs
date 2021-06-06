@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use super::super::state::Base;
 use std::rc::Rc;
 

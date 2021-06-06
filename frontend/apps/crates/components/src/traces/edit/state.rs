@@ -52,7 +52,7 @@ impl Edit {
             .collect()
     }
 
-    pub fn new(raw:Option<&[RawTrace]>, debug_opts:Option<DebugOptions>, callbacks: Callbacks) -> Rc<Self> {
+    pub fn from_raw(raw:&[RawTrace], debug_opts:Option<DebugOptions>, callbacks: Callbacks) -> Rc<Self> {
 
         let debug_opts = debug_opts.unwrap_or_default();
 
@@ -64,7 +64,7 @@ impl Edit {
         });
 
 
-        if let Some(raw) = raw {
+        if raw.len() > 0 {
             let resize_info = get_resize_info();
             _self.list.lock_mut().replace_cloned( 
                         raw.

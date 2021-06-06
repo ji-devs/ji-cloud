@@ -113,7 +113,13 @@ impl <RawData> StateOpts<RawData> {
  * and then pass it down here
  */
 
-pub type IsHistory = bool;
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum InitSource {
+    ForceRaw,
+    Load,
+    History,
+    ChooseMode,
+}
 
 impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
@@ -128,16 +134,13 @@ where
     RawData: BodyExt<RawMode> + 'static, 
     RawMode: 'static, 
 {
-    pub fn new<InitFromModeFn, InitFromModeOutput, InitFromRawFn, InitFromRawOutput>(
+    pub fn new<InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
-        init_from_mode: InitFromModeFn,
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
-        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
 
@@ -178,9 +181,10 @@ where
                 };
             }
 
-            let raw = {
+
+            let (raw, init_source) = {
                 if let Some(force_raw) = _self.opts.force_raw.clone() {
-                    force_raw
+                    (force_raw, InitSource::ForceRaw)
                 } else {
                     let path = Get::PATH
                         .replace("{id}",&_self.opts.jig_id.0.to_string())
@@ -189,7 +193,7 @@ where
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
                             let body = resp.module.body.unwrap_ji();
-                            body.try_into().unwrap_ji()
+                            (body.try_into().unwrap_ji(), InitSource::Load)
                         },
                         Err(_) => {
                             panic!("error loading module!")
@@ -206,7 +210,7 @@ where
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
                 ),
-                Self::reset_from_history(_self.clone(), init_from_raw.clone(), init_from_mode.clone())
+                Self::reset_from_history(_self.clone(), init_from_raw.clone())
             ));
 
             *_self.history.borrow_mut() = Some(history.clone());
@@ -217,10 +221,11 @@ where
                 _self.jig.borrow().clone()
             );
 
-            if let Some(base) = init_from_raw(jig_id, module_id, jig, raw, false, None, history.clone()).await {
-                Self::change_phase_steps(_self.clone(), base);
+            if raw.requires_choose_mode() {
+                Self::change_phase_choose(_self.clone(), init_from_raw);
             } else {
-                Self::change_phase_choose(_self.clone(), init_from_mode);
+                let steps_init = init_from_raw(jig_id, module_id, jig, raw, init_source, None, history.clone()).await;
+                Self::change_phase_steps(_self.clone(), steps_init);
             }
 
             _self.raw_loaded.set_neq(true);

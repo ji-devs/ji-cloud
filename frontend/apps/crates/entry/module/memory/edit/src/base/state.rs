@@ -1,7 +1,7 @@
 mod card;
 pub use card::*;
 
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
 use shared::domain::jig::{
@@ -51,11 +51,6 @@ pub struct Base {
     pub pairs: MutableVec<(Card, Card)>,
 }
 
-pub enum ModeOrRaw {
-    Mode(Mode),
-    Raw(RawContent)
-}
-
 pub struct Tooltips {
     pub delete: Mutable<Option<Rc<TooltipState>>>,
     pub list_error: Mutable<Option<Rc<TooltipState>>>
@@ -69,32 +64,27 @@ impl Tooltips {
     }
 }
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, mode_or_raw: ModeOrRaw) -> Rc<Self> {
+    pub async fn new(
+        jig_id: JigId,
+        module_id: ModuleId,
+        jig: Option<Jig>,
+        raw:RawData, 
+        step: ReadOnlyMutable<Step>,
+        history: Rc<HistoryStateImpl<RawData>>
+    ) -> Rc<Self> {
 
-        let (theme, mode, instructions, pairs) = match mode_or_raw {
-            ModeOrRaw::Mode(mode) => {
-                (
-                    ThemeChoice::Jig, 
-                    mode, 
-                    Instructions::default(),
-                    Vec::new()
-                )
-            },
-            ModeOrRaw::Raw(raw) => {
-                let pairs:Vec<(Card, Card)> = raw.pairs
-                    .iter()
-                    .map(|pair| {
-                        (pair.0.clone().into(), pair.1.clone().into())
-                    })
-                    .collect();
-                (
-                    raw.theme, 
-                    raw.mode.into(), 
-                    raw.instructions,
-                    pairs
-                )
-            }
-        };
+        let content = raw.content.unwrap_ji();
+
+        let pairs:Vec<(Card, Card)> = content.pairs
+            .iter()
+            .map(|pair| {
+                (pair.0.clone().into(), pair.1.clone().into())
+            })
+            .collect();
+
+        let theme = Mutable::new(content.theme);
+        let mode = content.mode.into();
+        let instructions = Mutable::new(content.instructions);
 
         let _self = Rc::new(Self {
             jig_id,
@@ -102,8 +92,8 @@ impl Base {
             jig,
             history,
             step,
-            theme: Mutable::new(theme),
-            instructions: Mutable::new(instructions),
+            theme,
+            instructions,
             audio_ctx: AudioContext::new().unwrap_ji(),
             mode,
             tooltips: Tooltips::new(),

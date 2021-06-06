@@ -31,14 +31,14 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn change_phase_choose<InitFromModeFn, InitFromModeOutput>(_self: Rc<Self>, init_from_mode: InitFromModeFn) 
+    pub fn change_phase_choose<InitFromRawFn, InitFromRawOutput>(_self: Rc<Self>, init_from_raw: InitFromRawFn) 
     where
-        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
-        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
             _self.clone(),
-            init_from_mode,
+            init_from_raw,
         )))));
     }
     pub fn change_phase_steps(_self: Rc<Self>, steps_init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>) -> Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
@@ -52,16 +52,13 @@ where
         steps
     }
 
-    pub fn reset_from_history<InitFromRawFn, InitFromRawOutput, InitFromModeFn, InitFromModeOutput>(
+    pub fn reset_from_history<InitFromRawFn, InitFromRawOutput>(
         _self: Rc<Self>,
         init_from_raw: InitFromRawFn,
-        init_from_mode: InitFromModeFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, IsHistory, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = Option<StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
-        InitFromModeFn: Fn(JigId, ModuleId, Option<Jig>, Mode, Rc<HistoryStateImpl<RawData>>) -> InitFromModeOutput + Clone + 'static,
-        InitFromModeOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
             let curr_steps = match &*_self.phase.get_cloned() {
@@ -77,21 +74,23 @@ where
                 (curr.step.get_cloned(), curr.steps_completed.get_cloned())
             });
 
-            _self.reset_from_history_loader.load(clone!(_self, init_from_raw, init_from_mode => async move {
+            _self.reset_from_history_loader.load(clone!(_self, init_from_raw => async move {
 
                 let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
                     _self.jig.borrow().clone()
                 );
-                if let Some(steps) = init_from_raw(jig_id, module_id, jig, raw, true, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await {
-                    let steps = Self::change_phase_steps(_self.clone(), steps);
+
+                if raw.requires_choose_mode() {
+                    Self::change_phase_choose(_self.clone(), init_from_raw.clone());
+                } else {
+                    let steps_init = init_from_raw(jig_id, module_id, jig, raw, InitSource::History, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
+                    let steps = Self::change_phase_steps(_self.clone(), steps_init);
                     if let Some((step, steps_completed)) = preserve_steps {
                         steps.step.set_neq(step);
                         steps.steps_completed.set(steps_completed);
                     }
-                } else {
-                    Self::change_phase_choose(_self.clone(), init_from_mode.clone());
                 }
             }));
         })

@@ -72,7 +72,7 @@ impl Stickers {
             .collect()
     }
 
-    pub fn new(raw:Option<&[RawSticker]>, text_editor: Rc<TextEditorState>, callbacks: Callbacks) -> Rc<Self> {
+    pub fn from_raw(raw:&[RawSticker], text_editor: Rc<TextEditorState>, callbacks: Callbacks) -> Rc<Self> {
   
         let _self = Rc::new(Self{
             text_editor: text_editor.clone(),
@@ -83,7 +83,7 @@ impl Stickers {
 
 
 
-        if let Some(raw) = raw {
+        if raw.len() > 0 {
             _self.list.lock_mut().replace_cloned( 
                         raw.
                             into_iter()

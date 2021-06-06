@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
 use shared::domain::jig::{
@@ -76,8 +76,7 @@ pub struct PlaySettings {
 }
 
 impl PlaySettings {
-    pub fn new(raw:Option<RawPlaySettings>) -> Self {
-        let settings = raw.unwrap_or_default();
+    pub fn new(settings:RawPlaySettings) -> Self {
 
         Self {
             hint: Mutable::new(settings.hint),
@@ -111,26 +110,36 @@ impl TraceMeta {
 }
 
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Rc<Self> {
+
+    pub async fn new(
+        jig_id: JigId,
+        module_id: ModuleId,
+        jig: Option<Jig>,
+        raw:RawData, 
+        step: ReadOnlyMutable<Step>,
+        history: Rc<HistoryStateImpl<RawData>>
+    ) -> Rc<Self> {
+
+        let content = raw.content.unwrap_ji();
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
-        let theme = match raw {
-            None => ThemeChoice::Jig,
-            Some(raw) => raw.theme
-        };
+        let theme = Mutable::new(content.theme);
+        let instructions = Mutable::new(content.instructions);
       
-        let theme_id = match theme {
-            ThemeChoice::Jig => {
-                // jig.as_ref().unwrap_ji().theme_id.clone()
-                unimplemented!("waiting on jig settings")
-            },
-            ThemeChoice::Override(theme_id) => theme_id
-        };
-       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
-        let text_editor = TextEditorState::new(theme_id, None, 
+        let text_editor = TextEditorState::new(
+
+            match content.theme {
+                ThemeChoice::Jig => {
+                    // self.jig.as_ref().unwrap_ji().theme_id.clone()
+                    log::warn!("waiting on jig settings");
+                    ThemeId::Chalkboard
+                },
+                ThemeChoice::Override(theme_id) => theme_id
+            },
+            None, 
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
@@ -153,8 +162,8 @@ impl Base {
         ));
 
 
-        let backgrounds = Rc::new(Backgrounds::new(
-                raw.map(|content| &content.backgrounds),
+        let backgrounds = Rc::new(Backgrounds::from_raw(
+                &content.backgrounds,
                 BackgroundsCallbacks::new(
                     Some(clone!(history => move |raw_bgs| {
                         history.push_modify(|raw| {
@@ -166,8 +175,8 @@ impl Base {
                 )
         ));
 
-        let stickers = Stickers::new(
-                raw.map(|content| content.stickers.as_ref()),
+        let stickers = Stickers::from_raw(
+                &content.stickers,
                 text_editor.clone(),
                 StickersCallbacks::new(
                     Some(clone!(history => move |raw_stickers| {
@@ -182,51 +191,45 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
-        let raw_traces:Option<Vec<RawTrace>> = 
-            raw.map(|content| {
-                    content.traces
-                        .iter()
-                        .map(|trace_meta| {
-                            trace_meta.trace.clone()
-                        })
-                        .collect()
-            });
 
+        let traces = TracesEdit::from_raw(
 
-        let traces = TracesEdit::new(
-                raw_traces.as_ref().map(|x| x.as_slice()),
-                crate::debug::settings().trace_opts.clone(),
-                TracesCallbacks::new(
-                    Some(clone!(_self_ref => move |raw_trace| {
-                        if let Some(_self) = _self_ref.borrow().as_ref() {
-                            _self.on_trace_added(raw_trace);
-                        }
-                    })),
-                    Some(clone!(_self_ref => move |index| {
-                        if let Some(_self) = _self_ref.borrow().as_ref() {
-                            _self.on_trace_deleted(index);
-                        }
-                    })),
-                    Some(clone!(_self_ref => move |index, raw_trace| {
-                        if let Some(_self) = _self_ref.borrow().as_ref() {
-                            _self.on_trace_changed(index, raw_trace);
-                        }
-                    })),
-                )
+            &content.traces
+                .iter()
+                .map(|trace_meta| {
+                    trace_meta.trace.clone()
+                })
+                .collect::<Vec<RawTrace>>(),
+            crate::debug::settings().trace_opts.clone(),
+            TracesCallbacks::new(
+                Some(clone!(_self_ref => move |raw_trace| {
+                    if let Some(_self) = _self_ref.borrow().as_ref() {
+                        _self.on_trace_added(raw_trace);
+                    }
+                })),
+                Some(clone!(_self_ref => move |index| {
+                    if let Some(_self) = _self_ref.borrow().as_ref() {
+                        _self.on_trace_deleted(index);
+                    }
+                })),
+                Some(clone!(_self_ref => move |index, raw_trace| {
+                    if let Some(_self) = _self_ref.borrow().as_ref() {
+                        _self.on_trace_changed(index, raw_trace);
+                    }
+                })),
+            )
         );
 
         let traces_meta = MutableVec::new_with_values(
-            raw.map(|content| {
-                    content.traces
-                        .iter()
-                        .map(|trace_meta| {
-                            TraceMeta::new(
-                                trace_meta.audio.clone(), 
-                                trace_meta.text.clone()
-                            )
-                        })
-                        .collect()
-            }).unwrap_or_default()
+            content.traces
+                .iter()
+                .map(|trace_meta| {
+                    TraceMeta::new(
+                        trace_meta.audio.clone(), 
+                        trace_meta.text.clone()
+                    )
+                })
+                .collect()
         );
 
         let _self = Rc::new(Self {
@@ -235,15 +238,15 @@ impl Base {
             jig,
             history,
             step,
-            theme: Mutable::new(theme),
-            instructions: Mutable::new(raw.map(|content| content.instructions.clone()).unwrap_or_default()),
+            theme,
+            instructions,
             text_editor,
             backgrounds,
             stickers,
             traces,
             traces_meta,
             audio_ctx: AudioContext::new().unwrap_ji(),
-            play_settings: Rc::new(PlaySettings::new(raw.map(|content| content.play_settings.clone())))
+            play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -255,10 +258,26 @@ impl Base {
         match self.theme.get_cloned() {
             ThemeChoice::Jig => {
                 // self.jig.as_ref().unwrap_ji().theme_id.clone()
-                unimplemented!("waiting on jig settings")
+                log::warn!("waiting on jig settings");
+                ThemeId::Chalkboard
             },
             ThemeChoice::Override(theme_id) => theme_id
         }
+    }
+    pub fn theme_id_signal(&self) -> impl Signal<Item = ThemeId> {
+        self.theme.signal_cloned()
+            .map(|theme| match theme {
+                ThemeChoice::Jig => {
+                    // self.jig.as_ref().unwrap_ji().theme_id.clone()
+                    log::warn!("waiting on jig settings");
+                    ThemeId::Chalkboard
+                },
+                ThemeChoice::Override(theme_id) => theme_id
+            })
+    }
+
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
+        self.theme_id_signal().map(|id| id.as_str_id())
     }
 
 }

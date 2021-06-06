@@ -19,7 +19,7 @@ use std::{
     cell::RefCell
 };
 use rand::prelude::*;
-use components::module::play::state::BaseExt;
+use components::module::play::prelude::*;
 use utils::prelude::*;
 use components::instructions::player::InstructionsPlayer;
 use web_sys::AudioContext;
@@ -49,7 +49,7 @@ pub enum FlipState {
     Two(usize, usize),
 }
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, ) -> Self {
+    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, init_source: InitSource) -> Self {
         log::info!("{:?}", raw);
 
         let audio_ctx = AudioContext::new().unwrap_ji();

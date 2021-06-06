@@ -1,6 +1,6 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use super::base::{
-    actions::{init_from_mode, init_from_raw},
+    actions::init_from_raw,
     state::{Base,Step},
     footer::state::Footer,
     header::state::Header,
@@ -25,8 +25,7 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
 
     AppState::new(
         opts,
-        init_from_mode, //create steps when mode selected
-        init_from_raw, //create steps when raw loaded or reset via history
+        init_from_raw, 
     )
 }
 

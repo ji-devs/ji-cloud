@@ -1,4 +1,4 @@
-use components::module::edit::DomRenderable;
+use components::module::edit::prelude::*;
 use dominator::{html, Dom, clone};
 use std::{rc::Rc, cell::RefCell};
 use components::{backgrounds, stickers, traces};

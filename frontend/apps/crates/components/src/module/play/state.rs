@@ -60,6 +60,11 @@ impl <RawData, Base> Phase <RawData, Base>
     }
 }
 
+pub enum InitSource {
+    ForceRaw,
+    Load,
+    IframeData
+}
 #[derive(Debug, Clone)]
 pub struct StateOpts<RawData> {
     pub jig_id: JigId,
@@ -94,7 +99,7 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Base>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -141,8 +146,8 @@ where
                     }
                 });
 
-            let raw = match raw {
-                Some(raw) => Some(raw),
+            let raw_source = match raw {
+                Some(raw) => Some((raw, InitSource::ForceRaw)),
                 None => {
                     if wait_iframe {
                         _self.phase.set(Rc::new(Phase::WaitingIframe(
@@ -154,7 +159,7 @@ where
                                         _self.opts.module_id.clone(),
                                         _self.jig.borrow().clone()
                                     );
-                                    let base = init_from_raw(jig_id, module_id, jig, raw).await;
+                                    let base = init_from_raw(jig_id, module_id, jig, raw, InitSource::IframeData).await;
 
                                     _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
                                 }));
@@ -170,7 +175,7 @@ where
                         match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                             Ok(resp) => {
                                 let body = resp.module.body.unwrap_ji();
-                                Some(body.try_into().unwrap_ji())
+                                Some((body.try_into().unwrap_ji(), InitSource::Load))
                             },
                             Err(_) => {
                                 panic!("error loading module!")
@@ -180,14 +185,14 @@ where
                 }
             };
 
-            if let Some(raw) = raw {
+            if let Some((raw, init_source)) = raw_source {
 
                 let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
                     _self.jig.borrow().clone()
                 );
-                let base = init_from_raw(jig_id, module_id, jig, raw).await;
+                let base = init_from_raw(jig_id, module_id, jig, raw, init_source).await;
 
                 _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
             }
@@ -196,3 +201,4 @@ where
         _self
     }
 }
+

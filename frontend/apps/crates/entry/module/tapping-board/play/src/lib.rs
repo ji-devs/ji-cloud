@@ -29,7 +29,7 @@ pub async fn main_js() {
 
     router::render(router.clone());
 
-    std::mem::forget(Box::new(router));
+    //std::mem::forget(Box::new(router));
 }
 
 

@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use crate::base::state::{Step, Base};
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;

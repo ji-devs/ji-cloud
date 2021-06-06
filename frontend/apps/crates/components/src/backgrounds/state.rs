@@ -16,22 +16,11 @@ pub struct Backgrounds
     pub(super) callbacks: Callbacks,
 }
 impl Backgrounds {
-    pub fn new(raw:Option<&RawBackgrounds>, callbacks: Callbacks) -> Self {
+    pub fn from_raw(raw:&RawBackgrounds, callbacks: Callbacks) -> Self {
    
-        let (layer_1, layer_2) = {
-            if let Some(raw) = raw {
-                (
-                    Mutable::new(raw.layer_1.clone()),
-                    Mutable::new(raw.layer_2.clone())
-                )
-            } else {
-                (Mutable::new(None), Mutable::new(None))
-            }
-        };
-
         Self {
-            layer_1,
-            layer_2,
+            layer_1: Mutable::new(raw.layer_1.clone()),
+            layer_2: Mutable::new(raw.layer_2.clone()),
             callbacks,
         }
     }

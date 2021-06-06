@@ -1,4 +1,4 @@
-use components::module::play::state::DomRenderable;
+use components::module::play::prelude::DomRenderable;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use super::state::*;

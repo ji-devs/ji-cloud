@@ -1,4 +1,4 @@
-use components::module::edit::*;
+use components::module::edit::prelude::*;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
