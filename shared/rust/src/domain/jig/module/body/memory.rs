@@ -1,10 +1,6 @@
-use crate::{
-    domain::{
-        jig::module::{
-            body::{Image, Body, BodyExt, Instructions, ThemeChoice},
-            ModuleKind,
-        },
-    },
+use crate::domain::jig::module::{
+    body::{Body, BodyExt, Image, Instructions, ThemeChoice},
+    ModuleKind,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -51,8 +47,12 @@ impl BodyExt<Mode> for ModuleData {
 
     fn new_mode(mode: Mode) -> Self {
         ModuleData {
-            content: Some(Content::default())
+            content: Some(Content::default()),
         }
+    }
+
+    fn requires_choose_mode(&self) -> bool {
+        self.content.is_none()
     }
 }
 

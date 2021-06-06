@@ -53,6 +53,9 @@ pub trait BodyExt<Mode>: TryFrom<Body> + Serialize + DeserializeOwned + Clone + 
     /// given a Mode, get a new Self
     /// will usually populate an inner .content
     fn new_mode(mode: Mode) -> Self;
+
+    /// requires an additional step of choosing the mode
+    fn requires_choose_mode(&self) -> bool;
 }
 
 impl Body {

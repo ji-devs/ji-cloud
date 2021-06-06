@@ -102,12 +102,12 @@ pub mod tag {
 /// Types for a user's recent images list. Can be from any ['MediaLibrary'](crate::media::MediaLibrary).
 /// Does not verify entries for validity/existence.
 pub mod recent {
+    use super::ImageId;
+    use crate::media::MediaLibrary;
+    use chrono::{DateTime, Utc};
     #[cfg(feature = "backend")]
     use paperclip::actix::Apiv2Schema;
     use serde::{Deserialize, Serialize};
-    use chrono::{DateTime, Utc};
-    use super::ImageId;
-    use crate::media::MediaLibrary;
 
     /// Over-the-wire representation of a single recent image.
     #[derive(Serialize, Deserialize, Debug)]

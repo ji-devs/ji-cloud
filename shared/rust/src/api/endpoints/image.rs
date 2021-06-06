@@ -80,11 +80,8 @@ pub mod tag {
     use super::super::ApiEndpoint;
     use crate::{
         api::Method,
-        domain::{
-            image::tag::{
-                ImageTagCreateRequest, ImageTagListResponse, ImageTagResponse,
-                ImageTagUpdateRequest,
-            },
+        domain::image::tag::{
+            ImageTagCreateRequest, ImageTagListResponse, ImageTagResponse, ImageTagUpdateRequest,
         },
         error::EmptyError,
     };
@@ -181,15 +178,9 @@ pub mod tag {
 pub mod recent {
     use crate::{
         api::{ApiEndpoint, Method},
-        domain::{
-            image::{
-                recent::{
-                    UserRecentImageListRequest,
-                    UserRecentImageListResponse,
-                    UserRecentImageCreateRequest,
-                    UserRecentImageResponse,
-                },
-            },
+        domain::image::recent::{
+            UserRecentImageCreateRequest, UserRecentImageListRequest, UserRecentImageListResponse,
+            UserRecentImageResponse,
         },
         error::EmptyError,
     };
