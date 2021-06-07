@@ -1,5 +1,5 @@
 ---
-source: tests/integration/image.rs
+source: tests/integration/image/tag.rs
 expression: body
 
 ---

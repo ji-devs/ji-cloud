@@ -1,5 +1,9 @@
 //! Types for images.
 
+pub mod recent;
+pub mod tag;
+pub mod user;
+
 use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
@@ -12,149 +16,6 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
-
-/// Types for user image library.
-pub mod user {
-    #[cfg(feature = "backend")]
-    use paperclip::actix::Apiv2Schema;
-    use serde::{Deserialize, Serialize};
-
-    use super::ImageId;
-
-    /// Response for listing.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserImageListResponse {
-        /// the images returned.
-        pub images: Vec<UserImageResponse>,
-    }
-
-    /// Response for getting a single image.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserImageResponse {
-        /// The image metadata.
-        pub metadata: UserImage,
-    }
-
-    /// Over the wire representation of an image's metadata.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserImage {
-        /// The image's ID.
-        pub id: ImageId,
-        // more fields to be added
-    }
-}
-
-/// Types to manage image tags.
-pub mod tag {
-    use crate::domain::meta::TagId;
-    #[cfg(feature = "backend")]
-    use paperclip::actix::Apiv2Schema;
-    use serde::{Deserialize, Serialize};
-
-    /// Request to create an image tag.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ImageTagCreateRequest {
-        /// Display name of the image tag.
-        pub display_name: String,
-    }
-
-    /// Response returned to list all image tags.
-    #[derive(Serialize, Deserialize)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ImageTagListResponse {
-        /// Indexes and ids for all the image tags.
-        pub image_tags: Vec<ImageTagResponse>,
-    }
-
-    /// Response for a single tag.
-    #[derive(Serialize, Deserialize)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ImageTagResponse {
-        /// The index of the image tag found.
-        pub index: i16,
-
-        /// The display name of the image tag found.
-        pub display_name: String,
-
-        /// The id of the image tag found.
-        pub id: TagId,
-    }
-
-    /// Request to update an image tag.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct ImageTagUpdateRequest {
-        /// Display name of the image tag. `None` means no change to be made.
-        pub display_name: Option<String>,
-
-        /// If [`Some`] attempt to move tag to the given index. If it is already occupied, do no
-        /// change the indexing.
-        ///
-        /// If `index` is [`None`] then it will not be updated.
-        pub index: Option<i16>,
-    }
-}
-
-/// Types for a user's recent images list. Can be from any ['MediaLibrary'](crate::media::MediaLibrary).
-/// Does not verify entries for validity/existence.
-pub mod recent {
-    use super::ImageId;
-    use crate::media::MediaLibrary;
-    use chrono::{DateTime, Utc};
-    #[cfg(feature = "backend")]
-    use paperclip::actix::Apiv2Schema;
-    use serde::{Deserialize, Serialize};
-
-    /// Over-the-wire representation of a single recent image.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserRecentImageResponse {
-        /// The image's ID.
-        pub id: ImageId,
-
-        /// The library that the image belongs to.
-        pub library: MediaLibrary,
-
-        /// When the image was last used.
-        pub last_used: DateTime<Utc>,
-    }
-
-    /// Request to add an entry to the recent user images list,
-    /// see ['recent::Create'](crate::endpoints::image::recent::Create).
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserRecentImageCreateRequest {
-        /// The image's ID.
-        pub id: ImageId,
-
-        /// The library that the image belongs to.
-        pub library: MediaLibrary,
-    }
-
-    /// Query to list a user's recent images,
-    /// see ['recent::List'](crate::endpoints::image::recent::List).
-    ///
-    /// This query is optional.
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserRecentImageListRequest {
-        /// Indicates how many recent items to retrieve.
-        pub limit: u16,
-    }
-
-    /// Response for listing a user's recent images,
-    /// see ['recent::List'](crate::endpoints::image::recent::List).
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-    pub struct UserRecentImageListResponse {
-        /// The images returned.
-        pub images: Vec<UserRecentImageResponse>,
-    }
-}
 
 /// Represents different kinds of images (which affects how the size is stored in the db)
 #[derive(Serialize, Deserialize, Copy, Clone, Debug)]
