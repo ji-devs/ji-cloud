@@ -1,5 +1,5 @@
 ---
-source: tests/integration/image.rs
+source: tests/integration/image/tag.rs
 expression: body
 
 ---
@@ -7,7 +7,7 @@ expression: body
   "image_tags": [
     {
       "index": 0,
-      "display_name": "A",
+      "display_name": "test",
       "id": "[id]"
     },
     {

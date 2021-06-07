@@ -43,7 +43,7 @@ pub struct AdditionalResourceResponse {
 }
 
 /// Request to update an `AdditionalResource`
-/// *Note*: URL field cannot be nulled out (`None` means "do not change").
+/// Note: URL field cannot be nulled out (`None` means "do not change").
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceUpdateRequest {

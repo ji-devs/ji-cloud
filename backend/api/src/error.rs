@@ -1,3 +1,11 @@
+//! Contains error types for api operations. Enums are declared with HTTP status codes
+//! indicating the type of error with optional descriptions.
+//!
+//! Casting and handling of:
+//!     * `sqlx::Error` -- database errors generated in database interactions, mostly in `db` module
+//!     * `actix_web::Error` -- server errors, used by actix for error logging
+//!     * `anyhow::Error` -- general intermediate error representation
+
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
 use paperclip::actix::api_v2_errors;
@@ -292,7 +300,7 @@ impl Into<actix_web::Error> for NotFound {
     code = 404,
     description = "Not Found: Parent Category Not Found OR category not found",
     code = 420,
-    description = "Unprocessable Entity: Cycle OR OutOfRange"
+    description = "Unprocessable Entity: Cycle OR OutOfRange",
     code = 500
 )]
 pub enum CategoryUpdate {
@@ -347,7 +355,8 @@ impl Into<actix_web::Error> for CategoryUpdate {
     code = 403,
     code = 404,
     description = "Not Found: Resource Not Found",
-    code = 420, description = "Unprocessable Entity: Invalid Content"
+    code = 420,
+    description = "Unprocessable Entity: Invalid Content",
     code = 500
 )]
 #[derive(Debug)]
@@ -395,7 +404,7 @@ impl Into<actix_web::Error> for Upload {
     code = 401,
     code = 403,
     code = 420,
-    description = "Unprocessable Entity: Metadata not Found"
+    description = "Unprocessable Entity: Metadata not Found",
     code = 500
 )]
 pub enum CreateWithMetadata {
@@ -441,7 +450,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
     code = 404,
     description = "Not Found: Resource Not Found",
     code = 420,
-    description = "Unprocessable Entity: Metadata not Found"
+    description = "Unprocessable Entity: Metadata not Found",
     code = 500
 )]
 pub enum UpdateWithMetadata {
@@ -514,7 +523,7 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
 #[api_v2_errors(
     code = 400,
     code = 409,
-    description = "Conflict: Another user with the provided username already exists"
+    description = "Conflict: Another user with the provided username already exists",
     code = 420,
     description = "Unprocessable Entity: No username was provided",
     code = 500
