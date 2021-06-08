@@ -1,8 +1,5 @@
 use crate::templates::{
-    direct::{direct_template_home, direct_template_no_auth},
-    epoch::epoch_page,
-    info::info_template,
-    spa,
+    direct::direct_template_no_auth, epoch::epoch_page, info::info_template, spa,
 };
 use actix_web::web::{self, ServiceConfig};
 
@@ -30,7 +27,7 @@ pub fn configure(config: &mut ServiceConfig) {
             web::get().to(spa::module_template),
         )
         .route("/dev/{path:.*}", web::get().to(spa::dev_template))
-        .route("/", web::get().to(direct_template_home))
+        .route("/", web::get().to(spa::home_template))
         .route("/no-auth", web::get().to(direct_template_no_auth))
         .route("/info", web::get().to(info_template))
         .route("/epoch", web::get().to(epoch_page));

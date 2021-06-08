@@ -26,6 +26,7 @@ impl ModuleJigPageKind {
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum SpaPage {
+    Home,
     User,
     Admin,
     Jig(ModuleJigPageKind),
@@ -37,6 +38,7 @@ pub enum SpaPage {
 impl SpaPage {
     pub fn as_str(&self) -> Cow<'static, str> {
         match self {
+            Self::Home => Cow::Borrowed("home"),
             Self::User => Cow::Borrowed("user"),
             Self::Admin => Cow::Borrowed("admin"),
             Self::Jig(page_kind) => Cow::Owned(format!("jig/{}", page_kind.as_str())),
@@ -83,6 +85,10 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
     let info = info.render().map_err(ErrorInternalServerError)?;
 
     Ok(actix_web::HttpResponse::Ok().body(info))
+}
+
+pub async fn home_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
+    spa_template(&settings, SpaPage::Home)
 }
 
 pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {

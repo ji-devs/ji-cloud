@@ -10,6 +10,8 @@ struct TitlePage<'a> {
     title: &'a str,
 }
 
+#[deprecated]
+#[allow(dead_code)]
 pub async fn direct_template_home(
     settings: Data<RuntimeSettings>,
 ) -> actix_web::Result<HttpResponse> {
