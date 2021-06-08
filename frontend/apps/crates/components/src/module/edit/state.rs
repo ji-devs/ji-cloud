@@ -189,7 +189,9 @@ where
                     };
                 }
 
-                let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
+                //let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
+                //For editor we'll just lazy-load
+                let audio_ctx = None;
                 if let Some(jig) = _self.jig.borrow().as_ref() {
                     *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
                 } else {
@@ -246,6 +248,10 @@ where
             }));
         })));
 
+        //for editor we'll just init right away, no need to create the audio context
+        //reverting is very easy if that becomes a problem (just create the audio context above and
+        //uncomment this):
+        (_self.on_init_ready.borrow().as_ref().unwrap_ji()) ();
         _self
     }
 

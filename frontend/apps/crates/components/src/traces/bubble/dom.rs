@@ -9,7 +9,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use super::state::*;
-use crate::audio_mixer::{AudioMixer, AudioPlayer};
+use crate::audio_mixer::AudioMixer;
 
 pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
 
@@ -18,7 +18,7 @@ pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
     let height = 100.0;
 
     *state.audio_player_instance.borrow_mut() = state.audio.as_ref().map(|audio| {
-        AudioPlayer::play_oneshot(&mixer.ctx, audio.clone())
+        mixer.play_oneshot(audio.clone())
     });
 
     //TODO - turn to custom element

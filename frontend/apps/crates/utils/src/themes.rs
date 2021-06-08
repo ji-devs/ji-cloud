@@ -10,7 +10,7 @@ use crate::unwrap::UnwrapJiExt;
 pub use shared::domain::jig::module::body::ThemeId;
 
 pub const THEME_IDS:[ThemeId;3] = [
-    ThemeId::None,
+    ThemeId::Blank,
     ThemeId::Chalkboard, 
     ThemeId::HappyBrush
 ];
@@ -57,7 +57,7 @@ impl ThemeIdExt for ThemeId {
     //TODO - tie to Localization
     fn display_name(self) -> &'static str {
         match self {
-            Self::None => "",
+            Self::Blank => "",
             Self::Chalkboard => "Chalkboard", 
             Self::HappyBrush => "Happy Brush", 
         }
@@ -65,7 +65,7 @@ impl ThemeIdExt for ThemeId {
 
     fn as_str_id(self) -> &'static str {
         match self {
-            Self::None => "",
+            Self::Blank => "",
             Self::Chalkboard => "chalkboard", 
             Self::HappyBrush => "happy-brush", 
         }
@@ -83,7 +83,7 @@ impl ThemeIdExt for ThemeId {
             }
             Some(themes) => {
                 mapper(match self {
-                    Self::None => &themes.none,
+                    Self::Blank => &themes.blank,
                     Self::Chalkboard => &themes.chalkboard,
                     Self::HappyBrush => &themes.happy_brush,
                 })
@@ -98,7 +98,7 @@ impl ThemeIdExt for ThemeId {
 #[derive(Debug, Deserialize)]
 struct Themes {
     #[serde(rename="")]
-    pub none: Theme,
+    pub blank: Theme,
     pub chalkboard: Theme,
     pub happy_brush: Theme,
 }

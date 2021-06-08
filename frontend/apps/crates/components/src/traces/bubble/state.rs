@@ -1,7 +1,7 @@
 use utils::{prelude::*, math::bounds::BoundsF64};
 use shared::domain::jig::module::body::Audio;
 use crate::animation::fade::*;
-use crate::audio_mixer::AudioPlayer;
+use crate::audio_mixer::AudioInstance;
 use std::cell::RefCell;
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
@@ -12,7 +12,7 @@ pub struct TraceBubble {
     pub audio: Option<Audio>,
     pub text: Option<String>,
     pub fade: Fade,
-    pub(super) audio_player_instance: RefCell<Option<AudioPlayer>>
+    pub(super) audio_player_instance: RefCell<Option<AudioInstance>>
 
 }
 

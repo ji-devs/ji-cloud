@@ -1,4 +1,4 @@
-mod state;
-mod player;
-pub use state::*;
-pub use player::*;
+mod mixer;
+mod instance;
+pub use mixer::*;
+pub use instance::*;

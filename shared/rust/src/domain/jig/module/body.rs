@@ -80,8 +80,8 @@ impl Body {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
-    /// No theme id set (a.k.a. blank)
-    None = 0,
+    /// Empty theme (white bg, no text, etc.) 
+    Blank = 0,
     /// Blueish theme
     Chalkboard = 1,
     /// Orangeish theme
@@ -90,7 +90,7 @@ pub enum ThemeId {
 
 impl Default for ThemeId {
     fn default() -> Self {
-        Self::None
+        Self::Blank
     }
 }
 

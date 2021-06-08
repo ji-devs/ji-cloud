@@ -34,7 +34,7 @@ impl Base {
     pub fn new(is_history: bool, history: Rc<HistoryStateImpl<RawData>>, step: ReadOnlyMutable<Step>, raw: Option<&RawContent>) -> Self {
 
         let theme_id = match raw {
-            None => ThemeId::None,
+            None => ThemeId::Blank,
             Some(raw) => raw.theme_id
         };
         

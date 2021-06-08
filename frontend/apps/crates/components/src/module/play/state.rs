@@ -143,7 +143,7 @@ where
                 }
 
 
-                let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
+                let audio_ctx = Some(web_sys::AudioContext::new().unwrap_ji());
                 if let Some(jig) = _self.jig.borrow().as_ref() {
                     *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
                 } else {

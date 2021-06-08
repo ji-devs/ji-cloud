@@ -4,7 +4,7 @@ use super::wysiwyg_types::{ElementType, Font, FontSize, Color};
 
 pub fn get_theme_element_styles(theme_id: &ThemeId, element: &ElementType) -> (Font, Color, FontSize) {
     let lookup: (usize, usize, FontSize) = match theme_id {
-        ThemeId::None => {
+        ThemeId::Blank => {
             match element {
                 ElementType::H1 => (0, 1, 28),
                 ElementType::H2 => (1, 2, 25),

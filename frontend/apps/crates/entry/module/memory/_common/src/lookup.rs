@@ -14,7 +14,7 @@ pub fn get_card_font_family(theme_id: ThemeId, mode: Mode, side: Side) -> usize 
     match mode {
         Mode::Lettering => {
             match theme_id {
-                ThemeId::None => 1,
+                ThemeId::Blank => 1,
                 ThemeId::Chalkboard => {
                     match side {
                         Side::Left => 2,
