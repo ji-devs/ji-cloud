@@ -80,7 +80,7 @@ impl Body {
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 pub enum ThemeId {
-    /// Empty theme (white bg, no text, etc.) 
+    /// Empty theme (white bg, no text, etc.)
     Blank = 0,
     /// Blueish theme
     Chalkboard = 1,
