@@ -17,6 +17,9 @@ pub mod poster;
 /// Tapping Board Body.
 pub mod tapping_board;
 
+/// Cover Body.
+pub mod cover;
+
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -34,8 +37,8 @@ pub enum Body {
 
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
-    /// This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
-    Cover,
+    /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
+    Cover(cover::ModuleData),
 }
 
 /// Extension trait for interop
@@ -62,7 +65,7 @@ impl Body {
     /// Gets this body's related [`ModuleKind`](super::ModuleKind)
     pub fn kind(&self) -> super::ModuleKind {
         match self {
-            Self::Cover => super::ModuleKind::Cover,
+            Self::Cover(_) => super::ModuleKind::Cover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
             Self::Poster(_) => super::ModuleKind::Poster,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,

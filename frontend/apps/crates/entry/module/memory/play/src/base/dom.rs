@@ -17,7 +17,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
-            .child(state.instructions.render(&state.audio_ctx))
+            .child(state.instructions.render(&state.audio_mixer))
             .child(
                 html!("play-container", {
                     .property("theme", state.theme_id.as_str_id())

@@ -11,7 +11,8 @@ use web_sys::{HtmlCanvasElement, SvgElement};
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
-use shared::domain::jig::module::body::Transform;
+use shared::domain::jig::module::body::{Trace, TraceShape, Transform};
+use super::utils::*;
 
 static SVG_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("position", "absolute")
@@ -35,6 +36,11 @@ static SHAPE_SHADOW_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("cursor", "pointer")
 });
 
+static SHAPE_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| class! {
+    .style("fill", "blue")
+    .style("cursor", "pointer")
+});
+
 static SHAPE_TRANSPARENT_CLASS: Lazy<String> = Lazy::new(|| class! {
     .style("fill-opacity", "0")
     .style("cursor", "pointer")
@@ -48,6 +54,7 @@ pub enum ShapeStyleBase {
     Mask,
     Shadow,
     Transparent,
+    Outline,
 }
 
 impl ShapeStyle {
@@ -61,7 +68,56 @@ impl ShapeStyle {
         match self.base {
             ShapeStyleBase::Mask => &SHAPE_MASK_CLASS,
             ShapeStyleBase::Shadow => &SHAPE_SHADOW_CLASS,
+            ShapeStyleBase::Outline => &SHAPE_OUTLINE_CLASS,
             ShapeStyleBase::Transparent => &SHAPE_TRANSPARENT_CLASS,
+        }
+    }
+}
+
+pub fn render_single_trace(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&Trace, callbacks: SvgCallbacks) -> Option<Dom> {
+    trace.calc_size(resize_info)
+        .map(|size| {
+            let (width, height) = size;
+            let (pos_x, pos_y) = trace.transform.get_denormalized_translation_2d(resize_info);
+            let transform = trace.transform.map(|t| {
+                let mut t = t.clone();
+                t.set_translation_2d(0.0, 0.0);
+                t
+            });
+
+
+            //Note - currently can't apply style directly, so need to set it as an attribute
+            let styles = format!("position: absolute; left: {}px; top: {}px;", pos_x, pos_y);
+
+            svg!("svg", {
+                .attribute("style", &styles)
+                .attribute("width", &format!("{}px", width))
+                .attribute("height", &format!("{}px", height))
+                .child(render_single_shape(style, resize_info, trace, Some((&transform, size)), callbacks))
+            })
+        })
+}
+pub fn render_single_shape(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&Trace, transform_size: Option<(&Transform, (f64, f64))>, callbacks: SvgCallbacks) -> Dom {
+
+    let transform_size = match transform_size {
+        Some(transform_size) => Some(transform_size),
+        None => {
+            trace.calc_size(resize_info)
+                .map(|size| (&trace.transform, size))
+        }
+    };
+
+    match trace.shape {
+
+        TraceShape::Path(ref path) => {
+            render_path(&style, &resize_info, transform_size, &path, callbacks)
+        },
+
+        TraceShape::Rect(width, height) => {
+            render_rect(&style, &resize_info, transform_size, width, height, callbacks)
+        }
+        TraceShape::Ellipse(radius_x, radius_y) => {
+            render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, callbacks)
         }
     }
 }
@@ -132,12 +188,17 @@ where
     })
 }
 
-/*
-pub fn render_simple<ChildrenSignal>(
+pub fn render_simple<ChildrenSignal, OnMouseDownFn, OnMouseUpFn, OnMouseMoveFn>(
     children: ChildrenSignal,
+    on_mouse_down:OnMouseDownFn,
+    on_mouse_up:OnMouseUpFn,
+    on_mouse_move:OnMouseMoveFn,
 ) -> Dom 
 where 
     ChildrenSignal: SignalVec<Item = Dom> + 'static,
+    OnMouseDownFn: Fn(i32, i32) + Clone + 'static,
+    OnMouseUpFn: Fn(i32, i32) + Clone + 'static,
+    OnMouseMoveFn: Fn(i32, i32) + Clone + 'static,
 
 {
     svg!("svg", {
@@ -149,9 +210,15 @@ where
             format!("{}px", info.height)
         }))
         .children_signal_vec(children)
+
+        .global_event_preventable(clone!(on_mouse_up => move |evt:events::MouseUp| {
+            on_mouse_up(evt.x() as i32, evt.y() as i32);
+        }))
+        .global_event_preventable(clone!(on_mouse_move => move |evt:events::MouseMove| {
+            on_mouse_move(evt.x() as i32, evt.y() as i32);
+        }))
     })
 }
-*/
 
 fn apply_transform<A: AsRef<web_sys::Element>>(dom:DomBuilder<A>, resize_info: &ResizeInfo, transform_size: Option<(&Transform, (f64, f64))>) -> DomBuilder<A> {
     dom.apply_if(transform_size.is_some(), |dom| {
@@ -181,6 +248,14 @@ impl SvgCallbacks
             on_mount: on_mount.map(|f| Box::new(f) as _),
             on_unmount: on_unmount.map(|f| Box::new(f) as _),
         }
+    }
+
+    pub fn select( on_select: impl Fn() + 'static) -> Self {
+        Self::new(
+            Some(on_select), 
+            None::<fn(web_sys::SvgElement)>, 
+            None::<fn(web_sys::SvgElement)>, 
+        )
     }
 
     pub fn none() -> Self {

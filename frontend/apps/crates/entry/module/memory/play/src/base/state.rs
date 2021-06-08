@@ -22,11 +22,11 @@ use rand::prelude::*;
 use components::module::play::prelude::*;
 use utils::prelude::*;
 use components::instructions::player::InstructionsPlayer;
-use web_sys::AudioContext;
 use super::card::state::*;
 use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
+use components::audio_mixer::AudioMixer;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -39,7 +39,7 @@ pub struct Base {
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
     pub instructions: InstructionsPlayer,
-    pub audio_ctx: AudioContext
+    pub audio_mixer: AudioMixer
 }
 
 #[derive(Debug, Clone)]
@@ -49,10 +49,7 @@ pub enum FlipState {
     Two(usize, usize),
 }
 impl Base {
-    pub async fn new(jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, init_source: InitSource) -> Self {
-        log::info!("{:?}", raw);
-
-        let audio_ctx = AudioContext::new().unwrap_ji();
+    pub async fn new(audio_mixer: AudioMixer, jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, init_source: InitSource) -> Self {
 
         let raw_content = raw.content.unwrap_ji();
 
@@ -109,7 +106,7 @@ impl Base {
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
             instructions: InstructionsPlayer::new(raw_content.instructions), 
-            audio_ctx,
+            audio_mixer,
         }
     }
 

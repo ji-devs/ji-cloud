@@ -126,7 +126,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Three),
+            step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
             bg_tab: Some(BgTabKind::Image),

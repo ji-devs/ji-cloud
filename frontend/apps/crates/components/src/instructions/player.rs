@@ -7,9 +7,9 @@ use futures_signals::signal::SignalExt;
 use web_sys::HtmlElement;
 use shared::domain::jig::module::body::Instructions;
 use crate::animation::fade::*;
-use crate::audio_player::AudioPlayer;
 use std::cell::RefCell;
 use web_sys::AudioContext;
+use crate::audio_mixer::{AudioMixer, AudioPlayer};
 
 pub struct InstructionsPlayer {
     data: Instructions,
@@ -39,9 +39,9 @@ impl InstructionsPlayer {
         }
     }
 
-    pub fn render(&self, ctx:&AudioContext) -> Dom {
+    pub fn render(&self, mixer:&AudioMixer) -> Dom {
         *self.audio.borrow_mut() = self.data.audio.as_ref().map(|audio| {
-            AudioPlayer::play_oneshot(ctx, audio.clone())
+            AudioPlayer::play_oneshot(&mixer.ctx, audio.clone())
         });
         html!("empty-fragment", {
             .apply_if(self.data.text.is_some(), |dom| {

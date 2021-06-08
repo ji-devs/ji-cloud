@@ -13,6 +13,7 @@ use super::super::{
     state::{Phase, GenericState},
     actions::*,
 };
+use crate::audio_mixer::AudioMixer;
 use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::BodyExt}};
 use utils::prelude::*;
 
@@ -60,7 +61,7 @@ where
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 
     {
@@ -84,7 +85,7 @@ where
                         *init = raw;
                     }));
 
-                    let steps_init = init_from_raw(jig_id, module_id, jig, raw, InitSource::ChooseMode, None,history).await;
+                    let steps_init = init_from_raw(app.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::ChooseMode, None,history).await;
                     GenericState::change_phase_steps(app.clone(), steps_init);
 
                 }))

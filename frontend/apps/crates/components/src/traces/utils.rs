@@ -1,12 +1,48 @@
-use utils::{math::BoundsF64, prelude::*};
-use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
+use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
+use shared::domain::jig::module::body::{Trace as RawTrace, TraceShape as RawTraceShape, Transform};
 
 pub trait TraceExt {
     fn to_raw(&self) -> RawTrace;
 
     fn calc_bounds(&self, add_offset: bool) -> Option<BoundsF64>;
+
+    fn calc_size(&self, resize_info: &ResizeInfo) -> Option<(f64, f64)> {
+        self.calc_bounds(false)
+            .map(|bounds| {
+                resize_info.get_size_full(bounds.width, bounds.height)
+            })
+    }
 }
 
+impl TraceExt for RawTrace {
+    fn to_raw(&self) -> RawTrace {
+        self.clone()
+    }
+
+    fn calc_bounds(&self, add_offset: bool) -> Option<BoundsF64> {
+        use crate::traces::utils::{calc_bounds, ShapeRef};
+
+        let offset = if add_offset {
+            Some(self.transform.get_translation_2d())
+        } else {
+            None
+        };
+
+        match &self.shape {
+            RawTraceShape::Path(path) => {
+                calc_bounds(ShapeRef::Path(&path), offset)
+            },
+
+            RawTraceShape::Ellipse(radius_x, radius_y) => {
+                calc_bounds(ShapeRef::Ellipse(*radius_x, *radius_y), offset)
+            },
+            RawTraceShape::Rect(width, height) => {
+                calc_bounds(ShapeRef::Rect(*width, *height), offset)
+            }
+        }
+
+    }
+}
 pub enum ShapeRef<'a>
 {
     Path(&'a[(f64, f64)]),
@@ -16,6 +52,7 @@ pub enum ShapeRef<'a>
 
 //Gets the bounds of the shape itself, prior to any scaling or rotation
 //if offset is supplied, then it is added
+//TODO - document the use-cases for where offset is used
 pub fn calc_bounds<'a>(shape: ShapeRef<'a>, offset: Option<(f64, f64)>) -> Option<BoundsF64> {
     let mut bounds = match shape {
             ShapeRef::Path(path) => {

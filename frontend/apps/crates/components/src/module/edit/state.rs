@@ -8,6 +8,7 @@ use futures_signals::{
 };
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use wasm_bindgen::prelude::*;
+use web_sys::AudioContext;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::convert::{TryFrom, TryInto};
@@ -37,6 +38,7 @@ use shared::{
 };
 use utils::{settings::SETTINGS, prelude::*};
 use std::marker::PhantomData;
+use crate::audio_mixer::AudioMixer;
 
 pub struct GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
@@ -61,6 +63,8 @@ where
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) reset_from_history_loader: AsyncLoader,
+    pub(super) audio_mixer: RefCell<Option<AudioMixer>>,
+    pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
     phantom: PhantomData<RawMode>,
 }
 
@@ -139,7 +143,7 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -156,83 +160,97 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
-            phantom: PhantomData
+            phantom: PhantomData,
+            audio_mixer: RefCell::new(None),
+            on_init_ready: RefCell::new(None)
         });
 
 
-        _self.raw_loader.load(clone!(_self => async move {
 
-            if _self.opts.load_fonts {
-                FontLoader::new().load_all().await;
-            }
-            if !_self.opts.skip_load_jig {
-                *_self.jig.borrow_mut() = {
+        *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
+            _self.raw_loader.load(clone!(_self, init_from_raw => async move {
 
-                        let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+                if _self.opts.load_fonts {
+                    FontLoader::new().load_all().await;
+                }
+                if !_self.opts.skip_load_jig {
+                    *_self.jig.borrow_mut() = {
 
-                        match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                            let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
+
+                            match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                                Ok(resp) => {
+                                    Some(resp.jig)
+                                },
+                                Err(_) => {
+                                    panic!("error loading jig!")
+                                },
+                            }
+                    };
+                }
+
+                let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
+                if let Some(jig) = _self.jig.borrow().as_ref() {
+                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
+                } else {
+                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new_without_jig(audio_ctx));
+                }
+
+                let (raw, init_source) = {
+                    if let Some(force_raw) = _self.opts.force_raw.clone() {
+                        (force_raw, InitSource::ForceRaw)
+                    } else {
+                        let path = Get::PATH
+                            .replace("{id}",&_self.opts.jig_id.0.to_string())
+                            .replace("{module_id}",&_self.opts.module_id.0.to_string());
+
+                        match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                             Ok(resp) => {
-                                Some(resp.jig)
+                                let body = resp.module.body.unwrap_ji();
+                                (body.try_into().unwrap_ji(), InitSource::Load)
                             },
                             Err(_) => {
-                                panic!("error loading jig!")
-                            },
-                        }
-                };
-            }
-
-
-            let (raw, init_source) = {
-                if let Some(force_raw) = _self.opts.force_raw.clone() {
-                    (force_raw, InitSource::ForceRaw)
-                } else {
-                    let path = Get::PATH
-                        .replace("{id}",&_self.opts.jig_id.0.to_string())
-                        .replace("{module_id}",&_self.opts.module_id.0.to_string());
-
-                    match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
-                        Ok(resp) => {
-                            let body = resp.module.body.unwrap_ji();
-                            (body.try_into().unwrap_ji(), InitSource::Load)
-                        },
-                        Err(_) => {
-                            panic!("error loading module!")
+                                panic!("error loading module!")
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            let history = Rc::new(HistoryState::new(
-                raw.clone(),
-                super::actions::save_history(
-                    _self.opts.skip_save_for_debug,
-                    _self.save_loader.clone(),
+                let history = Rc::new(HistoryState::new(
+                    raw.clone(),
+                    super::actions::save_history(
+                        _self.opts.skip_save_for_debug,
+                        _self.save_loader.clone(),
+                        _self.opts.jig_id.clone(),
+                        _self.opts.module_id.clone(),
+                    ),
+                    Self::reset_from_history(_self.clone(), init_from_raw.clone())
+                ));
+
+                *_self.history.borrow_mut() = Some(history.clone());
+
+                let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
-                ),
-                Self::reset_from_history(_self.clone(), init_from_raw.clone())
-            ));
+                    _self.jig.borrow().clone()
+                );
 
-            *_self.history.borrow_mut() = Some(history.clone());
+                if raw.requires_choose_mode() {
+                    Self::change_phase_choose(_self.clone(), init_from_raw);
+                } else {
+                    let steps_init = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source, None, history.clone()).await;
+                    Self::change_phase_steps(_self.clone(), steps_init);
+                }
 
-            let (jig_id, module_id, jig) = (
-                _self.opts.jig_id.clone(),
-                _self.opts.module_id.clone(),
-                _self.jig.borrow().clone()
-            );
-
-            if raw.requires_choose_mode() {
-                Self::change_phase_choose(_self.clone(), init_from_raw);
-            } else {
-                let steps_init = init_from_raw(jig_id, module_id, jig, raw, init_source, None, history.clone()).await;
-                Self::change_phase_steps(_self.clone(), steps_init);
-            }
-
-            _self.raw_loaded.set_neq(true);
-        }));
-
+                _self.raw_loaded.set_neq(true);
+            }));
+        })));
 
         _self
+    }
+
+    pub fn get_audio_mixer(&self) -> AudioMixer {
+        self.audio_mixer.borrow().as_ref().unwrap_ji().clone()
     }
 
 }

@@ -1,8 +1,11 @@
 use utils::{prelude::*, math::bounds::BoundsF64};
 use shared::domain::jig::module::body::Audio;
 use crate::animation::fade::*;
-use crate::audio_player::AudioPlayer;
+use crate::audio_mixer::AudioPlayer;
 use std::cell::RefCell;
+use futures_signals::signal::Mutable;
+use std::rc::Rc;
+use dominator::clone;
 
 pub struct TraceBubble {
     pub bounds: BoundsF64,
@@ -28,5 +31,20 @@ impl TraceBubble {
                 on_fade_end
             )
         }
+    }
+
+    //Will manage its own lifetime by way of a specific Mutable type
+    pub fn set_unset_mutable(bounds: BoundsF64, audio: Option<Audio>, text: Option<String>, mutable: Mutable<Option<Rc<TraceBubble>>>) {
+
+        let instance = Rc::new(TraceBubble::new(
+            bounds, 
+            audio, 
+            text,
+            Some(clone!(mutable => move || {
+                mutable.set(None)
+            }))
+        ));
+
+        mutable.set(Some(instance));
     }
 }

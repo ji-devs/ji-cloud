@@ -13,21 +13,29 @@ use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
 use shared::{
+    media::MediaLibrary,
     domain::{
+        audio::AudioId, 
+        image::ImageId, 
         jig::{
-            module::body::{
-                Image,
-                ThemeChoice,
-                Background, Backgrounds,
-                Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                tapping_board::{Content, Mode as RawMode, ModuleData as RawData, TappingTrace}
-            },
-            JigId, module::ModuleId
-        },
-        image::ImageId,
-        audio::AudioId
-    },
-    media::MediaLibrary
+            JigId, 
+            module::{
+                ModuleId, 
+                body::{
+                    Image,
+                    ThemeChoice,
+                    Background, Backgrounds,
+                    Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
+                    tapping_board::{
+                        Content, Mode as RawMode, ModuleData as RawData, TappingTrace,
+                        PlaySettings,
+                        Hint,
+                        Next
+                    }
+                }
+            }
+        }
+    }
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
@@ -73,7 +81,10 @@ impl DebugSettings {
                         content: Some(Content {
                             mode: RawMode::Poster,
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                            instructions: Instructions::default(),
+                            instructions: Instructions{
+                                text: Some("Heya World!".to_string()),
+                                ..Instructions::default()
+                            },
                             stickers: init_data.stickers.iter().map(|init| {
                                 match init {
                                     InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
@@ -97,11 +108,19 @@ impl DebugSettings {
                                     }
                                 };
 
-                                TappingTrace { trace, audio: None, text: None }
+                                TappingTrace { 
+                                    trace, 
+                                    audio: None, 
+                                    text: Some("hello world!".to_string()),
+                                }
                             }).collect(),
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                                 layer_2: None,
+                            },
+                            play_settings: PlaySettings {
+                                hint: Hint::None, 
+                                next: Next::Continue, 
                             },
                             ..Content::default()
                         })
@@ -124,7 +143,8 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 InitSticker::Text, InitSticker::Sprite
             ],
             traces: vec![
-                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1),
+                InitTrace::Ellipse(0.1, 0.1, 0.1, 0.1),
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

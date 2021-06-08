@@ -26,10 +26,12 @@ use crate::state::Mode;
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
 use utils::prelude::*;
 use components::{
+    audio_mixer::AudioMixer,
     text_editor::state::State as TextEditorState,
 };
 
 pub async fn init_from_raw(
+    audio_mixer: AudioMixer,
     jig_id: JigId,
     module_id: ModuleId,
     jig: Option<Jig>,
@@ -50,7 +52,7 @@ pub async fn init_from_raw(
         step
     });
 
-    let base = Base::new(jig_id, module_id, jig, raw, step.read_only(), history).await;
+    let base = Base::new(audio_mixer, jig_id, module_id, jig, raw, step.read_only(), history).await;
     
     StepsInit {
         step,

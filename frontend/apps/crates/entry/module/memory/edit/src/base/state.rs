@@ -28,6 +28,7 @@ use futures_signals::{
 };
 use utils::prelude::*;
 use components::{
+    audio_mixer::AudioMixer,
     tooltip::state::State as TooltipState
 };
 use dominator::clone;
@@ -42,7 +43,7 @@ pub struct Base {
     pub step: ReadOnlyMutable<Step>,
     pub theme: Mutable<ThemeChoice>,
     pub instructions: Mutable<Instructions>,
-    pub audio_ctx: AudioContext,
+    pub audio_mixer: AudioMixer,
 
     pub mode: Mode,
     pub tooltips: Tooltips,
@@ -65,6 +66,7 @@ impl Tooltips {
 }
 impl Base {
     pub async fn new(
+        audio_mixer: AudioMixer,
         jig_id: JigId,
         module_id: ModuleId,
         jig: Option<Jig>,
@@ -94,7 +96,7 @@ impl Base {
             step,
             theme,
             instructions,
-            audio_ctx: AudioContext::new().unwrap_ji(),
+            audio_mixer,
             mode,
             tooltips: Tooltips::new(),
             pairs: MutableVec::new_with_values(pairs)

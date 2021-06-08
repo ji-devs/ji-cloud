@@ -25,8 +25,6 @@ pub mod font_loader;
 pub mod instructions;
 #[cfg(feature = "animation")]
 pub mod animation;
-#[cfg(feature = "audio_player")]
-pub mod audio_player;
 #[cfg(feature = "transform")]
 pub mod transform;
 #[cfg(feature = "stickers")]
@@ -37,3 +35,5 @@ pub mod backgrounds;
 pub mod traces;
 #[cfg(feature = "lists")]
 pub mod lists;
+#[cfg(feature = "audio_mixer")]
+pub mod audio_mixer;

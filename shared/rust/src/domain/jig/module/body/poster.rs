@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeId},
+    body::{Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -29,7 +29,10 @@ impl BodyExt<Mode> for ModuleData {
     }
     fn new_mode(mode: Mode) -> Self {
         ModuleData {
-            content: Some(Content::default()),
+            content: Some(Content {
+                mode,
+                ..Content::default()
+            }),
         }
     }
 
@@ -59,8 +62,8 @@ pub struct Content {
     /// The instructions for the module.
     pub instructions: Instructions,
 
-    /// The ID of the module's theme.
-    pub theme_id: ThemeId,
+    /// The module's theme.
+    pub theme: ThemeChoice,
 
     /// Backgrounds
     pub backgrounds: Backgrounds,

@@ -2,7 +2,6 @@ use components::module::play::prelude::*;
 use super::base::state::*;
 use std::rc::Rc;
 use shared::domain::jig::{JigId, module::{ModuleId, body::tapping_board::{Mode as RawMode, ModuleData as RawData}}};
-
 pub type AppState = GenericState<RawData, RawMode, Base>;
 
 

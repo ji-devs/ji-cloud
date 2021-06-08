@@ -40,6 +40,8 @@ pub trait TransformExt {
     fn set_translation_identity(&mut self);
     fn set_rotation_identity(&mut self);
 
+    fn get_denormalized_translation_2d(&self, resize_info: &ResizeInfo) -> (f64, f64);
+
     fn denormalize_translation(&mut self, resize_info: &ResizeInfo);
 
     fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String;
@@ -196,6 +198,9 @@ impl TransformExt for Transform {
         scale[1] = y;
     }
 
+    fn get_denormalized_translation_2d(&self, resize_info: &ResizeInfo) -> (f64, f64) {
+        resize_info.get_pos_denormalized(self.translation.0[0], self.translation.0[1])
+    }
     /// Takes into account that translation coordinates are normalized
     fn denormalize_translation(&mut self, resize_info: &ResizeInfo) {
 

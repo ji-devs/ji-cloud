@@ -17,6 +17,7 @@ use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
 use std::future::Future;
 use dominator::clone;
+use crate::audio_mixer::AudioMixer;
 
 impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
@@ -33,7 +34,7 @@ where
 {
     pub fn change_phase_choose<InitFromRawFn, InitFromRawOutput>(_self: Rc<Self>, init_from_raw: InitFromRawFn) 
     where
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
@@ -57,7 +58,7 @@ where
         init_from_raw: InitFromRawFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
@@ -85,7 +86,7 @@ where
                 if raw.requires_choose_mode() {
                     Self::change_phase_choose(_self.clone(), init_from_raw.clone());
                 } else {
-                    let steps_init = init_from_raw(jig_id, module_id, jig, raw, InitSource::History, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
+                    let steps_init = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::History, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
                     let steps = Self::change_phase_steps(_self.clone(), steps_init);
                     if let Some((step, steps_completed)) = preserve_steps {
                         steps.step.set_neq(step);

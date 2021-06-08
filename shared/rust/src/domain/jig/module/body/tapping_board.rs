@@ -33,7 +33,10 @@ impl BodyExt<Mode> for ModuleData {
 
     fn new_mode(mode: Mode) -> Self {
         ModuleData {
-            content: Some(Content::default()),
+            content: Some(Content {
+                mode,
+                ..Content::default()
+            }),
         }
     }
 

@@ -12,7 +12,16 @@ use once_cell::unsync::OnceCell;
 use std::sync::Mutex;
 
 pub struct AudioPlayer {
-    audio: Rc<RefCell<Option<AwsmAudio>>>
+    one_shot: Rc<RefCell<Option<AwsmAudio>>>
+}
+
+//One-shot audios drop themselves when finished
+//to force early stop, need to manually take()
+impl Drop for AudioPlayer {
+    fn drop(&mut self) {
+        log::info!("audio dropped!!");
+        self.one_shot.borrow_mut().take();
+    }
 }
 
 impl AudioPlayer {
@@ -23,10 +32,8 @@ impl AudioPlayer {
     pub fn play_oneshot_callback(ctx: &AudioContext, audio: Audio, on_ended: Option<impl FnMut() + 'static>) -> Self {
         let url = audio_lib_url(audio.lib, audio.id);
 
-        log::info!("playing {}", url);
-
         Self {
-            audio: AwsmAudio::play_oneshot_url(ctx, &url, on_ended).unwrap_ji()
+            one_shot: AwsmAudio::play_oneshot_url(ctx, &url, on_ended).unwrap_ji()
         }
     }
 }

@@ -1,5 +1,5 @@
 use components::module::edit::prelude::*;
-use web_sys::AudioContext;
+use components::audio_mixer::AudioMixer;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
@@ -66,7 +66,7 @@ pub struct Base {
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
-    pub audio_ctx: AudioContext,
+    pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
 }
 
@@ -112,6 +112,7 @@ impl TraceMeta {
 impl Base {
 
     pub async fn new(
+        audio_mixer: AudioMixer,
         jig_id: JigId,
         module_id: ModuleId,
         jig: Option<Jig>,
@@ -245,7 +246,7 @@ impl Base {
             stickers,
             traces,
             traces_meta,
-            audio_ctx: AudioContext::new().unwrap_ji(),
+            audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
         });
 

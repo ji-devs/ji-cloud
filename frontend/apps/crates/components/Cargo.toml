@@ -73,7 +73,6 @@ sandbox = []
 
 animation = []
 audio_input = []
-audio_player = []
 backgrounds = []
 color_select = []
 font_loader = []
@@ -87,12 +86,12 @@ tooltip = []
 transform = []
 traces = []
 lists = []
+audio_mixer = []
 
 default = ["all"]
 all= [
     "animation", 
     "audio_input", 
-    "audio_player", 
     "backgrounds", 
     "color_select", 
     "font_loader", 
@@ -105,5 +104,6 @@ all= [
     "tooltip", 
     "transform",
     "traces",
-    "lists"
+    "lists",
+    "audio_mixer"
 ]

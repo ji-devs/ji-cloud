@@ -29,6 +29,7 @@ pub struct State {
     pub callbacks: Callbacks,
 }
 
+
 impl State {
     pub fn new(theme_id: ThemeId, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
         let _self = Rc::new(Self {

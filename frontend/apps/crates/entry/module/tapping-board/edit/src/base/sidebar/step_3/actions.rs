@@ -29,17 +29,7 @@ impl Step3 {
 
         let audio = trace_meta.audio.get_cloned();
         let text = trace_meta.text.get_cloned();
-        let bubble = trace_meta.bubble.clone();
 
-        let instance = Rc::new(TraceBubble::new(
-            bounds, 
-            audio, 
-            text,
-            Some(clone!(bubble => move || {
-                bubble.set(None)
-            }))
-        ));
-
-        bubble.set(Some(instance));
+        TraceBubble::set_unset_mutable(bounds, audio, text, trace_meta.bubble.clone());
     }
 }

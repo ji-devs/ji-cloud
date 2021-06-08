@@ -33,7 +33,7 @@ impl DomRenderable for Main {
                                     .children_signal_vec(
                                         state.trace_bubbles()
                                             .map(clone!(state => move |bubble| {
-                                                traces::bubble::dom::render(bubble, &state.base.audio_ctx)
+                                                traces::bubble::dom::render(bubble, &state.base.audio_mixer)
                                             }))
                                     )
                                 })

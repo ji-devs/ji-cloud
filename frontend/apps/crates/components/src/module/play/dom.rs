@@ -74,7 +74,9 @@ where
                                                     add_slot_to_dom(Base::render(base.clone()), "main")
                                                 ]
                                             },
-                                            Phase::Init => vec![]
+                                            Phase::Init => {
+                                                vec![super::init::dom::render(state.clone())]
+                                            }
                                         }
                                     }
                                 }))

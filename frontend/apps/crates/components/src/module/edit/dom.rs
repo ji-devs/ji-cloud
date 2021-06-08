@@ -56,17 +56,19 @@ where
 
     let sig =
             sig.map(clone!(state => move |(phase, is_preview)| {
-                let page_kind = match phase.as_ref() {
-                    Phase::Init | Phase::Choose(_) => ModulePageKind::GridPlain,
-                    Phase::Steps(_) => {
-                        if is_preview {
-                            ModulePageKind::GridResizePreview
-                        } else if state.opts.is_main_scrollable {
-                            ModulePageKind::GridResizeScrollable
-                        } else {
-                            ModulePageKind::GridResize
-                        }
-                    },
+                let page_kind = {
+                    match phase.as_ref() {
+                        Phase::Init | Phase::Choose(_) => ModulePageKind::GridPlain,
+                        Phase::Steps(_) => {
+                            if is_preview {
+                                ModulePageKind::GridResizePreview
+                            } else if state.opts.is_main_scrollable {
+                                ModulePageKind::GridResizeScrollable
+                            } else {
+                                ModulePageKind::GridResize
+                            }
+                        },
+                    }
                 };
 
                 let has_resized_once = Mutable::new(!page_kind.is_resize());
@@ -102,7 +104,9 @@ where
                                                     steps.clone()
                                                 )
                                             },
-                                            Phase::Init => vec![]
+                                            Phase::Init => {
+                                                vec![super::init::dom::render(state.clone())]
+                                            }
                                         }
                                     }
                                 }))
