@@ -1,6 +1,5 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/overlays/anchored-overlay";
-import { _ as AnchoredOverlay } from "@elements/core/overlays/anchored-overlay";
 
 @customElement('home-search-section-select')
 export class _ extends LitElement {
@@ -12,10 +11,20 @@ export class _ extends LitElement {
             anchored-overlay::part(overlay) {
                 box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.08);
                 padding: 16px 0;
-                border-radius: 12px;
+                border-radius: 10px;
             }
             .anchor {
-                min-height: 1em;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 22px;
+            }
+            .anchor img-ui {
+                width: 30px;
+                transition: transform .3s;
+            }
+            :host([open]) .anchor img-ui {
+                transform: rotate(180deg);
             }
         `];
     }
@@ -23,17 +32,24 @@ export class _ extends LitElement {
     @property()
     value: string = "";
 
-    @query("anchored-overlay")
-    anchoredOverlay!: AnchoredOverlay;
+    @property({ type: Boolean, reflect: true })
+    open: boolean = false;
 
     toggleOpen() {
-        this.anchoredOverlay.open = !this.anchoredOverlay.open;
+        this.open = !this.open;
+    }
+
+    onClose() {
+        this.open = false;
     }
 
     render() {
         return html`
-            <anchored-overlay tabindex="0" positionY="bottom-out" positionX="left-in">
-                <div class="anchor" @click="${this.toggleOpen}" slot="anchor">${this.value}</div>
+            <anchored-overlay tabindex="0" positionY="bottom-out" positionX="left-in" ?open="${this.open}" @close="${this.onClose}">
+                <div class="anchor" @click="${this.toggleOpen}" slot="anchor">
+                    ${this.value}
+                    <img-ui path="core/_common/chevron-down-blue.svg"></img-ui>
+                </div>
                 <div slot="overlay">
                     <slot></slot>
                 </div>

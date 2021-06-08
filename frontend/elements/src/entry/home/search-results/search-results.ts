@@ -7,6 +7,10 @@ const STR_RESULTS_FOR = "results for";
 export class _ extends LitElement {
     static get styles() {
         return [css`
+            :host {
+                display: block;
+                padding: 50px 0;
+            }
             h1 {
                 font-size: 40px;
                 color: #383838;

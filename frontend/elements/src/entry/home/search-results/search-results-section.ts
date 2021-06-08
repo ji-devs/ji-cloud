@@ -11,6 +11,9 @@ export class _ extends LitElement {
             :host {
                 display: grid;
                 row-gap: 48px;
+                padding: 0 50px;
+                max-width: 1800px;
+                margin: 0 auto;
             }
             .top-line {
                 display: flex;
@@ -19,6 +22,11 @@ export class _ extends LitElement {
             }
             .left-side {
                 display: flex;
+                position: relative;
+            }
+            .left-side img-ui {
+                position: absolute;
+                right: 100%;
             }
             h2 {
                 margin: 0;
@@ -58,7 +66,7 @@ export class _ extends LitElement {
         return html`
             <div class="top-line">
                 <div class="left-side">
-                    <img-ui path=""></img-ui>
+                    <img-ui path="entry/home/search-results/${this.kind === "jigs" ? "jig-section.png" : "learning-paths.svg"}"></img-ui>
                     <h2>
                         ${STR_JIGS}
                         <span class="results-count">(${this.resultsCount})</span>

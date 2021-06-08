@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, query, internalProperty } from 'lit-element';
 import "@elements/core/carousel/single";
-import "@elements/core/icon-arrow";
+import "@elements/entry/home/icon-arrow";
 import { CarouselSingle } from '@elements/core/carousel/single';
 import { MODE as CardMode } from "@elements/module/memory/_common/types";
 

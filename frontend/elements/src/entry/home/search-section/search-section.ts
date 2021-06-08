@@ -47,6 +47,8 @@ export class _ extends LitElement {
             .center-3 {
                 width: 1000px;
                 margin: 0 auto;
+                display: grid;
+                row-gap: 15px;
             }
             .jigzi {
                 display: grid;
@@ -67,6 +69,7 @@ export class _ extends LitElement {
                 font-size: 32px;
                 font-weight: 300;
                 text-align: center;
+                margin: 0;
             }
             h4 .results-count {
                 font-weight: bold;

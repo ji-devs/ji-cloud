@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property, internalProperty, query } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 import "@elements/core/carousel/single";
-import "@elements/core/icon-arrow";
+import "@elements/entry/home/icon-arrow";
 import { CarouselSingle } from '@elements/core/carousel/single';
 import { homeStyles } from '../styles';
 

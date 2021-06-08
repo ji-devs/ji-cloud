@@ -1,4 +1,4 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property, internalProperty } from 'lit-element';
 import "@elements/core/images/ui";
 
 const STR_HERE_TO_HELP = "Here to help";
@@ -24,6 +24,11 @@ export class _ extends LitElement {
                 grid-column: 1;
                 grid-row: 1;
                 position: relative;
+                transition: transform .2s;
+            }
+            :host([active]) .tooltip {
+                background-color: var(--dark-red-1);
+                transform: rotate(10deg);
             }
             .tooltip::after {
                 content: '';
@@ -35,6 +40,10 @@ export class _ extends LitElement {
                 right: 0;
                 top: 32px;
             }
+            :host([active]) .tooltip::after {
+                border-top-color: var(--dark-red-1);
+                border-right-color: var(--dark-red-1);
+            }
             img-ui {
                 grid-column: 1 / -1;
                 grid-row: 1;
@@ -43,10 +52,35 @@ export class _ extends LitElement {
         `];
     }
 
+    @property({ type: Boolean, reflect: true })
+    active: boolean = false;
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        this.addEventListener("mouseenter", this.onMouseEnter);
+        this.addEventListener("mouseleave", this.onMouseLeave);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+
+        this.removeEventListener("mouseenter", this.onMouseEnter);
+        this.removeEventListener("mouseleave", this.onMouseLeave);
+    }
+
+    onMouseEnter() {
+        this.active = true;
+    }
+
+    onMouseLeave() {
+        this.active = false;
+    }
+
     render() {
         return html`
             <span class="tooltip">${STR_HERE_TO_HELP}</span>
-            <img-ui path="entry/home/search-section/here-to-help.png"></img-ui>
+            <img-ui path="entry/home/search-section/here-to-help${ this.active ? "-wink" : "" }.png"></img-ui>
         `;
     }
 }
