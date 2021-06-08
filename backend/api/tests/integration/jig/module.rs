@@ -64,7 +64,11 @@ async fn update_contents() -> anyhow::Result<()> {
         .login()
         .json(&ModuleUpdateRequest {
             body: Some(
-                ModuleBody::MemoryGame(memory::ModuleData::default())
+                ModuleBody::MemoryGame(memory::ModuleData {
+                    content: Some(memory::Content {
+                        ..memory::Content::default()
+                    })
+                })
             ),
             is_complete: Some(true),
 
