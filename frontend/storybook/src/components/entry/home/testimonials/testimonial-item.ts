@@ -21,7 +21,7 @@ export const TestimonialItem = (props?: Partial<Args>) => {
 
     return `
         <home-testimonial-item ${props.slot ? `slot="${props.slot}"` : ""}>
-            <img-ji slot="image" id="something.jpg" lib="mock" size="original"></img-ji>
+            <img-ji slot="image" id="face-round.webp" lib="mock" size="original"></img-ji>
             <h4 slot="header">${props.header}</h4>
             <p slot="paragraph">${props.paragraph}</p>
         </home-testimonial-item>

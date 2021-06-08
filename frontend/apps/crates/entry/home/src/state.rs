@@ -45,7 +45,7 @@ impl State {
 
     fn get_whats_new() -> Vec<WhatsNewItem> {
         iter::repeat(WhatsNewItem {
-            image_id: String::from("??"),
+            image_id: String::from("something.jpg"),
             image_lib: String::from("mock"),
             header: String::from("HOP TV - New Hebrew Series"),
             paragraph: String::from("Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel, Learning Hebrew with HOP Channel Learning Hebrew with HOP"),
@@ -55,7 +55,7 @@ impl State {
 
     fn get_parents_testimonials() -> Vec<Testimonial> {
         iter::repeat(Testimonial {
-            image_id: String::from("??"),
+            image_id: String::from("face-round.webp"),
             image_lib: String::from("mock"),
             header: String::from("Sarah Nazirah, Mexico"),
             paragraph: String::from("I want to tell you, because of JI, my children are learning Hebrew and English simultaneously. For my children, you are not only teaching two children, you are also saving their souls. I reaffirm that they have achieved educational rehabilitation, thanks to JI."),
@@ -64,7 +64,7 @@ impl State {
 
     fn get_teachers_testimonials() -> Vec<Testimonial> {
         iter::repeat(Testimonial {
-            image_id: String::from("??"),
+            image_id: String::from("face-round.webp"),
             image_lib: String::from("mock"),
             header: String::from("Sarah Nazirah, Mexico"),
             paragraph: String::from("I want to tell you, because of JI, my children are learning Hebrew and English simultaneously. For my children, you are not only teaching two children, you are also saving their souls. I reaffirm that they have achieved educational rehabilitation, thanks to JI."),

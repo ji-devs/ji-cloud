@@ -37,6 +37,9 @@ export class _ extends LitElement {
             ::slotted([slot=query]:focus) {
                 outline: none;
             }
+            ::slotted([slot=age]), ::slotted([slot=language]) {
+                border-left: solid 2px var(--light-gray-2);
+            }
             ::slotted([slot=button]) {
                 /* cover .bar border */
                 margin: -1px -2px 0 0;

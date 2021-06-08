@@ -12,6 +12,7 @@ export class _ extends LitElement {
                 place-content: center;
                 justify-items: center;
                 text-decoration: none;
+                cursor: pointer;
             }
             a:hover {
                 background-color: var(--light-gray-1);

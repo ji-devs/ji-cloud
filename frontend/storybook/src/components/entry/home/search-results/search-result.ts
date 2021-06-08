@@ -46,7 +46,7 @@ export const SearchResult = (props?:Args) => {
                 <home-search-result-category label="Vocabulary"></home-search-result-category>
                 <home-search-result-category label="Hebrew letters"></home-search-result-category>
             </home-search-result-details>
-            <button-text slot="play-button" color="white">Play</button-text>
+            <button-rect slot="play-button" color="bluewhite">Play</button-rect>
         </home-search-result>
     `;
 }

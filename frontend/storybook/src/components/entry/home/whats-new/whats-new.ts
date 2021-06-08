@@ -13,7 +13,7 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    nResults: 10,
+    nResults: 3,
 }
 
 export const WhatsNew = (props?:Partial<Args>) => {

@@ -10,6 +10,9 @@ use super::state::State;
 pub fn fetch_metadata(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         state.search_options.populate_options().await;
+        let default_age = state.search_options.age_ranges.lock_ref()[0].id.clone();
+        log::info!("{:?}", default_age);
+        state.search_selected.age_ranges.lock_mut().insert(default_age);
     }));
 }
 

@@ -72,18 +72,26 @@ export class _ extends LitElement {
                 justify-content: space-between;
                 padding: 8px 16px;
             }
+            .main .ages-language, .main .language {
+                display: flex;
+                align-items: center;
+                column-gap: 4px;
+            }
             .main .author-section {
                 font-weight: 500;
                 line-height: 40px;
-                text-align: center;
                 color: var(--main-blue);
                 border-top: solid 1px var(--light-blue-2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             :host([byJiTeam]) .main .author-section {
                 background-color: var(--light-blue-2);
             }
             .main .author-section .by-ji-team {
                 font-weight: 800;
+                white-space: pre-wrap;
             }
 
             .hover {
@@ -137,6 +145,9 @@ export class _ extends LitElement {
                 font-size: 14px;
                 font-weight: 500;
                 margin: 4px 0;
+                display: flex;
+                align-items: center;
+                column-gap: 8px;
             }
             .hover .collapsibles {
                 margin: 20px 0;
@@ -150,6 +161,11 @@ export class _ extends LitElement {
             .hover .author-section {
                 display: flex;
                 justify-content: space-between;
+            }
+            .hover .author-section .left-side {
+                display: flex;
+                align-items: center;
+                column-gap: 6px;
             }
             .hover .play-button-wrapper {
                 height: 82px;
@@ -208,18 +224,18 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="ages-language">
-                        <div>
-                            <img-ui path=""></img-ui>
+                        <div class="age">
+                            <img-ui path="entry/home/search-results/age.svg"></img-ui>
                             <span class="count">${this.ages}</span>
                         </div>
-                        <div>
-                            <img-ui path=""></img-ui>
+                        <div class="language">
+                            <img-ui path="entry/home/search-results/language.svg"></img-ui>
                             <span class="count">${this.language}</span>
                         </div>
                     </div>
                     <div class="author-section">
                         ${this.byJiTeam ? html`
-                            <img-ui path=""></img-ui>
+                            <img-ui path="entry/home/search-results/ji-logo-blue.svg"></img-ui>
                             <span class="by-ji-team">${STR_JI_TEAM} - </span>
                         ` : nothing}
                         ${this.author}
@@ -228,7 +244,10 @@ export class _ extends LitElement {
                 <div class="hover">
                     <div class="scrollable-content">
                         <h3 class="title">${this.title}</h3>
-                        <p class="published-at">2 weeks ago</p>
+                        <p class="published-at">
+                            <img-ui path="entry/home/search-results/time.svg"></img-ui>
+                            2 weeks ago
+                        </p>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
                             <home-search-result-details>
@@ -240,9 +259,9 @@ export class _ extends LitElement {
                                 <slot name="additional-resources"></slot>
                             </home-search-result-details>
                             <div class="author-section">
-                                <span>
+                                <span class="left-side">
                                     ${this.byJiTeam ? html`
-                                        <img-ui path=""></img-ui>
+                                        <img-ui path="entry/home/search-results/ji-logo-white.svg"></img-ui>
                                         <span class="by-ji-team">${STR_JI_TEAM} </span>
                                     ` : nothing}
                                     ${this.author}
