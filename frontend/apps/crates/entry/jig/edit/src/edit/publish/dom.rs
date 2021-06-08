@@ -53,6 +53,7 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-switch", {
                 .property("slot", "public")
                 .property("label", STR_PUBLIC_LABEL)
+                .property_signal("enabled", state.jig.is_public.signal_cloned())
                 .event(clone!(state => move |evt: events::CustomToggle| {
                     let value = evt.value();
                     state.jig.is_public.set(value);
