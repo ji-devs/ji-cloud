@@ -71,6 +71,7 @@ async fn create_with_params() -> anyhow::Result<()> {
         .json(&json!({
             "modules": ["0cbfdd82-7c83-11eb-9f77-d7d86264c3bc"],
             "display_name": "test jig",
+            "description": "test description",
         }))
         .login()
         .send()

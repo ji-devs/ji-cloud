@@ -60,6 +60,7 @@ async fn create(
         creator_id,
         req.publish_at.map(DateTime::<Utc>::from),
         &language,
+        &req.description,
     )
     .await
     .map_err(db::meta::handle_metadata_err)?;
@@ -126,6 +127,8 @@ async fn update(
         req.affiliations.as_deref(),
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
         req.language.as_deref(),
+        req.description.as_deref(),
+        req.is_public,
     )
     .await?;
 

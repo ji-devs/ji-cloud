@@ -823,6 +823,30 @@
       "nullable": []
     }
   },
+  "2c5f9d004b784cbc4521f5a95c3ae2f2d42cc5d0517c78dec089cd7077e18d9c": {
+    "query": "\ninsert into jig\n    (display_name, creator_id, author_id, publish_at, language, description)\nvalues ($1, $2, $2, $3, $4, $5)\nreturning id\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Timestamptz",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "2fc15a774a3c774d8fbe0e1c9479a021c7491224421b3d51a739126b2f38a252": {
     "query": "\nupdate image_metadata\nset name        = coalesce($2, name),\n    description = coalesce($3, description),\n    is_premium  = coalesce($4, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from name) or\n       ($3::text is not null and $3 is distinct from description) or\n       ($4::boolean is not null and $4 is distinct from is_premium))",
     "describe": {
@@ -2098,7 +2122,7 @@
         true,
         true,
         false,
-        true,
+        false,
         false,
         null,
         null,
@@ -3053,29 +3077,6 @@
       "nullable": []
     }
   },
-  "c36ebb9a5396c74886fdb3fe7ed276d7398829b89a9c909f6a68de042a206aef": {
-    "query": "\ninsert into jig\n    (display_name, creator_id, author_id, publish_at, language)\nvalues ($1, $2, $2, $3, $4)\nreturning id\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid",
-          "Timestamptz",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "c5711732b2fcd0f1e9241eecd1714cd91d2de836d9bcb7561317e8fbca447b30": {
     "query": "update image_metadata set uploaded_at = now(), updated_at = now() where id = $1",
     "describe": {
@@ -3201,7 +3202,7 @@
         true,
         true,
         false,
-        true,
+        false,
         false,
         null,
         null,
@@ -3317,7 +3318,7 @@
         true,
         true,
         false,
-        true,
+        false,
         false,
         null,
         null,
@@ -3347,21 +3348,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "cce3aeaccc695f530ff0fed6306b6e87acc581c6cbbc29aed40b62beda863a18": {
-    "query": "\nupdate jig\nset display_name  = coalesce($2, display_name),\n    author_id  = coalesce($3, author_id),\n    language  = coalesce($4, language),\n    updated_at  = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::text is not null and $4 is distinct from language))",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
@@ -3630,6 +3616,23 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "e632f72e3856e06f121af5fe30045d3f17cd2e91bb1fdf9a798ea65c99b2f8b4": {
+    "query": "\nupdate jig\nset display_name    = coalesce($2, display_name),\n    author_id       = coalesce($3, author_id),\n    language        = coalesce($4, language),\n    description     = coalesce($5, description),\n    is_public       = coalesce($6, is_public),\n    updated_at      = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from display_name) or\n       ($3::uuid is not null and $3 is distinct from author_id) or\n       ($4::text is not null and $4 is distinct from language) or\n       ($5::text is not null and $5 is distinct from description) or\n       ($6::bool is not null and $6 is distinct from is_public))",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
     }
   },
   "e805579cae1a6b599640e1bedcc0aa45db9538e223ae3a572a2bbb7d85510cf2": {
