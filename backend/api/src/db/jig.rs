@@ -24,20 +24,22 @@ pub async fn create(
     creator_id: Uuid,
     publish_at: Option<DateTime<Utc>>,
     language: &str,
+    description: &str,
 ) -> sqlx::Result<JigId> {
     let mut transaction = pool.begin().await?;
 
     let jig = sqlx::query!(
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at, language)
-values ($1, $2, $2, $3, $4)
+    (display_name, creator_id, author_id, publish_at, language, description)
+values ($1, $2, $2, $3, $4, $5)
 returning id
 "#,
         display_name,
         creator_id,
         publish_at,
         language,
+        description,
     )
     .fetch_one(&mut transaction)
     .await?;
@@ -200,6 +202,8 @@ pub async fn update(
     affiliations: Option<&[AffiliationId]>,
     publish_at: Option<Option<DateTime<Utc>>>,
     language: Option<&str>,
+    description: Option<&str>,
+    is_public: Option<bool>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -229,18 +233,24 @@ where id = $1 and $2 is distinct from publish_at"#,
     sqlx::query!(
         r#"
 update jig
-set display_name  = coalesce($2, display_name),
-    author_id  = coalesce($3, author_id),
-    language  = coalesce($4, language),
-    updated_at  = now()
+set display_name    = coalesce($2, display_name),
+    author_id       = coalesce($3, author_id),
+    language        = coalesce($4, language),
+    description     = coalesce($5, description),
+    is_public       = coalesce($6, is_public),
+    updated_at      = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::uuid is not null and $3 is distinct from author_id) or
-       ($4::text is not null and $4 is distinct from language))"#,
+       ($4::text is not null and $4 is distinct from language) or
+       ($5::text is not null and $5 is distinct from description) or
+       ($6::bool is not null and $6 is distinct from is_public))"#,
         id.0,
         display_name,
         author_id,
-        language
+        language,
+        description,
+        is_public,
     )
     .execute(&mut transaction)
     .await?;

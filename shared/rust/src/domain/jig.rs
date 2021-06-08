@@ -124,8 +124,7 @@ pub struct JigCreateRequest {
     pub publish_at: Option<Publish>,
 
     /// Description of the jig. Defaults to empty string.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
+    pub description: String,
 }
 
 /// The over-the-wire representation of a JIG.
@@ -171,7 +170,7 @@ pub struct Jig {
     pub additional_resources: Vec<AdditionalResourceId>,
 
     /// Description of the jig.
-    pub description: Option<String>,
+    pub description: String,
 
     /// When the jig was last edited
     pub last_edited: Option<DateTime<Utc>>,
