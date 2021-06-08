@@ -4,11 +4,18 @@ import "@elements/core/images/ui";
 const STR_HEADER_FIRST = "Settings and JIG info.";
 const STR_HEADER_SECOND = "Last step before publishing";
 
-@customElement('creator-publish')
+@customElement('jig-edit-publish')
 export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
+                display: grid;
+                place-content: center;
+                padding: 50px;
+                height: 100%;
+                box-sizing: border-box;
+            }
+            main {
                 display: grid;
                 place-content: center;
                 background-color: var(--white);
@@ -90,44 +97,46 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <div class="width-holder">
-                <div class="header">
-                    <h1>${STR_HEADER_FIRST}</h1>
-                    <h3>${STR_HEADER_SECOND}</h3>
-                </div>
-                <div class="main">
-                    <div  class="column-1">
-                        <slot name="img"></slot>
-                        <div class="public">
-                            <slot name="public"></slot>
+            <main>
+                <div class="width-holder">
+                    <div class="header">
+                        <h1>${STR_HEADER_FIRST}</h1>
+                        <h3>${STR_HEADER_SECOND}</h3>
+                    </div>
+                    <div class="main">
+                        <div  class="column-1">
+                            <slot name="img"></slot>
+                            <div class="public">
+                                <slot name="public"></slot>
+                            </div>
                         </div>
-                    </div>
-                    <div class="column-2">
-                        <slot name="name"></slot>
-                        <slot name="description"></slot>
-                    </div>
-                    <div class="column-3">
-                        <slot name="language"></slot>
-                        <slot name="age"></slot>
-                        <slot name="goal"></slot>
-                        <div class="catagories">
-                            <slot name="catagories-select"></slot>
-                            <div class="category-labels">
-                                <slot name="category-labels"></slot>
+                        <div class="column-2">
+                            <slot name="name"></slot>
+                            <slot name="description"></slot>
+                        </div>
+                        <div class="column-3">
+                            <slot name="language"></slot>
+                            <slot name="age"></slot>
+                            <slot name="goal"></slot>
+                            <div class="catagories">
+                                <slot name="catagories-select"></slot>
+                                <div class="category-labels">
+                                    <slot name="category-labels"></slot>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column-4 additional-resources">
+                            <h4>Additional resources (Optional)</h4>
+                            <div class="additional-resources-items">
+                                <slot name="additional-resources"></slot>
                             </div>
                         </div>
                     </div>
-                    <div class="column-4 additional-resources">
-                        <h4>Additional resources (Optional)</h4>
-                        <div class="additional-resources-items">
-                            <slot name="additional-resources"></slot>
-                        </div>
+                    <div class="publish">
+                        <slot name="publish"></slot>
                     </div>
                 </div>
-                <div class="publish">
-                    <slot name="publish"></slot>
-                </div>
-            </div>
+            </main>
         `;
     }
 }

@@ -8,7 +8,7 @@ use shared::domain::{category::CategoryId, jig::{Jig, JigId, JigUpdateRequest}, 
 pub struct PublishJig {
     pub id: JigId,
     pub display_name: Mutable<String>,
-    pub description: Mutable<Option<String>>,
+    pub description: Mutable<String>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub goals: Mutable<HashSet<GoalId>>,
     pub language: Mutable<String>,
@@ -38,7 +38,7 @@ impl PublishJig {
         Self {
             id: jig_id,
             display_name: Mutable::new(String::new()),
-            description: Mutable::new(None),
+            description: Mutable::new(String::new()),
             age_ranges: Mutable::new(HashSet::new()),
             goals: Mutable::new(HashSet::new()),
             language: Mutable::new(String::new()),
@@ -60,7 +60,7 @@ impl PublishJig {
     pub fn to_jig_update_request(&self) -> JigUpdateRequest {
         JigUpdateRequest {
             display_name: Some(self.display_name.get_cloned()),
-            description: self.description.get_cloned(), // change to some
+            description: Some(self.description.get_cloned()),
             age_ranges: Some(self.age_ranges.get_cloned().into_iter().collect()),
             goals: Some(self.goals.get_cloned().into_iter().collect()),
             language: Some(self.language.get_cloned()),

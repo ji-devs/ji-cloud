@@ -62,9 +62,15 @@ pub enum LegacyRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
-    Publish(JigId),
-    Edit(JigId, Option<ModuleId>),
+    Edit(JigId, JigEditRoute),
     Play(JigId, Option<ModuleId>) 
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum JigEditRoute {
+    Landing,
+    Module(ModuleId),
+    Publish,
 }
 
 #[derive(Debug, Clone)]
@@ -173,20 +179,21 @@ impl Route {
             },
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
-            ["jig", "edit", "publish", jig_id] => Self::Jig(JigRoute::Publish(
-                JigId(Uuid::from_str(jig_id).unwrap_ji())
+            ["jig", "edit", jig_id, "publish"] => Self::Jig(JigRoute::Edit(
+                JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                JigEditRoute::Publish
             )),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
-                    None
+                    JigEditRoute::Landing
             )),
             ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    None
+                    JigEditRoute::Landing
             )),
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
+                    JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
             ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
@@ -287,14 +294,11 @@ impl From<&Route> for String {
             Route::Jig(route) => {
                 match route {
                     JigRoute::Gallery => "/jig/edit/gallery".to_string(),
-                    JigRoute::Publish(jig_id) => {
-                        format!("/jig/edit/publish/{}", jig_id.0.to_string())
-                    }
-                    JigRoute::Edit(jig_id, module_id) => {
-                        if let Some(module_id) = module_id {
-                            format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
-                        } else {
-                            format!("/jig/edit/{}", jig_id.0.to_string())
+                    JigRoute::Edit(jig_id, route) => {
+                        match route {
+                            JigEditRoute::Landing => format!("/jig/edit/{}", jig_id.0.to_string()),
+                            JigEditRoute::Module(module_id) => format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string()),
+                            JigEditRoute::Publish => format!("/jig/edit/{}/publish", jig_id.0.to_string()),
                         }
                     }
                     JigRoute::Play(jig_id, module_id) => {

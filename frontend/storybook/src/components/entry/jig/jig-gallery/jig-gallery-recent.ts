@@ -1,8 +1,8 @@
-import "@elements/module/_common/jig-gallery/jig-gallery-recent";
+import "@elements/entry/jig/gallery/recent";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _common / Jig Gallery"
+    title: "Entry / Jig / Gallery"
 }
 
 interface Args {
@@ -23,7 +23,7 @@ const DEFAULT_ARGS:Args = {
     href: "https://google.com",
 }
 
-export const JigGalleryRecent = (props?:Partial<Args>) => {
+export const Recent = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
@@ -35,5 +35,5 @@ export const JigGalleryRecent = (props?:Partial<Args>) => {
     `;
 }
 
-JigGalleryRecent.args = DEFAULT_ARGS;
+Recent.args = DEFAULT_ARGS;
 

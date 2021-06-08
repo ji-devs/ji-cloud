@@ -16,7 +16,9 @@ impl HeaderDom {
         html!("jig-edit-sidebar-header", {
             .property("slot", "header")
             .property_signal("collapsed", sidebar_state.collapsed.signal())
-            .property_signal("isModulePage", sidebar_state.module_id.signal_cloned().map(|module_id| module_id.is_none()))
+            .property_signal("isModulePage", sidebar_state.route.signal_cloned().map(|route| {
+                matches!(route, JigEditRoute::Landing)
+            }))
             .children(&mut [
                 html!("jig-edit-sidebar-close-button", {
                     .property("slot", "close")
@@ -62,8 +64,8 @@ impl HeaderDom {
                     .property("slot", "modules")
                     .property("kind", "modules")
                     .event(clone!(sidebar_state => move |_:events::Click| {
-                        sidebar_state.module_id.set_neq(None);
-                        let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), None)).into();
+                        sidebar_state.route.set_neq(JigEditRoute::Landing);
+                        let url:String = Route::Jig(JigRoute::Edit(sidebar_state.jig.id.clone(), JigEditRoute::Landing)).into();
                         dominator::routing::go_to_url(&url);
                     }))
                 }),

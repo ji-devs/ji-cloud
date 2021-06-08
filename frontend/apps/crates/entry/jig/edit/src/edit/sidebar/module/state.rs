@@ -1,4 +1,5 @@
 use shared::domain::jig::{LiteModule, module::ModuleId, ModuleKind};
+use utils::routes::JigEditRoute;
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::edit::sidebar::state::State as SidebarState;
@@ -47,7 +48,7 @@ impl State {
         map_ref! {
             let kind = self.kind_signal(),
             let publish_at = self.sidebar.publish_at.signal_cloned(),
-            let active_module_id = self.sidebar.module_id.signal_cloned()
+            let route = self.sidebar.route.signal_cloned()
                 => move {
                     if publish_at.is_some() {
                         return "published";
@@ -55,11 +56,10 @@ impl State {
                     match kind {
                         None => return "empty",
                         Some(_) => {
-                            if active_module_id.is_some() && active_module_id.unwrap() == this_module_id {
-                                return "active";
-                            } else {
-                                return "draft";
-                            };
+                            match route {
+                                JigEditRoute::Module(module_id) if *module_id == this_module_id => return "active",
+                                _ => return "draft",
+                            }
                         }
                     };
                 }

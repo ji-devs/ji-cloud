@@ -19,7 +19,6 @@ pub fn render(state: Rc<State>, items: Vec<Dom>) -> Dom {
     html!("menu-kebab", {
         .property("slot", "menu")
         .child(html!("jig-edit-sidebar-module-menu", {
-            .property("slot", "menu-content")
             .children(items)
         }))
         .after_inserted(clone!(state => move |elem| {

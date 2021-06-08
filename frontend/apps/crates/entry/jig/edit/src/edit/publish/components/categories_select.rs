@@ -4,7 +4,7 @@ use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use shared::domain::category::Category;
 use utils::unwrap::UnwrapJiExt;
 
-use crate::publish::state::State;
+use super::super::state::State;
 
 const STR_CATEGORIES_LABEL: &'static str = "Categories";
 const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";

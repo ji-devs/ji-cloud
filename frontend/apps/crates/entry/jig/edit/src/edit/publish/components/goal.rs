@@ -4,7 +4,7 @@ use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use shared::domain::meta::Goal;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use crate::publish::state::State;
+use super::super::state::State;
 
 const STR_TEACHING_GOAL_LABEL: &'static str = "Teaching Goal";
 const STR_TEACHING_GOAL_PLACEHOLDER: &'static str = "Select from the list";

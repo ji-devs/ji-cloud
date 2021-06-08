@@ -4,7 +4,7 @@ use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use shared::domain::meta::AgeRange;
 use utils::{events, unwrap::UnwrapJiExt};
 
-use crate::publish::state::State;
+use super::super::state::State;
 
 const STR_AGE_LABEL: &'static str = "Age";
 const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";

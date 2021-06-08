@@ -31,7 +31,7 @@ export class _ extends LitElement {
                 :host([isModulePage]) .page-overlay {
                     display: none;
                 }
-                :host([collapsed], [isModulePage]) .page-overlay {
+                :host([collapsed]) .page-overlay, :host([isModulePage]) .page-overlay {
                     background-color: #ffffff00;
                     pointer-events: none;
                 }

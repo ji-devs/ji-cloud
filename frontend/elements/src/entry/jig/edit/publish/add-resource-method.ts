@@ -11,7 +11,7 @@ const STR_LABEL_LOOKUP: {
 };
 
 
-@customElement('creator-publish-add-resource-method')
+@customElement('jig-edit-publish-add-resource-method')
 export class _ extends LitElement {
     static get styles() {
         return [css`

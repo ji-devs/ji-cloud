@@ -26,7 +26,7 @@ pub struct SidebarDom {
 }
 
 impl SidebarDom {
-    pub fn render(jig_id: JigId, module_id: Mutable<Option<ModuleId>>) -> Dom {
+    pub fn render(jig_id: JigId, route: Mutable<JigEditRoute>) -> Dom {
         let loader = AsyncLoader::new();
         let jig = Rc::new(RefCell::new(None));
 
@@ -38,14 +38,14 @@ impl SidebarDom {
             }
         }));
 
-        Dom::with_state(loader, clone!(jig, module_id => move |loader| {
+        Dom::with_state(loader, clone!(jig, route => move |loader| {
             html!("empty-fragment", {
                 .property("slot", "sidebar")
-                .child_signal(loader.is_loading().map(clone!(jig, module_id => move |loading| {
+                .child_signal(loader.is_loading().map(clone!(jig, route => move |loading| {
                     if loading {
                         None
                     } else {
-                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), module_id.clone()))
+                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), route.clone()))
                     }
                 })))
             })
@@ -53,14 +53,16 @@ impl SidebarDom {
 
     }
 
-    fn render_loaded(jig: Jig, module_id: Mutable<Option<ModuleId>>) -> Dom {
-        let state = Rc::new(State::new(jig, module_id));
+    fn render_loaded(jig: Jig, route: Mutable<JigEditRoute>) -> Dom {
+        let state = Rc::new(State::new(jig, route));
 
 
         html!("empty-fragment", {
             .child(html!("jig-edit-sidebar", {
                 .property_signal("collapsed", state.collapsed.signal())
-                .property_signal("isModulePage", state.module_id.signal_cloned().map(|module_id| module_id.is_none()))
+                .property_signal("isModulePage", state.route.signal_cloned().map(|route| {
+                    matches!(route, JigEditRoute::Landing)
+                }))
                 .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
                 .child(html!("jig-edit-sidebar-publish", {
@@ -69,6 +71,12 @@ impl SidebarDom {
                         publish_at.is_some()
                     }))
                     .property_signal("collapsed", state.collapsed.signal())
+                    .property_signal("selected", state.route.signal_cloned().map(|route| {
+                        matches!(route, JigEditRoute::Publish)
+                    }))
+                    .event(clone!(state => move |_ :events::Click| {
+                        actions::navigate_to_publish(state.clone());
+                    }))
                     .child(html!("menu-kebab", {
                         .property("slot", "menu")
                         .child(html!("menu-line", {

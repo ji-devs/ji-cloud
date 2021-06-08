@@ -4,7 +4,7 @@ use futures_signals::signal::SignalExt;
 use shared::domain::category::CategoryId;
 use utils::unwrap::UnwrapJiExt;
 
-use crate::publish::state::State;
+use super::super::state::State;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("div", {

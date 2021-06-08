@@ -4,7 +4,7 @@ use shared::domain::{category::{Category, CategoryId}, jig::JigId, meta::{AgeRan
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 
-use crate::publish::publish_jig::PublishJig;
+use super::publish_jig::PublishJig;
 
 const STR_LANGUAGE_ENGLISH: &'static str = "English";
 const STR_LANGUAGE_HEBREW: &'static str = "Hebrew";

@@ -1,6 +1,6 @@
-import "@elements/module/_common/creator-publish/creator-publish";
-import "@elements/module/_common/creator-publish/creator-publish-add-resource";
-import "@elements/module/_common/creator-publish/creator-publish-add-resource-method";
+import "@elements/entry/jig/edit/publish/publish";
+import "@elements/entry/jig/edit/publish/add-resource";
+import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/core/inputs/switch";
 import "@elements/core/inputs/text";
 import "@elements/core/inputs/form/textarea";
@@ -11,7 +11,7 @@ import "@elements/core/pills/pill-close";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _common / Creator Publish"
+    title: "Entry / Jig / Edit / Publish"
 }
 
 interface Args {
@@ -22,12 +22,12 @@ const DEFAULT_ARGS:Args = {
     recentCount: 12,
 }
 
-export const CreatorPublish = (props?:Partial<Args>) => {
+export const Publish = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
         <div style="padding:30px;background-color:#d7eafa;">
-            <creator-publish ${argsToAttrs(props)}>
+            <jig-edit-publish ${argsToAttrs(props)}>
                 <img-ji slot="img" lib="mock" size="full" id="jig-gallery.jpg"></img-ji>
                 <input-switch slot="public" label="My JIG is public"></input-switch>
 
@@ -93,37 +93,37 @@ export const CreatorPublish = (props?:Partial<Args>) => {
                 ></pill-close>
 
 
-                <creator-publish-add-resource
+                <jig-edit-publish-add-resource
                     slot="additional-resources"
                     label="Add Lesson Plan"
                 >
-                    <creator-publish-add-resource-method
+                    <jig-edit-publish-add-resource-method
                         slot="add-method"
                         kind="upload"
-                    ></creator-publish-add-resource-method>
-                    <creator-publish-add-resource-method
+                    ></jig-edit-publish-add-resource-method>
+                    <jig-edit-publish-add-resource-method
                         slot="add-method"
                         kind="link"
-                    ></creator-publish-add-resource-method>
-                </creator-publish-add-resource>
-                <creator-publish-add-resource
+                    ></jig-edit-publish-add-resource-method>
+                </jig-edit-publish-add-resource>
+                <jig-edit-publish-add-resource
                     slot="additional-resources"
                     label="Add Curriculum"
-                ></creator-publish-add-resource>
-                <creator-publish-add-resource
+                ></jig-edit-publish-add-resource>
+                <jig-edit-publish-add-resource
                     slot="additional-resources"
                     label="Add Activities Ideas"
-                ></creator-publish-add-resource>
-                <creator-publish-add-resource
+                ></jig-edit-publish-add-resource>
+                <jig-edit-publish-add-resource
                     slot="additional-resources"
                     label="Add Link"
-                ></creator-publish-add-resource>
+                ></jig-edit-publish-add-resource>
 
 
                 <button-rect slot="publish" iconAfter="rocket">Publish JIG</button-rect>
-            </creator-publish>
+            </jig-edit-publish>
         </div>
     `;
 }
 
-CreatorPublish.args = DEFAULT_ARGS;
+Publish.args = DEFAULT_ARGS;

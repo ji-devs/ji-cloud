@@ -3,7 +3,7 @@ use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
 use utils::events;
 
-use crate::publish::state::{Language, State};
+use super::super::state::{Language, State};
 
 
 const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";

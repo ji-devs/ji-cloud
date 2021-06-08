@@ -32,6 +32,7 @@ pub fn render(jig_id: JigId) -> Dom {
     actions::load_data(state.clone(), jig_id);
 
     html!("empty-fragment", {
+        .property("slot", "main")
         .child(render_page(state.clone()))
         .child(html!("window-loader-block", {
             .property_signal("visible", state.loader.is_loading())
@@ -41,7 +42,7 @@ pub fn render(jig_id: JigId) -> Dom {
 
 
 fn render_page(state: Rc<State>) -> Dom {
-    html!("creator-publish", {
+    html!("jig-edit-publish", {
         .children(&mut [
             html!("img-ji", {
                 .property("slot", "img")
@@ -83,13 +84,10 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-form-textarea", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
-                .property_signal("value", state.jig.description.signal_cloned().map(|v| match v {
-                    Some(v) => v,
-                    None => String::new(),
-                }))
+                .property_signal("value", state.jig.description.signal_cloned())
                 .event(clone!(state => move |evt: events::CustomChange| {
                     let value = evt.value();
-                    state.jig.description.set(Some(value));
+                    state.jig.description.set(value);
                 }))
             }),
 

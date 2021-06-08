@@ -1,8 +1,8 @@
-import "@elements/module/_common/jig-gallery/jig-gallery-create";
+import "@elements/entry/jig/gallery/create";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _common / Jig Gallery"
+    title: "Entry / Jig / Gallery"
 }
 
 interface Args {
@@ -11,7 +11,7 @@ interface Args {
 const DEFAULT_ARGS:Args = {
 }
 
-export const JigGalleryCreate = (props?:Partial<Args>) => {
+export const Create = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
@@ -19,4 +19,4 @@ export const JigGalleryCreate = (props?:Partial<Args>) => {
     `;
 }
 
-JigGalleryCreate.args = DEFAULT_ARGS;
+Create.args = DEFAULT_ARGS;

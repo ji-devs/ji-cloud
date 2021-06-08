@@ -5,7 +5,7 @@ import "@elements/core/overlays/anchored-overlay";
 const STR_HEADER = "Enter URL";
 const STR_INPUT_LABEL = "Enter your link here";
 
-@customElement('creator-publish-add-link-popup')
+@customElement('jig-edit-publish-add-link-popup')
 export class _ extends LitElement {
     static get styles() {
         return [css`

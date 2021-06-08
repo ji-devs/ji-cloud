@@ -1,10 +1,10 @@
 
-import "@elements/module/_common/jig-gallery/jig-gallery-template";
-import { Kind } from "@elements/module/_common/jig-gallery/jig-gallery-template";
+import "@elements/entry/jig/gallery/template";
+import { Kind } from "@elements/entry/jig/gallery/template";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _common / Jig Gallery"
+    title: "Entry / Jig / Gallery"
 }
 
 interface Args {
@@ -15,7 +15,7 @@ const DEFAULT_ARGS:Args = {
     kind: "vocabulary",
 }
 
-export const JigGalleryTemplate = (props?:Partial<Args>) => {
+export const Template = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
@@ -23,8 +23,8 @@ export const JigGalleryTemplate = (props?:Partial<Args>) => {
     `;
 }
 
-JigGalleryTemplate.args = DEFAULT_ARGS;
-JigGalleryTemplate.argTypes = {
+Template.args = DEFAULT_ARGS;
+Template.argTypes = {
     kind: {
         control: {
             type: 'inline-radio',

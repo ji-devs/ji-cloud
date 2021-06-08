@@ -18,6 +18,20 @@ pub async fn load_jig(jig_id: JigId, jig_cell: Rc<RefCell<Option<Jig>>>) {
 
 }
 
+pub fn navigate_to_publish(state: Rc<State>) {
+    state.route.set_neq(JigEditRoute::Publish);
+    state.collapsed.set(true);
+
+    let jig_id = state.jig.id;
+    let url:String = Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Publish)).into();
+    log::info!("{}", url);
+
+    /* this will cause a full refresh - but preserves history
+     * see the .future in EditPage too
+    dominator::routing::go_to_url(&url);
+     */
+}
+
 pub async fn update_jig(jig_id: &JigId, req: JigUpdateRequest) -> Result<(), EmptyError> {
     let path = endpoints::jig::Update::PATH
         .replace("{id}", &jig_id.0.to_string());

@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/images/ui";
 
 
-@customElement('creator-publish-add-resource')
+@customElement('jig-edit-publish-add-resource')
 export class _ extends LitElement {
     static get styles() {
         return [css`

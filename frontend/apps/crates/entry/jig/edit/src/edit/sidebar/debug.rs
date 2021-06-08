@@ -35,7 +35,7 @@ pub fn get_jig() -> Jig {
         categories: Vec::new(),
         publish_at: None,
         additional_resources: Vec::new(),
-        description: None,
+        description: String::new(),
         last_edited: None,
         is_public: false,
     }

@@ -1,7 +1,7 @@
-import "@elements/module/_common/jig-gallery/jig-gallery";
-import "@elements/module/_common/jig-gallery/jig-gallery-create";
-import "@elements/module/_common/jig-gallery/jig-gallery-template";
-import "@elements/module/_common/jig-gallery/jig-gallery-recent";
+import "@elements/entry/jig/gallery/gallery";
+import "@elements/entry/jig/gallery/create";
+import "@elements/entry/jig/gallery/template";
+import "@elements/entry/jig/gallery/recent";
 import "@elements/core/buttons/text";
 import "@elements/core/inputs/search";
 import "@elements/core/menu/menu-line";
@@ -9,7 +9,7 @@ import { arrayCount, mapToString } from "@utils/array";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {
-    title: "Module / _common / Jig Gallery"
+    title: "Entry / Jig / Gallery"
 }
 
 interface Args {
@@ -20,7 +20,7 @@ const DEFAULT_ARGS:Args = {
     recentCount: 12,
 }
 
-export const JigGallery = (props?:Partial<Args>) => {
+export const Gallery = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
@@ -40,7 +40,7 @@ export const JigGallery = (props?:Partial<Args>) => {
     `;
 }
 
-JigGallery.args = DEFAULT_ARGS;
+Gallery.args = DEFAULT_ARGS;
 
 
 function recent() {
