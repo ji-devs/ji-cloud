@@ -28,7 +28,7 @@ fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
         .property("playedCount", "???")
         .property("likedCount", "???")
         .property("language", &jig.language)
-        .property("description", jig.description.clone().unwrap_or_default())
+        .property("description", jig.description.clone())
         .children(&mut [
             html!("img-ji", {
                 .property("lib", "mock")
