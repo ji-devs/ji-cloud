@@ -36,7 +36,7 @@ impl State {
 
     fn get_quick_searches() -> Vec<QuickSearch> {
         iter::repeat(QuickSearch {
-            image_id: String::from("??"),
+            image_id: String::from("???"),
             image_lib: String::from("mock"),
             search_term: String::from("Chanukah"),
             jigs_count: 355 as u32,
