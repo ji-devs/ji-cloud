@@ -59,4 +59,5 @@ import "@elements/core/inputs/color";
 
 //trace
 import "@elements/module/_common/widgets/trace/edit-reshape-menu";
+import "@elements/module/_common/widgets/trace/edit-reshape-menu-btn";
 import "@elements/module/_common/widgets/trace/edit-select-box";

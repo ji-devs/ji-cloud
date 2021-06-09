@@ -20,12 +20,15 @@ impl Menu {
     pub fn get_pos(&self, resize_info: &ResizeInfo) -> (f64, f64) {
 
         let bounds = match self.trace.transform.get_dom_rect_bounds() {
-            Some(bounds) => bounds,
+            Some(bounds) => {
+                bounds
+            },
             None => {
                 //without the real DomRects, do our best with the basic transform bounds
-                //this will actually work fine in every case here
-                //since the initial transform is always non-rotated
-                self.trace.transform.get_bounds_px(false)
+                let mut bounds = self.trace.transform.get_bounds_px(false);
+                bounds.y += 10.0; //dunno why this shift happens..
+                bounds
+
             }
         };
 
