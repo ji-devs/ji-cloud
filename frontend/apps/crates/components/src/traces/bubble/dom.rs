@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone, svg, class};
+use dominator::{DomBuilder, html, Dom, clone, svg, class};
 use web_sys::AudioContext;
 use std::rc::Rc;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}, math::bounds::BoundsF64};
@@ -10,6 +10,8 @@ use futures_signals::{
 };
 use super::state::*;
 use crate::audio_mixer::AudioMixer;
+use crate::tooltip::dom::render_mixin as render_tooltip_mixin;
+use web_sys::{HtmlElement, Element, DomRect};
 
 pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
 
@@ -21,6 +23,12 @@ pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
         mixer.play_oneshot(audio.clone())
     });
 
+    if let Some(tooltip) = state.tooltip.as_ref() {
+        render_tooltip_mixin(tooltip.clone(), |dom:DomBuilder<HtmlElement>| state.fade.render(dom))
+    } else {
+        html!("empty-fragment")
+    }
+    /*
     //TODO - turn to custom element
     html!("div", {
         .apply(|dom| state.fade.render(dom))
@@ -39,4 +47,5 @@ pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
             dom.text(&state.text.as_ref().unwrap_ji())
         })
     })
+    */
 }

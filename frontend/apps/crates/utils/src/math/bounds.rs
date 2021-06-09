@@ -219,6 +219,23 @@ impl BoundsF64 {
             }
         })
     }
+    pub fn denormalize_fixed_signal(&self) -> impl Signal<Item = Self> {
+
+        resize_info_signal().map({
+            let _self = self.clone();
+
+            move |resize_info| {
+                let mut bounds = _self.denormalize(&resize_info);
+                let (pos_x, pos_y) = resize_info.get_fixed_pos_px(bounds.x, bounds.y);
+                bounds.x = pos_x;
+                bounds.y = pos_y;
+
+
+                bounds
+
+            }
+        })
+    }
     pub fn denormalize_x_signal(&self) -> impl Signal<Item = f64> {
         self.denormalize_signal().map(|bounds| bounds.x)
     }
@@ -254,6 +271,16 @@ impl From<DomRect> for BoundsF64 {
             height: rect.height(),
             invert_y: true
         }
+    }
+}
+impl From<BoundsF64> for DomRect {
+    fn from(bounds:BoundsF64) -> Self {
+        DomRect::new_with_x_and_y_and_width_and_height(
+            bounds.x,
+            bounds.y,
+            bounds.width,
+            bounds.height
+        ).unwrap_ji()
     }
 }
 impl From<&Element> for BoundsF64 {

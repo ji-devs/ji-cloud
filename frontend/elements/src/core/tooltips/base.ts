@@ -4,6 +4,8 @@ import {nothing} from "lit-html";
 //making them properties would be a nice improvement
 const ARROW_SIZE = 24;
 
+
+//TODO - draw the arrow/container manually as svg
 @customElement("tooltip-base")
 export class _ extends LitElement {
     static get styles() {
@@ -18,6 +20,13 @@ export class _ extends LitElement {
                     /*box-shadow: 0 3px 40px 0 rgba(0, 0, 0, 0.08);*/
                 }
 
+                :host([rounded]) {
+                    border-radius: 25rem;
+                }
+                :host([color="green"]) {
+                    border: solid 2px #4bb972;
+                    background-color: var(--main-green);
+                }
                 :host([color="beige"]) {
                     border: solid 2px var(--light-orange-2);
                     background-color: var(--light-orange-1);
@@ -28,13 +37,13 @@ export class _ extends LitElement {
 
                 
                 .content {
-                    padding: 24px;
+                    padding: 24rem;
                 }
                 #arrow {
                     position: absolute;
                     left: 0; top: 0;
-                    width: ${css`${ARROW_SIZE}px`}; 
-                    height: ${css`${ARROW_SIZE}px`}; 
+                    width: ${css`${ARROW_SIZE}rem`}; 
+                    height: ${css`${ARROW_SIZE}rem`}; 
                     background: inherit;
                 }
 
@@ -65,6 +74,7 @@ export class _ extends LitElement {
 
             const target = typeof this.target === "string" ? document.getElementById(this.target) // todo recurse for shadow dom?
                 : typeof this.target === "function" ? this.target()
+                : targetIsDomRect(this.target) ? this.target 
                 : this.target;
 
             if(!target) {
@@ -106,6 +116,9 @@ export class _ extends LitElement {
     @property()
     moveStrategy:MoveStrategy = "";
 
+    @property({type: Boolean, reflect: true})
+    rounded:boolean = false;
+
     @property({reflect: true})
     color:COLOR = "beige";
 
@@ -137,6 +150,25 @@ export class _ extends LitElement {
     }
 }
 
+function targetIsDomRect(target:any):boolean {
+    return typeof target.x === "number" 
+    && typeof target.y === "number"
+    && typeof target.width === "number"
+    && typeof target.height === "number";
+}
+
+function targetIsElement(target:any):boolean {
+    //TODO - make this better... instanceof?
+    return !targetIsDomRect(target);
+}
+function getTargetDomRect(target: ElementTarget):DOMRect {
+    if(targetIsDomRect(target)) {
+        return target as DOMRect;
+    } else {
+        //TODO - handle other target types
+        return (target as Element).getBoundingClientRect();
+    }
+}
 
 function createInstance(opts:Opts):TooltipInstance {
     let lastTargetRect:DOMRect | undefined;
@@ -156,7 +188,7 @@ function createInstance(opts:Opts):TooltipInstance {
         const align:Align = 
             splitIndex === -1 ? "middle" : placement.substr(splitIndex+1) as any;
 
-        const targetRect = target.getBoundingClientRect();
+        const targetRect = getTargetDomRect(target);
         //can help mitigate resize vs. move
         //but very confusing 
         //lastTargetRect = targetRect; //why not
@@ -291,7 +323,9 @@ function createInstance(opts:Opts):TooltipInstance {
     const recalc = () => _recalc(opts, 3);
     // @ts-ignore
     const observer = new ResizeObserver(recalc);
-    observer.observe(opts.target);
+    if(targetIsElement(opts.target)) {
+        observer.observe(opts.target as Element);
+    }
     observer.observe(opts.tooltip);
 
 
@@ -301,8 +335,7 @@ function createInstance(opts:Opts):TooltipInstance {
     if(moveStrategy !== "") {
         const checkPosition = () => {
 
-            const targetRect = opts.target.getBoundingClientRect();
-            console.log(targetRect.y);
+            const targetRect = getTargetDomRect(opts.target);
 
             if(lastTargetRect !== undefined) {
                 if(targetRect.x !== lastTargetRect.x || targetRect.y !== lastTargetRect.y) {
@@ -340,7 +373,7 @@ function createInstance(opts:Opts):TooltipInstance {
 }
 
 interface Opts {
-    target: Element,
+    target: Element | DOMRect,
     tooltip: Element,
     placement: Placement,
     margin: number,
@@ -360,9 +393,9 @@ interface TooltipInstance {
     destroy: () => any
 }
 
-export type ElementTarget = Element | string | (() => Element);
+export type ElementTarget = Element | string | (() => Element) | DOMRect;
 
-export type COLOR = "beige" | "red";
+export type COLOR = "beige" | "red" | "green";
 
 //match it in tooltip/types.rs on the rust side
 export type Placement = 

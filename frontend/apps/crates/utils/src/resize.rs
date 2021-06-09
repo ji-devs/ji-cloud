@@ -63,6 +63,15 @@ impl ResizeInfo {
         (x, y)
     }
 
+    //given coordinates within the viewport, get absolute coordinats in window 
+    pub fn get_fixed_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
+
+        //need to offset it by content space
+        let x = x + (self.x + self.content_x);
+        let y = y + (self.y + self.content_y);
+
+        (x, y)
+    }
     //given absolute coordinates, get normalized coordinates within the viewport
     pub fn get_pos_normalized(&self, x: f64, y: f64) -> (f64, f64) {
         let (x, y) = self.get_pos_px(x, y);

@@ -100,6 +100,7 @@ pub fn render_raw(sprite: &RawSprite) -> Dom {
             src.as_ref().map(|src| {
                 html!("img", {
                     .attribute("src", src)
+                    .style("pointer-events", "none")
                     .style("display", "block")
                     .style("position", "relative")
                     .style_signal("width", width_signal(size.signal_cloned()))

@@ -54,12 +54,13 @@ impl Placement {
 
 pub enum TooltipTarget {
     Element(HtmlElement, MoveStrategy),
-    NormalizedBounds(BoundsF64),
+    NormalizedBounds(BoundsF64, MoveStrategy),
 }
 
 pub enum TooltipData {
     Error(Rc<TooltipError>),
     Confirm(Rc<TooltipConfirm>),
+    Bubble(Rc<TooltipBubble>),
 }
 
 
@@ -81,6 +82,12 @@ pub struct TooltipConfirm {
     pub callbacks: TooltipConfirmCallbacks,
 }
 
+pub struct TooltipBubble {
+    pub placement:Placement, 
+    pub slot: Option<String>, 
+    pub body: String, 
+    pub max_width: Option<f64>,
+}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum MoveStrategy {

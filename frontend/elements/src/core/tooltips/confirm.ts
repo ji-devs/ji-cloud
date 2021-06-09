@@ -11,8 +11,8 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
-                font-family: Poppins;
-            }
+                    display: inline-block;
+                }
             .body {
                 font-size: 16px;
                 color: var(--dark-gray-6);

@@ -17,6 +17,7 @@ import "@elements/core/inputs/form/textarea";
 import "@elements/core/tooltips/info";
 import "@elements/core/tooltips/confirm";
 import "@elements/core/tooltips/error";
+import "@elements/core/tooltips/bubble";
 import "@elements/core/drag/container";
 import "@elements/core/menu/container";
 import "@elements/core/menu/menu-line";

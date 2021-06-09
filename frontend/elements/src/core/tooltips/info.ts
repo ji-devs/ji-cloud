@@ -11,8 +11,8 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-            :host {
-              font-family: Poppins;
+                :host {
+                    display: inline-block;
             }
 
             .content {
