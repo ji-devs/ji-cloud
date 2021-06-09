@@ -29,7 +29,7 @@ expression: body
     "language": "en",
     "categories": [],
     "publish_at": null,
-    "additional_resources": [],
+    "additional_resources": "[ids]",
     "description": "test description",
     "last_edited": "[last_edited]",
     "is_public": false,

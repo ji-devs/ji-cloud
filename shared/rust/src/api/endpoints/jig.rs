@@ -15,8 +15,11 @@ use super::ApiEndpoint;
 /// Endpoints for jig modules.
 pub mod module;
 
-/// Endpoints for JIG additional resources.
+/// Endpoints for jig additional resources.
 pub mod additional_resource;
+
+/// Endpoints for jig drafts.
+pub mod draft;
 
 /// Get a JIG by ID.
 ///
@@ -74,6 +77,15 @@ impl ApiEndpoint for Create {
 ///
 /// # Authorization
 /// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+///
+/// ['NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
+///
+/// ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the jig is a draft.
 pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();

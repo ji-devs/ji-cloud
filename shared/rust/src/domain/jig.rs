@@ -400,7 +400,7 @@ pub struct JigBrowseResponse {
     pub total_jig_count: u64,
 }
 
-/// Search for images via the given query string.
+/// Search for jigs via the given query string.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigSearchQuery {
@@ -467,6 +467,14 @@ pub struct JigSearchResponse {
 
     /// The total number of jigs found
     pub total_image_count: u64,
+}
+
+/// Response for successfully finding the draft of a jig.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigDraftResponse {
+    /// The ID of the jig
+    pub id: JigId,
 }
 
 /// Sets text direction for the jig

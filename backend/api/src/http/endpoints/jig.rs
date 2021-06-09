@@ -24,6 +24,7 @@ use crate::{
     extractor::TokenUser,
     service::ServiceData,
 };
+use shared::domain::jig::JigDraftResponse;
 
 /// Create a jig.
 #[api_v2_operation]
@@ -81,13 +82,12 @@ async fn clone(
     db: Data<PgPool>,
     claims: TokenUser,
     parent: web::Path<JigId>,
-) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::NotFound> {
+) -> Result<CreatedJson<<jig::Create as ApiEndpoint>::Res>, error::JigCloneDraft> {
     db::jig::authz(&*db, claims.0.user_id, None).await?;
 
-    match db::jig::clone(&*db, parent.into_inner(), claims.0.user_id).await? {
-        Some(id) => Ok(CreatedJson(CreateResponse { id })),
-        None => Err(error::NotFound::ResourceNotFound),
-    }
+    let id = db::jig::clone(&*db, parent.into_inner(), claims.0.user_id).await?;
+
+    Ok(CreatedJson(CreateResponse { id }))
 }
 
 /// Delete a jig.
@@ -231,6 +231,54 @@ async fn search(
     }))
 }
 
+/// Create a draft of a published jig
+#[api_v2_operation]
+async fn create_draft(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    live_id: web::Path<JigId>,
+) -> Result<CreatedJson<<jig::draft::Create as ApiEndpoint>::Res>, error::JigCloneDraft> {
+    let live_id = live_id.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
+
+    let id = db::jig::create_draft(&*db, live_id).await?;
+
+    Ok(CreatedJson(CreateResponse { id }))
+}
+
+/// Get the id for the draft of a published jig
+#[api_v2_operation]
+async fn get_draft(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    live_id: web::Path<JigId>,
+) -> Result<Json<<jig::draft::Get as ApiEndpoint>::Res>, error::JigCloneDraft> {
+    let live_id = live_id.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
+
+    let id = db::jig::get_draft(db.as_ref(), live_id).await?;
+
+    Ok(Json(JigDraftResponse { id }))
+}
+
+/// Publish the draft version of a jig.
+#[api_v2_operation]
+async fn publish_draft(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    live_id: web::Path<JigId>,
+) -> Result<Json<<jig::draft::Publish as ApiEndpoint>::Res>, error::JigCloneDraft> {
+    let live_id = live_id.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(live_id)).await?;
+
+    db::jig::publish_draft_to_live(db.as_ref(), live_id).await?;
+
+    Ok(Json(()))
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
         .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
@@ -238,5 +286,17 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
         .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
         .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
-        .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete));
+        .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
+        .route(
+            jig::draft::Create::PATH,
+            jig::draft::Create::METHOD.route().to(create_draft),
+        )
+        .route(
+            jig::draft::Get::PATH,
+            jig::draft::Get::METHOD.route().to(get_draft),
+        )
+        .route(
+            jig::draft::Publish::PATH,
+            jig::draft::Publish::METHOD.route().to(publish_draft),
+        );
 }
