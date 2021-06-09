@@ -4,7 +4,10 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         additional_resource::AdditionalResourceId,
-        module::{body::cover, ModuleBody, ModuleId},
+        module::{
+            body::{cover, ThemeId},
+            ModuleBody, ModuleId,
+        },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
         LiteModule, ModuleKind, TextDirection,
     },
@@ -15,7 +18,6 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error;
-use shared::domain::jig::module::body::ThemeId;
 
 pub async fn create(
     pool: &PgPool,
@@ -338,7 +340,6 @@ where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negativ
     }
 
     sqlx::query!(
-        //language=SQL
         r#"
 update jig
 set display_name     = coalesce($2, display_name),
@@ -403,11 +404,19 @@ where id = $1
 }
 
 pub async fn delete(pool: &PgPool, id: JigId) -> anyhow::Result<()> {
-    sqlx::query!("delete from jig where id = $1", id.0)
-        .execute(pool)
-        .await
-        .map(drop)
-        .map_err(Into::into)
+    sqlx::query!(
+        r#"
+with draft as (
+    select draft_id as id from jig_draft_join where live_id = $1
+)
+delete from jig where id = $1 or id = (select id from draft)
+"#,
+        id.0
+    )
+    .execute(pool)
+    .await
+    .map(drop)
+    .map_err(Into::into)
 }
 
 pub async fn list(
@@ -416,7 +425,8 @@ pub async fn list(
     author_id: Option<Uuid>,
     page: i32,
 ) -> sqlx::Result<Vec<Jig>> {
-    sqlx::query!( //language=SQL
+    log::info!("{:?}", author_id);
+    sqlx::query!(
         r#"
 select  
     id as "id: JigId",
@@ -447,8 +457,9 @@ select
     array(select row(id) from jig_additional_resource where jig_id = jig.id) as "additional_resources!: Vec<(AdditionalResourceId,)>"
 from jig
 where 
-    publish_at < now() is not distinct from $1 or $1 is null
-    and author_id is not distinct from $3 or $3 is null
+    (publish_at < now() is not distinct from $1 or $1 is null)
+    and (author_id is not distinct from $3 or $3 is null)
+    and jig.id not in (select draft_id as id from jig_draft_join) -- check explain. is this slow?
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#,
@@ -500,8 +511,9 @@ pub async fn filtered_count(
 select count(*) as "count!: i64"
 from jig
 where
-    publish_at < now() is not distinct from $1 or $1 is null
-    and author_id is not distinct from $2 or $2 is null
+    (publish_at < now() is not distinct from $1 or $1 is null)
+    and (author_id is not distinct from $2 or $2 is null)
+    and id not in (select draft_id as id from jig_draft_join) 
 "#,
         is_published,
         author_id,
@@ -511,10 +523,26 @@ where
     .map(|it| it.count as u64)
 }
 
-pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Option<JigId>> {
+pub async fn clone(
+    db: &PgPool,
+    parent: JigId,
+    user_id: Uuid,
+) -> Result<JigId, error::JigCloneDraft> {
     let mut txn = db.begin().await?;
 
-    let new_id = sqlx::query!( //language=SQL
+    let is_draft = sqlx::query!(
+        r#"select exists(select 1 from jig_draft_join where draft_id = $1) as "exists!""#,
+        parent.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    if is_draft {
+        txn.commit().await?;
+        return Err(error::JigCloneDraft::IsDraft);
+    }
+
+    let new_id = sqlx::query!(
         r#"
 insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score, theme,
                  audio_background, audio_feedback_positive, audio_feedback_negative)
@@ -532,18 +560,15 @@ select display_name,
        audio_feedback_negative
 from jig
 where id = $1
-returning id
+returning id as "id: JigId"
         "#,
         parent.0,
         user_id
     )
     .fetch_optional(&mut txn)
-    .await?;
-
-    let new_id = match new_id {
-        Some(it) => it.id,
-        None => return Ok(None),
-    };
+    .await?
+    .ok_or(error::JigCloneDraft::ResourceNotFound)?
+    .id.0;
 
     sqlx::query!(
         r#"
@@ -601,10 +626,230 @@ select $1, age_range_id from jig_age_range where jig_id = $2
     .execute(&mut txn)
     .await?;
 
+    sqlx::query!(
+        r#"
+insert into jig_additional_resource(jig_id, url)
+select $1, url from jig_additional_resource where jig_id = $2
+        "#,
+        new_id,
+        parent.0
+    )
+    .execute(&mut txn)
+    .await?;
+
     txn.commit().await?;
 
-    Ok(Some(JigId(new_id)))
+    Ok(JigId(new_id))
 }
+
+pub async fn create_draft(db: &PgPool, live_id: JigId) -> Result<JigId, error::JigCloneDraft> {
+    let mut txn = db.begin().await?;
+
+    let exists_draft = sqlx::query!(
+        r#"select exists(select 1 from jig_draft_join where live_id = $1) as "exists!""#,
+        live_id.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    if exists_draft {
+        txn.commit().await?;
+        return Err(error::JigCloneDraft::Conflict);
+    }
+
+    let is_draft = sqlx::query!(
+        r#"select exists(select 1 from jig_draft_join where draft_id = $1) as "exists!""#,
+        live_id.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    if is_draft {
+        txn.commit().await?;
+        return Err(error::JigCloneDraft::IsDraft);
+    }
+
+    let draft_id = sqlx::query!(
+        r#"
+insert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public, direction, display_score, theme)
+select display_name, parents, creator_id, author_id, language, description, $2, false, direction, display_score, theme-- infinity means "never auto-publish to public"
+from jig
+where id = $1
+returning id as "id: JigId"
+        "#,
+        live_id.0,
+        chrono::MAX_DATETIME,
+    )
+    .fetch_optional(&mut txn)
+    .await?
+    .ok_or(error::JigCloneDraft::ResourceNotFound)?
+    .id.0;
+
+    sqlx::query!(
+        r#"
+insert into jig_draft_join (draft_id, live_id)
+values ($1, $2)
+        "#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_module ("index", jig_id, kind, contents)
+select "index", $1 as "jig_id", kind, contents
+from jig_module where jig_id = $2
+"#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_affiliation(jig_id, affiliation_id)
+select $1, affiliation_id from jig_affiliation where jig_id = $2
+"#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_category(jig_id, category_id)
+select $1, category_id from jig_category where jig_id = $2
+"#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_goal(jig_id, goal_id)
+select $1, goal_id from jig_goal where jig_id = $2
+"#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_age_range(jig_id, age_range_id)
+select $1, age_range_id from jig_age_range where jig_id = $2
+"#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    sqlx::query!(
+        r#"
+insert into jig_additional_resource(jig_id, url)
+select $1, url from jig_additional_resource where jig_id = $2
+        "#,
+        draft_id,
+        live_id.0
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(JigId(draft_id))
+}
+
+pub async fn get_draft(db: &PgPool, live_id: JigId) -> Result<JigId, error::JigCloneDraft> {
+    let is_draft = sqlx::query!(
+        r#"select exists(select 1 from jig_draft_join where draft_id = $1) as "exists!""#,
+        live_id.0
+    )
+    .fetch_one(db)
+    .await?
+    .exists;
+    if is_draft {
+        return Err(error::JigCloneDraft::IsDraft);
+    }
+
+    sqlx::query!(
+        r#"
+select draft_id as "id: JigId" from jig_draft_join where live_id = $1
+        "#,
+        live_id.0,
+    )
+    .fetch_optional(db)
+    .await?
+    .map(|it| it.id)
+    .ok_or(error::JigCloneDraft::ResourceNotFound)
+}
+
+pub async fn publish_draft_to_live(
+    db: &PgPool,
+    live_id: JigId,
+) -> Result<(), error::JigCloneDraft> {
+    let draft_id = get_draft(db, live_id).await?;
+
+    let mut txn = db.begin().await?;
+
+    // delete live from database
+    let res = sqlx::query!(
+        r#"
+delete from jig where id = $1 returning publish_at as "publish_at: DateTime<Utc>", is_public as "is_public: bool"
+        "#,
+        live_id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    // update draft ids to previous live id
+    sqlx::query!(
+        r#"
+with module as (
+         update jig_module set jig_id = $1 where jig_id = $4
+     ),
+     affiliation as (
+         update jig_affiliation set jig_id = $1 where jig_id = $4
+     ),
+     category as (
+         update jig_category set jig_id = $1 where jig_id = $4
+     ),
+     goal as (
+         update jig_goal set jig_id = $1 where jig_id = $4
+     ),
+     age_range as (
+         update jig_age_range set jig_id = $1 where jig_id = $4
+     ),
+     additional_resource as (
+         update jig_additional_resource set jig_id = $1 where jig_id = $4
+     )
+update jig
+set id = $1, publish_at = $2, is_public = $3
+where id = $4
+"#,
+        live_id.0,
+        res.publish_at,
+        res.is_public,
+        draft_id.0,
+    )
+    .execute(&mut txn)
+    .await?;
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
+/////////
+// Auth based on user scope or jig association
 
 pub async fn authz_list(
     db: &PgPool,

@@ -640,3 +640,61 @@ impl Into<actix_web::Error> for UserRecentImage {
         }
     }
 }
+
+#[api_v2_errors(
+    code = 404,
+    code = 404,
+    code = 409,
+    description = "Conflict: a draft already exists for this jig",
+    code = 500
+)]
+pub enum JigCloneDraft {
+    ResourceNotFound,
+    IsDraft,
+    Conflict,
+    Forbidden,
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for JigCloneDraft {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl From<Auth> for JigCloneDraft {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
+}
+
+impl Into<actix_web::Error> for JigCloneDraft {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
+
+            Self::IsDraft => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                "Cannot create a draft from a draft".to_owned(),
+            )
+            .into(),
+
+            Self::Conflict => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "A draft already exists for this jig".to_owned(),
+            )
+            .into(),
+
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}

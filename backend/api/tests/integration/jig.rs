@@ -9,6 +9,7 @@ use crate::{
 
 mod additional_resource;
 mod cover;
+mod draft;
 mod module;
 
 #[actix_rt::test]
@@ -142,7 +143,8 @@ async fn clone() -> anyhow::Result<()> {
             ".**.id" => "[id]",
             ".**.last_edited" => "[last_edited]",
             ".**.feedback_positive" => "[audio]",
-            ".**.feedback_negative" => "[audio]"
+            ".**.feedback_negative" => "[audio]",
+            ".**.additional_resources" => "[ids]"
         }
     );
 
