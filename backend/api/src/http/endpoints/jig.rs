@@ -194,7 +194,6 @@ async fn browse(
 async fn search(
     db: Data<PgPool>,
     algolia: ServiceData<crate::algolia::Client>,
-    _claims: TokenUser,
     query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
