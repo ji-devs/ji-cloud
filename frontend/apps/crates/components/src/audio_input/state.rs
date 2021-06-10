@@ -26,8 +26,6 @@ pub enum AudioInputAddMethod {
 
 pub struct State {
     pub callbacks: Callbacks,
-    //audio_id is a mutable for affecting DOM
-    //intermediate updates can be skipped
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
