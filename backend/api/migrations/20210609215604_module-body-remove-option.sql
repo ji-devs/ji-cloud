@@ -6,7 +6,7 @@ where contents is not distinct from null;
 
 update jig_module
     set kind = 0
-where contents is not distinct from null;
+where kind is not distinct from null;
 
 alter table jig_module
     alter column contents set not null,
