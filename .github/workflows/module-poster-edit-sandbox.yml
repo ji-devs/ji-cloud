@@ -6,7 +6,7 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'frontend/apps/crates/core/**'
+    - 'frontend/apps/crates/components/**'
     - 'frontend/apps/crates/entry/module/poster/edit/**'
 
 jobs:

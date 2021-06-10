@@ -6,7 +6,7 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'frontend/apps/crates/core/**'
+    - 'frontend/apps/crates/components/**'
     - 'frontend/apps/crates/entry/module/tapping-board/_common/**'
     - 'frontend/apps/crates/entry/module/tapping-board/edit/**'
     - 'frontend/apps/config/module/tapping-board/**'
