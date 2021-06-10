@@ -129,7 +129,7 @@ pub struct LiteModule {
     pub id: ModuleId,
 
     /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
+    pub kind: ModuleKind,
 }
 
 /// Over the wire representation of a module.
@@ -140,18 +140,26 @@ pub struct Module {
     pub id: ModuleId,
 
     /// The module's body.
-    pub body: Option<ModuleBody>,
+    pub body: ModuleBody,
 
     /// Whether the module is complete or not.
     pub is_complete: bool,
 }
 
 /// Request to create a new `Module`.
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleCreateRequest {
     /// The module's body.
-    pub body: Option<ModuleBody>,
+    pub body: ModuleBody,
+}
+
+impl Default for ModuleCreateRequest {
+    fn default() -> Self {
+        ModuleCreateRequest {
+            body: ModuleBody::Cover(body::cover::ModuleData { content: None }),
+        }
+    }
 }
 
 /// Response for successfully finding a module

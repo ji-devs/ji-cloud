@@ -14,7 +14,7 @@ expression: body
       },
       {
         "id": "[id]",
-        "kind": null
+        "kind": "Flashcards"
       }
     ],
     "age_ranges": [],
