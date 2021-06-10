@@ -19,6 +19,9 @@ pub mod module;
 pub mod additional_resource;
 
 /// Get a JIG by ID.
+///
+/// # Authorization
+/// * None
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
@@ -29,6 +32,9 @@ impl ApiEndpoint for Get {
 }
 
 /// Browse jigs.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = JigBrowseQuery;
@@ -39,6 +45,9 @@ impl ApiEndpoint for Browse {
 }
 
 /// Search for jigs.
+///
+/// # Authorization
+/// * None
 pub struct Search;
 impl ApiEndpoint for Search {
     type Req = JigSearchQuery;
@@ -49,6 +58,9 @@ impl ApiEndpoint for Search {
 }
 
 /// Create a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigCreateRequest;
@@ -59,6 +71,9 @@ impl ApiEndpoint for Create {
 }
 
 /// Clone a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();
@@ -69,6 +84,9 @@ impl ApiEndpoint for Clone {
 }
 
 /// Update a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Jigs
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = JigUpdateRequest;
@@ -79,6 +97,9 @@ impl ApiEndpoint for Update {
 }
 
 /// Delete a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Jigs
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
