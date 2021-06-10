@@ -6,9 +6,13 @@ use super::{
     state::*,
 };
 use utils::prelude::*;
+use futures_signals::signal::Signal;
+use shared::domain::jig::module::body::Audio;
 
-
-pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
+/// Note - the external audio signal will only be valid for first render
+/// This can be fixed by instead storing an AsyncLoader which reacts to the
+/// Signal changes and sets an internal Mutable
+pub fn render (state: Rc<State>, slot: Option<&str>) -> Dom {
 
     html!("audio-input", {
         .apply_if(slot.is_some(), move |dom| {

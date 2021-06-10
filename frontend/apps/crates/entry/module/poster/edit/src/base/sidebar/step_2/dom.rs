@@ -3,6 +3,10 @@ use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
+use components::{
+    image::search::dom::render as render_image_search,
+    color_select::dom::render as render_color_picker
+};
 
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
@@ -15,10 +19,14 @@ pub fn render(state: Rc<Step2>) -> Dom {
                 .child_signal(state.tab.signal_cloned().map(|tab| {
                     match tab {
                         Tab::Image(state) => {
-                            None
-                            //Some(render_image_search(state.clone(), None))
+                            Some(render_image_search(state.clone(), None))
                         },
-                        _ => None,
+                        Tab::Color(state) => {
+                            Some(render_color_picker(state.clone(), None))
+                        },
+                        Tab::Overlay(state) => {
+                            Some(render_image_search(state.clone(), None))
+                        },
                     }
                 }))
             })
@@ -37,7 +45,7 @@ fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
             .property("kind", tab_kind.as_str())
         }))
         .event(clone!(state, tab_kind => move |evt:events::Click| {
-            state.tab.set(Tab::new(tab_kind));
+            state.tab.set(Tab::new(state.base.clone(), tab_kind));
         }))
     })
 }

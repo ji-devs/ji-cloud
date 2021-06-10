@@ -37,7 +37,10 @@ static SHAPE_SHADOW_CLASS: Lazy<String> = Lazy::new(|| class! {
 });
 
 static SHAPE_OUTLINE_CLASS: Lazy<String> = Lazy::new(|| class! {
-    .style("fill", "blue")
+    .style("fill-opacity", "0")
+    .style("stroke", "blue")
+    .style("stroke-width", "5")
+    .style("stroke-dasharray", "5,5")
     .style("cursor", "pointer")
 });
 
@@ -89,10 +92,11 @@ pub fn render_single_trace(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&T
             //Note - currently can't apply style directly, so need to set it as an attribute
             let styles = format!("position: absolute; left: {}px; top: {}px;", pos_x, pos_y);
 
+            //FIXME: the + 100 is a fudge-factor to account for stroke size
             svg!("svg", {
                 .attribute("style", &styles)
-                .attribute("width", &format!("{}px", width))
-                .attribute("height", &format!("{}px", height))
+                .attribute("width", &format!("{}px", width + 100.0))
+                .attribute("height", &format!("{}px", height + 100.0))
                 .child(render_single_shape(style, resize_info, trace, Some((&transform, size)), callbacks))
             })
         })

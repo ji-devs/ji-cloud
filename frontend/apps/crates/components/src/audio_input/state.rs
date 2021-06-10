@@ -1,8 +1,12 @@
-use futures_signals::signal::{Mutable};
+use futures_signals::signal::{Signal, SignalExt, Mutable};
 use shared::domain::jig::module::body::Audio;
 use super::recorder::AudioRecorder;
 use super::options::*;
 use super::callbacks::Callbacks;
+use utils::prelude::*;
+use std::cell::RefCell;
+use dominator::clone;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AudioInputMode {
@@ -27,20 +31,29 @@ pub struct State {
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
+    ext_audio_handle: RefCell<Option<FutureHandle>>,
 }
 
 impl State {
-    pub fn new(opts: AudioInputOptions, callbacks: Callbacks) -> Self {
-        let mode = match opts.audio {
-            Some(audio) => AudioInputMode::Stopped(audio),
-            None => AudioInputMode::Empty,
-        };
-
-        Self {
+    pub fn new<S>(opts: AudioInputOptions<S>, callbacks: Callbacks) -> Rc<Self>
+    where 
+        S: Signal<Item = Option<Audio>> + 'static
+    {
+        let _self = Rc::new(Self {
             callbacks, 
-            mode: Mutable::new(mode),
+            mode: Mutable::new(AudioInputMode::Empty),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),
-        }
+            ext_audio_handle: RefCell::new(None)
+        });
+
+        *_self.ext_audio_handle.borrow_mut() = opts.ext_audio_signal.map(|sig| {
+            spawn_handle(sig.for_each(clone!(_self => move |ext_audio| {
+                _self.set_audio_ext(ext_audio);
+                async {}
+            })))
+        });
+
+        _self
     }
 }

@@ -189,7 +189,7 @@ where
 
                             match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                                 Ok(resp) => {
-                                    let body = resp.module.body.unwrap_ji();
+                                    let body = resp.module.body;
                                     Some((body.try_into().unwrap_ji(), InitSource::Load))
                                 },
                                 Err(_) => {

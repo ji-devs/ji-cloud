@@ -109,9 +109,11 @@ impl Tab {
                 Self::Text(index, Mutable::new(text))
             },
             TabKind::Audio => {
-                let mut opts = AudioInputOptions::default();
+                
+                let opts = AudioInputOptions::new(
+                    Some(base.traces_meta.lock_ref()[index].audio.signal_cloned())
+                );
 
-                opts.audio = base.traces_meta.lock_ref()[index].audio.get_cloned();
 
                 let callbacks = AudioCallbacks::new(
                     Some(clone!(base, index => move |audio:Audio| {
@@ -124,7 +126,7 @@ impl Tab {
 
                 let state = AudioInputState::new(opts, callbacks);
 
-                Self::Audio(Rc::new(state))
+                Self::Audio(state)
             }
         }
     }

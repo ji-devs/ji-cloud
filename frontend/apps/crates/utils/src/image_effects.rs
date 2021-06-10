@@ -1,5 +1,5 @@
 use web_sys::{window, ImageData, HtmlImageElement, HtmlCanvasElement, CanvasRenderingContext2d, Blob};
-use awsm_web::canvas::{get_2d_context, Canvas2dContextOptions};
+use awsm_web::canvas::{get_2d_context, Canvas2dContextOptions, CanvasToBlobFuture};
 use crate::{prelude::*, path::image_lib_url};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -30,7 +30,12 @@ pub struct ImageEffect {
 impl ImageEffect {
     pub async fn new(src: Image) -> Self {
         let url = image_lib_url(src.lib.clone(), PngImageFile::Resized, src.id.clone());
-        let img = awsm_web::loaders::image::load(url).await.unwrap_ji();
+        let img = match awsm_web::loaders::image::load(url).await {
+            Ok(img) => img,
+            Err(_) => {
+                panic!("could not load image!");
+            }
+        };
 
         let width = img.natural_width() as usize;
         let height = img.natural_height() as usize;
@@ -195,79 +200,4 @@ impl ImageEffect {
 }
 
 
-pub struct CanvasToBlobFuture {
-    pub canvas: HtmlCanvasElement,
-    state: CanvasToBlobState,
-    closure: Option<Closure<dyn FnMut(Blob)>>,
-}
 
-impl CanvasToBlobFuture {
-    pub fn new(canvas: HtmlCanvasElement) -> Self {
-        Self {
-            canvas,
-            state: CanvasToBlobState::Empty,
-            closure: None
-        }
-    }
-}
-
-enum CanvasToBlobState {
-    Empty,
-    Loading {
-        receiver: Receiver<(Blob)>,
-    },
-}
-
-impl Future for CanvasToBlobFuture {
-    type Output = Blob;
-
-    fn poll(mut self: Pin<&mut Self>, ctx: &mut Context) -> Poll<Self::Output> {
-        match &mut self.state {
-            CanvasToBlobState::Empty => {
-                //success callback
-                let waker = ctx.waker().clone();
-                let (sender, receiver): (Sender<Blob>, Receiver<Blob>) = channel();
-                let mut sender = Option::from(sender);
-                let closure = Closure::wrap(Box::new(move |blob| {
-                    sender.take().unwrap_throw().send(blob).unwrap_throw();
-                    waker.wake_by_ref();
-                }) as Box<dyn FnMut(Blob)>);
-
-                self.canvas.to_blob(closure.as_ref().unchecked_ref());
-
-                self.state = CanvasToBlobState::Loading {
-                    receiver,
-                };
-                self.closure = Some(closure);
-
-                //notify the task that we're now loading
-                ctx.waker().wake_by_ref();
-
-                Poll::Pending
-            }
-
-            CanvasToBlobState::Loading { receiver } => {
-                //if let Poll::Ready(value) = Receiver::poll(Pin::new(receiver_err), ctx) {
-
-                let mut is_cancelled = false;
-
-                let state = match receiver.try_recv() {
-                    Ok(result) => result,
-                    _ => {
-                        is_cancelled = true;
-                        None
-                    }
-                };
-
-                if let Some(blob) = state {
-                    Poll::Ready(blob.clone())
-                } else {
-                    if !is_cancelled {
-                        //ctx.waker().wake_by_ref();
-                    }
-                    Poll::Pending
-                }
-            }
-        }
-    }
-}

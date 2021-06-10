@@ -13,9 +13,11 @@ use shared::{
     
 };
 use super::state::{AudioInputMode, State};
+use futures_signals::signal::Signal;
 
 impl State {
-    //Internal only, prevents callback cycles
+    //Internal only - when the audio is changed via recording/uploading
+    //Will call the callbacks
     pub(super) fn set_audio(&self, audio: Option<Audio>) {
         //Change the mutable for affecting all DOM rendering stuff
         //with _eventual consistency_
@@ -40,9 +42,11 @@ impl State {
     }
 
 
-    //Intended for externally forcing the state
-    //e.g. for undo/redo compatability
-    pub fn set_audio_ext(&self, audio: Option<Audio>) {
+    //Internal only - when the audio is changed via the external signal
+    //Only changes state. 
+    //It's safe and idiomatic to set the external signal from callbacks too
+    //(e.g. the external signal can be driven by a combo of history, current audio, and initial audio)
+    pub(super) fn set_audio_ext(&self, audio: Option<Audio>) {
         self.mode.set_neq(match audio {
             Some(audio) => AudioInputMode::Stopped(audio),
             None => AudioInputMode::Empty,
@@ -50,7 +54,7 @@ impl State {
     }
 }
 
-pub async fn file_change(state: Rc<State>, file: File) {
+pub async fn file_change (state: Rc<State>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
     let res = upload_file(file).await;
     if let Ok(audio_id) = res {

@@ -5,8 +5,9 @@ use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Audio;
 use crate::audio_input::state::State;
 use web_sys::HtmlAudioElement;
+use futures_signals::signal::Signal;
 
-pub fn render(state: Rc<State>, audio: Audio) -> Dom {
+pub fn render (state: Rc<State>, audio: Audio) -> Dom {
     let current_time = Mutable::new(0);
     html!("progress-bar", {
         .property("slot", "main-content")

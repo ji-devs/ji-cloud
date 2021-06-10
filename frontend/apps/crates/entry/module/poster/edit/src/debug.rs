@@ -10,13 +10,16 @@ use wasm_bindgen::JsCast;
 use std::cell::RefCell;
 use std::rc::Rc;
 use once_cell::sync::OnceCell;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 use uuid::Uuid;
 use shared::{
     domain::{
         jig::{
             module::body::{
-                Sprite, Instructions, Sticker, Text,
+                Image,
+                ThemeChoice,
+                Background, Backgrounds,
+                Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
                 poster::{Content, Mode as RawMode, ModuleData as RawData}
             },
             JigId, module::ModuleId
@@ -28,31 +31,46 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::state::Mode;
-use crate::steps::state::Step;
-use crate::steps::sidebar::step_2::state::TabKind as BgTabKind;
-use crate::steps::sidebar::step_3::state::TabKind as ContentTabKind;
+use crate::base::state::Step;
+use crate::base::sidebar::step_2::state::TabKind as BgTabKind;
+use crate::base::sidebar::step_3::state::TabKind as ContentTabKind;
+use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-const STRING_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
+const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
+
+
+pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data:Option<RawData>,
     pub step:Option<Step>,
     pub skip_save: bool,
+    pub skip_load_jig: bool,
     pub bg_tab: Option<BgTabKind>,
     pub content_tab: Option<ContentTabKind>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct InitData {
+    pub stickers: Vec<InitSticker>,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum InitData {
+pub enum InitSticker {
     Text,
     Sprite,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum InitTrace {
+    //x, y, w, h
+    Ellipse(f64, f64, f64, f64),
+}
+
 impl DebugSettings {
-    pub fn debug(init_data: Option<Vec<InitData>>, selected_index: Option<usize>) -> DebugSettings {
+    pub fn debug(init_data: Option<InitData>) -> DebugSettings {
         DebugSettings {
             //debug always has to have some data
             //otherwise it will fail at load time
@@ -61,14 +79,21 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             mode: RawMode::Poster,
-                            theme_id: ThemeId::Chalkboard, 
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
-                            stickers: init_data.iter().map(|init| {
+                            stickers: init_data.stickers.iter().map(|init| {
                                 match init {
-                                    InitData::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
-                                    InitData::Sprite => Sticker::Sprite(Sprite::new(ImageId(Uuid::parse_str(STRING_UUID).unwrap_ji()), MediaLibrary::Global))
+                                    InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
+                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                        lib: MediaLibrary::Global
+                                    }))
                                 }
                             }).collect(),
+                            backgrounds: Backgrounds {
+                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                layer_2: None,
+                            },
                             ..Content::default()
                         })
                     }
@@ -78,18 +103,23 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Two),
+            step: Some(Step::Three),
             skip_save: true,
-            bg_tab: Some(BgTabKind::Color),
-            content_tab: Some(ContentTabKind::Image),
+            skip_load_jig: true,
+            bg_tab: Some(BgTabKind::Image),
+            content_tab: Some(ContentTabKind::Text),
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        SETTINGS.set(DebugSettings::debug(Some(vec![InitData::Text, InitData::Sprite]), None)).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(None, None)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(InitData{
+            stickers: vec![
+                InitSticker::Text, InitSticker::Sprite
+            ],
+        }))).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

@@ -20,6 +20,9 @@ use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fe
 use web_sys::{File, Blob};
 use super::settings::SETTINGS;
 
+pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle};
+
+
 #[derive(Debug)]
 pub enum Error {
     AuthForbidden,

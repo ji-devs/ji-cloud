@@ -64,10 +64,9 @@ pub fn render_text(state: Rc<State>) -> Dom {
 }
 
 pub fn render_audio(state: Rc<State>) -> Dom {
-
-    let opts = AudioInputOptions {
-        audio: state.instructions.get_cloned().audio
-    };
+    let opts = AudioInputOptions::new(
+        Some(state.instructions.signal_cloned().map(|instructions| instructions.audio))
+    );
 
     let callbacks = AudioCallbacks::new(
         Some(clone!(state => move |audio:Audio| {
@@ -82,18 +81,7 @@ pub fn render_audio(state: Rc<State>) -> Dom {
         }))
     );
 
-    let audio_state = Rc::new(AudioState::new(opts, callbacks)); 
+    let audio_state = AudioState::new(opts, callbacks); 
 
-    html!("empty-fragment", {
-        .future(state.audio_signal()
-                .to_stream()
-                .skip(1)
-                .for_each(clone!(audio_state => move |audio| {
-                    //This just happens when history is changed really
-                    audio_state.set_audio_ext(audio);
-                    async {}
-                }))
-        )
-        .child(render_audio_input(audio_state, None))
-    })
+    render_audio_input(audio_state, None)
 }

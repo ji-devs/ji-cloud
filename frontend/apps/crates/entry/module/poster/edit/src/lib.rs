@@ -10,27 +10,20 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod router;
 mod debug;
-mod config;
 mod strings;
 mod state;
-mod steps;
+mod base;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
 use router::Router;
-/*
-mod page;
-mod pages;
-mod header;
-*/
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
-    config::init();
 
     let router = Rc::new(Router::new());
 

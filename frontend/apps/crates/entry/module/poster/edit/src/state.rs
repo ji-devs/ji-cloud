@@ -1,6 +1,6 @@
 use components::module::edit::prelude::*;
-use super::steps::{
-    actions::{init_from_mode, init_from_raw},
+use super::base::{
+    actions::init_from_raw,
     state::{Base,Step},
     footer::state::Footer,
     header::state::Header,
@@ -11,7 +11,7 @@ use super::steps::{
 use std::rc::Rc;
 use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode as RawMode, ModuleData as RawData}}};
 
-pub type AppState = GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>;
+pub type AppState = GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>;
 
 
 pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
@@ -21,13 +21,15 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
     opts.force_raw = crate::debug::settings().data.clone(); 
     opts.is_main_scrollable = false;
     opts.skip_save_for_debug = crate::debug::settings().skip_save;
+    opts.skip_load_jig = crate::debug::settings().skip_load_jig;
 
     AppState::new(
         opts,
-        init_from_mode, //create steps when mode selected
-        init_from_raw, //create steps when raw loaded or reset via history
+        init_from_raw, 
     )
 }
+
+
 
 
 
@@ -38,7 +40,7 @@ pub enum Mode {
     Comics,
     Timeline,
     FamilyTree,
-    Poster
+    Poster, 
 }
 
 impl From<RawMode> for Mode {
@@ -66,7 +68,7 @@ impl From<Mode> for RawMode {
     }
 }
 
-impl ModeExt for Mode {
+impl ModeExt<RawMode> for Mode {
     fn get_list() -> Vec<Self> {
         vec![
             Self::Printables,
@@ -106,5 +108,10 @@ impl ModeExt for Mode {
             Self::FamilyTree => crate::strings::mode::STR_FAMILY_TREE_LABEL,
             Self::Poster => crate::strings::mode::STR_POSTER_LABEL
         }
+    }
+
+
+    fn to_raw(&self) -> RawMode {
+        (*self).into()
     }
 }
