@@ -7,7 +7,7 @@ use shared::{
     api::{endpoints::jig::module, ApiEndpoint},
     domain::{
         jig::{
-            module::{ModuleCreateRequest, ModuleId, ModuleIdOrIndex, ModuleResponse},
+            module::{ModuleId, ModuleIdOrIndex, ModuleResponse},
             JigId,
         },
         CreateResponse,
@@ -23,14 +23,14 @@ async fn create(
     db: Data<PgPool>,
     auth: TokenUser,
     parent: Path<JigId>,
-    req: Option<Json<<module::Create as ApiEndpoint>::Req>>,
+    req: Json<<module::Create as ApiEndpoint>::Req>,
 ) -> Result<Json<<module::Create as ApiEndpoint>::Res>, error::Auth> {
     let parent_id = parent.into_inner();
 
     db::jig::authz(&*db, auth.0.user_id, Some(parent_id)).await?;
 
-    let req = req.map_or_else(ModuleCreateRequest::default, Json::into_inner);
-    let (id, _index) = db::module::create(&*db, parent_id, req.body.as_ref()).await?;
+    let req = req.into_inner();
+    let (id, _index) = db::module::create(&*db, parent_id, req.body).await?;
 
     Ok(Json(CreateResponse { id }))
 }

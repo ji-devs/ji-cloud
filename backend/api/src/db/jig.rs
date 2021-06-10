@@ -49,10 +49,7 @@ returning id
     super::recycle_metadata(&mut transaction, "jig", jig.id, age_ranges).await?;
     super::recycle_metadata(&mut transaction, "jig", jig.id, affiliations).await?;
 
-    let default_modules = [
-        (Some(ModuleKind::Cover), Some(serde_json::json!({}))),
-        (None, None),
-    ];
+    let default_modules = [(Some(ModuleKind::Cover), Some(serde_json::json!({})))];
 
     // todo: batch
     for (idx, (kind, contents)) in default_modules.iter().enumerate() {
@@ -92,7 +89,7 @@ select
         from jig_module
         where jig_id = jig.id
         order by "index"
-    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
@@ -154,7 +151,7 @@ select
         from jig_module
         where jig_id = $1
         order by "index"
-    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
     array(select row(goal_id) from jig_goal where jig_id = $1) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = $1) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",
@@ -315,7 +312,7 @@ select
         from jig_module
         where jig_id = jig.id
         order by "index"
-    ) as "modules!: Vec<(ModuleId, Option<ModuleKind>)>",
+    ) as "modules!: Vec<(ModuleId, ModuleKind)>",
     array(select row(goal_id) from jig_goal where jig_id = jig.id) as "goals!: Vec<(GoalId,)>",
     array(select row(category_id) from jig_category where jig_id = jig.id) as "categories!: Vec<(CategoryId,)>",
     array(select row(affiliation_id) from jig_affiliation where jig_id = jig.id) as "affiliations!: Vec<(AffiliationId,)>",

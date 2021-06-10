@@ -145,9 +145,11 @@ async fn jig_clone() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn module_post() -> anyhow::Result<()> {
+    use shared::domain::jig::module::ModuleCreateRequest;
+
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/module",
-        None,
+        Some(&serde_json::to_value(ModuleCreateRequest::default())?),
         Method::POST,
     )
     .await

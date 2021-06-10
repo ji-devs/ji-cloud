@@ -9,12 +9,10 @@ use std::cmp;
 pub async fn create(
     pool: &PgPool,
     parent: JigId,
-    body: Option<&ModuleBody>,
+    body: ModuleBody,
 ) -> anyhow::Result<(ModuleId, u16)> {
-    let (kind, body) = match body.map(map_module_contents).transpose()? {
-        Some((kind, body)) => (Some(kind), Some(body)),
-        None => (None, None),
-    };
+    let kind = body.kind();
+    let body = serde_json::to_value(body)?;
 
     sqlx::query!(
         r#"
@@ -23,7 +21,7 @@ values ($1, $2, $3, (select count(*) from jig_module where jig_id = $1))
 returning id, "index"
 "#,
         parent.0,
-        kind.map(|it| it as i16),
+        kind as i16,
         body,
     )
     .fetch_one(pool)
@@ -185,17 +183,15 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
     .fetch_optional(pool)
     .await?;
 
-    let map_response = |body, kind| Some(transform_response_kind(body?, kind?));
+    let map_response = |body, kind| transform_response_kind(body, kind);
 
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
-            body: map_response(it.body, it.kind)
-                .transpose()
-                .context(anyhow::anyhow!(
-                    "failed to transform module of kind {:?}",
-                    it.kind
-                ))?,
+            body: map_response(it.body, it.kind).context(anyhow::anyhow!(
+                "failed to transform module of kind {:?}",
+                it.kind
+            ))?,
             is_complete: it.is_complete,
         })),
         None => Ok(None),
