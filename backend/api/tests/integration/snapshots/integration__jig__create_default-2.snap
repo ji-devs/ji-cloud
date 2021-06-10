@@ -1,0 +1,29 @@
+---
+source: tests/integration/jig.rs
+expression: body
+
+---
+{
+  "jig": {
+    "id": "[id]",
+    "display_name": "",
+    "modules": [
+      {
+        "id": "[id]",
+        "kind": "Cover"
+      }
+    ],
+    "age_ranges": [],
+    "affiliations": [],
+    "goals": [],
+    "creator_id": "1f241e1b-b537-493f-a230-075cb16315be",
+    "author_id": "1f241e1b-b537-493f-a230-075cb16315be",
+    "language": "en_US",
+    "categories": [],
+    "publish_at": null,
+    "additional_resources": [],
+    "description": "",
+    "last_edited": "[time_stamp]",
+    "is_public": false
+  }
+}

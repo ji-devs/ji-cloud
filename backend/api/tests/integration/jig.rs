@@ -32,6 +32,19 @@ async fn create_default() -> anyhow::Result<()> {
 
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/{}", port, body.id.0))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    app.stop(false).await;
+
+    let body: serde_json::Value = resp.json().await?;
+
+    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".*.last_edited" => "[time_stamp]"});
+
     Ok(())
 }
 
@@ -81,6 +94,8 @@ async fn create_with_params() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let body: CreateResponse<JigId> = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".id" => "[id]", ".last_edited" => "[last_edited]"});
 

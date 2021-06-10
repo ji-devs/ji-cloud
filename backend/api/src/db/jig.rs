@@ -3,8 +3,9 @@ use futures::TryStreamExt;
 use shared::domain::{
     category::CategoryId,
     jig::{
-        additional_resource::AdditionalResourceId, module::ModuleId, Jig, JigId, LiteModule,
-        ModuleKind,
+        additional_resource::AdditionalResourceId,
+        module::{body::cover, ModuleId},
+        Jig, JigId, LiteModule, ModuleKind,
     },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -13,6 +14,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error;
+use shared::domain::jig::module::ModuleBody;
 
 pub async fn create(
     pool: &PgPool,
@@ -25,7 +27,7 @@ pub async fn create(
     publish_at: Option<DateTime<Utc>>,
     language: &str,
     description: &str,
-) -> sqlx::Result<JigId> {
+) -> Result<JigId, CreateJigError> {
     let mut transaction = pool.begin().await?;
 
     let jig = sqlx::query!(
@@ -49,7 +51,11 @@ returning id
     super::recycle_metadata(&mut transaction, "jig", jig.id, age_ranges).await?;
     super::recycle_metadata(&mut transaction, "jig", jig.id, affiliations).await?;
 
-    let default_modules = [(Some(ModuleKind::Cover), Some(serde_json::json!({})))];
+    let default_modules = [(
+        ModuleKind::Cover,
+        serde_json::to_value(ModuleBody::Cover(cover::ModuleData::default()))?,
+        // should NEVER error as long as ModuleBody::Cover doesn't break during serialization
+    )];
 
     // todo: batch
     for (idx, (kind, contents)) in default_modules.iter().enumerate() {
@@ -59,8 +65,8 @@ insert into jig_module (jig_id, "index", kind, contents)
 values ($1, $2, $3, $4)"#,
             jig.id,
             idx as i16,
-            kind.map(|it| it as i16),
-            contents.as_ref()
+            (*kind) as i16,
+            contents
         )
         .execute(&mut transaction)
         .await?;
@@ -69,6 +75,23 @@ values ($1, $2, $3, $4)"#,
     transaction.commit().await?;
 
     Ok(JigId(jig.id))
+}
+
+/// Handle errors for creating a module when posting a Jig
+/// This is here because the scope is limited to the above function
+pub enum CreateJigError {
+    Sqlx(sqlx::Error),
+    DefaultModules(serde_json::Error),
+}
+impl From<sqlx::Error> for CreateJigError {
+    fn from(e: sqlx::Error) -> Self {
+        Self::Sqlx(e)
+    }
+}
+impl From<serde_json::Error> for CreateJigError {
+    fn from(e: serde_json::Error) -> Self {
+        Self::DefaultModules(e)
+    }
 }
 
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
