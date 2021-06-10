@@ -1,10 +1,15 @@
+// use shared::{api::endpoints::{ApiEndpoint, self}, domain::{CreateResponse, jig::{self::*, module::body::cover::ModuleData}, jig::module::*}, error::{EmptyError, MetadataNotFound}};
 use shared::{
     api::endpoints::{ApiEndpoint, self},
     error::{EmptyError, MetadataNotFound},
-    domain::{CreateResponse, jig::*, jig::module::*},
+    domain::{
+        CreateResponse,
+        jig::*,
+        jig::module::{*, body::cover::ModuleData}
+    },
 };
 use std::rc::Rc;
-use super::state::{State, Module};
+use super::state::State;
 use utils::{prelude::*, drag::Drag};
 use crate::edit::sidebar::dragging::state::State as DragState;
 use dominator::clone;
@@ -22,61 +27,46 @@ pub fn mouse_down(state: Rc<State>, x: i32, y:i32) {
 }
 
 pub fn edit(state: Rc<State>) {
-    let module_id = state.module.id;
-    state.sidebar.route.set_neq(JigEditRoute::Module(module_id));
-    state.sidebar.collapsed.set(true);
+    if let Some(module) = &*state.module {
+        let module_id = module.id;
+        state.sidebar.route.set_neq(JigEditRoute::Module(module_id));
+        state.sidebar.collapsed.set(true);
 
-    let jig_id = state.sidebar.jig.id;
-    let url:String = Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
-    log::info!("{}", url);
+        let jig_id = state.sidebar.jig.id;
+        let url:String = Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
+        log::info!("{}", url);
 
-    /* this will cause a full refresh - but preserves history
-     * see the .future in EditPage too
-    dominator::routing::go_to_url(&url);
-     */
-}
-pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
-    state.sidebar.loader.load(clone!(state => async move {
-        let body = match kind {
-            ModuleKind::Memory => Some(body::Body::MemoryGame(body::memory::ModuleData::default())),
-            _ => None
-        };
-        let req = ModuleUpdateRequest {
-            body,
-            ..ModuleUpdateRequest::default()
-        };
-
-        match update_module(&state.sidebar.jig.id, &state.module.id, req).await {
-            Ok(_) => {
-                state.module.kind.set_neq(Some(kind));
-                state.sidebar.route.set(JigEditRoute::Module(state.module.id));
-                state.sidebar.collapsed.set(true);
-            },
-            Err(_) => {},
-        }
-    }));
+        /* this will cause a full refresh - but preserves history
+        * see the .future in EditPage too
+        dominator::routing::go_to_url(&url);
+        */
+    }
 }
 
 pub fn delete(state:Rc<State>) {
     let index = state.index;
 
     state.sidebar.loader.load(clone!(state => async move {
-        let path = endpoints::jig::module::Delete::PATH
-            .replace("{id}",&state.sidebar.jig.id.0.to_string())
-            .replace("{module_id}",&state.module.id.0.to_string());
-        match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::module::Delete::METHOD, None).await {
-            Ok(_) => {
-                state.sidebar.modules.lock_mut().remove(index);
-            },
-            Err(_) => {}
+        if let Some(module) = &*state.module {
+            let path = endpoints::jig::module::Delete::PATH
+                .replace("{id}",&state.sidebar.jig.id.0.to_string())
+                .replace("{module_id}",&module.id.0.to_string());
+            match api_with_auth_empty::<EmptyError, ()>(&path, endpoints::jig::module::Delete::METHOD, None).await {
+                Ok(_) => {
+                    state.sidebar.modules.lock_mut().remove(index);
+                },
+                Err(_) => {}
+            }
         }
     }));
-
 }
 pub fn add_empty_module_after(state:Rc<State>) {
+    state.sidebar.modules.lock_mut().insert_cloned(state.index + 1, Rc::new(None));
+}
+pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
         let req = Some(ModuleCreateRequest {
-            body: None
+            body: ModuleBody::new(kind),
         });
         let path = endpoints::jig::module::Create::PATH.replace("{id}",&state.sidebar.jig.id.0.to_string());
 
@@ -84,7 +74,11 @@ pub fn add_empty_module_after(state:Rc<State>) {
             Ok(resp) => {
                 let id = resp.id;
                 let index = state.index+1;
-                state.sidebar.modules.lock_mut().insert_cloned(index, Rc::new(Module::new(id)));
+                let module = Rc::new(Some(LiteModule {
+                    id,
+                    kind,
+                }));
+                state.sidebar.modules.lock_mut().set_cloned(index, module);
                 let req = ModuleUpdateRequest {
                     index: Some(index.try_into().unwrap_ji()),
                     ..Default::default()
@@ -108,28 +102,30 @@ pub enum MoveTarget {
 }
 pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
     state.sidebar.loader.load(clone!(state => async move {
-        if let Some(target) = {
-            match move_target {
-                MoveTarget::Up if state.index > 1 => {
-                    Some(state.index-1)
-                },
-                MoveTarget::Down if state.index < state.total_len-1 => {
-                    Some(state.index+1)
-                },
-                MoveTarget::Any(target) => Some(target),
-                _ => None
-            }
-        } {
-            state.sidebar.modules.lock_mut().move_from_to(state.index, target);
-            let req = ModuleUpdateRequest {
-                index: Some(target.try_into().unwrap_ji()),
-                ..Default::default()
-            };
+        if let Some(module) = &*state.module {
+            if let Some(target) = {
+                match move_target {
+                    MoveTarget::Up if state.index > 1 => {
+                        Some(state.index-1)
+                    },
+                    MoveTarget::Down if state.index < state.total_len-1 => {
+                        Some(state.index+1)
+                    },
+                    MoveTarget::Any(target) => Some(target),
+                    _ => None
+                }
+            } {
+                state.sidebar.modules.lock_mut().move_from_to(state.index, target);
+                let req = ModuleUpdateRequest {
+                    index: Some(target.try_into().unwrap_ji()),
+                    ..Default::default()
+                };
 
-            match update_module(&state.sidebar.jig.id, &state.module.id, req).await {
-                Ok(_) => {
-                },
-                Err(_) => {},
+                match update_module(&state.sidebar.jig.id, &module.id, req).await {
+                    Ok(_) => {
+                    },
+                    Err(_) => {},
+                }
             }
         }
     }));

@@ -9,7 +9,7 @@ use web_sys::HtmlElement;
 use dominator::clone;
 
 pub struct State {
-    pub module: Rc<Module>,
+    pub module: Rc<Option<LiteModule>>,
     pub sidebar: Rc<SidebarState>,
     pub drag: Mutable<Option<Drag>>,
     pub index: usize,
@@ -19,7 +19,7 @@ pub struct State {
 
 
 impl State {
-    pub fn new(sidebar: Rc<SidebarState>, index:usize, total_len: usize, module: Rc<Module>) -> Self {
+    pub fn new(sidebar: Rc<SidebarState>, index:usize, total_len: usize, module: Rc<Option<LiteModule>>) -> Self {
         Self {
             module,
             sidebar,
@@ -30,34 +30,26 @@ impl State {
         }
     }
 
-    pub fn kind_signal(&self) -> impl Signal<Item = Option<ModuleKind>> {
-        self.module.kind.signal_cloned()
+    pub fn kind_str(&self) -> &'static str {
+        match &*self.module {
+            None => "",
+            Some(module) => module.kind.as_str(),
+        }
     }
-    pub fn kind_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.kind_signal().map(|kind| {
-            match kind {
-                Some(kind) => kind.as_str(),
-                None => ""
-            }
-        })
-    }
-    pub fn window_state_signal(&self) -> impl Signal<Item = &'static str> {
-        let this_module_id = self.module.id.clone();
-
+    pub fn window_state_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
         // TODO: add done state
         map_ref! {
-            let kind = self.kind_signal(),
-            let publish_at = self.sidebar.publish_at.signal_cloned(),
-            let route = self.sidebar.route.signal_cloned()
+            let publish_at = state.sidebar.publish_at.signal_cloned(),
+            let route = state.sidebar.route.signal_cloned()
                 => move {
                     if publish_at.is_some() {
                         return "published";
                     };
-                    match kind {
+                    match &*state.module {
                         None => return "empty",
-                        Some(_) => {
+                        Some(this_module) => {
                             match route {
-                                JigEditRoute::Module(module_id) if *module_id == this_module_id => return "active",
+                                JigEditRoute::Module(module_id) if *module_id == this_module.id => return "active",
                                 _ => return "draft",
                             }
                         }
@@ -83,27 +75,5 @@ impl State {
                     _ => false
                 }
             }))
-    }
-}
-
-pub struct Module {
-    pub id: ModuleId,
-    pub kind: Mutable<Option<ModuleKind>>,
-}
-
-impl Module {
-    pub fn new(id: ModuleId) -> Self {
-        Self {
-            id,
-            kind: Mutable::new(None),
-        }
-    }
-}
-impl From<LiteModule> for Module {
-    fn from(raw:LiteModule) -> Self {
-        Self {
-            id: raw.id,
-            kind: Mutable::new(raw.kind),
-        }
     }
 }

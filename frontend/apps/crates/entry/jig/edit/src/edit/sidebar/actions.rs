@@ -57,6 +57,6 @@ pub fn update_display_name(state: Rc<State>, value: String) {
 pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
     state.loader.load(clone!(state, module_id => async move {
         let module = super::module_cloner::clone_module(&state.jig.id, &module_id, &state.jig.id).await.unwrap_ji();
-        state.modules.lock_mut().push_cloned(Rc::new(module));
+        state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
     }));
 }

@@ -16,7 +16,7 @@ pub struct ModuleDom {
 }
 
 impl ModuleDom {
-    pub fn render(sidebar_state: Rc<SidebarState>, index: usize, drag_target_index: Option<usize>, total_len:usize, module: Rc<Module>) -> Dom {
+    pub fn render(sidebar_state: Rc<SidebarState>, index: usize, drag_target_index: Option<usize>, total_len:usize, module: Rc<Option<LiteModule>>) -> Dom {
         let state = Rc::new(State::new(sidebar_state.clone(), index, total_len, module.clone()));
 
         let is_filler = Some(index) == drag_target_index;
@@ -44,7 +44,7 @@ impl ModuleDom {
                 .style("display", {
                     if is_filler { "none" } else {"block"}
                 })
-                .property_signal("module", state.kind_str_signal())
+                .property("module", state.kind_str())
                 .property("index", index as u32)
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
                 .property("lastBottomDecoration", index == total_len-1)
@@ -54,17 +54,12 @@ impl ModuleDom {
                 }))
                 .child(html!("jig-edit-sidebar-module-window", {
                     .property("slot", "window")
-                    .property_signal("state", state.window_state_signal())
-                    .property_signal("activeModuleKind", state.kind_signal().map(|kind| {
-                        match kind {
-                            Some(kind) => kind.as_str(),
-                            None => ""
-                        }
-                    }))
+                    .property_signal("state", State::window_state_signal(Rc::clone(&state)))
+                    .property("activeModuleKind", state.kind_str())
                     .event_preventable(clone!(state => move |evt:events::DragOver| {
                         if let Some(data_transfer) = evt.data_transfer() {
                             if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
-                                if state.module.kind.get().is_none() {
+                                if state.module.is_none() {
                                     evt.prevent_default();
                                 } 
                             }
@@ -102,15 +97,19 @@ impl ModuleDom {
                             ]
                         },
                         _ => {
-                            vec![
-                                MenuDom::item_edit(menu_state.clone(), state.clone()),
-                                MenuDom::item_move_up(menu_state.clone(), state.clone()),
-                                MenuDom::item_move_down(menu_state.clone(), state.clone()),
-                                MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id),
-                                MenuDom::item_delete(menu_state.clone(), state.clone()),
-                                MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id),
-                                MenuDom::item_duplicate_as(menu_state.clone()),
-                            ]
+                            let mut v = vec![];
+                            if let Some(module) = &*module {
+                                v.push(MenuDom::item_edit(menu_state.clone(), state.clone()));
+                                v.push(MenuDom::item_move_up(menu_state.clone(), state.clone()));
+                                v.push(MenuDom::item_move_down(menu_state.clone(), state.clone()));
+                                v.push(MenuDom::item_duplicate(menu_state.clone(), sidebar_state.clone(), module.id));
+                            }
+                            v.push(MenuDom::item_delete(menu_state.clone(), state.clone()));
+                            if let Some(module) = &*module {
+                                v.push(MenuDom::item_copy(menu_state.clone(), sidebar_state.clone(), module.id));
+                                v.push(MenuDom::item_duplicate_as(menu_state.clone()));
+                            }
+                            v
                         }
                     };
 

@@ -11,19 +11,19 @@ pub fn get_jig() -> Jig {
         modules: vec![
             LiteModule {
                 id: module_id,
-                kind: Some(ModuleKind::Cover)
+                kind: ModuleKind::Cover
             },
             LiteModule {
                 id: module_id,
-                kind: Some(ModuleKind::Memory)
+                kind: ModuleKind::Memory
             },
             LiteModule {
                 id: module_id,
-                kind: None 
+                kind: ModuleKind::Memory
             },
             LiteModule {
                 id: module_id,
-                kind: Some(ModuleKind::TappingBoard)
+                kind: ModuleKind::TappingBoard
             },
         ],
         age_ranges: Vec::new(),

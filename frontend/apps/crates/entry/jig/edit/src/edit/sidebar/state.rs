@@ -8,7 +8,7 @@ use std::{
     collections::HashMap
 };
 use super::{
-    module::state::{Module, State as ModuleState},
+    module::state::State as ModuleState,
     dragging::state::State as DragState
 };
 use utils::{drag::Drag, math::PointI32, routes::JigEditRoute};
@@ -23,7 +23,7 @@ pub struct State {
     pub route: Mutable<JigEditRoute>,
     pub name: Mutable<String>,
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
-    pub modules: MutableVec<Rc<Module>>,
+    pub modules: MutableVec<Rc<Option<LiteModule>>>,
     pub collapsed: Mutable<bool>,
     pub settings_shown: Mutable<bool>,
     pub drag: Mutable<Option<Rc<DragState>>>,
@@ -40,7 +40,7 @@ impl State {
             modules: MutableVec::new_with_values(
                 jig.modules
                     .iter()
-                    .map(|module| Rc::new(module.clone().into()))
+                    .map(|module| Rc::new(Some(module.clone().into())))
                     .collect()
             ),
             collapsed: Mutable::new(false),

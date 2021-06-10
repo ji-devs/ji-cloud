@@ -41,7 +41,7 @@ pub fn paste_module(state: Rc<State>) {
             state.loader.load(clone!(state => async move {
 
                 let module = super::module_cloner::clone_module(&jig_id, &module_id, &state.jig.id).await.unwrap_ji();
-                state.modules.lock_mut().push_cloned(Rc::new(module));
+                state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
 
             }));
         }
