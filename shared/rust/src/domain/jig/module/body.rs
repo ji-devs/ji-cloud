@@ -41,6 +41,21 @@ pub enum Body {
     Cover(cover::ModuleData),
 }
 
+impl Body {
+    /// create a new Body for a given ModuleKind
+    pub fn new(kind: super::ModuleKind) -> Self {
+        match kind {
+            super::ModuleKind::Cover => Self::Cover(cover::ModuleData::default()),
+            super::ModuleKind::Memory => Self::MemoryGame(memory::ModuleData::default()),
+            super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
+            super::ModuleKind::TappingBoard => {
+                Self::TappingBoard(tapping_board::ModuleData::default())
+            }
+            _ => unimplemented!("TODO!"),
+        }
+    }
+}
+
 /// Extension trait for interop
 /// impl on inner body data
 pub trait BodyExt<Mode>: TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug {
