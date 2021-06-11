@@ -10,7 +10,7 @@ use shared::domain::jig::{
             Trace as RawTrace,
             Audio,
             Instructions,
-            poster::{Mode as RawMode, Content as RawContent, ModuleData as RawData}
+            poster::{Mode, Content as RawContent, ModuleData as RawData}
         }
     }
 };
@@ -23,7 +23,6 @@ use super::{
     sidebar::state::Sidebar
 };
 use dominator::clone;
-use crate::state::Mode;
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
 use utils::prelude::*;
 use components::{

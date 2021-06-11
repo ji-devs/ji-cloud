@@ -14,47 +14,32 @@ use super::super::{
     actions::*,
 };
 use crate::audio_mixer::AudioMixer;
-use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::BodyExt}};
+use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::{ModeExt, BodyExt}}};
 use utils::prelude::*;
 
-pub trait ModeExt<RawMode> : Copy
+pub struct Choose <Mode>
 where
-    Self: Sized
-{
-    fn get_list() -> Vec<Self>;
-    fn title() -> &'static str; 
-    fn module() -> &'static str; 
-    fn as_str_id(&self) -> &'static str;
-    fn as_str_label(&self) -> &'static str;
-    fn to_raw(&self) -> RawMode;
-}
-
-pub struct Choose <Mode, RawMode>
-where
-    Mode: ModeExt<RawMode> + 'static,
-    RawMode: 'static
+    Mode: ModeExt + 'static,
 {
     //getting rid of this Box is probably more headache than it's worth
     pub on_mode_change: Box<dyn Fn(Mode)>,
     pub loader: Rc<AsyncLoader>,
-    pub phantom: PhantomData<RawMode> 
 }
 
 
 
-impl <Mode, RawMode> Choose <Mode, RawMode> 
+impl <Mode> Choose <Mode> 
 where
-    Mode: ModeExt<RawMode> + 'static,
-    RawMode: 'static
+    Mode: ModeExt + 'static,
 {
     pub fn new<Step, RawData, InitFromRawFn, InitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
-        app: Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>, 
+        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init_from_raw: InitFromRawFn,
     ) -> Self 
     where
-        Mode: ModeExt<RawMode> + 'static,
+        Mode: ModeExt + 'static,
         Step: StepExt + 'static,
-        RawData: BodyExt<RawMode> + 'static, 
+        RawData: BodyExt<Mode> + 'static, 
         Base: BaseExt<Step> + 'static,
         Main: MainExt + 'static,
         Sidebar: SidebarExt + 'static,
@@ -79,7 +64,7 @@ where
                         app.jig.borrow().clone()
                     );
                     
-                    let raw = RawData::new_mode(mode.to_raw());
+                    let raw = RawData::new_mode(mode);
                     let history = app.history.borrow().as_ref().unwrap_ji().clone();
                     history.push_modify(clone!(raw => |init| {
                         *init = raw;
@@ -90,7 +75,6 @@ where
 
                 }))
             }),
-            phantom: PhantomData
         }
     }
 }

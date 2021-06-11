@@ -1,16 +1,15 @@
 use super::super::{
     state::*,
     steps::state::*,
-    choose::state::ModeExt,
 };
 use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use shared::domain::jig::module::body::BodyExt;
+use shared::domain::jig::module::body::{ModeExt, BodyExt};
 use web_sys::AudioContext;
 use crate::audio_mixer::AudioMixer;
 
-pub fn render<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom
+pub fn render<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom
 where
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -18,10 +17,9 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    Mode: ModeExt<RawMode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt<RawMode> + 'static, 
-    RawMode: 'static, 
+    RawData: BodyExt<Mode> + 'static, 
 {
     html!("div", {
         .property("slot", "main")

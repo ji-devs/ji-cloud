@@ -27,7 +27,7 @@ use shared::{
                     Background, Backgrounds,
                     Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
                     tapping_board::{
-                        Content, Mode as RawMode, ModuleData as RawData, TappingTrace,
+                        Content, Mode, ModuleData as RawData, TappingTrace,
                         PlaySettings,
                         Hint,
                         Next
@@ -79,7 +79,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
-                            mode: RawMode::Poster,
+                            mode: Mode::Words,
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions{
                                 text: Some("Heya World!".to_string()),

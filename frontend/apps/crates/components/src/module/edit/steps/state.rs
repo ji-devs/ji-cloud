@@ -8,11 +8,8 @@ use dominator_helpers::futures::AsyncLoader;
 use std::rc::Rc;
 use std::collections::HashSet;
 use std::hash::Hash;
-use super::super::{
-    choose::state::ModeExt,
-    state::{Phase, GenericState}
-};
-use shared::domain::jig::module::body::BodyExt;
+use super::super::state::{Phase, GenericState};
+use shared::domain::jig::module::body::{ModeExt, BodyExt};
 use utils::prelude::*;
 
 pub struct Steps <Step, Base, Main, Sidebar, Header, Footer, Overlay> 
@@ -109,13 +106,13 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn new<Mode, RawData, RawMode>(
-        app: Rc<GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>>, 
+    pub fn new<Mode, RawData>(
+        app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>
     ) -> Self 
     where
-        Mode: ModeExt<RawMode> + 'static,
-        RawData: BodyExt<RawMode> + 'static, 
+        Mode: ModeExt + 'static,
+        RawData: BodyExt<Mode> + 'static, 
     {
 
         let preview_step_reactor = AsyncLoader::new();

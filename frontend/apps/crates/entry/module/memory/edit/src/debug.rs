@@ -19,7 +19,7 @@ use shared::{
                 Image,
                 ThemeChoice,
                 Instructions,
-                memory::{Content, Mode as RawMode, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
+                memory::{Content, Mode, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
             },
             JigId, module::ModuleId
         },
@@ -30,7 +30,6 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::{
-    state::Mode,
     base::{
         state::Step,
         sidebar::step_1::state::TabKind as Step1TabKind
@@ -65,7 +64,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = RawMode::WordsAndImages;
+                    let mode = Mode::WordsAndImages;
 
                     RawData{
                         content: Some(Content {
@@ -73,11 +72,11 @@ impl DebugSettings {
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
                             pairs: if init_data.with_pairs {
-                                crate::config::get_debug_pairs(mode.into())
+                                crate::config::get_debug_pairs(mode)
                                     .into_iter()
                                     .map(|(word_1, word_2)| {
                                         match mode {
-                                            RawMode::WordsAndImages => {
+                                            Mode::WordsAndImages => {
                                                 RawCardPair(RawCard::Text(word_1), RawCard::Image(None))
                                             }
                                             _ => RawCardPair(

@@ -2,15 +2,16 @@ use super::super::state::*;
 use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use shared::domain::jig::module::body::BodyExt;
+use shared::domain::jig::module::body::{ModeExt, BodyExt};
 use web_sys::AudioContext;
 use crate::audio_mixer::AudioMixer;
 
 
-pub fn render<RawData, RawMode, Base> (state:Rc<GenericState<RawData, RawMode, Base>>) -> Dom
+pub fn render<RawData, Mode, Base> (state:Rc<GenericState<RawData, Mode, Base>>) -> Dom
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<RawMode> + 'static, 
+    RawData: BodyExt<Mode> + 'static, 
+    Mode: ModeExt + 'static,
 {
     html!("div", {
         .property("slot", "main")

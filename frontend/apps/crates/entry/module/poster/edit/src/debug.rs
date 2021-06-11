@@ -20,7 +20,7 @@ use shared::{
                 ThemeChoice,
                 Background, Backgrounds,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                poster::{Content, Mode as RawMode, ModuleData as RawData}
+                poster::{Content, Mode, ModuleData as RawData}
             },
             JigId, module::ModuleId
         },
@@ -30,7 +30,6 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::state::Mode;
 use crate::base::state::Step;
 use crate::base::sidebar::step_2::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_3::state::TabKind as ContentTabKind;
@@ -78,7 +77,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
-                            mode: RawMode::Poster,
+                            mode: Mode::Poster,
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
                             stickers: init_data.stickers.iter().map(|init| {

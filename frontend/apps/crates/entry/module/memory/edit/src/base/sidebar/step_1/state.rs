@@ -18,8 +18,8 @@ use components::{
         },
     }
 };
+use shared::domain::jig::module::body::memory::Mode;
 use shared::domain::jig::module::body::Image;
-use crate::state::Mode;
 
 pub struct Step1 {
     pub base: Rc<Base>,

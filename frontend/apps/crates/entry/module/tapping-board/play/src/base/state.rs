@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Backgrounds, Sticker, tapping_board::{Mode as RawMode, ModuleData as RawData, PlaySettings, TappingTrace}}}};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Backgrounds, Sticker, tapping_board::{Mode, ModuleData as RawData, PlaySettings, TappingTrace}}}};
 use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;

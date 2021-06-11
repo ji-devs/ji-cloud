@@ -27,7 +27,7 @@ use shared::{
                     Background, Backgrounds,
                     Sprite, Instructions, Sticker, Text, Trace, Transform,
                     poster::{
-                        Content, Mode as RawMode, ModuleData as RawData
+                        Content, Mode, ModuleData as RawData
                     }
                 }
             }
@@ -68,7 +68,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
-                            mode: RawMode::Poster,
+                            mode: Mode::Poster,
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions{
                                 text: Some("Heya World!".to_string()),

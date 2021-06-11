@@ -15,7 +15,7 @@ use shared::domain::jig::{
             tapping_board::{
                 PlaySettings as RawPlaySettings, 
                 Hint, Next,
-                Mode as RawMode, 
+                Mode, 
                 Content as RawContent, 
                 ModuleData as RawData
             }

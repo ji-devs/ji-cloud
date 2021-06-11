@@ -4,6 +4,7 @@ use crate::{state::*, base::state::*};
 use shared::domain::jig::module::body::memory::{
     CardPair as RawCardPair
 };
+use shared::domain::jig::module::body::memory::Mode; 
 
 pub fn limit_text(max_len: usize, text:String) -> String {
     let len = text.graphemes(true).count();

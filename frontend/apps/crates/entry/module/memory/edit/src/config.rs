@@ -2,7 +2,7 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
-use crate::state::Mode;
+use shared::domain::jig::module::body::memory::Mode;
 
 pub const MAX_LIST_WORDS:usize = 14;
 

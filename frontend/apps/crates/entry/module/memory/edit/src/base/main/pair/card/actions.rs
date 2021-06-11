@@ -6,7 +6,7 @@ use shared::domain::jig::module::body::{
     memory::{
         ModuleData as RawData,
         Content as RawContent,
-        Mode as RawMode,
+        Mode,
         Card as RawCard,
         CardPair as RawCardPair
     }
@@ -26,7 +26,7 @@ impl MainCard {
         self.base.history.push_modify(|raw| {
             if let Some(content) = &mut raw.content {
                 with_raw_pair(content, pair_index, side, clone!(text => move |mode, card, other| {
-                    if mode == RawMode::Duplicate {
+                    if mode == Mode::Duplicate {
                         *other = RawCard::Text(text.clone());
                     }
                     *card = RawCard::Text(text.clone());
@@ -64,7 +64,7 @@ impl MainCard {
     }
 }
 
-fn with_raw_pair<A, F: FnOnce(RawMode, &mut RawCard, &mut RawCard) -> A>(raw: &mut RawContent, pair_index: usize, main_side: Side, f: F) -> A {
+fn with_raw_pair<A, F: FnOnce(Mode, &mut RawCard, &mut RawCard) -> A>(raw: &mut RawContent, pair_index: usize, main_side: Side, f: F) -> A {
     let mode = raw.mode;
     let pair = raw.pairs.get_mut(pair_index).unwrap_ji();
     match main_side {

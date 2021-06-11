@@ -9,7 +9,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
-            memory::{Mode as RawMode, Content as RawContent, ModuleData as RawData}
+            memory::{Mode, Content as RawContent, ModuleData as RawData}
         }
     }
 };
@@ -22,7 +22,6 @@ use super::{
     sidebar::state::Sidebar
 };
 use dominator::clone;
-use crate::state::Mode;
 use futures_signals::signal::{ReadOnlyMutable, Mutable};
 use utils::prelude::*;
 use components::{

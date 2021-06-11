@@ -11,11 +11,11 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use crate::module::header::controller::dom::ControllerDom;
 use super::super::actions::HistoryStateImpl;
-use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::BodyExt}};
+use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt}}};
 use utils::{prelude::*, iframe::IframeInit}; 
 use dominator_helpers::events::Message;
 
-pub fn render<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
@@ -23,8 +23,8 @@ pub fn render<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overl
     state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Vec<Dom>
 where
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static,
+    RawData: BodyExt<Mode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -77,7 +77,7 @@ where
         })
 }
 
-pub fn render_preview_main<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render_preview_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind, 
     jig_id: JigId, 
     module_id: ModuleId, 
@@ -85,8 +85,8 @@ pub fn render_preview_main<RawData, RawMode, Step, Base, Main, Sidebar, Header, 
     state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static,
+    RawData: BodyExt<Mode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -165,10 +165,10 @@ where
     })
 }
 
-pub fn render_header<RawData, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static,
+    RawData: BodyExt<Mode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,

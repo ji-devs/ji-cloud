@@ -14,7 +14,7 @@ use shared::domain::jig::{
             Audio,
             Instructions,
             memory::{
-                Mode as RawMode, 
+                Mode, 
                 Content as RawContent, 
                 ModuleData as RawData
             }
@@ -33,7 +33,6 @@ use components::{
 };
 use dominator::clone;
 use std::cell::RefCell;
-use crate::state::Mode;
 
 pub struct Base {
     pub jig_id: JigId,

@@ -6,7 +6,7 @@ use shared::{
     domain::{
         image::ImageId,
         audio::AudioId, 
-        jig::{*, module::{*, body::BodyExt}}
+        jig::{*, module::{*, body::{ModeExt, BodyExt}}}
     }, 
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
@@ -19,12 +19,11 @@ use std::future::Future;
 use dominator::clone;
 use crate::audio_mixer::AudioMixer;
 
-impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt<RawMode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static,
+    RawData: BodyExt<Mode> + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
@@ -101,10 +100,10 @@ where
 pub type HistoryStateImpl<RawData> = HistoryState<RawData, Box<dyn Fn(RawData)>, Box<dyn Fn(RawData)>>;
 //pub type HistorySaveFn<RawData> = impl Fn(RawData);
 
-pub fn save_history<RawData, RawMode>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
+pub fn save_history<RawData, Mode>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
 where
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static 
+    RawData: BodyExt<Mode> + 'static,
+    Mode: ModeExt + 'static 
 {
     Box::new(move |raw_data:RawData| {
         if !skip_for_debug {
@@ -113,10 +112,10 @@ where
     })
 }
 
-pub fn save<RawData, RawMode>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
+pub fn save<RawData, Mode>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
 where
-    RawData: BodyExt<RawMode> + 'static ,
-    RawMode: 'static 
+    RawData: BodyExt<Mode> + 'static ,
+    Mode: ModeExt + 'static 
 {
     save_loader.load(async move {
         let body = raw_data.as_body(); 

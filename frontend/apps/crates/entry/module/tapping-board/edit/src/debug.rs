@@ -20,7 +20,7 @@ use shared::{
                 ThemeChoice,
                 Background, Backgrounds,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                tapping_board::{Content, Mode as RawMode, ModuleData as RawData, TappingTrace}
+                tapping_board::{Content, Mode, ModuleData as RawData, TappingTrace}
             },
             JigId, module::ModuleId
         },
@@ -30,7 +30,6 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::state::Mode;
 use crate::base::state::Step;
 use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
@@ -85,7 +84,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
-                            mode: RawMode::Poster,
+                            mode: Mode::Words,
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                             instructions: Instructions::default(),
                             stickers: init_data.stickers.iter().map(|init| {

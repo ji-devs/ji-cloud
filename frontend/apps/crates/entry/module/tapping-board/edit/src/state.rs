@@ -9,9 +9,9 @@ use super::base::{
     sidebar::state::Sidebar
 };
 use std::rc::Rc;
-use shared::domain::jig::{JigId, module::{ModuleId, body::tapping_board::{Mode as RawMode, ModuleData as RawData}}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::tapping_board::{Mode, ModuleData as RawData}}};
 
-pub type AppState = GenericState<Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay>;
+pub type AppState = GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>;
 
 
 pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
@@ -29,89 +29,3 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
     )
 }
 
-
-
-
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Mode {
-    Printables,
-    TalkingPictures,
-    Comics,
-    Timeline,
-    FamilyTree,
-    Poster, 
-}
-
-impl From<RawMode> for Mode {
-    fn from(raw:RawMode) -> Self {
-        match raw {
-            RawMode::Printables => Self::Printables,
-            RawMode::TalkingPictures => Self::TalkingPictures,
-            RawMode::Comics => Self::Comics,
-            RawMode::Timeline => Self::Timeline,
-            RawMode::FamilyTree => Self::FamilyTree,
-            RawMode::Poster => Self::Poster,
-        }
-    }
-}
-impl From<Mode> for RawMode {
-    fn from(mode:Mode) -> Self {
-        match mode {
-            Mode::Printables => Self::Printables,
-            Mode::TalkingPictures => Self::TalkingPictures,
-            Mode::Comics => Self::Comics,
-            Mode::Timeline => Self::Timeline,
-            Mode::FamilyTree => Self::FamilyTree,
-            Mode::Poster => Self::Poster,
-        }
-    }
-}
-
-impl ModeExt<RawMode> for Mode {
-    fn get_list() -> Vec<Self> {
-        vec![
-            Self::Printables,
-            Self::TalkingPictures,
-            Self::Comics,
-            Self::Timeline,
-            Self::FamilyTree,
-            Self::Poster,
-        ]
-    }
-
-    fn title() -> &'static str {
-        crate::strings::mode::STR_TITLE
-    }
-
-    fn module() -> &'static str {
-        "tapping-board"
-    }
-
-    fn as_str_id(&self) -> &'static str {
-        match self {
-            Self::Printables => "printables",
-            Self::TalkingPictures => "talking-pictures",
-            Self::Comics => "comics",
-            Self::Timeline => "timeline",
-            Self::FamilyTree => "family-tree",
-            Self::Poster => "poster",
-        }
-    }
-
-    fn as_str_label(&self) -> &'static str {
-        match self {
-            Self::Printables => crate::strings::mode::STR_PRINTABLES_LABEL, 
-            Self::TalkingPictures => crate::strings::mode::STR_TALKING_PICTURES_LABEL,
-            Self::Comics => crate::strings::mode::STR_COMICS_LABEL,
-            Self::Timeline => crate::strings::mode::STR_TIMELINE_LABEL,
-            Self::FamilyTree => crate::strings::mode::STR_FAMILY_TREE_LABEL,
-            Self::Poster => crate::strings::mode::STR_POSTER_LABEL
-        }
-    }
-
-
-    fn to_raw(&self) -> RawMode {
-        (*self).into()
-    }
-}

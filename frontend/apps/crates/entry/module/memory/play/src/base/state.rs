@@ -5,7 +5,7 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             ThemeChoice,
-            memory::{Mode as RawMode, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
+            memory::{Mode, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
         }
     }
 };
@@ -31,7 +31,7 @@ use components::audio_mixer::AudioMixer;
 pub struct Base {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub mode: RawMode,
+    pub mode: Mode,
     pub pair_lookup: Vec<usize>,
     pub original_pairs: Vec<RawCardPair>,
     pub cards: Vec<Rc<CardState>>,

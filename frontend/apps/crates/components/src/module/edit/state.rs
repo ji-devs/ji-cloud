@@ -34,17 +34,16 @@ use super::{
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::Body}},
+    domain::jig::{*, module::{*, body::{ModeExt, Body}}},
 };
 use utils::{settings::SETTINGS, prelude::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 
-pub struct GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    RawData: BodyExt<RawMode> + 'static,
-    RawMode: 'static,
-    Mode: ModeExt<RawMode> + 'static,
+    RawData: BodyExt<Mode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -53,7 +52,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub phase: Mutable<Rc<Phase<Mode, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub phase: Mutable<Rc<Phase<Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) is_preview: Mutable<bool>,
@@ -65,13 +64,11 @@ where
     pub(super) reset_from_history_loader: AsyncLoader,
     pub(super) audio_mixer: RefCell<Option<AudioMixer>>,
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
-    phantom: PhantomData<RawMode>,
 }
 
-pub enum Phase <Mode, RawMode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub enum Phase <Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt<RawMode> + 'static,
-    RawMode: 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -81,7 +78,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     Init,
-    Choose(Rc<Choose<Mode, RawMode>>),
+    Choose(Rc<Choose<Mode>>),
     Steps(Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
@@ -125,9 +122,9 @@ pub enum InitSource {
     ChooseMode,
 }
 
-impl <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, RawMode, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    Mode: ModeExt<RawMode> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -135,8 +132,7 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    RawData: BodyExt<RawMode> + 'static, 
-    RawMode: 'static, 
+    RawData: BodyExt<Mode> + 'static, 
 {
     pub fn new<InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
@@ -160,7 +156,6 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
-            phantom: PhantomData,
             audio_mixer: RefCell::new(None),
             on_init_ready: RefCell::new(None)
         });

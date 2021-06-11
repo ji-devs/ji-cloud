@@ -14,10 +14,8 @@ use dominator_helpers::signals::EitherSignal;
 use components::image::search::types::*;
 use components::tooltip::state::{State as TooltipState, TooltipData, TooltipConfirm, MoveStrategy, Placement};
 use super::state::*;
-use crate::{
-    state::Mode,
-    base::state::{Step, Card}
-};
+use crate::base::state::{Step, Card};
+use shared::domain::jig::module::body::memory::Mode;
 
 pub fn render(state:Rc<MainCard>) -> Dom {
     html!("main-card", {
