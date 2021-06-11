@@ -9,6 +9,8 @@ on:
     - 'frontend/ts-utils/**'
     - 'frontend/elements/src/_styles/**'
     - 'frontend/elements/src/widgets/**'
+    - 'frontend/elements/src/_sub-bundles/module-edit.ts'
+    - 'frontend/elements/src/_sub-bundles/components/**'
     - 'frontend/elements/src/_bundles/module/memory/edit/**'
     - 'frontend/elements/src/module/memory/edit/**'
     - 'frontend/elements/src/module/memory/_common/**'

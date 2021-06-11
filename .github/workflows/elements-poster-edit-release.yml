@@ -1,4 +1,4 @@
-name: Tapping Board - Edit - Elements - Release 
+name: Poster - Edit - Elements - Release 
 
 on:
   push:
@@ -11,9 +11,9 @@ on:
     - 'frontend/elements/src/widgets/**'
     - 'frontend/elements/src/_sub-bundles/module-edit.ts'
     - 'frontend/elements/src/_sub-bundles/components/**'
-    - 'frontend/elements/src/_bundles/module/tapping-board/edit/**'
-    - 'frontend/elements/src/module/tapping-board/edit/**'
-    - 'frontend/elements/src/module/tapping-board/_common/**'
+    - 'frontend/elements/src/_bundles/module/poster/edit/**'
+    - 'frontend/elements/src/module/poster/edit/**'
+    - 'frontend/elements/src/module/poster/_common/**'
 
 jobs:
   bundle:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/tapping-board/edit - elements]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/poster/edit - elements]\")"
         id: extract_label
 
       - name: Notify slack
@@ -55,7 +55,7 @@ jobs:
         run: npm run build:release
         working-directory: "./frontend/elements"
         env: 
-          APP_NAME: "module/tapping-board/edit"
+          APP_NAME: "module/poster/edit"
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -64,7 +64,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/elements/dist/module/tapping-board/edit gs://ji-cloud-frontend-origin-eu-001/module/tapping-board/edit/elements
+        run: gsutil -m rsync -d -r frontend/elements/dist/module/poster/edit gs://ji-cloud-frontend-origin-eu-001/module/poster/edit/elements
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
