@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{EditorState, StepExt, Body, BodyExt, Image, Instructions, ThemeChoice},
+    body::{Body, BodyExt, EditorState, Image, Instructions, ModeExt, StepExt, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -92,7 +92,7 @@ pub enum Card {
 }
 
 /// What mode the module runs in.
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[repr(i16)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
@@ -132,6 +132,65 @@ pub enum Mode {
 impl Default for Mode {
     fn default() -> Self {
         Self::Duplicate
+    }
+}
+
+impl ModeExt for Mode {
+    fn get_list() -> Vec<Self> {
+        vec![
+            Self::Duplicate,
+            Self::WordsAndImages,
+            Self::BeginsWith,
+            Self::Lettering,
+            Self::Riddles,
+            Self::Opposites,
+            Self::Synonymns,
+            Self::Translate,
+        ]
+    }
+
+    fn title() -> &'static str {
+        const STR_TITLE: &'static str = "Create a Memory Game";
+        STR_TITLE
+    }
+
+    fn module_str_id() -> &'static str {
+        "memory"
+    }
+
+    fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Duplicate => "duplicate",
+            Self::WordsAndImages => "words-images",
+            Self::BeginsWith => "begins-with",
+            Self::Lettering => "lettering",
+            Self::Riddles => "riddles",
+            Self::Opposites => "opposites",
+            Self::Synonymns => "synonymns",
+            Self::Translate => "translate",
+        }
+    }
+
+    fn as_str_label(&self) -> &'static str {
+        const STR_DUPLICATE: &'static str = "Duplicate";
+        const STR_WORDS_IMAGES: &'static str = "Words & Images";
+        const STR_BEGINS_WITH: &'static str = "What begins with...";
+        const STR_LETTERING: &'static str = "Lettering";
+        const STR_RIDDLES: &'static str = "Riddles";
+        const STR_OPPOSITES: &'static str = "Opposites";
+        const STR_SYNONYMNS: &'static str = "Synonymns";
+        const STR_TRANSLATE: &'static str = "Translate";
+
+        match self {
+            Self::Duplicate => STR_DUPLICATE,
+            Self::WordsAndImages => STR_WORDS_IMAGES,
+            Self::BeginsWith => STR_BEGINS_WITH,
+            Self::Lettering => STR_LETTERING,
+            Self::Riddles => STR_RIDDLES,
+            Self::Opposites => STR_OPPOSITES,
+            Self::Synonymns => STR_SYNONYMNS,
+            Self::Translate => STR_TRANSLATE,
+        }
     }
 }
 
@@ -175,10 +234,10 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_CONTENT:&'static str = "Content";
-        const STR_DESIGN:&'static str = "Design";
-        const STR_SETTINGS:&'static str = "Settings";
-        const STR_PREVIEW:&'static str = "Preview";
+        const STR_CONTENT: &'static str = "Content";
+        const STR_DESIGN: &'static str = "Design";
+        const STR_SETTINGS: &'static str = "Settings";
+        const STR_PREVIEW: &'static str = "Preview";
 
         match self {
             Self::One => STR_CONTENT,
@@ -189,12 +248,7 @@ impl StepExt for Step {
     }
 
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-        ]
+        vec![Self::One, Self::Two, Self::Three, Self::Four]
     }
     fn get_preview() -> Self {
         Self::Four

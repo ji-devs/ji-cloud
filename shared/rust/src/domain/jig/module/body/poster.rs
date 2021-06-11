@@ -1,5 +1,8 @@
 use crate::domain::jig::module::{
-    body::{EditorState, StepExt, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice},
+    body::{
+        Backgrounds, Body, BodyExt, EditorState, Instructions, ModeExt, StepExt, Sticker,
+        ThemeChoice,
+    },
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -75,7 +78,7 @@ pub struct Content {
     pub stickers: Vec<Sticker>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
@@ -96,6 +99,57 @@ pub enum Mode {
 impl Default for Mode {
     fn default() -> Self {
         Self::Poster
+    }
+}
+
+impl ModeExt for Mode {
+    fn get_list() -> Vec<Self> {
+        vec![
+            Self::Printables,
+            Self::TalkingPictures,
+            Self::Comics,
+            Self::Timeline,
+            Self::FamilyTree,
+            Self::Poster,
+        ]
+    }
+
+    fn title() -> &'static str {
+        const STR_TITLE: &'static str = "Create a Poster";
+        STR_TITLE
+    }
+
+    fn module_str_id() -> &'static str {
+        "poster"
+    }
+
+    fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Printables => "printables",
+            Self::TalkingPictures => "talking-pictures",
+            Self::Comics => "comics",
+            Self::Timeline => "timeline",
+            Self::FamilyTree => "family-tree",
+            Self::Poster => "poster",
+        }
+    }
+
+    fn as_str_label(&self) -> &'static str {
+        const STR_PRINTABLES_LABEL: &'static str = "Printables";
+        const STR_TALKING_PICTURES_LABEL: &'static str = "Talking Pictures";
+        const STR_COMICS_LABEL: &'static str = "Comics";
+        const STR_TIMELINE_LABEL: &'static str = "Timeline";
+        const STR_FAMILY_TREE_LABEL: &'static str = "Family Tree";
+        const STR_POSTER_LABEL: &'static str = "Poster";
+
+        match self {
+            Self::Printables => STR_PRINTABLES_LABEL,
+            Self::TalkingPictures => STR_TALKING_PICTURES_LABEL,
+            Self::Comics => STR_COMICS_LABEL,
+            Self::Timeline => STR_TIMELINE_LABEL,
+            Self::FamilyTree => STR_FAMILY_TREE_LABEL,
+            Self::Poster => STR_POSTER_LABEL,
+        }
     }
 }
 
@@ -139,10 +193,10 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_THEMES:&'static str = "Themes";
-        const STR_BACKGROUND:&'static str = "Background";
-        const STR_CONTENT:&'static str = "Content";
-        const STR_PREVIEW:&'static str = "Preview";
+        const STR_THEMES: &'static str = "Themes";
+        const STR_BACKGROUND: &'static str = "Background";
+        const STR_CONTENT: &'static str = "Content";
+        const STR_PREVIEW: &'static str = "Preview";
 
         match self {
             Self::One => STR_THEMES,
@@ -153,12 +207,7 @@ impl StepExt for Step {
     }
 
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-        ]
+        vec![Self::One, Self::Two, Self::Three, Self::Four]
     }
     fn get_preview() -> Self {
         Self::Four

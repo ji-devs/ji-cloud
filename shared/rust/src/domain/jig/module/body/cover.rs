@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{EditorState, StepExt, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice},
+    body::{Backgrounds, Body, BodyExt, EditorState, Instructions, StepExt, Sticker, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -69,7 +69,6 @@ pub struct Content {
     pub stickers: Vec<Sticker>,
 }
 
-
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Step {
@@ -110,10 +109,10 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_THEMES:&'static str = "Themes";
-        const STR_BACKGROUND:&'static str = "Background";
-        const STR_CONTENT:&'static str = "Content";
-        const STR_PREVIEW:&'static str = "Preview";
+        const STR_THEMES: &'static str = "Themes";
+        const STR_BACKGROUND: &'static str = "Background";
+        const STR_CONTENT: &'static str = "Content";
+        const STR_PREVIEW: &'static str = "Preview";
 
         match self {
             Self::One => STR_THEMES,
@@ -124,12 +123,7 @@ impl StepExt for Step {
     }
 
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-        ]
+        vec![Self::One, Self::Two, Self::Three, Self::Four]
     }
     fn get_preview() -> Self {
         Self::Four

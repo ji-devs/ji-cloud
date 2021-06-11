@@ -5,7 +5,7 @@ use crate::{
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{fmt::Debug, hash::Hash, collections::HashSet, convert::TryFrom};
+use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
 
 /// Memory Game Body.
 pub mod memory;
@@ -57,7 +57,9 @@ impl Body {
 
 /// Extension trait for interop
 /// impl on inner body data
-pub trait BodyExt<Mode>: TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug {
+pub trait BodyExt<Mode: ModeExt>:
+    TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
+{
     /// get self as a Body
     fn as_body(&self) -> Body;
 
@@ -73,6 +75,47 @@ pub trait BodyExt<Mode>: TryFrom<Body> + Serialize + DeserializeOwned + Clone + 
 
     /// requires an additional step of choosing the mode
     fn requires_choose_mode(&self) -> bool;
+}
+
+/// Extenstion trait for modes
+pub trait ModeExt: Copy + Default + PartialEq + Eq + Hash {
+    /// get a list of all the modes for choosing
+    fn get_list() -> Vec<Self>;
+    /// get the title for the choose page
+    fn title() -> &'static str;
+    /// TODO: is this necessary?
+    /// sortof a reverse lookup. Get the module as a string id
+    fn module_str_id() -> &'static str;
+    /// get the mode itself as a string id
+    fn as_str_id(&self) -> &'static str;
+    /// for headers, labels, etc.
+    fn as_str_label(&self) -> &'static str;
+}
+
+/// impl ModeExt for empty modes
+/// this is a special case and should only be used
+/// where the module genuinely ignores the mode
+/// one example is the Cover module
+impl ModeExt for () {
+    fn get_list() -> Vec<Self> {
+        vec![]
+    }
+
+    fn title() -> &'static str {
+        ""
+    }
+
+    fn module_str_id() -> &'static str {
+        ""
+    }
+
+    fn as_str_id(&self) -> &'static str {
+        ""
+    }
+
+    fn as_str_label(&self) -> &'static str {
+        ""
+    }
 }
 
 impl Body {
@@ -93,20 +136,20 @@ impl Body {
 /// Although these are saved to the db, they aren't relevant for playback
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct EditorState<STEP> 
+pub struct EditorState<STEP>
 where
-    STEP: StepExt 
+    STEP: StepExt,
 {
     /// the current step
     pub step: STEP,
 
     /// the completed steps
-    pub steps_completed: HashSet<STEP>
+    pub steps_completed: HashSet<STEP>,
 }
 
 /// This extension trait makes it possible to keep the Step
-/// functionality generic and at a higher level than the module itself 
-pub trait StepExt : Copy + Default + PartialEq + Eq + Hash {
+/// functionality generic and at a higher level than the module itself
+pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
     /// Get the next step from current step
     fn next(&self) -> Option<Self>;
     /// Get the step as a number

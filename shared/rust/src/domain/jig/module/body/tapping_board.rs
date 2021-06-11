@@ -1,5 +1,8 @@
 use crate::domain::jig::module::{
-    body::{EditorState, StepExt, Audio, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice, Trace},
+    body::{
+        Audio, Backgrounds, Body, BodyExt, EditorState, Instructions, ModeExt, StepExt, Sticker,
+        ThemeChoice, Trace,
+    },
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -99,30 +102,87 @@ pub struct TappingTrace {
     pub text: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
-    /// Printables
-    Printables,
-    /// TalkingPictures
-    TalkingPictures,
-    /// Comics
-    Comics,
-    /// Timeline
-    Timeline,
-    /// Family Tree
-    FamilyTree,
-    /// Poster
-    Poster,
+    /// Words mode
+    Words,
+    /// Images mode
+    Images,
+    /// Talk mode
+    Talk,
+    /// Read mode
+    Read,
+    /// Draw mode
+    Draw,
+    /// Scene mode
+    Scene,
+    /// Photo album mode
+    PhotoAlbum,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Poster
+        Self::Words
     }
 }
 
+impl ModeExt for Mode {
+    fn get_list() -> Vec<Self> {
+        vec![
+            Self::Words,
+            Self::Images,
+            Self::Talk,
+            Self::Read,
+            Self::Draw,
+            Self::Scene,
+            Self::PhotoAlbum,
+        ]
+    }
+
+    fn title() -> &'static str {
+        const STR_TITLE: &'static str = "Create a Tapping Board";
+
+        STR_TITLE
+    }
+
+    fn module_str_id() -> &'static str {
+        "tapping-board"
+    }
+
+    fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Words => "words",
+            Self::Images => "images",
+            Self::Talk => "talk",
+            Self::Read => "read",
+            Self::Draw => "draw",
+            Self::Scene => "scene",
+            Self::PhotoAlbum => "photo-album",
+        }
+    }
+
+    fn as_str_label(&self) -> &'static str {
+        const STR_WORDS_LABEL: &'static str = "Tap words & hear";
+        const STR_IMAGES_LABEL: &'static str = "Tap images & hear";
+        const STR_TALK_LABEL: &'static str = "Tap & talk";
+        const STR_READ_LABEL: &'static str = "Tap & read";
+        const STR_DRAW_LABEL: &'static str = "Interactive drawing";
+        const STR_SCENE_LABEL: &'static str = "Interactive scene";
+        const STR_PHOTO_ALBUM_LABEL: &'static str = "Interactive photo album";
+
+        match self {
+            Self::Words => STR_WORDS_LABEL,
+            Self::Images => STR_IMAGES_LABEL,
+            Self::Talk => STR_TALK_LABEL,
+            Self::Read => STR_READ_LABEL,
+            Self::Draw => STR_DRAW_LABEL,
+            Self::Scene => STR_SCENE_LABEL,
+            Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
+        }
+    }
+}
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -168,11 +228,11 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_BACKGROUND:&'static str = "Background";
-        const STR_CONTENT:&'static str = "Content";
-        const STR_INTERACTION:&'static str = "Interaction";
-        const STR_SETTINGS:&'static str = "Settings";
-        const STR_PREVIEW:&'static str = "Preview";
+        const STR_BACKGROUND: &'static str = "Background";
+        const STR_CONTENT: &'static str = "Content";
+        const STR_INTERACTION: &'static str = "Interaction";
+        const STR_SETTINGS: &'static str = "Settings";
+        const STR_PREVIEW: &'static str = "Preview";
         match self {
             Self::One => STR_BACKGROUND,
             Self::Two => STR_CONTENT,
@@ -183,13 +243,7 @@ impl StepExt for Step {
     }
 
     fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-            Self::Five,
-        ]
+        vec![Self::One, Self::Two, Self::Three, Self::Four, Self::Five]
     }
     fn get_preview() -> Self {
         Self::Five
