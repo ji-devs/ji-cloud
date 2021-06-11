@@ -1,0 +1,73 @@
+name: Cover - Edit - Elements - Sandbox
+
+on:
+  push:
+    branches: [ sandbox ]
+    paths:
+    - 'config/**'
+    - 'frontend/config/**'
+    - 'frontend/ts-utils/**'
+    - 'frontend/elements/src/_styles/**'
+    - 'frontend/elements/src/widgets/**'
+    - 'frontend/elements/src/_bundles/module/cover/edit/**'
+    - 'frontend/elements/src/module/cover/edit/**'
+    - 'frontend/elements/src/module/cover/_common/**'
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/cover/edit - elements]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: make nightly the default
+        run: rustup default nightly
+
+      - name: install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/elements"
+
+      - name: test elements 
+        run: npm run test 
+        working-directory: "./frontend/elements"
+
+      - name: build elements 
+        run: npm run build:sandbox
+        working-directory: "./frontend/elements"
+        env: 
+          APP_NAME: "module/cover/edit"
+
+      - name: install google cloud sdk
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '295.0.0'
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+
+      - name: deploy to google cloud
+        run: gsutil -m rsync -d -r frontend/elements/dist/module/cover/edit gs://ji-cloud-sandbox-frontend-origin-eu-001/module/cover/edit/elements
+        
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
