@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Audio, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice, Trace},
+    body::{EditorState, StepExt, Audio, Backgrounds, Body, BodyExt, Instructions, Sticker, ThemeChoice, Trace},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -60,6 +60,9 @@ impl TryFrom<Body> for ModuleData {
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
+    /// The editor state
+    pub editor_state: EditorState<Step>,
+
     /// The mode
     pub mode: Mode,
 
@@ -117,5 +120,78 @@ pub enum Mode {
 impl Default for Mode {
     fn default() -> Self {
         Self::Poster
+    }
+}
+
+
+/// The Steps
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Step {
+    /// Step 1
+    One,
+    /// Step 2
+    Two,
+    /// Step 3
+    Three,
+    /// Step 4
+    Four,
+    /// Step 5
+    Five,
+}
+
+impl Default for Step {
+    fn default() -> Self {
+        Self::One
+    }
+}
+
+impl StepExt for Step {
+    fn next(&self) -> Option<Self> {
+        match self {
+            Self::One => Some(Self::Two),
+            Self::Two => Some(Self::Three),
+            Self::Three => Some(Self::Four),
+            Self::Four => Some(Self::Five),
+            Self::Five => None,
+        }
+    }
+
+    fn as_number(&self) -> usize {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+            Self::Three => 3,
+            Self::Four => 4,
+            Self::Five => 4,
+        }
+    }
+
+    fn label(&self) -> &'static str {
+        //TODO - localizaton
+        const STR_BACKGROUND:&'static str = "Background";
+        const STR_CONTENT:&'static str = "Content";
+        const STR_INTERACTION:&'static str = "Interaction";
+        const STR_SETTINGS:&'static str = "Settings";
+        const STR_PREVIEW:&'static str = "Preview";
+        match self {
+            Self::One => STR_BACKGROUND,
+            Self::Two => STR_CONTENT,
+            Self::Three => STR_INTERACTION,
+            Self::Four => STR_SETTINGS,
+            Self::Five => STR_PREVIEW,
+        }
+    }
+
+    fn get_list() -> Vec<Self> {
+        vec![
+            Self::One,
+            Self::Two,
+            Self::Three,
+            Self::Four,
+            Self::Five,
+        ]
+    }
+    fn get_preview() -> Self {
+        Self::Five
     }
 }

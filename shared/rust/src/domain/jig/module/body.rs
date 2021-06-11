@@ -5,8 +5,7 @@ use crate::{
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::convert::TryFrom;
-use std::fmt::Debug;
+use std::{fmt::Debug, hash::Hash, collections::HashSet, convert::TryFrom};
 
 /// Memory Game Body.
 pub mod memory;
@@ -85,6 +84,44 @@ impl Body {
             Self::Poster(_) => super::ModuleKind::Poster,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
         }
+    }
+}
+
+/* The following are things which are often used by multiple modules */
+
+/// Generic editor state which must be preserved between sessions
+/// Although these are saved to the db, they aren't relevant for playback
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct EditorState<STEP> 
+where
+    STEP: StepExt 
+{
+    /// the current step
+    pub step: STEP,
+
+    /// the completed steps
+    pub steps_completed: HashSet<STEP>
+}
+
+/// This extension trait makes it possible to keep the Step
+/// functionality generic and at a higher level than the module itself 
+pub trait StepExt : Copy + Default + PartialEq + Eq + Hash {
+    /// Get the next step from current step
+    fn next(&self) -> Option<Self>;
+    /// Get the step as a number
+    fn as_number(&self) -> usize;
+    /// Label to display (will be localized)
+    fn label(&self) -> &'static str;
+    /// List of all available steps
+    fn get_list() -> Vec<Self>;
+    /// Get the step which is synonymous with "preview"
+    /// TODO: this could probably be derived as a combo
+    /// of get_list() and next() (i.e. the first step to return None)
+    fn get_preview() -> Self;
+    /// Auto-implemented, check whether current step is "preview"
+    fn is_preview(&self) -> bool {
+        *self == Self::get_preview()
     }
 }
 

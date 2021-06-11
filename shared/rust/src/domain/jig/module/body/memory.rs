@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyExt, Image, Instructions, ThemeChoice},
+    body::{EditorState, StepExt, Body, BodyExt, Image, Instructions, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -19,6 +19,9 @@ pub struct ModuleData {
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
+    /// The editor state
+    pub editor_state: EditorState<Step>,
+
     /// The instructions for the module.
     pub instructions: Instructions,
 
@@ -129,5 +132,71 @@ pub enum Mode {
 impl Default for Mode {
     fn default() -> Self {
         Self::Duplicate
+    }
+}
+
+/// The Steps
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Step {
+    /// Step 1
+    One,
+    /// Step 2
+    Two,
+    /// Step 3
+    Three,
+    /// Step 4
+    Four,
+}
+
+impl Default for Step {
+    fn default() -> Self {
+        Self::One
+    }
+}
+
+impl StepExt for Step {
+    fn next(&self) -> Option<Self> {
+        match self {
+            Self::One => Some(Self::Two),
+            Self::Two => Some(Self::Three),
+            Self::Three => Some(Self::Four),
+            Self::Four => None,
+        }
+    }
+
+    fn as_number(&self) -> usize {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+            Self::Three => 3,
+            Self::Four => 4,
+        }
+    }
+
+    fn label(&self) -> &'static str {
+        //TODO - localizaton
+        const STR_CONTENT:&'static str = "Content";
+        const STR_DESIGN:&'static str = "Design";
+        const STR_SETTINGS:&'static str = "Settings";
+        const STR_PREVIEW:&'static str = "Preview";
+
+        match self {
+            Self::One => STR_CONTENT,
+            Self::Two => STR_DESIGN,
+            Self::Three => STR_SETTINGS,
+            Self::Four => STR_PREVIEW,
+        }
+    }
+
+    fn get_list() -> Vec<Self> {
+        vec![
+            Self::One,
+            Self::Two,
+            Self::Three,
+            Self::Four,
+        ]
+    }
+    fn get_preview() -> Self {
+        Self::Four
     }
 }
