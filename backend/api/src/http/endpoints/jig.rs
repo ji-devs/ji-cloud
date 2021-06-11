@@ -17,6 +17,7 @@ use shared::{
 };
 use sqlx::PgPool;
 
+use crate::db::jig::CreateJigError;
 use crate::{
     db,
     error::{self, ServiceKind},
@@ -63,7 +64,12 @@ async fn create(
         &req.description,
     )
     .await
-    .map_err(db::meta::handle_metadata_err)?;
+    .map_err(|e| match e {
+        CreateJigError::DefaultModules(e) => {
+            error::CreateWithMetadata::InternalServerError(e.into())
+        }
+        CreateJigError::Sqlx(e) => db::meta::handle_metadata_err(e).into(),
+    })?;
 
     Ok(CreatedJson(CreateResponse { id }))
 }
@@ -188,7 +194,6 @@ async fn browse(
 async fn search(
     db: Data<PgPool>,
     algolia: ServiceData<crate::algolia::Client>,
-    _claims: TokenUser,
     query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Search as ApiEndpoint>::Res>, error::Service> {
     let query = query.map_or_else(Default::default, Query::into_inner);
