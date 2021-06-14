@@ -6,6 +6,7 @@ use crate::{
 use paperclip::actix::Apiv2Schema;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{collections::HashSet, convert::TryFrom, fmt::Debug, hash::Hash};
+use paperclip::v2::schema::TypedData;
 
 /// Memory Game Body.
 pub mod memory;
@@ -149,7 +150,7 @@ where
 
 /// This extension trait makes it possible to keep the Step
 /// functionality generic and at a higher level than the module itself
-pub trait StepExt: Copy + Default + PartialEq + Eq + Hash {
+pub trait StepExt: Copy + Default + PartialEq + Eq + Hash + TypedData {
     /// Get the next step from current step
     fn next(&self) -> Option<Self>;
     /// Get the step as a number

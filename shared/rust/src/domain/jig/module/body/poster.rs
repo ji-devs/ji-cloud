@@ -213,3 +213,17 @@ impl StepExt for Step {
         Self::Four
     }
 }
+
+use paperclip::v2::{schema::TypedData, models::{DataType, DataTypeFormat}};
+
+impl TypedData for Step {
+    /// The OpenAPI type for `poster::Step`.
+    fn data_type() -> DataType {
+        DataType::Integer
+    }
+
+    /// The optional OpenAPI data format for `poster::Step`.
+    fn format() -> Option<DataTypeFormat> {
+        None
+    }
+}
