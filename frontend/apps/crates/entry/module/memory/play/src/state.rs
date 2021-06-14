@@ -1,9 +1,9 @@
 use components::module::play::prelude::*;
 use super::base::state::*;
 use std::rc::Rc;
-use shared::domain::jig::{JigId, module::{ModuleId, body::memory::{Mode, ModuleData as RawData}}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::memory::{Mode, Step, ModuleData as RawData}}};
 
-pub type AppState = GenericState<RawData, Mode, Base>;
+pub type AppState = GenericState<RawData, Mode, Step, Base>;
 
 
 pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {

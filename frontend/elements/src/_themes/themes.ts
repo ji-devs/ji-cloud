@@ -43,6 +43,7 @@ export const THEMES:Record<ThemeKind, Theme> = {
     },
 };
 
+
 function setRootVars() {
     const style = document.documentElement.style;
 

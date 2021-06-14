@@ -14,7 +14,7 @@ use super::super::{
     actions::*,
 };
 use crate::audio_mixer::AudioMixer;
-use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::{ModeExt, BodyExt}}};
+use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::{ModeExt, BodyExt, StepExt}}};
 use utils::prelude::*;
 
 pub struct Choose <Mode>
@@ -39,14 +39,14 @@ where
     where
         Mode: ModeExt + 'static,
         Step: StepExt + 'static,
-        RawData: BodyExt<Mode> + 'static, 
+        RawData: BodyExt<Mode, Step> + 'static, 
         Base: BaseExt<Step> + 'static,
         Main: MainExt + 'static,
         Sidebar: SidebarExt + 'static,
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 
     {
@@ -70,8 +70,11 @@ where
                         *init = raw;
                     }));
 
-                    let steps_init = init_from_raw(app.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::ChooseMode, None,history).await;
-                    GenericState::change_phase_steps(app.clone(), steps_init);
+                    let step_mutables = get_step_mutables(&raw);
+                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
+
+                    let steps_init = init_from_raw(app.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, InitSource::ChooseMode, history).await;
+                    GenericState::change_phase_steps(app.clone(), steps_init, step_mutables);
 
                 }))
             }),

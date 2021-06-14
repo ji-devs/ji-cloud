@@ -30,7 +30,7 @@ use discard::DiscardOnDrop;
 use super::state::*;
 use crate::module::prelude::*;
 use super::steps::state::*;
-use shared::domain::jig::module::body::{ModeExt, BodyExt};
+use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
 pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>)
 where
@@ -42,7 +42,7 @@ where
     Overlay: OverlayExt + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt<Mode> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static, 
 {
     let sig = map_ref! {
         let phase = state.phase.signal_cloned(),
@@ -98,7 +98,6 @@ where
                                                     is_preview, 
                                                     state.opts.jig_id.clone(), 
                                                     state.opts.module_id.clone(), 
-                                                    state.history.borrow().as_ref().unwrap_ji().clone(), 
                                                     steps.clone()
                                                 )
                                             },

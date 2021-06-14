@@ -18,7 +18,7 @@ use components::tooltip::{
 };
 use super::state::*;
 use super::card::dom::render as render_card;
-use crate::base::state::Step;
+use shared::domain::jig::module::body::memory::Step;
 
 pub fn render(state: Rc<MainPair>) -> Dom {
 

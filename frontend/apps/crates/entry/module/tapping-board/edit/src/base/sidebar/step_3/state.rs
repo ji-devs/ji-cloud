@@ -1,4 +1,4 @@
-use crate::base::state::{Step, Base};
+use crate::base::state::Base;
 use std::rc::Rc;
 use std::cell::RefCell;
 use futures_signals::{

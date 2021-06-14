@@ -9,7 +9,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
-            memory::{Mode, Content as RawContent, ModuleData as RawData}
+            memory::{Mode, Step, Content as RawContent, ModuleData as RawData}
         }
     }
 };
@@ -31,30 +31,28 @@ use components::{
 
 pub async fn init_from_raw(
     audio_mixer: AudioMixer,
+    step_mutables: ReadOnlyStepMutables<Step>,
     jig_id: JigId,
     module_id: ModuleId,
     jig: Option<Jig>,
     raw:RawData, 
     init_source: InitSource, 
-    current: Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, 
     history: Rc<HistoryStateImpl<RawData>>
 ) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
-    let step = Mutable::new({
-        let mut step = Step::default();
+    let force_step = {
         if init_source == InitSource::ForceRaw { 
-            if let Some(debug_step) = crate::debug::settings().step {
-                step = debug_step;
-            } 
+            crate::debug::settings().step
+        } else {
+            None
         }
+    };
 
-        step
-    });
 
-    let base = Base::new(audio_mixer, jig_id, module_id, jig, raw, step.read_only(), history).await;
+    let base = Base::new(audio_mixer, jig_id, module_id, jig, raw, step_mutables.0, history).await;
     
     StepsInit {
-        step,
+        force_step,
         base: base.clone(),
         main: Rc::new(Main::new(base.clone())),
         sidebar: Rc::new(Sidebar::new(base.clone())),
@@ -63,4 +61,5 @@ pub async fn init_from_raw(
         overlay: Rc::new(Overlay::new(base.clone())),
     }
 }
+
 

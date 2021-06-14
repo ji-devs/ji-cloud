@@ -19,7 +19,7 @@ use shared::{
                 Image,
                 ThemeChoice,
                 Instructions,
-                memory::{Content, Mode, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
+                memory::{Content, Mode, Step, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
             },
             JigId, module::ModuleId
         },
@@ -29,12 +29,7 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::{
-    base::{
-        state::Step,
-        sidebar::step_1::state::TabKind as Step1TabKind
-    }
-};
+use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 

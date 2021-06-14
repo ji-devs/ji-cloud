@@ -1,5 +1,5 @@
 
-use crate::base::state::{Step, Base};
+use crate::base::state::Base;
 use std::rc::Rc;
 use futures_signals::signal::{Signal, Mutable, SignalExt};
 use dominator::clone;

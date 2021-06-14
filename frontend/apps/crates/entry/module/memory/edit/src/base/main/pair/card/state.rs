@@ -10,6 +10,7 @@ use crate::base::{
 };
 use app_memory_common::lookup;
 use super::callbacks::*;
+use shared::domain::jig::module::body::memory::Step;
 
 pub struct MainCard {
     pub base: Rc<Base>,

@@ -20,7 +20,7 @@ use shared::{
                 ThemeChoice,
                 Background, Backgrounds,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                poster::{Content, Mode, ModuleData as RawData}
+                poster::{Content, Mode, Step, ModuleData as RawData}
             },
             JigId, module::ModuleId
         },
@@ -30,7 +30,7 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::state::Step;
+
 use crate::base::sidebar::step_2::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_3::state::TabKind as ContentTabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;

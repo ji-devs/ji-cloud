@@ -9,6 +9,7 @@ use crate::base::{
 };
 use super::card::state::*;
 
+use shared::domain::jig::module::body::memory::Step;
 pub struct MainPair {
     pub base: Rc<Base>,
     pub step: Step, 

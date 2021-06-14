@@ -11,7 +11,7 @@ use futures_signals::{
 use wasm_bindgen::prelude::*;
 use crate::module::header::controller::dom::ControllerDom;
 use super::super::actions::HistoryStateImpl;
-use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt}}};
+use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt, StepExt}}};
 use utils::{prelude::*, iframe::IframeInit}; 
 use dominator_helpers::events::Message;
 
@@ -19,11 +19,10 @@ pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
-    history: Rc<HistoryStateImpl<RawData>>,
-    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Vec<Dom>
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -36,24 +35,26 @@ where
     if is_preview {
         vec![
             render_preview_header(RawData::kind(), state.clone()),
-            render_preview_main(RawData::kind(), jig_id, module_id, history, state.clone())
+            render_preview_main(RawData::kind(), jig_id, module_id, state.clone())
         ]
     } else {
         vec![
             render_main(state.clone()),
             render_sidebar(state.clone()),
-            render_header(history, state.clone()),
+            render_header(state.clone()),
             render_footer(state.clone()),
             render_overlay(state.clone()),
         ]
     }
 }
 
-pub fn render_preview_header<Step, Base, Main, Sidebar, Header, Footer, Overlay>(
+pub fn render_preview_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind,
-    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -81,11 +82,10 @@ pub fn render_preview_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Foo
     module_kind: ModuleKind, 
     jig_id: JigId, 
     module_id: ModuleId, 
-    history: Rc<HistoryStateImpl<RawData>>, 
-    state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -114,13 +114,13 @@ where
             .style("height", "100%")
             .property("src", url.clone())
             .with_node!(elem => {
-                .global_event(clone!(history , url => move |evt:Message| {
+                .global_event(clone!(state, url => move |evt:Message| {
 
                     //Wait until the iframe sends its empty message
                     //Then send back the current raw data from history
                     if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
                         log::info!("sending iframe message!");
-                        let data = history.get_current();
+                        let data = state.history.get_current();
 
                         let msg:IframeInit<RawData> = IframeInit::new(data); 
                         if let Some(window) = elem.content_window() {
@@ -135,8 +135,10 @@ where
             })
         })
 }
-pub fn render_main<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -148,8 +150,10 @@ where
     add_slot_to_dom(Main::render(state.main.clone()), "main")
 }
 
-pub fn render_sidebar<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -165,9 +169,9 @@ where
     })
 }
 
-pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(history: Rc<HistoryStateImpl<RawData>>, state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -181,7 +185,7 @@ where
         .property("slot", "header")
         .property("moduleKind", RawData::kind().as_str())
         .child(ControllerDom::render(
-            history,
+            state.history.clone(),
             clone!(state => move || {
                 state.try_change_step(Step::get_preview());
             })
@@ -190,8 +194,10 @@ where
     })
 }
 
-pub fn render_footer<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_footer<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
@@ -213,8 +219,10 @@ where
     })
 }
 
-pub fn render_overlay<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,

@@ -6,7 +6,7 @@ use shared::{
     domain::{
         image::ImageId,
         audio::AudioId, 
-        jig::{*, module::{*, body::{ModeExt, BodyExt}}}
+        jig::{*, module::{*, body::{ModeExt, BodyExt, StepExt}}}
     }, 
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
@@ -23,7 +23,7 @@ impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> Generic
 where
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,
     Sidebar: SidebarExt + 'static,
@@ -33,7 +33,7 @@ where
 {
     pub fn change_phase_choose<InitFromRawFn, InitFromRawOutput>(_self: Rc<Self>, init_from_raw: InitFromRawFn) 
     where
-        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
@@ -41,10 +41,16 @@ where
             init_from_raw,
         )))));
     }
-    pub fn change_phase_steps(_self: Rc<Self>, steps_init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>) -> Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
+    pub fn change_phase_steps(
+        _self: Rc<Self>, 
+        steps_init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>,
+        step_mutables: StepMutables<Step>,
+
+    ) -> Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
         let steps = Rc::new(Steps::new(
             _self.clone(),
-            steps_init 
+            steps_init,
+            step_mutables,
         ));
 
         _self.phase.set(Rc::new(Phase::Steps(steps.clone())));
@@ -57,23 +63,10 @@ where
         init_from_raw: InitFromRawFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
-            let curr_steps = match &*_self.phase.get_cloned() {
-                Phase::Steps(curr_steps) => Some(curr_steps.clone()),
-                _ => None
-            };
-
-            //History shouldn't affect current or completed steps
-            //though this should arguably be configurable on the init object as a simple flag
-            //i.e. it's up to the app to decice whether or not to preserve it
-            //but the mechanism to do that is here
-            let preserve_steps = curr_steps.as_ref().map(|curr| {
-                (curr.step.get_cloned(), curr.steps_completed.get_cloned())
-            });
-
             _self.reset_from_history_loader.load(clone!(_self, init_from_raw => async move {
 
                 let (jig_id, module_id, jig) = (
@@ -85,12 +78,11 @@ where
                 if raw.requires_choose_mode() {
                     Self::change_phase_choose(_self.clone(), init_from_raw.clone());
                 } else {
-                    let steps_init = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::History, curr_steps, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
-                    let steps = Self::change_phase_steps(_self.clone(), steps_init);
-                    if let Some((step, steps_completed)) = preserve_steps {
-                        steps.step.set_neq(step);
-                        steps.steps_completed.set(steps_completed);
-                    }
+                    let step_mutables = get_step_mutables(&raw);
+                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
+
+                    let steps_init = init_from_raw(_self.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, InitSource::History, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
+                    let steps = Self::change_phase_steps(_self.clone(), steps_init, step_mutables);
                 }
             }));
         })
@@ -100,10 +92,11 @@ where
 pub type HistoryStateImpl<RawData> = HistoryState<RawData, Box<dyn Fn(RawData)>, Box<dyn Fn(RawData)>>;
 //pub type HistorySaveFn<RawData> = impl Fn(RawData);
 
-pub fn save_history<RawData, Mode>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
+pub fn save_history<RawData, Mode, Step>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
 where
-    RawData: BodyExt<Mode> + 'static,
-    Mode: ModeExt + 'static 
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static
 {
     Box::new(move |raw_data:RawData| {
         if !skip_for_debug {
@@ -112,10 +105,11 @@ where
     })
 }
 
-pub fn save<RawData, Mode>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
+pub fn save<RawData, Mode, Step>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
 where
-    RawData: BodyExt<Mode> + 'static ,
-    Mode: ModeExt + 'static 
+    RawData: BodyExt<Mode, Step> + 'static ,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static
 {
     save_loader.load(async move {
         let body = raw_data.as_body(); 

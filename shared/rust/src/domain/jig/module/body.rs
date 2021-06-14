@@ -57,7 +57,7 @@ impl Body {
 
 /// Extension trait for interop
 /// impl on inner body data
-pub trait BodyExt<Mode: ModeExt>:
+pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
     TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
 {
     /// get self as a Body
@@ -75,6 +75,22 @@ pub trait BodyExt<Mode: ModeExt>:
 
     /// requires an additional step of choosing the mode
     fn requires_choose_mode(&self) -> bool;
+
+    /// Set editor state step
+    fn set_editor_state_step(&mut self, step: Step);
+    /// Set editor state steps completed
+    fn set_editor_state_steps_completed(&mut self, steps_completed: HashSet<Step>);
+    /// Get editor state step
+    fn get_editor_state_step(&self) -> Option<Step>;
+    /// Get editor state steps completed
+    fn get_editor_state_steps_completed(&self) -> Option<HashSet<Step>>;
+    /// Insert a completed step
+    fn insert_editor_state_step_completed(&mut self, step: Step) {
+        if let Some(mut steps_completed) = self.get_editor_state_steps_completed() {
+            steps_completed.insert(step);
+            self.set_editor_state_steps_completed(steps_completed);
+        }
+    }
 }
 
 /// Extenstion trait for modes
@@ -135,7 +151,6 @@ impl Body {
 /// Generic editor state which must be preserved between sessions
 /// Although these are saved to the db, they aren't relevant for playback
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct EditorState<STEP>
 where
     STEP: StepExt,

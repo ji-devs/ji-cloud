@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::{Body, ModeExt, BodyExt}}},
+    domain::jig::{*, module::{*, body::{Body, ModeExt, BodyExt, StepExt}}},
 };
 use dominator::{clone, Dom};
 use futures_signals::{
@@ -23,11 +23,12 @@ use utils::{settings::SETTINGS, prelude::*, iframe::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 
-pub struct GenericState <RawData, Mode, Base> 
+pub struct GenericState <RawData, Mode, Step, Base> 
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Base: BaseExt + 'static,
+    Step: StepExt + 'static
 {
     pub(super) phase: Mutable<Rc<Phase<RawData, Base>>>,
     pub(super) jig: RefCell<Option<Jig>>,
@@ -36,7 +37,7 @@ where
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) audio_mixer: RefCell<Option<AudioMixer>>,
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
-    phantom: PhantomData<Mode>,
+    phantom: PhantomData<(Mode, Step)>,
 }
 
 pub trait DomRenderable {
@@ -91,11 +92,12 @@ impl <RawData> StateOpts<RawData> {
     }
 }
 
-impl <RawData, Mode, Base> GenericState <RawData, Mode, Base> 
+impl <RawData, Mode, Step, Base> GenericState <RawData, Mode, Step, Base> 
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Base: BaseExt + 'static,
+    Step: StepExt + 'static
 {
     pub fn new<InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 

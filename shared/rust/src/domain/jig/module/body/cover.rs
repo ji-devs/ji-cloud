@@ -1,10 +1,11 @@
 use crate::domain::jig::module::{
-    body::{Backgrounds, Body, BodyExt, EditorState, Instructions, StepExt, Sticker, ThemeChoice},
+    body::{Backgrounds, Body, BodyExt, Instructions, StepExt, Sticker, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::convert::TryFrom;
 
 /// The body for [`Cover`](crate::domain::jig::module::ModuleKind::Cover) modules.
@@ -15,7 +16,7 @@ pub struct ModuleData {
     pub content: Option<Content>,
 }
 
-impl BodyExt<()> for ModuleData {
+impl BodyExt<(), Step> for ModuleData {
     fn as_body(&self) -> Body {
         Body::Cover(self.clone())
     }
@@ -36,6 +37,29 @@ impl BodyExt<()> for ModuleData {
     fn requires_choose_mode(&self) -> bool {
         false
     }
+
+    fn set_editor_state_step(&mut self, step: Step) {
+        if let Some(content) = self.content.as_mut() {
+            content.editor_state.step = step;
+        }
+    }
+    fn set_editor_state_steps_completed(&mut self, steps_completed: HashSet<Step>) {
+        if let Some(content) = self.content.as_mut() {
+            content.editor_state.steps_completed = steps_completed;
+        }
+    }
+
+    fn get_editor_state_step(&self) -> Option<Step> {
+        self.content
+            .as_ref()
+            .map(|content| content.editor_state.step)
+    }
+
+    fn get_editor_state_steps_completed(&self) -> Option<HashSet<Step>> {
+        self.content
+            .as_ref()
+            .map(|content| content.editor_state.steps_completed.clone())
+    }
 }
 
 impl TryFrom<Body> for ModuleData {
@@ -54,7 +78,7 @@ impl TryFrom<Body> for ModuleData {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The editor state
-    pub editor_state: EditorState<Step>,
+    pub editor_state: EditorState,
 
     /// The instructions for the module.
     pub instructions: Instructions,
@@ -69,8 +93,20 @@ pub struct Content {
     pub stickers: Vec<Sticker>,
 }
 
+/// Editor state
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct EditorState {
+    /// the current step
+    pub step: Step,
+
+    /// the completed steps
+    pub steps_completed: HashSet<Step>,
+}
+
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

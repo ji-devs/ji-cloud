@@ -1,7 +1,7 @@
 use components::module::edit::prelude::*;
 use super::base::{
     actions::init_from_raw,
-    state::{Base,Step},
+    state::Base,
     footer::state::Footer,
     header::state::Header,
     main::state::Main,
@@ -9,7 +9,7 @@ use super::base::{
     sidebar::state::Sidebar
 };
 use std::rc::Rc;
-use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode, ModuleData as RawData}}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode, Step, ModuleData as RawData}}};
 
 pub type AppState = GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>;
 

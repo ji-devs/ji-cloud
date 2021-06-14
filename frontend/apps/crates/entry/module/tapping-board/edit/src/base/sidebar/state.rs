@@ -1,5 +1,5 @@
 use components::module::edit::prelude::*;
-use crate::base::state::{Step, Base};
+use crate::base::state::Base;
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::{Mutable, SignalExt};

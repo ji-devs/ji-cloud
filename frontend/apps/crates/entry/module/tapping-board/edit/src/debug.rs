@@ -20,7 +20,7 @@ use shared::{
                 ThemeChoice,
                 Background, Backgrounds,
                 Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                tapping_board::{Content, Mode, ModuleData as RawData, TappingTrace}
+                tapping_board::{Content, Mode, Step, ModuleData as RawData, TappingTrace}
             },
             JigId, module::ModuleId
         },
@@ -30,7 +30,6 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::state::Step;
 use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
 use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
 use crate::base::sidebar::step_3::state::TabKind as InteractionTabKind;

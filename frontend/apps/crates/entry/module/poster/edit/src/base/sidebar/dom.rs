@@ -3,7 +3,7 @@ use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use super::state::*;
 use futures_signals::signal::SignalExt;
-use crate::base::state::Step;
+use shared::domain::jig::module::body::poster::Step;
 
 use super::{
     step_1::{

@@ -8,9 +8,12 @@ use futures_signals::{
     signal::{Mutable, SignalExt, Signal},
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
+use shared::domain::jig::module::body::{StepExt, BodyExt, ModeExt};
 
-pub fn render<Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
+    RawData: BodyExt<Mode, Step> + 'static, 
+    Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
     Main: MainExt + 'static,

@@ -7,12 +7,14 @@ use shared::domain::jig::{
     module::{
         ModuleId, 
         body::{
+            StepExt,
             ThemeChoice,
             Trace as RawTrace,
             Backgrounds as RawBackgrounds, 
             Audio,
             Instructions,
             tapping_board::{
+                Step,
                 PlaySettings as RawPlaySettings, 
                 Hint, Next,
                 Mode, 
@@ -293,66 +295,5 @@ impl BaseExt<Step> for Base {
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
         signal::always(true)
-    }
-}
-
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Step {
-    One,
-    Two, 
-    Three,
-    Four,
-    Five,
-}
-
-impl Default for Step {
-    fn default() -> Self {
-        Self::One
-    }
-}
-
-impl StepExt for Step {
-    fn next(&self) -> Option<Self> {
-        match self {
-            Self::One => Some(Self::Two),
-            Self::Two => Some(Self::Three),
-            Self::Three => Some(Self::Four),
-            Self::Four => Some(Self::Five),
-            Self::Five => None,
-        }
-    }
-
-    fn as_number(&self) -> usize {
-        match self {
-            Self::One => 1,
-            Self::Two => 2,
-            Self::Three => 3,
-            Self::Four => 4,
-            Self::Five => 5,
-        }
-    }
-
-    fn label(&self) -> &'static str {
-        match self {
-            Self::One => crate::strings::steps_nav::STR_BACKGROUND,
-            Self::Two => crate::strings::steps_nav::STR_CONTENT,
-            Self::Three => crate::strings::steps_nav::STR_INTERACTION,
-            Self::Four => crate::strings::steps_nav::STR_SETTINGS,
-            Self::Five => crate::strings::steps_nav::STR_PREVIEW,
-        }
-    }
-
-    fn get_list() -> Vec<Self> {
-        vec![
-            Self::One,
-            Self::Two,
-            Self::Three,
-            Self::Four,
-            Self::Five
-        ]
-    }
-    fn get_preview() -> Self {
-        Self::Five
     }
 }

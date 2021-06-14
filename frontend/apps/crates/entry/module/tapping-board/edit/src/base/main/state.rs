@@ -3,7 +3,7 @@ use components::traces::{
     bubble::state::TraceBubble,
     edit::state::Edit as TracesEdit
 };
-use crate::base::state::{Step, Base};
+use crate::base::state::Base;
 use std::rc::Rc;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{
@@ -12,6 +12,7 @@ use futures_signals::{
 };
 use utils::prelude::*;
 use dominator::clone;
+use shared::domain::jig::module::body::tapping_board::Step;
 
 pub struct Main {
     pub base: Rc<Base>,

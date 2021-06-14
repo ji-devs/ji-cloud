@@ -25,7 +25,7 @@ use dominator_helpers::{
 };
 use wasm_bindgen_futures::spawn_local;
 //use super::actions::{HistoryChangeFn, HistoryUndoRedoFn};
-use shared::domain::jig::{JigId, module::{ModuleId, body::BodyExt}};
+use shared::domain::jig::{JigId, module::{ModuleId, body::{BodyExt, StepExt}}};
 use super::{
     actions::*,
     steps::state::*,
@@ -42,7 +42,7 @@ use crate::audio_mixer::AudioMixer;
 
 pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
-    RawData: BodyExt<Mode> + 'static,
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -52,7 +52,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub phase: Mutable<Rc<Phase<Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
+    pub phase: Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) is_preview: Mutable<bool>,
@@ -66,8 +66,9 @@ where
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
 }
 
-pub enum Phase <Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+pub enum Phase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -79,7 +80,7 @@ where
 {
     Init,
     Choose(Rc<Choose<Mode>>),
-    Steps(Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
+    Steps(Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
 #[derive(Debug, Clone)]
@@ -132,14 +133,14 @@ where
     Header: HeaderExt + 'static,
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
-    RawData: BodyExt<Mode> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static, 
 {
     pub fn new<InitFromRawFn, InitFromRawOutput>(
         opts: StateOpts<RawData>, 
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource, Option<Rc<Steps<Step, Base, Main, Sidebar, Header, Footer, Overlay>>>, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource,  Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -235,8 +236,11 @@ where
                 if raw.requires_choose_mode() {
                     Self::change_phase_choose(_self.clone(), init_from_raw);
                 } else {
-                    let steps_init = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source, None, history.clone()).await;
-                    Self::change_phase_steps(_self.clone(), steps_init);
+                    let step_mutables = get_step_mutables(&raw);
+                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
+
+                    let steps_init = init_from_raw(_self.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, init_source, history.clone()).await;
+                    Self::change_phase_steps(_self.clone(), steps_init, step_mutables);
                 }
 
                 _self.raw_loaded.set_neq(true);

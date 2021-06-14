@@ -1,13 +1,14 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Backgrounds, Body, BodyExt, EditorState, Instructions, ModeExt, StepExt, Sticker,
-        ThemeChoice, Trace,
+        Audio, Backgrounds, Body, BodyExt, Instructions, ModeExt, StepExt, Sticker, ThemeChoice,
+        Trace,
     },
     ModuleKind,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::convert::TryFrom;
 
 mod play_settings;
@@ -21,7 +22,7 @@ pub struct ModuleData {
     pub content: Option<Content>,
 }
 
-impl BodyExt<Mode> for ModuleData {
+impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
         Body::TappingBoard(self.clone())
     }
@@ -46,6 +47,29 @@ impl BodyExt<Mode> for ModuleData {
     fn requires_choose_mode(&self) -> bool {
         self.content.is_none()
     }
+
+    fn set_editor_state_step(&mut self, step: Step) {
+        if let Some(content) = self.content.as_mut() {
+            content.editor_state.step = step;
+        }
+    }
+    fn set_editor_state_steps_completed(&mut self, steps_completed: HashSet<Step>) {
+        if let Some(content) = self.content.as_mut() {
+            content.editor_state.steps_completed = steps_completed;
+        }
+    }
+
+    fn get_editor_state_step(&self) -> Option<Step> {
+        self.content
+            .as_ref()
+            .map(|content| content.editor_state.step)
+    }
+
+    fn get_editor_state_steps_completed(&self) -> Option<HashSet<Step>> {
+        self.content
+            .as_ref()
+            .map(|content| content.editor_state.steps_completed.clone())
+    }
 }
 
 impl TryFrom<Body> for ModuleData {
@@ -64,7 +88,7 @@ impl TryFrom<Body> for ModuleData {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The editor state
-    pub editor_state: EditorState<Step>,
+    pub editor_state: EditorState,
 
     /// The mode
     pub mode: Mode,
@@ -86,6 +110,17 @@ pub struct Content {
 
     /// play settings
     pub play_settings: PlaySettings,
+}
+
+/// Editor state
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct EditorState {
+    /// the current step
+    pub step: Step,
+
+    /// the completed steps
+    pub steps_completed: HashSet<Step>,
 }
 
 /// Tapping board trace w/ metadata
@@ -186,6 +221,7 @@ impl ModeExt for Mode {
 
 /// The Steps
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Step {
     /// Step 1
     One,

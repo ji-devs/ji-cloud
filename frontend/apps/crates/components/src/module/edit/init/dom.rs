@@ -5,7 +5,7 @@ use super::super::{
 use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use shared::domain::jig::module::body::{ModeExt, BodyExt};
+use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 use web_sys::AudioContext;
 use crate::audio_mixer::AudioMixer;
 
@@ -19,7 +19,7 @@ where
     Overlay: OverlayExt + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
-    RawData: BodyExt<Mode> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static, 
 {
     html!("div", {
         .property("slot", "main")

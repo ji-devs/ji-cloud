@@ -29,13 +29,14 @@ use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::state::*;
 use crate::module::prelude::*;
-use shared::domain::jig::module::body::{ModeExt, BodyExt};
+use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
-pub fn render_page_body<RawData, Mode, Base> (state:Rc<GenericState<RawData, Mode, Base>>)
+pub fn render_page_body<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>)
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode> + 'static, 
-    Mode: ModeExt + 'static
+    RawData: BodyExt<Mode, Step> + 'static, 
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
 {
 
     let sig =
@@ -100,11 +101,12 @@ where
 
 //This is just a placeholder to get messages
 //It'll be replaced when the iframe data arrives
-fn render_iframe_wait<RawData, Mode, Base> (state:Rc<GenericState<RawData, Mode, Base>>, on_raw: Rc<Box<dyn Fn(RawData)>>) -> Dom
+fn render_iframe_wait<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, on_raw: Rc<Box<dyn Fn(RawData)>>) -> Dom
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode> + 'static, 
-    Mode: ModeExt + 'static
+    RawData: BodyExt<Mode, Step> + 'static, 
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static
 {
 
     html!("empty-fragment", {
