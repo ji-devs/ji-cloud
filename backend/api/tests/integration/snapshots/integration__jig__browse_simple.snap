@@ -16,6 +16,10 @@ expression: body
         {
           "id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
           "kind": "Flashcards"
+        },
+        {
+          "id": "5fac2632-cd4a-11eb-ae4e-7b9a797001a5",
+          "kind": "Memory"
         }
       ],
       "age_ranges": [],
