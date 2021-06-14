@@ -9,6 +9,10 @@ expression: body
     "body": {
       "memoryGame": {
         "content": {
+          "editor_state": {
+            "step": "One",
+            "steps_completed": []
+          },
           "instructions": {
             "text": null,
             "audio": null
