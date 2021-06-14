@@ -1,33 +1,48 @@
 use dominator::clone;
-use shared::{
-    api::endpoints::{ApiEndpoint, jig::*,},
-    error::{EmptyError, MetadataNotFound},
-    domain::{CreateResponse, jig::*},
-};
+use futures::join;
+use shared::{api::endpoints::{ApiEndpoint, jig::*, meta}, domain::{CreateResponse, jig::*, meta::MetadataResponse}, error::{EmptyError, MetadataNotFound}};
 use std::rc::Rc;
 use super::state::*;
 use utils::prelude::*;
 
-pub fn load_jigs(state: Rc<State>) {
+
+pub fn load_data(state: Rc<State>) {
+    state.loader.load(clone!(state => async move {
+        join!(
+            load_jigs(Rc::clone(&state)),
+            load_ages(Rc::clone(&state)),
+        );
+    }));
+}
+
+async fn load_jigs(state: Rc<State>) {
     let is_published = match *state.visible_jigs.lock_ref() {
         VisibleJigs::All => None,
         VisibleJigs::Published => Some(true),
         VisibleJigs::Draft => Some(false),
     };
-    state.loader.load(clone!(state => async move {
-        let req = Some(JigBrowseQuery {
-            is_published,
-            author_id: Some(UserOrMe::Me),
-            page: None,
-        });
 
-        match api_with_auth::<JigBrowseResponse, EmptyError, _>(&Browse::PATH, Browse::METHOD, req).await {
-            Ok(resp) => {
-                state.jigs.lock_mut().replace_cloned(resp.jigs);
-            },
-            Err(_) => {},
-        }
-    }));
+    let req = Some(JigBrowseQuery {
+        is_published,
+        author_id: Some(UserOrMe::Me),
+        page: None,
+    });
+
+    match api_with_auth::<JigBrowseResponse, EmptyError, _>(&Browse::PATH, Browse::METHOD, req).await {
+        Ok(resp) => {
+            state.jigs.lock_mut().replace_cloned(resp.jigs);
+        },
+        Err(_) => {},
+    }
+}
+
+async fn load_ages(state: Rc<State>) {
+    match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        Err(e) => {},
+        Ok(res) => {
+            state.age_ranges.set(res.age_ranges);
+        },
+    }
 }
 
 pub fn search_jigs(state: Rc<State>, q: String) {
@@ -48,6 +63,12 @@ pub fn search_jigs(state: Rc<State>, q: String) {
             },
             Err(_) => {},
         }
+    }));
+}
+
+pub fn load_jigs_regular(state: Rc<State>) {
+    state.loader.load(clone!(state => async move {
+        load_jigs(Rc::clone(&state)).await
     }));
 }
 
