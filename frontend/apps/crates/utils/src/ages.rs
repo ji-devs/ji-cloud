@@ -9,7 +9,7 @@ pub trait AgeRangeVecExt {
 
 impl AgeRangeVecExt for Vec<AgeRange> {
     fn range_string(&self, selected: &Vec<AgeRangeId>) -> String {
-        if selected.len() == 0 {
+        if self.len() == 0 || selected.len() == 0 {
             return String::new();
         }
         if selected.contains(&self[0].id) {
@@ -19,9 +19,11 @@ impl AgeRangeVecExt for Vec<AgeRange> {
         let mut first: Option<&AgeRange> = None;
         let mut last: &AgeRange = &self[0];
         for age_range in self {
-            last = &age_range;
             if first.is_none() && selected.contains(&age_range.id) {
                 first = Some(&age_range);
+            }
+            if selected.contains(&age_range.id) {
+                last = &age_range;
             }
         }
 
