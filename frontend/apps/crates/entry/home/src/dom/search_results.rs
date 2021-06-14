@@ -2,6 +2,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::{signal::SignalExt, signal_vec::{MutableVec, SignalVecExt}};
 use shared::domain::jig::Jig;
+use utils::ages::AgeRangeVecExt;
 
 use crate::state::State;
 
@@ -22,12 +23,16 @@ pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom
 }
 
 fn render_result(state: Rc<State>, jig: &Jig) -> Dom {
+    let jig_ages = jig.age_ranges.clone();
     html!("home-search-result", {
         .property("slot", "results")
         .property("title", &jig.display_name)
         .property("playedCount", "???")
         .property("likedCount", "???")
         .property("language", &jig.language)
+        .property_signal("ages", state.search_options.age_ranges.signal_cloned().map(move |age_ranges| {
+            age_ranges.range_string(&jig_ages)
+        }))
         .property("description", jig.description.clone())
         .children(&mut [
             html!("img-ji", {

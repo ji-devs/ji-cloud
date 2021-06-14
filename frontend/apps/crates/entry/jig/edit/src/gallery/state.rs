@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::domain::jig::Jig;
+use shared::domain::{jig::Jig, meta::AgeRange};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use strum_macros::{EnumIter, Display, EnumString};
@@ -18,6 +18,7 @@ pub struct State {
     pub loader: AsyncLoader,
     pub jigs: MutableVec<Jig>,
     pub visible_jigs: Rc<Mutable<VisibleJigs>>,
+    pub age_ranges: Mutable<Vec<AgeRange>>,
 }
 
 impl State {
@@ -26,6 +27,7 @@ impl State {
             loader: AsyncLoader::new(),
             jigs: MutableVec::new(),
             visible_jigs: Rc::new(Mutable::new(VisibleJigs::All)),
+            age_ranges: Mutable::new(vec![]),
         }
     }
 }
