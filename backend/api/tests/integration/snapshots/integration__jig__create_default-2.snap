@@ -24,6 +24,9 @@ expression: body
     "additional_resources": [],
     "description": "",
     "last_edited": "[time_stamp]",
-    "is_public": false
+    "is_public": false,
+    "direction": "LeftToRight",
+    "display_score": false,
+    "theme": "Blank"
   }
 }
