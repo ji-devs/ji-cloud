@@ -62,6 +62,7 @@ async fn create(
         req.publish_at.map(DateTime::<Utc>::from),
         &language,
         &req.description,
+        &req.direction,
     )
     .await
     .map_err(|e| match e {
@@ -135,6 +136,9 @@ async fn update(
         req.language.as_deref(),
         req.description.as_deref(),
         req.is_public,
+        req.direction,
+        req.display_score,
+        req.theme,
     )
     .await?;
 

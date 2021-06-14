@@ -31,6 +31,9 @@ expression: body
     ],
     "description": "test description",
     "last_edited": "[last_edited]",
-    "is_public": true
+    "is_public": true,
+    "direction": "LeftToRight",
+    "display_score": false,
+    "theme": "Blank"
   }
 }

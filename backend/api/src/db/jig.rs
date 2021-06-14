@@ -4,8 +4,8 @@ use shared::domain::{
     category::CategoryId,
     jig::{
         additional_resource::AdditionalResourceId,
-        module::{body::cover, ModuleId},
-        Jig, JigId, LiteModule, ModuleKind,
+        module::{body::cover, ModuleBody, ModuleId},
+        Jig, JigId, LiteModule, ModuleKind, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -14,7 +14,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error;
-use shared::domain::jig::module::ModuleBody;
+use shared::domain::jig::module::body::ThemeId;
 
 pub async fn create(
     pool: &PgPool,
@@ -27,14 +27,16 @@ pub async fn create(
     publish_at: Option<DateTime<Utc>>,
     language: &str,
     description: &str,
+    direction: &TextDirection,
 ) -> Result<JigId, CreateJigError> {
     let mut transaction = pool.begin().await?;
 
     let jig = sqlx::query!(
+        // language=SQL
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at, language, description)
-values ($1, $2, $2, $3, $4, $5)
+    (display_name, creator_id, author_id, publish_at, language, description, direction)
+values ($1, $2, $2, $3, $4, $5, $6)
 returning id
 "#,
         display_name,
@@ -42,6 +44,7 @@ returning id
         publish_at,
         language,
         description,
+        (*direction) as i16,
     )
     .fetch_one(&mut transaction)
     .await?;
@@ -107,6 +110,9 @@ select
     language,
     description,
     is_public,
+    direction as "direction: TextDirection",
+    display_score,
+    theme as "theme: ThemeId",
     array(
         select row (id, kind)
         from jig_module
@@ -143,6 +149,9 @@ order by t.ord
             description: row.description,
             last_edited: row.updated_at,
             is_public: row.is_public,
+            direction: row.direction,
+            display_score: row.display_score,
+            theme: row.theme,
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
             additional_resources: row
@@ -169,6 +178,9 @@ select
     language,
     description,
     is_public,
+    direction as "direction: TextDirection",
+    display_score,
+    theme as "theme: ThemeId",
     array(
         select row (id, kind)
         from jig_module
@@ -203,6 +215,9 @@ where id = $1"#,
         description: row.description,
         last_edited: row.updated_at,
         is_public: row.is_public,
+        direction: row.direction,
+        display_score: row.display_score,
+        theme: row.theme,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
         additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
@@ -224,6 +239,9 @@ pub async fn update(
     language: Option<&str>,
     description: Option<&str>,
     is_public: Option<bool>,
+    direction: Option<TextDirection>,
+    display_score: Option<bool>,
+    theme: Option<ThemeId>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -251,6 +269,7 @@ where id = $1 and $2 is distinct from publish_at"#,
     }
 
     sqlx::query!(
+        //language=SQL
         r#"
 update jig
 set display_name    = coalesce($2, display_name),
@@ -258,19 +277,28 @@ set display_name    = coalesce($2, display_name),
     language        = coalesce($4, language),
     description     = coalesce($5, description),
     is_public       = coalesce($6, is_public),
+    direction       = coalesce($7, direction),
+    display_score   = coalesce($8, display_score),
+    theme           = coalesce($9, theme),
     updated_at      = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::uuid is not null and $3 is distinct from author_id) or
        ($4::text is not null and $4 is distinct from language) or
        ($5::text is not null and $5 is distinct from description) or
-       ($6::bool is not null and $6 is distinct from is_public))"#,
+       ($6::bool is not null and $6 is distinct from is_public) or
+       ($7::smallint is not null and $7 is distinct from direction) or
+       ($8::bool is not null and $8 is distinct from display_score) or
+       ($9::smallint is not null and $9 is distinct from theme))"#,
         id.0,
         display_name,
         author_id,
         language,
         description,
         is_public,
+        direction.map(|it| it as i16),
+        display_score,
+        theme.map(|it| it as i16),
     )
     .execute(&mut transaction)
     .await?;
@@ -318,7 +346,7 @@ pub async fn list(
     author_id: Option<Uuid>,
     page: i32,
 ) -> sqlx::Result<Vec<Jig>> {
-    sqlx::query!(
+    sqlx::query!( //language=SQL
         r#"
 select  
     id as "id: JigId",
@@ -330,6 +358,9 @@ select
     language,
     description,
     is_public,
+    direction as "direction: TextDirection",
+    display_score,
+    theme as "theme: ThemeId",
     array(
         select row (id, kind)
         from jig_module
@@ -370,6 +401,9 @@ limit 20 offset 20 * $2
         description: row.description,
         last_edited: row.updated_at,
         is_public: row.is_public,
+        direction: row.direction,
+        display_score: row.display_score,
+        theme: row.theme,
         age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
         affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
         additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
@@ -402,10 +436,10 @@ where
 pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Option<JigId>> {
     let mut txn = db.begin().await?;
 
-    let new_id = sqlx::query!(
+    let new_id = sqlx::query!( //language=SQL
         r#"
-insert into jig (display_name, parents, creator_id, author_id, language, description)
-select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language, description
+insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score, theme)
+select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language, description, direction, display_score, theme
 from jig
 where id = $1
 returning id

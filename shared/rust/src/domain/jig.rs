@@ -19,6 +19,7 @@ use uuid::Uuid;
 // avoid breaking Changes
 pub use module::{LiteModule, Module, ModuleKind};
 
+use crate::domain::jig::module::body::ThemeId;
 pub use additional_resource::AdditionalResourceId;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
@@ -124,7 +125,12 @@ pub struct JigCreateRequest {
     pub publish_at: Option<Publish>,
 
     /// Description of the jig. Defaults to empty string.
+    #[serde(default)]
     pub description: String,
+
+    /// Text direction for the jig.
+    #[serde(default)]
+    pub direction: TextDirection,
 }
 
 /// The over-the-wire representation of a JIG.
@@ -177,6 +183,24 @@ pub struct Jig {
 
     /// Whether the jig is public or not.
     pub is_public: bool,
+
+    /// Text direction for the jig.
+    pub direction: TextDirection,
+
+    /// Whether to display the score for this jig.
+    pub display_score: bool,
+
+    /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
+    pub theme: ThemeId,
+    // TODO: need Audio enums to exist
+    // /// Background audio
+    // pub background_audio: Option<BackgroundAudio>,
+
+    // /// Correct answer audio
+    // pub correct_answer_audio: HashSet<FeedbackAudio>,
+
+    // /// Wrong answer audio
+    // pub wrong_answer_audio: HashSet<FeedbackAudio>,
 }
 
 /// The response returned when a request for `GET`ing a jig is successful.
@@ -248,6 +272,37 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub is_public: Option<bool>,
+
+    /// Text direction for the jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub direction: Option<TextDirection>,
+
+    /// Whether to display the score for this jig.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub display_score: Option<bool>,
+
+    /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub theme: Option<ThemeId>,
+    // TODO: need Audio enums to exist
+    // /// Background audio
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(deserialize_with = "super::deserialize_optional_field")]
+    // #[serde(default)]
+    // pub background_audio: Option<Option<BackgroundAudio>>,
+
+    // /// Correct answer audio
+    // #[serde(skip_serializing_if = "HashSet::is_empty")]
+    // #[serde(default)]
+    // pub correct_answer_audio: Option<HashSet<FeedbackAudio>>,
+
+    // /// Wrong answer audio
+    // #[serde(skip_serializing_if = "HashSet::is_empty")]
+    // #[serde(default)]
+    // pub wrong_answer_audio: Option<HashSet<FeedbackAudio>>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
@@ -270,6 +325,7 @@ pub struct JigBrowseQuery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page: Option<u32>,
 }
+
 /// Response for [`Browse`](crate::api::endpoints::jig::Browse).
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -352,6 +408,24 @@ pub struct JigSearchResponse {
 
     /// The total number of jigs found
     pub total_image_count: u64,
+}
+
+/// Sets text direction for the jig
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+pub enum TextDirection {
+    /// left to right
+    LeftToRight = 0,
+    /// right to left
+    RightToLeft = 1,
+}
+
+impl Default for TextDirection {
+    fn default() -> Self {
+        Self::LeftToRight
+    }
 }
 
 into_uuid![JigId];
