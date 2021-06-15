@@ -37,3 +37,5 @@ pub mod traces;
 pub mod lists;
 #[cfg(feature = "audio_mixer")]
 pub mod audio_mixer;
+#[cfg(feature = "theme")]
+pub mod theme;

@@ -9,17 +9,24 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks
     },
     color_select::state::{State as ColorPickerState},
+    theme::design_selector::{
+        state::ThemeSelector
+    }
 };
 use shared::domain::jig::module::body::{Background, Image};
 pub struct Step1 {
     pub base: Rc<Base>,
+    pub theme_selector: Rc<ThemeSelector>
 }
 
 
 impl Step1 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
+        let theme_selector = Rc::new(ThemeSelector {});
+
         Rc::new(Self {
             base,
+            theme_selector,
         })
     }
 }
