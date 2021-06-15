@@ -207,7 +207,7 @@ pub enum AudioBackground {
 }
 
 /// Audio Effects
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioEffects {
     /// Positive audio feedback 
