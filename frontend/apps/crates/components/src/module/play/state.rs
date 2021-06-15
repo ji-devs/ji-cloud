@@ -191,7 +191,9 @@ where
                             is_public: false,
                             direction: TextDirection::default(),
                             display_score: false,
-                            theme: ThemeId::default()
+                            theme: ThemeId::default(),
+                            audio_bg: None,
+                            audio_effects: AudioEffects::default() 
                         })
                     } else {
                         let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());

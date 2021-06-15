@@ -38,7 +38,7 @@ use std::cell::RefCell;
 pub struct Base {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
+    pub jig_theme_id: Mutable<ThemeId>,
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme: Mutable<ThemeChoice>,
@@ -71,7 +71,7 @@ impl Base {
             raw,
             jig_id,
             module_id,
-            jig,
+            jig_theme_id,
             history,
             step,
             theme,
@@ -95,7 +95,7 @@ impl Base {
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            jig,
+            jig_theme_id,
             history,
             step: step.read_only(),
             theme,
@@ -151,26 +151,28 @@ impl BaseExt<Step> for Base {
                 }
         }
     }
-
+    
     fn get_theme_id(&self) -> ThemeId {
         match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig.theme.clone(),
+            ThemeChoice::Jig => self.jig_theme_id.get(),
             ThemeChoice::Override(theme_id) => theme_id
         }
     }
     fn theme_id_signal(&self) -> Self::ThemeIdSignal { 
-        let jig_theme_id = self.jig.theme.clone();
-
-        self.theme.signal_cloned()
-            .map(clone!(jig_theme_id => move |theme| {
-                match theme { 
-                    ThemeChoice::Jig => jig_theme_id,
+        map_ref! {
+            let jig_theme_id = self.jig_theme_id.signal(),
+            let theme = self.theme.signal()
+                => {
+                match *theme { 
+                    ThemeChoice::Jig => *jig_theme_id,
                     ThemeChoice::Override(theme_id) => theme_id
                 }
-            }))
+            }
+        }
     }
 
     fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal { 
         self.theme_id_signal().map(|id| id.as_str_id())
     }
+
 }

@@ -62,3 +62,10 @@ import "@elements/core/inputs/color";
 import "@elements/module/_common/widgets/trace/edit-reshape-menu";
 import "@elements/module/_common/widgets/trace/edit-reshape-menu-btn";
 import "@elements/module/_common/widgets/trace/edit-select-box";
+
+
+//theme selectors
+import "@elements/module/_common/widgets/theme/card-selector/container";
+import "@elements/module/_common/widgets/theme/card-selector/option";
+import "@elements/module/_common/widgets/theme/design-selector/container";
+import "@elements/module/_common/widgets/theme/design-selector/option";

@@ -61,8 +61,8 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Jig,
     // TappingBoard-specific
+    pub jig_theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
     pub traces: Rc<TracesEdit>,
@@ -118,7 +118,7 @@ impl Base {
             raw,
             jig_id,
             module_id,
-            jig,
+            jig_theme_id,
             history,
             step,
             theme,
@@ -240,7 +240,7 @@ impl Base {
         let _self = Rc::new(Self {
             jig_id,
             module_id,
-            jig,
+            jig_theme_id: jig_theme_id.read_only(),
             history,
             step: step.read_only(),
             theme,
@@ -258,33 +258,6 @@ impl Base {
 
         _self
     }
-
-    pub fn get_theme_id(&self) -> ThemeId {
-        match self.theme.get_cloned() {
-            ThemeChoice::Jig => {
-                // self.jig.as_ref().unwrap_ji().theme_id.clone()
-                log::warn!("waiting on jig settings");
-                ThemeId::Chalkboard
-            },
-            ThemeChoice::Override(theme_id) => theme_id
-        }
-    }
-    pub fn theme_id_signal(&self) -> impl Signal<Item = ThemeId> {
-        self.theme.signal_cloned()
-            .map(|theme| match theme {
-                ThemeChoice::Jig => {
-                    // self.jig.as_ref().unwrap_ji().theme_id.clone()
-                    log::warn!("waiting on jig settings");
-                    ThemeId::Chalkboard
-                },
-                ThemeChoice::Override(theme_id) => theme_id
-            })
-    }
-
-    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id_signal().map(|id| id.as_str_id())
-    }
-
 }
 
 
@@ -303,20 +276,21 @@ impl BaseExt<Step> for Base {
 
     fn get_theme_id(&self) -> ThemeId {
         match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig.theme.clone(),
+            ThemeChoice::Jig => self.jig_theme_id.get(),
             ThemeChoice::Override(theme_id) => theme_id
         }
     }
     fn theme_id_signal(&self) -> Self::ThemeIdSignal { 
-        let jig_theme_id = self.jig.theme.clone();
-
-        self.theme.signal_cloned()
-            .map(clone!(jig_theme_id => move |theme| {
-                match theme { 
-                    ThemeChoice::Jig => jig_theme_id,
+        map_ref! {
+            let jig_theme_id = self.jig_theme_id.signal(),
+            let theme = self.theme.signal()
+                => {
+                match *theme { 
+                    ThemeChoice::Jig => *jig_theme_id,
                     ThemeChoice::Override(theme_id) => theme_id
                 }
-            }))
+            }
+        }
     }
 
     fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal { 

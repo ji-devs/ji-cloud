@@ -12,7 +12,7 @@ use super::super::{
     state::*,
     actions::HistoryStateImpl
 };
-use shared::domain::jig::{JigId, Jig, TextDirection, module::{ModuleId, body::{ThemeChoice, BodyExt, ModeExt, StepExt}}};
+use shared::domain::jig::{JigId, Jig, TextDirection, AudioEffects, module::{ModuleId, body::{ThemeChoice, BodyExt, ModeExt, StepExt}}};
 use utils::prelude::*;
 use std::future::Future;
 use uuid::Uuid;
@@ -29,6 +29,7 @@ where
     pub step: Mutable<Step>,
     pub steps_completed: Mutable<HashSet<Step>>, 
     pub theme: Mutable<ThemeChoice>,
+    pub jig_theme_id: Mutable<ThemeId>,
     pub jig_id: JigId, 
     pub module_id: ModuleId, 
     pub jig: Jig,
@@ -83,7 +84,9 @@ where
                     is_public: false,
                     direction: TextDirection::default(),
                     display_score: false,
-                    theme: ThemeId::default()
+                    theme: ThemeId::default(),
+                    audio_bg: None,
+                    audio_effects: AudioEffects::default() 
                 }
             }
         };
@@ -94,6 +97,7 @@ where
             steps_completed,
             theme,
             jig_id,
+            jig_theme_id: Mutable::new(jig.theme),
             module_id,
             jig,
             raw,

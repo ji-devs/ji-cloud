@@ -87,7 +87,7 @@ transform = []
 traces = []
 lists = []
 audio_mixer = []
-theme = []
+theme_selector = []
 
 default = ["all"]
 all= [
@@ -107,5 +107,5 @@ all= [
     "traces",
     "lists",
     "audio_mixer",
-    "theme",
+    "theme_selector",
 ]
