@@ -193,16 +193,43 @@ pub struct Jig {
     /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
     pub theme: ThemeId,
     // TODO: need Audio enums to exist
-    // /// Background audio
-    // pub background_audio: Option<BackgroundAudio>,
+    /// Background audio
+    pub audio_bg: Option<AudioBackground>,
 
-    // /// Correct answer audio
-    // pub correct_answer_audio: HashSet<FeedbackAudio>,
-
-    // /// Wrong answer audio
-    // pub wrong_answer_audio: HashSet<FeedbackAudio>,
+    /// Audio effects 
+    pub audio_effects: AudioEffects,
 }
 
+/// Audio for background music 
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub enum AudioBackground {
+}
+
+/// Audio Effects
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AudioEffects {
+    /// Positive audio feedback 
+    pub feedback_positive: std::collections::HashSet<AudioFeedbackPositive>,
+
+    /// Negative audio feedback 
+    pub feedback_negative: std::collections::HashSet<AudioFeedbackNegative>,
+}
+
+/// Negative Audio Feedback
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub enum AudioFeedbackNegative {
+    
+}
+
+/// Positive Audio Feedback
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub enum AudioFeedbackPositive {
+
+}
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
