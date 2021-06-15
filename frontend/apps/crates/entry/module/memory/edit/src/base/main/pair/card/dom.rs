@@ -16,6 +16,7 @@ use components::tooltip::state::{State as TooltipState, TooltipData, TooltipConf
 use super::state::*;
 use crate::base::state::Card;
 use shared::domain::jig::module::body::memory::{Mode, Step};
+use components::module::edit::prelude::*;
 
 pub fn render(state:Rc<MainCard>) -> Dom {
     html!("main-card", {

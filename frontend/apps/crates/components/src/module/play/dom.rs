@@ -72,8 +72,11 @@ where
                                             },
                                             Phase::Playing(base) => {
                                                 vec![
-
-                                                    add_slot_to_dom(Base::render(base.clone()), "main")
+                                                    html!("empty-fragment", {
+                                                        .property("slot", "main")
+                                                        .property("theme", base.get_theme_id().as_str_id())
+                                                        .child(Base::render(base.clone()))
+                                                    })
                                                 ]
                                             },
                                             Phase::Init => {
@@ -137,11 +140,3 @@ where
 
 }
 
-
-fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom {
-    //there might be a better way, like Dom->DomBuilder->Dom
-    html!("empty-fragment", {
-        .property("slot", slot)
-        .child(dom)
-    })
-}

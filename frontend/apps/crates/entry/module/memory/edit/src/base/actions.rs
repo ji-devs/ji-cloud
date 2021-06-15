@@ -29,19 +29,10 @@ use components::{
     text_editor::state::State as TextEditorState,
 };
 
-pub async fn init_from_raw(
-    audio_mixer: AudioMixer,
-    step_mutables: ReadOnlyStepMutables<Step>,
-    jig_id: JigId,
-    module_id: ModuleId,
-    jig: Option<Jig>,
-    raw:RawData, 
-    init_source: InitSource, 
-    history: Rc<HistoryStateImpl<RawData>>
-) -> StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
+pub async fn init_from_raw(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay> {
 
     let force_step = {
-        if init_source == InitSource::ForceRaw { 
+        if init_args.source == InitSource::ForceRaw { 
             crate::debug::settings().step
         } else {
             None
@@ -49,10 +40,11 @@ pub async fn init_from_raw(
     };
 
 
-    let base = Base::new(audio_mixer, jig_id, module_id, jig, raw, step_mutables.0, history).await;
+    let base = Base::new(init_args).await;
     
-    StepsInit {
+    BaseInit {
         force_step,
+        force_theme: None,
         base: base.clone(),
         main: Rc::new(Main::new(base.clone())),
         sidebar: Rc::new(Sidebar::new(base.clone())),

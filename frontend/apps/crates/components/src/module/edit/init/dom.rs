@@ -1,6 +1,6 @@
 use super::super::{
     state::*,
-    steps::state::*,
+    base::state::*,
 };
 use std::rc::Rc;
 use dominator::{html, clone, Dom};

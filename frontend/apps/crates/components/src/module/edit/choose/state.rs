@@ -9,7 +9,7 @@ use std::{marker::PhantomData, rc::Rc};
 use std::future::Future;
 use super::super::{
     state::*,
-    steps::state::*,
+    base::state::*,
     state::{Phase, GenericState},
     actions::*,
 };
@@ -32,9 +32,9 @@ impl <Mode> Choose <Mode>
 where
     Mode: ModeExt + 'static,
 {
-    pub fn new<Step, RawData, InitFromRawFn, InitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
+    pub fn new<Step, RawData, BaseInitFromRawFn, BaseInitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
         app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
-        init_from_raw: InitFromRawFn,
+        init_from_raw: BaseInitFromRawFn,
     ) -> Self 
     where
         Mode: ModeExt + 'static,
@@ -46,8 +46,8 @@ where
         Header: HeaderExt + 'static,
         Footer: FooterExt + 'static,
         Overlay: OverlayExt + 'static,
-        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 
     {
 
@@ -70,11 +70,20 @@ where
                         *init = raw;
                     }));
 
-                    let step_mutables = get_step_mutables(&raw);
-                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
 
-                    let steps_init = init_from_raw(app.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, InitSource::ChooseMode, history).await;
-                    GenericState::change_phase_steps(app.clone(), steps_init, step_mutables);
+                    GenericState::change_phase_base(
+                        app.clone(),
+                        init_from_raw.clone(),
+                        BaseInitFromRawArgs::new(
+                            app.get_audio_mixer(), 
+                            jig_id, 
+                            module_id, 
+                            jig, 
+                            raw, 
+                            InitSource::ChooseMode, 
+                            history
+                        )
+                    ).await;
 
                 }))
             }),

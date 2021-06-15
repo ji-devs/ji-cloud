@@ -7,7 +7,7 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
-impl <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> Steps <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> AppBase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     RawData: BodyExt<Mode, Step> + 'static, 
     Mode: ModeExt + 'static,

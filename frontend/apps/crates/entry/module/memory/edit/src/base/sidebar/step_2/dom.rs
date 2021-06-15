@@ -7,8 +7,8 @@ use components::{
     image::search::dom::render as render_image_search,
     text_editor::dom::render_controls as render_text_editor,
     audio_input::dom::render as render_audio_input,
+    module::edit::prelude::*,
 };
-
 use shared::domain::jig::module::body::{ThemeChoice, ThemeId};
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("step2-sidebar-container", {

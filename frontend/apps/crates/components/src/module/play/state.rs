@@ -22,6 +22,7 @@ use crate::font_loader::{FontLoader, Font};
 use utils::{settings::SETTINGS, prelude::*, iframe::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
+use uuid::Uuid;
 
 pub struct GenericState <RawData, Mode, Step, Base> 
 where
@@ -45,6 +46,7 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt: DomRenderable {
+    fn get_theme_id(&self) -> ThemeId;
 }
 
 pub enum Phase <RawData, Base> 
@@ -92,6 +94,47 @@ impl <RawData> StateOpts<RawData> {
     }
 }
 
+pub struct InitFromRawArgs<RawData, Mode, Step> 
+where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static
+{
+    pub audio_mixer: AudioMixer, 
+    pub jig_id: JigId, 
+    pub module_id: ModuleId, 
+    pub jig: Jig, 
+    pub raw: RawData,
+    pub source: InitSource,
+    phantom: PhantomData<(Mode, Step)>
+}
+
+impl <RawData, Mode, Step> InitFromRawArgs <RawData, Mode, Step> 
+where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static
+{
+    pub fn new(
+        audio_mixer: AudioMixer, 
+        jig_id: JigId, 
+        module_id: ModuleId, 
+        jig: Jig, 
+        raw: RawData,
+        source: InitSource,
+    ) -> Self {
+        Self {
+            audio_mixer,
+            jig_id,
+            module_id,
+            jig,
+            raw,
+            source,
+            phantom: PhantomData
+        }
+    }
+}
+
 impl <RawData, Mode, Step, Base> GenericState <RawData, Mode, Step, Base> 
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -104,7 +147,7 @@ where
         init_from_raw: InitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(AudioMixer, JigId, ModuleId, Option<Jig>, RawData, InitSource) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn: Fn(InitFromRawArgs<RawData, Mode, Step>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Base>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
@@ -128,21 +171,41 @@ where
                     FontLoader::new().load_all().await;
                 }
 
-                if !_self.opts.skip_load_jig {
-                    *_self.jig.borrow_mut() = {
+                *_self.jig.borrow_mut() = {
+                    if _self.opts.skip_load_jig {
+                        Some(Jig {
+                            id: JigId(Uuid::from_u128(0)),
+                            display_name: String::from("debug!"),
+                            modules: Vec::new(),
+                            age_ranges: Vec::new(),
+                            affiliations: Vec::new(),
+                            goals: Vec::new(),
+                            creator_id: None,
+                            author_id: None,
+                            language: String::from("en"),
+                            categories: Vec::new(),
+                            publish_at: None,
+                            additional_resources: Vec::new(),
+                            description: String::from("debug"),
+                            last_edited: None,
+                            is_public: false,
+                            direction: TextDirection::default(),
+                            display_score: false,
+                            theme: ThemeId::default()
+                        })
+                    } else {
+                        let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
 
-                            let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
-
-                            match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
-                                Ok(resp) => {
-                                    Some(resp.jig)
-                                },
-                                Err(_) => {
-                                    panic!("error loading jig!")
-                                },
-                            }
-                    };
-                }
+                        match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                            Ok(resp) => {
+                                Some(resp.jig)
+                            },
+                            Err(_) => {
+                                panic!("error loading jig!")
+                            },
+                        }
+                    }
+                };
 
 
                 let audio_ctx = Some(web_sys::AudioContext::new().unwrap_ji());
@@ -174,9 +237,9 @@ where
                                         let (jig_id, module_id, jig) = (
                                             _self.opts.jig_id.clone(),
                                             _self.opts.module_id.clone(),
-                                            _self.jig.borrow().clone()
+                                            _self.jig.borrow().as_ref().unwrap_ji().clone()
                                         );
-                                        let base = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::IframeData).await;
+                                        let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
                                         _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
                                     }));
@@ -207,9 +270,9 @@ where
                     let (jig_id, module_id, jig) = (
                         _self.opts.jig_id.clone(),
                         _self.opts.module_id.clone(),
-                        _self.jig.borrow().clone()
+                        _self.jig.borrow().as_ref().unwrap_ji().clone()
                     );
-                    let base = init_from_raw(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source).await;
+                    let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source)).await;
 
                     _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
                 }

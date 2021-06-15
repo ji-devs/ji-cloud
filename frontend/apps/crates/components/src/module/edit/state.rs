@@ -28,7 +28,7 @@ use wasm_bindgen_futures::spawn_local;
 use shared::domain::jig::{JigId, module::{ModuleId, body::{BodyExt, StepExt}}};
 use super::{
     actions::*,
-    steps::state::*,
+    base::state::*,
     choose::state::*,
 };
 use shared::{
@@ -39,6 +39,7 @@ use shared::{
 use utils::{settings::SETTINGS, prelude::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
+use std::collections::HashSet;
 
 pub struct GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
@@ -80,7 +81,7 @@ where
 {
     Init,
     Choose(Rc<Choose<Mode>>),
-    Steps(Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
+    Base(Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
 #[derive(Debug, Clone)]
@@ -123,6 +124,7 @@ pub enum InitSource {
     ChooseMode,
 }
 
+
 impl <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> GenericState <Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     Mode: ModeExt + 'static,
@@ -135,13 +137,13 @@ where
     Overlay: OverlayExt + 'static,
     RawData: BodyExt<Mode, Step> + 'static, 
 {
-    pub fn new<InitFromRawFn, InitFromRawOutput>(
+    pub fn new<BaseInitFromRawFn, BaseInitFromRawOutput>(
         opts: StateOpts<RawData>, 
-        init_from_raw: InitFromRawFn, 
+        init_from_raw: BaseInitFromRawFn, 
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource,  Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
 
@@ -236,11 +238,20 @@ where
                 if raw.requires_choose_mode() {
                     Self::change_phase_choose(_self.clone(), init_from_raw);
                 } else {
-                    let step_mutables = get_step_mutables(&raw);
-                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
 
-                    let steps_init = init_from_raw(_self.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, init_source, history.clone()).await;
-                    Self::change_phase_steps(_self.clone(), steps_init, step_mutables);
+                    Self::change_phase_base(
+                        _self.clone(),
+                        init_from_raw.clone(),
+                        BaseInitFromRawArgs::new(
+                            _self.get_audio_mixer(), 
+                            jig_id, 
+                            module_id, 
+                            jig, 
+                            raw, 
+                            init_source, 
+                            history.clone() 
+                        )
+                    ).await;
                 }
 
                 _self.raw_loaded.set_neq(true);

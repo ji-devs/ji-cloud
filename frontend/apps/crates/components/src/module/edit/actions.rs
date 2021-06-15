@@ -11,7 +11,7 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
 };
-use super::steps::state::*;
+use super::base::state::*;
 use super::choose::state::*;
 use utils::prelude::*;
 use dominator_helpers::futures::AsyncLoader;
@@ -31,40 +31,43 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    pub fn change_phase_choose<InitFromRawFn, InitFromRawOutput>(_self: Rc<Self>, init_from_raw: InitFromRawFn) 
+    pub fn change_phase_choose<BaseInitFromRawFn, BaseInitFromRawOutput>(_self: Rc<Self>, init_from_raw: BaseInitFromRawFn) 
     where
-        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         _self.phase.set(Rc::new(Phase::Choose(Rc::new(Choose::new(
             _self.clone(),
             init_from_raw,
         )))));
     }
-    pub fn change_phase_steps(
+    pub async fn change_phase_base<BaseInitFromRawFn, BaseInitFromRawOutput>(
         _self: Rc<Self>, 
-        steps_init: StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>,
-        step_mutables: StepMutables<Step>,
-
-    ) -> Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>> {
-        let steps = Rc::new(Steps::new(
+        init_from_raw: BaseInitFromRawFn,
+        init_args: BaseInitFromRawArgs<RawData, Mode, Step>,
+    ) -> Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>> 
+    where
+        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+    {
+        let app_base = Rc::new(AppBase::new(
             _self.clone(),
-            steps_init,
-            step_mutables,
-        ));
+            init_from_raw,
+            init_args,
+        ).await);
 
-        _self.phase.set(Rc::new(Phase::Steps(steps.clone())));
+        _self.phase.set(Rc::new(Phase::Base(app_base.clone())));
 
-        steps
+        app_base
     }
 
-    pub fn reset_from_history<InitFromRawFn, InitFromRawOutput>(
+    pub fn reset_from_history<BaseInitFromRawFn, BaseInitFromRawOutput>(
         _self: Rc<Self>,
-        init_from_raw: InitFromRawFn,
+        init_from_raw: BaseInitFromRawFn,
     ) -> Box<dyn Fn(RawData)> 
     where
-        InitFromRawFn: Fn(AudioMixer, ReadOnlyStepMutables<Step>, JigId, ModuleId, Option<Jig>, RawData, InitSource, Rc<HistoryStateImpl<RawData>>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = StepsInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
+        BaseInitFromRawFn: Fn(BaseInitFromRawArgs<RawData, Mode, Step>) -> BaseInitFromRawOutput + Clone + 'static,
+        BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
         Box::new(move |raw:RawData| {
             _self.reset_from_history_loader.load(clone!(_self, init_from_raw => async move {
@@ -78,11 +81,20 @@ where
                 if raw.requires_choose_mode() {
                     Self::change_phase_choose(_self.clone(), init_from_raw.clone());
                 } else {
-                    let step_mutables = get_step_mutables(&raw);
-                    let read_only_step_mutables = (step_mutables.0.read_only(), step_mutables.1.read_only());
+                    Self::change_phase_base(
+                        _self.clone(),
+                        init_from_raw.clone(),
+                        BaseInitFromRawArgs::new(
+                            _self.get_audio_mixer(), 
+                            jig_id, 
+                            module_id, 
+                            jig, 
+                            raw, 
+                            InitSource::History, 
+                            _self.history.borrow().as_ref().unwrap_ji().clone()
+                        )
+                    ).await;
 
-                    let steps_init = init_from_raw(_self.get_audio_mixer(), read_only_step_mutables, jig_id, module_id, jig, raw, InitSource::History, _self.history.borrow().as_ref().unwrap_ji().clone()).await;
-                    let steps = Self::change_phase_steps(_self.clone(), steps_init, step_mutables);
                 }
             }));
         })

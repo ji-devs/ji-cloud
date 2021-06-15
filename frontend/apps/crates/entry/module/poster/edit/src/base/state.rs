@@ -13,6 +13,7 @@ use shared::domain::jig::{
             Instructions,
             poster::{
                 Step,
+                Mode,
                 Content as RawContent, 
                 ModuleData as RawData
             }
@@ -49,7 +50,7 @@ pub struct Base {
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub jig: Option<Jig>,
+    pub jig: Jig,
     // Poster-specific
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
@@ -60,21 +61,24 @@ pub struct Base {
 
 impl Base {
 
-    pub async fn new(
-        audio_mixer: AudioMixer,
-        jig_id: JigId,
-        module_id: ModuleId,
-        jig: Option<Jig>,
-        raw:RawData, 
-        step: ReadOnlyMutable<Step>,
-        history: Rc<HistoryStateImpl<RawData>>
-    ) -> Rc<Self> {
+    pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
+
+        let BaseInitFromRawArgs { 
+            raw,
+            jig_id,
+            module_id,
+            jig,
+            history,
+            step,
+            theme,
+            audio_mixer,
+            ..
+        } = init_args;
 
         let content = raw.content.unwrap_ji();
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
-        let theme = Mutable::new(content.theme);
         let instructions = Mutable::new(content.instructions);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
@@ -148,7 +152,7 @@ impl Base {
             module_id,
             jig,
             history,
-            step,
+            step: step.read_only(),
             theme,
             instructions,
             text_editor,
@@ -190,9 +194,10 @@ impl Base {
 
 }
 
-
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
+    type ThemeIdSignal = impl Signal<Item = ThemeId>;
+    type ThemeIdStrSignal = impl Signal<Item = &'static str>;
 
     fn allowed_step_change(&self, from:Step, to:Step) -> bool {
         true
@@ -200,5 +205,27 @@ impl BaseExt<Step> for Base {
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
         signal::always(true)
+    }
+
+    fn get_theme_id(&self) -> ThemeId {
+        match self.theme.get_cloned() {
+            ThemeChoice::Jig => self.jig.theme.clone(),
+            ThemeChoice::Override(theme_id) => theme_id
+        }
+    }
+    fn theme_id_signal(&self) -> Self::ThemeIdSignal { 
+        let jig_theme_id = self.jig.theme.clone();
+
+        self.theme.signal_cloned()
+            .map(clone!(jig_theme_id => move |theme| {
+                match theme { 
+                    ThemeChoice::Jig => jig_theme_id,
+                    ThemeChoice::Override(theme_id) => theme_id
+                }
+            }))
+    }
+
+    fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal { 
+        self.theme_id_signal().map(|id| id.as_str_id())
     }
 }

@@ -60,6 +60,10 @@ impl BodyExt<(), Step> for ModuleData {
             .as_ref()
             .map(|content| content.editor_state.steps_completed.clone())
     }
+
+    fn get_theme(&self) -> Option<ThemeChoice> {
+        self.content.as_ref().map(|content| content.theme)
+    }
 }
 
 impl TryFrom<Body> for ModuleData {

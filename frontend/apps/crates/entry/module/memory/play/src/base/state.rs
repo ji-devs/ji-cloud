@@ -5,7 +5,7 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             ThemeChoice,
-            memory::{Mode, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
+            memory::{Mode, Step, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
         }
     }
 };
@@ -49,23 +49,28 @@ pub enum FlipState {
     Two(usize, usize),
 }
 impl Base {
-    pub async fn new(audio_mixer: AudioMixer, jig_id: JigId, module_id: ModuleId, jig: Option<Jig>, raw:RawData, init_source: InitSource) -> Self {
+    pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Self {
 
-        let raw_content = raw.content.unwrap_ji();
+        let InitFromRawArgs {
+            jig_id,
+            module_id,
+            audio_mixer,
+            jig,
+            raw,
+            ..
+        } = init_args;
 
-        let theme_id = match raw_content.theme {
-            ThemeChoice::Jig => {
-                // self.jig.as_ref().unwrap_ji().theme_id.clone()
-                log::warn!("waiting on jig settings");
-                ThemeId::Chalkboard
-            },
+        let content = raw.content.unwrap_ji();
+
+        let theme_id = match content.theme {
+            ThemeChoice::Jig => jig.theme.clone(),
             ThemeChoice::Override(theme_id) => theme_id
         };
 
-        let n_cards = raw_content.pairs.len() * 2;
+        let n_cards = content.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
         let mut cards = { 
-            let pairs = &raw_content.pairs;
+            let pairs = &content.pairs;
 
             let n_cards = pairs.len() * 2;
             let mut cards:Vec<Rc<CardState>> = Vec::with_capacity(n_cards);
@@ -98,14 +103,14 @@ impl Base {
         Self {
             jig_id,
             module_id,
-            mode: raw_content.mode,
+            mode: content.mode,
             pair_lookup,
-            original_pairs: raw_content.pairs,
+            original_pairs: content.pairs,
             cards,
             theme_id,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
-            instructions: InstructionsPlayer::new(raw_content.instructions), 
+            instructions: InstructionsPlayer::new(content.instructions), 
             audio_mixer,
         }
     }
@@ -136,4 +141,8 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn get_theme_id(&self) -> ThemeId {
+        self.theme_id
+    }
+
 }

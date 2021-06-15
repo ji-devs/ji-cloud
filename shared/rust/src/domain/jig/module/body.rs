@@ -1,5 +1,5 @@
 use crate::{
-    domain::{audio::AudioId, image::ImageId},
+    domain::{audio::AudioId, image::ImageId, jig::Jig},
     media::MediaLibrary,
 };
 #[cfg(feature = "backend")]
@@ -75,6 +75,9 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 
     /// requires an additional step of choosing the mode
     fn requires_choose_mode(&self) -> bool;
+
+    /// Get the current theme
+    fn get_theme(&self) -> Option<ThemeChoice>;
 
     /// Set editor state step
     fn set_editor_state_step(&mut self, step: Step);

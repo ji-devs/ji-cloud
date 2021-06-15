@@ -19,7 +19,7 @@ pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
-    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Vec<Dom>
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -50,7 +50,7 @@ where
 
 pub fn render_preview_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     module_kind: ModuleKind,
-    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -65,6 +65,7 @@ where
 {
         html!("module-preview-header", {
             .property("slot", "header")
+            .property_signal("theme", state.base.theme_id_str_signal())
             .property("moduleKind", module_kind.as_str())
             .child(super::nav::dom::render(state.clone()))
             .child(html!("button-rect", {
@@ -82,7 +83,7 @@ pub fn render_preview_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Foo
     module_kind: ModuleKind, 
     jig_id: JigId, 
     module_id: ModuleId, 
-    state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
 ) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -135,7 +136,7 @@ where
             })
         })
 }
-pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -147,10 +148,10 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    add_slot_to_dom(Main::render(state.main.clone()), "main")
+    add_slot_to_dom(state.clone(), Main::render(state.main.clone()), "main")
 }
 
-pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -165,11 +166,11 @@ where
     html!("module-sidebar", {
         .property("slot", "sidebar")
         .child(super::nav::dom::render(state.clone()))
-        .child(add_slot_to_dom(Sidebar::render(state.sidebar.clone()), "content"))
+        .child(add_slot_to_dom(state.clone(), Sidebar::render(state.sidebar.clone()), "content"))
     })
 }
 
-pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_header<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -184,6 +185,7 @@ where
     html!("module-header", {
         .property("slot", "header")
         .property("moduleKind", RawData::kind().as_str())
+        .property_signal("theme", state.base.theme_id_str_signal())
         .child(ControllerDom::render(
             state.history.clone(),
             clone!(state => move || {
@@ -194,7 +196,7 @@ where
     })
 }
 
-pub fn render_footer<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_footer<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -208,6 +210,7 @@ where
 {
     html!("module-footer", {
         .property("slot", "footer")
+        .property_signal("theme", state.base.theme_id_str_signal())
         .child(Footer::render(state.footer.clone()))
         .child(html!("module-footer-continue-button", {
             .property("slot", "btn")
@@ -219,7 +222,7 @@ where
     })
 }
 
-pub fn render_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<Steps<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_overlay<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -231,12 +234,24 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    add_slot_to_dom(Overlay::render(state.overlay.clone()), "overlay")
+    add_slot_to_dom(state.clone(), Overlay::render(state.overlay.clone()), "overlay")
 }
 
-fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom {
+fn add_slot_to_dom<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>, dom:Dom, slot:&str) -> Dom 
+where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
+    Base: BaseExt<Step> + 'static,
+    Main: MainExt + 'static,
+    Sidebar: SidebarExt + 'static,
+    Header: HeaderExt + 'static,
+    Footer: FooterExt + 'static,
+    Overlay: OverlayExt + 'static,
+{
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {
+        .property_signal("theme", state.base.theme_id_str_signal())
         .property("slot", slot)
         .child(dom)
     })

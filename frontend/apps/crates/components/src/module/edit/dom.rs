@@ -29,7 +29,7 @@ use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::state::*;
 use crate::module::prelude::*;
-use super::steps::state::*;
+use super::base::state::*;
 use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
 pub fn render_page_body<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay> (state:Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>)
@@ -57,7 +57,7 @@ where
                 let page_kind = {
                     match phase.as_ref() {
                         Phase::Init | Phase::Choose(_) => ModulePageKind::GridPlain,
-                        Phase::Steps(_) => {
+                        Phase::Base(_) => {
                             if is_preview {
                                 ModulePageKind::GridResizePreview
                             } else if state.opts.is_main_scrollable {
@@ -93,12 +93,12 @@ where
                                             Phase::Choose(choose) => {
                                                 super::choose::dom::render(choose.clone())
                                             },
-                                            Phase::Steps(steps) => {
-                                                super::steps::dom::render(
+                                            Phase::Base(app_base) => {
+                                                super::base::dom::render(
                                                     is_preview, 
                                                     state.opts.jig_id.clone(), 
                                                     state.opts.module_id.clone(), 
-                                                    steps.clone()
+                                                    app_base.clone()
                                                 )
                                             },
                                             Phase::Init => {
