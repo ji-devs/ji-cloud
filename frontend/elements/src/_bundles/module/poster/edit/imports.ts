@@ -1,3 +1,2 @@
-import "@elements/_sub-bundles/module-edit";
-import "@elements/module/poster/edit/steps/sidebar/container";
-import "@elements/module/poster/edit/steps/sidebar/option";
+import "@elements/_bundles/_sub-bundles/module/edit";
+import "@elements/_bundles/_sub-bundles/module/_groups/design/edit";

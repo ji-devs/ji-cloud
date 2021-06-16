@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "tsc && jest",
+    "watch:tsc": "tsc --watch",
     "build:release": "rollup --config rollup.release.js",
     "build:sandbox": "rollup --config rollup.sandbox.js",
     "build:local": "rollup --config rollup.local.js",

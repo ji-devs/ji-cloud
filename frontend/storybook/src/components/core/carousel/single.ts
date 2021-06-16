@@ -1,4 +1,4 @@
-import "@elements/core/carousel/single-example";
+import "@elements/core/carousel/single";
 
 export default {
     title: "Core / Carousel"

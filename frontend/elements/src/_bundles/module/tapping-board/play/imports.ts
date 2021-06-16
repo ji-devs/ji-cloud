@@ -1,2 +1,1 @@
-import "@elements/_sub-bundles/module-play";
-//Tapping board CI - 001
+import "@elements/_bundles/_sub-bundles/module/play";

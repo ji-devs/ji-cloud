@@ -1,4 +1,4 @@
-import "@elements/core/carousel/single-example";
+import "@elements/mock/carousel-single-example";
 
 export default {
     title: "Core / Carousel"
@@ -19,3 +19,4 @@ export const SingleExample = (props?:Args) => {
 }
 
 SingleExample.args = DEFAULT_ARGS;
+

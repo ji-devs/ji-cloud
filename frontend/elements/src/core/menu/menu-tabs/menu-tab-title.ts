@@ -54,7 +54,7 @@ export class _ extends LitElement {
 
     render() {
         const label = STR_LABEL_LOOKUP[this.kind];
-        const iconUrl = `module/_common/widgets/sidebar/tab-${this.kind}-icon${this.active ? "-active" : ""}.svg`;
+        const iconUrl = `module/_common/edit/widgets/sidebar/tab-${this.kind}-icon${this.active ? "-active" : ""}.svg`;
 
         return html`
             ${this.kind === "" ? nothing : html`
