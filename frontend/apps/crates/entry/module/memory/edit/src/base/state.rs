@@ -41,7 +41,8 @@ pub struct Base {
     pub jig_theme_id: Mutable<ThemeId>,
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub theme: Mutable<ThemeChoice>,
+    pub theme_choice: Mutable<ThemeChoice>,
+    pub theme_id: ReadOnlyMutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
     pub audio_mixer: AudioMixer,
 
@@ -72,9 +73,10 @@ impl Base {
             jig_id,
             module_id,
             jig_theme_id,
+            theme_id,
             history,
             step,
-            theme,
+            theme_choice,
             audio_mixer,
             ..
         } = init_args;
@@ -98,7 +100,8 @@ impl Base {
             jig_theme_id,
             history,
             step: step.read_only(),
-            theme,
+            theme_choice,
+            theme_id,
             instructions,
             audio_mixer,
             mode,
@@ -119,6 +122,9 @@ impl Base {
             .dedupe()
     }
 
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
+        self.theme_id.signal().map(|id| id.as_str_id())
+    }
 }
 
 //the requirement for this indirection might be a compiler bug...
@@ -127,8 +133,6 @@ impl Base {
 
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
-    type ThemeIdSignal = impl Signal<Item = ThemeId>;
-    type ThemeIdStrSignal = impl Signal<Item = &'static str>;
 
     fn allowed_step_change(&self, from:Step, to:Step) -> bool {
         if self.pairs.lock_ref().len() >= 2 {
@@ -152,27 +156,5 @@ impl BaseExt<Step> for Base {
         }
     }
     
-    fn get_theme_id(&self) -> ThemeId {
-        match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig_theme_id.get(),
-            ThemeChoice::Override(theme_id) => theme_id
-        }
-    }
-    fn theme_id_signal(&self) -> Self::ThemeIdSignal { 
-        map_ref! {
-            let jig_theme_id = self.jig_theme_id.signal(),
-            let theme = self.theme.signal()
-                => {
-                match *theme { 
-                    ThemeChoice::Jig => *jig_theme_id,
-                    ThemeChoice::Override(theme_id) => theme_id
-                }
-            }
-        }
-    }
-
-    fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal { 
-        self.theme_id_signal().map(|id| id.as_str_id())
-    }
 
 }

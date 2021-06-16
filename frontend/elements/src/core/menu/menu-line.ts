@@ -12,7 +12,8 @@ type IconKind = ""
 | "move-up"
 | "paste"
 | "print"
-| "reuse";
+| "reuse"
+| "set-jig-theme";
 
 const STR_LABEL_LOOKUP:any = {
     copy: "Copy",
@@ -43,6 +44,8 @@ const STR_LABEL_LOOKUP:any = {
     ["upload-sound"]: "Upload sound",
     //module publish
     ["use-content-as"]: "Use content as",
+    //Theme selector
+    ["set-jig-theme"]: "Set JIG theme",
 };
 
 @customElement('menu-line')

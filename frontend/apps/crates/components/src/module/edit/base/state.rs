@@ -1,6 +1,6 @@
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal, ReadOnlyMutable},
+    signal::{Mutable, SignalExt, Signal, ReadOnlyMutable, Broadcaster},
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
 use dominator::{clone, Dom};
@@ -17,6 +17,8 @@ use utils::prelude::*;
 use std::future::Future;
 use uuid::Uuid;
 use crate::audio_mixer::AudioMixer;
+use std::pin::Pin;
+use wasm_bindgen_futures::spawn_local;
 
 /// This is passed *to* the consumer in order to get a BaseInit
 pub struct BaseInitFromRawArgs<RawData, Mode, Step>
@@ -26,9 +28,10 @@ where
     Step: StepExt + 'static,
 {
     pub audio_mixer: AudioMixer, 
-    pub step: Mutable<Step>,
+    pub step: Mutable<Step>, //not intended to be changed lower down, just for passing back really
     pub steps_completed: Mutable<HashSet<Step>>, 
-    pub theme: Mutable<ThemeChoice>,
+    pub theme_choice: Mutable<ThemeChoice>,
+    pub theme_id: ReadOnlyMutable<ThemeId>, //derived from jig and module theme
     pub jig_theme_id: Mutable<ThemeId>,
     pub jig_id: JigId, 
     pub module_id: ModuleId, 
@@ -57,7 +60,7 @@ where
         let step = Mutable::new(raw.get_editor_state_step().unwrap_or_default());
         let steps_completed = Mutable::new(raw.get_editor_state_steps_completed().unwrap_or_default());
 
-        let theme = Mutable::new(raw.get_theme().unwrap_or_default());
+        let theme_choice = Mutable::new(raw.get_theme().unwrap_or_default());
 
         let jig = match jig {
             Some(jig) => jig,
@@ -91,15 +94,47 @@ where
             }
         };
 
+        let jig_theme_id = Mutable::new(jig.theme);
+
+
+        let theme_id_sig = {
+            map_ref! {
+                let jig_theme_id = jig_theme_id.signal(),
+                let theme = theme_choice.signal()
+                    => {
+                    match *theme { 
+                        ThemeChoice::Jig => *jig_theme_id,
+                        ThemeChoice::Override(theme_id) => theme_id
+                    }
+                }
+            }
+        };
+
+        let theme_id = Mutable::new(
+            match theme_choice.get() {
+                ThemeChoice::Jig => jig.theme,
+                ThemeChoice::Override(id) => id
+            }
+        );
+
+        ///TODO - hold onto this somewhere?
+        spawn_local(clone!(theme_id => async move {
+            let _ = theme_id_sig.for_each(clone!(theme_id => move |id| {
+                theme_id.set_neq(id);
+                async {}
+            })).await;
+        }));
+
         Self {
             audio_mixer,
             step,
             steps_completed,
-            theme,
+            theme_choice,
+            theme_id: theme_id.read_only(),
             jig_id,
-            jig_theme_id: Mutable::new(jig.theme),
             module_id,
             jig,
+            jig_theme_id,
             raw,
             source,
             history,
@@ -125,7 +160,6 @@ where
 {
     pub preview_step_reactor: AsyncLoader,
     pub step: Mutable<Step>,
-    pub theme: ReadOnlyMutable<ThemeChoice>,
     pub jig: Jig,
     pub base: Rc<Base>,
     pub main: Rc<Main>,
@@ -160,10 +194,12 @@ where
         BaseInitFromRawOutput: Future<Output = BaseInit<Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
     {
 
+
         // extract the things from init args that need to be shared
+        // even if just for applying the debug override
         let step = init_args.step.clone();
+        let theme_choice = init_args.theme_choice.clone();
         let steps_completed = init_args.steps_completed.clone();
-        let theme = init_args.theme.clone();
         let jig = init_args.jig.clone();
 
         // get a BaseInit
@@ -174,7 +210,7 @@ where
             step.set_neq(force_step);
         }
         if let Some(force_theme) = init.force_theme {
-            theme.set_neq(force_theme);
+            theme_choice.set_neq(force_theme);
         }
 
         // setup a reactor on the step stuff, independent of the dom rendering
@@ -191,7 +227,6 @@ where
 
         Self {
             step, 
-            theme: theme.read_only(), // we don't change the theme at this level
             jig,
             base: init.base,
             main: init.main,
@@ -236,42 +271,11 @@ pub trait BaseExt<Step: StepExt> {
     // #![feature(min_type_alias_impl_trait)]
     // and the implementor will have
     // type FooSignal = impl Signal<Item = Foo>
-
-    type ThemeIdSignal: Signal<Item = ThemeId>;
-    type ThemeIdStrSignal: Signal<Item = &'static str>;
     type NextStepAllowedSignal: Signal<Item = bool>;
 
     fn allowed_step_change(&self, from:Step, to: Step) -> bool;
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
-
-    fn get_theme_id(&self) -> ThemeId;
-    fn theme_id_signal(&self) -> Self::ThemeIdSignal; 
-    fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal; 
-    /* Todo - make implementing this a macro for every module */
-    /*
-    fn get_theme_id(&self) -> ThemeId {
-        match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig.theme.clone(),
-            ThemeChoice::Override(theme_id) => theme_id
-        }
-    }
-    fn theme_id_signal(&self) -> impl Signal<Item = ThemeId> {
-        let jig_theme_id = self.jig.theme.clone();
-
-        self.theme.signal_cloned()
-            .map(clone!(jig_theme_id => move |theme| {
-                match theme { 
-                    ThemeChoice::Jig => jig_theme_id,
-                    ThemeChoice::Override(theme_id) => theme_id
-                }
-            }))
-    }
-
-    fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> {
-        self.theme_id_signal().map(|id| id.as_str_id())
-    }
-    */
 }
 
 pub trait MainExt: DomRenderable {

@@ -74,7 +74,6 @@ where
                                                 vec![
                                                     html!("empty-fragment", {
                                                         .property("slot", "main")
-                                                        .property("theme", base.get_theme_id().as_str_id())
                                                         .child(Base::render(base.clone()))
                                                     })
                                                 ]

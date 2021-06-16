@@ -65,7 +65,6 @@ where
 {
         html!("module-preview-header", {
             .property("slot", "header")
-            .property_signal("theme", state.base.theme_id_str_signal())
             .property("moduleKind", module_kind.as_str())
             .child(super::nav::dom::render(state.clone()))
             .child(html!("button-rect", {
@@ -185,7 +184,6 @@ where
     html!("module-header", {
         .property("slot", "header")
         .property("moduleKind", RawData::kind().as_str())
-        .property_signal("theme", state.base.theme_id_str_signal())
         .child(ControllerDom::render(
             state.history.clone(),
             clone!(state => move || {
@@ -210,7 +208,6 @@ where
 {
     html!("module-footer", {
         .property("slot", "footer")
-        .property_signal("theme", state.base.theme_id_str_signal())
         .child(Footer::render(state.footer.clone()))
         .child(html!("module-footer-continue-button", {
             .property("slot", "btn")
@@ -251,7 +248,6 @@ where
 {
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {
-        .property_signal("theme", state.base.theme_id_str_signal())
         .property("slot", slot)
         .child(dom)
     })

@@ -1,14 +1,13 @@
-import "@elements/module/_groups/cards/header/button-add";
-import "@elements/module/_groups/cards/main/main";
-import "@elements/module/_groups/cards/main/card-pair/card";
-import "@elements/module/_groups/cards/main/card-pair/pair";
-import "@elements/module/_groups/cards/sidebar/empty";
-
+import "@elements/module/_groups/cards/edit/header/button-add";
+import "@elements/module/_groups/cards/edit/main/main";
+import "@elements/module/_groups/cards/edit/main/main-empty";
+import "@elements/module/_groups/cards/edit/main/card-pair/card";
+import "@elements/module/_groups/cards/edit/main/card-pair/pair";
+import "@elements/module/_groups/cards/edit/sidebar/empty";
+import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 /* components */
 
 // theme selector
-import "@elements/module/_common/edit/widgets/theme-selector/cards/container";
-import "@elements/module/_common/edit/widgets/theme-selector/cards/option";
 
 // lists
 import "@elements/module/_common/edit/widgets/lists/single/single-list";

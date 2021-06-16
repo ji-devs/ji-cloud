@@ -20,6 +20,7 @@ import "@elements/core/tooltips/error";
 import "@elements/core/tooltips/bubble";
 import "@elements/core/drag/container";
 import "@elements/core/menu/container";
+import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
 import "@elements/core/module-page/grid-resize";
 import "@elements/core/module-page/grid-plain";
@@ -46,6 +47,8 @@ import "@elements/module/_common/edit/widgets/color-select/color-select-item";
 import "@elements/core/inputs/color";
 
 
+import "@elements/module/_common/edit/widgets/theme-selector/container";
+import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
 import "@elements/_bundles/_sub-bundles/components/image_search/imports";
 import "@elements/_bundles/_sub-bundles/components/audio_input/imports";

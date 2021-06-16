@@ -46,7 +46,8 @@ use std::cell::RefCell;
 pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
-    pub theme: Mutable<ThemeChoice>,
+    pub theme_choice: Mutable<ThemeChoice>,
+    pub theme_id: ReadOnlyMutable<ThemeId>,
     pub instructions: Mutable<Instructions>,
     pub jig_id: JigId,
     pub module_id: ModuleId,
@@ -67,10 +68,11 @@ impl Base {
             raw,
             jig_id,
             jig_theme_id,
+            theme_id,
             module_id,
             history,
             step,
-            theme,
+            theme_choice,
             audio_mixer,
             ..
         } = init_args;
@@ -84,15 +86,7 @@ impl Base {
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
-
-            match content.theme {
-                ThemeChoice::Jig => {
-                    // self.jig.as_ref().unwrap_ji().theme_id.clone()
-                    log::warn!("waiting on jig settings");
-                    ThemeId::Chalkboard
-                },
-                ThemeChoice::Override(theme_id) => theme_id
-            },
+            theme_id.clone(),
             None, 
             TextEditorCallbacks::new(
                 //New text
@@ -153,7 +147,8 @@ impl Base {
             jig_theme_id,
             history,
             step: step.read_only(),
-            theme,
+            theme_choice,
+            theme_id,
             instructions,
             text_editor,
             backgrounds,
@@ -166,12 +161,13 @@ impl Base {
         _self
     }
 
+    pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
+        self.theme_id.signal().map(|id| id.as_str_id())
+    }
 }
 
 impl BaseExt<Step> for Base {
     type NextStepAllowedSignal = impl Signal<Item = bool>;
-    type ThemeIdSignal = impl Signal<Item = ThemeId>;
-    type ThemeIdStrSignal = impl Signal<Item = &'static str>;
 
     fn allowed_step_change(&self, from:Step, to:Step) -> bool {
         true
@@ -179,28 +175,5 @@ impl BaseExt<Step> for Base {
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal {
         signal::always(true)
-    }
-
-    fn get_theme_id(&self) -> ThemeId {
-        match self.theme.get_cloned() {
-            ThemeChoice::Jig => self.jig_theme_id.get(),
-            ThemeChoice::Override(theme_id) => theme_id
-        }
-    }
-    fn theme_id_signal(&self) -> Self::ThemeIdSignal { 
-        map_ref! {
-            let jig_theme_id = self.jig_theme_id.signal(),
-            let theme = self.theme.signal()
-                => {
-                match *theme { 
-                    ThemeChoice::Jig => *jig_theme_id,
-                    ThemeChoice::Override(theme_id) => theme_id
-                }
-            }
-        }
-    }
-
-    fn theme_id_str_signal(&self) -> Self::ThemeIdStrSignal { 
-        self.theme_id_signal().map(|id| id.as_str_id())
     }
 }

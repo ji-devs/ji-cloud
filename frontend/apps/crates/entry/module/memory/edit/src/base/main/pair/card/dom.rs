@@ -45,7 +45,7 @@ pub fn render(state:Rc<MainCard>) -> Dom {
                             .property_signal("fontSize", {
                                 let sig = map_ref!{
                                     let value = data.signal_cloned(),
-                                    let theme_id = state.base.theme_id_signal()
+                                    let theme_id = state.base.theme_id.signal()
                                         => {
                                             (value.len(), *theme_id)
                                         }
@@ -56,11 +56,11 @@ pub fn render(state:Rc<MainCard>) -> Dom {
                                     format!("{}px", font_size)
                                 })
                             })
-                            .property_signal("fontFamily", state.base.theme_id_signal().map(clone!(state => move |theme_id| {
+                            .property_signal("fontFamily", state.base.theme_id.signal().map(clone!(state => move |theme_id| {
                                 let font_family = app_memory_common::lookup::get_card_font_family(theme_id, state.base.mode.into(), state.side.into());
                                 theme_id.css_var_font_family(font_family)
                             })))
-                            .property_signal("color", state.base.theme_id_signal().map(|theme_id| {
+                            .property_signal("color", state.base.theme_id.signal().map(|theme_id| {
                                 theme_id.css_var_color(1)
                             }))
                             .property("clickMode", "none")

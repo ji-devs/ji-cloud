@@ -1,6 +1,5 @@
 // theme selector
-import "@elements/module/_common/edit/widgets/theme-selector/design/container";
-import "@elements/module/_common/edit/widgets/theme-selector/design/option";
+import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
 
 //wysiwyg text editor
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";

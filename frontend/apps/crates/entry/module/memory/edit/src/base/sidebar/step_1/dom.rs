@@ -1,6 +1,6 @@
 use super::state::*;
 use std::rc::Rc;
-use dominator::{html, clone, Dom};
+use dominator::{html, clone, Dom, with_node};
 use utils::prelude::*;
 use futures_signals::signal::SignalExt;
 use futures_signals::signal::Mutable;
@@ -73,7 +73,7 @@ pub fn render(state: Rc<Step1>) -> Dom {
 }
 
 fn render_non_empty(state: Rc<Step1>) -> Dom {
-    html!("step1-sidebar-empty", {
+    html!("sidebar-empty", {
         .child(
             html!("button-text", {
                 .property("slot", "clear")

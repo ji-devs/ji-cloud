@@ -1,11 +1,14 @@
 use super::state::*;
-use shared::domain::jig::module::body::{ThemeChoice, ThemeId};
+use std::rc::Rc;
+use shared::domain::jig::module::body::ThemeChoice;
+use crate::base::state::*;
+use dominator::clone;
 
-impl Step2 {
-    pub fn change_theme(&self, theme: ThemeChoice) {
-        self.base.theme.set_neq(theme);
+impl Base {
+    pub fn set_theme(&self, theme: ThemeChoice) { 
+        self.theme_choice.set_neq(theme);
 
-        self.base.history.push_modify(move |raw| {
+        self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.theme = theme;
             }

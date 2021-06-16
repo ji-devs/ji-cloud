@@ -6,7 +6,7 @@ use dominator::clone;
 
 impl Base {
     pub fn set_theme(&self, theme: ThemeChoice) { 
-        self.theme.set_neq(theme);
+        self.theme_choice.set_neq(theme);
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {

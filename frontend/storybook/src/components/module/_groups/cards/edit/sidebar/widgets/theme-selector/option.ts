@@ -1,6 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
+import "@elements/core/menu/kebab";
+import "@elements/core/menu/menu-line";
 import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 import {STATE} from "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 
@@ -20,7 +22,10 @@ const DEFAULT_ARGS:Args = {
 
 export const Option = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    return `<theme-selector-cards-option ${argsToAttrs(props)}></theme-selector-cards-option>`;
+    return `
+    <theme-selector-cards-option ${argsToAttrs(props)}>
+       <menu-line slot="menu" icon="set-jig-theme"></menu-line>
+    </theme-selector-cards-option>`;
 }
 
 Option.args= DEFAULT_ARGS;

@@ -63,8 +63,6 @@ pub enum Tab {
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
-        let theme_id = base.get_theme_id();
-
         match kind {
             TabKind::Image => {
                 let opts = ImageSearchOptions {
@@ -83,7 +81,7 @@ impl Tab {
                 Self::Image(Rc::new(state))
             },
             TabKind::Color => {
-                let state = ColorPickerState::new(Some(theme_id), None, Some(clone!(base => move |color| {
+                let state = ColorPickerState::new(Some(base.theme_id.clone()), None, Some(clone!(base => move |color| {
                     base.backgrounds.set_layer(Layer::One, Background::Color(color));
                 })));
                 Self::Color(Rc::new(state))

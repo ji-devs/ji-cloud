@@ -46,7 +46,6 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt: DomRenderable {
-    fn get_theme_id(&self) -> ThemeId;
 }
 
 pub enum Phase <RawData, Base> 

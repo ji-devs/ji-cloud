@@ -141,8 +141,5 @@ impl Base {
 }
 
 impl BaseExt for Base {
-    fn get_theme_id(&self) -> ThemeId {
-        self.theme_id
-    }
 
 }

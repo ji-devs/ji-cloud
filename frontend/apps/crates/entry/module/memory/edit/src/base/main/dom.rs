@@ -19,7 +19,7 @@ impl DomRenderable for Main {
             .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {
-                        html!("module-main-empty")
+                        html!("main-empty")
                     } else {
                         html!("main-cards", {
                             .children_signal_vec({

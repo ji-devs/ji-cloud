@@ -3,28 +3,33 @@ use std::rc::Rc;
 use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use components::{
+    backgrounds::actions::Layer,
     image::search::{
         state::{State as ImageSearchState, ImageSearchOptions},
         callbacks::Callbacks as ImageSearchCallbacks
     },
-    audio_input::{
-        options::AudioInputOptions,
-        state::State as AudioInputState,
-        callbacks::Callbacks as AudioCallbacks,
-    },
-    stickers::state::Stickers,
+    color_select::state::{State as ColorPickerState},
+    theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
 };
-use shared::domain::jig::module::body::{Image, Audio};
-
+use shared::domain::jig::module::body::{Background, Image};
 pub struct Step2 {
     pub base: Rc<Base>,
+    pub theme_selector: Rc<ThemeSelector>
 }
 
 
 impl Step2 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
+        let callbacks = ThemeSelectorCallbacks::new(
+            clone!(base => move |theme| {
+                base.set_theme(theme);
+            })
+        );
+        let theme_selector = Rc::new(ThemeSelector::new(base.jig_id, base.jig_theme_id.clone(), base.theme_id.clone(), callbacks));
+
         Rc::new(Self {
             base,
+            theme_selector,
         })
     }
 }

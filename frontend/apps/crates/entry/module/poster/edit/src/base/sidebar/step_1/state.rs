@@ -20,16 +20,12 @@ pub struct Step1 {
 
 impl Step1 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
-        let get_theme_signal = clone!(base => move || {
-            base.theme.signal()
-        });
-
         let callbacks = ThemeSelectorCallbacks::new(
-            clone!(base => move |theme| {
-                base.set_theme(theme);
+            clone!(base => move |theme_choice| {
+                base.set_theme(theme_choice);
             })
         );
-        let theme_selector = Rc::new(ThemeSelector::new(base.jig_id, base.jig_theme_id.clone(), get_theme_signal, callbacks));
+        let theme_selector = Rc::new(ThemeSelector::new(base.jig_id, base.jig_theme_id.clone(), base.theme_id.clone(), callbacks));
 
         Rc::new(Self {
             base,

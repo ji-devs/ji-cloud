@@ -20,7 +20,10 @@ const DEFAULT_ARGS:Args = {
 
 export const Option = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    return `<theme-selector-design-option ${argsToAttrs(props)}></theme-selector-design-option>`;
+    return `
+    <theme-selector-design-option ${argsToAttrs(props)}>
+       <menu-line slot="menu" icon="set-jig-theme"></menu-line>
+    </theme-selector-design-option>`;
 }
 
 Option.args= DEFAULT_ARGS;

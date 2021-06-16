@@ -4,14 +4,19 @@ import {nothing} from "lit-html";
 
 const STR_HEADER = "Select theme";
 
-@customElement('theme-selector-cards')
+@customElement('theme-selector')
 export class _ extends LitElement {
   static get styles() {
       return [css`
           .options {
-              margin-top: 24px;
+              margin-top: 93px;
               display: grid;
               grid-template-columns: repeat(2, 1fr);
+              grid-template-rows: 259px; /*jig selected height is 212px, plus 47px gap*/
+          }
+          header {
+            font-size: 18px;
+            color: var(--dark-gray-6);
           }
     `];
   }
