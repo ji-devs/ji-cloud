@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/edit/theme";
+import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
 import {Option} from "./option"; 
 import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/container";
 
@@ -9,20 +9,24 @@ export default {
 }
 
 interface Args {
-    theme: ThemeKind
+    selected: ThemeKind,
+    jig: ThemeKind,
 }
 
 const DEFAULT_ARGS:Args = {
-    theme: "chalkboard"
+    selected: "chalkboard",
+    jig: "happy-brush",
 }
 
 export const Container = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {theme} = props;
+    const {selected, jig} = props;
     return `<theme-selector-cards ${argsToAttrs(props)}>
     ${mapToString(ThemeKinds, opt_theme => Option({
         theme: opt_theme,
-        state: opt_theme === theme ? "selected" : "idle"
+        state: opt_theme === jig ? "jig"
+        : opt_theme === selected ? "selected" 
+        : "idle"
     }))}
     </theme-selector-cards>`;
 }
@@ -30,5 +34,6 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
 Container.args= DEFAULT_ARGS;
 
 Container.argTypes = {
-    theme: ThemeControl
+    selected: ThemeControl,
+    jig: ThemeControl,
 }

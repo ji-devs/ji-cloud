@@ -4,7 +4,7 @@ import {nothing} from "lit-html";
 
 const STR_EMPTY = "No preview yet";
 
-@customElement('module-main-empty')
+@customElement('main-empty')
 export class _ extends LitElement {
   static get styles() {
       return [css`
@@ -26,7 +26,7 @@ export class _ extends LitElement {
   render() {
       return html`
           <section class="empty">
-              <img-ui path="module/_common/main/empty.svg"></img-ui>
+              <img-ui path="module/_groups/cards/edit/main/empty.svg"></img-ui>
               <div class="label">${STR_EMPTY}</div>
           </section>
       `

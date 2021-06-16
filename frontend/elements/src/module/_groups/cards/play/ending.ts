@@ -30,7 +30,7 @@ export class _ extends LitElement {
 
         return html`
             <div>
-                <img-ui path="module/memory/play/ending.png"></img-ui>
+                <img-ui path="module/_common/play/ending.png"></img-ui>
                 <div class="label">${STR_LABEL}</div>
             </div>`
     }

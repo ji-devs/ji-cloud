@@ -49,7 +49,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <section>
-                <img-ui path="module/memory/edit/sidebar/jiggling-card-pointer.svg"></img-ui>
+                <img-ui path="module/_groups/cards/edit/sidebar/jiggling-card-pointer.svg"></img-ui>
                 <div class="label">${STR_LABEL}</div>
             </section>
             <div class="clear"><slot name="clear"></slot></div>

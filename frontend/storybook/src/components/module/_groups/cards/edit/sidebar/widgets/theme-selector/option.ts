@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/edit/theme";
+import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 import {STATE} from "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 

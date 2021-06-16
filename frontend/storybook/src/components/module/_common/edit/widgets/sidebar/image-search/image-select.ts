@@ -8,7 +8,7 @@ import { argsToAttrs } from "@utils/attributes";
 import { imageMode } from "@elements/module/_common/edit/widgets/image-search/image-select";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Sidebar / Image Search"
+    title: "Module / _COMMON /  edit / Widgets / Sidebar / Image Search"
 }
 
 interface Args {
