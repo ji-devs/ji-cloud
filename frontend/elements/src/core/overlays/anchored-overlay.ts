@@ -1,10 +1,10 @@
 import { LitElement, html, css, customElement, property, query } from 'lit-element';
 
-export type PositionX = "left-out" | "right-out" | "left-in" | "right-in";
-export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in";
+export type PositionX = "left-out" | "right-out" | "left-in" | "right-in" | "center";
+export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "center";
 
 @customElement("anchored-overlay")
-export class _ extends LitElement {
+export class AnchoredOverlay extends LitElement {
     static get styles() {
         return [
             css`
@@ -33,6 +33,11 @@ export class _ extends LitElement {
                 :host([positionY=bottom-in]) .overlay {
                     bottom: 0;
                 }
+                :host([positionY=center]) .overlay {
+                    /* from https://stackoverflow.com/a/25776315/5253155 */
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
                 :host([positionX=right-out]) .overlay {
                     left: 100%;
                 }
@@ -44,6 +49,14 @@ export class _ extends LitElement {
                 }
                 :host([positionX=left-in]) .overlay {
                     left: 0;
+                }
+                :host([positionX=center]) .overlay {
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+                :host([positionY=center][positionX=center]) .overlay {
+                    /* when both are center but only one transform can be applied */
+                    transform: translate(-50%, -50%);
                 }
             `
         ];

@@ -38,13 +38,13 @@ Overlay.argTypes = {
     positionY: {
         control: {
             type: 'inline-radio',
-            options: ['top-out', 'top-in', 'bottom-out', 'bottom-in'],
+            options: ['top-out', 'top-in', 'bottom-out', 'bottom-in', 'center'],
         }
     },
     positionX: {
         control: {
             type: 'inline-radio',
-            options: ['left-out', 'left-in', 'right-out', 'right-in'],
+            options: ['left-out', 'left-in', 'right-out', 'right-in', 'center'],
         }
     },
 }
