@@ -87,7 +87,7 @@ export class _ extends LitElement {
   flipped:boolean = false;
 
   @property()
-  theme:ThemeKind= "";
+  theme:ThemeKind = "blank";
 
   @property({type: Boolean, reflect: true})
   transform:boolean = false;

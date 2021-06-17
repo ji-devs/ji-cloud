@@ -24,8 +24,6 @@ pub trait ThemeIdExt {
 
     fn as_str_id(self) -> &'static str;
 
-    fn filename(self) -> &'static str;
-
     //It's safe to just call this whenever, it will lazily init the config
     fn map_theme<F, A>(self, mapper:F) -> A
     where
@@ -59,24 +57,15 @@ impl ThemeIdExt for ThemeId {
     //TODO - tie to Localization
     fn display_name(self) -> &'static str {
         match self {
-            Self::Blank => "",
+            Self::Blank => "blank",
             Self::Chalkboard => "Chalkboard", 
             Self::HappyBrush => "Happy Brush", 
         }
     }
 
-    fn filename(self) -> &'static str {
-        let id = self.as_str_id();
-        if id.is_empty() {
-            "_default"
-        } else {
-            id
-        }
-    }
-
     fn as_str_id(self) -> &'static str {
         match self {
-            Self::Blank => "",
+            Self::Blank => "blank",
             Self::Chalkboard => "chalkboard", 
             Self::HappyBrush => "happy-brush", 
         }
@@ -108,7 +97,6 @@ impl ThemeIdExt for ThemeId {
 //access is via the public ThemeId getters
 #[derive(Debug, Deserialize)]
 struct Themes {
-    #[serde(rename="")]
     pub blank: Theme,
     pub chalkboard: Theme,
     pub happy_brush: Theme,

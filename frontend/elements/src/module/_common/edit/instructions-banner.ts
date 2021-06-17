@@ -34,7 +34,7 @@ export class _ extends LitElement {
     }
 
     @property()
-    theme:ThemeKind= "";
+    theme:ThemeKind= "blank";
 
     render() {
         return html`<section><slot></slot></section>`

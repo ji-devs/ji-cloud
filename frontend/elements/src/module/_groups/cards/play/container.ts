@@ -22,7 +22,7 @@ export class _ extends LitElement {
     }
 
       @property()
-      theme:ThemeKind= "";
+      theme:ThemeKind = "blank";
     render() {
         const {theme} = this;
 

@@ -102,7 +102,7 @@ export class _ extends LitElement {
   }
 
   @property()
-  theme:ThemeKind= "";
+  theme:ThemeKind = "blank";
 
   @property({reflect: true})
   state:STATE= "idle";
@@ -128,6 +128,7 @@ export class _ extends LitElement {
       const sectionClasses = classMap({
         hover: hover && state !== "jig"
       });
+      
 
       return html`
         <section class=${sectionClasses} @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
@@ -135,7 +136,7 @@ export class _ extends LitElement {
               <div class="content">
                   <div class="right" style="${style}">
                     <img-ui path="${cardBackPath(theme)}"></img-ui>
-                    ${hover ? renderMenu() : nothing}
+                    ${state === "selected" ? renderMenu() : nothing}
                   </div>
                   <div class="left" style="${style}"><span>${text}</span></div>
                   <div class="label">${STR_THEME_LABEL[theme]}</div>

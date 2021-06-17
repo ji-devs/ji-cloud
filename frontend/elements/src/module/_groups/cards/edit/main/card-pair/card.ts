@@ -80,7 +80,7 @@ export class _ extends LitElement {
   flippable:boolean = false;
 
   @property()
-  theme:ThemeKind= "";
+  theme:ThemeKind = "blank";
 
   @property({type: Boolean})
   editing: boolean = false;

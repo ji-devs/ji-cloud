@@ -29,21 +29,7 @@ const BASE_HEIGHT:f64 = 300.0;
 pub struct DebugOptions {
 }
 
-//TODO - fix this, toggle between wysyg and renderer
-//when that's done, then transform can be separated
-//and then layering will be properly fixed
 
-//Currently....
-//For text, we need to be able to click into the text while the transform is active
-//therefore it's a child of the transform
-//It's not enough to render only the lines of the SVG without the rect
-//since the element itself blocks (and the svg elements need pointer events)
-//
-//the transform box itself is only rotated, everything else is done by internal math
-//however the text shouldn't really scale either, so we just take the width/height
-//due to all this, we can't just pin the coordinate system to the top/left with rems
-//or use the transform directly as-is (other than for rotation)
-//like we did with sprites
 pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>, debug_opts: Option<DebugOptions>) -> Dom {
 
 

@@ -80,7 +80,7 @@ export class _ extends LitElement {
   }
 
   @property()
-  theme:ThemeKind= "";
+  theme:ThemeKind = "blank";
 
   @property({reflect: true})
   state:STATE= "idle";
@@ -116,7 +116,7 @@ export class _ extends LitElement {
                   <img-ui class=${imageClass} path="${themeIconPath(theme, false)}"></img-ui>
                   <img-ui class=${imageHoverClass} path="${themeIconPath(theme, true)}"></img-ui>
                   <div class="label">${STR_THEME_LABEL[theme]}</div>
-                  ${hover ? renderMenu() : nothing}
+                  ${state === "selected" ? renderMenu() : nothing}
               </div>
           </section>
       `

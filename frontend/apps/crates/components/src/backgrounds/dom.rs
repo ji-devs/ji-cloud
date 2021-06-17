@@ -24,9 +24,7 @@ pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
             => {
                 let mut children:Vec<Dom> = Vec::new();
 
-                if layer_1.is_none() && layer_2.is_none() {
-                    children.push(render_theme_bg(*theme_id));
-                }
+                children.push(render_theme_bg(*theme_id));
 
                 if let Some(layer_1) = layer_1 {
                     children.push(render_bg(layer_1));
@@ -59,9 +57,7 @@ pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId) -> Dom {
 
     let mut children:Vec<Dom> = Vec::new();
 
-    if bg.layer_1.is_none() && bg.layer_2.is_none() {
-        children.push(render_theme_bg(theme_id));
-    }
+    children.push(render_theme_bg(theme_id));
 
     if let Some(layer_1) = bg.layer_1.as_ref() {
         children.push(render_bg(layer_1));
@@ -127,7 +123,7 @@ fn render_theme_bg(theme_id:ThemeId) -> Dom {
         .style("width", "100%")
         .style("height", "100%")
         .property("path", {
-            &format!("theme/module/_groups/design/{}/bg.jpg", theme_id.filename())
+            &format!("theme/module/_groups/design/{}/bg.jpg", theme_id.as_str_id())
         })
     })
 }

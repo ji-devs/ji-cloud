@@ -38,9 +38,11 @@ export const Card= (props?:Partial<Args> & {slot?: string}) => {
         editing: editTarget
     });
 
+    /*
     if(cardProps.theme === "") {
         delete cardProps["theme"];
     }
+    */
     return `
     <main-card ${argsToAttrs(cardProps)} ${slot ? `slot="${slot}"` : ""}>
     ${getContent(contentMode, ioMode)}
