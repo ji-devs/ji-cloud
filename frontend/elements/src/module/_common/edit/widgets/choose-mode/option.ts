@@ -35,6 +35,10 @@ export class _ extends LitElement {
           text-align: center;
           color: var(--dark-gray-6);
         }
+
+        .hidden {
+          display: none;
+        }
     `];
   }
 
@@ -75,12 +79,18 @@ export class _ extends LitElement {
   render() {
       const {module, mode, label, hover} = this;
 
-      const filename = hover ? `${mode}-hover.png` : `${mode}.png`;
+      const imageClass = classMap({
+        hidden: hover,
+      });
+      const imageHoverClass = classMap({
+        hidden: !hover,
+      });
 
       return html`
           <section>
               <div class="label">${label}</div>  
-              <img-ui class="image" path="module/${module}/edit/choose/${filename}" alt="${label}"></img-ui>
+              <img-ui class=${imageClass} path="module/${module}/edit/choose/${mode}.png" alt="${label}"></img-ui>
+              <img-ui class=${imageHoverClass} path="module/${module}/edit/choose/${mode}-hover.png" alt="${label}"></img-ui>
           </section>
       `
   }
