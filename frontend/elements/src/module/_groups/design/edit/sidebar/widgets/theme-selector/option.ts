@@ -61,6 +61,9 @@ export class _ extends LitElement {
 
           }
 
+          .hidden {
+            display: none;
+          }
           .label {
             text-align: center;
             width: 229px;
@@ -100,11 +103,18 @@ export class _ extends LitElement {
         hover: hover && state !== "jig"
       });
 
+      const imageClass = classMap({
+        hidden: hover
+      });
+      const imageHoverClass = classMap({
+        hidden: !hover
+      });
       return html`
         <section class=${sectionClasses} @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
           ${state == "jig" ? html`<theme-selector-jig class="jig"></theme-selector-jig>` : nothing}
               <div class="content">
-                  <img-ui path="${themeIconPath(theme, hover)}"></img-ui>
+                  <img-ui class=${imageClass} path="${themeIconPath(theme, false)}"></img-ui>
+                  <img-ui class=${imageHoverClass} path="${themeIconPath(theme, true)}"></img-ui>
                   <div class="label">${STR_THEME_LABEL[theme]}</div>
                   ${hover ? renderMenu() : nothing}
               </div>

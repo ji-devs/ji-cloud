@@ -18,10 +18,16 @@ pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
     let debug_opts = debug_opts.unwrap_or_default();
 
     let children = map_ref!{
+        let theme_id = bg.theme_id.signal(),
         let layer_1 = bg.layer_1.signal_cloned(),
         let layer_2 = bg.layer_2.signal_cloned()
             => {
                 let mut children:Vec<Dom> = Vec::new();
+
+                if layer_1.is_none() && layer_2.is_none() {
+                    children.push(render_theme_bg(*theme_id));
+                }
+
                 if let Some(layer_1) = layer_1 {
                     children.push(render_bg(layer_1));
                 }
@@ -49,9 +55,14 @@ pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
     })
 }
 
-pub fn render_raw(bg:&RawBackgrounds) -> Dom {
+pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId) -> Dom {
 
     let mut children:Vec<Dom> = Vec::new();
+
+    if bg.layer_1.is_none() && bg.layer_2.is_none() {
+        children.push(render_theme_bg(theme_id));
+    }
+
     if let Some(layer_1) = bg.layer_1.as_ref() {
         children.push(render_bg(layer_1));
     }
@@ -106,4 +117,17 @@ fn render_bg(bg:&Background) -> Dom {
             })
         },
     }
+}
+fn render_theme_bg(theme_id:ThemeId) -> Dom {
+    html!("img-ui", {
+        .style("position", "absolute")
+        .style("top", "0")
+        .style("left", "0")
+        .style("display", "block")
+        .style("width", "100%")
+        .style("height", "100%")
+        .property("path", {
+            &format!("theme/module/_groups/design/{}/bg.jpg", theme_id.filename())
+        })
+    })
 }

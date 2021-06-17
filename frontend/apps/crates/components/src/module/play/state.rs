@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::{Body, ModeExt, BodyExt, StepExt}}},
+    domain::jig::{*, module::{*, body::{Body, ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
 };
 use dominator::{clone, Dom};
 use futures_signals::{
@@ -105,6 +105,7 @@ where
     pub jig: Jig, 
     pub raw: RawData,
     pub source: InitSource,
+    pub theme_id: ThemeId,
     phantom: PhantomData<(Mode, Step)>
 }
 
@@ -122,10 +123,25 @@ where
         raw: RawData,
         source: InitSource,
     ) -> Self {
+
+        let theme_id = match raw.get_theme() {
+            Some(theme_choice) => {
+                match theme_choice {
+                    ThemeChoice::Jig => jig.theme.clone(),
+                    ThemeChoice::Override(theme_id) => theme_id
+                }
+            },
+            None => {
+                log::warn!("this shouldn't happen! playing a module with no theme id...");
+                ThemeId::default()
+            }
+        };
+
         Self {
             audio_mixer,
             jig_id,
             module_id,
+            theme_id,
             jig,
             raw,
             source,

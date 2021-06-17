@@ -24,6 +24,8 @@ pub trait ThemeIdExt {
 
     fn as_str_id(self) -> &'static str;
 
+    fn filename(self) -> &'static str;
+
     //It's safe to just call this whenever, it will lazily init the config
     fn map_theme<F, A>(self, mapper:F) -> A
     where
@@ -60,6 +62,15 @@ impl ThemeIdExt for ThemeId {
             Self::Blank => "",
             Self::Chalkboard => "Chalkboard", 
             Self::HappyBrush => "Happy Brush", 
+        }
+    }
+
+    fn filename(self) -> &'static str {
+        let id = self.as_str_id();
+        if id.is_empty() {
+            "_default"
+        } else {
+            id
         }
     }
 

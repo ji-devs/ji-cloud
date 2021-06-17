@@ -112,6 +112,7 @@ impl Base {
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
                 &content.backgrounds,
+                theme_id.clone(),
                 BackgroundsCallbacks::new(
                     Some(clone!(history => move |raw_bgs| {
                         history.push_modify(|raw| {

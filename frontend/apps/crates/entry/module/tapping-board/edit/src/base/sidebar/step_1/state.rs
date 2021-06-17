@@ -81,7 +81,7 @@ impl Tab {
                 Self::Image(Rc::new(state))
             },
             TabKind::Color => {
-                let state = ColorPickerState::new(Some(base.theme_id.clone()), None, Some(clone!(base => move |color| {
+                let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
                     base.backgrounds.set_layer(Layer::One, Background::Color(color));
                 })));
                 Self::Color(Rc::new(state))

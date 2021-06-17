@@ -11,6 +11,7 @@ use std::cell::RefCell;
 use once_cell::unsync::OnceCell;
 use std::sync::Mutex;
 
+#[derive(Clone)]
 pub struct AudioInstance {
     pub(super) one_shot: Rc<RefCell<Option<AwsmAudio>>>
 }

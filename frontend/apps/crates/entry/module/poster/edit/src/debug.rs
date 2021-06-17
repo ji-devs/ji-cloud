@@ -118,6 +118,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 InitSticker::Text, InitSticker::Sprite
             ],
         }))).unwrap_ji();
+        
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();

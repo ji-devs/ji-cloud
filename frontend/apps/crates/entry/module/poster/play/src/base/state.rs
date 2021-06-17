@@ -24,15 +24,12 @@ impl Base {
             audio_mixer,
             jig,
             raw,
+            theme_id,
             ..
         } = init_args;
 
         let content = raw.content.unwrap_ji();
 
-        let theme_id = match content.theme {
-            ThemeChoice::Jig => jig.theme.clone(),
-            ThemeChoice::Override(theme_id) => theme_id
-        };
 
 
         Self {

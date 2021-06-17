@@ -22,11 +22,10 @@ impl DomRenderable for Main {
                             ]
                         },
                         Phase::Trace => {
-                            let raw_backgrounds = state.base.backgrounds.to_raw();
                             let raw_stickers = state.base.stickers.to_raw();
 
                             vec![
-                                backgrounds::dom::render_raw(&raw_backgrounds),
+                                backgrounds::dom::render(state.base.backgrounds.clone(), None),
                                 stickers::dom::render_raw(&raw_stickers),
                                 traces::edit::dom::render(state.base.traces.clone()),
                                 html!("empty-fragment", {
