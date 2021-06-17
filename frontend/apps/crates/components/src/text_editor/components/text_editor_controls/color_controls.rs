@@ -21,7 +21,7 @@ pub struct ColorState {
 impl ColorState {
     pub fn new(state:Rc<State>) -> Self {
         let picker = Rc::new(ColorPickerState::new(
-            Some(state.theme_id.lock_ref().clone()),
+            (*state).theme_id.clone(),
             None, 
             Some(clone!(state => move |color| {
                 let color = rgba8_to_hex_optional(&Some(color));
@@ -55,10 +55,10 @@ pub fn render(state: Rc<State>) -> Dom {
     let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {
-        .future(state.theme_id.signal_cloned().for_each(clone!(state, color_state => move |theme_id| {
-            color_state.picker.set_theme(theme_id);
-            ready(())
-        })))
+        // .future(state.theme_id.signal_cloned().for_each(clone!(state, color_state => move |theme_id| {
+        //     color_state.picker.set_theme(theme_id);
+        //     ready(())
+        // })))
         .property("slot", "color")
         .property("positionY", "top-in")
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))

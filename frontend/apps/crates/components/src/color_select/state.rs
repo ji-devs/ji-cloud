@@ -1,8 +1,11 @@
 use std::rc::Rc;
-use futures_signals::signal::Mutable;
+use dominator::clone;
+use futures::future::ready;
+use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
 use utils::{prelude::*, colors::*};
+use wasm_bindgen_futures::spawn_local;
 
 
 
@@ -35,28 +38,30 @@ static SYSTEM_COLORS: &'static [&str] = &[
 
 pub struct State {
     pub(super) value: Mutable<Option<RGBA8>>,
+    pub theme_id: ReadOnlyMutable<ThemeId>,
     pub system_colors: Rc<Vec<RGBA8>>,
-    pub theme_colors: Mutable<Option<Vec<RGBA8>>>,
+    pub theme_colors: Mutable<Vec<RGBA8>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
     pub on_select: Option<Box<dyn Fn(RGBA8)>>,
 }
 
 impl State {
-    pub fn new(theme: Option<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(RGBA8) + 'static>) -> Self {
+    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(RGBA8) + 'static>) -> Self {
         Self {
-            value: Mutable::new(init_value), 
+            value: Mutable::new(init_value),
+            theme_id,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-            theme_colors: Mutable::new(match theme {
-                Some(theme_id) => Some(Self::get_theme_colors(theme_id)),
-                None => None,
-            }),
+            theme_colors: Mutable::new(vec![]),
             user_colors: Rc::new(MutableVec::new()),
             on_select: on_select.map(|f| Box::new(f) as _)
         }
     }
 
-    pub fn set_theme(&self, theme_id: ThemeId) {
-        self.theme_colors.set(Some(Self::get_theme_colors(theme_id)))
+    pub fn handle_theme(state: Rc<State>, ) {
+        spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme_id| {
+            state.theme_colors.set(Self::get_theme_colors(theme_id));
+            ready(())
+        })));
     }
 
     fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {

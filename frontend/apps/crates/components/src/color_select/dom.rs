@@ -23,6 +23,8 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
         state.user_colors.lock_mut().replace_cloned(user_colors);
     }));
 
+    State::handle_theme(Rc::clone(&state));
+
     html!("empty-fragment", {
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
@@ -45,12 +47,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
         .child(html!("empty-fragment", { // TODO: once we can have multiple child signals we wont need this
             .property("slot", "sections")
             .child_signal(state.theme_colors.signal_cloned().map(clone!(state => move |theme_colors| {
-                match theme_colors {
-                    None => None,
-                    Some(theme_colors) => {
-                        Some(render_static_section(state.clone(), &theme_colors, STR_THEME_COLORS_LABEL))
-                    }
-                }
+                Some(render_static_section(state.clone(), &theme_colors, STR_THEME_COLORS_LABEL))
             })))
         }))
         .child(render_static_section(state.clone(), state.system_colors.as_ref(), STR_SYSTEM_COLORS_LABEL))

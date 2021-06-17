@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
+use futures_signals::signal::ReadOnlyMutable;
 use wasm_bindgen::UnwrapThrowExt;
 use wasm_bindgen::JsCast;
 use futures_signals::{
@@ -14,7 +15,7 @@ use awsm_web::dom::*;
 use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 use futures::future::ready;
 use components::{
-    image_search::{self, state::ImageSearchOptions},
+    // image_search::{self, state::ImageSearchOptions},
     audio_input::{self, options::AudioInputOptions, state::State as AudioState},
     color_select,
     text_editor,
@@ -76,60 +77,62 @@ fn render_button(step:u32, label:&str, state:Rc<State>) -> Dom {
     })
 }
 
-pub fn render_image_search() -> Dom {
-    let opts = ImageSearchOptions {
-        background_only: Some(false),
-        upload: Some(()),
-        filters: Some(()),
-        value: Mutable::new(None),
-    };
-    let state = image_search::state::State::new(opts, None);
+// pub fn render_image_search() -> Dom {
+//     let opts = ImageSearchOptions {
+//         background_only: Some(false),
+//         upload: Some(()),
+//         filters: Some(()),
+//         value: Mutable::new(None),
+//     };
+//     let state = image_search::state::State::new(opts, None);
 
-    html!("div", {
-        .style("padding", "30px")
-        .child(image_search::dom::render(state, None))
-    })
-}
+//     html!("div", {
+//         .style("padding", "30px")
+//         .child(image_search::dom::render(state, None))
+//     })
+// }
 
 
-pub fn render_audio_input() -> Dom {
-    let opts:AudioInputOptions = AudioInputOptions {
-        //ummm... this is a lie... I guess... but w/e
-        //in the usual case of supplying a Some the real type is inferred
-        // on_change: None,
-        on_change: Some(Box::new(|h| {
-            log::info!("Audio chagne: {:?}", h);
-        })),
-        audio_id: None,
-    };
+// pub fn render_audio_input() -> Dom {
+//     let opts:AudioInputOptions = AudioInputOptions {
+//         //ummm... this is a lie... I guess... but w/e
+//         //in the usual case of supplying a Some the real type is inferred
+//         // on_change: None,
+//         on_change: Some(Box::new(|h| {
+//             log::info!("Audio chagne: {:?}", h);
+//         })),
+//         audio_id: None,
+//     };
 
-    let state = Rc::new(AudioState::new(opts));
+//     let state = Rc::new(AudioState::new(opts));
 
-    html!("div", {
-        .style("padding", "30px")
-        .child(audio_input::dom::render(state.clone(), None))
-        .child(html!("button", {
-            .text("Set to Some")
-            .event(clone!(state => move |_: events::Click| {
-                let uuid = uuid::Uuid::parse_str("30a326ec-991f-11eb-afad-7717bd5f5028").unwrap_ji();
-                state.set_audio_id_ext(Some(AudioId(uuid)));
-            }))
-        }))
-        .child(html!("button", {
-            .text("Set to None")
-            .event(clone!(state => move |_: events::Click| {
-                state.set_audio_id_ext(None);
-            }))
-        }))
-    })
-}
+//     html!("div", {
+//         .style("padding", "30px")
+//         .child(audio_input::dom::render(state.clone(), None))
+//         .child(html!("button", {
+//             .text("Set to Some")
+//             .event(clone!(state => move |_: events::Click| {
+//                 let uuid = uuid::Uuid::parse_str("30a326ec-991f-11eb-afad-7717bd5f5028").unwrap_ji();
+//                 state.set_audio_id_ext(Some(AudioId(uuid)));
+//             }))
+//         }))
+//         .child(html!("button", {
+//             .text("Set to None")
+//             .event(clone!(state => move |_: events::Click| {
+//                 state.set_audio_id_ext(None);
+//             }))
+//         }))
+//     })
+// }
 
 
 pub fn render_color_select() -> Dom {
+    let theme_id = Mutable::new(ThemeId::HappyBrush);
     let state = color_select::state::State::new(
-        Some(ThemeId::HappyBrush),
-        Rc::new(Mutable::new(None))
-        );
+        (*theme_id).clone(),
+        None,
+        Some(|_| {})
+    );
     html!("div", {
         .style("padding", "30px")
         .child(color_select::dom::render(
@@ -210,16 +213,22 @@ fn render_text() -> Dom {
 
     let value_change = Rc::new(Mutable::new(value.clone()));
 
-    let state = text_editor::state::State::new(
-        ThemeId::HappyBrush,
-        value.clone(),
-        Some(Box::new(clone!(value_change => move |v| {
+    let callbacks = text_editor::callbacks::Callbacks::new(
+        Some(Box::new(|_v: &str| {
+        })),
+        Some(Box::new(clone!(value_change => move |v: &str| {
             value_change.set(Some(v.to_string()));
             log::info!("{:?}", v);
         }))),
         Some(Box::new(|| {
             log::info!("On blur");
-        })),
+        }))
+    );
+    let theme = Mutable::new(ThemeId::HappyBrush);
+    let state = text_editor::state::State::new(
+        (*theme).clone(),
+        value.clone(),
+        callbacks
     );
 
     html!("div", {
@@ -256,8 +265,8 @@ fn render_text() -> Dom {
                                         .property("type", "radio")
                                         .property("name", "them")
                                         .property("checked", true)
-                                        .event(clone!(state => move |_: events::Change| {
-                                            state.set_theme(ThemeId::HappyBrush)
+                                        .event(clone!(theme => move |_: events::Change| {
+                                            theme.set(ThemeId::HappyBrush);
                                         }))
                                     })
                                 )
@@ -268,8 +277,8 @@ fn render_text() -> Dom {
                                     html!("input", {
                                         .property("type", "radio")
                                         .property("name", "them")
-                                        .event(clone!(state => move |_: events::Change| {
-                                            state.set_theme(ThemeId::Chalkboard)
+                                        .event(clone!(theme => move |_: events::Change| {
+                                            theme.set(ThemeId::Chalkboard)
                                         }))
                                     })
                                 )

@@ -1,7 +1,9 @@
+use std::future::ready;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use futures_signals::signal::Mutable;
+use dominator::clone;
+use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use utils::themes::{ThemeId, ThemeIdExt};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -24,25 +26,27 @@ pub struct State {
     pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
     pub fonts: Mutable<Vec<String>>,
     pub value: RefCell<Option<String>>,
-    pub theme_id: Mutable<ThemeId>,
+    pub theme_id: ReadOnlyMutable<ThemeId>,
     pub color_state: RefCell<Option<Rc<ColorState>>>,
     pub callbacks: Callbacks,
 }
 
 
 impl State {
-    pub fn new(theme_id: ThemeId, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
+    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Rc::new(RefCell::new(None)),
-            fonts: Mutable::new(Self::get_fonts(theme_id)),
+            fonts: Mutable::new(vec![]),
             callbacks,
             value: RefCell::new(value),
-            theme_id: Mutable::new(theme_id),
+            theme_id,
             color_state: RefCell::new(None) 
         });
 
         *_self.color_state.borrow_mut() = Some(Rc::new(ColorState::new(_self.clone())));
+
+        Self::handle_fonts(Rc::clone(&_self));
 
         _self
     }
@@ -52,11 +56,6 @@ impl State {
         if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.borrow() {
             self.update_wysiwyg_value(&wysiwyg_ref);
         }
-    }
-
-    pub fn set_theme(&self, theme_id: ThemeId) {
-        self.theme_id.set_neq(theme_id.clone());
-        self.fonts.set(Self::get_fonts(theme_id));
     }
 
     pub fn select_all(&self) {
@@ -91,18 +90,21 @@ impl State {
         };
     }
 
-    fn get_fonts(theme: ThemeId) -> Vec<String> {
+    fn handle_fonts(state: Rc<State>) {
         // load all fonts in background
         spawn_local(async {
             FontLoader::new().load_all().await;
         });
 
-        let mut fonts: Vec<String> = Vec::from(theme.get_fonts());
-        let mut static_fonts: Vec<String> = StaticFont::iter().map(|font| {
-            String::from(font.get_font_name())
-        }).collect();
-        fonts.append(&mut static_fonts);
-        fonts
+        spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme| {
+            let mut fonts: Vec<String> = Vec::from(theme.get_fonts());
+            let mut static_fonts: Vec<String> = StaticFont::iter().map(|font| {
+                String::from(font.get_font_name())
+            }).collect();
+            fonts.append(&mut static_fonts);
+            state.fonts.set(fonts);
+            ready(())
+        })));
     }
 
     pub(super) fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
