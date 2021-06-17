@@ -3,22 +3,28 @@ use wasm_bindgen::prelude::*;
 
 pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
 
+/// Init is used for bootstrapping and passing initial loaded data
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IframeInit<T> {
-    pub data: Option<T>
+    pub data: T
 }
 
 impl <T> IframeInit <T> {
     pub fn new(data: T) -> Self {
-        Self { data: Some(data) }
+        Self { data }
     }
 }
 
-impl IframeInit <()> {
-    pub fn empty() -> IframeInit<()> {
-        IframeInit { data: None }
+impl IframeInit <EmptyMessage> {
+    pub fn empty() -> IframeInit<EmptyMessage> {
+        IframeInit { data: EmptyMessage {}}
     }
 }
+
+/// Needed to avoid accidentally creating a null over the wire
+/// which would be (de)serialized to anything
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EmptyMessage {}
 
 impl <T: Serialize> From<IframeInit<T>> for JsValue {
     fn from(msg:IframeInit<T>) -> Self {
@@ -56,14 +62,15 @@ pub fn should_get_iframe_data() -> bool {
 }
 
 
+/// Action is used for passing runtime messages 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IframeAction<T> {
-    pub data: Option<T>
+    pub data: T
 }
 
 impl <T> IframeAction <T> {
     pub fn new(data: T) -> Self {
-        Self { data: Some(data) }
+        Self { data }
     }
 }
 

@@ -48,18 +48,21 @@ pub trait DomRenderable {
 pub trait BaseExt: DomRenderable {
 }
 
+pub type RawDirect = bool;
+
 pub enum Phase <RawData, Base> 
 {
     Init,
-    WaitingIframe(Rc<Box<dyn Fn(RawData)>>),
-    Playing(Rc<Base>),
+    WaitingIframeRaw(Rc<Box<dyn Fn(RawData)>>),
+    Playing(Rc<Base>, RawDirect),
 }
+
 
 impl <RawData, Base> Phase <RawData, Base> 
 {
-    pub fn waiting_iframe(&self) -> bool {
+    pub fn waiting_iframe_raw(&self) -> bool {
         match self {
-            Self::WaitingIframe(_) => true,
+            Self::WaitingIframeRaw(_) => true,
             _ => false
         }
     }
@@ -232,11 +235,11 @@ where
                     *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new_without_jig(audio_ctx));
                 }
 
-                let wait_iframe = should_get_iframe_data();
+                let wait_iframe_data = should_get_iframe_data();
 
                 let raw:Option<RawData> = _self.opts.force_raw.clone()
                     .and_then(|raw| {
-                        if !wait_iframe || _self.opts.force_raw_even_in_iframe {
+                        if !wait_iframe_data || _self.opts.force_raw_even_in_iframe {
                             Some(raw)
                         } else {
                             None
@@ -246,8 +249,8 @@ where
                 let raw_source = match raw {
                     Some(raw) => Some((raw, InitSource::ForceRaw)),
                     None => {
-                        if wait_iframe {
-                            _self.phase.set(Rc::new(Phase::WaitingIframe(
+                        if wait_iframe_data {
+                            _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
                                 Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
                                     _self.raw_loader.load(clone!(init_from_raw, _self => async move {
 
@@ -258,7 +261,7 @@ where
                                         );
                                         let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
-                                        _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
+                                        _self.phase.set(Rc::new(Phase::Playing(Rc::new(base), true)));
                                     }));
                                 })))
                             )));
@@ -291,13 +294,17 @@ where
                     );
                     let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source)).await;
 
-                    _self.phase.set(Rc::new(Phase::Playing(Rc::new(base))));
+                    _self.phase.set(Rc::new(Phase::Playing(Rc::new(base), false)));
                 }
             }));
         })));
 
         _self
     }
+
+    /// this should always be fine.. the only reason to delay
+    /// is so that the audio mixer can be created with the jig info
+    /// and in some cases that happens after self is created
     pub fn get_audio_mixer(&self) -> AudioMixer {
         self.audio_mixer.borrow().as_ref().unwrap_ji().clone()
     }

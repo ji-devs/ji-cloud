@@ -21,6 +21,7 @@ strum_macros = "0.21.1"
 log = "0.4.14"
 serde_json = "1.0.64"
 cfg-if = "1.0.0"
+beach_map = "0.2.1"
 wasm-bindgen = { version = "0.2.74", features = ["serde-serialize"] }
 js-sys = "0.3.51"
 wasm-bindgen-futures = "0.4.24"

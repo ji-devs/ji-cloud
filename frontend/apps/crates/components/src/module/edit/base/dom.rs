@@ -12,7 +12,7 @@ use wasm_bindgen::prelude::*;
 use crate::module::header::controller::dom::ControllerDom;
 use super::super::actions::HistoryStateImpl;
 use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt, StepExt}}};
-use utils::{prelude::*, iframe::IframeInit}; 
+use utils::{prelude::*, iframe::{IframeInit, EmptyMessage}}; 
 use dominator_helpers::events::Message;
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
@@ -118,8 +118,7 @@ where
 
                     //Wait until the iframe sends its empty message
                     //Then send back the current raw data from history
-                    if let Ok(_) = evt.try_serde_data::<IframeInit<()>>() {
-                        log::info!("sending iframe message!");
+                    if let Ok(_) = evt.try_serde_data::<IframeInit<EmptyMessage>>() {
                         let data = state.history.get_current();
 
                         let msg:IframeInit<RawData> = IframeInit::new(data); 

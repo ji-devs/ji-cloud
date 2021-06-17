@@ -12,7 +12,7 @@ use dominator::clone;
 pub struct TraceBubble {
     pub audio: Option<Audio>,
     pub fade: Fade,
-    pub(super) audio_player_instance: RefCell<Option<AudioInstance>>,
+    pub(super) audio_player_instance: RefCell<Option<Rc<AudioInstance>>>,
     pub(super) tooltip: Option<Rc<TooltipState>>
 
 }

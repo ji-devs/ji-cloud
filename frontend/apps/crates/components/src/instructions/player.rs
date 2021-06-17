@@ -14,7 +14,7 @@ use crate::audio_mixer::{AudioMixer, AudioInstance};
 pub struct InstructionsPlayer {
     data: Instructions,
     fade: Fade,
-    audio: RefCell<Option<AudioInstance>>
+    audio: RefCell<Option<Rc<AudioInstance>>>
 }
 
 impl InstructionsPlayer {
