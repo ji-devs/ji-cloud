@@ -54,3 +54,46 @@ pub fn should_get_iframe_data() -> bool {
         }
     }
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct IframeAction<T> {
+    pub data: Option<T>
+}
+
+impl <T> IframeAction <T> {
+    pub fn new(data: T) -> Self {
+        Self { data: Some(data) }
+    }
+}
+
+impl <T: Serialize> From<IframeAction<T>> for JsValue {
+    fn from(msg:IframeAction<T>) -> Self {
+        (&msg).into()
+    }
+}
+
+impl <T: Serialize> From<&IframeAction<T>> for JsValue {
+    fn from(msg:&IframeAction<T>) -> Self {
+        serde_wasm_bindgen::to_value(msg).unwrap_throw()
+    }
+}
+
+impl <T: DeserializeOwned> From<JsValue> for IframeAction<T> {
+    fn from(msg:JsValue) -> Self {
+        serde_wasm_bindgen::from_value(msg).unwrap_throw()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum JigToModuleMessage {
+    TimerDone,
+    Play,
+    Pause,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ModuleToJigMessage {
+    AddPoints(u32),
+    StartTimer(u32),
+}

@@ -1,5 +1,4 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/module";
 import "@elements/entry/jig/edit/sidebar/publish";
 import "@elements/entry/jig/edit/sidebar/module/window";
 import { ModuleState } from "@elements/entry/jig/edit/sidebar/module/window";

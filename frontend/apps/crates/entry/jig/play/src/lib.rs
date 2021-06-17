@@ -7,7 +7,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod templates;
 mod router;
-mod pages;
+mod player;
 mod debug;
 
 use cfg_if::cfg_if;

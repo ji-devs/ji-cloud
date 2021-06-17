@@ -58,7 +58,7 @@ export class _ extends LitElement {
         window.removeEventListener("mousedown", this.onGlobalMouseDown);
     }
     onGlobalMouseDown = (evt: MouseEvent) => {
-        if(!evt.composedPath().includes(this)) {
+        if(this.open && !evt.composedPath().includes(this)) {
             if (this.autoClose) {
                 this.open = false;
             }

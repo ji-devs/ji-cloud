@@ -1,13 +1,8 @@
-use utils::routes::{Route, JigRoute, JigPlayMode};
+use utils::routes::{Route, JigRoute};
 use std::rc::Rc;
-use wasm_bindgen::UnwrapThrowExt;
-use web_sys::Url;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal}
-};
+use futures_signals::signal::{SignalExt, Signal};
 use dominator::{Dom, html};
-use crate::pages::PlayerPage;
+use crate::player::{dom::render as player_render, state::State as PlayerState};
 
 pub struct Router {
 }
@@ -28,7 +23,7 @@ impl Router {
                 match route {
                     Route::Jig(route) => {
                         match route {
-                            JigRoute::Play(jig_id, module_id) => Some(PlayerPage::render(PlayerPage::new())),
+                            JigRoute::Play(jig_id, module_id) => Some(player_render(Rc::new(PlayerState::new(jig_id, module_id)))),
                             _ => None
                         }
                     },

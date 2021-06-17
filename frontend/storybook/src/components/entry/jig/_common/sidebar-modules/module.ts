@@ -1,5 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/entry/jig/edit/sidebar/module";
+import "@elements/entry/jig/_common/sidebar-modules/module";
 import "@elements/entry/jig/edit/sidebar/module/window";
 import "@elements/entry/jig/edit/sidebar/module/menu";
 import "@elements/core/buttons/icon";
@@ -10,7 +10,7 @@ import {ModuleKind, moduleKinds} from "@elements/entry/jig/module-types";
 const STR_CUSTOM_COPY = "Copy to another Jig";
 
 export default {
-    title: "Entry / Jig / Edit / Sidebar"
+    title: "Entry / Jig / Sidebar modules"
 }
 
 interface Args {
@@ -71,11 +71,11 @@ export const Module = (props?:Partial<Args> & InternalExtra) => {
 
     return `
         <div style="${makeDemoRoomAtTop && `position: absolute; top: 200px;`}" ${slot && `slot="${slot}"`}>
-            <jig-edit-sidebar-module style="${style}" ${argsToAttrs(moduleProps)}>
+            <jig-sidebar-module style="${style}" ${argsToAttrs(moduleProps)}>
                 <jig-edit-sidebar-module-window ${argsToAttrs(windowProps)} slot="window"></jig-edit-sidebar-module-window>
                 ${renderMenu(menuOpen, showAdvancedMenu)} 
                 ${showAdd && `<button-icon icon="gears" slot="add"></button-icon>`}
-            </jig-edit-sidebar-module>
+            </jig-sidebar-module>
         </div>`;
 }
 

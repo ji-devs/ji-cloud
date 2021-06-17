@@ -3,7 +3,7 @@ import "@elements/entry/jig/edit/sidebar/sidebar";
 import "@elements/entry/jig/edit/sidebar/header";
 import "@elements/entry/jig/edit/sidebar/filler";
 import {mapToString, arrayIndex} from "@utils/array";
-import {Module} from "./module";
+import {Module} from "../../_common/sidebar-modules/module";
 import {Header} from "./header";
 import { Publish } from "./publish";
 

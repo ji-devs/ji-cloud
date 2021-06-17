@@ -41,6 +41,7 @@ web-sys = { version = "0.3.51", features = [
     'HtmlInputElement',
     'HtmlImageElement',
     'HtmlSelectElement',
+    'HtmlIFrameElement',
     'KeyboardEvent',
     'MouseEvent',
     'FileList',
@@ -59,12 +60,15 @@ serde_json = "1.0.64"
 futures = "0.3.15"
 log = "0.4.14"
 cfg-if = "1.0.0"
-awsm_web = { version = "0.18.1", features = ["dom"] }
+awsm_web = { version = "0.18.1", features = ["dom", "canvas"] }
 discard = "1.0.4"
 uuid = { version = "0.8.2", features = ["serde", "wasm-bindgen"] }
 url = "2.2.2"
 gloo = "0.2.1"
 itertools = "0.10.1"
+gloo-timers = "0.2.1"
+strum = "0.21.0"
+strum_macros = "0.21.1"
 
 [features]
 default = ["wee_alloc"]

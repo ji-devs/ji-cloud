@@ -30,7 +30,7 @@ impl ModuleDom {
                     if is_filler { "block" } else {"none"}
                 })
             }))
-            .child( html!("jig-edit-sidebar-module", {
+            .child( html!("jig-sidebar-module", {
                 .future(State::drag_overlap_signal(state.clone()).for_each(clone!(state => move |overlap| {
                     if overlap {
                         state.sidebar.drag_target_index.set(Some(state.index));

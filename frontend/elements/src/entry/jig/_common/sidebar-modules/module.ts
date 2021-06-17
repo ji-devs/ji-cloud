@@ -8,7 +8,7 @@ import "@elements/core/buttons/text";
 import { ModuleKind, GET_STR_MODULE } from "@elements/entry/jig/module-types";
 import { collapseStyles } from "./collapse-styles";
 
-@customElement("jig-edit-sidebar-module")
+@customElement("jig-sidebar-module")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -114,6 +114,10 @@ export class _ extends LitElement {
                 .window {
                     position: relative;
                     z-index: 1;
+                    width: 218px;
+                    height: 123px;
+                    border-radius: 16px;
+                    overflow: hidden;
                 }
                 .decorations {
                     position: relative;

@@ -26,6 +26,9 @@ export class _ extends LitElement {
                     /* only add margin in back exists */
                     margin-bottom: 16px;
                 }
+                ::slotted([slot=back])::after {
+                    content: "<";
+                }
                 ::slotted([slot=close]) {
                     height: 13px;
                     width: 13px;

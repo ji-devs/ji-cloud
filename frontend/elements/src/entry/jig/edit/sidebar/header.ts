@@ -4,7 +4,7 @@ import "@elements/core/images/ui";
 import "@elements/core/inputs/text-pencil";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/text";
-import { collapseStyles } from "./collapse-styles";
+import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
 
 @customElement("jig-edit-sidebar-header")

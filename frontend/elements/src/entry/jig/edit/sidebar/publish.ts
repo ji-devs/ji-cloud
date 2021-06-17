@@ -3,7 +3,7 @@ import "@elements/core/images/ui";
 import "@elements/core/inputs/text-pencil";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/text";
-import { collapseStyles } from "./collapse-styles";
+import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
 const STR_END = "End";
 const STR_PUBLISH = "Publish";
