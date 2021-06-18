@@ -22,7 +22,6 @@ pub use module::{LiteModule, Module, ModuleKind};
 
 use crate::domain::jig::module::body::ThemeId;
 pub use additional_resource::AdditionalResourceId;
-use std::convert::TryFrom;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]

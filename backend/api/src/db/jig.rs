@@ -669,10 +669,24 @@ pub async fn create_draft(db: &PgPool, live_id: JigId) -> Result<JigId, error::J
         return Err(error::JigCloneDraft::IsDraft);
     }
 
-    let draft_id = sqlx::query!(
+    let draft_id = sqlx::query!( //language=SQL
         r#"
-insert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public, direction, display_score, theme)
-select display_name, parents, creator_id, author_id, language, description, $2, false, direction, display_score, theme-- infinity means "never auto-publish to public"
+insert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public,
+                 direction, display_score, theme, audio_background, audio_feedback_positive, audio_feedback_negative)
+select display_name,
+       parents,
+       creator_id,
+       author_id,
+       language,
+       description,
+       $2,
+       false,
+       direction,
+       display_score,
+       theme,
+       audio_background,
+       audio_feedback_positive,
+       audio_feedback_negative       
 from jig
 where id = $1
 returning id as "id: JigId"

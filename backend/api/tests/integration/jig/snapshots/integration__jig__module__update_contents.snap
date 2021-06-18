@@ -19,7 +19,8 @@ expression: body
           },
           "mode": "Duplicate",
           "pairs": [],
-          "theme": "Jig"
+          "theme": "Jig",
+          "background": null
         }
       }
     },

@@ -22,6 +22,11 @@ expression: body
     "is_public": false,
     "direction": "LeftToRight",
     "display_score": false,
-    "theme": "Blank"
+    "theme": "Blank",
+    "audio_background": "Placeholder1",
+    "audio_effects": {
+      "feedback_positive": [],
+      "feedback_negative": []
+    }
   }
 }
