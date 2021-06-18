@@ -73,7 +73,7 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
         match api_with_auth::<CreateResponse<ModuleId>, EmptyError, _>(&path, endpoints::jig::module::Create::METHOD, req).await {
             Ok(resp) => {
                 let id = resp.id;
-                let index = state.index+1;
+                let index = state.index;
                 let module = Rc::new(Some(LiteModule {
                     id,
                     kind,
@@ -86,6 +86,8 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
 
                 match update_module(&state.sidebar.jig.id, &id, req).await {
                     Ok(_) => {
+                        state.sidebar.route.set(JigEditRoute::Module(id));
+                        state.sidebar.collapsed.set(true);
                     },
                     Err(_) => {},
                 }
