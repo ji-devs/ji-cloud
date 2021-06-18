@@ -1,5 +1,6 @@
 import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
+import {ModuleKind} from "@elements/module/_common/types";
 
 const STR_SUBTITLE = "What do you want to do?";
 
@@ -7,6 +8,13 @@ type ScrollPosition = 'left' | 'right' | null;
 
 const NAV_BUTTON_WIDTH = 80;
 
+const STR_TITLE:{[key in ModuleKind]:string} = {
+
+    ["tapping-board"]: "Create a Tapping Board",
+    memory: "Create a Memory Game",
+    poster: "Create a Poster",
+    cover: "" //not used
+};
 @customElement('choose-mode')
 export class _ extends LitElement {
     static get styles() {
@@ -175,15 +183,17 @@ export class _ extends LitElement {
     @property({ type: String })
     scrollPosition: ScrollPosition = 'left';
 
-    @property()
-    title:string = "";
+      @property()
+      moduleKind:ModuleKind = "memory";
 
     private onScroll() {
         this.scrollPosition = this.getScrollPosition();
     }
 
     render() {
-        const {title} = this;
+        const {moduleKind} = this;
+
+        const title = STR_TITLE[moduleKind];
 
         return html`
             <div class="">

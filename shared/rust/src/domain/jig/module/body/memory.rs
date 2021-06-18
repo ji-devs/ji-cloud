@@ -188,15 +188,6 @@ impl ModeExt for Mode {
         ]
     }
 
-    fn title() -> &'static str {
-        const STR_TITLE: &'static str = "Create a Memory Game";
-        STR_TITLE
-    }
-
-    fn module_str_id() -> &'static str {
-        "memory"
-    }
-
     fn as_str_id(&self) -> &'static str {
         match self {
             Self::Duplicate => "duplicate",
@@ -210,7 +201,7 @@ impl ModeExt for Mode {
         }
     }
 
-    fn as_str_label(&self) -> &'static str {
+    fn label(&self) -> &'static str {
         const STR_DUPLICATE: &'static str = "Duplicate";
         const STR_WORDS_IMAGES: &'static str = "Words & Images";
         const STR_BEGINS_WITH: &'static str = "What begins with...";

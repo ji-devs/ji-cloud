@@ -150,15 +150,6 @@ impl ModeExt for Mode {
         ]
     }
 
-    fn title() -> &'static str {
-        const STR_TITLE: &'static str = "Create a Poster";
-        STR_TITLE
-    }
-
-    fn module_str_id() -> &'static str {
-        "poster"
-    }
-
     fn as_str_id(&self) -> &'static str {
         match self {
             Self::Printables => "printables",
@@ -170,7 +161,7 @@ impl ModeExt for Mode {
         }
     }
 
-    fn as_str_label(&self) -> &'static str {
+    fn label(&self) -> &'static str {
         const STR_PRINTABLES_LABEL: &'static str = "Printables";
         const STR_TALKING_PICTURES_LABEL: &'static str = "Talking Pictures";
         const STR_COMICS_LABEL: &'static str = "Comics";

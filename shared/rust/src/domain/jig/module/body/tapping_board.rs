@@ -180,15 +180,6 @@ impl ModeExt for Mode {
         ]
     }
 
-    fn title() -> &'static str {
-        const STR_TITLE: &'static str = "Create a Tapping Board";
-
-        STR_TITLE
-    }
-
-    fn module_str_id() -> &'static str {
-        "tapping-board"
-    }
 
     fn as_str_id(&self) -> &'static str {
         match self {
@@ -202,7 +193,7 @@ impl ModeExt for Mode {
         }
     }
 
-    fn as_str_label(&self) -> &'static str {
+    fn label(&self) -> &'static str {
         const STR_WORDS_LABEL: &'static str = "Tap words & hear";
         const STR_IMAGES_LABEL: &'static str = "Tap images & hear";
         const STR_TALK_LABEL: &'static str = "Tap & talk";

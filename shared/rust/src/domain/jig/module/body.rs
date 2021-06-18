@@ -60,6 +60,12 @@ impl Body {
 pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
     TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
 {
+    /// get choose mode list. By default it's the full list
+    /// but that can be overridden to re-order or hide some modes
+    fn choose_mode_list() -> Vec<Mode> {
+        Mode::get_list()
+    }
+
     /// get self as a Body
     fn as_body(&self) -> Body;
 
@@ -98,17 +104,15 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 
 /// Extenstion trait for modes
 pub trait ModeExt: Copy + Default + PartialEq + Eq + Hash {
-    /// get a list of all the modes for choosing
+    /// get a list of all the modes
+    /// (becomes the default in Choose page, which can be overriden in BodyExt) 
     fn get_list() -> Vec<Self>;
-    /// get the title for the choose page
-    fn title() -> &'static str;
-    /// TODO: is this necessary?
-    /// sortof a reverse lookup. Get the module as a string id
-    fn module_str_id() -> &'static str;
+
     /// get the mode itself as a string id
     fn as_str_id(&self) -> &'static str;
     /// for headers, labels, etc.
-    fn as_str_label(&self) -> &'static str;
+    fn label(&self) -> &'static str;
+
 }
 
 /// impl ModeExt for empty modes
@@ -120,19 +124,11 @@ impl ModeExt for () {
         vec![]
     }
 
-    fn title() -> &'static str {
-        ""
-    }
-
-    fn module_str_id() -> &'static str {
-        ""
-    }
-
     fn as_str_id(&self) -> &'static str {
         ""
     }
 
-    fn as_str_label(&self) -> &'static str {
+    fn label(&self) -> &'static str {
         ""
     }
 }

@@ -6,13 +6,17 @@ import {ModuleKind} from "@elements/module/_common/types";
 
 const STR_TITLE:{[key in ModuleKind]:string} = {
     memory: "Memory Game",
-    poster: "Poster"
+    poster: "Poster",
+    "tapping-board": "Tapping Board",
+    cover: "Cover Page",
 };
 const STR_TOOLTIP_GETTING_STARTED = "Getting started";
 
 const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
     memory: "Add your words to the list on the left. You can either type the words or paste them in.",
-    poster: "Poster intro here"
+    poster: "Poster intro here",
+    "tapping-board": "Tapping Board intro here",
+    cover: "Cove here",
 };
 
 @customElement('module-header')

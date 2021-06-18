@@ -17,22 +17,27 @@ use crate::audio_mixer::AudioMixer;
 use shared::domain::jig::{JigId, Jig, module::{ModuleId, body::{ModeExt, BodyExt, StepExt}}};
 use utils::prelude::*;
 
-pub struct Choose <Mode>
+pub struct Choose <RawData, Mode, Step>
 where
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
 {
     //getting rid of this Box is probably more headache than it's worth
     pub on_mode_change: Box<dyn Fn(Mode)>,
     pub loader: Rc<AsyncLoader>,
+    phantom: PhantomData<(RawData, Step)> //TODO: might not need this once we derive the mode list from RawData
 }
 
 
 
-impl <Mode> Choose <Mode> 
+impl <RawData, Mode, Step> Choose <RawData, Mode, Step> 
 where
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
 {
-    pub fn new<Step, RawData, BaseInitFromRawFn, BaseInitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
+    pub fn new<BaseInitFromRawFn, BaseInitFromRawOutput, Base, Main, Sidebar, Header, Footer, Overlay>(
         app: Rc<GenericState<Mode, Step, RawData, Base, Main, Sidebar, Header, Footer, Overlay>>, 
         init_from_raw: BaseInitFromRawFn,
     ) -> Self 
@@ -54,6 +59,7 @@ where
         let loader = Rc::new(AsyncLoader::new());
 
         Self {
+            phantom: PhantomData,
             loader: loader.clone(),
             on_mode_change: Box::new(move |mode| {
                 loader.load(clone!(init_from_raw, app => async move {

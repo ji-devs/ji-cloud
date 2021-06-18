@@ -80,7 +80,7 @@ where
     Overlay: OverlayExt + 'static,
 {
     Init,
-    Choose(Rc<Choose<Mode>>),
+    Choose(Rc<Choose<RawData, Mode, Step>>),
     Base(Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>),
 }
 
