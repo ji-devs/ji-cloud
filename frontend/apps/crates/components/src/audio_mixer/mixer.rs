@@ -45,7 +45,8 @@ impl AudioMixer {
         }
     }
 
-    pub fn suspend_ctx(&self) {
+    pub fn pause_all(&self) {
+        //see https://github.com/ji-devs/ji-cloud/issues/1120
         self.with_ctx(|ctx| {
             let promise = ctx.suspend().unwrap_ji();
             spawn_local(async move {
@@ -53,7 +54,8 @@ impl AudioMixer {
             });
         });
     }
-    pub fn resume_ctx(&self) {
+    pub fn unpause_all(&self) {
+        //see https://github.com/ji-devs/ji-cloud/issues/1120
         self.with_ctx(|ctx| {
             let promise = ctx.resume().unwrap_ji();
             spawn_local(async move {
