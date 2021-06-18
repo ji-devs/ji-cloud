@@ -47,7 +47,7 @@ pub const fn STR_HEADER(side: ColumnSide, mode: Mode) -> &'static str {
         Mode::Synonymns => {
             match side {
                 ColumnSide::Left => "Word",
-                ColumnSide::Right => "Synonymn",
+                ColumnSide::Right => "Synonym",
             }
         },
         Mode::Translate => {
