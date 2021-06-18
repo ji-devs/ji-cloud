@@ -1,5 +1,5 @@
 use crate::{
-    domain::{audio::AudioId, image::ImageId, jig::Jig},
+    domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
 };
 #[cfg(feature = "backend")]

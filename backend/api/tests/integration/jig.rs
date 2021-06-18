@@ -137,7 +137,14 @@ async fn clone() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.id" => "[id]", ".**.last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.id" => "[id]",
+            ".**.last_edited" => "[last_edited]",
+            ".**.feedback_positive" => "[audio]",
+            ".**.feedback_negative" => "[audio]"
+        }
+    );
 
     Ok(())
 }
@@ -166,7 +173,13 @@ async fn get() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.last_edited" => "[last_edited]",
+            ".**.feedback_positive" => "[audio]",
+            ".**.feedback_negative" => "[audio]"
+        }
+    );
 
     Ok(())
 }
@@ -193,7 +206,13 @@ async fn browse_simple() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.last_edited" => "[last_edited]",
+            ".**.feedback_positive" => "[audio]",
+            ".**.feedback_negative" => "[audio]"
+        }
+    );
 
     Ok(())
 }
@@ -223,7 +242,13 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     app.stop(false).await;
 
-    insta::assert_json_snapshot!(body, {".**.last_edited" => "[last_edited]"});
+    insta::assert_json_snapshot!(
+        body, {
+            ".**.last_edited" => "[last_edited]",
+            ".**.feedback_positive" => "[audio]",
+            ".**.feedback_negative" => "[audio]"
+        }
+    );
 
     Ok(())
 }

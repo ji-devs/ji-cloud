@@ -5,7 +5,8 @@ use shared::domain::{
     jig::{
         additional_resource::AdditionalResourceId,
         module::{body::cover, ModuleBody, ModuleId},
-        Jig, JigId, LiteModule, ModuleKind, TextDirection,
+        AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
+        LiteModule, ModuleKind, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -86,11 +87,13 @@ pub enum CreateJigError {
     Sqlx(sqlx::Error),
     DefaultModules(serde_json::Error),
 }
+
 impl From<sqlx::Error> for CreateJigError {
     fn from(e: sqlx::Error) -> Self {
         Self::Sqlx(e)
     }
 }
+
 impl From<serde_json::Error> for CreateJigError {
     fn from(e: serde_json::Error) -> Self {
         Self::DefaultModules(e)
@@ -98,9 +101,9 @@ impl From<serde_json::Error> for CreateJigError {
 }
 
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
-    let v = sqlx::query!(
+    let v = sqlx::query!( //language=SQL
 r#"
-select  
+select
     id as "id: JigId",
     display_name,
     creator_id,
@@ -113,6 +116,9 @@ select
     direction as "direction: TextDirection",
     display_score,
     theme as "theme: ThemeId",
+    audio_background as "audio_background!: Option<AudioBackground>",
+    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
+    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
     array(
         select row (id, kind)
         from jig_module
@@ -128,7 +134,7 @@ from jig
 inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
 order by t.ord
 "#, ids)
-    .fetch_all(db).await?;
+        .fetch_all(db).await?;
 
     let v = v
         .into_iter()
@@ -159,6 +165,19 @@ order by t.ord
                 .into_iter()
                 .map(|(it,)| it)
                 .collect(),
+            audio_background: row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: row
+                    .audio_feedback_positive
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+                feedback_negative: row
+                    .audio_feedback_negative
+                    .into_iter()
+                    .map(|(it,)| it)
+                    .collect(),
+            },
         })
         .collect();
 
@@ -166,7 +185,7 @@ order by t.ord
 }
 
 pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
-    let jig = sqlx::query!(
+    let jig = sqlx::query!( //language=SQL
         r#"
 select  
     id as "id: JigId",
@@ -181,6 +200,9 @@ select
     direction as "direction: TextDirection",
     display_score,
     theme as "theme: ThemeId",
+    audio_background as "audio_background!: Option<AudioBackground>",
+    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
+    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
     array(
         select row (id, kind)
         from jig_module
@@ -196,32 +218,37 @@ from jig
 where id = $1"#,
         id.0
     )
-    .fetch_optional(pool)
-    .await?
-    .map(|row| Jig {
-        id: row.id,
-        display_name: row.display_name,
-        language: row.language,
-        modules: row
-            .modules
-            .into_iter()
-            .map(|(id, kind)| LiteModule { id, kind })
-            .collect(),
-        goals: row.goals.into_iter().map(|(it,)| it).collect(),
-        categories: row.categories.into_iter().map(|(it,)| it).collect(),
-        creator_id: row.creator_id,
-        author_id: row.author_id,
-        publish_at: row.publish_at,
-        description: row.description,
-        last_edited: row.updated_at,
-        is_public: row.is_public,
-        direction: row.direction,
-        display_score: row.display_score,
-        theme: row.theme,
-        age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
-        affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
-        additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
-    });
+        .fetch_optional(pool)
+        .await?
+        .map(|row| Jig {
+            id: row.id,
+            display_name: row.display_name,
+            language: row.language,
+            modules: row
+                .modules
+                .into_iter()
+                .map(|(id, kind)| LiteModule { id, kind })
+                .collect(),
+            goals: row.goals.into_iter().map(|(it, )| it).collect(),
+            categories: row.categories.into_iter().map(|(it, )| it).collect(),
+            creator_id: row.creator_id,
+            author_id: row.author_id,
+            publish_at: row.publish_at,
+            description: row.description,
+            last_edited: row.updated_at,
+            is_public: row.is_public,
+            direction: row.direction,
+            display_score: row.display_score,
+            theme: row.theme,
+            age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
+            affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
+            additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+            audio_background: row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: row.audio_feedback_positive.into_iter().map(|(it,)| it).collect(),
+                feedback_negative: row.audio_feedback_negative.into_iter().map(|(it,)| it).collect(),
+            },
+        });
 
     Ok(jig)
 }
@@ -242,6 +269,8 @@ pub async fn update(
     direction: Option<TextDirection>,
     display_score: Option<bool>,
     theme: Option<ThemeId>,
+    audio_background: Option<Option<AudioBackground>>,
+    audio_effects: Option<AudioEffects>,
 ) -> Result<(), error::UpdateWithMetadata> {
     let mut transaction = pool.begin().await?;
     if !sqlx::query!(
@@ -268,19 +297,59 @@ where id = $1 and $2 is distinct from publish_at"#,
         .await?;
     }
 
+    if let Some(audio_background) = audio_background {
+        sqlx::query!(
+            r#"
+update jig
+set audio_background = $2, updated_at = now()
+where id = $1 and $2 is distinct from audio_background
+            "#,
+            id.0,
+            audio_background.map(|it| it as i16),
+        )
+        .execute(&mut transaction)
+        .await?;
+    }
+
+    if let Some(audio_effects) = audio_effects {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig
+set audio_feedback_positive = $2,
+    audio_feedback_negative = $3,
+    updated_at = now()
+where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)
+            "#,
+            id.0,
+            &audio_effects
+                .feedback_positive
+                .into_iter()
+                .map(|it| it as i16)
+                .collect::<Vec<_>>(),
+            &audio_effects
+                .feedback_negative
+                .into_iter()
+                .map(|it| it as i16)
+                .collect::<Vec<_>>(),
+        )
+        .execute(&mut transaction)
+        .await?;
+    }
+
     sqlx::query!(
         //language=SQL
         r#"
 update jig
-set display_name    = coalesce($2, display_name),
-    author_id       = coalesce($3, author_id),
-    language        = coalesce($4, language),
-    description     = coalesce($5, description),
-    is_public       = coalesce($6, is_public),
-    direction       = coalesce($7, direction),
-    display_score   = coalesce($8, display_score),
-    theme           = coalesce($9, theme),
-    updated_at      = now()
+set display_name     = coalesce($2, display_name),
+    author_id        = coalesce($3, author_id),
+    language         = coalesce($4, language),
+    description      = coalesce($5, description),
+    is_public        = coalesce($6, is_public),
+    direction        = coalesce($7, direction),
+    display_score    = coalesce($8, display_score),
+    theme            = coalesce($9, theme),
+    updated_at       = now()
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::uuid is not null and $3 is distinct from author_id) or
@@ -289,7 +358,8 @@ where id = $1
        ($6::bool is not null and $6 is distinct from is_public) or
        ($7::smallint is not null and $7 is distinct from direction) or
        ($8::bool is not null and $8 is distinct from display_score) or
-       ($9::smallint is not null and $9 is distinct from theme))"#,
+       ($9::smallint is not null and $9 is distinct from theme))
+"#,
         id.0,
         display_name,
         author_id,
@@ -361,6 +431,9 @@ select
     direction as "direction: TextDirection",
     display_score,
     theme as "theme: ThemeId",
+    audio_background as "audio_background!: Option<AudioBackground>",
+    array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
+    array(select row(unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
     array(
         select row (id, kind)
         from jig_module
@@ -383,33 +456,38 @@ limit 20 offset 20 * $2
         page,
         author_id,
     )
-    .fetch(pool)
-    .map_ok(|row| Jig {
-        id: row.id,
-        display_name: row.display_name,
-        language: row.language,
-        modules: row
-            .modules
-            .into_iter()
-            .map(|(id, kind)| LiteModule { id, kind })
-            .collect(),
-        goals: row.goals.into_iter().map(|(it,)| it).collect(),
-        categories: row.categories.into_iter().map(|(it,)| it).collect(),
-        creator_id: row.creator_id,
-        author_id: row.author_id,
-        publish_at: row.publish_at,
-        description: row.description,
-        last_edited: row.updated_at,
-        is_public: row.is_public,
-        direction: row.direction,
-        display_score: row.display_score,
-        theme: row.theme,
-        age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
-        affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
-        additional_resources: row.additional_resources.into_iter().map(|(it,) | it).collect(),
-    })
-    .try_collect()
-    .await
+        .fetch(pool)
+        .map_ok(|row| Jig {
+            id: row.id,
+            display_name: row.display_name,
+            language: row.language,
+            modules: row
+                .modules
+                .into_iter()
+                .map(|(id, kind)| LiteModule { id, kind })
+                .collect(),
+            goals: row.goals.into_iter().map(|(it, )| it).collect(),
+            categories: row.categories.into_iter().map(|(it, )| it).collect(),
+            creator_id: row.creator_id,
+            author_id: row.author_id,
+            publish_at: row.publish_at,
+            description: row.description,
+            last_edited: row.updated_at,
+            is_public: row.is_public,
+            direction: row.direction,
+            display_score: row.display_score,
+            theme: row.theme,
+            age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
+            affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
+            additional_resources: row.additional_resources.into_iter().map(|(it, )| it).collect(),
+            audio_background: row.audio_background,
+            audio_effects: AudioEffects {
+                feedback_positive: row.audio_feedback_positive.into_iter().map(|(it, )| it).collect(),
+                feedback_negative: row.audio_feedback_negative.into_iter().map(|(it, )| it).collect(),
+            },
+        })
+        .try_collect()
+        .await
 }
 
 pub async fn filtered_count(
@@ -438,8 +516,20 @@ pub async fn clone(db: &PgPool, parent: JigId, user_id: Uuid) -> sqlx::Result<Op
 
     let new_id = sqlx::query!( //language=SQL
         r#"
-insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score, theme)
-select display_name, array_append(parents, id), $2 as creator_id, $2 as author_id, language, description, direction, display_score, theme
+insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score, theme,
+                 audio_background, audio_feedback_positive, audio_feedback_negative)
+select display_name,
+       array_append(parents, id),
+       $2 as creator_id,
+       $2 as author_id,
+       language,
+       description,
+       direction,
+       display_score,
+       theme,
+       audio_background,
+       audio_feedback_positive,
+       audio_feedback_negative
 from jig
 where id = $1
 returning id
