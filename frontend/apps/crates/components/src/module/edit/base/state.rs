@@ -88,7 +88,7 @@ where
                     direction: TextDirection::default(),
                     display_score: false,
                     theme: ThemeId::default(),
-                    audio_bg: None,
+                    audio_background: None,
                     audio_effects: AudioEffects::default() 
                 }
             }

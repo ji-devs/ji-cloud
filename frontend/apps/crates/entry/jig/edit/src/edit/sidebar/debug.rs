@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, LiteModule, ModuleKind, TextDirection, module::ModuleId};
+use shared::domain::jig::{AudioEffects, Jig, JigId, LiteModule, ModuleKind, TextDirection, module::ModuleId};
 use utils::themes::ThemeId;
 use uuid::Uuid;
 use cfg_if::cfg_if;
@@ -42,6 +42,8 @@ pub fn get_jig() -> Jig {
         direction: TextDirection::LeftToRight,
         display_score: true,
         theme: ThemeId::Chalkboard,
+        audio_background: None,
+        audio_effects: AudioEffects::default(),
     }
 
 }
