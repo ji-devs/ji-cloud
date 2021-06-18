@@ -105,14 +105,13 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
 /// Extenstion trait for modes
 pub trait ModeExt: Copy + Default + PartialEq + Eq + Hash {
     /// get a list of all the modes
-    /// (becomes the default in Choose page, which can be overriden in BodyExt) 
+    /// (becomes the default in Choose page, which can be overriden in BodyExt)
     fn get_list() -> Vec<Self>;
 
     /// get the mode itself as a string id
     fn as_str_id(&self) -> &'static str;
     /// for headers, labels, etc.
     fn label(&self) -> &'static str;
-
 }
 
 /// impl ModeExt for empty modes

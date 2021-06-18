@@ -180,7 +180,6 @@ impl ModeExt for Mode {
         ]
     }
 
-
     fn as_str_id(&self) -> &'static str {
         match self {
             Self::Words => "words",
