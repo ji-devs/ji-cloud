@@ -139,6 +139,8 @@ async fn update(
         req.direction,
         req.display_score,
         req.theme,
+        req.audio_background,
+        req.audio_effects,
     )
     .await?;
 

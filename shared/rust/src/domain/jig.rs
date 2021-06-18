@@ -14,6 +14,7 @@ use chrono::{DateTime, Utc};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use uuid::Uuid;
 
 // avoid breaking Changes
@@ -21,6 +22,7 @@ pub use module::{LiteModule, Module, ModuleKind};
 
 use crate::domain::jig::module::body::ThemeId;
 pub use additional_resource::AdditionalResourceId;
+use std::convert::TryFrom;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -192,44 +194,79 @@ pub struct Jig {
 
     /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
     pub theme: ThemeId,
-    // TODO: need Audio enums to exist
-    /// Background audio
-    pub audio_bg: Option<AudioBackground>,
 
-    /// Audio effects 
+    /// Background audio
+    pub audio_background: Option<AudioBackground>,
+
+    /// Audio effects
     pub audio_effects: AudioEffects,
 }
 
-/// Audio for background music 
+/// Audio for background music
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
 pub enum AudioBackground {
+    #[allow(missing_docs)]
+    Placeholder0 = 0,
+    #[allow(missing_docs)]
+    Placeholder1 = 1,
+    #[allow(missing_docs)]
+    Placeholder2 = 2,
+    #[allow(missing_docs)]
+    Placeholder3 = 3,
+    #[allow(missing_docs)]
+    Placeholder4 = 4,
 }
 
 /// Audio Effects
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AudioEffects {
-    /// Positive audio feedback 
-    pub feedback_positive: std::collections::HashSet<AudioFeedbackPositive>,
+    /// Positive audio feedback
+    pub feedback_positive: HashSet<AudioFeedbackPositive>,
 
-    /// Negative audio feedback 
-    pub feedback_negative: std::collections::HashSet<AudioFeedbackNegative>,
+    /// Negative audio feedback
+    pub feedback_negative: HashSet<AudioFeedbackNegative>,
 }
 
 /// Negative Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
 pub enum AudioFeedbackNegative {
-    
+    #[allow(missing_docs)]
+    Placeholder0 = 0,
+    #[allow(missing_docs)]
+    Placeholder1 = 1,
+    #[allow(missing_docs)]
+    Placeholder2 = 2,
+    #[allow(missing_docs)]
+    Placeholder3 = 3,
+    #[allow(missing_docs)]
+    Placeholder4 = 4,
 }
 
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
 pub enum AudioFeedbackPositive {
-
+    #[allow(missing_docs)]
+    Placeholder0 = 0,
+    #[allow(missing_docs)]
+    Placeholder1 = 1,
+    #[allow(missing_docs)]
+    Placeholder2 = 2,
+    #[allow(missing_docs)]
+    Placeholder3 = 3,
+    #[allow(missing_docs)]
+    Placeholder4 = 4,
 }
+
 /// The response returned when a request for `GET`ing a jig is successful.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -314,22 +351,17 @@ pub struct JigUpdateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub theme: Option<ThemeId>,
-    // TODO: need Audio enums to exist
-    // /// Background audio
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // #[serde(deserialize_with = "super::deserialize_optional_field")]
-    // #[serde(default)]
-    // pub background_audio: Option<Option<BackgroundAudio>>,
 
-    // /// Correct answer audio
-    // #[serde(skip_serializing_if = "HashSet::is_empty")]
-    // #[serde(default)]
-    // pub correct_answer_audio: Option<HashSet<FeedbackAudio>>,
+    /// Background audio
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub audio_background: Option<Option<AudioBackground>>,
 
-    // /// Wrong answer audio
-    // #[serde(skip_serializing_if = "HashSet::is_empty")]
-    // #[serde(default)]
-    // pub wrong_answer_audio: Option<HashSet<FeedbackAudio>>,
+    /// Audio effects
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub audio_effects: Option<AudioEffects>,
 }
 
 /// Query for [`Browse`](crate::api::endpoints::jig::Browse).
