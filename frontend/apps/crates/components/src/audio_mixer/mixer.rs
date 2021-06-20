@@ -1,8 +1,7 @@
 use web_sys::AudioContext;
 use std::rc::Rc;
 use shared::domain::jig::Jig;
-use super::instance::*;
-use awsm_web::audio::AudioPlayer as AwsmAudio;
+use awsm_web::audio::AudioMixer as AwsmAudioMixer;
 use std::cell::RefCell;
 use utils::{prelude::*, path::audio_lib_url};
 use shared::{
@@ -10,22 +9,15 @@ use shared::{
     media::MediaLibrary,
     domain::jig::module::body::Audio,
 };
-use beach_map::{BeachMap, DefaultVersion};
-use std::rc::Weak;
-use super::id::*;
 use wasm_bindgen_futures::{spawn_local, JsFuture};
+use std::ops::Deref;
 
-pub(super) type InstanceLookup = Rc<RefCell<BeachMap<DefaultVersion, Weak<AudioInstance>>>>;
+pub use awsm_web::audio::{Id, AudioHandle, AudioSource, AudioClipOptions, AudioClip};
 
 #[derive(Clone)]
 pub struct AudioMixer {
-    //All operations need to go through with_ctx
-    //So that we can lazy-load it
-    ctx: RefCell<Option<AudioContext>>,
-
-    //the lookup holds weak references to the instances
-    //when they're dropped, they'll clean up their entry
-    pub(super) instance_lookup: InstanceLookup,
+    inner: Rc<AwsmAudioMixer>,
+    jig: Rc<Jig>
 }
 
 impl AudioMixer {
@@ -33,78 +25,45 @@ impl AudioMixer {
 
         //TODO - populate jig-level effects
         Self {
-            ctx: RefCell::new(ctx),
-            instance_lookup: Rc::new(RefCell::new(BeachMap::new())),
-        }
-    }
-    pub fn new_without_jig(ctx: Option<AudioContext>) -> Self {
-
-        Self {
-            ctx: RefCell::new(ctx),
-            instance_lookup: Rc::new(RefCell::new(BeachMap::new())),
+            inner: Rc::new(AwsmAudioMixer::new(ctx)),
+            jig: Rc::new(jig.clone()),
         }
     }
 
-    pub fn pause_all(&self) {
-        //see https://github.com/ji-devs/ji-cloud/issues/1120
-        self.with_ctx(|ctx| {
-            let promise = ctx.suspend().unwrap_ji();
-            spawn_local(async move {
-                let _ = JsFuture::from(promise).await;
-            });
-        });
-    }
-    pub fn unpause_all(&self) {
-        //see https://github.com/ji-devs/ji-cloud/issues/1120
-        self.with_ctx(|ctx| {
-            let promise = ctx.resume().unwrap_ji();
-            spawn_local(async move {
-                let _ = JsFuture::from(promise).await;
-            });
-        });
-    }
+    /// Oneshots are AudioClips because they drop themselves
+    /// They're intended solely to be kicked off and not being held anywhere
+    /// However, if necessary, they can still be killed imperatively 
+    pub fn play_oneshot<F>(&self, audio: Audio, on_ended: Option<F>) -> AudioClip
+    where
+        F: FnMut() -> () + 'static,
 
-    //Lazy-creates the AudioContext as needed
-    pub fn with_ctx<A>(&self, f: impl FnOnce(&AudioContext) -> A) -> A {
-        let mut ctx = self.ctx.borrow_mut();
-        if let Some(ctx) = ctx.as_ref() {
-            f(ctx)
-        } else {
-            let new_ctx = AudioContext::new().unwrap_ji();
-            let ret = f(&new_ctx);
-            *ctx = Some(new_ctx);
-            ret
-        }
-    }
-
-    pub fn play_oneshot(&self, audio: Audio) -> Rc<AudioInstance> {
-        self.play_oneshot_callback(audio, None::<fn()>)
-    }
-
-    pub fn play_oneshot_callback(&self, audio: Audio, on_ended: Option<impl FnMut() + 'static>) -> Rc<AudioInstance> {
+    {
         let url = audio_lib_url(audio.lib, audio.id);
-        self.add_instance(AudioClip::OneShot(self.with_ctx(|ctx| AwsmAudio::play_oneshot_url(ctx, &url, on_ended).unwrap_ji())))
-
+        self.inner.play_oneshot(AudioSource::Url(url), on_ended).unwrap_ji()
     }
 
-    fn add_instance(&self, clip: AudioClip) -> Rc<AudioInstance> {
-        let id = self.instance_lookup.borrow_mut().insert_with_id(move |id| {
-            let instance = Rc::new(AudioInstance {
-                id,
-                instance_lookup: self.instance_lookup.clone(),
-                clip
-            });
-
-            Rc::downgrade(&instance)
-        });
-
-        self.get_instance(id).unwrap_ji()
+    /// Play a clip and get a Handle to hold (simple API around add_source)
+    pub fn play(&self, audio: Audio, is_loop: bool) -> AudioHandle
+    {
+        let url = audio_lib_url(audio.lib, audio.id);
+        self.inner.play(AudioSource::Url(url), is_loop).unwrap_ji()
     }
 
-    pub fn get_instance(&self, id: Id) -> Option<Rc<AudioInstance>> {
-        self.instance_lookup.borrow().get(id)
-            .and_then(|weak_ref| {
-                weak_ref.upgrade()
-            })
+    /// Add a source with various options and get a Handle to hold
+    pub fn add_source<F>(&self, audio: Audio, options: AudioClipOptions<F>) -> AudioHandle
+    where
+        F: FnMut() -> () + 'static,
+
+    {
+        let url = audio_lib_url(audio.lib, audio.id);
+        self.inner.add_source(AudioSource::Url(url), options).unwrap_ji()
+    }
+}
+
+impl Deref for AudioMixer {
+    type Target = AwsmAudioMixer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
     }
 }

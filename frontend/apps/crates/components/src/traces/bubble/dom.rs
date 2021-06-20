@@ -19,8 +19,8 @@ pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
     let width = 200.0;
     let height = 100.0;
 
-    *state.audio_player_instance.borrow_mut() = state.audio.as_ref().map(|audio| {
-        mixer.play_oneshot(audio.clone())
+    *state.audio_handle.borrow_mut() = state.audio.as_ref().map(|audio| {
+        mixer.play(audio.clone(), false)
     });
 
     if let Some(tooltip) = state.tooltip.as_ref() {

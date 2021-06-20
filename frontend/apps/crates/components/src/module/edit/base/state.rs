@@ -52,7 +52,7 @@ where
         audio_mixer: AudioMixer,
         jig_id: JigId,
         module_id: ModuleId,
-        jig: Option<Jig>,
+        jig: Jig,
         raw: RawData,
         source: InitSource,
         history: Rc<HistoryStateImpl<RawData>>
@@ -61,38 +61,6 @@ where
         let steps_completed = Mutable::new(raw.get_editor_state_steps_completed().unwrap_or_default());
 
         let theme_choice = Mutable::new(raw.get_theme().unwrap_or_default());
-
-        let jig = match jig {
-            Some(jig) => jig,
-            None => {
-                if source == InitSource::Load {
-                    panic!("no jig but was supposed to load!");
-                }
-                 
-                Jig {
-                    id: JigId(Uuid::from_u128(0)),
-                    display_name: String::from("debug!"),
-                    modules: Vec::new(),
-                    age_ranges: Vec::new(),
-                    affiliations: Vec::new(),
-                    goals: Vec::new(),
-                    creator_id: None,
-                    author_id: None,
-                    language: String::from("en"),
-                    categories: Vec::new(),
-                    publish_at: None,
-                    additional_resources: Vec::new(),
-                    description: String::from("debug"),
-                    last_edited: None,
-                    is_public: false,
-                    direction: TextDirection::default(),
-                    display_score: false,
-                    theme: ThemeId::default(),
-                    audio_background: None,
-                    audio_effects: AudioEffects::default() 
-                }
-            }
-        };
 
         let jig_theme_id = Mutable::new(jig.theme);
 

@@ -75,7 +75,7 @@ where
                 let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
-                    _self.jig.borrow().clone()
+                    _self.jig.borrow().clone().unwrap_ji()
                 );
 
                 if raw.requires_choose_mode() {

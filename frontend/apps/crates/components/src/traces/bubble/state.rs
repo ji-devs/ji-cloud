@@ -1,7 +1,7 @@
 use utils::{prelude::*, math::bounds::BoundsF64};
 use shared::domain::jig::module::body::Audio;
 use crate::animation::fade::*;
-use crate::audio_mixer::AudioInstance;
+use crate::audio_mixer::AudioHandle;
 use crate::tooltip::state::MoveStrategy;
 use crate::tooltip::state::{State as TooltipState, TooltipData, TooltipBubble, TooltipTarget, Placement};
 use std::cell::RefCell;
@@ -12,7 +12,7 @@ use dominator::clone;
 pub struct TraceBubble {
     pub audio: Option<Audio>,
     pub fade: Fade,
-    pub(super) audio_player_instance: RefCell<Option<Rc<AudioInstance>>>,
+    pub(super) audio_handle: RefCell<Option<AudioHandle>>,
     pub(super) tooltip: Option<Rc<TooltipState>>
 
 }
@@ -34,7 +34,7 @@ impl TraceBubble {
 
         Self {
             audio,
-            audio_player_instance: RefCell::new(None),
+            audio_handle: RefCell::new(None),
             tooltip,
             fade: Fade::new(
                 FadeKind::Out,

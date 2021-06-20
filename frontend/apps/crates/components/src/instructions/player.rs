@@ -9,12 +9,12 @@ use shared::domain::jig::module::body::Instructions;
 use crate::animation::fade::*;
 use std::cell::RefCell;
 use web_sys::AudioContext;
-use crate::audio_mixer::{AudioMixer, AudioInstance};
+use crate::audio_mixer::{AudioMixer, AudioHandle};
 
 pub struct InstructionsPlayer {
     data: Instructions,
     fade: Fade,
-    audio: RefCell<Option<Rc<AudioInstance>>>
+    audio: RefCell<Option<AudioHandle>>
 }
 
 impl InstructionsPlayer {
@@ -41,7 +41,7 @@ impl InstructionsPlayer {
 
     pub fn render(&self, mixer:&AudioMixer) -> Dom {
         *self.audio.borrow_mut() = self.data.audio.as_ref().map(|audio| {
-            mixer.play_oneshot(audio.clone())
+            mixer.play(audio.clone(), false)
         });
         html!("empty-fragment", {
             .apply_if(self.data.text.is_some(), |dom| {

@@ -6,6 +6,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
+use uuid::Uuid;
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use wasm_bindgen::prelude::*;
 use web_sys::AudioContext;
@@ -185,16 +186,36 @@ where
                                 },
                             }
                     };
+                } else {
+                    *_self.jig.borrow_mut() = Some(Jig {
+                        id: JigId(Uuid::from_u128(0)),
+                        display_name: String::from("debug!"),
+                        modules: Vec::new(),
+                        age_ranges: Vec::new(),
+                        affiliations: Vec::new(),
+                        goals: Vec::new(),
+                        creator_id: None,
+                        author_id: None,
+                        language: String::from("en"),
+                        categories: Vec::new(),
+                        publish_at: None,
+                        additional_resources: Vec::new(),
+                        description: String::from("debug"),
+                        last_edited: None,
+                        is_public: false,
+                        direction: TextDirection::default(),
+                        display_score: false,
+                        theme: ThemeId::default(),
+                        audio_background: None,
+                        audio_effects: AudioEffects::default() 
+                    });
                 }
 
                 //let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
                 //For editor we'll just lazy-load
                 let audio_ctx = None;
-                if let Some(jig) = _self.jig.borrow().as_ref() {
-                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
-                } else {
-                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new_without_jig(audio_ctx));
-                }
+                let jig = _self.jig.borrow().clone().unwrap_ji();
+                *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
 
                 let (raw, init_source) = {
                     if let Some(force_raw) = _self.opts.force_raw.clone() {
@@ -229,10 +250,9 @@ where
 
                 *_self.history.borrow_mut() = Some(history.clone());
 
-                let (jig_id, module_id, jig) = (
+                let (jig_id, module_id) = (
                     _self.opts.jig_id.clone(),
                     _self.opts.module_id.clone(),
-                    _self.jig.borrow().clone()
                 );
 
                 if raw.requires_choose_mode() {

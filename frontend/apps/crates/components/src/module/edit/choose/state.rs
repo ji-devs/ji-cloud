@@ -67,7 +67,7 @@ where
                     let (jig_id, module_id, jig) = (
                         app.opts.jig_id.clone(),
                         app.opts.module_id.clone(),
-                        app.jig.borrow().clone()
+                        app.jig.borrow().clone().unwrap_ji()
                     );
                     
                     let raw = RawData::new_mode(mode);

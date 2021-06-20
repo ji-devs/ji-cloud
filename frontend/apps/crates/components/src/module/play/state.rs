@@ -229,11 +229,8 @@ where
 
 
                 let audio_ctx = Some(web_sys::AudioContext::new().unwrap_ji());
-                if let Some(jig) = _self.jig.borrow().as_ref() {
-                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
-                } else {
-                    *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new_without_jig(audio_ctx));
-                }
+                let jig = _self.jig.borrow().as_ref().unwrap_ji().clone();
+                *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
 
                 let wait_iframe_data = should_get_iframe_data();
 
