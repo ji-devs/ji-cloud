@@ -105,7 +105,7 @@ export class _ extends LitElement {
             <a href="${this.href}">
                 ${ this.draft ? (
                     html`<div class="draft">
-                        <img-ui path="module/_common/jig-gallery/draft-icon.svg"></img-ui>
+                        <img-ui path="entry/jig/gallery/draft-icon.svg"></img-ui>
                         <span>${STR_DRAFT}</span>
                     </div>`
                 ) : nothing }
@@ -124,7 +124,7 @@ export class _ extends LitElement {
                     <div class="bottom-section">
                         <span class="label main-text">${this.label}</span>
                         <span class="ages">
-                            <img-ui path="module/_common/jig-gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
+                            <img-ui path="entry/jig/gallery/age-icon${this.draft ? "-draft" : ""}.svg"></img-ui>
                             ${this.ages}
                         </span>
                         <span class="last-edited">${this.lastEdited}</span>

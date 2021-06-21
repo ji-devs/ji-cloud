@@ -62,7 +62,7 @@ export class _ extends LitElement {
           <section>
                   <div class="topRight">
                       <slot name="controller"></slot>
-                      <img-ui @image-load=${this.onImageLoaded} id="gear-img" path="module/_common/header/jiggling-gear.png"></img-ui>
+                      <img-ui @image-load=${this.onImageLoaded} id="gear-img" path="module/_common/edit/header/jiggling-gear.png"></img-ui>
                       ${imgRef ? renderTooltip(moduleKind, imgRef) : nothing} 
                   </div>
                   <div class="title">${title}</div>

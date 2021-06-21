@@ -123,7 +123,7 @@ export class _ extends LitElement {
             }
             .bottom-section {
                 grid-column: 1 / -1;
-                background-image: url(${unsafeCSS(mediaUi('module/_common/jig-gallery/background.png'))});
+                background-image: url(${unsafeCSS(mediaUi('entry/jig/gallery/background.png'))});
                 background-size: cover;
             }
             .bottom-section .width-holder {
@@ -166,7 +166,7 @@ export class _ extends LitElement {
         return html`
             <div class="novel-row-1">
                 <div class="width-holder">
-                    <img-ui class="novel-img-1" path="module/_common/jig-gallery/novel-img-1.png"></img-ui>
+                    <img-ui class="novel-img-1" path="entry/jig/gallery/novel-img-1.png"></img-ui>
                 </div>
             </div>
             <section class="top-section">
@@ -199,8 +199,8 @@ export class _ extends LitElement {
             </section>
             <div class="novel-row-2">
                 <div class="width-holder">
-                    <img-ui class="novel-img-2" path="module/_common/jig-gallery/novel-img-2.png"></img-ui>
-                    <img-ui class="novel-img-3" path="module/_common/jig-gallery/novel-img-3.png"></img-ui>
+                    <img-ui class="novel-img-2" path="entry/jig/gallery/novel-img-2.png"></img-ui>
+                    <img-ui class="novel-img-3" path="entry/jig/gallery/novel-img-3.png"></img-ui>
                 </div>
             </div>
             <section class="bottom-section">

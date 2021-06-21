@@ -86,7 +86,7 @@ export class _ extends LitElement {
                         <slot name="dismiss-action"></slot>
                     </span>
                     <h4>
-                        <img-ui path="module/_common/creator-publish/link-icon-pink.svg"></img-ui>
+                        <img-ui path="entry/jig/publish/link-icon-pink.svg"></img-ui>
                         ${STR_HEADER}
                     </h4>
                     <div class="divider"></div>

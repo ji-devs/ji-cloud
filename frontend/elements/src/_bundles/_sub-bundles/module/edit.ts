@@ -11,6 +11,7 @@ import "@elements/core/inputs/textarea-content";
 import "@elements/core/menu/menu-tabs/menu-tabs";
 import "@elements/core/menu/menu-tabs/menu-tab";
 import "@elements/core/menu/menu-tabs/menu-tab-title";
+import "@elements/core/menu/menu-tabs/menu-tab-with-title";
 import "@elements/core/window/window-loader-block";
 import "@elements/core/inputs/text-content";
 import "@elements/core/inputs/form/textarea";

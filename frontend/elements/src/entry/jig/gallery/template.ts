@@ -75,11 +75,11 @@ export class _ extends LitElement {
 
         return html`
             <div class="top-section">
-                <img-ui path="module/_common/jig-gallery/template-${this.kind}.svg"></img-ui>
+                <img-ui path="entry/jig/gallery/template-${this.kind}.svg"></img-ui>
                 <span class="label">${info.label}</span>
             </div>
             <span class="ages">
-                <img-ui path="module/_common/jig-gallery/age-icon.svg"></img-ui>
+                <img-ui path="entry/jig/gallery/age-icon.svg"></img-ui>
                 ${info.ages}
             </span>
         `;

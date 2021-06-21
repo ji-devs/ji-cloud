@@ -80,12 +80,12 @@ export class _ extends LitElement {
       return html`
           <section>
               <div class="arrows">
-                  <img-ui @click=${this.onUndo} path="module/_common/header/${undoButton}.svg"></img-ui>
-                  <img-ui @click=${this.onRedo} path="module/_common/header/${redoButton}.svg"></img-ui>
+                  <img-ui @click=${this.onUndo} path="module/_common/edit/header/${undoButton}.svg"></img-ui>
+                  <img-ui @click=${this.onRedo} path="module/_common/edit/header/${redoButton}.svg"></img-ui>
               </div>
               <div class="divider"></div>
               <div class="preview" @click=${this.onPreview}>
-                  <img-ui path="module/_common/header/play.svg"></img-ui>
+                  <img-ui path="module/_common/edit/header/play.svg"></img-ui>
                   <div class="preview-label">${STR_PREVIEW}</div>
               </div>
           </section>

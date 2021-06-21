@@ -14,10 +14,14 @@ export class _ extends LitElement {
                 height: 100%;
                 min-height: 100%;
             }
+
+            section {
+                padding-top: 48px;
+            }
         `];
     }
 
     render() {
-        return html`<slot></slot>`
+        return html`<section><slot></slot></section>`
     }
 }

@@ -33,7 +33,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <img-ui path="module/_common/jig-gallery/add-icon.svg"></img-ui>
+            <img-ui path="entry/jig/gallery/add-icon.svg"></img-ui>
             <span class="label">${STR_LABEL}</span>
         `;
     }
