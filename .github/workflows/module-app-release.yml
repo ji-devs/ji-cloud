@@ -1,8 +1,8 @@
-name: Module - App - Sandbox
+name: Module - App - release 
 
 on:
   push:
-    branches: [ sandbox ]
+    branches: [ master ]
     paths:
     - 'config/**'
     - 'shared/**'
@@ -66,7 +66,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make sandbox "module/${{ matrix.app }}/${{ matrix.mode }}"
+        run: cargo make release "module/${{ matrix.app }}/${{ matrix.mode }}"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
@@ -78,7 +78,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/js
+        run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://ji-cloud-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
