@@ -26,12 +26,10 @@ export class _ extends LitElement {
                     /* only add margin in back exists */
                     margin-bottom: 16px;
                 }
-                ::slotted([slot=back])::after {
-                    content: "<";
-                }
                 ::slotted([slot=close]) {
-                    height: 13px;
-                    width: 13px;
+                    font-size: 24px;
+                    color: var(--dark-gray-5);
+                    font-weight: 300;
                 }
                 ::slotted([slot=heading]) {
                     color: #fd7076;

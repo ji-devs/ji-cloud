@@ -10,7 +10,7 @@ export class _ extends LitElement {
                     display: grid;
                     grid-template-columns: 416px auto;
                     justify-content: start;
-                    transform: translateX(-416px);
+                    transform: translateX(-424px);
                     transition: transform .3s;
                     height: 100%;
                 }
@@ -48,7 +48,8 @@ export class _ extends LitElement {
                     grid-column: 1;
                     display: grid;
                     grid-template-rows: auto 1fr;
-                    width: 416px;
+                    width: 424px;
+                    height: 100vh;
                     box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.08);
                     background-color: #fff;
                     z-index: 1;
@@ -64,10 +65,21 @@ export class _ extends LitElement {
                     padding: 20px 24px;
                     display: grid;
                     row-gap: 14px;
+                    grid-template-columns: 1fr auto
+                }
+                ::slotted([slot=close]) {
+                    align-self: start;
+                    height: 32px;
+                    width: 32px;
+                    display: grid;
+                    place-content: center;
+                    margin: -18px -18px 0px 0px;
+                    color: #4a4a4a;
+                    font-size: 24px;
+                    font-weight: 300;
                 }
                 .bottom {
                     display: grid;
-                    align-items: start;
                 }
                 .actions {
                     grid-column: 1;
@@ -76,6 +88,7 @@ export class _ extends LitElement {
                     display: flex;
                     column-gap: 16px;
                     z-index: 2;
+                    align-self: start;
                 }
                 ::slotted(*)::part(overlay) {
                     z-index: 2;
@@ -119,6 +132,7 @@ export class _ extends LitElement {
             <main>
                 <div class="heading">
                     <img-ui path="entry/jig/logo-jigzi.svg"></img-ui>
+                    <slot name="close"></slot>
                     <h2>${this.jigName}</h2>
                 </div>
                 <div class="bottom">

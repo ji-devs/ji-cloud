@@ -22,6 +22,7 @@ export class _ extends LitElement {
                     width: 2px;
                     background-color: #ffffff;
                     transform: rotate(-45deg);
+                    pointer-events: none;
                 }
                 :host([disabled]) .action {
                     border-color: var(--light-gray-2);

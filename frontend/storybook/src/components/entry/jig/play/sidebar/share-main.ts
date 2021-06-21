@@ -17,6 +17,7 @@ export const ShareMain = (props?:Partial<Args>) => {
 
     return `
         <jig-play-sidebar-share-main ${argsToAttrs(props)}>
+            <button-empty slot="close">&times;</button-empty>
             <jig-play-sidebar-share-option kind="students"></jig-play-sidebar-share-option>
             <jig-play-sidebar-share-option kind="embed"></jig-play-sidebar-share-option>
             <jig-play-sidebar-share-option kind="copy"></jig-play-sidebar-share-option>

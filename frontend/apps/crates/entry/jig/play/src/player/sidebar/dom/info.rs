@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use shared::domain::jig::Jig;
-use utils::events;
+use utils::{events, ages::AgeRangeVecExt};
 
 use super::{report, super::state::{ActivePopup, State}};
 
@@ -61,10 +61,19 @@ fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
         .property("name", &jig.display_name)
         .property("playedCount", "?")
         .property("likedCount", "?")
-        .property("ages", "?")
         .property("language", &jig.language)
         // .property("author", jig.author_id)
         .property("description", &jig.description)
+        .property_signal("ages", state.all_ages.signal_cloned().map(clone!(jig => move|all_ages| {
+            all_ages.range_string(&jig.age_ranges)
+        })))
+        .child(html!("button-empty", {
+            .property("slot", "close")
+            .text("×")
+            .event(clone!(state => move |_: events::Click| {
+                state.active_popup.set(ActivePopup::None);
+            }))
+        }))
         .children(jig.categories.iter().map(|category_id| {
             html!("pill-close", {
                 .property("slot", "categories")

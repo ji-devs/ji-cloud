@@ -33,6 +33,8 @@ export class _ extends LitElement {
                     font-weight: 500;
                     color: var(--dark-gray-6);
                     border: 0;
+                    width: 100%;
+                    box-sizing: border-box;
                 }
                 .field-url .under {
                     display: flex;
@@ -47,7 +49,6 @@ export class _ extends LitElement {
                 }
                 .field-code input {
                     font-size: 48px;
-                    width: 320px;
                 }
                 .field-code .under {
                     display: flex;

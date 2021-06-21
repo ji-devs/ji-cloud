@@ -23,10 +23,7 @@ pub fn render(state: Rc<State>) -> Dom {
             match evt.try_serde_data::<IframeAction<ModuleToJigMessage>>() {
                 Err(m) => log::info!("hmmm got other iframe message: {:?}", m),
                 Ok(m) => {
-                    match m.data {
-                        None => {},
-                        Some(data) => actions::on_iframe_message(Rc::clone(&state), data),
-                    }
+                    actions::on_iframe_message(Rc::clone(&state), m.data)
                 },
             };
         }))

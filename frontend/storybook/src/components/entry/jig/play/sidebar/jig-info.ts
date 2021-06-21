@@ -32,6 +32,7 @@ export const JigInfo = (props?:Partial<Args>) => {
 
     return `
         <jig-play-sidebar-jig-info ${argsToAttrs(props)}>
+            <button-empty slot="close">&times;</button-empty>
             <pill-close slot="categories" label="Hebrew"></pill-close>
             <pill-close slot="categories" label="Letters"></pill-close>
             <pill-close slot="categories" label="Letter recognition"></pill-close>

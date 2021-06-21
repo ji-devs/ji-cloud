@@ -21,6 +21,7 @@ export const Sidebar = (props?:Partial<Args>) => {
 
     return `
         <jig-play-sidebar ${argsToAttrs(props)}>
+            <button-empty slot="close"><</button-empty>
             <button slot="opener"></button>
             <jig-play-sidebar-action slot="actions" kind="like"></jig-play-sidebar-action>
             <jig-play-sidebar-action slot="actions" kind="share"></jig-play-sidebar-action>

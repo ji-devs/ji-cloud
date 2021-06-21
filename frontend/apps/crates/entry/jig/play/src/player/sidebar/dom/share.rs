@@ -2,9 +2,11 @@ use std::rc::Rc;
 
 use dominator::{Dom, clone, html};
 use futures_signals::signal::{Signal, SignalExt};
-use utils::events;
+use utils::{clipboard, events};
 
 use super::super::state::{ActivePopup, State};
+
+const STR_BACK: &'static str = "Back";
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
@@ -57,6 +59,13 @@ fn render_share_main(state: Rc<State>) -> Dom {
     html!("jig-play-sidebar-share-main", {
         .property("slot", "overlay")
         .children(&mut [
+            html!("button-empty", {
+                .property("slot", "close")
+                .text("×")
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(ActivePopup::None);
+                }))
+            }),
             html!("jig-play-sidebar-share-option", {
                 .property("kind", "students")
                 .event(clone!(state => move |_: events::Click| {
@@ -71,39 +80,76 @@ fn render_share_main(state: Rc<State>) -> Dom {
             }),
             html!("jig-play-sidebar-share-option", {
                 .property("kind", "copy")
-                .event(clone!(state => move |_: events::Click| {
-                    todo!();
-                }))
+                .event(|_: events::Click| {
+                    clipboard::write_text("???");
+                })
             }),
         ])
     })
 }
 
-fn render_share_students(_state: Rc<State>) -> Dom {
+fn render_share_students(state: Rc<State>) -> Dom {
     html!("jig-play-sidebar-share-students", {
         .property("slot", "overlay")
-        .property("url", "ji.zone/play/3692")
-        .property("code", "3692")
-
+        .property("url", "????")
+        .property("code", "???")
         .children(&mut [
+            html!("button-empty", {
+                .property("slot", "close")
+                .text("×")
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(ActivePopup::None);
+                }))
+            }),
+            html!("button-text", {
+                .property("slot", "back")
+                .text("< ")
+                .text(STR_BACK)
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(ActivePopup::ShareMain);
+                }))
+            }),
             html!("button-text", {
                 .property("slot", "copy-url")
                 .text("Copy URL")
+                .event(|_: events::Click| {
+                    clipboard::write_text("???");
+                })
             }),
             html!("button-text", {
                 .property("slot", "copy-code")
                 .text("Copy Code")
+                .event(|_: events::Click| {
+                    clipboard::write_text("???");
+                })
             }),
         ])
     })
 }
 
-fn render_share_embed(_state: Rc<State>) -> Dom {
+fn render_share_embed(state: Rc<State>) -> Dom {
     html!("jig-play-sidebar-share-embed", {
         .property("slot", "overlay")
-        .child(html!("button-text", {
-            .property("slot", "copy")
-            .text("Copy code")
-        }))
+        .children(&mut [
+            html!("button-empty", {
+                .property("slot", "close")
+                .text("×")
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(ActivePopup::None);
+                }))
+            }),
+            html!("button-text", {
+                .property("slot", "back")
+                .text("< ")
+                .text(STR_BACK)
+                .event(clone!(state => move |_: events::Click| {
+                    state.active_popup.set(ActivePopup::ShareMain);
+                }))
+            }),
+            html!("button-text", {
+                .property("slot", "copy")
+                .text("Copy code")
+            })
+        ])
     })
 }

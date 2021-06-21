@@ -4,6 +4,8 @@ use dominator::{Dom, clone, html};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
+use crate::player::sidebar::actions::load_ages;
+
 use super::state::State;
 
 pub(super) mod share;
@@ -12,6 +14,9 @@ pub(super) mod report;
 
 
 pub fn render(state: Rc<State>) -> Dom {
+
+    load_ages(Rc::clone(&state));
+
     html!("jig-play-sidebar", {
         .property("slot", "sidebar")
         .property_signal("jigName", state.player_state.jig.signal_cloned().map(|jig| {
@@ -21,6 +26,13 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         }))
         .property_signal("open", state.sidebar_open.signal())
+        .child(html!("button-empty", {
+            .property("slot", "close")
+            .text("<")
+            .event(clone!(state => move |_: events::Click| {
+                state.sidebar_open.set(false);
+            }))
+        }))
         .child(html!("button", {
             .property("slot", "opener")
             .event(clone!(state => move |_: events::Click| {
@@ -52,6 +64,10 @@ pub fn render(state: Rc<State>) -> Dom {
                             html!("jig-sidebar-module", {
                                 .property("module", module.kind.as_str())
                                 .property("index", i as u32)
+                                .property("selected", true)
+                                .property_signal("selected", state.player_state.active_module.signal().map(move |active_module_index| {
+                                    i == active_module_index
+                                }))
                                 .event(clone!(state => move |_: events::Click| {
                                     state.player_state.active_module.set(i);
                                 }))

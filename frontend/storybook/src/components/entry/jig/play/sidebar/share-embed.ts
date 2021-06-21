@@ -19,6 +19,8 @@ export const ShareEmbed = (props?:Partial<Args>) => {
 
     return `
         <jig-play-sidebar-share-embed ${argsToAttrs(props)}>
+            <button-text slot="back">< Back</button-text>
+            <button-empty slot="close">&times;</button-empty>
             <button-text slot="copy">Copy code</button-text>
         </jig-play-sidebar-share-embed>
     `;

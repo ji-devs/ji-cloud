@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
+use dominator_helpers::futures::AsyncLoader;
 use serde::{Serialize, Deserialize};
+use shared::domain::meta::AgeRange;
 use strum_macros::EnumIter;
 use futures_signals::signal::Mutable;
 use utils::unwrap::UnwrapJiExt;
@@ -20,6 +22,8 @@ pub struct State {
     pub player_state: Rc<PlayerState>,
     pub report_status: Mutable<ReportStatus>,
     pub report_type: Mutable<Option<ReportType>>,
+    pub all_ages: Mutable<Vec<AgeRange>>,
+    pub loader: AsyncLoader,
 }
 
 impl State {
@@ -29,7 +33,9 @@ impl State {
             sidebar_open: Mutable::new(false),
             player_state,
             report_status: Mutable::new(ReportStatus::Default),
-            report_type: Mutable::new(None)
+            report_type: Mutable::new(None),
+            all_ages: Mutable::new(vec![]),
+            loader: AsyncLoader::new(),
         }
     }
 }

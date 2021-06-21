@@ -132,6 +132,7 @@ export class _ extends LitElement {
     render() {
         return html`
             <popup-body>
+                <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${this.name}</h3>
                 <div class="body" slot="body">
                     <section class="main-info-section">

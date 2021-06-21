@@ -21,6 +21,8 @@ export const ShareStudents = (props?:Partial<Args>) => {
 
     return `
         <jig-play-sidebar-share-students ${argsToAttrs(props)}>
+            <button-text slot="back">< Back</button-text>
+            <button-empty slot="close">&times;</button-empty>
             <button-text slot="copy-url">Copy URL</button-text>
             <button-text slot="copy-code">Copy Code</button-text>
         </jig-play-sidebar-share-students>

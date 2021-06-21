@@ -23,7 +23,6 @@ export class _ extends LitElement {
     render() {
         return html`
             <popup-body>
-                <slot slot="back" name="back"></slot>
                 <slot slot="close" name="close"></slot>
                 <h3 slot="heading">${STR_SHARING_OPTIONS}</h3>
                 <div class="body" slot="body">
