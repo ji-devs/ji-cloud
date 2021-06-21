@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property, unsafeCSS, query } from 'lit-element';
 import "@elements/core/overlays/anchored-overlay";
-import { _ as AnchoredOverlay } from "@elements/core/overlays/anchored-overlay";
+import { AnchoredOverlay } from "@elements/core/overlays/anchored-overlay";
 import "@elements/core/images/ui";
 import { mediaUi } from '@utils/path';
 
