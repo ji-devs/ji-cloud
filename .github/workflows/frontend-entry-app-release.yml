@@ -1,4 +1,4 @@
-name: Module - App - release 
+name: Entry - App - Release 
 
 on:
   push:
@@ -6,10 +6,12 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'frontend/apps/config/module/**'
     - 'frontend/apps/crates/components/**'
     - 'frontend/apps/crates/utils/**'
-    - 'frontend/apps/crates/entry/module/**'
+    - 'frontend/apps/crates/entry/admin/**'
+    - 'frontend/apps/crates/entry/home/**'
+    - 'frontend/apps/crates/entry/jig/**'
+    - 'frontend/apps/crates/entry/user/**'
 
 jobs:
   build:
@@ -17,8 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [memory, tapping-board, poster]
-        mode: [edit, play]
+        app: [admin, home, jig/edit, jig/play, user, dev/showcase/001]
     steps:
 
       - name: checkout repo
@@ -26,7 +27,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }}/${{ matrix.mode }} - app]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - app]\")"
         id: extract_label
 
       - name: Notify slack
@@ -66,7 +67,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make release "module/${{ matrix.app }}/${{ matrix.mode }}"
+        run: cargo make release "${{ matrix.app }}"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
@@ -75,10 +76,10 @@ jobs:
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://ji-cloud-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/js
+        run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-frontend-origin-eu-001/module/${{ matrix.app }}/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

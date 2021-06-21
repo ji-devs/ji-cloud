@@ -1,4 +1,4 @@
-name: Jig/Edit - Elements - Release 
+name: Module - Elements - Release 
 
 on:
   push:
@@ -7,13 +7,10 @@ on:
     - 'config/**'
     - 'frontend/config/**'
     - 'frontend/ts-utils/**'
-    - 'frontend/elements/src/_styles/**'
-    - 'frontend/elements/src/widgets/**'
-    - 'frontend/elements/src/_bundles/jig/edit/**'
-    - 'frontend/elements/src/entry/jig/edit/**'
+    - 'frontend/elements/**'
 
 jobs:
-  bundle:
+  test:
     runs-on: ubuntu-latest
     steps:
 
@@ -22,7 +19,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - jig/edit - elements]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - test - elements]\")"
         id: extract_label
 
       - name: Notify slack
@@ -31,9 +28,6 @@ jobs:
           args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-      - name: make nightly the default
-        run: rustup default nightly
 
       - name: install node
         uses: actions/setup-node@v1
@@ -48,11 +42,52 @@ jobs:
         run: npm run test 
         working-directory: "./frontend/elements"
 
+      - name: Notify slack of all status
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} ${{job.status}}\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        if: always()
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    strategy:
+      matrix:
+        app: [admin, home, jig/edit, jig/play, user, dev/showcase/001]
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v1
+
+      - name: Extract label 
+        shell: bash
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - elements]\")"
+        id: extract_label
+
+      - name: Notify slack
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"CFYR62BRC\",\"text\":\"${{steps.extract_label.outputs.label}} starting...\"}'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/elements"
+
       - name: build elements 
         run: npm run build:release
         working-directory: "./frontend/elements"
         env: 
-          APP_NAME: "jig/edit"
+          APP_NAME: "${{ matrix.app }}"
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -61,7 +96,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/elements/dist/jig/edit gs://ji-cloud-frontend-origin-eu-001/jig/edit/elements
+        run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://ji-cloud-frontend-origin-eu-001/${{ matrix.app }}/elements
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

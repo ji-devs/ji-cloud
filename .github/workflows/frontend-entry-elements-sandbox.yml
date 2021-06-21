@@ -1,8 +1,8 @@
-name: Module - Elements - Release 
+name: Module - Elements - Sandbox 
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'config/**'
     - 'frontend/config/**'
@@ -56,8 +56,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [memory, tapping-board, poster]
-        mode: [edit, play]
+        app: [admin, home, jig/edit, jig/play, user, dev/showcase/001]
     steps:
 
       - name: checkout repo
@@ -65,7 +64,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }}/${{ matrix.mode }} - elements]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - elements]\")"
         id: extract_label
 
       - name: Notify slack
@@ -85,10 +84,10 @@ jobs:
         working-directory: "./frontend/elements"
 
       - name: build elements 
-        run: npm run build:release
+        run: npm run build:sandbox
         working-directory: "./frontend/elements"
         env: 
-          APP_NAME: "module/${{ matrix.app }}/${{ matrix.mode }}"
+          APP_NAME: "${{ matrix.app }}"
 
       - name: install google cloud sdk
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -97,7 +96,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/elements/dist/module/${{ matrix.app }}/${{ matrix.mode }} gs://ji-cloud-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/elements
+        run: gsutil -m rsync -d -r frontend/elements/dist/${{ matrix.app }} gs://ji-cloud-sandbox-frontend-origin-eu-001/${{ matrix.app }}/elements
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

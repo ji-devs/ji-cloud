@@ -1,17 +1,25 @@
-name: User - Release
+name: Entry - App - Sandbox 
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'config/**'
     - 'shared/**'
     - 'frontend/apps/crates/components/**'
+    - 'frontend/apps/crates/utils/**'
+    - 'frontend/apps/crates/entry/admin/**'
+    - 'frontend/apps/crates/entry/home/**'
+    - 'frontend/apps/crates/entry/jig/**'
     - 'frontend/apps/crates/entry/user/**'
 
 jobs:
-  bundle:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        app: [admin, home, jig/edit, jig/play, user, dev/showcase/001]
     steps:
 
       - name: checkout repo
@@ -19,7 +27,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - user - app]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }} - app]\")"
         id: extract_label
 
       - name: Notify slack
@@ -37,7 +45,7 @@ jobs:
         with:
           node-version: '12'
 
-      - name: download cargo-make release
+      - name: download cargo-make
         run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,8 +58,16 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
+      - name: install npm deps
+        run: npm ci 
+        working-directory: "./frontend/apps"
+
+      - name: install npm deps (build-utils)
+        run: npm ci 
+        working-directory: "./frontend/build-utils"
+
       - name: build 
-        run: cargo make release "user"
+        run: cargo make sandbox "${{ matrix.app }}"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
@@ -60,10 +76,10 @@ jobs:
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/user/js gs://ji-cloud-frontend-origin-eu-001/user/js
+        run: gsutil -m rsync -d -r frontend/apps/dist/${{ matrix.app }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/module/${{ matrix.app }}/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
