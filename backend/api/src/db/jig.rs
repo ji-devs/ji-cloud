@@ -416,7 +416,7 @@ pub async fn list(
     author_id: Option<Uuid>,
     page: i32,
 ) -> sqlx::Result<Vec<Jig>> {
-    sqlx::query!( //language=SQL
+    sqlx::query!(
         r#"
 select  
     id as "id: JigId",
