@@ -1,7 +1,9 @@
-import { LitElement, html, css, customElement, internalProperty } from 'lit-element';
+import { LitElement, html, css, customElement, internalProperty, property, PropertyValues } from 'lit-element';
 import { CustomElement, CustomText } from './slate-wysiwyg-react/EditorBackbone';
 import { StyleInfo, styleMap } from 'lit-html/directives/style-map';
 import { baseStyles, getElementStyles, getLeafStyles } from './styles';
+import { ThemeKind } from '@elements/_themes/themes';
+import { getThemeVars } from './wysiwyg-theme';
 
 
 @customElement("wysiwyg-output-renderer")
@@ -22,6 +24,21 @@ export class _ extends LitElement {
     @internalProperty()
     private value: CustomElement[] = [];
 
+    @property()
+    private theme: ThemeKind = "chalkboard";
+
+    updated(changedProperties: PropertyValues) {
+        if (changedProperties.has('theme')) {
+            this.onThemeChange();
+        }
+    }
+
+    private onThemeChange() {
+        getThemeVars(this.theme).forEach(([key, value]) => {
+            this.style.setProperty(key, value);
+        });
+    }
+
     public set valueAsString(v: string) {
         if (!v) this.value = [];
         else this.value = JSON.parse(v);
@@ -30,7 +47,7 @@ export class _ extends LitElement {
     private renderElement(element: CustomElement) {
         const styles = getElementStyles(element) as StyleInfo;
         return html`
-            <p style=${styleMap(styles)}>
+            <p style=${styleMap(styles)} type="${element.element}">
                 ${ element.children.map(leaf => {
                     return this.renderLeaf(leaf);
                 }) }

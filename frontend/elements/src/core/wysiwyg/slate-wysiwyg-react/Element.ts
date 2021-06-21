@@ -6,5 +6,7 @@ import { getElementStyles } from "../styles";
 export function Element(props: RenderElementProps): ReactElement {
     const styles = getElementStyles(props.element);
 
-    return React.createElement("p", {style: styles, ...props});
+    const type = props.element.element;
+
+    return React.createElement("p", {style: styles, type, ...props});
 }

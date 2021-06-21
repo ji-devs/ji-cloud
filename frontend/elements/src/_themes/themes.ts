@@ -13,7 +13,7 @@ export interface Theme {
 
 export interface ThemeText {
     fontFamily: string, //mapping
-    fontSize: string, //direct value
+    fontSize: number //direct value
     fontColor: string //mapping
 }
 export type FontFamily = {
@@ -41,22 +41,22 @@ export const THEMES:Record<ThemeKind, Theme> = {
         color3: "white",
         h1: {
             fontFamily: "1",
-            fontSize: "28px",
+            fontSize: 28,
             fontColor: "2",
         },
         h2: {
             fontFamily: "2",
-            fontSize: "25px",
+            fontSize: 25,
             fontColor: "3",
         },
         p1: {
             fontFamily: "1",
-            fontSize: "14px",
+            fontSize: 14,
             fontColor: "2",
         },
         p2: {
             fontFamily: "2",
-            fontSize: "12px",
+            fontSize: 12,
             fontColor: "3",
         },
     },
@@ -69,22 +69,22 @@ export const THEMES:Record<ThemeKind, Theme> = {
         color3: "#D8E7FA",
         h1: {
             fontFamily: "1",
-            fontSize: "28px",
+            fontSize: 28,
             fontColor: "2",
         },
         h2: {
             fontFamily: "2",
-            fontSize: "25px",
+            fontSize: 25,
             fontColor: "3",
         },
         p1: {
             fontFamily: "1",
-            fontSize: "14px",
+            fontSize: 14,
             fontColor: "2",
         },
         p2: {
             fontFamily: "2",
-            fontSize: "12px",
+            fontSize: 12,
             fontColor: "3",
         },
     },
@@ -97,22 +97,22 @@ export const THEMES:Record<ThemeKind, Theme> = {
         color3: "#FFF3ED",
         h1: {
             fontFamily: "1",
-            fontSize: "28px",
+            fontSize: 28,
             fontColor: "2",
         },
         h2: {
             fontFamily: "2",
-            fontSize: "25px",
+            fontSize: 25,
             fontColor: "3",
         },
         p1: {
             fontFamily: "1",
-            fontSize: "14px",
+            fontSize: 14,
             fontColor: "2",
         },
         p2: {
             fontFamily: "2",
-            fontSize: "12px",
+            fontSize: 12,
             fontColor: "3",
         },
     },
@@ -133,19 +133,19 @@ function setRootVars() {
             style.setProperty(`--theme-${id}-font-family-3`, fontFamily3);
             //h1
             style.setProperty(`--theme-${id}-h1-font-family`, `var(--theme-${id}-font-family-${h1.fontFamily})`);
-            style.setProperty(`--theme-${id}-h1-font-size`, h1.fontSize); 
+            style.setProperty(`--theme-${id}-h1-font-size`, `${h1.fontSize}px`); 
             style.setProperty(`--theme-${id}-h1-color`, `var(--theme-${id}-color-${h1.fontColor})`);
             //h2
             style.setProperty(`--theme-${id}-h2-font-family`, `var(--theme-${id}-font-family-${h2.fontFamily})`);
-            style.setProperty(`--theme-${id}-h2-font-size`, h2.fontSize); 
+            style.setProperty(`--theme-${id}-h2-font-size`, `${h2.fontSize}px`); 
             style.setProperty(`--theme-${id}-h2-color`, `var(--theme-${id}-color-${h2.fontColor})`);
             //p1
             style.setProperty(`--theme-${id}-p1-font-family`, `var(--theme-${id}-font-family-${p1.fontFamily})`);
-            style.setProperty(`--theme-${id}-p1-font-size`, p1.fontSize); 
+            style.setProperty(`--theme-${id}-p1-font-size`, `${p1.fontSize}px`); 
             style.setProperty(`--theme-${id}-p1-color`, `var(--theme-${id}-color-${p1.fontColor})`);
             //p2
             style.setProperty(`--theme-${id}-p2-font-family`, `var(--theme-${id}-font-family-${p2.fontFamily})`);
-            style.setProperty(`--theme-${id}-p2-font-size`, p2.fontSize); 
+            style.setProperty(`--theme-${id}-p2-font-size`, `${p2.fontSize}px`); 
             style.setProperty(`--theme-${id}-p2-color`, `var(--theme-${id}-color-${p2.fontColor})`);
         });
 }

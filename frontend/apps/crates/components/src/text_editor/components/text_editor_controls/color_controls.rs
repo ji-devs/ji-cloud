@@ -7,10 +7,10 @@ use futures_signals::signal::SignalExt;
 use wasm_bindgen_futures::spawn_local;
 use futures::future::ready;
 use rgb::RGBA8;
-use crate::color_select::{
+use crate::{color_select::{
     self,
     state::State as ColorPickerState,
-};
+}, text_editor::wysiwyg_types::ControlsChange};
 
 pub struct ColorState {
     pub select_for: Mutable<Option<ColorSelectFor>>,
@@ -30,8 +30,8 @@ impl ColorState {
                 };
 
                 match select_for {
-                    Some(ColorSelectFor::Highlight) => {state.set_highlight_color(color)},
-                    Some(ColorSelectFor::Text) => {state.set_color(color)},
+                    Some(ColorSelectFor::Highlight) => {state.set_control_value(ControlsChange::HighlightColor(color))},
+                    Some(ColorSelectFor::Text) => {state.set_control_value(ControlsChange::Color(color))},
                     None => {}
                 };
             }))

@@ -1,14 +1,31 @@
 import { css, unsafeCSS } from "lit-element";
 import { CSSProperties } from "react";
 import { CustomElement, CustomText } from "./slate-wysiwyg-react/EditorBackbone";
-import { Align, getDefault } from "./wysiwyg-types";
+import { Align } from "./wysiwyg-types";
 
 export const baseStyles = css`
     p {
         margin: 0px;
-        font-size: ${unsafeCSS(getDefault('fontSize'))};
-        font-family: ${unsafeCSS(getDefault('font'))};
-        font-weight: ${unsafeCSS(getDefault('weight'))};
+    }
+    p[type=H1] {
+        color: var(--h1-color);
+        font-family: var(--h1-font);
+        font-size: var(--h1-font-size);
+    }
+    p[type=H2] {
+        color: var(--h2-color);
+        font-family: var(--h2-font);
+        font-size: var(--h2-font-size);
+    }
+    p[type=P1] {
+        color: var(--p1-color);
+        font-family: var(--p1-font);
+        font-size: var(--p1-font-size);
+    }
+    p[type=P2] {
+        color: var(--p2-color);
+        font-family: var(--p2-font);
+        font-size: var(--p2-font-size);
     }
 `;
 

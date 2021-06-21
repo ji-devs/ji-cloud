@@ -82,6 +82,38 @@ pub enum ControlsChange {
     Underline(bool),
 }
 
+impl ControlsChange {
+    pub fn to_js_key_value(&self) -> (JsValue, JsValue) {
+        let key = enum_variant_to_string(self);
+        let key = JsValue::from_str(&key);
+
+        let value = match self {
+            Self::Font(font) => JsValue::from_str(&font.to_string()),
+            Self::Element(element) => JsValue::from_str(&element.to_string()),
+            Self::Weight(weight) => JsValue::from_f64(*weight as f64),
+            Self::Align(align) => JsValue::from_str(&align.to_string()),
+            Self::FontSize(font_size) => JsValue::from_f64(*font_size as f64),
+            Self::IndentCount(indent_count) => JsValue::from_f64(*indent_count as f64),
+            Self::Italic(italic) => JsValue::from_bool(*italic),
+            Self::Underline(underline) => JsValue::from_bool(*underline),
+            Self::Color(color) => {
+                match color {
+                    Some(color) => JsValue::from_str(&color),
+                    None => JsValue::UNDEFINED,
+                }
+            },
+            Self::HighlightColor(highlight_color) => {
+                match highlight_color {
+                    Some(highlight_color) => JsValue::from_str(&highlight_color),
+                    None => JsValue::UNDEFINED,
+                }
+            },
+        };
+
+        (key, value)
+    }
+}
+
 make_custom_event_serde!("wysiwyg-controls-change", WysiwygControlsChange, ControlsChange);
 
 impl WysiwygControlsChange {

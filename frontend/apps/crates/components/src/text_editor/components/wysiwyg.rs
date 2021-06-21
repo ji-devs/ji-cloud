@@ -1,4 +1,5 @@
 use dominator::{Dom, clone, html};
+use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
 use crate::text_editor::font_css_converter::font_from_css;
@@ -10,6 +11,9 @@ use super::super::{
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("wysiwyg-base", {
+        .property_signal("theme", state.theme_id.signal_cloned().map(|theme_id| {
+            theme_id.as_str_id()
+        }))
         .after_inserted(clone!(state => move |wysiwyg_ref| {
             state.set_wysiwyg_ref(wysiwyg_ref);
         }))
