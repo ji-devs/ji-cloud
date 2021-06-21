@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [admin, home, jig/edit, jig/play, user, dev/showcase/001]
+        app: [admin, home, jig/edit, jig/play, user]
     steps:
 
       - name: checkout repo
