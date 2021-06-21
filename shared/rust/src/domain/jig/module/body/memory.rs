@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyExt, Image, Instructions, ModeExt, StepExt, ThemeChoice},
+    body::{Background, Body, BodyExt, Image, Instructions, ModeExt, StepExt, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -34,6 +34,9 @@ pub struct Content {
 
     /// The ID of the module's theme.
     pub theme: ThemeChoice,
+
+    /// The optional background override
+    pub background: Option<Background>,
 }
 
 /// Editor state
