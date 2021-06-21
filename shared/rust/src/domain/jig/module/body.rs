@@ -259,8 +259,6 @@ pub struct Backgrounds {
 pub enum Background {
     /// Color
     Color(rgb::RGBA8),
-    /// Theme-based
-    Theme(ThemeId),
     /// Any other image
     Image(Image),
 }
