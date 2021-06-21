@@ -2,7 +2,7 @@ use components::module::edit::prelude::*;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use super::state::*;
-use components::{backgrounds, stickers, traces};
+use components::backgrounds;
 use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
@@ -16,6 +16,7 @@ impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
+            .child(backgrounds::dom::render_single(state.base.background.signal_cloned(), state.base.theme_id.signal_cloned(), None))
             .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {

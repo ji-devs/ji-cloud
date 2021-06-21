@@ -85,15 +85,14 @@ fn render_non_empty(state: Rc<Step1>) -> Dom {
         )
     })
 }
+
 fn render_tab(state: Rc<Step1>, tab: Mutable<Tab>, tab_kind:TabKind) -> Dom {
-    html!("menu-tab", {
+    html!("menu-tab-with-title", {
         .property("slot", "tabs")
         .property_signal("active", tab.signal_ref(clone!(tab_kind => move |curr| {
             curr.kind() == tab_kind
         })))
-        .child(html!("menu-tab-title", {
-            .property("kind", tab_kind.as_str())
-        }))
+        .property("kind", tab_kind.as_str())
         .event(clone!(state, tab_kind, tab => move |evt:events::Click| {
             tab.set(Tab::new(state.base.clone(), tab_kind));
         }))

@@ -51,17 +51,15 @@ pub fn render(state: Rc<Step3>) -> Dom {
 
 
 fn render_tab(state: Rc<Step3>, tab_kind:TabKind, selected_tab: Mutable<Option<TabKind>>) -> Dom {
-    html!("menu-tab", {
+    html!("menu-tab-with-title", {
         .property("slot", "tabs")
+        .property("kind", tab_kind.as_str())
         .property_signal("active", selected_tab.signal_ref(clone!(tab_kind => move |curr| {
             match curr {
                 Some(curr) => *curr == tab_kind,
                 None => false
             }
         })))
-        .child(html!("menu-tab-title", {
-            .property("kind", tab_kind.as_str())
-        }))
         .event(clone!(selected_tab, tab_kind => move |evt:events::Click| {
             selected_tab.set_neq(Some(tab_kind));
         }))

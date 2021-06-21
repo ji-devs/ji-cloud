@@ -36,14 +36,12 @@ pub fn render(state: Rc<Step1>) -> Dom {
 
 
 fn render_tab(state: Rc<Step1>, tab_kind:TabKind) -> Dom {
-    html!("menu-tab", {
+    html!("menu-tab-with-title", {
         .property("slot", "tabs")
+        .property("kind", tab_kind.as_str())
         .property_signal("active", state.tab.signal_ref(clone!(tab_kind => move |curr| {
             curr.kind() == tab_kind
         })))
-        .child(html!("menu-tab-title", {
-            .property("kind", tab_kind.as_str())
-        }))
         .event(clone!(state, tab_kind => move |evt:events::Click| {
             state.tab.set(Tab::new(state.base.clone(), tab_kind));
         }))

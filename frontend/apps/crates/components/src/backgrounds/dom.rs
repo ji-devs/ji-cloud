@@ -2,20 +2,12 @@ use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal, colors::*};
 use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::SignalExt,
-    signal_vec::SignalVecExt,
-};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 
 use super::state::*;
 use shared::domain::jig::module::body::{Background, Backgrounds as RawBackgrounds};
-#[derive(Clone, Debug, Default)]
-pub struct DebugOptions {
-}
 
-pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
-    let debug_opts = debug_opts.unwrap_or_default();
+pub fn render(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
 
     let children = map_ref!{
         let theme_id = bg.theme_id.signal(),
@@ -39,6 +31,7 @@ pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
     .to_signal_vec();
 
     html!("empty-fragment", {
+        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
         .style("position", "absolute")
         .style("top", "0")
         .style("left", "0")
@@ -53,7 +46,40 @@ pub fn render(bg:Rc<Backgrounds>, debug_opts: Option<DebugOptions>) -> Dom {
     })
 }
 
-pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId) -> Dom {
+pub fn render_single(bg_signal:impl Signal<Item = Option<Background>> + 'static, theme_id_signal: impl Signal<Item = ThemeId> + 'static, slot: Option<&str>) -> Dom {
+    let children = map_ref!{
+        let theme_id = theme_id_signal,
+        let layer = bg_signal
+            => {
+                let mut children:Vec<Dom> = Vec::new();
+
+                children.push(render_theme_bg(*theme_id));
+
+                if let Some(layer) = layer {
+                    children.push(render_bg(layer));
+                }
+
+                children
+            }
+    }
+    .to_signal_vec();
+
+    html!("empty-fragment", {
+        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .style("position", "absolute")
+        .style("top", "0")
+        .style("left", "0")
+        .style_signal("width", resize_info_signal().map(|resize_info| {
+            format!("{}px", resize_info.width)
+        }))
+        .style_signal("height", resize_info_signal().map(|resize_info| {
+            format!("{}px", resize_info.height)
+        }))
+        .children_signal_vec(children)
+
+    })
+}
+pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> Dom {
 
     let mut children:Vec<Dom> = Vec::new();
 
@@ -67,6 +93,7 @@ pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId) -> Dom {
     }
 
     html!("empty-fragment", {
+        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
         .style("position", "absolute")
         .style("top", "0")
         .style("left", "0")
@@ -81,6 +108,31 @@ pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId) -> Dom {
     })
 }
 
+pub fn render_raw_single(bg:&Option<Background>, theme_id: ThemeId, slot: Option<&str>) -> Dom {
+
+    let mut children:Vec<Dom> = Vec::new();
+
+    children.push(render_theme_bg(theme_id));
+
+    if let Some(bg) = bg.as_ref() {
+        children.push(render_bg(bg));
+    }
+
+    html!("empty-fragment", {
+        .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
+        .style("position", "absolute")
+        .style("top", "0")
+        .style("left", "0")
+        .style_signal("width", resize_info_signal().map(|resize_info| {
+            format!("{}px", resize_info.width)
+        }))
+        .style_signal("height", resize_info_signal().map(|resize_info| {
+            format!("{}px", resize_info.height)
+        }))
+        .children(children)
+
+    })
+}
 
 fn render_bg(bg:&Background) -> Dom {
     match bg {
@@ -106,14 +158,10 @@ fn render_bg(bg:&Background) -> Dom {
                 .property("lib", image.lib.to_str())
                 .property("size", "full")
             })
-        },
-        Background::Theme(theme_id) => {
-            html!("div", {
-                .style("background-color", "red")
-            })
-        },
+        }
     }
 }
+
 fn render_theme_bg(theme_id:ThemeId) -> Dom {
     html!("img-ui", {
         .style("position", "absolute")
@@ -123,7 +171,7 @@ fn render_theme_bg(theme_id:ThemeId) -> Dom {
         .style("width", "100%")
         .style("height", "100%")
         .property("path", {
-            &format!("theme/module/_groups/design/{}/bg.jpg", theme_id.as_str_id())
+            &format!("theme/module/_common/{}/bg.jpg", theme_id.as_str_id())
         })
     })
 }

@@ -5,6 +5,7 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             ThemeChoice,
+            Background,
             memory::{Mode, Step, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
         }
     }
@@ -36,6 +37,7 @@ pub struct Base {
     pub original_pairs: Vec<RawCardPair>,
     pub cards: Vec<Rc<CardState>>,
     pub theme_id: ThemeId,
+    pub background: Option<Background>,
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
     pub instructions: InstructionsPlayer,
@@ -104,6 +106,7 @@ impl Base {
             original_pairs: content.pairs,
             cards,
             theme_id,
+            background: content.background,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
             instructions: InstructionsPlayer::new(content.instructions), 

@@ -30,6 +30,8 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
+use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
+use crate::base::sidebar::step_3::state::TabKind as Step3TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -46,6 +48,8 @@ pub struct DebugSettings {
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub step1_tab: Option<Step1TabKind>,
+    pub step2_tab: Option<Step2TabKind>,
+    pub step3_tab: Option<Step3TabKind>,
 }
 
 #[derive(Debug, Default)]
@@ -97,14 +101,16 @@ impl DebugSettings {
             skip_save: true,
             skip_load_jig: true,
             step1_tab: Some(Step1TabKind::Text),
+            step2_tab: Some(Step2TabKind::Theme),
+            step3_tab: Some(Step3TabKind::Settings),
         }
     }
 }
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        //SETTINGS.set(DebugSettings::debug(Some(InitData { with_pairs: true }))).unwrap_ji();
-        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        SETTINGS.set(DebugSettings::debug(Some(InitData { with_pairs: true }))).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

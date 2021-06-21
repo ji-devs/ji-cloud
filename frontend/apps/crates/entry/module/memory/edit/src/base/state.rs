@@ -13,6 +13,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
+            Background,
             memory::{
                 Mode, 
                 Step,
@@ -51,6 +52,7 @@ pub struct Base {
 
     //memory
     pub pairs: MutableVec<(Card, Card)>,
+    pub background: Mutable<Option<Background>>,
 }
 
 pub struct Tooltips {
@@ -94,6 +96,8 @@ impl Base {
         let mode = content.mode.into();
         let instructions = Mutable::new(content.instructions);
 
+        let background = Mutable::new(content.background);
+
         let _self = Rc::new(Self {
             jig_id,
             module_id,
@@ -106,7 +110,8 @@ impl Base {
             audio_mixer,
             mode,
             tooltips: Tooltips::new(),
-            pairs: MutableVec::new_with_values(pairs)
+            pairs: MutableVec::new_with_values(pairs),
+            background,
         });
 
         _self

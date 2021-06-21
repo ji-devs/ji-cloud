@@ -1,7 +1,7 @@
 use components::module::play::prelude::DomRenderable;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use components::{backgrounds, stickers, traces};
+use components::backgrounds;
 use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
@@ -20,8 +20,8 @@ impl DomRenderable for Base {
             .child(state.instructions.render(&state.audio_mixer))
             .child(
                 html!("play-container", {
-                    .property("theme", state.theme_id.as_str_id())
                     .children(&mut [
+                        backgrounds::dom::render_raw_single(&state.background, state.theme_id, Some("bg")),
                         render_stage(state.clone()),
                         render_sidebar(state.clone()),
                     ])

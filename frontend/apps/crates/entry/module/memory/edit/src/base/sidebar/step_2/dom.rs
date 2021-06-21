@@ -10,10 +10,41 @@ use components::{
 };
 
 pub fn render(state: Rc<Step2>) -> Dom {
-
-    html!("module-sidebar-body", {
-        .property("slot", "body")
-        .child(render_theme_selector(state.theme_selector.clone(), None))
+    html!("menu-tabs", {
+        .children(&mut [
+            render_tab(state.clone(), TabKind::Theme),
+            render_tab(state.clone(), TabKind::Image),
+            render_tab(state.clone(), TabKind::Color),
+            html!("module-sidebar-body", {
+                .property("slot", "body")
+                .child_signal(state.tab.signal_cloned().map(|tab| {
+                    match tab {
+                        Tab::Theme(state) => {
+                            Some(render_theme_selector(state.clone(), None))
+                        },
+                        Tab::Image(state) => {
+                            Some(render_image_search(state.clone(), None))
+                        },
+                        Tab::Color(state) => {
+                            Some(render_color_picker(state.clone(), None))
+                        },
+                    }
+                }))
+            })
+        ])
     })
 }
 
+
+fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
+    html!("menu-tab-with-title", {
+        .property("slot", "tabs")
+        .property_signal("active", state.tab.signal_ref(clone!(tab_kind => move |curr| {
+            curr.kind() == tab_kind
+        })))
+        .property("kind", tab_kind.as_str())
+        .event(clone!(state, tab_kind => move |evt:events::Click| {
+            state.tab.set(Tab::new(state.base.clone(), tab_kind));
+        }))
+    })
+}
