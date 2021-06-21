@@ -1,6 +1,6 @@
 import { Editor, Transforms, Text, createEditor, BaseEditor, NodeEntry, Node, Element as SlateElement } from "slate";
 import { ReactEditor, withReact } from "slate-react";
-import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getDefault, getKeyType } from "../wysiwyg-types";
+import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getKeyType } from "../wysiwyg-types";
 
 export type CustomElement = {
     children: CustomText[];
@@ -83,20 +83,18 @@ export class EditorBackbone {
         return (iterator.next().value as any)[0] as CustomElement | undefined;
     }
 
-    setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
-        const defaultValue = getDefault(key);
-        let finalValue = value === defaultValue ? undefined : value;
+    setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K] | undefined) {
         const keyType = getKeyType(key);
         if(keyType === 'element') {
             Transforms.setNodes(
                 this._editor,
-                { [key]: finalValue },
+                { [key]: value },
                 { match: n => Editor.isBlock(this._editor, n) }
             );
         } else {
             Transforms.setNodes(
                 this._editor,
-                {[key]: finalValue},
+                {[key]: value},
                 { match: n => Text.isText(n), split: true }
             );
         }

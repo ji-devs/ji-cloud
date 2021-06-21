@@ -30,7 +30,7 @@ export class _ extends LitElement {
     active = false;
 
     render() {
-        const path = `module/_common/edit/widgets/sidebar/text-editor-controls/${ this.type }${ this.active ? '-active' : '' }.svg`;
+        const path = `module/_common/widgets/sidebar/text-editor-controls/${ this.type }${ this.active ? '-active' : '' }.svg`;
         return html`
             <button-collection-item>
                 <img-ui path="${path}"></img-ui>

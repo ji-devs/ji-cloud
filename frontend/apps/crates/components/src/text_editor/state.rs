@@ -183,132 +183,33 @@ impl State {
         }
    
     }
-    pub(super) fn set_align(&self, align: Align) {
-        let mut controls = self.controls.lock_mut();
-        controls.align = align;
 
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Align(Align::Left))),
-                &JsValue::from_str(&controls.align.to_string())
-            );
-        }
+    pub(super) fn set_control_value(&self, control: ControlsChange) {
+        self.set_control_value_rust(&control);
+        self.set_control_value_js(&control);
     }
-    pub(super) fn set_font_size(&self, font_size: u8) {
+    fn set_control_value_rust(&self, control: &ControlsChange) {
         let mut controls = self.controls.lock_mut();
-        controls.font_size = font_size;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            // &JsValue::from_f64 might be replace with something that converts u8 directly 
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::FontSize(0))),
-                &JsValue::from_f64(controls.font_size as f64)
-            );
-        }
+        match control {
+            ControlsChange::Font(font) => controls.font = font.clone(),
+            ControlsChange::Element(element) => controls.element = element.clone(),
+            ControlsChange::Weight(weight) => controls.weight = *weight,
+            ControlsChange::Align(align) => controls.align = align.clone(),
+            ControlsChange::FontSize(font_size) => controls.font_size = *font_size,
+            ControlsChange::Color(color) => controls.color = color.clone(),
+            ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color.clone(),
+            ControlsChange::IndentCount(indent_count) => controls.indent_count = *indent_count,
+            ControlsChange::Italic(italic) => controls.italic = *italic,
+            ControlsChange::Underline(underline) => controls.underline = *underline,
+        };
     }
-    pub(super) fn set_indent_count(&self, indent_count: u8) {
-        let mut controls = self.controls.lock_mut();
-        controls.indent_count = indent_count;
-
+    fn set_control_value_js(&self, control: &ControlsChange) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
+            let (key, value) = control.to_js_key_value();
             let _ = Reflect::set(
                 wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::IndentCount(0))),
-                &JsValue::from_f64(controls.indent_count as f64)
-            );
-        }
-    }
-    pub(super) fn set_color(&self, color: Option<String>) {
-        let mut controls = self.controls.lock_mut();
-        controls.color = color;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let js_value = match &controls.color {
-                Some(color) => JsValue::from_str(&color),
-                None => JsValue::UNDEFINED,
-            };
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Color(None))),
-                &js_value
-            );
-        }
-    }
-    pub(super) fn set_highlight_color(&self, highlight_color: Option<String>) {
-        let mut controls = self.controls.lock_mut();
-        controls.highlight_color = highlight_color;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let js_value = match &controls.highlight_color {
-                Some(color) => JsValue::from_str(&color),
-                None => JsValue::UNDEFINED,
-            };
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::HighlightColor(None))),
-                &js_value
-            );
-        }
-    }
-    pub(super) fn set_font(&self, font: Font) {
-        let mut controls = self.controls.lock_mut();
-        controls.font = font;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Font(String::new()))),
-                &JsValue::from_str(&font_to_css(&controls.font.to_string()))
-            );
-        }
-    }
-    pub(super) fn set_element(&self, element: ElementType) {
-        let mut controls = self.controls.lock_mut();
-        controls.element = element;
-
-        let element_styles = get_theme_element_styles(&self.theme_id.lock_ref(), &controls.element);
-        controls.font = element_styles.0;
-        controls.color = Some(element_styles.1);
-        controls.font_size = element_styles.2;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Element(ElementType::P1))),
-                &JsValue::from_str(&controls.element.to_string())
-            );
-            let js_color = match &controls.color {
-                Some(color) => JsValue::from_str(&color),
-                None => JsValue::UNDEFINED,
-            };
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Color(None))),
-                &js_color
-            );
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::FontSize(0))),
-                &JsValue::from_f64(controls.font_size as f64)
-            );
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Font(String::new()))),
-                &JsValue::from_str(&font_to_css(&controls.font.to_string()))
-            );
-        }
-    }
-    pub(super) fn set_weight(&self, weight: Weight) {
-        let mut controls = self.controls.lock_mut();
-        controls.weight = weight;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Weight(0))),
-                &JsValue::from_f64(controls.weight as f64)
+                &key,
+                &value
             );
         }
     }

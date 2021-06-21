@@ -43,9 +43,6 @@ export const defaultState: ControllerState = {
     indentCount: 0,
 }
 
-export function getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
-    return defaultState[key];
-}
 
 export function getKeyType<K extends keyof ControllerState>(key: K): 'leaf' | 'element' {
     if(key === "align" || key === "indentCount" || key === "element")

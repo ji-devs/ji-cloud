@@ -195,19 +195,20 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
     })
     
 }
-pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>) -> Dom {
+pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<ThemeId>) -> Dom {
     html!("div", {
         .child(html!("wysiwyg-output-renderer", {
             .style("border", "red solid 1px")
             .style("display", "block")
             .style("box-sizing", "border-box")
             .property_signal("valueAsString", value.signal_cloned())
+            .property_signal("theme", theme.signal_cloned().map(|theme| theme.as_str_id()))
         }))
     })
 }
 
 fn render_text() -> Dom {
-    let value = "[{\"children\":[{\"text\":\"text from rust\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#AFCBF4FF\"}],\"element\":\"P1\"}]".to_string();
+    let value = "[{\"children\":[{\"text\":\"text from rust\"}],\"element\":\"P1\"}]".to_string();
     let value = Some(value);
     // let value = None;
 
@@ -239,7 +240,7 @@ fn render_text() -> Dom {
         .children(&mut [
             render_text_editor_controls(state.clone()),
             render_wysiwyg(state.clone()),
-            render_wysiwyg_output(value_change.clone()),
+            render_wysiwyg_output(value_change.clone(), theme.clone()),
             html!("div", {
                 .style("display", "grid")
                 .children(&mut [

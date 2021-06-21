@@ -5,6 +5,7 @@ use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use strum::IntoEnumIterator;
 use crate::text_editor::config::STR_NEW_TEXT;
 use crate::text_editor::font_css_converter::font_to_css;
+use crate::text_editor::wysiwyg_types::ControlsChange;
 
 use super::super::super::wysiwyg_types::{Align, ElementType, Font, Weight, BOLD_WEIGHT};
 use super::super::super::state::State;
@@ -70,7 +71,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .event(clone!(state => move |e: events::CustomChange| {
                     let value = e.value();
                     let value = u8::from_str_radix(&value, 10).unwrap_or(24);
-                    state.set_font_size(value);
+                    state.set_control_value(ControlsChange::FontSize(value))
                 }))
             }),
             html!("button-collection", {
@@ -119,7 +120,7 @@ pub fn render(state: Rc<State>) -> Dom {
                         }))
                         .event(clone!(state => move |_: events::Click| {
                             let count: u8 = state.controls.lock_ref().indent_count + 1;
-                            state.set_indent_count(count);
+                            state.set_control_value(ControlsChange::IndentCount(count))
                         }))
                     }),
                     html!("text-editor-control", {
@@ -129,7 +130,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             if count > 0 {
                                 count = count - 1;
                             }
-                            state.set_indent_count(count);
+                            state.set_control_value(ControlsChange::IndentCount(count))
                         }))
                         .property_signal("active", state.controls.signal_cloned().map(|controls| {
                             controls.indent_count == 0
@@ -176,7 +177,7 @@ fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
             }
         })))
         .event(clone!(state, element => move |_: events::Click| {
-            state.set_element(element.clone());
+            state.set_control_value(ControlsChange::Element(element.clone()));
         }))
     })
 }
@@ -196,7 +197,7 @@ fn render_align_option(state: Rc<State>, align: Align) -> Dom {
             }
         })))
         .event(clone!(state, align => move |_: events::Click| {
-            state.set_align(align.clone());
+            state.set_control_value(ControlsChange::Align(align.clone()))
         }))
     })
 }
@@ -213,7 +214,7 @@ fn render_weight_option(state: Rc<State>, weight: Weight) -> Dom {
         })))
         .text(readable_weight(weight))
         .event(clone!(state, weight => move |_: events::Click| {
-            state.set_weight(weight);
+            state.set_control_value(ControlsChange::Weight(weight))
         }))
     })
 }
@@ -230,7 +231,7 @@ fn render_font_option(state: Rc<State>, font: &Font) -> Dom {
         })))
         .text(&font.to_string())
         .event(clone!(state, font => move |_: events::Click| {
-            state.set_font(font.clone());
+            state.set_control_value(ControlsChange::Font(font.clone()))
         }))
     })
 }

@@ -1,83 +1,124 @@
-import { LitElement, html, customElement, query } from 'lit-element';
+import { LitElement, html, customElement, query, property, PropertyValues } from 'lit-element';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-
 import { BaseSelection, Descendant, Transforms } from 'slate';
-import { Align, Color, ControllerState, ElementType, Font, FontSize, getDefault, Weight } from './wysiwyg-types';
+import { Align, Color, ControllerState, defaultState, ElementType, Font, FontSize, Weight } from './wysiwyg-types';
 import { EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
 import { baseStyles } from './styles';
+import { ThemeKind, THEMES } from '@elements/_themes/themes';
+import { getThemeVars } from "./wysiwyg-theme";
 
 @customElement("wysiwyg-base")
 export class _ extends LitElement {
     componentRef?: EditorComponent;
 
+    @property()
+    theme: ThemeKind = "chalkboard";
+
     static get styles() {
         return baseStyles;
     }
 
-    private _font = getDefault('font');
+    setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
+        const defaultValue = this.getDefault(key);
+        let finalValue = key !== "element" && value === defaultValue ? undefined : value;
+        this.backbone.setValue(key, finalValue);
+    }
+
+    private _font = this.getDefault('font');
     public set font(v: Font) {
         this.reFocus();
-        this.backbone.setValue("font", v);
+        this.setValue("font", v);
         this._font = v;
     }
 
-    private _weight = getDefault('weight');
+    private _weight = this.getDefault('weight');
     public set weight(v: Weight) {
         this.reFocus();
-        this.backbone.setValue("weight", v);
+        this.setValue("weight", v);
         this._weight = v;
     }
 
-    private _color = getDefault('color');
+    private _color = this.getDefault('color');
     public set color(v: Color | undefined) {
         this.reFocus();
-        this.backbone.setValue("color", v);
+        this.setValue("color", v);
         this._color = v;
     }
 
-    private _highlightColor = getDefault('highlightColor');
+    private _highlightColor = this.getDefault('highlightColor');
     public set highlightColor(v: Color | undefined) {
         this.reFocus();
-        this.backbone.setValue("highlightColor", v);
+        this.setValue("highlightColor", v);
         this._highlightColor = v;
     }
 
-    private _indentCount = getDefault('indentCount');
+    private _indentCount = this.getDefault('indentCount');
     public set indentCount(v: number) {
-        this.backbone.setValue("indentCount", v);
+        this.setValue("indentCount", v);
         this._indentCount = v;
     }
 
-    private _element = getDefault('element');
+    private _element = this.getDefault('element');
     public set element(v: ElementType) {
-        this.backbone.setValue("element", v);
+        this.setValue("element", v);
         this._element = v;
     }
 
-    private _fontSize = getDefault('fontSize');
+    private _fontSize = this.getDefault('fontSize');
     public set fontSize(v: number) {
-        this.backbone.setValue("fontSize", v);
+        this.setValue("fontSize", v);
         this._fontSize = v;
     }
 
-    private _italic = getDefault('italic');
+    private _italic = this.getDefault('italic');
     public set italic(v: boolean) {
-        this.backbone.setValue("italic", v);
+        this.setValue("italic", v);
         this._italic = v;
     }
 
-    private _underline = getDefault('underline');
+    private _underline = this.getDefault('underline');
     public set underline(v: boolean) {
-        this.backbone.setValue("underline", v);
+        this.setValue("underline", v);
         this._underline = v;
     }
 
-    private _align = getDefault('align');
+    private _align = this.getDefault('align');
     public set align(v: Align) {
-        this.backbone.setValue("align", v);
+        this.setValue("align", v);
         this._align = v;
+    }
+
+    updated(changedProperties: PropertyValues) {
+        if (changedProperties.has('theme')) {
+            this.onThemeChange();
+        }
+    }
+
+    private onThemeChange() {
+        getThemeVars(this.theme).forEach(([key, value]) => {
+            this.style.setProperty(key, value);
+        });
+    }
+
+    private getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
+        const elementType = this._element || this.elementDefault || defaultState.element;
+        const elementName = elementType.toLowerCase() as 'h1' | 'h2' | 'p1' | 'p2';
+
+        const themeInfo = THEMES[this.theme];
+        
+        switch (key) {
+            case "color":
+                return (themeInfo as any)["color" + themeInfo[elementName].fontColor];
+            case "font":
+                return (themeInfo as any)["fontFamily" + themeInfo[elementName].fontFamily];
+            case "fontSize":
+                // for some reason I need any
+                return themeInfo[elementName].fontSize as any;
+            default:
+                return defaultState[key];
+        }
     }
 
 
@@ -85,9 +126,6 @@ export class _ extends LitElement {
     editorRoot!: HTMLElement;
 
     elementDefault?: ElementType;
-    fontDefault?: Font;
-    fontSizeDefault?: FontSize;
-    colorDefault?: Color;
 
     private get baseValue(): Descendant[] {
         let v = [
@@ -99,9 +137,6 @@ export class _ extends LitElement {
         ] as any;
 
         if(this.elementDefault) v[0].element = this.elementDefault;
-        if(this.fontDefault) v[0].children[0].font = this.fontDefault;
-        if(this.fontSizeDefault) v[0].children[0].fontSize = this.fontSizeDefault;
-        if(this.colorDefault) v[0].children[0].color = this.colorDefault;
 
         return v;
     }
@@ -153,54 +188,54 @@ export class _ extends LitElement {
 
     private checkForControlsChange() {
         const leaf = this.backbone.getSelectedLeaf();
-        const leafFontSize = leaf?.fontSize || getDefault('fontSize');
+        const leafFontSize = leaf?.fontSize || this.getDefault('fontSize');
         if(this._fontSize != leafFontSize) {
             this._fontSize = leafFontSize;
             this.controlsChange("fontSize", leafFontSize);
         }
-        const leafItalic = leaf?.italic || getDefault('italic');
+        const leafItalic = leaf?.italic || this.getDefault('italic');
         if(this._italic != leafItalic) {
             this._italic = leafItalic;
             this.controlsChange("italic", leafItalic);
         }
-        const leafUnderline = leaf?.underline || getDefault('underline');
+        const leafUnderline = leaf?.underline || this.getDefault('underline');
         if(this._underline != leafUnderline) {
             this._underline = leafUnderline;
             this.controlsChange("underline", leafUnderline);
         }
-        const leafWeight = leaf?.weight || getDefault('weight');
+        const leafWeight = leaf?.weight || this.getDefault('weight');
         if(this._weight != leafWeight) {
             this._weight = leafWeight;
             this.controlsChange("weight", leafWeight);
         }
-        const leafFont = leaf?.font || getDefault('font');
+        const leafFont = leaf?.font || this.getDefault('font');
         if(this._font != leafFont) {
             this._font = leafFont;
             this.controlsChange("font", leafFont);
         }
-        const leafColor = leaf?.color || getDefault('color');
+        const leafColor = leaf?.color || this.getDefault('color');
         if(this._color != leafColor) {
             this._color = leafColor;
             this.controlsChange("color", leafColor);
         }
-        const leafHighlightColor = leaf?.highlightColor || getDefault('highlightColor');
+        const leafHighlightColor = leaf?.highlightColor || this.getDefault('highlightColor');
         if(this._highlightColor != leafHighlightColor) {
             this._highlightColor = leafHighlightColor;
             this.controlsChange("highlightColor", leafHighlightColor);
         }
 
         const element = this.backbone.getSelectedElement();
-        const elementAlign = element?.align || getDefault('align');
+        const elementAlign = element?.align || this.getDefault('align');
         if(this._align != elementAlign) {
             this._align = elementAlign;
             this.controlsChange("align", elementAlign);
         }
-        const elementIndentCount = element?.indentCount || getDefault('indentCount');
+        const elementIndentCount = element?.indentCount || this.getDefault('indentCount');
         if(this._indentCount != elementIndentCount) {
             this._indentCount = elementIndentCount;
             this.controlsChange("indentCount", elementIndentCount);
         }
-        const elementElement = element?.element || getDefault('element');
+        const elementElement = element?.element || this.getDefault('element');
         if(this._element != elementElement) {
             this._element = elementElement;
             this.controlsChange("element", elementElement);
