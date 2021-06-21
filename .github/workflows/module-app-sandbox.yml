@@ -1,4 +1,4 @@
-name: Module - Tapping Board - Play - Sandbox
+name: Module - App - Sandbox
 
 on:
   push:
@@ -6,14 +6,19 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
+    - 'frontend/apps/config/module/**'
     - 'frontend/apps/crates/components/**'
-    - 'frontend/apps/crates/entry/module/tapping-board/_common/**'
-    - 'frontend/apps/crates/entry/module/tapping-board/play/**'
-    - 'frontend/apps/config/module/tapping-board/**'
+    - 'frontend/apps/crates/utils/**'
+    - 'frontend/apps/crates/entry/module/**'
 
 jobs:
-  bundle:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        app: [memory, tapping-board, poster]
+        mode: [edit, play]
     steps:
 
       - name: checkout repo
@@ -21,7 +26,7 @@ jobs:
 
       - name: Extract label 
         shell: bash
-        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/tapping-board/play - app]\")"
+        run: echo "##[set-output name=label;]$(echo \"[${GITHUB_REF#refs/heads/} - module/${{ matrix.app }}/${{ matrix.mode }} - app]\")"
         id: extract_label
 
       - name: Notify slack
@@ -61,7 +66,7 @@ jobs:
         working-directory: "./frontend/build-utils"
 
       - name: build 
-        run: cargo make sandbox "module/tapping-board/play"
+        run: cargo make sandbox "module/${{ matrix.app }}/${{ matrix.mode }}"
         working-directory: "./frontend/apps"
         env:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
@@ -73,7 +78,7 @@ jobs:
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
 
       - name: deploy to google cloud
-        run: gsutil -m rsync -d -r frontend/apps/dist/module/tapping-board/play/js gs://ji-cloud-sandbox-frontend-origin-eu-001/module/tapping-board/play/js
+        run: gsutil -m rsync -d -r frontend/apps/dist/module/${{ matrix.app }}/${{ matrix.mode }}/js gs://ji-cloud-sandbox-frontend-origin-eu-001/module/${{ matrix.app }}/${{ matrix.mode }}/js
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
