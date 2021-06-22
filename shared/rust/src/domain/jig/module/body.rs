@@ -19,6 +19,18 @@ pub mod tapping_board;
 /// Cover Body.
 pub mod cover;
 
+/// Flashcards .
+pub mod flashcards;
+
+/// Card Quiz 
+pub mod card_quiz;
+
+/// Matching 
+pub mod matching;
+
+/// Groups that share types
+pub mod _groups;
+
 /// Body kinds for Modules.
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -27,6 +39,15 @@ pub mod cover;
 pub enum Body {
     /// Module is a memory game, and has a memory game's body.
     MemoryGame(memory::ModuleData),
+
+    /// Module is matching game, and has a matching game's body.
+    Matching(matching::ModuleData),
+
+    /// Module is flashcards, and has a flashcard's body.
+    Flashcards(flashcards::ModuleData),
+
+    /// Module is a card quiz, and has a card quiz's body.
+    CardQuiz(card_quiz::ModuleData),
 
     /// Module is a poster, and has a poster's body.
     Poster(poster::ModuleData),
@@ -46,6 +67,9 @@ impl Body {
         match kind {
             super::ModuleKind::Cover => Self::Cover(cover::ModuleData::default()),
             super::ModuleKind::Memory => Self::MemoryGame(memory::ModuleData::default()),
+            super::ModuleKind::CardQuiz => Self::CardQuiz(card_quiz::ModuleData::default()),
+            super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
+            super::ModuleKind::Matching => Self::Matching(matching::ModuleData::default()),
             super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
             super::ModuleKind::TappingBoard => {
                 Self::TappingBoard(tapping_board::ModuleData::default())
@@ -138,6 +162,9 @@ impl Body {
         match self {
             Self::Cover(_) => super::ModuleKind::Cover,
             Self::MemoryGame(_) => super::ModuleKind::Memory,
+            Self::Flashcards(_) => super::ModuleKind::Flashcards,
+            Self::CardQuiz(_) => super::ModuleKind::CardQuiz,
+            Self::Matching(_) => super::ModuleKind::Matching,
             Self::Poster(_) => super::ModuleKind::Poster,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
         }

@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The body for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+/// The body for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleData {
@@ -21,7 +21,7 @@ pub struct ModuleData {
     pub content: Option<Content>,
 }
 
-/// The content for [`Memory`](crate::domain::jig::module::ModuleKind::Memory) modules.
+/// The content for [`Flashcards`](crate::domain::jig::module::ModuleKind::Flashcards) modules.
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
@@ -32,7 +32,7 @@ pub struct Content {
 
 impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
-        Body::MemoryGame(self.clone())
+        Body::Flashcards(self.clone())
     }
 
     fn is_complete(&self) -> bool {
@@ -40,7 +40,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn kind() -> ModuleKind {
-        ModuleKind::Memory
+        ModuleKind::Flashcards
     }
 
     fn new_mode(mode: Mode) -> Self {
@@ -89,8 +89,8 @@ impl TryFrom<Body> for ModuleData {
 
     fn try_from(body: Body) -> Result<Self, Self::Error> {
         match body {
-            Body::MemoryGame(data) => Ok(data),
-            _ => Err("cannot convert body to memory game!"),
+            Body::Flashcards(data) => Ok(data),
+            _ => Err("cannot convert body to flashcards!"),
         }
     }
 }

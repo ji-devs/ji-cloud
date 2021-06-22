@@ -81,6 +81,9 @@ pub enum ModuleKind {
 
     /// Visual Quiz
     VisualQuiz = 8,
+
+    /// Card Quiz 
+    CardQuiz = 9,
 }
 
 impl ModuleKind {
@@ -97,6 +100,7 @@ impl ModuleKind {
             Self::Tracing => "tracing",
             Self::Video => "video",
             Self::VisualQuiz => "visual-quiz",
+            Self::CardQuiz => "card-quiz",
         }
     }
 }
@@ -114,6 +118,7 @@ impl FromStr for ModuleKind {
             "tracing" => Self::Tracing,
             "video" => Self::Video,
             "visual-quiz" => Self::VisualQuiz,
+            "card-quiz" => Self::CardQuiz,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };
 

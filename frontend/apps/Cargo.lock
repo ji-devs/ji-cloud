@@ -56,6 +56,79 @@ dependencies = [
 ]
 
 [[package]]
+name = "app-flashcards-edit"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "components",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools 0.10.1",
+ "js-sys",
+ "log",
+ "once_cell",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
+name = "app-flashcards-play"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "awsm_web",
+ "cfg-if 1.0.0",
+ "components",
+ "config",
+ "console_error_panic_hook",
+ "discard",
+ "dominator",
+ "dominator_helpers",
+ "futures",
+ "futures-signals",
+ "gloo",
+ "gloo-timers",
+ "itertools 0.10.1",
+ "js-sys",
+ "log",
+ "once_cell",
+ "rand",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "shared",
+ "unicode-segmentation",
+ "url",
+ "utils",
+ "uuid",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+]
+
+[[package]]
 name = "app-home"
 version = "0.1.0"
 dependencies = [
@@ -129,20 +202,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "app-memory-common"
-version = "0.1.0"
-dependencies = [
- "components",
- "config",
- "shared",
- "utils",
-]
-
-[[package]]
 name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
- "app-memory-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -179,7 +241,6 @@ dependencies = [
 name = "app-memory-play"
 version = "0.1.0"
 dependencies = [
- "app-memory-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -214,20 +275,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "app-poster-common"
-version = "0.1.0"
-dependencies = [
- "components",
- "config",
- "shared",
- "utils",
-]
-
-[[package]]
 name = "app-poster-edit"
 version = "0.1.0"
 dependencies = [
- "app-poster-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -264,7 +314,6 @@ dependencies = [
 name = "app-poster-play"
 version = "0.1.0"
 dependencies = [
- "app-poster-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -298,20 +347,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "app-tapping-board-common"
-version = "0.1.0"
-dependencies = [
- "components",
- "config",
- "shared",
- "utils",
-]
-
-[[package]]
 name = "app-tapping-board-edit"
 version = "0.1.0"
 dependencies = [
- "app-tapping-board-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -348,7 +386,6 @@ dependencies = [
 name = "app-tapping-board-play"
 version = "0.1.0"
 dependencies = [
- "app-tapping-board-common",
  "async-trait",
  "awsm_web",
  "cfg-if 1.0.0",
@@ -600,6 +637,7 @@ dependencies = [
  "simple-html-template",
  "strum",
  "strum_macros",
+ "unicode-segmentation",
  "url",
  "utils",
  "uuid",
