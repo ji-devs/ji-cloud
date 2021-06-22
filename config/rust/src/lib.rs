@@ -51,6 +51,14 @@ impl RemoteTarget {
         }
     }
 
+    pub const fn s3_processing_bucket(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => Some("ji-cloud-sandbox-processing-eu-001"),
+            Self::Release => Some("ji-cloud-processing-eu-001"),
+        }
+    }
+
     pub const fn s3_bucket(&self) -> Option<&'static str> {
         match self {
             Self::Local => None,
