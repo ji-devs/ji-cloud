@@ -171,12 +171,12 @@ pub async fn watch_animation(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Res
 
     let row = sqlx::query!(
         r#"
-select id,  variant as "kind: AnimationKind"
-from animation
-inner join global_animation_upload on animation.id = global_animation_upload.animation_id
+select id,  kind as "kind: AnimationKind"
+from animation_metadata
+inner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id
 where uploaded_at is not null and processed_at >= uploaded_at is not true
 for no key update of global_animation_upload
-for share of animation
+for share of animation_metadata
 skip locked
 "#
     )
