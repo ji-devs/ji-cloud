@@ -12,13 +12,13 @@ interface Args {
 const DEFAULT_ARGS:Args = {
 }
 
-export const TextEditorControls = (props?:Partial<Args>) => {
+export const HebrewKeyboard = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
     return `
-        <input>
+        <input placeholder="Click here before typing">
         <hebrew-keyboard></hebrew-keyboard>
     `;
 }
 
-TextEditorControls.args = DEFAULT_ARGS;
+HebrewKeyboard.args = DEFAULT_ARGS;

@@ -19,7 +19,7 @@ export class _ extends LitElement {
             css`
                 :host {
                     padding: 12px;
-                    display: grid;
+                    display: inline-grid;
                     grid-template-rows: repeat(5, 32px);
                     row-gap: 8px;
                     border-radius: 14px;
