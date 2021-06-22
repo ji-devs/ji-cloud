@@ -13,7 +13,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 once_cell = "1.8.0"
-app-poster-common = {path = "../_common"}
 utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 shared = {path = "../../../../../../../shared/rust"}
