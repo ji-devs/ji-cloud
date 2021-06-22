@@ -1,10 +1,5 @@
 use crate::domain::jig::module::{
-    body::{
-        Body, 
-        BodyExt, 
-        ThemeChoice,
-        _groups::cards::*,
-    },
+    body::{Body, BodyExt, ThemeChoice, _groups::cards::*},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -28,7 +23,6 @@ pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
 }
-
 
 impl BodyExt<Mode, Step> for ModuleData {
     fn as_body(&self) -> Body {
@@ -94,4 +88,3 @@ impl TryFrom<Body> for ModuleData {
         }
     }
 }
-

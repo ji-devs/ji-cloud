@@ -22,10 +22,10 @@ pub mod cover;
 /// Flashcards .
 pub mod flashcards;
 
-/// Card Quiz 
+/// Card Quiz
 pub mod card_quiz;
 
-/// Matching 
+/// Matching
 pub mod matching;
 
 /// Groups that share types

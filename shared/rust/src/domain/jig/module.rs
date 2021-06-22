@@ -82,7 +82,7 @@ pub enum ModuleKind {
     /// Visual Quiz
     VisualQuiz = 8,
 
-    /// Card Quiz 
+    /// Card Quiz
     CardQuiz = 9,
 }
 

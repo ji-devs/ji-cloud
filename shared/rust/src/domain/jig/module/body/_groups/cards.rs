@@ -1,14 +1,5 @@
 use crate::domain::jig::module::{
-    body::{
-        ModeExt,
-        StepExt,
-        Background, 
-        Body, 
-        BodyExt, 
-        Image, 
-        Instructions, 
-        ThemeChoice,
-    },
+    body::{Background, Body, BodyExt, Image, Instructions, ModeExt, StepExt, ThemeChoice},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -17,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::convert::TryFrom;
 
-/// The base content for card modules 
+/// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct BaseContent {
@@ -42,7 +33,7 @@ pub struct BaseContent {
 
 impl BaseContent {
     /// Get a new BaseContent
-    pub fn new(mode:Mode) -> Self {
+    pub fn new(mode: Mode) -> Self {
         Self {
             mode,
             ..Self::default()
