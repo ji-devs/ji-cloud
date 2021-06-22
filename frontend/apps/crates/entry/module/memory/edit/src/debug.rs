@@ -13,26 +13,37 @@ use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
 use shared::{
+    media::MediaLibrary,
     domain::{
+        audio::AudioId, 
+        image::ImageId, 
         jig::{
-            module::body::{
-                Image,
-                ThemeChoice,
-                Instructions,
-                memory::{Content, Mode, Step, ModuleData as RawData, Card as RawCard, CardPair as RawCardPair}
-            },
-            JigId, module::ModuleId
-        },
-        image::ImageId,
-        audio::AudioId
-    },
-    media::MediaLibrary
+            JigId, 
+            module::{
+                ModuleId, 
+                body::{
+                    Image,
+                    ThemeChoice,
+                    Instructions,
+                    _groups::cards::{
+                        BaseContent,
+                        Mode, Step, Card as RawCard, CardPair as RawCardPair
+                    },
+                    memory::{Content, ModuleData as RawData}
+                }
+            }
+        }
+    }
 };
-use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
-use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
-use crate::base::sidebar::step_3::state::TabKind as Step3TabKind;
-use components::traces::edit::state::DebugOptions as TracesOptions;
+use components::module::_groups::cards::edit::{
+    config,
+    debug::{
+        DebugSettings as BaseDebugSettings,
+        Step1TabKind,
+        Step2TabKind,
+        Step3TabKind
+    }
+};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -44,12 +55,10 @@ pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\
 #[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data:Option<RawData>,
-    pub step:Option<Step>,
-    pub skip_save: bool,
+    pub step: Option<Step>,
     pub skip_load_jig: bool,
-    pub step1_tab: Option<Step1TabKind>,
-    pub step2_tab: Option<Step2TabKind>,
-    pub step3_tab: Option<Step3TabKind>,
+    pub skip_save: bool,
+    pub base: Option<BaseDebugSettings>,
 }
 
 #[derive(Debug, Default)]
@@ -67,28 +76,30 @@ impl DebugSettings {
 
                     RawData{
                         content: Some(Content {
-                            mode: mode,
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                            instructions: Instructions::default(),
-                            pairs: if init_data.with_pairs {
-                                crate::config::get_debug_pairs(mode)
-                                    .into_iter()
-                                    .map(|(word_1, word_2)| {
-                                        match mode {
-                                            Mode::WordsAndImages => {
-                                                RawCardPair(RawCard::Text(word_1), RawCard::Image(None))
+                            base: BaseContent {
+                                mode,
+                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                                instructions: Instructions::default(),
+                                pairs: if init_data.with_pairs {
+                                    config::get_debug_pairs(mode)
+                                        .into_iter()
+                                        .map(|(word_1, word_2)| {
+                                            match mode {
+                                                Mode::WordsAndImages => {
+                                                    RawCardPair(RawCard::Text(word_1), RawCard::Image(None))
+                                                }
+                                                _ => RawCardPair(
+                                                    RawCard::Text(word_1),
+                                                    RawCard::Text(word_2),
+                                                ),
                                             }
-                                            _ => RawCardPair(
-                                                RawCard::Text(word_1),
-                                                RawCard::Text(word_2),
-                                            ),
-                                        }
-                                    })
-                                    .collect()
-                            } else {
-                                Vec::new()
-                            },
-                            ..Content::default()
+                                        })
+                                        .collect()
+                                } else {
+                                    Vec::new()
+                                },
+                                ..BaseContent::default()
+                            }
                         })
                     }
                 } else {
@@ -97,12 +108,14 @@ impl DebugSettings {
                     }
                 }
             ),
+            base: Some(BaseDebugSettings {
+                step1_tab: Some(Step1TabKind::Text),
+                step2_tab: Some(Step2TabKind::Theme),
+                step3_tab: Some(Step3TabKind::Settings),
+            }),
             step: Some(Step::Two),
             skip_save: true,
             skip_load_jig: true,
-            step1_tab: Some(Step1TabKind::Text),
-            step2_tab: Some(Step2TabKind::Theme),
-            step3_tab: Some(Step3TabKind::Settings),
         }
     }
 }
