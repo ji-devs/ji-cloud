@@ -2,16 +2,23 @@ use futures::stream::BoxStream;
 use shared::domain::image::{user::UserImage, ImageId};
 use sqlx::PgPool;
 
-pub async fn create(conn: &PgPool) -> sqlx::Result<ImageId> {
+pub async fn create(pool: &PgPool) -> sqlx::Result<ImageId> {
+    let mut txn = pool.begin().await?;
     let id: ImageId = sqlx::query!(
         r#"
 insert into user_image_library default values
 returning id as "id: ImageId"
 "#,
     )
-    .fetch_one(conn)
+    .fetch_one(&mut txn)
     .await?
     .id;
+
+    sqlx::query!("insert into user_image_upload (image_id) values($1)", id.0)
+        .execute(&mut txn)
+        .await?;
+
+    txn.commit().await?;
 
     Ok(id)
 }

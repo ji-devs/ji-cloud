@@ -1,6 +1,4 @@
-use crate::{
-    db, error, extractor::TokenUser, image_ops::generate_images, s3, service::ServiceData,
-};
+use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
 use paperclip::actix::{
     api_v2_operation,
     web::{Bytes, Data, Json, Path},
@@ -13,7 +11,7 @@ use shared::{
     domain::{
         image::{
             user::{UserImage, UserImageListResponse, UserImageResponse},
-            ImageId, ImageKind,
+            ImageId,
         },
         CreateResponse,
     },
@@ -44,33 +42,27 @@ pub(super) async fn upload(
     let mut txn = db.begin().await?;
 
     sqlx::query!(
-        r#"select 1 as discard from user_image_library where id = $1 for update"#,
-        id.0
+            r#"select exists(select 1 from user_image_upload where image_id = $1 for no key update) as "exists!""#,
+                id.0
+        )
+        .fetch_optional(&mut txn)
+        .await?
+        .ok_or(error::Upload::ResourceNotFound)?;
+
+    s3.upload_media_for_processing(
+        bytes.to_vec(),
+        MediaLibrary::Global,
+        id.0,
+        FileKind::ImagePng(PngImageFile::Original),
     )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::Upload::ResourceNotFound)?;
-
-    let kind = ImageKind::Sticker;
-
-    let (original, resized, thumbnail) =
-        actix_web::web::block(move || -> Result<_, error::Upload> {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-            Ok(generate_images(&original, kind)?)
-        })
-        .await
-        .map_err(error::Upload::blocking_error)?;
-
-    s3.upload_png_images(MediaLibrary::User, id.0, original, resized, thumbnail)
-        .await?;
+    .await?;
 
     sqlx::query!(
-        "update user_image_library set uploaded_at = now() where id = $1",
-        id.0
-    )
-    .execute(&mut txn)
-    .await?;
+            "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
+            id.0
+        )
+        .execute(&mut txn)
+        .await?;
 
     txn.commit().await?;
 

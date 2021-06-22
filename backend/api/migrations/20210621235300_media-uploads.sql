@@ -29,16 +29,17 @@ from user_image_library;
 alter table user_image_library drop column uploaded_at;
 
 create table global_animation_upload (
-    animation_id uuid primary key references image_metadata(id) on delete restrict,
-    uploaded_at timestamptz,
+                                         animation_id      uuid primary key references image_metadata (id) on delete restrict,
+                                         uploaded_at       timestamptz,
     -- if `uploaded_at is not null and processed_at >= uploaded_at is not true` at, this image hasn't been processed yet.
-    processed_at timestamptz,
+                                         processed_at      timestamptz,
     -- null if not processed, `is true` if the uploaded was successful, `is not true` otherwise.
-    processing_result boolean
+                                         processing_result boolean
 );
 
 insert into global_animation_upload (animation_id, uploaded_at, processed_at, processing_result)
 select id as animation_id, uploaded_at, now() as processed_at, true as processing_result
-from animation;
+from animation_metadata;
 
-alter table animation drop column uploaded_at;
+alter table animation_metadata
+    drop column uploaded_at;
