@@ -11,13 +11,11 @@ use futures_signals::{
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
             .children_signal_vec(
                 state.phase_signal().map(clone!(state => move |phase| {
                     match phase {
                         Phase::Layout => {
                             vec![
-                                backgrounds::dom::render(state.base.backgrounds.clone(), None),
                                 stickers::dom::render(state.base.stickers.clone(), None)
                             ]
                         },
@@ -25,7 +23,6 @@ impl DomRenderable for Main {
                             let raw_stickers = state.base.stickers.to_raw();
 
                             vec![
-                                backgrounds::dom::render(state.base.backgrounds.clone(), None),
                                 stickers::dom::render_raw(&raw_stickers),
                                 traces::edit::dom::render(state.base.traces.clone()),
                                 html!("empty-fragment", {
@@ -43,5 +40,11 @@ impl DomRenderable for Main {
                 .to_signal_vec()
             )
         })
+    }
+}
+
+impl MainDomRenderable for Main {
+    fn render_bg(state: Rc<Main>) -> Option<Dom> {
+        Some(backgrounds::dom::render(state.base.backgrounds.clone(), None))
     }
 }

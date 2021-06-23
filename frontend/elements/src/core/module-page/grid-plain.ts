@@ -66,7 +66,9 @@ export class _ extends BgBlue {
             
             <header><slot name="header"></slot></header>
 
-            <main><slot name="main"></slot></main>
+            <main>
+                <slot name="main"></slot>
+            </main>
 
             <footer><slot name="footer"></slot></footer>
         </div>

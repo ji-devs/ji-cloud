@@ -64,7 +64,7 @@ pub fn create_state(jig_id: JigId, module_id: ModuleId) -> Rc<AppState> {
 
     let mut opts = StateOpts::new( jig_id, module_id);
     opts.force_raw = debug_settings.data.clone();
-    opts.is_main_scrollable = false;
+    opts.is_main_scrollable = true;
     opts.skip_save_for_debug = debug_settings.skip_save; 
     opts.skip_load_jig = debug_settings.skip_load_jig; 
 

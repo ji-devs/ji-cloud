@@ -39,6 +39,7 @@ where
         ]
     } else {
         vec![
+            render_main_bg(state.clone()),
             render_main(state.clone()),
             render_sidebar(state.clone()),
             render_header(state.clone()),
@@ -134,6 +135,26 @@ where
             })
         })
 }
+pub fn render_main_bg<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
+    Base: BaseExt<Step> + 'static,
+    Main: MainExt + 'static,
+    Sidebar: SidebarExt + 'static,
+    Header: HeaderExt + 'static,
+    Footer: FooterExt + 'static,
+    Overlay: OverlayExt + 'static,
+{
+
+    let dom = match Main::render_bg(state.main.clone()) {
+        Some(dom) => dom,
+        None => html!("empty-fragment")
+    };
+
+    add_slot_to_dom(dom, "main-bg")
+}
 pub fn render_main<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -146,7 +167,7 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    add_slot_to_dom(state.clone(), Main::render(state.main.clone()), "main")
+    add_slot_to_dom(Main::render(state.main.clone()), "main")
 }
 
 pub fn render_sidebar<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
@@ -164,7 +185,7 @@ where
     html!("module-sidebar", {
         .property("slot", "sidebar")
         .child(super::nav::dom::render(state.clone()))
-        .child(add_slot_to_dom(state.clone(), Sidebar::render(state.sidebar.clone()), "content"))
+        .child(add_slot_to_dom(Sidebar::render(state.sidebar.clone()), "content"))
     })
 }
 
@@ -230,20 +251,10 @@ where
     Footer: FooterExt + 'static,
     Overlay: OverlayExt + 'static,
 {
-    add_slot_to_dom(state.clone(), Overlay::render(state.overlay.clone()), "overlay")
+    add_slot_to_dom(Overlay::render(state.overlay.clone()), "overlay")
 }
 
-fn add_slot_to_dom<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>, dom:Dom, slot:&str) -> Dom 
-where
-    RawData: BodyExt<Mode, Step> + 'static,
-    Mode: ModeExt + 'static,
-    Step: StepExt + 'static,
-    Base: BaseExt<Step> + 'static,
-    Main: MainExt + 'static,
-    Sidebar: SidebarExt + 'static,
-    Header: HeaderExt + 'static,
-    Footer: FooterExt + 'static,
-    Overlay: OverlayExt + 'static,
+fn add_slot_to_dom(dom:Dom, slot:&str) -> Dom 
 {
     //there might be a better way, like Dom->DomBuilder->Dom
     html!("empty-fragment", {

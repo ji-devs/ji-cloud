@@ -12,6 +12,8 @@ export class _ extends LitElement {
                     position: absolute;
                     top: 0;
                     left: 0;
+                    width: var(--content-width);
+                    height: var(--content-height);
                 }
                 .fg {
                     display: grid;

@@ -41,7 +41,7 @@ export class _ extends BgBlue {
             background-color: white;
         }
 
-        #content {
+        .main {
             position: absolute;
             top: var(--content-y);
             left: var(--content-x);
@@ -100,6 +100,7 @@ export class _ extends BgBlue {
             width: 100%;
             height: 100%;
         }
+
 
         footer {
             grid-area: footer;
@@ -178,7 +179,10 @@ export class _ extends BgBlue {
             <main>
                 <div id="outer">
                     <div id="container">
-                        <div id="content" class="${scrollStyle}">
+                        <div class="main-bg">
+                            <slot name="main-bg"></slot>
+                        </div>
+                        <div class="main ${scrollStyle}">
                             <slot name="main"></slot>
                         </div>
                     </div>

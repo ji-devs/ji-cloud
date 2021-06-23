@@ -28,8 +28,6 @@ where
 {
     fn render(state: Rc<Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>) -> Dom {
         html!("empty-fragment", {
-            .property("slot", "main")
-            .child(backgrounds::dom::render_single(state.base.background.signal_cloned(), state.base.theme_id.signal_cloned(), None))
             .child_signal(state.base.is_empty_signal().map(clone!(state => move |is_empty| {
                 Some(
                     if is_empty {
@@ -51,6 +49,18 @@ where
                 )
             })))
         })
+    }
+}
+impl <RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState> MainDomRenderable for Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState> 
+where
+    RawData: RawDataExt, 
+    E: ExtraExt,
+    GetSettingsStateFn: Fn(Rc<CardsBase<RawData, E>>) -> SettingsState + Clone + 'static,
+    RenderSettingsStateFn: Fn(Rc<SettingsState>) -> Dom + Clone + 'static,
+    SettingsState: 'static,
+{
+    fn render_bg(state: Rc<Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>) -> Option<Dom> {
+        Some(backgrounds::dom::render_single(state.base.background.signal_cloned(), state.base.theme_id.signal_cloned(), None))
     }
 }
 

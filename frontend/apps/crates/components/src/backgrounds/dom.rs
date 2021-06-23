@@ -32,17 +32,9 @@ pub fn render(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
-        .style("position", "absolute")
-        .style("top", "0")
-        .style("left", "0")
-        .style_signal("width", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.width)
-        }))
-        .style_signal("height", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.height)
-        }))
+        .style("width", "100%")
+        .style("height", "100%")
         .children_signal_vec(children)
-
     })
 }
 
@@ -66,15 +58,8 @@ pub fn render_single(bg_signal:impl Signal<Item = Option<Background>> + 'static,
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
-        .style("position", "absolute")
-        .style("top", "0")
-        .style("left", "0")
-        .style_signal("width", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.width)
-        }))
-        .style_signal("height", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.height)
-        }))
+        .style("width", "100%")
+        .style("height", "100%")
         .children_signal_vec(children)
 
     })
@@ -94,15 +79,8 @@ pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> 
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
-        .style("position", "absolute")
-        .style("top", "0")
-        .style("left", "0")
-        .style_signal("width", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.width)
-        }))
-        .style_signal("height", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.height)
-        }))
+        .style("width", "100%")
+        .style("height", "100%")
         .children(children)
 
     })
@@ -120,15 +98,8 @@ pub fn render_raw_single(bg:&Option<Background>, theme_id: ThemeId, slot: Option
 
     html!("empty-fragment", {
         .apply_if(slot.is_some(), |dom| dom.property("slot", slot.unwrap_ji()))
-        .style("position", "absolute")
-        .style("top", "0")
-        .style("left", "0")
-        .style_signal("width", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.width)
-        }))
-        .style_signal("height", resize_info_signal().map(|resize_info| {
-            format!("{}px", resize_info.height)
-        }))
+        .style("width", "100%")
+        .style("height", "100%")
         .children(children)
 
     })

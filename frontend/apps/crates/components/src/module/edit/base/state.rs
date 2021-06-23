@@ -1,6 +1,6 @@
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal, ReadOnlyMutable, Broadcaster},
+    signal::{self, Mutable, SignalExt, Signal, ReadOnlyMutable, Broadcaster},
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
 use dominator::{clone, Dom};
@@ -246,7 +246,15 @@ pub trait BaseExt<Step: StepExt> {
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
 }
 
-pub trait MainExt: DomRenderable {
+pub trait MainExt: MainDomRenderable {
+}
+
+pub trait MainDomRenderable: DomRenderable {
+    // This needs to be separate since we can have scrollbars
+    // and the background should not count towards that
+    fn render_bg(state: Rc<Self>) -> Option<Dom> {
+        None
+    }
 }
 
 pub trait SidebarExt: DomRenderable {
