@@ -337,7 +337,10 @@ impl SettingsManager {
             None => self.get_varying_secret(keys::s3::MEDIA_BUCKET).await?,
         };
 
-        let processing_bucket = self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?;
+        let processing_bucket = match self.remote_target.s3_processing_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?,
+        };
 
         let access_key_id = self.get_varying_secret(keys::s3::ACCESS_KEY).await?;
 
