@@ -1,5 +1,5 @@
 ## How to run this API locally
-CI - 001
+CI - 002
 
 * copy `.env.sample` to `.env`
 
