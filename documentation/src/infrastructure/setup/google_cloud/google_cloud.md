@@ -19,14 +19,17 @@ Some of these are also in local .env
 ### Backend - Cloud Run
 
 1. Create a service account with a new name
-2. Create an initial cloud run service and assign its service account to this new one
+2. Create an initial cloud run service and assign its service account to this new one 
+    * If not part of the initial flow, add permissions for `Service Account User` in the UI
+    * at this point the deploy will fail - CI will fix it later
 3. If Cloud SQL access is needed, assign it
-4. In IAM - give the service account all the permissions it needs:
-    * Cloud SQL Client
+4. In IAM - add the service account, and then give it roles (TODO - relax some of these)
+    * Cloud SQL Client (optional)
     * Compute Admin
     * Service Account Token Creator
     * Cloud Run Admin
     * Secret Manager Secret Accessor
+    * EventArc Admin
 5. If the Cloud Run instance needs to create files for a storage bucket - assign it as an admin for that bucket (via the bucket page)
 6. Assign the custom domain
 
