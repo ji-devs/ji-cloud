@@ -2837,26 +2837,6 @@
       ]
     }
   },
-  "8ba42906daf62f0c0c8f38c02f6b565a87aeec220566827bff783103b7f002d0": {
-    "query": "select kind as \"kind: AnimationKind\" from animation_metadata where id = $1 for update",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "kind: AnimationKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "8d817d6384c10aa3eddcbe4b990c830b69970f782ad4ecdd5af9380994dfef0c": {
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1",
     "describe": {
