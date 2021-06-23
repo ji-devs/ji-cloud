@@ -365,6 +365,7 @@ pub enum Upload {
 }
 
 impl Upload {
+    #[allow(dead_code)]
     pub fn blocking_error(err: BlockingError<Self>) -> Self {
         match err {
             BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),

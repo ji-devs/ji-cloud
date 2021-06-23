@@ -15,7 +15,7 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::image::{
-        CreateResponse, ImageBrowseResponse, ImageId, ImageKind, ImageMetadata, ImageResponse,
+        CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
         ImageSearchResponse, ImageUpdateRequest,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
