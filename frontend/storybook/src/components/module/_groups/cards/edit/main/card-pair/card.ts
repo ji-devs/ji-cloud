@@ -5,6 +5,8 @@ import {Ji as MockJiImage} from "~/components/core/images/ji";
 import "@elements/core/inputs/textarea-content";
 import "@elements/module/_groups/cards/edit/main/card-pair/card";
 
+import {Size} from "@elements/module/_groups/cards/edit/main/card-pair/card";
+
 export default {
     title: "Module / _GROUPS / Cards / edit / Main"
 }
@@ -18,14 +20,18 @@ export interface Args {
     editTarget: boolean,
     theme: ThemeKind,
     dragOver: boolean,
+    size: Size,
+    inverted: boolean
 }
 
 const DEFAULT_ARGS:Args = {
-    ioMode: "edit",
+    ioMode: "preview",
     contentMode: "image",
     theme: "chalkboard",
     editTarget: true,
-    dragOver: false 
+    dragOver: false,
+    size: "regular",
+    inverted: false
 }
 
 export const Card= (props?:Partial<Args> & {slot?: string}) => {

@@ -5,11 +5,21 @@ import {ThemeKind} from "@elements/_themes/themes";
 import {cardBackPath} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
 
+export type Size = "regular" | "flashcards";
+
 @customElement('main-card')
 export class _ extends LitElement {
   static get styles() {
       return [css`
 
+            :host([size="flashcards"]) {
+                --card-size: 316px;
+                --border-size: 10px;
+            }
+            :host([size="regular"]) {
+                --card-size: 160px;
+                --border-size: 3px;
+            }
           section {
               transition: transform 0.8s;
               transform-style: preserve-3d;
@@ -25,12 +35,19 @@ export class _ extends LitElement {
           .front {
               border-style: solid; 
               border-radius: 16px;
-              border-width: 1px;
+              border-width: var(--border-size); 
+              background-color: white;
+          }
+          
+          .front, .back, .back > img-ui {
+              box-sizing: border-box;
+              width: 100%; 
+              height: 100%;
           }
 
-          section, .back > img-ui {
-              width: 160px;
-              height: 160px;
+          section {
+              width: var(--card-size);
+              height: var(--card-size);
           }
 
           ::slotted(img-ui) {
@@ -39,13 +56,21 @@ export class _ extends LitElement {
           }
 
           ::slotted(img-ji) {
-              width: 150px;
-              height: 150px;
+                --img-size: calc(var(--card-size) - 10px);
+              width: var(--img-size); 
+              height: var(--img-size); 
               object-fit: contain;
 
           }
           
 
+          :host([inverted]) section {
+              transform: rotateY(180deg);
+          }
+
+          :host([inverted]) section.flippable:hover {
+              transform: rotateY(0);
+          }
           section.flippable:hover {
               transform: rotateY(180deg);
           }
@@ -55,8 +80,6 @@ export class _ extends LitElement {
               align-items: center;
               display: flex;
               position: absolute;
-              width: 100%;
-              height: 100%;
               -webkit-backface-visibility: hidden; /* Safari */
                   backface-visibility: hidden;
           }
@@ -72,12 +95,17 @@ export class _ extends LitElement {
             }
     `];
   }
+  @property({reflect: true})
+  size:Size = "regular";
 
   @property({type: Boolean, reflect: true})
   dragOver:boolean = false;
 
   @property({type: Boolean})
   flippable:boolean = false;
+
+  @property({type: Boolean, reflect: true})
+  inverted:boolean = false;
 
   @property()
   theme:ThemeKind = "blank";
@@ -92,7 +120,6 @@ export class _ extends LitElement {
 
       const frontStyle = styleMap({
           borderColor: `var(--theme-${theme}-color-2)`,
-          backgroundColor: `var(--theme-${theme}-color-3)`,
       });
 
       return html`
