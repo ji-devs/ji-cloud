@@ -9,18 +9,20 @@ expression: body
     "body": {
       "memoryGame": {
         "content": {
-          "editor_state": {
-            "step": "One",
-            "steps_completed": []
-          },
-          "instructions": {
-            "text": null,
-            "audio": null
-          },
-          "mode": "Duplicate",
-          "pairs": [],
-          "theme": "Jig",
-          "background": null
+          "base": {
+            "editor_state": {
+              "step": "One",
+              "steps_completed": []
+            },
+            "instructions": {
+              "text": null,
+              "audio": null
+            },
+            "mode": "Duplicate",
+            "pairs": [],
+            "theme": "Jig",
+            "background": null
+          }
         }
       }
     },
