@@ -20,12 +20,15 @@ use shared::{
                 ThemeChoice,
                 Background, Backgrounds,
                 Instructions, 
-                memory::{
-                    Content, 
+                _groups::cards::{
                     Mode, 
-                    ModuleData as RawData,
                     Card as RawCard, 
-                    CardPair as RawCardPair
+                    CardPair as RawCardPair,
+                    BaseContent, 
+                },
+                memory::{
+                    ModuleData as RawData,
+                    Content,
                 }
             },
             JigId, module::ModuleId
@@ -68,31 +71,33 @@ impl DebugSettings {
 
                     RawData{
                         content: Some(Content {
-                            mode,
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                            instructions: Instructions::default(),
-                            pairs: if init_data.with_pairs {
-                                crate::config::get_debug_pairs(mode, 3)
-                                    .into_iter()
-                                    .map(|(word_1, word_2)| {
-                                        match mode {
-                                            Mode::WordsAndImages => {
-                                                RawCardPair(RawCard::Text(word_1), RawCard::Image(Some(Image {
-                                                    id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
-                                                    lib: MediaLibrary::User
-                                                })))
+                            base: BaseContent {
+                                mode,
+                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                                instructions: Instructions::default(),
+                                pairs: if init_data.with_pairs {
+                                    crate::config::get_debug_pairs(mode, 3)
+                                        .into_iter()
+                                        .map(|(word_1, word_2)| {
+                                            match mode {
+                                                Mode::WordsAndImages => {
+                                                    RawCardPair(RawCard::Text(word_1), RawCard::Image(Some(Image {
+                                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
+                                                        lib: MediaLibrary::User
+                                                    })))
+                                                }
+                                                _ => RawCardPair(
+                                                    RawCard::Text(word_1),
+                                                    RawCard::Text(word_2),
+                                                ),
                                             }
-                                            _ => RawCardPair(
-                                                RawCard::Text(word_1),
-                                                RawCard::Text(word_2),
-                                            ),
-                                        }
-                                    })
-                                    .collect()
-                            } else {
-                                Vec::new()
-                            },
-                            ..Content::default()
+                                        })
+                                        .collect()
+                                } else {
+                                    Vec::new()
+                                },
+                                ..BaseContent::default()
+                            }
                         })
                     }
                 } else {

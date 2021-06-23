@@ -6,10 +6,12 @@ use shared::domain::jig::{
         body::{
             ThemeChoice,
             Background,
-            memory::{Mode, Step, ModuleData as RawData, Content as RawContent, CardPair as RawCardPair}
+            _groups::cards::{Mode, Step, CardPair as RawCardPair},
+            memory::{ModuleData as RawData, Content as RawContent}, 
         }
     }
 };
+
 use futures_signals::{
     map_ref,
     signal::{self, Signal, SignalExt, Mutable},
@@ -20,7 +22,10 @@ use std::{
     cell::RefCell
 };
 use rand::prelude::*;
-use components::module::play::prelude::*;
+use components::module::{
+    play::prelude::*,
+    _groups::cards::lookup::Side
+};
 use utils::prelude::*;
 use components::instructions::player::InstructionsPlayer;
 use super::card::state::*;
@@ -63,7 +68,7 @@ impl Base {
             ..
         } = init_args;
 
-        let content = raw.content.unwrap_ji();
+        let content = raw.content.unwrap_ji().base.clone();
 
         let n_cards = content.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 

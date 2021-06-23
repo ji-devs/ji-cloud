@@ -9,10 +9,12 @@ use crate::base::{
     state::*,
     card::state::*
 };
-use components::image::element::ImageJi;
-use shared::domain::jig::module::body::{
-    memory::Mode
+use components::{
+    image::element::ImageJi,
+    module::_groups::cards::lookup
 };
+
+use shared::domain::jig::module::body::_groups::cards::Mode;
 
 pub fn render_media(card:&CardState, mode: Mode, theme_id: ThemeId) -> Dom {
     match &card.media {
@@ -20,11 +22,11 @@ pub fn render_media(card:&CardState, mode: Mode, theme_id: ThemeId) -> Dom {
             html!("card-text", {
                 .property("value", s)
                 .property("fontSize", {
-                    let font_size = app_memory_common::lookup::get_card_font_size(s.len(), theme_id);
+                    let font_size = lookup::get_card_font_size(s.len(), theme_id);
                     format!("{}rem", font_size)
                 })
                 .property("fontFamily", {
-                    let font_family = app_memory_common::lookup::get_card_font_family(theme_id, mode, card.side.into());
+                    let font_family = lookup::get_card_font_family(theme_id, mode, card.side.into());
                     theme_id.css_var_font_family(font_family)
                 })
                 .property("color", { 

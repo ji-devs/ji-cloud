@@ -3,7 +3,7 @@ use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
-use shared::domain::jig::module::body::memory::Mode;
+use shared::domain::jig::module::body::_groups::cards::Mode;
 
 macro_rules! config_path {
     ($e:tt) => { 

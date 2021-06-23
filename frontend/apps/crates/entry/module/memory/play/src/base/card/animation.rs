@@ -1,9 +1,9 @@
 use dominator::animation::{easing, Percentage, MutableAnimation, AnimatedMapBroadcaster};
-use super::state::Side;
 use futures_signals::signal::{Signal, SignalExt};
 use web_sys::HtmlElement;
 use utils::resize::{ResizeInfo, get_resize_info};
 use super::super::state::*; 
+use components::module::_groups::cards::lookup::Side;
 
 pub struct Animation {
     pub animation: MutableAnimation,

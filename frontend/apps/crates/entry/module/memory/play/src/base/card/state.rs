@@ -17,12 +17,13 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Image,
-            memory::{CardPair as RawCardPair, Card as RawCard}
+            _groups::cards::{CardPair as RawCardPair, Card as RawCard}
         }
     }
 };
 use wasm_bindgen::prelude::*;
 use utils::prelude::*;
+use components::module::_groups::cards::lookup::Side;
 
 #[derive(Clone)]
 pub struct CardState {
@@ -101,31 +102,6 @@ impl From<&RawCard> for Media {
         match card {
             RawCard::Text(x) => Self::Text(x.to_string()),
             RawCard::Image(image) => Self::Image(image.as_ref().unwrap_ji().clone())
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Side {
-    Left,
-    Right
-}
-
-
-impl From<Side> for app_memory_common::lookup::Side {
-    fn from(side: Side) -> Self {
-        match side {
-            Side::Left => app_memory_common::lookup::Side::Left,
-            Side::Right => app_memory_common::lookup::Side::Right,
-        }
-    }
-}
-
-impl Side {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Left => "left",
-            Self::Right => "right",
         }
     }
 }
