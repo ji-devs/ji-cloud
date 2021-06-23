@@ -139,7 +139,7 @@ script_runner = "@shell"
 script = ["gcloud run deploy ji-cloud-api-media-watch --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api-media-watch:latest --platform managed"]
 
 #------Sandbox-----------#
-[tasks.sandbox-api]
+[tasks.sandbox-api-media-watch]
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-sandbox-api-media-watch",
