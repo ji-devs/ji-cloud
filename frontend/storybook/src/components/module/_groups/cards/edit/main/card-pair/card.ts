@@ -12,12 +12,11 @@ export default {
 }
 
 type CONTENT_MODE = "text" | "image" | "image-empty";
-type IO_MODE = "edit" | "preview";
+type IO_MODE = "edit" | "preview" | "static";
 
 export interface Args {
     ioMode: IO_MODE,
     contentMode: CONTENT_MODE,
-    editTarget: boolean,
     theme: ThemeKind,
     dragOver: boolean,
     size: Size,
@@ -28,7 +27,6 @@ const DEFAULT_ARGS:Args = {
     ioMode: "preview",
     contentMode: "image",
     theme: "chalkboard",
-    editTarget: true,
     dragOver: false,
     size: "regular",
     inverted: false
@@ -37,11 +35,11 @@ const DEFAULT_ARGS:Args = {
 export const Card= (props?:Partial<Args> & {slot?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {slot, contentMode, ioMode, editTarget, ...cardProps} = props;
+    const {slot, contentMode, ioMode, ...cardProps} = props;
 
     Object.assign(cardProps, {
         flippable: ioMode === "preview",
-        editing: editTarget
+        editing: ioMode === "edit" 
     });
 
     /*

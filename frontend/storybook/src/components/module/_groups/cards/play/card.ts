@@ -4,6 +4,7 @@ import "@elements/module/_groups/cards/play/card/text";
 import {mapToString, arrayIndex} from "@utils/array";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
+import {Size} from "@elements/module/_groups/cards/play/card/card";
 
 type CONTENT_MODE = "text" | "image";
 
@@ -11,14 +12,16 @@ export default {
     title: "Module / _GROUPS / Cards / play"
 }
 
-interface Args {
+export interface Args {
     scale: number,
     translateX: number,
     translateY: number,
     transform: boolean,
     theme: ThemeKind,
     flipped: boolean,
+    flipOnHover: boolean,
     contentMode: CONTENT_MODE,
+    size: Size,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -28,7 +31,9 @@ const DEFAULT_ARGS:Args = {
     transform: false,
     theme: "chalkboard",
     flipped: true,
+    flipOnHover: false,
     contentMode: "image",
+    size: "regular",
 }
 
 export const Card = (props?:Partial<Args>) => {

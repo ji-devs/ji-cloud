@@ -1,5 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/_groups/cards/play/container";
+import "@elements/module/memory/play/container";
+import "@elements/core/module-page/grid-resize";
 
 import {Sidebar} from "./sidebar";
 import {Main} from "./main";
@@ -7,7 +8,7 @@ import {Ending} from "./ending";
 import {mapToString, arrayIndex} from "@utils/array";
 
 export default {
-    title: "Module / _GROUPS / Cards / play"
+    title: "Module / Memory / Play" 
 }
 
 interface Args {
@@ -26,13 +27,17 @@ export const Player = (props?:Partial<Args>) => {
     const {nCards, isEnding} = props;
 
     return `
+
+      <module-page-grid-resize>
     <play-container slot="main">
         ${Sidebar({nPairs: nCards/2})}
         ${isEnding 
             ? Ending()
             : Main({nCards})
         }
-    </play-container>`;
+    </play-container>
+      </module-page-grid-resize>
+    `;
 }
 
 Player.args = DEFAULT_ARGS;

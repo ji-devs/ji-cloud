@@ -5,13 +5,22 @@ import {ThemeKind} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
 import {cardBackPath} from "@elements/module/_groups/cards/helpers";
 
-type SIDE = "left" | "right";
+export type Size = "regular" | "flashcards";
+export type Side = "left" | "right";
 
 @customElement('play-card')
 export class _ extends LitElement {
   static get styles() {
       return [css`
 
+            :host([size="flashcards"]) {
+                --card-size: 448rem;
+                --border-size: 16rem;
+            }
+            :host([size="regular"]) {
+                --card-size: 188rem;
+                --border-size: 3rem;
+            }
           :host([transform]) > section {
               position: absolute;
               top: 0;
@@ -37,17 +46,22 @@ export class _ extends LitElement {
               transition: transform 0.8s;
               transform-style: preserve-3d;
               transform: rotateY(180deg);
+              width: var(--card-size);
+              height: var(--card-size);
           }
 
-          section, .back > img-ui {
-              width: 188rem;
-              height: 188rem;
+          .front, .back, .back > img-ui {
+              box-sizing: border-box;
+              width: 100%; 
+              height: 100%;
           }
           
           ::slotted(img-ji) {
-            width: 178rem;
-            height: 178rem;
+            --img-size: calc(var(--card-size) - 10rem);
+            width: var(--img-size); 
+            height: var(--img-size); 
           }
+
           ::slotted(img-ji), ::slotted(img-ui) {
                 object-fit: contain;
             }
@@ -70,7 +84,7 @@ export class _ extends LitElement {
           .front {
               border-radius: 16px;
               border-style: solid;
-              border-width: 3px;
+              border-width: var(--border-size);
 
           }
 
@@ -102,7 +116,36 @@ export class _ extends LitElement {
   translateY:number = 0;
 
   @property({reflect: true})
-  side:SIDE = "left";
+  side:Side = "left";
+
+  @property({type: Boolean})
+  flipOnHover:boolean = false;
+
+  connectedCallback() {
+      super.connectedCallback();
+
+      this.addEventListener("mouseenter", this.onMouseEnter);
+      this.addEventListener("mouseleave", this.onMouseLeave);
+  }
+
+  disconnectedCallback() {
+      super.disconnectedCallback();
+
+      this.removeEventListener("mouseenter", this.onMouseEnter);
+      this.removeEventListener("mouseleave", this.onMouseLeave);
+  }
+
+  onMouseEnter() {
+      if(this.flipOnHover) {
+        this.flipped = !this.flipped;
+      }
+  }
+
+  onMouseLeave() {
+      if(this.flipOnHover) {
+        this.flipped = !this.flipped;
+      }
+  }
 
   render() {
       const {theme, scale, transform, translateX, translateY} = this;

@@ -1,14 +1,14 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/_groups/cards/play/sidebar";
+import "@elements/module/memory/play/sidebar";
 import {mapToString, arrayIndex} from "@utils/array";
-import {Card} from "./card";
+import {Card} from "../../_groups/cards/play/card";
 
 const N_PAIR_OPTIONS = 
     [8,10,12,14,16,18,20,22,24,26,28]
     .map(nCards => nCards/2);
 
 export default {
-    title: "Module / _GROUPS / Cards / play"
+    title: "Module / Memory / Play" 
 }
 
 interface Args {

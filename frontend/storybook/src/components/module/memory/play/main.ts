@@ -1,12 +1,12 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/_groups/cards/play/main";
-import {Card} from "./card"; 
+import "@elements/module/memory/play/main";
+import {Card} from "../../_groups/cards/play/card"; 
 import {mapToString, arrayIndex} from "@utils/array";
 
 const N_CARD_OPTIONS = [8,10,12,14,16,18,20,22,24,26,28];
 
 export default {
-    title: "Module / _GROUPS / Cards / play"
+    title: "Module / Memory / Play" 
 }
 
 interface Args {

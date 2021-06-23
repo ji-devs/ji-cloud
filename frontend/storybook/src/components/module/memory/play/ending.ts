@@ -1,10 +1,10 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/_groups/cards/play/ending";
+import "@elements/module/memory/play/ending";
 import {mapToString, arrayIndex} from "@utils/array";
 
 
 export default {
-    title: "Module / _GROUPS / Cards / play"
+    title: "Module / Memory / Play / Main" 
 }
 
 interface Args {
