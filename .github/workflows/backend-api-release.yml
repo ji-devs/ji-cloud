@@ -48,9 +48,12 @@ jobs:
           path: ${{github.workspace}}/cargo-make
 
 
-      - name: build and deploy 
+      - name: build and deploy api
         run: cargo make release-api
         
+      - name: build and deploy api-media-watch
+        run: cargo make release-api-media-watch
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:

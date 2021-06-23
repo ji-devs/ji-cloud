@@ -50,6 +50,9 @@ jobs:
       - name: build and deploy 
         run: cargo make sandbox-api
         
+      - name: build and deploy api-media-watch
+        run: cargo make sandbox-api-media-watch
+
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
