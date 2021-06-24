@@ -2,23 +2,18 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
-import {cardBackPath} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode, getFrontStyle} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
-
-export type Size = "regular" | "flashcards";
 
 @customElement('main-card')
 export class _ extends LitElement {
   static get styles() {
       return [css`
 
-            :host([size="flashcards"]) {
-                --card-size: 316px;
-                --border-size: 10px;
-            }
-            :host([size="regular"]) {
+            :host {
                 --card-size: 160px;
-                --border-size: 3px;
+                --border-size: 1px;
+                --img-padding: 10px;
             }
           section {
               transition: transform 0.8s;
@@ -56,13 +51,12 @@ export class _ extends LitElement {
           }
 
           ::slotted(img-ji) {
-                --img-size: calc(var(--card-size) - 10px);
+              --img-size: calc(var(--card-size) - ((var(--border-size) * 2) + var(--img-padding)));
               width: var(--img-size); 
               height: var(--img-size); 
               object-fit: contain;
 
           }
-          
 
           :host([inverted]) section {
               transform: rotateY(180deg);
@@ -95,8 +89,6 @@ export class _ extends LitElement {
             }
     `];
   }
-  @property({reflect: true})
-  size:Size = "regular";
 
   @property({type: Boolean, reflect: true})
   dragOver:boolean = false;
@@ -113,14 +105,13 @@ export class _ extends LitElement {
   @property({type: Boolean})
   editing: boolean = false;
 
+  @property()
+  mode:Mode = "duplicate";
 
   render() {
-      const {flippable, theme, editing} = this;
+      const {flippable, theme, editing, mode} = this;
 
-
-      const frontStyle = styleMap({
-          borderColor: `var(--theme-${theme}-color-2)`,
-      });
+      const frontStyle = getFrontStyle(theme, mode);
 
       return html`
           <section class="${classMap({flippable, editing})}" >

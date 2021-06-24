@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/core/module-page/grid-resize";
 import "@elements/module/card-quiz/edit/main/container";
-import "~/components/module/_groups/cards/edit/main/card-pair/card";
+import {Size} from "@elements/module/_groups/cards/play/card/card";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
 export default {
     title: "Module / Card Quiz / Edit / Main" 
@@ -22,21 +22,23 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
     return `
       <module-page-grid-resize>
         <card-quiz-main slot="main" ${argsToAttrs(props)}>
-      ${mapToString(arrayCount(nPairs), idx => {
-        return renderCard(false);
-      })}
+          ${renderCard(true, "quiz-target", "target")}
+          ${mapToString(arrayCount(nPairs), idx => {
+            return renderCard(true, "quiz-option", "options");
+          })}
         </card-quiz-main>
       </module-page-grid-resize>
       `;
 }
 
-function renderCard(flipped: boolean) {
+function renderCard(flipped: boolean, size: Size, slot: string) {
 	return Card({
 		contentMode: "image",
 		theme: "happy-brush",
-		size: "flashcards",
+		size,
 		flipped,
-		flipOnHover: false 
+		flipOnHover: false,
+    slot
 	});
 }
 

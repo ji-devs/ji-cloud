@@ -20,10 +20,10 @@ export type CLICK_MODE = "single" | "double" | "none";
 export class _ extends LitElement {
   static get styles() {
       return [css`
-
           textarea, span {
-              font-family: Poppins;
-              font-size: 16px;
+              font-family: var(--font-family, Poppins);
+              font-size: var(--font-size, 16px);
+              color: var(--color, black);
               display: none;
               text-align: center;
           }
@@ -66,15 +66,6 @@ export class _ extends LitElement {
 
   @property()
   clickMode: CLICK_MODE = "double";
-
-  @property()
-  fontFamily:string = "";
-
-  @property()
-  color:string = "";
-
-  @property()
-  fontSize:string = "";
 
   toggleEditing = (value: boolean) => {
     this.editing = value;
@@ -189,27 +180,12 @@ export class _ extends LitElement {
   }
 
   render() {
-    const { fontFamily, color, fontSize, value, editing, clickMode} = this;
+    const { value, editing, clickMode} = this;
 
-    let style:any = {};
-
-    if(fontFamily !== "") {
-        style.fontFamily = fontFamily;
-    }
-
-    if(color !== "") {
-        style.color = color;
-    }
-
-    if(fontSize !== "") {
-        style.fontSize = fontSize;
-    }
-
-    style = styleMap(style);
 
     return html`
-        <textarea style=${style} class="${classMap({visible: editing})}" id="input" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></textarea>
-        <span style=${style} id="show" class="${classMap({visible: !editing})}"
+        <textarea class="${classMap({visible: editing})}" id="input" @input="${this.onInput}" @keyup="${this.onKey}" .value="${value}"></textarea>
+        <span id="show" class="${classMap({visible: !editing})}"
               @dblclick=${() => {
                   if(clickMode === "double") {
                     this.toggleEditing(true);
@@ -221,8 +197,8 @@ export class _ extends LitElement {
                 }
               }}
               >${value}</span>
-        <span style=${style} id="measure" class="measure">${value}</span>
-        <span style=${style} id="measure-line" class="measure">&nbsp;</span>
+        <span id="measure" class="measure">${value}</span>
+        <span id="measure-line" class="measure">&nbsp;</span>
         `;
   }
 }

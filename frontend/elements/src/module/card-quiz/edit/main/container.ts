@@ -13,9 +13,18 @@ export class _ extends LitElement {
         align-items: center;
         justify-content: center;
       }
-        section {
+      section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .target {
+        margin-bottom: 105rem;
+      }
+        .options {
           display: flex;
-          gap: 56px;
+          gap: 80rem;
         }
     `];
   }
@@ -23,8 +32,13 @@ export class _ extends LitElement {
   render() {
       return html`
         <section>
-      	  <slot></slot>
+          <div class="target">
+            <slot name="target"></slot>
+          </div>
+          <div class="options">
+            <slot name="options"></slot>
+          </div>
         </section>
-      `
+      `;
   }
 }

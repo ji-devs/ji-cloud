@@ -72,7 +72,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::WordsAndImages;
+                    let mode = Mode::Duplicate;
 
                     RawData{
                         content: Some(Content {

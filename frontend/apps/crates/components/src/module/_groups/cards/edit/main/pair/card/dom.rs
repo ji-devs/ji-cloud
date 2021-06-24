@@ -23,7 +23,7 @@ use crate::{
     }
 };
 use super::state::*;
-use shared::domain::jig::module::body::_groups::cards::{Mode, Step};
+use shared::domain::jig::module::body::{ModeExt, _groups::cards::{Mode, Step}};
 
 pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>) -> Dom {
     html!("main-card", {
@@ -32,6 +32,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
         .property("editing", state.step == Step::One)
         .property_signal("dragOver", state.editing_active.signal())
         .property_signal("theme", state.base.theme_id_str_signal())
+        .property("mode", state.base.mode.as_str_id())
 
         .event(clone!(state => move |evt:events::Click| {
             if let Some(input_ref) = state.input_ref.borrow().as_ref() {
@@ -57,19 +58,14 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
                                             (value.len(), *theme_id)
                                         }
                                 };
+                                
+                                let mode = state.base.mode.clone();
 
-                                sig.map(|(len, theme_id)| {
-                                    let font_size = lookup::get_card_font_size(len, theme_id);
+                                sig.map(move |(len, theme_id)| {
+                                    let font_size = lookup::get_card_font_size(len, theme_id, mode);
                                     format!("{}px", font_size)
                                 })
                             })
-                            .property_signal("fontFamily", state.base.theme_id.signal().map(clone!(state => move |theme_id| {
-                                let font_family = lookup::get_card_font_family(theme_id, state.base.mode.into(), state.side.into());
-                                theme_id.css_var_font_family(font_family)
-                            })))
-                            .property_signal("color", state.base.theme_id.signal().map(|theme_id| {
-                                theme_id.css_var_color(1)
-                            }))
                             .property("clickMode", "none")
                             .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
                             .property("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)

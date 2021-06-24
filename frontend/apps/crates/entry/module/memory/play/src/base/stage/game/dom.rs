@@ -12,6 +12,7 @@ use crate::base::{
         dom::render_media as render_card_media
     }
 };
+use shared::domain::jig::module::body::ModeExt;
 
 pub fn render(state: Rc<Base>) -> Dom {
 
@@ -35,6 +36,8 @@ fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
     html!("play-card", {
         .property_signal("flipped", card.is_flipped(&state))
         .property("theme", state.theme_id.as_str_id())
+        .property("mode", state.mode.as_str_id())
+        .property("size", "regular")
         .property("side", card.side.as_str())
         .style_signal("visibility", card.is_found().map(|flag| {
             if flag {

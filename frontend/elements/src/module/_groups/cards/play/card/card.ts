@@ -3,9 +3,9 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
-import {cardBackPath} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode, getFrontStyle} from "@elements/module/_groups/cards/helpers";
 
-export type Size = "regular" | "flashcards";
+export type Size = "regular" | "flashcards" | "quiz-option" | "quiz-target";
 export type Side = "left" | "right";
 
 @customElement('play-card')
@@ -13,13 +13,26 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
 
+            :host {
+                --img-padding: 10rem;
+
+            }
+
             :host([size="flashcards"]) {
-                --card-size: 448rem;
+                --card-size: 500rem;
                 --border-size: 16rem;
             }
             :host([size="regular"]) {
                 --card-size: 188rem;
                 --border-size: 3rem;
+            }
+            :host([size="quiz-target"]) {
+                --card-size: 431rem;
+                --border-size: 4.75rem;
+            }
+            :host([size="quiz-option"]) {
+                --card-size: 253rem;
+                --border-size: 4.75rem;
             }
           :host([transform]) > section {
               position: absolute;
@@ -57,7 +70,7 @@ export class _ extends LitElement {
           }
           
           ::slotted(img-ji) {
-            --img-size: calc(var(--card-size) - 10rem);
+            --img-size: calc(var(--card-size) - ((var(--border-size) * 2) + var(--img-padding)));
             width: var(--img-size); 
             height: var(--img-size); 
           }
@@ -85,7 +98,7 @@ export class _ extends LitElement {
               border-radius: 16px;
               border-style: solid;
               border-width: var(--border-size);
-
+            background-color: white;
           }
 
           .back {
@@ -103,6 +116,9 @@ export class _ extends LitElement {
   @property()
   theme:ThemeKind = "blank";
 
+  @property()
+  mode:Mode = "duplicate";
+
   @property({type: Boolean, reflect: true})
   transform:boolean = false;
 
@@ -117,6 +133,9 @@ export class _ extends LitElement {
 
   @property({reflect: true})
   side:Side = "left";
+
+  @property({reflect: true})
+  size:Size = "regular";
 
   @property({type: Boolean})
   flipOnHover:boolean = false;
@@ -148,17 +167,14 @@ export class _ extends LitElement {
   }
 
   render() {
-      const {theme, scale, transform, translateX, translateY} = this;
+      const {theme, mode, scale, transform, translateX, translateY} = this;
 
-      const frontStyle = styleMap({
-          borderColor: `var(--theme-${theme}-color-2)`,
-          backgroundColor: `var(--theme-${theme}-color-3)`,
-      });
+      const frontStyle = getFrontStyle(theme, mode); 
 
       const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
 
       return html`
-          <section style="${style}">
+          <section style=${style}>
               <div class="front" style=${frontStyle}><slot></slot></div>
               <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
           </section>

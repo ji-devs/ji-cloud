@@ -12,6 +12,7 @@ use futures_signals::{
     signal_vec::SignalVecExt
 };
 use utils::prelude::*;
+use shared::domain::jig::module::body::ModeExt;
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-sidebar", {
@@ -66,6 +67,7 @@ fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
         }) 
         .property("flipped", true) 
         .property("theme", state.theme_id.as_str_id())
+        .property("mode", state.mode.as_str_id())
         .property("transform", true)
         .child(render_card_media(&card, state.mode, state.theme_id))
     })

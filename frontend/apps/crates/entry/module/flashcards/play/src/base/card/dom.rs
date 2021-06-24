@@ -22,17 +22,9 @@ pub fn render_media(card:&CardState, mode: Mode, theme_id: ThemeId) -> Dom {
             html!("card-text", {
                 .property("value", s)
                 .property("fontSize", {
-                    let font_size = lookup::get_card_font_size(s.len(), theme_id);
+                    let font_size = lookup::get_card_font_size(s.len(), theme_id, mode);
                     format!("{}rem", font_size)
                 })
-                .property("fontFamily", {
-                    let font_family = lookup::get_card_font_family(theme_id, mode, card.side.into());
-                    theme_id.css_var_font_family(font_family)
-                })
-                .property("color", { 
-                    theme_id.css_var_color(1)
-                })
-                
             })
         },
         Media::Image(image) => {
