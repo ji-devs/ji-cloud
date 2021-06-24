@@ -6,7 +6,7 @@ import { Align, Color, ControllerState, defaultState, ElementType, Font, FontSiz
 import { EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
 import { baseStyles } from './styles';
-import { ThemeKind, THEMES } from '@elements/_themes/themes';
+import { ThemeKind, THEMES, TextEditor as TextEditorTheme} from '@elements/_themes/themes';
 import { getThemeVars } from "./wysiwyg-theme";
 
 @customElement("wysiwyg-base")
@@ -104,9 +104,9 @@ export class _ extends LitElement {
 
     private getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
         const elementType = this._element || this.elementDefault || defaultState.element;
-        const elementName = elementType.toLowerCase() as 'h1' | 'h2' | 'p1' | 'p2';
+        const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
 
-        const themeInfo = THEMES[this.theme];
+        const themeInfo = THEMES[this.theme].textEditor;
         
         switch (key) {
             case "color":

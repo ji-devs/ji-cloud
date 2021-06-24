@@ -1,4 +1,4 @@
-import { THEMES, ThemeKind } from "@elements/_themes/themes";
+import { THEMES, ThemeKind, TextEditor as TextEditorTheme } from "@elements/_themes/themes";
 import { ElementType } from "./wysiwyg-types";
 
 export function getThemeVars(theme: ThemeKind): [string, string][] {
@@ -10,8 +10,8 @@ export function getThemeVars(theme: ThemeKind): [string, string][] {
 }
 
 function getElTheme(elName: ElementType, theme: ThemeKind): [string, string][] {
-    const el = elName.toLowerCase() as 'h1' | 'h2' | 'p1' | 'p2';
-    const themeInfo = THEMES[theme];
+    const el:keyof TextEditorTheme= elName.toLowerCase() as any;
+    const themeInfo = THEMES[theme].textEditor;
 
     const fontSize = themeInfo[el].fontSize;
     const color = (themeInfo as any)["color" + themeInfo[el].fontColor];
