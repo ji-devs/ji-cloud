@@ -494,4 +494,12 @@ impl Default for TextDirection {
     }
 }
 
+/// Response for total count of public and published jig.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigCountResponse {
+    /// Total number of public and published jigs.
+    pub total_count: u64,
+}
+
 into_uuid![JigId];
