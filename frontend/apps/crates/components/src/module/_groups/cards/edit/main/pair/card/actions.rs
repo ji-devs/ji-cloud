@@ -1,6 +1,6 @@
 use dominator::clone;
 use utils::prelude::*;
-use crate::module::_groups::cards::edit::state::*;
+use crate::module::_groups::cards::{lookup::Side, edit::state::*};
 use shared::domain::jig::module::body::{
     Image,
     _groups::cards::{
@@ -10,6 +10,7 @@ use shared::domain::jig::module::body::{
         BaseContent as RawBaseContent
     },
 };
+
 use super::state::*;
 
 impl <RawData: RawDataExt, E: ExtraExt> MainCard <RawData, E> {

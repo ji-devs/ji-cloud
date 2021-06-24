@@ -27,7 +27,8 @@ use shared::domain::jig::module::body::{ModeExt, _groups::cards::{Mode, Step}};
 
 pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>) -> Dom {
     html!("main-card", {
-        .property("slot", state.side.slot_name())
+        .property("slot", state.side.as_str_id())
+        .property("side", state.side.as_str_id())
         .property("flippable", state.step == Step::Two)
         .property("editing", state.step == Step::One)
         .property_signal("dragOver", state.editing_active.signal())

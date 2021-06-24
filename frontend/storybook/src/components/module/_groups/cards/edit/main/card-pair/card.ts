@@ -4,7 +4,7 @@ import "@elements/core/inputs/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import "@elements/core/inputs/textarea-content";
 import "@elements/module/_groups/cards/edit/main/card-pair/card";
-import {Mode} from "@elements/module/_groups/cards/helpers";
+import {Mode, Side} from "@elements/module/_groups/cards/helpers";
 
 export default {
     title: "Module / _GROUPS / Cards / edit / Main"
@@ -20,6 +20,7 @@ export interface Args {
     dragOver: boolean,
     inverted: boolean,
     mode: Mode,
+    side: Side,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -28,7 +29,8 @@ const DEFAULT_ARGS:Args = {
     theme: "chalkboard",
     dragOver: false,
     inverted: false,
-    mode: "lettering"
+    mode: "lettering",
+    side: "left",
 }
 
 export const Card= (props?:Partial<Args> & {slot?: string}) => {
@@ -75,6 +77,12 @@ Card.argTypes = {
         control: {
             type: 'inline-radio',
             options: ["text", "image", "image-empty"]
+        }
+    },
+    side: {
+        control: {
+            type: 'inline-radio',
+            options: ["left", "right"]
         }
     },
     theme: ThemeControl

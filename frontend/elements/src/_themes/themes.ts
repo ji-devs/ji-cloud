@@ -29,7 +29,8 @@ export interface CardsTheme {
     fillColor: ColorMapping,
     borderColor: ColorMapping,
     fontFamily: FontFamilyMapping,
-    fontFamilyLettering: FontFamilyMapping,
+    fontFamilyLetteringLeft: FontFamilyMapping,
+    fontFamilyLetteringRight: FontFamilyMapping,
 }
 
 
@@ -51,17 +52,22 @@ const cardsThemeDefault:CardsTheme = {
     borderColor: 2,
     fillColor: 3,
     fontFamily: 1,
-    fontFamilyLettering: 1,
+    fontFamilyLetteringLeft: 1,
+    fontFamilyLetteringRight: 1,
 }
 //TODO - import the config JSON via typescript / rollup
 //to match themes.rs
 export const THEMES:Record<ThemeKind, Theme> = {
     blank: {
-        fontFamily1: "_sans",
-        fontFamily2: "", 
-        color1: "black",
-        color2: "black",
-        color3: "white",
+        //Print
+        fontFamily1: `"Arial", "Times New Roman"`,
+        //Handwriting
+        fontFamily2: `"Shesek, Cursive"`, 
+        color1: "#ff2354",
+        color2: "orange",
+        color3: "purple",
+
+        ////////////////
         textEditor: {
             h1: {
                 fontFamily: 1,
@@ -84,10 +90,18 @@ export const THEMES:Record<ThemeKind, Theme> = {
                 fontColor: 3,
             },
         },
-        cards: cardsThemeDefault
+        cards: {
+            fontColor: 1,
+            borderColor: 2,
+            fillColor: 3,
+            fontFamily: 1,
+            fontFamilyLetteringLeft: 1,
+            fontFamilyLetteringRight: 2,
+        }
+        //cards: cardsThemeDefault
     },
     chalkboard: {
-        fontFamily1: `"Frank Ruhl Libre - Medium", "Architects Daughter - Regular"`,
+        fontFamily1: `"Frank Ruhl Libre - Medium", "Roboto Slab - Medium"`,
         fontFamily2: `"Shesek - Regular", "Architects Daughter - Regular"`,
         color1: "#272727",
         color2: "#AFCBF4",
@@ -116,7 +130,8 @@ export const THEMES:Record<ThemeKind, Theme> = {
         },
         cards: {
             ...cardsThemeDefault,
-            fontFamilyLettering: 2,
+            fontFamilyLetteringLeft: 1,
+            fontFamilyLetteringRight: 2,
         }
     },
     ["happy-brush"]: {
@@ -149,7 +164,8 @@ export const THEMES:Record<ThemeKind, Theme> = {
         },
         cards: {
             ...cardsThemeDefault,
-            fontFamilyLettering: 2,
+            fontFamilyLetteringLeft: 1,
+            fontFamilyLetteringRight: 2,
         }
     },
 };
@@ -193,12 +209,13 @@ function setRootVars() {
 
             //cards
             (() => {
-                const {fontColor, borderColor, fillColor, fontFamily, fontFamilyLettering} = cards;
+                const {fontColor, borderColor, fillColor, fontFamily, fontFamilyLetteringLeft, fontFamilyLetteringRight} = cards;
                 style.setProperty(`--theme-${id}-cards-color`, `var(--theme-${id}-color-${fontColor})`);
                 style.setProperty(`--theme-${id}-cards-border-color`, `var(--theme-${id}-color-${borderColor})`);
                 style.setProperty(`--theme-${id}-cards-fill-color`, `var(--theme-${id}-color-${fillColor})`);
                 style.setProperty(`--theme-${id}-cards-font-family`, `var(--theme-${id}-font-family-${fontFamily})`);
-                style.setProperty(`--theme-${id}-cards-font-family-lettering`, `var(--theme-${id}-font-family-${fontFamilyLettering})`);
+                style.setProperty(`--theme-${id}-cards-font-family-lettering-left`, `var(--theme-${id}-font-family-${fontFamilyLetteringLeft})`);
+                style.setProperty(`--theme-${id}-cards-font-family-lettering-right`, `var(--theme-${id}-font-family-${fontFamilyLetteringRight})`);
             })();
         });
 }

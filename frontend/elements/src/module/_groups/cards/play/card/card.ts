@@ -3,10 +3,9 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
-import {cardBackPath, Mode, getFrontStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode, Side, getFrontStyle} from "@elements/module/_groups/cards/helpers";
 
 export type Size = "regular" | "flashcards" | "quiz-option" | "quiz-target";
-export type Side = "left" | "right";
 
 @customElement('play-card')
 export class _ extends LitElement {
@@ -167,9 +166,9 @@ export class _ extends LitElement {
   }
 
   render() {
-      const {theme, mode, scale, transform, translateX, translateY} = this;
+      const {theme, mode, scale, side, transform, translateX, translateY} = this;
 
-      const frontStyle = getFrontStyle(theme, mode); 
+      const frontStyle = getFrontStyle(theme, mode, side); 
 
       const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
 

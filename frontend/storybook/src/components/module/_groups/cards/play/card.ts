@@ -5,7 +5,7 @@ import {mapToString, arrayIndex} from "@utils/array";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import {Size} from "@elements/module/_groups/cards/play/card/card";
-import {Mode} from "@elements/module/_groups/cards/helpers";
+import {Mode, Side} from "@elements/module/_groups/cards/helpers";
 
 type CONTENT_MODE = "text" | "image";
 
@@ -23,6 +23,7 @@ export interface Args {
     flipOnHover: boolean,
     contentMode: CONTENT_MODE,
     size: Size,
+    side: Side,
     mode: Mode,
     slot?: string
 }
@@ -37,7 +38,8 @@ const DEFAULT_ARGS:Args = {
     flipOnHover: false,
     contentMode: "text",
     size: "regular",
-    mode: "lettering"
+    mode: "lettering",
+    side: "left"
 }
 
 export const Card = (props?:Partial<Args>) => {
@@ -66,6 +68,12 @@ Card.argTypes = {
         control: {
             type: 'inline-radio',
             options: ["text", "image", "image-empty"]
+        }
+    },
+    side: {
+        control: {
+            type: 'inline-radio',
+            options: ["left", "right"]
         }
     },
     theme: ThemeControl

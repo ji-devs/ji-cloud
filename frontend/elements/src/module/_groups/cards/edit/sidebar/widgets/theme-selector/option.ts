@@ -7,9 +7,6 @@ import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
 export type STATE = "idle" | "selected" | "jig";
 
-const STR_SAMPLE_HEBREW = "אבא";
-const STR_SAMPLE_ENGLISH = "Mom";
-
 @customElement('theme-selector-cards-option')
 export class _ extends LitElement {
   static get styles() {
@@ -42,10 +39,17 @@ export class _ extends LitElement {
             top: 0px;
             left: 0px;
           }
+          .left, .right {
+            box-sizing: border-box;
+            width: 112px;
+            height: 112px;
+          }
           .left {
             position: absolute;
             top: 16px;
             left: 13px;
+            border-radius: 16px;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
           }
 
           .right {
@@ -53,15 +57,11 @@ export class _ extends LitElement {
             top: 32px;
             left: calc(88px + 13px);
           }
-          .left,
+
           .right {
             display: flex;
             justify-content: center;
             align-items: center;
-            box-sizing: border-box;
-            width: 112px;
-            height: 112px;
-            box-shadow: 0 3px 20px 0 rgba(0, 0, 0, 0.06);
           }
 
           .menu {
@@ -69,12 +69,6 @@ export class _ extends LitElement {
             top: -16px;
             right: -16px;
             z-index: 1;
-          }
-
-          .left {
-            border: solid 3px #fa632f;
-            border-radius: 16px;
-            background-color: var(--white);
           }
 
           .label {
@@ -88,13 +82,17 @@ export class _ extends LitElement {
             color: var(--dark-blue-8);
           }
 
+          .hidden {
+            display: none;
+          }
+
           :host([state="selected"]) .label, :host([state="jig"]) .label {
             color: var(--main-blue);
           }
-          
+         
           img-ui {
-            width: 109px;
-            height: 109px;
+            width: 100%;
+            height: 100%; 
             object-fit: cover;
           }
         `,
@@ -121,24 +119,29 @@ export class _ extends LitElement {
   render() {
       const {theme, state, hover} = this;
 
-      const style = `border-color: var(--theme-${theme}-color-2)`;
-
-      const text = hover ? STR_SAMPLE_HEBREW : STR_SAMPLE_ENGLISH;
-
       const sectionClasses = classMap({
         hover: hover && state !== "jig"
       });
       
 
+      const imageClass = classMap({
+        hidden: hover
+      })
+      const imageHoverClass = classMap({
+        hidden: !hover
+      })
       return html`
         <section class=${sectionClasses} @mouseenter="${this.onEnter.bind(this)}" @mouseleave="${this.onLeave.bind(this)}">
           ${state == "jig" ? html`<theme-selector-jig class="jig"></theme-selector-jig>` : nothing}
               <div class="content">
-                  <div class="right" style="${style}">
+                  <div class="right">
                     <img-ui path="${cardBackPath(theme)}"></img-ui>
                     ${state === "selected" ? renderMenu() : nothing}
                   </div>
-                  <div class="left" style="${style}"><span>${text}</span></div>
+                  <div class="left">
+                    <img-ui class=${imageClass} path="theme/module/_groups/cards/${theme}/card-front.svg"></img-ui>
+                    <img-ui class=${imageHoverClass} path="theme/module/_groups/cards/${theme}/card-front-hover.svg"></img-ui>
+                  </div>
                   <div class="label">${STR_THEME_LABEL[theme]}</div>
               </div>
           </section>

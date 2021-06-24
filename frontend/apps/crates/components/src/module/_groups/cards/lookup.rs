@@ -7,7 +7,7 @@ pub enum Side {
 }
 
 impl Side {
-    pub const fn as_str(&self) -> &'static str {
+    pub const fn as_str_id(&self) -> &'static str {
         match self {
             Self::Left => "left",
             Self::Right => "right",

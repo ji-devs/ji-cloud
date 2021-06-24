@@ -3,6 +3,8 @@ import "@elements/module/_groups/cards/edit/main/main";
 import "@elements/module/_groups/cards/edit/main/main-empty";
 import "@elements/module/_groups/cards/edit/main/card-pair/card";
 import "@elements/module/_groups/cards/edit/main/card-pair/pair";
+import "@elements/module/_groups/cards/play/card/card";
+import "@elements/module/_groups/cards/play/card/text";
 import "@elements/module/_groups/cards/edit/sidebar/empty";
 import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
 /* components */

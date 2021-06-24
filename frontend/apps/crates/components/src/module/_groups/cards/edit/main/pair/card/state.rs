@@ -2,7 +2,7 @@ use dominator::{html, Dom, clone};
 use std::{rc::Rc, cell::RefCell};
 use web_sys::HtmlElement;
 use futures_signals::{signal::{Mutable, ReadOnlyMutable, SignalExt}, signal_vec::SignalVecExt};
-use crate::module::_groups::cards::{lookup, edit::state::*};
+use crate::module::_groups::cards::{lookup::{self, Side}, edit::state::*};
 use super::callbacks::*;
 use shared::domain::jig::module::body::_groups::cards::Step;
 
@@ -57,33 +57,3 @@ impl <RawData: RawDataExt, E: ExtraExt> MainCard <RawData, E> {
 }
 
 
-#[derive(Copy, Clone, Debug)]
-pub enum Side {
-    Left,
-    Right,
-}
-
-impl From<Side> for lookup::Side {
-    fn from(side: Side) -> Self {
-        match side {
-            Side::Left => lookup::Side::Left,
-            Side::Right => lookup::Side::Right,
-        }
-    }
-}
-impl Side {
-    pub const fn as_str(&self) -> &'static str {
-        match self {
-            Self::Left => "left",
-            Self::Right => "right",
-        }
-    }
-
-    pub const fn slot_name(&self) -> &'static str {
-        match self {
-            Self::Left => "left",
-            Self::Right => "right",
-        }
-    }
-}
-//pub fn render(state:Rc<State>, mode: Mode, step: Step, index: ReadOnlyMutable<Option<usize>>, side:Side, card: Card, other: Card) -> Dom {

@@ -39,7 +39,7 @@ fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
             }
             async {}
         })))
-        .property("side", card.side.as_str())
+        .property("side", card.side.as_str_id())
         .style_signal("display", card.is_found().map(|flag| {
             if flag {
                 "block"

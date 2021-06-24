@@ -38,7 +38,7 @@ fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
         .property("theme", state.theme_id.as_str_id())
         .property("mode", state.mode.as_str_id())
         .property("size", "regular")
-        .property("side", card.side.as_str())
+        .property("side", card.side.as_str_id())
         .style_signal("visibility", card.is_found().map(|flag| {
             if flag {
                 "hidden"

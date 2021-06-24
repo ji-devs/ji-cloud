@@ -1,9 +1,12 @@
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use futures_signals::{signal::{ReadOnlyMutable, SignalExt}, signal_vec::SignalVecExt};
-use crate::module::_groups::cards::edit::{
-    state::*,
-    main::state::Main
+use crate::module::_groups::cards::{
+    lookup::Side,
+    edit::{
+        state::*,
+        main::state::Main
+    }
 };
 use super::card::state::*;
 
