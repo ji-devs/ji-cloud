@@ -9,8 +9,8 @@ use shared::{
     api::{endpoints::jig, ApiEndpoint},
     domain::{
         jig::{
-            Jig, JigBrowseResponse, JigCreateRequest, JigId, JigResponse, JigSearchResponse,
-            UserOrMe,
+            Jig, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId, JigResponse,
+            JigSearchResponse, UserOrMe,
         },
         CreateResponse,
     },
@@ -279,8 +279,16 @@ async fn publish_draft(
     Ok(Json(()))
 }
 
+#[api_v2_operation]
+async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res>, error::Server> {
+    let total_count: u64 = db::jig::filtered_count(&*db, Some(true), None).await?;
+
+    Ok(Json(JigCountResponse { total_count }))
+}
+
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
     cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
+        .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
         .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
         .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
         .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
