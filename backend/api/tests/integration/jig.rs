@@ -254,3 +254,29 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn count() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/jig/count", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body);
+
+    Ok(())
+}
