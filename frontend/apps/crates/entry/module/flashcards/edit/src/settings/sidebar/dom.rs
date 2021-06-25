@@ -10,7 +10,7 @@ use utils::prelude::*;
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
     html!("flashcards-settings", {
         .child(render_display_mode(state.clone(), DisplayMode::Single))
-        .child(render_display_mode(state.clone(), DisplayMode::Pair))
+        .child(render_display_mode(state.clone(), DisplayMode::Double))
     })
 }
 pub fn render_display_mode(state: Rc<SidebarSettings>, display_mode:DisplayMode) -> Dom {

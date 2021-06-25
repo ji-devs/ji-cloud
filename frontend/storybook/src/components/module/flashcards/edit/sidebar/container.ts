@@ -16,7 +16,7 @@ const DEFAULT_ARGS:Args = {
     selected: "single",
 }
 
-const modes:Array<Mode> = ["single", "pair"];
+const modes:Array<Mode> = ["single", "double"];
 
 export const Container = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;

@@ -6,4 +6,5 @@ pub use crate::{
     settings::SETTINGS,
     themes::*,
     math::transform_ext::*,
+    image::ImageExt,
 };

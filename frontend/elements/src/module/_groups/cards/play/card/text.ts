@@ -6,40 +6,21 @@ import { styleMap } from 'lit-html/directives/style-map';
 export class _ extends LitElement {
   static get styles() {
       return [css`
-
+          span {
+              font-family: var(--font-family, Poppins);
+              font-size: var(--font-size, 40rem);
+              color: var(--color, black);
+              text-align: center;
+          }
     `];
   }
 
   @property()
   value:string = "";
 
-  @property()
-  fontFamily:string = "";
-
-  @property()
-  color:string = "";
-
-  @property()
-  fontSize:string = "";
-
   render() {
-    const { fontFamily, color, fontSize, value} = this;
+    const { value} = this;
 
-    let style:any = {};
-
-    if(fontFamily !== "") {
-        style.fontFamily = fontFamily;
-    }
-
-    if(color !== "") {
-        style.color = color;
-    }
-
-    if(fontSize !== "") {
-        style.fontSize = fontSize;
-    }
-
-    style = styleMap(style);
-    return html`<span style=${style}>${value}</span>`
+    return html`<span>${value}</span>`
   }
 }

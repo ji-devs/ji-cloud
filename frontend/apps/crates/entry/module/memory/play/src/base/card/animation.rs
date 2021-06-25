@@ -15,7 +15,7 @@ pub struct Animation {
     pub side: Side,
 }
 
-pub struct Transform {
+pub struct AnimationState {
     pub x: f64,
     pub y: f64,
     pub scale: f64,
@@ -53,12 +53,12 @@ impl Animation {
     }
 
     pub fn ended_signal(&self) -> impl Signal<Item = bool> {
-        self.transform_signal()
+        self.state_signal()
             .map(|t| t.finished)
             .dedupe()
     }
 
-    pub fn transform_signal(&self) -> impl Signal<Item = Transform> {
+    pub fn state_signal(&self) -> impl Signal<Item = AnimationState> {
         let orig_x = self.orig_x; 
         let orig_y = self.orig_y; 
         let dest_x = self.dest_x; 
@@ -67,7 +67,7 @@ impl Animation {
         self.animation.signal()
             .map(move |t| easing::in_out(t, easing::cubic))
             .map(move |t| {
-                Transform {
+                AnimationState {
                     x: t.range_inclusive(orig_x, dest_x),
                     y: t.range_inclusive(orig_y, dest_y),
                     scale: t.range_inclusive(1.0, dest_scale),

@@ -17,7 +17,7 @@ export type Mode =
         | "synonymns"
         | "translate"
 
-export const getFrontStyle = (theme:ThemeKind, mode: Mode, side: Side) => {
+export const getContentStyle = (theme:ThemeKind, mode: Mode, side: Side) => {
       return styleMap({
           "--color": `var(--theme-${theme}-cards-color)`,
           "--font-family": mode === "lettering" 

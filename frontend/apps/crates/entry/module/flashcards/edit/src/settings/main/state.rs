@@ -6,6 +6,7 @@ use futures_signals::signal::Mutable;
 use std::rc::Rc;
 use utils::prelude::*;
 use shared::domain::jig::module::body::_groups::cards::Card;
+use rand::{prelude::*, distributions::{Standard, Distribution}};
 
 pub struct MainSettings {
     pub base: Rc<Base>,
@@ -35,5 +36,12 @@ impl MainSettings {
             right,
             display_mode
         }
+    }
+
+    pub fn get_random<T>(&self) -> T 
+    where 
+        Standard: Distribution<T>
+    {
+        self.base.extra.settings.rng.borrow_mut().gen::<T>()
     }
 }

@@ -25,7 +25,8 @@ export interface Args {
     size: Size,
     side: Side,
     mode: Mode,
-    slot?: string
+    slot?: string,
+    backSideContent: CONTENT_MODE | "none",
 }
 
 const DEFAULT_ARGS:Args = {
@@ -37,29 +38,37 @@ const DEFAULT_ARGS:Args = {
     flipped: true,
     flipOnHover: false,
     contentMode: "text",
-    size: "regular",
+    size: "memory",
     mode: "lettering",
-    side: "left"
+    side: "left",
+    backSideContent: "none"
 }
 
 export const Card = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {contentMode, ...cardProps} = props;
+    const {contentMode, backSideContent, ...cardProps} = props;
 
+    if(backSideContent !== "none") {
+        (cardProps as any).doubleSided = true;
+    }
     return `
     <play-card ${argsToAttrs(cardProps)} >
         ${getContent(contentMode)}
+        ${backSideContent !== "none" ? getContent(backSideContent, "backSideContent") : ``}
     </play-card>`;
 }
 
-function getContent(contentMode: CONTENT_MODE) {
+function getContent(contentMode: CONTENT_MODE, slot?: string) {
+    const slotAttr = slot ? `slot="${slot}"` : "";
     if(contentMode === "text") {
         const value = "hello";
-        return `<card-text value="${value}"></card-text>`;
+        return `<card-text value="${value}" ${slotAttr}></card-text>`;
     } else if(contentMode === "image") {
-        return MockJiImage({size: "thumb"})
-    } 
+        return MockJiImage({size: "thumb", slot})
+    } else if(contentMode === "image-empty") {
+        return `<img-ui path="core/_common/image-empty.svg" ${slotAttr}></img-ui>`
+    }
 }
 
 Card.args = DEFAULT_ARGS;
@@ -68,6 +77,12 @@ Card.argTypes = {
         control: {
             type: 'inline-radio',
             options: ["text", "image", "image-empty"]
+        }
+    },
+    backSideContent: {
+        control: {
+            type: 'inline-radio',
+            options: ["none", "text", "image", "image-empty"]
         }
     },
     side: {

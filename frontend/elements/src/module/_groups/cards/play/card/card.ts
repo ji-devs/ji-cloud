@@ -3,9 +3,9 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
-import {cardBackPath, Mode, Side, getFrontStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode, Side, getContentStyle} from "@elements/module/_groups/cards/helpers";
 
-export type Size = "regular" | "flashcards" | "quiz-option" | "quiz-target";
+export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target";
 
 @customElement('play-card')
 export class _ extends LitElement {
@@ -21,7 +21,7 @@ export class _ extends LitElement {
                 --card-size: 500rem;
                 --border-size: 16rem;
             }
-            :host([size="regular"]) {
+            :host([size="memory"]) {
                 --card-size: 188rem;
                 --border-size: 3rem;
             }
@@ -62,7 +62,19 @@ export class _ extends LitElement {
               height: var(--card-size);
           }
 
-          .front, .back, .back > img-ui {
+          .back {
+              transform: rotateY(180deg);
+          }
+            .back > img-ui {
+                object-fit: cover;
+            }
+          .content {
+              border-radius: 16px;
+              border-style: solid;
+              border-width: var(--border-size);
+              background-color: white;
+          }
+          .content, .back > img-ui {
               box-sizing: border-box;
               width: 100%; 
               height: 100%;
@@ -82,7 +94,7 @@ export class _ extends LitElement {
               transform: rotateY(0deg);
           }
 
-          .front, .back {
+          .content, .back {
               justify-content: center;
               align-items: center;
               display: flex;
@@ -93,19 +105,7 @@ export class _ extends LitElement {
                   backface-visibility: hidden;
           }
 
-          .front {
-              border-radius: 16px;
-              border-style: solid;
-              border-width: var(--border-size);
-            background-color: white;
-          }
 
-          .back {
-              transform: rotateY(180deg);
-          }
-            .back > img-ui {
-                object-fit: cover;
-            }
     `];
   }
 
@@ -134,10 +134,13 @@ export class _ extends LitElement {
   side:Side = "left";
 
   @property({reflect: true})
-  size:Size = "regular";
+  size:Size = "memory";
 
   @property({type: Boolean})
   flipOnHover:boolean = false;
+
+  @property({type: Boolean})
+  doubleSided:boolean = false;
 
   connectedCallback() {
       super.connectedCallback();
@@ -166,16 +169,23 @@ export class _ extends LitElement {
   }
 
   render() {
-      const {theme, mode, scale, side, transform, translateX, translateY} = this;
+      const {theme, mode, scale, side, doubleSided, transform, translateX, translateY} = this;
 
-      const frontStyle = getFrontStyle(theme, mode, side); 
+      const contentStyle = getContentStyle(theme, mode, side); 
+
+      const backSide = side === "left" ? "right" : "left";
 
       const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
 
       return html`
           <section style=${style}>
-              <div class="front" style=${frontStyle}><slot></slot></div>
-              <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
+              <div class="content" style=${getContentStyle(theme, mode, side)}><slot></slot></div>
+              <div class="back">
+                ${doubleSided 
+                    ? html`<div class="content" style=${getContentStyle(theme, mode, backSide)}><slot name="backSideContent"></slot></div>`
+                    : html`<img-ui path="${cardBackPath(theme)}"></img-ui>`
+                }
+                </div>
           </section>
       `
   }

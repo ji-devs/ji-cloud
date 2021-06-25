@@ -5,15 +5,13 @@ use crate::{
     settings::state::*
 };
 use super::state::*;
-use components::{
-    image::element::ImageJi,
-    module::_groups::cards::{
-        lookup::{self, Side},
-        edit::{
-            config,
-            state::*
-        },
-    }
+use components::module::_groups::cards::{
+    lookup::{self, Side},
+    play::card::dom::{render_card, CardOptions, Size},
+    edit::{
+        config,
+        state::*
+    },
 };
 use futures_signals::{
     map_ref,
@@ -25,6 +23,7 @@ use shared::domain::jig::module::body::{
     ModeExt,
     _groups::cards::{Mode, Step, Card}
 };
+use rand::prelude::*;
 
 use utils::prelude::*;
 
@@ -38,9 +37,36 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
                 .signal()
                 .map(clone!(state => move |display_mode| {
                     let mut children:Vec<Dom> = Vec::new();
-                    children.push(render_card(state.clone(), Side::Left));
-                    if display_mode == DisplayMode::Pair {
-                        children.push(render_card(state.clone(), Side::Right));
+                    let (card, other, side) = {
+                        if state.get_random::<bool>() { 
+                            (&state.left, &state.right, Side::Left)
+                        } else {
+                            (&state.right, &state.left, Side::Right)
+                        }
+                    };
+
+
+                    let theme_id = state.base.theme_id.get_cloned();
+                    let mode = state.base.mode.clone();
+
+                    if display_mode == DisplayMode::Single {
+
+                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        options.back_card = Some(other);
+                        options.flip_on_hover = true;
+                        options.flipped = true;
+
+                        children.push(render_card(options));
+                    } else {
+                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        options.flipped = true;
+
+                        children.push(render_card(options));
+
+                        let mut options = CardOptions::new(card, theme_id, mode, side, Size::Flashcards);
+                        options.flip_on_hover = true;
+
+                        children.push(render_card(options));
                     }
 
                     children
@@ -48,46 +74,4 @@ pub fn render(state: Rc<MainSettings>) -> Dom {
                 .to_signal_vec()
         )
     })
-}
-
-fn render_card(state: Rc<MainSettings>, side:Side) -> Dom {
-    let card = if side == Side::Left { &state.left } else { &state.right };
-
-    let theme_id = state.base.theme_id.get_cloned();
-    let mode = state.base.mode.clone();
-
-    html!("play-card", {
-        .style("visibility", "visible") 
-        .property("size", "flashcards")
-        .property("flipOnHover", true)
-        .property("flipped", if side == Side::Left { true } else { false }) 
-        .property("theme", theme_id.as_str_id())
-        .property("mode", mode.as_str_id())
-        .property("side", side.as_str_id())
-        .child(render_media(&card, mode, theme_id))
-    })
-}
-
-pub fn render_media(card:&Card, mode: Mode, theme_id: ThemeId) -> Dom {
-    match &card {
-        Card::Text(s) => {
-            html!("card-text", {
-                .property("value", s)
-                .property("fontSize", {
-                    let font_size = lookup::get_card_font_size(s.len(), theme_id, mode);
-                    format!("{}rem", font_size)
-                })
-            })
-        },
-        Card::Image(image) => {
-            match image {
-                Some(image) => {
-                    ImageJi::render(&image.id, image.lib, None)
-                },
-                None => {
-                    html!("empty-fragment")
-                }
-            }
-        },
-    }
 }

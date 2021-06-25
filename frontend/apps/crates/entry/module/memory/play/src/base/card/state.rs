@@ -1,6 +1,6 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use super::{
-    animation::{Animation, Transform},
+    animation::{Animation, AnimationState},
     super::state::*
 };
 use dominator::clone;
@@ -17,7 +17,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Image,
-            _groups::cards::{CardPair as RawCardPair, Card as RawCard}
+            _groups::cards::{CardPair as RawCardPair, Card}
         }
     }
 };
@@ -27,7 +27,7 @@ use components::module::_groups::cards::lookup::Side;
 
 #[derive(Clone)]
 pub struct CardState {
-    pub media: Media,
+    pub card: Card,
     pub id: usize,
     pub other_id: usize,
     pub side: Side,
@@ -37,9 +37,9 @@ pub struct CardState {
 }
 
 impl CardState {
-    pub fn new(media:Media, id: usize, other_id:usize, side:Side) -> Self {
+    pub fn new(card:Card, id: usize, other_id:usize, side:Side) -> Self {
         Self { 
-            media,
+            card,
             id,
             other_id,
             side,
@@ -69,10 +69,10 @@ impl CardState {
             }))
     }
 
-    pub fn transform_signal(&self) -> impl Signal<Item = Option<Transform>> {
+    pub fn animation_state_signal(&self) -> impl Signal<Item = Option<AnimationState>> {
         self.animation.signal_ref(|anim| {
             OptionSignal::new( 
-                anim.as_ref().map(|anim| anim.transform_signal())
+                anim.as_ref().map(|anim| anim.state_signal())
             )
         })
         .flatten()
@@ -90,18 +90,3 @@ impl CardState {
     }
 }
 
-
-#[derive(Debug, Clone)]
-pub enum Media{
-    Text(String),
-    Image(Image),
-}
-
-impl From<&RawCard> for Media {
-    fn from(card:&RawCard) -> Self {
-        match card {
-            RawCard::Text(x) => Self::Text(x.to_string()),
-            RawCard::Image(image) => Self::Image(image.as_ref().unwrap_ji().clone())
-        }
-    }
-}

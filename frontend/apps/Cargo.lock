@@ -149,6 +149,7 @@ dependencies = [
  "js-sys",
  "log",
  "once_cell",
+ "rand",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

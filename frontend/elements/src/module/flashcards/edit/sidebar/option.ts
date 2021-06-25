@@ -2,11 +2,11 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 
-export type Mode = "single" | "pair";
+export type Mode = "single" | "double";
 
 const STR_MODE_LABEL:Record<Mode, string> = {
     "single": "Single card",
-    "pair": "A pair",
+    "double": "A pair",
 }
 
 @customElement('flashcards-settings-option')

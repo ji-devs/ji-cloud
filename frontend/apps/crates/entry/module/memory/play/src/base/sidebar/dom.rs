@@ -2,17 +2,15 @@ use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use crate::base::{
     state::*,
-    card::{
-        state::*,
-        dom::render_media as render_card_media
-    }
+    card::state::*,
 };
 use futures_signals::{
-    signal::SignalExt,
+    signal::{always, SignalExt},
     signal_vec::SignalVecExt
 };
 use utils::prelude::*;
 use shared::domain::jig::module::body::ModeExt;
+use components::module::_groups::cards::play::card::dom::{render_dynamic_card_mixin, DynamicCardOptions, Size, SimpleTransform};
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-sidebar", {
@@ -23,52 +21,58 @@ pub fn render(state: Rc<Base>) -> Dom {
             state.cards
                 .iter()
                 .map(clone!(state => move |card| {
-                    render_card(state.clone(), card.clone())
+                    render_sidebar_card(state.clone(), card.clone())
                 }))
         )
     })
 }
 
-fn render_card(state: Rc<Base>, card: Rc<CardState>) -> Dom {
-    let card_id = &card.id;
+fn render_sidebar_card(state: Rc<Base>, card_state: Rc<CardState>) -> Dom {
+    let card_id = &card_state.id;
+    let card = &card_state.card;
+   
+    let theme_id = state.theme_id;
+    let mode = state.mode;
+    let side = card_state.side;
+    let size = Size::Memory;
 
-    html!("play-card", {
-        .future(card.found_index.signal().for_each(clone!(state, card => move |found_index| {
-            if let Some(found_index) = found_index {
-                super::actions::start_animation(&state, card.clone(), found_index);
-            }
-            async {}
-        })))
-        .property("side", card.side.as_str_id())
-        .style_signal("display", card.is_found().map(|flag| {
-            if flag {
-                "block"
-            } else {
-                "none"
-            }
-        }))
-        .property_signal("translateX", {
-            card.transform_signal().map(|t| match t {
-                Some(t) => t.x,
-                None => 0.0
+    let flipped_signal = always(true);
+    let transparent_signal = always(false);
+    let hidden_signal = card_state.is_found().map(|found| !found);
+    let get_simple_transform = clone!(card_state => move || {
+        card_state.animation_state_signal()
+            .map(|animation_state| {
+                animation_state.map(|animation_state| {
+                    SimpleTransform {
+                        x: animation_state.x,
+                        y: animation_state.y,
+                        scale: animation_state.scale,
+                    }
+                })
             })
-        }) 
-        .property_signal("translateY", {
-            card.transform_signal().map(|t| match t {
-                Some(t) => t.y,
-                None => 0.0
-            })
-        }) 
-        .property_signal("scale", {
-            card.transform_signal().map(|t| match t {
-                Some(t) => t.scale,
-                None => 1.0 
-            })
-        }) 
-        .property("flipped", true) 
-        .property("theme", state.theme_id.as_str_id())
-        .property("mode", state.mode.as_str_id())
-        .property("transform", true)
-        .child(render_card_media(&card, state.mode, state.theme_id))
+    });
+
+    let mut options = DynamicCardOptions::new(
+        card,
+        theme_id,
+        mode,
+        side,
+        size,
+        flipped_signal,
+        transparent_signal,
+        hidden_signal,
+        Some(get_simple_transform)
+
+    );
+
+
+    render_dynamic_card_mixin(options, |dom| {
+        dom
+            .future(card_state.found_index.signal().for_each(clone!(state, card_state => move |found_index| {
+                if let Some(found_index) = found_index {
+                    super::actions::start_animation(&state, card_state.clone(), found_index);
+                }
+                async {}
+            })))
     })
 }

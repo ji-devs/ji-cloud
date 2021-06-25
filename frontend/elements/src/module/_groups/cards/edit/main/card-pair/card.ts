@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
-import {cardBackPath, Mode,Side, getFrontStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode,Side, getContentStyle} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
 
 @customElement('main-card')
@@ -114,11 +114,11 @@ export class _ extends LitElement {
   render() {
       const {flippable, theme, editing, mode, side} = this;
 
-      const frontStyle = getFrontStyle(theme, mode, side);
+      const contentStyle = getContentStyle(theme, mode, side);
 
       return html`
           <section class="${classMap({flippable, editing})}" >
-          <div class="front" style=${frontStyle}><slot></slot></div>
+          <div class="front" style=${contentStyle}><slot></slot></div>
           <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
           </section>
       `

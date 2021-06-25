@@ -86,8 +86,8 @@ impl Base {
                 let id_2 = index + 1;
                 index = id_2 + 1;
 
-                cards.push(Rc::new(CardState::new(card_1.into(), id_1, id_2, Side::Left)));
-                cards.push(Rc::new(CardState::new(card_2.into(), id_2, id_1, Side::Right)));
+                cards.push(Rc::new(CardState::new(card_1.clone(), id_1, id_2, Side::Left)));
+                cards.push(Rc::new(CardState::new(card_2.clone(), id_2, id_1, Side::Right)));
             }
 
             cards

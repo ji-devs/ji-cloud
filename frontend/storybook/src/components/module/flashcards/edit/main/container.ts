@@ -14,7 +14,7 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    mode: "pair",
+    mode: "single",
 }
 
 export const Container = (props?:Partial<Args> & {content?: string}) => {
@@ -30,24 +30,47 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
       `;
 }
 
-function renderCard(flipped: boolean) {
-	return Card({
+interface CardOptions {
+	flipped: boolean,
+	flippable: boolean,
+	doubleSided: boolean,
+}
+function renderCard({flipped, flippable, doubleSided}) {
+	const cardArgs:Partial<CardArgs> = {
 		contentMode: "image",
 		theme: "happy-brush",
 		size: "flashcards",
 		flipped,
-		flipOnHover: true
-	});
+		flipOnHover: flippable,
+	};
+
+	if(doubleSided) {
+		cardArgs.backSideContent = "text";
+	}
+
+	return Card(cardArgs);
 }
 function renderSingle() {
 	return `
-		${renderCard(true)}
+		${renderCard({
+			flipped: true,
+			flippable: true,
+			doubleSided: true
+		})}
 	`
 }
 function renderPair() {
 	return `
-		${renderCard(true)}
-		${renderCard(false)}
+		${renderCard({
+			flipped: true,
+			flippable: false,
+			doubleSided: false
+		})}
+		${renderCard({
+			flipped: false,
+			flippable: true,
+			doubleSided: false
+		})}
 	`
 }
 Container.args= DEFAULT_ARGS;
