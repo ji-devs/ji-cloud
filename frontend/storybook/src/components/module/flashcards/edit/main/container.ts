@@ -1,7 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/core/module-page/grid-resize";
-import "@elements/module/flashcards/edit/main/container";
+import "@elements/module/flashcards/_common/main/container";
 import "~/components/module/_groups/cards/edit/main/card-pair/card";
 import {Mode} from "@elements/module/flashcards/edit/sidebar/option";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";

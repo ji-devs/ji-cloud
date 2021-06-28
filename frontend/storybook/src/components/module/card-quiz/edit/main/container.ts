@@ -1,7 +1,7 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/core/module-page/grid-resize";
-import "@elements/module/card-quiz/edit/main/container";
+import "@elements/module/card-quiz/_common/main/container";
 import {Size} from "@elements/module/_groups/cards/play/card/styles";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
 export default {

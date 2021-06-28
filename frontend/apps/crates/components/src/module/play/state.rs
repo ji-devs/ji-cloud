@@ -166,7 +166,7 @@ where
     ) -> Rc<Self>
     where
         InitFromRawFn: Fn(InitFromRawArgs<RawData, Mode, Step>) -> InitFromRawOutput + Clone + 'static,
-        InitFromRawOutput: Future<Output = Base>,
+        InitFromRawOutput: Future<Output = Rc<Base>>,
         <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
     {
         
@@ -258,7 +258,7 @@ where
                                         );
                                         let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, InitSource::IframeData)).await;
 
-                                        _self.phase.set(Rc::new(Phase::Playing(Rc::new(base), true)));
+                                        _self.phase.set(Rc::new(Phase::Playing(base, true)));
                                     }));
                                 })))
                             )));
@@ -291,7 +291,7 @@ where
                     );
                     let base = init_from_raw(InitFromRawArgs::new(_self.get_audio_mixer(), jig_id, module_id, jig, raw, init_source)).await;
 
-                    _self.phase.set(Rc::new(Phase::Playing(Rc::new(base), false)));
+                    _self.phase.set(Rc::new(Phase::Playing(base, false)));
                 }
             }));
         })));

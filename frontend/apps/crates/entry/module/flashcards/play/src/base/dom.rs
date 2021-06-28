@@ -8,25 +8,25 @@ use futures_signals::{
 };
 use utils::prelude::*;
 use super::{
-    state::*,
-    stage::dom::render as render_stage,
-    sidebar::dom::render as render_sidebar,
+    state::{Base, Phase},
+    game::dom::render as render_game,
+    ending::dom::render as render_ending
 };
+
 
 impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
             .child(state.instructions.render(&state.audio_mixer))
-            .child(
-                html!("play-container", {
-                    .children(&mut [
-                        backgrounds::dom::render_raw_single(&state.background, state.theme_id, Some("bg")),
-                        render_stage(state.clone()),
-                        render_sidebar(state.clone()),
-                    ])
-                })
-            )
+            .child(backgrounds::dom::render_raw_single(&state.background, state.theme_id, None))
+            .child_signal(state.phase.signal_cloned().map(|phase| {
+                match phase {
+                    Phase::Init => None,
+                    Phase::Playing(game) => Some(render_game(game)),
+                    Phase::Ending(ending) => Some(render_ending(ending))
+                }
+            }))
         })
     }
 }

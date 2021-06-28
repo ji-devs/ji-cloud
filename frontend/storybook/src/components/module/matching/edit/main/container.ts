@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/core/module-page/grid-resize";
-import "@elements/module/matching/edit/main/container";
-import "@elements/module/matching/edit/main/column";
+import "@elements/module/matching/_common/main/container";
+import "@elements/module/matching/_common/main/column";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
 import {Empty, Args as EmptyArgs} from "~/components/module/_groups/cards/play/empty";
 import {Kind as EmptyKind} from "@elements/module/_groups/cards/play/card/empty";
