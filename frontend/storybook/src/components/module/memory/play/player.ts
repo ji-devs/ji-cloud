@@ -29,13 +29,13 @@ export const Player = (props?:Partial<Args>) => {
     return `
 
       <module-page-grid-resize>
-    <play-container slot="main">
+    <memory-container slot="main">
         ${Sidebar({nPairs: nCards/2})}
         ${isEnding 
             ? Ending()
             : Main({nCards})
         }
-    </play-container>
+    </memory-container>
       </module-page-grid-resize>
     `;
 }

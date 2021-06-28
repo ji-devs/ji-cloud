@@ -7,6 +7,9 @@ export class _ extends LitElement {
   static get styles() {
       return [css`
       :host {
+        position: absolute;
+        top: 0;
+        left: 0;
         display: flex;
         width: 100%;
         height: 100%;

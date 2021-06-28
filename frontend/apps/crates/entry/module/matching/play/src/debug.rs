@@ -18,7 +18,7 @@ use shared::{
             module::body::{
                 Image,
                 ThemeChoice,
-                Background, Backgrounds,
+                Background,
                 Instructions, 
                 _groups::cards::{
                     Mode, 
@@ -27,6 +27,7 @@ use shared::{
                     BaseContent, 
                 },
                 matching::{
+                    PlayerSettings,
                     ModuleData as RawData,
                     Content,
                 }
@@ -39,6 +40,7 @@ use shared::{
     media::MediaLibrary
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
+use components::module::_groups::cards::play::config;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 //const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
@@ -67,16 +69,19 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::WordsAndImages;
+                    let mode = Mode::Translate;
 
                     RawData{
                         content: Some(Content {
+                            player_settings: PlayerSettings {
+                                ..PlayerSettings::default()
+                            },
                             base: BaseContent {
                                 mode,
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 
                                 instructions: Instructions::default(),
                                 pairs: if init_data.with_pairs {
-                                    crate::config::get_debug_pairs(mode, 3)
+                                    config::get_debug_pairs(mode)
                                         .into_iter()
                                         .map(|(word_1, word_2)| {
                                             match mode {

@@ -19,7 +19,7 @@ impl DomRenderable for Base {
             .property("slot", "main")
             .child(state.instructions.render(&state.audio_mixer))
             .child(
-                html!("play-container", {
+                html!("memory-container", {
                     .children(&mut [
                         backgrounds::dom::render_raw_single(&state.background, state.theme_id, Some("bg")),
                         render_stage(state.clone()),

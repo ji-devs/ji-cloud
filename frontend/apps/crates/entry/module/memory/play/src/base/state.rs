@@ -56,7 +56,7 @@ pub enum FlipState {
     Two(usize, usize),
 }
 impl Base {
-    pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Self {
+    pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
 
         let InitFromRawArgs {
             jig_id,
@@ -103,7 +103,7 @@ impl Base {
             cards.shuffle(&mut rng);
         }
 
-        Self {
+        Rc::new(Self {
             jig_id,
             module_id,
             mode: content.mode,
@@ -116,7 +116,7 @@ impl Base {
             found_pairs: RefCell::new(Vec::new()),
             instructions: InstructionsPlayer::new(content.instructions), 
             audio_mixer,
-        }
+        })
     }
 
 

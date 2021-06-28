@@ -3,11 +3,17 @@ import { mediaUi } from "@utils/path";
 import {ThemeKind} from "@elements/_themes/themes";
 
 
-@customElement("play-container")
+@customElement("memory-container")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
+
+            :host {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
                 .bg {
                     position: absolute;
                     top: 0;

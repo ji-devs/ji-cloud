@@ -144,7 +144,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
-                InitSticker::Text, InitSticker::Sprite
+                InitSticker::Text,// InitSticker::Sprite
             ],
             traces: vec![
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1),

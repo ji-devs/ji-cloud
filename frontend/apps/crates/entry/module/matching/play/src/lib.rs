@@ -20,17 +20,13 @@ use wasm_bindgen::prelude::*;
 use std::rc::Rc;
 use web_sys::{window, Element};
 use router::Router;
-/*
-mod page;
-mod pages;
-mod header;
-*/
 
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
     let settings = utils::settings::init();
 
+    components::module::_groups::cards::play::config::init();
     let router = Rc::new(Router::new());
 
     router::render(router.clone());

@@ -2,6 +2,7 @@ use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design:
 use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
+use std::rc::Rc;
 
 pub struct Base {
     pub jig_id: JigId,
@@ -16,7 +17,7 @@ pub struct Base {
 
 impl Base {
 
-    pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Self {
+    pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
 
         let InitFromRawArgs {
             jig_id,
@@ -33,7 +34,7 @@ impl Base {
 
 
 
-        Self {
+        Rc::new(Self {
             jig_id,
             module_id,
             jig,
@@ -42,7 +43,7 @@ impl Base {
             instructions: InstructionsPlayer::new(base_content.instructions),
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
-        }
+        })
     }
 }
 
