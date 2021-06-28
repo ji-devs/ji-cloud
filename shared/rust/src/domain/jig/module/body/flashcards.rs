@@ -22,6 +22,42 @@ pub struct ModuleData {
 pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
+    /// Settings for playback
+    pub player_settings: PlayerSettings,
+}
+
+/// Player settings
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct PlayerSettings {
+    /// display mode
+    pub display_mode: DisplayMode,
+}
+
+/// Display Mode
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub enum DisplayMode {
+    /// Single sided cards
+    Single,
+    /// Double sided cards
+    Double,
+}
+
+impl Default for DisplayMode {
+    fn default() -> Self {
+        Self::Single
+    }
+}
+
+impl DisplayMode {
+    /// Get it as a string
+    pub fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Single => "single",
+            Self::Double => "double",
+        }
+    }
 }
 
 impl BodyExt<Mode, Step> for ModuleData {

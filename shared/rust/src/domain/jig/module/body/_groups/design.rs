@@ -84,7 +84,6 @@ pub enum SpriteEffect {
     RemoveWhite,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Trace

@@ -267,7 +267,6 @@ pub struct Instructions {
     pub audio: Option<Audio>,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Background
@@ -278,7 +277,6 @@ pub enum Background {
     Image(Image),
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Images need id and lib
@@ -288,7 +286,6 @@ pub struct Image {
     /// The MediaLibrary
     pub lib: MediaLibrary,
 }
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -313,4 +310,3 @@ pub struct Transform {
     /// Origin
     pub origin: Vec3,
 }
-

@@ -22,6 +22,16 @@ pub struct ModuleData {
 pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
+    /// Settings for playback
+    pub player_settings: PlayerSettings,
+}
+
+/// Player settings
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct PlayerSettings {
+    /// time limit in minutes
+    pub time_limit: Option<u32>,
 }
 
 impl BodyExt<Mode, Step> for ModuleData {

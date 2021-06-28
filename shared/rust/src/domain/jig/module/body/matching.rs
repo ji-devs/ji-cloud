@@ -22,6 +22,37 @@ pub struct ModuleData {
 pub struct Content {
     /// The base content for all cards modules
     pub base: BaseContent,
+
+    /// Settings for playback
+    pub player_settings: PlayerSettings,
+}
+
+/// Player settings
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct PlayerSettings {
+    /// number of choices
+    pub n_choices: u8,
+
+    /// swap the display to be primary left vs. right
+    pub swap: bool,
+
+    /// number of rounds to play
+    pub n_rounds: u32,
+
+    /// time limit in minutes
+    pub time_limit: Option<u32>,
+}
+
+impl Default for PlayerSettings {
+    fn default() -> Self {
+        Self {
+            n_choices: 3,
+            swap: false,
+            n_rounds: 1,
+            time_limit: None,
+        }
+    }
 }
 
 impl BodyExt<Mode, Step> for ModuleData {
