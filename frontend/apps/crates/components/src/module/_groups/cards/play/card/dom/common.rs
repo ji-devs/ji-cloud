@@ -5,16 +5,24 @@ use crate::module::_groups::cards::lookup::{self, Side};
 use shared::domain::jig::module::body::{ModeExt, Transform, _groups::cards::{Mode, Step, Card}};
 use futures_signals::signal::{Signal, SignalExt, Always};
 
+//must match @elements/module/_groups/cards/play/card/styles.ts
+//export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target" | "matching";
 pub enum Size {
     Memory,
-    Flashcards
+    Flashcards,
+    QuizOption,
+    QuizTarget,
+    Matching
 }
 
 impl Size {
     pub fn as_str_id(&self) -> &'static str {
         match self {
             Self::Memory => "memory",
-            Self::Flashcards => "flashcards"
+            Self::Flashcards => "flashcards",
+            Self::QuizOption => "quiz-option",
+            Self::QuizTarget => "quiz-target",
+            Self::Matching => "matching"
         }
     }
 }

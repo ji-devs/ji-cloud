@@ -13,6 +13,14 @@ impl Side {
             Self::Right => "right",
         }
     }
+
+    pub fn negate(&self) -> Self {
+        if *self == Side::Left {
+            Side::Right
+        } else {
+            Side::Left
+        }
+    }
 }
 
 pub fn get_card_font_size(length: usize, theme_id: ThemeId, mode: Mode) -> usize {

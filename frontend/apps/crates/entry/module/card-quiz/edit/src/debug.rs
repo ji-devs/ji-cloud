@@ -72,7 +72,7 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
-                    let mode = Mode::WordsAndImages;
+                    let mode = Mode::Translate;
 
                     RawData{
                         content: Some(Content {
@@ -113,7 +113,7 @@ impl DebugSettings {
                 step2_tab: Some(Step2TabKind::Theme),
                 step3_tab: Some(Step3TabKind::Settings),
             }),
-            step: Some(Step::Two),
+            step: Some(Step::Three),
             skip_save: true,
             skip_load_jig: true,
         }

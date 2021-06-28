@@ -28,6 +28,7 @@ where
     //should be set to match card and back_card will automatically
     //use the opposite
     pub side: Side, 
+    pub slot: Option<&'a str>
 }
 
 //To make it easier to pass None::<NoTransform> for the get_simple_transform arg
@@ -68,6 +69,7 @@ where
             //mimic default derive
             back_card: None,
             flip_on_hover: false,
+            slot: None,
 
         }
     }
@@ -119,11 +121,15 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
         theme_id, 
         mode, 
         size, 
-        side
+        side,
+        slot,
     } = options;
 
     html!("play-card", {
         .style("visibility", "visible") 
+        .apply_if(slot.is_some(), |dom| 
+            dom.property("slot", slot.unwrap_ji())
+        )
         .property("size", size.as_str_id())
         .property("flipOnHover", flip_on_hover)
         .property_signal("flipped", flipped)

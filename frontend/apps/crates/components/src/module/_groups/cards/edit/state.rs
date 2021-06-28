@@ -164,6 +164,16 @@ impl <RawData: RawDataExt, E: ExtraExt> CardsBase <RawData, E> {
         _self
     }
 
+    pub fn clone_pairs_raw(&self) -> Vec<(raw::Card, raw::Card)> {
+        self.pairs
+            .lock_ref()
+            .iter()
+            .map(|pair| {
+                (pair.0.clone().into(), pair.1.clone().into())
+            })
+            .collect()
+    }
+
     pub fn pairs_len_signal(&self) -> impl Signal<Item = usize> {
         self.pairs.signal_vec_cloned().len()
     }

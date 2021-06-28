@@ -20,6 +20,7 @@ pub struct CardOptions <'a> {
     //should be set to match card and back_card will automatically
     //use the opposite
     pub side: Side, 
+    pub slot: Option<&'a str>
 }
 
 /*
@@ -43,6 +44,7 @@ impl <'a> CardOptions <'a> {
             transparent: false,
             hidden: false,
             simple_transform: None,
+            slot: None,
         }
     }
 }
@@ -74,11 +76,15 @@ fn _render_card<F>(options: CardOptions, mixin: Option<F>) -> Dom
         theme_id, 
         mode, 
         size, 
-        side
+        side,
+        slot
     } = options;
 
     html!("play-card", {
         .style("visibility", "visible") 
+        .apply_if(slot.is_some(), |dom| 
+            dom.property("slot", slot.unwrap_ji())
+        )
         .property("size", size.as_str_id())
         .property("flipOnHover", flip_on_hover)
         .property("flipped", flipped)
