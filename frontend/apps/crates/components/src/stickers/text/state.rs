@@ -5,7 +5,7 @@ use futures_signals::{
 };
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::{domain::{image::ImageId, jig::module::body::{Text as RawText, Transform}}, media::MediaLibrary};
+use shared::{domain::{image::ImageId, jig::module::body::{_groups::design::Text as RawText, Transform}}, media::MediaLibrary};
 use dominator::clone;
 
 use crate::{

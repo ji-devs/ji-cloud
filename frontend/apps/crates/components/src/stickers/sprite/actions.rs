@@ -15,7 +15,7 @@ use super::{
     super::state::Stickers
 };
 use shared::{
-    domain::jig::module::body::{SpriteEffect, Image},
+    domain::jig::module::body::{_groups::design::SpriteEffect, Image},
 };
 
 impl Sprite {

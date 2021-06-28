@@ -10,7 +10,7 @@ impl Base {
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.theme = theme;
+                content.base.theme = theme;
             }
         });
     }

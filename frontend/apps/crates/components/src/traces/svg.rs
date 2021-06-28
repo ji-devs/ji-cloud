@@ -11,7 +11,7 @@ use web_sys::{HtmlCanvasElement, SvgElement};
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
-use shared::domain::jig::module::body::{Trace, TraceShape, Transform};
+use shared::domain::jig::module::body::{Transform, _groups::design::{Trace, TraceShape}};
 use super::utils::*;
 
 static SVG_CLASS: Lazy<String> = Lazy::new(|| class! {

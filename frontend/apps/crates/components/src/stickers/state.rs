@@ -6,7 +6,7 @@ use futures_signals::{
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::Sticker as RawSticker;
+use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 use super::{
     sprite::state::Sprite,
     text::state::Text,

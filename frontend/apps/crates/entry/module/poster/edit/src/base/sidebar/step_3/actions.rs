@@ -14,7 +14,7 @@ impl Base {
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
-                content.instructions.audio = audio;
+                content.base.instructions.audio = audio;
             }
         });
     }

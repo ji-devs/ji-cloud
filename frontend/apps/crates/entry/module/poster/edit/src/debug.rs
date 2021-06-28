@@ -18,9 +18,11 @@ use shared::{
             module::body::{
                 Image,
                 ThemeChoice,
-                Background, Backgrounds,
-                Sprite, Instructions, Sticker, Text, Trace, Transform, TraceShape,
-                poster::{Content, Mode, Step, ModuleData as RawData}
+                Background,
+                Instructions, 
+                Transform,
+                poster::{Content, Mode, Step, ModuleData as RawData},
+                _groups::design::{BaseContent, Sticker, Text, Trace, TraceShape, Backgrounds, Sprite}
             },
             JigId, module::ModuleId
         },
@@ -78,20 +80,22 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             mode: Mode::Poster,
-                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                            instructions: Instructions::default(),
-                            stickers: init_data.stickers.iter().map(|init| {
-                                match init {
-                                    InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
-                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
-                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
-                                        lib: MediaLibrary::Global
-                                    }))
-                                }
-                            }).collect(),
-                            backgrounds: Backgrounds {
-                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
-                                layer_2: None,
+                            base: BaseContent {
+                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                                instructions: Instructions::default(),
+                                stickers: init_data.stickers.iter().map(|init| {
+                                    match init {
+                                        InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                        InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
+                                            id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                            lib: MediaLibrary::Global
+                                        }))
+                                    }
+                                }).collect(),
+                                backgrounds: Backgrounds {
+                                    layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                    layer_2: None,
+                                },
                             },
                             ..Content::default()
                         })

@@ -7,7 +7,7 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             ThemeChoice,
-            Trace as RawTrace,
+            _groups::design::Trace as RawTrace,
             Audio,
             Instructions,
             poster::{Mode, Step, Content as RawContent, ModuleData as RawData}

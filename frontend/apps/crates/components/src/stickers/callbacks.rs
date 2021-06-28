@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::Sticker as RawSticker;
+use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 
 pub struct Callbacks {
     pub on_change: Option<Box<dyn Fn(Vec<RawSticker>)>>,

@@ -12,7 +12,7 @@ use super::{
     sprite,
     text,
 };
-use shared::domain::jig::module::body::Sticker as RawSticker;
+use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {

@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Backgrounds, Sticker, ThemeChoice, tapping_board::{Mode, Step, ModuleData as RawData, PlaySettings, TappingTrace}}}};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, tapping_board::{Mode, Step, ModuleData as RawData, PlaySettings, TappingTrace}}}};
 use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
@@ -38,10 +38,10 @@ impl Base {
             jig,
             theme_id,
             audio_mixer,
-            instructions: InstructionsPlayer::new(content.instructions),
+            instructions: InstructionsPlayer::new(content.base.instructions),
             settings: content.play_settings,
-            backgrounds: content.backgrounds,
-            stickers: content.stickers,
+            backgrounds: content.base.backgrounds,
+            stickers: content.base.stickers,
             traces: content.traces,
         }
     }

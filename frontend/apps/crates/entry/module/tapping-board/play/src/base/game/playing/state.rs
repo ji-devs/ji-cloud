@@ -10,7 +10,7 @@ use components::traces::{
 };
 use shared::domain::jig::module::body::{
     Audio,
-    Trace,
+    _groups::design::Trace,
     tapping_board::{Next, TappingTrace}
 };
 use web_sys::AudioContext;

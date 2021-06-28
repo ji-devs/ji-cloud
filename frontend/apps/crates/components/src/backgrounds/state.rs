@@ -6,7 +6,7 @@ use futures_signals::{
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{ThemeId, Background, Backgrounds as RawBackgrounds};
+use shared::domain::jig::module::body::{ThemeId, Background, _groups::design::Backgrounds as RawBackgrounds};
 use super::callbacks::Callbacks;
 
 pub struct Backgrounds 

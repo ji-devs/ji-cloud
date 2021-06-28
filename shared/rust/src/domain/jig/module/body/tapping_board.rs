@@ -1,7 +1,7 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Backgrounds, Body, BodyExt, Instructions, ModeExt, StepExt, Sticker, ThemeChoice,
-        Trace,
+        Audio, Body, BodyExt, ModeExt, StepExt, ThemeChoice,
+        _groups::design::{BaseContent, Trace}
     },
     ModuleKind,
 };
@@ -72,7 +72,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn get_theme(&self) -> Option<ThemeChoice> {
-        self.content.as_ref().map(|content| content.theme)
+        self.content.as_ref().map(|content| content.base.theme)
     }
 }
 
@@ -91,23 +91,14 @@ impl TryFrom<Body> for ModuleData {
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
+    /// The base content for all design modules
+    pub base: BaseContent,
+
     /// The editor state
     pub editor_state: EditorState,
 
     /// The mode
     pub mode: Mode,
-
-    /// The instructions for the module.
-    pub instructions: Instructions,
-
-    /// The module's theme.
-    pub theme: ThemeChoice,
-
-    /// Backgrounds
-    pub backgrounds: Backgrounds,
-
-    /// Stickers
-    pub stickers: Vec<Sticker>,
 
     /// Traces
     pub traces: Vec<TappingTrace>,

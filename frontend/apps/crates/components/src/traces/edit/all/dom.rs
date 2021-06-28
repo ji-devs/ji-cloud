@@ -13,7 +13,7 @@ use crate::traces::{
 };
 use super::trace::state::*;
 
-use shared::domain::jig::module::body::{Trace as RawTrace, Transform, TraceShape};
+use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape}};
 use web_sys::{SvgElement, HtmlCanvasElement};
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;

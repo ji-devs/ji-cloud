@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Backgrounds, Body, BodyExt, Instructions, StepExt, Sticker, ThemeChoice},
+    body::{Body, BodyExt, Instructions, StepExt, ThemeChoice, _groups::design::*},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -62,7 +62,7 @@ impl BodyExt<(), Step> for ModuleData {
     }
 
     fn get_theme(&self) -> Option<ThemeChoice> {
-        self.content.as_ref().map(|content| content.theme)
+        self.content.as_ref().map(|content| content.base.theme)
     }
 }
 
@@ -84,17 +84,8 @@ pub struct Content {
     /// The editor state
     pub editor_state: EditorState,
 
-    /// The instructions for the module.
-    pub instructions: Instructions,
-
-    /// The module's theme.
-    pub theme: ThemeChoice,
-
-    /// Backgrounds
-    pub backgrounds: Backgrounds,
-
-    /// Stickers
-    pub stickers: Vec<Sticker>,
+    /// The base content for all design modules
+    pub base: BaseContent,
 }
 
 /// Editor state

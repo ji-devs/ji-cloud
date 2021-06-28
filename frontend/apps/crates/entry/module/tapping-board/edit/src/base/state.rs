@@ -9,8 +9,6 @@ use shared::domain::jig::{
         body::{
             StepExt,
             ThemeChoice,
-            Trace as RawTrace,
-            Backgrounds as RawBackgrounds, 
             Audio,
             Instructions,
             tapping_board::{
@@ -20,6 +18,10 @@ use shared::domain::jig::{
                 Mode, 
                 Content as RawContent, 
                 ModuleData as RawData
+            },
+            _groups::design::{
+                Trace as RawTrace,
+                Backgrounds as RawBackgrounds, 
             }
         }
     }
@@ -130,7 +132,7 @@ impl Base {
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
-        let instructions = Mutable::new(content.instructions);
+        let instructions = Mutable::new(content.base.instructions);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
@@ -160,13 +162,13 @@ impl Base {
 
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
-                &content.backgrounds,
+                &content.base.backgrounds,
                 theme_id.clone(),
                 BackgroundsCallbacks::new(
                     Some(clone!(history => move |raw_bgs| {
                         history.push_modify(|raw| {
                             if let Some(content) = &mut raw.content {
-                                content.backgrounds = raw_bgs;
+                                content.base.backgrounds = raw_bgs;
                             }
                         });
                     }))
@@ -174,13 +176,13 @@ impl Base {
         ));
 
         let stickers = Stickers::from_raw(
-                &content.stickers,
+                &content.base.stickers,
                 text_editor.clone(),
                 StickersCallbacks::new(
                     Some(clone!(history => move |raw_stickers| {
                         history.push_modify(|raw| {
                             if let Some(content) = &mut raw.content {
-                                content.stickers = raw_stickers;
+                                content.base.stickers = raw_stickers;
                             }
                         });
                     }))

@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{always, Signal, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::module::body::{Sprite, Transform};
+use shared::domain::jig::module::body::{_groups::design::Sprite, Transform};
 use super::{
     super::state::Text,
     super::super::state::Stickers

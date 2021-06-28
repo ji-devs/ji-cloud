@@ -7,7 +7,7 @@ use futures_signals::{
     signal::{self, always, Signal, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::jig::module::body::{Text as RawText, Transform};
+use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
 use crate::{
     transform::{
         self, 

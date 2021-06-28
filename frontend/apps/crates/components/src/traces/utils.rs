@@ -1,5 +1,5 @@
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};
-use shared::domain::jig::module::body::{Trace as RawTrace, TraceShape as RawTraceShape, Transform};
+use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape as RawTraceShape}};
 
 pub trait TraceExt {
     fn to_raw(&self) -> RawTrace;

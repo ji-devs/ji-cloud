@@ -11,7 +11,7 @@ use super::{
     super::state::Sprite,
     super::super::state::Stickers
 };
-use shared::domain::jig::module::body::SpriteEffect;
+use shared::domain::jig::module::body::_groups::design::SpriteEffect;
 
 pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("div", {

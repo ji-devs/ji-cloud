@@ -1,3 +1,7 @@
+/*
+ * The card modules not only share some base content
+ * But the editor steps are identical except for 3
+ */
 use crate::domain::jig::module::{
     body::{Background, Body, BodyExt, Image, Instructions, ModeExt, StepExt, ThemeChoice},
     ModuleKind,

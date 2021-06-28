@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Trace as RawTrace, Transform};
+use shared::domain::jig::module::body::{_groups::design::Trace as RawTrace, Transform};
 use crate::transform::state::TransformState;
 use dominator::clone;
 use super::{

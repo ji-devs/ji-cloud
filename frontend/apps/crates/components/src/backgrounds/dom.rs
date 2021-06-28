@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 
 use super::state::*;
-use shared::domain::jig::module::body::{Background, Backgrounds as RawBackgrounds};
+use shared::domain::jig::module::body::{Background, _groups::design::Backgrounds as RawBackgrounds};
 
 pub fn render(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
 

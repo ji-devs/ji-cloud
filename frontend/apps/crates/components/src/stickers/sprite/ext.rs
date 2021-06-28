@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::{Image, Sprite, Transform};
+use shared::domain::jig::module::body::{Image, Transform, _groups::design::Sprite};
 use utils::prelude::*;
 
 pub trait SpriteExt {

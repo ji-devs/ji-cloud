@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Backgrounds, Sticker, ThemeChoice, poster::{Mode, Step, ModuleData as RawData}}}};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, poster::{Mode, Step, ModuleData as RawData}}}};
 use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
@@ -29,6 +29,7 @@ impl Base {
         } = init_args;
 
         let content = raw.content.unwrap_ji();
+        let base_content = content.base; 
 
 
 
@@ -38,9 +39,9 @@ impl Base {
             jig,
             theme_id,
             audio_mixer,
-            instructions: InstructionsPlayer::new(content.instructions),
-            backgrounds: content.backgrounds,
-            stickers: content.stickers,
+            instructions: InstructionsPlayer::new(base_content.instructions),
+            backgrounds: base_content.backgrounds,
+            stickers: base_content.stickers,
         }
     }
 }

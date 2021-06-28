@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::Trace as RawTrace;
+use shared::domain::jig::module::body::_groups::design::Trace as RawTrace;
 
 pub struct Callbacks {
     pub on_add: Option<Box<dyn Fn(RawTrace)>>,

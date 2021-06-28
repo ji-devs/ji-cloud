@@ -1,4 +1,4 @@
-use shared::domain::jig::module::body::{Trace, Transform, TraceShape};
+use shared::domain::jig::module::body::{Transform, _groups::design::{Trace, TraceShape}};
 use std::rc::Rc;
 pub struct SelectTrace {
     pub inner: Trace,

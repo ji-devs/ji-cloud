@@ -69,13 +69,13 @@ impl Tab {
                     if(also_history) {
                         base.history.push_modify(|raw| {
                             if let Some(content) = raw.content.as_mut() {
-                                content.instructions = instructions;
+                                content.base.instructions = instructions;
                             }
                         });
                     } else {
                         base.history.save_current_modify(|raw| {
                             if let Some(content) = raw.content.as_mut() {
-                                content.instructions = instructions;
+                                content.base.instructions = instructions;
                             }
                         });
                     }

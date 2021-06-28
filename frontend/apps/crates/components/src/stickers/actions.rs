@@ -11,10 +11,8 @@ use shared::{
         image::ImageId,
         jig::module::body::{
             Image,
-            Sticker as RawSticker, 
-            Text as RawText, 
-            Sprite as RawSprite, 
-            Transform
+            Transform,
+            _groups::design::{Sticker as RawSticker, Text as RawText, Sprite as RawSprite, }
         }
     }
 };

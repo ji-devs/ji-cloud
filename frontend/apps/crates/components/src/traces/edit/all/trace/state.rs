@@ -6,7 +6,7 @@ use futures_signals::{
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use shared::domain::jig::module::body::{Trace as RawTrace, Transform, TraceShape};
+use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape}};
 use crate::transform::state::TransformState;
 use dominator::clone;
 use utils::{math::BoundsF64, prelude::*, resize::ResizeInfo};

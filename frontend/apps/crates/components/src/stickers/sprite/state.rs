@@ -4,7 +4,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt},
 };
 use std::rc::Rc;
-use shared::{domain::{image::ImageId, jig::module::body::{Image, SpriteEffect, Sprite as RawSprite, Transform}}, media::MediaLibrary};
+use shared::{domain::{image::ImageId, jig::module::body::{Image, Transform, _groups::design::{SpriteEffect, Sprite as RawSprite}}}, media::MediaLibrary};
 use std::cell::RefCell;
 use crate::transform::state::{TransformState, TransformCallbacks};
 use utils::resize::resize_info_signal;

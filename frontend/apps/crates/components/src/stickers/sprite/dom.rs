@@ -13,7 +13,7 @@ use super::{
     actions::load_and_render,
 };
 use crate::transform;
-use shared::domain::jig::module::body::{Sprite as RawSprite, Transform};
+use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Transform};
 //For stickers, just let the transform affect it directly
 //that means it's not a child of the transform, they're independent
 //this is both faster for performance, theoretically, and simpler to use the same

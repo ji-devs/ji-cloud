@@ -7,10 +7,10 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             ThemeChoice,
-            Trace as RawTrace,
             Audio,
             Instructions,
-            tapping_board::{Mode, Step, TappingTrace, Content as RawContent, ModuleData as RawData}
+            tapping_board::{Mode, Step, TappingTrace, Content as RawContent, ModuleData as RawData},
+            _groups::design::Trace as RawTrace,
         }
     }
 };

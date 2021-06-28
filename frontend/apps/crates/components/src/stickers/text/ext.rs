@@ -1,7 +1,7 @@
 use shared::{
     domain::{
         audio::AudioId,
-        jig::module::body::{Text, Transform},
+        jig::module::body::{Transform, _groups::design::Text},
     },
     media::MediaLibrary
 };
