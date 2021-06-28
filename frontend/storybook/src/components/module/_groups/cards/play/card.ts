@@ -4,8 +4,8 @@ import "@elements/module/_groups/cards/play/card/text";
 import {mapToString, arrayIndex} from "@utils/array";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
-import {Size} from "@elements/module/_groups/cards/play/card/card";
-import {Mode, Side} from "@elements/module/_groups/cards/helpers";
+import {Size} from "@elements/module/_groups/cards/play/card/styles";
+import {Mode, Side, StyleKind} from "@elements/module/_groups/cards/helpers";
 
 type CONTENT_MODE = "text" | "image";
 
@@ -14,10 +14,12 @@ export default {
 }
 
 export interface Args {
+    /*
     scale: number,
     translateX: number,
     translateY: number,
     transform: boolean,
+    */
     theme: ThemeKind,
     flipped: boolean,
     flipOnHover: boolean,
@@ -25,15 +27,20 @@ export interface Args {
     size: Size,
     side: Side,
     mode: Mode,
+    styleKind: StyleKind,
+    transform?: string,
     slot?: string,
     backSideContent: CONTENT_MODE | "none",
 }
 
 const DEFAULT_ARGS:Args = {
+    /*
     scale: 1,
     translateX: 0,
     translateY: 0,
     transform: false,
+    */
+    styleKind: "theme",
     theme: "chalkboard",
     flipped: true,
     flipOnHover: false,
@@ -47,13 +54,25 @@ const DEFAULT_ARGS:Args = {
 export const Card = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {contentMode, backSideContent, ...cardProps} = props;
+    const {contentMode, backSideContent, transform, ...cardProps} = props;
 
     if(backSideContent !== "none") {
         (cardProps as any).doubleSided = true;
     }
+
+    let style = "";
+    if(transform && transform !== "") {
+        console.log(transform);
+        style = `transform: ${transform};`;
+        (cardProps as any).hasTransform = true;
+    }
+
+    if(style != "") {
+        style = `style="${style}"`;
+    }
+
     return `
-    <play-card ${argsToAttrs(cardProps)} >
+    <play-card ${argsToAttrs(cardProps)} ${style}>
         ${getContent(contentMode)}
         ${backSideContent !== "none" ? getContent(backSideContent, "backSideContent") : ``}
     </play-card>`;

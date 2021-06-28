@@ -132,7 +132,6 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
         .property("side", side.as_str_id())
         .style_signal("visibility", transparent.map(|transparent| {
             if transparent {
-                log::info!("BANG!");
                 "hidden"
             } else {
                 "visible"
@@ -149,25 +148,13 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
             let get_simple_transform = get_simple_transform.unwrap_ji();
 
             dom
-                .property_signal("translateX", {
+                .style_signal("transform", {
                     get_simple_transform().map(|t| match t {
-                        Some(t) => t.x,
-                        None => 0.0
+                        Some(t) => format!("scale({}) translate({}rem, {}rem)", t.scale, t.x, t.y),
+                        None => String::from("none")
                     })
-                }) 
-                .property_signal("translateY", {
-                    get_simple_transform().map(|t| match t {
-                        Some(t) => t.y,
-                        None => 0.0
-                    })
-                }) 
-                .property_signal("scale", {
-                    get_simple_transform().map(|t| match t {
-                        Some(t) => t.scale,
-                        None => 1.0 
-                    })
-                }) 
-                .property("transform", true)
+                })
+                .property("hasTransform", true)
         })
         .child(render_media(&card, mode, theme_id, None))
         .apply_if(back_card.is_some(), |dom| {

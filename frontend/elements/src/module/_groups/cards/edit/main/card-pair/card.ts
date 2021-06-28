@@ -2,8 +2,13 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
-import {cardBackPath, Mode,Side, getContentStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode,Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
+
+// this is kept separate from "play-card" because:
+// 1. Values are in px not rem
+// 2. It's often displayed in dual-pairs and may need slight styling changes for that
+// 3. There is only one size to deal with
 
 @customElement('main-card')
 export class _ extends LitElement {
@@ -111,10 +116,14 @@ export class _ extends LitElement {
   @property()
   mode:Mode = "duplicate";
 
-  render() {
-      const {flippable, theme, editing, mode, side} = this;
+  // style mode - see helpers definition
+  @property()
+  styleKind:StyleKind = "theme"
 
-      const contentStyle = getContentStyle(theme, mode, side);
+  render() {
+      const {flippable, theme, editing, mode, side, styleKind} = this;
+
+      const contentStyle = getContentStyle(styleKind, theme, mode, side);
 
       return html`
           <section class="${classMap({flippable, editing})}" >

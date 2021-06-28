@@ -41,8 +41,8 @@ function makePairs(nPairs:number):Array<any> {
         const x = (index % 2) * 280;
         const y = 100 + ((Math.floor(index / 2)) * 280);
             const pair = [
-                {scale: .5, translateX: x, translateY: y, transform: true},
-                {scale: .5, translateX: x + 10, translateY: y + 10, transform: true},
+                {transform: `scale(.5) translate(${x}rem, ${y}rem)`},
+                {transform: `scale(.5) translate(${x + 10}rem, ${y + 10}rem)`},
             ];
 
             return pair;

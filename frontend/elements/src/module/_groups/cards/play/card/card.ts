@@ -3,144 +3,117 @@ import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
-import {cardBackPath, Mode, Side, getContentStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackPath, Mode, Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
+import {Size, cardStyles} from "./styles";
 
-export type Size = "memory" | "flashcards" | "quiz-option" | "quiz-target";
 
 @customElement('play-card')
 export class _ extends LitElement {
   static get styles() {
-      return [css`
+      return [...cardStyles, css`
+      
+        :host([hasTransform]) {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition-duration: 0s;
+        }
 
-            :host {
-                --img-padding: 10rem;
+        :host([side="right"]) > section {
+            z-index: 1000;
+        }
 
-            }
+        :host([side="left"]) > section {
+            z-index: 1001;
+        }
 
-            :host([size="flashcards"]) {
-                --card-size: 500rem;
-                --border-size: 16rem;
-            }
-            :host([size="memory"]) {
-                --card-size: 188rem;
-                --border-size: 3rem;
-            }
-            :host([size="quiz-target"]) {
-                --card-size: 431rem;
-                --border-size: 4.75rem;
-            }
-            :host([size="quiz-option"]) {
-                --card-size: 253rem;
-                --border-size: 4.75rem;
-            }
-          :host([transform]) > section {
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 1000;
-              transition-duration: 0s;
-          }
+        section {
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            transform: rotateY(180deg);
+        }
 
-          :host([transform]) {
-              cursor: default;
-          }
+        .front, .back {
+            position: absolute;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+        }
 
-          :host([side="right"]) > section {
-                  z-index: 1000;
-          }
-          :host([side="left"]) > section {
-                  z-index: 1001;
-          }
-          :host {
-                  cursor: pointer;
-          }
-          section {
-              transition: transform 0.8s;
-              transform-style: preserve-3d;
-              transform: rotateY(180deg);
-              width: var(--card-size);
-              height: var(--card-size);
-          }
+        .back {
+            transform: rotateY(180deg);
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
 
-          .back {
-              transform: rotateY(180deg);
-          }
-            .back > img-ui {
-                object-fit: cover;
-            }
-          .content {
-              border-radius: 16px;
-              border-style: solid;
-              border-width: var(--border-size);
-              background-color: white;
-          }
-          .content, .back > img-ui {
-              box-sizing: border-box;
-              width: 100%; 
-              height: 100%;
-          }
-          
-          ::slotted(img-ji) {
-            --img-size: calc(var(--card-size) - ((var(--border-size) * 2) + var(--img-padding)));
-            width: var(--img-size); 
-            height: var(--img-size); 
-          }
+        .back > img-ui {
+            object-fit: cover;
+        }
 
-          ::slotted(img-ji), ::slotted(img-ui) {
-                object-fit: contain;
-            }
+        .back > img-ui {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+        }
 
-          :host([flipped]) > section {
-              transform: rotateY(0deg);
-          }
+        ::slotted(img-ji) {
+            --img-size: calc(
+            var(--card-size) - ((var(--border-size) * 2) + var(--img-padding))
+            );
+            width: var(--img-size);
+            height: var(--img-size);
+        }
 
-          .content, .back {
-              justify-content: center;
-              align-items: center;
-              display: flex;
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              -webkit-backface-visibility: hidden; /* Safari */
-                  backface-visibility: hidden;
-          }
+        ::slotted(img-ji), ::slotted(img-ui) {
+            object-fit: contain;
+        }
+
+        :host([flipped]) > section {
+            transform: rotateY(0deg);
+        }
 
 
-    `];
+      `];
   }
 
+  // whether or not showing front vs. back
   @property({type: Boolean, reflect: true})
   flipped:boolean = false;
 
+  // required for styling
   @property()
   theme:ThemeKind = "blank";
 
+  // required for styling
   @property()
   mode:Mode = "duplicate";
 
-  @property({type: Boolean, reflect: true})
-  transform:boolean = false;
-
-  @property({type: Number})
-  scale:number = 1;
-
-  @property({type: Number})
-  translateX:number = 0;
-
-  @property({type: Number})
-  translateY:number = 0;
-
+  // required for styling (i.e. "primary" vs. "secondary" in lettering mode)
   @property({reflect: true})
   side:Side = "left";
 
+  // predefined card sizes
   @property({reflect: true})
   size:Size = "memory";
 
+  // if applying a transform, convenient to set all the positioning/z-indexing etc.
+  @property({type: Boolean, reflect: true})
+  hasTransform:boolean = false;
+
+  // automatically flip it while hovering
   @property({type: Boolean})
   flipOnHover:boolean = false;
 
+  // double-sided cards need the border etc. on the back
   @property({type: Boolean})
   doubleSided:boolean = false;
+
+  // style mode - see helpers definition
+  @property()
+  styleKind:StyleKind = "theme"
 
   connectedCallback() {
       super.connectedCallback();
@@ -169,20 +142,20 @@ export class _ extends LitElement {
   }
 
   render() {
-      const {theme, mode, scale, side, doubleSided, transform, translateX, translateY} = this;
+      //const {theme, mode, scale, side, doubleSided, transform, translateX, translateY} = this;
+      const {theme, mode, side, doubleSided, styleKind} = this;
 
-      const contentStyle = getContentStyle(theme, mode, side); 
 
       const backSide = side === "left" ? "right" : "left";
 
-      const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
+      //const style = transform ? `transform: scale(${scale}) translate(${translateX}rem, ${translateY}rem);` : nothing;
 
       return html`
-          <section style=${style}>
-              <div class="content" style=${getContentStyle(theme, mode, side)}><slot></slot></div>
+          <section>
+              <div class="front content" style=${getContentStyle(styleKind, theme, mode, side)}><slot></slot></div>
               <div class="back">
                 ${doubleSided 
-                    ? html`<div class="content" style=${getContentStyle(theme, mode, backSide)}><slot name="backSideContent"></slot></div>`
+                    ? html`<div class="content" style=${getContentStyle(styleKind, theme, mode, backSide)}><slot name="backSideContent"></slot></div>`
                     : html`<img-ui path="${cardBackPath(theme)}"></img-ui>`
                 }
                 </div>

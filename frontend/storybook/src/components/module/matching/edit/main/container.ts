@@ -1,43 +1,96 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
 import "@elements/core/module-page/grid-resize";
-import "@elements/module/card-quiz/edit/main/container";
-import "~/components/module/_groups/cards/edit/main/card-pair/card";
+import "@elements/module/matching/edit/main/container";
+import "@elements/module/matching/edit/main/column";
 import {Card, Args as CardArgs} from "~/components/module/_groups/cards/play/card";
+import {Empty, Args as EmptyArgs} from "~/components/module/_groups/cards/play/empty";
+import {Kind as EmptyKind} from "@elements/module/_groups/cards/play/card/empty";
+import {StyleKind} from "@elements/module/_groups/cards/helpers";
+
 export default {
     title: "Module / Matching / Edit / Main" 
 }
 
 interface Args {
     nPairs: number,
+    colorBackground: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
     nPairs: 4,
+    colorBackground: true,
 }
 
 export const Container = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {nPairs} = props;
+    const {nPairs, colorBackground} = props;
+    const style = colorBackground ? `style="background-color: #83cb6f;"` : "";
+
     return `
 
       <module-page-grid-resize>
-    <card-quiz-main slot="main" ${argsToAttrs(props)}>
-	${mapToString(arrayCount(nPairs), idx => {
-		return renderCard(false);
-	})}
-    </card-quiz-main>
+        <matching-main slot="main" ${argsToAttrs(props)} ${style} >
+          ${mapToString(arrayCount(nPairs), idx => {
+            return renderTop(idx);
+          })}
+          ${mapToString(arrayCount(nPairs), idx => {
+            return renderBottom(idx);
+          })}
+          ${renderFloating()}
+        </matching-main>
       </module-page-grid-resize>
     `;
 }
 
-function renderCard(flipped: boolean) {
+function renderTop(idx:number) {
+  return `
+    <matching-column slot="top">
+      ${renderCard()}
+      ${renderEmpty("question", idx === 2)}
+    </matching-column>
+  `;
+}
+
+function renderBottom(idx:number) {
+  if(idx == 2) {
+      return renderEmpty("translucent", false, "bottom");
+  } else {
+    return renderCard("bottom", "none");
+  }
+}
+
+function renderFloating() {
 	return Card({
 		contentMode: "image",
 		theme: "happy-brush",
-		size: "flashcards",
-		flipped,
-		flipOnHover: false 
+		size: "matching",
+		flipped: true,
+		flipOnHover: false,
+    slot: "floating",
+    styleKind: "dragging",
+    transform: "translate(350rem, 500rem)"
+	});
+}
+
+function renderEmpty(kind: EmptyKind, active?: boolean, slot?:string) {
+	return Empty({
+		theme: "happy-brush",
+		size: "matching",
+    kind,
+    active,
+    slot
+	});
+}
+function renderCard(slot?:string, styleKind?: StyleKind) {
+	return Card({
+		contentMode: "image",
+		theme: "happy-brush",
+		size: "matching",
+		flipped: true,
+		flipOnHover: false,
+    slot,
+    styleKind,
 	});
 }
 
