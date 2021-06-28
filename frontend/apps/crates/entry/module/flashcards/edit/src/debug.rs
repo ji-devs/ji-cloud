@@ -12,29 +12,10 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{
-    media::MediaLibrary,
-    domain::{
-        audio::AudioId, 
-        image::ImageId, 
-        jig::{
-            JigId, 
-            module::{
-                ModuleId, 
-                body::{
-                    Image,
-                    ThemeChoice,
-                    Instructions,
-                    _groups::cards::{
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::{Image, Instructions, ThemeChoice, _groups::cards::{
                         BaseContent,
                         Mode, Step, Card as RawCard, CardPair as RawCardPair
-                    },
-                    flashcards::{Content, ModuleData as RawData}
-                }
-            }
-        }
-    }
-};
+                    }, flashcards::{Content, ModuleData as RawData, PlayerSettings}}}}}, media::MediaLibrary};
 use components::module::_groups::cards::edit::{
     config,
     debug::{
@@ -76,6 +57,9 @@ impl DebugSettings {
 
                     RawData{
                         content: Some(Content {
+                            player_settings: PlayerSettings {
+                                display_mode: shared::domain::jig::module::body::flashcards::DisplayMode::Single
+                            },
                             base: BaseContent {
                                 mode,
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 

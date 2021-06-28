@@ -6,7 +6,7 @@ use shared::domain::jig::{
         ModuleId, 
         body::{
             _groups::cards::{Mode, Step},
-            matching::ModuleData as RawData
+            matching::{ModuleData as RawData, Content}
         }
     }
 };
@@ -27,7 +27,7 @@ use super::settings::{
     main::state::MainSettings,
     sidebar::state::SidebarSettings,
 };
-
+use utils::prelude::*;
 
 
 type GetSidebarSettings = fn(Rc<Base>) -> SidebarSettings; 
@@ -47,10 +47,11 @@ pub type AppState = GenericState<Mode, Step, RawData, Base, Main, Sidebar, Heade
 pub struct Extra {
     pub settings: Rc<Settings>
 }
+
 impl Extra {
-    pub fn new(raw: &RawData) -> Self {
+    pub fn new(content: Content) -> Self {
         Self {
-            settings: Rc::new(Settings::new(raw))
+            settings: Rc::new(Settings::new(content))
         }
     }
 }
@@ -88,7 +89,7 @@ pub async fn init_from_raw(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) 
 
     let debug_settings = crate::debug::settings();
 
-    let extra = Extra::new(&init_args.raw);
+    let extra = Extra::new(init_args.raw.content.as_ref().unwrap_ji().clone());
 
     let base = Base::new(init_args, extra, debug_settings.base.clone()).await;
     

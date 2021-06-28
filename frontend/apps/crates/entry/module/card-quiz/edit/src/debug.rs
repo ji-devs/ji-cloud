@@ -99,7 +99,8 @@ impl DebugSettings {
                                     Vec::new()
                                 },
                                 ..BaseContent::default()
-                            }
+                            },
+                            ..Content::default()
                         })
                     }
                 } else {

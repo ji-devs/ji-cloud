@@ -39,7 +39,13 @@ impl MainSettings {
     }
 
     pub fn top_side_signal(&self) -> impl Signal<Item = Side> {
-        self.base.extra.settings.top_side.signal()
+        self.base.extra.settings.swap.signal().map(|swap| {
+            if swap {
+                Side::Right
+            } else {
+                Side::Left
+            }
+        })
     }
 
     pub fn correct_signal(&self) -> impl Signal<Item = (Card, Side)> {
@@ -77,7 +83,7 @@ impl MainSettings {
 
                 let mut choices:Vec<(Card, Side, bool)> = wrong_bank
                     .iter()
-                    .take(n_choices - 1)
+                    .take((n_choices - 1).into())
                     .map(|pair| {
                         let card = if bottom_side == Side::Left { &pair.0 } else { &pair.1 };
                         (card.clone(), bottom_side, false)

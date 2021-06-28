@@ -6,6 +6,7 @@ use crate::{
 };
 use super::state::*;
 use utils::prelude::*;
+use shared::domain::jig::module::body::flashcards::DisplayMode;
 
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
     html!("flashcards-settings", {
@@ -20,7 +21,7 @@ pub fn render_display_mode(state: Rc<SidebarSettings>, display_mode:DisplayMode)
             *curr == display_mode
         }))
         .event(clone!(state => move |evt:events::Click| {
-            state.base.extra.settings.display_mode.set_neq(display_mode);
+            state.set_display_mode(display_mode); 
         }))
     })
 

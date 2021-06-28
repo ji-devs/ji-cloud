@@ -18,7 +18,7 @@ use shared::{
             module::body::{
                 Image,
                 ThemeChoice,
-                Background, Backgrounds,
+                Background,
                 Instructions, 
                 _groups::cards::{
                     Mode, 
@@ -29,6 +29,7 @@ use shared::{
                 memory::{
                     ModuleData as RawData,
                     Content,
+                    PlayerSettings,
                 }
             },
             JigId, module::ModuleId
@@ -71,6 +72,7 @@ impl DebugSettings {
 
                     RawData{
                         content: Some(Content {
+                            player_settings: PlayerSettings::default(),
                             base: BaseContent {
                                 mode,
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 

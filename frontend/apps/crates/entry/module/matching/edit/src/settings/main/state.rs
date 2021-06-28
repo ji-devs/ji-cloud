@@ -35,11 +35,24 @@ impl MainSettings {
     }
 
     pub fn top_choices_signal(&self) -> impl Signal<Item = Vec<(Card, Side)>> {
-        self.choices_signal(self.base.extra.settings.top_side.signal())
+        self.choices_signal(self.base.extra.settings.swap.signal().map(|swap| {
+            if swap {
+                Side::Right
+            } else {
+                Side::Left
+            }
+        }))
     }
 
     pub fn bottom_choices_signal(&self) -> impl Signal<Item = Vec<(Card, Side)>> {
-        self.choices_signal(self.base.extra.settings.top_side.signal().map(|side| side.negate()))
+        self.choices_signal(self.base.extra.settings.swap.signal().map(|swap| {
+            if swap {
+                Side::Left
+            } else {
+                Side::Right
+            }
+
+        }))
     }
 
     fn choices_signal(&self, side_signal: impl Signal<Item = Side>) -> impl Signal<Item = Vec<(Card, Side)>> {
@@ -55,7 +68,7 @@ impl MainSettings {
             .map(move |(side, n_choices)| {
                 pairs
                     .iter()
-                    .take(n_choices)
+                    .take(n_choices.into())
                     .map(|pair| {
                         let card = {
                             if side == Side::Left {

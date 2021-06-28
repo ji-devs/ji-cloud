@@ -2,7 +2,7 @@ use crate::state::Base;
 use std::rc::Rc;
 use std::cell::RefCell;
 use rand::prelude::*;
-use shared::domain::jig::module::body::flashcards::ModuleData as RawData;
+use shared::domain::jig::module::body::flashcards::{DisplayMode, Content};
 use futures_signals::signal::Mutable;
 
 pub struct Settings {
@@ -11,25 +11,10 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new(raw:&RawData) -> Self {
+    pub fn new(content:Content) -> Self {
         Self {
-            display_mode: Mutable::new(DisplayMode::Single),
+            display_mode: Mutable::new(content.player_settings.display_mode),
             rng: RefCell::new(thread_rng())
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum DisplayMode {
-    Single,
-    Double
-}
-
-impl DisplayMode {
-    pub fn as_str_id(&self) -> &'static str {
-        match self {
-            Self::Single => "single",
-            Self::Double => "double",
         }
     }
 }

@@ -22,9 +22,7 @@ fn render_top_side(state: Rc<SidebarSettings>) -> Dom {
     html!("button", {
         .text("Swap side")
         .event(clone!(state => move |evt:events::Click| {
-            state.settings().top_side.replace_with(|side| {
-                side.negate()
-            });
+            state.toggle_swap();
         }))
     })
 }
@@ -41,9 +39,9 @@ fn render_n_choices(state: Rc<SidebarSettings>) -> Dom {
                 .with_node!(elem => {
                     .event(clone!(state => move |evt:events::Change| {
                         let value = elem.value();
-                        if let Ok(value) = value.parse::<usize>() {
+                        if let Ok(value) = value.parse::<u8>() {
                             if value > 0 {
-                                state.settings().n_choices.set_neq(value);
+                                state.set_n_choices(value);
                             }
                         }
                     }))

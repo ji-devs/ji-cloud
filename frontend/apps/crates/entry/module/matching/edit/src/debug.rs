@@ -29,7 +29,7 @@ use shared::{
                         BaseContent,
                         Mode, Step, Card as RawCard, CardPair as RawCardPair
                     },
-                    matching::{Content, ModuleData as RawData}
+                    matching::{Content, ModuleData as RawData, PlayerSettings}
                 }
             }
         }
@@ -76,6 +76,9 @@ impl DebugSettings {
 
                     RawData{
                         content: Some(Content {
+                            player_settings: PlayerSettings {
+                                ..PlayerSettings::default()
+                            },
                             base: BaseContent {
                                 mode,
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 

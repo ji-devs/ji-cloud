@@ -18,7 +18,7 @@ use shared::{
             module::body::{
                 Image,
                 ThemeChoice,
-                Background, Backgrounds,
+                Background,
                 Instructions, 
                 _groups::cards::{
                     Mode, 

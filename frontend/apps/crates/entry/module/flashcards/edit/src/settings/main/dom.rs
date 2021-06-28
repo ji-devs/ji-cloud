@@ -21,7 +21,8 @@ use futures_signals::{
 use shared::domain::jig::module::body::{
     ThemeId,
     ModeExt,
-    _groups::cards::{Mode, Step, Card}
+    _groups::cards::{Mode, Step, Card},
+    flashcards::DisplayMode,
 };
 use rand::prelude::*;
 

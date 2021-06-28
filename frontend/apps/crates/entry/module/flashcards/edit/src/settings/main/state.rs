@@ -5,7 +5,10 @@ use crate::{
 use futures_signals::signal::Mutable;
 use std::rc::Rc;
 use utils::prelude::*;
-use shared::domain::jig::module::body::_groups::cards::Card;
+use shared::domain::jig::module::body::{
+    _groups::cards::Card,
+    flashcards::DisplayMode
+};
 use rand::{prelude::*, distributions::{Standard, Distribution}};
 
 pub struct MainSettings {
