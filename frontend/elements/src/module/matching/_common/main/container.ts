@@ -29,7 +29,7 @@ export class _ extends LitElement {
         section {
           display: flex;
         }
-        .floating {
+        .drag {
           position: absolute;
           top: 0;
           left: 0;
@@ -45,8 +45,8 @@ export class _ extends LitElement {
         <section class="bottom">
       	  <slot name="bottom"></slot>
         </section>
-        <div class="floating">
-      	  <slot name="floating"></slot>
+        <div class="drag">
+      	  <slot name="drag"></slot>
         </div>
       `
   }

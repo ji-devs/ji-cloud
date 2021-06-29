@@ -85,7 +85,7 @@ impl Base {
             phase: Mutable::new(Phase::Init),
         });
 
-        _self.phase.set(Phase::Playing(Rc::new(Game::new(_self.clone()))));
+        _self.phase.set(Phase::Playing(Game::new(_self.clone())));
 
         _self
     }

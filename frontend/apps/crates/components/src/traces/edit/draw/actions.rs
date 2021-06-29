@@ -25,7 +25,7 @@ impl Draw {
         let resize_info = get_resize_info();
         let (pos_x, pos_y) = resize_info.get_pos_px(x as f64, y as f64);
 
-        self.drag.set(Some(Drag::new(pos_x as i32, pos_y as i32, 0.0, 0.0)));
+        self.drag.set(Some(Drag::new(pos_x as i32, pos_y as i32, 0.0, 0.0, false)));
 
         let (norm_x, norm_y) = resize_info.get_pos_normalized(x as f64, y as f64);
 

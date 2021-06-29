@@ -25,6 +25,7 @@ where
     pub theme_id: ThemeId,
     pub size: Size,
     pub mode: Mode,
+    pub style_kind: StyleKind,
     //should be set to match card and back_card will automatically
     //use the opposite
     pub side: Side, 
@@ -70,6 +71,7 @@ where
             back_card: None,
             flip_on_hover: false,
             slot: None,
+            style_kind: StyleKind::Theme,
 
         }
     }
@@ -123,6 +125,7 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
         size, 
         side,
         slot,
+        style_kind,
     } = options;
 
     html!("play-card", {
@@ -130,6 +133,7 @@ fn _render_dynamic_card<F, T, H, S, SOut, M>(options: DynamicCardOptions<F, T, H
         .apply_if(slot.is_some(), |dom| 
             dom.property("slot", slot.unwrap_ji())
         )
+        .property("styleKind", style_kind.as_str_id())
         .property("size", size.as_str_id())
         .property("flipOnHover", flip_on_hover)
         .property_signal("flipped", flipped)

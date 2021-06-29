@@ -29,6 +29,13 @@ where
                     (on_init_ready) ();
                 }
             }))
+            .after_inserted(clone!(state => move |elem| {
+                if state.opts.skip_play {
+                    if let Some(on_init_ready) = state.on_init_ready.borrow().as_ref() {
+                        (on_init_ready) ();
+                    }
+                }
+            }))
         }))
     })
 }

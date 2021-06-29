@@ -81,6 +81,7 @@ pub struct StateOpts<RawData> {
     pub force_raw_even_in_iframe: bool,
     pub skip_load_jig: bool,
     pub load_fonts: bool,
+    pub skip_play: bool,
 }
 
 impl <RawData> StateOpts<RawData> {
@@ -92,6 +93,7 @@ impl <RawData> StateOpts<RawData> {
             force_raw_even_in_iframe: false,
             skip_load_jig: false,
             load_fonts: true,
+            skip_play: false,
         }
     }
 }

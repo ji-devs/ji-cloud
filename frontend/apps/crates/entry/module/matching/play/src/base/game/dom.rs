@@ -3,7 +3,14 @@ use gloo_timers::future::TimeoutFuture;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use std::rc::Rc;
-use super::state::*;
+use super::{
+    state::*,
+    card::{
+        state::CardChoice,
+        dom::{render_top, render_bottom, render_drag}
+    }
+};
+
 use components::module::_groups::cards::{
     lookup::{self, Side},
     play::card::dom::{render_card, render_card_mixin, CardOptions, render_empty_card, render_empty_card_mixin, EmptyCardOptions, EmptyKind, Size},
@@ -34,36 +41,24 @@ pub fn render(state: Rc<Game>) -> Dom {
                 .map(clone!(state => move |current| {
                     let mut children:Vec<Dom> = Vec::new();
 
-                    let theme_id = state.base.theme_id.clone();
-                    let mode = state.base.mode.clone();
+                    if let Some(current) = current {
 
-                    let Current { top, bottom, side, phase } = current;
-
-                    for item in top.iter() {
+                        for top in current.top.iter() {
+                            children.push(render_top(top.clone()));
+                        }
+                        for bottom in current.bottom.iter() {
+                            children.push(render_bottom(bottom.clone()));
+                        }
 
                         children.push(
-                            html!("matching-column", {
-                                .property("slot", "top")
-                                .child({
-                                    let mut options = CardOptions::new(&item.card, theme_id, mode, side, Size::Matching);
-                                    options.flipped = true;
-                                    render_card(options)
-                                })
-                                .child({
-                                    let mut options = EmptyCardOptions::new(EmptyKind::Question, theme_id, Size::Matching);
-                                    render_empty_card(options)
-                                })
+                            html!("empty-fragment", {
+                                .property("slot", "drag")
+                                .style("position", "absolute")
+                                .child_signal(current.drag.signal_cloned().map(|drag| {
+                                    drag.map(render_drag)
+                                }))
                             })
                         );
-                    }
-
-                    for item in bottom.iter() {
-                        children.push({
-                            let mut options = CardOptions::new(&item.card, theme_id, mode, side, Size::Matching);
-                            options.flipped = true;
-                            options.slot = Some("bottom"); 
-                            render_card(options)
-                        });
                     }
 
                     children

@@ -54,6 +54,7 @@ pub struct DebugSettings {
     pub skip_load_jig: bool,
     pub no_shuffle: bool,
     pub ending: bool,
+    pub skip_play: bool
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -113,7 +114,8 @@ impl DebugSettings {
             ),
             skip_load_jig: true,
             no_shuffle: true,
-            ending: true
+            ending: true,
+            skip_play: true
         }
     }
 }

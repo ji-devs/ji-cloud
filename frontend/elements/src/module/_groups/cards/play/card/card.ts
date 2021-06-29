@@ -75,6 +75,10 @@ export class _ extends LitElement {
             transform: rotateY(0deg);
         }
 
+        :host * {
+            pointer-events: none;
+        }
+
 
       `];
   }

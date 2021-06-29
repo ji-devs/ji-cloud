@@ -37,7 +37,7 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
           ${mapToString(arrayCount(nPairs), idx => {
             return renderBottom(idx);
           })}
-          ${renderFloating()}
+          ${renderDrag()}
         </matching-main>
       </module-page-grid-resize>
     `;
@@ -60,14 +60,14 @@ function renderBottom(idx:number) {
   }
 }
 
-function renderFloating() {
+function renderDrag() {
 	return Card({
 		contentMode: "image",
 		theme: "happy-brush",
 		size: "matching",
 		flipped: true,
 		flipOnHover: false,
-    slot: "floating",
+    slot: "drag",
     styleKind: "dragging",
     transform: "translate(350rem, 500rem)"
 	});

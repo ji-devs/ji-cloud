@@ -193,6 +193,41 @@ impl BoundsF64 {
         contains_horiz && contains_vert
     }
 
+    pub fn intersects(&self, other:Self) -> bool {
+        self.contains_corner(other) || other.contains_corner(*self)
+    }
+
+    pub fn contains_corner(&self, other:Self) -> bool {
+        if self.invert_y != other.invert_y {
+            log::warn!("TODO - handle a case of different coordinate spaces!");
+            return false;
+        }
+
+        let contains_left = other.left() >= self.left() && other.left() <= self.right();
+        let contains_right = other.right() >= self.left() && other.right() <= self.right();
+        let contains_top = {
+            if self.invert_y {
+                other.top() >= self.top() && other.top() <= self.bottom()
+            } else {
+                other.top() >= self.bottom() && other.top() <= self.top()
+            }
+        };
+        let contains_bottom = {
+            if self.invert_y {
+                other.bottom() >= self.top() && other.bottom() <= self.bottom()
+            } else {
+                other.bottom() >= self.bottom() && other.bottom() <= self.top()
+            }
+        };
+
+
+        (contains_left && contains_top)
+            || (contains_right && contains_top)
+            || (contains_left && contains_bottom)
+            || (contains_right && contains_bottom)
+
+
+    }
 
     pub fn denormalize(&self, resize_info: &ResizeInfo) -> Self {
 

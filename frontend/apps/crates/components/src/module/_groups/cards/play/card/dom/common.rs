@@ -27,6 +27,21 @@ impl Size {
     }
 }
 
+pub enum StyleKind {
+    Theme,
+    None,
+    Dragging
+}
+
+impl StyleKind {
+    pub fn as_str_id(&self) -> &'static str {
+        match self {
+            Self::Theme => "theme",
+            Self::None => "none",
+            Self::Dragging => "dragging",
+        }
+    }
+}
 pub struct SimpleTransform {
     pub x: f64,
     pub y: f64,

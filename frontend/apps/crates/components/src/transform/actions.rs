@@ -79,7 +79,7 @@ impl TransformState {
         }
         
 
-        self.drag.set(Some(Drag::new(x, y, anchor_x, anchor_y)));
+        self.drag.set(Some(Drag::new(x, y, anchor_x, anchor_y, false)));
     }
 
     pub fn mouse_move(&self, x: i32, y:i32) {

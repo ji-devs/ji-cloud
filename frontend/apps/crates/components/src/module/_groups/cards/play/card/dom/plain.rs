@@ -17,6 +17,7 @@ pub struct CardOptions <'a> {
     pub theme_id: ThemeId,
     pub size: Size,
     pub mode: Mode,
+    pub style_kind: StyleKind,
     //should be set to match card and back_card will automatically
     //use the opposite
     pub side: Side, 
@@ -45,6 +46,7 @@ impl <'a> CardOptions <'a> {
             hidden: false,
             simple_transform: None,
             slot: None,
+            style_kind: StyleKind::Theme,
         }
     }
 }
@@ -77,7 +79,8 @@ fn _render_card<F>(options: CardOptions, mixin: Option<F>) -> Dom
         mode, 
         size, 
         side,
-        slot
+        slot,
+        style_kind
     } = options;
 
     html!("play-card", {
@@ -85,6 +88,7 @@ fn _render_card<F>(options: CardOptions, mixin: Option<F>) -> Dom
         .apply_if(slot.is_some(), |dom| 
             dom.property("slot", slot.unwrap_ji())
         )
+        .property("styleKind", style_kind.as_str_id())
         .property("size", size.as_str_id())
         .property("flipOnHover", flip_on_hover)
         .property("flipped", flipped)
@@ -113,7 +117,7 @@ fn _render_card<F>(options: CardOptions, mixin: Option<F>) -> Dom
                 .property("translateX", t.x)
                 .property("translateY", t.y)
                 .property("scale", t.scale)
-                .property("transform", true)
+                .property("hasTransform", true)
         })
         .child(render_media(&card, mode, theme_id, None))
         .apply_if(back_card.is_some(), |dom| {
