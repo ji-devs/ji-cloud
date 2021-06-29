@@ -19,7 +19,7 @@ impl State {
     pub fn new(module: Rc<ModuleState>, x: i32, y: i32) -> Self {
         Self {
             module,
-            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y),
+            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false),
         }
     }
 
