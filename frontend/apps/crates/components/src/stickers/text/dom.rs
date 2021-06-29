@@ -23,7 +23,7 @@ use super::{
 use web_sys::HtmlElement;
 
 const BASE_WIDTH:f64 = 300.0;
-const BASE_HEIGHT:f64 = 300.0;
+const BASE_HEIGHT:f64 = 30.0;
 
 #[derive(Clone, Debug, Default)]
 pub struct DebugOptions {
