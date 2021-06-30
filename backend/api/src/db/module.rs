@@ -134,8 +134,11 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
     let kind = body.kind();
 
     let body = match body {
-        ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
+        ModuleBody::CardQuiz(body) => serde_json::to_value(body)?,
         ModuleBody::Cover(body) => serde_json::to_value(body)?,
+        ModuleBody::Flashcards(body) => serde_json::to_value(body)?,
+        ModuleBody::Matching(body) => serde_json::to_value(body)?,
+        ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
         ModuleBody::Poster(body) => serde_json::to_value(body)?,
         ModuleBody::TappingBoard(body) => serde_json::to_value(body)?,
 
@@ -150,8 +153,11 @@ fn transform_response_kind(
     kind: ModuleKind,
 ) -> anyhow::Result<ModuleBody> {
     match kind {
-        ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
+        ModuleKind::CardQuiz => Ok(ModuleBody::CardQuiz(serde_json::from_value(contents)?)),
         ModuleKind::Cover => Ok(ModuleBody::Cover(serde_json::from_value(contents)?)),
+        ModuleKind::Flashcards => Ok(ModuleBody::Flashcards(serde_json::from_value(contents)?)),
+        ModuleKind::Matching => Ok(ModuleBody::Matching(serde_json::from_value(contents)?)),
+        ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
         ModuleKind::Poster => Ok(ModuleBody::Poster(serde_json::from_value(contents)?)),
         ModuleKind::TappingBoard => Ok(ModuleBody::TappingBoard(serde_json::from_value(contents)?)),
 
