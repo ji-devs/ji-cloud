@@ -1,4 +1,4 @@
-name: Api - Backend - Release
+name: Media - Backend - Release
 
 on:
   push:
@@ -47,9 +47,8 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
-
-      - name: build and deploy api
-        run: cargo make release-api
+      - name: build and deploy
+        run: cargo make release-api-media-watch
         
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master

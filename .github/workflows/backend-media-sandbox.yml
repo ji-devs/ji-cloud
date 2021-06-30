@@ -1,12 +1,12 @@
-name: Api - Backend - Release
+name: Media - Backend - Sandbox 
 
 on:
   push:
-    branches: [ master ]
+    branches: [ sandbox ]
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'backend/_core/rust/**'
+    - 'backend/core/**'
     - 'backend/api/**'
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
-          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
+          service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
       
       - name: download cargo-make release
         run: curl -u jewish-interactive:"$GITHUB_TOKEN" -s https://api.github.com/repos/sagiegurari/cargo-make/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | xargs -I {} wget -c https://github.com/sagiegurari/cargo-make/releases/latest/download/cargo-make-v{}-x86_64-unknown-linux-musl.zip -O cargo-make.zip
@@ -47,10 +47,9 @@ jobs:
         with:
           path: ${{github.workspace}}/cargo-make
 
+      - name: build and deploy 
+        run: cargo make sandbox-api-media-watch
 
-      - name: build and deploy api
-        run: cargo make release-api
-        
       - name: Notify slack of all status
         uses: pullreminders/slack-action@master
         with:
