@@ -27,9 +27,15 @@ export const Step1 = (props?:Partial<Args>) => {
 
     return `
         <page-register-step1>
-          <input-text slot="topleft" label="${STR_FIRSTNAME_LABEL}" placeholder="${STR_FIRSTNAME_PLACEHOLDER}" ></input-text>
-          <input-text slot="topright" label="${STR_LASTNAME_LABEL}" placeholder="${STR_LASTNAME_PLACEHOLDER}" ></input-text>
-          <input-text slot="username" label="${STR_USERNAME_LABEL}" placeholder="${STR_USERNAME_PLACEHOLDER}"  ></input-text>
+          <input-wrapper slot="topleft" label="${STR_FIRSTNAME_LABEL}">
+            <input placeholder="${STR_FIRSTNAME_PLACEHOLDER}">
+          </input-wrapper>
+          <input-wrapper slot="topright" label="${STR_LASTNAME_LABEL}">
+            <input placeholder="${STR_LASTNAME_PLACEHOLDER}">
+          </input-wrapper>
+          <input-wrapper slot="username" label="${STR_USERNAME_LABEL}">
+            <input placeholder="${STR_USERNAME_PLACEHOLDER}">
+          </input-wrapper>
           <input-checkbox slot="checkbox" label="${STR_18}"></input-checkbox>
           <button-rect slot="submit" iconAfter="arrow" color="red" size="medium">${STR_CONTINUE}</button-rect> 
           <footer-register-login slot="footer"></footer-register-login>

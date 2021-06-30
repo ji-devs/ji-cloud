@@ -11,7 +11,7 @@ const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";
 
 
 pub fn render(state: Rc<State>) -> Dom {
-    html!("dropdown-select", {
+    html!("input-select", {
         .property("slot", "catagories-select")
         .property("label", STR_CATEGORIES_LABEL)
         .property("placeholder", STR_CATEGORIES_PLACEHOLDER)

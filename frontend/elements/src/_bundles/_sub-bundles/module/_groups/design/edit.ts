@@ -6,8 +6,8 @@ import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-c
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-control";
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls-overlay-shadow";
 import "@elements/core/buttons/button-collection/button-collection";
-import "@elements/core/inputs/dropdowns/dropdown-select";
-import "@elements/core/inputs/inc-dec";
+import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/composed/inc-dec";
 import "@elements/core/lists/li-check";
 import "@elements/core/buttons/sidebar";
 import "@elements/core/overlays/anchored-overlay";

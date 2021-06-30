@@ -1,5 +1,5 @@
 use dominator::{Dom, html, clone, with_node};
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
@@ -27,34 +27,49 @@ impl Step1Page {
 
         html!("page-register-step1", {
             .children(vec![
-                html!("input-text", {
+                html!("input-wrapper", {
                     .property("slot", "topleft")
                     .property("label", STR_FIRSTNAME_LABEL)
-                    .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
-                    .property_signal("error", state.firstname_error())
-                    .event(clone!(state => move |evt:events::CustomInput| {
-                        state.clear_firstname_status();
-                        *state.firstname.borrow_mut() = evt.value();
+                    .property_signal("error", state.firstname_error().map(|err| {
+                        !err.is_empty()
+                    }))
+                    .property_signal("hint", state.firstname_error())
+                    .child(html!("input", {
+                        .property("placeholder", STR_FIRSTNAME_PLACEHOLDER)
+                        .event(clone!(state => move |evt:events::Input| {
+                            state.clear_firstname_status();
+                            *state.firstname.borrow_mut() = evt.value().unwrap_or_default();
+                        }))
                     }))
                 }),
-                html!("input-text", {
+                html!("input-wrapper", {
                     .property("slot", "topright")
                     .property("label", STR_LASTNAME_LABEL)
-                    .property("placeholder", STR_LASTNAME_PLACEHOLDER)
-                    .property_signal("error", state.lastname_error())
-                    .event(clone!(state => move |evt:events::CustomInput| {
-                        state.clear_lastname_status();
-                        *state.lastname.borrow_mut() = evt.value();
+                    .property_signal("error", state.lastname_error().map(|err| {
+                        !err.is_empty()
+                    }))
+                    .property_signal("hint", state.lastname_error())
+                    .child(html!("input", {
+                        .property("placeholder", STR_LASTNAME_PLACEHOLDER)
+                        .event(clone!(state => move |evt:events::Input| {
+                            state.clear_lastname_status();
+                            *state.lastname.borrow_mut() = evt.value().unwrap_or_default();
+                        }))
                     }))
                 }),
-                html!("input-text", {
+                html!("input-wrapper", {
                     .property("slot", "username")
                     .property("label", STR_USERNAME_LABEL)
-                    .property("placeholder", STR_USERNAME_PLACEHOLDER)
-                    .property_signal("error", state.username_error())
-                    .event(clone!(state => move |evt:events::CustomInput| {
-                        state.clear_username_status();
-                        *state.username.borrow_mut() = evt.value();
+                    .property_signal("error", state.username_error().map(|err| {
+                        !err.is_empty()
+                    }))
+                    .property_signal("hint", state.username_error())
+                    .child(html!("input", {
+                        .property("placeholder", STR_USERNAME_PLACEHOLDER)
+                        .event(clone!(state => move |evt:events::Input| {
+                            state.clear_username_status();
+                            *state.username.borrow_mut() = evt.value().unwrap_or_default();
+                        }))
                     }))
                 }),
                 html!("input-checkbox", {

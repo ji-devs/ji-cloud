@@ -25,7 +25,9 @@ export const Step2 = (props?:Partial<Args>) => {
     return `
         <page-register-step2>
             <input-location slot="location"></input-location>
-            <input-text slot="language" label="${STR_LANGUAGE_LABEL}" mode="text"></input-text>
+            <input-wrapper slot="language" label="${STR_LANGUAGE_LABEL}"">
+                <input>
+            </input-wrapper>
             <input-checkbox slot="checkbox" label="${STR_TERMS_LABEL}"></input-checkbox>
             <input-checkbox slot="checkbox" label="${STR_MARKETING_LABEL}"></input-checkbox>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 

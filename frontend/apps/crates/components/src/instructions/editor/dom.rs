@@ -1,4 +1,5 @@
 use dominator::{html, Dom, clone};
+use web_sys::HtmlSelectElement;
 use std::rc::Rc;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -47,18 +48,21 @@ pub fn render_text(state: Rc<State>) -> Dom {
         }
         (state.callbacks.save) (lock.clone(), push_history);
     }
-    html!("input-form-textarea", {
-        .property_signal("value", state.text_signal())
+    html!("input-wrapper", {
         .property("label", STR_INSTRUCTIONS_LABEL)
-        .property("placeholder", STR_INSTRUCTIONS_PLACEHOLDER)
-        .property("rows", 4)
-        //Input saves every character
-        //Change also pushes history
-        .event(clone!(state => move |evt:events::CustomInput| {
-            change_text(&state, evt.value(), false);
-        }))
-        .event(clone!(state => move |evt:events::CustomChange| {
-            change_text(&state, evt.value(), true);
+        .child(html!("textarea", {
+            .text_signal(state.text_signal())
+            .property("placeholder", STR_INSTRUCTIONS_PLACEHOLDER)
+            .property("rows", 4)
+            //Input saves every character
+            //Change also pushes history
+            .event(clone!(state => move |evt:events::Input| {
+                change_text(&state, evt.value().unwrap_or_default(), false);
+            }))
+            .event(clone!(state => move |evt:events::Change| {
+                let target = evt.dyn_target::<HtmlSelectElement>().unwrap();
+                change_text(&state, target.value(), true);
+            }))
         }))
     })
 }

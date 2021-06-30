@@ -27,21 +27,27 @@ impl LoginPage {
                     async {}
                 }))
                 .children(vec![
-                    html!("input-text", {
+                    html!("input-wrapper", {
                         .property("slot", "email")
-                        .property("mode", "text")
                         .property("label", STR_EMAIL_LABEL)
-                        .property_signal("error", state.email_error())
-                        .event(clone!(state => move |evt:events::CustomInput| {
-                            state.clear_email_status();
-                            *state.email.borrow_mut() = evt.value();
+                        .property_signal("hint", state.email_error())
+                        .property_signal("error", state.email_error().map(|err| {
+                            !err.is_empty()
+                        }))
+                        .child(html!("input", {
+                            .event(clone!(state => move |evt:events::Input| {
+                                state.clear_email_status();
+                                *state.email.borrow_mut() = evt.value().unwrap_or_default();
+                            }))
                         }))
                     }),
-                    html!("input-text", {
+                    html!("input-password", {
                         .property("slot", "password")
-                        .property("mode", "passwordHidden")
                         .property("label", STR_PASSWORD_LABEL)
-                        .property_signal("error", state.password_error())
+                        .property_signal("hint", state.password_error())
+                        .property_signal("error", state.password_error().map(|err| {
+                            !err.is_empty()
+                        }))
                         .event(clone!(state => move |evt:events::CustomInput| {
                             state.clear_password_status();
                             *state.password.borrow_mut() = evt.value();

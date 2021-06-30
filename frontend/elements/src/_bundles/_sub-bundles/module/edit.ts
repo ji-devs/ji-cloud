@@ -7,14 +7,14 @@ import "@elements/core/buttons/text";
 import "@elements/core/buttons/sidebar";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/circle";
-import "@elements/core/inputs/textarea-content";
+import "@elements/core/inputs/primitives/textarea-content";
 import "@elements/core/menu/menu-tabs/menu-tabs";
 import "@elements/core/menu/menu-tabs/menu-tab";
 import "@elements/core/menu/menu-tabs/menu-tab-title";
 import "@elements/core/menu/menu-tabs/menu-tab-with-title";
 import "@elements/core/window/window-loader-block";
-import "@elements/core/inputs/text-content";
-import "@elements/core/inputs/form/textarea";
+import "@elements/core/inputs/primitives/text-content";
+import "@elements/core/inputs/wrapper";
 import "@elements/core/tooltips/info";
 import "@elements/core/tooltips/confirm";
 import "@elements/core/tooltips/error";
@@ -45,7 +45,7 @@ import "@elements/module/_common/edit/widgets/choose-mode/option";
 import "@elements/module/_common/edit/widgets/color-select/color-select";
 import "@elements/module/_common/edit/widgets/color-select/color-select-section";
 import "@elements/module/_common/edit/widgets/color-select/color-select-item";
-import "@elements/core/inputs/color";
+import "@elements/core/inputs/primitives/color";
 
 
 import "@elements/module/_common/edit/widgets/theme-selector/container";

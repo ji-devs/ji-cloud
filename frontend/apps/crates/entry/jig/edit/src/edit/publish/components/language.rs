@@ -10,7 +10,7 @@ const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";
 const STR_LANGUAGE_PLACEHOLDER: &'static str = "Select language";
 
 pub fn render(state: Rc<State>) -> Dom {
-    html!("dropdown-select", {
+    html!("input-select", {
         .property("slot", "language")
         .property("label", STR_LANGUAGE_LABEL)
         .property("placeholder", STR_LANGUAGE_PLACEHOLDER)

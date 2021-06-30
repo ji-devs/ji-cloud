@@ -59,10 +59,9 @@ fn render_page(state: Rc<State>) -> Dom {
                     state.jig.is_public.set(value);
                 }))
             }),
-            html!("input-text", {
+            html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)
-                .property_signal("value", state.jig.display_name.signal_cloned())
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -70,25 +69,26 @@ fn render_page(state: Rc<State>) -> Dom {
                             => (*submission_tried, value.clone())
                     })
                         .map(|(submission_tried, value)| {
-                            if submission_tried && value.is_empty() {
-                                String::from(" ")
-                            } else {
-                                String::new()
-                            }
+                            submission_tried && value.is_empty()
                         })
                 })
-                .event(clone!(state => move |evt: events::CustomChange| {
-                    let value = evt.value();
-                    state.jig.display_name.set(value);
+                .child(html!("input", {
+                    .property_signal("value", state.jig.display_name.signal_cloned())
+                    .event(clone!(state => move |evt: events::Input| {
+                        let value = evt.value().unwrap_or_default();
+                        state.jig.display_name.set(value);
+                    }))
                 }))
             }),
-            html!("input-form-textarea", {
+            html!("input-wrapper", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
-                .property_signal("value", state.jig.description.signal_cloned())
-                .event(clone!(state => move |evt: events::CustomChange| {
-                    let value = evt.value();
-                    state.jig.description.set(value);
+                .child(html!("textarea", {
+                    .text_signal(state.jig.description.signal_cloned())
+                    .event(clone!(state => move |evt: events::Input| {
+                        let value = evt.value().unwrap_or_default();
+                        state.jig.description.set(value);
+                    }))
                 }))
             }),
 

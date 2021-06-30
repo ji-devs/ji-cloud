@@ -3,12 +3,12 @@ import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-c
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-control";
 import "@elements/core/buttons/button-collection/button-collection";
 import "@elements/core/buttons/sidebar";
-import "@elements/core/inputs/dropdowns/dropdown-select";
-import "@elements/core/inputs/inc-dec";
+import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/composed/inc-dec";
 import "@elements/core/lists/li-check";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Sidebar"
+    title: "Module / _COMMON / edit / Widgets / Sidebar"
 }
 
 
@@ -23,18 +23,18 @@ export const TextEditorControls = (props?:Partial<Args>) => {
 
     return `
         <text-editor-controls ${argsToAttrs(props)} style="width: 492px">
-            <dropdown-select slot="font" label="Font" value="Arial">
+            <input-select slot="font" label="Font" value="Arial">
                 <li-check selected>Options</li-check>
-            </dropdown-select>
+            </input-select>
             <button-collection slot="type">
                 <text-editor-control type="h1"></text-editor-control>
                 <text-editor-control type="h2"></text-editor-control>
                 <text-editor-control type="p1"></text-editor-control>
                 <text-editor-control type="p2"></text-editor-control>
             </button-collection>
-            <dropdown-select slot="weight" label="Weight" value="Normal">
+            <input-select slot="weight" label="Weight" value="Normal">
                 <li-check selected>Options</li-check>
-            </dropdown-select>
+            </input-select>
             <input-inc-dec slot="font-size"></input-inc-dec>
             <button-collection slot="style">
                 <text-editor-control type="bold"></text-editor-control>

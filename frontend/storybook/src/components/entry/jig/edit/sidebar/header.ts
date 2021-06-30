@@ -27,7 +27,10 @@ export const Header = (props?:Partial<Args>) => {
             <button-text slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
             <img-ui slot="settings" path="entry/jig/settings.svg"></img-ui>
             <img-ui slot="modules" path="entry/jig/modules.svg"></img-ui>
-            <input-text-pencil slot="input" placeholder="My JIG’s name"></input-text-pencil>
+            <input-wrapper slot="input">
+                <input placeholder="My JIG’s name">
+                <img-ui slot="icon" path="core/inputs/pencil-blue-darker.svg">
+            </input-wrapper>
         </jig-edit-sidebar-header>
     `;
 }

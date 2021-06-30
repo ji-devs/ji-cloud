@@ -10,7 +10,7 @@ const STR_TEACHING_GOAL_LABEL: &'static str = "Teaching Goal";
 const STR_TEACHING_GOAL_PLACEHOLDER: &'static str = "Select from the list";
 
 pub fn render(state: Rc<State>) -> Dom {
-    html!("dropdown-select", {
+    html!("input-select", {
         .property("slot", "goal")
         .property("label", STR_TEACHING_GOAL_LABEL)
         .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)

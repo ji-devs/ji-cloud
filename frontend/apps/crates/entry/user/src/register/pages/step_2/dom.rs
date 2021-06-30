@@ -24,18 +24,21 @@ impl Step2Page {
 
         html!("page-register-step2", {
             .children(&mut [
-                html!("input-location", {
+                html!("input-wrapper", {
                     .property("slot", "location")
-                    .event(clone!(state => move |evt:events::GoogleLocation| {
-                        *state.location_json.borrow_mut() = evt.raw_json();
+                    .child(html!("input-location", {
+                        .event(clone!(state => move |evt:events::GoogleLocation| {
+                            *state.location_json.borrow_mut() = evt.raw_json();
+                        }))
                     }))
                 }),
-                html!("input-text", {
+                html!("input-wrapper", {
                     .property("slot", "language")
                     .property("label", STR_LANGUAGE_LABEL)
-                    .property("mode", "text")
-                    .event(clone!(state => move |evt:events::CustomInput| {
-                        *state.language.borrow_mut() = evt.value();
+                    .child(html!("input", {
+                        .event(clone!(state => move |evt:events::Input| {
+                            *state.language.borrow_mut() = evt.value().unwrap_or_default();
+                        }))
                     }))
                 }),
                 html!("input-checkbox", {

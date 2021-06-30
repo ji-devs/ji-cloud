@@ -36,7 +36,7 @@ fn readable_weight(weight: Weight) -> &'static str {
 pub fn render(state: Rc<State>) -> Dom {
     html!("text-editor-controls", {
         .children(&mut [
-            html!("dropdown-select", {
+            html!("input-select", {
                 .property("slot", "font")
                 .property("label", STR_FONT_LABEL)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| controls.font.to_string()))
@@ -55,7 +55,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     .map(|element| render_element_option(state.clone(), element))
                 )
             }),
-            html!("dropdown-select", {
+            html!("input-select", {
                 .property("slot", "weight")
                 .property("label", STR_WEIGHT_LABEL)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| readable_weight(controls.weight)))

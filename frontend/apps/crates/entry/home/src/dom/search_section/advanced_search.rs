@@ -33,7 +33,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .text(STR_ADVANCED)
             }),
 
-            html!("dropdown-select", {
+            html!("input-select", {
                 .property("slot", "affiliation")
                 .property("label", STR_AFFILIATION_LABEL)
                 .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
@@ -57,7 +57,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 })).to_signal_vec())
             }),
     
-            html!("dropdown-select", {
+            html!("input-select", {
                 .property("slot", "goal")
                 .property("label", STR_GOAL_LABEL)
                 .property("placeholder", STR_GOAL_PLACEHOLDER)

@@ -3,7 +3,7 @@ import "@elements/entry/jig/gallery/create";
 import "@elements/entry/jig/gallery/template";
 import "@elements/entry/jig/gallery/recent";
 import "@elements/core/buttons/text";
-import "@elements/core/inputs/search";
+import "@elements/core/inputs/composed/search";
 import "@elements/core/menu/menu-line";
 import { arrayCount, mapToString } from "@utils/array";
 import { argsToAttrs } from "@utils/attributes";
@@ -29,11 +29,11 @@ export const Gallery = (props?:Partial<Args>) => {
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="vocabulary"></jig-gallery-template>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="parsha"></jig-gallery-template>
             <jig-gallery-template slot="jig-templates" ages="5-8" kind="vocabulary"></jig-gallery-template>
-            <dropdown-select slot="filters" value="Show all my JIGs">
+            <input-select slot="filters" value="Show all my JIGs">
                 <li-check selected>Show all my JIGs</li-check>
                 <li-check>Show published Jigs</li-check>
                 <li-check>Show drafts</li-check>
-            </dropdown-select>
+            </input-select>
             <input-search slot="search-input"></input-search>
             ${mapToString(arrayCount(props.recentCount), recent)}
         </jig-gallery>

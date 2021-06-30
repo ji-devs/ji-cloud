@@ -17,9 +17,9 @@ export const AdvancedSearch = (props?:Args) => {
     return `
         <home-search-section-advanced slot="advanced">
             <button-text slot="opener" color="white" weight="bold">Search <br> Advanced</button-text>
-            <dropdown-select slot="categories" label="Categories" placeholder="Select one or more from the list"></dropdown-select>
-            <dropdown-select slot="affiliation" label="Affiliation" placeholder="Select one or more from the list"></dropdown-select>
-            <dropdown-select slot="goal" label="Teaching Goal" placeholder="Select from the list"></dropdown-select>
+            <input-select slot="categories" label="Categories" placeholder="Select one or more from the list"></input-select>
+            <input-select slot="affiliation" label="Affiliation" placeholder="Select one or more from the list"></input-select>
+            <input-select slot="goal" label="Teaching Goal" placeholder="Select from the list"></input-select>
             <button-rect slot="search-button" color="blue">Search</button-rect>
         </home-search-section-advanced>
     `;

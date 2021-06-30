@@ -10,7 +10,7 @@ const STR_AGE_LABEL: &'static str = "Age";
 const STR_AGE_PLACEHOLDER: &'static str = "Select one or more";
 
 pub fn render(state: Rc<State>) -> Dom {
-    html!("dropdown-select", {
+    html!("input-select", {
         .property("slot", "age")
         .property("label", STR_AGE_LABEL)
         .property("placeholder", STR_AGE_PLACEHOLDER)
