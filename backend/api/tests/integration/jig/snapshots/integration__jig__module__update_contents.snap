@@ -22,6 +22,9 @@ expression: body
             "pairs": [],
             "theme": "Jig",
             "background": null
+          },
+          "player_settings": {
+            "time_limit": null
           }
         }
       }
