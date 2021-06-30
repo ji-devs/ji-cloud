@@ -75,7 +75,7 @@ async-trait = "0.1.50"
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["utils/sandbox"]
+sandbox = ["wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["wasm-logger", "console_error_panic_hook", "quiet", "utils/local", "components/local", "renderer/local"]

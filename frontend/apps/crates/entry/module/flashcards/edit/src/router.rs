@@ -44,7 +44,9 @@ pub fn render(state: Rc<Router>) {
                                         render_page_body(app.clone());
                                         *state.app.borrow_mut() = Some(app);
                                     }
-                                    _ => {}
+                                    _ => {
+                                        log::info!("unsupported route!!")
+                                    }
                                 }
                             }
                             _ => {}

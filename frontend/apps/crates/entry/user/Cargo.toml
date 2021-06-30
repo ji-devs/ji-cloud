@@ -70,7 +70,7 @@ zxcvbn = "2.1.1"
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["utils/sandbox"]
+sandbox = ["wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/local"]

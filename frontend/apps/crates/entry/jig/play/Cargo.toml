@@ -73,7 +73,7 @@ strum_macros = "0.21.1"
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["utils/sandbox"]
+sandbox = ["wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["wasm-logger", "console_error_panic_hook", "utils/local"]
