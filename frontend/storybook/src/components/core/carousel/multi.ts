@@ -1,5 +1,4 @@
 import "@elements/core/carousel/multi";
-import "@elements/core/buttons/text";
 import { arrayCount, mapToString } from "@utils/array";
 import {argsToAttrs} from "@utils/attributes";
 

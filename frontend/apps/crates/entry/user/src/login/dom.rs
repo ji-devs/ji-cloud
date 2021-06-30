@@ -59,8 +59,9 @@ impl LoginPage {
                             actions::signin_google(state.clone())
                         }))
                     }),
-                    html!("button-text", {
+                    html!("button-rect", {
                         .property("slot", "password-forgot")
+                        .property("kind", "text")
                         .property("color", "blue")
                         .text(STR_FORGOTTEN)
                         .event(clone!(state => move |evt:events::Click| {

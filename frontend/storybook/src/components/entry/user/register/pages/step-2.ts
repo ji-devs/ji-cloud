@@ -2,7 +2,6 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/step2";
 import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 
 const STR_SUBMIT = "One more step"
 const STR_TERMS_LABEL = "I have read the terms and conditions (legal text…)";

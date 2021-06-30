@@ -2,7 +2,6 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/start";
 import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 import "@elements/entry/user/_common/buttons/google";
 
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";

@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/titles/ji";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/inputs/composed/search";
+import "@elements/core/buttons/rectangle-icon";
 import { nothing } from "lit-html";
 
 const STR_ADD = "Add image";
@@ -71,7 +72,7 @@ export class _ extends LitElement {
             <aside>
                 <div class="title">${title}</div>
                 <div class="right">
-                    ${hideAdd ? nothing : html`<button-rect @click=${this.gotoAdd} color="blue" size="small" iconBefore="plus">${STR_ADD}</button-rect>`}
+                    ${hideAdd ? nothing : html`<button-rect-icon @click=${this.gotoAdd} color="blue" size="small" iconBefore="plus">${STR_ADD}</button-rect-icon>`}
                     <input-search .value=${query}></input-search>
                 </div>
             </aside>

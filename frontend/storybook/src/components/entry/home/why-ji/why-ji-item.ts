@@ -1,8 +1,5 @@
 import "@elements/entry/home/why-ji/home-why-ji-item";
 import { Kind } from "@elements/entry/home/why-ji/home-why-ji-item";
-import { Text } from "~/components/core/buttons/text";
-import { PlainTextButton } from "~/components/entry/home/sections/plain-text-button";
-import { Color, Size, Weight } from "@elements/core/buttons/text";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {

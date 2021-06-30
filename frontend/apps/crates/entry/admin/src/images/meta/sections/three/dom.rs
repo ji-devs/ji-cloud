@@ -25,7 +25,8 @@ impl Section3Dom {
                         render_report(state.image.categories.clone(), None, cat.clone())
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
+                      .property("kind", "text")
                       .property("color", "blue")
                       .property("weight", "medium")
                       .property("slot", "edit")

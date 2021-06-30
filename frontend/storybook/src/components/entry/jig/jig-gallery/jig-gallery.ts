@@ -2,7 +2,6 @@ import "@elements/entry/jig/gallery/gallery";
 import "@elements/entry/jig/gallery/create";
 import "@elements/entry/jig/gallery/template";
 import "@elements/entry/jig/gallery/recent";
-import "@elements/core/buttons/text";
 import "@elements/core/inputs/composed/search";
 import "@elements/core/menu/menu-line";
 import { arrayCount, mapToString } from "@utils/array";

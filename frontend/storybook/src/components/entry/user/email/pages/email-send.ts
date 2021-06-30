@@ -1,7 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/email/pages/email-send";
 import "@elements/entry/user/email/buttons/email-send";
-import "@elements/core/buttons/text";
 import { Mode as ConfirmationMode }  from "@elements/entry/user/email/buttons/email-send";
 
 export default {
@@ -20,7 +19,7 @@ export const EmailSend = (props?:Partial<Args>) => {
 
     return `
         <page-email-send>
-            <button-text slot="change" color="blue">${STR_CHANGE}</button-text>
+            <button-rect kind="text" slot="change" color="blue">${STR_CHANGE}</button-rect>
             <button-email-send slot="send"></button-email-send>
         </page-email-send>
     `

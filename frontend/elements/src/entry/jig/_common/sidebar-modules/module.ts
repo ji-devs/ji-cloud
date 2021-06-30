@@ -3,7 +3,7 @@ import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 import { ModuleKind, GET_STR_MODULE } from "@elements/entry/jig/module-types";
 import { collapseStyles } from "./collapse-styles";
 

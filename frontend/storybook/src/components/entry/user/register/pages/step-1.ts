@@ -2,7 +2,6 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/register/pages/step1";
 import "@elements/entry/user/register/footer/login";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 
 const STR_FIRSTNAME_LABEL = "First name";
 const STR_FIRSTNAME_PLACEHOLDER = "Type your first name";

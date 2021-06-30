@@ -1,4 +1,4 @@
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 import "@elements/entry/admin/locale/locale-select-columns";
 import "@elements/entry/admin/locale/locale-select-columns-item";
 import {argsToAttrs} from "@utils/attributes";
@@ -25,16 +25,16 @@ export const LocaleSelectColumns = (props?: Partial<Args>) => {
             <locale-select-columns-item slot="hidden-columns">Column C</locale-select-columns-item>
             <locale-select-columns-item slot="hidden-columns">Column D</locale-select-columns-item>
 
-            <button-text slot="move-actions">⇨</button-text>
-            <button-text slot="move-actions">⇦</button-text>
+            <button-rect kind="text" slot="move-actions">⇨</button-rect>
+            <button-rect kind="text" slot="move-actions">⇦</button-rect>
 
 
             <locale-select-columns-item slot="visible-columns" active>Column E (active)</locale-select-columns-item>
             <locale-select-columns-item slot="visible-columns">Column F</locale-select-columns-item>
             <locale-select-columns-item slot="visible-columns">Column G</locale-select-columns-item>
 
-            <button-text slot="sort-actions">⇧</button-text>
-            <button-text slot="sort-actions">⇩</button-text>
+            <button-rect kind="text" slot="sort-actions">⇧</button-rect>
+            <button-rect kind="text" slot="sort-actions">⇩</button-rect>
 
         </locale-select-columns>
     </dialog>

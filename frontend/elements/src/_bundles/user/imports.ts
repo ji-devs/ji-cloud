@@ -12,7 +12,6 @@ import "@elements/entry/user/register/pages/step1";
 import "@elements/entry/user/register/pages/step2";
 import "@elements/entry/user/register/pages/step3";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 import "@elements/core/inputs/composed/checkbox";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/composed/password";

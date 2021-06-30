@@ -10,11 +10,11 @@ export class _ extends LitElement {
 
     static get styles() {
         return [css`
-            button-text {
+            button-rect {
                 display: grid;
                 grid-template-columns: auto auto;
             }
-            :host([sorted]) button-text::before {
+            :host([sorted]) button-rect::before {
                 content: var(--sort-arrow);
                 font-size: 15px;
                 display: inline-block;
@@ -25,9 +25,9 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <button-text color="blue">
+            <button-rect kind="text" color="blue">
                 Sort
-            </button-text>
+            </button-rect>
         `;
     }
 }

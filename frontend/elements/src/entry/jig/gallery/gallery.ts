@@ -183,7 +183,7 @@ export class _ extends LitElement {
                             </div>
                         </div>
                         <div class="see-all-templates-button">
-                            <button-text
+                            <button-rect kind="text"
                                 color="blue"
                                 weight="bold"
                                 @click="${() => this.allTemplatesVisible = !this.allTemplatesVisible}"
@@ -192,7 +192,7 @@ export class _ extends LitElement {
                                     ${ this.allTemplatesVisible ? STR_SEE_LESS_TEMPLATES : STR_SEE_ALL_TEMPLATES }
                                     <img-ui path="core/_common/chevron-down-blue.svg"></img-ui>
                                 </span>
-                            </button-text>
+                            </button-rect>
                         </div>
                     </div>
                 </div>

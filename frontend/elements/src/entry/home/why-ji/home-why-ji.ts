@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property, unsafeCSS } from 'lit-element';
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 import "./home-why-ji-item";
 import { mediaUi } from '@utils/path';
 import { homeStyles } from '../styles';
@@ -43,19 +43,19 @@ export class _ extends LitElement {
 
                 <div class="items-wrapper">
                     <home-why-ji-item kind="content">
-                        <button-text color="blue" size="small" weight="normal">${STR_CONTENT_ACTION}</button-text>
+                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CONTENT_ACTION}</button-rect>
                     </home-why-ji-item>
                     <home-why-ji-item kind="create">
-                        <button-text color="blue" size="small" weight="normal">${STR_CREATE_ACTION}</button-text>
+                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CREATE_ACTION}</button-rect>
                     </home-why-ji-item>
                     <home-why-ji-item kind="customize">
-                        <button-text color="blue" size="small" weight="normal">${STR_CUSTOMIZE_ACTION}</button-text>
+                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CUSTOMIZE_ACTION}</button-rect>
                     </home-why-ji-item>
                     <home-why-ji-item kind="community">
-                        <button-text color="blue" size="small" weight="normal">${STR_COMMUNITY_ACTION}</button-text>
+                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_COMMUNITY_ACTION}</button-rect>
                     </home-why-ji-item>
                     <home-why-ji-item kind="classroom">
-                        <button-text color="blue" size="small" weight="normal">${STR_CLASSROOM_ACTION}</button-text>
+                        <button-rect kind="text" color="blue" size="small" weight="normal">${STR_CLASSROOM_ACTION}</button-rect>
                     </home-why-ji-item>
                 </div>
             </div>

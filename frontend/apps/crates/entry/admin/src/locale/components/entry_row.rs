@@ -246,8 +246,9 @@ impl EntryRow {
                                 .child(
                                     html!("locale-actions-wrapper", {
                                         .children(&mut [
-                                            html!("button-text", {
+                                            html!("button-rect", {
                                                 .property("slot", "first")
+                                                .property("kind", "text")
                                                 .text("Clone")
                                                 .event(clone!(state, entry => move |_event: events::Click| {
                                                     state.loader.load(clone!(state, entry => async move {
@@ -255,8 +256,9 @@ impl EntryRow {
                                                     }))
                                                 }))
                                             }),
-                                            html!("button-text", {
+                                            html!("button-rect", {
                                                 .property("slot", "second")
+                                                .property("kind", "text")
                                                 .text("Delete")
                                                 .event(clone!(state, entry => move |_event: events::Click| {
                                                     state.loader.load(clone!(state, entry => async move {

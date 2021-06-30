@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
-import "@elements/core/buttons/text";
 import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
 const STR_END = "End";

@@ -16,7 +16,7 @@ export const AdvancedSearch = (props?:Args) => {
 
     return `
         <home-search-section-advanced slot="advanced">
-            <button-text slot="opener" color="white" weight="bold">Search <br> Advanced</button-text>
+            <button-rect kind="text" slot="opener" color="white" weight="bold">Search <br> Advanced</button-rect>
             <input-select slot="categories" label="Categories" placeholder="Select one or more from the list"></input-select>
             <input-select slot="affiliation" label="Affiliation" placeholder="Select one or more from the list"></input-select>
             <input-select slot="goal" label="Teaching Goal" placeholder="Select from the list"></input-select>

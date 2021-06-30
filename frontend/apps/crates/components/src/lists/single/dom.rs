@@ -19,8 +19,9 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("sidebar-widget-single-list", {
         .children(&mut [
 
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "clear")
+                .property("kind", "text")
                 .text(super::strings::STR_CLEAR)
                 .event(clone!(state => move |evt:events::Click| {
                     state.clear();
@@ -39,6 +40,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("mode", "sefaria")
             }),
             html!("button-rect", {
+                // TODO: think should should be change from color to disabled
                 .property_signal("color", state.is_valid_signal().map(|ready| {
                     if ready.is_ok() {
                         "red"

@@ -3,7 +3,7 @@ import "@elements/entry/admin/images/base-page";
 import "@elements/core/inputs/composed/checkbox";
 import "@elements/core/inputs/composed/text-underline";
 import "@elements/core/inputs/composed/textarea-underline";
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 import "@elements/core/dividers/horizontal-full";
 
 const STR_TITLE = "Label Images";

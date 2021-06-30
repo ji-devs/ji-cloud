@@ -17,12 +17,11 @@ export class _ extends LitElement {
   render() {
       const {enabled} = this;
 
-      const color = enabled ? "red" : "grey";
       const pointer = enabled ? "initial" : "none";
 
       return html`
           <button-rect 
-              .color=${color} 
+              .disabled=${!enabled} 
               style="pointer-events: ${pointer}"
               size="small"
               iconAfter="arrow"

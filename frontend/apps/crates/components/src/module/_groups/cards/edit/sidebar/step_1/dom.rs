@@ -79,8 +79,9 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) ->
 fn render_non_empty<RawData: RawDataExt, E: ExtraExt>(state: Rc<Step1<RawData, E>>) -> Dom {
     html!("sidebar-empty", {
         .child(
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "clear")
+                .property("kind", "text")
                 .text(strings::STR_CREATE_NEW_LIST)
                 .event(clone!(state => move |evt:events::Click| {
                     state.base.clear_all();

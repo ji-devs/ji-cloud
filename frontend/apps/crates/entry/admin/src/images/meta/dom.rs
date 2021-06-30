@@ -78,8 +78,9 @@ impl ImageMetaPage {
                                         id.0.to_string()
                                     }))
                                 }),
-                                html!("button-text", {
+                                html!("button-rect", {
                                     .property("slot", "replace")
+                                    .property("kind", "text")
                                     .property("color", "blue")
                                     .property("size", "small")
                                     .text(STR_REPLACE)
@@ -89,8 +90,9 @@ impl ImageMetaPage {
                                         }
                                     }))
                                 }),
-                                html!("button-text", {
+                                html!("button-rect", {
                                     .property("slot", "delete")
+                                    .property("kind", "text")
                                     .property("color", "blue")
                                     .property("size", "small")
                                     .text(STR_DELETE)

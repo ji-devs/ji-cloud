@@ -29,7 +29,6 @@ import "@elements/core/cards/blue";
 import "@elements/core/menu/ellipses";
 import "@elements/core/buttons/expand";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 import "@elements/core/window/window-loader-block";
 import "@elements/core/images/ji";
 import "@elements/core/images/ui";

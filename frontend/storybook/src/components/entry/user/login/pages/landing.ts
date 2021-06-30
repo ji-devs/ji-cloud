@@ -36,9 +36,9 @@ export const Landing = (props?:Partial<Args>) => {
             <input-password slot="password" placeholder="${STR_PASSWORDPLACEHOLDER}" label="${STR_PASSWORD}" >
                 <input>
             </input-password>
-            <button-text color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-text>
+            <button-rect kind="text" color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-rect>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
-            <button-text color="blue" slot="register" weight="normal">${STR_REGISTER}</button-text>
+            <button-rect kind="text" color="blue" slot="register" weight="normal">${STR_REGISTER}</button-rect>
         </page-login-landing>
     
     `

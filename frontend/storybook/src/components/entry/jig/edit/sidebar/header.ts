@@ -24,7 +24,7 @@ export const Header = (props?:Partial<Args>) => {
     return `
         <jig-edit-sidebar-header slot="header" ${argsToAttrs(props)}>
             <img-ui slot="close" path="entry/jig/collapse.svg"></img-ui>
-            <button-text slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
+            <button-rect kind="text" slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-rect>
             <img-ui slot="settings" path="entry/jig/settings.svg"></img-ui>
             <img-ui slot="modules" path="entry/jig/modules.svg"></img-ui>
             <input-wrapper slot="input">

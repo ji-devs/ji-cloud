@@ -101,23 +101,26 @@ fn render_share_students(state: Rc<State>) -> Dom {
                     state.active_popup.set(ActivePopup::None);
                 }))
             }),
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "back")
+                .property("kind", "text")
                 .text("< ")
                 .text(STR_BACK)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::ShareMain);
                 }))
             }),
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "copy-url")
+                .property("kind", "text")
                 .text("Copy URL")
                 .event(|_: events::Click| {
                     clipboard::write_text("???");
                 })
             }),
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "copy-code")
+                .property("kind", "text")
                 .text("Copy Code")
                 .event(|_: events::Click| {
                     clipboard::write_text("???");
@@ -138,16 +141,18 @@ fn render_share_embed(state: Rc<State>) -> Dom {
                     state.active_popup.set(ActivePopup::None);
                 }))
             }),
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "back")
+                .property("kind", "text")
                 .text("< ")
                 .text(STR_BACK)
                 .event(clone!(state => move |_: events::Click| {
                     state.active_popup.set(ActivePopup::ShareMain);
                 }))
             }),
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "copy")
+                .property("kind", "text")
                 .text("Copy code")
             })
         ])

@@ -27,7 +27,7 @@ export const ImageMeta3 = () => {
         content: `
             <image-meta-section-3>
             <div slot="category-report">${ReportTree({mock: "images"})}</div>
-            <button-text color="blue" weight="medium" slot="edit">${STR_EDIT}</button-text>
+            <button-rect kind="text" color="blue" weight="medium" slot="edit">${STR_EDIT}</button-rect>
 
 
               <div slot="imagename">

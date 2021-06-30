@@ -23,7 +23,7 @@ export class _ extends LitElement {
         <main>
             <title-ji color="black" weight="normal">${STR_ACCOUNT}</title-ji>
             &nbsp;
-            <button-text color="blue">${STR_LOGIN}</button-text>
+            <button-rect kind="text" color="blue">${STR_LOGIN}</button-rect>
         </main>
     `;
   }

@@ -28,9 +28,9 @@ export const Body = (props?:Partial<Args>) => {
                 <input type="radio">
                 Mistake
             </label>
-            <button-text slot="back">Back to JIG settings</button-text>
+            <button-rect kind="text" slot="back">Back to JIG settings</button-rect>
             <button-icon icon="x" slot="close"></button-icon>
-            <button-text slot="add-custom">Add your own</button-text>
+            <button-rect kind="text" slot="add-custom">Add your own</button-rect>
             <input-search slot="search"></input-search>
             ${mapToString(arrayCount(7), line)}
         </jig-audio-body>

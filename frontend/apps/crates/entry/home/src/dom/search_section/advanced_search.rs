@@ -24,8 +24,9 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("home-search-section-advanced", {
         .property("slot", "advanced")
         .children(&mut [
-            html!("button-text", {
+            html!("button-rect", {
                 .property("slot", "opener")
+                .property("kind", "text")
                 .property("color", "white")
                 .property("bold", true)
                 .text(STR_SEARCH)

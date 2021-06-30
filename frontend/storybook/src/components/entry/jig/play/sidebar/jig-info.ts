@@ -39,9 +39,9 @@ export const JigInfo = (props?:Partial<Args>) => {
             <pill-close slot="categories" label="Holidays"></pill-close>
             <pill-close slot="categories" label="Passover"></pill-close>
             <pill-close slot="categories" label="Jewish Texts"></pill-close>
-            <button-text slot="courses">Sefer Bereishit</button-text>
-            <button-text slot="courses">Shabat</button-text>
-            <button-text slot="courses">Briat Haolam</button-text>
+            <button-rect kind="text" slot="courses">Sefer Bereishit</button-rect>
+            <button-rect kind="text" slot="courses">Shabat</button-rect>
+            <button-rect kind="text" slot="courses">Briat Haolam</button-rect>
             <button-rect slot="report" color="blue">Report</button-rect>
         </jig-play-sidebar-jig-info>
     `;

@@ -27,8 +27,9 @@ impl HeaderDom {
                         *collapsed = !*collapsed;
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
                     .property("slot", "gallery")
+                    .property("kind", "text")
                     .property("color", "blue")
                     .property("weight", "medium")
                     .text(STR_MY_JIGS)

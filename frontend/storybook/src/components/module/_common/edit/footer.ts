@@ -18,7 +18,7 @@ export const Footer = (props?:Partial<Args>) => {
 
     return `<module-footer slot="footer">
 
-        <button-rect color="grey" size="small" iconAfter="arrow" slot="btn">${STR_CONTINUE}</button-rect>
+        <button-rect disabled size="small" iconAfter="arrow" slot="btn">${STR_CONTINUE}</button-rect>
     </module-footer>`
 }
 

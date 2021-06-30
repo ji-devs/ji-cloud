@@ -2,7 +2,7 @@ import "@elements/module/_common/edit/widgets/color-select/color-select";
 import "@elements/module/_common/edit/widgets/color-select/color-select-section";
 import "@elements/module/_common/edit/widgets/color-select/color-select-item";
 import "@elements/core/inputs/primitives/color";
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/icon";
 import { argsToAttrs } from "@utils/attributes";
 
@@ -84,7 +84,7 @@ export const colorSelect = (props?: Partial<Args>) => {
             </color-select-section>
 
             <input-color slot="add-color">
-                <button-text>+ Add color</button-text>
+                <button-rect kind="text">+ Add color</button-rect>
             </input-color>
         </color-select>
     `;

@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 
 const STR_ADVANCED = "Advanced";
 
@@ -71,7 +71,7 @@ export class _ extends LitElement {
                   <div class="separator"></div>
 
                   <div @click=${() => this.advanced = true} class="${advancedButtonClasses}">
-                      <button-text color="blue">${STR_ADVANCED}</button-text>
+                      <button-rect kind="text" color="blue">${STR_ADVANCED}</button-rect>
                   </div>
                   <div class="${advancedClasses}">
                       <slot name="advanced">

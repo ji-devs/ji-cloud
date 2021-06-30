@@ -3,7 +3,6 @@ import "@elements/core/carousel/multi";
 import "@elements/core/images/ji";
 import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
-import "@elements/core/buttons/text";
 import "@elements/core/buttons/sidebar";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/circle";
