@@ -12,6 +12,44 @@ export function withSlot(slot:string, html:string):string {
     return `${part_1} slot="${slot}" ${part_2}`;
 }
 
+// difference between closestPierceShadow and closestPierceSlot:
+// closestPierceShadow starts in a shadow and crawls out, while closestPierceSlot starts outside of the shadow on crawls in
+
+export function closestPierceShadow(node: Node | null, selector: string) : HTMLElement | null {
+    if (!node) {
+        return null;
+    }
+    if (node instanceof ShadowRoot) {
+        return closestPierceShadow(node.host, selector);
+    }
+    if (node instanceof HTMLElement) {
+        if (node.matches(selector)) {
+            return node;
+        } else {
+            return closestPierceShadow(node.parentNode, selector);
+        }
+    }
+    return closestPierceShadow(node.parentNode, selector);
+}
+
+export function closestPierceSlot(node: Node | null, selector: string) : Node | null {
+    if (!node) {
+        return null;
+    } else {
+        if (node instanceof ShadowRoot){
+            return closestPierceSlot(node.host, selector);
+        }
+        if (node instanceof HTMLElement) {
+            if (node.matches(selector)) {
+                return node;
+            } else {
+                return closestPierceSlot(node.assignedSlot || node.parentNode, selector);
+            }
+        }
+        return node.parentNode; // not sure if this is reachable
+    }
+}
+
 /* not using any of these any more
 
 // https://stackoverflow.com/a/56105394/784519

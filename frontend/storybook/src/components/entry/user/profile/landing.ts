@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/profile/landing";
-import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/old/select";
 
 export default {
     title: 'Entry / User / Profile',

@@ -1,9 +1,9 @@
 import { argsToAttrs } from "@utils/attributes";
-import "@elements/core/inputs/wrapper";
+import "@elements/core/inputs/old/select";
 import { arrayCount, mapToString } from "@utils/array";
 
 export default {
-    title: "Core / Inputs / Wrappers"
+    title: "Core / Inputs / Old"
 }
 
 interface Args {
@@ -22,18 +22,16 @@ const DEFAULT_ARGS: Args = {
     error: false,
 }
 
-export const Wrapper = (props?: Partial<Args>) => {
+export const Select = (props?: Partial<Args>) => {
     props = props ? { ...DEFAULT_ARGS, ...props } : DEFAULT_ARGS;
 
     return `
-        <input-wrapper ${argsToAttrs(props)}>
-            <input ${argsToAttrs(props)}>
-        </input-wrapper>
-        <br>
-        <input-wrapper ${argsToAttrs(props)}>
-            <textarea ${argsToAttrs(props)}></textarea>
-        </input-wrapper>
+        <input-select ${argsToAttrs(props)}>
+            ${mapToString(arrayCount(10), i => {
+                return `<li-check>item ${i}</li-check>`;
+            })}
+        </input-select>
     `;
 }
 
-Wrapper.args = DEFAULT_ARGS;
+Select.args = DEFAULT_ARGS;

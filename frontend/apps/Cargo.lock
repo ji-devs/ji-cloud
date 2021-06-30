@@ -2113,6 +2113,7 @@ dependencies = [
  "dominator_helpers",
  "futures",
  "futures-signals",
+ "gloo-timers",
  "htmlescape",
  "itertools 0.10.1",
  "js-sys",

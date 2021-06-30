@@ -1,6 +1,6 @@
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
-import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/old/select";
 import "@elements/core/lists/li-check";
 import "@elements/core/lists/li-check-collection";
 import "@elements/core/page-header/page-header";

@@ -171,7 +171,6 @@ export class _ extends LitElement {
     private getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
         const elementType = this.controllerState?.element || this.elementDefault || defaultState.element;
         const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
-
         const themeInfo = THEMES[this.theme];
         const themeVariant = themeInfo.textEditor[elementName] as TextEditorVariant;
 

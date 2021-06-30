@@ -7,7 +7,7 @@ import "@elements/module/_common/edit/widgets/text-editor-controls/button";
 import "@elements/module/_common/edit/widgets/text-editor-controls/overlay-shadow";
 import "@elements/module/_common/edit/widgets/text-editor-controls/input-number";
 import "@elements/module/_common/edit/widgets/text-editor-controls/insert-button";
-import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/old/select";
 import "@elements/core/lists/li-check";
 import "@elements/core/overlays/anchored-overlay";
 

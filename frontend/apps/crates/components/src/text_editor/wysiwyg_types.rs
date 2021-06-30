@@ -127,6 +127,9 @@ make_custom_event_serde!("wysiwyg-controls-change", WysiwygControlsChange, Contr
 
 impl WysiwygControlsChange {
     pub fn value(&self) -> ControlsChange {
+
+        log::info!("{:#?}", self.detail());
+
         self.detail().into_serde().unwrap()
     }
 }

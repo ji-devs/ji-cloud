@@ -22,7 +22,7 @@ import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-play-pause
 import "@elements/entry/jig/edit/sidebar/settings/jig-audio/jig-audio-playing-indicator";
 import "@elements/entry/jig/_common/bg";
 import "@elements/core/inputs/composed/search";
-import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/old/select";
 import "@elements/core/inputs/wrapper";
 import "@elements/core/inputs/composed/switch";
 import "@elements/core/buttons/icon";

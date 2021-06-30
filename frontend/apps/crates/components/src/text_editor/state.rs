@@ -14,7 +14,6 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use js_sys::Reflect;
 use strum::IntoEnumIterator;
-
 use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT};
 use super::dom::text_editor_controls::color_controls::ColorState;
 use super::callbacks::Callbacks;
