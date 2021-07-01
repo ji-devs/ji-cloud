@@ -37,7 +37,10 @@ import "@elements/module/_common/edit/sidebar-body";
 import "@elements/module/_common/edit/widgets/header-controller";
 import "@elements/module/_common/edit/widgets/choose-mode/choose-mode";
 import "@elements/module/_common/edit/widgets/choose-mode/option";
-
+import "@elements/module/_common/edit/widgets/settings/button";
+import "@elements/module/_common/edit/widgets/settings/bubble";
+import "@elements/module/_common/edit/widgets/settings/bubble-content";
+import "@elements/module/_common/edit/widgets/settings/line";
 
 /* Common components used in most editors */
 
