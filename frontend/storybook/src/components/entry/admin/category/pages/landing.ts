@@ -2,14 +2,14 @@ import "@elements/entry/admin/category/pages/landing";
 import "@elements/entry/admin/category/buttons/add";
 import "@elements/core/titles/variants/underlined-title";
 import "@elements/core/titles/ji";
-import "@elements/core/inputs/dropdowns/tree/tree";
+import "@elements/core/inputs/composed//dropdown-tree";
 import "@elements/core/cards/blue";
 import "@elements/core/buttons/expand";
 import {mockCategoryHierarchy, TreeNode} from "~/mock/hierarchy";
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString} from "@utils/array";
 import { Rectangle } from "~/components/core/buttons/rectangle";
-import {DropdownTree} from "~/components/core/inputs/dropdowns/dropdown-tree"
+import {DropdownTree} from "~/components/core/inputs/composed/dropdown-tree"
 
 export default {
   title: 'Entry/Admin/Category/Pages',

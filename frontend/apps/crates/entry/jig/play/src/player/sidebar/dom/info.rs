@@ -80,8 +80,9 @@ fn render_jig_info(state: Rc<State>, jig: &Jig) -> Dom {
                 .property("label", &category_id.0.to_string())
             })
         }).collect::<Vec<Dom>>())
-        .child(html!("button-text", {
+        .child(html!("button-rect", {
             .property("slot", "courses")
+            .property("kind", "text")
             .text("Sefer Bereishit")
         }))
         .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())

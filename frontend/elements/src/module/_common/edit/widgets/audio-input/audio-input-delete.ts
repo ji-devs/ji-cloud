@@ -18,12 +18,12 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <button-text color="blue">
+            <button-rect kind="text" color="blue">
                 <div class="content">
                     <img-ui path="module/_common/edit/widgets/sidebar/audio-input/delete.svg"></img-ui>
                     ${ STR_DELETE }
                 </div>
-            </button-text>
+            </button-rect>
         `;
     }
 }

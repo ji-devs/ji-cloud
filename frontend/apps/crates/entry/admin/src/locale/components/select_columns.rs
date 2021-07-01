@@ -35,9 +35,10 @@ fn render_list(slot: &str, list: MutableSignalVec<Column>, selected: Mutable<Opt
 }
 
 fn render_move_button(button_content: &str, list: Rc<MutableVec<Column>>, selected: Mutable<Option<Column>>, other_list: Rc<MutableVec<Column>>) -> Dom {
-    html!("button-text", {
+    html!("button-rect", {
         .text(button_content)
         .property("slot", "move-actions")
+        .property("kind", "text")
         .property("weight", "bold")
         .event(clone!(selected, list, other_list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();
@@ -54,9 +55,10 @@ fn render_move_button(button_content: &str, list: Rc<MutableVec<Column>>, select
 }
 
 fn render_sort_button(button_content: &str, list: Rc<MutableVec<Column>>, selected: Mutable<Option<Column>>, on_click: fn(usize, usize) -> Option<usize>) -> Dom {
-    html!("button-text", {
+    html!("button-rect", {
         .text(button_content)
         .property("slot", "sort-actions")
+        .property("kind", "text")
         .property("weight", "bold")
         .event(clone!(selected, list => move |_: events::Click| {
             let selected_ref = selected.lock_ref().clone();

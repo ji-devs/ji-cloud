@@ -1,5 +1,5 @@
 use dominator::{Dom, html, clone, with_node};
-use futures_signals::signal::Mutable;
+use futures_signals::signal::{Mutable, SignalExt};
 use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
@@ -29,23 +29,30 @@ impl StartPage {
             .child(html!("page-register-start", {
                 .property_signal("passwordStrength", state.get_password_strength())
                 .children(vec![
-                    html!("input-text", {
+                    html!("input-wrapper", {
                         .property("slot", "email")
-                        .property("mode", "text")
                         .property("label", STR_EMAIL_LABEL)
-                        .property("placeholder", STR_EMAIL_PLACEHOLDER)
-                        .property_signal("error", state.email_error())
-                        .event(clone!(state => move |evt:events::CustomInput| {
-                            state.clear_email_status();
-                            *state.email.borrow_mut() = evt.value();
+                        .property_signal("error", state.email_error().map(|err| {
+                            !err.is_empty()
+                        }))
+                        .property_signal("hint", state.email_error())
+                        .child(html!("input", {
+                            .property("type", "email")
+                            .property("placeholder", STR_EMAIL_PLACEHOLDER)
+                            .event(clone!(state => move |evt:events::Input| {
+                                state.clear_email_status();
+                                *state.email.borrow_mut() = evt.value().unwrap_or_default();
+                            }))
                         }))
                     }),
-                    html!("input-text", {
+                    html!("input-password", {
                         .property("slot", "password")
-                        .property("mode", "passwordHidden")
                         .property("label", STR_PASSWORD_LABEL)
                         .property("placeholder", STR_PASSWORD_PLACEHOLDER)
-                        .property_signal("error", state.password_error())
+                        .property_signal("error", state.password_error().map(|err| {
+                            !err.is_empty()
+                        }))
+                        .property_signal("hint", state.password_error())
                         .event(clone!(state => move |evt:events::CustomInput| {
                             state.clear_password_status();
                             *state.password.borrow_mut() = evt.value();

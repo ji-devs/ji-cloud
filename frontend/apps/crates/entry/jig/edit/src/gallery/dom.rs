@@ -58,7 +58,7 @@ impl GalleryDom {
                     }
                 }))
             }))
-            .child(html!("dropdown-select", {
+            .child(html!("input-select", {
                 .property("slot", "filters")
                 .property_signal("value", state.visible_jigs.signal_cloned().map(|visible_jigs| Self::visible_jigs_option_string(&visible_jigs)))
                 .children(VisibleJigs::iter().map(|option| {

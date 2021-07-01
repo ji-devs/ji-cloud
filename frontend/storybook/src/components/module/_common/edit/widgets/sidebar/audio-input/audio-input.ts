@@ -33,7 +33,7 @@ export const AudioInput = (props?: Partial<Args>) => {
             <div slot="main-content">
                 <audio-input-icon kind="success"></audio-input-icon>
             </div>
-            <button-text slot="delete" color="blue">Delete</button-text>
+            <button-rect kind="text" slot="delete" color="blue">Delete</button-rect>
             <audio-input-action slot="main-action" kind="play"></audio-input-action>
         </audio-input>
     `;

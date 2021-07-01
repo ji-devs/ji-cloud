@@ -5,8 +5,8 @@ import "@elements/module/_common/edit/widgets/audio-input/audio-input-action";
 import "@elements/module/_common/edit/widgets/audio-input/audio-input-delete";
 import "@elements/module/_common/edit/widgets/audio-input/audio-input-icon";
 import "@elements/core/progress-bar/progress-bar";
-import "@elements/core/inputs/file";
-import "@elements/core/buttons/text";
+import "@elements/core/inputs/primitives/file";
+import "@elements/core/buttons/rectangle";
 
 export default {
     title: "Module / _COMMON /  edit /Widgets / Sidebar / Audio Input"
@@ -124,7 +124,7 @@ function getAction(previewMode: PreviewMode): string {
         case 'Upload / Browse':
             return `<audio-input-action slot="main-action" kind="add-sound"></audio-input-action>`;
         case 'Uploading':
-            return `<button-text slot="main-action">Cancel</button-text>`;
+            return `<button-rect kind="text" slot="main-action">Cancel</button-rect>`;
         case 'File Uploaded':
             return `<audio-input-action slot="main-action" kind="play"></audio-input-action>`;
         case 'Playing Uploaded File':

@@ -9,6 +9,7 @@ use futures_signals::{
 use components::{
     audio_input::dom::render as render_audio_input,
 };
+use web_sys::HtmlTextAreaElement;
 
 pub fn render(state: Rc<Step3>) -> Dom {
 
@@ -70,23 +71,26 @@ fn render_tab_body(state: Rc<Step3>, tab: Tab) -> Dom {
     match tab {
         Tab::Text(index, text_state) => {
             html!("div", {
-                .child(html!("input-form-textarea", {
-                    .property_signal("value", text_state.signal_cloned().map(|text| {
-                        text.unwrap_or_default()
-                    }))
+                .child(html!("input-wrapper", {
                     .property("label", crate::strings::step_3::STR_LABEL)
-                    .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
-                    .property("rows", 4)
-                    //Input is just local 
-                    //Change pushes history and sets at a higher level
-                    .event(clone!(text_state => move |evt:events::CustomInput| {
-                        let value = evt.value();
-                        text_state.set(if value.is_empty() { None } else { Some(value) });
-                    }))
-                    .event(clone!(state => move |evt:events::CustomChange| {
-                        let value = evt.value();
+                    .child(html!("textarea", {
+                        .property_signal("value", text_state.signal_cloned().map(|text| {
+                            text.unwrap_or_default()
+                        }))
+                        .property("placeholder", crate::strings::step_3::STR_PLACEHOLDER)
+                        .property("rows", 4)
+                        //Input is just local 
+                        //Change pushes history and sets at a higher level
+                        .event(clone!(text_state => move |evt:events::Input| {
+                            let value = evt.value().unwrap_or_default();
+                            text_state.set(if value.is_empty() { None } else { Some(value) });
+                        }))
+                        .event(clone!(state => move |evt:events::Change| {
+                            let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
+                            let value = target.value();
 
-                        state.base.set_trace_meta_text(index, if value.is_empty() { None } else { Some(value) });
+                            state.base.set_trace_meta_text(index, if value.is_empty() { None } else { Some(value) });
+                        }))
                     }))
                 }))
                 .child(html!("button", {

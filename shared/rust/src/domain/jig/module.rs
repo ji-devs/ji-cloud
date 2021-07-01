@@ -162,7 +162,7 @@ pub struct ModuleCreateRequest {
 impl Default for ModuleCreateRequest {
     fn default() -> Self {
         ModuleCreateRequest {
-            body: ModuleBody::Cover(body::cover::ModuleData { content: None }),
+            body: ModuleBody::Cover(body::cover::ModuleData::default()),
         }
     }
 }

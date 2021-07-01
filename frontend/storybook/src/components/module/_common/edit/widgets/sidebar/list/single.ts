@@ -26,11 +26,11 @@ export const Single = (props?:Partial<Args>) => {
 
     return `
     <sidebar-widget-single-list>
-        <button-text slot="clear">${STR_CLEAR}</button-text>
+        <button-rect kind="text" slot="clear">${STR_CLEAR}</button-rect>
         <button-sidebar slot="input-buttons" mode="keyboard"></button-sidebar>
         <button-sidebar slot="input-buttons" mode="dicta"></button-sidebar>
         <button-sidebar slot="input-buttons" mode="sefaria"></button-sidebar>
-        <button-rect color="grey" size="small" iconAfter="done" slot="done-btn">${STR_DONE}</button-rect>
+        <button-rect disabled size="small" iconAfter="done" slot="done-btn">${STR_DONE}</button-rect>
     ${mapToString(arrayCount(nRows), row => {
 
         const is_placeholder = row < placeholderCutoff;

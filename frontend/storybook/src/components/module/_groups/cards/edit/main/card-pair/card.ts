@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
 import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
-import "@elements/core/inputs/text-content";
+import "@elements/core/inputs/primitives/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
-import "@elements/core/inputs/textarea-content";
+import "@elements/core/inputs/primitives/textarea-content";
 import "@elements/module/_groups/cards/edit/main/card-pair/card";
 import {Mode, Side} from "@elements/module/_groups/cards/helpers";
 

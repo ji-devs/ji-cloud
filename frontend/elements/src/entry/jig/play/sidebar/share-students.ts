@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
-import "@elements/core/buttons/text";
+import "@elements/core/buttons/rectangle";
 
 const STR_STUDENTS_HEADER = "Share with Students";
 const STR_STUDENTS_URL_LABEL = "Ask the students to go to:";
@@ -81,7 +81,7 @@ export class _ extends LitElement {
                             <input readonly value="${this.url}">
                         </label>
                         <div class="under">
-                            <a href="${this.url}"><button-text>${STR_STUDENTS_URL_LINK}</button-text></a>
+                            <a href="${this.url}"><button-rect kind="text">${STR_STUDENTS_URL_LINK}</button-rect></a>
                             <span class="divider"></span>
                             <slot name="copy-url"></slot>
                         </div>

@@ -142,7 +142,7 @@ export class _ extends LitElement {
                     </div>
                 </div>
                 <div class="footer">
-                    <button-rect color="whiteblue" iconBefore="blueplay">Play</button-rect>
+                    <button-rect-icon color="blue" kind="text" iconBefore="blueplay">Play</button-rect-icon>
                 </div>
             </main>
         </div>

@@ -10,8 +10,9 @@ use shared::domain::jig::module::body::Audio;
 
 pub fn render (state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     if let AudioInputMode::Uploading = mode {
-        html!("button-text", {
+        html!("button-rect", {
             .property("slot", "main-action")
+            .property("kind", "text")
             .text("Cancel")
             .event(clone!(state => move |_: events::Click| {
                 todo!();

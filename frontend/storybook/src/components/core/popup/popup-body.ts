@@ -16,7 +16,7 @@ export const Confirm = (props?:Args) => {
 
     return `
         <popup-body ${argsToAttrs(props)}>
-            <button-text slot="back">Back to JIG settings</button-text>
+            <button-rect kind="text" slot="back">Back to JIG settings</button-rect>
             <button-icon icon="x" slot="close"></button-icon>
             <h2 slot="heading">Add Background Music</h2>
             <div slot="body">

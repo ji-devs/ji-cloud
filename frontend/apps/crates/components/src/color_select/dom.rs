@@ -125,7 +125,8 @@ fn render_user_section(state: Rc<State>) -> Dom {
 fn render_add_color(state: Rc<State>) -> Dom {
     html!("input-color", {
         .property("slot", "add-color")
-        .child(html!("button-text", {
+        .child(html!("button-rect", {
+            .property("kind", "text")
             .text("+ Add color")
         }))
         .event(clone!(state => move |e: events::CustomChange| {

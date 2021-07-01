@@ -1,7 +1,6 @@
 import "@elements/module/_common/edit/widgets/color-select/color-select-section";
 import "@elements/module/_common/edit/widgets/color-select/color-select-item";
-import "@elements/core/inputs/color";
-import "@elements/core/buttons/text";
+import "@elements/core/inputs/primitives/color";
 import { argsToAttrs } from "@utils/attributes";
 
 export default {

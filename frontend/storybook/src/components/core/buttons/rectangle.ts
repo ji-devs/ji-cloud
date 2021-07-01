@@ -1,66 +1,59 @@
-import {argsToAttrs, deleteNone} from "@utils/attributes";
+import {argsToAttrs} from "@utils/attributes";
 import "@elements/core/buttons/rectangle";
-import {Color, Size, IconAfter, IconBefore} from "@elements/core/buttons/rectangle";
+import { Color, Size, Kind } from "@elements/core/buttons/rectangle";
 
 export default {
   title: 'Core / Buttons',
 }
-
 interface Args {
-  contents: string,
-  color: Color,
-  size: Size,
-  bold: boolean,
-  italic: boolean,
-  iconAfter:IconAfter | "none",
-  iconBefore:IconBefore | "none",
+    size: Size,
+    color: Color,
+    kind: Kind,
+    bold: boolean,
+    italic: boolean,
+    submit: boolean,
+    disabled: boolean,
+
+    contents: string,
 }
 
 const DEFAULT_ARGS:Args = {
-  contents: "Submit",
-  color: "red",
-  size: "medium",
-  bold: false,
-  italic: false,
-  iconAfter: "none",
-  iconBefore: "none",
+    size: "medium",
+    color: "red",
+    kind: "filled",
+    bold: false,
+    italic: false,
+    submit: false,
+    disabled: false,
+
+    contents: "Submit",
 }
 
 export const Rectangle = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {contents, ...buttonProps} = props;
-
-    return `<button-rect ${argsToAttrs(deleteNone(buttonProps))}>${contents}</button-rect>`
+    return `<button-rect ${argsToAttrs(props)}>${props.contents}</button-rect>`;
 }
-
-//Continuing the previous example
-Rectangle.argTypes = {
-  color: {
-    control: {
-      type: 'inline-radio',
-      options: ["red", "grey", "blue", "green", "white"]
-    }
-  },
-  size: {
-    control: {
-      type: 'inline-radio',
-      options: ["small", "medium", "large"]
-    }
-  },
-  iconBefore: {
-    control: {
-      type: 'inline-radio',
-      options: ["none"]
-    }
-  },
-  iconAfter: {
-    control: {
-      type: 'inline-radio',
-      options: ["none", "arrow", "done"]
-    }
-  }
-}
-
 
 Rectangle.args = DEFAULT_ARGS;
+
+Rectangle.argTypes = {
+    size: {
+        control: {
+            type: 'inline-radio',
+            options: ["small", "medium", "large"]
+        }
+    },
+    color: {
+        control: {
+            type: 'inline-radio',
+            options: ["red", "blue", "green"]
+        }
+    },
+    kind: {
+        control: {
+            type: 'inline-radio',
+            options: ["filled", "text", "outline"]
+        }
+    },
+}

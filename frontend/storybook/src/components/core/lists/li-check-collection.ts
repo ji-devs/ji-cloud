@@ -38,9 +38,12 @@ const DEFAULT_ARGS2:Args2 = {
 export const LiCheckCollectionInSelect = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
+    // @ts-ignore
+    props.nested = true;
+
     return `
         <div style="width:400px;">
-            <dropdown-select ${argsToAttrs(props)}>
+            <input-select ${argsToAttrs(props)}>
                 <li-check-collection label="hello0" open>
                     <li-check>Hello1</li-check>
                     <li-check>Hello2</li-check>
@@ -59,7 +62,7 @@ export const LiCheckCollectionInSelect = (props?:Partial<Args>) => {
                 <li-check>Hello2</li-check>
                 <li-check>Hello3</li-check>
                 <li-check>Hello4</li-check>
-            </dropdown-select>
+            </input-select>
         </div>
     `;
 }

@@ -1,10 +1,10 @@
 import "@elements/entry/jig/edit/publish/publish";
 import "@elements/entry/jig/edit/publish/add-resource";
 import "@elements/entry/jig/edit/publish/add-resource-method";
-import "@elements/core/inputs/switch";
-import "@elements/core/inputs/text";
-import "@elements/core/inputs/form/textarea";
-import "@elements/core/inputs/dropdowns/dropdown-select";
+import "@elements/core/inputs/composed/switch";
+import "@elements/core/inputs/old/text";
+import "@elements/core/inputs/old/textarea";
+import "@elements/core/inputs/composed/select";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/pills/pill-close";
 
@@ -32,37 +32,39 @@ export const Publish = (props?:Partial<Args>) => {
                 <input-switch slot="public" label="My JIG is public"></input-switch>
 
                 
-                <input-text
+                <input-wrapper
                     slot="name"
                     label="JIG’s name"
-                    value="Parashat Bereshit"
-                ></input-text>
-                <input-form-textarea
+                >
+                    <input value="Parashat Bereshit">
+                </input-wrapper>
+                <input-wrapper
                     slot="description"
                     label="Description"
-                    value="This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
-                ></input-form-textarea>
+                >
+                    <textarea>This game is about… using … Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
+                </input-wrapper>
 
-                <dropdown-select
+                <input-select
                     slot="language"
                     label="Language of instructions"
                     value="English"
-                ></dropdown-select>
-                <dropdown-select
+                ></input-select>
+                <input-select
                     slot="age"
                     label="Age"
                     value="All Ages"
-                ></dropdown-select>
-                <dropdown-select
+                ></input-select>
+                <input-select
                     slot="goal"
                     label="Teaching Goal"
                     placeholder="Select from the list"
-                ></dropdown-select>
-                <dropdown-select
+                ></input-select>
+                <input-select
                     slot="catagories-select"
                     label="Categories"
                     placeholder="Select from the list"
-                ></dropdown-select>
+                ></input-select>
                 <pill-close
                     slot="category-labels"
                     label="Hebrew"

@@ -1,8 +1,8 @@
 import "@elements/module/_common/edit/widgets/image-search/image-select";
 import "@elements/module/_common/edit/widgets/image-search/image-search-filters";
-import "@elements/core/inputs/search";
-import "@elements/core/inputs/checkbox";
-import "@elements/core/inputs/switch";
+import "@elements/core/inputs/composed/search";
+import "@elements/core/inputs/composed/checkbox";
+import "@elements/core/inputs/composed/switch";
 import { arrayCount, mapToString } from "@utils/array";
 import { argsToAttrs } from "@utils/attributes";
 import { imageMode } from "@elements/module/_common/edit/widgets/image-search/image-select";

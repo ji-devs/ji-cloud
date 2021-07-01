@@ -3,7 +3,7 @@ import { classMap } from 'lit-html/directives/class-map';
 import "@elements/core/titles/variants/horizontal-underlined-title";
 import "@elements/entry/admin/images/base-page";
 import "@elements/core/pagination/widget";
-import "@elements/core/inputs/dropdowns/dropdown-underlined";
+import "@elements/core/inputs/composed/dropdown-underlined";
 import "@elements/entry/admin/images/search/image-cell";
 import "@elements/entry/admin/images/search/publish-filter";
 

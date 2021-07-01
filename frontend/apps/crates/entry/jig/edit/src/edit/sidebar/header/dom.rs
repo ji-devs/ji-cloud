@@ -27,8 +27,9 @@ impl HeaderDom {
                         *collapsed = !*collapsed;
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
                     .property("slot", "gallery")
+                    .property("kind", "text")
                     .property("color", "blue")
                     .property("weight", "medium")
                     .text(STR_MY_JIGS)
@@ -69,13 +70,29 @@ impl HeaderDom {
                         dominator::routing::go_to_url(&url);
                     }))
                 }),
-                html!("input-text-pencil", {
+                // old pencil input
+                // html!("input-text-pencil", {
+                //     .property("slot", "input")
+                //     .property("placeholder", STR_SEARCH_PLACEHOLDER)
+                //     .property_signal("value", sidebar_state.name.signal_cloned())
+                //     .event(clone!(sidebar_state => move |e: events::CustomInput| {
+                //         let value = e.value();
+                //         sidebar_actions::update_display_name(sidebar_state.clone(), value);
+                //     }))
+                // }),
+                html!("input-wrapper", {
                     .property("slot", "input")
-                    .property("placeholder", STR_SEARCH_PLACEHOLDER)
-                    .property_signal("value", sidebar_state.name.signal_cloned())
-                    .event(clone!(sidebar_state => move |e: events::CustomInput| {
-                        let value = e.value();
-                        sidebar_actions::update_display_name(sidebar_state.clone(), value);
+                    .child(html!("input", {
+                        .property("placeholder", STR_SEARCH_PLACEHOLDER)
+                        .property_signal("value", sidebar_state.name.signal_cloned())
+                        .event(clone!(sidebar_state => move |e: events::Input| {
+                            let value = e.value().unwrap_or_default();
+                            sidebar_actions::update_display_name(sidebar_state.clone(), value);
+                        }))
+                    }))
+                    .child(html!("img-ui ", {
+                        .property("slot", "icon")
+                        .property("path", "core/inputs/pencil-blue-darker.svg")
                     }))
                 }),
                 html!("jig-edit-sidebar-preview-button", {

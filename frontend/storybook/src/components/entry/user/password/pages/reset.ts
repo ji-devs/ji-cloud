@@ -1,7 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/password/pages/reset";
 import "@elements/core/buttons/rectangle";
-import "@elements/core/buttons/text";
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
 export default {
@@ -27,7 +26,7 @@ export const Reset = (props?:Partial<Args>) => {
 
     return `
         <page-password-reset passwordStrength="${passwordStrength}">
-            <input-text slot="password" placeholder=${STR_PASSWORD_LABEL} label="${STR_PASSWORD_LABEL}" helpertext="${STR_PASSWORD_HELP}"  mode="passwordHidden"></input-text>
+            <input-password slot="password" placeholder="${STR_PASSWORD_LABEL}" label="${STR_PASSWORD_LABEL}" hint="${STR_PASSWORD_HELP}"</input-password>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
         </page-password-reset>
     `
