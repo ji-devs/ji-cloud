@@ -10,7 +10,6 @@ use futures_signals::{
 use dominator::{Dom, html, clone};
 use dominator_helpers::futures::AsyncLoader;
 use std::cell::RefCell;
-use components::module::edit::dom::render_page_body;
 use crate::{
     categories::dom::CategoriesPage,
     locale::{
