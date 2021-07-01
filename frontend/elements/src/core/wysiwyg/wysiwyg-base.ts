@@ -106,16 +106,17 @@ export class _ extends LitElement {
         const elementType = this._element || this.elementDefault || defaultState.element;
         const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
 
-        const themeInfo = THEMES[this.theme].textEditor;
-        
+        const themeInfo = THEMES[this.theme];
+
         switch (key) {
             case "color":
-                return (themeInfo as any)["color" + themeInfo[elementName].fontColor];
+                let color = (themeInfo as any)["color" + themeInfo.textEditor[elementName].fontColor];
+                return `#${color[0].toString(16)}${color[1].toString(16)}${color[2].toString(16)}` as any;
             case "font":
-                return (themeInfo as any)["fontFamily" + themeInfo[elementName].fontFamily];
+                return (themeInfo as any)["fontFamily" + themeInfo.textEditor[elementName].fontFamily];
             case "fontSize":
                 // for some reason I need any
-                return themeInfo[elementName].fontSize as any;
+                return themeInfo.textEditor[elementName].fontSize as any;
             default:
                 return defaultState[key];
         }
