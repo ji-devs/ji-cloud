@@ -5,7 +5,7 @@ use shared::domain::jig::module::body::_groups::cards::{
     Mode
 };
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 };
 

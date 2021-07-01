@@ -12,7 +12,7 @@ use super::pair::{
 use crate::{
     module::{
         _groups::cards::edit::state::*,
-        edit::prelude::*,
+        _common::edit::prelude::*,
     },
     backgrounds
 };

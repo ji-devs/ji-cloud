@@ -2,7 +2,7 @@ use std::rc::Rc;
 use shared::domain::jig::module::body::{Background, ThemeChoice};
 use dominator::clone;
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 };
 

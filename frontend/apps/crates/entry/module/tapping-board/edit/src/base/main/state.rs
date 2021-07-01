@@ -1,4 +1,4 @@
-use components::module::edit::prelude::*;
+use components::module::_common::edit::prelude::*;
 use components::traces::{
     bubble::state::TraceBubble,
     edit::state::Edit as TracesEdit

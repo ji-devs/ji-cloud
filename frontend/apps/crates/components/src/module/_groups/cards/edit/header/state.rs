@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 };
 

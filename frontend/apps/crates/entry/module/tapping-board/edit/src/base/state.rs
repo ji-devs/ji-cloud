@@ -1,4 +1,4 @@
-use components::module::edit::prelude::*;
+use components::module::_common::edit::prelude::*;
 use components::audio_mixer::AudioMixer;
 use std::rc::Rc;
 use shared::domain::jig::{
@@ -76,15 +76,25 @@ pub struct Base {
 
 pub struct PlaySettings {
     pub hint: Mutable<Hint>,
-    pub next: Mutable<Next>
+    pub next: Mutable<Next>,
+    pub next_value: Mutable<usize>
 }
 
 impl PlaySettings {
     pub fn new(settings:RawPlaySettings) -> Self {
 
+        let next_value = Mutable::new(
+                match &settings.next {
+                    Next::SelectSome(value) => *value,
+                    _ => {
+                        crate::config::DEFAULT_SELECT_AMOUNT
+                    }
+                },
+            );
         Self {
             hint: Mutable::new(settings.hint),
             next: Mutable::new(settings.next),
+            next_value
         }
     }
 

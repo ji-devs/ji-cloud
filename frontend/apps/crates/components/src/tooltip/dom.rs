@@ -3,7 +3,7 @@ use futures_signals::signal_vec::SignalVecExt;
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};
 use futures_signals::signal::SignalExt;
-use crate::module::history::state::HistoryState;
+use crate::module::_common::edit::history::state::HistoryState;
 use super::state::*;
 use web_sys::{HtmlElement, Element, DomRect};
 

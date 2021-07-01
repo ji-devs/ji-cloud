@@ -9,7 +9,6 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks
     },
     color_select::state::{State as ColorPickerState},
-    module::edit::prelude::*
 };
 use shared::domain::jig::module::body::{Background, Image};
 pub struct Step2 {

@@ -911,9 +911,9 @@ dependencies = [
 
 [[package]]
 name = "dominator_helpers"
-version = "0.6.2"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09b0f514ed77912233b3cd2454b362c0240215d9fa46c408675565203ce1823b"
+checksum = "b72a94c66d66e8fcecbd15ea7b40faa8d70d4b40c48eacb3157b8ba11dc4a017"
 dependencies = [
  "discard",
  "dominator",

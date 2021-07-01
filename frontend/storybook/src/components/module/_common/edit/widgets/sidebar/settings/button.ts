@@ -5,7 +5,7 @@ import "@elements/module/_common/edit/widgets/settings/bubble";
 import "@elements/module/_common/edit/widgets/settings/bubble-content";
 import {mapToString, arrayCount} from "@utils/array";
 
-const kinds:Array<Kind> = ["attempts", "card-double", "card-single", "continue-all", "continue-click", "continue-some", "highlight", "highlight-off", "limit", "n_choices", "n_pairs", "order", "randomize", "rounds", "score", "score-off", "swap", "time-limit", "time-limit-off"];
+const kinds:Array<Kind> = ["attempts", "card-double", "card-single", "continue-all", "continue-click", "continue-some", "highlight", "highlight-off", "no-limit", "n_choices", "n_pairs", "order", "randomize", "rounds", "score", "score-off", "swap", "time-limit", "time-limit-off"];
 
 
 export default {

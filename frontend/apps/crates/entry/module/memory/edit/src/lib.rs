@@ -12,6 +12,7 @@ mod router;
 mod debug;
 mod state;
 mod settings;
+mod config;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

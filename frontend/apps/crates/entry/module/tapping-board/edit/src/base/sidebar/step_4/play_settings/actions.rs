@@ -5,20 +5,14 @@ use shared::domain::jig::module::body::tapping_board::{Next, Hint};
 use super::state::State;
 
 impl State {
-    pub fn on_next_amount_value(&self, amount: usize) {
-        *self.some_amount.borrow_mut() = amount;
+    pub fn set_hint(&self, hint: Hint) {
+        self.base.play_settings.hint.set(hint.clone());
 
-
-        if std::mem::discriminant(&*self.base.play_settings.next.lock_ref())
-            == std::mem::discriminant(&Next::SelectSome(0)) {
-                self.set_next_amount();
+        self.base.history.push_modify(move |raw| {
+            if let Some(content) = &mut raw.content {
+                content.play_settings.hint = hint;
             }
-    }
-
-    pub fn set_next_amount(&self) {
-        let amount = *self.some_amount.borrow();
-
-        self.set_next(Next::SelectSome(amount));
+        })
     }
     pub fn set_next(&self, next: Next) {
         self.base.play_settings.next.set(next.clone());
@@ -29,13 +23,18 @@ impl State {
             }
         })
     }
-    pub fn set_hint(&self, hint: Hint) {
-        self.base.play_settings.hint.set(hint.clone());
 
-        self.base.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.play_settings.hint = hint;
+    pub fn set_next_value(&self, amount: usize) {
+        self.base.play_settings.next_value.set(amount);
+
+
+        if std::mem::discriminant(&*self.base.play_settings.next.lock_ref())
+            == std::mem::discriminant(&Next::SelectSome(0)) {
+                self.set_next_some();
             }
-        })
+    }
+
+    pub fn set_next_some(&self) {
+        self.set_next(Next::SelectSome(self.base.play_settings.next_value.get()));
     }
 }

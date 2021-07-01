@@ -3,10 +3,20 @@ import {nothing} from "lit-html";
 import { classMap } from 'lit-html/directives/class-map';
 import "@elements/core/images/ui";
 
-export type Kind = "card-view";
+export type Kind = "card-view"
+	| "game-display"
+	| "rounds"
+	| "time-limit"
+	| "attempts"
+	| "score";
 
 const STR_LABEL:Record<Kind, string> = {
 	"card-view": "Select how the player will view the cards",
+	"game-display": "How to display your game?",
+	"rounds": "How many slides / questions?",
+	"time-limit": "Would you like to set time limit?",
+	"attempts": "How many attempts?",
+	"score": "Would you like to include score?"
 };
 
 @customElement("module-settings-line")
@@ -19,13 +29,8 @@ export class _ extends LitElement {
   		grid-template-columns: 123px 1fr; 
   		gap: 0px 70px; 
 		  width: 491px;
-		  padding-bottom: 24px;
-		  padding-top: 24px;
         }
 
-	:host([borderTop]) {
-		border-top: solid 1px var(--light-blue-4);
-	}
 
 	.label {
 		margin-top: 11px;
@@ -58,8 +63,6 @@ export class _ extends LitElement {
 
     const label = STR_LABEL[kind];
    
-    console.log(kind);
-
     return html`
 	<div class="label">${label}</div>
 	<div class="options"><slot></slot></div>

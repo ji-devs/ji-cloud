@@ -23,7 +23,7 @@ use std::{
 };
 use rand::prelude::*;
 use components::module::{
-    play::prelude::*,
+    _common::play::prelude::*,
     _groups::cards::lookup::Side
 };
 use utils::prelude::*;

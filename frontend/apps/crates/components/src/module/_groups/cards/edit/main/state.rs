@@ -7,7 +7,7 @@ use futures_signals::{
 use utils::prelude::*;
 use dominator::{Dom, clone};
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 };
 

@@ -1,4 +1,4 @@
-use components::module::edit::prelude::*;
+use components::module::_common::edit::prelude::*;
 use components::audio_mixer::AudioMixer;
 use std::rc::Rc;
 use shared::domain::jig::{

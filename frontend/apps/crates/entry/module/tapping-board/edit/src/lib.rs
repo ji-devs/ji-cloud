@@ -13,6 +13,7 @@ mod debug;
 mod strings;
 mod state;
 mod base;
+mod config;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;

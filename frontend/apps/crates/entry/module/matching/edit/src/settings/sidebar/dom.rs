@@ -6,47 +6,81 @@ use crate::{
 };
 use super::state::*;
 use utils::prelude::*;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{always, SignalExt};
 use components::module::_groups::cards::lookup::Side;
+use components::module::_common::edit::settings::prelude::*;
 
 pub fn render(state: Rc<SidebarSettings>) -> Dom {
-    html!("card-quiz-settings", {
-        .style("display", "flex")
-        .style("flex-direction", "column")
-        .child(render_top_side(state.clone()))
-        .child(render_n_choices(state.clone()))
-    })
-}
+    render_settings(Rc::new(ModuleSettings {
+        lines: vec![
+            (LineKind::GameDisplay, vec![
+                SettingsButton::new_value(
+                    SettingsButtonKind::NumChoices,
+                    || always(true),
+                    SettingsValue::new(
+                        state.settings().n_choices.get(),
+                        clone!(state => move |value| {
+                            state.set_n_choices(value);
+                        })
+                    )
+                ),
+                SettingsButton::new_click(
+                    SettingsButtonKind::Swap, 
+                    clone!(state => move || {
+                        state.base.extra.settings.swap.signal()
+                    }),
+                    clone!(state => move || {
+                        state.toggle_swap();
+                    }),
 
-fn render_top_side(state: Rc<SidebarSettings>) -> Dom {
-    html!("button", {
-        .text("Swap side")
-        .event(clone!(state => move |evt:events::Click| {
-            state.toggle_swap();
-        }))
-    })
-}
+                )
+            ]),
 
-fn render_n_choices(state: Rc<SidebarSettings>) -> Dom {
-    html!("label", {
-        .text("Number of choices:")
-        .child(
-            html!("input" => web_sys::HtmlInputElement,{
-                .property("type", "number")
-                .property_signal("value", state.settings().n_choices.signal().map(|x| {
-                    format!("{}", x)
-                }))
-                .with_node!(elem => {
-                    .event(clone!(state => move |evt:events::Change| {
-                        let value = elem.value();
-                        if let Ok(value) = value.parse::<u8>() {
-                            if value > 0 {
-                                state.set_n_choices(value);
-                            }
-                        }
-                    }))
-                })
-            })
-        )
-    })
+            (LineKind::Rounds, vec![
+                SettingsButton::new_value(
+                    SettingsButtonKind::Rounds,
+                    || always(true),
+                    SettingsValue::new(
+                        state.settings().n_rounds.get(),
+                        clone!(state => move |value| {
+                            state.set_n_rounds(value);
+                        })
+                    )
+                ),
+            ]),
+
+            (LineKind::TimeLimit, vec![
+                SettingsButton::new_click(
+                    SettingsButtonKind::TimeLimitOff, 
+                    clone!(state => move || {
+                        state.base.extra.settings.has_time_limit
+                            .signal()
+                            .map(|flag| !flag) 
+                    }),
+                    clone!(state => move || {
+                        state.set_has_time_limit(false);
+                    }),
+                ),
+                SettingsButton::new_value_click(
+                    SettingsButtonKind::TimeLimit,
+                    clone!(state => move || {
+                        state.base.extra.settings.has_time_limit
+                            .signal()
+                    }),
+                    SettingsValue::new(
+                        state.settings().time_limit.get(),
+                        clone!(state => move |value| {
+                            state.set_time_limit(value);
+                        })
+                    ),
+                    clone!(state => move || {
+                        state.set_has_time_limit(true);
+                    }),
+                ),
+            ]),
+
+
+            // NOTE - not including score until player/jig story is resolved
+        ]
+    }))
 }

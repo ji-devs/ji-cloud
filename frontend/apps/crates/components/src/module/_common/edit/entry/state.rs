@@ -17,8 +17,10 @@ use std::future::Future;
 use itertools::Itertools;
 use std::fmt::Write;
 use serde::{Serialize, de::DeserializeOwned};
-use crate::module::prelude::*;
-use crate::module::history::state::HistoryState;
+use crate::module::_common::edit::{
+    prelude::*,
+    history::state::HistoryState
+};
 use crate::font_loader::{FontLoader, Font};
 use dominator_helpers::{
     signals::OptionSignal,

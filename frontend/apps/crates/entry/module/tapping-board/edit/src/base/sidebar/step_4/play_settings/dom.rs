@@ -1,11 +1,86 @@
 use std::rc::Rc;
 use dominator::{html, clone, Dom, with_node};
 use utils::prelude::*;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{always, SignalExt};
 use crate::base::state::Base;
 use shared::domain::jig::module::body::tapping_board::{Hint, Next};
 use super::state::State;
 
+use components::module::_common::edit::settings::prelude::*;
+pub fn render(state: Rc<State>) -> Dom {
+    render_settings(Rc::new(ModuleSettings {
+        lines: vec![
+            (LineKind::GameDisplay, vec![
+                SettingsButton::new_click(
+                    SettingsButtonKind::Highlight, 
+                    clone!(state => move || {
+                        state.base.play_settings.hint.signal_ref(|curr| {
+                            *curr == Hint::Highlight
+                        })
+                    }),
+                    clone!(state => move || {
+                        state.set_hint(Hint::Highlight);
+                    }),
+                ),
+                SettingsButton::new_click(
+                    SettingsButtonKind::HighlightOff, 
+                    clone!(state => move || {
+                        state.base.play_settings.hint.signal_ref(|curr| {
+                            *curr == Hint::None
+                        })
+                    }),
+                    clone!(state => move || {
+                        state.set_hint(Hint::None);
+                    }),
+                )
+            ]),
+            (LineKind::GameDisplay, vec![
+                SettingsButton::new_click(
+                    SettingsButtonKind::ContinueClick, 
+                    clone!(state => move || {
+                        state.base.play_settings.next.signal_ref(|curr| {
+                            std::mem::discriminant(curr) == std::mem::discriminant(&Next::Continue)
+                        })
+                    }),
+                    clone!(state => move || {
+                        state.set_next(Next::Continue);
+                    }),
+                ),
+                SettingsButton::new_click(
+                    SettingsButtonKind::ContinueAll, 
+                    clone!(state => move || {
+                        state.base.play_settings.next.signal_ref(|curr| {
+                            std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectAll)
+                        })
+                    }),
+                    clone!(state => move || {
+                        state.set_next(Next::SelectAll);
+                    }),
+                ),
+
+                SettingsButton::new_value_click(
+                    SettingsButtonKind::ContinueSome,
+                    clone!(state => move || {
+                        state.base.play_settings.next.signal_ref(|curr| {
+                            std::mem::discriminant(curr) == std::mem::discriminant(&Next::SelectSome(0))
+                        })
+                    }),
+                    SettingsValue::new(
+                        state.base.play_settings.next_value.get(),
+                        clone!(state => move |value| {
+                            state.set_next_value(value);
+                        })
+                    ),
+                    clone!(state => move || {
+                        state.set_next_some();
+                    }),
+                ),
+                
+            ])
+        ]
+    }))
+}
+/*
 pub fn render(state: Rc<State>) -> Dom {
     html!("section", {
         .style("display", "flex")
@@ -107,3 +182,5 @@ fn render_next_select_some(state: Rc<State>) -> Dom {
     })
 }
 //<input @change=${this.onRadioChange} type="radio" name="img_kind" value="sticker" .checked=${imageKind === "sticker"} />
+//
+*/

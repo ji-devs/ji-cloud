@@ -7,7 +7,7 @@ use futures_signals::{
 use std::rc::Rc;
 use utils::prelude::*;
 use futures_signals::signal::{Signal, SignalExt};
-use crate::module::history::state::HistoryState;
+use crate::module::_common::edit::history::state::HistoryState;
 use web_sys::HtmlElement;
 use super::state::*;
 use utils::resize::resize_info_signal;

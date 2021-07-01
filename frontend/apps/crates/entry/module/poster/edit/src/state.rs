@@ -1,4 +1,4 @@
-use components::module::edit::prelude::*;
+use components::module::_common::edit::prelude::*;
 use super::base::{
     actions::init_from_raw,
     state::Base,

@@ -40,6 +40,7 @@ import "@elements/module/_common/edit/widgets/settings/button";
 import "@elements/module/_common/edit/widgets/settings/bubble";
 import "@elements/module/_common/edit/widgets/settings/bubble-content";
 import "@elements/module/_common/edit/widgets/settings/line";
+import "@elements/module/_common/edit/widgets/settings/container";
 
 /* Common components used in most editors */
 

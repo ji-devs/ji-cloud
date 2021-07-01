@@ -12,7 +12,7 @@ export type Kind =
 	| "continue-some"
 	| "highlight"
 	| "highlight-off"
-	| "limit"
+	| "no-limit"
 	| "n_choices"
 	| "n_pairs"
 	| "order"
@@ -29,7 +29,7 @@ const OneImage:Set<Kind> = new Set(["n_choices", "n_pairs", "order", "rounds"]);
 const STR_LABEL:Record<Kind, string> = {
 	"randomize": "Randomize",
 	"order": "Ask in order",
-	"limit": "No limit",
+	"no-limit": "No limit",
 	"attempts": "No. of attempts",
 	"score": "Include in\nfinal score",
 	"score-off": "Don't include in\nfinal score",
@@ -109,7 +109,7 @@ export class _ extends LitElement {
 		the bubble will nudge itself to the left;
 		*/
 	.bubble {
-		/*display: none;*/
+		display: none;
 		position: relative;
 		top: 0;
 		left: 0;

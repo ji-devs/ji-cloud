@@ -1,4 +1,4 @@
-use components::module::play::prelude::DomRenderable;
+use components::module::_common::play::prelude::DomRenderable;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use components::backgrounds;

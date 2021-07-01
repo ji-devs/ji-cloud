@@ -2,7 +2,7 @@ use utils::unwrap::UnwrapJiExt;
 use std::rc::Rc;
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 
 };

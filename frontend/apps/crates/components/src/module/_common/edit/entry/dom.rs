@@ -28,7 +28,7 @@ use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::state::*;
-use crate::module::prelude::*;
+use crate::module::_common::edit::prelude::*;
 use super::base::state::*;
 use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 

@@ -1,4 +1,4 @@
-use crate::module::history::state::HistoryState;
+use crate::module::_common::edit::history::state::HistoryState;
 use super::state::*;
 use std::rc::Rc;
 use shared::{

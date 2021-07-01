@@ -1,4 +1,4 @@
-use components::module::edit::prelude::*;
+use components::module::_common::edit::prelude::*;
 use dominator::{clone, html, Dom};
 use std::rc::Rc;
 use super::state::*;

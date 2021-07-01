@@ -24,7 +24,7 @@ impl Step4 {
 
         let kind = match crate::debug::settings().settings_tab {
             Some(kind) => kind,
-            None => TabKind::Play
+            None => TabKind::Settings
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -39,14 +39,14 @@ impl Step4 {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum TabKind {
-    Play,
+    Settings,
     Instructions,
 }
 
 impl TabKind {
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Self::Play => "play-settings",
+            Self::Settings => "play-settings",
             Self::Instructions => "instructions",
         }
     }
@@ -54,15 +54,15 @@ impl TabKind {
 
 #[derive(Clone)]
 pub enum Tab {
-    Play(Rc<PlaySettingsState>),
+    Settings(Rc<PlaySettingsState>),
     Instructions(Rc<InstructionsEditorState>),
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
         match kind {
-            TabKind::Play => {
-                Self::Play(Rc::new(PlaySettingsState::new(base)))
+            TabKind::Settings => {
+                Self::Settings(Rc::new(PlaySettingsState::new(base)))
             },
             TabKind::Instructions => {
                 let callbacks = InstructionsEditorCallbacks::new(clone!(base => move |instructions, also_history| {
@@ -90,7 +90,7 @@ impl Tab {
 
     pub fn kind(&self) -> TabKind {
         match self {
-            Self::Play(_) => TabKind::Play,
+            Self::Settings(_) => TabKind::Settings,
             Self::Instructions(_) => TabKind::Instructions,
         }
     }

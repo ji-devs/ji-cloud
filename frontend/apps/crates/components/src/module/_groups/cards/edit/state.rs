@@ -33,7 +33,7 @@ use shared::{
     media::MediaLibrary
 };
 use crate::{
-    module::edit::prelude::*,
+    module::_common::edit::prelude::*,
     audio_mixer::AudioMixer,
     tooltip::state::State as TooltipState
 };

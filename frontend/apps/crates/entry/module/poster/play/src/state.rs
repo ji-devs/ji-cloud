@@ -1,4 +1,4 @@
-use components::module::play::prelude::*;
+use components::module::_common::play::prelude::*;
 use super::base::state::*;
 use std::rc::Rc;
 use shared::domain::jig::{JigId, module::{ModuleId, body::poster::{Mode, Step, ModuleData as RawData}}};

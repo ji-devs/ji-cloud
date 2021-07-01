@@ -18,7 +18,7 @@ use super::{
 };
 use crate::module::{
     _groups::cards::edit::state::*,
-    edit::prelude::*,
+    _common::edit::prelude::*,
 };
 use shared::domain::jig::module::body::_groups::cards::Step;
 

@@ -11,7 +11,7 @@ use shared::domain::jig::{
     }
 };
 use components::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::{
         state::*,
         footer::state::Footer as CardsFooter,

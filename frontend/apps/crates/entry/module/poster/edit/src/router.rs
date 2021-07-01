@@ -10,7 +10,7 @@ use futures_signals::{
 use dominator::{Dom, html, clone};
 use dominator_helpers::futures::AsyncLoader;
 use std::cell::RefCell;
-use components::module::edit::dom::render_page_body;
+use components::module::_common::edit::entry::dom::render_page_body;
 use super::state::{AppState, create_state};
 
 pub struct Router {

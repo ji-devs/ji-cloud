@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use dominator::Dom;
 use crate::module::{
-    edit::prelude::*,
+    _common::edit::prelude::*,
     _groups::cards::edit::state::*,
 };
 use super::{

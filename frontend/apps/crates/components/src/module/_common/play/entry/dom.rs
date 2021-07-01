@@ -28,7 +28,7 @@ use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::state::*;
-use crate::module::prelude::*;
+use crate::module::_common::play::prelude::*;
 use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
 pub fn render_page_body<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>)

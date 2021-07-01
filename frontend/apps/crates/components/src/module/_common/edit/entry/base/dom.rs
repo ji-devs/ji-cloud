@@ -9,7 +9,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
 };
 use wasm_bindgen::prelude::*;
-use crate::module::header::controller::dom::ControllerDom;
+use crate::module::_common::edit::header::controller::dom::ControllerDom;
 use super::super::actions::HistoryStateImpl;
 use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt, StepExt}}};
 use utils::{prelude::*, iframe::{IframeInit, EmptyMessage}}; 

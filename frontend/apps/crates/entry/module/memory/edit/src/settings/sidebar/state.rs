@@ -12,4 +12,8 @@ impl SidebarSettings {
             base
         }
     }
+
+    pub fn settings(&self) -> &Settings {
+        &self.base.extra.settings
+    }
 }
