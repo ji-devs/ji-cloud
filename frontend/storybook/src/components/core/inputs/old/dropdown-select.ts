@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import "@elements/core/inputs/composed/select";
+import "@elements/core/inputs/old/dropdown-select";
 import "@elements/core/lists/li-check";
 
 export default {

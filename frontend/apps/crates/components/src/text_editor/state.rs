@@ -14,7 +14,6 @@ use strum::IntoEnumIterator;
 
 use super::{
     font_css_converter::font_to_css,
-    theme_element_styles::get_theme_element_styles, 
     wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT}
 };
 use super::super::font_loader::{FontLoader, Font as StaticFont};
@@ -115,26 +114,26 @@ impl State {
             &JsValue::from_str(&ElementType::P1.to_string())
         );
 
-        let (font, color, font_size) = get_theme_element_styles(&self.theme_id.lock_ref(), &ElementType::P1);
+        // let (font, color, font_size) = get_theme_element_styles(&self.theme_id.lock_ref(), &ElementType::P1);
 
-        let key = enum_variant_to_string(&ControlsChange::FontSize(0)) + &String::from("Default");
-        let _ = Reflect::set(
-            &wysiwyg_ref,
-            &JsValue::from_str(&key),
-            &JsValue::from_f64(font_size as f64)
-        );
-        let key = enum_variant_to_string(&ControlsChange::Font(String::new())) + &String::from("Default");
-        let _ = Reflect::set(
-            &wysiwyg_ref,
-            &JsValue::from_str(&key),
-            &JsValue::from_str(&font_to_css(&font))
-        );
-        let key = enum_variant_to_string(&ControlsChange::Color(None)) + &String::from("Default");
-        let _ = Reflect::set(
-            &wysiwyg_ref,
-            &JsValue::from_str(&key),
-            &JsValue::from_str(&color)
-        );
+        // let key = enum_variant_to_string(&ControlsChange::FontSize(0)) + &String::from("Default");
+        // let _ = Reflect::set(
+        //     &wysiwyg_ref,
+        //     &JsValue::from_str(&key),
+        //     &JsValue::from_f64(font_size as f64)
+        // );
+        // let key = enum_variant_to_string(&ControlsChange::Font(String::new())) + &String::from("Default");
+        // let _ = Reflect::set(
+        //     &wysiwyg_ref,
+        //     &JsValue::from_str(&key),
+        //     &JsValue::from_str(&font_to_css(&font))
+        // );
+        // let key = enum_variant_to_string(&ControlsChange::Color(None)) + &String::from("Default");
+        // let _ = Reflect::set(
+        //     &wysiwyg_ref,
+        //     &JsValue::from_str(&key),
+        //     &JsValue::from_str(&color)
+        // );
 
         self.update_wysiwyg_value(&wysiwyg_ref);
 

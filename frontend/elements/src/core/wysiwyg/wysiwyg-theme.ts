@@ -11,11 +11,17 @@ export function getThemeVars(theme: ThemeKind): [string, string][] {
 
 function getElTheme(elName: ElementType, theme: ThemeKind): [string, string][] {
     const el:keyof TextEditorTheme= elName.toLowerCase() as any;
-    const themeInfo = THEMES[theme].textEditor;
+    const themeInfo = THEMES[theme];
 
-    const fontSize = themeInfo[el].fontSize;
-    const color = (themeInfo as any)["color" + themeInfo[el].fontColor];
-    const font = (themeInfo as any)["fontFamily" + themeInfo[el].fontFamily];
+    const fontSize = themeInfo.textEditor[el].fontSize;
+    const font = (themeInfo as any)["fontFamily" + themeInfo.textEditor[el].fontFamily];
+    let color = (themeInfo as any)["color" + themeInfo.textEditor[el].fontColor];
+    
+    // the following are both doing same thing
+    // color = `#${color[0].toString(16)}${color[1].toString(16)}${color[2].toString(16)}`;
+    color = color.reduce((accumulator: string, currentValue: number) => {
+        return accumulator += currentValue.toString(16);
+    }, "#")
 
     return [
         [`--${el}-color`, color],
