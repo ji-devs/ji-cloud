@@ -6,7 +6,7 @@ use wasm_bindgen::JsValue;
 use strum_macros::{EnumIter, Display};
 use dominator_helpers::make_custom_event_serde;
 
-use super::super::font_loader::Font as StaticFont;
+use super::{super::font_loader::Font as StaticFont, font_css_converter::font_to_css};
 
 #[derive(Clone, Debug, EnumIter, Display, PartialEq, Serialize, Deserialize)]
 pub enum ElementType {
@@ -88,7 +88,7 @@ impl ControlsChange {
         let key = JsValue::from_str(&key);
 
         let value = match self {
-            Self::Font(font) => JsValue::from_str(&font.to_string()),
+            Self::Font(font) => JsValue::from_str(&font_to_css(&font.to_string())),
             Self::Element(element) => JsValue::from_str(&element.to_string()),
             Self::Weight(weight) => JsValue::from_f64(*weight as f64),
             Self::Align(align) => JsValue::from_str(&align.to_string()),
