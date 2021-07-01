@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind} from "@elements/_themes/themes";
-import {cardBackPath, Mode,Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
+import {cardBackFullPath, Mode,Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
 
 // this is kept separate from "play-card" because:
@@ -128,7 +128,7 @@ export class _ extends LitElement {
       return html`
           <section class="${classMap({flippable, editing})}" >
           <div class="front" style=${contentStyle}><slot></slot></div>
-          <div class="back"><img-ui path="${cardBackPath(theme)}"></img-ui></div>
+          <div class="back"><img-ui path="${cardBackFullPath(theme)}"></img-ui></div>
           </section>
       `
   }

@@ -1,8 +1,11 @@
 import { styleMap } from 'lit-html/directives/style-map';
 import {ThemeKind} from "@elements/_themes/themes";
 
-export const cardBackPath = (theme:ThemeKind):string => {
-    return `theme/module/_groups/cards/${theme}/card-back.png`;
+export const cardBackIconPath = (theme:ThemeKind):string => {
+    return `theme/${theme}/card-back-icon.png`;
+}
+export const cardBackFullPath = (theme:ThemeKind):string => {
+    return `theme/${theme}/card-back.png`;
 }
 
 //sets the style kind on the card itself

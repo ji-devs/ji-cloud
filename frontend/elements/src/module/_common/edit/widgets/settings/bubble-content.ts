@@ -7,7 +7,7 @@ import {Kind} from "./button";
 
 const STR_LABEL:Partial<Record<Kind, string>> = {
 	"attempts": "Player gets",
-	"continue-some": "Of",
+	"continue-some": "of",
 	"rounds": "Play",
 	"n_choices": "Display",
 	"n_pairs": "Display",

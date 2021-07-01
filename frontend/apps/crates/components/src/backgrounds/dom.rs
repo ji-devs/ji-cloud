@@ -142,7 +142,7 @@ fn render_theme_bg(theme_id:ThemeId) -> Dom {
         .style("width", "100%")
         .style("height", "100%")
         .property("path", {
-            &format!("theme/module/_common/{}/bg.jpg", theme_id.as_str_id())
+            &format!("theme/{}/bg.jpg", theme_id.as_str_id())
         })
     })
 }

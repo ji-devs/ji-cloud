@@ -90,9 +90,18 @@ export class _ extends LitElement {
 		position: absolute;
 		width: 24px;
 		height: 24px;
-		top: calc(64px - 12px);
+		top: 45px; 
 		right: -12px;
 	}
+
+	.circle {
+		fill: #AFCBF4;
+	}
+
+	.circle.active {
+		fill: #5893f9;
+	}
+
 	.label {
 		pointer-events: none;
 		width: 126px;
@@ -170,7 +179,7 @@ export class _ extends LitElement {
 	<div class="icon-and-label">
 		<div class="icon">
 			${renderImage(kind, hover, active)}
-			${!isNaN(num) ? renderNumber(num) : nothing }
+			${!isNaN(num) ? renderNumber(num, hover, active) : nothing }
 		</div>
 		<div class="label">${STR_LABEL[kind]}</div>
   	</div>
@@ -207,11 +216,16 @@ function renderImage(kind: Kind, hover: boolean, active: boolean) {
 	`
 }
 
-function renderNumber(num:number) {
+function renderNumber(num:number, hover: boolean, active: boolean) {
+	const circleClass = classMap({
+		circle: true,
+		hover,
+		active
+	})
 	return svg`
 		<svg class="num-circle" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 		<g id="Group_17881" data-name="Group 17881" transform="translate(-55 -47)">
-		<circle id="Ellipse_770" data-name="Ellipse 770" cx="12" cy="12" r="12" transform="translate(55 47)" fill="#5893f9"/>
+		<circle class=${circleClass} id="Ellipse_770" data-name="Ellipse 770" cx="12" cy="12" r="12" transform="translate(55 47)" />
 		<text id="_2" data-name="2" transform="translate(67 64)" fill="#fff" font-size="14" font-family="Poppins-ExtraBold, Poppins" font-weight="800"><tspan x="-3.983" y="0">${num}</tspan></text>
 		</g>
 		</svg>

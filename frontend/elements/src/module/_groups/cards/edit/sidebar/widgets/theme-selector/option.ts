@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 import {ThemeKind, STR_THEME_LABEL} from "@elements/_themes/themes";
-import {cardBackPath} from "@elements/module/_groups/cards/helpers";
+import {cardBackIconPath} from "@elements/module/_groups/cards/helpers";
 import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
 export type STATE = "idle" | "selected" | "jig";
@@ -135,12 +135,12 @@ export class _ extends LitElement {
           ${state == "jig" ? html`<theme-selector-jig class="jig"></theme-selector-jig>` : nothing}
               <div class="content">
                   <div class="right">
-                    <img-ui path="${cardBackPath(theme)}"></img-ui>
+                    <img-ui path="${cardBackIconPath(theme)}"></img-ui>
                     ${state === "selected" ? renderMenu() : nothing}
                   </div>
                   <div class="left">
-                    <img-ui class=${imageClass} path="theme/module/_groups/cards/${theme}/card-front.svg"></img-ui>
-                    <img-ui class=${imageHoverClass} path="theme/module/_groups/cards/${theme}/card-front-hover.svg"></img-ui>
+                    <img-ui class=${imageClass} path="theme/${theme}/card-front-icon.svg"></img-ui>
+                    <img-ui class=${imageHoverClass} path="theme/${theme}/card-front-icon-hover.svg"></img-ui>
                   </div>
                   <div class="label">${STR_THEME_LABEL[theme]}</div>
               </div>

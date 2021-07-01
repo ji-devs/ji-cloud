@@ -110,32 +110,49 @@ export class TransformBox extends LitElement {
   @property()
   menuButtonDot:DotPos = "tr";
 
+  @property({type: Boolean})
+  buttonHack:boolean = false;
+
+  private timeoutId:any = null;
+
   updateMenuButtonLocation = () => {
-      
-      type ToBeat = {id: DotPos, domRect: DOMRect};
-      let toBeat:ToBeat = (null as unknown as ToBeat);
+    
+    //setting a small timeout as a hack to fight browser measuring delay
+    //delay is in ms
+    this.buttonHack = true;
+    const HACK_DELAY = 1000;
 
-      dotIds.forEach((id, index) => {
-          const ref = this.shadowRoot?.getElementById(`dot-${id}`);
-          if(ref != null) {
-              const domRect = ref.getBoundingClientRect();
-              if(index === 0) {
-                  toBeat = {id, domRect};
-              } else {
-                  if(domRect.y === toBeat.domRect.y) {
-                      if(domRect.x > toBeat.domRect.x) {
-                          toBeat = {id, domRect};
-                      }
-                  } else if(domRect.y < toBeat.domRect.y) {
-                      toBeat = {id, domRect};
-                  }
-              }
-          }
-      });
+    if(this.timeoutId !== null) {
+        clearTimeout(this.timeoutId);
+    }
 
-      if(toBeat != null) {
-          this.menuButtonDot = toBeat.id;
-      }
+    this.timeoutId = setTimeout(() => {
+        type ToBeat = {id: DotPos, domRect: DOMRect};
+        let toBeat:ToBeat = (null as unknown as ToBeat);
+
+        dotIds.forEach((id, index) => {
+            const ref = this.shadowRoot?.getElementById(`dot-${id}`);
+            if(ref != null) {
+                const domRect = ref.getBoundingClientRect();
+                if(index === 0) {
+                    toBeat = {id, domRect};
+                } else {
+                    if(domRect.y === toBeat.domRect.y) {
+                        if(domRect.x > toBeat.domRect.x) {
+                            toBeat = {id, domRect};
+                        }
+                    } else if(domRect.y < toBeat.domRect.y) {
+                        toBeat = {id, domRect};
+                    }
+                }
+            }
+        });
+
+        if(toBeat != null) {
+            this.menuButtonDot = toBeat.id;
+        }
+        this.buttonHack = false;
+    }, HACK_DELAY);
 
   }
 
@@ -193,7 +210,7 @@ export class TransformBox extends LitElement {
   height:number = 0;
 
   render() {
-      const {width, height, isTransforming, hasMenu, menuButtonDot} = this;
+      const {width, height, isTransforming, hasMenu, menuButtonDot, buttonHack} = this;
 
       const dotPositions:Record<DotPos, [number, number]> = {
             "tl": [0, 0],
@@ -295,7 +312,7 @@ export class TransformBox extends LitElement {
           let style = `left: calc(${x}px - ${MENU_BUTTON_RADIUS}px);` 
           style += ` top: calc(${y}px - ${MENU_BUTTON_RADIUS}px);`;
 
-          return !isTransforming && hasMenu
+          return !isTransforming && hasMenu && !buttonHack 
               ? html`<div id="menu-btn" style="${style}"><slot name="menu-btn"></slot></div>`
               : nothing;
       }

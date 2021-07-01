@@ -8,9 +8,11 @@ export class _ extends LitElement {
       return [css`
           span {
               font-family: var(--font-family, Poppins);
-              font-size: var(--font-size, 40rem);
+              /*font-size: var(--font-size, 40rem);*/
               color: var(--color, black);
               text-align: center;
+
+              white-space: pre-wrap;
           }
     `];
   }
@@ -18,9 +20,16 @@ export class _ extends LitElement {
   @property()
   value:string = "";
 
+  @property()
+  fontSize:string = "40rem";
+
   render() {
     const { value} = this;
 
-    return html`<span>${value}</span>`
+    const style = styleMap({
+      fontSize: this.fontSize
+    });
+
+    return html`<span style=${style} >${value}</span>`
   }
 }
