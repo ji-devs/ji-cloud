@@ -10,6 +10,9 @@ export class BaseSelect extends LitElement {
                 anchored-overlay {
                     display: block;
                 }
+                .input {
+                    display: grid;
+                }
                 .input .value, .input .placeholder {
                     grid-column: 1;
                     overflow: hidden;

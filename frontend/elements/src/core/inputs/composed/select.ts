@@ -17,7 +17,7 @@ export class _ extends BaseSelect {
                     transform: rotate(180deg);
                 }
                 anchored-overlay::part(overlay) {
-                    width: 100%;
+                    min-width: 100%;
                     padding-top: 30px;
                     margin-top: -30px;
                     border-radius: 14px;
