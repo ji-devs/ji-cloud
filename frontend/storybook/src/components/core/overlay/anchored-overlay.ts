@@ -18,7 +18,7 @@ const DEFAULT_ARGS:Args = {
     positionX: "right-out",
 }
 
-export const Overlay = (props?:Args) => {
+export const AnchoredOverlay = (props?:Args) => {
 
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     const {} = props
@@ -33,8 +33,8 @@ export const Overlay = (props?:Args) => {
     `;
 }
 
-Overlay.args = DEFAULT_ARGS;
-Overlay.argTypes = {
+AnchoredOverlay.args = DEFAULT_ARGS;
+AnchoredOverlay.argTypes = {
     positionY: {
         control: {
             type: 'inline-radio',
