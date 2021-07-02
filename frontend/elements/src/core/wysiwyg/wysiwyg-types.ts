@@ -38,6 +38,10 @@ export const defaultState: ControllerState = {
     weight: 400,
     align: Align.Left,
     fontSize: 16,
+
+    // keep here even undefined for Object.keys
+    color: undefined,
+    highlightColor: undefined,
     italic: false,
     underline: false,
     indentCount: 0,

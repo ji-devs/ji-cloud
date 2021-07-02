@@ -64,6 +64,14 @@ export class _ extends LitElement {
     public set element(v: ElementType) {
         this.setValue("element", v);
         this._element = v;
+
+        // setting element resets all other values
+        for (const key of Object.keys(defaultState)) {
+            // console.log(key, this.getDefault(key as any));
+            if(key === "element") continue;
+            this.backbone.setValue(key as any, undefined);
+
+        }
     }
 
     private _fontSize = this.getDefault('fontSize');
