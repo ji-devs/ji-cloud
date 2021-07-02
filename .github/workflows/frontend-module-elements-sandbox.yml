@@ -56,7 +56,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [memory, tapping-board, poster]
+        app: [poster, tapping-board, memory, matching, flashcards, card-quiz]
         mode: [edit, play]
     steps:
 
