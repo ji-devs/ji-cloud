@@ -1,5 +1,6 @@
-use dominator::{html, Dom, clone};
+use dominator::{Dom, clone, html, with_node};
 use shared::domain::jig::Jig;
+use web_sys::HtmlInputElement;
 use std::rc::Rc;
 use futures_signals::signal::SignalExt;
 use super::super::{state::State as SidebarState, actions as sidebar_actions};
@@ -82,15 +83,17 @@ impl HeaderDom {
                 // }),
                 html!("input-wrapper", {
                     .property("slot", "input")
-                    .child(html!("input", {
-                        .property("placeholder", STR_SEARCH_PLACEHOLDER)
-                        .property_signal("value", sidebar_state.name.signal_cloned())
-                        .event(clone!(sidebar_state => move |e: events::Input| {
-                            let value = e.value().unwrap_or_default();
-                            sidebar_actions::update_display_name(sidebar_state.clone(), value);
-                        }))
+                    .child(html!("input" => HtmlInputElement, {
+                        .with_node!(input => {
+                            .property("placeholder", STR_SEARCH_PLACEHOLDER)
+                            .property_signal("value", sidebar_state.name.signal_cloned())
+                            .event(clone!(sidebar_state => move |_: events::Input| {
+                                let value = input.value();
+                                sidebar_actions::update_display_name(sidebar_state.clone(), value);
+                            }))
+                        })
                     }))
-                    .child(html!("img-ui ", {
+                    .child(html!("img-ui", {
                         .property("slot", "icon")
                         .property("path", "core/inputs/pencil-blue-darker.svg")
                     }))
