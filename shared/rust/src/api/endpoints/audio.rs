@@ -42,7 +42,10 @@ pub mod user {
     }
 
     /// Upload an audio file
-    /// Note: can be used to update the raw data associated with the audio file.
+    ///
+    /// Notes:
+    /// * can be used to update the raw data associated with the audio file.
+    /// * handled through API server, unlike other media types which return a presigned URL.
     pub struct Upload;
     impl ApiEndpoint for Upload {
         // raw bytes

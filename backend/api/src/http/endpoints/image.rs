@@ -16,7 +16,7 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::image::{
         CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
-        ImageSearchResponse, ImageUpdateRequest,
+        ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
@@ -71,11 +71,8 @@ async fn upload(
     s3: ServiceData<s3::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
-    bytes: Bytes,
-) -> Result<NoContent, error::Upload> {
+) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
-
-    // fixme: don't bother with this query, just create the `image_upload` when the image is created.
 
     let exists = sqlx::query!(
         r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
@@ -88,14 +85,13 @@ async fn upload(
         return Err(error::Upload::ResourceNotFound);
     }
 
-    // todo: ferry the data more efficently?
-    s3.upload_media_for_processing(
-        bytes.to_vec(),
-        MediaLibrary::Global,
-        id.0,
-        FileKind::ImagePng(PngImageFile::Original),
-    )
-    .await?;
+    let resp = s3
+        .get_presigned_url_to_upload_media_for_processing(
+            MediaLibrary::Global,
+            id.0,
+            FileKind::ImagePng(PngImageFile::Original),
+        )
+        .await?;
 
     sqlx::query!(
         "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
@@ -106,7 +102,7 @@ async fn upload(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(Json(ImageUploadResponse { url: resp }))
 }
 
 /// Get an image from the global image library.
