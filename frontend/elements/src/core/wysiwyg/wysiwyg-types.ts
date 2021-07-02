@@ -49,7 +49,7 @@ export const defaultState: ControllerState = {
 
 
 export function getKeyType<K extends keyof ControllerState>(key: K): 'leaf' | 'element' {
-    if(key === "align" || key === "indentCount" || key === "element")
+    if(key === "align" || key === "indentCount")
         return 'element';
     else
         return 'leaf';

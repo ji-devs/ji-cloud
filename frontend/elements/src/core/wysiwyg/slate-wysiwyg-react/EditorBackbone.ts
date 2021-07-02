@@ -4,7 +4,6 @@ import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount
 
 export type CustomElement = {
     children: CustomText[];
-    element: ElementType;
     align: Align,
     indentCount: IndentCount,
 }
@@ -17,6 +16,7 @@ export type CustomText = {
     fontSize: FontSize;
     weight: Weight;
     font: Font;
+    element: ElementType;
 }
 
 declare module 'slate' {

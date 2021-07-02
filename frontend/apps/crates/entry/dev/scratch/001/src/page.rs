@@ -208,7 +208,7 @@ pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<
 }
 
 fn render_text() -> Dom {
-    let value = "[{\"children\":[{\"text\":\"text from rust\"}],\"element\":\"P1\"}]".to_string();
+    let value = "[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]".to_string();
     let value = Some(value);
     // let value = None;
 
@@ -219,7 +219,7 @@ fn render_text() -> Dom {
         })),
         Some(Box::new(clone!(value_change => move |v: &str| {
             value_change.set(Some(v.to_string()));
-            log::info!("{:?}", v);
+            // log::info!("{:?}", v);
         }))),
         Some(Box::new(|| {
             log::info!("On blur");
