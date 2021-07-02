@@ -12,10 +12,7 @@ use web_sys::HtmlElement;
 use js_sys::Reflect;
 use strum::IntoEnumIterator;
 
-use super::{
-    font_css_converter::font_to_css,
-    wysiwyg_types::{ControlsState, ControlsChange, Align, Weight, Font, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT}
-};
+use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT};
 use super::super::font_loader::{FontLoader, Font as StaticFont};
 use super::components::text_editor_controls::color_controls::ColorState;
 use super::callbacks::Callbacks;

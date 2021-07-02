@@ -1,5 +1,3 @@
-use shared::domain::jig::module::body::Audio;
-
 pub struct Callbacks {
     pub on_new_text: Option<Box<dyn Fn(&str)>>,
     pub on_change: Option<Box<dyn Fn(&str)>>,
