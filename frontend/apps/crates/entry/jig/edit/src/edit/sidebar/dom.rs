@@ -27,29 +27,31 @@ pub struct SidebarDom {
 
 impl SidebarDom {
     pub fn render(jig_id: JigId, route: Mutable<JigEditRoute>) -> Dom {
-        let loader = AsyncLoader::new();
+        let is_loading = Mutable::new(true);
         let jig = Rc::new(RefCell::new(None));
 
-        loader.load(clone!(jig => async move {
-            if jig_id == JigId(Uuid::from_u128(0)) {
-                *jig.borrow_mut() = Some(debug::get_jig());
-            } else {
-                actions::load_jig(jig_id, jig.clone()).await;
-            }
-        }));
 
-        Dom::with_state(loader, clone!(jig, route => move |loader| {
-            html!("empty-fragment", {
-                .property("slot", "sidebar")
-                .child_signal(loader.is_loading().map(clone!(jig, route => move |loading| {
-                    if loading {
-                        None
-                    } else {
-                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), route.clone()))
-                    }
-                })))
-            })
-        }))
+        html!("empty-fragment", {
+            .property("slot", "sidebar")
+            .future(clone!(is_loading, jig, jig_id => async move {
+                if jig_id == JigId(Uuid::from_u128(0)) {
+                    *jig.borrow_mut() = Some(debug::get_jig());
+                } else {
+                    actions::load_jig(jig_id, jig.clone()).await;
+                }
+
+                is_loading.set_neq(false);
+
+            }))
+            .child_signal(is_loading.signal().map(clone!(jig, route => move |loading| {
+                if loading {
+                    None
+                } else {
+                    Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), route.clone()))
+                }
+            })))
+        })
+
 
     }
 
