@@ -1,5 +1,5 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, drag_drop::{Mode, Step, ModuleData as RawData, PlaySettings, DragDropTrace}}}};
-use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, drag_drop::{Mode, Step, ModuleData as RawData, PlaySettings, DragDropTrace}}}};
+use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
@@ -10,7 +10,7 @@ pub struct Base {
     pub jig: Jig,
     pub theme_id: ThemeId,
     pub audio_mixer: AudioMixer,
-    pub instructions: InstructionsPlayer,
+    pub instructions: Instructions,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
@@ -39,7 +39,7 @@ impl Base {
             jig,
             theme_id,
             audio_mixer,
-            instructions: InstructionsPlayer::new(content.base.instructions),
+            instructions: content.base.instructions,
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,
             stickers: content.base.stickers,
@@ -49,4 +49,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn get_instructions(&self) -> Option<Instructions> {
+        Some(self.instructions.clone())
+    }
 }

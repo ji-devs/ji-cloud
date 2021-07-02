@@ -1,5 +1,5 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, poster::{Mode, Step, ModuleData as RawData}}}};
-use components::{audio_mixer::AudioMixer, instructions::player::InstructionsPlayer, module::_common::play::prelude::*};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, poster::{Mode, Step, ModuleData as RawData}}}};
+use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
 use std::rc::Rc;
@@ -10,7 +10,7 @@ pub struct Base {
     pub jig: Jig,
     pub theme_id: ThemeId,
     pub audio_mixer: AudioMixer,
-    pub instructions: InstructionsPlayer,
+    pub instructions: Instructions,
     pub backgrounds: Backgrounds,
     pub stickers: Vec<Sticker>,
 }
@@ -40,7 +40,7 @@ impl Base {
             jig,
             theme_id,
             audio_mixer,
-            instructions: InstructionsPlayer::new(base_content.instructions),
+            instructions: base_content.instructions,
             backgrounds: base_content.backgrounds,
             stickers: base_content.stickers,
         })
@@ -48,4 +48,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn get_instructions(&self) -> Option<Instructions> {
+        Some(self.instructions.clone())
+    }
 }

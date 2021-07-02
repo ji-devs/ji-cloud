@@ -43,11 +43,15 @@ pub fn render(state: Rc<Router>) {
                                         let app = create_state(jig_id, module_id);
                                         render_page_body(app.clone());
                                         *state.app.borrow_mut() = Some(app);
+                                    },
+                                    _ => {
+                                        log::warn!("different module?!")
                                     }
-                                    _ => {}
                                 }
                             }
-                            _ => {}
+                            _ => {
+                                log::warn!("different route?!")
+                            }
                         }
                     },
                     _ => {}

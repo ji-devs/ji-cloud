@@ -15,7 +15,6 @@ impl DomRenderable for Base {
             .children(&mut [
                 backgrounds::dom::render_raw(&state.backgrounds, state.theme_id, None),
                 stickers::dom::render_raw(&state.stickers),
-                state.instructions.render(&state.audio_mixer),
             ])
         })
     }

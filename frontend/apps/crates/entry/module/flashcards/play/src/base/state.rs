@@ -1,16 +1,4 @@
-use shared::domain::jig::{
-    JigId, 
-    Jig, 
-    module::{
-        ModuleId, 
-        body::{
-            ThemeChoice,
-            Background,
-            _groups::cards::{Mode, Step, CardPair},
-            flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}, 
-        }
-    }
-};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Background, Instructions, ThemeChoice, _groups::cards::{Mode, Step, CardPair}, flashcards::{ModuleData as RawData, Content as RawContent, PlayerSettings}}}};
 
 use futures_signals::{
     map_ref,
@@ -27,7 +15,6 @@ use components::module::{
     _groups::cards::lookup::Side
 };
 use utils::prelude::*;
-use components::instructions::player::InstructionsPlayer;
 use std::future::Future;
 use futures::future::join_all;
 use gloo_timers::future::TimeoutFuture;
@@ -43,7 +30,7 @@ pub struct Base {
     pub mode: Mode,
     pub theme_id: ThemeId,
     pub background: Option<Background>,
-    pub instructions: InstructionsPlayer,
+    pub instructions: Instructions,
     pub audio_mixer: AudioMixer,
     pub settings: PlayerSettings,
     pub raw_pairs: Vec<CardPair>,
@@ -78,7 +65,7 @@ impl Base {
             mode: content.base.mode,
             theme_id,
             background: content.base.background,
-            instructions: InstructionsPlayer::new(content.base.instructions), 
+            instructions: content.base.instructions,
             audio_mixer,
             settings: content.player_settings,
             raw_pairs: content.base.pairs,
@@ -92,5 +79,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
-
+    fn get_instructions(&self) -> Option<Instructions> {
+        Some(self.instructions.clone())
+    }
 }

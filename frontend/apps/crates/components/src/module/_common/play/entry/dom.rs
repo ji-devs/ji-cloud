@@ -28,7 +28,13 @@ use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
 use super::state::*;
-use crate::module::_common::play::prelude::*;
+use crate::{
+    module::_common::play::prelude::*,
+    instructions::player::{
+        state::InstructionsPlayer,
+        dom::render_instructions_player
+    }
+};
 use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
 
 pub fn render_page_body<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>)
@@ -139,13 +145,24 @@ where
     Step: StepExt + 'static
 {
 
+    let instructions = base.get_instructions();
+
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
+        .apply_if(instructions.is_some(), |dom| {
+            dom
+                .child(render_instructions_player(
+                        Rc::new(InstructionsPlayer::new(instructions.unwrap_ji())),
+                        &state.get_audio_mixer()
+                ))
+        })
+
         //raw_direct generally means "preview window"
-        //and we already got the init event with the raw data
-        //plus there's no jig player to send more messages
-        //so bypass the bootstrapping cycle
+        //so there is no jig player to communicate with
+        //just show the player and that's it
+        //also, in this case, we already got the init event with the raw data
+        //so bypass the bootstrapping cycle for that reason too
         .apply_if(!raw_direct, |dom| {
             dom
                 .global_event(clone!(state, base => move |evt:dominator_helpers::events::Message| {

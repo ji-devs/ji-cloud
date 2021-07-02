@@ -20,7 +20,6 @@ impl DomRenderable for Base {
                 backgrounds::dom::render_raw(&state.backgrounds, state.theme_id, None),
                 stickers::dom::render_raw(&state.stickers),
                 render_game(Game::new(state.clone())),
-                state.instructions.render(&state.audio_mixer),
             ])
         })
     }

@@ -14,6 +14,7 @@ use std::ops::Deref;
 
 pub use awsm_web::audio::{Id, AudioHandle, AudioSource, AudioClipOptions, AudioClip};
 
+//inherently cloneable, conceptually like it's wrapped in Rc itself
 #[derive(Clone)]
 pub struct AudioMixer {
     inner: Rc<AwsmAudioMixer>,

@@ -18,7 +18,6 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
-            .child(state.instructions.render(&state.audio_mixer))
             .child(backgrounds::dom::render_raw_single(&state.background, state.theme_id, None))
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {

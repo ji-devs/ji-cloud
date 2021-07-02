@@ -6,6 +6,7 @@ use shared::domain::jig::{
         body::{
             ThemeChoice,
             Background,
+            Instructions,
             _groups::cards::{Mode, Step, CardPair as RawCardPair},
             memory::{ModuleData as RawData, Content as RawContent}, 
         }
@@ -27,7 +28,6 @@ use components::module::{
     _groups::cards::lookup::Side
 };
 use utils::prelude::*;
-use components::instructions::player::InstructionsPlayer;
 use super::card::state::*;
 use std::future::Future;
 use futures::future::join_all;
@@ -45,7 +45,7 @@ pub struct Base {
     pub background: Option<Background>,
     pub flip_state: Mutable<FlipState>,
     pub found_pairs: RefCell<Vec<(usize, usize)>>, 
-    pub instructions: InstructionsPlayer,
+    pub instructions: Instructions,
     pub audio_mixer: AudioMixer
 }
 
@@ -68,12 +68,12 @@ impl Base {
             ..
         } = init_args;
 
-        let content = raw.content.unwrap_ji().base.clone();
+        let content = raw.content.unwrap_ji();
 
-        let n_cards = content.pairs.len() * 2;
+        let n_cards = content.base.pairs.len() * 2;
         let mut pair_lookup:Vec<usize> = vec![0;n_cards]; 
         let mut cards = { 
-            let pairs = &content.pairs;
+            let pairs = &content.base.pairs;
 
             let n_cards = pairs.len() * 2;
             let mut cards:Vec<Rc<CardState>> = Vec::with_capacity(n_cards);
@@ -106,15 +106,15 @@ impl Base {
         Rc::new(Self {
             jig_id,
             module_id,
-            mode: content.mode,
+            mode: content.base.mode,
             pair_lookup,
-            original_pairs: content.pairs,
+            original_pairs: content.base.pairs,
             cards,
             theme_id,
-            background: content.background,
+            background: content.base.background,
             flip_state: Mutable::new(FlipState::None), 
             found_pairs: RefCell::new(Vec::new()),
-            instructions: InstructionsPlayer::new(content.instructions), 
+            instructions: content.base.instructions,
             audio_mixer,
         })
     }
@@ -145,5 +145,7 @@ impl Base {
 }
 
 impl BaseExt for Base {
-
+    fn get_instructions(&self) -> Option<Instructions> {
+        Some(self.instructions.clone())
+    }
 }

@@ -12,9 +12,9 @@ use web_sys::AudioContext;
 use crate::audio_mixer::{AudioMixer, AudioHandle};
 
 pub struct InstructionsPlayer {
-    data: Instructions,
-    fade: Fade,
-    audio: RefCell<Option<AudioHandle>>
+    pub(super) data: Instructions,
+    pub(super) fade: Fade,
+    pub(super) audio: RefCell<Option<AudioHandle>>
 }
 
 impl InstructionsPlayer {
@@ -38,23 +38,4 @@ impl InstructionsPlayer {
             audio: RefCell::new(None),
         }
     }
-
-    pub fn render(&self, mixer:&AudioMixer) -> Dom {
-        *self.audio.borrow_mut() = self.data.audio.as_ref().map(|audio| {
-            mixer.play(audio.clone(), false)
-        });
-        html!("empty-fragment", {
-            .apply_if(self.data.text.is_some(), |dom| {
-                let text = self.data.text.as_ref().unwrap_ji();
-
-                self.fade.render(dom.child(
-                    html!("instructions-banner", {
-                        .text(text)
-                    })
-                ))
-                
-            })
-        })
-    }
-
 }

@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
+use shared::domain::jig::module::body::Instructions;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
     error::{EmptyError, MetadataNotFound},
@@ -46,6 +47,7 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt: DomRenderable {
+    fn get_instructions(&self) -> Option<Instructions>;
 }
 
 pub type RawDirect = bool;
