@@ -24,6 +24,8 @@ members = [
     "crates/entry/module/poster/play",
     "crates/entry/module/tapping-board/edit",
     "crates/entry/module/tapping-board/play",
+	"crates/entry/module/drag-drop/edit",
+    "crates/entry/module/drag-drop/play",
 ]
 
 [profile.release]

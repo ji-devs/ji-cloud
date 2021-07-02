@@ -16,6 +16,9 @@ pub mod poster;
 /// Tapping Board Body.
 pub mod tapping_board;
 
+/// Drag and Drop Body.
+pub mod drag_drop;
+
 /// Cover Body.
 pub mod cover;
 
@@ -55,6 +58,9 @@ pub enum Body {
     /// Module is a tapping board, and has a tapping board's body.
     TappingBoard(tapping_board::ModuleData),
 
+    /// Module is a drag and drop, and has a drag and drop's body.
+    DragDrop(drag_drop::ModuleData),
+
     /// Module is a [`Cover`](super::ModuleKind::Cover).
     ///
     /// DEPRECATED INFO: This exists as an empty enum because cover *needs* to exist, but it also isn't decided yet.
@@ -71,9 +77,8 @@ impl Body {
             super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
             super::ModuleKind::Matching => Self::Matching(matching::ModuleData::default()),
             super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
-            super::ModuleKind::TappingBoard => {
-                Self::TappingBoard(tapping_board::ModuleData::default())
-            }
+            super::ModuleKind::TappingBoard => Self::TappingBoard(tapping_board::ModuleData::default()),
+            super::ModuleKind::DragDrop => Self::DragDrop(drag_drop::ModuleData::default()),
             _ => unimplemented!("TODO!"),
         }
     }
@@ -167,6 +172,7 @@ impl Body {
             Self::Matching(_) => super::ModuleKind::Matching,
             Self::Poster(_) => super::ModuleKind::Poster,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
+            Self::DragDrop(_) => super::ModuleKind::DragDrop,
         }
     }
 }

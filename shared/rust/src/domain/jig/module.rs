@@ -84,6 +84,9 @@ pub enum ModuleKind {
 
     /// Card Quiz
     CardQuiz = 9,
+    
+    /// Drag and Drop 
+    DragDrop = 10,
 }
 
 impl ModuleKind {
@@ -97,6 +100,7 @@ impl ModuleKind {
             Self::Memory => "memory",
             Self::Poster => "poster",
             Self::TappingBoard => "tapping-board",
+            Self::DragDrop => "drag-drop",
             Self::Tracing => "tracing",
             Self::Video => "video",
             Self::VisualQuiz => "visual-quiz",
@@ -115,6 +119,7 @@ impl FromStr for ModuleKind {
             "memory" => Self::Memory,
             "poster" => Self::Poster,
             "tapping-board" => Self::TappingBoard,
+            "drag-drop" => Self::DragDrop,
             "tracing" => Self::Tracing,
             "video" => Self::Video,
             "visual-quiz" => Self::VisualQuiz,
