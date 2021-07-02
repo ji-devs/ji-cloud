@@ -6,7 +6,7 @@ on:
     paths:
     - 'config/**'
     - 'shared/**'
-    - 'frontend/apps/config/module/**'
+    - 'frontend/config/**'
     - 'frontend/apps/crates/components/**'
     - 'frontend/apps/crates/utils/**'
     - 'frontend/apps/crates/entry/module/**'
