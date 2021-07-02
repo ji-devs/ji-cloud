@@ -64,7 +64,8 @@ anyhow = "1.0.41"
 rgb = "0.8.27"
 
 [features]
+debug_log = []
 quiet = []
-local = ["quiet"]
+local = ["quiet", "debug_log"]
 release = []
-sandbox = []
+sandbox = ["debug_log"]

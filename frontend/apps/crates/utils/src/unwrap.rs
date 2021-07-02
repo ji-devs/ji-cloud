@@ -18,8 +18,7 @@ pub trait UnwrapJiExt<T>: Sized {
     fn expect_ji(self, message: &str) -> T;
 }
 cfg_if! {
-    if #[cfg(debug_assertions)] {
-
+    if #[cfg(feature = "debug_log")] {
         impl<T> UnwrapJiExt<T> for Option<T> {
             fn expect_ji(self, message: &str) -> T {
                 self.expect(message)
