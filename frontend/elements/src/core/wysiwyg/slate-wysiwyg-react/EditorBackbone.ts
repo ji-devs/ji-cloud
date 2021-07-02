@@ -2,28 +2,28 @@ import { Editor, Transforms, Text, createEditor, BaseEditor, NodeEntry, Node, El
 import { ReactEditor, withReact } from "slate-react";
 import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getKeyType } from "../wysiwyg-types";
 
-export type CustomElement = {
-    children: CustomText[];
-    align: Align,
-    indentCount: IndentCount,
+export type EditorElement = {
+    children: EditorText[];
+    align?: Align,
+    indentCount?: IndentCount,
 }
-export type CustomText = {
-    text: string;
-    underline: boolean;
-    italic: boolean;
-    color: Color;
-    highlightColor: Color;
-    fontSize: FontSize;
-    weight: Weight;
-    font: Font;
-    element: ElementType;
+export type EditorText = {
+    text?: string;
+    underline?: boolean;
+    italic?: boolean;
+    color?: Color;
+    highlightColor?: Color;
+    fontSize?: FontSize;
+    weight?: Weight;
+    font?: Font;
+    element?: ElementType;
 }
 
 declare module 'slate' {
     interface CustomTypes {
         Editor: BaseEditor & ReactEditor;
-        Element: CustomElement;
-        Text: CustomText;
+        Element: EditorElement;
+        Text: EditorText;
     }
 }
 
@@ -68,19 +68,22 @@ export class EditorBackbone {
         }
     }
 
-    getSelectedLeaf(): CustomText | undefined {
+    getSelectedLeaf(): EditorText | undefined {
         if(!this.editor.selection) return;
-        const [fistSelectedElement] = Editor.node(this.editor, this.editor.selection);
-        return fistSelectedElement as CustomText;
+        const iterator = Editor.nodes(this.editor, {
+            at: this.editor.selection,
+            match: n => Text.isText(n),
+        });
+        return (iterator.next().value as any)[0] as Text | undefined;
     }
 
-    getSelectedElement() : CustomElement | undefined {
+    getSelectedElement() : EditorElement | undefined {
         if(!this.editor.selection) return;
         let iterator = Editor.nodes(this.editor, {
             at: this.editor.selection,
             match: n => SlateElement.isElement(n),
         });
-        return (iterator.next().value as any)[0] as CustomElement | undefined;
+        return (iterator.next().value as any)[0] as EditorElement | undefined;
     }
 
     setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K] | undefined) {

@@ -146,22 +146,25 @@ export class _ extends LitElement {
     }
 
     private onClick = (char: string) => {
-        const input = this.deepActiveElement() as any;
+        const input = this.deepActiveElementOrWysiwyg() as any;
         if("setRangeText" in input) {
             input.setRangeText(char, input.selectionStart, input.selectionEnd, "end");
+        } else if("setTextAtSelection" in input) {
+            // for wysiwyg
+            input.setTextAtSelection(char);
         }
     }
 
-    private deepActiveElement() {
+    private deepActiveElementOrWysiwyg() {
         let a = document.activeElement;
-        while (a && a.shadowRoot && a.shadowRoot.activeElement) {
+        while (a && !a.matches("wysiwyg-base") && a.shadowRoot && a.shadowRoot.activeElement) {
             a = a.shadowRoot.activeElement;
         }
         return a;
     }
 
     private onDelete = () => {
-        const input = this.deepActiveElement() as any;
+        const input = this.deepActiveElementOrWysiwyg() as any;
         if("setRangeText" in input) {
             if(input.selectionStart === input.selectionEnd) {
                 const start = input.selectionStart;
@@ -171,6 +174,9 @@ export class _ extends LitElement {
             } else {
                 input.setRangeText('', input.selectionStart, input.selectionEnd, "end");
             }
+        } else if("triggerBackspace" in input) {
+            // for wysiwyg
+            input.triggerBackspace();
         }
     }
 

@@ -1,6 +1,6 @@
 import { css, unsafeCSS } from "lit-element";
 import { CSSProperties } from "react";
-import { CustomElement, CustomText } from "./slate-wysiwyg-react/EditorBackbone";
+import { EditorElement, EditorText } from "./slate-wysiwyg-react/EditorBackbone";
 import { Align } from "./wysiwyg-types";
 
 export const baseStyles = css`
@@ -30,19 +30,19 @@ export const baseStyles = css`
 `;
 
 const TAB_SIZE = 50;
-export function getElementStyles(props: CustomElement) {
+export function getElementStyles(props: EditorElement) {
     let styles: CSSProperties = {};
 
     if(props.align === Align.Center) styles.textAlign = "center";
     else if(props.align === Align.Right) styles.textAlign = "right";
 
-    if(props.indentCount > 0) styles.textIndent = (props.indentCount * TAB_SIZE) + 'px';
+    if(props.indentCount) styles.textIndent = (props.indentCount * TAB_SIZE) + 'px';
 
     return styles;
 }
 
 
-export function getLeafStyles(text: CustomText) {
+export function getLeafStyles(text: EditorText) {
     let styles: CSSProperties = {};
 
     if(text.underline) styles.textDecoration = "underline";

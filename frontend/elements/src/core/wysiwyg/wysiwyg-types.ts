@@ -1,5 +1,14 @@
 // this file needs to be in sync with frontend\apps\crates\components\src\text_editor\wysiwyg_types.rs
 
+import { EditorElement } from "./slate-wysiwyg-react/EditorBackbone";
+
+export type WysiwygValueVersion = "0.1.0";
+
+export interface WysiwygValue {
+    content: EditorElement[];
+    boxColor?: Color;
+    version: WysiwygValueVersion;
+}
 
 export type Color = string;
 export type FontSize = number;
@@ -54,3 +63,7 @@ export function getKeyType<K extends keyof ControllerState>(key: K): 'leaf' | 'e
     else
         return 'leaf';
 }
+
+export type ControlName = keyof ControllerState;
+
+export const controlNameList = Object.keys(defaultState) as ControlName[];

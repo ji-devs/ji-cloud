@@ -21,6 +21,9 @@ export class _ extends LitElement {
         left: 0px;
         z-index: 2;
         cursor: pointer;
+
+        /* make sure host doesn't cover up anything on the page */
+        height: 0;
       }
 
           ::slotted(*) {

@@ -22,7 +22,7 @@ impl ColorState {
             (*state).theme_id.clone(),
             None, 
             Some(clone!(state => move |color| {
-                let color = rgba8_to_hex_optional(&Some(color));
+                let color = rgba8_to_hex_optional(&color);
                 let select_for = {
                     state.color_state.borrow().as_ref().unwrap_ji().select_for.get()
                 };
@@ -30,6 +30,7 @@ impl ColorState {
                 match select_for {
                     Some(ColorSelectFor::Highlight) => {state.set_control_value(ControlsChange::HighlightColor(color))},
                     Some(ColorSelectFor::Text) => {state.set_control_value(ControlsChange::Color(color))},
+                    Some(ColorSelectFor::Box) => {state.set_control_value(ControlsChange::BoxColor(color))},
                     None => {}
                 };
             }))
@@ -47,39 +48,45 @@ impl ColorState {
 pub enum ColorSelectFor {
     Text,
     Highlight,
+    Box,
 }
 
 pub fn render(state: Rc<State>) -> Dom {
     let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {
-        .property("slot", "color")
+        .property("slot", "colors")
         .property("positionY", "top-in")
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
         }))
-        .child(html!("button-collection", {
+        .child(html!("div", {
             .property("slot", "anchor")
+            .style("display", "flex")
             .children(&mut [
-                html!("text-editor-control", {
-                    .property("type", "color")
+                html!("text-editor-controls-button", {
+                    .property("kind", "color")
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Text));
                         let color = { state.controls.lock_ref().color.clone() };
-                        if let Some(color) = hex_to_rgba8_optional(&color) {
-                            color_state.picker.set_selected(color);
-                        }
+                        color_state.picker.set_value(hex_to_rgba8_optional(&color));
                     }))
                 }),
-                html!("text-editor-control", {
-                    .property("type", "marker-color")
+                html!("text-editor-controls-button", {
+                    .property("kind", "highlight-color")
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Highlight));
-                        let color = { state.controls.lock_ref().color.clone() };
-                        if let Some(color) = hex_to_rgba8_optional(&color) {
-                            color_state.picker.set_selected(color);
-                        }
+                        let color = { state.controls.lock_ref().highlight_color.clone() };
+                        color_state.picker.set_value(hex_to_rgba8_optional(&color));
+                    }))
+                }),
+                html!("text-editor-controls-button", {
+                    .property("kind", "box-color")
+                    .event(clone!(state, color_state => move |_: events::Click| {
+                        color_state.select_for.set(Some(ColorSelectFor::Box));
+                        let color = { state.controls.lock_ref().highlight_color.clone() };
+                        color_state.picker.set_value(hex_to_rgba8_optional(&color));
                     }))
                 }),
             ])

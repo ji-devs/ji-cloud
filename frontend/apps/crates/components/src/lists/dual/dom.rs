@@ -25,6 +25,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     state.clear();
                 }))
             }),
+            // TODO:replace with new hebrew buttons
             html!("button-sidebar", {
                 .property("slot", "input-buttons")
                 .property("mode", "keyboard")

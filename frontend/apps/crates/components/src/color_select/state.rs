@@ -42,11 +42,11 @@ pub struct State {
     pub system_colors: Rc<Vec<RGBA8>>,
     pub theme_colors: Mutable<Vec<RGBA8>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
-    pub on_select: Option<Box<dyn Fn(RGBA8)>>,
+    pub on_select: Option<Box<dyn Fn(Option<RGBA8>)>>,
 }
 
 impl State {
-    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(RGBA8) + 'static>) -> Self {
+    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(Option<RGBA8>) + 'static>) -> Self {
         Self {
             value: Mutable::new(init_value),
             theme_id,
@@ -62,6 +62,10 @@ impl State {
             state.theme_colors.set(Self::get_theme_colors(theme_id));
             ready(())
         })));
+    }
+
+    pub fn set_value(&self, value: Option<RGBA8>) {
+        self.value.set(value);
     }
 
     fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {

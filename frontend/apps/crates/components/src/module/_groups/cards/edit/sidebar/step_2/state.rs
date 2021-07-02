@@ -95,7 +95,9 @@ impl Tab {
 
             TabKind::Color => {
                 let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
-                    base.set_bg(Background::Color(color));
+                    if let Some(color) = color {
+                        base.set_bg(Background::Color(color));
+                    };
                 })));
                 Self::Color(Rc::new(state))
             }

@@ -57,6 +57,10 @@ pub fn render(state: Rc<State>) -> Dom {
                     let mut controls = state.controls.lock_mut();
                     controls.highlight_color = color;
                 },
+                ControlsChange::BoxColor(color) => {
+                    let mut controls = state.controls.lock_mut();
+                    controls.box_color = color;
+                },
                 ControlsChange::IndentCount(indent_count) => {
                     let mut controls = state.controls.lock_mut();
                     controls.indent_count = indent_count;

@@ -61,6 +61,7 @@ web-sys = { version = "0.3.51", features = [
     'HtmlAudioElement',
     'HtmlIFrameElement',
     'CanvasRenderingContext2d',
+    'HtmlSelectElement',
 ] }
 awsm_web = { version = "0.19.2", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.41"

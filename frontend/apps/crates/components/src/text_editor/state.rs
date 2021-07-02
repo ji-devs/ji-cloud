@@ -14,12 +14,12 @@ use strum::IntoEnumIterator;
 
 use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT};
 use super::super::font_loader::{FontLoader, Font as StaticFont};
-use super::components::text_editor_controls::color_controls::ColorState;
+use super::dom::text_editor_controls::color_controls::ColorState;
 use super::callbacks::Callbacks;
 
 pub struct State {
     pub controls: Mutable<ControlsState>,
-    pub wysiwyg_ref: Rc<RefCell<Option<HtmlElement>>>,
+    pub wysiwyg_ref: Mutable<Option<HtmlElement>>,
     pub fonts: Mutable<Vec<String>>,
     pub value: RefCell<Option<String>>,
     pub theme_id: ReadOnlyMutable<ThemeId>,
@@ -32,7 +32,7 @@ impl State {
     pub fn new(theme_id: ReadOnlyMutable<ThemeId>, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
-            wysiwyg_ref: Rc::new(RefCell::new(None)),
+            wysiwyg_ref: Mutable::new(None),
             fonts: Mutable::new(vec![]),
             callbacks,
             value: RefCell::new(value),
@@ -47,15 +47,19 @@ impl State {
         _self
     }
 
+    pub fn text_to_value(text: &str) -> String {
+        format!("{{\"version\":\"0.1.0\",\"content\":[{{\"children\":[{{\"text\":\"{}\",\"element\":\"P1\"}}]}}]}}", text)
+    }
+
     pub fn set_value(&self, value: Option<String>) {
         self.value.replace(value);
-        if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.borrow() {
+        if let Some(wysiwyg_ref) = &*self.wysiwyg_ref.lock_ref() {
             self.update_wysiwyg_value(&wysiwyg_ref);
         }
     }
 
     pub fn select_all(&self) {
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
+        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let select_all_method = Reflect::get(
                 &wysiwyg_ref,
                 &JsValue::from_str("selectAll")
@@ -78,7 +82,7 @@ impl State {
             None => {
                 let reset_value_method = Reflect::get(
                     &wysiwyg_ref,
-                    &JsValue::from_str("resetValue")
+                    &JsValue::from_str("clearValue")
                 ).unwrap();
                 let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
                 let _ = reset_value_method.call0(&wysiwyg_ref);
@@ -111,73 +115,28 @@ impl State {
             &JsValue::from_str(&ElementType::P1.to_string())
         );
 
-        // let (font, color, font_size) = get_theme_element_styles(&self.theme_id.lock_ref(), &ElementType::P1);
-
-        // let key = enum_variant_to_string(&ControlsChange::FontSize(0)) + &String::from("Default");
-        // let _ = Reflect::set(
-        //     &wysiwyg_ref,
-        //     &JsValue::from_str(&key),
-        //     &JsValue::from_f64(font_size as f64)
-        // );
-        // let key = enum_variant_to_string(&ControlsChange::Font(String::new())) + &String::from("Default");
-        // let _ = Reflect::set(
-        //     &wysiwyg_ref,
-        //     &JsValue::from_str(&key),
-        //     &JsValue::from_str(&font_to_css(&font))
-        // );
-        // let key = enum_variant_to_string(&ControlsChange::Color(None)) + &String::from("Default");
-        // let _ = Reflect::set(
-        //     &wysiwyg_ref,
-        //     &JsValue::from_str(&key),
-        //     &JsValue::from_str(&color)
-        // );
-
         self.update_wysiwyg_value(&wysiwyg_ref);
 
-        *self.wysiwyg_ref.borrow_mut() = Some(wysiwyg_ref);
+        self.wysiwyg_ref.set(Some(wysiwyg_ref));
     }
 
-    // Suggestion: maybe replace all there functions with one that just takes a controls change.
-    // Suggestion: might be a good idea to remove all this and just have the event listener trigger the update to the element and have the change propagate up.
     pub(super) fn toggle_bold(&self) {
-        let mut controls = self.controls.lock_mut();
-        controls.weight = if controls.weight == BOLD_WEIGHT {
+        let mut weight = self.controls.lock_mut().weight;
+        weight = if weight == BOLD_WEIGHT {
             REGULAR_WEIGHT
         } else {
             BOLD_WEIGHT
         };
 
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Weight(0))),
-                &JsValue::from_f64(controls.weight as f64)
-            );
-        }
+        self.set_control_value(ControlsChange::Weight(weight));
     }
     pub(super) fn toggle_italic(&self) {
-        let mut controls = self.controls.lock_mut();
-        controls.italic = !controls.italic;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Italic(false))),
-                &JsValue::from_bool(controls.italic));
-        }
-   
+        let italic_active = self.controls.lock_ref().italic;
+        self.set_control_value(ControlsChange::Italic(!italic_active));
     }
     pub(super) fn toggle_underline(&self) {
-        let mut controls = self.controls.lock_mut();
-        controls.underline = !controls.underline;
-
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &JsValue::from_str(&enum_variant_to_string(&ControlsChange::Underline(false))),
-                &JsValue::from_bool(controls.underline));
-        }
-   
+        let underline_active = self.controls.lock_ref().underline;
+        self.set_control_value(ControlsChange::Underline(!underline_active));
     }
 
     pub(super) fn set_control_value(&self, control: ControlsChange) {
@@ -194,19 +153,23 @@ impl State {
             ControlsChange::FontSize(font_size) => controls.font_size = *font_size,
             ControlsChange::Color(color) => controls.color = color.clone(),
             ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color.clone(),
+            ControlsChange::BoxColor(box_color) => controls.box_color = box_color.clone(),
             ControlsChange::IndentCount(indent_count) => controls.indent_count = *indent_count,
             ControlsChange::Italic(italic) => controls.italic = *italic,
             ControlsChange::Underline(underline) => controls.underline = *underline,
         };
     }
     fn set_control_value_js(&self, control: &ControlsChange) {
-        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.borrow().as_ref() {
+        if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let (key, value) = control.to_js_key_value();
-            let _ = Reflect::set(
-                wysiwyg_ref,
-                &key,
-                &value
-            );
+            let set_control_value_method = Reflect::get(
+                &wysiwyg_ref,
+                &JsValue::from_str("setControlValue")
+            )
+                .unwrap();
+            let set_control_value_method = set_control_value_method.dyn_ref::<js_sys::Function>().unwrap();
+            let _ = set_control_value_method.call2(&wysiwyg_ref, &key, &value);
         }
+        
     }
 }

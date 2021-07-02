@@ -1,8 +1,8 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/module/_common/edit/widgets/hebrew-keyboard/hebrew-keyboard";
+import "@elements/core/hebrew-buttons/hebrew-keyboard/hebrew-keyboard";
 
 export default {
-    title: "Module / _COMMON / edit / Widgets / Hebrew keyboard"
+    title: "Core / Hebrew buttons"
 }
 
 

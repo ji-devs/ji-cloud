@@ -44,6 +44,7 @@ pub struct ControlsState {
     // using strings for color as it's easy to and from convert to js
     pub color: Option<Color>,
     pub highlight_color: Option<Color>,
+    pub box_color: Option<Color>,
     pub indent_count: IndentCount,
     pub italic: bool,
     pub underline: bool,
@@ -60,6 +61,7 @@ impl ControlsState {
             font_size: 16,
             color: None,
             highlight_color: None,
+            box_color: None,
             indent_count: 0,
             italic: false,
             underline: false,
@@ -77,6 +79,7 @@ pub enum ControlsChange {
     FontSize(FontSize),
     Color(Option<String>),
     HighlightColor(Option<String>),
+    BoxColor(Option<String>),
     IndentCount(IndentCount),
     Italic(bool),
     Underline(bool),
@@ -105,6 +108,12 @@ impl ControlsChange {
             Self::HighlightColor(highlight_color) => {
                 match highlight_color {
                     Some(highlight_color) => JsValue::from_str(&highlight_color),
+                    None => JsValue::UNDEFINED,
+                }
+            },
+            Self::BoxColor(highlight_color) => {
+                match highlight_color {
+                    Some(box_color) => JsValue::from_str(&box_color),
                     None => JsValue::UNDEFINED,
                 }
             },

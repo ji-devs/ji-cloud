@@ -1,5 +1,5 @@
 use dominator::{html, Dom, clone};
-use web_sys::HtmlSelectElement;
+use web_sys::HtmlTextAreaElement;
 use std::rc::Rc;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
@@ -60,7 +60,7 @@ pub fn render_text(state: Rc<State>) -> Dom {
                 change_text(&state, evt.value().unwrap_or_default(), false);
             }))
             .event(clone!(state => move |evt:events::Change| {
-                let target = evt.dyn_target::<HtmlSelectElement>().unwrap();
+                let target = evt.dyn_target::<HtmlTextAreaElement>().unwrap();
                 change_text(&state, target.value(), true);
             }))
         }))

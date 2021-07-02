@@ -35,7 +35,22 @@ fn readable_weight(weight: Weight) -> &'static str {
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("text-editor-controls", {
+        .property_signal("controlsDisabled", state.wysiwyg_ref.signal_ref(|x| x.is_none()))
         .children(&mut [
+            html!("text-editor-controls-insert-button", {
+                .property("slot", "insert-button")
+                .property_signal("disabled", state.wysiwyg_ref.signal_ref(|x| x.is_some()))
+                .event(clone!(state => move |_: events::Click| {
+                    if let Some(on_new_text) = state.callbacks.on_new_text.as_ref() {
+                        //TODO - this should create a slate value
+                        //with the current settings and only replace the text
+                        (on_new_text) (STR_NEW_TEXT);
+                    }
+                }))
+            }),
+            html!("hebrew-buttons", {
+                .property("slot", "hebrew-buttons")
+            }),
             html!("input-select", {
                 .property("slot", "font")
                 .property("label", STR_FONT_LABEL)
@@ -49,19 +64,13 @@ pub fn render(state: Rc<State>) -> Dom {
                         .map(clone!(state => move |font| render_font_option(state.clone(), &font)))
                 )
             }),
-            html!("button-collection", {
-                .property("slot", "element")
-                .children(ElementType::iter()
-                    .map(|element| render_element_option(state.clone(), element))
-                )
-            }),
             html!("input-select", {
                 .property("slot", "weight")
                 .property("label", STR_WEIGHT_LABEL)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| readable_weight(controls.weight)))
                 .children(WEIGHT_OPTIONS.iter().map(|weight| render_weight_option(state.clone(), *weight)))
             }),
-            html!("input-inc-dec", {
+            html!("text-editor-controls-input-number", {
                 .property("slot", "font-size")
                 .property("min", 1)
                 .property("max", 50)
@@ -74,69 +83,60 @@ pub fn render(state: Rc<State>) -> Dom {
                     state.set_control_value(ControlsChange::FontSize(value))
                 }))
             }),
-            html!("button-collection", {
-                .property("slot", "style")
-                .children(&mut [
-                    html!("text-editor-control", {
-                        .property("type", "bold")
-                        .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.weight == BOLD_WEIGHT
-                        }))
-                        .event(clone!(state => move |_: events::Click| {
-                            state.toggle_bold();
-                        }))
-                    }),
-                    html!("text-editor-control", {
-                        .property("type", "italic")
-                        .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.italic
-                        }))
-                        .event(clone!(state => move |_: events::Click| {
-                            state.toggle_italic();
-                        }))
-                    }),
-                    html!("text-editor-control", {
-                        .property("type", "underline")
-                        .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.underline
-                        }))
-                        .event(clone!(state => move |_: events::Click| {
-                            state.toggle_underline();
-                        }))
-                    }),
-                ])
+            html!("text-editor-controls-button", {
+                .property("kind", "bold")
+                .property("slot", "bold")
+                .property_signal("active", state.controls.signal_cloned().map(|controls| {
+                    controls.weight == BOLD_WEIGHT
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    state.toggle_bold();
+                }))
             }),
-            color_controls::render(state.clone()),
-            html!("button-collection", {
-                .property("slot", "justify")
-                .children(Align::iter()
-                    .map(|align| render_align_option(state.clone(), align))
-                )
-                .children(&mut [
-                    html!("text-editor-control", {
-                        .property("type", "dir-ltr")
-                        .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.indent_count > 0
-                        }))
-                        .event(clone!(state => move |_: events::Click| {
-                            let count: u8 = state.controls.lock_ref().indent_count + 1;
-                            state.set_control_value(ControlsChange::IndentCount(count))
-                        }))
-                    }),
-                    html!("text-editor-control", {
-                        .property("type", "dir-rtl")
-                        .event(clone!(state => move |_: events::Click| {
-                            let mut count: u8 = state.controls.lock_ref().indent_count;
-                            if count > 0 {
-                                count = count - 1;
-                            }
-                            state.set_control_value(ControlsChange::IndentCount(count))
-                        }))
-                        .property_signal("active", state.controls.signal_cloned().map(|controls| {
-                            controls.indent_count == 0
-                        }))
-                    }),
-                ])
+            html!("text-editor-controls-button", {
+                .property("kind", "italic")
+                .property("slot", "italic")
+                .property_signal("active", state.controls.signal_cloned().map(|controls| {
+                    controls.italic
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    state.toggle_italic();
+                }))
+            }),
+            html!("text-editor-controls-button", {
+                .property("kind", "underline")
+                .property("slot", "underline")
+                .property_signal("active", state.controls.signal_cloned().map(|controls| {
+                    controls.underline
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    state.toggle_underline();
+                }))
+            }),
+            html!("text-editor-controls-button", {
+                .property("kind", "indent")
+                .property("slot", "indent")
+                .property_signal("active", state.controls.signal_cloned().map(|controls| {
+                    controls.indent_count > 0
+                }))
+                .event(clone!(state => move |_: events::Click| {
+                    let count: u8 = state.controls.lock_ref().indent_count + 1;
+                    state.set_control_value(ControlsChange::IndentCount(count))
+                }))
+            }),
+            html!("text-editor-controls-button", {
+                .property("kind", "outdent")
+                .property("slot", "outdent")
+                .event(clone!(state => move |_: events::Click| {
+                    let mut count: u8 = state.controls.lock_ref().indent_count;
+                    if count > 0 {
+                        count = count - 1;
+                    }
+                    state.set_control_value(ControlsChange::IndentCount(count))
+                }))
+                .property_signal("active", state.controls.signal_cloned().map(|controls| {
+                    controls.indent_count == 0
+                }))
             }),
             html!("button-sidebar", {
                 .property("slot", "hebrew-keyboard")
@@ -150,25 +150,22 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "sefaria")
                 .property("mode", "sefaria")
             }),
-            html!("button", {
-                .text("ADD")
-                .property("slot", "add")
-                .event(clone!(state => move |_: events::Click| {
-                    if let Some(on_new_text) = state.callbacks.on_new_text.as_ref() {
-                        //TODO - this should create a slate value
-                        //with the current settings and only replace the text
-                        (on_new_text) (STR_NEW_TEXT);
-                    }
-                }))
-            })
+            color_controls::render(state.clone()),
         ])
+        .children(ElementType::iter()
+            .map(|element| render_element_option(state.clone(), element))
+        )
+        .children(Align::iter()
+            .map(|align| render_align_option(state.clone(), align))
+        )
     })
 }
 
 
 fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
-    html!("text-editor-control", {
-        .property("type", element.to_string())
+    html!("text-editor-controls-button", {
+        .property("kind", element.to_string().to_lowercase())
+        .property("slot", element.to_string().to_lowercase())
         .property_signal("active", state.controls.signal_cloned().map(clone!(element => move |controls| {
             if controls.element == element {
                 true
@@ -183,8 +180,13 @@ fn render_element_option(state: Rc<State>, element: ElementType) -> Dom {
 }
 
 fn render_align_option(state: Rc<State>, align: Align) -> Dom {
-    html!("text-editor-control", {
-        .property("type", match align {
+    html!("text-editor-controls-button", {
+        .property("kind", match align {
+            Align::Left => "align-left",
+            Align::Center => "align-center",
+            Align::Right => "align-right",
+        })
+        .property("slot", match align {
             Align::Left => "align-left",
             Align::Center => "align-center",
             Align::Right => "align-right",

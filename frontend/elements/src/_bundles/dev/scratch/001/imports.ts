@@ -25,13 +25,12 @@ import "@elements/core/inputs/primitives/color";
 import "@elements/core/buttons/icon";
 
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";
-import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-control";
-import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls-overlay-shadow";
-import "@elements/core/buttons/button-collection/button-collection";
+import "@elements/module/_common/edit/widgets/text-editor-controls/button";
+import "@elements/module/_common/edit/widgets/text-editor-controls/overlay-shadow";
+import "@elements/module/_common/edit/widgets/text-editor-controls/input-number";
+import "@elements/module/_common/edit/widgets/text-editor-controls/insert-button";
 import "@elements/core/inputs/composed/select";
-import "@elements/core/inputs/composed/inc-dec";
 import "@elements/core/lists/li-check";
-import "@elements/core/buttons/sidebar";
 import "@elements/core/overlays/anchored-overlay";
 
 import "@elements/core/wysiwyg/wysiwyg-base";

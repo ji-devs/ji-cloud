@@ -6,7 +6,7 @@ use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
 use crate::color_select::actions::get_user_colors;
 
-use super::actions::{add_user_color, delete_user_color};
+use super::actions::{add_user_color, delete_user_color, set_selected};
 use super::state::State;
 use dominator_helpers::futures::AsyncLoader;
 use wasm_bindgen_futures::spawn_local;
@@ -80,7 +80,7 @@ fn render_static_section(state: Rc<State>, color_options: &Vec<RGBA8>, label: &s
                     }
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    state.set_selected(color.clone());
+                    set_selected(Rc::clone(&state), Some(color.clone()));
                 }))
             })
         }))
@@ -103,7 +103,7 @@ fn render_user_section(state: Rc<State>) -> Dom {
                     false
                 })))
                 .event(clone!(color, state => move |_:events::Click| {
-                    state.set_selected(color.clone());
+                    set_selected(Rc::clone(&state), Some(color.clone()));
                 }))
                 .attribute("deletable", "")
                 .child(html!("button-icon", {

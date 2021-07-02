@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
 
-@customElement("input-inc-dec")
+@customElement("text-editor-controls-input-number")
 export class _ extends LitElement {
     static get styles() {
         return [
@@ -43,6 +43,7 @@ export class _ extends LitElement {
                     font-style: normal;
                     width: 30px;
                     flex-grow: 1;
+                    background-color: transparent;
                 }
                 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
                     display: none;
