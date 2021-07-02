@@ -10,7 +10,7 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::{StepExt, BodyExt, ModeExt};
 
-pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
+pub fn render_nav<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>) -> Dom 
 where
     RawData: BodyExt<Mode, Step> + 'static, 
     Mode: ModeExt + 'static,

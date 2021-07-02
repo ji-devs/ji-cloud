@@ -97,7 +97,7 @@ impl DebugSettings {
                 step2_tab: Some(Step2TabKind::Theme),
                 step3_tab: Some(Step3TabKind::Settings),
             }),
-            step: Some(Step::Three),
+            step: Some(Step::Four),
             skip_save: true,
             skip_load_jig: true,
         }

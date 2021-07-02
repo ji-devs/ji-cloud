@@ -23,7 +23,7 @@ use crate::module::_common::edit::{
 };
 use crate::font_loader::{FontLoader, Font};
 use dominator_helpers::{
-    signals::OptionSignal,
+    signals::DefaultSignal,
     futures::AsyncLoader,
 };
 use wasm_bindgen_futures::spawn_local;
@@ -59,7 +59,6 @@ where
     pub phase: Mutable<Rc<Phase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
-    pub(super) is_preview: Mutable<bool>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) save_loader: Rc<AsyncLoader>,
     pub(super) history: RefCell<Option<Rc<HistoryStateImpl<RawData>>>>,
@@ -155,7 +154,6 @@ where
             opts,
             jig: RefCell::new(None),
             phase: Mutable::new(Rc::new(Phase::Init)), 
-            is_preview: Mutable::new(false),
             history: RefCell::new(None),
             raw_loaded: Mutable::new(false),
             raw_loader: AsyncLoader::new(),
@@ -285,6 +283,23 @@ where
         //uncomment this):
         (_self.on_init_ready.borrow().as_ref().unwrap_ji()) ();
         _self
+    }
+
+    pub fn is_preview_signal(&self) -> impl Signal<Item = bool> {
+        self.phase.signal_cloned()
+            .switch(|phase| {
+                match phase.as_ref() {
+                    Phase::Choose(_) => DefaultSignal::new(false, None),
+                    Phase::Init => DefaultSignal::new(false, None),
+                    Phase::Base(app_base) => {
+                        DefaultSignal::new(false, Some(
+                            app_base.preview_mode.signal_cloned()
+                                .map(|preview_mode| preview_mode.is_some())
+                        ))
+                    }
+                }
+            })
+            
     }
 
     pub fn get_audio_mixer(&self) -> AudioMixer {

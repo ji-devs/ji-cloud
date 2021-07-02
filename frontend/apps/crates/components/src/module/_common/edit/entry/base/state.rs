@@ -16,7 +16,10 @@ use shared::domain::jig::{JigId, Jig, TextDirection, AudioEffects, module::{Modu
 use utils::prelude::*;
 use std::future::Future;
 use uuid::Uuid;
-use crate::audio_mixer::AudioMixer;
+use crate::{
+    audio_mixer::AudioMixer,
+    module::_common::edit::post_preview::state::PostPreview
+};
 use std::pin::Pin;
 use wasm_bindgen_futures::spawn_local;
 
@@ -114,6 +117,7 @@ where
 /// this is held in this top level, created essentially from a BaseInit
 /// By way of a BaseInit factory and BaseInitFromRawArgs
 /// (it's done this way since args like step mutable need to be shared at both levels) 
+
 pub struct AppBase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -137,7 +141,14 @@ where
     pub overlay: Rc<Overlay>,
     pub steps_completed: Mutable<HashSet<Step>>,
     pub history: Rc<HistoryStateImpl<RawData>>,
+    pub preview_mode: Mutable<Option<PreviewMode>>,
     phantom: PhantomData<Mode>
+}
+
+#[derive(Clone)]
+pub enum PreviewMode {
+    Preview,
+    PostPreview(Rc<PostPreview>)
 }
 
 impl <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> AppBase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
@@ -184,11 +195,14 @@ where
         // setup a reactor on the step stuff, independent of the dom rendering
         let preview_step_reactor = AsyncLoader::new();
 
-        preview_step_reactor.load(step.signal().for_each(clone!(app => move |step| {
+        let preview_mode = Mutable::new(None);
+        preview_step_reactor.load(step.signal().for_each(clone!(preview_mode => move |step| {
             if step.is_preview() {
-                app.is_preview.set_neq(true);
+                preview_mode.set(Some(PreviewMode::Preview));
             } else {
-                app.is_preview.set_neq(false);
+                if preview_mode.lock_ref().is_some() {
+                    preview_mode.set(None);
+                }
             }
             async move {}
         })));
@@ -205,6 +219,7 @@ where
             preview_step_reactor,
             steps_completed,
             history: app.history.borrow().as_ref().unwrap_ji().clone(),
+            preview_mode,
             phantom: PhantomData,
         }
     }
@@ -244,6 +259,10 @@ pub trait BaseExt<Step: StepExt> {
     fn allowed_step_change(&self, from:Step, to: Step) -> bool;
 
     fn next_step_allowed_signal(&self) -> Self::NextStepAllowedSignal;
+
+    fn get_post_preview(&self) -> Option<PostPreview> {
+        None
+    }
 }
 
 pub trait MainExt: MainDomRenderable {

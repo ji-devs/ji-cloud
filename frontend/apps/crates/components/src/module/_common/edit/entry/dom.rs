@@ -46,7 +46,7 @@ where
 {
     let sig = map_ref! {
         let phase = state.phase.signal_cloned(),
-        let is_preview = state.is_preview.signal()
+        let is_preview = state.is_preview_signal()
             => {
                 (phase.clone(), *is_preview)
             }
@@ -95,7 +95,7 @@ where
                                             },
                                             Phase::Base(app_base) => {
                                                 super::base::dom::render(
-                                                    is_preview, 
+                                                    is_preview,
                                                     state.opts.jig_id.clone(), 
                                                     state.opts.module_id.clone(), 
                                                     app_base.clone()
