@@ -3,7 +3,7 @@ use crate::{
     api::Method,
     domain::image::{
         CreateResponse, ImageBrowseQuery, ImageBrowseResponse, ImageCreateRequest, ImageResponse,
-        ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest,
+        ImageSearchQuery, ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
     },
     error::{EmptyError, MetadataNotFound},
 };
@@ -59,7 +59,7 @@ pub struct Upload;
 impl ApiEndpoint for Upload {
     // raw bytes
     type Req = ();
-    type Res = ();
+    type Res = ImageUploadResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/image/{id}/raw";
     const METHOD: Method = Method::Patch;

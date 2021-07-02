@@ -1,14 +1,17 @@
 use anyhow::Context;
 use core::settings::S3Settings;
+use rusoto_core::credential::ProvideAwsCredentials;
 use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
     HttpClient, Region, RusotoError,
 };
+use rusoto_s3::util::{PreSignedRequest, PreSignedRequestOption};
 use rusoto_s3::{
     CopyObjectRequest, DeleteObjectRequest, GetObjectError, GetObjectRequest, PutObjectRequest, S3,
 };
 use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
 use tokio::io::AsyncReadExt;
+use url::Url;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -16,6 +19,8 @@ pub struct Client {
     media_bucket: String,
     processing_bucket: String,
     client: rusoto_s3::S3Client,
+    credentials_provider: StaticProvider, // get rid of,
+    region: Region,
 }
 
 impl Client {
@@ -40,13 +45,18 @@ impl Client {
             None,
         ));
 
-        let client =
-            rusoto_s3::S3Client::new_with(HttpClient::new()?, credentials_provider, region.clone());
+        let client = rusoto_s3::S3Client::new_with(
+            HttpClient::new()?,
+            credentials_provider.clone(),
+            region.clone(),
+        );
 
         Ok(Self {
             media_bucket,
             processing_bucket,
             client,
+            credentials_provider,
+            region,
         })
     }
 
@@ -273,5 +283,35 @@ impl Client {
             .await?;
 
         Ok(Some(body))
+    }
+
+    pub async fn get_presigned_url_to_upload_media_for_processing(
+        &self,
+        library: MediaLibrary,
+        id: Uuid,
+        file_kind: FileKind,
+    ) -> anyhow::Result<Url> {
+        // FIXME: should probably use self.client, but S3Client doesn't support signed URLs.
+
+        let option = PreSignedRequestOption {
+            expires_in: std::time::Duration::from_secs(config::MEDIA_UPLOAD_TIMEOUT_SECS),
+        };
+
+        let req = PutObjectRequest {
+            bucket: self.processing_bucket.clone(),
+            key: media::media_key(library, id, file_kind),
+            ..PutObjectRequest::default()
+        };
+
+        let url = req.get_presigned_url(
+            &self.region,
+            &self.credentials_provider.credentials().await?,
+            &option,
+        );
+
+        match Url::parse(&url) {
+            Ok(url) => Ok(url),
+            Err(e) => Err(e.into()),
+        }
     }
 }

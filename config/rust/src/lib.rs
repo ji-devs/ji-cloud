@@ -36,6 +36,8 @@ pub const DB_INSTANCE_SANDBOX: &str =
     "ji-cloud-developer-sandbox:europe-west1:ji-cloud-003-sandbox";
 pub const DB_INSTANCE_RELEASE: &str = "ji-cloud:europe-west1:ji-cloud-002";
 
+pub const MEDIA_UPLOAD_TIMEOUT_SECS: u64 = 300;
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,
