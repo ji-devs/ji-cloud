@@ -6,6 +6,7 @@ use futures_signals::{map_ref, signal::{ReadOnlyMutable, Signal, SignalExt}, sig
 use super::{
     state::*,
     trace::state::*,
+    menu::dom::render_draw_menu
 };
 use crate::traces::{edit::{state::*, all::trace::state::*}, svg::{self, SvgCallbacks, ShapeStyle, ShapeStyleBase}};
 
@@ -13,8 +14,9 @@ use web_sys::HtmlCanvasElement;
 use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
-use crate::transform;
-pub fn render(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTrace>>) -> Dom { 
+use crate::transform::dom::render_transform;
+
+pub fn render_traces_draw(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTrace>>) -> Dom { 
 
     let shadow_traces:Vec<Rc<AllTrace>> = 
         full_list
@@ -115,8 +117,8 @@ pub fn render(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTrace>>) -> Dom
             menu_signal.map(clone!(state => move |(resize_info, menu)| {
                 let mut children:Vec<Dom> = Vec::new();
                 if let Some(menu) = menu {
-                    children.push(super::menu::dom::render(state.clone(), menu, &resize_info));
-                    children.push(transform::dom::render(
+                    children.push(render_draw_menu(state.clone(), menu, &resize_info));
+                    children.push(render_transform(
                             state.trace.transform.clone(),
                             None as Option<Box<dyn Fn() -> Dom>>
                     ));

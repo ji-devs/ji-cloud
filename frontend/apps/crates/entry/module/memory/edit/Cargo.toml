@@ -52,7 +52,7 @@ web-sys = { version = "0.3.51", features = [
 wasm-bindgen-futures = "0.4.24"
 dominator = "0.5.19"
 futures-signals = "0.3.22"
-dominator_helpers = "0.6.3"
+dominator_helpers = "0.6.4"
 serde = { version = "1.0.126", features = ["derive"] }
 serde-wasm-bindgen = "0.3.0"
 serde_json = "1.0.64"
@@ -67,7 +67,7 @@ gloo = "0.2.1"
 gloo-timers = { version = "0.2.1", features = ["futures"] }
 itertools = "0.10.1"
 async-trait = "0.1.50"
-unicode-segmentation = "1.7.1"
+unicode-segmentation = "1.8.0"
 
 [features]
 default = ["wee_alloc"]

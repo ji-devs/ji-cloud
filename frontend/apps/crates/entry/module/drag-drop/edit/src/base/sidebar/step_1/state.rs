@@ -9,6 +9,7 @@ use components::{
         callbacks::Callbacks as ImageSearchCallbacks
     },
     color_select::state::{State as ColorPickerState},
+    stickers::state::Stickers,
 };
 use shared::domain::jig::module::body::{Background, Image};
 pub struct Step1 {
@@ -20,9 +21,9 @@ pub struct Step1 {
 impl Step1 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
 
-        let kind = match crate::debug::settings().bg_tab {
+        let kind = match crate::debug::settings().step_1_tab {
             Some(kind) => kind,
-            None => TabKind::Image
+            None => TabKind::BgImage
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -37,33 +38,38 @@ impl Step1 {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum TabKind {
-    Image,
-    Color,
-    Overlay
+    BgImage,
+    BgColor,
+    BgOverlay,
+    StickerImage,
+    StickerText,
 }
 
 impl TabKind {
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Self::Image => "image",
-            Self::Color => "color",
-            Self::Overlay => "overlay",
+            Self::BgImage => "image",
+            Self::BgColor => "color",
+            Self::BgOverlay => "overlay",
+            Self::StickerImage => "image",
+            Self::StickerText => "text",
         }
     }
 }
 
 #[derive(Clone)]
 pub enum Tab {
-    //Image(Rc<ImageSearchState>),
-    Image(Rc<ImageSearchState>),
-    Color(Rc<ColorPickerState>),
-    Overlay(Rc<ImageSearchState>),
+    BgImage(Rc<ImageSearchState>),
+    BgColor(Rc<ColorPickerState>),
+    BgOverlay(Rc<ImageSearchState>),
+    StickerImage(Rc<ImageSearchState>),
+    StickerText
 }
 
 impl Tab {
     pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
         match kind {
-            TabKind::Image => {
+            TabKind::BgImage => {
                 let opts = ImageSearchOptions {
                     background_only: Some(true),
                     upload: true, 
@@ -77,15 +83,15 @@ impl Tab {
                 );
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::Image(Rc::new(state))
+                Self::BgImage(Rc::new(state))
             },
-            TabKind::Color => {
+            TabKind::BgColor => {
                 let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
                     base.backgrounds.set_layer(Layer::One, Background::Color(color));
                 })));
-                Self::Color(Rc::new(state))
+                Self::BgColor(Rc::new(state))
             },
-            TabKind::Overlay => {
+            TabKind::BgOverlay => {
                 let opts = ImageSearchOptions {
                     background_only: Some(true),
                     upload: true, 
@@ -99,16 +105,39 @@ impl Tab {
                 );
                 let state = ImageSearchState::new(opts, callbacks);
 
-                Self::Overlay(Rc::new(state))
-            }
+                Self::BgOverlay(Rc::new(state))
+            },
+
+            TabKind::StickerImage => {
+                let opts = ImageSearchOptions {
+                    background_only: Some(true),
+                    upload: true, 
+                    filters: true, 
+                };
+
+                let callbacks = ImageSearchCallbacks::new(
+                    Some(clone!(base => move |image| {
+                        Stickers::add_sprite(base.stickers.clone(), image);
+                    }))
+                );
+                let state = ImageSearchState::new(opts, callbacks);
+
+                Self::StickerImage(Rc::new(state))
+            },
+
+            TabKind::StickerText=> {
+                Self::StickerText
+            },
         }
     }
 
     pub fn kind(&self) -> TabKind {
         match self {
-            Self::Image(_) => TabKind::Image,
-            Self::Color(_) => TabKind::Color,
-            Self::Overlay(_) => TabKind::Overlay,
+            Self::BgImage(_) => TabKind::BgImage,
+            Self::BgColor(_) => TabKind::BgColor,
+            Self::BgOverlay(_) => TabKind::BgOverlay,
+            Self::StickerImage(_) => TabKind::StickerImage,
+            Self::StickerText => TabKind::StickerText,
         }
     }
 }

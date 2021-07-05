@@ -14,7 +14,7 @@ use crate::{
         _groups::cards::edit::state::*,
         _common::edit::prelude::*,
     },
-    backgrounds
+    backgrounds::dom::render_single_background
 };
 use shared::domain::jig::module::body::_groups::cards::Step;
 
@@ -60,7 +60,7 @@ where
     SettingsState: 'static,
 {
     fn render_bg(state: Rc<Main<RawData, E, GetSettingsStateFn, RenderSettingsStateFn, SettingsState>>) -> Option<Dom> {
-        Some(backgrounds::dom::render_single(state.base.background.signal_cloned(), state.base.theme_id.signal_cloned(), None))
+        Some(render_single_background(state.base.background.signal_cloned(), state.base.theme_id.signal_cloned(), None))
     }
 }
 

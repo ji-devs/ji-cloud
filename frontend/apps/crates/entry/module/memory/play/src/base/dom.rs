@@ -1,4 +1,7 @@
-use components::module::_common::play::prelude::DomRenderable;
+use components::{
+    module::_common::play::prelude::DomRenderable,
+    backgrounds::dom::render_single_background_raw
+};
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use components::backgrounds;
@@ -20,7 +23,7 @@ impl DomRenderable for Base {
             .child(
                 html!("memory-container", {
                     .children(&mut [
-                        backgrounds::dom::render_raw_single(&state.background, state.theme_id, Some("bg")),
+                        render_single_background_raw(&state.background, state.theme_id, Some("bg")),
                         render_stage(state.clone()),
                         render_sidebar(state.clone()),
                     ])

@@ -5,30 +5,39 @@ use utils::prelude::*;
 use futures_signals::signal::SignalExt;
 use components::{
     image::search::dom::render as render_image_search,
-    color_select::dom::render as render_color_picker
+    color_select::dom::render as render_color_picker,
+    text_editor::dom::render_controls as render_text_editor,
 };
 
 pub fn render(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
         .children(&mut [
-            render_tab(state.clone(), TabKind::Image),
-            render_tab(state.clone(), TabKind::Color),
-            render_tab(state.clone(), TabKind::Overlay),
+            render_tab(state.clone(), TabKind::BgImage),
+            render_tab(state.clone(), TabKind::BgColor),
+            render_tab(state.clone(), TabKind::BgOverlay),
+            render_tab(state.clone(), TabKind::StickerImage),
+            render_tab(state.clone(), TabKind::StickerText),
             html!("module-sidebar-body", {
                 .property("slot", "body")
-                .child_signal(state.tab.signal_cloned().map(|tab| {
+                .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
-                        Tab::Image(state) => {
+                        Tab::BgImage(state) => {
                             Some(render_image_search(state.clone(), None))
                         },
-                        Tab::Color(state) => {
+                        Tab::BgColor(state) => {
                             Some(render_color_picker(state.clone(), None))
                         },
-                        Tab::Overlay(state) => {
+                        Tab::BgOverlay(state) => {
                             Some(render_image_search(state.clone(), None))
                         },
+                        Tab::StickerImage(state) => {
+                            Some(render_image_search(state.clone(), None))
+                        },
+                        Tab::StickerText => {
+                            Some(render_text_editor(state.base.text_editor.clone()))
+                        },
                     }
-                }))
+                })))
             })
         ])
     })

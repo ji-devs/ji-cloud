@@ -14,7 +14,7 @@ use utils::resize::resize_info_signal;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-pub fn render(state: Rc<TransformState>, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
+pub fn render_transform(state: Rc<TransformState>, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
     html!("empty-fragment", {
         .child(
             html!("transform-box", {

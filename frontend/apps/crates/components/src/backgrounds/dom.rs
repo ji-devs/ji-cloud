@@ -7,7 +7,7 @@ use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVe
 use super::state::*;
 use shared::domain::jig::module::body::{Background, _groups::design::Backgrounds as RawBackgrounds};
 
-pub fn render(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
+pub fn render_backgrounds(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
 
     let children = map_ref!{
         let theme_id = bg.theme_id.signal(),
@@ -38,7 +38,7 @@ pub fn render(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
     })
 }
 
-pub fn render_single(bg_signal:impl Signal<Item = Option<Background>> + 'static, theme_id_signal: impl Signal<Item = ThemeId> + 'static, slot: Option<&str>) -> Dom {
+pub fn render_single_background(bg_signal:impl Signal<Item = Option<Background>> + 'static, theme_id_signal: impl Signal<Item = ThemeId> + 'static, slot: Option<&str>) -> Dom {
     let children = map_ref!{
         let theme_id = theme_id_signal,
         let layer = bg_signal
@@ -64,7 +64,7 @@ pub fn render_single(bg_signal:impl Signal<Item = Option<Background>> + 'static,
 
     })
 }
-pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> Dom {
+pub fn render_backgrounds_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> Dom {
 
     let mut children:Vec<Dom> = Vec::new();
 
@@ -86,7 +86,7 @@ pub fn render_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Option<&str>) -> 
     })
 }
 
-pub fn render_raw_single(bg:&Option<Background>, theme_id: ThemeId, slot: Option<&str>) -> Dom {
+pub fn render_single_background_raw(bg:&Option<Background>, theme_id: ThemeId, slot: Option<&str>) -> Dom {
 
     let mut children:Vec<Dom> = Vec::new();
 

@@ -13,7 +13,7 @@ use super::{
     super::super::state::Stickers
 };
 
-pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
+pub fn render_sticker_text_menu(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {

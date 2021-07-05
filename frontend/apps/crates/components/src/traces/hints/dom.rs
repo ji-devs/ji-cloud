@@ -19,7 +19,7 @@ use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
 
-pub fn render(traces: Vec<Trace>) -> Dom { 
+pub fn render_traces_hint(traces: Vec<Trace>) -> Dom { 
 
     let traces = Rc::new(traces);
 
@@ -34,7 +34,7 @@ pub fn render(traces: Vec<Trace>) -> Dom {
                         None::<fn(web_sys::SvgElement)>, 
                         None::<fn(web_sys::SvgElement)>, 
                     );
-                    render_trace(&style, &resize_info, &trace, callbacks)
+                    render_trace_hint(&style, &resize_info, &trace, callbacks)
                 })
                 .collect::<Vec<Dom>>()
         }))
@@ -56,7 +56,7 @@ pub fn render(traces: Vec<Trace>) -> Dom {
     })
 }
 
-pub fn render_trace(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&Trace, callbacks: SvgCallbacks) -> Dom {
+pub fn render_trace_hint(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&Trace, callbacks: SvgCallbacks) -> Dom {
 
     let transform_size = trace.calc_size(resize_info)
         .map(|size| (&trace.transform, size));

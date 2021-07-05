@@ -10,7 +10,7 @@ use futures_signals::{
 
 use crate::traces::edit::state::*;
 
-pub fn render(state:Rc<Edit>, index: ReadOnlyMutable<Option<usize>>) -> Dom {
+pub fn render_menu(state:Rc<Edit>, index: ReadOnlyMutable<Option<usize>>) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {

@@ -11,15 +11,16 @@ use super::{
     state::{Sprite, width_signal, height_signal},
     super::state::Stickers,
     actions::load_and_render,
+    menu::dom::render_sticker_sprite_menu
 };
-use crate::transform;
+use crate::transform::dom::render_transform;
 use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Transform};
 //For stickers, just let the transform affect it directly
 //that means it's not a child of the transform, they're independent
 //this is both faster for performance, theoretically, and simpler to use the same
 //code for playing and editing
 
-pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
+pub fn render_sticker_sprite(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
 
     html!("empty-fragment", {
         .child(html!("empty-fragment", {
@@ -61,9 +62,9 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
         }))
         .child_signal(stickers.selected_signal(index.clone()).map(clone!(stickers, sprite, index => move |active| {
             if active {
-                Some(transform::dom::render(
+                Some(render_transform(
                     sprite.transform.clone(),
-                    Some(clone!(stickers, index, sprite => move || super::menu::dom::render(stickers.clone(), index.clone(), sprite.clone())))
+                    Some(clone!(stickers, index, sprite => move || render_sticker_sprite_menu(stickers.clone(), index.clone(), sprite.clone())))
                 ))
             } else {
                 None
@@ -74,7 +75,7 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, spri
 }
 
 
-pub fn render_raw(sprite: &RawSprite) -> Dom {
+pub fn render_sticker_sprite_raw(sprite: &RawSprite) -> Dom {
 
     let src:Mutable<Option<String>> = Mutable::new(None);
     let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);

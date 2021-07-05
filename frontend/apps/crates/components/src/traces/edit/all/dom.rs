@@ -11,7 +11,10 @@ use crate::traces::{
     svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks}, 
     edit::state::*
 };
-use super::trace::state::*;
+use super::{
+    trace::state::*,
+    select_box::dom::render_select_box
+};
 
 use shared::domain::jig::module::body::{Transform, _groups::design::{Trace as RawTrace, TraceShape}};
 use web_sys::{SvgElement, HtmlCanvasElement};
@@ -19,7 +22,7 @@ use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
 
-pub fn render(state:Rc<Edit>) -> Dom { 
+pub fn render_traces_all(state:Rc<Edit>) -> Dom { 
 
     let mask_children = resize_info_signal()
         .switch_signal_vec(clone!(state => move |resize_info| {
@@ -68,7 +71,7 @@ pub fn render(state:Rc<Edit>) -> Dom {
                 .signal_vec_cloned()
                 .enumerate()
                 .map(clone!(state, resize_info => move |(index, trace)| {
-                    super::select_box::dom::render(state.clone(), index, &trace, &resize_info)
+                    render_select_box(state.clone(), index, &trace, &resize_info)
                 }))
         }));
     html!("empty-fragment", {

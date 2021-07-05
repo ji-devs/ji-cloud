@@ -1,5 +1,6 @@
 use components::module::_common::edit::prelude::*;
 use components::audio_mixer::AudioMixer;
+use uuid::Uuid;
 use std::rc::Rc;
 use shared::domain::jig::{
     JigId, 
@@ -21,6 +22,7 @@ use shared::domain::jig::{
             },
             _groups::design::{
                 Trace as RawTrace,
+                Sticker as RawSticker,
                 Backgrounds as RawBackgrounds, 
             }
         }
@@ -67,6 +69,8 @@ pub struct Base {
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
+    pub drag_stickers: Rc<Stickers>, 
+    pub drags_meta: MutableVec<DragMeta>,
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
@@ -108,17 +112,28 @@ impl PlaySettings {
 
 #[derive(Clone)]
 pub struct TraceMeta {
-    pub audio: Mutable<Option<Audio>>,
-    pub text: Mutable<Option<String>>,
-    pub bubble: Mutable<Option<Rc<TraceBubble>>>,
+    pub id: Uuid,
 }
 
 impl TraceMeta {
-    pub fn new(audio: Option<Audio>, text: Option<String>) -> Self {
+    pub fn new() -> Self {
+        Self {
+            id: Uuid::new_v4() 
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct DragMeta {
+    pub audio: Mutable<Option<Audio>>,
+    pub trace_id: Mutable<Option<Uuid>>,
+}
+
+impl DragMeta {
+    pub fn new(audio: Option<Audio>, trace_id: Option<Uuid>) -> Self {
         Self {
             audio: Mutable::new(audio),
-            text: Mutable::new(text),
-            bubble: Mutable::new(None)
+            trace_id: Mutable::new(trace_id),
         }
     }
 }
@@ -145,26 +160,48 @@ impl Base {
         let instructions = Mutable::new(content.base.instructions);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
+        let drag_stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
             None, 
             TextEditorCallbacks::new(
                 //New text
-                Some(clone!(stickers_ref => move |value:&str| {
-                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                Some(clone!(stickers_ref, drag_stickers_ref, step => move |value:&str| {
+                    let stickers = {
+                        if step.get_cloned() == Step::One {
+                            &stickers_ref
+                        } else {
+                            &drag_stickers_ref
+                        }
+                    };
+                    if let Some(stickers) = stickers.borrow().as_ref() {
                         Stickers::add_text(stickers.clone(), value.to_string());
                     }
                 })),
                 //Text change
-                Some(clone!(stickers_ref => move |value:&str| {
-                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                Some(clone!(stickers_ref, drag_stickers_ref, step => move |value:&str| {
+                    let stickers = {
+                        if step.get_cloned() == Step::One {
+                            &stickers_ref
+                        } else {
+                            &drag_stickers_ref
+                        }
+                    };
+                    if let Some(stickers) = stickers.borrow().as_ref() {
                         stickers.set_current_text_value(value.to_string());
                     }
                 })),
                 //Blur
-                Some(clone!(stickers_ref => move || {
-                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
+                Some(clone!(stickers_ref, drag_stickers_ref, step => move || {
+                    let stickers = {
+                        if step.get_cloned() == Step::One {
+                            &stickers_ref
+                        } else {
+                            &drag_stickers_ref
+                        }
+                    };
+                    if let Some(stickers) = stickers.borrow().as_ref() {
                         stickers.stop_current_text_editing();
                     }
                 }))
@@ -202,6 +239,32 @@ impl Base {
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
 
+        let drag_stickers = Stickers::from_raw(
+                &content.drag_items
+                    .iter()
+                    .map(|drag_item| {
+                        drag_item.sticker.clone()
+                    })
+                    .collect::<Vec<RawSticker>>(),
+                text_editor.clone(),
+                StickersCallbacks::new(
+                    Some(clone!(history => move |raw_stickers| {
+                        //TODO - need to split into add/delete/change, like trace...
+                    }))
+                )
+        );
+
+        *drag_stickers_ref.borrow_mut() = Some(drag_stickers.clone());
+        let drags_meta = MutableVec::new_with_values(
+            content.drag_items
+                .iter()
+                .map(|drag_item| {
+                    DragMeta::new(drag_item.audio.clone(), drag_item.trace_id)
+                })
+                .collect()
+        );
+
+
         let traces = TracesEdit::from_raw(
 
             &content.traces
@@ -234,10 +297,9 @@ impl Base {
             content.traces
                 .iter()
                 .map(|trace_meta| {
-                    TraceMeta::new(
-                        trace_meta.audio.clone(), 
-                        trace_meta.text.clone()
-                    )
+                    TraceMeta {
+                        id: trace_meta.id
+                    }
                 })
                 .collect()
         );
@@ -253,6 +315,8 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
+            drag_stickers,
+            drags_meta,
             traces,
             traces_meta,
             audio_mixer,
@@ -267,6 +331,7 @@ impl Base {
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
         self.theme_id.signal().map(|id| id.as_str_id())
     }
+
 }
 
 

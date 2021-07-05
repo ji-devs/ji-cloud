@@ -13,7 +13,7 @@ use crate::audio_mixer::AudioMixer;
 use crate::tooltip::dom::render_mixin as render_tooltip_mixin;
 use web_sys::{HtmlElement, Element, DomRect};
 
-pub fn render(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
+pub fn render_trace_bubble(state: Rc<TraceBubble>, mixer: &AudioMixer) -> Dom {
 
     //in rem
     let width = 200.0;

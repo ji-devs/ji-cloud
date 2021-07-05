@@ -11,11 +11,11 @@ use components::traces::{
     utils::TraceExt,
     svg::{render_single_trace, ShapeStyle, ShapeStyleBase, SvgCallbacks},
     select::{
-        dom::render as render_select_traces,
+        dom::render_traces_select,
         trace::SelectTrace
     },
     bubble::{
-        dom::render as render_bubble,
+        dom::render_trace_bubble,
         state::*
     }
 };
@@ -70,7 +70,7 @@ pub fn render_trace(state: Rc<PlayState>, trace: Rc<PlayTrace>, index: usize) ->
 
                         match play_phase {
                             PlayPhase::Playing(bubble) => {
-                                children.push(render_bubble(bubble, &state.game.base.audio_mixer));
+                                children.push(render_race_bubble(bubble, &state.game.base.audio_mixer));
                             },
                             _ => {
                             }

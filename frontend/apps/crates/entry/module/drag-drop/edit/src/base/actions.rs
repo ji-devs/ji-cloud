@@ -63,6 +63,7 @@ impl Base {
      * meta and history
      */
     pub fn on_trace_added(&self, raw_trace: RawTrace) {
+        /*
         self.traces_meta.lock_mut().push_cloned(TraceMeta::new(None, None));
 
         self.history.push_modify(move |raw| {
@@ -74,9 +75,11 @@ impl Base {
                 })
             }
         });
+        */
     }
 
     pub fn on_trace_deleted(&self, index: usize) {
+        /*
         self.traces_meta.lock_mut().remove(index);
 
         self.history.push_modify(move |raw| {
@@ -84,17 +87,21 @@ impl Base {
                 content.traces.remove(index);
             }
         });
+        */
     }
 
     pub fn on_trace_changed(&self, index: usize, raw_trace: RawTrace) {
+        /*
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {
                 content.traces[index].trace = raw_trace;
             }
         });
+        */
     }
 
-    pub fn set_trace_meta_audio(&self, index: usize, audio: Option<Audio>) {
+    pub fn set_drags_meta_audio(&self, index: usize, audio: Option<Audio>) {
+        /*
         self.traces_meta.lock_ref().as_slice()[index].audio.set(audio.clone());
 
         self.history.push_modify(move |raw| {
@@ -102,14 +109,6 @@ impl Base {
                 content.traces[index].audio = audio;
             }
         });
-    }
-    pub fn set_trace_meta_text(&self, index: usize, text: Option<String>) {
-        self.traces_meta.lock_ref().as_slice()[index].text.set(text.clone());
-
-        self.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.traces[index].text = text;
-            }
-        });
+        */
     }
 }

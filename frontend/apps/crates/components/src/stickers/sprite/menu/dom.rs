@@ -13,7 +13,7 @@ use super::{
 };
 use shared::domain::jig::module::body::_groups::design::SpriteEffect;
 
-pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
+pub fn render_sticker_sprite_menu(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {

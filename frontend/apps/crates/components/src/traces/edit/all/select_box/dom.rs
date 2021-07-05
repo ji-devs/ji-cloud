@@ -13,7 +13,8 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::Transform;
 use super::{
-    super::trace::state::*
+    super::trace::state::*,
+    menu::dom::render_menu
 };
 use crate::traces::{
     edit::state::*,
@@ -21,7 +22,7 @@ use crate::traces::{
 };
 
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
-pub fn render(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &AllTrace, resize_info:&ResizeInfo) -> Dom {
+pub fn render_select_box(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &AllTrace, resize_info:&ResizeInfo) -> Dom {
 
     let select_box = trace.select_box.clone();
 
@@ -87,7 +88,7 @@ pub fn render(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &Al
                                 .property("x", pos.0 + 32.0)
                                 .property("y", pos.1)
                                 .child(html!("menu-container", {
-                                    .child(super::menu::dom::render(state.clone(), index.clone()))
+                                    .child(render_menu(state.clone(), index.clone()))
                                 }))
                                 .event(clone!(select_box => move |evt:events::Close| {
                                     log::info!("GOT CLOSE!");

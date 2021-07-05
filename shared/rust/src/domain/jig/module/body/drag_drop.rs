@@ -1,14 +1,15 @@
 use crate::domain::jig::module::{
     body::{
         Audio, Body, BodyExt, ModeExt, StepExt, ThemeChoice,
-        _groups::design::{BaseContent, Trace},
+        _groups::design::{BaseContent, Trace, Sticker},
     },
     ModuleKind,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use uuid::Uuid;
+use std::collections::{HashMap, HashSet};
 use std::convert::TryFrom;
 
 mod play_settings;
@@ -92,6 +93,7 @@ impl TryFrom<Body> for ModuleData {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
     /// The base content for all design modules
+    /// in this case it's also the "scene"
     pub base: BaseContent,
 
     /// The editor state
@@ -99,6 +101,9 @@ pub struct Content {
 
     /// The mode
     pub mode: Mode,
+
+    /// Drag items 
+    pub drag_items: Vec<DragDropItem>,
 
     /// Traces
     pub traces: Vec<DragDropTrace>,
@@ -118,6 +123,20 @@ pub struct EditorState {
     pub steps_completed: HashSet<Step>,
 }
 
+/// drag and drop sticker w/ metadata
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct DragDropItem {
+    /// the sticker 
+    pub sticker: Sticker,
+
+    /// audio
+    pub audio: Option<Audio>,
+
+    /// target trace id 
+    pub trace_id: Option<Uuid>,
+}
+
 /// drag and drop trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -125,12 +144,10 @@ pub struct DragDropTrace {
     /// the trace
     pub trace: Trace,
 
-    /// audio
-    pub audio: Option<Audio>,
-
-    /// text
-    pub text: Option<String>,
+    /// unique id for trace 
+    pub id: Uuid 
 }
+
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

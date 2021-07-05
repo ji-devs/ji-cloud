@@ -12,10 +12,7 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{
-    domain::{
-        jig::{
-            module::body::{
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::drag_drop::DragDropItem}, module::body::{
                 Image,
                 ThemeChoice,
                 Background,
@@ -23,19 +20,10 @@ use shared::{
                 Transform,
                 drag_drop::{Content, Mode, Step, ModuleData as RawData, DragDropTrace},
                 _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }
-            },
-            JigId, module::ModuleId
-        },
-        image::ImageId,
-        audio::AudioId
-    },
-    media::MediaLibrary
-};
+            }}}, media::MediaLibrary};
 use components::stickers::{sprite::ext::*, text::ext::*};
-use crate::base::sidebar::step_1::state::TabKind as BgTabKind;
-use crate::base::sidebar::step_2::state::TabKind as ContentTabKind;
-use crate::base::sidebar::step_3::state::TabKind as InteractionTabKind;
-use crate::base::sidebar::step_4::state::TabKind as SettingsTabKind;
+use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
+use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -51,16 +39,15 @@ pub struct DebugSettings {
     pub step:Option<Step>,
     pub skip_save: bool,
     pub skip_load_jig: bool,
-    pub bg_tab: Option<BgTabKind>,
-    pub content_tab: Option<ContentTabKind>,
-    pub interaction_tab: Option<InteractionTabKind>,
-    pub settings_tab: Option<SettingsTabKind>,
+    pub step_1_tab: Option<Step1TabKind>,
+    pub step_2_tab: Option<Step2TabKind>,
     pub trace_opts: Option<TracesOptions>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InitData {
     pub stickers: Vec<InitSticker>,
+    pub drag_stickers: Vec<InitSticker>,
     pub traces: Vec<InitTrace>
 }
 
@@ -86,6 +73,21 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             mode: Mode::SettingTable,
+                            drag_items: init_data.drag_stickers.iter().map(|init| {
+                                let sticker = match init {
+                                    InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
+                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                        lib: MediaLibrary::Global
+                                    }))
+                                };
+
+                                DragDropItem {
+                                    sticker,
+                                    audio: None,
+                                    trace_id: None,
+                                }
+                            }).collect(),
                             traces: init_data.traces.iter().map(|init| {
                                 let trace = {
                                     match init {
@@ -100,7 +102,7 @@ impl DebugSettings {
                                     }
                                 };
 
-                                DragDropTrace { trace, audio: None, text: None }
+                                DragDropTrace { trace, id: Uuid::new_v4() }
                             }).collect(),
                             base: BaseContent {
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 
@@ -131,10 +133,8 @@ impl DebugSettings {
             step: Some(Step::Four),
             skip_save: true,
             skip_load_jig: true,
-            bg_tab: Some(BgTabKind::Image),
-            content_tab: Some(ContentTabKind::Text),
-            interaction_tab: Some(InteractionTabKind::Audio),
-            settings_tab: Some(SettingsTabKind::Settings),
+            step_1_tab: Some(Step1TabKind::BgImage),
+            step_2_tab: Some(Step2TabKind::Audio),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })
@@ -144,17 +144,18 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
-        /*
-         * SETTINGS.set(DebugSettings::debug(Some(InitData{
+         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
+                //InitSticker::Text, //InitSticker::Sprite
+            ],
+            drag_stickers: vec![
                 InitSticker::Text, //InitSticker::Sprite
             ],
             traces: vec![
-                //InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        */
-        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }

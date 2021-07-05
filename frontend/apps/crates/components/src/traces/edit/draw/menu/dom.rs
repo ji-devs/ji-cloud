@@ -22,7 +22,7 @@ use super::{
     </trace-edit-reshape-menu>
     */
 
-pub fn render(state:Rc<Draw>, menu:Menu, resize_info:&ResizeInfo) -> Dom {
+pub fn render_draw_menu(state:Rc<Draw>, menu:Menu, resize_info:&ResizeInfo) -> Dom {
     let (x, y) = menu.get_pos(&resize_info);
 
     html!("trace-edit-reshape-menu", {

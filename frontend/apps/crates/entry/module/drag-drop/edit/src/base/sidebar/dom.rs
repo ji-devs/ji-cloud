@@ -14,14 +14,6 @@ use super::{
         dom::render as render_step_2,
         state::Step2
     },
-    step_3::{
-        dom::render as render_step_3,
-        state::Step3
-    },
-    step_4::{
-        dom::render as render_step_4,
-        state::Step4
-    },
 };
 
 impl DomRenderable for Sidebar {
@@ -31,8 +23,6 @@ impl DomRenderable for Sidebar {
                 match step {
                     Step::One => Some(render_step_1(Step1::new(state.base.clone()))),
                     Step::Two => Some(render_step_2(Step2::new(state.base.clone()))),
-                    Step::Three => Some(render_step_3(Step3::new(state.base.clone()))),
-                    Step::Four => Some(render_step_4(Step4::new(state.base.clone()))),
                     _ => None
                 }
             })))

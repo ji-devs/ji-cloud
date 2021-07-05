@@ -20,7 +20,7 @@ use once_cell::sync::Lazy;
 use std::fmt::Write;
 use super::trace::*;
 
-pub fn render(traces: Vec<SelectTrace>) -> Dom { 
+pub fn render_traces_select(traces: Vec<SelectTrace>) -> Dom { 
 
     let traces = Rc::new(traces);
 

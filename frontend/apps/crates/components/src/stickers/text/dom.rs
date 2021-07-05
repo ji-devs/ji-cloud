@@ -10,7 +10,7 @@ use futures_signals::{
 use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
 use crate::{
     transform::{
-        self, 
+        dom::render_transform,
         events::Move as TransformMove,
         state::{TransformState, Action as TransformAction},
     },
@@ -18,23 +18,16 @@ use crate::{
 };
 use super::{
     state::Text,
-    super::state::Stickers
+    super::state::Stickers,
+    menu::dom::render_sticker_text_menu
 };
 use web_sys::HtmlElement;
 
 const BASE_WIDTH:f64 = 300.0;
 const BASE_HEIGHT:f64 = 30.0;
 
-#[derive(Clone, Debug, Default)]
-pub struct DebugOptions {
-}
 
-
-pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>, debug_opts: Option<DebugOptions>) -> Dom {
-
-
-    let debug_opts = debug_opts.unwrap_or_default();
-
+pub fn render_sticker_text(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
     text.transform.size.set(Some((BASE_WIDTH, BASE_HEIGHT)));
 
     let get_visible_signals = || map_ref! {
@@ -90,9 +83,9 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
         }))
         .child_signal(get_visible_signals().map(clone!(stickers, text, index => move |(is_active, is_editing)| {
             if is_active && !is_editing {
-                Some(transform::dom::render(
+                Some(render_transform(
                     text.transform.clone(),
-                    Some(clone!(stickers, index, text => move || super::menu::dom::render(stickers.clone(), index.clone(), text.clone())))
+                    Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
                 ))
             } else {
                 None
@@ -101,54 +94,8 @@ pub fn render(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text
 
     })
 
-    /*
-    transform::dom::render_child(
-        text.transform.clone(),
-        Some(clone!(stickers, index, text => move || super::menu::dom::render(stickers.clone(), index.clone(), text.clone()))),
-        get_active_signal,
-        get_active_signal().map(clone!(stickers, text, index => move |active| {
-
-            *text.transform.hide_on_dbl_click.borrow_mut() = active;
-
-
-            fn apply_transform<A: AsRef<HtmlElement>>(dom:DomBuilder<A>, transform: &TransformState) -> DomBuilder<A> {
-                dom
-                        .style("position", "absolute")
-                        .style_signal("width", transform.width_px_signal().map(|x| format!("{}px", x)))
-                        .style_signal("height", transform.height_px_signal().map(|x| format!("{}px", x)))
-            }
-
-            if active {
-                let value = text.value.get_cloned();
-                text.editor.set_value(if value.is_empty() { None } else { Some(value) });
-
-                Some(html!("div", {
-                    .style("display", "block")
-                    .style("border", "green dashed 1px")
-                    .style("box-sizing", "border-box")
-                    .style("align-self", "baseline")
-                    .apply(|dom| apply_transform(dom, &text.transform))
-                    .child(render_wysiwyg(text.editor.clone()))
-                }))
-            } else {
-                Some(html!("wysiwyg-output-renderer", {
-                    .property_signal("valueAsString", text.value.signal_cloned())
-                    .style("cursor", "pointer")
-                    .apply(|dom| apply_transform(dom, &text.transform))
-                    .event(clone!(index, stickers, text => move |evt:events::Click| {
-                        if let Some(index) = index.get_cloned() {
-                            let value = text.value.get_cloned();
-
-                            text.editor.set_value(if value.is_empty() { None } else { Some(value) });
-                            stickers.select_index(index);
-                        }
-                    }))
-                }))
-            }
-    })))
-    */
 }
-pub fn render_raw(text: &RawText) -> Dom {
+pub fn render_sticker_text_raw(text: &RawText) -> Dom {
     const COORDS_IN_CENTER:bool = true;
 
     let size = Some((BASE_WIDTH, BASE_HEIGHT));

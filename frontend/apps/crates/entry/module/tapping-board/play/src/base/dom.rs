@@ -1,4 +1,8 @@
-use components::module::_common::play::prelude::DomRenderable;
+use components::{
+    module::_common::play::prelude::DomRenderable,
+    backgrounds::dom::render_backgrounds_raw,
+    stickers::dom::render_stickers_raw
+};
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use super::state::*;
@@ -17,8 +21,8 @@ impl DomRenderable for Base {
         html!("empty-fragment", {
             .property("slot", "main")
             .children(&mut [
-                backgrounds::dom::render_raw(&state.backgrounds, state.theme_id, None),
-                stickers::dom::render_raw(&state.stickers),
+                render_backgrounds_raw(&state.backgrounds, state.theme_id, None),
+                render_stickers_raw(&state.stickers),
                 render_game(Game::new(state.clone())),
             ])
         })

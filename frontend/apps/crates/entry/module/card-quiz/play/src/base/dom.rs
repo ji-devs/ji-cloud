@@ -1,4 +1,7 @@
-use components::module::_common::play::prelude::DomRenderable;
+use components::{
+    module::_common::play::prelude::DomRenderable,
+    backgrounds::dom::render_single_background_raw
+};
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use components::backgrounds;
@@ -18,7 +21,7 @@ impl DomRenderable for Base {
     fn render(state: Rc<Base>) -> Dom {
         html!("empty-fragment", {
             .property("slot", "main")
-            .child(backgrounds::dom::render_raw_single(&state.background, state.theme_id, None))
+            .child(render_single_background_raw(&state.background, state.theme_id, None))
             .child_signal(state.phase.signal_cloned().map(|phase| {
                 match phase {
                     Phase::Init => None,

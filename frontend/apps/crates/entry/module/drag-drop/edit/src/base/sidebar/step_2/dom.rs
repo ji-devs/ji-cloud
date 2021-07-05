@@ -2,11 +2,11 @@ use super::state::*;
 use std::rc::Rc;
 use dominator::{html, clone, Dom};
 use utils::prelude::*;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Signal, SignalExt};
 use components::{
     image::search::dom::render as render_image_search,
     text_editor::dom::render_controls as render_text_editor,
-    audio_input::dom::render as render_audio_input,
+    audio_input::{state::State as AudioInputState, dom::render as render_audio_input},
 };
 
 pub fn render(state: Rc<Step2>) -> Dom {
@@ -14,6 +14,7 @@ pub fn render(state: Rc<Step2>) -> Dom {
         .children(&mut [
             render_tab(state.clone(), TabKind::Text),
             render_tab(state.clone(), TabKind::Image),
+            render_tab(state.clone(), TabKind::Audio),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
@@ -21,8 +22,11 @@ pub fn render(state: Rc<Step2>) -> Dom {
                         Tab::Text => {
                             Some(render_text_editor(state.base.text_editor.clone()))
                         },
-                        Tab::Image(state) => {
-                            Some(render_image_search(state.clone(), None))
+                        Tab::Image(image_state) => {
+                            Some(render_image_search(image_state.clone(), None))
+                        },
+                        Tab::Audio(audio_signal_fn) => {
+                            Some(render_audio(state.clone(), audio_signal_fn()))
                         },
                     }
                 })))
@@ -42,5 +46,20 @@ fn render_tab(state: Rc<Step2>, tab_kind:TabKind) -> Dom {
         .event(clone!(state, tab_kind => move |evt:events::Click| {
             state.tab.set(Tab::new(state.base.clone(), tab_kind));
         }))
+    })
+}
+
+fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<Rc<AudioInputState>>> + 'static) -> Dom {
+    html!("empty-fragment", {
+        .child_signal(audio_state_signal.map(|audio_state| Some({
+            match audio_state {
+                Some(audio_state) => {
+                    render_audio_input(audio_state, None)
+                },
+                None => {
+                    html!("div", {.text("TODO!") })
+                }
+            }
+        })))
     })
 }

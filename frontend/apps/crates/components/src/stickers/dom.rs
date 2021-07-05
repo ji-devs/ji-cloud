@@ -9,19 +9,12 @@ use futures_signals::{
 };
 use super::{
     state::*,
-    sprite,
-    text,
+    sprite::dom::{render_sticker_sprite, render_sticker_sprite_raw},
+    text::dom::{render_sticker_text, render_sticker_text_raw},
 };
 use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 
-#[derive(Clone, Debug, Default)]
-pub struct DebugOptions {
-    pub text: Option<text::dom::DebugOptions>, 
-}
-
-pub fn render(stickers:Rc<Stickers>, debug_opts: Option<DebugOptions>) -> Dom {
-    let debug_opts = debug_opts.unwrap_or_default();
-
+pub fn render_stickers(stickers:Rc<Stickers>) -> Dom {
     html!("empty-fragment", {
         .children_signal_vec(
             stickers.list
@@ -29,22 +22,23 @@ pub fn render(stickers:Rc<Stickers>, debug_opts: Option<DebugOptions>) -> Dom {
             .enumerate()
             .map(clone!(stickers => move |(index, sticker)| {
                 match sticker {
-                    Sticker::Sprite(sprite) => sprite::dom::render(stickers.clone(), index, sprite),
-                    Sticker::Text(text) => text::dom::render(stickers.clone(), index, text, debug_opts.text.clone()),
+                    Sticker::Sprite(sprite) => render_sticker_sprite(stickers.clone(), index, sprite),
+                    Sticker::Text(text) => render_sticker_text(stickers.clone(), index, text),
                 }
             }))
         )
     })
 }
-pub fn render_raw(stickers:&[RawSticker]) -> Dom {
+
+pub fn render_stickers_raw(stickers:&[RawSticker]) -> Dom {
     html!("empty-fragment", {
         .children(
             stickers
                 .iter()
                 .map(|sticker| {
                     match sticker {
-                        RawSticker::Sprite(sprite) => sprite::dom::render_raw(sprite),
-                        RawSticker::Text(text) => text::dom::render_raw(text),
+                        RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite),
+                        RawSticker::Text(text) => render_sticker_text_raw(text),
                     }
                 })
                 .collect::<Vec<Dom>>()

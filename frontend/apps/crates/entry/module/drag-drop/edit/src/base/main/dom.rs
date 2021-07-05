@@ -2,7 +2,11 @@ use components::module::_common::edit::prelude::*;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
 use super::state::*;
-use components::{backgrounds, stickers, traces};
+use components::{
+    backgrounds::dom::render_backgrounds, 
+    stickers::dom::{render_stickers, render_stickers_raw},
+    traces::edit::dom::render_traces_edit
+};
 use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
@@ -11,33 +15,42 @@ use futures_signals::{
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
-            .children_signal_vec(
-                state.phase_signal().map(clone!(state => move |phase| {
-                    match phase {
-                        Phase::Layout => {
-                            vec![
-                                stickers::dom::render(state.base.stickers.clone(), None)
-                            ]
-                        },
-                        Phase::Trace => {
-                            let raw_stickers = state.base.stickers.to_raw();
-
-                            vec![
-                                stickers::dom::render_raw(&raw_stickers),
-                                traces::edit::dom::render(state.base.traces.clone()),
-                                html!("empty-fragment", {
-                                    .children_signal_vec(
-                                        state.trace_bubbles()
-                                            .map(clone!(state => move |bubble| {
-                                                traces::bubble::dom::render(bubble, &state.base.audio_mixer)
-                                            }))
-                                    )
-                                })
-                            ]
-                        }
+            .child_signal(
+                state.locked_scene_signal().map(clone!(state => move |locked_scene| Some({
+                    if locked_scene {
+                        let raw_stickers = state.base.stickers.to_raw();
+                        render_stickers_raw(&raw_stickers)
+                    } else {
+                        render_stickers(state.base.stickers.clone())
                     }
+                })))
+            )
+            .child_signal(
+                state.locked_drags_signal().map(clone!(state => move |locked_drags| Some({
+                    if locked_drags {
+                        let raw_stickers = state.base.drag_stickers.to_raw();
+
+                        log::info!("len: {}", raw_stickers.len());
+
+                        render_stickers_raw(&raw_stickers)
+                    } else {
+                        render_stickers(state.base.drag_stickers.clone())
+                    }
+                })))
+            )
+            .child_signal(
+                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
+                    trace_phase.map(|trace_phase| {
+                        match trace_phase {
+                            TracePhase::Edit => {
+                                render_traces_edit(state.base.traces.clone())
+                            },
+                            TracePhase::Show => {
+                                html!("div")
+                            }
+                        }
+                    })
                 }))
-                .to_signal_vec()
             )
         })
     }
@@ -45,6 +58,6 @@ impl DomRenderable for Main {
 
 impl MainDomRenderable for Main {
     fn render_bg(state: Rc<Main>) -> Option<Dom> {
-        Some(backgrounds::dom::render(state.base.backgrounds.clone(), None))
+        Some(render_backgrounds(state.base.backgrounds.clone(), None))
     }
 }

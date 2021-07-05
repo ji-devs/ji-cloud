@@ -16,15 +16,15 @@ use std::fmt::Write;
 
 
 
-pub fn render(state:Rc<Edit>) -> Dom {
+pub fn render_traces_edit(state:Rc<Edit>) -> Dom {
     html!("empty-fragment", {
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
             match phase {
                 Phase::All => {
-                    Some(super::all::dom::render(state.clone()))
+                    Some(super::all::dom::render_traces_all(state.clone()))
                 },
                 Phase::Draw(draw) => {
-                    Some(super::draw::dom::render(draw.clone(), state.list.lock_ref()))
+                    Some(super::draw::dom::render_traces_draw(draw.clone(), state.list.lock_ref()))
                 }
             }
         })))

@@ -25,37 +25,34 @@ impl Main {
         }
     }
 
-    pub fn phase_signal(&self) -> impl Signal<Item = Phase> {
+    pub fn locked_scene_signal(&self) -> impl Signal<Item = bool> {
         self.base.step.signal()
-            .map(|step| step == Step::Three)
+            .map(|step| step != Step::One)
             .dedupe()
-            .map(|is_step_three| {
-                if is_step_three {
-                    Phase::Trace
-                } else {
-                    Phase::Layout
-                }
-            })
     }
-
-    pub fn trace_bubbles(&self) -> impl SignalVec<Item = Rc<TraceBubble>> {
-        self.base
-            .traces_meta
-            .signal_vec_cloned()
-            .map_signal(|trace_meta| trace_meta.bubble.signal_cloned())
-            .filter(|bubble| bubble.is_some())
-            .map(|bubble| bubble.unwrap_ji())
+    pub fn locked_drags_signal(&self) -> impl Signal<Item = bool> {
+        self.base.step.signal()
+            .map(|step| step != Step::Two)
+            .dedupe()
+    }
+    pub fn trace_phase_signal(&self) -> impl Signal<Item = Option<TracePhase>> {
+        self.base.step.signal()
+            .map(|step| match step {
+                Step::Three => Some(TracePhase::Edit),
+                Step::Four => Some(TracePhase::Show),
+                _ => None
+            })
+            .dedupe()
     }
 }
 
-#[derive(Clone, Copy)]
-pub enum Phase {
-    Layout,
-    Trace
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum TracePhase {
+    Edit,
+    Show,
 }
 
 
 impl MainExt for Main {
 }
-
 
