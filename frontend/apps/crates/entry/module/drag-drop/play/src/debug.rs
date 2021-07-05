@@ -81,7 +81,7 @@ impl DebugSettings {
                 if let Some(init_data) = init_data {
                     RawData{
                         content: Some(Content {
-                            mode: Mode::Words,
+                            mode: Mode::SettingTable,
                             play_settings: PlaySettings {
                                 hint: Hint::None, 
                                 next: Next::Continue, 
