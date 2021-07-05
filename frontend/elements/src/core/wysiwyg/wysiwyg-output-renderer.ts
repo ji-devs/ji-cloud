@@ -47,7 +47,7 @@ export class _ extends LitElement {
     private renderElement(element: CustomElement) {
         const styles = getElementStyles(element) as StyleInfo;
         return html`
-            <p style=${styleMap(styles)} type="${element.element}">
+            <p style=${styleMap(styles)}>
                 ${ element.children.map(leaf => {
                     return this.renderLeaf(leaf);
                 }) }
@@ -57,7 +57,7 @@ export class _ extends LitElement {
 
     private renderLeaf(leaf: CustomText) {
         const styles = getLeafStyles(leaf) as StyleInfo;
-        return html`<span style=${styleMap(styles)}>
+        return html`<span style=${styleMap(styles)} type="${leaf.element}">
             ${ leaf.text === "" ? html`<br>` : leaf.text }
         </span>`;
     }

@@ -38,6 +38,10 @@ export const defaultState: ControllerState = {
     weight: 400,
     align: Align.Left,
     fontSize: 16,
+
+    // keep here even undefined for Object.keys
+    color: undefined,
+    highlightColor: undefined,
     italic: false,
     underline: false,
     indentCount: 0,
@@ -45,7 +49,7 @@ export const defaultState: ControllerState = {
 
 
 export function getKeyType<K extends keyof ControllerState>(key: K): 'leaf' | 'element' {
-    if(key === "align" || key === "indentCount" || key === "element")
+    if(key === "align" || key === "indentCount")
         return 'element';
     else
         return 'leaf';

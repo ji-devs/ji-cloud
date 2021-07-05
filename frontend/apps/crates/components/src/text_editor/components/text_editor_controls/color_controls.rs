@@ -4,8 +4,6 @@ use super::super::super::state::State;
 use futures_signals::signal::Mutable;
 use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
-use wasm_bindgen_futures::spawn_local;
-use futures::future::ready;
 use rgb::RGBA8;
 use crate::{color_select::{
     self,
@@ -55,10 +53,6 @@ pub fn render(state: Rc<State>) -> Dom {
     let color_state = state.color_state.borrow().as_ref().unwrap_ji().clone();
 
     html!("anchored-overlay", {
-        // .future(state.theme_id.signal_cloned().for_each(clone!(state, color_state => move |theme_id| {
-        //     color_state.picker.set_theme(theme_id);
-        //     ready(())
-        // })))
         .property("slot", "color")
         .property("positionY", "top-in")
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
@@ -71,7 +65,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 html!("text-editor-control", {
                     .property("type", "color")
                     .event(clone!(state, color_state => move |_: events::Click| {
-                        color_state.select_for.set(Some(ColorSelectFor::Highlight));
+                        color_state.select_for.set(Some(ColorSelectFor::Text));
                         let color = { state.controls.lock_ref().color.clone() };
                         if let Some(color) = hex_to_rgba8_optional(&color) {
                             color_state.picker.set_selected(color);
@@ -81,7 +75,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 html!("text-editor-control", {
                     .property("type", "marker-color")
                     .event(clone!(state, color_state => move |_: events::Click| {
-                        color_state.select_for.set(Some(ColorSelectFor::Text));
+                        color_state.select_for.set(Some(ColorSelectFor::Highlight));
                         let color = { state.controls.lock_ref().color.clone() };
                         if let Some(color) = hex_to_rgba8_optional(&color) {
                             color_state.picker.set_selected(color);

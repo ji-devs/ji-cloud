@@ -64,6 +64,14 @@ export class _ extends LitElement {
     public set element(v: ElementType) {
         this.setValue("element", v);
         this._element = v;
+
+        // setting element resets all other values
+        for (const key of Object.keys(defaultState)) {
+            // console.log(key, this.getDefault(key as any));
+            if(key === "element") continue;
+            this.backbone.setValue(key as any, undefined);
+
+        }
     }
 
     private _fontSize = this.getDefault('fontSize');
@@ -137,7 +145,7 @@ export class _ extends LitElement {
             },
         ] as any;
 
-        if(this.elementDefault) v[0].element = this.elementDefault;
+        if(this.elementDefault) v[0].children[0].element = this.elementDefault;
 
         return v;
     }
@@ -224,6 +232,11 @@ export class _ extends LitElement {
             this._highlightColor = leafHighlightColor;
             this.controlsChange("highlightColor", leafHighlightColor);
         }
+        const leafElement = leaf?.element || this.getDefault('element');
+        if(this._element != leafElement) {
+            this._element = leafElement;
+            this.controlsChange("element", leafElement);
+        }
 
         const element = this.backbone.getSelectedElement();
         const elementAlign = element?.align || this.getDefault('align');
@@ -235,11 +248,6 @@ export class _ extends LitElement {
         if(this._indentCount != elementIndentCount) {
             this._indentCount = elementIndentCount;
             this.controlsChange("indentCount", elementIndentCount);
-        }
-        const elementElement = element?.element || this.getDefault('element');
-        if(this._element != elementElement) {
-            this._element = elementElement;
-            this.controlsChange("element", elementElement);
         }
     }
 

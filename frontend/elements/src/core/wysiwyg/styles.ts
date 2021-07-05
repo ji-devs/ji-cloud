@@ -7,22 +7,22 @@ export const baseStyles = css`
     p {
         margin: 0px;
     }
-    p[type=H1] {
+    span[type=H1] {
         color: var(--h1-color);
         font-family: var(--h1-font);
         font-size: var(--h1-font-size);
     }
-    p[type=H2] {
+    span[type=H2] {
         color: var(--h2-color);
         font-family: var(--h2-font);
         font-size: var(--h2-font-size);
     }
-    p[type=P1] {
+    span[type=P1] {
         color: var(--p1-color);
         font-family: var(--p1-font);
         font-size: var(--p1-font-size);
     }
-    p[type=P2] {
+    span[type=P2] {
         color: var(--p2-color);
         font-family: var(--p2-font);
         font-size: var(--p2-font-size);
