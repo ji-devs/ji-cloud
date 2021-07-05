@@ -1,5 +1,6 @@
 import { mediaUi } from '@utils/path';
 import { LitElement, html, css, customElement, property, query, unsafeCSS } from 'lit-element';
+import { nothing } from 'lit-html';
 import {ModuleKind} from "@elements/module/_common/types";
 
 const STR_SUBTITLE = "What do you want to do?";
@@ -9,11 +10,14 @@ type ScrollPosition = 'left' | 'right' | null;
 const NAV_BUTTON_WIDTH = 80;
 
 const STR_TITLE:{[key in ModuleKind]:string} = {
-
-    ["tapping-board"]: "Create a Tapping Board",
-    memory: "Create a Memory Game",
-    poster: "Create a Poster",
-    cover: "" //not used
+    "memory": "Create a Memory Game",
+    "flashcards": "Create a Flashcards Game",
+    "card-quiz": "Create a Quiz Game",
+    "matching": "Create a Quiz Game",
+    "tapping-board": "Create a Tapping Board",
+    "poster": "Create a Poster",
+    "drag-drop": "Create a Drag and Drop",
+    "cover": "" //not used
 };
 @customElement('choose-mode')
 export class _ extends LitElement {
@@ -47,11 +51,12 @@ export class _ extends LitElement {
             }
 
             :host {
+                /* Effectively 50px - 178px offset, with the in-between dependent on height */
+                padding-top: min(178px, max(50px, 100vh - 700px));
                 display: block;
                 background-color: #d8e7fa;
                 background-size: cover;
                 display: grid;
-                padding-top: 178px;
                 box-sizing: border-box;
                 height: 100vh;
                 align-content: start;
@@ -183,25 +188,28 @@ export class _ extends LitElement {
     @property({ type: String })
     scrollPosition: ScrollPosition = 'left';
 
-      @property()
-      moduleKind:ModuleKind = "memory";
+    @property()
+    module:ModuleKind = "memory";
 
     private onScroll() {
         this.scrollPosition = this.getScrollPosition();
     }
 
     render() {
-        const {moduleKind} = this;
+        const {module} = this;
 
-        const title = STR_TITLE[moduleKind];
+        const title = STR_TITLE[module];
 
         return html`
+        ${nothing 
+        /*
             <div class="">
-                <!-- background: green;
+                background: green;
                 width: 20px;
                 height: 30px;
-                justify-self: end; -->
+                justify-self: end;
             </div>
+        */}
             <header>
                 <div class="title">${title}</div>
                 <div class="subtitle">${STR_SUBTITLE}</div>

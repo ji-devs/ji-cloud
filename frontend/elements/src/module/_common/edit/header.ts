@@ -5,18 +5,27 @@ import "@elements/core/tooltips/info";
 import {ModuleKind} from "@elements/module/_common/types";
 
 const STR_TITLE:{[key in ModuleKind]:string} = {
-    memory: "Memory Game",
-    poster: "Poster",
+    "memory": "Memory Game",
+    "flashcards": "Flashcards",
+    "card-quiz": "Quiz",
+    "matching": "Matching",
+    "poster": "Poster",
     "tapping-board": "Tapping Board",
-    cover: "Cover Page",
+    "drag-drop": "Drag & Drop",
+    "cover": "Cover Page",
 };
+
 const STR_TOOLTIP_GETTING_STARTED = "Getting started";
 
 const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    memory: "Add your words to the list on the left. You can either type the words or paste them in.",
-    poster: "Poster intro here",
+    "memory": "Add your words to the list on the left. You can either type the words or paste them in.",
+    "flashcards": "Flashcards intro here",
+    "card-quiz": "Quiz intro here",
+    "matching": "Matching intro here",
+    "poster": "Poster intro here",
     "tapping-board": "Tapping Board intro here",
-    cover: "Cove here",
+    "drag-drop": "Drag & Drop intro here",
+    "cover": "Cover intro here",
 };
 
 @customElement('module-header')

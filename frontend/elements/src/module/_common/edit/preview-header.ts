@@ -9,10 +9,14 @@ const STR_TOOLTIP_CONTINUE = "Click to continue";
 const STR_TOOLTIP_GETTING_STARTED = "Time to play!";
 
 const STR_TOOLTIP_BODY:{[key in ModuleKind]:string} = {
-    memory: "Here’s your memory game for you to play. Want to change something? Just go back and edit!",
-    poster: "Here’s your poster for you to play. Want to change something? Just go back and edit!",
+    "memory": "Here’s your memory game for you to play. Want to change something? Just go back and edit!",
+    "card-quiz": "Here’s your quiz for you to play. Want to change something? Just go back and edit!",
+    "flashcards": "Here’s your flashcards for you to play. Want to change something? Just go back and edit!",
+    "matching": "Here’s your matching game for you to play. Want to change something? Just go back and edit!",
+    "poster": "Here’s your poster for you to play. Want to change something? Just go back and edit!",
     "tapping-board": "Here’s your Tapping Board for you to play. Want to change something? Just go back and edit!",
-    cover: "Here’s your cover page for you to play. Want to change something? Just go back and edit!",
+    "drag-drop": "Here’s your Drag & Drop for you to play. Want to change something? Just go back and edit!",
+    "cover": "Here’s your cover page for you to play. Want to change something? Just go back and edit!",
 };
 
 @customElement('module-preview-header')
