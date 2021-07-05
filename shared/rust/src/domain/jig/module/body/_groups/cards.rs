@@ -2,15 +2,13 @@
  * The card modules not only share some base content
  * But the editor steps are identical except for 3
  */
-use crate::domain::jig::module::{
-    body::{Background, Body, BodyExt, Image, Instructions, ModeExt, StepExt, ThemeChoice},
-    ModuleKind,
+use crate::domain::jig::module::body::{
+    Background, Image, Instructions, ModeExt, StepExt, ThemeChoice,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]

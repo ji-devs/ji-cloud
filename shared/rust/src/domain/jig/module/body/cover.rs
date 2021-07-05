@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyExt, Instructions, StepExt, ThemeChoice, _groups::design::*},
+    body::{Body, BodyExt, StepExt, ThemeChoice, _groups::design::*},
     ModuleKind,
 };
 #[cfg(feature = "backend")]

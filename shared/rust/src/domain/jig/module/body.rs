@@ -77,7 +77,9 @@ impl Body {
             super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
             super::ModuleKind::Matching => Self::Matching(matching::ModuleData::default()),
             super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
-            super::ModuleKind::TappingBoard => Self::TappingBoard(tapping_board::ModuleData::default()),
+            super::ModuleKind::TappingBoard => {
+                Self::TappingBoard(tapping_board::ModuleData::default())
+            }
             super::ModuleKind::DragDrop => Self::DragDrop(drag_drop::ModuleData::default()),
             _ => unimplemented!("TODO!"),
         }

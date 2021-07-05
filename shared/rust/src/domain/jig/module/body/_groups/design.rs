@@ -1,12 +1,7 @@
-use crate::domain::jig::module::{
-    body::{Background, Image, Instructions, ThemeChoice, Transform},
-    ModuleKind,
-};
+use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeChoice, Transform};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
-use std::convert::TryFrom;
 
 /// The base content for card modules
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]

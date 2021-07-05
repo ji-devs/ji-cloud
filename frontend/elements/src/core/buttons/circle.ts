@@ -13,7 +13,7 @@ export class CircleButton extends LitElement {
         :host([color=blue]) {
           --color: var(--main-blue);
         }
-        main {
+        section {
           cursor: pointer;
           display: flex;
           flex-direction: column;
@@ -44,6 +44,14 @@ export class CircleButton extends LitElement {
         :host([color]) .label {
           color: var(--color);
         }
+
+        p.label {
+          font-size: 14px;
+          font-weight: 500;
+          letter-spacing: 0.14px;
+          text-align: center;
+          color: var(--dark-gray-3);
+        }
       `,
     ];
   }
@@ -56,12 +64,12 @@ export class CircleButton extends LitElement {
 
   render() {
     return html`
-      <main>
+      <section>
         <div class="circle">
           <slot></slot>
         </div>
         <p class="label">${this.label}</p>
-      </main>
+      </section>
     `;
   }
 }

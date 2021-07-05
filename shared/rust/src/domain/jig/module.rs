@@ -84,8 +84,8 @@ pub enum ModuleKind {
 
     /// Card Quiz
     CardQuiz = 9,
-    
-    /// Drag and Drop 
+
+    /// Drag and Drop
     DragDrop = 10,
 }
 

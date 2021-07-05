@@ -136,70 +136,58 @@ pub struct DragDropTrace {
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// The mode
 pub enum Mode {
-    /// Words mode
-    Words,
-    /// Images mode
-    Images,
-    /// Talk mode
-    Talk,
-    /// Read mode
-    Read,
-    /// Draw mode
-    Draw,
-    /// Scene mode
-    Scene,
-    /// Photo album mode
-    PhotoAlbum,
+    #[allow(missing_docs)]
+    SettingTable,
+    #[allow(missing_docs)]
+    Sorting,
+    #[allow(missing_docs)]
+    WordBuilder,
+    #[allow(missing_docs)]
+    Matching,
+    #[allow(missing_docs)]
+    DressUp,
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Self::Words
+        Self::SettingTable
     }
 }
 
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
         vec![
-            Self::Words,
-            Self::Images,
-            Self::Talk,
-            Self::Read,
-            Self::Draw,
-            Self::Scene,
-            Self::PhotoAlbum,
+            Self::SettingTable,
+            Self::Sorting,
+            Self::WordBuilder,
+            Self::Matching,
+            Self::DressUp,
         ]
     }
 
     fn as_str_id(&self) -> &'static str {
         match self {
-            Self::Words => "words",
-            Self::Images => "images",
-            Self::Talk => "talk",
-            Self::Read => "read",
-            Self::Draw => "draw",
-            Self::Scene => "scene",
-            Self::PhotoAlbum => "photo-album",
+            Self::SettingTable => "setting-table",
+            Self::Sorting => "sorting",
+            Self::WordBuilder => "word-builder",
+            Self::Matching => "matching",
+            Self::DressUp => "dress-up",
         }
     }
 
     fn label(&self) -> &'static str {
-        const STR_WORDS_LABEL: &'static str = "Tap words & hear";
-        const STR_IMAGES_LABEL: &'static str = "Tap images & hear";
-        const STR_TALK_LABEL: &'static str = "Tap & talk";
-        const STR_READ_LABEL: &'static str = "Tap & read";
-        const STR_DRAW_LABEL: &'static str = "Interactive drawing";
-        const STR_SCENE_LABEL: &'static str = "Interactive scene";
-        const STR_PHOTO_ALBUM_LABEL: &'static str = "Interactive photo album";
+        const STR_SETTING_TABLE: &'static str = "Setting a table";
+        const STR_SORTING: &'static str = "Sorting";
+        const STR_WORD_BUILDER: &'static str = "Word builder";
+        const STR_MATCHING: &'static str = "Matching";
+        const STR_DRESS_UP: &'static str = "Dress-up";
 
         match self {
-            Self::Words => STR_WORDS_LABEL,
-            Self::Images => STR_IMAGES_LABEL,
-            Self::Talk => STR_TALK_LABEL,
-            Self::Read => STR_READ_LABEL,
-            Self::Draw => STR_DRAW_LABEL,
-            Self::Scene => STR_SCENE_LABEL,
-            Self::PhotoAlbum => STR_PHOTO_ALBUM_LABEL,
+            Self::SettingTable => STR_SETTING_TABLE,
+            Self::Sorting => STR_SORTING,
+            Self::WordBuilder => STR_WORD_BUILDER,
+            Self::Matching => STR_MATCHING,
+            Self::DressUp => STR_DRESS_UP,
         }
     }
 }
@@ -218,6 +206,8 @@ pub enum Step {
     Four,
     /// Step 5
     Five,
+    /// Step 6
+    Six,
 }
 
 impl Default for Step {
@@ -233,7 +223,8 @@ impl StepExt for Step {
             Self::Two => Some(Self::Three),
             Self::Three => Some(Self::Four),
             Self::Four => Some(Self::Five),
-            Self::Five => None,
+            Self::Five => Some(Self::Six),
+            Self::Six => None,
         }
     }
 
@@ -243,30 +234,41 @@ impl StepExt for Step {
             Self::Two => 2,
             Self::Three => 3,
             Self::Four => 4,
-            Self::Five => 4,
+            Self::Five => 5,
+            Self::Six => 6,
         }
     }
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_BACKGROUND: &'static str = "Background";
-        const STR_CONTENT: &'static str = "Content";
-        const STR_INTERACTION: &'static str = "Interaction";
-        const STR_SETTINGS: &'static str = "Settings";
-        const STR_PREVIEW: &'static str = "Preview";
+        const STR_1: &'static str = "Background";
+        const STR_2: &'static str = "Starting State";
+        const STR_3: &'static str = "Drop Areas";
+        const STR_4: &'static str = "End State";
+        const STR_5: &'static str = "Settings";
+        const STR_6: &'static str = "Preview";
+
         match self {
-            Self::One => STR_BACKGROUND,
-            Self::Two => STR_CONTENT,
-            Self::Three => STR_INTERACTION,
-            Self::Four => STR_SETTINGS,
-            Self::Five => STR_PREVIEW,
+            Self::One => STR_1,
+            Self::Two => STR_2,
+            Self::Three => STR_3,
+            Self::Four => STR_4,
+            Self::Five => STR_5,
+            Self::Six => STR_6,
         }
     }
 
     fn get_list() -> Vec<Self> {
-        vec![Self::One, Self::Two, Self::Three, Self::Four, Self::Five]
+        vec![
+            Self::One,
+            Self::Two,
+            Self::Three,
+            Self::Four,
+            Self::Five,
+            Self::Six,
+        ]
     }
     fn get_preview() -> Self {
-        Self::Five
+        Self::Six
     }
 }
