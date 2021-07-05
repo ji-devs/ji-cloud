@@ -99,10 +99,10 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap_ji();
 
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK))
     } else {
         side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
     }
 }
 
@@ -116,10 +116,10 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
     let res = fetch_with_data(&url, method.as_str(), true, data).await.unwrap_ji();
 
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK))
     } else {
         side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
     }
 }
 
@@ -134,17 +134,17 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
         .await
         .unwrap_ji();
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK))
     } else {
         side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
     }
 }
 
 pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().expect_throw("no CSRF / not logged in!");
+    let csrf = load_csrf_token().expect_ji("no CSRF / not logged in!");
 
     let (url, data) = api_get_query(endpoint, method, data);
 
@@ -154,10 +154,10 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 
 
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK))
     } else {
         side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
     }
 }
 
@@ -176,7 +176,7 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
         Ok(())
     } else {
         side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
     }
 }
 

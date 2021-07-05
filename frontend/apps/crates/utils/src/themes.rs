@@ -116,7 +116,7 @@ pub struct Theme {
 static THEMES: OnceCell<Themes> = OnceCell::new();
 
 fn init_config() {
-    let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect("Invalid Themes");
+    let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect_ji("Invalid Themes");
 
     THEMES.set(themes).unwrap_ji()
 }

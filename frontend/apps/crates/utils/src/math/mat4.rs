@@ -1,5 +1,6 @@
 use std::ops::{Mul, MulAssign, Deref, DerefMut};
 use std::convert::{AsRef, TryInto};
+use crate::unwrap::UnwrapJiExt;
 
 #[derive(thiserror::Error, Debug)]
 pub enum MatrixError {
@@ -356,7 +357,7 @@ impl Matrix4 {
 
 impl From<&[f64]> for Matrix4 {
     fn from(values:&[f64]) -> Self {
-        let data:[f64;16] = values.try_into().unwrap();
+        let data:[f64;16] = values.try_into().unwrap_ji();
         Self(data)
     }
 }

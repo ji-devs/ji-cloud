@@ -5,6 +5,7 @@ use config::RemoteTarget;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use shared::domain::auth::AUTH_COOKIE_NAME;
+use crate::unwrap::UnwrapJiExt;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -47,16 +48,14 @@ extern "C" {
 }
 
 fn _init(remote_target:RemoteTarget) -> Settings {
-    let settings = match remote_target {
-        RemoteTarget::Local => Settings::new_local(),
-        RemoteTarget::Sandbox => Settings::new_sandbox(),
-        RemoteTarget::Release => Settings::new_release(),
+    let settings = Settings {
+        remote_target
     };
-
+    
     if remote_target == RemoteTarget::Local {
         unsafe {
-            let window = web_sys::window().unwrap_throw();
-            if dev_auth() && !window.location().pathname().unwrap_throw().contains("user/"){
+            let window = web_sys::window().unwrap_ji();
+            if dev_auth() && !window.location().pathname().unwrap_ji().contains("user/"){
 
                 let csrf = dev_csrf();
                 let token = dev_token();
@@ -66,7 +65,7 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
                 window
                     .document()
-                    .unwrap_throw()
+                    .unwrap_ji()
                     .unchecked_into::<web_sys::HtmlDocument>()
                     .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
             } else {
@@ -74,7 +73,7 @@ fn _init(remote_target:RemoteTarget) -> Settings {
             }
         }
     }
-    SETTINGS.set(settings.clone()).expect("couldn't set settings!");
+    SETTINGS.set(settings.clone()).expect_ji("couldn't set settings!");
 
     settings
 }
@@ -83,35 +82,5 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "remote_target is [{:?}]", self.remote_target)
-    }
-}
-
-impl Settings {
-    pub fn new_local() -> Self {
-        Self {
-            remote_target: RemoteTarget::Local,
-        }
-    }
-    pub fn new_sandbox() -> Self {
-        Self {
-            remote_target: RemoteTarget::Sandbox,
-        }
-    }
-    pub fn new_release() -> Self {
-        Self {
-            remote_target: RemoteTarget::Release,
-        }
-    }
-    
-    cfg_if! {
-        if #[cfg(feature = "local")] {
-            pub fn new() -> Self { Self::new_local() }
-        } else if #[cfg(feature = "sandbox")] {
-            pub fn new() -> Self { Self::new_sandbox() }
-        } else if #[cfg(feature = "release")] {
-            pub fn new() -> Self { Self::new_release() }
-        } else {
-            pub fn new() -> Self { unimplemented!() }
-        } 
     }
 }

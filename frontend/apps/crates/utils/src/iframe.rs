@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
+use crate::unwrap::UnwrapJiExt;
 
 pub const IFRAME_DATA_PARAM:&'static str = "iframe_data";
 
@@ -34,19 +35,19 @@ impl <T: Serialize> From<IframeInit<T>> for JsValue {
 
 impl <T: Serialize> From<&IframeInit<T>> for JsValue {
     fn from(msg:&IframeInit<T>) -> Self {
-        serde_wasm_bindgen::to_value(msg).unwrap_throw()
+        serde_wasm_bindgen::to_value(msg).unwrap_ji()
     }
 }
 
 impl <T: DeserializeOwned> From<JsValue> for IframeInit<T> {
     fn from(msg:JsValue) -> Self {
-        serde_wasm_bindgen::from_value(msg).unwrap_throw()
+        serde_wasm_bindgen::from_value(msg).unwrap_ji()
     }
 }
 
 pub fn should_get_iframe_data() -> bool { 
     let url:String = dominator::routing::url().get_cloned();
-    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_throw();
+    let url:web_sys::Url = web_sys::Url::new(&url).unwrap_ji();
     let params = url.search_params();
 
     match params.get(IFRAME_DATA_PARAM) {
@@ -82,13 +83,13 @@ impl <T: Serialize> From<IframeAction<T>> for JsValue {
 
 impl <T: Serialize> From<&IframeAction<T>> for JsValue {
     fn from(msg:&IframeAction<T>) -> Self {
-        serde_wasm_bindgen::to_value(msg).unwrap_throw()
+        serde_wasm_bindgen::to_value(msg).unwrap_ji()
     }
 }
 
 impl <T: DeserializeOwned> From<JsValue> for IframeAction<T> {
     fn from(msg:JsValue) -> Self {
-        serde_wasm_bindgen::from_value(msg).unwrap_throw()
+        serde_wasm_bindgen::from_value(msg).unwrap_ji()
     }
 }
 
