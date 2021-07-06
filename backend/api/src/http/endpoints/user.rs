@@ -59,7 +59,7 @@ async fn send_verification_email(
         .signup_verify_template()
         .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/verify-email/{}", pages_url, session);
+    let email_link = format!("{}/user/verify-email/{}", pages_url, session);
 
     mail.send_signup_verify(template, Email::new(email_address), email_link)
         .await?;
@@ -87,7 +87,7 @@ async fn send_password_email(
         .password_reset_template()
         .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/change-pw/{}", pages_url, session);
+    let email_link = format!("{}/user/change-pw/{}", pages_url, session);
 
     mail.send_password_reset(template, Email::new(email_address), email_link)
         .await?;
