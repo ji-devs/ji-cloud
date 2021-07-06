@@ -1,5 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/email/pages/email-send";
+import "@elements/core/buttons/rectangle";
 import "@elements/entry/user/email/buttons/email-send";
 import { Mode as ConfirmationMode }  from "@elements/entry/user/email/buttons/email-send";
 

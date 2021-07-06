@@ -15,7 +15,8 @@ use crate::{
     oauth::dom::OauthPage,
     login::dom::LoginPage,
     profile::dom::ProfilePage,
-    //register_complete::dom::RegisterCompletePage,
+    email::confirmation::SendEmailConfirmationPage,
+    email::verify::VerifyEmailPage,
 };
 
 pub struct Router {
@@ -44,11 +45,8 @@ impl Router {
                             UserRoute::Profile(ProfileSection::Landing) => Some(ProfilePage::render()),
                             UserRoute::RegisterComplete => Some(RegisterCompletePage::render()),
                             UserRoute::ContinueRegistration => Some(RegisterPage::render(Some(Step::One))),
-                            /*
-                            UserRoute::Profile(ProfileSection::ChangeEmail) => Some(ProfileEmailChangePage::render(ProfileEmailChangePage::new())),
-                            UserRoute::SendEmailConfirmation => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new())),
-                            UserRoute::GotEmailConfirmation => Some(GotEmailConfirmationPage::render(GotEmailConfirmationPage::new())),
-                            */
+                            UserRoute::SendEmailConfirmation(email) => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new(email))),
+                            UserRoute::VerifyEmail(token) => Some(VerifyEmailPage::render(VerifyEmailPage::new(token))),
                             _ => None
                         }
                     }

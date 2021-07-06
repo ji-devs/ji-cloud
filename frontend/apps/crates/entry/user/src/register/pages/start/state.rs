@@ -82,13 +82,17 @@ impl PasswordStrength {
 
 impl From<Entropy> for PasswordStrength {
     fn from(entropy:Entropy) -> Self {
-        let score = entropy.score();
-        if score < 2 {
-            Self::Weak
-        } else if score < 4 {
-            Self::Average
-        } else {
+        if crate::debug::settings().skip_password_strength {
             Self::Strong
+        } else {
+            let score = entropy.score();
+            if score < 2 {
+                Self::Weak
+            } else if score < 4 {
+                Self::Average
+            } else {
+                Self::Strong
+            }
         }
     }
 }
@@ -118,7 +122,7 @@ impl EmailStatus {
         match self {
             Self::ConfirmEmail => "confirm your email!",
             Self::EmptyEmail => "supply an email address!",
-            Self::InvalidEmail => "invalid email address!",
+            Self::InvalidEmail => "invalid email address (or already in use?)!",
             Self::IdExists => "id exists!",
             Self::EmailExists => "Email in use!",
             Self::UnknownFirebase => "firebase error!",

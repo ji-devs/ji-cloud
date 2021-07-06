@@ -64,6 +64,8 @@ export class _ extends LitElement {
                     placeholder="${this.placeholder}"
                     value="${this.value}"
                     type="${inputType}"
+                    @input="${this.onInput}"
+                    @change="${this.onChange}"
                 >
                 <img-ui @click="${this.toggleVisible}" slot="icon" path="${path}"></img-ui>
             </input-wrapper>

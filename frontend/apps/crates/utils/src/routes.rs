@@ -34,7 +34,8 @@ pub enum UserRoute {
     Login,
     Register,
     ContinueRegistration,
-    SendEmailConfirmation,
+    SendEmailConfirmation(String), //the email address
+    VerifyEmail(String), //the token 
     RegisterComplete,
 }
 
@@ -160,7 +161,8 @@ impl Route {
                 }
             }
             ["user", "continue-registration"] => Self::User(UserRoute::ContinueRegistration),
-            ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
+            ["user", "send-email-confirmation", email] => Self::User(UserRoute::SendEmailConfirmation(email.to_string())),
+            ["user", "verify-email", token] => Self::User(UserRoute::VerifyEmail(token.to_string())),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
@@ -267,7 +269,8 @@ impl From<&Route> for String {
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                     UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
-                    UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
+                    UserRoute::SendEmailConfirmation(email) => format!("/user/send-email-confirmation/{}", email),
+                    UserRoute::VerifyEmail(token) => format!("/user/verify-email/{}", token),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }
             },

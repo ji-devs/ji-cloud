@@ -11,6 +11,8 @@ mod login;
 mod oauth;
 mod strings;
 mod profile;
+mod email;
+mod debug;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -21,6 +23,8 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
+    crate::debug::init();
+
     let settings = utils::settings::init();
 
     let router = router::Router::new();

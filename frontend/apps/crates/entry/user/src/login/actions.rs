@@ -78,8 +78,8 @@ pub fn go_register(state: Rc<State>) {
 pub fn status_redirect(status:Option<Status>) {
     if let Some(status) = status {
         match status {
-            Status::ConfirmEmail => {
-                let route:String = Route::User(UserRoute::SendEmailConfirmation).into();
+            Status::ConfirmEmail(email) => {
+                let route:String = Route::User(UserRoute::SendEmailConfirmation(email)).into();
                 dominator::routing::go_to_url(&route);
             },
             _ => {}

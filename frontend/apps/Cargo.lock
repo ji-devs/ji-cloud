@@ -660,6 +660,7 @@ dependencies = [
  "js-sys",
  "jsonwebtoken",
  "log",
+ "once_cell",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

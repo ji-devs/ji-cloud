@@ -162,6 +162,23 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 }
 
 //TODO - get rid of this, use specialization
+pub async fn api_no_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
+    let (url, data) = api_get_query(endpoint, method, data);
+
+    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap_ji();
+
+    if res.ok() {
+        Ok(())
+    } else {
+        side_effect_error(res.status());
+        Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR))
+    }
+}
+
+//TODO - get rid of this, use specialization
 pub async fn api_with_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {

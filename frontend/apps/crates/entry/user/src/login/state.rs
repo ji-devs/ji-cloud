@@ -58,14 +58,14 @@ pub enum Status {
     Technical,
     PasswordResetSent,
     InvalidEmail,
-    ConfirmEmail
+    ConfirmEmail(String)
 }
 
 impl Status {
     pub fn email_error(&self) -> Option<&'static str> {
         match self {
             Self::InvalidEmail => Some("invalid email"),
-            Self::ConfirmEmail => Some("need to confirm your email!"),
+            Self::ConfirmEmail(_) => Some("need to confirm your email!"),
             _ => None
         }
     }
