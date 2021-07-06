@@ -31,7 +31,9 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 
 
-pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]";
+pub const DEBUG_TEXT:&'static str = r#" 
+[{"children":[{"text":"Hello World","element":"H1"}]},{"children":[{"element":"H1","text":"This is a Test"}]}]
+"#;
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -130,7 +132,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Four),
+            step: Some(Step::Two),
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::BgImage),

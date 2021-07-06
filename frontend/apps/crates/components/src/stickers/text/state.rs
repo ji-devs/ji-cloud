@@ -3,6 +3,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
     signal_vec::{MutableVec, SignalVecExt},
 };
+use web_sys::HtmlElement;
 use std::rc::Rc;
 use std::cell::RefCell;
 use shared::{domain::{image::ImageId, jig::module::body::{_groups::design::Text as RawText, Transform}}, media::MediaLibrary};

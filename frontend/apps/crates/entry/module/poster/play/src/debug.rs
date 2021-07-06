@@ -40,7 +40,9 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]";
+pub const DEBUG_TEXT:&'static str = r#" 
+[{"children":[{"text":"Hello World","element":"H1"}]},{"children":[{"element":"H1","text":"This is a Test"}]}]
+"#;
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -108,7 +110,7 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
-                InitSticker::Text, InitSticker::Sprite
+                InitSticker::Text, //InitSticker::Sprite
             ],
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

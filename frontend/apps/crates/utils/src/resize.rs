@@ -85,6 +85,10 @@ impl ResizeInfo {
         (width * self.width, height * self.height)
     }
 
+    //given current pixel size, get size in relative units
+    pub fn get_size_rem(&self, width: f64, height: f64) -> (f64, f64) {
+        (width / self.scale, height / self.scale)
+    }
     //given the full size, get current relative size in px
     pub fn get_size_px(&self, width: f64, height: f64) -> (f64, f64) {
         (width * self.scale, height * self.scale)

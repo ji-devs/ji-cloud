@@ -983,10 +983,12 @@ dependencies = [
 
 [[package]]
 name = "dominator_helpers"
-version = "0.6.4"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c457fb8fa8b630f916dfb2d050b752d9c1147ad5e886e69b89291dff60972624"
+checksum = "7d5f287d7fa1d11adcc26365e005482852ef664c77739c880d8f7e04f0163875"
 dependencies = [
+ "awsm_web",
+ "cfg-if 0.1.10",
  "discard",
  "dominator",
  "futures",

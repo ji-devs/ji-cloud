@@ -99,12 +99,7 @@ impl DebugSettings {
                                         }
                                     }
                                 };
-
-                                DragDropTrace { 
-                                    trace, 
-                                    audio: None, 
-                                    text: Some("hello world!".to_string()),
-                                }
+                                DragDropTrace { trace, id: Uuid::new_v4() }
                             }).collect(),
                             base: BaseContent {
                                 theme: ThemeChoice::Override(ThemeId::Chalkboard), 

@@ -12,7 +12,7 @@ export class _ extends LitElement {
     static get styles() {
         return [baseStyles, css`
             :host {
-                display: block;
+                display: inline-block;
                 /* TO FIX:
                     white-space: pre-wrap;
                 */

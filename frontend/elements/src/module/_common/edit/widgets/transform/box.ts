@@ -203,6 +203,9 @@ export class TransformBox extends LitElement {
   @property({type: Boolean})
   hasMenu:boolean = false;
 
+  @property({type: Boolean})
+  hideResizeControls:boolean = false;
+
   @property({type: Number})
   width:number = 0;
 
@@ -210,7 +213,7 @@ export class TransformBox extends LitElement {
   height:number = 0;
 
   render() {
-      const {width, height, isTransforming, hasMenu, menuButtonDot, buttonHack} = this;
+      const {width, height, isTransforming, hasMenu, menuButtonDot, hideResizeControls, buttonHack} = this;
 
       const dotPositions:Record<DotPos, [number, number]> = {
             "tl": [0, 0],
@@ -269,6 +272,10 @@ export class TransformBox extends LitElement {
       }
 
       const renderDots = () => {
+          if(hideResizeControls) {
+              return nothing;
+          }
+
           const diameter = DOT_RADIUS * 2;
 
           const renderDot = (pos:DotPos) => {

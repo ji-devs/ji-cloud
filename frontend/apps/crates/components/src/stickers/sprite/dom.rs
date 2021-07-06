@@ -64,6 +64,7 @@ pub fn render_sticker_sprite(stickers:Rc<Stickers>, index: ReadOnlyMutable<Optio
             if active {
                 Some(render_transform(
                     sprite.transform.clone(),
+                    true,
                     Some(clone!(stickers, index, sprite => move || render_sticker_sprite_menu(stickers.clone(), index.clone(), sprite.clone())))
                 ))
             } else {

@@ -120,6 +120,7 @@ pub fn render_traces_draw(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTra
                     children.push(render_draw_menu(state.clone(), menu, &resize_info));
                     children.push(render_transform(
                             state.trace.transform.clone(),
+                            true,
                             None as Option<Box<dyn Fn() -> Dom>>
                     ));
                 }
