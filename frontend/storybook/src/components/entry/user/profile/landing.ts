@@ -1,7 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/profile/landing";
-import "@elements/core/inputs/text-pencil";
-import "@elements/core/inputs/dropdowns/dropdown-select";
+import "@elements/core/inputs/composed/select";
 
 export default {
     title: 'Entry / User / Profile',
@@ -26,14 +25,26 @@ export const Profile = (props?:Partial<Args>) => {
             <img-ji slot="editable-profile-image" lib="mock" id="face-round.webp" size="original"></img-ji>
             <button-empty slot="profile-image-edit">✎</button-empty>
             <button-text slot="profile-image-delete">remove image</button-text>
-            <input-text-pencil slot="email"></input-text-pencil>
+            <input-wrapper slot="email">
+                <input>
+            </input-wrapper>
             <button-rect kind="outline" color="blue" size="small" slot="password-edit">Edit</button-rect>
-            <input-text-pencil slot="first-name"></input-text-pencil>
-            <input-text-pencil slot="family-name"></input-text-pencil>
-            <input-text-pencil slot="username"></input-text-pencil>
-            <input-text-pencil slot="location"></input-text-pencil>
-            <dropdown-select slot="preferred-language"></dropdown-select>
-            <input-text-pencil slot="school-organization"></input-text-pencil>
+            <input-wrapper slot="first-name">
+                <input>
+            </input-wrapper>
+            <input-wrapper slot="family-name">
+                <input>
+            </input-wrapper>
+            <input-wrapper slot="username">
+                <input>
+            </input-wrapper>
+            <input-wrapper slot="location">
+                <input>
+            </input-wrapper>
+            <input-select slot="preferred-language"></input-select>
+            <input-wrapper slot="school-organization">
+                <input>
+            </input-wrapper>
 
             <pill-close slot="age-groups" label="Kindergarden"></pill-close>
             <pill-close slot="age-groups" label="Elementry School"></pill-close>
