@@ -1,6 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/entry/user/profile/options-popup";
-import "@elements/core/buttons/text";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/empty";
 
@@ -30,7 +29,7 @@ export const OptionsPopup = (props?:Partial<Args>) => {
             <input-checkbox slot="options" label="something"></input-checkbox>
             <input-checkbox slot="options" label="something"></input-checkbox>
             <input-checkbox slot="options" label="something"></input-checkbox>
-            <button-text slot="cancel">Cancel</button-text>
+            <button-rect type  slot="cancel">Cancel</button-rect>
             <button-rect slot="save" color="blue">Save</button-rect>
         </user-profile-options-popup>
     `
