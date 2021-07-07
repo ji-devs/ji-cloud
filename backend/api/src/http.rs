@@ -3,7 +3,7 @@ mod endpoints;
 
 use crate::{
     error::BasicError,
-    s3,
+    google, s3,
     service::{mail, ServiceData},
 };
 use actix_service::Service;
@@ -107,6 +107,7 @@ pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcs: Option<google::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -116,6 +117,7 @@ pub async fn build_and_run(
         pool,
         settings,
         s3,
+        gcs,
         algolia,
         algolia_key_store,
         jwk_verifier,
@@ -130,6 +132,7 @@ pub fn build(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcs: Option<google::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -139,6 +142,7 @@ pub fn build(
     let api_port = settings.api_port;
 
     let s3 = s3.map(ServiceData::new);
+    let gcs = gcs.map(ServiceData::new);
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
     let mail_client = mail_client.map(ServiceData::new);
@@ -150,6 +154,11 @@ pub fn build(
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
+            None => server,
+        };
+
+        let server = match gcs.clone() {
+            Some(gcs) => server.app_data(gcs),
             None => server,
         };
 

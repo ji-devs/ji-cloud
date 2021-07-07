@@ -4,6 +4,8 @@ mod tag;
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
+use std::io;
+use std::io::prelude::*;
 use uuid::Uuid;
 
 use crate::{
@@ -247,4 +249,103 @@ async fn update_styles() -> anyhow::Result<()> {
 #[actix_rt::test]
 async fn update_tags() -> anyhow::Result<()> {
     update(&json!({"tags": ["591a2a64-a3a4-11eb-96e7-6bc0e819bc5f", "5b032222-a3a4-11eb-96e7-dbc5742f1640"]})).await
+}
+
+// https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
+#[actix_rt::test]
+async fn upload_with_url() -> anyhow::Result<()> {
+    let file: Vec<u8> = include_bytes!("../../fixtures/ji-logo.png").to_vec();
+
+    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    // get an upload URL for the new media
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/image/8cca720a-c4bb-11eb-8edf-63da1d86939c/raw",
+            port,
+        ))
+        .json(&json!({ "file_size": &file.len() }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
+
+    let resp = client
+        .put(&resp.session_uri)
+        .header(reqwest::header::CONTENT_LENGTH, &file.len().to_string())
+        .body(file)
+        .send()
+        .await?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    Ok(())
+}
+
+#[ignore]
+#[actix_rt::test]
+async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    // create a new image resource
+    let resp = client
+        .post(&format!("http://0.0.0.0:{}/v1/image", port))
+        .json(&json!({
+            "name": "test_img",
+            "description": "test_descip",
+            "is_premium": false,
+            "publish_at": (),
+            "styles": [],
+            "age_ranges": [],
+            "affiliations": [],
+            "tags": [],
+            "categories": [],
+            "kind": "Canvas",
+        }))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(StatusCode::CREATED, resp.status());
+
+    let resp: shared::domain::image::CreateResponse = resp.json().await?;
+
+    let id = resp.id.0;
+
+    // get an upload URL for the new media
+    let resp = client
+        .patch(&format!(
+            "http://0.0.0.0:{}/v1/image/{}/raw",
+            port,
+            id.to_string()
+        ))
+        .json(&json!({"file_size": 5}))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
+
+    let url = resp.session_uri;
+
+    // perform upload in single chunk
+    let resp = client;
+
+    Ok(())
 }

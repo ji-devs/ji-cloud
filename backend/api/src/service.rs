@@ -30,6 +30,10 @@ impl Service for crate::s3::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::S3;
 }
 
+impl Service for crate::google::storage::Client {
+    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudStorage;
+}
+
 #[derive(Debug)]
 pub struct ServiceData<T: ?Sized>(Arc<T>);
 

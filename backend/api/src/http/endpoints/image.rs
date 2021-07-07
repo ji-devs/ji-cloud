@@ -2,14 +2,14 @@ use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
     extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
-    s3,
+    google, s3,
     service::ServiceData,
 };
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
+    web::{Data, Json, Path, Query, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{
@@ -68,9 +68,10 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: ServiceData<s3::Client>,
+    gcs: ServiceData<google::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
+    req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
 
@@ -85,8 +86,17 @@ async fn upload(
         return Err(error::Upload::ResourceNotFound);
     }
 
-    let resp = s3
-        .get_presigned_url_to_upload_media_for_processing(
+    let upload_content_length = req.into_inner().file_size;
+
+    if let Some(file_limit) = gcs.file_size_limit(&FileKind::ImagePng(PngImageFile::Original)) {
+        if file_limit < upload_content_length {
+            return Err(error::Upload::FileTooLarge);
+        }
+    }
+
+    let resp = gcs
+        .get_url_for_resumable_upload_for_processing(
+            upload_content_length,
             MediaLibrary::Global,
             id.0,
             FileKind::ImagePng(PngImageFile::Original),
@@ -102,7 +112,7 @@ async fn upload(
 
     txn.commit().await?;
 
-    Ok(Json(ImageUploadResponse { url: resp }))
+    Ok(Json(ImageUploadResponse { session_uri: resp }))
 }
 
 /// Get an image from the global image library.
@@ -273,10 +283,14 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    .service(
-        web::resource(image::Upload::PATH)
-            .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
-            .route(image::Upload::METHOD.route().to(upload)),
+    // .service(
+    //     web::resource(image::Upload::PATH)
+    //         .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
+    //         .route(image::Upload::METHOD.route().to(upload)),
+    // )
+    .route(
+        image::Upload::PATH,
+        image::Upload::METHOD.route().to(upload),
     )
     .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(

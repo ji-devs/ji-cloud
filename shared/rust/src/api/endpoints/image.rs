@@ -7,6 +7,7 @@ use crate::{
     },
     error::{EmptyError, MetadataNotFound},
 };
+use crate::domain::image::ImageUploadRequest;
 
 pub mod recent;
 pub mod tag;
@@ -58,7 +59,7 @@ impl ApiEndpoint for Create {
 pub struct Upload;
 impl ApiEndpoint for Upload {
     // raw bytes
-    type Req = ();
+    type Req = ImageUploadRequest;
     type Res = ImageUploadResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/image/{id}/raw";

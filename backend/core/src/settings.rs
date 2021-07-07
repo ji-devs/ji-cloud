@@ -226,6 +226,25 @@ pub struct EmailClientSettings {
     pub password_reset_template: Option<String>,
 }
 
+/// Settings for the google cloud storage client
+pub struct GoogleCloudStorageSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    pub oauth2_token: String,
+    /// Bucket for processed media.
+    pub media_bucket: String,
+    /// Bucket for raw media uploads.
+    pub processing_bucket: String,
+}
+
+pub struct GoogleCloudEventArcSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    oauth2_token: String,
+    /// TODO
+    media_uploaded_trigger: String,
+    /// TODO
+    media_processed_trigger: String,
+}
+
 /// Manages access to settings.
 pub struct SettingsManager {
     token: Option<String>,
@@ -242,18 +261,26 @@ impl SettingsManager {
 
     async fn get_optional_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
         log::debug!("Getting secret `{}`", secret);
+
+        // todo: clean up the control flow? Some(token) => Ok(None) and None have the same calls
+        // should it also try to read from .env if it errors during `get_optional_secret` from GCP?
         match &self.token {
-            // todo: this
-            Some(token) => get_optional_secret(token, &self.project_id, secret)
-                .await
-                .with_context(|| anyhow::anyhow!("failed to get secret `{}`", secret)),
-            None => match std::env::var(secret) {
-                Ok(secret) => Ok(Some(secret)),
-                Err(VarError::NotPresent) => Ok(None),
-                Err(VarError::NotUnicode(_)) => {
-                    Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
-                }
+            Some(token) => match get_optional_secret(token, &self.project_id, secret).await {
+                Ok(Some(secret)) => Ok(Some(secret)),
+                Ok(None) => self.get_secret_from_env(secret),
+                Err(_) => Err(anyhow::anyhow!("failed to get secret `{}`", secret)),
             },
+            None => self.get_secret_from_env(secret),
+        }
+    }
+
+    fn get_secret_from_env(&self, secret: &str) -> anyhow::Result<Option<String>> {
+        match std::env::var(secret) {
+            Ok(secret) => Ok(Some(secret)),
+            Err(VarError::NotPresent) => Ok(None),
+            Err(VarError::NotUnicode(_)) => {
+                Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
+            }
         }
     }
 
@@ -487,6 +514,36 @@ impl SettingsManager {
             signup_verify_template,
             password_reset_template,
         }))
+    }
+
+    /// Load the google cloud storage Client settings
+    pub async fn google_cloud_storage_settings(
+        &self,
+    ) -> anyhow::Result<Option<GoogleCloudStorageSettings>> {
+        let oauth2_token = self.token.clone();
+
+        // buckets are the same as those for S3, but uses the GCS API instead of S3 interop
+        let media_bucket = match self.remote_target.s3_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::MEDIA_BUCKET).await?,
+        };
+
+        let processing_bucket = match self.remote_target.s3_processing_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?,
+        };
+
+        match (oauth2_token, media_bucket, processing_bucket) {
+            (Some(oauth2_token), Some(media_bucket), Some(processing_bucket)) => {
+                Ok(Some(GoogleCloudStorageSettings {
+                    oauth2_token,
+                    media_bucket,
+                    processing_bucket,
+                }))
+            }
+
+            _ => return Ok(None),
+        }
     }
 
     /// Load the `RuntimeSettings`.
