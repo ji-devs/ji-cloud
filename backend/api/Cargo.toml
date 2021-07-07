@@ -22,7 +22,6 @@ config = {path = "../../config/rust"}
 dotenv = "0.15"
 env_logger = "0.8.2"
 futures = "0.3.5"
-google-eventarc1 = "2.0.4"
 http = "0.2.2"
 image = "0.23.10"
 jsonwebtoken = "7.2"
@@ -88,7 +87,7 @@ opt-level = 3
 once_cell = "1.7.2"
 insta = { version = "1.7.0", features = ["redactions"] }
 
-# for rusoto_s3 `ext` extension. remove once moved to amazon s3 sdk
+# for `ext::rusoto_s3` extension. remove once moved to s3 aws-sdk
 [dependencies.hex]
 version = "0.4"
 [dependencies.hmac]

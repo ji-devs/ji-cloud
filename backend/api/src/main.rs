@@ -13,7 +13,7 @@
 
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
-use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
+use ji_cloud_api::{algolia, db, google, http, jwk, logger, s3, service};
 use std::thread;
 
 #[tokio::main]
@@ -25,20 +25,21 @@ async fn main() -> anyhow::Result<()> {
     let (
         runtime_settings,
         s3,
+        gcs,
         algolia_client,
         algolia_key_store,
         algolia_manager,
         db_pool,
         jwk_verifier,
         mail_client,
-        _guard,
+        // _guard,
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        // let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         let runtime_settings = settings.runtime_settings().await?;
 
@@ -46,6 +47,12 @@ async fn main() -> anyhow::Result<()> {
             .s3_settings()
             .await?
             .map(s3::Client::new)
+            .transpose()?;
+
+        let gcs = settings
+            .google_cloud_storage_settings()
+            .await?
+            .map(google::storage::Client::new)
             .transpose()?;
 
         let algolia_settings = settings.algolia_settings().await?;
@@ -84,13 +91,14 @@ async fn main() -> anyhow::Result<()> {
         (
             runtime_settings,
             s3,
+            gcs,
             algolia_client,
             algolia_key_store,
             algolia_manager,
             db_pool,
             jwk_verifier,
             mail_client,
-            guard,
+            // guard,
         )
     };
 
@@ -109,6 +117,7 @@ async fn main() -> anyhow::Result<()> {
             db_pool,
             runtime_settings,
             s3,
+            gcs,
             algolia_client,
             algolia_key_store,
             jwk_verifier,

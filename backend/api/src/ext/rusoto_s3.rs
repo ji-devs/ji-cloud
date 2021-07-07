@@ -1,2 +1,2 @@
 /// s3, POST policies
-mod policy;
+pub mod policy;

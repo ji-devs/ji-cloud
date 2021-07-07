@@ -1,9 +1,9 @@
-use core::settings::RuntimeSettings;
+use core::settings::{EmailClientSettings, GoogleCloudStorageSettings, RuntimeSettings};
 use std::{collections::HashSet, sync::Mutex};
 
 use chrono::{Duration, Utc};
 use config::RemoteTarget;
-use ji_cloud_api::http::Application;
+use ji_cloud_api::{google, http::Application, service::mail};
 use rand::Rng;
 use sqlx::{Connection, Executor};
 
@@ -165,8 +165,27 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
         None,
     );
 
-    let app = ji_cloud_api::http::build(db, settings, None, None, None, jwk_verifier, None)
-        .expect("failed to initialize server");
+    // TODO: use token from .json credentials file
+    let mock_gcs_client = Some(GoogleCloudStorageSettings {
+        oauth2_token: "ya29.a0ARrdaM8TTKf8NdOIQpGNPrvBJZrdvsRd0jnffKZFmA-Rn38rsmF3Dced2ujYxiH4qFANwaFv7q5obvyTna3KfWRvpdIGQb013VitlxSOhcL5AgRB7bn6gBAXc2Hm-EhPC2OPmPon8IylXHcnUSbc2PRRuelv".to_owned(),
+        processing_bucket: "ji-cloud-sandbox-processing-eu-001".to_owned(),
+        media_bucket: "ji-cloud-sandbox-uploads-origin-eu-001".to_owned(),
+    })
+    .map(google::storage::Client::new)
+    .transpose()
+    .unwrap();
+
+    let app = ji_cloud_api::http::build(
+        db,
+        settings,
+        None,
+        mock_gcs_client,
+        None,
+        None,
+        jwk_verifier,
+        None,
+    )
+    .expect("failed to initialize server");
 
     app
 }

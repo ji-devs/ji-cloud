@@ -36,7 +36,7 @@ mod domain;
 mod error;
 mod ext;
 mod extractor;
-mod google;
+pub mod google;
 pub mod http;
 mod image_ops;
 pub mod image_search;

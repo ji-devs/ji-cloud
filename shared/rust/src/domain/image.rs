@@ -15,7 +15,6 @@ use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "backend")]
 use sqlx::postgres::PgRow;
-use url::Url;
 use uuid::Uuid;
 
 /// Represents different kinds of images (which affects how the size is stored in the db)
@@ -272,13 +271,23 @@ pub struct ImageResponse {
     pub metadata: ImageMetadata,
 }
 
-/// Response for the signed URL to upload an image.
+/// Request to indicate the size of an image for upload.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct ImageUploadRequest {
+    /// The size of the image to be upload. Allows the API server to check that the file size is
+    /// within limits and as a verification at GCS that the entire file was uploaded
+    pub file_size: usize,
+}
+
+
+/// URL to upload an image, supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[cfg_attr(feature = "backend", openapi(empty))]
 pub struct ImageUploadResponse {
-    /// The url.
-    pub url: Url,
+    /// The session URI used for uploading, including the query for uploader ID
+    pub session_uri: String,
 }
 
 /// Over the wire representation of an image's metadata.
