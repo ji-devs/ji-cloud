@@ -26,6 +26,7 @@ impl Step2Page {
             .children(&mut [
                 html!("input-wrapper", {
                     .property("slot", "location")
+                    .property("label", STR_LOCATION_LABEL)
                     .child(html!("input-location", {
                         .event(clone!(state => move |evt:events::GoogleLocation| {
                             *state.location_json.borrow_mut() = evt.raw_json();

@@ -5,8 +5,10 @@ use utils::prelude::*;
 
 impl VerifyEmailPage {
     pub fn render(state: Rc<VerifyEmailPage>) -> Dom {
-        html!("h1", {
-            .text(&format!("TODO: verify {}", state.token))
+        html!("empty-fragment", {
+            .future(clone!(state => async move {
+                state.verify().await;
+            }))
         })
     }
 }
