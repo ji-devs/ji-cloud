@@ -129,7 +129,7 @@ async fn create_user(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<Create as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::Service> {
+) -> Result<NoContent, error::Register> {
     let req = req.into_inner();
 
     if req.password.is_empty() {
@@ -138,7 +138,17 @@ async fn create_user(
 
     let mut txn = db.begin().await?;
 
-    // todo: handle duplicate emails
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    if exists {
+        txn.rollback().await?;
+        return Err(error::RegisterUsername::TakenUsername.into());
+    }
 
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
         .fetch_one(&mut txn)
@@ -153,7 +163,7 @@ async fn create_user(
         pass_hash.to_string(),
     )
     .execute(&mut txn)
-    .await?;
+    .await?; // TODO check unique constraint violations here?
 
     send_verification_email(
         &mut txn,
@@ -162,7 +172,8 @@ async fn create_user(
         &mail,
         config.remote_target().pages_url(),
     )
-    .await?;
+    .await
+    .map_err(error::Register::from)?;
 
     txn.commit().await?;
 
@@ -295,9 +306,9 @@ async fn user_lookup(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
-fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register> {
+fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::RegisterUsername> {
     if req.username.is_empty() {
-        return Err(error::Register::EmptyUsername);
+        return Err(error::RegisterUsername::EmptyUsername);
     }
 
     Ok(())
@@ -310,7 +321,7 @@ async fn put_profile(
     db: Data<PgPool>,
     signup_user: TokenSessionOf<SessionPutProfile>,
     req: Json<PutProfileRequest>,
-) -> actix_web::Result<HttpResponse, error::Register> {
+) -> actix_web::Result<HttpResponse, error::RegisterUsername> {
     validate_register_req(&req)?;
 
     let mut txn = db.begin().await?;

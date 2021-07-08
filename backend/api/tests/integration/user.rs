@@ -33,3 +33,8 @@ async fn get_profile() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[actix_rt::test]
+async fn basic_user_create() -> anyhow::Result<()> {
+    Ok(())
+}

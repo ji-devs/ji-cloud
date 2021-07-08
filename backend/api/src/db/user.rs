@@ -100,7 +100,7 @@ pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &PutProfileRequest,
     user_id: Uuid,
-) -> Result<(), error::Register> {
+) -> Result<(), error::RegisterUsername> {
     sqlx::query!(
         r#"
 insert into user_profile
@@ -138,7 +138,7 @@ set
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("user_username_key") =>
         {
-            error::Register::TakenUsername
+            error::RegisterUsername::TakenUsername
         }
 
         e => e.into(),
