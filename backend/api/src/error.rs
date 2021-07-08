@@ -14,7 +14,12 @@ use shared::error::{ApiError, EmptyError, MetadataNotFound};
 use crate::db::meta::MetaWrapperError;
 
 mod oauth;
+
 pub use oauth::{GoogleOAuth, OAuth};
+
+mod user;
+
+pub use user::{Register, RegisterUsername, UserNotFound};
 
 /// Represents an error returned by the api.
 // mostly used in this module
@@ -214,36 +219,6 @@ impl Into<actix_web::Error> for Refresh {
                 "Resource Not Found".to_owned(),
             )
             .into(),
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: User not Found",
-    code = 500
-)]
-pub enum UserNotFound {
-    UserNotFound,
-    InternalServerError(anyhow::Error),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for UserNotFound {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for UserNotFound {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::UserNotFound => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, "User Not Found".to_owned())
-                    .into()
-            }
-            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -515,46 +490,6 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
             MetaWrapperError::MissingMetadata { id, kind } => {
                 Self::MissingMetadata(MetadataNotFound { id, kind })
             }
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided username already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username was provided",
-    code = 500
-)]
-pub enum Register {
-    EmptyUsername,
-    TakenUsername,
-    InternalServerError(anyhow::Error),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Register {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for Register {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::EmptyUsername => BasicError::with_message(
-                http::StatusCode::UNPROCESSABLE_ENTITY,
-                "No username was provided".to_owned(),
-            )
-            .into(),
-
-            Self::TakenUsername => BasicError::with_message(
-                http::StatusCode::CONFLICT,
-                "Username already taken".to_owned(),
-            )
-            .into(),
-
-            Self::InternalServerError(e) => ise(e),
         }
     }
 }
