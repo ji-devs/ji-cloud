@@ -12,6 +12,7 @@ mod oauth;
 mod strings;
 mod profile;
 mod email;
+mod password;
 mod debug;
 
 use cfg_if::cfg_if;

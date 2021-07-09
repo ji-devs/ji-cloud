@@ -54,33 +54,26 @@ impl State {
 
 #[derive(Debug, Clone)]
 pub enum Status {
-    BadPassword,
-    Technical,
+    BadCredentials,
     PasswordResetSent,
-    InvalidEmail,
     ConfirmEmail(String)
 }
 
 impl Status {
     pub fn email_error(&self) -> Option<&'static str> {
         match self {
-            Self::InvalidEmail => Some("invalid email"),
+            Self::PasswordResetSent => Some("check your email at this address!"),
+            Self::BadCredentials => Some("bad email or password"),
             Self::ConfirmEmail(_) => Some("need to confirm your email!"),
             _ => None
         }
     }
     pub fn password_error(&self) -> Option<&'static str> {
         match self {
-            Self::BadPassword => Some("wrong password!"),
             Self::PasswordResetSent => Some("password reset link sent!"),
+            Self::BadCredentials => Some("bad email or password"),
             _ => None
         }
-    }
-
-    pub fn technical_error(&self) -> String {
-        match self {
-            _ => "technical error!"
-        }.to_string()
     }
 
 }

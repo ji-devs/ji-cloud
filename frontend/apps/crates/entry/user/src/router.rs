@@ -17,6 +17,7 @@ use crate::{
     profile::dom::ProfilePage,
     email::confirmation::SendEmailConfirmationPage,
     email::verify::VerifyEmailPage,
+    password::reset::PasswordResetPage,
 };
 
 pub struct Router {
@@ -47,6 +48,7 @@ impl Router {
                             UserRoute::ContinueRegistration => Some(RegisterPage::render(Some(Step::One))),
                             UserRoute::SendEmailConfirmation(email) => Some(SendEmailConfirmationPage::render(SendEmailConfirmationPage::new(email))),
                             UserRoute::VerifyEmail(token) => Some(VerifyEmailPage::render(VerifyEmailPage::new(token))),
+                            UserRoute::PasswordReset(token) => Some(PasswordResetPage::render(PasswordResetPage::new(token))),
                             _ => None
                         }
                     }

@@ -1,7 +1,7 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyExt, ModeExt, StepExt, ThemeChoice,
-        _groups::design::{BaseContent, Trace, Sticker},
+        Audio, Body, BodyExt, ModeExt, StepExt, ThemeChoice, Instructions,
+        _groups::design::{Backgrounds, Trace, Sticker},
     },
     ModuleKind,
 };
@@ -9,7 +9,7 @@ use crate::domain::jig::module::{
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::convert::TryFrom;
 
 mod play_settings;
@@ -73,7 +73,7 @@ impl BodyExt<Mode, Step> for ModuleData {
     }
 
     fn get_theme(&self) -> Option<ThemeChoice> {
-        self.content.as_ref().map(|content| content.base.theme)
+        self.content.as_ref().map(|content| content.theme)
     }
 }
 
@@ -92,9 +92,17 @@ impl TryFrom<Body> for ModuleData {
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Content {
-    /// The base content for all design modules
-    /// in this case it's also the "scene"
-    pub base: BaseContent,
+    /// The instructions for the module.
+    pub instructions: Instructions,
+
+    /// The module's theme.
+    pub theme: ThemeChoice,
+
+    /// Backgrounds
+    pub backgrounds: Backgrounds,
+
+    /// Items (wrapper around Sticker and metadata) 
+    pub items: Vec<Item>,
 
     /// The editor state
     pub editor_state: EditorState,
@@ -102,11 +110,8 @@ pub struct Content {
     /// The mode
     pub mode: Mode,
 
-    /// Drag items 
-    pub drag_items: Vec<DragDropItem>,
-
-    /// Traces
-    pub traces: Vec<DragDropTrace>,
+    /// target areas 
+    pub target_areas: Vec<TargetArea>,
 
     /// play settings
     pub play_settings: PlaySettings,
@@ -126,21 +131,39 @@ pub struct EditorState {
 /// drag and drop sticker w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct DragDropItem {
+pub struct Item {
     /// the sticker 
     pub sticker: Sticker,
 
+    /// the kind
+    pub kind: ItemKind,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// The mode
+pub enum ItemKind {
+    /// Just part of the scene
+    Static,
+    /// One of the draggables
+    Interactive(Interactive)
+}
+
+/// drag and drop sticker w/ metadata
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct Interactive {
     /// audio
     pub audio: Option<Audio>,
 
     /// target trace id 
-    pub trace_id: Option<Uuid>,
+    pub target_id: Option<Uuid>,
 }
 
 /// drag and drop trace w/ metadata
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct DragDropTrace {
+pub struct TargetArea {
     /// the trace
     pub trace: Trace,
 

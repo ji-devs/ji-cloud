@@ -3,7 +3,7 @@ use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeCho
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
-/// The base content for card modules
+/// The base content for design modules that don't need custom Sticker wrappers
 #[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct BaseContent {

@@ -89,9 +89,7 @@ export class _ extends LitElement {
             <slot name="submit"></slot>
           </div>
 
-            <title-ji color="blue"></title-ji>
-            &nbsp;
-            <slot name="register"></slot>
+            <slot name="footer"></slot>
           </div>
         </base-page>
     `;

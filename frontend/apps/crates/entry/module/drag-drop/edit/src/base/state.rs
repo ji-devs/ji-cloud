@@ -17,6 +17,10 @@ use shared::domain::jig::{
                 PlaySettings as RawPlaySettings, 
                 Hint, Next,
                 Mode, 
+                Item as RawItem,
+                ItemKind as RawItemKind,
+                Interactive as RawInteractive,
+                TargetArea as RawTargetArea,
                 Content as RawContent, 
                 ModuleData as RawData
             },
@@ -69,10 +73,9 @@ pub struct Base {
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
-    pub drag_stickers: Rc<Stickers>, 
-    pub drags_meta: MutableVec<DragMeta>,
+    pub items_meta: Mutable<Vec<ItemMeta>>,
     pub traces: Rc<TracesEdit>,
-    pub traces_meta: MutableVec<TraceMeta>,
+    pub targets_meta: Mutable<Vec<TargetMeta>>,
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
@@ -111,32 +114,61 @@ impl PlaySettings {
 }
 
 #[derive(Clone)]
-pub struct TraceMeta {
+pub struct TargetMeta {
     pub id: Uuid,
 }
 
-impl TraceMeta {
-    pub fn new() -> Self {
+impl TargetMeta {
+    pub fn new(raw: Option<&RawTargetArea>) -> Self {
         Self {
-            id: Uuid::new_v4() 
+            id: match raw {
+                Some(raw) => raw.id,
+                None => Uuid::new_v4() 
+            }
         }
     }
 }
 
 #[derive(Clone)]
-pub struct DragMeta {
-    pub audio: Mutable<Option<Audio>>,
-    pub trace_id: Mutable<Option<Uuid>>,
+pub struct ItemMeta {
+    pub kind: Mutable<ItemKind>
 }
 
-impl DragMeta {
-    pub fn new(audio: Option<Audio>, trace_id: Option<Uuid>) -> Self {
+impl ItemMeta {
+    pub fn new(raw: Option<&RawItem>) -> Self {
         Self {
-            audio: Mutable::new(audio),
-            trace_id: Mutable::new(trace_id),
+            kind: Mutable::new(
+              match raw {
+                  None => ItemKind::Static,
+                  Some(raw) => {
+                      match raw.kind {
+                        RawItemKind::Static => ItemKind::Static,
+                        RawItemKind::Interactive(data) => {
+                            ItemKind::Interactive(Interactive {
+                                audio: Mutable::new(audio),
+                                target_id: Mutable::new(target_id),
+                            })
+                        }
+                      }
+                  }
+              }
+            )
         }
     }
 }
+
+#[derive(Clone)]
+pub enum ItemKind {
+    Static,
+    Interactive(Interactive)
+}
+
+#[derive(Clone)]
+pub struct Interactive {
+    pub audio: Mutable<Option<Audio>>,
+    pub target_id: Mutable<Option<Uuid>>,
+}
+
 
 impl Base {
     pub async fn new(init_args: BaseInitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
@@ -160,48 +192,26 @@ impl Base {
         let instructions = Mutable::new(content.base.instructions);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
-        let drag_stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
             None, 
             TextEditorCallbacks::new(
                 //New text
-                Some(clone!(stickers_ref, drag_stickers_ref, step => move |value:&str| {
-                    let stickers = {
-                        if step.get_cloned() == Step::One {
-                            &stickers_ref
-                        } else {
-                            &drag_stickers_ref
-                        }
-                    };
-                    if let Some(stickers) = stickers.borrow().as_ref() {
+                Some(clone!(stickers_ref => move |value:&str| {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         Stickers::add_text(stickers.clone(), value.to_string());
                     }
                 })),
                 //Text change
-                Some(clone!(stickers_ref, drag_stickers_ref, step => move |value:&str| {
-                    let stickers = {
-                        if step.get_cloned() == Step::One {
-                            &stickers_ref
-                        } else {
-                            &drag_stickers_ref
-                        }
-                    };
-                    if let Some(stickers) = stickers.borrow().as_ref() {
+                Some(clone!(stickers_ref => move |value:&str| {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         stickers.set_current_text_value(value.to_string());
                     }
                 })),
                 //Blur
-                Some(clone!(stickers_ref, drag_stickers_ref, step => move || {
-                    let stickers = {
-                        if step.get_cloned() == Step::One {
-                            &stickers_ref
-                        } else {
-                            &drag_stickers_ref
-                        }
-                    };
-                    if let Some(stickers) = stickers.borrow().as_ref() {
+                Some(clone!(stickers_ref => move || {
+                    if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         stickers.stop_current_text_editing();
                     }
                 }))
@@ -294,7 +304,7 @@ impl Base {
         );
 
         let traces_meta = MutableVec::new_with_values(
-            content.traces
+            content.target_areas
                 .iter()
                 .map(|trace_meta| {
                     TraceMeta {

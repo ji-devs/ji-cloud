@@ -30,11 +30,7 @@ impl Main {
             .map(|step| step != Step::One)
             .dedupe()
     }
-    pub fn locked_drags_signal(&self) -> impl Signal<Item = bool> {
-        self.base.step.signal()
-            .map(|step| step != Step::Two)
-            .dedupe()
-    }
+
     pub fn trace_phase_signal(&self) -> impl Signal<Item = Option<TracePhase>> {
         self.base.step.signal()
             .map(|step| match step {

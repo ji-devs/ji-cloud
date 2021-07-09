@@ -12,19 +12,11 @@ use components::{
 pub fn render(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
         .children(&mut [
-            render_tab(state.clone(), TabKind::Text),
-            render_tab(state.clone(), TabKind::Image),
             render_tab(state.clone(), TabKind::Audio),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
-                        Tab::Text => {
-                            Some(render_text_editor(state.base.text_editor.clone()))
-                        },
-                        Tab::Image(image_state) => {
-                            Some(render_image_search(image_state.clone(), None))
-                        },
                         Tab::Audio(audio_signal_fn) => {
                             Some(render_audio(state.clone(), audio_signal_fn()))
                         },

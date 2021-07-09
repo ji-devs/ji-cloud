@@ -1949,6 +1949,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "awsm_web",
+ "base64 0.13.0",
  "cfg-if 1.0.0",
  "chrono",
  "config",

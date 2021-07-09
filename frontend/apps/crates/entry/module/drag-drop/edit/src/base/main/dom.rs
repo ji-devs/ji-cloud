@@ -26,19 +26,6 @@ impl DomRenderable for Main {
                 })))
             )
             .child_signal(
-                state.locked_drags_signal().map(clone!(state => move |locked_drags| Some({
-                    if locked_drags {
-                        let raw_stickers = state.base.drag_stickers.to_raw();
-
-                        log::info!("len: {}", raw_stickers.len());
-
-                        render_stickers_raw(&raw_stickers)
-                    } else {
-                        render_stickers(state.base.drag_stickers.clone())
-                    }
-                })))
-            )
-            .child_signal(
                 state.trace_phase_signal().map(clone!(state => move |trace_phase| {
                     trace_phase.map(|trace_phase| {
                         match trace_phase {

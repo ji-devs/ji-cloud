@@ -41,25 +41,19 @@ impl Step2 {
             tab
         })
     }
-
-    pub fn drag_sticker_index_signal(&self) -> impl Signal<Item = Option<usize>> {
-        self.base.drag_stickers.selected_index.signal_cloned()
-    }
 }
 
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum TabKind {
-    Text,
-    Image,
+    Select,
     Audio,
 }
 
 impl TabKind {
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Self::Text => "text",
-            Self::Image => "image",
+            Self::Select => "select",
             Self::Audio => "audio",
         }
     }
@@ -67,8 +61,7 @@ impl TabKind {
 
 #[derive(Clone)]
 pub enum Tab {
-    Text, // uses top-level state since it must be toggled from main too
-    Image(Rc<ImageSearchState>),
+    Select,
     Audio(RcSignalFn<Option<Rc<AudioInputState>>>),
 }
 
@@ -76,25 +69,7 @@ impl Tab {
 
     pub fn new(base: Rc<Base>, kind:TabKind) -> Self {
         match kind {
-            TabKind::Text=> {
-                Self::Text
-            },
-            TabKind::Image=> {
-                let opts = ImageSearchOptions {
-                    background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
-                };
-
-                let callbacks = ImageSearchCallbacks::new(
-                    Some(clone!(base => move |image| {
-                        Stickers::add_sprite(base.stickers.clone(), image);
-                    }))
-                );
-                let state = ImageSearchState::new(opts, callbacks);
-
-                Self::Image(Rc::new(state))
-            },
+            TabKind::Select => Self::Select,
             TabKind::Audio => {
               
                 let cb = clone!(base => move || {
@@ -129,8 +104,7 @@ impl Tab {
 
     pub fn kind(&self) -> TabKind {
         match self {
-            Self::Text => TabKind::Text,
-            Self::Image(_) => TabKind::Image,
+            Self::Select => TabKind::Select,
             Self::Audio(_) => TabKind::Audio,
         }
     }

@@ -1,13 +1,14 @@
 use std::rc::Rc;
 use super::state::*;
 use shared::{
-    api::endpoints::{ApiEndpoint, user::*, session::*},
-    domain::session::*,
+    api::endpoints::{ApiEndpoint, user, session},
+    domain::{user::*, session::*},
     error::EmptyError
 };
 use utils::{
     routes::*,
     storage,
+    prelude::*,
 };
 use dominator::clone;
 use wasm_bindgen::prelude::*;
@@ -20,21 +21,26 @@ pub fn signin_email(state: Rc<State>) {
     state.clear_password_status();
 
     state.loader.load(clone!(state => async move {
-        /*
         let email:String = state.email.borrow().clone();
         let password:String = state.password.borrow().clone();
 
-        let token_promise = unsafe { firebase_signin_email(&email, &password) };
-
-        match signin(token_promise, SigninKind::Email).await {
-            Ok(csrf) => {
-                do_success(&state, csrf);
-            },
+        let (resp, _):(Result<CreateSessionResponse, EmptyError>, u16) = api_with_basic_token_status(&session::Create::PATH, &email, &password, session::Create::METHOD, None::<()>).await;
+       
+        match resp {
+            Ok(resp) => {
+                match resp {
+                    CreateSessionResponse::Login(resp) => {
+                        do_success(&resp.csrf);
+                    },
+                    CreateSessionResponse::Register(resp) => {
+                        panic!("didn't expect register response here!");
+                    }
+                }
+            }, 
             Err(err) => {
-                state.status.set(err);
+                state.status.set(Some(Status::BadCredentials));
             }
         }
-        */
     }));
 }
 
@@ -52,21 +58,22 @@ pub fn forgot_password(state: Rc<State>) {
 
     state.loader.load(clone!(state => async move {
         let email:String = state.email.borrow().clone();
-        /*
-        let token_promise = unsafe { firebase_forgot_password(&email) };
-        let res = JsFuture::from(token_promise).await
-            .map(|_| ())
-            .map_err(|err| Status::from_firebase_err(err));
 
-        match res {
-            Ok(csrf) => {
+        let query = ResetPasswordRequest {
+            email
+        };
+
+        let resp:Result<(), EmptyError> = api_no_auth_empty(&user::ResetPassword::PATH, user::ResetPassword::METHOD, Some(query)).await;
+
+        
+        match resp {
+            Ok(_) => {
                 state.status.set(Some(Status::PasswordResetSent));
-            },
+            }, 
             Err(err) => {
-                state.status.set(Some(err));
+                log::error!("Got error!")
             }
         }
-        */
     }));
 }
 
@@ -89,7 +96,10 @@ pub fn status_redirect(status:Option<Status>) {
 //// PRIVATE HELPERS /////
 
 
-fn do_success(state:&State, csrf:String) {
+pub fn do_success(csrf:&str) {
+    storage::save_csrf_token(&csrf);
+    let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
+    dominator::routing::go_to_url(&route);
 }
 
 

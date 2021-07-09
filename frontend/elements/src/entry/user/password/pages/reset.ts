@@ -4,7 +4,8 @@ import "@elements/entry/user/_common/base-page";
 import {Strength as PasswordStrength} from "@elements/entry/user/register/widgets/password-strength";
 
 const STR_TITLE = "Create a New password";
-const STR_LOGGEDOUT = "You’ll be logged in automatically after this";
+//const STR_AFTER = "You’ll be logged in automatically after this";
+const STR_AFTER = "You will need to log in after this";
 
 @customElement("page-password-reset")
 export class _ extends LitElement {
@@ -88,7 +89,7 @@ export class _ extends LitElement {
             <slot name="submit"></slot>
           </div>
           <div class="account-wrapper">
-            <title-ji color="black">${STR_LOGGEDOUT}</title-ji>
+            <title-ji color="black">${STR_AFTER}</title-ji>
           </div>
         </base-page>
     `;

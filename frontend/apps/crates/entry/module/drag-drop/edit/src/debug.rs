@@ -12,15 +12,28 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::drag_drop::DragDropItem}, module::body::{
-                Image,
-                ThemeChoice,
-                Background,
-                Instructions, 
-                Transform,
-                drag_drop::{Content, Mode, Step, ModuleData as RawData, DragDropTrace},
-                _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }
-            }}}, media::MediaLibrary};
+use shared::{
+    domain::{
+        audio::AudioId, 
+        image::ImageId, 
+        jig::{
+            JigId, 
+            module::{
+                ModuleId, 
+                body::{
+                    Image,
+                    ThemeChoice,
+                    Background,
+                    Instructions, 
+                    Transform,
+                    drag_drop::{Content, Mode, Step, ModuleData as RawData, TargetArea, Item, ItemKind},
+                    _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }
+                }
+            }
+        }
+    },
+    media::MediaLibrary
+};
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
@@ -75,22 +88,7 @@ impl DebugSettings {
                     RawData{
                         content: Some(Content {
                             mode: Mode::SettingTable,
-                            drag_items: init_data.drag_stickers.iter().map(|init| {
-                                let sticker = match init {
-                                    InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
-                                    InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
-                                        id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
-                                        lib: MediaLibrary::Global
-                                    }))
-                                };
-
-                                DragDropItem {
-                                    sticker,
-                                    audio: None,
-                                    trace_id: None,
-                                }
-                            }).collect(),
-                            traces: init_data.traces.iter().map(|init| {
+                            target_areas: init_data.traces.iter().map(|init| {
                                 let trace = {
                                     match init {
                                         InitTrace::Ellipse(x, y, w, h) => {
@@ -104,12 +102,10 @@ impl DebugSettings {
                                     }
                                 };
 
-                                DragDropTrace { trace, id: Uuid::new_v4() }
+                                TargetArea { trace, id: Uuid::new_v4() }
                             }).collect(),
-                            base: BaseContent {
-                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                                instructions: Instructions::default(),
-                                stickers: init_data.stickers.iter().map(|init| {
+                            items: init_data.stickers.iter().map(|init| {
+                                let sticker = {
                                     match init {
                                         InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
@@ -117,11 +113,18 @@ impl DebugSettings {
                                             lib: MediaLibrary::Global
                                         }))
                                     }
-                                }).collect(),
-                                backgrounds: Backgrounds {
-                                    layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
-                                    layer_2: None,
-                                },
+                                };
+
+                                Item {
+                                    sticker,
+                                    kind: ItemKind::Static
+                                }
+                            }).collect(),
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                            instructions: Instructions::default(),
+                            backgrounds: Backgrounds {
+                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                layer_2: None,
                             },
                             ..Content::default()
                         })
