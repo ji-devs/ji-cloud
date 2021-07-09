@@ -2837,6 +2837,26 @@
       ]
     }
   },
+  "8b5a14ecfd4982d3bc52a06e56d522b2ab65afecc898e2de015adcaa2b039a93": {
+    "query": "select exists(select 1 from user_auth_basic where email = lower($1)) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "8d817d6384c10aa3eddcbe4b990c830b69970f782ad4ecdd5af9380994dfef0c": {
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1",
     "describe": {

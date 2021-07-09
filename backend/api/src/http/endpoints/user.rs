@@ -33,6 +33,7 @@ use shared::{
         user::{ChangePasswordRequest, PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
+use sqlx::postgres::PgDatabaseError;
 use sqlx::{Acquire, PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -138,16 +139,31 @@ async fn create_user(
 
     let mut txn = db.begin().await?;
 
-    let exists = sqlx::query!(
+    // FIXME simplify these queries
+    let exists_basic = sqlx::query!(
+        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    let exists_google = sqlx::query!(
         r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
         &req.email
     )
     .fetch_one(&mut txn)
     .await?
     .exists;
-    if exists {
-        txn.rollback().await?;
-        return Err(error::RegisterUsername::TakenUsername.into());
+    match (exists_basic, exists_google) {
+        (true, _) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenEmailBasic.into());
+        }
+        (false, true) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenEmailGoogle.into());
+        }
+        (false, false) => (), // do nothing
     }
 
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
@@ -163,7 +179,7 @@ async fn create_user(
         pass_hash.to_string(),
     )
     .execute(&mut txn)
-    .await?; // TODO check unique constraint violations here?
+    .await?;
 
     send_verification_email(
         &mut txn,
@@ -187,7 +203,7 @@ async fn verify_email(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<VerifyEmail as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::ServiceSession> {
+) -> Result<HttpResponse, error::VerifyEmail> {
     let req = req.into_inner();
 
     match req {
@@ -227,9 +243,11 @@ where
             .await
             .map_err(|it| match it {
                 error::Service::InternalServerError(it) => {
-                    error::ServiceSession::InternalServerError(it)
+                    error::VerifyEmail::InternalServerError(it)
                 }
-                error::Service::DisabledService(it) => error::ServiceSession::DisabledService(it),
+                error::Service::DisabledService(it) => {
+                    error::ServiceSession::DisabledService(it).into()
+                }
             })?;
 
             txn.commit().await?;
@@ -241,7 +259,6 @@ where
             let mut txn = db.begin().await?;
 
             // todo: make this more future proof and exhaustive.
-            // todo: handle the conflict case?
 
             let user = sqlx::query!(
                 r#"
@@ -258,9 +275,20 @@ returning user_id
                 token,
                 SessionMask::VERIFY_EMAIL.bits(),
             )
-            .fetch_optional(&mut txn)
-            .await?
-            .ok_or(error::ServiceSession::Unauthorized)?;
+            .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
+            .await
+            .map_err(|err| match err {
+                sqlx::Error::Database(err)
+                    if err.downcast_ref::<PgDatabaseError>().constraint()
+                        == Some("user_email_email_key") =>
+                {
+                    error::VerifyEmail::Email(error::Email::TakenEmailBasic)
+                }
+                err => err.into(),
+            })?
+            .ok_or(error::VerifyEmail::ServiceSession(
+                error::ServiceSession::Unauthorized,
+            ))?;
 
             // make sure they can't use the link, now that they're verified.
             db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;

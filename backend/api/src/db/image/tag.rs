@@ -41,7 +41,6 @@ returning id as "id: TagId", index as "index: i16", display_name
             if err.downcast_ref::<PgDatabaseError>().constraint()
                 == Some("image_tag_index_key") =>
         {
-            log::info!("CONFLICT FOUND");
             error::Tag::TakenIndex
         }
         e => e.into(),
