@@ -19,7 +19,7 @@ pub use oauth::{GoogleOAuth, OAuth};
 
 mod user;
 
-pub use user::{Register, RegisterUsername, UserNotFound};
+pub use user::{Email, Register, RegisterUsername, UserNotFound, VerifyEmail};
 
 /// Represents an error returned by the api.
 // mostly used in this module

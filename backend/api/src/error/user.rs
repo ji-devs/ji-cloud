@@ -1,6 +1,5 @@
-use super::{ise, BasicError};
+use super::{ise, BasicError, Service, ServiceSession};
 use paperclip::actix::api_v2_errors;
-use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
 #[api_v2_errors(
     code = 401,
@@ -43,7 +42,7 @@ impl Into<actix_web::Error> for UserNotFound {
 )]
 pub enum Register {
     Username(RegisterUsername),
-    Email(RegisterEmail),
+    Email(Email),
     Service(super::Service),
     InternalServerError(anyhow::Error),
 }
@@ -65,11 +64,11 @@ impl Into<actix_web::Error> for Register {
     }
 }
 
-impl From<super::Service> for Register {
-    fn from(s: super::Service) -> Self {
+impl From<Service> for Register {
+    fn from(s: Service) -> Self {
         match s {
-            super::Service::DisabledService(s) => Self::Service(super::Service::DisabledService(s)),
-            super::Service::InternalServerError(e) => Self::InternalServerError(e),
+            Service::DisabledService(s) => Self::Service(Service::DisabledService(s)),
+            Service::InternalServerError(e) => Self::InternalServerError(e),
         }
     }
 }
@@ -131,21 +130,22 @@ impl Into<Register> for RegisterUsername {
     description = "Unprocessable Entity: No email was provided",
     code = 500
 )]
-pub enum RegisterEmail {
+#[derive(Debug)]
+pub enum Email {
     EmptyEmail,
     TakenEmailGoogle,
+    // two types but
     TakenEmailBasic,
     InternalServerError(anyhow::Error),
-    // TODO: invalid email
 }
 
-impl<T: Into<anyhow::Error>> From<T> for RegisterEmail {
+impl<T: Into<anyhow::Error>> From<T> for Email {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for RegisterEmail {
+impl Into<actix_web::Error> for Email {
     fn into(self) -> actix_web::Error {
         match self {
             Self::EmptyEmail => BasicError::with_message(
@@ -163,11 +163,41 @@ impl Into<actix_web::Error> for RegisterEmail {
     }
 }
 
-impl Into<Register> for RegisterEmail {
+impl Into<Register> for Email {
     fn into(self) -> Register {
         match self {
             Self::InternalServerError(e) => Register::InternalServerError(e),
             email_error => Register::Email(email_error),
         }
+    }
+}
+
+#[api_v2_errors(code = 400, code = 401, code = 403, code = 500, code = 501)]
+#[derive(Debug)]
+pub enum VerifyEmail {
+    ServiceSession(ServiceSession),
+    Email(Email),
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for VerifyEmail {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ServiceSession(e) => e.into(),
+            Self::Email(e) => e.into(),
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+impl From<ServiceSession> for VerifyEmail {
+    fn from(e: ServiceSession) -> Self {
+        Self::ServiceSession(e)
     }
 }
