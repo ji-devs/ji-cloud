@@ -1,1 +1,4 @@
-pub const STR_NEW_TEXT:&'static str = "[{\"children\":[{\"text\":\"Hello World!\",\"font\":\"\\\"Shesek - Regular\\\", \\\"Architects Daughter - Regular\\\"\",\"fontSize\":14,\"color\":\"#000000\"}],\"element\":\"P1\"}]";
+use std::fmt::Display;
+use const_format::formatcp;
+
+pub const STR_NEW_TEXT:&'static str = "Hello World!";

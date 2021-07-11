@@ -44,7 +44,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     if let Some(on_new_text) = state.callbacks.on_new_text.as_ref() {
                         //TODO - this should create a slate value
                         //with the current settings and only replace the text
-                        (on_new_text) (STR_NEW_TEXT);
+                        (on_new_text) (&State::text_to_value(STR_NEW_TEXT));
                     }
                 }))
             }),
