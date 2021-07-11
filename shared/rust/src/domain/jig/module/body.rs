@@ -280,7 +280,7 @@ pub struct Instructions {
 /// Background
 pub enum Background {
     /// Color
-    Color(rgb::RGBA8),
+    Color(Option<rgb::RGBA8>),
     /// Any other image
     Image(Image),
 }
