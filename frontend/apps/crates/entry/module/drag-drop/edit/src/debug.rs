@@ -36,7 +36,7 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
-//use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
+use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -44,9 +44,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 
 
-pub const DEBUG_TEXT:&'static str = r#" 
-[{"children":[{"text":"Hello World","element":"H1"}]},{"children":[{"element":"H1","text":"This is a Test"}]}]
-"#;
+pub const DEBUG_TEXT:&'static str = "Debug Text"; 
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -55,14 +53,13 @@ pub struct DebugSettings {
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub step_1_tab: Option<Step1TabKind>,
-    //pub step_2_tab: Option<Step2TabKind>,
+    pub step_2_tab: Option<Step2TabKind>,
     pub trace_opts: Option<TracesOptions>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InitData {
     pub stickers: Vec<InitSticker>,
-    pub drag_stickers: Vec<InitSticker>,
     pub traces: Vec<InitTrace>
 }
 
@@ -107,7 +104,13 @@ impl DebugSettings {
                             items: init_data.stickers.iter().map(|init| {
                                 let sticker = {
                                     match init {
-                                        InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                        InitSticker::Text => {
+                                            let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
+
+                                            log::info!("VALUE: {}", value);
+
+                                            Sticker::Text(Text::new(value))
+                                        },
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                             id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
                                             lib: MediaLibrary::Global
@@ -135,11 +138,11 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::One),
+            step: Some(Step::Two),
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::StickerText),
-            //step_2_tab: Some(Step2TabKind::Audio),
+            step_2_tab: Some(Step2TabKind::Audio),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })
@@ -151,9 +154,6 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
          SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
-                //InitSticker::Text, //InitSticker::Sprite
-            ],
-            drag_stickers: vec![
                 InitSticker::Text, //InitSticker::Sprite
             ],
             traces: vec![

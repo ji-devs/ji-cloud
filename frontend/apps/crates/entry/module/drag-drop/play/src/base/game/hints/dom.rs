@@ -16,9 +16,9 @@ pub fn render(state: Rc<Hints>) -> Dom {
             state.finish();
         }))
         .child(render_traces_hint(
-                state.game.base.traces
+                state.game.base.target_areas
                     .iter()
-                    .map(|t| t.trace.clone())
+                    .map(|area| area.trace.clone())
                     .collect()
         ))
     })

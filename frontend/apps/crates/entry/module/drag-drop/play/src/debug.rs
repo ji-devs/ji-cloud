@@ -28,7 +28,10 @@ use shared::{
                     Instructions,
                     Transform,
                     drag_drop::{
-                        Content, Mode, ModuleData as RawData, DragDropTrace,
+                        Content, Mode, ModuleData as RawData,
+                        Item,
+                        TargetArea,
+                        ItemKind,
                         PlaySettings,
                         Hint,
                         Next
@@ -79,14 +82,11 @@ impl DebugSettings {
             //otherwise it will fail at load time
             data: Some(
                 if let Some(init_data) = init_data {
+
                     RawData{
                         content: Some(Content {
                             mode: Mode::SettingTable,
-                            play_settings: PlaySettings {
-                                hint: Hint::None, 
-                                next: Next::Continue, 
-                            },
-                            traces: init_data.traces.iter().map(|init| {
+                            target_areas: init_data.traces.iter().map(|init| {
                                 let trace = {
                                     match init {
                                         InitTrace::Ellipse(x, y, w, h) => {
@@ -99,15 +99,11 @@ impl DebugSettings {
                                         }
                                     }
                                 };
-                                DragDropTrace { trace, id: Uuid::new_v4() }
+
+                                TargetArea { trace, id: Uuid::new_v4() }
                             }).collect(),
-                            base: BaseContent {
-                                theme: ThemeChoice::Override(ThemeId::Chalkboard), 
-                                instructions: Instructions{
-                                    text: Some("Heya World!".to_string()),
-                                    ..Instructions::default()
-                                },
-                                stickers: init_data.stickers.iter().map(|init| {
+                            items: init_data.stickers.iter().map(|init| {
+                                let sticker = {
                                     match init {
                                         InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
@@ -115,11 +111,18 @@ impl DebugSettings {
                                             lib: MediaLibrary::Global
                                         }))
                                     }
-                                }).collect(),
-                                backgrounds: Backgrounds {
-                                    layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
-                                    layer_2: None,
-                                },
+                                };
+
+                                Item {
+                                    sticker,
+                                    kind: ItemKind::Static
+                                }
+                            }).collect(),
+                            theme: ThemeChoice::Override(ThemeId::Chalkboard), 
+                            instructions: Instructions::default(),
+                            backgrounds: Backgrounds {
+                                layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
+                                layer_2: None,
                             },
                             ..Content::default()
                         })

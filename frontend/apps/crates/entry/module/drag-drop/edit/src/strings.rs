@@ -3,6 +3,7 @@ pub const STR_DONE:&'static str = "Done";
 pub const STR_CLEAR:&'static str = "Clear";
 pub const STR_CONTINUE:&'static str = "Continue";
 
+pub const STR_SIDEBAR_SELECT:&'static str = "Select the items that can be dragged";
 
 pub mod steps_nav {
     pub const STR_BACKGROUND:&'static str = "Background";

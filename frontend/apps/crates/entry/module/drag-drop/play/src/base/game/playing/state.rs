@@ -11,7 +11,7 @@ use components::traces::{
 use shared::domain::jig::module::body::{
     Audio,
     _groups::design::Trace,
-    drag_drop::{Next, DragDropTrace}
+    drag_drop::{Next}
 };
 use web_sys::AudioContext;
 use std::collections::HashSet;

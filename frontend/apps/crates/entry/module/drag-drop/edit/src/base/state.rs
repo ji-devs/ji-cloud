@@ -1,5 +1,6 @@
 use components::module::_common::edit::prelude::*;
 use components::audio_mixer::AudioMixer;
+use dominator_helpers::signals::OptionSignal;
 use uuid::Uuid;
 use std::rc::Rc;
 use shared::domain::jig::{
@@ -73,9 +74,9 @@ pub struct Base {
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
-    pub items_meta: MutableVec<ItemMeta>,
+    pub items_meta: Mutable<Vec<ItemMeta>>,
     pub traces: Rc<TracesEdit>,
-    pub targets_meta: MutableVec<TargetMeta>,
+    pub targets_meta: Mutable<Vec<TargetMeta>>,
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
@@ -199,8 +200,6 @@ impl Base {
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
-                    log::info!("VALUE: {}", value);
-
                     if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         Stickers::add_text(stickers.clone(), value.to_string());
                     }
@@ -251,7 +250,7 @@ impl Base {
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());
 
-        let items_meta = MutableVec::new_with_values(
+        let items_meta = Mutable::new(
             content.items
                 .iter()
                 .map(|item| {
@@ -289,7 +288,7 @@ impl Base {
             )
         );
 
-        let targets_meta = MutableVec::new_with_values(
+        let targets_meta = Mutable::new(
             content.target_areas
                 .iter()
                 .map(|target_area| {
@@ -323,6 +322,35 @@ impl Base {
 
     pub fn theme_id_str_signal(&self) -> impl Signal<Item = &'static str> { 
         self.theme_id.signal().map(|id| id.as_str_id())
+    }
+
+    //TODO - these can/should be made simpler by maintaining a "selected for drag" index
+    //independent of stickers.selected_index
+    pub fn selected_item_meta_signal(&self) -> impl Signal<Item = Option<(usize, ItemMeta)>> {
+        map_ref! {
+            let index = self.stickers.selected_index.signal(),
+            let items_meta = self.items_meta.signal_cloned()
+                => {
+                    index.and_then(|index| {
+                        items_meta
+                            .get(index)
+                            .map(|meta| (index, meta.clone()))
+                    })
+                }
+        }
+    }
+
+    pub fn selected_item_kind_signal(&self) -> impl Signal<Item = Option<(usize, ItemKind)>> {
+        self.selected_item_meta_signal()
+            .map(|index_meta| {
+                OptionSignal::new(
+                    index_meta.map(|(index, meta)| {
+                        meta.kind.signal_cloned()
+                            .map(clone!(index => move |kind| (index, kind)))
+                    })
+                )
+            })
+            .flatten()
     }
 
 }

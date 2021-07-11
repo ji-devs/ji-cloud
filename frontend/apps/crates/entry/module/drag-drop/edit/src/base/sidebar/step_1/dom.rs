@@ -9,7 +9,7 @@ use components::{
     text_editor::dom::render_controls as render_text_editor,
 };
 
-pub fn render(state: Rc<Step1>) -> Dom {
+pub fn render_step_1(state: Rc<Step1>) -> Dom {
     html!("menu-tabs", {
         .children(&mut [
             render_tab(state.clone(), TabKind::BgImage),

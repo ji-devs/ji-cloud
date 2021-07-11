@@ -1,4 +1,4 @@
-use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{_groups::design::{Backgrounds, Sticker}, ThemeChoice, Instructions, drag_drop::{Mode, Step, ModuleData as RawData, PlaySettings, DragDropTrace}}}};
+use shared::domain::jig::{Jig, JigId, module::{ModuleId, body::{Instructions, ThemeChoice, _groups::design::{Backgrounds, Sticker}, drag_drop::{Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea}}}};
 use components::{audio_mixer::AudioMixer, module::_common::play::prelude::*};
 use utils::prelude::*;
 use web_sys::AudioContext;
@@ -13,8 +13,8 @@ pub struct Base {
     pub instructions: Instructions,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
-    pub stickers: Vec<Sticker>,
-    pub traces: Vec<DragDropTrace>,
+    pub items: Vec<Item>,
+    pub target_areas: Vec<TargetArea>,
 }
 
 impl Base {
@@ -39,11 +39,11 @@ impl Base {
             jig,
             theme_id,
             audio_mixer,
-            instructions: content.base.instructions,
+            instructions: content.instructions,
             settings: content.play_settings,
-            backgrounds: content.base.backgrounds,
-            stickers: content.base.stickers,
-            traces: content.traces,
+            backgrounds: content.backgrounds,
+            items: content.items,
+            target_areas: content.target_areas,
         })
     }
 }

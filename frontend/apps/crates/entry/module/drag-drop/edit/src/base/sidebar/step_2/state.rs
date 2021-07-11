@@ -1,4 +1,4 @@
-use crate::base::state::Base;
+use crate::base::state::*;
 use std::rc::Rc;
 use dominator_helpers::signals::{RcSignalFn, rc_signal_fn};
 use futures_signals::{
@@ -31,7 +31,7 @@ impl Step2 {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let kind = match crate::debug::settings().step_2_tab {
             Some(kind) => kind,
-            None => TabKind::Text
+            None => TabKind::Select
         };
         
         let tab = Mutable::new(Tab::new(base.clone(), kind));
@@ -41,6 +41,7 @@ impl Step2 {
             tab
         })
     }
+
 }
 
 
@@ -71,27 +72,33 @@ impl Tab {
         match kind {
             TabKind::Select => Self::Select,
             TabKind::Audio => {
-              
                 let cb = clone!(base => move || {
-                    base.drag_stickers.selected_index
-                        .signal()
-                        .map(clone!(base => move |index| {
-                            index.map(|index| {
+                    base.selected_item_kind_signal()
+                        .map(clone!(base => move |index_item_kind| {
+                            index_item_kind.and_then(|(index, item_kind)| {
+
+                                match item_kind {
+                                    ItemKind::Static => None,
+                                    ItemKind::Interactive(data) => None
+                                }
+
+                                /* TODO
                                 let opts = AudioInputOptions::new(
-                                    Some(base.drags_meta.lock_ref()[index].audio.signal_cloned())
+                                    //Some(item_kind.audio.signal_cloned())
+                                    None
                                 );
 
-
                                 let callbacks = AudioCallbacks::new(
-                                    Some(clone!(base, index => move |audio:Audio| {
-                                        base.set_drags_meta_audio(index, Some(audio));
+                                    Some(clone!(base => move |audio:Audio| {
+                                       // base.set_drags_meta_audio(index, Some(audio));
                                     })),
-                                    Some(clone!(base, index => move || {
-                                        base.set_drags_meta_audio(index, None);
+                                    Some(clone!(base => move || {
+                                        //base.set_drags_meta_audio(index, None);
                                     })),
                                 );
 
                                 AudioInputState::new(opts, callbacks)
+                                */
                             })
                         }))
                 });

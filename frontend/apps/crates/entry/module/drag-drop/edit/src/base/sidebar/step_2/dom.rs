@@ -9,14 +9,18 @@ use components::{
     audio_input::{state::State as AudioInputState, dom::render as render_audio_input},
 };
 
-pub fn render(state: Rc<Step2>) -> Dom {
+pub fn render_step_2(state: Rc<Step2>) -> Dom {
     html!("menu-tabs", {
         .children(&mut [
+            render_tab(state.clone(), TabKind::Select),
             render_tab(state.clone(), TabKind::Audio),
             html!("module-sidebar-body", {
                 .property("slot", "body")
                 .child_signal(state.tab.signal_cloned().map(clone!(state => move |tab| {
                     match tab {
+                        Tab::Select => {
+                            Some(html!("div", {.text(crate::strings::STR_SIDEBAR_SELECT) }))
+                        },
                         Tab::Audio(audio_signal_fn) => {
                             Some(render_audio(state.clone(), audio_signal_fn()))
                         },
@@ -49,7 +53,7 @@ fn render_audio(state: Rc<Step2>, audio_state_signal: impl Signal<Item = Option<
                     render_audio_input(audio_state, None)
                 },
                 None => {
-                    html!("div", {.text("TODO!") })
+                    html!("div", {.text("TODO! (disabled audio input)") })
                 }
             }
         })))

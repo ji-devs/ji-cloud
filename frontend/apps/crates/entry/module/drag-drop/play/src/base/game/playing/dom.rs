@@ -5,7 +5,6 @@ use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
 };
-use shared::domain::jig::module::body::drag_drop::DragDropTrace;
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::traces::{
     utils::TraceExt,
