@@ -6,7 +6,7 @@ use futures_signals::signal::{Mutable, SignalExt};
 use dominator::clone;
 use super::{
     step_1::state::Step1,
-    step_2::state::Step2,
+    //step_2::state::Step2,
     //step_3::state::Step3,
     //step_4::state::Step4,
 };

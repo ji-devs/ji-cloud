@@ -36,7 +36,7 @@ use shared::{
 };
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
-use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
+//use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -55,7 +55,7 @@ pub struct DebugSettings {
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub step_1_tab: Option<Step1TabKind>,
-    pub step_2_tab: Option<Step2TabKind>,
+    //pub step_2_tab: Option<Step2TabKind>,
     pub trace_opts: Option<TracesOptions>,
 }
 
@@ -135,11 +135,11 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Two),
+            step: Some(Step::One),
             skip_save: true,
             skip_load_jig: true,
-            step_1_tab: Some(Step1TabKind::BgImage),
-            step_2_tab: Some(Step2TabKind::Audio),
+            step_1_tab: Some(Step1TabKind::StickerText),
+            //step_2_tab: Some(Step2TabKind::Audio),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })

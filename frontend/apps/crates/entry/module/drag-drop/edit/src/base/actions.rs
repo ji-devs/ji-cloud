@@ -9,7 +9,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
-            drag_drop::{Mode, Step, DragDropTrace, Content as RawContent, ModuleData as RawData},
+            drag_drop::{Mode, Step, Content as RawContent, ModuleData as RawData},
             _groups::design::Trace as RawTrace,
         }
     }

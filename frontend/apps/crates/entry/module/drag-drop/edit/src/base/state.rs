@@ -73,9 +73,9 @@ pub struct Base {
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
     pub stickers: Rc<Stickers>, 
-    pub items_meta: Mutable<Vec<ItemMeta>>,
+    pub items_meta: MutableVec<ItemMeta>,
     pub traces: Rc<TracesEdit>,
-    pub targets_meta: Mutable<Vec<TargetMeta>>,
+    pub targets_meta: MutableVec<TargetMeta>,
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
@@ -141,12 +141,12 @@ impl ItemMeta {
               match raw {
                   None => ItemKind::Static,
                   Some(raw) => {
-                      match raw.kind {
+                      match raw.kind.clone() {
                         RawItemKind::Static => ItemKind::Static,
                         RawItemKind::Interactive(data) => {
                             ItemKind::Interactive(Interactive {
-                                audio: Mutable::new(audio),
-                                target_id: Mutable::new(target_id),
+                                audio: Mutable::new(data.audio),
+                                target_id: Mutable::new(data.target_id),
                             })
                         }
                       }
@@ -189,7 +189,7 @@ impl Base {
 
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
-        let instructions = Mutable::new(content.base.instructions);
+        let instructions = Mutable::new(content.instructions);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
 
@@ -199,6 +199,8 @@ impl Base {
             TextEditorCallbacks::new(
                 //New text
                 Some(clone!(stickers_ref => move |value:&str| {
+                    log::info!("VALUE: {}", value);
+
                     if let Some(stickers) = stickers_ref.borrow().as_ref() {
                         Stickers::add_text(stickers.clone(), value.to_string());
                     }
@@ -219,13 +221,13 @@ impl Base {
 
 
         let backgrounds = Rc::new(Backgrounds::from_raw(
-                &content.base.backgrounds,
+                &content.backgrounds,
                 theme_id.clone(),
                 BackgroundsCallbacks::new(
                     Some(clone!(history => move |raw_bgs| {
                         history.push_modify(|raw| {
                             if let Some(content) = &mut raw.content {
-                                content.base.backgrounds = raw_bgs;
+                                content.backgrounds = raw_bgs;
                             }
                         });
                     }))
@@ -233,27 +235,10 @@ impl Base {
         ));
 
         let stickers = Stickers::from_raw(
-                &content.base.stickers,
-                text_editor.clone(),
-                StickersCallbacks::new(
-                    Some(clone!(history => move |raw_stickers| {
-                        history.push_modify(|raw| {
-                            if let Some(content) = &mut raw.content {
-                                content.base.stickers = raw_stickers;
-                            }
-                        });
-                    }))
-                )
-        );
-
-        *stickers_ref.borrow_mut() = Some(stickers.clone());
-
-
-        let drag_stickers = Stickers::from_raw(
-                &content.drag_items
+                &content.items
                     .iter()
-                    .map(|drag_item| {
-                        drag_item.sticker.clone()
+                    .map(|item| {
+                        item.sticker.clone()
                     })
                     .collect::<Vec<RawSticker>>(),
                 text_editor.clone(),
@@ -264,12 +249,13 @@ impl Base {
                 )
         );
 
-        *drag_stickers_ref.borrow_mut() = Some(drag_stickers.clone());
-        let drags_meta = MutableVec::new_with_values(
-            content.drag_items
+        *stickers_ref.borrow_mut() = Some(stickers.clone());
+
+        let items_meta = MutableVec::new_with_values(
+            content.items
                 .iter()
-                .map(|drag_item| {
-                    DragMeta::new(drag_item.audio.clone(), drag_item.trace_id)
+                .map(|item| {
+                    ItemMeta::new(Some(&item))
                 })
                 .collect()
         );
@@ -277,10 +263,10 @@ impl Base {
 
         let traces = TracesEdit::from_raw(
 
-            &content.traces
+            &content.target_areas
                 .iter()
-                .map(|trace_meta| {
-                    trace_meta.trace.clone()
+                .map(|target_area| {
+                    target_area.trace.clone()
                 })
                 .collect::<Vec<RawTrace>>(),
             crate::debug::settings().trace_opts.clone(),
@@ -303,13 +289,11 @@ impl Base {
             )
         );
 
-        let traces_meta = MutableVec::new_with_values(
+        let targets_meta = MutableVec::new_with_values(
             content.target_areas
                 .iter()
-                .map(|trace_meta| {
-                    TraceMeta {
-                        id: trace_meta.id
-                    }
+                .map(|target_area| {
+                    TargetMeta::new(Some(target_area))
                 })
                 .collect()
         );
@@ -325,10 +309,9 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
-            drag_stickers,
-            drags_meta,
+            items_meta,
             traces,
-            traces_meta,
+            targets_meta,
             audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
         });
