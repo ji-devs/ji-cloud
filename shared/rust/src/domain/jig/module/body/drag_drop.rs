@@ -1,16 +1,16 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyExt, ModeExt, StepExt, ThemeChoice, Instructions,
-        _groups::design::{Backgrounds, Trace, Sticker},
+        Audio, Body, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice,
+        _groups::design::{Backgrounds, Sticker, Trace},
     },
     ModuleKind,
 };
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use std::collections::HashSet;
 use std::convert::TryFrom;
+use uuid::Uuid;
 
 mod play_settings;
 pub use play_settings::*;
@@ -101,7 +101,7 @@ pub struct Content {
     /// Backgrounds
     pub backgrounds: Backgrounds,
 
-    /// Items (wrapper around Sticker and metadata) 
+    /// Items (wrapper around Sticker and metadata)
     pub items: Vec<Item>,
 
     /// The editor state
@@ -110,7 +110,7 @@ pub struct Content {
     /// The mode
     pub mode: Mode,
 
-    /// target areas 
+    /// target areas
     pub target_areas: Vec<TargetArea>,
 
     /// play settings
@@ -132,7 +132,7 @@ pub struct EditorState {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Item {
-    /// the sticker 
+    /// the sticker
     pub sticker: Sticker,
 
     /// the kind
@@ -146,7 +146,7 @@ pub enum ItemKind {
     /// Just part of the scene
     Static,
     /// One of the draggables
-    Interactive(Interactive)
+    Interactive(Interactive),
 }
 
 /// drag and drop sticker w/ metadata
@@ -156,7 +156,7 @@ pub struct Interactive {
     /// audio
     pub audio: Option<Audio>,
 
-    /// target trace id 
+    /// target trace id
     pub target_id: Option<Uuid>,
 }
 
@@ -167,10 +167,9 @@ pub struct TargetArea {
     /// the trace
     pub trace: Trace,
 
-    /// unique id for trace 
-    pub id: Uuid 
+    /// unique id for trace
+    pub id: Uuid,
 }
-
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
@@ -281,10 +280,10 @@ impl StepExt for Step {
 
     fn label(&self) -> &'static str {
         //TODO - localizaton
-        const STR_1: &'static str = "Background";
-        const STR_2: &'static str = "Starting State";
+        const STR_1: &'static str = "Scene";
+        const STR_2: &'static str = "Drag Start";
         const STR_3: &'static str = "Drop Areas";
-        const STR_4: &'static str = "End State";
+        const STR_4: &'static str = "Drag End";
         const STR_5: &'static str = "Settings";
         const STR_6: &'static str = "Preview";
 
