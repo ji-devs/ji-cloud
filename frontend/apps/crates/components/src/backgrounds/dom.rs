@@ -19,10 +19,14 @@ pub fn render_backgrounds(bg:Rc<Backgrounds>, slot: Option<&str>) -> Dom {
                 children.push(render_theme_bg(*theme_id));
 
                 if let Some(layer_1) = layer_1 {
-                    children.push(render_bg(layer_1));
+                    if let Some(dom) = render_bg(layer_1) {
+                        children.push(dom);
+                    }
                 }
                 if let Some(layer_2) = layer_2 {
-                    children.push(render_bg(layer_2));
+                    if let Some(dom) = render_bg(layer_2) {
+                        children.push(dom);
+                    }
                 }
 
                 children
@@ -48,7 +52,9 @@ pub fn render_single_background(bg_signal:impl Signal<Item = Option<Background>>
                 children.push(render_theme_bg(*theme_id));
 
                 if let Some(layer) = layer {
-                    children.push(render_bg(layer));
+                    if let Some(dom) = render_bg(layer) {
+                        children.push(dom);
+                    }
                 }
 
                 children
@@ -71,10 +77,14 @@ pub fn render_backgrounds_raw(bg:&RawBackgrounds, theme_id: ThemeId, slot: Optio
     children.push(render_theme_bg(theme_id));
 
     if let Some(layer_1) = bg.layer_1.as_ref() {
-        children.push(render_bg(layer_1));
+        if let Some(dom) = render_bg(layer_1) {
+            children.push(dom);
+        }
     }
     if let Some(layer_2) = bg.layer_2.as_ref() {
-        children.push(render_bg(layer_2));
+        if let Some(dom) = render_bg(layer_2) {
+            children.push(dom);
+        }
     }
 
     html!("empty-fragment", {
@@ -93,7 +103,9 @@ pub fn render_single_background_raw(bg:&Option<Background>, theme_id: ThemeId, s
     children.push(render_theme_bg(theme_id));
 
     if let Some(bg) = bg.as_ref() {
-        children.push(render_bg(bg));
+        if let Some(dom) = render_bg(bg) {
+            children.push(dom);
+        }
     }
 
     html!("empty-fragment", {
@@ -105,20 +117,22 @@ pub fn render_single_background_raw(bg:&Option<Background>, theme_id: ThemeId, s
     })
 }
 
-fn render_bg(bg:&Background) -> Dom {
+fn render_bg(bg:&Background) -> Option<Dom> {
     match bg {
         Background::Color(color) => {
-            html!("div", {
-                .style("position", "absolute")
-                .style("top", "0")
-                .style("left", "0")
-                .style("width", "100%")
-                .style("height", "100%")
-                .style("background-color", rgba8_to_hex(color))
+            color.map(|color| {
+                html!("div", {
+                    .style("position", "absolute")
+                    .style("top", "0")
+                    .style("left", "0")
+                    .style("width", "100%")
+                    .style("height", "100%")
+                    .style("background-color", rgba8_to_hex(&color))
+                })
             })
         },
         Background::Image(image) => {
-            html!("img-ji", {
+            Some(html!("img-ji", {
                 .style("position", "absolute")
                 .style("top", "0")
                 .style("left", "0")
@@ -128,7 +142,7 @@ fn render_bg(bg:&Background) -> Dom {
                 .property("id", image.id.0.to_string())
                 .property("lib", image.lib.to_str())
                 .property("size", "full")
-            })
+            }))
         }
     }
 }

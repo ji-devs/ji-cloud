@@ -18,6 +18,7 @@ serde = { version = "1.0.126", features = ["derive"] }
 serde_repr = "0.1.7"
 strum = "0.21.0"
 strum_macros = "0.21.1"
+const_format = {version = "0.2.14", features = ["const_generics"] }
 log = "0.4.14"
 serde_json = "1.0.64"
 cfg-if = "1.0.0"
