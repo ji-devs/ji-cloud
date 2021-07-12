@@ -102,7 +102,7 @@ export class _ extends LitElement {
     }
 
     onClose() {
-      () => this.dispatchEvent(new Event("close"))
+      this.dispatchEvent(new Event("close"));
     }
 
     render() {
@@ -113,7 +113,7 @@ export class _ extends LitElement {
                 <slot></slot>
                 <div class="audio">
                   <slot name="audio">
-                    <button-icon icon="audio" @click=${this.onClose}></button-icon>
+                    <!--<button-icon icon="audio"></button-icon>-->
                   </slot>
                 </div> 
                 ${uncloseable 

@@ -22,7 +22,7 @@ enum Direction {
     Head,
     Tail 
 }
-impl Stickers {
+impl <T: AsSticker> Stickers<T> {
 
     pub fn duplicate(_self: Rc<Self>, index: usize) {
         if let Some(mut raw) = _self.get_raw(index) {
@@ -32,7 +32,7 @@ impl Stickers {
                 RawSticker::Text(text) => text.transform.nudge_for_duplicate(),
             };
             
-            _self.add_sticker(Sticker::new(_self.clone(), &raw));
+            _self.add_sticker(T::new_from_sticker(Sticker::new(_self.clone(), &raw)));
         }
     }
     pub fn move_forward(&self, index: usize) {
@@ -79,18 +79,18 @@ impl Stickers {
     }
 
     pub fn add_sprite(_self: Rc<Self>, image: Image) {
-        _self.add_sticker(Sticker::Sprite(Rc::new(
+        _self.add_sticker(T::new_from_sticker(Sticker::Sprite(Rc::new(
             Sprite::new(
                 &RawSprite::new(image),
                 Some(clone!(_self => move |_| {
                     _self.call_change();
                 }))
             )
-        )));
+        ))));
     }
 
     pub fn add_text(_self: Rc<Self>, value: String) {
-        _self.add_sticker(Sticker::Text(Rc::new(
+        _self.add_sticker(T::new_from_sticker(Sticker::Text(Rc::new(
             Text::new(
                 _self.text_editor.clone(),
                 &RawText::new(value),
@@ -98,13 +98,16 @@ impl Stickers {
                     _self.call_change();
                 }))
             )
-        )));
+        ))));
     }
 
-    pub fn add_sticker(&self, sticker: Sticker) {
-        let mut list = self.list.lock_mut();
-        list.push_cloned(sticker);
-        self.selected_index.set_neq(Some(list.len()-1));
+    pub fn add_sticker(&self, sticker: T) {
+        {
+            let mut list = self.list.lock_mut();
+            list.push_cloned(sticker);
+            self.selected_index.set_neq(Some(list.len()-1));
+        }
+        self.call_change();
     }
 
 
@@ -141,13 +144,7 @@ impl Stickers {
     // Internal - saving/history is done on the module level
     pub fn call_change(&self) {
         if let Some(on_change) = self.callbacks.on_change.as_ref() {
-            let raw:Vec<RawSticker> = 
-                self.list.lock_ref()
-                    .iter()
-                    .map(|sticker| sticker.to_raw())
-                    .collect();
-
-            on_change(raw);
+            on_change(&*self.list.lock_ref());
         }
     }
 }

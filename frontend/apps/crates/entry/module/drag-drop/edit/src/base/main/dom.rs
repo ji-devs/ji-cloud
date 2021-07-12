@@ -1,7 +1,11 @@
 use components::module::_common::edit::prelude::*;
 use dominator::{html, Dom, clone};
 use std::rc::Rc;
-use super::state::*;
+use super::{
+    state::*,
+    select::*,
+    drag::*
+};
 use components::{
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
@@ -16,12 +20,21 @@ impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
         html!("empty-fragment", {
             .child_signal(
-                state.locked_scene_signal().map(clone!(state => move |locked_scene| Some({
-                    if locked_scene {
-                        let raw_stickers = state.base.stickers.to_raw();
-                        render_stickers_raw(&raw_stickers)
-                    } else {
-                        render_stickers(state.base.stickers.clone())
+                state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
+                    match sticker_phase {
+                        StickerPhase::Scene => {
+                            render_stickers(state.base.stickers.clone())
+                        },
+                        StickerPhase::Select(state) => {
+                            MainSelect::render(state)
+                        },
+                        StickerPhase::Drag(state) => {
+                            MainDrag::render(state)
+                        },
+                        StickerPhase::Static => {
+                            let raw_stickers = state.base.stickers.to_raw();
+                            render_stickers_raw(&raw_stickers)
+                        }
                     }
                 })))
             )

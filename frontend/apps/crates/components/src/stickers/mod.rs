@@ -4,3 +4,4 @@ pub mod text;
 pub mod actions;
 pub mod state;
 pub mod callbacks;
+pub mod outline;

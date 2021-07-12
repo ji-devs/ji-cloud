@@ -1,4 +1,4 @@
-use components::module::_common::edit::prelude::*;
+use components::{module::_common::edit::prelude::*, stickers::state::Sticker};
 use components::audio_mixer::AudioMixer;
 use dominator_helpers::signals::OptionSignal;
 use uuid::Uuid;
@@ -36,7 +36,7 @@ use shared::domain::jig::{
 use futures_signals::{
     map_ref,
     signal::{self, Signal, SignalExt, ReadOnlyMutable, Mutable},
-    signal_vec::MutableVec
+    signal_vec::{MutableVec, SignalVecExt},
 };
 use utils::prelude::*;
 use components::{
@@ -45,7 +45,7 @@ use components::{
         callbacks::Callbacks as TextEditorCallbacks
     },
     stickers::{
-        state::Stickers,
+        state::{Stickers, AsSticker},
         callbacks::Callbacks as StickersCallbacks
     },
     backgrounds::{
@@ -73,13 +73,14 @@ pub struct Base {
     // DragDrop-specific
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers>, 
-    pub items_meta: Mutable<Vec<ItemMeta>>,
+    pub stickers: Rc<Stickers<Item>>, 
     pub traces: Rc<TracesEdit>,
     pub targets_meta: Mutable<Vec<TargetMeta>>,
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
     pub play_settings: Rc<PlaySettings>,
+
+    pub drag_item_selected_index: Mutable<Option<usize>>,
 }
 
 pub struct PlaySettings {
@@ -115,6 +116,58 @@ impl PlaySettings {
 }
 
 #[derive(Clone)]
+pub struct Item {
+    pub sticker: Sticker,
+    pub kind: Mutable<ItemKind>
+}
+
+impl Item {
+    pub fn new(stickers: Rc<Stickers<Item>>, raw:&RawItem) -> Self {
+        Self {
+            sticker: Sticker::new(stickers, &raw.sticker),
+            kind: Mutable::new(
+                      match raw.kind.clone() {
+                        RawItemKind::Static => ItemKind::Static,
+                        RawItemKind::Interactive(data) => {
+                            ItemKind::Interactive(Interactive::new(Some(data)))
+                        }
+                      }
+            )
+        }
+    }
+
+    pub fn to_raw(&self) -> RawItem {
+        RawItem {
+            sticker: self.sticker.to_raw(),
+            kind: match self.kind.get_cloned() {
+                    ItemKind::Static => RawItemKind::Static,
+                    ItemKind::Interactive(data) => {
+                        RawItemKind::Interactive(RawInteractive{
+                            audio: data.audio.get_cloned(),
+                            target_id: data.target_id.get_cloned()
+                        })
+                    }
+            }
+        }
+    }
+}
+
+impl AsSticker for Item {
+    fn new_from_sticker(sticker: Sticker) -> Self {
+        Self {
+            sticker,
+            kind: Mutable::new(ItemKind::Static)
+        }
+    }
+}
+
+impl AsRef<Sticker> for Item {
+    fn as_ref(&self) -> &Sticker {
+        &self.sticker
+    }
+}
+
+#[derive(Clone)]
 pub struct TargetMeta {
     pub id: Uuid,
 }
@@ -130,33 +183,6 @@ impl TargetMeta {
     }
 }
 
-#[derive(Clone)]
-pub struct ItemMeta {
-    pub kind: Mutable<ItemKind>
-}
-
-impl ItemMeta {
-    pub fn new(raw: Option<&RawItem>) -> Self {
-        Self {
-            kind: Mutable::new(
-              match raw {
-                  None => ItemKind::Static,
-                  Some(raw) => {
-                      match raw.kind.clone() {
-                        RawItemKind::Static => ItemKind::Static,
-                        RawItemKind::Interactive(data) => {
-                            ItemKind::Interactive(Interactive {
-                                audio: Mutable::new(data.audio),
-                                target_id: Mutable::new(data.target_id),
-                            })
-                        }
-                      }
-                  }
-              }
-            )
-        }
-    }
-}
 
 #[derive(Clone)]
 pub enum ItemKind {
@@ -168,6 +194,25 @@ pub enum ItemKind {
 pub struct Interactive {
     pub audio: Mutable<Option<Audio>>,
     pub target_id: Mutable<Option<Uuid>>,
+}
+
+impl Interactive {
+    pub fn new(raw: Option<RawInteractive>) -> Self {
+        match raw {
+            Some(data) => {
+                Self {
+                    audio: Mutable::new(data.audio),
+                    target_id: Mutable::new(data.target_id),
+                }
+            },
+            None => {
+                Self {
+                    audio: Mutable::new(None),
+                    target_id: Mutable::new(None),
+                }
+            }
+        }
+    }
 }
 
 
@@ -192,7 +237,7 @@ impl Base {
 
         let instructions = Mutable::new(content.instructions);
       
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
+        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Item>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
@@ -233,32 +278,34 @@ impl Base {
                 )
         ));
 
-        let stickers = Stickers::from_raw(
-                &content.items
-                    .iter()
-                    .map(|item| {
-                        item.sticker.clone()
-                    })
-                    .collect::<Vec<RawSticker>>(),
+        let stickers = Stickers::new(
                 text_editor.clone(),
                 StickersCallbacks::new(
-                    Some(clone!(history => move |raw_stickers| {
-                        //TODO - need to split into add/delete/change, like trace...
+                    Some(clone!(history => move |items:&[Item]| {
+                        history.push_modify(|raw| {
+                            if let Some(content) = &mut raw.content {
+                                content.items = items
+                                    .iter()
+                                    .map(|item| {
+                                        item.to_raw()
+                                    })
+                                    .collect();
+                            }
+                        });
                     }))
                 )
         );
-
-        *stickers_ref.borrow_mut() = Some(stickers.clone());
-
-        let items_meta = Mutable::new(
+       
+        stickers.replace_all(
             content.items
                 .iter()
                 .map(|item| {
-                    ItemMeta::new(Some(&item))
+                    Item::new(stickers.clone(), item)
                 })
-                .collect()
+                .collect::<Vec<Item>>()
         );
 
+        *stickers_ref.borrow_mut() = Some(stickers.clone());
 
         let traces = TracesEdit::from_raw(
 
@@ -308,11 +355,11 @@ impl Base {
             text_editor,
             backgrounds,
             stickers,
-            items_meta,
             traces,
             targets_meta,
             audio_mixer,
             play_settings: Rc::new(PlaySettings::new(content.play_settings.clone())),
+            drag_item_selected_index: Mutable::new(None),
         });
 
         *_self_ref.borrow_mut() = Some(_self.clone());
@@ -324,28 +371,27 @@ impl Base {
         self.theme_id.signal().map(|id| id.as_str_id())
     }
 
-    //TODO - these can/should be made simpler by maintaining a "selected for drag" index
-    //independent of stickers.selected_index
-    pub fn selected_item_meta_signal(&self) -> impl Signal<Item = Option<(usize, ItemMeta)>> {
+
+    pub fn selected_item_signal(&self) -> impl Signal<Item = Option<(usize, Item)>> {
         map_ref! {
-            let index = self.stickers.selected_index.signal(),
-            let items_meta = self.items_meta.signal_cloned()
+            let index = self.drag_item_selected_index.signal(),
+            let list = self.stickers.list.signal_vec_cloned().to_signal_cloned()
                 => {
                     index.and_then(|index| {
-                        items_meta
+                        list 
                             .get(index)
-                            .map(|meta| (index, meta.clone()))
+                            .map(|item| (index, item.clone())) 
                     })
                 }
         }
     }
 
     pub fn selected_item_kind_signal(&self) -> impl Signal<Item = Option<(usize, ItemKind)>> {
-        self.selected_item_meta_signal()
-            .map(|index_meta| {
+        self.selected_item_signal()
+            .map(|index_item| {
                 OptionSignal::new(
-                    index_meta.map(|(index, meta)| {
-                        meta.kind.signal_cloned()
+                    index_item.map(|(index, item)| {
+                        item.kind.signal_cloned()
                             .map(clone!(index => move |kind| (index, kind)))
                     })
                 )

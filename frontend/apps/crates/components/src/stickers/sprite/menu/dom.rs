@@ -9,11 +9,11 @@ use futures_signals::{
 };
 use super::{
     super::state::Sprite,
-    super::super::state::Stickers
+    super::super::state::{Stickers, AsSticker}
 };
 use shared::domain::jig::module::body::_groups::design::SpriteEffect;
 
-pub fn render_sticker_sprite_menu(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
+pub fn render_sticker_sprite_menu<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {

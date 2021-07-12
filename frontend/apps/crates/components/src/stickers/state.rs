@@ -16,12 +16,16 @@ use crate::text_editor::state::State as TextEditorState;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 
-pub struct Stickers 
+pub trait AsSticker: AsRef<Sticker> + Clone + 'static{
+    fn new_from_sticker(sticker: Sticker) -> Self;
+}
+
+pub struct Stickers<T: AsSticker>
 {
-    pub list: MutableVec<Sticker>,
+    pub list: MutableVec<T>,
     pub selected_index: Mutable<Option<usize>>,
     pub text_editor: Rc<TextEditorState>,
-    pub(super) callbacks: Callbacks,
+    pub(super) callbacks: Callbacks<T>,
 }
 
 #[derive(Clone)]
@@ -32,8 +36,19 @@ pub enum Sticker {
     Text(Rc<Text>)
 }
 
+impl AsRef<Sticker> for Sticker {
+    fn as_ref(&self) -> &Sticker {
+        self
+    }
+}
+impl AsSticker for Sticker {
+    fn new_from_sticker(sticker: Sticker) -> Self {
+        sticker
+    }
+}
+
 impl Sticker {
-    pub fn new(stickers: Rc<Stickers>, raw:&RawSticker) -> Self {
+    pub fn new<T: AsSticker>(stickers: Rc<Stickers<T>>, raw:&RawSticker) -> Self {
         match raw {
             RawSticker::Sprite(sprite) => Self::Sprite(Rc::new(
                 Sprite::new(
@@ -63,37 +78,26 @@ impl Sticker {
     }
 }
 
-impl Stickers {
+impl <T: AsSticker> Stickers<T> {
     pub fn to_raw(&self) -> Vec<RawSticker> {
         self.list
             .lock_ref()
             .iter()
-            .map(|sticker| sticker.to_raw())
+            .map(|sticker| sticker.as_ref().to_raw())
             .collect()
     }
 
-    pub fn from_raw(raw:&[RawSticker], text_editor: Rc<TextEditorState>, callbacks: Callbacks) -> Rc<Self> {
-  
-        let _self = Rc::new(Self{
+    pub fn new(text_editor: Rc<TextEditorState>, callbacks: Callbacks<T>) -> Rc<Self> {
+        Rc::new(Self{
             text_editor: text_editor.clone(),
             list: MutableVec::new(),
             selected_index: Mutable::new(None),
             callbacks,
-        });
+        })
+    }
 
-
-
-        if raw.len() > 0 {
-            _self.list.lock_mut().replace_cloned( 
-                        raw.
-                            into_iter()
-                            .map(|x| Sticker::new(_self.clone(), x))
-                            .collect()
-            );
-        }
-
-        _self
-
+    pub fn replace_all(&self, stickers: Vec<T>) {
+        self.list.lock_mut().replace_cloned(stickers);
     }
 
     pub fn get_current(&self) -> Option<Sticker> {
@@ -139,10 +143,10 @@ impl Stickers {
     }
 
     pub fn get(&self, index: usize) -> Option<Sticker> {
-        self.list.lock_ref().get(index).map(|x| x.clone())
+        self.list.lock_ref().get(index).map(|x| x.as_ref().clone())
     }
     pub fn get_raw(&self, index: usize) -> Option<RawSticker> {
-        self.list.lock_ref().get(index).map(|x| x.to_raw())
+        self.list.lock_ref().get(index).map(|x| x.as_ref().to_raw())
     }
 
     pub fn selected_signal(&self, index: ReadOnlyMutable<Option<usize>>) -> impl Signal<Item = bool> {

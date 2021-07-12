@@ -142,7 +142,7 @@ impl DebugSettings {
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::StickerText),
-            step_2_tab: Some(Step2TabKind::Audio),
+            step_2_tab: Some(Step2TabKind::Select),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })

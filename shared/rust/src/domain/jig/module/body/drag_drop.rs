@@ -150,7 +150,7 @@ pub enum ItemKind {
 }
 
 /// drag and drop sticker w/ metadata
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Interactive {
     /// audio

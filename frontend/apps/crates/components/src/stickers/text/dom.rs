@@ -19,12 +19,12 @@ use crate::{
 };
 use super::{
     state::Text,
-    super::state::Stickers,
+    super::state::{Stickers, AsSticker},
     menu::dom::render_sticker_text_menu
 };
 use web_sys::{DomRect, HtmlElement};
 
-pub fn render_sticker_text(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
+pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
     let get_visible_signals = || map_ref! {
         let is_editing = text.is_editing.signal(),
         let is_active = stickers.selected_signal(index.clone())
@@ -101,12 +101,46 @@ pub fn render_sticker_text(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<
                 None
             }
         })))
-
     })
-
 }
 
 pub fn render_sticker_text_raw(text: &RawText) -> Dom {
+    _render_sticker_text_raw_mixin(text, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
+}
+
+pub fn render_sticker_text_raw_mixin<F>(text: &RawText, mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_text_raw_mixin(text, Some(mixin))
+}
+
+fn _render_sticker_text_raw_mixin<F>(text: &RawText, mixin: Option<F>) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_text_raw_parent_mixin(DomBuilder::new_html("empty-fragment"), text, mixin)
+}
+
+pub fn sticker_text_raw_parent(parent: DomBuilder<HtmlElement>, text: &RawText) -> Dom 
+{
+    _render_sticker_text_raw_parent_mixin(parent, text, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+}
+
+pub fn render_sticker_text_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText,child_mixin: F) -> Dom
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> 
+{
+    _render_sticker_text_raw_parent_mixin(parent, text, Some(child_mixin))
+}
+
+//Yeah it's a bit weird, but helpful for creating generic containers like StickerOutline
+//The idea is that the sticker sets styles on the parent and then appends itself
+//So the parent gets transformed etc.
+fn _render_sticker_text_raw_parent_mixin<F>(parent: DomBuilder<HtmlElement>, text: &RawText, child_mixin: Option<F>) -> Dom
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
     const COORDS_IN_CENTER:bool = true;
 
     let size = Mutable::new(None);
@@ -122,7 +156,7 @@ pub fn render_sticker_text_raw(text: &RawText) -> Dom {
         size.signal_cloned(), 
     );
 
-    html!("empty_fragment", {
+    html!("empty-fragment", {
         .child(
             //invisible element for measuring text size
             //required so that the transform will match
@@ -138,8 +172,7 @@ pub fn render_sticker_text_raw(text: &RawText) -> Dom {
             })
         )
         .child(
-            html!("wysiwyg-output-renderer", {
-                .property("valueAsString", &text.value)
+            parent
                 .style("position", "absolute")
                 .style("transform", text.transform.rotation_matrix_string())
                 //the text determines transform size, not the other way around
@@ -147,7 +180,14 @@ pub fn render_sticker_text_raw(text: &RawText) -> Dom {
                 //.style_signal("height", height_signal.map(|x| format!("{}px", x)))
                 .style_signal("left", x_signal.map(|x| format!("{}px", x)))
                 .style_signal("top", y_signal.map(|x| format!("{}px", x)))
-            })
+                .child(
+                    html!("wysiwyg-output-renderer", {
+                        .property("valueAsString", &text.value)
+                        .apply_if(child_mixin.is_some(), move |dom| {
+                            dom.apply(child_mixin.unwrap_ji())
+                        })
+                    })
+            ).into_dom()
         )
     })
 }

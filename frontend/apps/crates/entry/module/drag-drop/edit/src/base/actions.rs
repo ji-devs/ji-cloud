@@ -9,7 +9,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
-            drag_drop::{Mode, Step, Content as RawContent, ModuleData as RawData},
+            drag_drop::{Mode, Step, Content as RawContent, ModuleData as RawData, ItemKind as RawItemKind, Interactive as RawInteractive},
             _groups::design::Trace as RawTrace,
         }
     }
@@ -100,15 +100,59 @@ impl Base {
         */
     }
 
-    pub fn set_drags_meta_audio(&self, index: usize, audio: Option<Audio>) {
-        /*
-        self.traces_meta.lock_ref().as_slice()[index].audio.set(audio.clone());
+    pub fn set_drag_item_selected(&self, index: usize) {
+        let list = &*self.stickers.list.lock_ref();
+        let kind = &list[index].kind;
 
-        self.history.push_modify(move |raw| {
-            if let Some(content) = &mut raw.content {
-                content.traces[index].audio = audio;
+        if std::mem::discriminant(&*kind.lock_ref()) == std::mem::discriminant(&ItemKind::Static) {
+            kind.set(ItemKind::Interactive(Interactive::new(None)));
+            self.history.push_modify(move |raw| {
+                if let Some(content) = &mut raw.content {
+                    content.items[index].kind = RawItemKind::Interactive(RawInteractive::default());
+                }
+            });
+        }
+
+        self.drag_item_selected_index.set(Some(index));
+    }
+
+    pub fn set_drag_item_deselected(&self, index: usize) {
+        let list = &*self.stickers.list.lock_ref();
+        let kind = &list[index].kind;
+
+        if std::mem::discriminant(&*kind.lock_ref()) != std::mem::discriminant(&ItemKind::Static) {
+            kind.set(ItemKind::Static);
+            self.history.push_modify(move |raw| {
+                if let Some(content) = &mut raw.content {
+                    content.items[index].kind = RawItemKind::Static;
+                }
+            });
+        }
+        self.drag_item_selected_index.set(None);
+    }
+
+    pub fn set_drag_item_meta_audio(&self, index: usize, audio: Option<Audio>) {
+        let list = &*self.stickers.list.lock_ref();
+        let kind = &list[index].kind;
+        match kind.get_cloned() {
+            ItemKind::Interactive(data) => {
+                data.audio.set(audio.clone());
+                self.history.push_modify(move |raw| {
+                    if let Some(content) = &mut raw.content {
+                        match &mut content.items[index].kind {
+                            RawItemKind::Interactive(data) => {
+                                data.audio = audio;
+                            },
+                            RawItemKind::Static => {
+                                panic!("saving audio on static item!?");
+                            },
+                        }
+                    }
+                });
+            },
+            _ => {
+                panic!("setting audio on static item!?");
             }
-        });
-        */
+        }
     }
 }

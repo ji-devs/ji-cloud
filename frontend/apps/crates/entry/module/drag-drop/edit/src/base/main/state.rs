@@ -13,6 +13,10 @@ use futures_signals::{
 use utils::prelude::*;
 use dominator::clone;
 use shared::domain::jig::module::body::drag_drop::Step;
+use super::{
+    drag::*,
+    select::*
+};
 
 pub struct Main {
     pub base: Rc<Base>,
@@ -25,10 +29,16 @@ impl Main {
         }
     }
 
-    pub fn locked_scene_signal(&self) -> impl Signal<Item = bool> {
+    pub fn sticker_phase_signal(&self) -> impl Signal<Item = StickerPhase> {
+        let base = self.base.clone();
+
         self.base.step.signal()
-            .map(|step| step != Step::One)
-            .dedupe()
+            .map(clone!(base => move |step| match step {
+                Step::One => StickerPhase::Scene,
+                Step::Two => StickerPhase::Select(MainSelect::new(base.clone())),
+                Step::Four => StickerPhase::Drag(MainDrag::new(base.clone())),
+                _ => StickerPhase::Static,
+            }))
     }
 
     pub fn trace_phase_signal(&self) -> impl Signal<Item = Option<TracePhase>> {
@@ -40,6 +50,14 @@ impl Main {
             })
             .dedupe()
     }
+}
+
+#[derive(Clone)]
+pub enum StickerPhase {
+    Scene,
+    Select(Rc<MainSelect>),
+    Drag(Rc<MainDrag>),
+    Static,
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]

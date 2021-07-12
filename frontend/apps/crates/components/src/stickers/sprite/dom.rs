@@ -1,4 +1,4 @@
-use dominator::{html, Dom, clone};
+use dominator::{html, Dom, clone, DomBuilder, apply_methods};
 use std::rc::Rc;
 use utils::{prelude::*, math::{bounds, transform_signals}};
 use wasm_bindgen::prelude::*;
@@ -9,10 +9,11 @@ use futures_signals::{
 };
 use super::{
     state::{Sprite, width_signal, height_signal},
-    super::state::Stickers,
+    super::state::{Stickers, AsSticker},
     actions::load_and_render,
     menu::dom::render_sticker_sprite_menu
 };
+use web_sys::HtmlElement;
 use crate::transform::dom::render_transform;
 use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Transform};
 //For stickers, just let the transform affect it directly
@@ -20,46 +21,46 @@ use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Tr
 //this is both faster for performance, theoretically, and simpler to use the same
 //code for playing and editing
 
-pub fn render_sticker_sprite(stickers:Rc<Stickers>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
-
+pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("empty-fragment", {
-        .child(html!("empty-fragment", {
+        .child(
+            html!("empty-fragment", {
+                .style("cursor", "pointer")
+                .style_signal("width", sprite.width_signal())
+                .style_signal("height", sprite.height_signal())
+                .style_signal("transform", sprite.transform.denormalize_matrix_string_signal())
+                // And pin the coordinate system to the center regardless of screen size
+                .style_signal("top", bounds::size_height_center_rem_signal(sprite.transform.size.signal()))
+                .style_signal("left", bounds::size_width_center_rem_signal(sprite.transform.size.signal()))
+                .style("display", "block")
+                .style("position", "absolute")
+                .future(sprite.effects.signal_cloned().for_each(clone!(sprite => move |effects| {
+                    clone!(sprite => async move {
 
-            .style("cursor", "pointer")
-            .style_signal("width", sprite.width_signal())
-            .style_signal("height", sprite.height_signal())
-            .style_signal("transform", sprite.transform.denormalize_matrix_string_signal())
-            // And pin the coordinate system to the center regardless of screen size
-            .style_signal("top", bounds::size_height_center_rem_signal(sprite.transform.size.signal()))
-            .style_signal("left", bounds::size_width_center_rem_signal(sprite.transform.size.signal()))
-            .style("display", "block")
-            .style("position", "absolute")
-            .future(sprite.effects.signal_cloned().for_each(clone!(sprite => move |effects| {
-                clone!(sprite => async move {
-
-                    let (src, width, height) = load_and_render(sprite.image.get_cloned(), &effects).await;
-                    sprite.transform.size.set(Some((width, height)));
-                    sprite.src.set(Some(src));
-                })
-            })))
-            .child_signal(sprite.src.signal_ref(clone!(stickers, index, sprite => move |src| {
-                src.as_ref().map(|src| {
-                    html!("img", {
-                        .attribute("src", src)
-                        .style("display", "block")
-                        .style("position", "relative")
-                        .style_signal("width", sprite.width_signal())
-                        .style_signal("height", sprite.height_signal())
-                        .style_signal("transform", sprite.inner_transform_signal()) 
-                        .event(clone!(index, stickers => move |evt:events::Click| {
-                            if let Some(index) = index.get_cloned() {
-                                stickers.select_index(index);
-                            }
-                        }))
+                        let (src, width, height) = load_and_render(sprite.image.get_cloned(), &effects).await;
+                        sprite.transform.size.set(Some((width, height)));
+                        sprite.src.set(Some(src));
                     })
-                })
-            })))
-        }))
+                })))
+                .child_signal(sprite.src.signal_ref(clone!(stickers, index, sprite => move |src| {
+                    src.as_ref().map(|src| {
+                        html!("img", {
+                            .attribute("src", src)
+                            .style("display", "block")
+                            .style("position", "relative")
+                            .style_signal("width", sprite.width_signal())
+                            .style_signal("height", sprite.height_signal())
+                            .style_signal("transform", sprite.inner_transform_signal()) 
+                            .event(clone!(index, stickers => move |evt:events::Click| {
+                                if let Some(index) = index.get_cloned() {
+                                    stickers.select_index(index);
+                                }
+                            }))
+                        })
+                    })
+                })))
+            })
+        )
         .child_signal(stickers.selected_signal(index.clone()).map(clone!(stickers, sprite, index => move |active| {
             if active {
                 Some(render_transform(
@@ -71,20 +72,55 @@ pub fn render_sticker_sprite(stickers:Rc<Stickers>, index: ReadOnlyMutable<Optio
                 None
             }
         })))
-
     })
+
 }
 
-
 pub fn render_sticker_sprite_raw(sprite: &RawSprite) -> Dom {
+    _render_sticker_sprite_raw_mixin(sprite, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
+}
 
+pub fn render_sticker_sprite_raw_mixin<F>(sprite: &RawSprite, mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_sprite_raw_mixin(sprite, Some(mixin))
+}
+
+fn _render_sticker_sprite_raw_mixin<F>(sprite: &RawSprite, mixin: Option<F>) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+
+    _render_sticker_sprite_raw_parent_mixin(DomBuilder::new_html("empty-fragment"), sprite, mixin)
+
+}
+
+pub fn render_sticker_sprite_raw_parent(parent: DomBuilder<HtmlElement>, sprite: &RawSprite) -> Dom
+{
+    _render_sticker_sprite_raw_parent_mixin(parent, sprite, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+}
+
+pub fn render_sticker_sprite_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, sprite: &RawSprite,child_mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_sprite_raw_parent_mixin(parent, sprite, Some(child_mixin))
+}
+
+//Yeah it's a bit weird, but helpful for creating generic containers like StickerOutline
+//The idea is that the sticker sets styles on the parent and then appends itself
+//So the parent gets transformed etc.
+fn _render_sticker_sprite_raw_parent_mixin<F>(parent: DomBuilder<HtmlElement>, sprite: &RawSprite, child_mixin: Option<F>) -> Dom
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
     let src:Mutable<Option<String>> = Mutable::new(None);
     let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);
 
     let RawSprite { image, effects, flip_horizontal, flip_vertical, ..} = sprite;
 
-    html!("empty-fragment", {
-
+    parent
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
         .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))
@@ -116,6 +152,7 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite) -> Dom {
                 })
             })
         })))
-    })
+        .apply_if(child_mixin.is_some(), |dom| dom.apply(child_mixin.unwrap_ji()))
+        .into_dom()
 
 }

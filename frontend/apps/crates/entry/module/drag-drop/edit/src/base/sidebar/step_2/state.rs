@@ -79,26 +79,23 @@ impl Tab {
 
                                 match item_kind {
                                     ItemKind::Static => None,
-                                    ItemKind::Interactive(data) => None
+                                    ItemKind::Interactive(data) => {
+                                        let opts = AudioInputOptions::new(
+                                            Some(data.audio.signal_cloned())
+                                        );
+
+                                        let callbacks = AudioCallbacks::new(
+                                            Some(clone!(base => move |audio:Audio| {
+                                               base.set_drag_item_meta_audio(index, Some(audio));
+                                            })),
+                                            Some(clone!(base => move || {
+                                               base.set_drag_item_meta_audio(index, None);
+                                            })),
+                                        );
+
+                                        Some(AudioInputState::new(opts, callbacks))
+                                    }
                                 }
-
-                                /* TODO
-                                let opts = AudioInputOptions::new(
-                                    //Some(item_kind.audio.signal_cloned())
-                                    None
-                                );
-
-                                let callbacks = AudioCallbacks::new(
-                                    Some(clone!(base => move |audio:Audio| {
-                                       // base.set_drags_meta_audio(index, Some(audio));
-                                    })),
-                                    Some(clone!(base => move || {
-                                        //base.set_drags_meta_audio(index, None);
-                                    })),
-                                );
-
-                                AudioInputState::new(opts, callbacks)
-                                */
                             })
                         }))
                 });
