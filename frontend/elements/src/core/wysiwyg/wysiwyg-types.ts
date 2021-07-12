@@ -36,6 +36,7 @@ export interface ControllerState {
     fontSize: FontSize,
     color?: Color,
     highlightColor?: Color,
+    boxColor?: Color,
     italic: boolean,
     underline: boolean,
     indentCount: IndentCount;
@@ -51,15 +52,19 @@ export const defaultState: ControllerState = {
     // keep here even undefined for Object.keys
     color: undefined,
     highlightColor: undefined,
+    boxColor: undefined,
     italic: false,
     underline: false,
     indentCount: 0,
 }
 
+export type KeyLevel = 'leaf' | 'element' | 'root';
 
-export function getKeyType<K extends keyof ControllerState>(key: K): 'leaf' | 'element' {
+export function getKeyLevel<K extends keyof ControllerState>(key: K): KeyLevel {
     if(key === "align" || key === "indentCount")
         return 'element';
+    if(key === "boxColor")
+        return 'root';
     else
         return 'leaf';
 }

@@ -1,9 +1,14 @@
 import { css, unsafeCSS } from "lit-element";
+import { html, nothing } from "lit-html";
 import { CSSProperties } from "react";
 import { EditorElement, EditorText } from "./slate-wysiwyg-react/EditorBackbone";
-import { Align } from "./wysiwyg-types";
+import { Align, WysiwygValue } from "./wysiwyg-types";
 
 export const baseStyles = css`
+    :host {
+        display: inline-block;
+        padding: 0 5px;
+    }
     p {
         margin: 0px;
     }
@@ -54,4 +59,18 @@ export function getLeafStyles(text: EditorText) {
     if(text.weight) styles.fontWeight = text.weight;
 
     return styles;
+}
+
+export function getRootStyles(value: WysiwygValue) {
+    if(value.boxColor) {
+        return html`
+            <style>
+                :host {
+                    background-color: ${value.boxColor}
+                }
+            </style>
+        `;
+    } else {
+        return nothing;
+    }
 }

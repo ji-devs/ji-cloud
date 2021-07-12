@@ -65,7 +65,7 @@ export class _ extends LitElement {
                 <slot name="insert-button"></slot>
             </div>
             <div class="divider"></div>
-            <hebrew-buttons></hebrew-buttons>
+            <hebrew-buttons full></hebrew-buttons>
             <div class="controls">
                 <div class="row first">
                     <div class="button-collection">

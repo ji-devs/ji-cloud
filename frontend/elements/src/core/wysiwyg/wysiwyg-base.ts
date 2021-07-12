@@ -1,11 +1,11 @@
-import { LitElement, html, customElement, query, property, PropertyValues, css } from 'lit-element';
+import { LitElement, html, customElement, query, property, PropertyValues, css, internalProperty } from 'lit-element';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { BaseSelection, Descendant, Point, Transforms } from 'slate';
-import { ControllerState, controlNameList, defaultState, ElementType, getKeyType, WysiwygValue } from './wysiwyg-types';
+import { ControllerState, controlNameList, defaultState, ElementType, getKeyLevel, WysiwygValue } from './wysiwyg-types';
 import { EditorElement, EditorText, EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
-import { baseStyles } from './styles';
+import { baseStyles, getRootStyles } from './styles';
 import { ThemeKind, THEMES, TextEditor as TextEditorTheme} from '@elements/_themes/themes';
 import { getThemeVars } from "./wysiwyg-theme";
 
@@ -57,6 +57,7 @@ export class _ extends LitElement {
         return v;
     }
 
+    @internalProperty()
     private value: WysiwygValue = this.createValue();
 
     public set valueAsString(v: string) {
@@ -85,6 +86,8 @@ export class _ extends LitElement {
 
     render() {
         return html`
+            ${getRootStyles(this.value)}
+
             <div id="editorRoot"></div>
         `;
     }
@@ -127,8 +130,17 @@ export class _ extends LitElement {
 
         const defaultValue = this.getDefault(key);
         let finalValue = key !== "element" && value === defaultValue ? undefined : value;
-        this.backbone.setValue(key, finalValue);
-        this.controllerState[key] = value;
+
+        if(getKeyLevel(key) === "root") {
+            let wysiwygValue: any = {...this.value};
+            wysiwygValue[key] = value;
+            this.value = wysiwygValue;
+
+            // if change is in root the event is dispatched right away since we can't rely on slate's onChange event
+            this.triggerValueChangeEvent();
+        } else {
+            this.backbone.setValue(key, finalValue);
+        }
 
         if(key === "element") {
             // setting element resets all other values
@@ -185,7 +197,15 @@ export class _ extends LitElement {
         }));
     }
 
-    private onChange(value: Descendant[]) {
+    private triggerValueChangeEvent() {
+        this.dispatchEvent(new CustomEvent("custom-change", {
+            detail: {
+                value: this.valueAsString
+            }
+        }));
+    }
+
+    private onSlateChange(value: Descendant[]) {
         this.checkForControlsChange();
         this.checkForValueChangeChange(value as EditorElement[]);
     }
@@ -196,22 +216,21 @@ export class _ extends LitElement {
         newValue.content = newContent;
         const newValueAsString = JSON.stringify(newValue);
         if(valueAsString !== newValueAsString) {
-            this.dispatchEvent(new CustomEvent("custom-change", {
-                detail: {
-                    value: newValueAsString
-                }
-            }));
+            this.value = newValue;
+            this.triggerValueChangeEvent();
         }
-        this.value = newValue;
     }
 
     private checkForControlsChange() {
         const leaf = this.backbone.getSelectedLeaf();
         const element = this.backbone.getSelectedElement();
+        const root = this.value;
 
         for (const key of controlNameList) {
-            let node: any = getKeyType(key) === 'element' ? element
-                : leaf;
+            const keyLevel = getKeyLevel(key);
+            let node: any = keyLevel === 'element' ? element
+                : keyLevel === "leaf" ? leaf
+                : root;
 
             const controlValue = node?.[key] || this.getDefault(key);
             if(this.controllerState[key] != controlValue) {
@@ -243,7 +262,7 @@ export class _ extends LitElement {
                 {
                     backbone: this.backbone,
                     value: this.value.content,
-                    onChange: (e) => this.onChange(e),
+                    onChange: (e) => this.onSlateChange(e),
                     onBlur: (e: any) => this.onBlur(e),
                 }
             ),

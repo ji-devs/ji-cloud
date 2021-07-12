@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property, internalProperty } from "lit-element";
 import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 import "../drag/container";
 import "./hebrew-keyboard/hebrew-keyboard";
 
@@ -27,6 +28,7 @@ export class _ extends LitElement {
                 }
                 button img-ui {
                     display: none;
+                    height: 28px;
                 }
                 button:not(.active):not(:hover) .img-default {
                     display: block;
@@ -42,12 +44,15 @@ export class _ extends LitElement {
                     height: 20px;
                     background-color: var(--main-blue);
                 }
+                :host(:not([full]):not(:hover)) .full-only {
+                    display: none;
+                }
             `,
         ];
     }
 
     @property({ type: Boolean })
-    short: boolean = true;
+    full: boolean = false;
 
     @internalProperty()
     active?: Button;
@@ -71,14 +76,17 @@ export class _ extends LitElement {
         `;
     }
 
-    private renderButton(button: Button) {
-        const activeClass = this.active === button ? "active" : "";
+    private renderButton(button: Button, fullOnly: boolean) {
+        const classes = classMap({
+            "active": this.active === button,
+            "full-only": fullOnly,
+        });
 
         return html`
             <button
                 type="button"
                 @click="${() => this.onButtonClick(button)}"
-                class="${activeClass}"
+                class="${classes}"
             >
                 <img-ui class="img-default" path="core/hebrew-buttons/${button}.svg"></img-ui>
                 <img-ui class="img-hover" path="core/hebrew-buttons/${button}-hover.svg"></img-ui>
@@ -90,11 +98,11 @@ export class _ extends LitElement {
     render() {
         return html`
             <div class="main">
-                ${this.renderButton("sefaria")}
-                <div class="divider"></div>
-                ${this.renderButton("dicta")}
-                <div class="divider"></div>
-                ${this.renderButton("keyboard")}
+                ${this.renderButton("sefaria", true)}
+                <div class="divider full-only"></div>
+                ${this.renderButton("dicta", true)}
+                <div class="divider full-only"></div>
+                ${this.renderButton("keyboard", false)}
             </div>
             ${
                 this.active === "keyboard" ? this.renderHebrewKeyboard()

@@ -1,6 +1,6 @@
 import { Editor, Transforms, Text, createEditor, BaseEditor, NodeEntry, Node, Element as SlateElement } from "slate";
 import { ReactEditor, withReact } from "slate-react";
-import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getKeyType } from "../wysiwyg-types";
+import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getKeyLevel } from "../wysiwyg-types";
 
 export type EditorElement = {
     children: EditorText[];
@@ -60,11 +60,13 @@ export class EditorBackbone {
     }
 
     getValue<K extends keyof ControllerState>(key: K): ControllerState[K] | undefined {
-        const keyType = getKeyType(key);
+        const keyType = getKeyLevel(key);
         if(keyType === 'element') {
             return (this.getSelectedElement() as any)?.[key];
-        } else {
+        } else if(keyType === "leaf") {
             return (this.getSelectedLeaf() as any)?.[key];
+        } else {
+            throw new Error("Should not be handled on this level");
         }
     }
 
@@ -87,19 +89,21 @@ export class EditorBackbone {
     }
 
     setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K] | undefined) {
-        const keyType = getKeyType(key);
+        const keyType = getKeyLevel(key);
         if(keyType === 'element') {
             Transforms.setNodes(
                 this._editor,
                 { [key]: value },
                 { match: n => Editor.isBlock(this._editor, n) }
             );
-        } else {
+        } else if(keyType === "leaf") {
             Transforms.setNodes(
                 this._editor,
                 {[key]: value},
                 { match: n => Text.isText(n), split: true }
             );
+        } else {
+            throw new Error("Should not be handled on this level");
         }
     }
 
