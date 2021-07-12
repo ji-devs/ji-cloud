@@ -5,6 +5,7 @@ import "@elements/core/images/ui";
 import "@elements/core/buttons/icon";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/circle";
+import "@elements/core/box/outline";
 import "@elements/core/inputs/primitives/textarea-content";
 import "@elements/core/menu/menu-tabs/menu-tabs";
 import "@elements/core/menu/menu-tabs/menu-tab";
