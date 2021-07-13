@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use dominator::{Dom, clone, html};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use utils::events;
 
 use super::super::state::{Language, State};
@@ -15,6 +15,16 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("label", STR_LANGUAGE_LABEL)
         .property("placeholder", STR_LANGUAGE_PLACEHOLDER)
         .property_signal("value", language_value_signal(state.clone()))
+        .property_signal("error", {
+            (map_ref! {
+                let submission_tried = state.submission_tried.signal(),
+                let value = state.jig.language.signal_cloned()
+                    => (*submission_tried, value.clone())
+            })
+                .map(|(submission_tried, value)| {
+                    submission_tried && value.is_empty()
+                })
+        })
         .children(state.languages.iter().map(clone!(state => move |language| {
             render_language(language, state.clone())
         })))

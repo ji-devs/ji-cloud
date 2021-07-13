@@ -74,8 +74,22 @@ async fn load_categories() -> Result<Vec<Category>, EmptyError> {
     }
 }
 
+fn form_invalid(state: Rc<State>) -> bool {
+    state.jig.display_name.lock_ref().is_empty()
+    ||
+    state.jig.description.lock_ref().is_empty()
+    ||
+    state.jig.language.lock_ref().is_empty()
+    ||
+    state.jig.age_ranges.lock_ref().is_empty()
+    ||
+    state.jig.goals.lock_ref().is_empty()
+    ||
+    state.jig.categories.lock_ref().is_empty()
+}
+
 pub fn save_jig(state: Rc<State>) {
-    if state.jig.display_name.lock_ref().is_empty() {
+    if form_invalid(Rc::clone(&state)) {
         state.submission_tried.set(true);
         return;
     };
