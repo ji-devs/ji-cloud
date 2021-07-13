@@ -33,7 +33,7 @@ use components::{
         callbacks::Callbacks as TextEditorCallbacks
     },
     stickers::{
-        state::Stickers,
+        state::{Stickers, Sticker},
         callbacks::Callbacks as StickersCallbacks
     },
     backgrounds::{
@@ -55,7 +55,7 @@ pub struct Base {
     pub jig_theme_id: Mutable<ThemeId>,
     // Poster-specific
     pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers>, 
+    pub stickers: Rc<Stickers<Sticker>>, 
     pub text_editor: Rc<TextEditorState>,
     pub audio_mixer: AudioMixer,
 }
@@ -85,7 +85,7 @@ impl Base {
 
         let instructions = Mutable::new(base_content.instructions);
       
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
+        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
@@ -126,18 +126,31 @@ impl Base {
                 )
         ));
 
-        let stickers = Stickers::from_raw(
-                &base_content.stickers,
+        let stickers = Stickers::new(
                 text_editor.clone(),
                 StickersCallbacks::new(
-                    Some(clone!(history => move |raw_stickers| {
+                    Some(clone!(history => move |stickers:&[Sticker]| {
                         history.push_modify(|raw| {
                             if let Some(content) = &mut raw.content {
-                                content.base.stickers = raw_stickers;
+                                content.base.stickers = stickers 
+                                    .iter()
+                                    .map(|sticker| {
+                                        sticker.to_raw()
+                                    })
+                                    .collect();
                             }
                         });
                     }))
                 )
+        );
+       
+        stickers.replace_all(
+            base_content.stickers.clone()
+                .iter()
+                .map(|raw_sticker| {
+                    Sticker::new(stickers.clone(), raw_sticker)
+                })
+                .collect::<Vec<Sticker>>()
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());

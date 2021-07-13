@@ -47,10 +47,21 @@ pub fn get_resize_info() -> ResizeInfo {
 
 
 impl ResizeInfo {
+    //given a px value relative to the viewport, get normalized coordinates 
+    pub fn get_px_normalized(&self, x: f64, y: f64) -> (f64, f64) {
+        let x = x / self.width;
+        let y = y / self.height;
+
+        (x, y)
+    }
 
     //given normalized coordinates, get the current relative value in pixels
-    pub fn get_pos_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
+    pub fn get_px_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
         (x * self.width, y * self.height)
+    }
+    //alias for the above
+    pub fn get_pos_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
+        self.get_px_denormalized(x, y)
     }
 
     //given absolute coordinates, get the coordinats within the viewport
@@ -75,15 +86,12 @@ impl ResizeInfo {
     //given absolute coordinates, get normalized coordinates within the viewport
     pub fn get_pos_normalized(&self, x: f64, y: f64) -> (f64, f64) {
         let (x, y) = self.get_pos_px(x, y);
-
-        let x = x / self.width;
-        let y = y / self.height;
-
-        (x, y)
+        self.get_px_normalized(x, y)
     }
     pub fn get_size_denormalized(&self, width: f64, height: f64) -> (f64, f64) {
         (width * self.width, height * self.height)
     }
+
 
     //given current pixel size, get size in relative units
     pub fn get_size_rem(&self, width: f64, height: f64) -> (f64, f64) {

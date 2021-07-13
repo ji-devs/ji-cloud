@@ -9,7 +9,10 @@ use super::{
 use components::{
     backgrounds::dom::render_backgrounds, 
     stickers::dom::{render_stickers, render_stickers_raw},
-    traces::edit::dom::render_traces_edit
+    traces::{
+        edit::dom::render_traces_edit,
+        hints::dom::render_traces_hint,
+    }
 };
 use futures_signals::{
     signal_vec::SignalVecExt,
@@ -18,7 +21,23 @@ use futures_signals::{
 
 impl DomRenderable for Main {
     fn render(state: Rc<Main>) -> Dom {
+        let theme_id = state.base.theme_id.get();
+
         html!("empty-fragment", {
+            .child_signal(
+                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
+                    trace_phase.map(|trace_phase| {
+                        match trace_phase {
+                            TracePhase::Edit => {
+                                render_traces_edit(state.base.traces.clone())
+                            },
+                            TracePhase::Show => {
+                                render_traces_hint(state.base.traces.to_raw())
+                            }
+                        }
+                    })
+                }))
+            )
             .child_signal(
                 state.sticker_phase_signal().map(clone!(state => move |sticker_phase| Some({
                     match sticker_phase {
@@ -33,24 +52,10 @@ impl DomRenderable for Main {
                         },
                         StickerPhase::Static => {
                             let raw_stickers = state.base.stickers.to_raw();
-                            render_stickers_raw(&raw_stickers)
+                            render_stickers_raw(&raw_stickers, theme_id)
                         }
                     }
                 })))
-            )
-            .child_signal(
-                state.trace_phase_signal().map(clone!(state => move |trace_phase| {
-                    trace_phase.map(|trace_phase| {
-                        match trace_phase {
-                            TracePhase::Edit => {
-                                render_traces_edit(state.base.traces.clone())
-                            },
-                            TracePhase::Show => {
-                                html!("div")
-                            }
-                        }
-                    })
-                }))
             )
         })
     }

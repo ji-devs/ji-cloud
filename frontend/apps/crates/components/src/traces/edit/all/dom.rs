@@ -22,7 +22,7 @@ use awsm_web::canvas::get_2d_context;
 use once_cell::sync::Lazy;
 use std::fmt::Write;
 
-pub fn render_traces_all(state:Rc<Edit>) -> Dom { 
+pub fn render_traces_all(state:Rc<TracesEdit>) -> Dom { 
 
     let mask_children = resize_info_signal()
         .switch_signal_vec(clone!(state => move |resize_info| {
@@ -80,7 +80,7 @@ pub fn render_traces_all(state:Rc<Edit>) -> Dom {
                 mask_children,
                 click_children,
                 clone!(state => move |x, y| {
-                    Edit::start_draw(state.clone(), None, Some((x, y)));
+                    TracesEdit::start_draw(state.clone(), None, Some((x, y)));
                 }),
                 clone!(state => move |x, y| {
                 }),

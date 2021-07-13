@@ -10,14 +10,14 @@ use futures_signals::{
 
 use crate::traces::edit::state::*;
 
-pub fn render_menu(state:Rc<Edit>, index: ReadOnlyMutable<Option<usize>>) -> Dom {
+pub fn render_menu(state:Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {
                 .property("icon", "edit")
                 .event(clone!(state, index => move |evt:events::Click| {
                     if let Some(index) = index.get() {
-                        Edit::start_draw(state.clone(), Some(index), None);
+                        TracesEdit::start_draw(state.clone(), Some(index), None);
                     }
                 }))
             }),

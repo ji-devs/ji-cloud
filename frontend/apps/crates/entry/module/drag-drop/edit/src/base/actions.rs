@@ -104,11 +104,18 @@ impl Base {
         let list = &*self.stickers.list.lock_ref();
         let kind = &list[index].kind;
 
+
         if std::mem::discriminant(&*kind.lock_ref()) == std::mem::discriminant(&ItemKind::Static) {
-            kind.set(ItemKind::Interactive(Interactive::new(None)));
+            let data = RawInteractive {
+                audio: None,
+                target_offset: (0.0, 0.0),
+            };
+
+            kind.set(ItemKind::Interactive(Interactive::new(data.clone())));
+
             self.history.push_modify(move |raw| {
                 if let Some(content) = &mut raw.content {
-                    content.items[index].kind = RawItemKind::Interactive(RawInteractive::default());
+                    content.items[index].kind = RawItemKind::Interactive(data);
                 }
             });
         }
@@ -133,26 +140,41 @@ impl Base {
 
     pub fn set_drag_item_meta_audio(&self, index: usize, audio: Option<Audio>) {
         let list = &*self.stickers.list.lock_ref();
-        let kind = &list[index].kind;
-        match kind.get_cloned() {
-            ItemKind::Interactive(data) => {
-                data.audio.set(audio.clone());
-                self.history.push_modify(move |raw| {
-                    if let Some(content) = &mut raw.content {
-                        match &mut content.items[index].kind {
-                            RawItemKind::Interactive(data) => {
-                                data.audio = audio;
-                            },
-                            RawItemKind::Static => {
-                                panic!("saving audio on static item!?");
-                            },
-                        }
-                    }
-                });
-            },
-            _ => {
-                panic!("setting audio on static item!?");
+        let item = &list[index];
+        let data = item.get_interactive_unchecked();
+
+        data.audio.set(audio.clone());
+        self.history.push_modify(move |raw| {
+            if let Some(content) = &mut raw.content {
+                match &mut content.items[index].kind {
+                    RawItemKind::Interactive(data) => {
+                        data.audio = audio;
+                    },
+                    RawItemKind::Static => {
+                        panic!("saving audio on static item!?");
+                    },
+                }
             }
-        }
+        });
+    }
+
+    pub fn set_drag_item_target_offset(&self, index: usize, offset: (f64, f64)) {
+        let list = &*self.stickers.list.lock_ref();
+        let item = &list[index];
+        let data = item.get_interactive_unchecked();
+
+        data.target_offset.set(offset);
+        self.history.push_modify(move |raw| {
+            if let Some(content) = &mut raw.content {
+                match &mut content.items[index].kind {
+                    RawItemKind::Interactive(data) => {
+                        data.target_offset = offset;
+                    },
+                    RawItemKind::Static => {
+                        panic!("saving offset on static item!?");
+                    },
+                }
+            }
+        });
     }
 }

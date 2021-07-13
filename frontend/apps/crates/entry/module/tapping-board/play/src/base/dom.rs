@@ -22,7 +22,7 @@ impl DomRenderable for Base {
             .property("slot", "main")
             .children(&mut [
                 render_backgrounds_raw(&state.backgrounds, state.theme_id, None),
-                render_stickers_raw(&state.stickers),
+                render_stickers_raw(&state.stickers, state.theme_id),
                 render_game(Game::new(state.clone())),
             ])
         })

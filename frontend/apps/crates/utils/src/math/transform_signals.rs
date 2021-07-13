@@ -11,6 +11,13 @@ use dominator::clone;
 use crate::{prelude::*, math, resize::resize_info_signal};
 
 
+// the transform itself isn't expected to change here
+pub fn map_offset(transform:Transform, offset:impl Signal<Item = (f64, f64)> + 'static) -> impl Signal<Item = Transform> {
+    offset
+        .map(move |(offset_x, offset_y)| {
+            transform.map_offset(offset_x, offset_y)
+        })
+}
 /*
  * These are signals mainly due to resize info
  * it's common to pass in an always(transform)
@@ -29,6 +36,7 @@ pub fn bounds_px(
         }
     }
 }
+
 pub fn x_px(
     coords_in_center: bool, 
     transform_signal: impl Signal<Item = Transform>, 

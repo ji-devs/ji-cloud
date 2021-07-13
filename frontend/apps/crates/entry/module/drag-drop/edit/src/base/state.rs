@@ -1,6 +1,7 @@
 use components::{module::_common::edit::prelude::*, stickers::state::Sticker};
 use components::audio_mixer::AudioMixer;
 use dominator_helpers::signals::OptionSignal;
+use utils::drag::Drag;
 use uuid::Uuid;
 use std::rc::Rc;
 use shared::domain::jig::{
@@ -55,7 +56,7 @@ use components::{
     traces::{
         bubble::state::TraceBubble,
         edit::{
-            state::Edit as TracesEdit, 
+            state::TracesEdit, 
             callbacks::Callbacks as TracesCallbacks
         }
     },
@@ -129,7 +130,7 @@ impl Item {
                       match raw.kind.clone() {
                         RawItemKind::Static => ItemKind::Static,
                         RawItemKind::Interactive(data) => {
-                            ItemKind::Interactive(Interactive::new(Some(data)))
+                            ItemKind::Interactive(Interactive::new(data))
                         }
                       }
             )
@@ -144,9 +145,21 @@ impl Item {
                     ItemKind::Interactive(data) => {
                         RawItemKind::Interactive(RawInteractive{
                             audio: data.audio.get_cloned(),
-                            target_id: data.target_id.get_cloned()
+                            target_offset: data.target_offset.get_cloned()
                         })
                     }
+            }
+        }
+    }
+
+
+    pub fn get_interactive_unchecked(&self) -> Interactive {
+        match self.kind.get_cloned() {
+            ItemKind::Interactive(data) => {
+                data
+            }
+            _ => {
+                panic!("failed to get interactive data!");
             }
         }
     }
@@ -157,6 +170,12 @@ impl AsSticker for Item {
         Self {
             sticker,
             kind: Mutable::new(ItemKind::Static)
+        }
+    }
+    fn duplicate_with_sticker(&self, sticker: Sticker) -> Self {
+        Self {
+            sticker,
+            kind: Mutable::new(self.kind.get_cloned())
         }
     }
 }
@@ -193,24 +212,14 @@ pub enum ItemKind {
 #[derive(Clone)]
 pub struct Interactive {
     pub audio: Mutable<Option<Audio>>,
-    pub target_id: Mutable<Option<Uuid>>,
+    pub target_offset: Mutable<(f64, f64)>,
 }
 
 impl Interactive {
-    pub fn new(raw: Option<RawInteractive>) -> Self {
-        match raw {
-            Some(data) => {
-                Self {
-                    audio: Mutable::new(data.audio),
-                    target_id: Mutable::new(data.target_id),
-                }
-            },
-            None => {
-                Self {
-                    audio: Mutable::new(None),
-                    target_id: Mutable::new(None),
-                }
-            }
+    pub fn new(raw: RawInteractive) -> Self {
+        Self {
+            audio: Mutable::new(raw.audio),
+            target_offset: Mutable::new(raw.target_offset),
         }
     }
 }

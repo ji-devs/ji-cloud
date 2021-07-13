@@ -22,7 +22,7 @@ use utils::{
 };
 use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d};
 
-pub struct Edit 
+pub struct TracesEdit 
 {
     pub list: MutableVec<Rc<AllTrace>>,
     pub selected_index: Mutable<Option<usize>>,
@@ -43,7 +43,7 @@ pub struct DebugOptions {
     pub start_in_phase_draw: bool, 
 }
 
-impl Edit {
+impl TracesEdit {
     pub fn to_raw(&self) -> Vec<RawTrace> {
         self.list
             .lock_ref()

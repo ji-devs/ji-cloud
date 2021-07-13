@@ -22,7 +22,7 @@ use utils::{
 };
 
 
-impl Edit {
+impl TracesEdit {
     pub fn delete_index(&self, index: usize) {
         self.selected_index.set(None);
         self.list.lock_mut().remove(index);

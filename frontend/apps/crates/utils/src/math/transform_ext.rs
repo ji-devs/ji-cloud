@@ -15,8 +15,9 @@
 use crate::resize::ResizeInfo;
 use shared::domain::jig::module::body::{Vec3, Vec4, Transform};
 use super::mat4::Matrix4;
+use futures_signals::signal::{Signal, SignalExt};
 
-pub trait TransformExt {
+pub trait TransformExt: Clone {
     fn to_mat4(&self) -> Matrix4;
 
     /// Create a new Transform
@@ -51,6 +52,15 @@ pub trait TransformExt {
 
     fn nudge_for_duplicate(&mut self);
 
+    fn map_offset(&self, offset_x: f64, offset_y: f64) -> Self {
+        self.map(|t| {
+            let mut t = t.clone();
+            let (tx, ty) = t.get_translation_2d();
+            t.set_translation_2d(tx + offset_x, ty + offset_y);
+            t
+        })
+    }
+
     fn map<A>(&self, f: impl FnOnce(&Self) -> A) -> A {
         f(&self)
     }
@@ -84,8 +94,11 @@ impl RenderableMatrix for [f64;16] {
         )
     }
 }
-impl TransformExt for Transform {
 
+
+
+
+impl TransformExt for Transform {
             //translation: Vec3([0.0, 0.0, 0.0]),
             //rotation: Vec4([0.0, 0.0, 0.0, 1.0]),
             //scale: Vec3([1.0, 1.0, 1.0]),

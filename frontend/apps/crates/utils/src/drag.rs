@@ -26,7 +26,7 @@ use std::marker::Unpin;
 use std::future::Future;
 use std::task::{Context, Poll};
 use shared::domain::jig::ModuleKind;
-use crate::{math::*, resize::get_resize_info};
+use crate::{math::*, resize::{get_resize_info, resize_info_signal}};
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::SeqCst;
 
@@ -112,6 +112,12 @@ impl Drag {
             None
         }
     }
+    pub fn get_pos_normalized(&self) -> Option<(f64, f64)> { 
+        self.get_pos().map(|pos| {
+            let resize_info = get_resize_info();
+            resize_info.get_pos_normalized(pos.x as f64, pos.y as f64)
+        })
+    }
 
     pub fn pos_signal(&self) -> impl Signal<Item = Option<PointI32>> {
         map_ref! {
@@ -124,6 +130,16 @@ impl Drag {
                     Some(*pos)
                 }
             }
+        }
+    }
+
+    pub fn pos_normalized_signal(&self) -> impl Signal<Item = Option<(f64, f64)>> {
+        map_ref! {
+            let resize_info = resize_info_signal(),
+            let pos = self.pos_signal()
+                => {
+                    pos.map(|pos| resize_info.get_pos_normalized(pos.x as f64, pos.y as f64))
+                }
         }
     }
 

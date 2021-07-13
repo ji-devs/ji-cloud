@@ -1,11 +1,11 @@
 use dominator::{html, Dom, DomBuilder, clone, with_node, apply_methods};
-use dominator_helpers::signals::DomRectSignal;
+use dominator_helpers::signals::{DefaultSignal, DomRectSignal};
 use std::{borrow::BorrowMut, rc::Rc};
 use utils::{math::{BoundsF64, transform_signals}, prelude::*, resize::resize_info_signal};
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{self, always, Signal, Mutable, ReadOnlyMutable, SignalExt},
+    signal::{self, always, Always, Signal, Mutable, ReadOnlyMutable, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
@@ -19,10 +19,11 @@ use crate::{
 };
 use super::{
     state::Text,
-    super::state::{Stickers, AsSticker},
+    super::{dom::OffsetMutable, state::{Stickers, AsSticker}},
     menu::dom::render_sticker_text_menu
 };
 use web_sys::{DomRect, HtmlElement};
+
 
 pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
     let get_visible_signals = || map_ref! {
@@ -50,6 +51,7 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
             //required so that the transform will match
             html!("wysiwyg-output-renderer" => HtmlElement, {
                 .property_signal("valueAsString", text.value.signal_cloned())
+                .property_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
                 .apply(|dom| mixin_measured_text(dom, clone!(text => move |(width, height)| {
                     if width > 0.0 && height > 0.0 {
                         text.transform.size.set(Some((width, height)));
@@ -64,6 +66,7 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
                 //non-interactive rendering of wysiwyg text
                 Some(html!("wysiwyg-output-renderer", {
                     .property_signal("valueAsString", text.value.signal_cloned())
+                    .property_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
                     .style("cursor", "pointer")
                     .apply(|dom| apply_transform(dom, &text.transform))
                     .event(clone!(index, stickers, text => move |evt:events::Click| {
@@ -104,40 +107,63 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
     })
 }
 
-pub fn render_sticker_text_raw(text: &RawText) -> Dom {
-    _render_sticker_text_raw_mixin(text, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
+
+pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId) -> Dom {
+    _render_sticker_text_raw_mixin(text,theme_id, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
 }
 
-pub fn render_sticker_text_raw_mixin<F>(text: &RawText, mixin: F) -> Dom 
+pub fn render_sticker_text_raw_mixin<F>(text: &RawText, theme_id: ThemeId, mixin: F) -> Dom 
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
-    _render_sticker_text_raw_mixin(text, Some(mixin))
+    _render_sticker_text_raw_mixin(text, theme_id, Some(mixin))
 }
 
-fn _render_sticker_text_raw_mixin<F>(text: &RawText, mixin: Option<F>) -> Dom 
+fn _render_sticker_text_raw_mixin<F>(text: &RawText, theme_id: ThemeId, mixin: Option<F>) -> Dom 
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
-    _render_sticker_text_raw_parent_mixin(DomBuilder::new_html("empty-fragment"), text, mixin)
-}
 
-pub fn sticker_text_raw_parent(parent: DomBuilder<HtmlElement>, text: &RawText) -> Dom 
+    _render_sticker_text_raw_offset_parent_mixin(DomBuilder::new_html("empty-fragment"), text, theme_id, None, mixin)
+
+}
+pub fn render_sticker_text_raw_offset(text: &RawText, theme_id: ThemeId, offset: OffsetMutable) -> Dom
 {
-    _render_sticker_text_raw_parent_mixin(parent, text, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+    let parent = DomBuilder::new_html("empty-fragment");
+    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
 }
 
-pub fn render_sticker_text_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText,child_mixin: F) -> Dom
+pub fn render_sticker_text_raw_offset_mixin<F>(text: &RawText, theme_id: ThemeId, offset: OffsetMutable, mixin: F) -> Dom
 where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> 
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
-    _render_sticker_text_raw_parent_mixin(parent, text, Some(child_mixin))
+    let parent = DomBuilder::new_html("empty-fragment");
+    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), Some(mixin)) 
 }
 
-//Yeah it's a bit weird, but helpful for creating generic containers like StickerOutline
+pub fn render_sticker_text_raw_parent(parent: DomBuilder<HtmlElement>, theme_id: ThemeId, text: &RawText) -> Dom
+{
+    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, None, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+}
+
+pub fn render_sticker_text_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, child_mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, None, Some(child_mixin))
+}
+
+pub fn render_sticker_text_raw_offset_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, offset: OffsetMutable, child_mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), Some(child_mixin))
+}
+
+//The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
 //The idea is that the sticker sets styles on the parent and then appends itself
 //So the parent gets transformed etc.
-fn _render_sticker_text_raw_parent_mixin<F>(parent: DomBuilder<HtmlElement>, text: &RawText, child_mixin: Option<F>) -> Dom
+fn _render_sticker_text_raw_offset_parent_mixin<F>(parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, offset: Option<OffsetMutable>, child_mixin: Option<F>) -> Dom
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
@@ -145,14 +171,25 @@ where
 
     let size = Mutable::new(None);
 
+    let transform = text.transform.clone();
+
+    let get_transform_signal = clone!(offset, transform => move || {
+        DefaultSignal::new(
+            transform.clone(),
+            offset.clone().map(clone!(transform => move |offset| {
+                transform_signals::map_offset(transform, offset.signal_cloned())
+            }))
+        )
+    });
+
     let x_signal = transform_signals::x_px(
         COORDS_IN_CENTER, 
-        always(text.transform.clone()), 
+        get_transform_signal(), 
         size.signal_cloned(), 
     );
     let y_signal = transform_signals::y_px(
         COORDS_IN_CENTER, 
-        always(text.transform.clone()), 
+        get_transform_signal(), 
         size.signal_cloned(), 
     );
 
@@ -162,6 +199,7 @@ where
             //required so that the transform will match
             html!("wysiwyg-output-renderer" => HtmlElement, {
                 .property("valueAsString", &text.value)
+                .property("theme", theme_id.as_str_id())
                 .apply(|dom| mixin_measured_text(dom, clone!(size => move |(width, height)| {
                     if width > 0.0 && height > 0.0 {
                         size.set(Some((width, height)));
@@ -183,6 +221,7 @@ where
                 .child(
                     html!("wysiwyg-output-renderer", {
                         .property("valueAsString", &text.value)
+                        .property("theme", theme_id.as_str_id())
                         .apply_if(child_mixin.is_some(), move |dom| {
                             dom.apply(child_mixin.unwrap_ji())
                         })

@@ -1,7 +1,7 @@
 use components::module::_common::edit::prelude::*;
 use components::traces::{
     bubble::state::TraceBubble,
-    edit::state::Edit as TracesEdit
+    edit::state::TracesEdit
 };
 use crate::base::state::Base;
 use std::rc::Rc;

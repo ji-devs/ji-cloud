@@ -3,6 +3,7 @@ use futures_signals::{
     signal_vec::{SignalVecExt, SignalVec, MutableVec},
     signal::{Signal, SignalExt, Mutable, ReadOnlyMutable},
 };
+use utils::prelude::TransformExt;
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -12,12 +13,13 @@ use super::{
     text::state::Text,
     callbacks::Callbacks,
 };
-use crate::text_editor::state::State as TextEditorState;
+use crate::{text_editor::state::State as TextEditorState, transform::state::TransformState};
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 
 pub trait AsSticker: AsRef<Sticker> + Clone + 'static{
     fn new_from_sticker(sticker: Sticker) -> Self;
+    fn duplicate_with_sticker(&self, sticker: Sticker) -> Self;
 }
 
 pub struct Stickers<T: AsSticker>
@@ -43,6 +45,9 @@ impl AsRef<Sticker> for Sticker {
 }
 impl AsSticker for Sticker {
     fn new_from_sticker(sticker: Sticker) -> Self {
+        sticker
+    }
+    fn duplicate_with_sticker(&self, sticker: Sticker) -> Self {
         sticker
     }
 }
@@ -76,6 +81,19 @@ impl Sticker {
             Self::Text(text) => RawSticker::Text(text.to_raw()),
         }
     }
+
+    pub fn get_translation_2d(&self) -> (f64, f64) {
+        match self {
+            Self::Sprite(sprite) => sprite.transform.get_inner_clone().get_translation_2d(),
+            Self::Text(text) => text.transform.get_inner_clone().get_translation_2d()
+        }
+    }
+    pub fn transform(&self) -> &TransformState {
+        match self {
+            Self::Sprite(sprite) => &sprite.transform,
+            Self::Text(text) => &text.transform,
+        }
+    }
 }
 
 impl <T: AsSticker> Stickers<T> {
@@ -100,6 +118,15 @@ impl <T: AsSticker> Stickers<T> {
         self.list.lock_mut().replace_cloned(stickers);
     }
 
+    pub fn map_current<F, A>(&self, f: F) -> Option<A> 
+    where
+        F: FnOnce(&T) -> A
+    {
+        self
+            .selected_index
+            .get_cloned()
+            .and_then(|i| self.map(i, f)) 
+    }
     pub fn get_current(&self) -> Option<Sticker> {
         self
             .selected_index
@@ -140,6 +167,13 @@ impl <T: AsSticker> Stickers<T> {
     pub fn get_current_as_sprite(&self) -> Option<Rc<Sprite>> {
         self.get_index()
             .and_then(|index| self.get_as_sprite(index))
+    }
+
+    pub fn map<F, A>(&self, index: usize, f: F) -> Option<A> 
+    where
+        F: FnOnce(&T) -> A
+    {
+        self.list.lock_ref().get(index).map(|x| f(x))
     }
 
     pub fn get(&self, index: usize) -> Option<Sticker> {

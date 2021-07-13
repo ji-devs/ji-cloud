@@ -12,28 +12,7 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{
-    domain::{
-        audio::AudioId, 
-        image::ImageId, 
-        jig::{
-            JigId, 
-            module::{
-                ModuleId, 
-                body::{
-                    Image,
-                    ThemeChoice,
-                    Background,
-                    Instructions, 
-                    Transform,
-                    drag_drop::{Content, Mode, Step, ModuleData as RawData, TargetArea, Item, ItemKind},
-                    _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }
-                }
-            }
-        }
-    },
-    media::MediaLibrary
-};
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::{Background, Image, Instructions, ThemeChoice, Transform, _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }, drag_drop::{Content, Interactive, Item, ItemKind, Mode, ModuleData as RawData, Step, TargetArea}}}}}, media::MediaLibrary};
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
@@ -120,7 +99,11 @@ impl DebugSettings {
 
                                 Item {
                                     sticker,
-                                    kind: ItemKind::Static
+                                    //kind: ItemKind::Static
+                                    kind: ItemKind::Interactive(Interactive {
+                                        audio: None,
+                                        target_offset: (0.0, 0.0)
+                                    })
                                 }
                             }).collect(),
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
@@ -138,7 +121,7 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Two),
+            step: Some(Step::Four),
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::StickerText),

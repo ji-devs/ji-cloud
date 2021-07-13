@@ -156,8 +156,8 @@ pub struct Interactive {
     /// audio
     pub audio: Option<Audio>,
 
-    /// target trace id
-    pub target_id: Option<Uuid>,
+    /// target offset in normalized coordinates
+    pub target_offset: (f64, f64),
 }
 
 /// drag and drop trace w/ metadata

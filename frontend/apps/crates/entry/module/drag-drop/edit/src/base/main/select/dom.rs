@@ -17,6 +17,7 @@ use futures_signals::{
 
 impl MainSelect {
     pub fn render(state: Rc<Self>) -> Dom {
+        let theme_id = state.base.theme_id.get();
         let raw_stickers = Rc::new(state.base.stickers.to_raw());
         
         html!("empty-fragment", {
@@ -27,6 +28,7 @@ impl MainSelect {
 
                         render_sticker_raw_parent_mixin(
                             &sticker,
+                            theme_id,
                             match kind {
                                 ItemKind::Static => DomBuilder::new_html("empty-fragment"),
                                 ItemKind::Interactive(kind_state) => {

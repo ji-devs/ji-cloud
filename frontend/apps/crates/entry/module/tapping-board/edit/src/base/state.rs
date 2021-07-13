@@ -38,7 +38,7 @@ use components::{
         callbacks::Callbacks as TextEditorCallbacks
     },
     stickers::{
-        state::Stickers,
+        state::{Stickers,Sticker},
         callbacks::Callbacks as StickersCallbacks
     },
     backgrounds::{
@@ -48,7 +48,7 @@ use components::{
     traces::{
         bubble::state::TraceBubble,
         edit::{
-            state::Edit as TracesEdit, 
+            state::TracesEdit, 
             callbacks::Callbacks as TracesCallbacks
         }
     },
@@ -66,7 +66,7 @@ pub struct Base {
     // TappingBoard-specific
     pub theme_id: ReadOnlyMutable<ThemeId>,
     pub backgrounds: Rc<Backgrounds>, 
-    pub stickers: Rc<Stickers>, 
+    pub stickers: Rc<Stickers<Sticker>>, 
     pub traces: Rc<TracesEdit>,
     pub traces_meta: MutableVec<TraceMeta>,
     pub text_editor: Rc<TextEditorState>,
@@ -144,7 +144,7 @@ impl Base {
 
         let instructions = Mutable::new(content.base.instructions);
       
-        let stickers_ref:Rc<RefCell<Option<Rc<Stickers>>>> = Rc::new(RefCell::new(None));
+        let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
         let text_editor = TextEditorState::new(
             theme_id.clone(),
@@ -185,18 +185,32 @@ impl Base {
                 )
         ));
 
-        let stickers = Stickers::from_raw(
-                &content.base.stickers,
+
+        let stickers = Stickers::new(
                 text_editor.clone(),
                 StickersCallbacks::new(
-                    Some(clone!(history => move |raw_stickers| {
+                    Some(clone!(history => move |stickers:&[Sticker]| {
                         history.push_modify(|raw| {
                             if let Some(content) = &mut raw.content {
-                                content.base.stickers = raw_stickers;
+                                content.base.stickers = stickers 
+                                    .iter()
+                                    .map(|sticker| {
+                                        sticker.to_raw()
+                                    })
+                                    .collect();
                             }
                         });
                     }))
                 )
+        );
+       
+        stickers.replace_all(
+            content.base.stickers.clone()
+                .iter()
+                .map(|raw_sticker| {
+                    Sticker::new(stickers.clone(), raw_sticker)
+                })
+                .collect::<Vec<Sticker>>()
         );
 
         *stickers_ref.borrow_mut() = Some(stickers.clone());

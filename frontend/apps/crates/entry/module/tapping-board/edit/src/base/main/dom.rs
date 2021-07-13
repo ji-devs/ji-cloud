@@ -28,9 +28,10 @@ impl DomRenderable for Main {
                         },
                         Phase::Trace => {
                             let raw_stickers = state.base.stickers.to_raw();
+                            let theme_id = state.base.theme_id.get();
 
                             vec![
-                                render_stickers_raw(&raw_stickers),
+                                render_stickers_raw(&raw_stickers, theme_id),
                                 render_traces_edit(state.base.traces.clone()),
                                 html!("empty-fragment", {
                                     .children_signal_vec(

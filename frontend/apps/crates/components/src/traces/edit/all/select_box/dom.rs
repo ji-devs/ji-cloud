@@ -22,7 +22,7 @@ use crate::traces::{
 };
 
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
-pub fn render_select_box(state: Rc<Edit>, index: ReadOnlyMutable<Option<usize>>, trace: &AllTrace, resize_info:&ResizeInfo) -> Dom {
+pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>, trace: &AllTrace, resize_info:&ResizeInfo) -> Dom {
 
     let select_box = trace.select_box.clone();
 

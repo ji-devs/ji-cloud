@@ -1,15 +1,12 @@
 use dominator::{html, Dom, clone, DomBuilder, apply_methods};
+use dominator_helpers::signals::DefaultSignal;
 use std::rc::Rc;
 use utils::{prelude::*, math::{bounds, transform_signals}};
 use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::{always, Signal, Mutable, ReadOnlyMutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
+use futures_signals::{map_ref, signal::{Always, Mutable, ReadOnlyMutable, Signal, SignalExt, always}, signal_vec::SignalVecExt};
 use super::{
     state::{Sprite, width_signal, height_signal},
-    super::state::{Stickers, AsSticker},
+    super::{dom::OffsetMutable, state::{Stickers, AsSticker}},
     actions::load_and_render,
     menu::dom::render_sticker_sprite_menu
 };
@@ -20,6 +17,7 @@ use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Tr
 //that means it's not a child of the transform, they're independent
 //this is both faster for performance, theoretically, and simpler to use the same
 //code for playing and editing
+
 
 pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("empty-fragment", {
@@ -92,26 +90,45 @@ where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
 
-    _render_sticker_sprite_raw_parent_mixin(DomBuilder::new_html("empty-fragment"), sprite, mixin)
+    _render_sticker_sprite_raw_offset_parent_mixin(DomBuilder::new_html("empty-fragment"), sprite, None, mixin)
 
+}
+pub fn render_sticker_sprite_raw_offset(sprite: &RawSprite, offset: OffsetMutable) -> Dom
+{
+    let parent = DomBuilder::new_html("empty-fragment");
+    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+}
+pub fn render_sticker_sprite_raw_offset_mixin<F>(sprite: &RawSprite, offset: OffsetMutable, mixin: F) -> Dom
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    let parent = DomBuilder::new_html("empty-fragment");
+    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), Some(mixin)) 
 }
 
 pub fn render_sticker_sprite_raw_parent(parent: DomBuilder<HtmlElement>, sprite: &RawSprite) -> Dom
 {
-    _render_sticker_sprite_raw_parent_mixin(parent, sprite, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
+    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, None, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
 }
 
 pub fn render_sticker_sprite_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, sprite: &RawSprite,child_mixin: F) -> Dom 
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
-    _render_sticker_sprite_raw_parent_mixin(parent, sprite, Some(child_mixin))
+    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, None, Some(child_mixin))
 }
 
-//Yeah it's a bit weird, but helpful for creating generic containers like StickerOutline
+pub fn render_sticker_sprite_raw_offset_parent_mixin<F>( parent: DomBuilder<HtmlElement>, sprite: &RawSprite, offset: OffsetMutable, child_mixin: F) -> Dom 
+where
+    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
+{
+    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), Some(child_mixin))
+}
+//The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
 //The idea is that the sticker sets styles on the parent and then appends itself
 //So the parent gets transformed etc.
-fn _render_sticker_sprite_raw_parent_mixin<F>(parent: DomBuilder<HtmlElement>, sprite: &RawSprite, child_mixin: Option<F>) -> Dom
+
+fn _render_sticker_sprite_raw_offset_parent_mixin<F>(parent: DomBuilder<HtmlElement>, sprite: &RawSprite, offset: Option<OffsetMutable>, child_mixin: Option<F>) -> Dom
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
 {
@@ -120,12 +137,21 @@ where
 
     let RawSprite { image, effects, flip_horizontal, flip_vertical, ..} = sprite;
 
+    let transform = sprite.transform.clone();
+
+    let transform_signal = DefaultSignal::new(
+        transform.clone(),
+        offset.map(|offset| {
+            transform_signals::map_offset(transform, offset.signal_cloned())
+        })
+    );
+
     parent
         .style_signal("width", width_signal(size.signal_cloned()))
         .style_signal("height", height_signal(size.signal_cloned()))
         .style_signal("top", bounds::size_height_center_rem_signal(size.signal()))
         .style_signal("left", bounds::size_width_center_rem_signal(size.signal()))
-        .style_signal("transform", transform_signals::denormalize_matrix_string(always(sprite.transform.clone())))
+        .style_signal("transform", transform_signals::denormalize_matrix_string(transform_signal))
 
         .style("display", "block")
         .style("position", "absolute")

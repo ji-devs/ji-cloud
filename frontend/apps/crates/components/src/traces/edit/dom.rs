@@ -16,7 +16,7 @@ use std::fmt::Write;
 
 
 
-pub fn render_traces_edit(state:Rc<Edit>) -> Dom {
+pub fn render_traces_edit(state:Rc<TracesEdit>) -> Dom {
     html!("empty-fragment", {
         .child_signal(state.phase.signal_cloned().map(clone!(state => move |phase| {
             match phase {

@@ -26,13 +26,16 @@ impl <T: AsSticker> Stickers<T> {
 
     pub fn duplicate(_self: Rc<Self>, index: usize) {
         if let Some(mut raw) = _self.get_raw(index) {
+            _self.map(index, |item| {
+                match &mut raw {
+                    RawSticker::Sprite(sprite) => sprite.transform.nudge_for_duplicate(),
+                    RawSticker::Text(text) => text.transform.nudge_for_duplicate(),
+                };
+               
+                let sticker = Sticker::new(_self.clone(), &raw);
 
-            match &mut raw {
-                RawSticker::Sprite(sprite) => sprite.transform.nudge_for_duplicate(),
-                RawSticker::Text(text) => text.transform.nudge_for_duplicate(),
-            };
-            
-            _self.add_sticker(T::new_from_sticker(Sticker::new(_self.clone(), &raw)));
+                _self.add_sticker(item.duplicate_with_sticker(sticker));
+            });
         }
     }
     pub fn move_forward(&self, index: usize) {
