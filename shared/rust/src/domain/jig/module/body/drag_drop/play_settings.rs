@@ -6,11 +6,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct PlaySettings {
-    /// hint style
-    pub hint: Hint,
-
     /// next style
     pub next: Next,
+
+    /// time limit in minutes
+    pub time_limit: Option<u32>,
+
+    /// hint style
+    pub hint: Hint,
 }
 
 /// Hint
@@ -34,18 +37,15 @@ impl Default for Hint {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub enum Next {
-    /// Continue
-    Continue,
+    /// Place all
+    PlaceAll,
 
-    /// SelectAll
-    SelectAll,
-
-    /// Select Some
-    SelectSome(usize),
+    /// click continue
+    ClickContinue,
 }
 
 impl Default for Next {
     fn default() -> Self {
-        Self::Continue
+        Self::PlaceAll
     }
 }

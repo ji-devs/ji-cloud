@@ -295,15 +295,56 @@ pub struct Image {
     pub lib: MediaLibrary,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Vector of 2 floats
+pub struct Vec2(pub [f64; 2]);
+
+impl From<(f64, f64)> for Vec2 {
+    fn from((x, y): (f64, f64)) -> Self {
+        Self([x, y])
+    }
+}
+
+impl From<Vec2> for (f64, f64) {
+    fn from(v: Vec2) -> Self {
+        (v.0[0], v.0[1])
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Vector of 3 floats
 pub struct Vec3(pub [f64; 3]);
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+impl From<(f64, f64, f64)> for Vec3 {
+    fn from((x, y, z): (f64, f64, f64)) -> Self {
+        Self([x, y, z])
+    }
+}
+
+impl From<Vec3> for (f64, f64, f64) {
+    fn from(v: Vec3) -> Self {
+        (v.0[0], v.0[1], v.0[2])
+    }
+}
+
+#[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Vector of 4 floats, also used as a Quaternion
 pub struct Vec4(pub [f64; 4]);
+
+impl From<(f64, f64, f64, f64)> for Vec4 {
+    fn from((x, y, z, w): (f64, f64, f64, f64)) -> Self {
+        Self([x, y, z, w])
+    }
+}
+
+impl From<Vec4> for (f64, f64, f64, f64) {
+    fn from(v: Vec4) -> Self {
+        (v.0[0], v.0[1], v.0[2], v.0[3])
+    }
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

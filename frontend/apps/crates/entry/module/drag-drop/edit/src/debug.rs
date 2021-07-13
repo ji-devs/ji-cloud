@@ -12,10 +12,11 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::{Background, Image, Instructions, ThemeChoice, Transform, _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }, drag_drop::{Content, Interactive, Item, ItemKind, Mode, ModuleData as RawData, Step, TargetArea}}}}}, media::MediaLibrary};
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::{Background, Image, Vec2, Instructions, ThemeChoice, Transform, _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }, drag_drop::{Content, Interactive, Item, ItemKind, Mode, ModuleData as RawData, Step, TargetArea}}}}}, media::MediaLibrary};
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
+use crate::base::sidebar::step_5::state::TabKind as Step5TabKind;
 use components::traces::edit::state::DebugOptions as TracesOptions;
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
@@ -33,6 +34,7 @@ pub struct DebugSettings {
     pub skip_load_jig: bool,
     pub step_1_tab: Option<Step1TabKind>,
     pub step_2_tab: Option<Step2TabKind>,
+    pub step_5_tab: Option<Step5TabKind>,
     pub trace_opts: Option<TracesOptions>,
 }
 
@@ -102,7 +104,7 @@ impl DebugSettings {
                                     //kind: ItemKind::Static
                                     kind: ItemKind::Interactive(Interactive {
                                         audio: None,
-                                        target_offset: (0.0, 0.0)
+                                        target_offset: Vec2::default() 
                                     })
                                 }
                             }).collect(),
@@ -121,11 +123,12 @@ impl DebugSettings {
                     }
                 }
             ),
-            step: Some(Step::Four),
+            step: Some(Step::Five),
             skip_save: true,
             skip_load_jig: true,
             step_1_tab: Some(Step1TabKind::StickerText),
             step_2_tab: Some(Step2TabKind::Select),
+            step_5_tab: Some(Step5TabKind::Settings),
             trace_opts: Some(TracesOptions {
                 start_in_phase_draw: false
             })

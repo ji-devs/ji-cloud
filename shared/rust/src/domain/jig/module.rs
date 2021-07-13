@@ -79,8 +79,8 @@ pub enum ModuleKind {
     /// Video
     Video = 7,
 
-    /// Visual Quiz
-    VisualQuiz = 8,
+    /// Deprecated, next new module should use this slot
+    //VisualQuiz = 8,
 
     /// Card Quiz
     CardQuiz = 9,
@@ -103,7 +103,6 @@ impl ModuleKind {
             Self::DragDrop => "drag-drop",
             Self::Tracing => "tracing",
             Self::Video => "video",
-            Self::VisualQuiz => "visual-quiz",
             Self::CardQuiz => "card-quiz",
         }
     }
@@ -122,7 +121,6 @@ impl FromStr for ModuleKind {
             "drag-drop" => Self::DragDrop,
             "tracing" => Self::Tracing,
             "video" => Self::Video,
-            "visual-quiz" => Self::VisualQuiz,
             "card-quiz" => Self::CardQuiz,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };

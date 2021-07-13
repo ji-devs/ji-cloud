@@ -9,6 +9,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
+            Vec2,
             drag_drop::{Mode, Step, Content as RawContent, ModuleData as RawData, ItemKind as RawItemKind, Interactive as RawInteractive},
             _groups::design::Trace as RawTrace,
         }
@@ -108,7 +109,7 @@ impl Base {
         if std::mem::discriminant(&*kind.lock_ref()) == std::mem::discriminant(&ItemKind::Static) {
             let data = RawInteractive {
                 audio: None,
-                target_offset: (0.0, 0.0),
+                target_offset: Vec2::default(),
             };
 
             kind.set(ItemKind::Interactive(Interactive::new(data.clone())));
@@ -138,7 +139,7 @@ impl Base {
         self.drag_item_selected_index.set(None);
     }
 
-    pub fn set_drag_item_meta_audio(&self, index: usize, audio: Option<Audio>) {
+    pub fn set_drag_item_audio(&self, index: usize, audio: Option<Audio>) {
         let list = &*self.stickers.list.lock_ref();
         let item = &list[index];
         let data = item.get_interactive_unchecked();
@@ -168,7 +169,7 @@ impl Base {
             if let Some(content) = &mut raw.content {
                 match &mut content.items[index].kind {
                     RawItemKind::Interactive(data) => {
-                        data.target_offset = offset;
+                        data.target_offset = offset.into(); 
                     },
                     RawItemKind::Static => {
                         panic!("saving offset on static item!?");

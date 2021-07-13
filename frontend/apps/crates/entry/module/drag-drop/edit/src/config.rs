@@ -1,1 +1,1 @@
-pub const DEFAULT_SELECT_AMOUNT:usize = 3;
+pub const DEFAULT_TIME_LIMIT:u32 = 2;

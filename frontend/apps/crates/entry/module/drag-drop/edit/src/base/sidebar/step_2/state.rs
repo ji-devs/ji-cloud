@@ -86,10 +86,10 @@ impl Tab {
 
                                         let callbacks = AudioCallbacks::new(
                                             Some(clone!(base => move |audio:Audio| {
-                                               base.set_drag_item_meta_audio(index, Some(audio));
+                                               base.set_drag_item_audio(index, Some(audio));
                                             })),
                                             Some(clone!(base => move || {
-                                               base.set_drag_item_meta_audio(index, None);
+                                               base.set_drag_item_audio(index, None);
                                             })),
                                         );
 

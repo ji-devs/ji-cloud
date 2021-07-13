@@ -82,38 +82,26 @@ pub struct Base {
     pub play_settings: Rc<PlaySettings>,
 
     pub drag_item_selected_index: Mutable<Option<usize>>,
+    pub feedback: Mutable<Instructions>,
 }
 
 pub struct PlaySettings {
     pub hint: Mutable<Hint>,
     pub next: Mutable<Next>,
-    pub next_value: Mutable<usize>
+    pub time_limit: Mutable<u32>,
+    pub has_time_limit: Mutable<bool>,
 }
 
 impl PlaySettings {
     pub fn new(settings:RawPlaySettings) -> Self {
-
-        let next_value = Mutable::new(
-                match &settings.next {
-                    Next::SelectSome(value) => *value,
-                    _ => {
-                        crate::config::DEFAULT_SELECT_AMOUNT
-                    }
-                },
-            );
         Self {
             hint: Mutable::new(settings.hint),
             next: Mutable::new(settings.next),
-            next_value
+            time_limit: Mutable::new(settings.time_limit.unwrap_or(crate::config::DEFAULT_TIME_LIMIT)),
+            has_time_limit: Mutable::new(settings.time_limit.is_some()),
         }
     }
 
-    pub fn to_raw(&self) -> RawPlaySettings {
-        RawPlaySettings {
-            hint: self.hint.get_cloned(),
-            next: self.next.get_cloned(),
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -145,7 +133,7 @@ impl Item {
                     ItemKind::Interactive(data) => {
                         RawItemKind::Interactive(RawInteractive{
                             audio: data.audio.get_cloned(),
-                            target_offset: data.target_offset.get_cloned()
+                            target_offset: data.target_offset.get_cloned().into()
                         })
                     }
             }
@@ -219,7 +207,7 @@ impl Interactive {
     pub fn new(raw: RawInteractive) -> Self {
         Self {
             audio: Mutable::new(raw.audio),
-            target_offset: Mutable::new(raw.target_offset),
+            target_offset: Mutable::new(raw.target_offset.into()),
         }
     }
 }
@@ -245,6 +233,7 @@ impl Base {
         let _self_ref:Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
 
         let instructions = Mutable::new(content.instructions);
+        let feedback = Mutable::new(content.feedback);
       
         let stickers_ref:Rc<RefCell<Option<Rc<Stickers<Item>>>>> = Rc::new(RefCell::new(None));
 
@@ -361,6 +350,7 @@ impl Base {
             step: step.read_only(),
             theme_choice,
             instructions,
+            feedback,
             text_editor,
             backgrounds,
             stickers,

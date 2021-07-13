@@ -1,6 +1,6 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice,
+        Audio, Body, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice, Vec2,
         _groups::design::{Backgrounds, Sticker, Trace},
     },
     ModuleKind,
@@ -115,6 +115,9 @@ pub struct Content {
 
     /// play settings
     pub play_settings: PlaySettings,
+
+    /// The feedback for the module.
+    pub feedback: Instructions,
 }
 
 /// Editor state
@@ -157,7 +160,7 @@ pub struct Interactive {
     pub audio: Option<Audio>,
 
     /// target offset in normalized coordinates
-    pub target_offset: (f64, f64),
+    pub target_offset: Vec2,
 }
 
 /// drag and drop trace w/ metadata

@@ -5,6 +5,9 @@ pub const STR_CONTINUE:&'static str = "Continue";
 
 pub const STR_SIDEBAR_SELECT:&'static str = "Select the items that can be dragged";
 
+pub const STR_SIDEBAR_TRACE:&'static str = "Trace the areas where items can be dropped.";
+
+
 pub mod steps_nav {
     pub const STR_BACKGROUND:&'static str = "Background";
     pub const STR_CONTENT:&'static str = "Content";
