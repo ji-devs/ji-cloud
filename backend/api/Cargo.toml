@@ -34,7 +34,7 @@ percent-encoding = "2.1.0"
 pin-project = "1.0.1"
 # pin-project = "0.4.23"
 rand = "0.8"
-reqwest = { version = "0.10", features = ["json", "stream"] }
+reqwest = { version = "0.10", features = ["cookies", "json", "stream"] }
 rusoto_core = "0.45.0"
 rusoto_signature = "0.45.0"
 rusoto_s3 = "0.45.0"
