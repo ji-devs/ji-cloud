@@ -3,7 +3,7 @@
 #![deny(missing_docs)]
 
 /// Environment helpers.
-pub(crate) mod env;
+pub mod env;
 
 /// Interaction with google.
 pub mod google;

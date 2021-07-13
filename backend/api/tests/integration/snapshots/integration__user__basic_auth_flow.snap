@@ -1,0 +1,8 @@
+---
+source: tests/integration/user.rs
+expression: body
+
+---
+{
+  "csrf": "[csrf]"
+}
