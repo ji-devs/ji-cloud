@@ -42,7 +42,7 @@ export class _ extends LitElement {
             }
             .main {
                 display: grid;
-                grid-template-columns: repeat(4, minmax(auto, 296px));;
+                grid-template-columns: repeat(4, minmax(auto, 1fr));;
                 column-gap: 48px;
                 justify-content: center;
                 align-items: start;
@@ -57,7 +57,12 @@ export class _ extends LitElement {
                 display: grid;
                 place-content: center;
             }
-            .column-2, .column-3 {
+            .column-2 {
+                display: grid;
+                align-items: flex-start;
+                row-gap: 86px;
+            }
+            .column-3 {
                 display: grid;
                 align-items: flex-start;
                 row-gap: 40px;

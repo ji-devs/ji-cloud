@@ -1,5 +1,5 @@
 use dominator::{Dom, clone, html, with_node};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use futures_signals::{map_ref, signal::SignalExt};
 use shared::domain::jig::JigId;
 use utils::events;
 use web_sys::HtmlElement;
@@ -62,6 +62,7 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)
+                .property("withHebrewButtons", true)
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -83,6 +84,7 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
+                .property("withHebrewButtons", true)
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),

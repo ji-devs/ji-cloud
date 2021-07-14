@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/hebrew-buttons/hebrew-buttons";
+import { KEYBOARD_HEIGHT } from "@elements/core/hebrew-buttons/hebrew-buttons";
 
 @customElement("text-editor-controls")
 export class _ extends LitElement {
@@ -59,13 +60,20 @@ export class _ extends LitElement {
         this.setAttribute("tabindex", "0");
     }
 
+    private positionHebrewKeyboard(rect: DOMRect) {
+        return {
+            y: rect.top - KEYBOARD_HEIGHT,
+            x: 0,
+        }
+    }
+
     render() {
         return html`
             <div class="insert">
                 <slot name="insert-button"></slot>
             </div>
             <div class="divider"></div>
-            <hebrew-buttons full></hebrew-buttons>
+            <hebrew-buttons full .positionKeyboard="${this.positionHebrewKeyboard}"></hebrew-buttons>
             <div class="controls">
                 <div class="row first">
                     <div class="button-collection">

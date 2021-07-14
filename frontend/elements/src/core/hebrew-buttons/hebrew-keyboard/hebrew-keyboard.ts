@@ -23,7 +23,7 @@ export class _ extends LitElement {
                     grid-template-rows: repeat(5, 32px);
                     row-gap: 8px;
                     border-radius: 14px;
-                    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+                    box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.16);
                     background-color: #fff;
                 }
                 .row {
