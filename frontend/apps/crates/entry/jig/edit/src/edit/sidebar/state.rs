@@ -33,16 +33,22 @@ pub struct State {
 
 impl State {
     pub fn new(jig: Jig, route: Mutable<JigEditRoute>) -> Self {
+
+        let mut modules: Vec<Rc<Option<LiteModule>>> = jig.modules
+            .iter()
+            .map(|module| Rc::new(Some(module.clone().into())))
+            .collect();
+
+        // if no module besides cover add empty
+        if modules.len() <= 1 {
+            modules.push(Rc::new(None));
+        };
+
         Self {
             route,
             name: Mutable::new(jig.display_name.clone()),
             publish_at: Mutable::new(jig.publish_at.clone()),
-            modules: MutableVec::new_with_values(
-                jig.modules
-                    .iter()
-                    .map(|module| Rc::new(Some(module.clone().into())))
-                    .collect()
-            ),
+            modules: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings_shown: Mutable::new(false),
             drag: Mutable::new(None),
