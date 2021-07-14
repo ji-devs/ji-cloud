@@ -1,18 +1,19 @@
-import { LitElement, html, css, customElement, property, internalProperty } from "lit-element";
+import { LitElement, html, css, customElement, property, internalProperty, query } from "lit-element";
 import { nothing } from "lit-html";
+import { classMap } from "lit-html/directives/class-map";
 import "../drag/container";
 import "./hebrew-keyboard/hebrew-keyboard";
 
 type Button = "sefaria" | "dicta" | "keyboard";
 
-const KEYBOARD_HEIGHT = 216;
+export const KEYBOARD_HEIGHT = 216;
 
 @customElement("hebrew-buttons")
 export class _ extends LitElement {
     static get styles() {
         return [
             css`
-                .main {
+                #buttons-wrapper {
                     display: inline-flex;
                     grid-gap: 12px;
                     align-items: center;
@@ -27,6 +28,7 @@ export class _ extends LitElement {
                 }
                 button img-ui {
                     display: none;
+                    height: 28px;
                 }
                 button:not(.active):not(:hover) .img-default {
                     display: block;
@@ -42,43 +44,65 @@ export class _ extends LitElement {
                     height: 20px;
                     background-color: var(--main-blue);
                 }
+                .no-short {
+                    display: none;
+                }
+                :host([full]) .no-short, :host(:hover) .no-short, .full .no-short {
+                    display: inline-block;
+                }
             `,
         ];
     }
 
     @property({ type: Boolean })
-    short: boolean = true;
+    full: boolean = false;
 
     @internalProperty()
     active?: Button;
 
+    @query("#buttons-wrapper")
+    private buttonsWrapper!: HTMLElement;
+
     private rect?: DOMRect;
+
+    // this can be overridden to change the keyboard placement position
+    public positionKeyboard(rect: DOMRect): { x: number, y: number } {
+        return {
+            x: rect.right,
+            y: rect.top,
+        }
+    }
 
     private onButtonClick(button: Button) {
         if(this.active === button) {
             this.active = undefined;
         } else {
             this.active = button;
-            this.rect = this.getBoundingClientRect();
+            this.rect = this.buttonsWrapper.getBoundingClientRect();
         }
     }
 
     private renderHebrewKeyboard() {
+        const pos = this.positionKeyboard(this.rect!);
+
         return html`
-            <drag-container x="0" y="${this.rect!.top - KEYBOARD_HEIGHT}">
+            <drag-container y="${pos.y}" x="${pos.x}">
                 <hebrew-keyboard></hebrew-keyboard>
             </drag-container>
         `;
     }
 
-    private renderButton(button: Button) {
-        const activeClass = this.active === button ? "active" : "";
+    private renderButton(button: Button, noShort: boolean) {
+        const classes = classMap({
+            "active": this.active === button,
+            "no-short": noShort,
+        });
 
         return html`
             <button
                 type="button"
                 @click="${() => this.onButtonClick(button)}"
-                class="${activeClass}"
+                class="${classes}"
             >
                 <img-ui class="img-default" path="core/hebrew-buttons/${button}.svg"></img-ui>
                 <img-ui class="img-hover" path="core/hebrew-buttons/${button}-hover.svg"></img-ui>
@@ -88,13 +112,17 @@ export class _ extends LitElement {
     }
 
     render() {
+        const classes = classMap({
+            "full": Boolean(this.active),
+        });
+
         return html`
-            <div class="main">
-                ${this.renderButton("sefaria")}
-                <div class="divider"></div>
-                ${this.renderButton("dicta")}
-                <div class="divider"></div>
-                ${this.renderButton("keyboard")}
+            <div id="buttons-wrapper" part="buttons-wrapper" class="${classes}">
+                ${this.renderButton("sefaria", true)}
+                <div class="divider no-short"></div>
+                ${this.renderButton("dicta", true)}
+                <div class="divider no-short"></div>
+                ${this.renderButton("keyboard", false)}
             </div>
             ${
                 this.active === "keyboard" ? this.renderHebrewKeyboard()

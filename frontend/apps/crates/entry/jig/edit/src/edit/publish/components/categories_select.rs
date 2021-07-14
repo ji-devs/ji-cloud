@@ -17,6 +17,16 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("placeholder", STR_CATEGORIES_PLACEHOLDER)
         .property("nested", true)
         .property_signal("value", category_value_signal(state.clone()))
+        .property_signal("error", {
+            (map_ref! {
+                let submission_tried = state.submission_tried.signal(),
+                let value = state.jig.categories.signal_cloned()
+                    => (*submission_tried, value.clone())
+            })
+                .map(|(submission_tried, value)| {
+                    submission_tried && value.is_empty()
+                })
+        })
         .children_signal_vec(state.categories.signal_cloned().map(clone!(state => move |categories| {
             match categories {
                 None => vec![],

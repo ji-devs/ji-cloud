@@ -1,5 +1,6 @@
 import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
+import "@elements/core/hebrew-buttons/hebrew-buttons";
 
 @customElement("input-wrapper")
 export class _ extends LitElement {
@@ -8,6 +9,15 @@ export class _ extends LitElement {
             css`
                 :host {
                     display: block;
+                }
+                hebrew-buttons {
+                    display: block;
+                    height: 0px;
+                }
+                hebrew-buttons::part(buttons-wrapper) {
+                    display: flex;
+                    justify-content: flex-end;
+                    transform: translateY(-100%);
                 }
                 .wrapper {
                     border: solid 1px var(--light-blue-5);
@@ -22,13 +32,11 @@ export class _ extends LitElement {
                     z-index: 1;
                     background-color: #fff;
                 }
-                :host(:focus-within) .wrapper {
+                .wrapper:focus-within {
                     border-color: var(--dark-blue-3);
                     border-width: 2px;
                     /* removing one pixel to account for thicker border */
                     padding: 7px 15px;
-                    position: relative;
-                    z-index: 2;
                 }
                 :host([error]) .wrapper {
                     border-color: var(--red-alert);
@@ -40,7 +48,7 @@ export class _ extends LitElement {
                     color: var(--main-blue);
                     font-weight: 500;
                 }
-                :host(:focus-within) .label {
+                .wrapper:focus-within .label {
                     color: var(--dark-blue-3);
                 }
                 ::slotted([slot=icon]) {
@@ -101,16 +109,21 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     error: boolean = false;
 
+    @property({ type: Boolean })
+    withHebrewButtons: boolean = false;
 
     @query("slot#main-slot")
     private mainSlot!: HTMLSlotElement;
 
     focus() {
-        (this.mainSlot.assignedElements() as any)[0]?.focus?.()
+        (this.mainSlot.assignedElements() as any)[0]?.focus?.();
     }
 
     render() {
         return html`
+            ${ this.withHebrewButtons ? html`
+                <hebrew-buttons></hebrew-buttons>
+            ` : nothing }
             <label class="wrapper" @click="${this.focus}">
                 ${ this.label ? html`<span class="label">${this.label}</span>` : nothing }
                 <slot id="main-slot"></slot>

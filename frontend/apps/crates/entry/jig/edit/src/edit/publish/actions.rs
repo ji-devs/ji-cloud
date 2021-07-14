@@ -30,7 +30,7 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
 
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
-        get_categories_labels(&categories, &mut category_label_lookup);
+        get_categories_labels(&categories, &mut category_label_lookup, "");
         state.categories.set(Some(categories));
         log::info!("{:?}", category_label_lookup);
         state.category_label_lookup.set(Some(category_label_lookup));
@@ -41,10 +41,13 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
     }));
 }
 
-fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
+fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>, base_name: &str) {
     for category in categories {
-        lookup.insert(category.id.clone(), category.name.clone());
-        get_categories_labels(&category.children, lookup);
+        let name = format!("{}{}", base_name, category.name);
+        lookup.insert(category.id.clone(), name.clone());
+
+        let base_name = name + "/";
+        get_categories_labels(&category.children, lookup, &base_name);
     }
 }
 
@@ -74,8 +77,22 @@ async fn load_categories() -> Result<Vec<Category>, EmptyError> {
     }
 }
 
+fn form_invalid(state: Rc<State>) -> bool {
+    state.jig.display_name.lock_ref().is_empty()
+    ||
+    state.jig.description.lock_ref().is_empty()
+    ||
+    state.jig.language.lock_ref().is_empty()
+    ||
+    state.jig.age_ranges.lock_ref().is_empty()
+    ||
+    state.jig.goals.lock_ref().is_empty()
+    ||
+    state.jig.categories.lock_ref().is_empty()
+}
+
 pub fn save_jig(state: Rc<State>) {
-    if state.jig.display_name.lock_ref().is_empty() {
+    if form_invalid(Rc::clone(&state)) {
         state.submission_tried.set(true);
         return;
     };

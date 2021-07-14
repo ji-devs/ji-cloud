@@ -48,9 +48,6 @@ pub fn render(state: Rc<State>) -> Dom {
                     }
                 }))
             }),
-            html!("hebrew-buttons", {
-                .property("slot", "hebrew-buttons")
-            }),
             html!("input-select", {
                 .property("slot", "font")
                 .property("label", STR_FONT_LABEL)

@@ -85,7 +85,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     .property("kind", "box-color")
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Box));
-                        let color = { state.controls.lock_ref().highlight_color.clone() };
+                        let color = { state.controls.lock_ref().box_color.clone() };
                         color_state.picker.set_value(hex_to_rgba8_optional(&color));
                     }))
                 }),

@@ -172,6 +172,9 @@ pub fn render_text_editor_controls(state: Rc<text_editor::state::State>) -> Dom 
                 html!("dt", {.text("Highlight color")}),
                 html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.highlight_color)))}),
 
+                html!("dt", {.text("box color")}),
+                html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.box_color)))}),
+
                 html!("dt", {.text("Color")}),
                 html!("dd", {.text_signal(state.controls.signal_cloned().map(|controls| format!("{:?}", controls.color)))}),
 
@@ -197,10 +200,11 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
 }
 pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<ThemeId>) -> Dom {
     html!("div", {
+        .style("display", "block")
+        .style("border", "red solid 1px")
+        .style("box-sizing", "border-box")
+        .style("align-self", "baseline")
         .child(html!("wysiwyg-output-renderer", {
-            .style("border", "red solid 1px")
-            .style("display", "block")
-            .style("box-sizing", "border-box")
             .property_signal("valueAsString", value.signal_cloned())
             .property_signal("theme", theme.signal_cloned().map(|theme| theme.as_str_id()))
         }))

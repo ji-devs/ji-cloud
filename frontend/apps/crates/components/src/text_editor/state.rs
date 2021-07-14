@@ -12,7 +12,7 @@ use web_sys::HtmlElement;
 use js_sys::Reflect;
 use strum::IntoEnumIterator;
 
-use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, enum_variant_to_string, BOLD_WEIGHT, REGULAR_WEIGHT};
+use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT};
 use super::super::font_loader::{FontLoader, Font as StaticFont};
 use super::dom::text_editor_controls::color_controls::ColorState;
 use super::callbacks::Callbacks;
@@ -26,6 +26,8 @@ pub struct State {
     pub color_state: RefCell<Option<Rc<ColorState>>>,
     pub callbacks: Callbacks,
 }
+
+pub const ELEMENT_DEFAULT_KEY:&'static str = "elementDefault";
 
 
 impl State {
@@ -108,16 +110,19 @@ impl State {
     }
 
     pub(super) fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
-        let key = enum_variant_to_string(&ControlsChange::Element(ElementType::P1)) + &String::from("Default");
         let _ = Reflect::set(
             &wysiwyg_ref,
-            &JsValue::from_str(&key),
+            &JsValue::from_str(ELEMENT_DEFAULT_KEY),
             &JsValue::from_str(&ElementType::P1.to_string())
         );
 
         self.update_wysiwyg_value(&wysiwyg_ref);
 
         self.wysiwyg_ref.set(Some(wysiwyg_ref));
+    }
+
+    pub(super) fn clear_wysiwyg_ref(&self) {
+        self.wysiwyg_ref.set(None);
     }
 
     pub(super) fn toggle_bold(&self) {
@@ -140,26 +145,6 @@ impl State {
     }
 
     pub(super) fn set_control_value(&self, control: ControlsChange) {
-        self.set_control_value_rust(&control);
-        self.set_control_value_js(&control);
-    }
-    fn set_control_value_rust(&self, control: &ControlsChange) {
-        let mut controls = self.controls.lock_mut();
-        match control {
-            ControlsChange::Font(font) => controls.font = font.clone(),
-            ControlsChange::Element(element) => controls.element = element.clone(),
-            ControlsChange::Weight(weight) => controls.weight = *weight,
-            ControlsChange::Align(align) => controls.align = align.clone(),
-            ControlsChange::FontSize(font_size) => controls.font_size = *font_size,
-            ControlsChange::Color(color) => controls.color = color.clone(),
-            ControlsChange::HighlightColor(highlight_color) => controls.highlight_color = highlight_color.clone(),
-            ControlsChange::BoxColor(box_color) => controls.box_color = box_color.clone(),
-            ControlsChange::IndentCount(indent_count) => controls.indent_count = *indent_count,
-            ControlsChange::Italic(italic) => controls.italic = *italic,
-            ControlsChange::Underline(underline) => controls.underline = *underline,
-        };
-    }
-    fn set_control_value_js(&self, control: &ControlsChange) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let (key, value) = control.to_js_key_value();
             let set_control_value_method = Reflect::get(
@@ -170,6 +155,5 @@ impl State {
             let set_control_value_method = set_control_value_method.dyn_ref::<js_sys::Function>().unwrap();
             let _ = set_control_value_method.call2(&wysiwyg_ref, &key, &value);
         }
-        
     }
 }

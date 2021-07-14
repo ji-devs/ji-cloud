@@ -62,6 +62,7 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)
+                .property("withHebrewButtons", true)
                 .property_signal("error", {
                     (map_ref! {
                         let submission_tried = state.submission_tried.signal(),
@@ -83,6 +84,17 @@ fn render_page(state: Rc<State>) -> Dom {
             html!("input-wrapper", {
                 .property("slot", "description")
                 .property("label", STR_DESCRIPTION_LABEL)
+                .property("withHebrewButtons", true)
+                .property_signal("error", {
+                    (map_ref! {
+                        let submission_tried = state.submission_tried.signal(),
+                        let value = state.jig.description.signal_cloned()
+                            => (*submission_tried, value.clone())
+                    })
+                        .map(|(submission_tried, value)| {
+                            submission_tried && value.is_empty()
+                        })
+                })
                 .child(html!("textarea", {
                     .text_signal(state.jig.description.signal_cloned())
                     .event(clone!(state => move |evt: events::Input| {

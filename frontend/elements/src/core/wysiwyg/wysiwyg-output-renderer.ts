@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, internalProperty, property, PropertyValues } from 'lit-element';
 import { EditorElement, EditorText } from './slate-wysiwyg-react/EditorBackbone';
 import { StyleInfo, styleMap } from 'lit-html/directives/style-map';
-import { baseStyles, getElementStyles, getLeafStyles } from './styles';
+import { baseStyles, getElementStyles, getLeafStyles, getRootStyles } from './styles';
 import { ThemeKind } from '@elements/_themes/themes';
 import { getThemeVars } from './wysiwyg-theme';
 import { WysiwygValue } from './wysiwyg-types';
@@ -20,7 +20,6 @@ export class _ extends LitElement {
     static get styles() {
         return [baseStyles, css`
             :host {
-                display: inline-block;
                 /* TO FIX:
                     white-space: pre-wrap;
                 */
@@ -74,6 +73,8 @@ export class _ extends LitElement {
 
     public render() {
         return html`
+            ${getRootStyles(this.value)}
+
             ${ this.value.content.map(element => {
                 return this.renderElement(element);
             }) }

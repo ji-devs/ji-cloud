@@ -15,6 +15,16 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("label", STR_TEACHING_GOAL_LABEL)
         .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)
         .property_signal("value", goal_value_signal(state.clone()))
+        .property_signal("error", {
+            (map_ref! {
+                let submission_tried = state.submission_tried.signal(),
+                let value = state.jig.goals.signal_cloned()
+                    => (*submission_tried, value.clone())
+            })
+                .map(|(submission_tried, value)| {
+                    submission_tried && value.is_empty()
+                })
+        })
         .children_signal_vec(state.goals.signal_cloned().map(clone!(state => move |goals| {
             match goals {
                 None => vec![],

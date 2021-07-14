@@ -1,4 +1,4 @@
-export const letters = ["alef", "vet", "bet", "gimel", "dalet", "hay", "vav", "vav-holam", "vav-dagesh", "zayin", "chet", "tet", "yud", "chaf", "kaf", "chaf-sofit", "lamed", "mem", "mem-sofit", "nun", "nun-sofit", "samech", "ayin", "fay", "pay", "fay-sofit", "tsadi", "tsadi-sofit", "kuf", "resh", "shin-sin", "shin", "sin", "tav"] as const;
+export const letters = ["alef", "vet", "bet", "gimel", "dalet", "hay", "vav", "vav-holam", "vav-shuruk", "zayin", "chet", "tet", "yud", "chaf", "kaf", "chaf-sofit", "lamed", "mem", "mem-sofit", "nun", "nun-sofit", "samech", "ayin", "fay", "pay", "fay-sofit", "tsadi", "tsadi-sofit", "kuf", "resh", "shin-sin", "shin", "sin", "tav"] as const;
 export type Letter = typeof letters[number];
 
 export const niqquds = ["dagesh", "patach", "kamatz", "kamatz-katan", "‎sheva", "chirik", "tsere", "segol", "hataf-patach", "hataf-kamatz", "hataf-segol", "cholam-chaser", "kubutz"] as const;
@@ -111,11 +111,11 @@ export const LETTER_INFO: {
         char: 'ו',
     },
     "vav-holam": {
-        name: "Vav",
+        name: "Cholom",
         char: 'וֹ',
     },
-    "vav-dagesh": {
-        name: "Vav",
+    "vav-shuruk": {
+        name: "Shuruk",
         char: 'וּ',
     },
     "zayin": {

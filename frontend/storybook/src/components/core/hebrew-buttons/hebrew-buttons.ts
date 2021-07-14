@@ -7,11 +7,11 @@ export default {
 
 
 interface Args {
-    short: boolean,
+    full: boolean,
 }
 
 const DEFAULT_ARGS: Args = {
-    short: true,
+    full: false,
 };
 
 export const Ji = (props?: Partial<Args>) => {
