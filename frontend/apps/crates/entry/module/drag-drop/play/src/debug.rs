@@ -69,10 +69,12 @@ pub enum InitSticker {
     Sprite,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum InitTrace {
     //x, y, w, h
     Ellipse(f64, f64, f64, f64, bool),
+    Path(f64, f64, Vec<(f64, f64)>, bool),
+    Rect(f64, f64, f64, f64, bool),
 }
 
 impl DebugSettings {
@@ -100,6 +102,30 @@ impl DebugSettings {
                                                 shape: TraceShape::Ellipse(*w, *h),
                                                 transform
                                             }
+                                        },
+                                        InitTrace::Path(x, y, path, transform_more) => {
+                                            let mut transform = Transform::identity();
+                                            transform.set_translation_2d(*x, *y);
+                                            if *transform_more {
+                                                transform.rotate_z(1.5);
+                                                transform.set_scale_2d(0.2, 1.3);
+                                            }
+                                            Trace {
+                                                shape: TraceShape::Path(path.clone()),
+                                                transform
+                                            }
+                                        },
+                                        InitTrace::Rect(x, y, width, height, transform_more) => {
+                                            let mut transform = Transform::identity();
+                                            transform.set_translation_2d(*x, *y);
+                                            if *transform_more {
+                                                transform.rotate_z(1.5);
+                                                transform.set_scale_2d(0.2, 1.3);
+                                            }
+                                            Trace {
+                                                shape: TraceShape::Rect(*width, *height),
+                                                transform
+                                            }
                                         }
                                     }
                                 };
@@ -114,7 +140,7 @@ impl DebugSettings {
                                             let mut text = Text::new(value);
 
                                             text.transform.set_translation_2d(*translation_x, *translation_y);
-                                            text.transform.rotate_z(1.5);
+                                            text.transform.rotate_z(1.0);
 
                                             Sticker::Text(text)
                                         },
@@ -197,8 +223,14 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                 //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
+                InitTrace::Rect(0.6, 0.1, 0.1, 0.2, true),
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1, true),
-                InitTrace::Ellipse(0.6, 0.1, 0.1, 0.1, false),
+                InitTrace::Path(0.6, 0.1, vec![
+                    (0.1, 0.2),
+                    (0.1, 0.4),
+                    (0.3, 0.5),
+                    (0.3, 0.6),
+                ], true),
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

@@ -47,7 +47,8 @@ web-sys = { version = "0.3.51", features = [
     'FileList',
     'File',
     'DomRect',
-    'HtmlIFrameElement'
+    'HtmlIFrameElement',
+    'Performance',
 ] }
 wasm-bindgen-futures = "0.4.24"
 dominator = "0.5.19"

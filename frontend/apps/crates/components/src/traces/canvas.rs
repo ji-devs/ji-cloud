@@ -16,50 +16,44 @@ use super::utils::*;
 use web_sys::CanvasRenderingContext2d;
 
 pub fn draw_trace(ctx: &CanvasRenderingContext2d, resize_info:&ResizeInfo, trace:&Trace) {
-    if let Some(size) = trace.calc_size(resize_info) {
-        //could use canvas size too, they should be the same
-        let h_screen_width = resize_info.width / 2.0;
-        let h_screen_height = resize_info.height / 2.0;
+    if let Some(bounds) = trace.calc_bounds(false) {
+        let (width, height) = resize_info.get_size_denormalized(bounds.width, bounds.height);
+        let h_width = width / 2.0;
+        let h_height = height / 2.0;
         let (tx, ty) = trace.transform.get_denormalized_translation_2d(resize_info);
         let (_, rot_rad) = quat::get_axis_angle(&trace.transform.rotation.0);
         let (scale_x, scale_y) = trace.transform.get_scale_2d();
 
         ctx.save();
 
-        ctx.begin_path();
-
         //TODO - would be nice to just get the 2d matrix directly
         //Should be able to use it for ctx.set_transform
         //But this works for now :)
 
-        //Move our origin to the middle of the canvas
-        ctx.translate(h_screen_width, h_screen_height);
+        ctx.translate(tx, ty);
+
+        ctx.translate(h_width, h_height);
        
         //Rotate the canvas these degrees around that middle
         ctx.rotate(rot_rad);
 
-        //Scale this amount around that middle
         ctx.scale(scale_x, scale_y);
 
-        //Translate our 0,0 based on the transform
-        ctx.translate(tx, ty);
-
         //Move the canvas back so it all appears normal again
-        ctx.translate(-h_screen_width, -h_screen_height);
-       
-        match trace.shape {
-            TraceShape::Path(ref path) => {
-                draw_path(&ctx, &resize_info, &path)
-            },
+        ctx.translate(-h_width, -h_height);
 
+        ctx.begin_path();
+        match &trace.shape {
             TraceShape::Rect(width, height) => {
-                draw_rect(&ctx, &resize_info, width, height)
-            }
+                draw_rect(&ctx, &resize_info, *width, *height);
+            },
             TraceShape::Ellipse(radius_x, radius_y) => {
-                draw_ellipse(&ctx, &resize_info, radius_x, radius_y)
-            }
+                draw_ellipse(&ctx, &resize_info, *radius_x, *radius_y);
+            },
+            TraceShape::Path(points) => {
+                draw_path(&ctx, &resize_info, &points);
+            },
         }
-
         ctx.close_path();
 
         ctx.restore();
