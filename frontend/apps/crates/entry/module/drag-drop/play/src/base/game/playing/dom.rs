@@ -8,7 +8,7 @@ use futures_signals::{
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
     traces::hints::dom::render_traces_hint,
-    stickers::dom::{render_sticker_raw, render_sticker_raw_offset_mixin, mixin_sticker_button}
+    stickers::dom::{render_sticker_raw, StickerRawRenderOptions, TransformOverride, mixin_sticker_button}
 };
 
 use super::state::*;
@@ -34,11 +34,13 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             render_sticker_raw(&sticker, theme_id, None)
                         },
                         PlayItem::Interactive(item) => {
-                            render_sticker_raw_offset_mixin(
-                                &item.sticker, 
-                                theme_id, 
-                                Some(item.size.clone()),
-                                item.curr_offset.read_only(), 
+                            let mut opts = StickerRawRenderOptions::new();
+
+                            opts.set_size(item.size.clone());
+
+                            opts.set_transform_override(TransformOverride::Always(item.curr_transform.read_only()));
+
+                            opts.set_mixin(
                                 clone!(state, item => move |dom| {
                                     apply_methods!(dom, {
                                         .apply(mixin_sticker_button)
@@ -55,7 +57,9 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                         }))
                                     })
                                 })
-                            )
+                            );
+
+                            render_sticker_raw(&item.sticker, theme_id, Some(opts))
                         }
                     }
                 })

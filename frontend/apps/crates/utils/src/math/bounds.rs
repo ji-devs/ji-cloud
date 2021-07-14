@@ -1,5 +1,5 @@
 use super::*;
-use web_sys::{Element, DomRect};
+use web_sys::{CanvasRenderingContext2d, DomRect, Element};
 
 use shared::domain::jig::module::body::{Vec3, Vec4, Transform};
 use crate::resize::ResizeInfo;
@@ -52,17 +52,58 @@ pub fn center_rem(size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> Option<
     })
 }
 
+pub fn oobb_transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> OobbF64 {
 
-// does not include rotation!
-// so if creating a proper bounding box, gotta rotate separately
-pub fn transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
+    let bounds = aabb_transform_px(coords_in_center, &transform, size, &resize_info);
+  
+    let invert_y = bounds.invert_y;
+
+    // note: invert_y is untested
+    //
+    let width = bounds.width; 
+    let height = bounds.height; 
+
+    let center_x = (bounds.x + (width/2.0));
+    let center_y = if invert_y { (bounds.y - (height/2.0)) } else { (bounds.y + (height/2.0)) };
+
+    let q = &transform.rotation.0;
+
+    let rotate_point = |p:[f64; 2]| -> (f64, f64) {
+        let p = [p[0] - center_x, p[1] - center_y];
+
+        let p = vec2::rotate_by_quat(&p, q);
+
+        (p[0] + center_x, p[1] + center_y)
+    };
+
+    if invert_y {
+        OobbF64 {
+            tl: rotate_point([bounds.x, bounds.y]),
+            tr: rotate_point([bounds.x + bounds.width, bounds.y]),
+            bl: rotate_point([bounds.x, bounds.y - bounds.height]),
+            br: rotate_point([bounds.x + bounds.width, bounds.y - bounds.height]),
+            invert_y: true
+        }
+    } else {
+        OobbF64 {
+            tl: rotate_point([bounds.x, bounds.y]),
+            tr: rotate_point([bounds.x + bounds.width, bounds.y]),
+            bl: rotate_point([bounds.x, bounds.y + bounds.height]),
+            br: rotate_point([bounds.x + bounds.width, bounds.y + bounds.height]),
+            invert_y: false 
+        }
+    }
+
+}
+
+pub fn aabb_transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
 
     if let Some(size) = size {
         let (mut x, mut y) = transform
             .map(|t| {
                 let mut t = t.clone();
                 t.set_rotation_identity();
-                t.denormalize_translation(resize_info);
+                t.denormalize(resize_info);
                 t.get_translation_2d()
             });
 
@@ -298,6 +339,21 @@ impl BoundsF64 {
     pub fn denormalize_height_string_signal(&self) -> impl Signal<Item = String> {
         self.denormalize_signal().map(|bounds| format!("{}px", bounds.height))
     }
+
+    pub fn draw_to_canvas(&self, ctx: &CanvasRenderingContext2d) {
+        ctx.save();
+
+        ctx.begin_path();
+
+        ctx.move_to(self.left(), self.top());
+        ctx.line_to(self.right(), self.top());
+        ctx.line_to(self.right(), self.bottom());
+        ctx.line_to(self.left(), self.bottom());
+
+        ctx.close_path();
+
+        ctx.restore();
+    }
 }
 
 impl From<DomRect> for BoundsF64 {
@@ -343,3 +399,82 @@ impl From<(PointI32, RectF64)> for BoundsF64 {
         }
     }
 }
+
+
+
+#[derive(Debug, Clone, Copy)]
+pub struct OobbF64 {
+    pub tl: (f64, f64),
+    pub tr: (f64, f64),
+    pub bl: (f64, f64),
+    pub br: (f64, f64),
+    pub invert_y: bool,
+}
+
+impl OobbF64 {
+    pub fn draw_to_canvas(&self, ctx: &CanvasRenderingContext2d) {
+        ctx.save();
+
+        ctx.begin_path();
+
+        ctx.move_to(self.tl.0, self.tl.1);
+        ctx.line_to(self.tr.0, self.tr.1);
+        ctx.line_to(self.br.0, self.br.1);
+        ctx.line_to(self.bl.0, self.bl.1);
+
+        ctx.close_path();
+
+        ctx.restore();
+    }
+
+    pub fn to_aabb(&self) -> BoundsF64 {
+        //invert_y is untested
+
+        let mut max_x:f64 = f64::NEG_INFINITY;
+        let mut max_y:f64 = f64::NEG_INFINITY;
+        let mut min_x:f64 = f64::INFINITY;
+        let mut min_y:f64 = f64::INFINITY;
+
+        for(x, y) in [self.tl, self.tr, self.bl, self.br] {
+            if x < min_x {
+                min_x = x;
+            }
+            if x > max_x {
+                max_x = x;
+            }
+            if y < min_y {
+                min_y = y;
+            }
+            if y > max_y {
+                max_y = y;
+            }
+        }
+
+
+        BoundsF64 {
+            x: min_x,
+            y: if self.invert_y { min_y } else { max_y },
+            width: max_x - min_x,
+            height: max_y - min_y,
+            invert_y: self.invert_y
+        }
+    }
+}
+/*
+    pub fn top(&self) -> f64 {
+        self.y
+    }
+    pub fn bottom(&self) -> f64 {
+        if self.invert_y {
+            self.y + self.height
+        } else {
+            self.y - self.height
+        }
+    }
+    pub fn left(&self) -> f64 {
+        self.x
+    }
+    pub fn right(&self) -> f64 {
+        self.x + self.width
+    }
+    */

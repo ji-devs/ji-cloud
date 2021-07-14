@@ -46,9 +46,7 @@ use shared::{
 use components::stickers::{sprite::ext::*, text::ext::*};
 pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
-//const IMAGE_UUID:&'static str = "bf2fe548-7ffd-11eb-b3ab-579026da8b36";
-const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
-
+const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
 pub const DEBUG_TEXT:&'static str = "Hello World this is a long line of text";
 
@@ -74,7 +72,7 @@ pub enum InitSticker {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum InitTrace {
     //x, y, w, h
-    Ellipse(f64, f64, f64, f64),
+    Ellipse(f64, f64, f64, f64, bool),
 }
 
 impl DebugSettings {
@@ -91,9 +89,13 @@ impl DebugSettings {
                             target_areas: init_data.traces.iter().map(|init| {
                                 let trace = {
                                     match init {
-                                        InitTrace::Ellipse(x, y, w, h) => {
+                                        InitTrace::Ellipse(x, y, w, h, transform_more) => {
                                             let mut transform = Transform::identity();
                                             transform.set_translation_2d(*x, *y);
+                                            if *transform_more {
+                                                transform.rotate_z(1.5);
+                                                transform.set_scale_2d(0.2, 1.3);
+                                            }
                                             Trace {
                                                 shape: TraceShape::Ellipse(*w, *h),
                                                 transform
@@ -116,10 +118,18 @@ impl DebugSettings {
 
                                             Sticker::Text(text)
                                         },
-                                        InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
-                                            id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
-                                            lib: MediaLibrary::Global
-                                        }))
+                                        InitSticker::Sprite => {
+                                            let mut sprite = Sprite::new(Image {
+                                                id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
+                                                lib: MediaLibrary::Global
+                                            });
+
+                                            sprite.transform.set_translation_2d(*translation_x, *translation_y);
+                                            sprite.transform.rotate_z(1.5);
+                                            sprite.transform.set_scale_2d(0.2, 1.3);
+
+                                            Sticker::Sprite(sprite)
+                                        }
                                     }
                                 };
 
@@ -163,16 +173,32 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
                     ItemKind::Interactive(
                         Interactive {
                             audio: None,
-                            target_offset: (0.0, 0.0).into()
+                            target_transform: {
+                                let mut t = Transform::identity();
+                                Some(t)
+                            }
                         }
                     ),
                     (-0.3, -0.3)
                 ),
+                (
+                    InitSticker::Sprite, 
+                    ItemKind::Interactive(
+                        Interactive {
+                            audio: None,
+                            target_transform: {
+                                let mut t = Transform::identity();
+                                Some(t)
+                            }
+                        }
+                    ),
+                    (-0.3, 0.3)
+                ),
                 //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
-                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1),
-                InitTrace::Ellipse(0.6, 0.1, 0.1, 0.1),
+                InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1, true),
+                InitTrace::Ellipse(0.6, 0.1, 0.1, 0.1, false),
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

@@ -2,6 +2,8 @@
 
 // 2d matrix math taken from glmatrix: http://glmatrix.net/docs/mat2d.js.html
 
+//Broken?
+/*
 pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
     let out:[f64;6] = [
         mat[0],
@@ -14,6 +16,7 @@ pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
 
     out
 }
+*/
 
 pub fn translate_mut(transform:&mut [f64;6], x:f64, y: f64) {
     let a = transform;

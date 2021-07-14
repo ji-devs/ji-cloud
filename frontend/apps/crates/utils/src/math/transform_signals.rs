@@ -22,7 +22,21 @@ pub fn map_offset(transform:Transform, offset:impl Signal<Item = (f64, f64)> + '
  * These are signals mainly due to resize info
  * it's common to pass in an always(transform)
  */
-pub fn bounds_px(
+pub fn oobb_bounds_px(
+    coords_in_center: bool, 
+    transform_signal: impl Signal<Item = Transform>, 
+    size_signal: impl Signal<Item = Option<(f64, f64)>>
+) -> impl Signal<Item = OobbF64> {
+    map_ref! {
+        let resize_info = resize_info_signal(),
+        let transform = transform_signal,
+        let size = size_signal 
+        => move {
+            super::bounds::oobb_transform_px(coords_in_center, transform, *size, resize_info)
+        }
+    }
+}
+pub fn aabb_bounds_px(
     coords_in_center: bool, 
     transform_signal: impl Signal<Item = Transform>, 
     size_signal: impl Signal<Item = Option<(f64, f64)>>
@@ -32,7 +46,7 @@ pub fn bounds_px(
         let transform = transform_signal,
         let size = size_signal 
         => move {
-            super::bounds::transform_px(coords_in_center, transform, *size, resize_info)
+            super::bounds::aabb_transform_px(coords_in_center, transform, *size, resize_info)
         }
     }
 }
@@ -42,7 +56,7 @@ pub fn x_px(
     transform_signal: impl Signal<Item = Transform>, 
     size_signal: impl Signal<Item = Option<(f64, f64)>>
 ) -> impl Signal<Item = f64> {
-    bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.x)
+    aabb_bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.x)
 }
 
 pub fn y_px(
@@ -50,7 +64,7 @@ pub fn y_px(
     transform_signal: impl Signal<Item = Transform>, 
     size_signal: impl Signal<Item = Option<(f64, f64)>>
 ) -> impl Signal<Item = f64> {
-    bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.y)
+    aabb_bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.y)
 }
 
 pub fn width_px(
@@ -58,7 +72,7 @@ pub fn width_px(
     transform_signal: impl Signal<Item = Transform>, 
     size_signal: impl Signal<Item = Option<(f64, f64)>>
 ) -> impl Signal<Item = f64> {
-    bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.width)
+    aabb_bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.width)
 }
 
 
@@ -67,7 +81,7 @@ pub fn height_px(
     transform_signal: impl Signal<Item = Transform>, 
     size_signal: impl Signal<Item = Option<(f64, f64)>>
 ) -> impl Signal<Item = f64> {
-    bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.height)
+    aabb_bounds_px(coords_in_center, transform_signal, size_signal).map(|bounds| bounds.height)
 }
 
 

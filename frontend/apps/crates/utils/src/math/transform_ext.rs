@@ -47,7 +47,7 @@ pub trait TransformExt: Clone {
 
     fn get_denormalized_translation_2d(&self, resize_info: &ResizeInfo) -> (f64, f64);
 
-    fn denormalize_translation(&mut self, resize_info: &ResizeInfo);
+    fn denormalize(&mut self, resize_info: &ResizeInfo);
 
     fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String;
     fn scale_only(&self) -> Self;
@@ -121,7 +121,7 @@ impl TransformExt for Transform {
 
     fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String {
         let mut t = self.clone();
-        t.denormalize_translation(resize_info);
+        t.denormalize(resize_info);
         t.to_mat4().as_matrix_string()
     }
 
@@ -232,7 +232,7 @@ impl TransformExt for Transform {
         resize_info.get_pos_denormalized(self.translation.0[0], self.translation.0[1])
     }
     /// Takes into account that translation coordinates are normalized
-    fn denormalize_translation(&mut self, resize_info: &ResizeInfo) {
+    fn denormalize(&mut self, resize_info: &ResizeInfo) {
 
 
         let mut translation = &mut self.translation.0;

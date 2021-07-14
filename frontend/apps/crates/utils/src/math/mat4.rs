@@ -354,17 +354,6 @@ impl Matrix4 {
         ]
     }
 
-    pub fn to_mat2d(&self) -> [f64;6] {
-        let m = self.0;
-        [
-            m[0],
-            m[1],
-            m[4],
-            m[5],
-            m[8],
-            m[9],
-        ]
-    }
 }
 
 impl From<&[f64]> for Matrix4 {
