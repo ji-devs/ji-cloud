@@ -30,7 +30,7 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
 
         let categories = categories.unwrap_ji();
         let mut category_label_lookup = HashMap::new();
-        get_categories_labels(&categories, &mut category_label_lookup);
+        get_categories_labels(&categories, &mut category_label_lookup, "");
         state.categories.set(Some(categories));
         log::info!("{:?}", category_label_lookup);
         state.category_label_lookup.set(Some(category_label_lookup));
@@ -41,10 +41,13 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
     }));
 }
 
-fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>) {
+fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>, base_name: &str) {
     for category in categories {
-        lookup.insert(category.id.clone(), category.name.clone());
-        get_categories_labels(&category.children, lookup);
+        let name = format!("{}{}", base_name, category.name);
+        lookup.insert(category.id.clone(), name.clone());
+
+        let base_name = name + "/";
+        get_categories_labels(&category.children, lookup, &base_name);
     }
 }
 
