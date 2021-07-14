@@ -31,6 +31,7 @@ export const Header = (props?:Partial<Args>) => {
                 <input placeholder="My JIG’s name">
                 <img-ui slot="icon" path="core/inputs/pencil-blue-darker.svg">
             </input-wrapper>
+            <jig-edit-sidebar-preview-button slot="preview"></jig-edit-sidebar-preview-button>
         </jig-edit-sidebar-header>
     `;
 }

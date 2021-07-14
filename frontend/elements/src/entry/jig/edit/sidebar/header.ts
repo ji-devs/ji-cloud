@@ -73,7 +73,7 @@ export class _ extends LitElement {
                     height: 12px;
                     width: 1px;
                 }
-                nav {
+                nav, .settings-preview {
                     display: flex;
                     align-items: center;
                     column-gap: 12px;
@@ -103,8 +103,6 @@ export class _ extends LitElement {
                 <img-ui class="logo collapsing-phase" path="entry/jig/logo-jigzi.svg"></img-ui>
                 <nav class="open-only">
                     <slot name="gallery"></slot>
-                    <div class="divider"></div>
-                    <slot name="settings"></slot>
                     ${ this.isModulePage ? nothing : (html`
                         <div class="divider"></div>
                         <slot name="modules"></slot>
@@ -112,7 +110,11 @@ export class _ extends LitElement {
                 </nav>
             </div>
             <div class="input open-only"><slot name="input"></slot></div>
-            <div class="preview open-only"><slot name="preview"></slot></div>
+            <div class="settings-preview open-only">
+                <slot name="settings"></slot>
+                <div class="divider"></div>
+                <slot name="preview"></slot>
+            </div>
         `;
     }
 }
