@@ -353,6 +353,18 @@ impl Matrix4 {
             (m[2] * x + m[6] * y + m[10] * z + m[14]) / w,
         ]
     }
+
+    pub fn to_mat2d(&self) -> [f64;6] {
+        let m = self.0;
+        [
+            m[0],
+            m[1],
+            m[4],
+            m[5],
+            m[8],
+            m[9],
+        ]
+    }
 }
 
 impl From<&[f64]> for Matrix4 {
@@ -452,6 +464,8 @@ impl <T: AsRef<Matrix4>> MulAssign<T> for Matrix4 {
         values[14] = b0*a02 + b1*a12 + b2*a22 + b3*a32;
         values[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
     }
+
+    
 }
 
 

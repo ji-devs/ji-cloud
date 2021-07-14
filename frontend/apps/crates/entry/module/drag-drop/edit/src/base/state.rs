@@ -14,6 +14,7 @@ use shared::domain::jig::{
             ThemeChoice,
             Audio,
             Instructions,
+            Transform,
             drag_drop::{
                 Step,
                 PlaySettings as RawPlaySettings, 
@@ -133,7 +134,7 @@ impl Item {
                     ItemKind::Interactive(data) => {
                         RawItemKind::Interactive(RawInteractive{
                             audio: data.audio.get_cloned(),
-                            target_offset: data.target_offset.get_cloned().into()
+                            target_transform: data.target_transform.get_cloned()
                         })
                     }
             }
@@ -200,14 +201,14 @@ pub enum ItemKind {
 #[derive(Clone)]
 pub struct Interactive {
     pub audio: Mutable<Option<Audio>>,
-    pub target_offset: Mutable<(f64, f64)>,
+    pub target_transform: Mutable<Option<Transform>>,
 }
 
 impl Interactive {
     pub fn new(raw: RawInteractive) -> Self {
         Self {
             audio: Mutable::new(raw.audio),
-            target_offset: Mutable::new(raw.target_offset.into()),
+            target_transform: Mutable::new(raw.target_transform),
         }
     }
 }

@@ -29,6 +29,10 @@ pub trait TransformExt: Clone {
 
     fn get_translation_2d(&self) -> (f64, f64);
     fn set_translation_2d(&mut self, x: f64, y: f64);
+    fn add_translation_2d(&mut self, x: f64, y: f64) {
+        let (tx, ty) = self.get_translation_2d();
+        self.set_translation_2d(tx + x, ty + y);
+    }
 
     fn set_origin_2d(&mut self, x: f64, y: f64);
     
@@ -46,6 +50,8 @@ pub trait TransformExt: Clone {
     fn denormalize_translation(&mut self, resize_info: &ResizeInfo);
 
     fn denormalize_matrix_string(&self, resize_info: &ResizeInfo) -> String;
+    fn scale_only(&self) -> Self;
+    fn rotation_only(&self) -> Self;
     fn scale_matrix_string(&self) -> String;
     fn rotation_matrix_string(&self) -> String;
     fn invert_rotation_matrix_string(&self) -> String;
@@ -121,19 +127,30 @@ impl TransformExt for Transform {
 
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the rotation and translation to identity
-    fn scale_matrix_string(&self) -> String {
+    fn scale_only(&self) -> Self {
         let mut t = self.clone();
         t.set_rotation_identity();
         t.set_translation_identity();
-        t.to_mat4().as_matrix_string()
+        t
+    }
+
+    fn scale_matrix_string(&self) -> String {
+        self.scale_only()
+            .to_mat4()
+            .as_matrix_string()
     }
     //CSS requires the full 4x4 or 6-element 2d matrix, so we return the whole thing
     //but set the scale and translation to identity
-    fn rotation_matrix_string(&self) -> String {
+    fn rotation_only(&self) -> Self {
         let mut t = self.clone();
         t.set_scale_identity();
         t.set_translation_identity();
-        t.to_mat4().as_matrix_string()
+        t
+    }
+    fn rotation_matrix_string(&self) -> String {
+        self.rotation_only()
+            .to_mat4()
+            .as_matrix_string()
     }
     fn invert_rotation_matrix_string(&self) -> String {
         let mut t = self.clone();
@@ -238,4 +255,5 @@ impl TransformExt for Transform {
             &self.origin.0
         )
     }
+
 }

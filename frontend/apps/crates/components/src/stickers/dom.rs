@@ -1,10 +1,11 @@
 use dominator::{Dom, DomBuilder, clone, html};
+use dominator_helpers::signals::EitherSignal;
 use std::rc::Rc;
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
 use futures_signals::{
     map_ref,
-    signal::{ReadOnlyMutable, Signal, SignalExt},
+    signal::{ReadOnlyMutable, Mutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
 use super::{
@@ -12,30 +13,87 @@ use super::{
     sprite::dom::{
         render_sticker_sprite, 
         render_sticker_sprite_raw, 
-        render_sticker_sprite_raw_mixin, 
-        render_sticker_sprite_raw_parent_mixin,
-        render_sticker_sprite_raw_offset, 
-        render_sticker_sprite_raw_offset_mixin, 
-        render_sticker_sprite_raw_offset_parent_mixin,
     }, 
     text::dom::{
         render_sticker_text, 
         render_sticker_text_raw, 
-        render_sticker_text_raw_mixin, 
-        render_sticker_text_raw_parent_mixin,
-        render_sticker_text_raw_offset, 
-        render_sticker_text_raw_offset_mixin, 
-        render_sticker_text_raw_offset_parent_mixin,
     }
 };
 use web_sys::HtmlElement;
-use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
+use shared::domain::jig::module::body::{Transform, _groups::design::Sticker as RawSticker};
 
-pub type OffsetMutable = ReadOnlyMutable<(f64, f64)>;
+pub fn mixin_sticker_button(dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
+    dom
+        .style("cursor", "pointer")
+        .style("user-select", "none")
+        .style("-webkit-user-select", "none")
+}
 
-/* TODO - not all these patterns are really used... clean up or make it more about providing
- * options?
- */
+#[derive(Default)]
+pub struct StickerRawRenderOptions {
+    //For sharing the size setting
+    //if not supplied then it will just be created internally
+    pub size: Option<Mutable<Option<(f64, f64)>>>,
+
+    //For overriding the transform (read-only)
+    //if not supplied, or its value is None, the original transform
+    //will be used instead
+    pub transform_override: Option<TransformOverride>,
+
+    //For mixing in the sticker
+    pub mixin: Option<Box<dyn Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>>,
+
+    //The parent to use for containing the sticker
+    //it's kinda weird, the sticker will append itself
+    //but it's useful!
+    pub parent: Option<DomBuilder<HtmlElement>>
+}
+
+impl StickerRawRenderOptions {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn set_size(&mut self, size: Mutable<Option<(f64, f64)>>) {
+        self.size = Some(size);
+    }
+    pub fn set_transform_override(&mut self, transform_override: TransformOverride) {
+        self.transform_override = Some(transform_override);
+    }
+    pub fn set_mixin(&mut self, f: impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + 'static) {
+        self.mixin = Some(Box::new(f) as _);
+    }
+
+    pub fn set_parent(&mut self, parent: DomBuilder<HtmlElement>) {
+        self.parent = Some(parent);
+    }
+}
+
+#[derive(Clone)]
+pub enum TransformOverride {
+    Always(ReadOnlyMutable<Transform>),
+    Sometimes(ReadOnlyMutable<Option<Transform>>),
+}
+
+impl TransformOverride {
+    pub fn get_signal(&self, default: Transform) -> impl Signal<Item = Transform> {
+        match self {
+            Self::Always(t) => {
+                EitherSignal::Left(t.signal_cloned())
+            },
+            Self::Sometimes(t) => {
+                EitherSignal::Right(t.signal_cloned()
+                    .map(clone!(default => move |transform_override| {
+                        match transform_override {
+                            Some(t) => t,
+                            None => default.clone()
+                        }
+                    }))
+                )
+            }
+        }
+    }
+}
 
 pub fn render_stickers<T: AsSticker>(stickers:Rc<Stickers<T>>) -> Dom {
     html!("empty-fragment", {
@@ -62,12 +120,7 @@ pub fn render_stickers_raw(stickers:&[RawSticker], theme_id: ThemeId) -> Dom {
 pub fn render_stickers_raw_vec(stickers:&[RawSticker], theme_id: ThemeId) -> Vec<Dom> {
     stickers
         .iter()
-        .map(|sticker| {
-            match sticker {
-                RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite),
-                RawSticker::Text(text) => render_sticker_text_raw(text, theme_id),
-            }
-        })
+        .map(|sticker| render_sticker_raw(&sticker, theme_id, None))
         .collect::<Vec<Dom>>()
 }
 
@@ -84,52 +137,23 @@ pub fn render_stickers_raw_vec_mixin<F>(stickers:&[RawSticker], theme_id: ThemeI
 where
     F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + Clone + 'static
 {
+
+
     stickers
         .iter()
         .map(|sticker| {
-            match sticker {
-                RawSticker::Sprite(sprite) => render_sticker_sprite_raw_mixin(sprite, mixin.clone()),
-                RawSticker::Text(text) => render_sticker_text_raw_mixin(text, theme_id, mixin.clone()),
-            }
+            let mut opts = StickerRawRenderOptions::new();
+            opts.set_mixin(mixin.clone());
+
+            render_sticker_raw(&sticker, theme_id, Some(opts))
         })
         .collect::<Vec<Dom>>()
 }
 
-pub fn render_sticker_raw(sticker:&RawSticker, theme_id: ThemeId) -> Dom {
+pub fn render_sticker_raw(sticker:&RawSticker, theme_id: ThemeId, opts: Option<StickerRawRenderOptions>) -> Dom {
     match sticker {
-        RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite),
-        RawSticker::Text(text) => render_sticker_text_raw(text, theme_id),
+        RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, opts),
+        RawSticker::Text(text) => render_sticker_text_raw(text, theme_id, opts),
     }
 }
 
-pub fn render_sticker_raw_offset_mixin<F>(sticker:&RawSticker, theme_id: ThemeId, offset: OffsetMutable, mixin: F) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + 'static
-{
-    match sticker {
-        RawSticker::Sprite(sprite) => render_sticker_sprite_raw_offset_mixin(sprite, offset, mixin),
-        RawSticker::Text(text) => render_sticker_text_raw_offset_mixin(text, theme_id, offset, mixin),
-    }
-}
-
-pub fn render_sticker_raw_mixin<F>(sticker:&RawSticker, theme_id: ThemeId, mixin: F) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + 'static
-{
-    match sticker {
-        RawSticker::Sprite(sprite) => render_sticker_sprite_raw_mixin(sprite, mixin),
-        RawSticker::Text(text) => render_sticker_text_raw_mixin(text, theme_id, mixin),
-    }
-}
-//Yeah it's a bit weird, but helpful for creating generic containers like StickerOutline
-//The idea is that the sticker sets styles on the parent and then appends itself
-//So the parent gets transformed etc.
-pub fn render_sticker_raw_parent_mixin<F>(sticker:&RawSticker, theme_id: ThemeId, parent: DomBuilder<HtmlElement>, child_mixin: F) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> + 'static
-{
-    match sticker {
-        RawSticker::Sprite(sprite) => render_sticker_sprite_raw_parent_mixin(parent, sprite, child_mixin),
-        RawSticker::Text(text) => render_sticker_text_raw_parent_mixin(parent, text, theme_id, child_mixin),
-    }
-}

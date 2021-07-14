@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 use futures_signals::{map_ref, signal::{Always, Mutable, ReadOnlyMutable, Signal, SignalExt, always}, signal_vec::SignalVecExt};
 use super::{
     state::{Sprite, width_signal, height_signal},
-    super::{dom::OffsetMutable, state::{Stickers, AsSticker}},
+    super::{dom::StickerRawRenderOptions, state::{Stickers, AsSticker}},
     actions::load_and_render,
     menu::dom::render_sticker_sprite_menu
 };
@@ -74,77 +74,26 @@ pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: Read
 
 }
 
-pub fn render_sticker_sprite_raw(sprite: &RawSprite) -> Dom {
-    _render_sticker_sprite_raw_mixin(sprite, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
-}
-
-pub fn render_sticker_sprite_raw_mixin<F>(sprite: &RawSprite, mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_sprite_raw_mixin(sprite, Some(mixin))
-}
-
-fn _render_sticker_sprite_raw_mixin<F>(sprite: &RawSprite, mixin: Option<F>) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-
-    _render_sticker_sprite_raw_offset_parent_mixin(DomBuilder::new_html("empty-fragment"), sprite, None, mixin)
-
-}
-pub fn render_sticker_sprite_raw_offset(sprite: &RawSprite, offset: OffsetMutable) -> Dom
-{
-    let parent = DomBuilder::new_html("empty-fragment");
-    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
-}
-pub fn render_sticker_sprite_raw_offset_mixin<F>(sprite: &RawSprite, offset: OffsetMutable, mixin: F) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    let parent = DomBuilder::new_html("empty-fragment");
-    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), Some(mixin)) 
-}
-
-pub fn render_sticker_sprite_raw_parent(parent: DomBuilder<HtmlElement>, sprite: &RawSprite) -> Dom
-{
-    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, None, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
-}
-
-pub fn render_sticker_sprite_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, sprite: &RawSprite,child_mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, None, Some(child_mixin))
-}
-
-pub fn render_sticker_sprite_raw_offset_parent_mixin<F>( parent: DomBuilder<HtmlElement>, sprite: &RawSprite, offset: OffsetMutable, child_mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_sprite_raw_offset_parent_mixin(parent, sprite, Some(offset), Some(child_mixin))
-}
-//The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
-//The idea is that the sticker sets styles on the parent and then appends itself
-//So the parent gets transformed etc.
-
-fn _render_sticker_sprite_raw_offset_parent_mixin<F>(parent: DomBuilder<HtmlElement>, sprite: &RawSprite, offset: Option<OffsetMutable>, child_mixin: Option<F>) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
+pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<StickerRawRenderOptions>) -> Dom {
     let src:Mutable<Option<String>> = Mutable::new(None);
-    let size:Mutable<Option<(f64, f64)>> = Mutable::new(None);
-
     let RawSprite { image, effects, flip_horizontal, flip_vertical, ..} = sprite;
+
+    let opts = opts.unwrap_or_default();
+
+    let parent = opts.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+
+    let size = opts.size.unwrap_or_else(|| Mutable::new(None));
 
     let transform = sprite.transform.clone();
 
+    let transform_override = opts.transform_override;
+
     let transform_signal = DefaultSignal::new(
         transform.clone(),
-        offset.map(|offset| {
-            transform_signals::map_offset(transform, offset.signal_cloned())
-        })
+        transform_override.map(|t| t.get_signal(transform))
     );
+
+    let mixin = opts.mixin;
 
     parent
         .style_signal("width", width_signal(size.signal_cloned()))
@@ -178,7 +127,7 @@ where
                 })
             })
         })))
-        .apply_if(child_mixin.is_some(), |dom| dom.apply(child_mixin.unwrap_ji()))
+        .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))
         .into_dom()
 
 }

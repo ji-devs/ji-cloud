@@ -43,6 +43,16 @@ pub enum Sticker {
     Text(Text),
 }
 
+impl Sticker {
+    /// Get the inner transform of a sticker
+    pub fn transform(&self) -> &Transform {
+        match self {
+            Self::Sprite(sprite) => &sprite.transform,
+            Self::Text(text) => &text.transform
+        }
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Text are serialized text things

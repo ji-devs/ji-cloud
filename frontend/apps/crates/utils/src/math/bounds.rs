@@ -39,6 +39,7 @@ pub fn center_rem_signal(size_signal: impl Signal<Item = Option<(f64, f64)>>) ->
     }
 }
 
+// will 0,0 mean centering in the middle of the screen
 pub fn center_rem(size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> Option<(f64, f64)> {
     size.map(|(width, height)| {
         let (full_width, full_height) = resize_info.full_size();
@@ -52,6 +53,8 @@ pub fn center_rem(size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> Option<
 }
 
 
+// does not include rotation!
+// so if creating a proper bounding box, gotta rotate separately
 pub fn transform_px(coords_in_center: bool, transform: &Transform, size: Option<(f64, f64)>, resize_info: &ResizeInfo) -> BoundsF64 {
 
     if let Some(size) = size {

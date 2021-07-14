@@ -12,7 +12,6 @@ pub fn from_mat4(mat:&[f64;16]) -> [f64;6] {
         mat[9],
     ];
 
-    log::info!("{:?}", out);
     out
 }
 

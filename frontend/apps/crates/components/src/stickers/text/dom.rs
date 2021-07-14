@@ -10,16 +10,16 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
 use crate::{
+    text_editor::dom::render_wysiwyg, 
     transform::{
         dom::render_transform,
         events::Move as TransformMove,
         state::{TransformState, Action as TransformAction},
-    },
-    text_editor::dom::render_wysiwyg,
+    }
 };
 use super::{
     state::Text,
-    super::{dom::OffsetMutable, state::{Stickers, AsSticker}},
+    super::{dom::StickerRawRenderOptions, state::{Stickers, AsSticker}},
     menu::dom::render_sticker_text_menu
 };
 use web_sys::{DomRect, HtmlElement};
@@ -108,77 +108,27 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
 }
 
 
-pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId) -> Dom {
-    _render_sticker_text_raw_mixin(text,theme_id, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>)
-}
-
-pub fn render_sticker_text_raw_mixin<F>(text: &RawText, theme_id: ThemeId, mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_text_raw_mixin(text, theme_id, Some(mixin))
-}
-
-fn _render_sticker_text_raw_mixin<F>(text: &RawText, theme_id: ThemeId, mixin: Option<F>) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-
-    _render_sticker_text_raw_offset_parent_mixin(DomBuilder::new_html("empty-fragment"), text, theme_id, None, mixin)
-
-}
-pub fn render_sticker_text_raw_offset(text: &RawText, theme_id: ThemeId, offset: OffsetMutable) -> Dom
-{
-    let parent = DomBuilder::new_html("empty-fragment");
-    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
-}
-
-pub fn render_sticker_text_raw_offset_mixin<F>(text: &RawText, theme_id: ThemeId, offset: OffsetMutable, mixin: F) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    let parent = DomBuilder::new_html("empty-fragment");
-    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), Some(mixin)) 
-}
-
-pub fn render_sticker_text_raw_parent(parent: DomBuilder<HtmlElement>, theme_id: ThemeId, text: &RawText) -> Dom
-{
-    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, None, None::<fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>>) 
-}
-
-pub fn render_sticker_text_raw_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, child_mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, None, Some(child_mixin))
-}
-
-pub fn render_sticker_text_raw_offset_parent_mixin<F>( parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, offset: OffsetMutable, child_mixin: F) -> Dom 
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
-    _render_sticker_text_raw_offset_parent_mixin(parent, text, theme_id, Some(offset), Some(child_mixin))
-}
 
 //The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
 //The idea is that the sticker sets styles on the parent and then appends itself
 //So the parent gets transformed etc.
-fn _render_sticker_text_raw_offset_parent_mixin<F>(parent: DomBuilder<HtmlElement>, text: &RawText, theme_id: ThemeId, offset: Option<OffsetMutable>, child_mixin: Option<F>) -> Dom
-where
-    F: Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>
-{
+pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<StickerRawRenderOptions>) -> Dom {
     const COORDS_IN_CENTER:bool = true;
 
-    let size = Mutable::new(None);
+    let opts = opts.unwrap_or_default();
+
+    let parent = opts.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+
+    let size = opts.size.unwrap_or_else(|| Mutable::new(None));
 
     let transform = text.transform.clone();
 
-    let get_transform_signal = clone!(offset, transform => move || {
+    let transform_override = opts.transform_override;
+
+    let get_transform_signal = clone!(transform, transform_override => move || {
         DefaultSignal::new(
             transform.clone(),
-            offset.clone().map(clone!(transform => move |offset| {
-                transform_signals::map_offset(transform, offset.signal_cloned())
-            }))
+            transform_override.clone().map(clone!(transform => move |t| t.get_signal(transform)))
         )
     });
 
@@ -192,6 +142,8 @@ where
         get_transform_signal(), 
         size.signal_cloned(), 
     );
+
+    let mixin = opts.mixin;
 
     html!("empty-fragment", {
         .child(
@@ -222,8 +174,8 @@ where
                     html!("wysiwyg-output-renderer", {
                         .property("valueAsString", &text.value)
                         .property("theme", theme_id.as_str_id())
-                        .apply_if(child_mixin.is_some(), move |dom| {
-                            dom.apply(child_mixin.unwrap_ji())
+                        .apply_if(mixin.is_some(), move |dom| {
+                            dom.apply(mixin.unwrap_ji())
                         })
                     })
             ).into_dom()

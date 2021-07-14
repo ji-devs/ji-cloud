@@ -32,6 +32,7 @@ use shared::{
                         Item,
                         TargetArea,
                         ItemKind,
+                        Interactive,
                         PlaySettings,
                         Hint,
                         Next
@@ -49,17 +50,18 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 const IMAGE_UUID:&'static str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 
 
-pub const DEBUG_TEXT:&'static str = "[{\"children\":[{\"text\":\"text from rust\",\"element\":\"P1\"}]}]";
+pub const DEBUG_TEXT:&'static str = "Hello World this is a long line of text";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
     pub data:Option<RawData>,
     pub skip_load_jig: bool,
+    pub skip_play: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct InitData {
-    pub stickers: Vec<InitSticker>,
+    pub stickers: Vec<(InitSticker, ItemKind, (f64, f64))>, //last param is translation in the sticker's transform
     pub traces: Vec<InitTrace>
 }
 
@@ -102,10 +104,18 @@ impl DebugSettings {
 
                                 TargetArea { trace, id: Uuid::new_v4() }
                             }).collect(),
-                            items: init_data.stickers.iter().map(|init| {
+                            items: init_data.stickers.iter().map(|(sticker_kind, item_kind, (translation_x, translation_y))| {
                                 let sticker = {
-                                    match init {
-                                        InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                    match sticker_kind {
+                                        InitSticker::Text => {
+                                            let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
+                                            let mut text = Text::new(value);
+
+                                            text.transform.set_translation_2d(*translation_x, *translation_y);
+                                            text.transform.rotate_z(1.5);
+
+                                            Sticker::Text(text)
+                                        },
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                             id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
                                             lib: MediaLibrary::Global
@@ -115,7 +125,7 @@ impl DebugSettings {
 
                                 Item {
                                     sticker,
-                                    kind: ItemKind::Static
+                                    kind: item_kind.clone() 
                                 }
                             }).collect(),
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
@@ -123,6 +133,10 @@ impl DebugSettings {
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                                 layer_2: None,
+                            },
+                            play_settings: PlaySettings {
+                                hint: Hint::None,
+                                ..PlaySettings::default()
                             },
                             ..Content::default()
                         })
@@ -133,7 +147,8 @@ impl DebugSettings {
                     }
                 }
             ),
-            skip_load_jig: true
+            skip_load_jig: true,
+            skip_play: true,
         }
     }
 }
@@ -142,11 +157,22 @@ pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
         SETTINGS.set(DebugSettings::debug(Some(InitData{
             stickers: vec![
-                InitSticker::Text,// InitSticker::Sprite
+                (InitSticker::Text, ItemKind::Static, (0.3, 0.3)),
+                (
+                    InitSticker::Text, 
+                    ItemKind::Interactive(
+                        Interactive {
+                            audio: None,
+                            target_offset: (0.0, 0.0).into()
+                        }
+                    ),
+                    (-0.3, -0.3)
+                ),
+                //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1),
-                InitTrace::Ellipse(0.1, 0.1, 0.1, 0.1),
+                InitTrace::Ellipse(0.6, 0.1, 0.1, 0.1),
             ]
         }))).unwrap_ji();
         //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();

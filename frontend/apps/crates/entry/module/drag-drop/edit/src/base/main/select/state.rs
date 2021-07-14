@@ -1,20 +1,38 @@
 use crate::base::state::*;
 use std::rc::Rc;
 use dominator::clone;
+use utils::{drag::Drag, math::PointI32};
+use shared::domain::jig::module::body::{Transform, _groups::design::Sticker as RawSticker};
 use futures_signals::{
     map_ref,
-    signal::{Mutable, SignalExt, Signal},
+    signal::{Mutable, SignalExt, Signal, ReadOnlyMutable},
     signal_vec::{SignalVec, SignalVecExt}
 };
+use components::stickers::dom::TransformOverride;
 
 pub struct MainSelect {
     pub base: Rc<Base>,
+    pub items: Vec<SelectItem>,
 }
 
 impl MainSelect {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
+        let items = base.stickers.list.lock_ref()
+            .iter()
+            .enumerate()
+            .map(|(index, item)| {
+                SelectItem {
+                    item: item.clone(),
+                    index,
+                    drag: Mutable::new(None),
+                    base: base.clone(),
+                }
+            })
+            .collect();
+
         Rc::new(Self {
             base,
+            items,
         })
     }
 
@@ -41,3 +59,24 @@ impl MainSelect {
     }
 }
 
+#[derive(Clone)]
+pub struct SelectItem {
+    pub item: Item,
+    pub index: usize,
+    pub drag: Mutable<Option<Rc<Drag>>>,
+    pub base: Rc<Base>,
+}
+
+impl SelectItem {
+    pub fn raw_sticker(&self) -> RawSticker {
+        self.item.sticker.to_raw()
+    }
+
+    pub fn kind_signal_cloned(&self) -> impl Signal<Item = ItemKind> {
+        self.item.kind.signal_cloned()
+    }
+
+    pub fn get_transform_override(&self) -> TransformOverride { 
+        TransformOverride::Always(self.item.sticker.transform().get_inner_mutable().read_only())
+    }
+}

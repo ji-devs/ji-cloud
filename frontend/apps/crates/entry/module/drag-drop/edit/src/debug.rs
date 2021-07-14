@@ -12,7 +12,38 @@ use std::rc::Rc;
 use once_cell::sync::OnceCell;
 use utils::{prelude::*, colors::*};
 use uuid::Uuid;
-use shared::{domain::{audio::AudioId, image::ImageId, jig::{JigId, module::{ModuleId, body::{Background, Image, Vec2, Instructions, ThemeChoice, Transform, _groups::design::{Sticker, Text, Trace, Backgrounds, Sprite, TraceShape, BaseContent }, drag_drop::{Content, Interactive, Item, ItemKind, Mode, ModuleData as RawData, Step, TargetArea}}}}}, media::MediaLibrary};
+use shared::{
+    media::MediaLibrary,
+    domain::{
+        audio::AudioId, 
+        image::ImageId, 
+        jig::{
+            JigId, 
+            module::{
+                ModuleId, 
+                body::{
+                    Image,
+                    ThemeChoice,
+                    Background,
+                    Instructions,
+                    Transform,
+                    drag_drop::{
+                        Content, Mode, ModuleData as RawData,
+                        Item,
+                        TargetArea,
+                        ItemKind,
+                        Interactive,
+                        PlaySettings,
+                        Hint,
+                        Next,
+                        Step,
+                    },
+                    _groups::design::{Backgrounds, Sprite, Sticker, Text, Trace, TraceShape, BaseContent}
+                }
+            }
+        }
+    }
+};
 use components::stickers::{sprite::ext::*, text::ext::*};
 use crate::base::sidebar::step_1::state::TabKind as Step1TabKind;
 use crate::base::sidebar::step_2::state::TabKind as Step2TabKind;
@@ -38,9 +69,9 @@ pub struct DebugSettings {
     pub trace_opts: Option<TracesOptions>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct InitData {
-    pub stickers: Vec<InitSticker>,
+    pub stickers: Vec<(InitSticker, ItemKind, (f64, f64))>, //last param is translation in the sticker's transform
     pub traces: Vec<InitTrace>
 }
 
@@ -55,6 +86,8 @@ pub enum InitTrace {
     //x, y, w, h
     Ellipse(f64, f64, f64, f64),
 }
+
+
 
 impl DebugSettings {
     pub fn debug(init_data: Option<InitData>) -> DebugSettings {
@@ -82,15 +115,17 @@ impl DebugSettings {
 
                                 TargetArea { trace, id: Uuid::new_v4() }
                             }).collect(),
-                            items: init_data.stickers.iter().map(|init| {
+                            items: init_data.stickers.iter().map(|(sticker_kind, item_kind, (translation_x, translation_y))| {
                                 let sticker = {
-                                    match init {
+                                    match sticker_kind {
                                         InitSticker::Text => {
                                             let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
+                                            let mut text = Text::new(value);
 
-                                            log::info!("VALUE: {}", value);
+                                            text.transform.set_translation_2d(*translation_x, *translation_y);
+                                            text.transform.rotate_z(1.5);
 
-                                            Sticker::Text(Text::new(value))
+                                            Sticker::Text(text)
                                         },
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                             id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
@@ -101,11 +136,7 @@ impl DebugSettings {
 
                                 Item {
                                     sticker,
-                                    //kind: ItemKind::Static
-                                    kind: ItemKind::Interactive(Interactive {
-                                        audio: None,
-                                        target_offset: Vec2::default() 
-                                    })
+                                    kind: item_kind.clone() 
                                 }
                             }).collect(),
                             theme: ThemeChoice::Override(ThemeId::Chalkboard), 
@@ -113,6 +144,10 @@ impl DebugSettings {
                             backgrounds: Backgrounds {
                                 layer_1: None, //Some(Background::Color(hex_to_rgba8("#ff0000"))),
                                 layer_2: None,
+                            },
+                            play_settings: PlaySettings {
+                                hint: Hint::None,
+                                ..PlaySettings::default()
                             },
                             ..Content::default()
                         })
@@ -138,15 +173,29 @@ impl DebugSettings {
 
 pub fn init(jig_id: JigId, module_id: ModuleId) {
     if jig_id == JigId(Uuid::from_u128(0)) {
+        /*
          SETTINGS.set(DebugSettings::debug(Some(InitData{
+
             stickers: vec![
-                InitSticker::Text, //InitSticker::Sprite
+                (InitSticker::Text, ItemKind::Static, (0.3, 0.3)),
+                (
+                    InitSticker::Text, 
+                    ItemKind::Interactive(
+                        Interactive {
+                            audio: None,
+                            target_offset: (0.0, 0.0).into()
+                        }
+                    ),
+                    (-0.3, -0.3)
+                ),
+                //( InitSticker::Sprite, ItemKind::Static)
             ],
             traces: vec![
                 InitTrace::Ellipse(0.3, 0.4, 0.2, 0.1)
             ]
         }))).unwrap_ji();
-        //SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
+        */
+        SETTINGS.set(DebugSettings::debug(None)).unwrap_ji();
     } else {
         SETTINGS.set(DebugSettings::default()).unwrap_ji();
     }
