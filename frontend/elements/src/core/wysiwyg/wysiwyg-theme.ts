@@ -26,6 +26,6 @@ function getElTheme(elName: ElementType, theme: ThemeKind): [string, string][] {
     return [
         [`--${el}-color`, color],
         [`--${el}-font`, font],
-        [`--${el}-font-size`, `${fontSize}px`],
+        [`--${el}-font-size`, `${fontSize}rem`],
     ];
 }

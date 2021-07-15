@@ -194,6 +194,7 @@ pub fn render_wysiwyg(state: Rc<text_editor::state::State>) -> Dom {
         .style("border", "green dashed 1px")
         .style("box-sizing", "border-box")
         .style("align-self", "baseline")
+        .style("justify-self", "start")
         .child(text_editor::dom::render_wysiwyg(state))
     })
     
@@ -204,6 +205,7 @@ pub fn render_wysiwyg_output(value: Rc<Mutable<Option<String>>>, theme: Mutable<
         .style("border", "red solid 1px")
         .style("box-sizing", "border-box")
         .style("align-self", "baseline")
+        .style("justify-self", "start")
         .child(html!("wysiwyg-output-renderer", {
             .property_signal("valueAsString", value.signal_cloned())
             .property_signal("theme", theme.signal_cloned().map(|theme| theme.as_str_id()))
