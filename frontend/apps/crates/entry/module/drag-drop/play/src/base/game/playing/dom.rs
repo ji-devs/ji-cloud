@@ -3,7 +3,7 @@ use dominator::{clone, html, Dom, with_node, apply_methods};
 use futures_signals::{
     map_ref,
     signal_vec::SignalVecExt,
-    signal::SignalExt
+    signal::{Mutable, SignalExt}
 };
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
@@ -18,7 +18,17 @@ pub fn render(state: Rc<PlayState>) -> Dom {
 
     let theme_id = state.game.base.theme_id;
 
+    let targets_ready = Mutable::new(false);
+
     html!("empty-fragment", {
+        .future(state.all_interactive_items_have_sizes().for_each(clone!(state, targets_ready => move |x| {
+            clone!(state, targets_ready => async move {
+                if x {
+                    state.set_targets().await;
+                    targets_ready.set_neq(true);
+                }
+            })
+        })))
         .child(render_traces_hint(
                 state.game.base.target_areas
                     .iter()
@@ -41,9 +51,15 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             opts.set_transform_override(TransformOverride::Always(item.curr_transform.read_only()));
 
                             opts.set_mixin(
-                                clone!(state, item => move |dom| {
+                                clone!(state, item, targets_ready => move |dom| {
                                     apply_methods!(dom, {
                                         .apply(mixin_sticker_button)
+                                        .apply(|dom| {
+                                            dom
+                                                .style_signal("display", targets_ready.signal().map(|ready| {
+                                                    if ready { "block" } else { "none" }
+                                                }))
+                                        })
                                         .event(clone!(item => move |evt:events::MouseDown| {
                                             item.start_drag(evt.x() as i32, evt.y() as i32);
                                         }))
@@ -52,7 +68,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                         }))
                                         .global_event_preventable(clone!(state, item => move |evt:events::MouseUp| {
                                             if item.try_end_drag(evt.x() as i32, evt.y() as i32) {
-                                                state.evaluate(&item);
+                                                state.evaluate(item.clone());
                                             }
                                         }))
                                     })

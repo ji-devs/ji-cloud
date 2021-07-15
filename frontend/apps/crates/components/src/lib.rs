@@ -39,3 +39,6 @@ pub mod lists;
 pub mod audio_mixer;
 #[cfg(feature = "theme_selector")]
 pub mod theme_selector;
+#[cfg(feature = "collision")]
+pub mod collision;
+

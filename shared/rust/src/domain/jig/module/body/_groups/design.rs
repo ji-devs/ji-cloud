@@ -99,6 +99,12 @@ pub struct Trace {
     pub shape: TraceShape,
 }
 
+impl AsRef<Trace> for Trace {
+    fn as_ref(&self) -> &Trace {
+        self
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Trace shape

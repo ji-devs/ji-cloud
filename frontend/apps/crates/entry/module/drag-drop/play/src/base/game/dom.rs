@@ -1,9 +1,6 @@
 use std::rc::Rc;
 use dominator::{clone, html, Dom};
-use futures_signals::{
-    signal_vec::SignalVecExt,
-    signal::SignalExt
-};
+use futures_signals::{signal::{Mutable, SignalExt}, signal_vec::SignalVecExt};
 use super::{
     state::*,
     hints::{

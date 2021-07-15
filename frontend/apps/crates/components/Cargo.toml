@@ -63,6 +63,7 @@ web-sys = { version = "0.3.51", features = [
     'HtmlIFrameElement',
     'CanvasRenderingContext2d',
     'HtmlSelectElement',
+    'Performance',
 ] }
 awsm_web = { version = "0.19.2", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.41"
@@ -95,6 +96,7 @@ lists = []
 audio_mixer = []
 theme_selector = []
 module_groups_cards = []
+collision = []
 
 default = ["all"]
 all= [
@@ -118,4 +120,5 @@ all= [
     "audio_mixer",
     "theme_selector",
     "module_groups_cards",
+    "collision",
 ]
