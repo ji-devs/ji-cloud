@@ -33,7 +33,7 @@ export const GET_STR_MODULE = (kind: ModuleKind) => {
         case "tapping-board": return "Tapping Board";
         case "tracing": return "Tracing";
         case "video": return "Video Player";
-        case "card-quiz": return "Card Quiz";
+        case "card-quiz": return "Find the Pair";
         case "drag-drop": return "Drag and Drop";
         default: return "";
     }
