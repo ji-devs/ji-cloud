@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind, STR_THEME_LABEL} from "@elements/_themes/themes";
+import {ThemeId, THEMES} from "@elements/_themes/themes";
 import {cardBackIconPath} from "@elements/module/_groups/cards/helpers";
 import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
@@ -100,7 +100,7 @@ export class _ extends LitElement {
   }
 
   @property()
-  theme:ThemeKind = "blank";
+  theme:ThemeId = "blank";
 
   @property({reflect: true})
   state:STATE= "idle";
@@ -142,7 +142,7 @@ export class _ extends LitElement {
                     <img-ui class=${imageClass} path="theme/${theme}/card-front-icon.svg"></img-ui>
                     <img-ui class=${imageHoverClass} path="theme/${theme}/card-front-icon-hover.svg"></img-ui>
                   </div>
-                  <div class="label">${STR_THEME_LABEL[theme]}</div>
+                  <div class="label">${THEMES[theme].label.en}</div>
               </div>
           </section>
       `

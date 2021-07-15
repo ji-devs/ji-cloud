@@ -1,5 +1,5 @@
 import {argsToAttrs} from "@utils/attributes";
-import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/core/inputs/primitives/text-content";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import "@elements/core/inputs/primitives/textarea-content";
@@ -16,7 +16,7 @@ type IO_MODE = "edit" | "preview" | "static";
 export interface Args {
     ioMode: IO_MODE,
     contentMode: CONTENT_MODE,
-    theme: ThemeKind,
+    theme: ThemeId,
     dragOver: boolean,
     inverted: boolean,
     mode: Mode,
@@ -65,6 +65,7 @@ function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE) {
         return `<img-ui path="core/_common/image-empty.svg"></img-ui>`
     }
 }
+
 Card.args = DEFAULT_ARGS;
 Card.argTypes = {
     ioMode: {
@@ -85,5 +86,6 @@ Card.argTypes = {
             options: ["left", "right"]
         }
     },
+
     theme: ThemeControl
 }

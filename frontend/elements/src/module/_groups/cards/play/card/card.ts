@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
 import {cardBackFullPath, Mode, Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
 import {Size, cardStyles} from "./styles";
@@ -89,7 +89,7 @@ export class _ extends LitElement {
 
   // required for styling
   @property()
-  theme:ThemeKind = "blank";
+  theme:ThemeId = "blank";
 
   // required for styling
   @property()

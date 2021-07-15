@@ -99,7 +99,7 @@ impl State {
         });
 
         spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme| {
-            let mut fonts: Vec<String> = Vec::from(theme.get_fonts());
+            let mut fonts: Vec<String> = Vec::from(theme.get_text_editor_fonts());
             let mut static_fonts: Vec<String> = StaticFont::iter().map(|font| {
                 String::from(font.get_font_name())
             }).collect();

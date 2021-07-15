@@ -1,12 +1,12 @@
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId, THEMES} from "@elements/_themes/themes";
 export * from "@elements/_themes/themes";
 
-//TODO - import from config instead
-export const ThemeKinds:Array<ThemeKind> = ["blank", "chalkboard", "happy-brush"];
+export const ThemeIds:Array<ThemeId> = Object.keys(THEMES) as Array<ThemeId>; 
 
 export const ThemeControl = {
     control: {
             type: 'inline-radio',
-            options: ThemeKinds 
+            options: ThemeIds 
     }
 }
+

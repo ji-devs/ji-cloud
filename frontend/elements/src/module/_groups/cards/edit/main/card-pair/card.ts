@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 import {cardBackFullPath, Mode,Side, StyleKind, getContentStyle} from "@elements/module/_groups/cards/helpers";
 import { styleMap } from 'lit-html/directives/style-map';
 
@@ -105,7 +105,7 @@ export class _ extends LitElement {
   inverted:boolean = false;
 
   @property()
-  theme:ThemeKind = "blank";
+  theme:ThemeId = "blank";
 
   @property({type: Boolean})
   editing: boolean = false;

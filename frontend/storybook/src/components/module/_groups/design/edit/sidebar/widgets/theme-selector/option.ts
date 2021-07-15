@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeIds, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
 import {STATE} from "@elements/module/_groups/design/edit/sidebar/widgets/theme-selector/option";
 
@@ -9,7 +9,7 @@ export default {
 }
 
 interface Args {
-    theme: ThemeKind,
+    theme: ThemeId,
     state: STATE,
 }
 

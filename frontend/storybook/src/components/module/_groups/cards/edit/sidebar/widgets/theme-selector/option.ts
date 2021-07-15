@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeIds, ThemeControl} from "~/components/module/_common/theme";
 import "@elements/core/menu/kebab";
 import "@elements/core/menu/menu-line";
 import "@elements/module/_groups/cards/edit/sidebar/widgets/theme-selector/option";
@@ -11,7 +11,7 @@ export default {
 }
 
 interface Args {
-    theme: ThemeKind,
+    theme: ThemeId,
     state: STATE,
 }
 

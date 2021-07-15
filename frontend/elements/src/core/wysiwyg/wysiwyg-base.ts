@@ -6,7 +6,7 @@ import { ControllerState, controlNameList, defaultState, ElementType, getKeyLeve
 import { EditorElement, EditorText, EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
 import { baseStyles, getRootStyles } from './styles';
-import { ThemeKind, THEMES, TextEditor as TextEditorTheme} from '@elements/_themes/themes';
+import { ThemeId, THEMES, TextEditor as TextEditorTheme, TextEditorVariant} from '@elements/_themes/themes';
 import { getThemeVars } from "./wysiwyg-theme";
 
 @customElement("wysiwyg-base")
@@ -23,7 +23,7 @@ export class _ extends LitElement {
     }
 
     @property()
-    public theme: ThemeKind = "chalkboard";
+    public theme: ThemeId = "chalkboard";
 
     public elementDefault?: ElementType;
 
@@ -173,16 +173,15 @@ export class _ extends LitElement {
         const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
 
         const themeInfo = THEMES[this.theme];
+        const themeVariant = themeInfo.textEditor[elementName] as TextEditorVariant;
 
         switch (key) {
             case "color":
-                let color = (themeInfo as any)["color" + themeInfo.textEditor[elementName].fontColor];
-                return `#${color[0].toString(16)}${color[1].toString(16)}${color[2].toString(16)}` as any;
+                return themeInfo.colors[themeVariant.fontColor] as any;
             case "font":
-                return (themeInfo as any)["fontFamily" + themeInfo.textEditor[elementName].fontFamily];
+                return themeInfo.fontFamilies[themeVariant.fontFamily] as any;
             case "fontSize":
-                // for some reason I need any
-                return themeInfo.textEditor[elementName].fontSize as any;
+                return themeVariant.fontSize as any;
             default:
                 return defaultState[key];
         }

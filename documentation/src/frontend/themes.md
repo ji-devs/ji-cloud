@@ -1,22 +1,23 @@
 # Themes 
 
-The theme settings are defined from ideation at [here](https://docs.google.com/spreadsheets/d/1kT35Q0AUuT5Fz8juPOW_-OVnIT08bF2E5RZK1vUI4Wc/edit?usp=sharing)
+## Configuring existing themes
 
-On the code side, this is applied across a few places:
+Themes are configured in `frontend/config/themes.json`
 
-1. CSS var definition: `elements/src/_themes/themes.ts`
-2. Rust definitions and config loading: `crates/utils/src/themes.rs`
-3. Rust config JSON: `config/themes.json`
+The various images are stored on the CDN in the ui/theme directory
 
-Ideally the `themes.json` would be used in both the CSS var side and Rust, and would be the single source of truth for all settings, but that isn't working right now (just need to import directly into TS)
+## Adding new themes
 
-There are a few other places where compile-time definitions need to be made as new themes are added:
+Requires a couple extra steps:
 
 1. ThemeId in Rust: in the shared crate
-2. ThemeIdExt and list of themes in Rust: `crates/utils/src/themes.rs`
-3. ThemeKind in elements: `elements/src/_themes/themes.ts`
-4. List of themes in Storybook: `components/module/_common/theme.ts`
+2. The as_str_id definition in the Rust themes.rs 
 
-Lastly, the various images are stored on the CDN in the ui/theme directory
+## Usage in code
+
+The JSON is checked via Serde on the Rust side at `crates/utils/src/themes.rs`
+It is also loosely checked on the element side via Typescript definitions at `elements/src/_themes/themes.ts`
+
+These respectively do a bit more processing too (the element sets CSS vars and Rust sets up helpers to access data)
 
 Note that modules are free to use the above settings however they wish, e.g. to use a specific theme mapping based on runtime conditions

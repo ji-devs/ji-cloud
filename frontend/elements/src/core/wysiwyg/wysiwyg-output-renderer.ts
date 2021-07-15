@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, internalProperty, property, Prope
 import { EditorElement, EditorText } from './slate-wysiwyg-react/EditorBackbone';
 import { StyleInfo, styleMap } from 'lit-html/directives/style-map';
 import { baseStyles, getElementStyles, getLeafStyles, getRootStyles } from './styles';
-import { ThemeKind } from '@elements/_themes/themes';
+import { ThemeId } from '@elements/_themes/themes';
 import { getThemeVars } from './wysiwyg-theme';
 import { WysiwygValue } from './wysiwyg-types';
 import { ifDefined } from 'lit-html/directives/if-defined';
@@ -32,7 +32,7 @@ export class _ extends LitElement {
     private value: WysiwygValue = getDefaultValue();
 
     @property()
-    private theme: ThemeKind = "chalkboard";
+    private theme: ThemeId = "chalkboard";
 
     updated(changedProperties: PropertyValues) {
         if (changedProperties.has('theme')) {

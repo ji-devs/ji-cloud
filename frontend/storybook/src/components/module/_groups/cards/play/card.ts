@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/_groups/cards/play/card/card";
 import "@elements/module/_groups/cards/play/card/text";
 import {mapToString, arrayIndex} from "@utils/array";
-import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeControl} from "~/components/module/_common/theme";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import {Size} from "@elements/module/_groups/cards/play/card/styles";
 import {Mode, Side, StyleKind} from "@elements/module/_groups/cards/helpers";
@@ -20,7 +20,7 @@ export interface Args {
     translateY: number,
     transform: boolean,
     */
-    theme: ThemeKind,
+    theme: ThemeId,
     flipped: boolean,
     flipOnHover: boolean,
     contentMode: CONTENT_MODE,

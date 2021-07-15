@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property} from "lit-element";
 import { mediaUi } from "@utils/path";
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 
 
 @customElement("instructions-banner")
@@ -34,7 +34,7 @@ export class _ extends LitElement {
     }
 
     @property()
-    theme:ThemeKind= "blank";
+    theme:ThemeId= "blank";
 
     render() {
         return html`<section><slot></slot></section>`

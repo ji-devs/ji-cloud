@@ -5,6 +5,7 @@ import alias from '@rollup/plugin-alias';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import typescript from "rollup-plugin-typescript2";
 import commonjs from "@rollup/plugin-commonjs";
+import json from '@rollup/plugin-json';
 
 const path = require('path');
 
@@ -38,6 +39,8 @@ export function createConfig(target) {
         //         "@bundles": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src/_bundles")
         //     }
         // }),
+
+        json(),
 
         resolve(),
 

@@ -1,10 +1,10 @@
 import { styleMap } from 'lit-html/directives/style-map';
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 
-export const cardBackIconPath = (theme:ThemeKind):string => {
+export const cardBackIconPath = (theme:ThemeId):string => {
     return `theme/${theme}/card-back-icon.png`;
 }
-export const cardBackFullPath = (theme:ThemeKind):string => {
+export const cardBackFullPath = (theme:ThemeId):string => {
     return `theme/${theme}/card-back.png`;
 }
 
@@ -25,7 +25,7 @@ export type Mode =
         | "synonymns"
         | "translate"
 
-export const getEmptyStyle = (theme:ThemeKind, active: boolean, bgOpacity: number = 1.0) => {
+export const getEmptyStyle = (theme:ThemeId, active: boolean, bgOpacity: number = 1.0) => {
       return styleMap({
         "--color": `var(--theme-${theme}-cards-color)`,
         borderColor: `var(--theme-${theme}-cards-border-color)`,
@@ -40,7 +40,7 @@ export const getEmptyStyle = (theme:ThemeKind, active: boolean, bgOpacity: numbe
       });
 }
 
-export const getContentStyle = (styleKind:StyleKind, theme:ThemeKind, mode: Mode, side: Side, bgOpacity:number = 1.0) => {
+export const getContentStyle = (styleKind:StyleKind, theme:ThemeId, mode: Mode, side: Side, bgOpacity:number = 1.0) => {
       return styleMap({
         "--color": `var(--theme-${theme}-cards-color)`,
         borderColor: styleKind === "dragging" ? "#1160fb"

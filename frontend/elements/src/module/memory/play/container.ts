@@ -1,6 +1,6 @@
 import { LitElement, html, css, customElement, property, unsafeCSS } from "lit-element";
 import { mediaUi } from "@utils/path";
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 
 
 @customElement("memory-container")

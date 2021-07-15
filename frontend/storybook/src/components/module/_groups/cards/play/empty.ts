@@ -2,7 +2,7 @@ import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/_groups/cards/play/card/empty";
 import {Kind} from "@elements/module/_groups/cards/play/card/empty";
 import {mapToString, arrayIndex} from "@utils/array";
-import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeControl} from "~/components/module/_common/theme";
 import {Ji as MockJiImage} from "~/components/core/images/ji";
 import {Size} from "@elements/module/_groups/cards/play/card/styles";
 
@@ -11,7 +11,7 @@ export default {
 }
 
 export interface Args {
-    theme: ThemeKind,
+    theme: ThemeId,
     size: Size,
     kind: Kind,
     active?: boolean,

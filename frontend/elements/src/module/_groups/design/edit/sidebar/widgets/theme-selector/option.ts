@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind, STR_THEME_LABEL} from "@elements/_themes/themes";
+import {ThemeId, THEMES} from "@elements/_themes/themes";
 import {themeIconPath} from "@elements/module/_groups/design/helpers";
 import "@elements/module/_common/edit/widgets/theme-selector/jig";
 
@@ -80,7 +80,7 @@ export class _ extends LitElement {
   }
 
   @property()
-  theme:ThemeKind = "blank";
+  theme:ThemeId = "blank";
 
   @property({reflect: true})
   state:STATE= "idle";
@@ -115,7 +115,7 @@ export class _ extends LitElement {
               <div class="content">
                   <img-ui class=${imageClass} path="${themeIconPath(theme, false)}"></img-ui>
                   <img-ui class=${imageHoverClass} path="${themeIconPath(theme, true)}"></img-ui>
-                  <div class="label">${STR_THEME_LABEL[theme]}</div>
+                  <div class="label">${THEMES[theme].label.en}</div>
                   ${state === "selected" ? renderMenu() : nothing}
               </div>
           </section>

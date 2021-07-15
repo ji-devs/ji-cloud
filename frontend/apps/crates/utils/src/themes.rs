@@ -1,4 +1,4 @@
-use once_cell::sync::OnceCell;
+use once_cell::sync::{Lazy, OnceCell};
 use rgb::RGBA8;
 use serde::{
     de::{self, Deserializer},
@@ -9,6 +9,13 @@ use std::{fmt, marker::PhantomData};
 use crate::unwrap::UnwrapJiExt;
 pub use shared::domain::jig::module::body::ThemeId;
 
+//Set lazily, first time as-needed
+static THEMES: Lazy<Themes> = Lazy::new(|| {
+        let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect_ji("Invalid Themes");
+        
+        themes
+});
+
 pub const THEME_IDS:[ThemeId;3] = [
     ThemeId::Blank,
     ThemeId::Chalkboard, 
@@ -18,9 +25,7 @@ pub const THEME_IDS:[ThemeId;3] = [
 pub trait ThemeIdExt {
     fn get_colors(self) -> &'static [RGBA8];
 
-    fn get_fonts(self) -> &'static [String];
-
-    fn display_name(self) -> &'static str;
+    fn get_text_editor_fonts(self) -> &'static [String];
 
     fn as_str_id(self) -> &'static str;
 
@@ -50,24 +55,15 @@ impl ThemeIdExt for ThemeId {
         self.map_theme(|theme| theme.colors.as_slice())
     }
 
-    fn get_fonts(self) -> &'static [String] {
-        self.map_theme(|theme| theme.fonts.as_slice())
-    }
-
-    //TODO - tie to Localization
-    fn display_name(self) -> &'static str {
-        match self {
-            Self::Blank => "blank",
-            Self::Chalkboard => "Chalkboard", 
-            Self::HappyBrush => "Happy Brush", 
-        }
+    fn get_text_editor_fonts(self) -> &'static [String] {
+        self.map_theme(|theme| theme.text_editor.font_list.as_slice())
     }
 
     fn as_str_id(self) -> &'static str {
         match self {
-            Self::Blank => "blank",
-            Self::Chalkboard => "chalkboard", 
-            Self::HappyBrush => "happy-brush", 
+            ThemeId::Blank => "blank",
+            ThemeId::Chalkboard => "chalkboard",
+            ThemeId::HappyBrush => "happy-brush"
         }
     }
 
@@ -76,50 +72,93 @@ impl ThemeIdExt for ThemeId {
     where
         F: FnOnce(&'static Theme) -> A
     {
-        match THEMES.get() {
-            None => {
-                init_config();
-                self.map_theme(mapper)
-            }
-            Some(themes) => {
-                mapper(match self {
-                    Self::Blank => &themes.blank,
-                    Self::Chalkboard => &themes.chalkboard,
-                    Self::HappyBrush => &themes.happy_brush,
-                })
-            }
-        }
+        let theme = THEMES
+            .get(self.as_str_id())
+            .unwrap_ji();
+
+        mapper(theme)
     }
 
 }
 
 //These are for storing the config statically
 //access is via the public ThemeId getters
+//TODO - would be cool to change this to HashMap<ThemeId, Theme>
+type Themes = std::collections::HashMap<String, Theme>;
+/*
 #[derive(Debug, Deserialize)]
 struct Themes {
     pub blank: Theme,
     pub chalkboard: Theme,
     pub happy_brush: Theme,
 }
+*/
 
 #[derive(Debug, Deserialize)]
 pub struct Theme {
+    pub label: ThemeLabel,
+    
+    pub id: String,
+
+    #[serde(rename(deserialize = "fontFamilies"))]
+    pub font_familes: Vec<String>,
     /// 3 values for now
     #[serde(deserialize_with = "hex_to_rgba8")]
     pub colors: Vec<RGBA8>,
 
-    /// 3 values for now
-    pub fonts: Vec<String> 
+    #[serde(rename(deserialize = "textEditor"))]
+    pub text_editor: TextEditor,
+
+    #[serde(rename(deserialize = "cards"))]
+    pub cards: Cards,
 }
 
-//Set lazily, first time as-needed
-static THEMES: OnceCell<Themes> = OnceCell::new();
-
-fn init_config() {
-    let themes:Themes = serde_json::from_str(include_str!("../../../../config/themes.json")).expect_ji("Invalid Themes");
-
-    THEMES.set(themes).unwrap_ji()
+#[derive(Debug, Deserialize)]
+pub struct ThemeLabel {
+    pub en: String,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct TextEditor {
+    pub h1: TextEditorVariant,
+    pub h2: TextEditorVariant,
+    pub p1: TextEditorVariant,
+    pub p2: TextEditorVariant,
+    #[serde(rename(deserialize = "fontList"))]
+    pub font_list: Vec<String>
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct TextEditorVariant {
+    #[serde(rename(deserialize = "fontFamily"))]
+    pub font_family: FontFamilyMapping, 
+    #[serde(rename(deserialize = "fontColor"))]
+    pub font_color: ColorMapping, 
+    #[serde(rename(deserialize = "fontSize"))]
+    pub font_size: f64, 
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Cards {
+    #[serde(rename(deserialize = "fontColor"))]
+    pub font_color: ColorMapping,
+    #[serde(rename(deserialize = "fillColor"))]
+    pub fill_color: ColorMapping,
+    #[serde(rename(deserialize = "borderColor"))]
+    pub border_color: ColorMapping,
+    #[serde(rename(deserialize = "fontFamily"))]
+    pub font_family: FontFamilyMapping,
+    #[serde(rename(deserialize = "fontFamilyLetteringLeft"))]
+    pub font_family_lettering_left: FontFamilyMapping,
+    #[serde(rename(deserialize = "fontFamilyLetteringRight"))]
+    pub font_family_lettering_right: FontFamilyMapping,
+}
+
+pub type FontFamilyMapping = usize;
+pub type ColorMapping = usize;
+
+
 
 //Deserializes the colors from Vec<String> to Vec<RGBA8>
 //currently assumes all the strings are in the format 0xRRGGBB
@@ -147,7 +186,7 @@ where
             // While there are entries remaining in the input, add them
             // into our vec.
             while let Some(value) = visitor.next_element::<String>()? {
-                let value = value.trim_start_matches("0x");
+                let value = value.trim_start_matches("#");
                 let value = u32::from_str_radix(value, 16)
                     .map_err(|_| serde::de::Error::custom(format!("invalid color [{}]!", value)))?;
 

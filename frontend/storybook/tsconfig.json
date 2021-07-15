@@ -14,5 +14,7 @@
             "dom", 
             "dom.iterable"
         ],
+
+        "resolveJsonModule": true,
     },
 }

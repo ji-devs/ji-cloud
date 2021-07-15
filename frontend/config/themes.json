@@ -1,32 +1,135 @@
 {
-	"blank": {
-		"colors": [
-		],
-		"fonts": [
-		]
-	},
-	
-    "chalkboard": {
-        "colors": [
-            "0x272727",
-            "0xAFCBF4",
-            "0xD8E7FA"
+    "blank": {
+        "id": "blank",
+        "label": {
+            "en": "Blank"
+        },
+        "fontFamilies": [
+            "'Arial', 'Times New Roman'",
+            "'Shesek', Cursive'"
         ],
-		"fonts": [
-            "Shesek - Regular, Architects Daughter - Regular",
-            "Shesek - Regular, Roboto Slab - Regular",
-            "Frank Ruhl Libre - Medium, Architects Daughter - Regular"
-		]
+        "colors": ["#ff2354", "#ff2354","#ff2354"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 28,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 1,
+                "fontSize": 25,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 14,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 12,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 1,
+            "fillColor": 2,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
     },
-    "happy_brush": {
-        "colors": [
-            "0x272727",
-            "0xFF6639",
-            "0xFFF3ED"
+    "chalkboard": {
+        "id": "chalkboard",
+        "label": {
+            "en": "Chalkboard"
+        },
+        "fontFamilies": [
+            "'Frank Ruhl Libre - Medium', 'Roboto Slab - Medium'",
+            "'Shesek - Regular', 'Architects Daughter - Regular'"
         ],
-		"fonts": [
-            "Frank Ruhl Libre - Medium, Roboto Slab - Medium",
-            "Shesek - Regular, Caveat - Medium"
-		]
+        "colors": ["#272727", "#AFCBF4", "#D8E7FA"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 28,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 1,
+                "fontSize": 25,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 14,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 12,
+                "fontColor": 2
+            },
+            "fontList": [
+                "Shesek - Regular, Architects Daughter - Regular",
+                "Shesek - Regular, Roboto Slab - Regular",
+                "Frank Ruhl Libre - Medium, Architects Daughter - Regular"
+            ]
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 1,
+            "fillColor": 2,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "happy-brush": {
+        "id": "happy-brush",
+        "label": {
+            "en": "Happy Brush"
+        },
+        "fontFamilies": [
+            "'Frank Ruhl Libre - Medium', 'Roboto Slab - Medium'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#272727", "#FF6639","#FFF3ED"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 28,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 1,
+                "fontSize": 25,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 14,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 12,
+                "fontColor": 2
+            },
+            "fontList": [
+                "Frank Ruhl Libre - Medium, Roboto Slab - Medium",
+                "Shesek - Regular, Caveat - Medium"
+            ]
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 1,
+            "fillColor": 2,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
     }
 }

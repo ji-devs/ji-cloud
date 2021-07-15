@@ -1,6 +1,6 @@
 import {argsToAttrs} from "@utils/attributes";
 import {mapToString, arrayCount} from "@utils/array";
-import {ThemeKind, ThemeKinds, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeIds, ThemeControl} from "~/components/module/_common/theme";
 import {Option} from "./option"; 
 import "@elements/module/_common/edit/widgets/theme-selector/container";
 
@@ -11,8 +11,8 @@ export default {
 
 
 interface Args {
-    selected: ThemeKind,
-    jig: ThemeKind,
+    selected: ThemeId,
+    jig: ThemeId,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -24,7 +24,7 @@ export const Container = (props?:Partial<Args> & {content?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     const {selected, jig} = props;
     return `<theme-selector ${argsToAttrs(props)}>
-    ${mapToString(ThemeKinds, opt_theme => Option({
+    ${mapToString(ThemeIds, opt_theme => Option({
         theme: opt_theme,
         state: opt_theme === jig ? "jig"
         : opt_theme === selected ? "selected" 

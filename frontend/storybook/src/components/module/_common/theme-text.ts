@@ -1,10 +1,10 @@
-import {ThemeKind, ThemeControl} from "~/components/module/_common/theme";
+import {ThemeId, ThemeControl} from "~/components/module/_common/theme";
 export default {
     title: "Module / _common"
 }
 
 interface Args {
-    theme: ThemeKind;
+    theme: ThemeId;
 }
 
 const DEFAULT_ARGS:Args = {
@@ -30,7 +30,7 @@ export const TextExample = (props?:Partial<Args>) => {
     `;
 }
 
-function makeLine(element: ElementKind, theme: ThemeKind) {
+function makeLine(element: ElementKind, theme: ThemeId) {
 	return `
 		<b>${element.toUpperCase()}</b>:
 		<br/>
@@ -38,7 +38,7 @@ function makeLine(element: ElementKind, theme: ThemeKind) {
 	`;
 }
 
-function makeStyle(element: ElementKind, theme: ThemeKind) {
+function makeStyle(element: ElementKind, theme: ThemeId) {
 	let style = `font-family: var(--theme-${theme}-${element}-font-family);`;
 	style += ` font-size: var(--theme-${theme}-${element}-font-size);`;
 	style += ` color: var(--theme-${theme}-${element}-color);`;

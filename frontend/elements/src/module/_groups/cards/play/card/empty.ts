@@ -1,7 +1,7 @@
 import { LitElement, svg, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
-import {ThemeKind} from "@elements/_themes/themes";
+import {ThemeId} from "@elements/_themes/themes";
 import { styleMap } from 'lit-html/directives/style-map';
 import {getEmptyStyle} from "@elements/module/_groups/cards/helpers";
 import {Size, cardStyles} from "./styles";
@@ -32,7 +32,7 @@ export class _ extends LitElement {
   }
 
   @property()
-  theme:ThemeKind = "blank";
+  theme:ThemeId = "blank";
 
   @property({reflect: true})
   size:Size = "memory";
@@ -53,7 +53,7 @@ export class _ extends LitElement {
   }
 }
 
-function renderQuestion(theme:ThemeKind, active: boolean) {
+function renderQuestion(theme:ThemeId, active: boolean) {
       const style = getEmptyStyle(theme, active, 0.7); 
       return html`
           <section>
@@ -74,7 +74,7 @@ function renderTranslucent() {
 	`
 }
 
-function renderQuestionMark(theme:ThemeKind, active: boolean) {
+function renderQuestionMark(theme:ThemeId, active: boolean) {
 
 	const style = active 
 		? styleMap({fill: `var(--theme-${theme}-cards-border-color)`})
