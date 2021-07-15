@@ -8,7 +8,8 @@ export const moduleKinds:Array<ModuleKind> = [
     "tapping-board",
     "tracing",
     "video",
-    "visual-quiz",
+    "card-quiz",
+    "drag-drop",
 ];
 export type ModuleKind =
     "cover"
@@ -19,7 +20,8 @@ export type ModuleKind =
     | "tapping-board"
     | "tracing"
     | "video"
-    | "visual-quiz";
+    | "card-quiz"
+    | "drag-drop";
 
 export const GET_STR_MODULE = (kind: ModuleKind) => {
     switch(kind) {
@@ -31,7 +33,8 @@ export const GET_STR_MODULE = (kind: ModuleKind) => {
         case "tapping-board": return "Tapping Board";
         case "tracing": return "Tracing";
         case "video": return "Video Player";
-        case "visual-quiz": return "Visual Quiz";
+        case "card-quiz": return "Card Quiz";
+        case "drag-drop": return "Drag and Drop";
         default: return "";
     }
 }
