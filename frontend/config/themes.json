@@ -8,7 +8,49 @@
             "'Arial', 'Times New Roman'",
             "'Shesek', Cursive'"
         ],
-        "colors": ["#ff2354", "#ff2354","#ff2354"],
+        "colors": ["#ff2354", "#00ff00","#ff2354"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 28,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 1,
+                "fontSize": 25,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 14,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 1,
+                "fontSize": 12,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 1,
+            "fillColor": 2,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 0
+        }
+    },
+    "comix": {
+        "id": "blank",
+        "label": {
+            "en": "Blank"
+        },
+        "fontFamilies": [
+            "'Arial', 'Times New Roman'",
+            "'Shesek', Cursive'"
+        ],
+        "colors": ["#ff2354", "#00ff00","#ff2354"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
