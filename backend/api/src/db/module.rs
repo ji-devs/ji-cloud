@@ -141,6 +141,7 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
         ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
         ModuleBody::Poster(body) => serde_json::to_value(body)?,
         ModuleBody::TappingBoard(body) => serde_json::to_value(body)?,
+        ModuleBody::DragDrop(body) => serde_json::to_value(body)?,
 
         _ => anyhow::bail!("Unimplemented body kind: {}", kind.as_str()),
     };
@@ -160,6 +161,7 @@ fn transform_response_kind(
         ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
         ModuleKind::Poster => Ok(ModuleBody::Poster(serde_json::from_value(contents)?)),
         ModuleKind::TappingBoard => Ok(ModuleBody::TappingBoard(serde_json::from_value(contents)?)),
+        ModuleKind::DragDrop => Ok(ModuleBody::DragDrop(serde_json::from_value(contents)?)),
 
         _ => anyhow::bail!("Unimplemented response kind"),
     }
