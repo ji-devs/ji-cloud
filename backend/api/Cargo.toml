@@ -19,6 +19,7 @@ anyhow = "1.0.32"
 chrono = "0.4.13"
 chrono-tz = "0.5.3"
 config = {path = "../../config/rust"}
+cloudevents-sdk = { version = "^0.4", features = ["actix"] }
 dotenv = "0.15"
 env_logger = "0.8.2"
 futures = "0.3.5"

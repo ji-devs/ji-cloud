@@ -66,7 +66,7 @@ pub struct Application {
 }
 
 impl Application {
-    fn new(port: u16, server: Server) -> Self {
+    pub fn new(port: u16, server: Server) -> Self {
         Self {
             port,
             server: Some(server),
@@ -254,6 +254,6 @@ async fn no_content_response() -> NoContent {
     NoContent
 }
 
-fn bad_request_handler() -> actix_web::Error {
+pub fn bad_request_handler() -> actix_web::Error {
     BasicError::new(http::StatusCode::BAD_REQUEST).into()
 }

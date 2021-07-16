@@ -60,8 +60,10 @@ impl Client {
                 let session_uri = resp
                     .headers()
                     .get("Location")
-                    .unwrap()
-                    .to_str()? // assuming google API is stable, shouldn't panic as long as StatusCode::OK
+                    .expect(
+                        "Should give valid session URI, as long as google storage API is stable",
+                    )
+                    .to_str()?
                     .to_owned();
 
                 Ok(session_uri)
