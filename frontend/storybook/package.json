@@ -22,6 +22,7 @@
     "@storybook/addon-controls": "^6.1.14",
     "@storybook/addon-docs": "^6.1.14",
     "@storybook/html": "^6.1.11",
+    "@types/css-font-loading-module": "^0.0.6",
     "@types/googlemaps": "^3.43.2",
     "babel-loader": "^8.2.2",
     "babel-plugin-root-import": "^6.6.0",

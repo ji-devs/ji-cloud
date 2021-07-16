@@ -1,0 +1,24 @@
+{
+    "Shesek - Regular": {
+        "file": "shesek-regular-fm.woff2", 
+        "format": "woff2",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Frank Ruhl Libre - Medium": {
+        "file": "Frank_Ruhl_Libre/FrankRuhlLibre-Medium.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Architects Daughter - Regular": {
+        "file": "Architects_Daughter/ArchitectsDaughter-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Roboto Slab - Regular": {
+        "file": "Roboto_Slab/static/RobotoSlab-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Caveat - Medium": {
+        "file": "Caveat/static/Caveat-Medium.ttf", 
+        "format": "truetype"
+    }
+}            

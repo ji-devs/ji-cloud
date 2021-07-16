@@ -7,17 +7,27 @@
     the exception to this is font sizes which are straight, unmapped values
     font sizes are numbers - do not specify px vs. rem since it differs in the use case
 */
+import {mediaUi} from "@utils/path";
 import THEMES_JSON from "../../../config/themes.json";
+import FONTS_JSON from "../../../config/fonts.json";
 import {hexStringToNumber, hexNumberToRgb} from "@utils/hex";
 
 export type ThemeId = keyof typeof THEMES_JSON;
 
 export const THEMES = THEMES_JSON as Record<ThemeId, Theme>;
+export const FONTS = FONTS_JSON as Record<FontFamilyName, FontInfo>;
 //These are just for TS help, real ThemeId is defined in the Rust shared crate
 //There is probably a way to get it from Object.keys(THEMES) ?
 
 /******** Nothing to configure below this line **********/
 
+export interface FontInfo {
+    file: string,
+    format: string,
+    range?: string
+}
+
+export type FontFamilyName = string;
 
 //Typescript definitions
 export interface Theme {
@@ -80,10 +90,8 @@ function setRootVars() {
             //text editor
             (() => {
                 Object.entries(theme.textEditor)
-                    .filter(key => ["h1", "h2", "p1", "p2"].indexOf(key as any) !== -1)
+                    .filter(([key, _]) => ["h1", "h2", "p1", "p2"].indexOf(key as any) !== -1)
                     .forEach(([key, value]) => {
-                        console.log(key, value);
-
                         style.setProperty(`--theme-${id}-${key}-font-family`, fontFamily(value.fontFamily));
                         style.setProperty(`--theme-${id}-${key}-font-size`, `${value.fontSize}px`); 
                         style.setProperty(`--theme-${id}-${key}-color`, rgb(value.fontColor, "color"));
@@ -106,6 +114,36 @@ function setRootVars() {
                 style.setProperty(`--theme-${id}-cards-font-family-lettering-right`, fontFamily(value.fontFamilyLetteringRight)); 
             })();
         });
+}
+
+const fontsQueued:Set<FontFamilyName> = new Set();
+
+//It's safe to call these multiple times and just await the promise
+//Fonts will only be loaded once
+export function loadFonts(fonts: Array<FontFamilyName>):Promise<void> {
+    fonts
+        .filter(name => !fontsQueued.has(name))
+        .forEach(name => {
+            fontsQueued.add(name);
+
+            const {file, format, range} = FONTS[name];
+
+            let descriptors = {} as any;
+            if(range && range != "") {
+                descriptors.unicodeRange = range;
+            }
+
+            const url = mediaUi(`fonts/${file}`);
+
+            const face = new FontFace(name, `url(${url}) format('${format}')`, descriptors);
+            document.fonts.add(face);
+        });
+
+    return document.fonts.ready.then(() => console.log("fonts are ready!"));
+}
+
+export function loadAllFonts():Promise<void> {
+    return loadFonts(Object.keys(FONTS));
 }
 
 setRootVars();

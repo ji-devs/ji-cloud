@@ -5,6 +5,10 @@
  * error handling is non-existant atm
  */
 
+//TODO - ditch all this and rather:
+//1. call loadAllFonts() from themes.ts (perhaps in a top-level bundle)
+//2. simply await for fonts_ready() here
+//
 use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use std::collections::HashSet;
