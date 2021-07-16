@@ -226,7 +226,7 @@ pub struct EmailClientSettings {
     pub password_reset_template: Option<String>,
 }
 
-/// Settings for the google cloud storage client
+/// Settings for the Google Cloud Storage client
 pub struct GoogleCloudStorageSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
     pub oauth2_token: String,
@@ -236,13 +236,14 @@ pub struct GoogleCloudStorageSettings {
     pub processing_bucket: String,
 }
 
+/// Settings for handling Google EventArc triggers
 pub struct GoogleCloudEventArcSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
-    oauth2_token: String,
+    pub oauth2_token: String,
     /// TODO
-    media_uploaded_trigger: String,
+    pub media_uploaded_topic: String,
     /// TODO
-    media_processed_trigger: String,
+    pub media_processed_topic: String,
 }
 
 /// Manages access to settings.

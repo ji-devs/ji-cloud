@@ -167,7 +167,7 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
 
     // TODO: use token from .json credentials file
     let mock_gcs_client = Some(GoogleCloudStorageSettings {
-        oauth2_token: "ya29.a0ARrdaM8TTKf8NdOIQpGNPrvBJZrdvsRd0jnffKZFmA-Rn38rsmF3Dced2ujYxiH4qFANwaFv7q5obvyTna3KfWRvpdIGQb013VitlxSOhcL5AgRB7bn6gBAXc2Hm-EhPC2OPmPon8IylXHcnUSbc2PRRuelv".to_owned(),
+        oauth2_token: "ya29.a0ARrdaM_F3l6E8Pzc3fmUdHwuA0qqDu8Rv2LAt8mFHhEYcxmLOynW-AbgL_lncc4BJ1RvkEfk3AjCviEwVD1PWpLRKpDBT8l44tKPVPigVAYuUfZWxrqvNpyfgrT_dXzlcKQDwN9JcrNF8M-3EkgyFCYRwcUY".to_owned(),
         processing_bucket: "ji-cloud-sandbox-processing-eu-001".to_owned(),
         media_bucket: "ji-cloud-sandbox-uploads-origin-eu-001".to_owned(),
     })
