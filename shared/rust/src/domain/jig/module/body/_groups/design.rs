@@ -48,7 +48,7 @@ impl Sticker {
     pub fn transform(&self) -> &Transform {
         match self {
             Self::Sprite(sprite) => &sprite.transform,
-            Self::Text(text) => &text.transform
+            Self::Text(text) => &text.transform,
         }
     }
 }

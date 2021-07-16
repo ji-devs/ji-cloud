@@ -19,8 +19,33 @@ static THEMES: Lazy<Themes> = Lazy::new(|| {
 pub const THEME_IDS:[ThemeId;3] = [
     ThemeId::Blank,
     ThemeId::Chalkboard, 
-    ThemeId::HappyBrush
+    ThemeId::HappyBrush,
 ];
+/*
+pub const THEME_IDS:[ThemeId;21] = [
+    ThemeId::Blank,
+    ThemeId::Chalkboard, 
+    ThemeId::HappyBrush,
+    ThemeId::BackToSchool,
+    ThemeId::Comix,
+    ThemeId::ExcitingFall,
+    ThemeId::HappyPassover,
+    ThemeId::HappyShavuot,
+    ThemeId::HappySukkot,
+    ThemeId::IlluminatingHanukkah,
+    ThemeId::JewishText,
+    ThemeId::Jigzi,
+    ThemeId::LostInSpace,
+    ThemeId::LovelySpring,
+    ThemeId::MyNotebook,
+    ThemeId::OurIsrael,
+    ThemeId::Purim,
+    ThemeId::RoshHashana,
+    ThemeId::ShabbatShalom,
+    ThemeId::WatermelonSummer,
+    ThemeId::WinterSnow,
+];
+*/
 
 pub trait ThemeIdExt {
     fn get_colors(self) -> &'static [RGBA8];
@@ -63,7 +88,25 @@ impl ThemeIdExt for ThemeId {
         match self {
             ThemeId::Blank => "blank",
             ThemeId::Chalkboard => "chalkboard",
-            ThemeId::HappyBrush => "happy-brush"
+            ThemeId::HappyBrush => "happy-brush",
+            ThemeId::BackToSchool => "back-to-school",
+            ThemeId::Comix => "comix",
+            ThemeId::ExcitingFall => "exciting-fall",
+            ThemeId::HappyPassover => "happy-passover",
+            ThemeId::HappyShavuot => "happy-shavuot",
+            ThemeId::HappySukkot => "happy-sukkot",
+            ThemeId::IlluminatingHanukkah => "illuminating-hanukkah",
+            ThemeId::JewishText => "jewish-text",
+            ThemeId::Jigzi => "jigzi",
+            ThemeId::LostInSpace => "lost-in-space",
+            ThemeId::LovelySpring => "lovely-spring",
+            ThemeId::MyNotebook => "my-notebook",
+            ThemeId::OurIsrael => "our-israel",
+            ThemeId::Purim => "purim",
+            ThemeId::RoshHashana => "rosh-hashanah",
+            ThemeId::ShabbatShalom => "shabbat-shalom",
+            ThemeId::WatermelonSummer => "watermelon-summer",
+            ThemeId::WinterSnow => "winter-snow",
         }
     }
 

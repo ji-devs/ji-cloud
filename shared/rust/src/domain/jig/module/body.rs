@@ -229,6 +229,60 @@ pub enum ThemeId {
     Chalkboard = 1,
     /// Orangeish theme
     HappyBrush = 2,
+
+    #[allow(missing_docs)]
+    BackToSchool = 3,
+
+    #[allow(missing_docs)]
+    Comix = 4,
+
+    #[allow(missing_docs)]
+    ExcitingFall = 5,
+
+    #[allow(missing_docs)]
+    HappyPassover = 6,
+
+    #[allow(missing_docs)]
+    HappyShavuot = 7,
+
+    #[allow(missing_docs)]
+    HappySukkot = 8,
+
+    #[allow(missing_docs)]
+    IlluminatingHanukkah = 9,
+
+    #[allow(missing_docs)]
+    JewishText = 10,
+
+    #[allow(missing_docs)]
+    Jigzi = 11,
+
+    #[allow(missing_docs)]
+    LostInSpace = 12,
+
+    #[allow(missing_docs)]
+    LovelySpring = 13,
+
+    #[allow(missing_docs)]
+    MyNotebook = 14,
+
+    #[allow(missing_docs)]
+    OurIsrael = 15,
+
+    #[allow(missing_docs)]
+    Purim = 16,
+
+    #[allow(missing_docs)]
+    RoshHashana = 17,
+
+    #[allow(missing_docs)]
+    ShabbatShalom = 18,
+
+    #[allow(missing_docs)]
+    WatermelonSummer = 19,
+
+    #[allow(missing_docs)]
+    WinterSnow = 20,
 }
 
 impl Default for ThemeId {

@@ -159,7 +159,7 @@ pub struct Interactive {
     /// audio
     pub audio: Option<Audio>,
 
-    /// target transform 
+    /// target transform
     pub target_transform: Option<Transform>,
 }
 
