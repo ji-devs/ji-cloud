@@ -158,4 +158,21 @@ pub struct AnimationCreateRequest {
     pub is_looping: bool,
 }
 
+/// Request to indicate the size of an user library image for upload.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationUploadRequest {
+    /// The size of the image to be uploaded in bytes.
+    pub file_size: usize,
+}
+
+/// URL to upload an user library image, supports resumable uploading.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct AnimationUploadResponse {
+    /// The session URI used for uploading, including the query for uploader ID
+    pub session_uri: String,
+}
+
 into_uuid![AnimationId];

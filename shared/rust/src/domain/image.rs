@@ -275,7 +275,7 @@ pub struct ImageResponse {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ImageUploadRequest {
-    /// The size of the image to be upload. Allows the API server to check that the file size is
+    /// The size of the image to be uploaded in bytes. Allows the API server to check that the file size is
     /// within limits and as a verification at GCS that the entire file was uploaded
     pub file_size: usize,
 }

@@ -233,4 +233,11 @@ pub mod audit_log {
         pub bucket_name: String,
         pub location: String,
     }
+
+    #[derive(Debug, Serialize, Deserialize, Clone, Default)]
+    pub struct Query {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "GCP_CloudEventsMode")]
+        pub cloud_events_mode: Option<String>,
+    }
 }
