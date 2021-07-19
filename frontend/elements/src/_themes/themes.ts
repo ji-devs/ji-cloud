@@ -93,7 +93,7 @@ function setRootVars() {
                     .filter(([key, _]) => ["h1", "h2", "p1", "p2"].indexOf(key as any) !== -1)
                     .forEach(([key, value]) => {
                         style.setProperty(`--theme-${id}-${key}-font-family`, fontFamily(value.fontFamily));
-                        style.setProperty(`--theme-${id}-${key}-font-size`, `${value.fontSize}px`); 
+                        style.setProperty(`--theme-${id}-${key}-font-size`, `${value.fontSize}rem`); 
                         style.setProperty(`--theme-${id}-${key}-color`, rgb(value.fontColor, "color"));
                         style.setProperty(`--theme-${id}-${key}-color-var`, rgb(value.fontColor, "var"));
                     });
