@@ -149,7 +149,7 @@ run_task = [{name = [
 
 [tasks.docker-build-sandbox-api-media-watch]
 command = "docker"
-args = ["build", "-f", "backend/api/Dockerfile", "--target", "sandbox", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest", "."]
+args = ["build", "-f", "backend/api/Dockerfile", "--target", "sandbox_media_watch", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest", "."]
 
 [tasks.docker-publish-sandbox-api-media-watch]
 command = "docker"
