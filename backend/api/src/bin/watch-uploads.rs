@@ -194,17 +194,17 @@ async fn process_uploaded_media_trigger(
     fcm: ServiceData<notifications::Client>,
     event_arc: ServiceData<event_arc::Client>,
     event: Event,
-    query: Query<audit_log::Query>,
+    _query: Option<Query<audit_log::Query>>,
 ) -> Result<Json<()>, error::EventArc> {
     type Error = error::EventArc;
 
-    if let Some(cloud_events_mode) = query.into_inner().cloud_events_mode {
-        if cloud_events_mode != "CE_PUBSUB_BINDING" {
-            return Err(Error::InvalidEventSource);
-        }
-    } else {
-        return Err(Error::InvalidEventSource);
-    }
+    // if let Some(cloud_events_mode) = query.into_inner().cloud_events_mode {
+    //     if cloud_events_mode != "__CE_PUBSUB_BINDING" {
+    //         return Err(Error::InvalidEventSource);
+    //     }
+    // } else {
+    //     return Err(Error::InvalidEventSource);
+    // }
 
     let event: audit_log::Event = audit_log::Event::try_from(event)?;
 

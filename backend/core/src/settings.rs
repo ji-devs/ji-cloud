@@ -5,6 +5,7 @@ use crate::{
     env::{keys, req_env},
     google::{get_access_token_and_project_id, get_optional_secret},
 };
+use anyhow::Context;
 use config::RemoteTarget;
 use std::str::FromStr;
 use std::{
@@ -283,29 +284,30 @@ impl SettingsManager {
 
     async fn get_optional_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
         log::debug!("Getting secret `{}`", secret);
-
-        // todo: clean up the control flow? Some(token) => Ok(None) and None have the same calls
-        // FIXME
-        // should it also try to read from .env if it errors during `get_optional_secret` from GCP?
         match &self.token {
-            Some(token) => match get_optional_secret(token, &self.project_id, secret).await {
-                Ok(Some(secret)) => Ok(Some(secret)),
-                Ok(None) => self.get_secret_from_env(secret),
-                Err(_) => Err(anyhow::anyhow!("failed to get secret `{}`", secret)),
+            // todo: this
+            Some(token) => get_optional_secret(token, &self.project_id, secret)
+                .await
+                .with_context(|| anyhow::anyhow!("failed to get secret `{}`", secret)),
+            None => match std::env::var(secret) {
+                Ok(secret) => Ok(Some(secret)),
+                Err(VarError::NotPresent) => Ok(None),
+                Err(VarError::NotUnicode(_)) => {
+                    Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
+                }
             },
-            None => self.get_secret_from_env(secret),
         }
     }
-
-    fn get_secret_from_env(&self, secret: &str) -> anyhow::Result<Option<String>> {
-        match std::env::var(secret) {
-            Ok(secret) => Ok(Some(secret)),
-            Err(VarError::NotPresent) => Ok(None),
-            Err(VarError::NotUnicode(_)) => {
-                Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
-            }
-        }
-    }
+    //
+    // fn get_secret_from_env(&self, secret: &str) -> anyhow::Result<Option<String>> {
+    //     match std::env::var(secret) {
+    //         Ok(secret) => Ok(Some(secret)),
+    //         Err(VarError::NotPresent) => Ok(None),
+    //         Err(VarError::NotUnicode(_)) => {
+    //             Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
+    //         }
+    //     }
+    // }
 
     /// get a secret that may be optional, required, or in between (optional but warn on missing) depending on `self`'s configuration.
     async fn get_varying_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
