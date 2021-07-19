@@ -1,16 +1,16 @@
+use crate::service::storage;
 use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
+use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
-    web::{Bytes, Data, Json, Path},
+    web::{Data, Json, Path},
     CreatedJson, NoContent,
 };
-
-use futures::TryStreamExt;
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{
-            user::{UserImage, UserImageListResponse, UserImageResponse},
+            user::{UserImage, UserImageListResponse, UserImageResponse, UserImageUploadResponse},
             ImageId,
         },
         CreateResponse,
@@ -34,11 +34,11 @@ pub(super) async fn create(
 #[api_v2_operation]
 pub(super) async fn upload(
     db: Data<PgPool>,
-    s3: ServiceData<s3::Client>,
+    gcs: ServiceData<storage::Client>,
     _claims: TokenUser,
     Path(id): Path<ImageId>,
-    bytes: Bytes,
-) -> Result<NoContent, error::Upload> {
+    req: Json<<endpoints::image::user::Upload as ApiEndpoint>::Req>,
+) -> Result<Json<<endpoints::image::user::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
 
     sqlx::query!(
@@ -49,13 +49,22 @@ pub(super) async fn upload(
         .await?
         .ok_or(error::Upload::ResourceNotFound)?;
 
-    s3.upload_media_for_processing(
-        bytes.to_vec(),
-        MediaLibrary::Global,
-        id.0,
-        FileKind::ImagePng(PngImageFile::Original),
-    )
-    .await?;
+    let upload_content_length = req.into_inner().file_size;
+
+    if let Some(file_limit) = gcs.file_size_limit(&FileKind::ImagePng(PngImageFile::Original)) {
+        if file_limit < upload_content_length {
+            return Err(error::Upload::FileTooLarge);
+        }
+    }
+
+    let resp = gcs
+        .get_url_for_resumable_upload_for_processing(
+            upload_content_length,
+            MediaLibrary::User,
+            id.0,
+            FileKind::ImagePng(PngImageFile::Original),
+        )
+        .await?;
 
     sqlx::query!(
             "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
@@ -66,7 +75,7 @@ pub(super) async fn upload(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(Json(UserImageUploadResponse { session_uri: resp }))
 }
 
 /// Delete an image from the user's image library.

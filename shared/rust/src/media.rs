@@ -154,6 +154,21 @@ impl std::str::FromStr for FileKind {
     }
 }
 
+/// FCM Data Message format for signalling processing completion.
+///
+///
+#[derive(Deserialize, Serialize)]
+#[allow(dead_code)]
+pub struct MediaKey {
+    ///
+    pub media_library: MediaLibrary,
+    /// The id of the media
+    pub id: Uuid,
+    /// The content type of the media.
+    /// The definitions can be found in [`content_type()`](FileKind::content_type).
+    pub content_type: String,
+}
+
 /// gives the key for some media with the given parameters
 /// this is *not* a full url, (for CDN it's missing the domain)
 #[must_use]

@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, ServiceConfig},
+    web::{self, Data, Json, Path, PayloadConfig, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{
@@ -14,12 +14,14 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
+use crate::service::storage;
 use crate::{
     db, error,
     extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
     s3,
     service::ServiceData,
 };
+use shared::domain::animation::AnimationUploadResponse;
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {
@@ -99,11 +101,11 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: ServiceData<s3::Client>,
+    gcs: ServiceData<storage::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
-    bytes: Bytes,
-) -> Result<NoContent, error::Upload> {
+    req: Json<<animation::Upload as ApiEndpoint>::Req>,
+) -> Result<Json<<animation::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
 
     let exists = sqlx::query!(
@@ -117,14 +119,22 @@ async fn upload(
         return Err(error::Upload::ResourceNotFound);
     }
 
-    // todo: ferry the data more efficently?
-    s3.upload_media_for_processing(
-        bytes.to_vec(),
-        MediaLibrary::Global,
-        id.0,
-        FileKind::AnimationGif,
-    )
-    .await?;
+    let upload_content_length = req.into_inner().file_size;
+
+    if let Some(file_limit) = gcs.file_size_limit(&FileKind::AnimationGif) {
+        if file_limit < upload_content_length {
+            return Err(error::Upload::FileTooLarge);
+        }
+    }
+
+    let resp = gcs
+        .get_url_for_resumable_upload_for_processing(
+            upload_content_length,
+            MediaLibrary::Global,
+            id.0,
+            FileKind::AnimationGif,
+        )
+        .await?;
 
     sqlx::query!(
         "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1",
@@ -135,7 +145,7 @@ async fn upload(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(Json(AnimationUploadResponse { session_uri: resp }))
 }
 
 /// Get an animation from the global animation library.
