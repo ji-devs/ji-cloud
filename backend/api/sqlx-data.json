@@ -1565,24 +1565,6 @@
       ]
     }
   },
-  "51593f54e3edcf7db360da93e2eb8952e58499b50180310772c16d6635bb29dc": {
-    "query": "\nselect id\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere uploaded_at is not null and processed_at >= uploaded_at is not true\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "51a40f41372d3ac245973b6c148c56e71684c771e64465cf5c188241d4416d4a": {
     "query": "\nupdate category\nset index = index - 1, updated_at = now()\nwhere index > $1 and index <= $2 is not false and parent_id is not distinct from $3\n",
     "describe": {
@@ -1994,30 +1976,6 @@
         ]
       },
       "nullable": [
-        false
-      ]
-    }
-  },
-  "6bf8342e04bdd717bcc7b29f4eefad221a27c3ec45cdb278aaa8547a8cffb395": {
-    "query": "\nselect id,  kind as \"kind: AnimationKind\"\nfrom animation_metadata\ninner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id\nwhere uploaded_at is not null and processed_at >= uploaded_at is not true\nfor no key update of global_animation_upload\nfor share of animation_metadata\nskip locked\n",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "kind: AnimationKind",
-          "type_info": "Int2"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
         false
       ]
     }
