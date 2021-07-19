@@ -3,11 +3,7 @@
 use crate::service::notifications::MessageRequest;
 use crate::{error, service};
 use shared::{
-    domain::{
-        animation::AnimationKind,
-        firebase::{FirebaseCloudMessage, MessageTarget},
-        image::ImageKind,
-    },
+    domain::{animation::AnimationKind, firebase::MessageTarget, image::ImageKind},
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
