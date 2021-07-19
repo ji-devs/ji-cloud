@@ -1,7 +1,3 @@
-pub mod mail;
-
-pub mod uploads;
-
 use std::{
     future::{ready, Ready},
     ops::Deref,
@@ -12,6 +8,13 @@ use actix_web::FromRequest;
 use paperclip::{actix::OperationModifier, v2::schema::Apiv2Schema};
 
 use crate::error;
+
+pub mod mail;
+
+pub mod event_arc;
+pub mod notifications;
+pub mod storage;
+pub mod uploads;
 
 pub trait Service {
     const DISABLED_ERROR: error::ServiceKind;
@@ -30,8 +33,16 @@ impl Service for crate::s3::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::S3;
 }
 
-impl Service for crate::google::storage::Client {
+impl Service for storage::Client {
     const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudStorage;
+}
+
+impl Service for crate::service::event_arc::Client {
+    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::GoogleCloudStorage;
+}
+
+impl Service for crate::service::notifications::Client {
+    const DISABLED_ERROR: error::ServiceKind = error::ServiceKind::FirebaseCloudMessaging;
 }
 
 #[derive(Debug)]

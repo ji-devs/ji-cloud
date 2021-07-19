@@ -33,7 +33,7 @@
 pub mod algolia;
 pub mod db;
 mod domain;
-mod error;
+pub mod error;
 mod ext;
 mod extractor;
 pub mod google;

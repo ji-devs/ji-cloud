@@ -9,6 +9,8 @@ pub const MEDIA_UI_PATH: &str = "ui";
 pub const JWK_ISSUER_URL: &str = "https://accounts.google.com";
 pub const JWK_URL: &str = "https://www.googleapis.com/oauth2/v3/certs";
 
+pub const EVENTARC_STORAGE_SERVICE_NAME: &str = "storage.googleapis.com";
+
 /// `MAX_SIGNIN_COOKIE_DURATION` but as seconds,
 /// as there's no way to get the string number of seconds from it `const`ly
 #[deprecated = "use `MAX_SIGNIN_COOKIE_DURATION.whole_seconds()` instead"]
@@ -74,6 +76,22 @@ impl RemoteTarget {
             Self::Local => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
             Self::Sandbox => "GOOGLE_APPLICATION_CREDENTIALS_DEV_SANDBOX",
             Self::Release => "GOOGLE_APPLICATION_CREDENTIALS_DEV_RELEASE",
+        }
+    }
+
+    pub const fn google_eventarc_media_uploaded_topic(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => Some("eventarc-global-trigger-media-uploaded-sandbox-959"),
+            Self::Release => Some("eventarc-global-trigger-media-uploaded-197"),
+        }
+    }
+
+    pub const fn google_eventarc_media_processed_topic(&self) -> Option<&'static str> {
+        match self {
+            Self::Local => None,
+            Self::Sandbox => Some("media-processed-sandbox"),
+            Self::Release => Some("media-processed"),
         }
     }
 

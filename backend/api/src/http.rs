@@ -1,11 +1,5 @@
-mod cors;
-mod endpoints;
+use std::{net::TcpListener, sync::Arc};
 
-use crate::{
-    error::BasicError,
-    google, s3,
-    service::{mail, ServiceData},
-};
 use actix_service::Service;
 use actix_web::{dev::Server, HttpResponse};
 use actix_web::{
@@ -20,7 +14,15 @@ use core::{
 use futures::Future;
 use paperclip::actix::{api_v2_operation, NoContent, OpenApiExt};
 use sqlx::postgres::PgPool;
-use std::{net::TcpListener, sync::Arc};
+
+use crate::{
+    error::BasicError,
+    s3, service,
+    service::{mail, ServiceData},
+};
+
+mod cors;
+mod endpoints;
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
@@ -107,7 +109,7 @@ pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
-    gcs: Option<google::storage::Client>,
+    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -132,7 +134,7 @@ pub fn build(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
-    gcs: Option<google::storage::Client>,
+    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,

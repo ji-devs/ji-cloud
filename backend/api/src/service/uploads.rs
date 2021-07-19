@@ -1,30 +1,38 @@
+//! TODO: profile this. load test?
+
+use crate::service::notifications::MessageRequest;
+use crate::{error, service};
 use shared::{
-    domain::animation::AnimationKind,
-    domain::image::ImageKind,
+    domain::{
+        animation::AnimationKind,
+        firebase::{FirebaseCloudMessage, MessageTarget},
+        image::ImageKind,
+    },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
+use uuid::Uuid;
 
-use crate::error;
-
-pub async fn watch_image(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Result<bool> {
+pub async fn process_image(db: &PgPool, s3: &crate::s3::Client, id: Uuid) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
 
-    let row = sqlx::query!(
+    let kind = sqlx::query!(
         r#"
-select id, kind as "kind: ImageKind"
+select kind as "kind: ImageKind"
 from image_metadata
 inner join image_upload on image_metadata.id = image_upload.image_id
-where uploaded_at is not null and processed_at >= uploaded_at is not true
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
 for no key update of image_upload
 for share of image_metadata
 skip locked
-"#
+        "#,
+        id
     )
     .fetch_optional(&mut txn)
-    .await?;
+    .await?
+    .map(|it| it.kind);
 
-    let row = match row {
+    let kind = match kind {
         Some(row) => row,
         None => {
             txn.rollback().await?;
@@ -35,7 +43,7 @@ skip locked
     let file = s3
         .download_media_for_processing(
             MediaLibrary::Global,
-            row.id,
+            id,
             FileKind::ImagePng(PngImageFile::Original),
         )
         .await?;
@@ -43,7 +51,7 @@ skip locked
     let file = match file {
         Some(it) => it,
         None => {
-            sqlx::query!("update image_upload set processed_at = now(), processing_result = false where image_id = $1", row.id)
+            sqlx::query!("update image_upload set processed_at = now(), processing_result = false where image_id = $1", id)
                 .execute(&mut txn)
                 .await?;
 
@@ -52,8 +60,6 @@ skip locked
             return Ok(true);
         }
     };
-
-    let kind = row.kind;
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
@@ -65,7 +71,7 @@ skip locked
     let (resized, thumbnail) = match processed {
         Ok(it) => it,
         Err(error::Upload::InvalidMedia) => {
-            sqlx::query!("update image_upload set processed_at = now(), processing_result = false where image_id = $1", row.id)
+            sqlx::query!("update image_upload set processed_at = now(), processing_result = false where image_id = $1", id)
                 .execute(&mut txn)
                 .await?;
 
@@ -76,45 +82,51 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.upload_png_images_copy_original(MediaLibrary::Global, row.id, resized, thumbnail)
+    s3.upload_png_images_copy_original(MediaLibrary::Global, id, resized, thumbnail)
         .await?;
 
-    sqlx::query!("update image_upload set processed_at = now(), processing_result = true where image_id = $1", row.id).execute(&mut txn).await?;
+    sqlx::query!("update image_upload set processed_at = now(), processing_result = true where image_id = $1", id)
+        .execute(&mut txn)
+        .await?;
 
     txn.commit().await?;
 
     Ok(true)
 }
 
-pub async fn watch_user_image(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Result<bool> {
+pub async fn process_user_image(
+    db: &PgPool,
+    s3: &crate::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
 
-    let row = sqlx::query!(
+    let exists = sqlx::query!(
         r#"
-select id
+select exists(select 1
 from user_image_library
 inner join user_image_upload on user_image_library.id = user_image_upload.image_id
-where uploaded_at is not null and processed_at >= uploaded_at is not true
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
 for no key update of user_image_upload
 for share of user_image_library
 skip locked
-"#
+) as "exists!"
+        "#,
+        id
     )
-    .fetch_optional(&mut txn)
-    .await?;
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
 
-    let row = match row {
-        Some(row) => row,
-        None => {
-            txn.rollback().await?;
-            return Ok(false);
-        }
-    };
+    if !exists {
+        txn.rollback().await?;
+        return Ok(false);
+    }
 
     let file = s3
         .download_media_for_processing(
             MediaLibrary::Global,
-            row.id,
+            id,
             FileKind::ImagePng(PngImageFile::Original),
         )
         .await?;
@@ -122,7 +134,7 @@ skip locked
     let file = match file {
         Some(it) => it,
         None => {
-            sqlx::query!("update user_image_upload set processed_at = now(), processing_result = false where image_id = $1", row.id)
+            sqlx::query!("update user_image_upload set processed_at = now(), processing_result = false where image_id = $1", id)
                 .execute(&mut txn)
                 .await?;
 
@@ -145,7 +157,7 @@ skip locked
     let (resized, thumbnail) = match processed {
         Ok(it) => it,
         Err(error::Upload::InvalidMedia) => {
-            sqlx::query!("update user_image_upload set processed_at = now(), processing_result = false where image_id = $1", row.id)
+            sqlx::query!("update user_image_upload set processed_at = now(), processing_result = false where image_id = $1", id)
                 .execute(&mut txn)
                 .await?;
 
@@ -156,17 +168,21 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.upload_png_images_copy_original(MediaLibrary::Global, row.id, resized, thumbnail)
+    s3.upload_png_images_copy_original(MediaLibrary::Global, id, resized, thumbnail)
         .await?;
 
-    sqlx::query!("update user_image_upload set processed_at = now(), processing_result = true where image_id = $1", row.id).execute(&mut txn).await?;
+    sqlx::query!("update user_image_upload set processed_at = now(), processing_result = true where image_id = $1", id).execute(&mut txn).await?;
 
     txn.commit().await?;
 
     Ok(true)
 }
 
-pub async fn watch_animation(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Result<bool> {
+pub async fn process_animation(
+    db: &PgPool,
+    s3: &crate::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
 
     let row = sqlx::query!(
@@ -174,11 +190,12 @@ pub async fn watch_animation(db: &PgPool, s3: &crate::s3::Client) -> anyhow::Res
 select id,  kind as "kind: AnimationKind"
 from animation_metadata
 inner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id
-where uploaded_at is not null and processed_at >= uploaded_at is not true
+where (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)
 for no key update of global_animation_upload
 for share of animation_metadata
 skip locked
-"#
+"#,
+        id
     )
     .fetch_optional(&mut txn)
     .await?;
@@ -196,15 +213,15 @@ skip locked
     }
 
     let file = s3
-        .download_media_for_processing(MediaLibrary::Global, row.id, FileKind::AnimationGif)
+        .download_media_for_processing(MediaLibrary::Global, id, FileKind::AnimationGif)
         .await?;
 
     let file = match file {
         Some(it) => it,
         None => {
-            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", row.id)
-                    .execute(&mut txn)
-                    .await?;
+            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", id)
+                .execute(&mut txn)
+                .await?;
 
             log::warn!("Animation wasn't uploaded properly before processing?");
             txn.commit().await?;
@@ -223,7 +240,7 @@ skip locked
     match res {
         Ok(()) => {}
         Err(error::Upload::InvalidMedia) => {
-            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", row.id)
+            sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1", id)
                 .execute(&mut txn)
                 .await?;
 
@@ -234,12 +251,31 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.copy_processed_file(MediaLibrary::Global, row.id, FileKind::AnimationGif)
+    s3.copy_processed_file(MediaLibrary::Global, id, FileKind::AnimationGif)
         .await?;
 
-    sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1", row.id).execute(&mut txn).await?;
+    sqlx::query!("update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1", id).execute(&mut txn).await?;
 
     txn.commit().await?;
 
     Ok(true)
+}
+
+pub async fn finalize_upload(
+    fcm: &service::notifications::Client,
+    library: &MediaLibrary,
+    id: &Uuid,
+    file_kind: &FileKind,
+) -> anyhow::Result<()> {
+    let mut data = std::collections::HashMap::new();
+
+    data.insert("library".to_owned(), library.to_str().to_owned());
+    data.insert("id".to_owned(), id.to_string());
+    data.insert("file_kind".to_owned(), file_kind.content_type().to_owned());
+
+    let message = MessageRequest::with_data(MessageTarget::Topic(id.to_string()), data);
+
+    fcm.send_message(message).await?;
+
+    Ok(())
 }

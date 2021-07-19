@@ -1,6 +1,5 @@
 use anyhow::Context;
 use core::settings::S3Settings;
-use rusoto_core::credential::ProvideAwsCredentials;
 use rusoto_core::{
     credential::{AwsCredentials, StaticProvider},
     HttpClient, Region, RusotoError,
@@ -52,6 +51,14 @@ impl Client {
             processing_bucket,
             client,
         })
+    }
+
+    pub fn media_bucket(&self) -> &str {
+        &self.media_bucket
+    }
+
+    pub fn processing_bucket(&self) -> &str {
+        &self.processing_bucket
     }
 
     pub async fn upload_png_images_copy_original(

@@ -252,6 +252,7 @@ async fn update_tags() -> anyhow::Result<()> {
 }
 
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
+#[ignore]
 #[actix_rt::test]
 async fn upload_with_url() -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/ji-logo.png").to_vec();

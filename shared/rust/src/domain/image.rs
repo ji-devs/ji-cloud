@@ -280,7 +280,6 @@ pub struct ImageUploadRequest {
     pub file_size: usize,
 }
 
-
 /// URL to upload an image, supports resumable uploading.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

@@ -1,4 +1,3 @@
-use anyhow::Context;
 #[cfg(feature = "db")]
 use sqlx::postgres::PgConnectOptions;
 
@@ -64,6 +63,9 @@ pub struct RuntimeSettings {
     /// The code that the pages api runs on.
     pub pages_port: u16,
 
+    /// The port that the media transformation api runs on.
+    pub media_watch_port: u16,
+
     /// When the server started.
     pub epoch: Duration,
 
@@ -94,6 +96,7 @@ impl RuntimeSettings {
         remote_target: RemoteTarget,
         api_port: u16,
         pages_port: u16,
+        media_watch_port: u16,
         bing_search_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
@@ -104,6 +107,7 @@ impl RuntimeSettings {
         Self {
             api_port,
             pages_port,
+            media_watch_port,
             epoch: get_epoch(),
             remote_target,
             bing_search_key,
@@ -120,13 +124,14 @@ impl RuntimeSettings {
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
     ) -> anyhow::Result<Self> {
-        let (api_port, pages_port) = match remote_target {
+        let (api_port, pages_port, media_watch_port) = match remote_target {
             RemoteTarget::Local => (
                 req_env("LOCAL_API_PORT")?.parse()?,
                 req_env("LOCAL_PAGES_PORT")?.parse()?,
+                req_env("LOCAL_MEDIA_TRANSFORM_PORT")?.parse()?,
             ),
 
-            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
+            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16, 8080_u16),
         };
 
         assert_eq!(token_secret.len(), 32);
@@ -134,6 +139,7 @@ impl RuntimeSettings {
         Ok(Self {
             api_port,
             pages_port,
+            media_watch_port,
             epoch: get_epoch(),
             remote_target,
             bing_search_key,
@@ -226,6 +232,8 @@ pub struct EmailClientSettings {
     pub password_reset_template: Option<String>,
 }
 
+// TODO: unify google services clients' auth tokens and project_id requirements
+
 /// Settings for the Google Cloud Storage client
 pub struct GoogleCloudStorageSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
@@ -237,13 +245,26 @@ pub struct GoogleCloudStorageSettings {
 }
 
 /// Settings for handling Google EventArc triggers
+#[derive(Debug)]
 pub struct GoogleCloudEventArcSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
     pub oauth2_token: String,
-    /// TODO
+    /// Service name for Google Cloud storage
+    pub storage_service_name: String,
+    /// ID of the GCP project
+    pub project_id: String,
+    /// Topic name for raw media upload event
     pub media_uploaded_topic: String,
-    /// TODO
+    /// Topic name for completed media processing event
     pub media_processed_topic: String,
+}
+
+/// Firebase Cloud Message client
+pub struct FirebaseCloudMessageSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    pub oauth2_token: String,
+    /// ID of the GCP project
+    pub project_id: String,
 }
 
 /// Manages access to settings.
@@ -264,6 +285,7 @@ impl SettingsManager {
         log::debug!("Getting secret `{}`", secret);
 
         // todo: clean up the control flow? Some(token) => Ok(None) and None have the same calls
+        // FIXME
         // should it also try to read from .env if it errors during `get_optional_secret` from GCP?
         match &self.token {
             Some(token) => match get_optional_secret(token, &self.project_id, secret).await {
@@ -544,6 +566,72 @@ impl SettingsManager {
             }
 
             _ => return Ok(None),
+        }
+    }
+
+    /// Load the Google Cloud EventArc settings
+    pub async fn google_cloud_eventarc_settings(
+        &self,
+    ) -> anyhow::Result<Option<GoogleCloudEventArcSettings>> {
+        let oauth2_token = self.token.clone();
+
+        let project_id = Some(self.project_id.clone());
+
+        let storage_service_name = Some(config::EVENTARC_STORAGE_SERVICE_NAME.to_owned());
+
+        let media_uploaded_topic = match self.remote_target.google_eventarc_media_uploaded_topic() {
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => {
+                self.get_varying_secret(keys::event_arc::MEDIA_UPLOADED_TOPIC)
+                    .await?
+            }
+        };
+
+        let media_processed_topic = match self.remote_target.google_eventarc_media_processed_topic()
+        {
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => {
+                self.get_varying_secret(keys::event_arc::MEDIA_PROCESSED_TOPIC)
+                    .await?
+            }
+        };
+
+        match (
+            oauth2_token,
+            project_id,
+            storage_service_name,
+            media_uploaded_topic,
+            media_processed_topic,
+        ) {
+            (
+                Some(oauth2_token),
+                Some(project_id),
+                Some(storage_service_name),
+                Some(media_uploaded_topic),
+                Some(media_processed_topic),
+            ) => Ok(Some(GoogleCloudEventArcSettings {
+                oauth2_token,
+                media_uploaded_topic,
+                media_processed_topic,
+                storage_service_name,
+                project_id,
+            })),
+            _ => Ok(None),
+        }
+    }
+
+    /// Load the settings for firebase cloud messages
+    pub async fn fcm_settings(&self) -> anyhow::Result<Option<FirebaseCloudMessageSettings>> {
+        let oauth2_token = self.token.clone();
+
+        let project_id = Some(self.project_id.clone());
+
+        match (oauth2_token, project_id) {
+            (Some(oauth2_token), Some(project_id)) => Ok(Some(FirebaseCloudMessageSettings {
+                oauth2_token,
+                project_id,
+            })),
+            _ => Ok(None),
         }
     }
 

@@ -1,4 +1,5 @@
 use super::ApiEndpoint;
+use crate::domain::image::ImageUploadRequest;
 use crate::{
     api::Method,
     domain::image::{
@@ -7,7 +8,6 @@ use crate::{
     },
     error::{EmptyError, MetadataNotFound},
 };
-use crate::domain::image::ImageUploadRequest;
 
 pub mod recent;
 pub mod tag;

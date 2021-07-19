@@ -1,10 +1,3 @@
-use crate::{
-    db::{self, meta::handle_metadata_err, nul_if_empty},
-    error::{self, ServiceKind},
-    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
-    google, s3,
-    service::ServiceData,
-};
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
@@ -21,6 +14,14 @@ use shared::{
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
+
+use crate::{
+    db::{self, meta::handle_metadata_err, nul_if_empty},
+    error::{self, ServiceKind},
+    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
+    s3, service,
+    service::ServiceData,
+};
 
 pub mod recent;
 pub mod tag;
@@ -68,7 +69,7 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    gcs: ServiceData<google::storage::Client>,
+    gcs: ServiceData<service::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
     req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,

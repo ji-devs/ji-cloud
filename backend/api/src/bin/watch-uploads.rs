@@ -24,6 +24,9 @@
 #![warn(clippy::use_self)]
 #![warn(clippy::useless_let_if_seq)]
 
+use std::net::TcpListener;
+
+use actix_web::web::Data;
 use actix_web::{post, web::Json};
 use anyhow::Context;
 use cloudevents::Event;
@@ -33,30 +36,37 @@ use core::{
     settings::{self, RuntimeSettings, SettingsManager},
 };
 use ji_cloud_api::{
-    db,
-    google::storage,
+    db, error,
     http::{bad_request_handler, Application},
     logger, s3,
-    service::ServiceData,
+    service::{
+        event_arc::{self, audit_log, EventResource, EventSource},
+        notifications, uploads, ServiceData,
+    },
 };
-use std::net::TcpListener;
-use tokio::task;
+use shared::media::{FileKind, MediaLibrary, PngImageFile};
+use sqlx::PgPool;
+use std::convert::TryFrom;
+use std::str::FromStr;
 
-// Only route is to accept POST /v1/media-watch.
-// This application *shouldn't* need strict security requirements, as GCP ingress settings for this
-// service allows only requests from authed GCP services. Will need to take this into account
-// if this is changed in the future
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let _ = dotenv::dotenv().ok();
 
     logger::init()?;
 
-    let (s3, gcs, runtime_settings) = {
+    let (s3, event_arc, notifications, db_pool, runtime_settings) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
+
+        let db_pool = db::get_pool(
+            settings
+                .db_connect_options(settings::read_sql_proxy())
+                .await?,
+        )
+        .await?;
 
         let s3 = settings
             .s3_settings()
@@ -64,18 +74,26 @@ async fn main() -> anyhow::Result<()> {
             .map(s3::Client::new)
             .transpose()?;
 
-        let gcs = settings
-            .google_cloud_storage_settings()
+        let event_arc = settings
+            .google_cloud_eventarc_settings()
             .await?
-            .map(storage::Client::new)
+            .map(event_arc::Client::new)
+            .transpose()?;
+
+        let notifications = settings
+            .fcm_settings()
+            .await?
+            .map(notifications::Client::new)
             .transpose()?;
 
         let runtime_settings = settings.runtime_settings().await?;
 
-        (s3, gcs, runtime_settings)
+        (s3, event_arc, notifications, db_pool, runtime_settings)
     };
 
-    let handle = std::thread::spawn(|| build_and_run_media_watch(runtime_settings, s3, gcs));
+    let handle = std::thread::spawn(|| {
+        build_and_run_media_watch(db_pool, runtime_settings, s3, event_arc, notifications)
+    });
 
     log::info!("media watch started!");
 
@@ -88,11 +106,13 @@ async fn main() -> anyhow::Result<()> {
 
 #[actix_web::main]
 pub async fn build_and_run_media_watch(
+    db_pool: PgPool,
     runtime_settings: RuntimeSettings,
     s3: Option<s3::Client>,
-    gcs: Option<storage::Client>,
+    event_arc: Option<event_arc::Client>,
+    notifications: Option<notifications::Client>,
 ) -> anyhow::Result<()> {
-    let app = build_media_watch(runtime_settings, s3, gcs)?;
+    let app = build_media_watch(runtime_settings, db_pool, s3, event_arc, notifications)?;
     app.run_until_stopped().await?;
 
     Ok(())
@@ -100,25 +120,38 @@ pub async fn build_and_run_media_watch(
 
 fn build_media_watch(
     runtime_settings: RuntimeSettings,
+    db_pool: PgPool,
     s3: Option<s3::Client>,
-    gcs: Option<storage::Client>,
+    event_arc: Option<event_arc::Client>,
+    notifications: Option<notifications::Client>,
 ) -> anyhow::Result<Application> {
-    let local_insecure = runtime_settings.is_local();
-    let api_port = runtime_settings.api_port;
+    // let local_insecure = runtime_settings.is_local();
+    let media_watch_port = runtime_settings.media_watch_port;
 
     let s3 = s3.map(ServiceData::new);
-    let gcs = gcs.map(ServiceData::new);
+    let event_arc = event_arc.map(ServiceData::new);
+    let notifications = notifications.map(ServiceData::new);
 
+    // This application *shouldn't* need strict security requirements, as GCP ingress settings for this
+    // service allows only requests from authed GCP services. Will need to take this into account
+    // if this is changed in the future
     let server = actix_web::HttpServer::new(move || {
-        let server = actix_web::App::new().data(runtime_settings.clone());
+        let server = actix_web::App::new()
+            .data(db_pool.clone())
+            .data(runtime_settings.clone());
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
             None => server,
         };
 
-        let server = match gcs.clone() {
-            Some(gcs) => server.app_data(gcs),
+        let server = match event_arc.clone() {
+            Some(event_arc) => server.app_data(event_arc),
+            None => server,
+        };
+
+        let server = match notifications.clone() {
+            Some(notifications) => server.app_data(notifications),
             None => server,
         };
 
@@ -139,7 +172,7 @@ fn build_media_watch(
     let listener = if let Some(l) = get_tcp_fd() {
         l
     } else {
-        TcpListener::bind(get_addr(Some(api_port)))?
+        TcpListener::bind(get_addr(Some(media_watch_port)))?
     };
 
     let port = listener.local_addr().unwrap().port();
@@ -149,121 +182,63 @@ fn build_media_watch(
     Ok(Application::new(port, server.run()))
 }
 
+/// Only route is to accept for this application is POST /v1/media-watch. Checks that it is the
+/// upload to processing event that we are looking for.
+/// https://cloud.google.com/eventarc/docs/cloudevents#cloud-audit-logs
 #[post("/v1/media-watch")]
 async fn process_uploaded_media_trigger(
-    gcs: ServiceData<storage::Client>,
+    db: Data<PgPool>,
     s3: ServiceData<s3::Client>,
+    fcm: ServiceData<notifications::Client>,
+    event_arc: ServiceData<event_arc::Client>,
     event: Event,
-) -> Result<Json<()>, actix_web::Error> {
-    log::info!("Received event {:?}", event);
+) -> Result<Json<()>, error::EventArc> {
+    type Error = error::EventArc;
 
-    Ok(Json(()))
+    let event: audit_log::Event = audit_log::Event::try_from(event)?;
+
+    let event_source: EventSource = EventSource::from_str(&event.source)?;
+    if event_source.service_name != event_arc.storage_service_name()
+        || event_source.project_id != event_arc.project_id()
+    {
+        return Err(Error::InvalidEventSource);
+    }
+
+    let event_data: audit_log::Data = event.try_decode_event_payload()?;
+    if event_data.resource.labels.bucket_name != s3.processing_bucket() {
+        return Err(Error::InvalidEventSource);
+    }
+
+    let event_resource: EventResource =
+        EventResource::from_str(&event_data.proto_payload.resource_name)?;
+
+    // TODO: use gcs instead of S3
+    let res = match event_resource.file_kind {
+        FileKind::ImagePng(PngImageFile::Original) => match event_resource.library {
+            MediaLibrary::Global => uploads::process_image(&db, &s3, event_resource.id)
+                .await
+                .map_err(|_| Error::NotProcessed)?,
+            MediaLibrary::User => uploads::process_user_image(&db, &s3, event_resource.id)
+                .await
+                .map_err(|_| Error::NotProcessed)?,
+            _ => return Err(Error::InvalidEventResource),
+        },
+        FileKind::AnimationGif => uploads::process_animation(&db, &s3, event_resource.id)
+            .await
+            .map_err(|_| Error::NotProcessed)?,
+        _ => return Err(Error::InvalidEventResource),
+    };
+
+    if res == true {
+        uploads::finalize_upload(
+            &fcm,
+            &event_resource.library,
+            &event_resource.id,
+            &event_resource.file_kind,
+        )
+        .await?;
+        Ok(Json(()))
+    } else {
+        Err(Error::NotProcessed)
+    }
 }
-
-// #[tokio::main]
-// async fn main() -> anyhow::Result<()> {
-//     let _ = dotenv::dotenv().ok();
-//
-//     logger::init()?;
-//
-//     let (s3, db_pool) = {
-//         log::trace!("initializing settings and processes");
-//         let remote_target = settings::read_remote_target()?;
-//
-//         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
-//
-//         let s3 = settings
-//             .s3_settings()
-//             .await?
-//             .map(s3::Client::new)
-//             .transpose()?;
-//
-//         let db_pool = db::get_pool(
-//             settings
-//                 .db_connect_options(settings::read_sql_proxy())
-//                 .await?,
-//         )
-//         .await?;
-//
-//         (s3, db_pool)
-//     };
-//
-//     let s3 = s3.ok_or_else(|| anyhow::anyhow!("S3 client invalid"))?;
-//
-//     log::info!("task started!");
-//
-//     task::spawn({
-//         let db_pool = db_pool.clone();
-//         let s3 = s3.clone();
-//         async move {
-//             loop {
-//                 let start = tokio::time::Instant::now();
-//                 log::debug!("running watch_image loop");
-//
-//                 let delay_time =
-//                     match ji_cloud_api::service::uploads::watch_image(&db_pool, &s3).await {
-//                         // there was an image processed, delay for shorter.
-//                         Ok(true) => tokio::time::Duration::from_secs(1),
-//                         // Out of images to process, wait longer.
-//                         Ok(false) => tokio::time::Duration::from_secs(5),
-//                         Err(e) => {
-//                             log::error!("watch_image task error: {:?}", e);
-//
-//                             continue;
-//                         }
-//                     };
-//
-//                 // only process an image at most every second (it probably takes longer than that to process one anyway)
-//                 tokio::time::delay_until(start + delay_time).await;
-//             }
-//         }
-//     });
-//
-//     task::spawn({
-//         let db_pool = db_pool.clone();
-//         let s3 = s3.clone();
-//         async move {
-//             loop {
-//                 let start = tokio::time::Instant::now();
-//                 log::debug!("running watch_animation loop");
-//
-//                 let delay_time =
-//                     match ji_cloud_api::service::uploads::watch_animation(&db_pool, &s3).await {
-//                         // there was an animation processed, delay for shorter.
-//                         Ok(true) => tokio::time::Duration::from_secs(1),
-//                         // Out of animations to process, wait longer.
-//                         Ok(false) => tokio::time::Duration::from_secs(5),
-//                         Err(e) => {
-//                             log::error!("watch_animation task error: {:?}", e);
-//
-//                             continue;
-//                         }
-//                     };
-//
-//                 // only process an animation at most every second (it probably takes longer than that to process one anyway)
-//                 tokio::time::delay_until(start + delay_time).await;
-//             }
-//         }
-//     });
-//
-//     loop {
-//         let start = tokio::time::Instant::now();
-//         log::debug!("running watch_user_image loop");
-//
-//         let delay_time = match ji_cloud_api::service::uploads::watch_user_image(&db_pool, &s3).await
-//         {
-//             // there was an image processed, delay for shorter.
-//             Ok(true) => tokio::time::Duration::from_secs(1),
-//             // Out of images to process, wait longer.
-//             Ok(false) => tokio::time::Duration::from_secs(5),
-//             Err(e) => {
-//                 log::error!("watch_user_image task error: {:?}", e);
-//
-//                 continue;
-//             }
-//         };
-//
-//         // only process an image at most every second (it probably takes longer than that to process one anyway)
-//         tokio::time::delay_until(start + delay_time).await;
-//     }
-// }

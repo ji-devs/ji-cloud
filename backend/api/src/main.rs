@@ -11,10 +11,12 @@
 #![warn(clippy::use_self)]
 #![warn(clippy::useless_let_if_seq)]
 
+use std::thread;
+
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
-use ji_cloud_api::{algolia, db, google, http, jwk, logger, s3, service};
-use std::thread;
+
+use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -32,14 +34,14 @@ async fn main() -> anyhow::Result<()> {
         db_pool,
         jwk_verifier,
         mail_client,
-        // _guard,
+        _guard,
     ) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        // let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
+        let guard = core::sentry::init(settings.sentry_api_key().await?.as_deref(), remote_target)?;
 
         let runtime_settings = settings.runtime_settings().await?;
 
@@ -52,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         let gcs = settings
             .google_cloud_storage_settings()
             .await?
-            .map(google::storage::Client::new)
+            .map(service::storage::Client::new)
             .transpose()?;
 
         let algolia_settings = settings.algolia_settings().await?;
@@ -98,7 +100,7 @@ async fn main() -> anyhow::Result<()> {
             db_pool,
             jwk_verifier,
             mail_client,
-            // guard,
+            guard,
         )
     };
 
