@@ -108,6 +108,18 @@ pub mod algolia {
     pub const FRONTEND_SEARCH_KEY: &str = "ALGOLIA_FRONTEND_SEARCH_KEY";
 }
 
+pub mod event_arc {
+    /// The key the media transformation service uses to monitor raw media upload events.
+    /// Is optional. If missing, then the media transformation service will not process new uploads.
+    /// All related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const MEDIA_UPLOADED_TOPIC: &str = "GOOGLE_EVENTARC_MEDIA_UPLOADED_TOPIC";
+
+    /// The key the media transformation service uses to monitor completed media processing events.
+    /// Is optional. If missing, then the media transformation service will not process new uploads.
+    /// All related routes will return "501 - Not Implemented" and a warning will be emitted.
+    pub const MEDIA_PROCESSED_TOPIC: &str = "GOOGLE_EVENTARC_MEDIA_PROCESSED_TOPIC";
+}
+
 /// Must be 32 bytes of hex
 pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 

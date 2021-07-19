@@ -1,9 +1,8 @@
 use paperclip::actix::api_v2_errors;
 
-use crate::google::storage;
+use crate::service::storage;
 
 use super::{ise, BasicError};
-use actix_web_httpauth::headers::authorization::Basic;
 use http::StatusCode;
 
 #[api_v2_errors(code = 400, code = 401, code = 404, code = 501)]

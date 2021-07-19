@@ -16,6 +16,7 @@ pub mod admin;
 pub mod animation;
 pub mod audio;
 pub mod category;
+pub mod firebase;
 pub mod image;
 pub mod jig;
 pub mod locale;

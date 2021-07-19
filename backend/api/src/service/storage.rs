@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 pub struct Client {
     oauth2_token: String,
+    #[allow(dead_code)]
     media_bucket: String,
     processing_bucket: String,
 }

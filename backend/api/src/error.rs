@@ -19,6 +19,9 @@ pub use oauth::{GoogleOAuth, OAuth};
 mod storage;
 pub use storage::Storage;
 
+pub mod event_arc;
+pub use event_arc::EventArc;
+
 /// Represents an error returned by the api.
 // mostly used in this module
 #[allow(clippy::clippy::module_name_repetitions)]
@@ -106,39 +109,33 @@ pub enum ServiceKind {
     Algolia,
     S3,
     GoogleCloudStorage,
+    GoogleEventArc,
     GoogleOAuth,
     Mail,
+    FirebaseCloudMessaging,
+}
+
+impl ServiceKind {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Algolia => "Algolia",
+            Self::S3 => "S3",
+            Self::GoogleCloudStorage => "Google Cloud Storage",
+            Self::GoogleEventArc => "Google EventArc",
+            Self::GoogleOAuth => "Google OAuth",
+            Self::Mail => "Sendgrid Mail",
+            Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
+        }
+    }
 }
 
 impl Into<actix_web::Error> for ServiceKind {
     fn into(self) -> actix_web::Error {
-        match self {
-            Self::Algolia => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Algolia service is disabled".to_owned(),
-            )
-            .into(),
-            Self::S3 => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "S3 service is disabled".to_owned(),
-            )
-            .into(),
-            self::ServiceKind::GoogleCloudStorage => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Google cloud storage service is disabled".to_owned(),
-            )
-            .into(),
-            Self::GoogleOAuth => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Google OAuth service is disabled".to_owned(),
-            )
-            .into(),
-            Self::Mail => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Mail service is disabled".to_owned(),
-            )
-            .into(),
-        }
+        BasicError::with_message(
+            http::StatusCode::NOT_IMPLEMENTED,
+            format!("{} is disabled", self.as_str()).to_owned(),
+        )
+        .into()
     }
 }
 
@@ -721,6 +718,34 @@ impl Into<actix_web::Error> for JigCloneDraft {
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
 
             Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+pub enum MediaProcessing {
+    InternalServerError(anyhow::Error),
+    EventArc(EventArc),
+    ResourceNotFound,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for MediaProcessing {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for MediaProcessing {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+
+            Self::EventArc(e) => e.into(),
+
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
         }
     }
 }
