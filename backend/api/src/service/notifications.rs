@@ -54,7 +54,7 @@ pub struct MessageRequest {
 }
 
 impl MessageRequest {
-    pub fn with_data(target: MessageTarget, data: HashMap<String, String>) -> Self {
+    pub fn with_data(target: MessageTarget, data: serde_json::Value) -> Self {
         Self {
             validate_only: false,
             message: FirebaseCloudMessage {

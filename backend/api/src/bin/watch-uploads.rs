@@ -243,9 +243,9 @@ async fn process_uploaded_media_trigger(
     if res == true {
         uploads::finalize_upload(
             &fcm,
-            &event_resource.library,
-            &event_resource.id,
-            &event_resource.file_kind,
+            event_resource.library,
+            event_resource.id,
+            event_resource.file_kind,
         )
         .await?;
         Ok(Json(()))

@@ -2,8 +2,13 @@
 
 use crate::service::notifications::MessageRequest;
 use crate::{error, service};
+use chrono::{DateTime, Utc};
 use shared::{
-    domain::{animation::AnimationKind, firebase::MessageTarget, image::ImageKind},
+    domain::{
+        animation::AnimationKind,
+        firebase::{MediaProcessedNotification, MessageTarget},
+        image::ImageKind,
+    },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
@@ -259,15 +264,16 @@ skip locked
 
 pub async fn finalize_upload(
     fcm: &service::notifications::Client,
-    library: &MediaLibrary,
-    id: &Uuid,
-    file_kind: &FileKind,
+    library: MediaLibrary,
+    id: Uuid,
+    file_kind: FileKind,
 ) -> anyhow::Result<()> {
-    let mut data = std::collections::HashMap::new();
-
-    data.insert("library".to_owned(), library.to_str().to_owned());
-    data.insert("id".to_owned(), id.to_string());
-    data.insert("file_kind".to_owned(), file_kind.content_type().to_owned());
+    let data = MediaProcessedNotification {
+        library,
+        content_type: file_kind.content_type().to_owned(),
+        processed_at: Utc::now(),
+    };
+    let data = serde_json::to_value(data)?;
 
     let message = MessageRequest::with_data(MessageTarget::Topic(id.to_string()), data);
 
