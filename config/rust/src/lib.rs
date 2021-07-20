@@ -18,7 +18,7 @@ pub const CORS_ORIGINS: &[&str] = &[
     "https://api.jicloud.org",
     "https://api.sandbox.jicloud.org",
     "http://localhost:4104",
-    "http://localhost:4105"
+    "http://localhost:4105",
 ];
 pub const DB_POOL_CONNECTIONS: u32 = 5;
 
@@ -66,7 +66,6 @@ cfg_if::cfg_if! {
         }
     }
 }
-
 
 impl RemoteTarget {
     pub const fn s3_endpoint(&self) -> Option<&'static str> {
@@ -126,29 +125,36 @@ impl RemoteTarget {
 
     pub fn uploads_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_UPLOADS_URL").unwrap_or("http://localhost:9000/test-bucket".to_string()),
+            Self::Local => env_var("LOCAL_UPLOADS_URL")
+                .unwrap_or("http://localhost:9000/test-bucket".to_string()),
             Self::Sandbox => "https://uploads.sandbox.jicloud.org".to_string(),
-            Self::Release => "https://uploads.jicloud.org".to_string()
+            Self::Release => "https://uploads.jicloud.org".to_string(),
         }
     }
 
     pub fn media_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_MEDIA_URL").unwrap_or("http://localhost:4102".to_string()),
+            Self::Local => {
+                env_var("LOCAL_MEDIA_URL").unwrap_or("http://localhost:4102".to_string())
+            }
             Self::Sandbox | Self::Release => "https://media.jicloud.org".to_string(),
         }
     }
 
     pub fn pages_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_PAGES_URL").unwrap_or("http://localhost:4104".to_string()),
+            Self::Local => {
+                env_var("LOCAL_PAGES_URL").unwrap_or("http://localhost:4104".to_string())
+            }
             Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
             Self::Release => "https://jicloud.org".to_string(),
         }
     }
     pub fn pages_url_iframe(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or("http://localhost:4105".to_string()),
+            Self::Local => {
+                env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or("http://localhost:4105".to_string())
+            }
             Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
             Self::Release => "https://jicloud.org".to_string(),
         }
@@ -156,7 +162,9 @@ impl RemoteTarget {
 
     pub fn frontend_url(&self) -> String {
         match self {
-            Self::Local => env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string()),
+            Self::Local => {
+                env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string())
+            }
             Self::Sandbox => "https://frontend.sandbox.jicloud.org".to_string(),
             Self::Release => "https://frontend.jicloud.org".to_string(),
         }
