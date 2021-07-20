@@ -186,7 +186,7 @@ async fn create_user(
         user.id,
         req.email,
         &mail,
-        config.remote_target().pages_url(),
+        &config.remote_target().pages_url(),
     )
     .await
     .map_err(error::Register::from)?;
@@ -238,7 +238,7 @@ where
                 user.user_id,
                 email,
                 &mail,
-                config.remote_target().pages_url(),
+                &config.remote_target().pages_url(),
             )
             .await
             .map_err(|it| match it {
@@ -448,7 +448,7 @@ async fn reset_password(
         user_id,
         req.email,
         mail.as_ref(),
-        config.remote_target().pages_url(),
+        &config.remote_target().pages_url(),
     )
     .await?;
 
