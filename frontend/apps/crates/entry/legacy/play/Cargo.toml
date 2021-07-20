@@ -16,7 +16,7 @@ crate-type = ["cdylib"]
 legacy = {path = "../_common"}
 utils = {path = "../../../utils"}
 shared = {path = "../../../../../../shared/rust"}
-config = {path = "../../../../../../config/rust"}
+config = {path = "../../../../../../config/rust", features = ["wasm"]}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
