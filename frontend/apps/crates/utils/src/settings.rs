@@ -52,7 +52,8 @@ fn _init(remote_target:RemoteTarget) -> Settings {
     let settings = Settings {
         remote_target
     };
-    
+   
+    /*
     if remote_target == RemoteTarget::Local {
         unsafe {
             let window = web_sys::window().unwrap_ji();
@@ -68,12 +69,13 @@ fn _init(remote_target:RemoteTarget) -> Settings {
                     .document()
                     .unwrap_ji()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
+                    .set_cookie(&format!("{}={}; Path=/", AUTH_COOKIE_NAME, token));
             } else {
                 log::info!("skipping auth for dev mode");
             }
         }
     }
+    */
     SETTINGS.set(settings.clone()).expect_ji("couldn't set settings!");
 
     settings
