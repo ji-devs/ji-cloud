@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyExt, ThemeChoice, _groups::cards::*},
+    body::{Body, BodyConvert, BodyExt, ThemeChoice, _groups::cards::*},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -111,6 +111,47 @@ impl BodyExt<Mode, Step> for ModuleData {
 
     fn get_theme(&self) -> Option<ThemeChoice> {
         self.content.as_ref().map(|content| content.base.theme)
+    }
+}
+
+impl BodyConvert for ModuleData {
+    fn convertable_list() -> Vec<ModuleKind> {
+        vec![
+            ModuleKind::Memory,
+            ModuleKind::Matching,
+            ModuleKind::CardQuiz,
+        ]
+    }
+    fn convert_to_memory(&self) -> Result<super::memory::ModuleData, &'static str> {
+        Ok(super::memory::ModuleData {
+            content: self.content.as_ref().map(|content| super::memory::Content {
+                base: content.base.clone(),
+                player_settings: super::memory::PlayerSettings::default(),
+            }),
+        })
+    }
+    fn convert_to_matching(&self) -> Result<super::matching::ModuleData, &'static str> {
+        Ok(super::matching::ModuleData {
+            content: self
+                .content
+                .as_ref()
+                .map(|content| super::matching::Content {
+                    base: content.base.clone(),
+                    player_settings: super::matching::PlayerSettings::default(),
+                }),
+        })
+    }
+
+    fn convert_to_card_quiz(&self) -> Result<super::card_quiz::ModuleData, &'static str> {
+        Ok(super::card_quiz::ModuleData {
+            content: self
+                .content
+                .as_ref()
+                .map(|content| super::card_quiz::Content {
+                    base: content.base.clone(),
+                    player_settings: super::card_quiz::PlayerSettings::default(),
+                }),
+        })
     }
 }
 

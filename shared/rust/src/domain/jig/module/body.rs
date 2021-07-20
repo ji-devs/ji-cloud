@@ -1,3 +1,4 @@
+use super::ModuleKind;
 use crate::{
     domain::{audio::AudioId, image::ImageId},
     media::MediaLibrary,
@@ -89,7 +90,7 @@ impl Body {
 /// Extension trait for interop
 /// impl on inner body data
 pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
-    TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
+    BodyConvert + TryFrom<Body> + Serialize + DeserializeOwned + Clone + Debug
 {
     /// get choose mode list. By default it's the full list
     /// but that can be overridden to re-order or hide some modes
@@ -130,6 +131,67 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             steps_completed.insert(step);
             self.set_editor_state_steps_completed(steps_completed);
         }
+    }
+
+    /// Convert this inner data to a Body wrapper of a specific kind
+    fn convert_to_body(&self, kind: ModuleKind) -> Result<Body, &'static str> {
+        match kind {
+            ModuleKind::Memory => Ok(Body::MemoryGame(self.convert_to_memory()?)),
+            ModuleKind::Matching => Ok(Body::Matching(self.convert_to_matching()?)),
+            ModuleKind::Flashcards => Ok(Body::Flashcards(self.convert_to_flashcards()?)),
+            ModuleKind::CardQuiz => Ok(Body::CardQuiz(self.convert_to_card_quiz()?)),
+            ModuleKind::Poster => Ok(Body::Poster(self.convert_to_poster()?)),
+            ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
+            ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
+            ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
+            _ => unimplemented!(
+                "cannot convert from {} to {}",
+                Self::kind().as_str(),
+                kind.as_str()
+            ),
+        }
+    }
+}
+
+/// These will all error by default.
+/// Modules that can be converted between eachother must override
+/// The relevant methods
+pub trait BodyConvert {
+    /// Get a list of valid conversion targets
+    fn convertable_list() -> Vec<ModuleKind> {
+        Vec::new()
+    }
+    /// Memory game
+    fn convert_to_memory(&self) -> Result<memory::ModuleData, &'static str> {
+        Err("cannot convert to memory game!")
+    }
+    /// Matching
+    fn convert_to_matching(&self) -> Result<matching::ModuleData, &'static str> {
+        Err("cannot convert to matching!")
+    }
+    /// Flashcards
+    fn convert_to_flashcards(&self) -> Result<flashcards::ModuleData, &'static str> {
+        Err("cannot convert to matching!")
+    }
+    /// Card quiz
+    fn convert_to_card_quiz(&self) -> Result<card_quiz::ModuleData, &'static str> {
+        Err("cannot convert to card quiz!")
+    }
+    /// Poster
+    fn convert_to_poster(&self) -> Result<poster::ModuleData, &'static str> {
+        Err("cannot convert to poster!")
+    }
+    /// Tapping board
+    fn convert_to_tapping_board(&self) -> Result<tapping_board::ModuleData, &'static str> {
+        Err("cannot convert to tapping board!")
+    }
+    /// Drag and Drop
+    fn convert_to_drag_drop(&self) -> Result<drag_drop::ModuleData, &'static str> {
+        Err("cannot convert to drag and drop!")
+    }
+    /// Cover
+    fn convert_to_cover(&self) -> Result<cover::ModuleData, &'static str> {
+        Err("cannot convert to cover!")
     }
 }
 

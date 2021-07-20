@@ -41,7 +41,8 @@ where
     if is_preview {
         vec![
             render_preview_header(RawData::kind(), state.clone()),
-            render_preview_main(RawData::kind(), jig_id, module_id, state.clone())
+            render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
+            render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone())
         ]
     } else {
         vec![

@@ -9,14 +9,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVecExt, SignalVec},
     CancelableFutureHandle, 
 };
-use shared::{
-    domain::{
-        image::ImageId,
-        audio::AudioId,
-        jig::{
-            JigId, 
-            Jig,
-            module::{
+use shared::{domain::{audio::AudioId, image::ImageId, jig::{Jig, JigId, ModuleKind, module::{
                 ModuleId, 
                 body::{
                     BodyExt,
@@ -27,15 +20,11 @@ use shared::{
                     Background,
                     _groups::cards::{self as raw, Mode, Step, BaseContent}
                 }
-            }
-        }
-    },
-    media::MediaLibrary
-};
+            }}}, media::MediaLibrary};
 use crate::{
     module::_common::edit::prelude::*,
     audio_mixer::AudioMixer,
-    tooltip::state::State as TooltipState
+    tooltip::state::State as TooltipState,
 };
 use utils::prelude::*;
 use super::debug::DebugSettings;
@@ -92,6 +81,7 @@ pub struct CardsBase<RawData: RawDataExt, E: ExtraExt> {
     pub instructions: Mutable<Instructions>,
     pub audio_mixer: AudioMixer,
     pub mode: Mode,
+    pub module_kind: ModuleKind,
     pub tooltips: Tooltips,
     pub pairs: MutableVec<(Card, Card)>,
     pub background: Mutable<Option<Background>>,
@@ -125,6 +115,7 @@ impl <RawData: RawDataExt, E: ExtraExt> CardsBase <RawData, E> {
             step,
             theme_choice,
             audio_mixer,
+            module_kind,
             ..
         } = init_args;
 
@@ -158,6 +149,7 @@ impl <RawData: RawDataExt, E: ExtraExt> CardsBase <RawData, E> {
             pairs: MutableVec::new_with_values(pairs),
             background,
             extra,
+            module_kind,
             debug: debug.unwrap_or_default()
         });
 
@@ -216,6 +208,10 @@ impl <RawData: RawDataExt, E: ExtraExt> BaseExt<Step> for CardsBase<RawData, E> 
                     }
                 }
         }
+    }
+
+    fn get_post_preview(&self) -> Option<PostPreview> {
+        Some(PostPreview::new(RawData::kind(), self.jig_id, self.module_id))
     }
     
 

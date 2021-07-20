@@ -1,6 +1,6 @@
 use crate::domain::jig::module::{
     body::{
-        Audio, Body, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice, Transform,
+        Audio, Body, BodyConvert, BodyExt, Instructions, ModeExt, StepExt, ThemeChoice, Transform,
         _groups::design::{Backgrounds, Sticker, Trace},
     },
     ModuleKind,
@@ -76,6 +76,8 @@ impl BodyExt<Mode, Step> for ModuleData {
         self.content.as_ref().map(|content| content.theme)
     }
 }
+
+impl BodyConvert for ModuleData {}
 
 impl TryFrom<Body> for ModuleData {
     type Error = &'static str;

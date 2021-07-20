@@ -43,6 +43,7 @@ import "@elements/module/_common/edit/widgets/settings/line";
 import "@elements/module/_common/edit/widgets/settings/container";
 import "@elements/module/_common/edit/widgets/sidebar-drag-prompt";
 import "@elements/module/_common/edit/post-preview/post-preview";
+import "@elements/module/_common/edit/post-preview/post-preview-container";
 import "@elements/module/_common/edit/post-preview/post-preview-action";
 /* Common components used in most editors */
 

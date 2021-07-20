@@ -12,7 +12,7 @@ use super::super::{
     state::*,
     actions::HistoryStateImpl
 };
-use shared::domain::jig::{JigId, Jig, TextDirection, AudioEffects, module::{ModuleId, body::{ThemeChoice, BodyExt, ModeExt, StepExt}}};
+use shared::domain::jig::{AudioEffects, Jig, JigId, ModuleKind, TextDirection, module::{ModuleId, body::{ThemeChoice, BodyExt, ModeExt, StepExt}}};
 use utils::prelude::*;
 use std::future::Future;
 use uuid::Uuid;
@@ -42,6 +42,7 @@ where
     pub raw: RawData, 
     pub source: InitSource,  
     pub history: Rc<HistoryStateImpl<RawData>>,
+    pub module_kind: ModuleKind,
     phantom: PhantomData<Mode>
 }
 
@@ -109,9 +110,12 @@ where
             raw,
             source,
             history,
+            module_kind: RawData::kind(),
             phantom: PhantomData
         }
     }
+
+
 }
 
 /// this is held in this top level, created essentially from a BaseInit

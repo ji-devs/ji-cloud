@@ -1,20 +1,62 @@
 use dominator::{html, clone, Dom};
+use dominator_helpers::futures::AsyncLoader;
 use std::rc::Rc;
 use futures_signals::signal::SignalExt;
 use super::state::*;
+use utils::prelude::*;
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
-pub fn render_post_preview(state:Rc<PostPreview>) -> Dom {
-    //TODO!
-    html!("post-preview", {
+pub fn render_post_preview<RawData, Mode, Step>(state:Rc<PostPreview>, raw_data: RawData) -> Dom 
+where
+    RawData: BodyExt<Mode, Step> + 'static,
+    Mode: ModeExt + 'static,
+    Step: StepExt + 'static,
+
+{
+
+    html!("post-preview-container", {
+        .child(html!("post-preview", {
+            .child(html!("window-loader-block", {
+                .property("slot", "loader")
+                .property_signal("visible", state.loader.is_loading()) 
+            }))
+            .property("module", state.module_kind.as_str())
+            .children(
+                RawData::convertable_list() 
+                    .iter()
+                    .enumerate()
+                    .map(|(index, kind)| {
+                        html!("post-preview-action", {
+                            .property("slot", format!("module-{}", index+1))
+                            .property("kind", kind.as_str())
+                            .event(clone!(state, kind, raw_data => move |evt:events::Click| {
+                                state.duplicate_module(kind, raw_data.clone());
+                            }))
+                        })
+                    })
+                    .collect::<Vec<Dom>>()
+            )
+            /* Leaving off fo now...
+            .child(
+                html!("post-preview-action", {
+                    .property("slot", "action-print") 
+                    .property("kind", "print") 
+                    .event(clone!(state => move |evt:events::Click| {
+                        log::info!("TODO - print!")
+                    }))
+                })
+            )
+            */
+            .child(
+                html!("post-preview-action", {
+                    .property("slot", "action-continue") 
+                    .property("kind", "continue") 
+                    .event(clone!(state => move |evt:events::Click| {
+                        let route:String = Route::Jig(JigRoute::Edit(state.jig_id, JigEditRoute::Landing)).into();
+                        dominator::routing::go_to_url(&route);
+                    }))
+                })
+            )
+        }))
     })
 }
-
-/*
-<post-preview ${argsToAttrs(props)}>
-            <post-preview-action slot="action-1of3" kind="1of3"></post-preview-action>
-            <post-preview-action slot="action-matching" kind="matching"></post-preview-action>
-            <post-preview-action slot="action-flashcards" kind="flashcards"></post-preview-action>
-            <post-preview-action slot="action-print" kind="print"></post-preview-action>
-            <post-preview-action slot="action-continue" kind="continue"></post-preview-action>
-        </post-preview>
-        */

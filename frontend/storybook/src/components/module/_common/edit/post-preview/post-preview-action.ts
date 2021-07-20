@@ -27,7 +27,7 @@ PostPreviewAction.argTypes = {
     kind: {
         control: {
             type: 'inline-radio',
-            options: ['1of3', 'matching', 'flashcards', 'print', 'continue']
+            options: ['card-quiz', 'matching', 'flashcards', 'memory', 'print', 'continue']
         }
     }
 }

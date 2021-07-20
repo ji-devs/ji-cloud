@@ -1,5 +1,5 @@
 use crate::domain::jig::module::{
-    body::{Body, BodyExt, StepExt, ThemeChoice, _groups::design::*},
+    body::{Body, BodyConvert, BodyExt, StepExt, ThemeChoice, _groups::design::*},
     ModuleKind,
 };
 #[cfg(feature = "backend")]
@@ -65,6 +65,8 @@ impl BodyExt<(), Step> for ModuleData {
         self.content.as_ref().map(|content| content.base.theme)
     }
 }
+
+impl BodyConvert for ModuleData {}
 
 impl TryFrom<Body> for ModuleData {
     type Error = &'static str;

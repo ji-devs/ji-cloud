@@ -2,12 +2,24 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
 import { GET_STR_MODULE, ModuleKind } from '@elements/entry/jig/module-types';
 
-const STR_ACTION_HEADER = "What do you want to do next?";
-const STR_USE_IN_ACTION_HEADER = "Use the content from this memory game in:";
+const STR_LABEL_LOOKUP:Partial<{[key in ModuleKind]:string}> = {
+    "memory": "Memory Game",
+    "flashcards": "Flashcards",
+    "card-quiz": "Quiz",
+    "matching": "Matching",
+    "poster": "Poster",
+    "tapping-board": "Tapping Board",
+    "drag-drop": "Drag & Drop",
+    "cover": "Cover Page",
+};
 
-const STR_MESSAGE_LINE_1_PART_1 = "Your ";
-const STR_MESSAGE_LINE_1_PART_2 = " is ready!";
-const STR_MESSAGE_LINE_2 = "It’s now part of your JIG.";
+const STR_ACTION_HEADER = "What do you want to do next?";
+const STR_USE_IN_PREFIX = "Use the content from this";
+const STR_USE_IN_SUFFIX = "in:";
+
+const STR_HEADER_LINE_1_PREFIX = "Your";
+const STR_HEADER_LINE_1_SUFFIX = "is ready!";
+const STR_HEADER_LINE_2 = "It’s now part of your JIG.";
 
 @customElement('post-preview')
 export class _ extends LitElement {
@@ -64,13 +76,13 @@ export class _ extends LitElement {
                 margin-bottom: 12px;
                 font-weight: 500;
             }
-            ::slotted([slot=action-1of3]) {
+            ::slotted([slot=module-1]) {
                 grid-column: 1;
             }
-            ::slotted([slot=action-matching]) {
+            ::slotted([slot=module-2]) {
                 grid-column: 2;
             }
-            ::slotted([slot=action-flashcards]) {
+            ::slotted([slot=module-3]) {
                 grid-column: 3;
             }
             .divider {
@@ -92,27 +104,30 @@ export class _ extends LitElement {
     module: ModuleKind = "memory";
 
     render() {
+        const {module} = this;
+
         return html`
             <div class="top-section">
-                <img-ui path="module/_common/post-preview/splash.png"></img-ui>
+                <img-ui path="module/_common/edit/post-preview/splash.png"></img-ui>
                 <div class="message">
-                    ${STR_MESSAGE_LINE_1_PART_1}
+                    ${STR_HEADER_LINE_1_PREFIX}
                     ${GET_STR_MODULE(this.module)}
-                    ${STR_MESSAGE_LINE_1_PART_2}
+                    ${STR_HEADER_LINE_1_SUFFIX}
                     <br>
-                    ${STR_MESSAGE_LINE_2}
+                    ${STR_HEADER_LINE_2}
                 </div>
             </div>
             <div class="bottom-section">
                 <h3 class="action-header">${STR_ACTION_HEADER}</h3>
-                <h4 class="action-use-in-header">${STR_USE_IN_ACTION_HEADER}</h4>
-                <slot class="slot-1of3" name="action-1of3"></slot>
-                <slot class="slot-matching" name="action-matching"></slot>
-                <slot class="slot-flashcards" name="action-flashcards"></slot>
+                <h4 class="action-use-in-header">${STR_USE_IN_PREFIX} ${STR_LABEL_LOOKUP[module]} ${STR_USE_IN_SUFFIX}</h4>
+                <slot class="module-1" name="module-1"></slot>
+                <slot class="module-2" name="module-2"></slot>
+                <slot class="module-3" name="module-3"></slot>
                 <div class="divider"></div>
-                <slot class="slot-print" name="action-print"></slot>
-                <slot class="slot-continue" name="action-continue"></slot>
+                <slot class="action-print" name="action-print"></slot>
+                <slot class="action-continue" name="action-continue"></slot>
             </div>
+            <slot name="loader"></slot>
         `;
     }
 }

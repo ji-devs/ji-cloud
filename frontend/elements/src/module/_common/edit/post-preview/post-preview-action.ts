@@ -1,17 +1,21 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import '@elements/core/images/ui';
+import {ModuleKind} from "@elements/module/_common/types";
 
-export type Kind = '1of3' | 'matching' | 'flashcards' | 'print' | 'continue';
-
-const STR_LABEL_LOOKUP: {
-    [key in Kind]: string
-} = {
-    ['1of3']: '1 of 3',
-    ['matching']: 'Matching',
-    ['flashcards']: 'Flashcards',
-    ['print']: 'Print the cards',
-    ['continue']: 'Continue',
+export type Kind = ModuleKind | 'print' | 'continue';
+const STR_LABEL_LOOKUP:{[key in Kind]:string} = {
+    "memory": "Memory Game",
+    "flashcards": "Flashcards",
+    "card-quiz": "Quiz",
+    "matching": "Matching",
+    "poster": "Poster",
+    "tapping-board": "Tapping Board",
+    "drag-drop": "Drag & Drop",
+    "cover": "Cover Page",
+    'print': 'Print the cards',
+    'continue': 'Continue',
 };
+
 
 @customElement('post-preview-action')
 export class _ extends LitElement {
@@ -46,10 +50,16 @@ export class _ extends LitElement {
     }
 
     @property()
-    kind: Kind = "1of3";
+    kind: Kind = "card-quiz";
 
     render() {
-        const path = `module/_common/post-preview/${this.kind}${this.kind === 'continue' ? '.png' : '.svg'}`;
+        const {kind} = this;
+
+        const isModule = kind !== 'continue' && kind !== 'print';
+
+        const path = isModule 
+            ? `module/_common/edit/post-preview/module/${kind}.svg`
+            : `module/_common/edit/post-preview/${this.kind}${this.kind === 'continue' ? '.png' : '.svg'}`;
 
         return html`
             <div class="circle">

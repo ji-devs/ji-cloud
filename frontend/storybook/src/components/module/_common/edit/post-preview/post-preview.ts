@@ -20,9 +20,9 @@ export const PostPreview = (props?:Partial<Args>) => {
 
     return `
         <post-preview ${argsToAttrs(props)}>
-            <post-preview-action slot="action-1of3" kind="1of3"></post-preview-action>
-            <post-preview-action slot="action-matching" kind="matching"></post-preview-action>
-            <post-preview-action slot="action-flashcards" kind="flashcards"></post-preview-action>
+            <post-preview-action slot="module-1" kind="card-quiz"></post-preview-action>
+            <post-preview-action slot="module-2" kind="matching"></post-preview-action>
+            <post-preview-action slot="module-3" kind="flashcards"></post-preview-action>
             <post-preview-action slot="action-print" kind="print"></post-preview-action>
             <post-preview-action slot="action-continue" kind="continue"></post-preview-action>
         </post-preview>
@@ -34,7 +34,7 @@ PostPreview.argTypes = {
     module: {
         control: {
             type: 'inline-radio',
-            options: ["cover", "flashcards", "matching", "memory", "poster", "tapping-board", "tracing", "video", "visual-quiz"],
+            options: ["matching", "memory", "card-quiz", "flashcards"],
         }
     }
 }
