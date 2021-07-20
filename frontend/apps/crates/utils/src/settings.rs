@@ -47,6 +47,7 @@ extern "C" {
     fn dev_csrf() -> String;
 }
 
+
 fn _init(remote_target:RemoteTarget) -> Settings {
     let settings = Settings {
         remote_target

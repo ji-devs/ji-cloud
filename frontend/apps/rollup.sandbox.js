@@ -1,5 +1,9 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
+
+require('dotenv').config({path:__dirname+'/./../../.env'});
+
 const {URL_FRONTEND_SANDBOX} = require("../../config/typescript");
 
 let {APP_NAME} = process.env;
@@ -26,5 +30,13 @@ export default {
             debug: false,
         }),
 		nodeResolve(),
+        injectProcessEnv({
+            LOCAL_API_URL: process.env.LOCAL_API_URL,
+            LOCAL_UPLOADS_URL: process.env.LOCAL_UPLOADS_URL,
+            LOCAL_MEDIA_URL: process.env.LOCAL_MEDIA_URL,
+            LOCAL_PAGES_URL: process.env.LOCAL_PAGES_URL,
+            LOCAL_PAGES_URL_IFRAME: process.env.LOCAL_PAGES_URL_IFRAME,
+            LOCAL_FRONTEND_URL: process.env.LOCAL_FRONTEND_URL,
+        }),
     ],
 };

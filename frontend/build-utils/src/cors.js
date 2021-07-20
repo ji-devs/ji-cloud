@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const sh = require('shelljs');
 const cwd = sh.pwd().toString();
-const config = require("../config/js");
+const config = require("../../../config/typescript");
 
 const getBucket = () => {
     switch(process.argv[2]) {
@@ -49,7 +49,7 @@ if(bucket === null || configFile === null || action === null) {
     return;
 }
 
-const configPath = path.resolve(cwd, `../${configFile}`);
+const configPath = path.resolve(cwd, `./${configFile}`);
 
 if(action === "set") {
     execSync(`gsutil cors set ${configPath} gs://${bucket}`, {stdio:[0,1,2]});

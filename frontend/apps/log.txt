@@ -1,0 +1,110 @@
+[cargo-make] INFO - cargo make 0.32.9
+[cargo-make] INFO - Build File: Makefile.toml
+[cargo-make] INFO - Task: local-main
+[cargo-make] INFO - Profile: development
+[cargo-make] INFO - Running Task: local-main
+[cargo-make] INFO - Running Task: local-build-elements
+
+E:\ji\ji-cloud\frontend\elements>cd E:\ji\ji-cloud\frontend\elements 
+
+E:\ji\ji-cloud\frontend\elements>npm run build:local 
+
+> elements@1.0.0 build:local
+> rollup --config rollup.local.js
+
+[1mloaded rollup.local.js with warnings[22m
+[1m[33m(!) Unused external imports[39m[22m
+default imported from external module '@rollup/plugin-alias' but never used
+BUNDLING module/poster/edit for local
+[36m
+[1m./src/_bundles/module/poster/edit/imports.ts[22m → [1m./dist/module/poster/edit/custom-elements.js[22m...[39m
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│   [32m[1mDestination: [22m[39m[33m./dist/module/poster/edit/custom-elements.js[39m   │
+│   [32m[1mBundle Size: [22m[39m [33m1.79 MB[39m                                       │
+│   [32m[1mGzipped Size: [22m[39m [33m208.9 KB[39m                                     │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+[32mcreated [1m./dist/module/poster/edit/custom-elements.js[22m in [1m11.2s[22m[39m
+[cargo-make] INFO - Running Task: local-port-main
+[cargo-make] INFO - Running Task: local-prep-files
+
+E:\ji\ji-cloud\frontend\build-utils>cd E:\ji\ji-cloud\frontend\build-utils 
+
+E:\ji\ji-cloud\frontend\build-utils>npm run local-dev-files 
+
+> local-dev-files
+> node ./src/local-dev-files.js
+
+[cargo-make] INFO - Execute Command: "cargo" "make" "--disable-check-for-updates" "--no-on-error" "--loglevel=info" "--profile=development" "--allow-private" "--skip-init-end-tasks" "--makefile" "\\\\?\\E:\\ji\\ji-cloud\\frontend\\apps\\Makefile.toml" "local-mediaserver"
+[cargo-make] INFO - Execute Command: "cargo" "make" "--disable-check-for-updates" "--no-on-error" "--loglevel=info" "--profile=development" "--allow-private" "--skip-init-end-tasks" "--makefile" "\\\\?\\E:\\ji\\ji-cloud\\frontend\\apps\\Makefile.toml" "local-watch-app"
+[cargo-make] INFO - Execute Command: "cargo" "make" "--disable-check-for-updates" "--no-on-error" "--loglevel=info" "--profile=development" "--allow-private" "--skip-init-end-tasks" "--makefile" "\\\\?\\E:\\ji\\ji-cloud\\frontend\\apps\\Makefile.toml" "local-watch-elements"
+[cargo-make][1] INFO - Build File: \\?\E:\ji\ji-cloud\frontend\apps\Makefile.toml
+[cargo-make][1] INFO - Task: local-watch-app
+[cargo-make][1] INFO - Profile: development
+[cargo-make][1] INFO - Running Task: local-watch-app
+[cargo-make][1] INFO - Build File: \\?\E:\ji\ji-cloud\frontend\apps\Makefile.toml
+[cargo-make][1] INFO - Task: local-watch-elements
+[cargo-make][1] INFO - Profile: development
+[cargo-make][1] INFO - Build File: \\?\E:\ji\ji-cloud\frontend\apps\Makefile.toml
+[cargo-make][1] INFO - Task: local-mediaserver
+[cargo-make][1] INFO - Profile: development
+[cargo-make][1] INFO - Running Task: local-watch-elements
+[cargo-make][1] INFO - Running Task: local-mediaserver
+
+E:\ji\ji-cloud\frontend\apps>cd E:\ji\ji-cloud\frontend\apps 
+
+E:\ji\ji-cloud\frontend\apps>npm run build:watch 
+
+E:\ji\ji-cloud\frontend\elements>cd E:\ji\ji-cloud\frontend\elements 
+
+E:\ji\ji-cloud\frontend\elements>npm run watch 
+
+E:\ji\ji-cloud\frontend\build-utils>cd E:\ji\ji-cloud\frontend\build-utils 
+
+E:\ji\ji-cloud\frontend\build-utils>npm run local-media-server 
+
+> app@0.1.0 build:watch
+> cross-env RUSTUP_TOOLCHAIN=nightly rollup --config rollup.local.js --watch
+
+
+> local-media-server
+> node ./src/local-media-server.js
+
+
+> elements@1.0.0 watch
+> rollup --config rollup.local.js --watch
+
+Local CDN for Media Started on port 4102, serving D:\Dropbox (Jewish Interactive)\ji-cloud-media!
+Local CDN for Elements started on port 4103, serving E:\ji\ji-cloud\frontend\elements\dist!
+[1mloaded rollup.local.js with warnings[22m
+[1m[33m(!) Unused external imports[39m[22m
+default imported from external module '@rollup/plugin-alias' but never used
+*********************
+** BUILDING module/poster/edit **
+*********************
+[4mrollup v2.53.2[24m
+[36mbundles [1m./crates/entry/module/poster/edit/Cargo.toml[22m → [1mdist\module\poster\edit\js[22m...[39m
+You must install wasm-pack before you can run it
+BUNDLING module/poster/edit for local
+[1m[31m[!] [1m(plugin rust) Error: Rust compilation failed[22m[1m[39m[22m
+crates\entry\module\poster\edit\Cargo.toml
+[2mError: Rust compilation failed
+    at wasm_pack (E:\ji\ji-cloud\frontend\apps\node_modules\@wasm-tool\rollup-plugin-rust\index.js:171:19)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+    at async Promise.all (index 0)
+    at async build (E:\ji\ji-cloud\frontend\apps\node_modules\@wasm-tool\rollup-plugin-rust\index.js:353:22)
+    at async ModuleLoader.addModuleSource (E:\ji\ji-cloud\frontend\apps\node_modules\rollup\dist\shared\rollup.js:19682:30)
+    at async ModuleLoader.fetchModule (E:\ji\ji-cloud\frontend\apps\node_modules\rollup\dist\shared\rollup.js:19738:9)
+    at async Promise.all (index 0)[22m
+
+[4mrollup v2.45.2[24m
+[36mbundles [1m./src/_bundles/module/poster/edit/imports.ts[22m → [1mdist\module\poster\edit\custom-elements.js[22m...[39m
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│   [32m[1mDestination: [22m[39m[33m./dist/module/poster/edit/custom-elements.js[39m   │
+│   [32m[1mBundle Size: [22m[39m [33m1.79 MB[39m                                       │
+│   [32m[1mGzipped Size: [22m[39m [33m208.9 KB[39m                                     │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+[32mcreated [1mdist\module\poster\edit\custom-elements.js[22m in [1m11.9s[22m[39m

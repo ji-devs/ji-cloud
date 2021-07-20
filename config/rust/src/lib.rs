@@ -1,9 +1,4 @@
-//TODO - read from env to get local/dev port settings and minio bucket name
-pub const STAGE_WIDTH: f64 = 1920.0;
-pub const STAGE_HEIGHT: f64 = 1080.0;
-pub const STAGE_PADDING_Y_PERC: f64 = 0.00; // in percentage, to offset the stage area a bit
-pub const STAGE_PADDING_X_PERC: f64 = 0.00;
-pub const STAGE_RATIO: f64 = STAGE_WIDTH / STAGE_HEIGHT;
+use std::env::VarError;
 
 pub const MEDIA_UI_PATH: &str = "ui";
 pub const JWK_ISSUER_URL: &str = "https://accounts.google.com";
@@ -22,6 +17,8 @@ pub const CORS_ORIGINS: &[&str] = &[
     "https://sandbox.jicloud.org",
     "https://api.jicloud.org",
     "https://api.sandbox.jicloud.org",
+    "http://localhost:4104",
+    "http://localhost:4105"
 ];
 pub const DB_POOL_CONNECTIONS: u32 = 5;
 
@@ -46,6 +43,30 @@ pub enum RemoteTarget {
     Sandbox,
     Release,
 }
+
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "wasm32")] {
+        use wasm_bindgen::prelude::*;
+        use wasm_bindgen::JsCast;
+
+        #[wasm_bindgen(inline_js = "export function process_env_var(key) { const value = process.env[key]; return value == undefined ? '' : value; }")]
+        extern "C" {
+            #[wasm_bindgen(catch)]
+            fn process_env_var(key:&str) -> Result<String, JsValue>;
+        }
+
+        pub fn env_var(key: &str) -> Result<String, VarError> {
+            process_env_var(key).map_err(|_| {
+                VarError::NotPresent
+            })
+        }
+    } else {
+        pub fn env_var(key: &str) -> Result<String, VarError> {
+            std::env::var(key)
+        }
+    }
+}
+
 
 impl RemoteTarget {
     pub const fn s3_endpoint(&self) -> Option<&'static str> {
@@ -95,49 +116,49 @@ impl RemoteTarget {
         }
     }
 
-    pub const fn api_url(&self) -> &'static str {
+    pub fn api_url(&self) -> String {
         match self {
-            Self::Local => "http://localhost:8080",
-            Self::Sandbox => "https://api.sandbox.jicloud.org",
-            Self::Release => "https://api.jicloud.org",
+            Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
+            Self::Sandbox => "https://api.sandbox.jicloud.org".to_string(),
+            Self::Release => "https://api.jicloud.org".to_string(),
         }
     }
 
-    pub const fn uploads_url(&self) -> &'static str {
+    pub fn uploads_url(&self) -> String {
         match self {
-            Self::Local => "http://localhost:9000/test-bucket",
-            Self::Sandbox => "https://uploads.sandbox.jicloud.org",
-            Self::Release => "https://uploads.jicloud.org",
+            Self::Local => env_var("LOCAL_UPLOADS_URL").unwrap_or("http://localhost:9000/test-bucket".to_string()),
+            Self::Sandbox => "https://uploads.sandbox.jicloud.org".to_string(),
+            Self::Release => "https://uploads.jicloud.org".to_string()
         }
     }
 
-    pub const fn media_url(&self) -> &'static str {
+    pub fn media_url(&self) -> String {
         match self {
-            Self::Local => "http://localhost:4102",
-            Self::Sandbox | Self::Release => "https://media.jicloud.org",
+            Self::Local => env_var("LOCAL_MEDIA_URL").unwrap_or("http://localhost:4102".to_string()),
+            Self::Sandbox | Self::Release => "https://media.jicloud.org".to_string(),
         }
     }
 
-    pub const fn pages_url(&self) -> &'static str {
+    pub fn pages_url(&self) -> String {
         match self {
-            Self::Local => "http://localhost:4104",
-            Self::Sandbox => "https://sandbox.jicloud.org",
-            Self::Release => "https://jicloud.org",
+            Self::Local => env_var("LOCAL_PAGES_URL").unwrap_or("http://localhost:4104".to_string()),
+            Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
+            Self::Release => "https://jicloud.org".to_string(),
         }
     }
-    pub const fn pages_url_iframe(&self) -> &'static str {
+    pub fn pages_url_iframe(&self) -> String {
         match self {
-            Self::Local => "http://localhost:4105",
-            Self::Sandbox => "https://sandbox.jicloud.org",
-            Self::Release => "https://jicloud.org",
+            Self::Local => env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or("http://localhost:4105".to_string()),
+            Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
+            Self::Release => "https://jicloud.org".to_string(),
         }
     }
 
-    pub const fn frontend_url(&self) -> &'static str {
+    pub fn frontend_url(&self) -> String {
         match self {
-            Self::Local => "http://localhost:4104",
-            Self::Sandbox => "https://frontend.sandbox.jicloud.org",
-            Self::Release => "https://frontend.jicloud.org",
+            Self::Local => env_var("LOCAL_FRONTEND_URL").unwrap_or("http://localhost:4104".to_string()),
+            Self::Sandbox => "https://frontend.sandbox.jicloud.org".to_string(),
+            Self::Release => "https://frontend.jicloud.org".to_string(),
         }
     }
 
