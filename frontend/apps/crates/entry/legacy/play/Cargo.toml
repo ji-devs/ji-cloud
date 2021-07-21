@@ -71,7 +71,7 @@ awsm_web = { version = "0.19.2", features = ["dom", "loaders", "canvas", "serde_
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["quiet, "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
+sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["wasm-logger", "console_error_panic_hook", "utils/local"]

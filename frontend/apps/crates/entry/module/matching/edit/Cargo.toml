@@ -73,7 +73,7 @@ unicode-segmentation = "1.8.0"
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["quiet, "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
+sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = ["utils/quiet", "components/quiet"]
 local = ["wasm-logger", "console_error_panic_hook", "utils/local"]
