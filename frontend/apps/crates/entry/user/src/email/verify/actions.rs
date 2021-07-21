@@ -15,7 +15,7 @@ impl VerifyEmailPage {
             token: self.token.clone() 
         };
 
-        let resp:Result<Option<NewSessionResponse>, EmptyError> = api_no_auth(&user::VerifyEmail::PATH, user::VerifyEmail::METHOD, Some(query)).await;
+        let resp:Result<Option<NewSessionResponse>, EmptyError> = api_no_auth_with_credentials(&user::VerifyEmail::PATH, user::VerifyEmail::METHOD, Some(query)).await;
 
         
         match resp {
