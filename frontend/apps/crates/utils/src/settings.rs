@@ -35,19 +35,6 @@ cfg_if! {
     } 
 }
 
-//These will only be set in the local index.html created via dev-files
-//However they are only called in local mode, so it's fine
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_name = DEV_AUTH)]
-    fn dev_auth() -> bool;
-    #[wasm_bindgen(js_name = API_TOKEN)]
-    fn dev_token() -> String;
-    #[wasm_bindgen(js_name = API_CSRF)]
-    fn dev_csrf() -> String;
-}
-
-
 fn _init(remote_target:RemoteTarget) -> Settings {
     let settings = Settings {
         remote_target

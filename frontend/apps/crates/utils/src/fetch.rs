@@ -42,9 +42,7 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 
 fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
-
     let api_url = SETTINGS.get().unwrap_ji().remote_target.api_url();
-
     if method == Method::Get {
         if let Some(data) = data {
             let query = serde_qs::to_string(&data).unwrap_ji();
@@ -73,8 +71,8 @@ pub async fn api_upload_blob_status(endpoint:&str, blob:&Blob, method:Method) ->
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
-    let csrf = load_csrf_token().unwrap_ji();
-
+    let csrf = load_csrf_token().unwrap_or_default();
+    
     let res = fetch_upload_blob_with_headers(&url, blob, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
 
     let status = res.status();
@@ -100,8 +98,7 @@ pub async fn api_upload_file_status(endpoint:&str, file:&File, method:Method) ->
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
-    let csrf = load_csrf_token().unwrap_ji();
-
+    let csrf = load_csrf_token().unwrap_or_default();
     let res = fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
 
     let status = res.status();
@@ -211,7 +208,7 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 pub async fn api_with_auth_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().expect_ji("no CSRF / not logged in!");
+    let csrf = load_csrf_token().unwrap_or_default();
 
     let (url, data) = api_get_query(endpoint, method, data);
 
@@ -270,7 +267,7 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
 pub async fn api_with_auth_empty_status<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().unwrap_ji();
+    let csrf = load_csrf_token().unwrap_or_default();
     
     let (url, data) = api_get_query(endpoint, method, data);
 
