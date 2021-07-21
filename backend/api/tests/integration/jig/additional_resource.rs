@@ -8,7 +8,7 @@ use shared::domain::jig::additional_resource::AdditionalResourceCreateRequest;
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -40,7 +40,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -69,7 +69,7 @@ async fn get() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 
@@ -109,7 +109,7 @@ async fn update() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port: u16 = app.port();
 

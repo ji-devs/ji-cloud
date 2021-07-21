@@ -1788,6 +1788,7 @@ dependencies = [
  "tokio",
  "url",
  "uuid 0.8.2",
+ "yup-oauth2",
 ]
 
 [[package]]

@@ -3,13 +3,12 @@ use std::{collections::HashSet, sync::Mutex};
 use chrono::{Duration, Utc};
 use config::RemoteTarget;
 use core::settings::{EmailClientSettings, GoogleCloudStorageSettings, RuntimeSettings};
-use ji_cloud_api::{http::Application, service::mail};
+use ji_cloud_api::http::Application;
 use rand::Rng;
 use sqlx::{Connection, Executor, PgPool};
 
-use ji_cloud_api::{google, http::Application, service, service::mail};
-
 use crate::fixture::Fixture;
+use crate::service::{Service, TestServicesSettings};
 
 pub trait LoginExt {
     fn login(self) -> Self;
@@ -140,7 +139,7 @@ static DB_URL_MANAGER: once_cell::sync::Lazy<DbManager> = once_cell::sync::Lazy:
 pub static PASETO_KEY: once_cell::sync::Lazy<Box<[u8; 32]>> =
     once_cell::sync::Lazy::new(|| Box::new(generate_paseto_key()));
 
-pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
+pub async fn initialize_server(fixtures: &[Fixture], services: &[Service]) -> Application {
     let _ = dotenv::dotenv().ok();
 
     log_init();
@@ -160,6 +159,20 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
             .expect("failed to execute fixture");
     }
 
+    let (mail, s3, gcs, algolia) = match services.is_empty() {
+        true => (None, None, None, None),
+        false => {
+            let settings = TestServicesSettings::new().await;
+            match settings {
+                Ok(s) => s.init_services(services).await,
+                Err(e) => {
+                    log::info!("Error while reading test service settings: {:?}", e);
+                    (None, None, None, None)
+                }
+            }
+        }
+    };
+
     // todo: cache this.
     let settings = RuntimeSettings::new(
         RemoteTarget::Local,
@@ -172,37 +185,17 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
         None,
     );
 
-    // TODO: use token from .json credentials file
-    let mock_gcs_client = Some(GoogleCloudStorageSettings {
-        oauth2_token: "".to_owned(),
-        processing_bucket: "test-processing-bucket".to_owned(),
-        media_bucket: "test-bucket".to_owned(),
-    })
-    .map(service::storage::Client::new)
-    .transpose()
-    .unwrap();
-
-    let services_settings = TestServicesSettings::new();
-
-    let test_mail_client = services_settings.create_test_mail_client();
-
-    let app = ji_cloud_api::http::build(
-        db,
-        settings,
-        None,
-        mock_gcs_client,
-        None,
-        None,
-        jwk_verifier,
-        None,
-    )
-    .expect("failed to initialize server");
+    let app = ji_cloud_api::http::build(db, settings, s3, gcs, algolia, None, jwk_verifier, mail)
+        .expect("failed to initialize server");
 
     app
 }
 
 // FIXME: is there a cleaner way to get a db connection from the application?
-pub async fn initialize_server_and_get_db(fixtures: &[Fixture]) -> (Application, PgPool) {
+pub async fn initialize_server_and_get_db(
+    fixtures: &[Fixture],
+    services: &[Service],
+) -> (Application, PgPool) {
     let _ = dotenv::dotenv().ok();
 
     log_init();
@@ -222,9 +215,24 @@ pub async fn initialize_server_and_get_db(fixtures: &[Fixture]) -> (Application,
             .expect("failed to execute fixture");
     }
 
+    let (mail, s3, gcs, algolia) = match services.is_empty() {
+        true => (None, None, None, None),
+        false => {
+            let settings = TestServicesSettings::new().await;
+            match settings {
+                Ok(s) => s.init_services(services).await,
+                Err(e) => {
+                    log::info!("Error while reading test service settings: {:?}", e);
+                    (None, None, None, None)
+                }
+            }
+        }
+    };
+
     // todo: cache this.
     let settings = RuntimeSettings::new(
         RemoteTarget::Local,
+        0,
         0,
         0,
         None,
@@ -233,18 +241,15 @@ pub async fn initialize_server_and_get_db(fixtures: &[Fixture]) -> (Application,
         None,
     );
 
-    let services_settings = TestServicesSettings::new();
-
-    let test_mail_client = services_settings.create_test_mail_client();
-
     let app = ji_cloud_api::http::build(
         db.clone(),
         settings,
-        None,
-        None,
+        s3,
+        gcs,
+        algolia,
         None,
         jwk_verifier,
-        test_mail_client,
+        mail,
     )
     .expect("failed to initialize server");
 
@@ -257,64 +262,4 @@ pub fn log_init() {
         .parse_filters("info,sqlx::query=warn,sqlx::postgres::notice=warn")
         .parse_default_env()
         .try_init();
-}
-
-// FIXME: make this more generic for all services, once GCS migration and test coverage is included
-// if the given key is false, then bypass the test so CI can
-pub fn email_test_guard() -> bool {
-    let _ = dotenv::dotenv().ok();
-    core::env::env_bool("TEST_SENDGRID_ENABLE")
-}
-
-/// Holds settings related to external services, in test context only
-struct TestServicesSettings {}
-
-impl TestServicesSettings {
-    const SENDGRID_API_KEY: &'static str = "TEST_SENDGRID_API_KEY";
-    const SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
-    const SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
-    const SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_PASSWORD_RESET_TEMPLATE";
-
-    pub fn new() -> Self {
-        TestServicesSettings {}
-    }
-
-    fn read_test_secret_from_env(&self, secret: &str) -> Option<String> {
-        match std::env::var(secret) {
-            Ok(secret) => Some(secret),
-            Err(_) => None,
-        }
-    }
-
-    pub fn create_test_mail_client(&self) -> Option<mail::Client> {
-        let api_key = self.read_test_secret_from_env(Self::SENDGRID_API_KEY);
-
-        let sender_email = self.read_test_secret_from_env(Self::SENDER_EMAIL);
-
-        let signup_verify_template = self.read_test_secret_from_env(Self::SIGNUP_VERIFY_TEMPLATE);
-
-        let password_reset_template =
-            self.read_test_secret_from_env(Self::SIGNUP_PASSWORD_RESET_TEMPLATE);
-
-        let (api_key, sender_email) = match (api_key, sender_email) {
-            (Some(api_key), Some(sender_email)) => (api_key, sender_email),
-            _ => return None,
-        };
-
-        let settings = EmailClientSettings {
-            api_key,
-            sender_email,
-            signup_verify_template,
-            password_reset_template,
-        };
-
-        let client = mail::Client::new(settings);
-
-        Some(client)
-    }
-
-    // TODO: this
-    // fn create_test_gcs_client(&self) -> Option<ji_cloud_api::google::storage::Client> {
-    //
-    // }
 }

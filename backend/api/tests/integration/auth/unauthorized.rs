@@ -4,7 +4,7 @@ use shared::error::{ApiError, EmptyError};
 use crate::{fixture::Fixture, helpers::initialize_server};
 
 async fn unauthorized(route: &str) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms]).await;
+    let app = initialize_server(&[Fixture::UserNoPerms], &[]).await;
 
     let port = app.port();
 

@@ -8,12 +8,13 @@ mod image;
 mod jig;
 mod locale;
 mod meta;
+mod service;
 mod session;
 mod user;
 
 #[actix_rt::test]
 async fn pass() -> anyhow::Result<()> {
-    let app = helpers::initialize_server(&[]).await;
+    let app = helpers::initialize_server(&[], &[]).await;
 
     let port = app.port();
 
