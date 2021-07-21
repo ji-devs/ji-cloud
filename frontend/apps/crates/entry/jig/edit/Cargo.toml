@@ -74,7 +74,7 @@ components = {path = "../../../components"}
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["wasm-logger", "console_error_panic_hook", "utils/sandbox"]
+sandbox = ["quiet, "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["wasm-logger", "console_error_panic_hook", "utils/local"]
