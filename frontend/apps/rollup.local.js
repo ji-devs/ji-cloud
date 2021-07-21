@@ -3,7 +3,7 @@ import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
-import {getEnv} from "./rollup.common";
+import {getEnv} from "./rollup.common.js";
 
 let {APP_NAME, APP_PORT} = process.env;
 

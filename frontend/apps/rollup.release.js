@@ -1,7 +1,7 @@
 import rust from "@wasm-tool/rollup-plugin-rust";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
-import {getEnv} from "./rollup.common";
+import {getEnv} from "./rollup.common.js";
 
 const {URL_FRONTEND_RELEASE} = require("../../config/typescript");
 

@@ -1,2 +1,2 @@
-import {createConfig} from "./rollup.common";
+import {createConfig} from "./rollup.common.js";
 export default createConfig("local");
