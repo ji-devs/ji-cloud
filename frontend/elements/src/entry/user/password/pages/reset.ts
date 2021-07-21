@@ -80,13 +80,16 @@ export class _ extends LitElement {
         <base-page>
           <h1>${STR_TITLE}</h1>
           <div class="inside-wrapper">
-            <div class="password-wrapper">
-            <password-strength strength ="${passwordStrength}"></password-strength>
 
-              <slot name="password"> </slot>
-              <div>${strengthText(passwordStrength)}</div>
-            </div>
-            <slot name="submit"></slot>
+            <form @submit=${(evt:Event) => { evt.preventDefault(); }}>
+              <div class="password-wrapper">
+              <password-strength strength ="${passwordStrength}"></password-strength>
+
+                <slot name="password"> </slot>
+                <div>${strengthText(passwordStrength)}</div>
+              </div>
+              <slot name="submit"></slot>
+            </form>
           </div>
           <div class="account-wrapper">
             <title-ji color="black">${STR_AFTER}</title-ji>

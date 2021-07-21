@@ -35,6 +35,9 @@ impl LoginPage {
                             !err.is_empty()
                         }))
                         .child(html!("input", {
+                            .property("type", "email")
+                            .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
+                            .attribute("autocomplete", "email")
                             .event(clone!(state => move |evt:events::Input| {
                                 state.clear_email_status();
                                 *state.email.borrow_mut() = evt.value().unwrap_or_default();
