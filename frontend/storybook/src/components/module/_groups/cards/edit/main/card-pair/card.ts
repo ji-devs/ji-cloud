@@ -21,6 +21,7 @@ export interface Args {
     inverted: boolean,
     mode: Mode,
     side: Side,
+    text: string,
 }
 
 const DEFAULT_ARGS:Args = {
@@ -31,12 +32,13 @@ const DEFAULT_ARGS:Args = {
     inverted: false,
     mode: "lettering",
     side: "left",
+    text: "hello שָׁלוֹם"
 }
 
 export const Card= (props?:Partial<Args> & {slot?: string}) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {slot, contentMode, ioMode, ...cardProps} = props;
+    const {slot, contentMode, ioMode, text, ...cardProps} = props;
 
     Object.assign(cardProps, {
         flippable: ioMode === "preview",
@@ -50,15 +52,14 @@ export const Card= (props?:Partial<Args> & {slot?: string}) => {
     */
     return `
     <main-card ${argsToAttrs(cardProps)} ${slot ? `slot="${slot}"` : ""}>
-    ${getContent(contentMode, ioMode)}
+    ${getContent(contentMode, ioMode, text)}
     </main-card>`
 }
 
-function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE) {
+function getContent(contentMode: CONTENT_MODE, ioMode: IO_MODE, text: string) {
     const editing = ioMode === "edit"; 
     if(contentMode === "text") {
-        const value = "hello";
-        return `<input-textarea-content value="${value}" ${editing}></input-textarea-content>`;
+        return `<input-textarea-content value="${text}" ${editing}></input-textarea-content>`;
     } else if(contentMode === "image") {
         return MockJiImage({size: "thumb"})
     } else if(contentMode === "image-empty") {

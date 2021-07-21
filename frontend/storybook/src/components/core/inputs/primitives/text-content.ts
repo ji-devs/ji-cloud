@@ -11,7 +11,7 @@ interface Args {
 }
 
 const DEFAULT_ARGS:Args = {
-    value: "hello world",
+    value: "hello שָׁלוֹם",
     editing: false
 }
 

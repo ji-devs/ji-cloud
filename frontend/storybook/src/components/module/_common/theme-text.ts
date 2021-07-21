@@ -14,7 +14,7 @@ interface Args {
 
 const DEFAULT_ARGS:Args = {
     theme: "blank",
-    text: "Hello World",
+    text: "hello שָׁלוֹם",
 }
 
 export const TextExample = (props?:Partial<Args>) => {

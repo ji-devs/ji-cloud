@@ -28,6 +28,7 @@ export interface Args {
     side: Side,
     mode: Mode,
     styleKind: StyleKind,
+    text: string,
     transform?: string,
     slot?: string,
     backSideContent: CONTENT_MODE | "none",
@@ -48,13 +49,14 @@ const DEFAULT_ARGS:Args = {
     size: "memory",
     mode: "lettering",
     side: "left",
+    text: "hello שָׁלוֹם",
     backSideContent: "none"
 }
 
 export const Card = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
 
-    const {contentMode, backSideContent, transform, ...cardProps} = props;
+    const {contentMode, backSideContent, transform, text, ...cardProps} = props;
 
     if(backSideContent !== "none") {
         (cardProps as any).doubleSided = true;
@@ -73,16 +75,15 @@ export const Card = (props?:Partial<Args>) => {
 
     return `
     <play-card ${argsToAttrs(cardProps)} ${style}>
-        ${getContent(contentMode)}
-        ${backSideContent !== "none" ? getContent(backSideContent, "backSideContent") : ``}
+        ${getContent(contentMode, text)}
+        ${backSideContent !== "none" ? getContent(backSideContent, text, "backSideContent") : ``}
     </play-card>`;
 }
 
-function getContent(contentMode: CONTENT_MODE, slot?: string) {
+function getContent(contentMode: CONTENT_MODE, text: string, slot?: string) {
     const slotAttr = slot ? `slot="${slot}"` : "";
     if(contentMode === "text") {
-        const value = "hello";
-        return `<card-text value="${value}" ${slotAttr}></card-text>`;
+        return `<card-text value="${text}" ${slotAttr}></card-text>`;
     } else if(contentMode === "image") {
         return MockJiImage({size: "thumb", slot})
     } else if(contentMode === "image-empty") {

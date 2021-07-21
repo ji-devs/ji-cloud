@@ -17,7 +17,7 @@ export class _ extends LitElement {
   theme:ThemeId = "blank";
 
   @property()
-  text:string = "hello world";
+  text:string = ""
 
 	@property({type: Boolean})
 	fontsLoaded:boolean = false;
