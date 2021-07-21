@@ -65,3 +65,28 @@ impl MessageRequest {
         }
     }
 }
+
+pub struct RequestBuilder {
+    request: MessageRequest, // make this a Result, consumed during build()
+}
+
+impl RequestBuilder {
+    pub fn named(&mut self, name: String) -> &mut RequestBuilder {
+        self.request.message.name = Some(name);
+        self
+    }
+
+    pub fn target(&mut self, target: MessageTarget) -> &mut RequestBuilder {
+        self.request.message.target = target;
+        self
+    }
+
+    pub fn json_data<T: Serialize>(&mut self, data: serde_json::Value) -> &mut RequestBuilder {
+        self.request.message.data = data;
+        self
+    }
+
+    pub fn build(self) -> MessageRequest {
+        self.request
+    }
+}

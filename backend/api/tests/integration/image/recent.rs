@@ -9,7 +9,7 @@ use shared::domain::image::recent::UserRecentImageListRequest;
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -39,7 +39,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -69,7 +69,7 @@ async fn create_conflict() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn list_no_limit() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -95,7 +95,7 @@ async fn list_no_limit() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn list_with_limit() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -122,7 +122,7 @@ async fn list_with_limit() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -160,7 +160,7 @@ async fn update() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 

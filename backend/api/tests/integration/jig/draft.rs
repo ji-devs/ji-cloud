@@ -7,7 +7,7 @@ use serde_json::json;
 
 #[actix_rt::test]
 async fn create_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -51,7 +51,7 @@ async fn create_draft() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -93,7 +93,7 @@ async fn get_draft() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn publish_draft() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 

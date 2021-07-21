@@ -3,7 +3,6 @@
 use crate::media::MediaLibrary;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 /// Notification to firebase indicating completed media processing status
 #[derive(Deserialize, Serialize)]

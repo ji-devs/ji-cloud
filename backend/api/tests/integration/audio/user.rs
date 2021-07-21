@@ -8,7 +8,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn create_returns_created() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 

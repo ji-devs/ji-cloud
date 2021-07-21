@@ -9,7 +9,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn update_empty() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -50,7 +50,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_contents() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 

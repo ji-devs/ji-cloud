@@ -12,7 +12,7 @@ async fn forbidden(
     req: Option<&serde_json::Value>,
     method: Method,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms]).await;
+    let app = initialize_server(&[Fixture::UserNoPerms], &[]).await;
 
     let port = app.port();
 
