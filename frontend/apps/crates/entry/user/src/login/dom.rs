@@ -5,10 +5,6 @@ use super::{state::*, actions};
 use web_sys::HtmlInputElement;
 use utils::{events, routes::*};
 
-const STR_PASSWORD_LABEL:&'static str = "Password";
-const STR_FORGOTTEN:&'static str ="Forgot your Password?";
-const STR_EMAIL_LABEL:&'static str = "Email";
-const STR_SUBMIT:&'static str = "Submit";
 
 
 pub struct LoginPage {
@@ -29,14 +25,14 @@ impl LoginPage {
                 .children(vec![
                     html!("input-wrapper", {
                         .property("slot", "email")
-                        .property("label", STR_EMAIL_LABEL)
+                        .property("label", crate::strings::STR_EMAIL_LABEL)
                         .property_signal("hint", state.email_error())
                         .property_signal("error", state.email_error().map(|err| {
                             !err.is_empty()
                         }))
                         .child(html!("input", {
                             .property("type", "email")
-                            .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
+                            .property("placeholder", crate::strings::STR_EMAIL_PLACEHOLDER)
                             .attribute("autocomplete", "email")
                             .event(clone!(state => move |evt:events::Input| {
                                 state.clear_email_status();
@@ -46,7 +42,7 @@ impl LoginPage {
                     }),
                     html!("input-password", {
                         .property("slot", "password")
-                        .property("label", STR_PASSWORD_LABEL)
+                        .property("label", crate::strings::STR_PASSWORD_LABEL)
                         .property_signal("hint", state.password_error())
                         .property_signal("error", state.password_error().map(|err| {
                             !err.is_empty()
@@ -66,7 +62,7 @@ impl LoginPage {
                         .property("slot", "password-forgot")
                         .property("kind", "text")
                         .property("color", "blue")
-                        .text(STR_FORGOTTEN)
+                        .text(crate::strings::STR_PASSWORD_FORGOTTEN)
                         .event(clone!(state => move |evt:events::Click| {
                             actions::forgot_password(state.clone())
                         }))
@@ -75,7 +71,7 @@ impl LoginPage {
                         .property("slot", "submit")
                         .property("color", "red")
                         .property("size", "medium")
-                        .text(STR_SUBMIT)
+                        .text(crate::strings::STR_SUBMIT)
                         .event(clone!(state => move |evt:events::Click| {
                             actions::signin_email(state.clone())
                         }))

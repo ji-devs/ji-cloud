@@ -19,7 +19,7 @@ impl PasswordResetPage {
             .child(
                     html!("input-password", {
                         .property("slot", "password")
-                        .property("label", strings::STR_PASSWORD_LABEL)
+                        .property("label", strings::STR_PASSWORD_CREATE_LABEL)
                         .property("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
                         .property("autocomplete", "new-password")
                         .property_signal("error", state.password.error().map(|err| {
