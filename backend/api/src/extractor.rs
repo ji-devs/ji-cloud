@@ -5,7 +5,10 @@ use crate::{
     token::{check_login_token, SessionClaims, SessionMask},
 };
 use actix_http::error::BlockingError;
-use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
+use actix_http::Payload;
+use actix_web::{
+    cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
+};
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{
     password_hash::{Encoding, SaltString},
@@ -489,5 +492,39 @@ fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> acti
         BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
         BlockingError::Error(Either::B(e)) => crate::error::ise(e),
         BlockingError::Error(Either::A(e)) => e.into(),
+    }
+}
+
+#[derive(Apiv2Security)]
+#[openapi(
+    origin,
+    alias = "origin",
+    in = "header",
+    name = "Request Origin",
+    description = "Domain of cross-origin requestor"
+)]
+pub struct RequestOrigin {
+    pub origin: Option<String>,
+}
+
+impl FromRequest for RequestOrigin {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        let origin: Option<String> = req
+            .headers()
+            .get("Origin")
+            .map(|it| it.to_str().ok())
+            .flatten()
+            .map(ToOwned::to_owned);
+
+        async move {
+            let origin = origin;
+
+            Ok(Self { origin })
+        }
+        .boxed()
+        .into()
     }
 }

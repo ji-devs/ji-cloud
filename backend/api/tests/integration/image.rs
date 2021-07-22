@@ -343,10 +343,10 @@ async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
 
     let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
 
-    let url = resp.session_uri;
+    let _url = resp.session_uri;
 
     // perform upload in single chunk
-    let resp = client;
+    let _resp = client;
 
     Ok(())
 }
