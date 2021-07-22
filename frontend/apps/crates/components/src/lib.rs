@@ -18,8 +18,6 @@ pub mod color_select;
 pub mod audio_input;
 #[cfg(feature = "text_editor")]
 pub mod text_editor;
-#[cfg(feature = "font_loader")]
-pub mod font_loader;
 #[cfg(feature = "instructions")]
 pub mod instructions;
 #[cfg(feature = "animation")]

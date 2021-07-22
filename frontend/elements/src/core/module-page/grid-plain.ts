@@ -1,7 +1,8 @@
 import { LitElement, html, css, customElement, property} from 'lit-element';
 import {nothing} from "lit-html";
 import {BgBlue} from "@elements/_styles/bg";
-
+import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
+import { classMap } from 'lit-html/directives/class-map';
 @customElement('module-page-grid-plain')
 export class _ extends BgBlue {
 
@@ -54,13 +55,36 @@ export class _ extends BgBlue {
         footer {
             grid-area: footer;
         }
+
+        .hidden {
+            display: none;
+        }
     `];
+  }
+
+  @property({type: Boolean})
+  fontsLoaded:boolean = false;
+
+  @property()
+  fontFamilies:Array<string> | undefined;
+
+  firstUpdated(_:any) {
+      if(this.fontFamilies) {
+          loadFonts(this.fontFamilies).then(() => {
+            this.fontsLoaded = true;
+          });
+      } else {
+        loadAllFonts().then(() => {
+            this.fontsLoaded = true;
+        });
+    }
   }
 
   // Define the element's template
   render() {
+      const classes = classMap({hidden: !this.fontsLoaded});
     return html`
-        <div id="grid">
+        <div id="grid" class=${classes}>
 
             <aside><slot name="sidebar"></slot></aside>
             
@@ -72,7 +96,7 @@ export class _ extends BgBlue {
 
             <footer><slot name="footer"></slot></footer>
         </div>
-        <div id="overlay"><slot name="overlay"></slot></div>
+        <div id="overlay" class=${classes}><slot name="overlay"></slot></div>
     `;
   }
 }

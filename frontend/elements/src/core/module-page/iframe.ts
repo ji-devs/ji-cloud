@@ -3,6 +3,8 @@ import {nothing} from "lit-html";
 import {BgBlue} from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
 import {STAGE_PLAYER, STAGE_LEGACY} from "@project-config";
+import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
+import { classMap } from 'lit-html/directives/class-map';
 
 @customElement('module-page-iframe')
 export class _ extends BgBlue {
@@ -56,6 +58,9 @@ export class _ extends BgBlue {
             width: 100%;
             height: 100%;
         }
+        .hidden {
+            display: none;
+        }
     `];
     }
 
@@ -64,6 +69,12 @@ export class _ extends BgBlue {
 
     @property({ type: Boolean })
     legacy: boolean = false;
+
+  @property({type: Boolean})
+  fontsLoaded:boolean = false;
+
+  @property()
+  fontFamilies:Array<string> | undefined;
 
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
@@ -79,6 +90,16 @@ export class _ extends BgBlue {
             });
 
         this.cancelResize = cancelResize;
+
+        if(this.fontFamilies) {
+            loadFonts(this.fontFamilies).then(() => {
+                this.fontsLoaded = true;
+            });
+        } else {
+            loadAllFonts().then(() => {
+                this.fontsLoaded = true;
+            });
+        }
     }
 
     disconnectedCallback() {
@@ -95,8 +116,10 @@ export class _ extends BgBlue {
 
         const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
 
+        const classes = classMap({hidden: !this.fontsLoaded});
+
         return html`
-            <main>
+            <main class=${classes}>
                 <div id="outer">
                     <div id="container">
                         <div id="content" class="${scrollStyle}">
@@ -105,7 +128,7 @@ export class _ extends BgBlue {
                     </div>
                 </div>
             </main>
-            <div id="overlay"><slot name="overlay"></slot></div>
+            <div id="overlay" class=${classes}><slot name="overlay"></slot></div>
     `;
     }
 }

@@ -19,7 +19,6 @@ use dominator_helpers::{
     signals::OptionSignal,
     futures::AsyncLoader,
 };
-use crate::font_loader::{FontLoader, Font};
 use utils::{settings::SETTINGS, prelude::*, iframe::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
@@ -82,7 +81,6 @@ pub struct StateOpts<RawData> {
     pub force_raw: Option<RawData>, 
     pub force_raw_even_in_iframe: bool,
     pub skip_load_jig: bool,
-    pub load_fonts: bool,
     pub skip_play: bool,
 }
 
@@ -94,7 +92,6 @@ impl <RawData> StateOpts<RawData> {
             force_raw: None,
             force_raw_even_in_iframe: false,
             skip_load_jig: false,
-            load_fonts: true,
             skip_play: false,
         }
     }
@@ -188,11 +185,6 @@ where
 
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
             _self.raw_loader.load(clone!(_self, init_from_raw => async move {
-
-                if _self.opts.load_fonts {
-                    FontLoader::new().load_all().await;
-                }
-
                 *_self.jig.borrow_mut() = {
                     if _self.opts.skip_load_jig {
                         Some(Jig {

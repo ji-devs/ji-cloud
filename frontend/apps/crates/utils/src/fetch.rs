@@ -19,7 +19,7 @@ use crate::{
 };
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
 use web_sys::{File, Blob};
 use super::settings::SETTINGS;
 
@@ -58,6 +58,40 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
     } else {
         let url = format!("{}{}", api_url, endpoint);
         (url, data)
+    }
+}
+
+//TODO - resumeable uploads
+//https://cloud.google.com/storage/docs/performing-resumable-uploads#resume-upload
+pub async fn upload_file_gcs(url:&str, file:&File) -> Result<(), ()> {
+    let (resp, status) = upload_file_gcs_status(url, file).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn upload_file_gcs_status(url:&str, file:&File) -> (Result<(), ()>, u16) {
+    upload_file_direct_status(url, file, Method::Put).await
+}
+
+pub async fn upload_file_direct(url:&str, file:&File, method:Method) -> Result<(), ()> {
+    let (resp, status) = upload_file_direct_status(url, file, method).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn upload_file_direct_status(url:&str, file:&File, method:Method) -> (Result<(), ()>, u16) {
+    let res = fetch_upload_file(&url, file, method.as_str()).await.unwrap_ji();
+
+    let status = res.status();
+
+    if res.ok() {
+        (Ok(()), status)
+    } else {
+        (Err(()), status)
     }
 }
 

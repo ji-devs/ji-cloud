@@ -4,6 +4,7 @@ import { BgBlue } from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
 import {classMap} from "lit-html/directives/class-map";
 import {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY} from "@project-config";
+import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
 
 @customElement('module-page-grid-resize')
 export class _ extends BgBlue {
@@ -107,6 +108,10 @@ export class _ extends BgBlue {
             z-index: 1;
         }
 
+        .hidden {
+            display: none;
+        }
+
     `];
     }
 
@@ -118,6 +123,13 @@ export class _ extends BgBlue {
 
     @property({ type: Boolean, reflect: true })
     preview: boolean = false;
+
+  @property({type: Boolean})
+  fontsLoaded:boolean = false;
+
+  @property()
+  fontFamilies:Array<string> | undefined;
+
     firstUpdated() {
         const shadowRoot = this.shadowRoot as ShadowRoot;
 
@@ -148,6 +160,16 @@ export class _ extends BgBlue {
         });
 
         this.cancelResize = cancelResize;
+
+        if(this.fontFamilies) {
+            loadFonts(this.fontFamilies).then(() => {
+                this.fontsLoaded = true;
+            });
+        } else {
+            loadAllFonts().then(() => {
+                this.fontsLoaded = true;
+            });
+        }
     }
 
     disconnectedCallback() {
@@ -164,7 +186,16 @@ export class _ extends BgBlue {
 
         const scrollStyle = scrollable ? `overflow-auto` : `overflow-hidden`;
 
-        const gridClass = preview ? "grid-preview" : "grid";
+        const gridClass = classMap({
+            "grid-preview": preview,
+            "grid": !preview,
+            hidden: !this.fontsLoaded,
+        });
+
+        const overlayClass = classMap({
+            hidden: !this.fontsLoaded,
+        });
+
         return html`
         <div class="${gridClass}">
         
@@ -193,7 +224,7 @@ export class _ extends BgBlue {
                 <slot name="footer"></slot>
             </footer>
         </div>
-        <div id="overlay"><slot name="overlay"></slot></div>
+        <div id="overlay" class=${overlayClass} ><slot name="overlay"></slot></div>
     `;
     }
 }

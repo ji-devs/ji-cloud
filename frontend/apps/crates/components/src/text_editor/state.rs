@@ -4,7 +4,10 @@ use std::cell::RefCell;
 
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
-use utils::themes::{ThemeId, ThemeIdExt};
+use utils::{
+    fonts::font_families_iter,
+    themes::{ThemeId, ThemeIdExt}
+};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -13,7 +16,6 @@ use js_sys::Reflect;
 use strum::IntoEnumIterator;
 
 use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT};
-use super::super::font_loader::{FontLoader, Font as StaticFont};
 use super::dom::text_editor_controls::color_controls::ColorState;
 use super::callbacks::Callbacks;
 
@@ -93,15 +95,10 @@ impl State {
     }
 
     fn handle_fonts(state: Rc<State>) {
-        // load all fonts in background
-        spawn_local(async {
-            FontLoader::new().load_all().await;
-        });
-
         spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme| {
             let mut fonts: Vec<String> = Vec::from(theme.get_text_editor_fonts());
-            let mut static_fonts: Vec<String> = StaticFont::iter().map(|font| {
-                String::from(font.get_font_name())
+            let mut static_fonts: Vec<String> = font_families_iter().map(|font_family| {
+                font_family.to_string()
             }).collect();
             fonts.append(&mut static_fonts);
             state.fonts.set(fonts);

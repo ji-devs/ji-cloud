@@ -80,7 +80,6 @@ animation = []
 audio_input = []
 backgrounds = []
 color_select = []
-font_loader = []
 image = []
 image_search = []
 instructions = []
@@ -104,7 +103,6 @@ all= [
     "audio_input", 
     "backgrounds", 
     "color_select", 
-    "font_loader", 
     "image", 
     "image_search", 
     "instructions", 

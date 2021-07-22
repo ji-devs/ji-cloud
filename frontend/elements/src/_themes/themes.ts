@@ -136,6 +136,10 @@ export function loadFonts(fonts: Array<FontFamilyName>):Promise<void> {
             const url = mediaUi(`fonts/${file}`);
 
             const face = new FontFace(name, `url(${url}) format('${format}')`, descriptors);
+
+            //Disabling this will make it just lazy-load when needed?
+            face.load();
+
             document.fonts.add(face);
         });
 

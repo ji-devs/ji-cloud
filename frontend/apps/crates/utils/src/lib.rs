@@ -23,5 +23,6 @@ pub mod image_effects;
 pub mod ages;
 pub mod clipboard;
 pub mod env;
+pub mod fonts;
 
 pub(crate) mod strings;

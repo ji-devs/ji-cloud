@@ -6,7 +6,7 @@ use wasm_bindgen::JsValue;
 use strum_macros::{EnumIter, Display};
 use dominator_helpers::make_custom_event_serde;
 
-use super::{super::font_loader::Font as StaticFont, font_css_converter::font_to_css};
+use super::font_css_converter::font_to_css;
 
 #[derive(Clone, Debug, EnumIter, Display, PartialEq, Serialize, Deserialize)]
 pub enum ElementType {
@@ -54,7 +54,7 @@ impl ControlsState {
     // maybe take from js default
     pub fn new() -> Self {
         Self {
-            font: String::from(StaticFont::RobotoSlabRegular.get_font_name()),
+            font: super::config::DEFAULT_FONT_FAMILY.to_string(), 
             element: ElementType::P1,
             weight: REGULAR_WEIGHT,
             align: Align::Left,

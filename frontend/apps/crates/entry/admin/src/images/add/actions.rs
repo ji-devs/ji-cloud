@@ -4,7 +4,7 @@ use shared::{
     api::{ApiEndpoint, endpoints},
 };
 use utils::{
-    fetch::{api_with_auth, api_upload_file},
+    prelude::*,
     routes::*
 };
 use dominator::clone;
@@ -45,20 +45,38 @@ pub fn on_file(state: Rc<State>, file: File) {
             Ok(resp) => {
                 let CreateResponse { id} = resp;
 
+                let req = ImageUploadRequest {
+                    file_size: file.size() as usize
+                };
+
                 let path = endpoints::image::Upload::PATH.replace("{id}",&id.0.to_string());
-                match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
-                    Ok(_) => {
-                        let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
-                        dominator::routing::go_to_url(&route);
+
+                match api_with_auth::<ImageUploadResponse, EmptyError, _>(&path, endpoints::image::Upload::METHOD, Some(req)).await {
+                    Ok(resp) => {
+                        let ImageUploadResponse {session_uri} = resp;
+                        
+                        match upload_file_gcs(&session_uri, &file).await {
+                            Ok(_) => {
+                                log::info!("file uploaded!");
+                            },
+                            Err(_) => {
+                            },
+                        }
+
                     },
-                    Err(_) => {
-                        log::error!("error uploading!");
+
+                    Err(err) => {
+                        log::error!("error getting image upload uri!")
                     }
                 }
             },
-            Err(_) => {
-                log::error!("error creating image db!")
+            Err(err) => {
+                log::error!("error creating image id!")
             }
         }
     }))
+}
+
+async fn upload_file(file: File, id: ImageId, session_uri: &str) {
+    log::info!("Uploading {} to {}", id.0.to_string(), session_uri);
 }

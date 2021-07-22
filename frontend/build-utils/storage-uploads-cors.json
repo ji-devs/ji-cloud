@@ -18,7 +18,8 @@
             "Content-Length", 
             "Accept-Encoding", 
             "X-CSRF-Token",
-            "Access-Control-Allow-Credentials"
+            "Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Origin"
         ],
         "method": [
             "GET", 

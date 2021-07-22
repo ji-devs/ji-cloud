@@ -21,7 +21,6 @@ use crate::module::_common::edit::{
     prelude::*,
     history::state::HistoryState
 };
-use crate::font_loader::{FontLoader, Font};
 use dominator_helpers::{
     signals::DefaultSignal,
     futures::AsyncLoader,
@@ -95,7 +94,6 @@ pub struct StateOpts<RawData> {
     //the step which is for previewing
     pub is_main_scrollable: bool,
     pub force_raw: Option<RawData>, 
-    pub load_fonts: bool,
 }
 
 impl <RawData> StateOpts<RawData> {
@@ -107,7 +105,6 @@ impl <RawData> StateOpts<RawData> {
             module_id,
             is_main_scrollable: true,
             force_raw: None,
-            load_fonts: true,
         }
     }
 }
@@ -168,10 +165,6 @@ where
 
         *_self.on_init_ready.borrow_mut() = Some(Box::new(clone!(_self => move || {
             _self.raw_loader.load(clone!(_self, init_from_raw => async move {
-
-                if _self.opts.load_fonts {
-                    FontLoader::new().load_all().await;
-                }
                 if !_self.opts.skip_load_jig {
                     *_self.jig.borrow_mut() = {
 
