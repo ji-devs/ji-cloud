@@ -16,12 +16,6 @@ static THEMES: Lazy<Themes> = Lazy::new(|| {
         themes
 });
 
-pub const THEME_IDS:[ThemeId;3] = [
-    ThemeId::Blank,
-    ThemeId::Chalkboard, 
-    ThemeId::HappyBrush,
-];
-/*
 pub const THEME_IDS:[ThemeId;21] = [
     ThemeId::Blank,
     ThemeId::Chalkboard, 
@@ -45,7 +39,6 @@ pub const THEME_IDS:[ThemeId;21] = [
     ThemeId::WatermelonSummer,
     ThemeId::WinterSnow,
 ];
-*/
 
 pub trait ThemeIdExt {
     fn get_colors(self) -> &'static [RGBA8];
