@@ -27,13 +27,13 @@ use sqlx::postgres::PgPool;
 use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
 
-fn token_query(query_string: &str) -> Option<String> {
+fn token_from_query(query_string: &str) -> Option<String> {
     serde_urlencoded::from_str::<SessionTokenQuery>(query_string)
         .map(|it| it.access_token)
         .unwrap_or(None)
 }
 
-fn token_header(headers: &HeaderMap) -> Option<String> {
+fn token_from_header(headers: &HeaderMap) -> Option<String> {
     let parse_for_token = |header: &str| -> Option<String> {
         let mut it = header.split(" ");
 
@@ -108,7 +108,8 @@ impl FromRequest for TokenUser {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
@@ -236,7 +237,8 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
@@ -356,7 +358,8 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),

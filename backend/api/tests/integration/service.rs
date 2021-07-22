@@ -27,21 +27,24 @@ pub struct TestServicesSettings {
 }
 
 impl TestServicesSettings {
+    const TEST_SERVICE_ACCOUNT_JSON: &'static str = "TEST_SERVICE_ACCOUNT_JSON";
+
     const TEST_SENDGRID_API_KEY: &'static str = "TEST_SENDGRID_API_KEY";
     const TEST_SENDER_EMAIL: &'static str = "TEST_SENDER_EMAIL";
     const TEST_SIGNUP_VERIFY_TEMPLATE: &'static str = "TEST_SIGNUP_VERIFY_TEMPLATE";
     const TEST_SIGNUP_PASSWORD_RESET_TEMPLATE: &'static str = "TEST_SIGNUP_PASSWORD_RESET_TEMPLATE";
 
     pub async fn new() -> anyhow::Result<Self> {
-        let (token, project_id) = match req_env("GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX") {
+        let (token, project_id) = match req_env("TEST_SERVICE_ACCOUNT_JSON") {
             Ok(key_json) => {
                 let credentials =
                     match serde_json::from_str::<yup_oauth2::ServiceAccountKey>(&key_json) {
                         Ok(v) => v,
                         Err(e) => {
                             return Err(anyhow::anyhow!(
-                                "Could not parse service account json key {:?}",
-                                e
+                                "Could not parse service account json key {:?}. Len: {:?}",
+                                e,
+                                &key_json.len()
                             ));
                         }
                     };
