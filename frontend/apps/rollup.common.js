@@ -8,5 +8,6 @@ export function getEnv() {
 		LOCAL_PAGES_URL: process.env.LOCAL_PAGES_URL,
 		LOCAL_PAGES_URL_IFRAME: process.env.LOCAL_PAGES_URL_IFRAME,
 		LOCAL_FRONTEND_URL: process.env.LOCAL_FRONTEND_URL,
+		LOCAL_API_AUTH_OVERRIDE: process.env.LOCAL_API_AUTH_OVERRIDE,
 	}
 }
