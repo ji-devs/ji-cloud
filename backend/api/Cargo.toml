@@ -41,6 +41,7 @@ rusoto_s3 = "0.45.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
 serde_json = { version = "1.0", features = ["preserve_order"] }
+serde_urlencoded = "0.7.0"
 sha2 = "0.9.2"
 shared = {path = "../../shared/rust", features = ["backend"]}
 time = "0.2.16"
