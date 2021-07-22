@@ -1,11 +1,13 @@
 //! Google Cloud Storage
 
 use crate::error;
+use crate::extractor::RequestOrigin;
 use anyhow::Context;
 use core::settings::GoogleCloudStorageSettings;
 use http::StatusCode;
 use reqwest::{self, header};
 use shared::media::{self, FileKind, MediaLibrary, PngImageFile};
+use std::ops::Deref;
 use uuid::Uuid;
 
 pub struct Client {
@@ -37,10 +39,11 @@ impl Client {
         library: MediaLibrary,
         id: Uuid,
         file_kind: FileKind,
+        origin: RequestOrigin,
     ) -> Result<String, error::Storage> {
         let key = media::media_key(library, id, file_kind);
 
-        let resp: reqwest::Response = reqwest::Client::new()
+        let req = reqwest::Client::new()
             .post(&format!(
                 "https://storage.googleapis.com/upload/storage/v1/b/{}/o",
                 bucket
@@ -52,10 +55,16 @@ impl Client {
                 header::AUTHORIZATION,
                 format!("Bearer {}", self.oauth2_token.to_owned()),
             )
-            .header(header::CONTENT_LENGTH, "0")
-            .send()
-            .await?;
+            .header(header::CONTENT_LENGTH, "0");
 
+        let req = match origin.origin {
+            Some(origin) if config::CORS_ORIGINS.contains(&origin.deref()) => {
+                req.header(header::ORIGIN, origin)
+            }
+            _ => req,
+        };
+
+        let resp: reqwest::Response = req.send().await?;
         match resp.status() {
             StatusCode::OK => {
                 let session_uri = resp
@@ -93,6 +102,7 @@ impl Client {
         library: MediaLibrary,
         id: Uuid,
         file_kind: FileKind,
+        origin: RequestOrigin,
     ) -> Result<String, error::Storage> {
         self.get_url_for_resumable_upload(
             &self.processing_bucket,
@@ -100,6 +110,7 @@ impl Client {
             library,
             id,
             file_kind,
+            origin,
         )
         .await
     }
@@ -110,6 +121,7 @@ impl Client {
         library: MediaLibrary,
         id: Uuid,
         file_kind: FileKind,
+        origin: RequestOrigin,
     ) -> Result<String, error::Storage> {
         self.get_url_for_resumable_upload(
             &self.processing_bucket,
@@ -117,6 +129,7 @@ impl Client {
             library,
             id,
             file_kind,
+            origin,
         )
         .await
     }

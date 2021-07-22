@@ -1,3 +1,4 @@
+use crate::extractor::RequestOrigin;
 use crate::service::storage;
 use crate::{db, error, extractor::TokenUser, s3, service::ServiceData};
 use futures::TryStreamExt;
@@ -37,6 +38,7 @@ pub(super) async fn upload(
     gcs: ServiceData<storage::Client>,
     _claims: TokenUser,
     Path(id): Path<ImageId>,
+    origin: RequestOrigin,
     req: Json<<endpoints::image::user::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::user::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
@@ -63,6 +65,7 @@ pub(super) async fn upload(
             MediaLibrary::User,
             id.0,
             FileKind::ImagePng(PngImageFile::Original),
+            origin,
         )
         .await?;
 
