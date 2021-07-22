@@ -1,11 +1,22 @@
 {
     "Shesek - Regular": {
-        "file": "shesek-regular-fm.woff2", 
+        "file": "Shesek/shesek-regular-fm.woff2", 
+        "format": "woff2",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Shesek - dashed": {
+        "file": "Shesek/shesek-dashed-fm.woff2", 
         "format": "woff2",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
     "Frank Ruhl Libre - Medium": {
         "file": "Frank_Ruhl_Libre/FrankRuhlLibre-Medium.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    
+    "Frank Ruhl Libre - Bold": {
+        "file": "Frank_Ruhl_Libre/FrankRuhlLibre-Bold.ttf", 
         "format": "truetype",
         "range": "U+0590-05FF, U+FB1D-FB4F"
     },
@@ -17,8 +28,155 @@
         "file": "Roboto_Slab/static/RobotoSlab-Regular.ttf", 
         "format": "truetype"
     },
+    "Roboto Slab - Bold": {
+        "file": "Roboto_Slab/static/RobotoSlab-Bold.ttf", 
+        "format": "truetype"
+    },
     "Caveat - Medium": {
         "file": "Caveat/static/Caveat-Medium.ttf", 
+        "format": "truetype"
+    },
+    "Goldman-Regular": {
+        "file": "Goldman/Goldman-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Goldman-Bold": {
+        "file": "Goldman/Goldman-Bold.ttf", 
+        "format": "truetype"
+    },
+    "Alef-regular": {
+        "file": "Alef/Alef-Regular.woff", 
+        "format": "truetype"
+    },
+    "Alef-Heb": {
+        "file": "Alef/Alef-Regular.woff", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Alef-bold": {
+        "file": "Alef/Alef-bold.woff", 
+        "format": "truetype"
+    },
+    "Itim-Regular": {
+        "file": "Itim-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Assistant-Bold": {
+        "file": "Assistant/Assistant-Bold.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Assistant-SemiBold": {
+        "file": "Assistant/Assistant-SemiBold.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Assistant-Regular": {
+        "file": "Assistant/Assistant-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Assistant-Light": {
+        "file": "Assistant/Assistant-Light.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Sunflower-Bold": {
+        "file": "Sunflower/Sunflower-Bold.ttf", 
+        "format": "truetype"
+    },
+    "Sunflower-Medium": {
+        "file": "Sunflower/Sunflower-Medium.ttf", 
+        "format": "truetype"
+    },
+    "Sunflower-Light": {
+        "file": "Sunflower/Sunflower-Light.ttf", 
+        "format": "truetype"
+    },
+    "GveretLevinAlefAlefAlef-Regular": {
+        "file": "GveretLevin/GveretLevinAlefAlefAlef-Regular.woff2", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Courgette-Regular": {
+        "file": "Courgette-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Merienda-Regular": {
+        "file": "Merienda-Regular.ttf", 
+        "format": "truetype"
+    },
+    
+    "VarelaRound-Regular": {
+        "file": "VarelaRound-Regular.ttf", 
+        "format": "truetype"
+    },
+    "VarelaRound-Heb": {
+        "file": "VarelaRound-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Bellefair-Regular": {
+        "file": "Bellefair-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "Tinos-Regular": {
+        "file": "Tinos-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Kalam-Regular": {
+        "file": "Kalam-Regular.ttf", 
+        "format": "truetype"
+    },
+    "Amatic-Regular": {
+        "file": "AmaticSC-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "IndieFlower-Regular": {
+        "file": "IndieFlower-Regular.ttf", 
+        "format": "truetype"
+    },
+    "CarterOne-Regular": {
+        "file": "CarterOne-Regular.ttf", 
+        "format": "truetype"
+    },
+    "SuezOne-Regular": {
+        "file": "SuezOne-Regular.ttf", 
+        "format": "truetype",
+        "range": "U+0590-05FF, U+FB1D-FB4F"
+    },
+    "OpenSans-Bold": {
+        "file": "OpenSans/OpenSans-Bold.ttf", 
+        "format": "truetype"
+    },
+    "OpenSans-regular": {
+        "file": "OpenSans/OpenSans-Regular.ttf", 
+        "format": "truetype"
+    },
+    "OpenSans-light": {
+        "file": "OpenSans/OpenSans-Light.ttf", 
+        "format": "truetype"
+    },
+    "OpenSans-SemiBold": {
+        "file": "OpenSans/OpenSans-SemiBold.ttf", 
+        "format": "truetype"
+    },
+    "Glegoo-Regular": {
+        "file": "Glegoo/Glegoo-regular.ttf", 
+        "format": "truetype"
+    },
+    "Glegoo-Bold": {
+        "file": "Glegoo/Glegoo-Bold.ttf", 
+        "format": "truetype"
+    },
+    "Laila-Medium": {
+        "file": "Laila/Laila-Medium.ttf", 
+        "format": "truetype"
+    },
+    "Laila-Regular": {
+        "file": "Laila/Laila-REgular.ttf", 
         "format": "truetype"
     }
 }            

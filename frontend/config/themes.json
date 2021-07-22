@@ -5,71 +5,583 @@
             "en": "Blank"
         },
         "fontFamilies": [
-            "'Arial', 'Times New Roman'",
-            "'Shesek', Cursive'"
+            "'Alef-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Alef-bold'"
         ],
-        "colors": ["#ff2354", "#00ff00","#ff2354"],
+        "colors": ["#272727", "#ffffff","#272727","#387AF4"],
         "textEditor": {
             "h1": {
-                "fontFamily": 0,
-                "fontSize": 28,
-                "fontColor": 1
+                "fontFamily": 2,
+                "fontSize": 120,
+                "fontColor": 0
             },
             "h2": {
-                "fontFamily": 1,
-                "fontSize": 25,
-                "fontColor": 2
+                "fontFamily": 2,
+                "fontSize": 70,
+                "fontColor": 0
             },
             "p1": {
                 "fontFamily": 0,
-                "fontSize": 14,
-                "fontColor": 1
+                "fontSize": 40,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 30,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 3,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "winter-snow": {
+        "id": "winter-snow",
+        "label": {
+            "en": "Winter Snow"
+        },
+        "fontFamilies": [
+            "'Assistant-SemiBold', 'Sunflower-Medium'",
+            "'Assistant-Regular', 'Sunflower-Light'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#0061A5", "#ffffff","#0061A5"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 1,
+                "fontSize": 45,
+                "fontColor": 0
             },
             "p2": {
                 "fontFamily": 1,
-                "fontSize": 12,
+                "fontSize": 35,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 2
+        }
+    },
+    "watermelon-summer": {
+        "id": "watermelon-summer",
+        "label": {
+            "en": "Watermelon Summer"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'Itim-Regular'",
+            "'Frank Ruhl Libre - Medium', 'Caveat - Medium'"
+        ],
+        "colors": ["#40721F", "#ECFADC","#ff2354"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 140,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 30,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "shabbat-shalom": {
+        "id": "shabbat-shalom",
+        "label": {
+            "en": "Shabbat Shalom"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#FDFDF4", "#F3AD1C","#F3AD1C"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 1
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 1
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 1
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 1
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "rosh-hashanah": {
+        "id": "rosh-hashanah",
+        "label": {
+            "en": "Rosh Hashanah"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular', 'Tinos-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Kalam-Regular','Tinos-Regular'"
+        ],
+        "colors": ["#754112", "#eaf6e8","#91631f"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 40,
                 "fontColor": 2
             },
             "fontList": []
         },
         "cards": {
             "fontColor": 0,
-            "borderColor": 1,
-            "fillColor": 2,
+            "borderColor": 0,
+            "fillColor": 1,
             "fontFamily": 0,
             "fontFamilyLetteringLeft": 0,
-            "fontFamilyLetteringRight": 0
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "purim": {
+        "id": "purim",
+        "label": {
+            "en": "Purim"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#1C0B42", "#EAE3F4","#EAE3F4"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35
+                ,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "our-israel": {
+        "id": "our-israel",
+        "label": {
+            "en": "Our Israel"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#ffffff", "#039BE5","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "my-notebook": {
+        "id": "my-notebook",
+        "label": {
+            "en": "My Notebook"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Laila-Medium'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'VarelaRound-Heb', 'Laila-Regular'"
+        ],
+        "colors": ["#6E6E6E", "#FFF8DF","#6E6E6E"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 30,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 2,
+            "fontFamilyLetteringLeft": 2,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "lovely-spring": {
+        "id": "lovely-spring",
+        "label": {
+            "en": "Lovely Spring"
+        },
+        "fontFamilies": [
+            "'VarelaRound-Heb', 'Courgette-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#06877A", "#FFF9E5","#06877A"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "lost-in-space": {
+        "id": "lost-in-space",
+        "label": {
+            "en": "Lost in Space"
+        },
+        "fontFamilies": [
+            "'Alef-Heb', 'Goldman-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Alef-Heb', 'Alef-Regular'"
+        ],
+        "colors": ["#E3F0F9", "#2983C3","#ffffff"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 2,
+            "fontFamilyLetteringLeft": 2,
+            "fontFamilyLetteringRight": 1
         }
     },
     "comix": {
-        "id": "blank",
+        "id": "comix",
         "label": {
-            "en": "Blank"
+            "en": "Comix"
         },
         "fontFamilies": [
-            "'Arial', 'Times New Roman'",
-            "'Shesek', Cursive'"
+            "'SuezOne-Regular', 'CarterOne-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
         ],
-        "colors": ["#ff2354", "#00ff00","#ff2354"],
+        "colors": ["#000000", "#FFF8DF","#000000"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
-                "fontSize": 28,
-                "fontColor": 1
+                "fontSize": 110,
+                "fontColor": 2
             },
             "h2": {
-                "fontFamily": 1,
-                "fontSize": 25,
+                "fontFamily": 0,
+                "fontSize": 70,
                 "fontColor": 2
             },
             "p1": {
                 "fontFamily": 0,
-                "fontSize": 14,
-                "fontColor": 1
+                "fontSize": 48,
+                "fontColor": 2
             },
             "p2": {
-                "fontFamily": 1,
-                "fontSize": 12,
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "back-to-school": {
+        "id": "back-to-school",
+        "label": {
+            "en": "Back-to-School"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'Itim-Regular'",
+            "'Alef-Heb', 'Caveat - Medium'"
+        ],
+        "colors": ["#242942", "#fff8df","#242942"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 40,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 30,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "jigzi": {
+        "id": "jigzi",
+        "label": {
+            "en": "Jigzi"
+        },
+        "fontFamilies": [
+            "'Alef-Bold'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Alef-regular'"
+        ],
+        "colors": ["#37568f", "#FFFFFF","#000000","#FFC900"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 0
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 0
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 50,
+                "fontColor": 0
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 40,
+                "fontColor": 0
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 3,
+            "fillColor": 1,
+            "fontFamily": 2,
+            "fontFamilyLetteringLeft": 2,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "jewish-text": {
+        "id": "jewish-text",
+        "label": {
+            "en": "Jewish Text"
+        },
+        "fontFamilies": [
+            "'Frank Ruhl Libre - Medium','Roboto Slab - Bold'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Frank Ruhl Libre - Medium','Roboto Slab - Regular'"
+        ],
+        "colors": ["#A14E00", "#E9D8AD","#A14E00"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 50,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 40,
                 "fontColor": 2
             },
             "fontList": []
@@ -77,10 +589,221 @@
         "cards": {
             "fontColor": 0,
             "borderColor": 1,
-            "fillColor": 2,
+            "fillColor": 1,
+            "fontFamily": 2,
+            "fontFamilyLetteringLeft": 2,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "illuminating-hanukkah": {
+        "id": "illuminating-hanukkah",
+        "label": {
+            "en": "Illuminating Hanukkah"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#9E875A", "#ffffff","#F0DB75"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 80,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 48,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 38,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 2,
+            "fillColor": 1,
             "fontFamily": 0,
             "fontFamilyLetteringLeft": 0,
-            "fontFamilyLetteringRight": 0
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "happy-sukkot": {
+        "id": "happy-sukkot",
+        "label": {
+            "en": "Happy Sukkot"
+        },
+        "fontFamilies": [
+            "'Shesek - Regular', 'IndieFlower-Regular'",
+            "'Tinos-Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#FDFBEE", "#3E9B42","#4a7838"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 150,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 80,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 55,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 1,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "happy-shavuot": {
+        "id": "happy-shavuot",
+        "label": {
+            "en": "Happy Shavuot"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#FEF5E3", "#F4AD1C","#A14E00"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 48,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 2,
+            "borderColor": 1,
+            "fillColor": 0,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "happy-passover": {
+        "id": "happy-passover",
+        "label": {
+            "en": "Happy Passover"
+        },
+        "fontFamilies": [
+            "'Tinos-Regular'",
+            "'Shesek - Regular','Caveat - Medium'",
+            "'Kalam-Regular'"
+        ],
+        "colors": ["#91631F", "#F0F9FB","#91631F"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 2,
+                "fontSize": 48,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 2,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
+        }
+    },
+    "exciting-fall": {
+        "id": "exciting-fall",
+        "label": {
+            "en": "Exciting Fall"
+        },
+        "fontFamilies": [
+            "'Bellefair-Regular', 'Merienda-Regular'",
+            "'Shesek - Regular', 'Caveat - Medium'"
+        ],
+        "colors": ["#B81843", "#FFF9E5","#FF8C31"],
+        "textEditor": {
+            "h1": {
+                "fontFamily": 0,
+                "fontSize": 120,
+                "fontColor": 2
+            },
+            "h2": {
+                "fontFamily": 0,
+                "fontSize": 70,
+                "fontColor": 2
+            },
+            "p1": {
+                "fontFamily": 0,
+                "fontSize": 45,
+                "fontColor": 2
+            },
+            "p2": {
+                "fontFamily": 0,
+                "fontSize": 35,
+                "fontColor": 2
+            },
+            "fontList": []
+        },
+        "cards": {
+            "fontColor": 0,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 0,
+            "fontFamilyLetteringLeft": 0,
+            "fontFamilyLetteringRight": 1
         }
     },
     "chalkboard": {
@@ -89,29 +812,30 @@
             "en": "Chalkboard"
         },
         "fontFamilies": [
-            "'Frank Ruhl Libre - Medium', 'Roboto Slab - Medium'",
-            "'Shesek - Regular', 'Architects Daughter - Regular'"
+            "'Shesek - Regular','Architects Daughter - Regular'",
+            "'Alef-Heb', 'Architects Daughter - Regular'",
+            "'Alef-Heb','Glegoo-Regular'"
         ],
-        "colors": ["#272727", "#AFCBF4", "#D8E7FA"],
+        "colors": ["#272727", "#AFCBF4", "#FFFFFF","#272727"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
-                "fontSize": 28,
-                "fontColor": 1
+                "fontSize": 120,
+                "fontColor": 2
             },
             "h2": {
-                "fontFamily": 1,
-                "fontSize": 25,
+                "fontFamily": 0,
+                "fontSize": 70,
                 "fontColor": 2
             },
             "p1": {
-                "fontFamily": 0,
-                "fontSize": 14,
-                "fontColor": 1
+                "fontFamily": 2,
+                "fontSize": 40,
+                "fontColor": 2
             },
             "p2": {
-                "fontFamily": 1,
-                "fontSize": 12,
+                "fontFamily": 2,
+                "fontSize": 30,
                 "fontColor": 2
             },
             "fontList": [
@@ -126,7 +850,7 @@
             "fillColor": 2,
             "fontFamily": 0,
             "fontFamilyLetteringLeft": 0,
-            "fontFamilyLetteringRight": 1
+            "fontFamilyLetteringRight": 2
         }
     },
     "happy-brush": {
@@ -135,29 +859,31 @@
             "en": "Happy Brush"
         },
         "fontFamilies": [
-            "'Frank Ruhl Libre - Medium', 'Roboto Slab - Medium'",
-            "'Shesek - Regular', 'Caveat - Medium'"
+            "'Frank Ruhl Libre - Bold', 'Roboto Slab - Bold'",
+            "'Shesek - Regular', 'Caveat - Medium'",
+            "'Assistant-SemiBold','OpenSans-SemiBold'",
+            "'Assistant-Regular','OpenSans-Regular'"
         ],
-        "colors": ["#272727", "#FF6639","#FFF3ED"],
+        "colors": ["#fa632f", "#FFFFFF","#272727","#387AF4"],
         "textEditor": {
             "h1": {
                 "fontFamily": 0,
-                "fontSize": 28,
-                "fontColor": 1
+                "fontSize": 120,
+                "fontColor": 2
             },
             "h2": {
-                "fontFamily": 1,
-                "fontSize": 25,
+                "fontFamily": 2,
+                "fontSize": 70,
                 "fontColor": 2
             },
             "p1": {
-                "fontFamily": 0,
-                "fontSize": 14,
-                "fontColor": 1
+                "fontFamily": 3,
+                "fontSize": 48,
+                "fontColor": 2
             },
             "p2": {
-                "fontFamily": 1,
-                "fontSize": 12,
+                "fontFamily": 3,
+                "fontSize": 35,
                 "fontColor": 2
             },
             "fontList": [
@@ -166,11 +892,11 @@
             ]
         },
         "cards": {
-            "fontColor": 0,
-            "borderColor": 1,
-            "fillColor": 2,
-            "fontFamily": 0,
-            "fontFamilyLetteringLeft": 0,
+            "fontColor": 2,
+            "borderColor": 0,
+            "fillColor": 1,
+            "fontFamily": 3,
+            "fontFamilyLetteringLeft": 3,
             "fontFamilyLetteringRight": 1
         }
     }
