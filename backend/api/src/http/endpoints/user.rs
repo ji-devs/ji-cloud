@@ -88,7 +88,7 @@ async fn send_password_email(
         .password_reset_template()
         .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/user/change-pw/{}", pages_url, session);
+    let email_link = format!("{}/user/password-reset/{}", pages_url, session);
 
     mail.send_password_reset(template, Email::new(email_address), email_link)
         .await?;

@@ -56,9 +56,11 @@ cfg_if::cfg_if! {
         }
 
         pub fn env_var(key: &str) -> Result<String, VarError> {
-            process_env_var(key).map_err(|_| {
-                VarError::NotPresent
-            })
+            process_env_var(key)
+                .map_err(|_| {
+                    VarError::NotPresent
+                })
+                .and_then(|var| if var.is_empty() { Err(VarError::NotPresent) } else { Ok(var) })
         }
     } else {
         pub fn env_var(key: &str) -> Result<String, VarError> {

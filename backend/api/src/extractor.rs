@@ -17,15 +17,44 @@ use http::StatusCode;
 use paperclip::actix::{Apiv2Schema, Apiv2Security};
 use rand::thread_rng;
 use shared::domain::{
-    session::{AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
+    session::{SessionTokenQuery, AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
     user::UserScope,
 };
 use sqlx::postgres::PgPool;
 use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
 
-fn csrf_header(headers: &HeaderMap) -> Option<&str> {
-    headers.get(CSRF_HEADER_NAME)?.to_str().ok()
+fn token_query(query_string: &str) -> Option<String> {
+    serde_urlencoded::from_str::<SessionTokenQuery>(query_string)
+        .map(|it| it.access_token)
+        .unwrap_or(None)
+}
+
+fn token_header(headers: &HeaderMap) -> Option<String> {
+    let parse_for_token = |header: &str| -> Option<String> {
+        let mut it = header.split(" ");
+
+        if let Some(head) = it.next() {
+            if !head.eq_ignore_ascii_case("Bearer") {
+                return None;
+            }
+        }
+
+        it.next().map(ToOwned::to_owned)
+    };
+
+    headers
+        .get(http::header::AUTHORIZATION)?
+        .to_str()
+        .map_or_else(|_| None, parse_for_token)
+}
+
+fn csrf_header(headers: &HeaderMap) -> Option<String> {
+    headers
+        .get(CSRF_HEADER_NAME)?
+        .to_str()
+        .ok()
+        .map(ToOwned::to_owned)
 }
 
 fn check_cookie_csrf<'a>(
@@ -70,26 +99,33 @@ impl FromRequest for TokenUser {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let cookie = req.cookie(AUTH_COOKIE_NAME);
-        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
-
         let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
         let settings = Data::clone(settings);
 
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
-            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
-            Err(e) => return futures::future::err(e.into()).into(),
+        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+
+        let (token_string, csrf) = match token {
+            Some(token_string) => (token_string, None),
+            None => {
+                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let csrf = csrf_header(req.headers());
+
+                match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+                    Ok((cookie, csrf)) => (cookie.value().to_owned(), Some(csrf.into_owned())),
+                    Err(e) => return futures::future::err(e.into()).into(),
+                }
+            }
         };
 
         async move {
             let csrf = csrf;
             let claims = check_login_token(
                 &db,
-                cookie.value(),
-                &csrf,
+                &token_string,
+                csrf.as_deref(),
                 &settings.token_secret,
                 SessionMask::GENERAL_API,
             )
@@ -191,24 +227,38 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let cookie = req.cookie(AUTH_COOKIE_NAME);
-        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
-
         let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
         let settings = Data::clone(settings);
 
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
-            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
-            Err(e) => return futures::future::err(e.into()).into(),
+        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+
+        let (token_string, csrf) = match token {
+            Some(token_string) => (token_string, None),
+            None => {
+                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let csrf = csrf_header(req.headers());
+
+                match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+                    Ok((cookie, csrf)) => (cookie.value().to_owned(), Some(csrf.into_owned())),
+                    Err(e) => return futures::future::err(e.into()).into(),
+                }
+            }
         };
 
         async move {
             let csrf = csrf;
             // todo: fix the race condition here (user deleted between the db access in `check_token` and `has_scope`)
-            let claims = check_login_token(&db, cookie.value(), &csrf, &settings.token_secret, SessionMask::GENERAL_API).await?;
+            let claims = check_login_token(
+                &db,
+                &token_string,
+                csrf.as_deref(),
+                &settings.token_secret,
+                SessionMask::GENERAL_API
+            )
+                .await?;
 
             let has_scope = sqlx::query!(
                 r#"select exists(select 1 from "user_scope" where user_id = $1 and (scope = $2 or scope = $3)) as "exists!""#,
@@ -297,26 +347,33 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let cookie = req.cookie(AUTH_COOKIE_NAME);
-        let csrf = csrf_header(req.headers()).map(ToOwned::to_owned);
-
         let settings: &Data<RuntimeSettings> = req.app_data().expect("Settings??");
         let settings = Data::clone(settings);
 
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let (cookie, csrf) = match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
-            Ok((cookie, csrf)) => (cookie, csrf.into_owned()),
-            Err(e) => return futures::future::err(e.into()).into(),
+        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+
+        let (token_string, csrf) = match token {
+            Some(token_string) => (token_string, None),
+            None => {
+                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let csrf = csrf_header(req.headers());
+
+                match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
+                    Ok((cookie, csrf)) => (cookie.value().to_owned(), Some(csrf.into_owned())),
+                    Err(e) => return futures::future::err(e.into()).into(),
+                }
+            }
         };
 
         async move {
             let csrf = csrf;
             let claims = check_login_token(
                 &db,
-                cookie.value(),
-                &csrf,
+                &token_string,
+                csrf.as_deref(),
                 &settings.token_secret,
                 S::REQUIREMENTS,
             )

@@ -28,6 +28,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     visible: boolean = false;
 
+    @property()
+    autocomplete:string = "current-password"; 
+
     toggleVisible() {
         this.visible = !this.visible;
     }
@@ -54,6 +57,7 @@ export class _ extends LitElement {
 
         const inputType = this.visible ? "text" : "password";
 
+
         return html`
             <input-wrapper
                 label="${this.label}"
@@ -64,6 +68,7 @@ export class _ extends LitElement {
                     placeholder="${this.placeholder}"
                     value="${this.value}"
                     type="${inputType}"
+                    autocomplete="${this.autocomplete}"
                     @input="${this.onInput}"
                     @change="${this.onChange}"
                 >

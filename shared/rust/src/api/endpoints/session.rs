@@ -19,7 +19,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Sign in via oauth
+/// Sign in via oauth.
 ///
 /// Note: If the account doesn't exist, but the oauth token is valid, it'll return a token that can be used to create an account.
 ///

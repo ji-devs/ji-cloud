@@ -32,6 +32,8 @@ impl LoginExt for reqwest::RequestBuilder {
 
         self.header("X-CSRF", CSRF)
             .header("Cookie", format!("X-AUTH={}", token))
+        //.header("Authorization", format!("Bearer {}", token)) // PASSED
+        //.query(&[(shared::domain::session::AUTH_QUERY_NAME, token.as_str())]) // PASSED
     }
 }
 

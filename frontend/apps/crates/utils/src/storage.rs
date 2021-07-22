@@ -5,10 +5,16 @@ use crate::unwrap::UnwrapJiExt;
 pub const CSRF_STORAGE_NAME:&'static str = "X-CSRF";
 
 pub fn load_csrf_token() -> Option<String> {
-    get_local_storage()
+    let res = get_local_storage()
         .unwrap_ji()
         .get(CSRF_STORAGE_NAME)
-        .unwrap_ji()
+        .unwrap_ji();
+
+    if res.is_none() {
+        log::warn!("unable to load CSRF!");
+    }
+
+    res
 }
 
 pub fn save_csrf_token(csrf:&str) {

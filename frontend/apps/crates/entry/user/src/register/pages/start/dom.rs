@@ -33,6 +33,7 @@ impl StartPage {
                         .property_signal("hint", state.email_error())
                         .child(html!("input", {
                             .property("type", "email")
+                            .attribute("autocomplete", "email")
                             .property("placeholder", strings::STR_EMAIL_PLACEHOLDER)
                             .event(clone!(state => move |evt:events::Input| {
                                 state.clear_email_status();
@@ -42,8 +43,9 @@ impl StartPage {
                     }),
                     html!("input-password", {
                         .property("slot", "password")
-                        .property("label", strings::STR_PASSWORD_LABEL)
+                        .property("label", strings::STR_PASSWORD_CREATE_LABEL)
                         .property("placeholder", strings::STR_PASSWORD_PLACEHOLDER)
+                        .property("autocomplete", "new-password")
                         .property_signal("error", state.password.error().map(|err| {
                             !err.is_empty()
                         }))

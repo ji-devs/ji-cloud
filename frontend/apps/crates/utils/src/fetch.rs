@@ -12,13 +12,16 @@ use shared::api::{
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
 use shared::domain::auth::CSRF_HEADER_NAME;
-use crate::storage::load_csrf_token; 
+use crate::{
+    storage::load_csrf_token,
+    unwrap::UnwrapJiExt,
+    env::env_var
+};
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
 use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
 use web_sys::{File, Blob};
 use super::settings::SETTINGS;
-use crate::unwrap::UnwrapJiExt;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle};
 
@@ -42,9 +45,7 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 
 fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
-
     let api_url = SETTINGS.get().unwrap_ji().remote_target.api_url();
-
     if method == Method::Get {
         if let Some(data) = data {
             let query = serde_qs::to_string(&data).unwrap_ji();
@@ -73,8 +74,8 @@ pub async fn api_upload_blob_status(endpoint:&str, blob:&Blob, method:Method) ->
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
-    let csrf = load_csrf_token().unwrap_ji();
-
+    let csrf = load_csrf_token().unwrap_or_default();
+    
     let res = fetch_upload_blob_with_headers(&url, blob, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
 
     let status = res.status();
@@ -100,8 +101,7 @@ pub async fn api_upload_file_status(endpoint:&str, file:&File, method:Method) ->
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
-    let csrf = load_csrf_token().unwrap_ji();
-
+    let csrf = load_csrf_token().unwrap_or_default();
     let res = fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
 
     let status = res.status();
@@ -197,6 +197,35 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
         (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
     }
 }
+//TODO - get rid of this, use specialization
+pub async fn api_with_token_empty<E, Payload>(endpoint: &str, token: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let (resp, status) = api_with_token_empty_status(endpoint, token, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+pub async fn api_with_token_empty_status<E, Payload>(endpoint: &str, token: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let bearer = format!("Bearer {}", token);
+
+    let (url, data) = api_get_query(endpoint, method, data);
+ 
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
+        .await
+        .unwrap_ji();
+
+    let status = res.status();
+
+    if res.ok() {
+        (Ok(()), status)
+    } else {
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+    }
+}
 
 pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
@@ -211,21 +240,60 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 pub async fn api_with_auth_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().expect_ji("no CSRF / not logged in!");
 
-    let (url, data) = api_get_query(endpoint, method, data);
-
-    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
-        .await
-        .unwrap_ji();
-
-
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
+    if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
+        api_with_token_status(endpoint, &token, method, data).await
     } else {
-        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+        let csrf = load_csrf_token().unwrap_or_default();
+
+        let (url, data) = api_get_query(endpoint, method, data);
+
+        let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+            .await
+            .unwrap_ji();
+
+
+        let status = res.status();
+
+        if res.ok() {
+            (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
+        } else {
+            (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+        }
+    }
+}
+//TODO - get rid of this, use specialization
+pub async fn api_with_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+pub async fn api_with_auth_empty_status<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
+        api_with_token_empty_status(endpoint, &token, method, data).await
+    } else {
+        let csrf = load_csrf_token().unwrap_or_default();
+        
+        let (url, data) = api_get_query(endpoint, method, data);
+
+        let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+            .await
+            .unwrap_ji();
+
+
+        let status = res.status();
+
+        if res.ok() {
+            (Ok(()), status)
+        } else {
+            (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+        }
     }
 }
 
@@ -257,36 +325,6 @@ where E: DeserializeOwned + Serialize, Payload: Serialize {
     }
 }
 
-//TODO - get rid of this, use specialization
-pub async fn api_with_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
-where E: DeserializeOwned + Serialize, Payload: Serialize
-{
-    let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
-
-    side_effect_error(status);
-
-    resp
-}
-pub async fn api_with_auth_empty_status<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
-where E: DeserializeOwned + Serialize, Payload: Serialize
-{
-    let csrf = load_csrf_token().unwrap_ji();
-    
-    let (url, data) = api_get_query(endpoint, method, data);
-
-    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
-        .await
-        .unwrap_ji();
-
-
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(()), status)
-    } else {
-        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
-    }
-}
 
 //really just used with login - see https://datatracker.ietf.org/doc/html/rfc7617#section-2
 pub async fn api_with_basic_token<T, E, Payload>(endpoint: &str, user_id:&str, password:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
