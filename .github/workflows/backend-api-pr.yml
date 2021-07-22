@@ -80,7 +80,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: check out repo
+        uses: actions/checkout@v2
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -105,4 +106,4 @@ jobs:
         env: 
           DATABASE_URL: postgres://postgres:password@localhost
           SQLX_OFFLINE: 1
-          GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
+          TEST_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_TEST }}
