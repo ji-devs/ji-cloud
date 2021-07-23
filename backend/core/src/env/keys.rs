@@ -46,7 +46,7 @@ pub mod email {
     pub const DISABLE: &str = "SENDGRID_DISABLE_LOCAL";
 
     /// Sendgrid / email client api key.
-    // Is optional. If missing, all mailing services will be disabled,
+    /// Is optional. If missing, all mailing services will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub const API_KEY: &str = "SENDGRID_API_KEY";
 

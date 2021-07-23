@@ -5,7 +5,10 @@ use crate::{
     token::{check_login_token, SessionClaims, SessionMask},
 };
 use actix_http::error::BlockingError;
-use actix_web::{cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage};
+use actix_http::Payload;
+use actix_web::{
+    cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
+};
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{
     password_hash::{Encoding, SaltString},
@@ -24,13 +27,13 @@ use sqlx::postgres::PgPool;
 use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
 
-fn token_query(query_string: &str) -> Option<String> {
+fn token_from_query(query_string: &str) -> Option<String> {
     serde_urlencoded::from_str::<SessionTokenQuery>(query_string)
         .map(|it| it.access_token)
         .unwrap_or(None)
 }
 
-fn token_header(headers: &HeaderMap) -> Option<String> {
+fn token_from_header(headers: &HeaderMap) -> Option<String> {
     let parse_for_token = |header: &str| -> Option<String> {
         let mut it = header.split(" ");
 
@@ -105,7 +108,8 @@ impl FromRequest for TokenUser {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
@@ -233,7 +237,8 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
@@ -353,7 +358,8 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let token = token_query(req.query_string()).or_else(|| token_header(req.headers()));
+        let token =
+            token_from_query(req.query_string()).or_else(|| token_from_header(req.headers()));
 
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
@@ -489,5 +495,39 @@ fn blocking_error(err: BlockingError<Either<BasicError, anyhow::Error>>) -> acti
         BlockingError::Canceled => crate::error::ise(anyhow::anyhow!("Thread pool is gone")),
         BlockingError::Error(Either::B(e)) => crate::error::ise(e),
         BlockingError::Error(Either::A(e)) => e.into(),
+    }
+}
+
+#[derive(Apiv2Security)]
+#[openapi(
+    origin,
+    alias = "origin",
+    in = "header",
+    name = "Request Origin",
+    description = "Domain of cross-origin requestor"
+)]
+pub struct RequestOrigin {
+    pub origin: Option<String>,
+}
+
+impl FromRequest for RequestOrigin {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        let origin: Option<String> = req
+            .headers()
+            .get("Origin")
+            .map(|it| it.to_str().ok())
+            .flatten()
+            .map(ToOwned::to_owned);
+
+        async move {
+            let origin = origin;
+
+            Ok(Self { origin })
+        }
+        .boxed()
+        .into()
     }
 }

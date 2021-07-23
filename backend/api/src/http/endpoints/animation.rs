@@ -14,6 +14,7 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
+use crate::extractor::RequestOrigin;
 use crate::service::storage;
 use crate::{
     db, error,
@@ -104,6 +105,7 @@ async fn upload(
     gcs: ServiceData<storage::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
+    origin: RequestOrigin,
     req: Json<<animation::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<animation::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
@@ -133,6 +135,7 @@ async fn upload(
             MediaLibrary::Global,
             id.0,
             FileKind::AnimationGif,
+            origin,
         )
         .await?;
 

@@ -4,8 +4,6 @@ mod tag;
 use http::StatusCode;
 use serde_json::json;
 use shared::domain::{image::ImageId, CreateResponse};
-use std::io;
-use std::io::prelude::*;
 use uuid::Uuid;
 
 use crate::{
@@ -20,7 +18,7 @@ async fn create(
     categories: &[Uuid],
     tags: &[Uuid],
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -89,7 +87,7 @@ async fn create_with_meta() -> anyhow::Result<()> {
 }
 
 async fn create_error(kind: &str, id: &str) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -152,12 +150,15 @@ async fn create_with_tags_error() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(&[
-        Fixture::User,
-        Fixture::MetaKinds,
-        Fixture::Image,
-        Fixture::MetaImage,
-    ])
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::MetaKinds,
+            Fixture::Image,
+            Fixture::MetaImage,
+        ],
+        &[],
+    )
     .await;
 
     let port = app.port();
@@ -191,7 +192,7 @@ async fn get_metadata() -> anyhow::Result<()> {
 // todo: delete: edge case (never uploaded, should work even without s3), missing algolia
 
 async fn update(req: &serde_json::Value) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -257,7 +258,7 @@ async fn update_tags() -> anyhow::Result<()> {
 async fn upload_with_url() -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/ji-logo.png").to_vec();
 
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -294,7 +295,7 @@ async fn upload_with_url() -> anyhow::Result<()> {
 #[ignore]
 #[actix_rt::test]
 async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
 
     let port = app.port();
 
@@ -343,10 +344,10 @@ async fn create_media_and_upload_with_url() -> anyhow::Result<()> {
 
     let resp: shared::domain::image::ImageUploadResponse = resp.json().await?;
 
-    let url = resp.session_uri;
+    let _url = resp.session_uri;
 
     // perform upload in single chunk
-    let resp = client;
+    let _resp = client;
 
     Ok(())
 }

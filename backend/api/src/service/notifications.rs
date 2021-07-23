@@ -54,7 +54,7 @@ pub struct MessageRequest {
 }
 
 impl MessageRequest {
-    pub fn with_data(target: MessageTarget, data: HashMap<String, String>) -> Self {
+    pub fn with_data(target: MessageTarget, data: serde_json::Value) -> Self {
         Self {
             validate_only: false,
             message: FirebaseCloudMessage {
@@ -63,5 +63,30 @@ impl MessageRequest {
                 target,
             },
         }
+    }
+}
+
+pub struct RequestBuilder {
+    request: MessageRequest, // make this a Result, consumed during build()
+}
+
+impl RequestBuilder {
+    pub fn named(&mut self, name: String) -> &mut RequestBuilder {
+        self.request.message.name = Some(name);
+        self
+    }
+
+    pub fn target(&mut self, target: MessageTarget) -> &mut RequestBuilder {
+        self.request.message.target = target;
+        self
+    }
+
+    pub fn json_data<T: Serialize>(&mut self, data: serde_json::Value) -> &mut RequestBuilder {
+        self.request.message.data = data;
+        self
+    }
+
+    pub fn build(self) -> MessageRequest {
+        self.request
     }
 }

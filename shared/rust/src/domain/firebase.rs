@@ -1,7 +1,21 @@
 //! TODO this
 
+use crate::media::MediaLibrary;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
+/// Notification to firebase indicating completed media processing status
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub struct MediaProcessedNotification {
+    /// The media library that the media item is from.
+    pub library: MediaLibrary,
+    /// The content type of the media item.
+    pub content_type: String,
+    /// Time when processing was completed. Might be slightly different from which is fetched as a
+    /// part of the image metadata.
+    pub processed_at: DateTime<Utc>,
+}
 
 /// https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages
 #[derive(Deserialize, Serialize)]
@@ -9,7 +23,7 @@ pub struct FirebaseCloudMessage {
     /// Name of the message.
     pub name: Option<String>,
     /// Data field.
-    pub data: HashMap<String, String>,
+    pub data: serde_json::Value,
     /// The target of the message, one of `Token`, `Topic`, or `Condition`
     #[serde(flatten)]
     pub target: MessageTarget,

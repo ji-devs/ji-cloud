@@ -8,7 +8,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn get_all() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -34,7 +34,7 @@ async fn get_all() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -77,7 +77,7 @@ async fn update() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -112,7 +112,7 @@ async fn delete() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 

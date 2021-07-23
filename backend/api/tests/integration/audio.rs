@@ -12,7 +12,7 @@ use crate::{
 #[ignore]
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -46,12 +46,15 @@ async fn create() -> anyhow::Result<()> {
 #[ignore]
 #[actix_rt::test]
 async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(&[
-        Fixture::User,
-        Fixture::Audio,
-        Fixture::MetaKinds,
-        Fixture::MetaAudio,
-    ])
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::Audio,
+            Fixture::MetaKinds,
+            Fixture::MetaAudio,
+        ],
+        &[],
+    )
     .await;
 
     let port = app.port();

@@ -7,7 +7,7 @@ use shared::domain::image::tag::{ImageTagCreateRequest, ImageTagUpdateRequest};
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -36,7 +36,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -60,7 +60,7 @@ async fn create_conflict() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn list() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -87,7 +87,7 @@ async fn list() -> anyhow::Result<()> {
 }
 
 async fn update(index: i16, req: ImageTagUpdateRequest) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -171,7 +171,7 @@ async fn update_only_index() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_conflict() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 
@@ -209,7 +209,7 @@ async fn update_conflict() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Image, Fixture::MetaKinds], &[]).await;
 
     let port = app.port();
 

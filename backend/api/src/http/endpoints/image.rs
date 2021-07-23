@@ -18,7 +18,7 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self, ServiceKind},
-    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
+    extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
     s3, service,
     service::ServiceData,
 };
@@ -72,6 +72,7 @@ async fn upload(
     gcs: ServiceData<service::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
+    origin: RequestOrigin,
     req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,
 ) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
@@ -101,6 +102,7 @@ async fn upload(
             MediaLibrary::Global,
             id.0,
             FileKind::ImagePng(PngImageFile::Original),
+            origin,
         )
         .await?;
 

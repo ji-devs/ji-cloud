@@ -156,11 +156,11 @@ impl std::str::FromStr for FileKind {
 
 /// FCM Data Message format for signalling processing completion.
 ///
-///
+/// Contains the information necessary to find the media from the GCS project.
 #[derive(Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct MediaKey {
-    ///
+    /// Media library the
     pub media_library: MediaLibrary,
     /// The id of the media
     pub id: Uuid,

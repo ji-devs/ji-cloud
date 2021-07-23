@@ -13,7 +13,8 @@ pub(crate) struct GoogleSecretResponsePayload {
     pub data: String,
 }
 
-async fn get_google_token_from_credentials(
+/// Attemps to fetch the oauth2 token given a credentials file.
+pub async fn get_google_token_from_credentials(
     credentials: ServiceAccountKey,
 ) -> anyhow::Result<AccessToken> {
     let token = ServiceAccountAuthenticator::builder(credentials)

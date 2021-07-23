@@ -14,7 +14,7 @@ mod module;
 
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -74,7 +74,7 @@ async fn create_default() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create_with_params() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -105,7 +105,7 @@ async fn create_with_params() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn clone() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -153,7 +153,7 @@ async fn clone() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -189,7 +189,7 @@ async fn get() -> anyhow::Result<()> {
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[actix_rt::test]
 async fn browse_simple() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -222,7 +222,7 @@ async fn browse_simple() -> anyhow::Result<()> {
 // todo: test-exhaustiveness: create a `JigBrowse` Fixture, actually test the cases (paging, jig count, etc)
 #[actix_rt::test]
 async fn browse_own_simple() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -257,7 +257,7 @@ async fn browse_own_simple() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn count() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::UserDefaultPerms, Fixture::Jig], &[]).await;
 
     let port = app.port();
 

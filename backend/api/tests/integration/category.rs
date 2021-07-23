@@ -12,7 +12,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -40,7 +40,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
     let port = app.port();
 
@@ -65,7 +65,7 @@ async fn get() -> anyhow::Result<()> {
 }
 
 async fn get_nested_categories(query: &GetCategoryRequest) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryNesting], &[]).await;
 
     let port = app.port();
 
@@ -141,7 +141,7 @@ async fn nested_exact() -> anyhow::Result<()> {
 async fn upgdate_ordering() -> anyhow::Result<()> {
     let category_three = "81c4796a-e883-11ea-93f0-df2484ab6b11";
 
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
     let port = app.port();
 
@@ -206,7 +206,7 @@ async fn upgdate_ordering() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
     let port = app.port();
 
@@ -243,7 +243,7 @@ async fn delete() -> anyhow::Result<()> {
 }
 
 async fn update(id: Uuid, body: &serde_json::Value) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::CategoryOrdering], &[]).await;
 
     let port = app.port();
 
