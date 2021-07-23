@@ -2,7 +2,6 @@ use core::settings::FirebaseCloudMessageSettings;
 use reqwest::{self, header, StatusCode};
 use serde::Serialize;
 use shared::domain::firebase::{FirebaseCloudMessage, MessageTarget};
-use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Client {

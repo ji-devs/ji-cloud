@@ -2,7 +2,7 @@
 
 use crate::service::notifications::MessageRequest;
 use crate::{error, service};
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use shared::{
     domain::{
         animation::AnimationKind,
@@ -15,6 +15,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn process_image(db: &PgPool, s3: &crate::s3::Client, id: Uuid) -> anyhow::Result<bool> {
+    log::info!("Processing image {}", id);
+
     let mut txn = db.begin().await?;
 
     let kind = sqlx::query!(
@@ -36,11 +38,14 @@ skip locked
     let kind = match kind {
         Some(row) => row,
         None => {
+            log::info!("image not found in database!");
+
             txn.rollback().await?;
             return Ok(false);
         }
     };
 
+    log::info!("downloading image for processing");
     let file = s3
         .download_media_for_processing(
             MediaLibrary::Global,
@@ -63,6 +68,7 @@ skip locked
     };
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
+        log::info!("Running resizer");
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
         Ok(crate::image_ops::regenerate_images(&original, kind)?)
     })
@@ -72,6 +78,7 @@ skip locked
     let (resized, thumbnail) = match processed {
         Ok(it) => it,
         Err(error::Upload::InvalidMedia) => {
+            log::info!("invalid media");
             sqlx::query!("update image_upload set processed_at = now(), processing_result = false where image_id = $1", id)
                 .execute(&mut txn)
                 .await?;
