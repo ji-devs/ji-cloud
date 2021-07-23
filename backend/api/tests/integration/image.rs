@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
+    service::Service,
 };
 
 async fn create(
@@ -258,7 +259,11 @@ async fn update_tags() -> anyhow::Result<()> {
 async fn upload_with_url() -> anyhow::Result<()> {
     let file: Vec<u8> = include_bytes!("../../fixtures/ji-logo.png").to_vec();
 
-    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+    let app = initialize_server(
+        &[Fixture::User, Fixture::Image],
+        &[Service::GoogleCloudStorage],
+    )
+    .await;
 
     let port = app.port();
 

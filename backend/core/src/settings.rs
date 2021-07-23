@@ -579,7 +579,7 @@ impl SettingsManager {
 
         let project_id = Some(self.project_id.clone());
 
-        let storage_service_name = Some(config::EVENTARC_STORAGE_SERVICE_NAME.to_owned());
+        let storage_service_name = Some(config::EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
 
         let media_uploaded_topic = match self.remote_target.google_eventarc_media_uploaded_topic() {
             Some(endpoint) => Some(endpoint.to_string()),

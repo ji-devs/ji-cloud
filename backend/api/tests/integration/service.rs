@@ -1,10 +1,14 @@
 use config::RemoteTarget;
 use core::env::req_env;
-use core::settings::EmailClientSettings;
-use ji_cloud_api::s3;
-use ji_cloud_api::service::{mail, storage};
+use core::settings::{EmailClientSettings, GoogleCloudStorageSettings};
+use futures::future::Remote;
+use ji_cloud_api::{
+    s3,
+    service::{mail, storage},
+};
+use std::hash::Hash;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(dead_code)] // temp
 pub enum Service {
     S3,
@@ -85,33 +89,41 @@ impl TestServicesSettings {
         Option<storage::Client>,
         Option<ji_cloud_api::algolia::Client>,
     ) {
-        let mail = match services.iter().any(|&it| it == Service::Email) {
-            true => {
-                log::info!("adrenochrome");
-                self.create_test_mail_client().await
-            }
+        let services: std::collections::HashSet<&Service> = services.into_iter().collect();
+
+        let mail = match services.contains(&Service::Email) {
+            true => self.create_test_mail_client().await,
             false => None,
         };
 
-        // todo once s3, algolia, storage tests are ready
+        let gcs = match services.contains(&Service::GoogleCloudStorage) {
+            true => self.create_test_gcs_client(),
+            false => None,
+        };
 
-        (mail, None, None, None)
+        // todo: other clients
+
+        (mail, None, gcs, None)
     }
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
-        log::info!("Starting email client");
+        let api_key = self
+            .get_gcp_managed_secret(Self::TEST_SENDGRID_API_KEY)
+            .await
+            .ok();
 
-        let api_key = self.get_gcp_secret(Self::TEST_SENDGRID_API_KEY).await.ok();
-
-        let sender_email = self.get_gcp_secret(Self::TEST_SENDER_EMAIL).await.ok();
+        let sender_email = self
+            .get_gcp_managed_secret(Self::TEST_SENDER_EMAIL)
+            .await
+            .ok();
 
         let signup_verify_template = self
-            .get_gcp_secret(Self::TEST_SIGNUP_VERIFY_TEMPLATE)
+            .get_gcp_managed_secret(Self::TEST_SIGNUP_VERIFY_TEMPLATE)
             .await
             .ok();
 
         let password_reset_template = self
-            .get_gcp_secret(Self::TEST_SIGNUP_PASSWORD_RESET_TEMPLATE)
+            .get_gcp_managed_secret(Self::TEST_SIGNUP_PASSWORD_RESET_TEMPLATE)
             .await
             .ok();
 
@@ -129,7 +141,7 @@ impl TestServicesSettings {
 
         let client = mail::Client::new(settings);
 
-        log::info!("Test mail client created");
+        log::info!("Test mail client created successfully");
 
         Some(client)
     }
@@ -143,7 +155,7 @@ impl TestServicesSettings {
         }
     }
 
-    async fn get_gcp_secret(&self, secret_name: &str) -> anyhow::Result<String> {
+    async fn get_gcp_managed_secret(&self, secret_name: &str) -> anyhow::Result<String> {
         core::google::get_secret(
             self.oauth2_token.as_ref().unwrap(),
             &*self.project_id,
@@ -152,8 +164,22 @@ impl TestServicesSettings {
         .await
     }
 
-    // TODO: this
-    // fn create_test_gcs_client(&self) -> Option<ji_cloud_api::google::storage::Client> {
-    //
-    // }
+    fn create_test_gcs_client(&self) -> Option<storage::Client> {
+        let settings = GoogleCloudStorageSettings {
+            oauth2_token: "redacted".to_owned(),
+            processing_bucket: RemoteTarget::Local
+                .s3_processing_bucket()
+                .unwrap()
+                .to_owned(),
+            media_bucket: RemoteTarget::Local.s3_bucket().unwrap().to_owned(),
+        };
+
+        return None;
+
+        let client = storage::Client::new(settings);
+
+        log::info!("Test GCS client created successfully");
+
+        client.ok()
+    }
 }

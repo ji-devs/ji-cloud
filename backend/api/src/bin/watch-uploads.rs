@@ -212,11 +212,13 @@ async fn process_uploaded_media_trigger(
     if event_source.service_name != event_arc.storage_service_name()
         || event_source.project_id != event_arc.project_id()
     {
+        log::warn!("Bad event source: {:?}", event_source);
         return Err(Error::InvalidEventSource);
     }
 
     let event_data: audit_log::Data = event.try_decode_event_payload()?;
     if event_data.resource.labels.bucket_name != s3.processing_bucket() {
+        log::warn!("Bad event data: {:?}", event_data);
         return Err(Error::InvalidEventSource);
     }
 
@@ -241,6 +243,8 @@ async fn process_uploaded_media_trigger(
     };
 
     if res == true {
+        log::info!("Finalizing upload...");
+
         uploads::finalize_upload(
             &fcm,
             event_resource.library,
