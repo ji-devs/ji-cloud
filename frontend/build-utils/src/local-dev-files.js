@@ -44,14 +44,13 @@ if(ALLOWED_APP_NAMES.indexOf(APP_NAME) === -1) {
     process.exit(1);
 }
 //HTML
-const srcPath = path.resolve("./dev-index.html");
-
 const destDir = `../apps/dist/${APP_NAME}`;
-const destPath = path.resolve(`${destDir}/index.html`);
-
 fs.ensureDirSync(path.resolve(destDir));
-fs.readFile(srcPath, 'utf-8')
-    .then(html => html.replace(/{{APP_NAME}}/g, APP_NAME))
-    .then(html => fs.writeFile(destPath, html))
-    .catch(err => console.error(err));
 
+const srcPathIndex = path.resolve("./dev-index.html");
+const destPathIndex = path.resolve(`${destDir}/index.html`);
+
+fs.readFile(srcPathIndex, 'utf-8')
+    .then(html => html.replace(/{{APP_NAME}}/g, APP_NAME))
+    .then(html => fs.writeFile(destPathIndex, html))
+    .catch(err => console.error(err));

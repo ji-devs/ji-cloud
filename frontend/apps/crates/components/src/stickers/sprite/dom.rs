@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 use futures_signals::{map_ref, signal::{Always, Mutable, ReadOnlyMutable, Signal, SignalExt, always}, signal_vec::SignalVecExt};
 use super::{
     state::{Sprite, width_signal, height_signal},
-    super::{dom::StickerRawRenderOptions, state::{Stickers, AsSticker}},
+    super::{dom::BaseRawRenderOptions, state::{Stickers, AsSticker}},
     actions::load_and_render,
     menu::dom::render_sticker_sprite_menu
 };
@@ -18,6 +18,10 @@ use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Tr
 //this is both faster for performance, theoretically, and simpler to use the same
 //code for playing and editing
 
+#[derive(Default)]
+pub struct SpriteRawRenderOptions {
+    pub base: BaseRawRenderOptions,
+}
 
 pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
     html!("empty-fragment", {
@@ -74,26 +78,26 @@ pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: Read
 
 }
 
-pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<StickerRawRenderOptions>) -> Dom {
+pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRenderOptions>) -> Dom {
     let src:Mutable<Option<String>> = Mutable::new(None);
     let RawSprite { image, effects, flip_horizontal, flip_vertical, ..} = sprite;
 
     let opts = opts.unwrap_or_default();
 
-    let parent = opts.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+    let parent = opts.base.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
 
-    let size = opts.size.unwrap_or_else(|| Mutable::new(None));
+    let size = opts.base.size.unwrap_or_else(|| Mutable::new(None));
 
     let transform = sprite.transform.clone();
 
-    let transform_override = opts.transform_override;
+    let transform_override = opts.base.transform_override;
 
     let transform_signal = DefaultSignal::new(
         transform.clone(),
         transform_override.map(|t| t.get_signal(transform))
     );
 
-    let mixin = opts.mixin;
+    let mixin = opts.base.mixin;
 
     parent
         .style_signal("width", width_signal(size.signal_cloned()))

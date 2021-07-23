@@ -9,21 +9,23 @@ use futures_signals::{
     signal_vec::SignalVecExt,
 };
 use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
-use crate::{
-    text_editor::dom::render_wysiwyg, 
-    transform::{
+use crate::{text_editor::dom::render_wysiwyg, transform::{
         dom::render_transform,
         events::Move as TransformMove,
         state::{TransformState, Action as TransformAction},
-    }
-};
+    }};
 use super::{
     state::Text,
-    super::{dom::StickerRawRenderOptions, state::{Stickers, AsSticker}},
+    super::{dom::BaseRawRenderOptions, state::{Stickers, AsSticker}},
     menu::dom::render_sticker_text_menu
 };
 use web_sys::{DomRect, HtmlElement};
 
+
+#[derive(Default)]
+pub struct TextRawRenderOptions {
+    pub base: BaseRawRenderOptions,
+}
 
 pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
     let get_visible_signals = || map_ref! {
@@ -112,18 +114,18 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
 //The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
 //The idea is that the sticker sets styles on the parent and then appends itself
 //So the parent gets transformed etc.
-pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<StickerRawRenderOptions>) -> Dom {
+pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<TextRawRenderOptions>) -> Dom {
     const COORDS_IN_CENTER:bool = true;
 
     let opts = opts.unwrap_or_default();
 
-    let parent = opts.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+    let parent = opts.base.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
 
-    let size = opts.size.unwrap_or_else(|| Mutable::new(None));
+    let size = opts.base.size.unwrap_or_else(|| Mutable::new(None));
 
     let transform = text.transform.clone();
 
-    let transform_override = opts.transform_override;
+    let transform_override = opts.base.transform_override;
 
     let get_transform_signal = clone!(transform, transform_override => move || {
         DefaultSignal::new(
@@ -143,7 +145,7 @@ pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<S
         size.signal_cloned(), 
     );
 
-    let mixin = opts.mixin;
+    let mixin = opts.base.mixin;
 
     html!("empty-fragment", {
         .child(

@@ -38,4 +38,5 @@ pub mod audio_mixer;
 pub mod theme_selector;
 #[cfg(feature = "collision")]
 pub mod collision;
-
+#[cfg(feature = "firebase")]
+pub mod firebase;

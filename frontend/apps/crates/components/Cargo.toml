@@ -96,6 +96,7 @@ audio_mixer = []
 theme_selector = []
 module_groups_cards = []
 collision = []
+firebase = []
 
 default = ["all"]
 all= [
@@ -119,4 +120,5 @@ all= [
     "theme_selector",
     "module_groups_cards",
     "collision",
+    "firebase",
 ]

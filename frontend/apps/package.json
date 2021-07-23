@@ -13,6 +13,7 @@
     "@rollup/plugin-node-resolve": "^13.0.2",
     "@wasm-tool/rollup-plugin-rust": "1.0.5",
     "cross-env": "^7.0.3",
+    "firebase": "^9.0.0-beta.6",
     "rollup": "^2.53.2",
     "vmsg": "^0.4.0"
   },

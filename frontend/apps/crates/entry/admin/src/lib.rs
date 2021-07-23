@@ -26,7 +26,9 @@ mod header;
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
-    foo();
+
+    components::firebase::listen_for_upload_image("foo");
+
     let settings = utils::settings::init();
 
     let r = Rc::new(router::Router::new());
@@ -35,20 +37,6 @@ pub async fn main_js() {
 
     std::mem::forget(Box::new(r));
 }
-
-
-cfg_if! {
-    if #[cfg(feature = "quiet")] {
-        fn foo() {
-            log::info!("quiet MODE!");
-        }
-    } else {
-        fn foo() {
-            log::info!("NOT quiet MODE!");
-        }
-    }
-}
-
 
 // enable logging and panic hook only during debug builds
 cfg_if! {

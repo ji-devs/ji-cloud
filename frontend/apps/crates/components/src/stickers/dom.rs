@@ -11,10 +11,12 @@ use futures_signals::{
 use super::{
     state::*,
     sprite::dom::{
+        SpriteRawRenderOptions,
         render_sticker_sprite, 
         render_sticker_sprite_raw, 
     }, 
     text::dom::{
+        TextRawRenderOptions,
         render_sticker_text, 
         render_sticker_text_raw, 
     }
@@ -29,8 +31,30 @@ pub fn mixin_sticker_button(dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlEleme
         .style("-webkit-user-select", "none")
 }
 
+pub enum StickerRawRenderOptions {
+    Sprite(SpriteRawRenderOptions),
+    Text(TextRawRenderOptions),
+}
+
+impl StickerRawRenderOptions {
+    pub fn into_sprite_unchecked(self) -> SpriteRawRenderOptions {
+        match self {
+            Self::Sprite(inner) => inner,
+            _ => panic!("not a sprite!")
+        }
+    }
+    pub fn into_text_unchecked(self) -> TextRawRenderOptions {
+        match self {
+            Self::Text(inner) => inner,
+            _ => panic!("not a text!")
+        }
+    }
+}
+
+
+
 #[derive(Default)]
-pub struct StickerRawRenderOptions {
+pub struct BaseRawRenderOptions {
     //For sharing the size setting
     //if not supplied then it will just be created internally
     pub size: Option<Mutable<Option<(f64, f64)>>>,
@@ -49,11 +73,7 @@ pub struct StickerRawRenderOptions {
     pub parent: Option<DomBuilder<HtmlElement>>
 }
 
-impl StickerRawRenderOptions {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
+impl BaseRawRenderOptions {
     pub fn set_size(&mut self, size: Mutable<Option<(f64, f64)>>) {
         self.size = Some(size);
     }
@@ -68,6 +88,7 @@ impl StickerRawRenderOptions {
         self.parent = Some(parent);
     }
 }
+
 
 #[derive(Clone)]
 pub enum TransformOverride {
@@ -142,8 +163,18 @@ where
     stickers
         .iter()
         .map(|sticker| {
-            let mut opts = StickerRawRenderOptions::new();
-            opts.set_mixin(mixin.clone());
+            let opts = match sticker {
+                RawSticker::Sprite(_) => {
+                    let mut opts = SpriteRawRenderOptions::default();
+                    opts.base.set_mixin(mixin.clone());
+                    StickerRawRenderOptions::Sprite(opts)
+                },
+                RawSticker::Text(_) => {
+                    let mut opts = TextRawRenderOptions::default();
+                    opts.base.set_mixin(mixin.clone());
+                    StickerRawRenderOptions::Text(opts)
+                },
+            };
 
             render_sticker_raw(&sticker, theme_id, Some(opts))
         })
@@ -152,8 +183,8 @@ where
 
 pub fn render_sticker_raw(sticker:&RawSticker, theme_id: ThemeId, opts: Option<StickerRawRenderOptions>) -> Dom {
     match sticker {
-        RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, opts),
-        RawSticker::Text(text) => render_sticker_text_raw(text, theme_id, opts),
+        RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, opts.map(|opts| opts.into_sprite_unchecked())),
+        RawSticker::Text(text) => render_sticker_text_raw(text, theme_id, opts.map(|opts| opts.into_text_unchecked())),
     }
 }
 
