@@ -138,6 +138,7 @@ async fn verify_email() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[ignore]
 #[actix_rt::test]
 async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     if !service::email_test_guard() {
@@ -241,6 +242,7 @@ async fn basic_auth_flow_no_login() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[ignore]
 #[actix_rt::test]
 async fn basic_auth_flow() -> anyhow::Result<()> {
     if !service::email_test_guard() {
