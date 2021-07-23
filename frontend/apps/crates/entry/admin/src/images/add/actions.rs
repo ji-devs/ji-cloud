@@ -11,6 +11,7 @@ use dominator::clone;
 use super::state::*;
 use std::rc::Rc;
 use web_sys::File;
+use components::firebase;
 
 pub fn on_change(state: Rc<State>, value: String) {
     match value.as_ref() {
@@ -54,15 +55,32 @@ pub fn on_file(state: Rc<State>, file: File) {
                 match api_with_auth::<ImageUploadResponse, EmptyError, _>(&path, endpoints::image::Upload::METHOD, Some(req)).await {
                     Ok(resp) => {
                         let ImageUploadResponse {session_uri} = resp;
-                        
+                      
+                        //Before we upload, setup the firestore listener 
+                        //so we get all the status updates
+                        *state.upload_listener.borrow_mut() = Some(firebase::add_upload_listener(&id.0.to_string(), clone!(state => move |status| {
+                            if status.ready {
+                                log::info!("READY!");
+                                state.upload_listener.borrow_mut().take();
+                                let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
+                                dominator::routing::go_to_url(&route);
+                            } else if status.processing {
+                                log::info!("{} has started processing, waiting to finalize...", id.0.to_string());
+                            } else {
+                                log::info!("{:?}", status);
+                            }
+                        })));
+
+                        //upload to GCS
                         match upload_file_gcs(&session_uri, &file).await {
                             Ok(_) => {
-                                log::info!("file uploaded!");
+                                log::info!("{} uploaded, waiting for processing to start...", id.0.to_string());
                             },
                             Err(_) => {
+                                //Something went wrong, clear the firestore listener
+                                state.upload_listener.borrow_mut().take();
                             },
                         }
-
                     },
 
                     Err(err) => {

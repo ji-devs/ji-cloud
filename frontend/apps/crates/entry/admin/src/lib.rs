@@ -27,7 +27,6 @@ mod header;
 pub async fn main_js() {
     setup_logger();
 
-    components::firebase::listen_for_upload_image("foo");
 
     let settings = utils::settings::init();
 

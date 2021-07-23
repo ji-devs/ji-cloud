@@ -1,16 +1,16 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase, ref, onValue} from "firebase/database";
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 
-let hasInit = false;
-
+let app;
 let analytics;
 let db;
 
 export function _init(target) {
-    if(hasInit) {
+    if(app != undefined) {
         return;
     }
+
     const config = target == "release" 
         ? {
               apiKey: "AIzaSyB1aDTWI5nez8SJe6oGp-o2LErxAEDSktQ",
@@ -32,24 +32,49 @@ export function _init(target) {
           appId: "1:735837525944:web:10e1fc18d5d10f04c3614d"
         };    
 
-    initializeApp(config);
-
-    analytics = getAnalytics();
-    db = getDatabase();
+    app = initializeApp(config);
+    analytics = getAnalytics(app);
+    db = getFirestore(app);
 
     console.log("firebase initialized! target:", target);
-
-    hasInit = true;
 }
 
-export function listenForUploadImage(id) {
-    console.log("listening for", 'media-upload-state/image/' + id + '/state');
+let uploadListeners = new Map();
+let uploadListenerCounter = 0;
 
-    const imageStateRef = ref(db, 'media-upload-state/image/' + id + '/state');
+export function addUploadListener(mediaId, listener) {
 
-    onValue(imageStateRef, (snapshot) => {
-        const data = snapshot.val();
-        console.log("Image state:", data);
-    });    
+    const listenerId = uploadListenerCounter++;
 
+    uploadListeners.set(listenerId, listener);
+
+    const ref = doc(db, "uploads", mediaId);
+
+    onSnapshot(ref, doc => {
+        if(uploadListeners.has(listenerId)) {
+            const onStatus = uploadListeners.get(listenerId);
+
+            const data = doc.data();
+
+            if(data == null) {
+                onStatus({
+                    ready: false,
+                    processing: false
+                });
+            } else {
+                onStatus({
+                    ready: data.ready === true,
+                    processing: data.processing === true
+                });
+            }
+        }
+    });
+
+    return listenerId;
+}
+
+export function removeUploadListener(listenerId) {
+    if(uploadListeners.has(listenerId)) {
+        uploadListeners.delete(listenerId);
+    } 
 }
