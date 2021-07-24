@@ -21,6 +21,9 @@ pub mod additional_resource;
 /// Endpoints for jig drafts.
 pub mod draft;
 
+/// Endpoints for jig codes.
+pub mod code;
+
 /// Get a JIG by ID.
 ///
 /// # Authorization

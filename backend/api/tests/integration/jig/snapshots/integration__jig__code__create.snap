@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig/code.rs
+expression: body
+
+---
+{
+  "code": 8672
+}
