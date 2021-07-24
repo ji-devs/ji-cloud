@@ -72,7 +72,7 @@ jobs:
           LOCAL_CDN_FRONTEND_DIR: ${{ github.workspace }}/frontend
       
       - name: install google cloud sdk
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}
