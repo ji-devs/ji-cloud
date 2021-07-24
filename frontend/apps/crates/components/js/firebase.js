@@ -39,42 +39,37 @@ export function _init(target) {
     console.log("firebase initialized! target:", target);
 }
 
-let uploadListeners = new Map();
-let uploadListenerCounter = 0;
+//Abortable Promise example: https://codepen.io/dakom/pen/LYyOvwV?editors=1111
+export function waitForUploadReady(mediaId, abortController) {
 
-export function addUploadListener(mediaId, listener) {
-
-    const listenerId = uploadListenerCounter++;
-
-    uploadListeners.set(listenerId, listener);
-
-    const ref = doc(db, "uploads", mediaId);
-
-    onSnapshot(ref, doc => {
-        if(uploadListeners.has(listenerId)) {
-            const onStatus = uploadListeners.get(listenerId);
-
-            const data = doc.data();
-
-            if(data == null) {
-                onStatus({
-                    ready: false,
-                    processing: false
-                });
-            } else {
-                onStatus({
-                    ready: data.ready === true,
-                    processing: data.processing === true
-                });
+    return new Promise((resolve, reject) => {
+        const ref = doc(db, "uploads", mediaId);
+        
+        if(abortController != null) {
+            abortController.signal.onabort = () => {
+                reject();
             }
         }
+
+        onSnapshot(ref, doc => {
+            if(abortController == null || !abortController.signal.aborted) {
+                const data = doc.data();
+                const status = data == null 
+                    ?  {
+                        ready: false,
+                        processing: false
+                    }
+                    : {
+                        ready: data.ready === true,
+                        processing: data.processing === true
+                    };
+
+                console.log(status);
+
+                if(status.ready) {
+                    resolve();
+                }
+            }
+        });
     });
-
-    return listenerId;
-}
-
-export function removeUploadListener(listenerId) {
-    if(uploadListeners.has(listenerId)) {
-        uploadListeners.delete(listenerId);
-    } 
 }
