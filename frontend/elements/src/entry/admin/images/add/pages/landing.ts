@@ -60,6 +60,7 @@ export class _ extends LitElement {
                         </label>
                     </div>
                 </div>
+                <slot></slot>
             </image-page>
         `;
     }
