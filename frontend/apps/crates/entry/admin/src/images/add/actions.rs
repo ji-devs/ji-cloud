@@ -46,6 +46,8 @@ pub fn on_file(state: Rc<State>, file: File) {
             Ok(resp) => {
                 let CreateResponse { id} = resp;
 
+                //TODO - abstract from here on in (given an id and file, upload)
+                //though need to think about where to put the closure
                 let req = ImageUploadRequest {
                     file_size: file.size() as usize
                 };
@@ -56,29 +58,20 @@ pub fn on_file(state: Rc<State>, file: File) {
                     Ok(resp) => {
                         let ImageUploadResponse {session_uri} = resp;
                       
-                        //Before we upload, setup the firestore listener 
-                        //so we get all the status updates
-                        *state.upload_listener.borrow_mut() = Some(firebase::add_upload_listener(&id.0.to_string(), clone!(state => move |status| {
-                            if status.ready {
-                                log::info!("READY!");
-                                state.upload_listener.borrow_mut().take();
-                                let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
-                                dominator::routing::go_to_url(&route);
-                            } else if status.processing {
-                                log::info!("{} has started processing, waiting to finalize...", id.0.to_string());
-                            } else {
-                                log::info!("{:?}", status);
-                            }
-                        })));
 
                         //upload to GCS
                         match upload_file_gcs(&session_uri, &file).await {
                             Ok(_) => {
                                 log::info!("{} uploaded, waiting for processing to start...", id.0.to_string());
+
+                                if firebase::wait_for_upload_ready(&id.0.to_string(), None).await {
+                                    let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
+                                    dominator::routing::go_to_url(&route);
+                                } else {
+                                    log::info!("NOPE, ABORTED OR ERROR!");
+                                }
                             },
                             Err(_) => {
-                                //Something went wrong, clear the firestore listener
-                                state.upload_listener.borrow_mut().take();
                             },
                         }
                     },

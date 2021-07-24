@@ -1,36 +1,28 @@
+use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use cfg_if::cfg_if;
-use serde::{Deserialize};
 use utils::prelude::*;
+use wasm_bindgen_futures::JsFuture;
+use awsm_web::loaders::helpers::AbortController;
+use std::future::Future;
 
-pub struct FirebaseListener {
-    pub id: usize,
-    pub closure: Closure<dyn FnMut(JsValue)>
-}
-impl Drop for FirebaseListener {
-    fn drop(&mut self) {
-        removeUploadListener(self.id);
-        log::info!("firebase listener #{} has dropped!", self.id);
-    }
-}
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct UploadStatus {
-    pub ready: bool,
-    pub processing: bool
-}
-
-// It is up to the caller to keep the listener valid 
-pub fn add_upload_listener(media_id:&str, mut on_status: impl FnMut(UploadStatus) + 'static) -> FirebaseListener {
+// If an AbortController is provided, then dropping it will cause the JS promise to reject and this
+// future will resolve with false
+// In all cases, when upload is completed, the Future will resolve with true
+pub fn wait_for_upload_ready(media_id:&str, abort_controller: Option<AbortController>) -> impl Future<Output = bool> {
     init();
 
-    let closure = Closure::new(move |status| {
-        on_status(serde_wasm_bindgen::from_value(status).unwrap_ji());
-    });
+    let promise = match abort_controller.as_ref() {
+        Some(abort_controller) => waitForUploadReady(media_id, Some(&*abort_controller)),
+        None => waitForUploadReady(media_id, None) 
+    };
 
-    let id = addUploadListener(media_id, &closure);
-
-    FirebaseListener { id, closure }
+    async move {
+        match JsFuture::from(promise).await {
+            Ok(_) => true,
+            Err(_) => false
+        }
+    }
 }
 
 
@@ -51,6 +43,5 @@ cfg_if::cfg_if! {
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
     fn _init(remote_target: &str);
-    fn addUploadListener(media_id: &str, on_ready: &Closure<dyn FnMut(JsValue)>) -> usize;
-    fn removeUploadListener(listener_id: usize);
+    fn waitForUploadReady(media_id: &str, abort_controller: Option<&web_sys::AbortController>) -> Promise;
 }
