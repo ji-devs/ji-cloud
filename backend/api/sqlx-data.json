@@ -247,26 +247,6 @@
       ]
     }
   },
-  "0ac36d2112d07f62bb717c238915a8d7741759a9d2c5faf421129d5480bbfdec": {
-    "query": "\nupdate user_profile\nset username               = coalesce($2, username),\n    over_18                = coalesce($3, over_18),\n    given_name             = coalesce($4, given_name),\n    family_name            = coalesce($5, family_name),\n    language               = coalesce($6, language),\n    locale                 = coalesce($7, locale),\n    timezone               = coalesce($8, timezone),\n    opt_into_edu_resources = coalesce($9, opt_into_edu_resources)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::bool is not null and $3 is distinct from over_18) or\n       ($4::text is not null and $4 is distinct from given_name) or\n       ($5::text is not null and $5 is distinct from family_name) or\n       ($6::text is not null and $6 is distinct from language) or\n       ($7::text is not null and $7 is distinct from locale) or\n       ($8::text is not null and $8 is distinct from timezone) or\n       ($9::bool is not null and $9 is distinct from opt_into_edu_resources) )\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Bool"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "query": "insert into user_email (user_id, email) values ($1, $2::text)",
     "describe": {
@@ -436,19 +416,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "1150af6395059759109a8e8200058064186a44dc8db4e6098dd1fa449e6a8e7f": {
-    "query": "\nupdate user_profile\nset location = $2\nwhere user_id = $1 and location is distinct from $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
@@ -884,6 +851,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "238a5718da032d40902cea9035d4d42177c0bf5ffca818b9372cb1bb2a0e336b": {
+    "query": "select jig_id as \"id!: JigId\" from jig_code where index = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id!: JigId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false
+      ]
     }
   },
   "2493076ad606463154fd13635bd6c37e9ef3044edc2ef2c0214cff99ed507200": {
@@ -1553,6 +1540,26 @@
         true,
         null,
         null
+      ]
+    }
+  },
+  "4e82705433b604e7925ef33d6ed8f760c397e205744f990345168c7bc01596b8": {
+    "query": "select index as \"index!: i16\" from jig_code where jig_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index!: i16",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },
@@ -2447,6 +2454,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "75f5caef8817e32480a0c43cb8a514a72119eba0d648c5ade88e705d77f09230": {
+    "query": "insert into jig_code (jig_id, index) values ($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      },
+      "nullable": []
     }
   },
   "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e": {
@@ -3403,24 +3423,6 @@
       ]
     }
   },
-  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
-    "query": "select token from \"session\" order by created_at limit 1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "token",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "b0abad8e6c605062d886f6f1e3dfd7aaab57f30c3615de97e484cd4c6645bba4": {
     "query": "\ninsert into jig_additional_resource (jig_id, url)\nvalues ($1, $2)\nreturning id\n        ",
     "describe": {
@@ -3531,26 +3533,6 @@
       },
       "nullable": [
         false
-      ]
-    }
-  },
-  "bc43edfc2dcbeea691560c655987b29f3a3c919223487912f63be464fec522a4": {
-    "query": "\nselect exists(select 1 from user_profile where user_id = $1 for update) as \"exists!\"\n    ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "exists!",
-          "type_info": "Bool"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -3711,6 +3693,26 @@
       ]
     }
   },
+  "bf285d5cdc79e81cac3469977323276f63b30258b5663d16de7b3fb94da80acb": {
+    "query": "select exists(select 1 from jig_code where jig_id=$1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "c0503b4756010f70f84bfc842758cc356568bcb7324b0c0a8454f49511300942": {
     "query": "insert into user_scope (user_id, scope) values ($1, $2)",
     "describe": {
@@ -3860,27 +3862,6 @@
       "nullable": []
     }
   },
-  "d8032d2eb89764dbd098df12c400d66030d32259400b2f539d60658605ca7648": {
-    "query": "\nselect count(*) as \"count!: i64\" \nfrom image_metadata\n        inner join image_upload on image_id = id \nwhere processing_result is not distinct from true \n    and (publish_at < now() is not distinct from $1 or $1 is null)\n    and (kind is not distinct from $2 or $2 is null)",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Int2"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "da24841a3eb28555d3242508c7be3a7c9f802ef0acb2328578ad0d137453cd44": {
     "query": "\ninsert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public,\n                 direction, display_score, theme, audio_background, audio_feedback_positive, audio_feedback_negative)\nselect display_name,\n       parents,\n       creator_id,\n       author_id,\n       language,\n       description,\n       $2,\n       false,\n       direction,\n       display_score,\n       theme,\n       audio_background,\n       audio_feedback_positive,\n       audio_feedback_negative       \nfrom jig\nwhere id = $1\nreturning id as \"id: JigId\"\n        ",
     "describe": {
@@ -3920,19 +3901,6 @@
       "nullable": [
         null
       ]
-    }
-  },
-  "dce1ba23b612bd8fa029a70a2e43b93f5158cbf0f24377b079e70d5d6c29a97c": {
-    "query": "\nupdate user_profile\nset organization = $2\nwhere user_id = $1 and organization is distinct from $2",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "dda8d8d2bc07da17016ae44616deda2fe94bf8a0db546e60b07200c95caa40f1": {
@@ -4271,6 +4239,26 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "f48faeb03b1a3f94308c075c38d25ec0495ded0eb3cd21e20980e0bb5c8e0609": {
+    "query": "select count(*) as \"count!: i64\" from image_metadata where publish_at < now() is not distinct from $1 or $1 is null",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "f4d6632fc60abf4351be966b89b2490a3c3aef6f9f59d9ab4ea2eecc68d8cb72": {

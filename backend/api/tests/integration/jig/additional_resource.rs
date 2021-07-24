@@ -1,9 +1,8 @@
-use http::StatusCode;
-
 use crate::{
     fixture::Fixture,
     helpers::{initialize_server, LoginExt},
 };
+use http::StatusCode;
 use shared::domain::jig::additional_resource::AdditionalResourceCreateRequest;
 
 #[actix_rt::test]

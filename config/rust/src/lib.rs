@@ -36,6 +36,8 @@ pub const DB_INSTANCE_RELEASE: &str = "ji-cloud:europe-west1:ji-cloud-002";
 
 pub const MEDIA_UPLOAD_TIMEOUT_SECS: u64 = 300;
 
+pub const JIG_CODE_NUMBER_OF_DIGITS: u32 = 4; // 4 means 0-9999 are possible
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum RemoteTarget {
     Local,

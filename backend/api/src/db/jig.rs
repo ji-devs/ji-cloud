@@ -19,6 +19,8 @@ use uuid::Uuid;
 
 use crate::error;
 
+pub(crate) mod code;
+
 pub async fn create(
     pool: &PgPool,
     display_name: &str,

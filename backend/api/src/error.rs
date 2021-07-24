@@ -693,3 +693,60 @@ impl Into<actix_web::Error> for MediaProcessing {
         }
     }
 }
+
+// TODO
+#[api_v2_errors(code = 400, code = 404)]
+pub enum JigCode {
+    InternalServerError(anyhow::Error),
+    ResourceNotFound,
+    Conflict,
+    AllCodesUsed,
+    Forbidden,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for JigCode {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for JigCode {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+
+            Self::Conflict => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "A code already exists for this jig".to_owned(),
+            )
+            .into(),
+
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource not found".to_owned(),
+            )
+            .into(),
+
+            Self::AllCodesUsed => BasicError::with_message(
+                http::StatusCode::UNPROCESSABLE_ENTITY,
+                "Maximum number of possible codes exist!".to_owned(),
+            )
+            .into(),
+
+            Self::Forbidden => BasicError::with_message(
+                http::StatusCode::FORBIDDEN,
+                "User does not have permissions for this jig".to_owned(),
+            )
+            .into(),
+        }
+    }
+}
+
+impl From<Auth> for JigCode {
+    fn from(err: Auth) -> Self {
+        match err {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
+}

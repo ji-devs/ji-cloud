@@ -18,9 +18,9 @@ use super::ApiEndpoint;
 /// Standard
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent jig doesn't exist.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or the parent jig doesn't exist.
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
@@ -33,14 +33,14 @@ impl ApiEndpoint for Get {
 /// Add an additional resource URL to a JIG.
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the request is missing/invalid.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the request is missing/invalid.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = AdditionalResourceCreateRequest;
@@ -53,16 +53,15 @@ impl ApiEndpoint for Create {
 /// Update an additional resource URL for a
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
-///
-/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
+/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = AdditionalResourceUpdateRequest;
@@ -75,16 +74,15 @@ impl ApiEndpoint for Update {
 /// Delete an additional resource URL from a JIG
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+///
+/// * Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
-///
-/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
+/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

@@ -1,6 +1,7 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
+pub mod code;
 pub mod module;
 
 use std::{fmt, str::FromStr};
