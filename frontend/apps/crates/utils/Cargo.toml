@@ -11,7 +11,7 @@ shared = {path = "../../../../shared/rust"}
 config = {path = "../../../../config/rust", features = ["wasm"]}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
 thiserror = "1.0.26"
-futures = "0.3.15"
+futures = "0.3.16"
 itertools = "0.10.1"
 async-trait = "0.1.50"
 serde = { version = "1.0.126", features = ["derive"] }
@@ -60,8 +60,8 @@ web-sys = { version = "0.3.51", features = [
     'ImageData',
     'Blob'
 ] }
-awsm_web = { version = "0.19.2", features = ["loaders", "image", "serde_iso", "canvas"] }
-anyhow = "1.0.41"
+awsm_web = { version = "0.22.0", features = ["loaders", "image", "serde_iso", "canvas"] }
+anyhow = "1.0.42"
 rgb = "0.8.27"
 
 [features]
