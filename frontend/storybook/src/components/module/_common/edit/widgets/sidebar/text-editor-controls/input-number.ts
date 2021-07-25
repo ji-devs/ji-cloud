@@ -7,14 +7,10 @@ export default {
 
 interface Args {
     value: number,
-    min: number,
-    max: number,
 }
 
 const DEFAULT_ARGS: Args = {
     value: 3,
-    min: -2,
-    max: 4,
 }
 
 export const InputNumber = (props?: Partial<Args>) => {
