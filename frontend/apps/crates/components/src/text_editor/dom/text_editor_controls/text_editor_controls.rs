@@ -69,8 +69,6 @@ pub fn render(state: Rc<State>) -> Dom {
             }),
             html!("text-editor-controls-input-number", {
                 .property("slot", "font-size")
-                .property("min", 1)
-                .property("max", 50)
                 .property_signal("value", state.controls.signal_cloned().map(|controls| {
                     controls.font_size
                 }))
