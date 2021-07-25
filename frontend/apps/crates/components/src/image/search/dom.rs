@@ -14,73 +14,65 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
         .apply_if(slot.is_some(), move |dom| {
             dom.property("slot", slot.unwrap_ji())
         })
-        .children_signal_vec(state.init_loader.is_loading().map(clone!(state => move |init_loading| {
+        .child_signal(state.init_loader.is_loading().map(clone!(state => move |init_loading| {
             if init_loading {
-                vec![html!("window-loader-block", {
-                    .property("visible", true)
-                })]
+                Some(html!("p", {
+                    .text("Loading...")
+                }))
             } else {
-                render_loaded(state.clone())
+                Some(render_loaded(state.clone()))
             }
-        })).to_signal_vec())
+        })))
     })
 }
 
 
-pub fn render_loaded(state: Rc<State>) -> Vec<Dom> {
+pub fn render_loaded(state: Rc<State>) -> Dom {
     state.loader.load(clone!(state => async move {
         search(state);
     }));
 
-    vec![
-        html!("image-select", {
-            .property("label", "Select background")
-            .children(render_controls(state.clone()))
-            .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
-                html!("img-ji", {
-                    .property("slot", "images")
-                    .property("size", "thumb")
-                    .property("id", image.id.0.to_string())
-                    .event(clone!(state, image => move |_: events::Click| {
-                        //TODO - this should change if the library has changed
-                        state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
+    html!("image-select", {
+        .property("label", "Select background")
+        .children(render_controls(state.clone()))
+        .children_signal_vec(state.image_list.signal_vec_cloned().map(clone!(state => move |image| {
+            html!("img-ji", {
+                .property("slot", "images")
+                .property("size", "thumb")
+                .property("id", image.id.0.to_string())
+                .event(clone!(state, image => move |_: events::Click| {
+                    //TODO - this should change if the library has changed
+                    state.set_selected(Image { id: image.id, lib: MediaLibrary::Global});
+                }))
+                .event(clone!(image => move |evt: events::DragStart| {
+                    if let Some(data_transfer) = evt.data_transfer() {
+                        let data = ImageDataTransfer {
+                            image: Image { 
+                                id: image.id.clone(),
+                                //TODO - this should change if the library has changed
+                                lib: MediaLibrary::Global
+                            }
+                        };
+                        let json = serde_json::to_string(&data).unwrap_ji();
+                        let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
+                        data_transfer.set_drop_effect("all");
+                    } else {
+                        log::error!("no data transfer - use a real computer!!!");
+                    }
+                }))
+            })
+        })))
+        .child_signal(state.loader.is_loading().map(|is_loading| {
+            match is_loading {
+                false => None,
+                true => {
+                    Some(html!("p", {
+                        .text("Loading..")
                     }))
-                    .event(clone!(image => move |evt: events::DragStart| {
-                        if let Some(data_transfer) = evt.data_transfer() {
-                            let data = ImageDataTransfer {
-                                image: Image { 
-                                    id: image.id.clone(),
-                                    //TODO - this should change if the library has changed
-                                    lib: MediaLibrary::Global
-                                }
-                            };
-                            let json = serde_json::to_string(&data).unwrap_ji();
-                            let _ = data_transfer.set_data(IMAGE_SEARCH_DATA_TRANSFER, &json);
-                            data_transfer.set_drop_effect("all");
-                        } else {
-                            log::error!("no data transfer - use a real computer!!!");
-                        }
-                    }))
-                })
-            })))
-        }),
-        html!("window-loader-block", {
-            .property_signal("visible", state.loader.is_loading())
-        })
-        // .child(html!("img-ji", {
-        //     .style("position", "fixed")
-        //     .style("right", "0")
-        //     .style("top", "0")
-        //     .style("height", "30px")
-        //     .style("width", "30px")
-        //     .property_signal("id", state.options.value.signal_cloned().map(|o| {
-        //         match o {
-        //             Some(image_id) => image_id.0.to_string(),
-        //             None => String::new(),
-        //         }
-        //     }))
-        // }))
-    ]
+                },
+            }
+        }))
+    })
 }
 
 fn render_controls(state: Rc<State>) -> Vec<Dom> {
