@@ -10,7 +10,8 @@ use shared::{
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::JigSearchQuery,
-        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Goal, GoalId, MetadataResponse}
+        meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Goal, GoalId, MetadataResponse},
+        user::UserProfile
     },
     error::EmptyError
 };
@@ -38,6 +39,18 @@ impl SearchSelected {
             language: Mutable::new(None),
             query: Mutable::new(String::new()),
         }
+    }
+
+    pub fn set_from_profile(&self, profile: &UserProfile) {
+        let mut age_ranges = self.age_ranges.lock_mut();
+        if profile.age_ranges.len() > 0 {
+            age_ranges.clear();
+            age_ranges.extend(profile.age_ranges.clone());
+        }
+
+        // TODO: deal with goal/subject
+
+        self.language.set(Some(profile.language.clone()));
     }
 
     pub fn to_search_request(&self) -> JigSearchQuery {
@@ -83,12 +96,19 @@ impl SearchOptions {
     }
     
     async fn load_metadata(&self) -> Result<(), EmptyError> {
-        match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        match api_no_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
             Err(e) => Err(e),
             Ok(res) => {
-                self.affiliations.set(res.affiliations);
-                self.age_ranges.set(res.age_ranges);
-                self.goals.set(res.goals);
+                // only set values if they're not set yet from the profile
+                if self.affiliations.lock_ref().is_empty() {
+                    self.affiliations.set(res.affiliations);
+                }
+                if self.age_ranges.lock_ref().is_empty() {
+                    self.age_ranges.set(res.age_ranges);
+                }
+                if self.goals.lock_ref().is_empty() {
+                    self.goals.set(res.goals);
+                }
                 Ok(())
             },
         }
@@ -100,13 +120,15 @@ impl SearchOptions {
             scope: Some(CategoryTreeScope::Decendants)
         };
 
-        match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(category::Get::PATH, category::Get::METHOD, Some(req)).await {
+        match api_no_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(category::Get::PATH, category::Get::METHOD, Some(req)).await {
             Err(e) => Err(e),
             Ok(res) => {
                 let mut category_label_lookup = HashMap::new();
                 Self::get_categories_labels(&res.categories, &mut category_label_lookup);
                 self.category_label_lookup.set(category_label_lookup);
-                self.categories.set(res.categories);
+                if self.categories.lock_ref().is_empty() {
+                    self.categories.set(res.categories);
+                }
                 Ok(())
             },
         }

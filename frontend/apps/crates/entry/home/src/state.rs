@@ -12,6 +12,7 @@ use super::search_state::{SearchOptions, SearchSelected};
 pub struct State {
     pub loader: AsyncLoader,
     pub mode: Mutable<HomePageMode>,
+    pub is_logged_in: Mutable<bool>,
     pub search_options: SearchOptions,
     pub search_selected: SearchSelected,
     pub quick_searches: Vec<QuickSearch>,
@@ -25,6 +26,7 @@ impl State {
         Self {
             loader: AsyncLoader::new(),
             mode: Mutable::new(HomePageMode::Home),
+            is_logged_in: Mutable::new(false),
             search_options: SearchOptions::new(),
             search_selected: SearchSelected::new(),
             quick_searches: Self::get_quick_searches(),

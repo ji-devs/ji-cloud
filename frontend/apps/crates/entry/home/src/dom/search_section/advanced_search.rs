@@ -38,6 +38,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "affiliation")
                 .property("label", STR_AFFILIATION_LABEL)
                 .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
+                .visible_signal(state.is_logged_in.signal().map(|is_logged_in| {
+                    !is_logged_in
+                }))
                 .property_signal("value", affiliation_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.affiliations.signal_cloned().map(clone!(state => move|affiliations| {
                     affiliations.iter().map(|affiliation| {

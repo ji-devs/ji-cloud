@@ -7,7 +7,7 @@ use crate::state::HomePageMode;
 
 use super::super::{
     state::State,
-    actions::{fetch_metadata, search}
+    actions::{fetch_data, search}
 };
 
 
@@ -18,7 +18,7 @@ const STR_ALL_LANGUAGES: &'static str = "All languages";
 
 pub fn render(state: Rc<State>) -> Dom {
 
-    fetch_metadata(state.clone());
+    fetch_data(state.clone());
 
     html!("home-search-section", {
         .property_signal("mode", state.mode.signal_cloned().map(|mode| {
@@ -70,17 +70,17 @@ pub fn render(state: Rc<State>) -> Dom {
                             .search_options
                             .languages
                             .iter()
-                            .map(|Language(lang_id, lang_label)| {
+                            .map(|lang| {
                                 html!("li-check", {
-                                    .text(lang_label)
-                                    .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang_id => move |selected_language| {
+                                    .text(lang.display_name())
+                                    .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang => move |selected_language| {
                                         match selected_language {
-                                            Some(selected_language) => selected_language == lang_id,
+                                            Some(selected_language) => selected_language == lang.code(),
                                             None => false,
                                         }
                                     })))
-                                    .event(clone!(state, lang_id => move |_: events::Click| {
-                                        state.search_selected.language.set(Some(lang_id.to_string()));
+                                    .event(clone!(state, lang => move |_: events::Click| {
+                                        state.search_selected.language.set(Some(lang.code().to_string()));
                                     }))
                                 })
                             })
@@ -108,8 +108,11 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let available_ages = state.search_options.age_ranges.signal_cloned() => {
             let mut output = vec![];
             selected_ages.iter().for_each(|age_id| {
-                let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
-                output.push(age.display_name.clone());
+                // only search list if already populated
+                if available_ages.len() > 0 {
+                    let age = available_ages.iter().find(|age| age.id == *age_id).unwrap_ji();
+                    output.push(age.display_name.clone());
+                }
             });
             output.join(", ")
         }
@@ -122,13 +125,13 @@ fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
             .search_options
             .languages
             .iter()
-            .find(|Language(lang_code, _)| match &selected_language {
-                Some(selected_language) => lang_code == &selected_language,
+            .find(|lang| match &selected_language {
+                Some(selected_language) => lang.code() == selected_language,
                 None => false,
             });
 
         match lang {
-            Some(lang) => lang.1,
+            Some(lang) => lang.display_name(),
             None => STR_ALL_LANGUAGES
         }
     }))
