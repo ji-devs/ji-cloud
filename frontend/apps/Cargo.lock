@@ -21,7 +21,7 @@ checksum = "595d3cfa7a60d4555cb5067b99f07142a08ea778de5cf993f7b75c7d8fabc486"
 name = "app-admin"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -60,7 +60,7 @@ name = "app-card-quiz-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -97,7 +97,7 @@ name = "app-card-quiz-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -134,7 +134,7 @@ name = "app-drag-drop-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -170,7 +170,7 @@ name = "app-drag-drop-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -206,7 +206,7 @@ name = "app-flashcards-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -243,7 +243,7 @@ name = "app-flashcards-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -279,7 +279,7 @@ dependencies = [
 name = "app-home"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -315,7 +315,7 @@ dependencies = [
 name = "app-jig-edit"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "chrono",
  "components",
@@ -353,7 +353,7 @@ name = "app-matching-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -390,7 +390,7 @@ name = "app-matching-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -427,7 +427,7 @@ name = "app-memory-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -463,7 +463,7 @@ name = "app-memory-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -500,7 +500,7 @@ name = "app-poster-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -536,7 +536,7 @@ name = "app-poster-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -572,7 +572,7 @@ name = "app-tapping-board-edit"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -608,7 +608,7 @@ name = "app-tapping-board-play"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -643,7 +643,7 @@ dependencies = [
 name = "app-user"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
@@ -707,9 +707,9 @@ dependencies = [
 
 [[package]]
 name = "awsm_web"
-version = "0.22.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a9a37c1432404797a60dce3d50102face73a112e1eac76721cec345a5f98c30"
+checksum = "c006a3e9c7896fddbef72cd9f5545776e92936edb6b75a0ef4a71ed5f5b8328e"
 dependencies = [
  "beach_map",
  "discard",
@@ -839,7 +839,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "beach_map",
  "cfg-if 1.0.0",
  "chrono",
@@ -896,9 +896,9 @@ dependencies = [
 
 [[package]]
 name = "const_format"
-version = "0.2.14"
+version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c75ea7d6aeb2ebd1ee24f7b7e1b23242ef5a56b3a693733b99bfbe5ef31d0306"
+checksum = "74cd0be51cd9ea39adba1f11b1a82d0fb41674c800540e2817d510da21bf9508"
 dependencies = [
  "const_format_proc_macros",
 ]
@@ -1329,7 +1329,7 @@ checksum = "dd25036021b0de88a0aff6b850051563c6516d0bf53f8638938edbb9de732736"
 name = "jig-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
@@ -1404,7 +1404,7 @@ dependencies = [
 name = "legacy-play"
 version = "0.1.0"
 dependencies = [
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "config",
  "console_error_panic_hook",
@@ -1702,7 +1702,7 @@ name = "scratch-001"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "cfg-if 1.0.0",
  "components",
  "config",
@@ -1986,7 +1986,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "awsm_web 0.22.0",
+ "awsm_web 0.24.1",
  "base64 0.13.0",
  "cfg-if 1.0.0",
  "chrono",

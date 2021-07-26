@@ -19,11 +19,11 @@ use crate::{
 };
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_upload_file, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, fetch_upload_file, fetch_upload_file_abortable, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
 use web_sys::{File, Blob};
 use super::settings::SETTINGS;
 
-pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle};
+pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle, AbortController};
 
 
 #[derive(Debug)]
@@ -37,6 +37,8 @@ pub enum Error {
 
 pub const POST:&'static str = "POST";
 pub const GET:&'static str = "GET";
+
+pub type IsAborted = bool;
 
 const DESERIALIZE_ERR:&'static str = "couldn't deserialize error in fetch";
 const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
@@ -63,65 +65,33 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
 
 //TODO - resumeable uploads
 //https://cloud.google.com/storage/docs/performing-resumable-uploads#resume-upload
-pub async fn upload_file_gcs(url:&str, file:&File) -> Result<(), ()> {
-    let (resp, status) = upload_file_gcs_status(url, file).await;
+pub async fn upload_file_gcs(url:&str, file:&File, abort_controller: Option<&AbortController>) -> Result<(), awsm_web::errors::Error> {
+    let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
 
     side_effect_error(status);
 
     resp
 }
 
-pub async fn upload_file_gcs_status(url:&str, file:&File) -> (Result<(), ()>, u16) {
-    upload_file_direct_status(url, file, Method::Put).await
-}
+pub async fn upload_file_gcs_status(url:&str, file:&File, abort_controller: Option<&AbortController>) -> (Result<(), awsm_web::errors::Error>, u16) {
+    match fetch_upload_file_abortable(&url, file, Method::Put.as_str(), abort_controller).await {
+        Ok(res) => {
+            let status = res.status();
 
-pub async fn upload_file_direct(url:&str, file:&File, method:Method) -> Result<(), ()> {
-    let (resp, status) = upload_file_direct_status(url, file, method).await;
-
-    side_effect_error(status);
-
-    resp
-}
-
-pub async fn upload_file_direct_status(url:&str, file:&File, method:Method) -> (Result<(), ()>, u16) {
-    let res = fetch_upload_file(&url, file, method.as_str()).await.unwrap_ji();
-
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(()), status)
-    } else {
-        (Err(()), status)
+            if res.ok() {
+                (Ok(()), status)
+            } else {
+                (Err(awsm_web::errors::Error::Empty), status)
+            }
+        }
+        Err(err) => {
+            (Err(err), 0)
+        }
     }
-}
-
-pub async fn api_upload_blob(endpoint:&str, blob:&Blob, method:Method) -> Result<(), ()> {
-    let (resp, status) = api_upload_blob_status(endpoint, blob, method).await;
-
-    side_effect_error(status);
-
-    resp
 
 }
 
-pub async fn api_upload_blob_status(endpoint:&str, blob:&Blob, method:Method) -> (Result<(), ()>, u16) {
-
-    let (url, _) = api_get_query::<()>(endpoint, method, None);
-
-    let csrf = load_csrf_token().unwrap_or_default();
-    
-    let res = fetch_upload_blob_with_headers(&url, blob, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
-
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(()), status)
-    } else {
-        (Err(()), status)
-    }
-}
-
-
+//TODO - deprecate! All uploads should go through GCS signed urls
 pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), ()> {
     let (resp, status) = api_upload_file_status(endpoint, file, method).await;
 
@@ -215,20 +185,33 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 pub async fn api_with_token_status<T, E, Payload>(endpoint: &str, token:&str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
+    api_with_token_status_abortable(endpoint, token, method, None, data).await.unwrap_ji()
+}
+
+pub async fn api_with_token_status_abortable<T, E, Payload>(endpoint: &str, token:&str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<(Result<T, E>, u16), IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
     let bearer = format!("Bearer {}", token);
 
     let (url, data) = api_get_query(endpoint, method, data);
  
-    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
-        .await
-        .unwrap_ji();
+    match fetch_with_headers_and_data_abortable(&url, method.as_str(), true, abort_controller, &vec![("Authorization", &bearer)], data).await {
+        Ok(res) => {
+            let status = res.status();
 
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
-    } else {
-        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+            if res.ok() {
+                Ok((Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status))
+            } else {
+                Ok((Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status))
+            }
+        },
+        Err(err) => {
+            if err.is_abort() {
+                Err(true)
+            } else {
+                panic!("request failed but was not aborted");
+            }
+        }
     }
 }
 //TODO - get rid of this, use specialization
@@ -261,6 +244,18 @@ where E: DeserializeOwned + Serialize, Payload: Serialize
     }
 }
 
+pub async fn api_with_auth_abortable<T, E, Payload>(endpoint: &str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<Result<T, E>, IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    api_with_auth_status_abortable(endpoint, method, abort_controller, data).await
+        .map(|res| {
+            let (resp, status) = res;
+
+            side_effect_error(status);
+
+            resp
+        })
+}
 pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
@@ -274,25 +269,37 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 pub async fn api_with_auth_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
+    api_with_auth_status_abortable(endpoint, method, None, data).await.unwrap_ji()
+}
+
+pub async fn api_with_auth_status_abortable<T, E, Payload>(endpoint: &str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<(Result<T, E>, u16), IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
 
     if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
-        api_with_token_status(endpoint, &token, method, data).await
+        api_with_token_status_abortable(endpoint, &token, method, abort_controller, data).await
     } else {
         let csrf = load_csrf_token().unwrap_or_default();
 
         let (url, data) = api_get_query(endpoint, method, data);
 
-        let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
-            .await
-            .unwrap_ji();
+        match fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+            Ok(res) => {
+                let status = res.status();
 
-
-        let status = res.status();
-
-        if res.ok() {
-            (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
-        } else {
-            (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+                if res.ok() {
+                    Ok((Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status))
+                } else {
+                    Ok((Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status))
+                }
+            },
+            Err(err) => {
+                if err.is_abort() {
+                    Err(true)
+                } else {
+                    panic!("request failed but was not aborted");
+                }
+            }
         }
     }
 }

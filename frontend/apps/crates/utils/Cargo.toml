@@ -60,7 +60,7 @@ web-sys = { version = "0.3.51", features = [
     'ImageData',
     'Blob'
 ] }
-awsm_web = { version = "0.22.0", features = ["loaders", "image", "serde_iso", "canvas"] }
+awsm_web = { version = "0.24.1", features = ["loaders", "image", "serde_iso", "canvas"] }
 anyhow = "1.0.42"
 rgb = "0.8.27"
 
