@@ -37,6 +37,13 @@ pub enum StickerRawRenderOptions {
 }
 
 impl StickerRawRenderOptions {
+    pub fn new(sticker:&RawSticker, base: Option<BaseRawRenderOptions>) -> Self {
+        match sticker {
+            RawSticker::Sprite(_) => Self::Sprite(SpriteRawRenderOptions { base: base.unwrap_or_default() }),
+            RawSticker::Text(_) => Self::Text(TextRawRenderOptions { base: base.unwrap_or_default() }),
+        }
+    }
+
     pub fn into_sprite_unchecked(self) -> SpriteRawRenderOptions {
         match self {
             Self::Sprite(inner) => inner,
@@ -47,6 +54,13 @@ impl StickerRawRenderOptions {
         match self {
             Self::Text(inner) => inner,
             _ => panic!("not a text!")
+        }
+    }
+
+    pub fn base(&self) -> &BaseRawRenderOptions {
+        match self {
+            Self::Sprite(inner) => &inner.base,
+            Self::Text(inner) => &inner.base,
         }
     }
 }

@@ -5,7 +5,7 @@ use utils::prelude::*;
 use super::state::*;
 use components::{
     backgrounds::dom::render_backgrounds, 
-    stickers::dom::{render_stickers, render_sticker_raw, StickerRawRenderOptions, mixin_sticker_button},
+    stickers::dom::{render_stickers, render_sticker_raw, BaseRawRenderOptions, StickerRawRenderOptions, mixin_sticker_button},
     traces::edit::dom::render_traces_edit
 };
 use futures_signals::{
@@ -22,9 +22,12 @@ impl MainDrag {
                 state.clone().items
                     .iter()
                     .map(|item| {
+
+                        let raw_sticker = &item.raw_sticker();
+
                         let opts = {
                             if item.get_is_interactive() {
-                                let mut opts = StickerRawRenderOptions::new();
+                                let mut opts = BaseRawRenderOptions::default();
 
                                 opts.set_transform_override(item.get_transform_override());
 
@@ -43,13 +46,14 @@ impl MainDrag {
                                         }))
                                 }));
 
+                                let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
                                 Some(opts)
                             } else {
                                 None
                             }
                         };
 
-                        render_sticker_raw(&item.raw_sticker(), theme_id, opts)
+                        render_sticker_raw(&raw_sticker, theme_id, opts)
                     })
                     .collect::<Vec<Dom>>()
             })

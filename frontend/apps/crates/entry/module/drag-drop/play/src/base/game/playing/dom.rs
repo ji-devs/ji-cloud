@@ -8,7 +8,7 @@ use futures_signals::{
 use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}};
 use components::{
     traces::hints::dom::render_traces_hint,
-    stickers::dom::{render_sticker_raw, StickerRawRenderOptions, TransformOverride, mixin_sticker_button}
+    stickers::dom::{render_sticker_raw, StickerRawRenderOptions,BaseRawRenderOptions ,TransformOverride, mixin_sticker_button}
 };
 
 use super::state::*;
@@ -44,7 +44,7 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                             render_sticker_raw(&sticker, theme_id, None)
                         },
                         PlayItem::Interactive(item) => {
-                            let mut opts = StickerRawRenderOptions::new();
+                            let mut opts = BaseRawRenderOptions::default();
 
                             opts.set_size(item.size.clone());
 
@@ -74,6 +74,8 @@ pub fn render(state: Rc<PlayState>) -> Dom {
                                     })
                                 })
                             );
+                            
+                            let opts = StickerRawRenderOptions::new(&item.sticker, Some(opts));
 
                             render_sticker_raw(&item.sticker, theme_id, Some(opts))
                         }
