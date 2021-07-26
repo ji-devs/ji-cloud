@@ -4,4 +4,4 @@ pub mod search;
 #[cfg(feature = "image_upload")]
 pub mod upload;
 
-pub mod tags;
+pub mod tag;

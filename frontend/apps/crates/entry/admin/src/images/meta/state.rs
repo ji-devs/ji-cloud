@@ -1,5 +1,5 @@
 use shared::domain::{
-    meta::{ImageStyleId, AffiliationId, AgeRangeId},
+    meta::{ImageStyleId, AffiliationId, AgeRangeId, TagId},
     category::CategoryId,
     image::{ImageId, ImageSearchQuery, ImageMetadata},
 };
@@ -8,6 +8,7 @@ use dominator_helpers::futures::AsyncLoader;
 use std::collections::HashSet;
 use web_sys::HtmlInputElement;
 use std::cell::RefCell;
+use components::image::tag::ImageTag;
 
 pub struct State {
     pub id: ImageId, 
@@ -55,6 +56,7 @@ pub struct MutableImage {
     pub styles: Mutable<HashSet<ImageStyleId>>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
+    pub tag_ids: Mutable<HashSet<TagId>>,
     pub categories: Mutable<HashSet<CategoryId>>,
 }
 
@@ -85,6 +87,13 @@ impl From<ImageMetadata> for MutableImage {
                     affiliations.insert(id);
                 }
                 Mutable::new(affiliations)
+            },
+            tag_ids: {
+                let mut tag_ids = HashSet::with_capacity(image.tags.len());
+                for id in image.tags.into_iter() {
+                    tag_ids.insert(id);
+                }
+                Mutable::new(tag_ids)
             },
             categories: {
                 let mut categories = HashSet::with_capacity(image.categories.len());

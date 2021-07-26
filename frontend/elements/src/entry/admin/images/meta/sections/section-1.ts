@@ -8,6 +8,7 @@ import { nothing } from "lit-html";
 const STR_STYLE = "Image style";
 const STR_AGE = "Suitable for age";
 const STR_AFFILIATION = "Suitable for jewish stream?";
+const STR_TAGS = "Tags (internal use only)";
 
 @customElement('image-meta-section-1')
 export class _ extends LitElement {
@@ -30,6 +31,9 @@ export class _ extends LitElement {
             <div class="container1">
                 <list-vertical label="${STR_STYLE}">
                     <slot name="styles"></slot>
+                </list-vertical>
+                <list-vertical label="${STR_TAGS}">
+                    <slot name="tags"></slot>
                 </list-vertical>
                 <div class="container2">
                     <list-vertical label="${STR_AGE}">
