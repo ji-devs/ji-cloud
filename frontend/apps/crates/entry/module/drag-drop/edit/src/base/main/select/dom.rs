@@ -7,7 +7,7 @@ use super::state::*;
 use utils::prelude::*;
 use components::{
     backgrounds::dom::render_backgrounds, 
-    stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, render_sticker_raw},
+    stickers::dom::{render_stickers, mixin_sticker_button, StickerRawRenderOptions, BaseRawRenderOptions, render_sticker_raw},
     traces::edit::dom::render_traces_edit
 };
 
@@ -46,7 +46,7 @@ impl MainSelect {
     }
 
     pub fn render_interactive(state: Rc<Self>, theme_id: ThemeId, item: SelectItem, data: Interactive) -> Dom {
-        let mut opts = StickerRawRenderOptions::new();
+        let mut opts = BaseRawRenderOptions::default();
         let index = item.index;
 
         opts.set_parent(
@@ -75,15 +75,23 @@ impl MainSelect {
                 }))
         }));
 
-        render_sticker_raw(&item.raw_sticker(), theme_id, Some(opts))
+        let raw_sticker = &item.raw_sticker();
+
+        let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
+
+        render_sticker_raw(&raw_sticker, theme_id, Some(opts))
 
     }
 
     pub fn render_static(state: Rc<Self>, theme_id: ThemeId, item: SelectItem) -> Dom {
-        let mut opts = StickerRawRenderOptions::new();
+        let mut opts = BaseRawRenderOptions::default();
         opts.set_mixin(Self::mixin_click(state.clone(), item.index));
 
-        render_sticker_raw(&item.raw_sticker(), theme_id, Some(opts))
+        let raw_sticker = &item.raw_sticker();
+
+        let opts = StickerRawRenderOptions::new(&raw_sticker, Some(opts));
+
+        render_sticker_raw(&raw_sticker, theme_id, Some(opts))
     }
 
     pub fn mixin_click(state:Rc<Self>, index: usize) -> impl Fn(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement> {
