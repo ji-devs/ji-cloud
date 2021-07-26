@@ -19,7 +19,8 @@ use crate::{
     images::{
         add::dom::ImageAddPage,
         meta::dom::ImageMetaPage,
-        search::dom::ImageSearchPage
+        search::dom::ImageSearchPage,
+        tags::ImageTags,
     },
     sidebar::dom::SidebarDom,
 };
@@ -62,6 +63,7 @@ pub fn render(state: Rc<Router>) {
                             AdminRoute::ImageAdd => Some(with_child(route, ImageAddPage::render())),
                             AdminRoute::ImageMeta(id, is_new) => Some(with_child(route, ImageMetaPage::render(id, is_new))),
                             AdminRoute::ImageSearch(query) => Some(with_child(route, ImageSearchPage::render(query))),
+                            AdminRoute::ImageTags => Some(with_child(route, ImageTags::render(ImageTags::new()))),
                             _ => Some(with_child(route, html!("empty-fragment"))),
                         }
                     }
