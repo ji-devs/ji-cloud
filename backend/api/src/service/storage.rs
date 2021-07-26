@@ -78,7 +78,7 @@ impl Client {
 
                 Ok(session_uri)
             }
-            StatusCode::UNAUTHORIZED => Err(error::Storage::InvalidGrant),
+            // StatusCode::UNAUTHORIZED => Err(error::Storage::InvalidGrant),
             _ => {
                 let err = resp
                     .json::<UploadUrlErrorResponse>()
