@@ -1,10 +1,24 @@
 use std::rc::Rc;
 use dominator::{clone};
-use shared::{api::{ApiEndpoint, endpoints}, domain::{image::*, meta::*, jig::module::body::Image}, error::{EmptyError, MetadataNotFound}, media::MediaLibrary};
+use shared::{
+    api::{ApiEndpoint, endpoints}, 
+    domain::{
+        image::{
+            *,
+            tag::{ImageTagListResponse, ImageTagResponse}
+        }, 
+        jig::module::body::Image, meta::*
+    }, 
+    error::{EmptyError, MetadataNotFound}, 
+    media::MediaLibrary
+};
 use utils::prelude::*;
 use web_sys::File;
 use super::state::{BACKGROUND_NAME, State};
 use super::super::upload::upload_image;
+use crate::image::tag::ImageTag;
+use std::collections::HashMap;
+use strum::IntoEnumIterator;
 
 impl State {
     pub fn set_selected(&self, image: Image) {
@@ -21,6 +35,25 @@ pub async fn get_styles() -> Vec<ImageStyle> {
         None
     ).await;
     res.unwrap_ji().image_styles
+}
+
+pub async fn get_tag_id_lookup() -> HashMap<ImageTag, TagId> {
+    let list:Vec<ImageTagResponse> = api_with_auth::<ImageTagListResponse, EmptyError, _>(
+        &endpoints::image::tag::List::PATH,
+        endpoints::image::tag::List::METHOD,
+        None::<()>
+    ).await.unwrap_ji().image_tags;
+
+    let mut hash_map = HashMap::new();
+
+    for tag in ImageTag::iter() {
+        let db_tag = list.iter().find(|item| item.index == tag.as_index()).unwrap_ji();
+
+        hash_map.insert(tag, db_tag.id);
+    }
+
+    hash_map
+
 }
 
 pub fn get_background_id(styles: &Vec<ImageStyle>) -> ImageStyleId {
