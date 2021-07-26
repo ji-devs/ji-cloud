@@ -53,6 +53,7 @@ pub enum AdminRoute {
     Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
+    ImageTags,
     ImageMeta(ImageId, bool), //flag is for if it's a new image
 }
 
@@ -177,6 +178,7 @@ impl Route {
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
+            ["admin", "image-tags"] => Self::Admin(AdminRoute::ImageTags),
             ["admin", "image-meta", id, flag] => {
                 let id = ImageId(Uuid::from_str(id).unwrap_ji());
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
@@ -294,6 +296,7 @@ impl From<&Route> for String {
                         }
                     }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
+                    AdminRoute::ImageTags => "/admin/image-tags".to_string(),
                     AdminRoute::ImageMeta(id, is_new) => format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new),
                 }
             },
