@@ -12,7 +12,7 @@ use futures_signals::{
     signal_vec::{MutableVec, SignalVec, SignalVecExt},
 };
 use utils::prelude::*;
-use components::image::tags::ImageTag;
+use components::image::tag::ImageTag;
 use strum::IntoEnumIterator;
 
 //index is id. See https://github.com/ji-devs/ji-cloud/pull/1082

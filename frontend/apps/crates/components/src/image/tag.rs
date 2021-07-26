@@ -3,7 +3,7 @@ use strum_macros::EnumIter;
 
 
 #[repr(i16)]
-#[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq)]
+#[derive(EnumIter, Debug, PartialEq, Copy, Clone, Eq, Hash)]
 pub enum ImageTag {
     BackgroundLayer1,
     BackgroundLayer2,
