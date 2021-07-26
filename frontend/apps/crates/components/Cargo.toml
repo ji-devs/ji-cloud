@@ -18,7 +18,7 @@ serde = { version = "1.0.126", features = ["derive"] }
 serde_repr = "0.1.7"
 strum = "0.21.0"
 strum_macros = "0.21.1"
-const_format = { version = "0.2.14", features = ["const_generics"] }
+const_format = { version = "0.2.15", features = ["const_generics"] }
 log = "0.4.14"
 serde_json = "1.0.64"
 cfg-if = "1.0.0"
@@ -66,7 +66,7 @@ web-sys = { version = "0.3.51", features = [
     'HtmlSelectElement',
     'Performance',
 ] }
-awsm_web = { version = "0.22.0", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
+awsm_web = { version = "0.24.1", features = ["loaders", "serde_iso", "dom", "image", "audio", "canvas"] }
 anyhow = "1.0.42"
 gloo-timers = "0.2.1"
 rgb = "0.8.27"
@@ -83,6 +83,7 @@ backgrounds = []
 color_select = []
 image = []
 image_search = []
+image_upload = []
 instructions = []
 module = []
 module_edit = []
@@ -107,6 +108,7 @@ all= [
     "color_select", 
     "image", 
     "image_search", 
+    "image_upload", 
     "instructions", 
     "module", 
     "module_edit", 

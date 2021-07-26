@@ -1,4 +1,6 @@
+use gloo::timers::future::TimeoutFuture;
 use shared::{
+    media::MediaLibrary,
     api::{ApiEndpoint, endpoints},
     domain::{Publish, image::*, category::*, meta::*},
     error::{EmptyError, MetadataNotFound},
@@ -9,6 +11,7 @@ use super::state::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use web_sys::File;
+use components::image::upload::{upload_image};
 use super::sections::common::categories::MutableCategory;
 
 pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>)>>> {
@@ -66,13 +69,19 @@ pub fn save(state: Rc<State>, req:ImageUpdateRequest) {
 pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
     state.loader.load(clone!(state => async move {
 
-        let path = endpoints::image::Upload::PATH.replace("{id}",&state.id.0.to_string());
-        match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
+        match upload_image(state.id, MediaLibrary::Global, &file, None).await {
             Ok(_) => {
+                //Trigger a re-render. 
+                //To debug: this shouldn't be necessary, but it temp fixes!
+                //TimeoutFuture::new(5_000).await;
                 image.id.replace_with(|id| id.clone());
             },
-            Err(_) => {
-                log::error!("error uploading!");
+            Err(err) => {
+                if err.is_abort() {
+                    log::info!("aborted!");
+                } else {
+                    log::error!("got error! {:?}", err);
+                }
             }
         }
     }))

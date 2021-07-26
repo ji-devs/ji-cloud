@@ -160,43 +160,6 @@ impl ImageEffect {
         web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji()
     }
 
-    pub async fn upload(&self) -> Result<Image, String> {
-        let blob = self.to_blob().await;
-
-
-        let req = ImageCreateRequest {
-            name: "".to_string(),
-            description: "".to_string(),
-            is_premium: false,
-            publish_at: None,
-            tags: Vec::new(),
-            styles: Vec::new(),
-            age_ranges: Vec::new(),
-            affiliations: Vec::new(),
-            categories: Vec::new(),
-            kind: ImageKind::Sticker,
-        };
-
-        match api_with_auth::<CreateResponse, MetadataNotFound, _>(endpoints::image::Create::PATH, endpoints::image::Create::METHOD, Some(req)).await {
-            Ok(resp) => {
-                let CreateResponse { id } = resp;
-
-                let path = endpoints::image::Upload::PATH.replace("{id}", &id.0.to_string());
-                match api_upload_blob(&path, &blob, endpoints::image::Upload::METHOD).await {
-                    Ok(_) => {
-                        //FIXME should be user lib!
-                        Ok(Image { id, lib: MediaLibrary::Global})
-                    },
-                    Err(_) => {
-                        Err("error uploading!".to_string())
-                    }
-                }
-            },
-            Err(_) => {
-                Err("error creating image db!".to_string())
-            }
-        }
-    }
 }
 
 

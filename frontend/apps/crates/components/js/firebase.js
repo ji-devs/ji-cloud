@@ -40,10 +40,10 @@ export function _init(target) {
 }
 
 //Abortable Promise example: https://codepen.io/dakom/pen/LYyOvwV?editors=1111
-export function waitForUploadReady(mediaId, abortController) {
+export function waitForUploadReady(mediaId, libId, abortController) {
 
     return new Promise((resolve, reject) => {
-        const ref = doc(db, "uploads", mediaId);
+        const ref = doc(db, "uploads", "media", libId, mediaId);
         
         if(abortController != null) {
             abortController.signal.onabort = () => {
