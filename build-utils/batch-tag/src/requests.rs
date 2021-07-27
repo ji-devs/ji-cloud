@@ -29,8 +29,7 @@ pub async fn get_image_list(ctx: Arc<Context>, meta: &MetaInfo) -> anyhow::Resul
 
     let mut list:Vec<ImageInfo> = Vec::new();
 
-    //TODO resurrect when https://github.com/ji-devs/ji-cloud/issues/1214 is fixed
-    /*
+    //TODO: https://github.com/ji-devs/ji-cloud/issues/1214 is fixed
     let client = reqwest::Client::new();
     let req = ImageBrowseQuery { 
         is_published: None,
@@ -50,14 +49,14 @@ pub async fn get_image_list(ctx: Arc<Context>, meta: &MetaInfo) -> anyhow::Resul
 
     let body: serde_json::Value = resp.json().await?;
     let body:ImageBrowseResponse = serde_json::from_value(body)?;
-    */
 
-    //Just mock for now:
+    /*
     let body = ImageBrowseResponse {
         images: vec![],
         pages: 1,
         total_image_count: 1
     };
+    */
 
     for image in body.images {
         let mut has_all_affiliations = image.metadata.affiliations.iter().any(|x| *x == meta.affiliation_all_id);

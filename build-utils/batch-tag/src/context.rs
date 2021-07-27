@@ -19,6 +19,8 @@ impl Context {
 
         init_logger(&opts);
 
+        opts.sanitize();
+
         log::info!("dry run: {}", opts.dry_run);
 
         let token = {
