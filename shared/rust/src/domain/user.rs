@@ -76,7 +76,7 @@ pub struct UserLookupQuery {
     pub name: Option<String>,
 }
 
-/// Publically accessable information about a user.
+/// Publicly accessible information about a user.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct OtherUser {
@@ -233,6 +233,78 @@ pub struct PutProfileRequest {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
+}
+
+/// Request for [`PatchProfile`](crate::api::endpoints::user::PatchProfile)
+#[derive(Debug, Serialize, Deserialize)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[cfg_attr(feature = "backend", openapi(empty))]
+pub struct PatchProfileRequest {
+    /// The user's username.
+    ///
+    /// This must be unique.
+    pub username: Option<String>,
+
+    /// Is the user >= 18 yeas old?
+    pub over_18: Option<bool>,
+
+    /// The user's given name / "first name".
+    pub given_name: Option<String>,
+
+    /// The user's family name / "last name".
+    pub family_name: Option<String>,
+
+    // todo: create a struct that enforces format like `en_us`
+    /// the language the user prefers to communicate with.
+    pub language: Option<String>,
+
+    /// The locale that should be used for the user.
+    pub locale: Option<String>,
+
+    /// the timezone that the user uses.
+    pub timezone: Option<chrono_tz::Tz>,
+
+    /// Does the user want educational resources sent to them?
+    pub opt_into_edu_resources: Option<bool>,
+
+    /// The organization that the user belongs to.
+    /// * If the outer `Option` is `None`, then no update is done,
+    /// * If `Some(None)`, sets the location to `None`,
+    /// * If `Some(Some(_))`, updates the user organization to `Some(_)`.
+    #[serde(default)]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<Option<String>>,
+
+    /// The user's taught subjects.
+    ///
+    /// If `Some`, replace the existing `SubjectId`s with this.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subjects: Option<Vec<SubjectId>>,
+
+    /// The user's age-ranges.
+    ///
+    /// If `Some`, replace the existing `AgeRangeId`s with this.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub age_ranges: Option<Vec<AgeRangeId>>,
+
+    /// The user's affiliations.
+    ///
+    /// If `Some`, replace the existing `AffiliationId`s with this.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub affiliations: Option<Vec<AffiliationId>>,
+
+    /// The user's location.
+    /// * If the outer `Option` is `None`, then no update is done,
+    /// * If `Some(None)`, sets the location to `None`,
+    /// * If `Some(Some(_))`, updates the user location to `Some(_)`.
+    #[serde(default)]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<Option<serde_json::Value>>,
 }
 
 /// Request for [`Create`](crate::api::endpoints::user::Create)

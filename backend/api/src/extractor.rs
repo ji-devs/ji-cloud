@@ -297,35 +297,30 @@ pub trait SessionMaskRequirement {
 
 #[derive(Apiv2Schema)]
 pub struct SessionPutProfile;
-
 impl SessionMaskRequirement for SessionPutProfile {
     const REQUIREMENTS: SessionMask = SessionMask::PUT_PROFILE;
 }
 
 #[derive(Apiv2Schema)]
 pub struct SessionChangePassword;
-
 impl SessionMaskRequirement for SessionChangePassword {
     const REQUIREMENTS: SessionMask = SessionMask::CHANGE_PASSWORD;
 }
 
 #[derive(Apiv2Schema)]
 pub struct SessionVerifyEmail;
-
 impl SessionMaskRequirement for SessionVerifyEmail {
     const REQUIREMENTS: SessionMask = SessionMask::VERIFY_EMAIL;
 }
 
 #[derive(Apiv2Schema)]
 pub struct SessionAny;
-
 impl SessionMaskRequirement for SessionAny {
     const REQUIREMENTS: SessionMask = SessionMask::empty();
 }
 
 #[derive(Apiv2Schema)]
 pub struct SessionDelete;
-
 impl SessionMaskRequirement for SessionDelete {
     const REQUIREMENTS: SessionMask = SessionMask::DELETE_ACCOUNT;
 }

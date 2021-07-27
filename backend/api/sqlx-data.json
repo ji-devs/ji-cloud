@@ -247,6 +247,26 @@
       ]
     }
   },
+  "0ac36d2112d07f62bb717c238915a8d7741759a9d2c5faf421129d5480bbfdec": {
+    "query": "\nupdate user_profile\nset username               = coalesce($2, username),\n    over_18                = coalesce($3, over_18),\n    given_name             = coalesce($4, given_name),\n    family_name            = coalesce($5, family_name),\n    language               = coalesce($6, language),\n    locale                 = coalesce($7, locale),\n    timezone               = coalesce($8, timezone),\n    opt_into_edu_resources = coalesce($9, opt_into_edu_resources)\nwhere user_id = $1\n  and (($2::text is not null and $2 is distinct from username) or\n       ($3::bool is not null and $3 is distinct from over_18) or\n       ($4::text is not null and $4 is distinct from given_name) or\n       ($5::text is not null and $5 is distinct from family_name) or\n       ($6::text is not null and $6 is distinct from language) or\n       ($7::text is not null and $7 is distinct from locale) or\n       ($8::text is not null and $8 is distinct from timezone) or\n       ($9::bool is not null and $9 is distinct from opt_into_edu_resources) )\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "query": "insert into user_email (user_id, email) values ($1, $2::text)",
     "describe": {
@@ -416,6 +436,19 @@
       "nullable": [
         false
       ]
+    }
+  },
+  "1150af6395059759109a8e8200058064186a44dc8db4e6098dd1fa449e6a8e7f": {
+    "query": "\nupdate user_profile\nset location = $2\nwhere user_id = $1 and location is distinct from $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
     }
   },
   "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca": {
@@ -3370,6 +3403,24 @@
       ]
     }
   },
+  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
+    "query": "select token from \"session\" order by created_at limit 1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "token",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "b0abad8e6c605062d886f6f1e3dfd7aaab57f30c3615de97e484cd4c6645bba4": {
     "query": "\ninsert into jig_additional_resource (jig_id, url)\nvalues ($1, $2)\nreturning id\n        ",
     "describe": {
@@ -3480,6 +3531,26 @@
       },
       "nullable": [
         false
+      ]
+    }
+  },
+  "bc43edfc2dcbeea691560c655987b29f3a3c919223487912f63be464fec522a4": {
+    "query": "\nselect exists(select 1 from user_profile where user_id = $1 for update) as \"exists!\"\n    ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -3828,6 +3899,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "dce1ba23b612bd8fa029a70a2e43b93f5158cbf0f24377b079e70d5d6c29a97c": {
+    "query": "\nupdate user_profile\nset organization = $2\nwhere user_id = $1 and organization is distinct from $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "dda8d8d2bc07da17016ae44616deda2fe94bf8a0db546e60b07200c95caa40f1": {
@@ -4486,24 +4570,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
-    "query": "select token from \"session\" order by created_at limit 1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "token",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
       ]
     }
   }
