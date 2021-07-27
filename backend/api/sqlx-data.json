@@ -1616,6 +1616,26 @@
       ]
     }
   },
+  "5379816dbbb936c2fa84c55000f10298f1b22286f2523b5f70dbab56b7e06d9f": {
+    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library inner join user_image_upload \n    on user_image_library.id = user_image_upload.image_id \nwhere id = $1 and processing_result is true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "539bfa401960f946b1f9dab2156b13e1c5b69fea237777f05c9a26d6adb6caab": {
     "query": "select exists(select 1 from jig_draft_join where draft_id = $1) as \"exists!\"",
     "describe": {
@@ -1747,24 +1767,6 @@
         false,
         true,
         null
-      ]
-    }
-  },
-  "60b0832812a09b331d67eded7a6e1a0d323d66443c0a06b7b7ef2628e9cd1ad2": {
-    "query": "select id as \"id: ImageId\" from user_image_library order by created_at desc",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
       ]
     }
   },
@@ -2604,26 +2606,6 @@
       ]
     }
   },
-  "80e114ec0b610550438d73280239678e249985eb19134c9917b39b34ead292c6": {
-    "query": "select id as \"id: ImageId\" from user_image_library where id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageId",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
   "81d346d41686f94b2bbb1477d0e7e407d67e12bb2c2cccfb474c536ddd8f0eeb": {
     "query": "update user_image_upload set processed_at = now(), processing_result = false where image_id = $1",
     "describe": {
@@ -3233,6 +3215,24 @@
       "nullable": []
     }
   },
+  "a17d100505aa7d8a6310b6a8d8db590654d9b5fbba1fd339851c9a95effe0af6": {
+    "query": "\nselect id as \"id: ImageId\" \nfrom user_image_library join user_image_upload \n    on user_image_library.id = user_image_upload.image_id\nwhere processing_result is true\norder by created_at desc\n",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageId",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "a196efbd15600fad1de6cd53a5fbdcc2f070b122f30811275dd7d5567f455346": {
     "query": "\ninsert into jig_additional_resource(jig_id, url)\nselect $1, url from jig_additional_resource where jig_id = $2\n        ",
     "describe": {
@@ -3367,24 +3367,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
-    "query": "select token from \"session\" order by created_at limit 1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "token",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false
       ]
     }
   },
@@ -4506,5 +4488,24 @@
         null
       ]
     }
+  },
+  "b093762d4b40e825b57962cb833a8144a57270a3029f0cd6362d956b701e0651": {
+    "query": "select token from \"session\" order by created_at limit 1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "token",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false
+      ]
+    }
   }
 }
+

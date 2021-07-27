@@ -58,8 +58,8 @@ select  id,
         kind,
         looping         as is_looping,
         array((select row (style_id) from animation_style where animation_id = animation_metadata.id)) as styles
-from animation_metadata
-where id = $1
+from animation_metadata inner join global_animation_upload gau on animation_id=id
+where id = $1 and processing_result is true
 "#)
     .bind(id)
     .fetch_optional(db)

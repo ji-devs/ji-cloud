@@ -103,7 +103,7 @@ impl From<serde_json::Error> for CreateJigError {
 }
 
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
-    let v = sqlx::query!( //language=SQL
+    let v = sqlx::query!(
 r#"
 select
     id as "id: JigId",
@@ -187,7 +187,7 @@ order by t.ord
 }
 
 pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
-    let jig = sqlx::query!( //language=SQL
+    let jig = sqlx::query!(
         r#"
 select  
     id as "id: JigId",
@@ -315,7 +315,6 @@ where id = $1 and $2 is distinct from audio_background
 
     if let Some(audio_effects) = audio_effects {
         sqlx::query!(
-            //language=SQL
             r#"
 update jig
 set audio_feedback_positive = $2,
@@ -669,7 +668,7 @@ pub async fn create_draft(db: &PgPool, live_id: JigId) -> Result<JigId, error::J
         return Err(error::JigCloneDraft::IsDraft);
     }
 
-    let draft_id = sqlx::query!( //language=SQL
+    let draft_id = sqlx::query!(
         r#"
 insert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public,
                  direction, display_score, theme, audio_background, audio_feedback_positive, audio_feedback_negative)
