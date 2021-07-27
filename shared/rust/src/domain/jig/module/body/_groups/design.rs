@@ -94,7 +94,6 @@ pub enum SpriteEffect {
     RemoveWhite,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Video
@@ -107,7 +106,6 @@ pub struct Video {
     pub transform: Transform,
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// Host of video
@@ -116,16 +114,13 @@ pub enum VideoHost {
     Youtube(YoutubeUrl),
 }
 
-
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 /// YouTube host video url
-pub struct YoutubeUrl (pub String);
-
+pub struct YoutubeUrl(pub String);
 
 /// Youtube url parse error
 pub type YoutubeUrlError = String;
-
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

@@ -99,7 +99,6 @@ pub struct Content {
 
     /// Play settings
     pub play_settings: PlaySettings,
-
 }
 
 /// Editor state
@@ -257,7 +256,6 @@ pub struct PlaySettings {
     /// what to do when done
     pub done_action: Option<DoneAction>,
 }
-
 
 /// what to do when done playing video
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
