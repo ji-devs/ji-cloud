@@ -178,11 +178,11 @@ select id,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
        array((select row (tag_id) from image_tag_join where image_id = id))            as tags
-from image_metadata
-         inner join image_upload on image_id = id
-where publish_at < now() is not distinct from $1 or $1 is null
-    and kind = $3 is not distinct from $3 or $3 is null
-    and processing_result is true
+from (image_metadata
+         inner join image_upload on image_id = id)
+where processing_result is not distinct from true 
+    and (publish_at < now() is not distinct from $1 or $1 is null)
+    and (kind is not distinct from $3 or $3 is null) 
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#)

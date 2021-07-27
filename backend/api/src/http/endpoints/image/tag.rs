@@ -21,8 +21,6 @@ pub(super) async fn list(
     db: Data<PgPool>,
     _claims: TokenUserWithScope<ScopeAdmin>,
 ) -> Result<Json<<endpoints::image::tag::List as ApiEndpoint>::Res>, error::NotFound> {
-    log::info!("reached List");
-
     let image_tags = db::image::tag::list(db.as_ref()).await?;
 
     Ok(Json(ImageTagListResponse { image_tags }))
