@@ -164,7 +164,7 @@
         "format": "truetype"
     },
     "Glegoo-Regular": {
-        "file": "Glegoo/Glegoo-regular.ttf", 
+        "file": "Glegoo/Glegoo-Regular.ttf", 
         "format": "truetype"
     },
     "Glegoo-Bold": {
@@ -176,7 +176,7 @@
         "format": "truetype"
     },
     "Laila-Regular": {
-        "file": "Laila/Laila-REgular.ttf", 
+        "file": "Laila/Laila-Regular.ttf", 
         "format": "truetype"
     }
 }            
