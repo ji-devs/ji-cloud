@@ -2,11 +2,10 @@ use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
     error,
-    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf},
+    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf, TokenUser},
     service::{mail, ServiceData},
-    token::SessionMask,
+    token::{create_auth_token, SessionMask},
 };
-use crate::{extractor::TokenUser, token::create_auth_token};
 use actix_http::error::BlockingError;
 use actix_web::HttpResponse;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
@@ -23,8 +22,8 @@ use shared::{
     api::endpoints::{
         user::{
             ChangePassword, Create, CreateColor, CreateFont, Delete, DeleteColor, DeleteFont,
-            GetColors, GetFonts, Profile, PutProfile, ResetPassword, UpdateColor, UpdateFont,
-            UserLookup, VerifyEmail,
+            GetColors, GetFonts, PatchProfile, Profile, PutProfile, ResetPassword, UpdateColor,
+            UpdateFont, UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
@@ -157,11 +156,11 @@ async fn create_user(
     match (exists_basic, exists_google) {
         (true, _) => {
             txn.rollback().await?;
-            return Err(error::Email::TakenEmailBasic.into());
+            return Err(error::Email::TakenBasic.into());
         }
         (false, true) => {
             txn.rollback().await?;
-            return Err(error::Email::TakenEmailGoogle.into());
+            return Err(error::Email::TakenGoogle.into());
         }
         (false, false) => (), // do nothing
     }
@@ -282,7 +281,7 @@ returning user_id
                     if err.downcast_ref::<PgDatabaseError>().constraint()
                         == Some("user_email_email_key") =>
                 {
-                    error::VerifyEmail::Email(error::Email::TakenEmailBasic)
+                    error::VerifyEmail::Email(error::Email::TakenBasic)
                 }
                 err => err.into(),
             })?
@@ -334,9 +333,9 @@ async fn user_lookup(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
-fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::RegisterUsername> {
+fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::UserUpdate> {
     if req.username.is_empty() {
-        return Err(error::RegisterUsername::EmptyUsername);
+        return Err(error::UserUpdate::Username(error::Username::Empty));
     }
 
     Ok(())
@@ -349,7 +348,7 @@ async fn put_profile(
     db: Data<PgPool>,
     signup_user: TokenSessionOf<SessionPutProfile>,
     req: Json<PutProfileRequest>,
-) -> actix_web::Result<HttpResponse, error::RegisterUsername> {
+) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
     let mut txn = db.begin().await?;
@@ -387,6 +386,33 @@ async fn put_profile(
     Ok(HttpResponse::Created()
         .cookie(cookie)
         .json(NewSessionResponse { csrf }))
+}
+
+fn validate_patch_profile_req(
+    req: &Json<<PatchProfile as ApiEndpoint>::Req>,
+) -> Result<(), error::UserUpdate> {
+    match &req.username {
+        Some(username) if username.is_empty() => {
+            Err(error::UserUpdate::Username(error::Username::Empty))
+        }
+        _ => Ok(()),
+    }
+}
+
+/// Update your profile.
+#[api_v2_operation]
+async fn patch_profile(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    req: Json<<PatchProfile as ApiEndpoint>::Req>,
+) -> Result<NoContent, error::UserUpdate> {
+    validate_patch_profile_req(&req)?;
+
+    log::info!("reached");
+
+    db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
+
+    Ok(NoContent)
 }
 
 /// Get a user's profile.
@@ -555,6 +581,10 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             ChangePassword::METHOD.route().to(put_password),
         )
         .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
+        .route(
+            PatchProfile::PATH,
+            PatchProfile::METHOD.route().to(patch_profile),
+        )
         .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
         .route(Delete::PATH, Delete::METHOD.route().to(delete))
         .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))

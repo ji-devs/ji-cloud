@@ -1,0 +1,22 @@
+---
+source: tests/integration/user.rs
+expression: body
+
+---
+{
+  "id": "1f241e1b-b537-493f-a230-075cb16315be",
+  "username": "test_user",
+  "email": "test@test.test",
+  "given_name": "name",
+  "family_name": "nameson",
+  "language": "en_US",
+  "locale": "en_US",
+  "opt_into_edu_resources": false,
+  "over_18": false,
+  "timezone": "US/Pacific-New",
+  "scopes": [
+    "Admin"
+  ],
+  "created_at": "2020-08-08T00:11:21Z",
+  "updated_at": "[timestamptz]"
+}

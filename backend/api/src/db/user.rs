@@ -4,11 +4,13 @@ use shared::domain::{
     meta::{AffiliationId, AgeRangeId, SubjectId},
     user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
 };
-use sqlx::{postgres::PgDatabaseError, PgConnection};
+use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
 
 use super::{nul_if_empty, recycle_metadata};
+use crate::error::Username;
+use shared::domain::user::PatchProfileRequest;
 
 pub async fn lookup(
     db: &sqlx::PgPool,
@@ -100,7 +102,7 @@ pub async fn upsert_profile(
     txn: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     req: &PutProfileRequest,
     user_id: Uuid,
-) -> Result<(), error::RegisterUsername> {
+) -> Result<(), error::UserUpdate> {
     sqlx::query!(
         r#"
 insert into user_profile
@@ -132,17 +134,7 @@ set
         req.location.as_ref(),
     )
     .execute(&mut *txn)
-    .await
-    .map_err(|err| match err {
-        sqlx::Error::Database(err)
-            if err.downcast_ref::<PgDatabaseError>().constraint()
-                == Some("user_username_key") =>
-        {
-            error::RegisterUsername::TakenUsername
-        }
-
-        e => e.into(),
-    })?;
+    .await?;
 
     sqlx::query!(
         "insert into user_scope (user_id, scope) values ($1, $2)",
@@ -160,6 +152,108 @@ set
         nul_if_empty(&req.age_ranges),
     )
     .await?;
+
+    Ok(())
+}
+
+pub async fn update_profile(
+    db: &PgPool,
+    user_id: Uuid,
+    req: PatchProfileRequest,
+) -> Result<(), error::UserUpdate> {
+    let mut txn = db.begin().await?;
+
+    log::info!("asd");
+
+    if !sqlx::query!(
+        //language=SQL
+        r#"
+select exists(select 1 from user_profile where user_id = $1 for update) as "exists!"
+    "#,
+        user_id
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists
+    {
+        return Err(error::UserUpdate::UserNotFound);
+    }
+
+    // handle Option<Option<_>> fields
+
+    if let Some(organization) = req.organization {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set organization = $2
+where user_id = $1 and organization is distinct from $2"#,
+            user_id,
+            organization
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(location) = req.location {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set location = $2
+where user_id = $1 and location is distinct from $2"#,
+            user_id,
+            location
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_profile
+set username               = coalesce($2, username),
+    over_18                = coalesce($3, over_18),
+    given_name             = coalesce($4, given_name),
+    family_name            = coalesce($5, family_name),
+    language               = coalesce($6, language),
+    locale                 = coalesce($7, locale),
+    timezone               = coalesce($8, timezone),
+    opt_into_edu_resources = coalesce($9, opt_into_edu_resources)
+where user_id = $1
+  and (($2::text is not null and $2 is distinct from username) or
+       ($3::bool is not null and $3 is distinct from over_18) or
+       ($4::text is not null and $4 is distinct from given_name) or
+       ($5::text is not null and $5 is distinct from family_name) or
+       ($6::text is not null and $6 is distinct from language) or
+       ($7::text is not null and $7 is distinct from locale) or
+       ($8::text is not null and $8 is distinct from timezone) or
+       ($9::bool is not null and $9 is distinct from opt_into_edu_resources) )
+    "#,
+        user_id,
+        req.username,
+        req.over_18,
+        req.given_name,
+        req.family_name,
+        req.language,
+        req.locale,
+        req.timezone.map(|it| it.to_string()),
+        req.opt_into_edu_resources,
+    )
+    .execute(&mut txn)
+    .await?;
+
+    update_metadata(
+        &mut txn,
+        user_id,
+        req.subjects.as_deref(),
+        req.affiliations.as_deref(),
+        req.age_ranges.as_deref(),
+    )
+    .await?;
+
+    txn.commit().await?;
 
     Ok(())
 }

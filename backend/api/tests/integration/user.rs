@@ -8,6 +8,7 @@ use http::StatusCode;
 use ji_cloud_api::http::Application;
 use serde_json::json;
 use shared::domain::session::NewSessionResponse;
+use shared::domain::user::PatchProfileRequest;
 use shared::domain::{
     meta::{AffiliationId, AgeRangeId, SubjectId},
     session::CreateSessionResponse,
@@ -105,6 +106,56 @@ async fn put_profile() -> anyhow::Result<()> {
     app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".csrf" => "[csrf]"});
+
+    Ok(())
+}
+
+#[actix_rt::test]
+async fn patch_profile() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    let resp = client
+        .patch(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+        .json(&PatchProfileRequest {
+            username: Some("test_user".to_owned()),
+            over_18: Some(false),
+            given_name: Some("name".to_owned()),
+            family_name: Some("nameson".to_owned()),
+            language: Some("en_US".to_owned()),
+            locale: Some("en_US".to_owned()),
+            timezone: None,
+            opt_into_edu_resources: Some(false),
+            organization: Some(None),
+            subjects: None,
+            age_ranges: None,
+            affiliations: Some(Vec::<AffiliationId>::new()),
+            location: None,
+        })
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/user/me/profile", port))
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, { ".updated_at" => "[timestamptz]" });
 
     Ok(())
 }
