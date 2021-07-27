@@ -165,21 +165,21 @@ impl TestServicesSettings {
     }
 
     fn create_test_gcs_client(&self) -> Option<storage::Client> {
-        let settings = GoogleCloudStorageSettings {
-            oauth2_token: "redacted".to_owned(),
-            processing_bucket: RemoteTarget::Local
-                .s3_processing_bucket()
-                .unwrap()
-                .to_owned(),
-            media_bucket: RemoteTarget::Local.s3_bucket().unwrap().to_owned(),
-        };
-
         return None;
 
-        let client = storage::Client::new(settings);
-
-        log::info!("Test GCS client created successfully");
-
-        client.ok()
+        // let settings = GoogleCloudStorageSettings {
+        //     oauth2_token: "redacted".to_owned(),
+        //     processing_bucket: RemoteTarget::Local
+        //         .s3_processing_bucket()
+        //         .unwrap()
+        //         .to_owned(),
+        //     media_bucket: RemoteTarget::Local.s3_bucket().unwrap().to_owned(),
+        // };
+        //
+        // let client = storage::Client::new(settings);
+        //
+        // log::info!("Test GCS client created successfully");
+        //
+        // client.ok()
     }
 }

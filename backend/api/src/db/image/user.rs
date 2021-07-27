@@ -33,7 +33,12 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
 pub async fn get(db: &PgPool, image: ImageId) -> sqlx::Result<Option<UserImage>> {
     sqlx::query_as!(
         UserImage,
-        r#"select id as "id: ImageId" from user_image_library where id = $1"#,
+        r#"
+select id as "id: ImageId" 
+from user_image_library inner join user_image_upload 
+    on user_image_library.id = user_image_upload.image_id 
+where id = $1 and processing_result is true
+        "#,
         image.0
     )
     .fetch_optional(db)
@@ -43,7 +48,13 @@ pub async fn get(db: &PgPool, image: ImageId) -> sqlx::Result<Option<UserImage>>
 pub fn list(db: &PgPool) -> BoxStream<'_, sqlx::Result<UserImage>> {
     sqlx::query_as!(
         UserImage,
-        r#"select id as "id: ImageId" from user_image_library order by created_at desc"#,
+        r#"
+select id as "id: ImageId" 
+from user_image_library join user_image_upload 
+    on user_image_library.id = user_image_upload.image_id
+where processing_result is true
+order by created_at desc
+"#,
     )
     .fetch(db)
 }

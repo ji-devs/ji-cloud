@@ -142,13 +142,15 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))                as categories,
-       array((select row (style_id) from image_style where image_id = id))                      as styles,
-       array((select row (age_range_id) from image_age_range where image_id = id))              as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id))          as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id))                     as tags
+       array((select row (category_id) from image_category where image_id = id))       as categories,
+       array((select row (style_id) from image_style where image_id = id))             as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
 from image_metadata
+         join image_upload on id = image_id
 where id = $1
+  and processing_result is true
 "#)
     .bind(id)
     .fetch_optional(db)
@@ -171,15 +173,16 @@ select id,
        publish_at,
        created_at,
        updated_at,
-       array((select row (category_id) from image_category where image_id = id))                as categories,
-       array((select row (style_id) from image_style where image_id = id))                      as styles,
-       array((select row (age_range_id) from image_age_range where image_id = id))              as age_ranges,
-       array((select row (affiliation_id) from image_affiliation where image_id = id))          as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id))                     as tags
+       array((select row (category_id) from image_category where image_id = id))       as categories,
+       array((select row (style_id) from image_style where image_id = id))             as styles,
+       array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
+       array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
 from image_metadata
-where 
-    publish_at < now() is not distinct from $1 or $1 is null
+         inner join image_upload on image_id = id
+where publish_at < now() is not distinct from $1 or $1 is null
     and kind = $3 is not distinct from $3 or $3 is null
+    and processing_result is true
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#)
@@ -211,9 +214,12 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
 from image_metadata
-inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+         inner join image_upload on image_id = id
+         inner join unnest($1::uuid[])
+    with ordinality t(id, ord) USING (id)
+where processing_result is true
 order by t.ord
 "#).bind(ids)
     .fetch(db)
