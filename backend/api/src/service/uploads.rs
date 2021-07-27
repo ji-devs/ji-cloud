@@ -133,7 +133,7 @@ skip locked
 
     let file = s3
         .download_media_for_processing(
-            MediaLibrary::Global,
+            MediaLibrary::User,
             id,
             FileKind::ImagePng(PngImageFile::Original),
         )
@@ -176,7 +176,7 @@ skip locked
         Err(_) => unreachable!(),
     };
 
-    s3.upload_png_images_copy_original(MediaLibrary::Global, id, resized, thumbnail)
+    s3.upload_png_images_copy_original(MediaLibrary::User, id, resized, thumbnail)
         .await?;
 
     sqlx::query!("update user_image_upload set processed_at = now(), processing_result = true where image_id = $1", id).execute(&mut txn).await?;
