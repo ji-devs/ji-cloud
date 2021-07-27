@@ -286,16 +286,6 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    // .service(
-    //     web::resource(image::Upload::PATH)
-    //         .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
-    //         .route(image::Upload::METHOD.route().to(upload)),
-    // )
-    .route(
-        image::Upload::PATH,
-        image::Upload::METHOD.route().to(upload),
-    )
-    .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
         image::Search::PATH,
         image::Search::METHOD.route().to(search),
@@ -304,6 +294,7 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         image::Browse::PATH,
         image::Browse::METHOD.route().to(browse),
     )
+    .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),
@@ -311,6 +302,10 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::Delete::PATH,
         image::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        image::Upload::PATH,
+        image::Upload::METHOD.route().to(upload),
     )
     .route(
         image::user::Create::PATH,

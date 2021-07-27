@@ -54,15 +54,14 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Upload an image
-/// Note: can be used to update the raw data associated with the image.
+/// Upload an image.
+/// _NOTE_: can be used to update the raw data associated with the image.
 ///
 /// Errors:
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`Unimplemented`](http::StatusCode::UNIMPLEMENTED) when the s3/gcs service is disabled.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid. This may be an API server issue.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`Unimplemented`](http::StatusCode::UNIMPLEMENTED) when the s3/gcs service is disabled.
 pub struct Upload;
 impl ApiEndpoint for Upload {
     // raw bytes
