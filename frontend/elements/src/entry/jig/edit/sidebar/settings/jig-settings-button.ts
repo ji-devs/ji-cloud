@@ -1,10 +1,11 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 
-export type Kind = "background" | "feedback"; 
+export type Kind = "theme" | "background" | "feedback"; 
 
 const STR_LABEL: {
     [key in Kind]: string
 } = {
+    ['theme']: "JIG’s theme",
     ['background']: "Add Background Music",
     ['feedback']: "Feedback Effects",
 };
@@ -18,15 +19,21 @@ export class _ extends LitElement {
                     background-color: transparent;
                     padding: 0;
                     border: 0;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    align-items: center;
+                }
+                button:hover, button:active {
+                    color: var(--main-blue);
+                }
+                .label {
                     display: grid;
                     grid-template-columns: auto auto;
                     column-gap: 12px;
                     align-items: center;
-                    cursor: pointer;
                     font-size: 16px;
-                }
-                button:hover, button:active {
-                    color: var(--main-blue);
                 }
                 img-ui {
                     display: inline-block;
@@ -54,9 +61,13 @@ export class _ extends LitElement {
     render() {
         return html`
             <button>
-                <img-ui class="inactive" path="entry/jig/settings/audio-${this.kind}.svg"></img-ui>
-                <img-ui class="active" path="entry/jig/settings/audio-${this.kind}-active.svg"></img-ui>
-                <span>${STR_LABEL[this.kind]}</span>
+                <div class="label">
+                    <img-ui class="inactive" path="entry/jig/settings/${this.kind}.svg"></img-ui>
+                    <img-ui class="active" path="entry/jig/settings/${this.kind}-active.svg"></img-ui>
+                    <span>${STR_LABEL[this.kind]}</span>
+                </div>
+
+                <i class="fa-light fa-chevron-right"></i>
             </button>
         `;
     }

@@ -2,27 +2,21 @@ use dominator::{Dom, DomBuilder, clone, html};
 use dominator_helpers::signals::EitherSignal;
 use std::rc::Rc;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
 use futures_signals::{
-    map_ref,
     signal::{ReadOnlyMutable, Mutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use super::{
-    state::*,
-    sprite::dom::{
+use super::{sprite::dom::{
         SpriteRawRenderOptions,
         SpriteRenderOptions,
         render_sticker_sprite, 
         render_sticker_sprite_raw, 
-    }, 
-    text::dom::{
+    }, state::*, text::dom::{
         TextRawRenderOptions,
         TextRenderOptions,
         render_sticker_text, 
         render_sticker_text_raw, 
-    }
-};
+    }, video::dom::{VideoRawRenderOptions, VideoRenderOptions, render_sticker_video, render_sticker_video_raw}};
 use web_sys::HtmlElement;
 use shared::domain::jig::module::body::{Transform, _groups::design::Sticker as RawSticker};
 
@@ -36,6 +30,7 @@ pub fn mixin_sticker_button(dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlEleme
 pub enum StickerRenderOptions {
     Sprite(SpriteRenderOptions),
     Text(TextRenderOptions),
+    Video(VideoRenderOptions),
 }
 
 
@@ -44,6 +39,7 @@ impl StickerRenderOptions {
         match sticker {
             Sticker::Sprite(_) => Self::Sprite(SpriteRenderOptions { base: base.unwrap_or_default() }),
             Sticker::Text(_) => Self::Text(TextRenderOptions { base: base.unwrap_or_default() }),
+            Sticker::Video(_) => Self::Video(VideoRenderOptions { base: base.unwrap_or_default(), ..Default::default() }),
         }
     }
 
@@ -59,11 +55,18 @@ impl StickerRenderOptions {
             _ => panic!("not a text!")
         }
     }
+    pub fn into_video_unchecked(self) -> VideoRenderOptions {
+        match self {
+            Self::Video(inner) => inner,
+            _ => panic!("not a video!")
+        }
+    }
 
     pub fn base(&self) -> &BaseRenderOptions {
         match self {
             Self::Sprite(inner) => &inner.base,
             Self::Text(inner) => &inner.base,
+            Self::Video(inner) => &inner.base,
         }
     }
 }
@@ -77,6 +80,7 @@ pub struct BaseRenderOptions {
 pub enum StickerRawRenderOptions {
     Sprite(SpriteRawRenderOptions),
     Text(TextRawRenderOptions),
+    Video(VideoRawRenderOptions),
 }
 
 impl StickerRawRenderOptions {
@@ -84,6 +88,7 @@ impl StickerRawRenderOptions {
         match sticker {
             RawSticker::Sprite(_) => Self::Sprite(SpriteRawRenderOptions { base: base.unwrap_or_default() }),
             RawSticker::Text(_) => Self::Text(TextRawRenderOptions { base: base.unwrap_or_default() }),
+            RawSticker::Video(_) => Self::Video(VideoRawRenderOptions { base: base.unwrap_or_default(), ..Default::default() }),
         }
     }
 
@@ -99,11 +104,18 @@ impl StickerRawRenderOptions {
             _ => panic!("not a text!")
         }
     }
+    pub fn into_video_unchecked(self) -> VideoRawRenderOptions {
+        match self {
+            Self::Video(inner) => inner,
+            _ => panic!("not a video!")
+        }
+    }
 
     pub fn base(&self) -> &BaseRawRenderOptions {
         match self {
             Self::Sprite(inner) => &inner.base,
             Self::Text(inner) => &inner.base,
+            Self::Video(inner) => &inner.base,
         }
     }
 }
@@ -192,6 +204,7 @@ pub fn render_sticker<T: AsSticker>(stickers: Rc<Stickers<T>>, index: ReadOnlyMu
     match sticker.as_ref() {
         Sticker::Sprite(sprite) => render_sticker_sprite(stickers.clone(), index, sprite.clone(), opts.map(|opts| opts.into_sprite_unchecked())),
         Sticker::Text(text) => render_sticker_text(stickers.clone(), index, text.clone(), opts.map(|opts| opts.into_text_unchecked())),
+        Sticker::Video(video) => render_sticker_video(stickers.clone(), index, video.clone(), opts.map(|opts| opts.into_video_unchecked())),
     }
 }
 
@@ -236,6 +249,11 @@ where
                     opts.base.set_mixin(mixin.clone());
                     StickerRawRenderOptions::Text(opts)
                 },
+                RawSticker::Video(_) => {
+                    let mut opts = VideoRawRenderOptions::default();
+                    opts.base.set_mixin(mixin.clone());
+                    StickerRawRenderOptions::Video(opts)
+                },
             };
 
             render_sticker_raw(&sticker, theme_id, Some(opts))
@@ -247,6 +265,7 @@ pub fn render_sticker_raw(sticker:&RawSticker, theme_id: ThemeId, opts: Option<S
     match sticker {
         RawSticker::Sprite(sprite) => render_sticker_sprite_raw(sprite, opts.map(|opts| opts.into_sprite_unchecked())),
         RawSticker::Text(text) => render_sticker_text_raw(text, theme_id, opts.map(|opts| opts.into_text_unchecked())),
+        RawSticker::Video(video) => render_sticker_video_raw(video, opts.map(|opts| opts.into_video_unchecked())),
     }
 }
 

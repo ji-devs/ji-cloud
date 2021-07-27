@@ -112,6 +112,7 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
         StickerBoundsKind::Auto => {
             match sticker {
                 Sticker::Text(_) => StickerBoundsKind::BoundingBox,
+                Sticker::Video(_) => StickerBoundsKind::BoundingBox,
                 Sticker::Sprite(_) => StickerBoundsKind::BoundingBox //TODO - change to media when sticker.draw_to_canvas() exists
             }
         },
@@ -122,7 +123,8 @@ pub async fn get_hit_index<'a, V: AsRef<Trace>>(source: StickerHitSource<'a>, tr
                     //TODO - kick this down to sticker.draw_to_canvas() when it exists
                     panic!("can't get bounds for text media!");
                 },
-                Sticker::Sprite(_) => StickerBoundsKind::Media
+                Sticker::Sprite(_) => StickerBoundsKind::Media,
+                Sticker::Video(_) => StickerBoundsKind::Media
             }
         }
     };

@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeChoice, Transform};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
@@ -41,6 +43,8 @@ pub enum Sticker {
     Sprite(Sprite),
     /// Text
     Text(Text),
+    /// Video
+    Video(Video),
 }
 
 impl Sticker {
@@ -49,6 +53,7 @@ impl Sticker {
         match self {
             Self::Sprite(sprite) => &sprite.transform,
             Self::Text(text) => &text.transform,
+            Self::Video(video) => &video.transform,
         }
     }
 }
@@ -88,6 +93,39 @@ pub enum SpriteEffect {
     /// Remove White
     RemoveWhite,
 }
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Video
+/// Text are serialized text things
+pub struct Video {
+    /// The video host
+    pub host: VideoHost,
+
+    /// Transforms
+    pub transform: Transform,
+}
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// Host of video
+pub enum VideoHost {
+    /// YouTube
+    Youtube(YoutubeUrl),
+}
+
+
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+/// YouTube host video url
+pub struct YoutubeUrl (pub String);
+
+
+/// Youtube url parse error
+pub type YoutubeUrlError = String;
+
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]

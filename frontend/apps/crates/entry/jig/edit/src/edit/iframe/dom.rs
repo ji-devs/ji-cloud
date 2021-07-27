@@ -20,6 +20,7 @@ impl IframeDom {
         let module_kind:Rc<RefCell<Option<ModuleKind>>> = Rc::new(RefCell::new(None));
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
+            .property("allow", "autoplay; fullscreen")
             .property("slot", "main")
             .future(clone!(jig_id, module_id, module_kind, is_loading => async move { 
                 actions::load_module_kind(jig_id, module_id, module_kind).await;

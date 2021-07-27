@@ -22,6 +22,8 @@ members = [
     "crates/entry/module/matching/play",
     "crates/entry/module/poster/edit",
     "crates/entry/module/poster/play",
+    "crates/entry/module/video/edit",
+    "crates/entry/module/video/play",
     "crates/entry/module/tapping-board/edit",
     "crates/entry/module/tapping-board/play",
 	"crates/entry/module/drag-drop/edit",

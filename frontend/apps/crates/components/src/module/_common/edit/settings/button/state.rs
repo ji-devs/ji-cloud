@@ -108,13 +108,17 @@ impl <T: Copy + Display + Default + Eq + FromStr + 'static> SettingsValueExt for
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SettingsButtonKind {
     Attempts,
+    Autoplay,
     CardDouble,
     CardSingle,
     ContinueAll,
     ContinueClick,
+    ContinueNextActivity,
     ContinueSome,
     Highlight,
     HighlightOff,
+    Loop,
+    Mute,
     NoLimit,
     NumChoices,
     NumPairs,
@@ -125,20 +129,25 @@ pub enum SettingsButtonKind {
     ScoreOff,
     Swap,
     TimeLimit,
-    TimeLimitOff
+    TimeLimitOff,
+    VideoCaptions,
 }
 
 impl SettingsButtonKind {
     pub fn as_str_id(&self) -> &'static str {
         match self {
             Self::Attempts => "attempts",
+            Self::Autoplay => "autoplay",
             Self::CardDouble => "card-double",
             Self::CardSingle => "card-single",
             Self::ContinueAll => "continue-all",
             Self::ContinueClick => "continue-click",
+            Self::ContinueNextActivity => "continue-next-activity",
             Self::ContinueSome => "continue-some",
             Self::Highlight => "highlight",
             Self::HighlightOff => "highlight-off",
+            Self::Loop => "loop",
+            Self::Mute => "mute",
             Self::NoLimit => "no-limit",
             Self::NumChoices => "n_choices",
             Self::NumPairs => "n_pairs",
@@ -150,6 +159,7 @@ impl SettingsButtonKind {
             Self::Swap => "swap",
             Self::TimeLimit => "time-limit",
             Self::TimeLimitOff => "time-limit-off",
+            Self::VideoCaptions => "video-captions",
         }
     }
 }

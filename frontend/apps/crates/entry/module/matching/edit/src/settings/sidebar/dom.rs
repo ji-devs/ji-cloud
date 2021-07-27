@@ -14,7 +14,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
             (LineKind::GameDisplay, vec![
-                SettingsButton::new_value(
+                Some(SettingsButton::new_value(
                     SettingsButtonKind::NumChoices,
                     || always(true),
                     SettingsValue::new(
@@ -23,8 +23,8 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                             state.set_n_choices(value);
                         })
                     )
-                ),
-                SettingsButton::new_click(
+                )),
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::Swap, 
                     clone!(state => move || {
                         state.base.extra.settings.swap.signal()
@@ -33,11 +33,11 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                         state.toggle_swap();
                     }),
 
-                )
+                ))
             ]),
 
             (LineKind::Rounds, vec![
-                SettingsButton::new_value(
+                Some(SettingsButton::new_value(
                     SettingsButtonKind::Rounds,
                     || always(true),
                     SettingsValue::new(
@@ -46,11 +46,11 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                             state.set_n_rounds(value);
                         })
                     )
-                ),
+                )),
             ]),
 
             (LineKind::TimeLimit, vec![
-                SettingsButton::new_click(
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::TimeLimitOff, 
                     clone!(state => move || {
                         state.base.extra.settings.has_time_limit
@@ -60,8 +60,8 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     clone!(state => move || {
                         state.set_has_time_limit(false);
                     }),
-                ),
-                SettingsButton::new_value_click(
+                )),
+                Some(SettingsButton::new_value_click(
                     SettingsButtonKind::TimeLimit,
                     clone!(state => move || {
                         state.base.extra.settings.has_time_limit
@@ -76,7 +76,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     clone!(state => move || {
                         state.set_has_time_limit(true);
                     }),
-                ),
+                )),
             ]),
 
 

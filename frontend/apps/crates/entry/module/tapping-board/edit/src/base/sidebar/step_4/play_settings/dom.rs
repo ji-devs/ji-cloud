@@ -11,7 +11,7 @@ pub fn render(state: Rc<State>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
             (LineKind::GameDisplay, vec![
-                SettingsButton::new_click(
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::Highlight, 
                     clone!(state => move || {
                         state.base.play_settings.hint.signal_ref(|curr| {
@@ -21,8 +21,8 @@ pub fn render(state: Rc<State>) -> Dom {
                     clone!(state => move || {
                         state.set_hint(Hint::Highlight);
                     }),
-                ),
-                SettingsButton::new_click(
+                )),
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::HighlightOff, 
                     clone!(state => move || {
                         state.base.play_settings.hint.signal_ref(|curr| {
@@ -32,10 +32,10 @@ pub fn render(state: Rc<State>) -> Dom {
                     clone!(state => move || {
                         state.set_hint(Hint::None);
                     }),
-                )
+                ))
             ]),
             (LineKind::GameDisplay, vec![
-                SettingsButton::new_click(
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::ContinueClick, 
                     clone!(state => move || {
                         state.base.play_settings.next.signal_ref(|curr| {
@@ -45,8 +45,8 @@ pub fn render(state: Rc<State>) -> Dom {
                     clone!(state => move || {
                         state.set_next(Next::Continue);
                     }),
-                ),
-                SettingsButton::new_click(
+                )),
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::ContinueAll, 
                     clone!(state => move || {
                         state.base.play_settings.next.signal_ref(|curr| {
@@ -56,9 +56,9 @@ pub fn render(state: Rc<State>) -> Dom {
                     clone!(state => move || {
                         state.set_next(Next::SelectAll);
                     }),
-                ),
+                )),
 
-                SettingsButton::new_value_click(
+                Some(SettingsButton::new_value_click(
                     SettingsButtonKind::ContinueSome,
                     clone!(state => move || {
                         state.base.play_settings.next.signal_ref(|curr| {
@@ -74,7 +74,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     clone!(state => move || {
                         state.set_next_some();
                     }),
-                ),
+                )),
                 
             ])
         ]

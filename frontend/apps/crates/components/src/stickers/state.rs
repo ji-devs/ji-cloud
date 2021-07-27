@@ -11,6 +11,7 @@ use shared::domain::jig::module::body::_groups::design::Sticker as RawSticker;
 use super::{
     sprite::state::Sprite,
     text::state::Text,
+    video::state::Video,
     callbacks::Callbacks,
 };
 use crate::{text_editor::state::State as TextEditorState, transform::state::TransformState};
@@ -35,7 +36,9 @@ pub enum Sticker {
     /// Sprites
     Sprite(Rc<Sprite>),
     /// Text
-    Text(Rc<Text>)
+    Text(Rc<Text>),
+    /// Text
+    Video(Rc<Video>)
 }
 
 impl AsRef<Sticker> for Sticker {
@@ -71,6 +74,14 @@ impl Sticker {
                             stickers.call_change();
                         }))
                     )
+            )),
+            RawSticker::Video(video) => Self::Video(Rc::new(
+                    Video::new(
+                        video,
+                        Some(clone!(stickers => move |_| {
+                            stickers.call_change();
+                        }))
+                    )
             ))
         }
     }
@@ -79,19 +90,22 @@ impl Sticker {
         match self {
             Self::Sprite(sprite) => RawSticker::Sprite(sprite.to_raw()),
             Self::Text(text) => RawSticker::Text(text.to_raw()),
+            Self::Video(video) => RawSticker::Video(video.to_raw()),
         }
     }
 
     pub fn get_translation_2d(&self) -> (f64, f64) {
         match self {
             Self::Sprite(sprite) => sprite.transform.get_inner_clone().get_translation_2d(),
-            Self::Text(text) => text.transform.get_inner_clone().get_translation_2d()
+            Self::Text(text) => text.transform.get_inner_clone().get_translation_2d(),
+            Self::Video(video) => video.transform.get_inner_clone().get_translation_2d()
         }
     }
     pub fn transform(&self) -> &TransformState {
         match self {
             Self::Sprite(sprite) => &sprite.transform,
             Self::Text(text) => &text.transform,
+            Self::Video(video) => &video.transform,
         }
     }
 }

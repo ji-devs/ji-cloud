@@ -11,7 +11,7 @@ use super::{
     menu::dom::render_sticker_sprite_menu
 };
 use web_sys::HtmlElement;
-use crate::transform::dom::render_transform;
+use crate::transform::{dom::render_transform, state::ResizeLevel};
 use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Transform};
 //For stickers, just let the transform affect it directly
 //that means it's not a child of the transform, they're independent
@@ -75,7 +75,7 @@ pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: Read
             if active {
                 Some(render_transform(
                     sprite.transform.clone(),
-                    true,
+                    ResizeLevel::Full,
                     Some(clone!(stickers, index, sprite => move || render_sticker_sprite_menu(stickers.clone(), index.clone(), sprite.clone())))
                 ))
             } else {

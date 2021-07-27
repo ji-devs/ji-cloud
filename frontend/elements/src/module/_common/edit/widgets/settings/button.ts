@@ -23,6 +23,11 @@ export type Kind =
 	| "swap"
 	| "time-limit"
 	| "time-limit-off"
+	| "video-captions"
+	| "autoplay"
+	| "mute"
+	| "loop"
+	| "continue-next-activity"
 
 const OneImage:Set<Kind> = new Set(["n_choices", "n_pairs", "order", "rounds"]);
 
@@ -45,7 +50,12 @@ const STR_LABEL:Record<Kind, string> = {
 	"rounds": "Game rounds",
 	"n_choices": "No. of choices",
 	"n_pairs": "Pairs",
-	"swap": "Swap rows"
+	"swap": "Swap rows",
+	"video-captions": "Play with\ncaptions",
+	"autoplay": "Start video\nautomatically",
+	"mute": "Play video\nwithout the sound",
+	"loop": "Play video\nin loop",
+	"continue-next-activity": "Continue to\nnext activity\nautomatically",
 };
 
 @customElement("module-settings-button")

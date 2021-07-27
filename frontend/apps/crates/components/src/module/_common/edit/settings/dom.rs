@@ -27,7 +27,10 @@ fn _render_mixin<F>(state: Rc<ModuleSettings>, mixin: Option<F>) -> Dom
               html!("module-settings-line", {
                   .property("kind", line_kind.as_str_id())
                     .children(buttons.iter().map(|button| {
-                        render_button(button.clone())
+                        match button {
+                            Some(button) => render_button(button.clone()),
+                            None => html!("span"),
+                        }
                     }))
               })
             })

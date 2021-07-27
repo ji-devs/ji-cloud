@@ -1,7 +1,10 @@
+use crate::stickers::video::state::Video;
+
 use super::{
     state::*,
     sprite::{ext::*, state::*},
     text::{ext::*, state::*},
+    video::{ext::*, state::*},
 };
 use dominator::clone;
 use std::rc::Rc;
@@ -12,7 +15,7 @@ use shared::{
         jig::module::body::{
             Image,
             Transform,
-            _groups::design::{Sticker as RawSticker, Text as RawText, Sprite as RawSprite, }
+            _groups::design::{Sticker as RawSticker, Text as RawText, Sprite as RawSprite, Video as RawVideo, VideoHost }
         }
     }
 };
@@ -30,6 +33,7 @@ impl <T: AsSticker> Stickers<T> {
                 match &mut raw {
                     RawSticker::Sprite(sprite) => sprite.transform.nudge_for_duplicate(),
                     RawSticker::Text(text) => text.transform.nudge_for_duplicate(),
+                    RawSticker::Video(video) => video.transform.nudge_for_duplicate(),
                 };
                
                 item.duplicate_with_sticker(Sticker::new(_self.clone(), &raw))
@@ -99,6 +103,17 @@ impl <T: AsSticker> Stickers<T> {
             Text::new(
                 _self.text_editor.clone(),
                 &RawText::new(value),
+                Some(clone!(_self => move |_| {
+                    _self.call_change();
+                }))
+            )
+        ))));
+    }
+
+    pub fn add_video(_self: Rc<Self>, value: VideoHost) {
+        _self.add_sticker(T::new_from_sticker(Sticker::Video(Rc::new(
+            Video::new(
+                &RawVideo::new(value),
                 Some(clone!(_self => move |_| {
                     _self.call_change();
                 }))

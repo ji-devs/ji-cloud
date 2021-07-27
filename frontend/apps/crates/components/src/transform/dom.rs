@@ -14,7 +14,7 @@ use utils::resize::resize_info_signal;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-pub fn render_transform(state: Rc<TransformState>, allow_resize: bool, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
+pub fn render_transform(state: Rc<TransformState>, resize_level: ResizeLevel, get_menu_contents: Option<impl Fn() -> Dom + 'static>) -> Dom {
     html!("empty-fragment", {
         .child(
             html!("transform-box", {
@@ -48,7 +48,7 @@ pub fn render_transform(state: Rc<TransformState>, allow_resize: bool, get_menu_
                 .style_signal("height", state.height_px_signal().map(|x| format!("{}px", x)))
                 .property_signal("isTransforming", state.is_transforming.signal())
                 .property("hasMenu", get_menu_contents.is_some())
-                .property("hideResizeControls", !allow_resize)
+                .property("resizeLevel", resize_level.to_str())
                 .property_signal("width", state.width_px_signal())
                 .property_signal("height", state.height_px_signal())
                 .property_signal("screenScale", resize_info_signal().map(|resize| resize.scale)) 

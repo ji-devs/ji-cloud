@@ -7,7 +7,9 @@ pub enum LineKind {
     Rounds,
     TimeLimit,
     Attempts,
-    Score
+    Score,
+    VideoPlay,
+    VideoFeatures,
 }
 
 impl LineKind {
@@ -19,7 +21,8 @@ impl LineKind {
             Self::TimeLimit => "time-limit",
             Self::Attempts => "attempts",
             Self::Score => "score",
-
+            Self::VideoPlay => "video-play",
+            Self::VideoFeatures => "video-features",
         }
     }
 }

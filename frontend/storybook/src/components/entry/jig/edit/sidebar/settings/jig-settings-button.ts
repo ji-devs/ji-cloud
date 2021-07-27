@@ -26,7 +26,7 @@ SettingsButton.argTypes = {
     kind: {
         control: {
             type: 'inline-radio',
-            options: ["background", "effects"],
+            options: ["theme", "background", "feedback"],
         }
     },
 }

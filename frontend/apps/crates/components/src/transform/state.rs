@@ -287,3 +287,18 @@ pub enum ScaleFrom {
     BottomLeft,
     BottomRight,
 }
+
+pub enum ResizeLevel {
+    Full,
+    None,
+    KeepAspectRatio
+}
+impl ResizeLevel {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            ResizeLevel::Full => "full",
+            ResizeLevel::None => "none",
+            ResizeLevel::KeepAspectRatio => "keep-aspect-ratio",
+        }
+    }
+}

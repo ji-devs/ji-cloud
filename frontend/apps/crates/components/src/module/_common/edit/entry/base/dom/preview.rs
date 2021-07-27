@@ -140,6 +140,7 @@ where
 
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
+            .property("allow", "autoplay; fullscreen")
             .property("slot", "main")
             .style("width", "100%")
             .style("height", "100%")

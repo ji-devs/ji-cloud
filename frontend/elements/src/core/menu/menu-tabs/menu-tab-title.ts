@@ -12,6 +12,7 @@ export type TitleKind = ""
     | 'text'
     | 'image'
     | 'audio'
+    | 'video'
     | 'select'
     | 'play-settings'
     | 'instructions';
@@ -29,6 +30,7 @@ const STR_LABEL_LOOKUP: {
     ['text']: 'Text',
     ['image']: 'Image',
     ['audio']: 'Audio',
+    ['video']: 'Video',
     ['play-settings']: 'Play Settings',
     ['instructions']: 'Instructions',
 };

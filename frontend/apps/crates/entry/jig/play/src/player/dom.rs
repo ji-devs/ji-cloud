@@ -37,6 +37,7 @@ pub fn render(state: Rc<State>) -> Dom {
         })
         .children(&mut [
             html!("iframe" => HtmlIFrameElement, {
+                .property("allow", "autoplay; fullscreen")
                 .property("slot", "iframe")
                 .property_signal("src", state.active_module.signal_cloned().map(clone!(state => move|active_module_index| {
                     match &*state.jig.lock_ref() {

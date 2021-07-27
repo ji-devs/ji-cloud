@@ -53,9 +53,11 @@ export class _ extends LitElement {
                 border-radius: 16px;
                 overflow: hidden;
             }
-            .public {
-                display: grid;
-                place-content: center;
+            ::slotted([slot=public]) {
+                display: flex;
+                place-content: space-between;
+                margin-top: 24px;
+                padding: 0 16px;
             }
             .column-2 {
                 display: grid;

@@ -29,9 +29,10 @@ export const Publish = (props?:Partial<Args>) => {
         <div style="padding:30px;background-color:#d7eafa;">
             <jig-edit-publish ${argsToAttrs(props)}>
                 <img-ji slot="img" lib="mock" size="full" id="jig-gallery.jpg"></img-ji>
-                <input-switch slot="public" label="My JIG is public"></input-switch>
-
-                
+                <label slot="public">
+                    My JIG is public
+                    <input-switch></input-switch>
+                </label>
                 <input-wrapper
                     slot="name"
                     label="JIG’s name"

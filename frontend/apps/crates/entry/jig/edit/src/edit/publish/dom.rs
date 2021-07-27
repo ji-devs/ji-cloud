@@ -50,15 +50,18 @@ fn render_page(state: Rc<State>) -> Dom {
                 .property("size", "full")
                 .property("id", "jig-gallery.jpg")
             }),
-            html!("input-switch", {
+            html!("label", {
                 .property("slot", "public")
-                .property("label", STR_PUBLIC_LABEL)
-                .property_signal("enabled", state.jig.is_public.signal_cloned())
-                .event(clone!(state => move |evt: events::CustomToggle| {
-                    let value = evt.value();
-                    state.jig.is_public.set(value);
+                .text(STR_PUBLIC_LABEL)
+                .child(html!("input-switch", {
+                    .property_signal("enabled", state.jig.is_public.signal_cloned())
+                    .event(clone!(state => move |evt: events::CustomToggle| {
+                        let value = evt.value();
+                        state.jig.is_public.set(value);
+                    }))
                 }))
-            }),
+            })
+            ,
             html!("input-wrapper", {
                 .property("slot", "name")
                 .property("label", STR_NAME_LABEL)

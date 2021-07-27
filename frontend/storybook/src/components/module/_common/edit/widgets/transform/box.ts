@@ -1,18 +1,21 @@
 import {argsToAttrs} from "@utils/attributes";
 import "@elements/module/_common/edit/widgets/transform/box";
+import { ResizeLevel } from "@elements/module/_common/edit/widgets/transform/box";
 
 export default {
-    title: "Module / _COMMON /  edit /Widgets / Transform"
+    title: "Module / _COMMON / edit / Widgets / Transform"
 }
 
 interface Args {
     width: number;
     height: number;
+    resizeLevel: ResizeLevel;
 }
 
 const DEFAULT_ARGS:Args = {
     width: 300,
     height: 100,
+    resizeLevel: "full",
 }
 
 export const Box = (props?:Partial<Args>) => {
@@ -43,3 +46,11 @@ export const Box = (props?:Partial<Args>) => {
 }
 
 Box.args = DEFAULT_ARGS;
+Box.argTypes = {
+    resizeLevel: {
+        control: {
+            type: 'inline-radio',
+            options: ["full", "keep-aspect-ratio", "none"]
+        }
+    }
+}

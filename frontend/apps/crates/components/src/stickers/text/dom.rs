@@ -10,10 +10,10 @@ use futures_signals::{
 };
 use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
 use crate::{text_editor::dom::render_wysiwyg, transform::{
-        dom::render_transform,
-        events::Move as TransformMove,
-        state::{TransformState, Action as TransformAction},
-    }};
+    dom::render_transform,
+    events::Move as TransformMove,
+    state::{TransformState, Action as TransformAction, ResizeLevel},
+}};
 use super::{
     state::Text,
     super::{dom::{BaseRawRenderOptions, BaseRenderOptions}, state::{Stickers, AsSticker}},
@@ -106,7 +106,7 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
             if is_active && !is_editing {
                 Some(render_transform(
                     text.transform.clone(),
-                    false,
+                    ResizeLevel::None,
                     Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
                 ))
             } else {

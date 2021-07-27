@@ -8,7 +8,9 @@ export type Kind = "card-view"
 	| "rounds"
 	| "time-limit"
 	| "attempts"
-	| "score";
+	| "score"
+	| "video-play"
+	| "video-features";
 
 const STR_LABEL:Record<Kind, string> = {
 	"card-view": "Select how the player will view the cards",
@@ -16,7 +18,9 @@ const STR_LABEL:Record<Kind, string> = {
 	"rounds": "How many slides / questions?",
 	"time-limit": "Would you like to set time limit?",
 	"attempts": "How many attempts?",
-	"score": "Would you like to include score?"
+	"score": "Would you like to include score?",
+	"video-play": "Video play settings",
+	"video-features": "Play features"
 };
 
 @customElement("module-settings-line")
@@ -44,7 +48,7 @@ export class _ extends LitElement {
 	.options {
 		display: grid; 
   		grid-template-columns: 64px 64px; 
-  		gap: 0px 52px; 
+  		gap: 24px 52px; 
 	}
 
       `,

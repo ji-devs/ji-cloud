@@ -13,6 +13,11 @@ temp_make_event!(Ended, "ended" => web_sys::Event);
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
 
+temp_make_event!(YoutubePlaying, "youtube-playing" => web_sys::Event);
+temp_make_event!(YoutubePaused, "youtube-paused" => web_sys::Event);
+temp_make_event!(YoutubeBuffering, "youtube-buffering" => web_sys::Event);
+temp_make_event!(YoutubeEnded, "youtube-ended" => web_sys::Event);
+
 temp_make_event!(Updated, "updated" => web_sys::Event);
 
 temp_make_event!(Accept, "accept" => web_sys::Event);

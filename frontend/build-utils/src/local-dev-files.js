@@ -25,6 +25,8 @@ const ALLOWED_APP_NAMES = [
 	"module/matching/play",
 	"module/poster/edit",
 	"module/poster/play",
+	"module/video/edit",
+	"module/video/play",
 	"module/tapping-board/edit",
 	"module/tapping-board/play",
 	"module/drag-drop/edit",

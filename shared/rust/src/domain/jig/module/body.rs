@@ -14,6 +14,9 @@ pub mod memory;
 /// Poster Body.
 pub mod poster;
 
+/// Video Body.
+pub mod video;
+
 /// Tapping Board Body.
 pub mod tapping_board;
 
@@ -55,6 +58,9 @@ pub enum Body {
 
     /// Module is a poster, and has a poster's body.
     Poster(poster::ModuleData),
+
+    /// ??
+    Video(video::ModuleData),
 
     /// Module is a tapping board, and has a tapping board's body.
     TappingBoard(tapping_board::ModuleData),
@@ -235,6 +241,7 @@ impl Body {
             Self::CardQuiz(_) => super::ModuleKind::CardQuiz,
             Self::Matching(_) => super::ModuleKind::Matching,
             Self::Poster(_) => super::ModuleKind::Poster,
+            Self::Video(_) => super::ModuleKind::Video,
             Self::TappingBoard(_) => super::ModuleKind::TappingBoard,
             Self::DragDrop(_) => super::ModuleKind::DragDrop,
         }

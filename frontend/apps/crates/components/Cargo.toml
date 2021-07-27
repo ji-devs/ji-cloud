@@ -70,6 +70,7 @@ awsm_web = { version = "0.24.1", features = ["loaders", "serde_iso", "dom", "ima
 anyhow = "1.0.42"
 gloo-timers = "0.2.1"
 rgb = "0.8.27"
+regex = "1.5.4"
 
 [features]
 quiet = ["utils/quiet"]

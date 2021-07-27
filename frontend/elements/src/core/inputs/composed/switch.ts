@@ -1,108 +1,66 @@
-import { MEDIA_UI } from "@utils/path";
 import { LitElement, html, css, customElement, property } from "lit-element";
+
 @customElement("input-switch")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-        .wrapper {
-          display: flex;
-          align-items: center;
-        }
-        .onoffswitch {
-          position: relative;
-          width: 40px;
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-        }
-        .onoffswitch-checkbox {
-          position: absolute;
-          opacity: 0;
-          pointer-events: none;
-        }
-        .onoffswitch-label {
-          display: block;
-          overflow: hidden;
-          cursor: pointer;
-          border-radius: 10px;
-          height: 20px;
-          background-color: #d3ddea;
-        }
-        .onoffswitch-inner {
-          display: block;
-          width: 200%;
-          margin-left: -100%;
-          transition: margin 0.3s ease-in 0s;
-        }
-        .onoffswitch-inner:before,
-        .onoffswitch-inner:after {
-          display: block;
-          float: left;
-          width: 50%;
-          height: 20px;
-          padding: 0;
-          line-height: 20px;
-          font-size: 14px;
-          box-sizing: border-box;
-        }
+    static get styles() {
+        return [
+            css`
+                input {
+                    display: none;
+                }
+                label {
+                    display: inline-grid;
+                    width: 40px;
+                    height: 20px;
+                    align-items: center;
+                    cursor: pointer;
+                }
+                label .track {
+                    grid-row: 1;
+                    grid-column: 1;
+                    height: 12px;
+                    width: 100%;
+                    background-color: var(--light-gray-2);
+                    border-radius: 6px;
+                }
+                label .circle {
+                    grid-row: 1;
+                    grid-column: 1;
+                    height: 20px;
+                    width: 20px;
+                    border-radius: 50%;
+                    background-color: var(--light-gray-4);
+                    transition: transform .3s, background-color .3s;
+                }
+                input:checked + label .circle {
+                    transform: translateX(20px);
+                    background-color: var(--main-blue);
+                }
+            `,
+        ];
+    }
 
-        .onoffswitch-switch {
-          display: block;
-          width: 20px;
-          height: 20px;
-          margin: 0px;
-          background: #a1a1a1;
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 20px;
-          border-radius: 50%;
-          transition: all 0.3s ease-in 0s;
-        }
-        .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
-          margin-left: 0;
-        }
-        .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-          right: 0px;
-          background-color: #5590fc;
-        }
-        p {
-          margin-right: 66px;
-        }
-      `,
-    ];
-  }
+    @property({ type: Boolean })
+    enabled: boolean = false;
 
-  @property()
-  label: string = "";
+    private toggle() {
+        this.enabled = !this.enabled;
+        this.dispatchEvent(
+            new CustomEvent("custom-toggle", {
+                detail: {
+                    value: this.enabled,
+                },
+            })
+        );
+    }
 
-  @property({ type: Boolean })
-  enabled: boolean = false;
-
-  private toggle(){
-    this.enabled = !this.enabled;
-    this.dispatchEvent(new CustomEvent("custom-toggle", {
-        detail: {
-            value: this.enabled
-        }
-    }));
-  }
-
-  render() {
-    const { label, enabled } = this;
-
-    return html`
-    <div class="wrapper">
-        <p>${label}</p>
-        <div class="onoffswitch">
-            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" ?checked="${enabled}" @change="${this.toggle}"></input>
-            <label class="onoffswitch-label" for="myonoffswitch">
-                <span class="onoffswitch-inner"></span>
-                <span class="onoffswitch-switch"></span>
+    render() {
+        return html`
+            <input id="input" type="checkbox" ?checked="${this.enabled}" @change="${this.toggle}">
+            <label for="input">
+                <span class="track"></span>
+                <span class="circle"></span>
             </label>
-        </div>
-    </div>
-  `;
-  }
+        `;
+    }
 }

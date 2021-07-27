@@ -8,7 +8,7 @@ use super::{
     trace::state::*,
     menu::dom::render_draw_menu
 };
-use crate::traces::{edit::{state::*, all::trace::state::*}, svg::{self, SvgCallbacks, ShapeStyle, ShapeStyleBase}};
+use crate::{traces::{edit::{state::*, all::trace::state::*}, svg::{self, SvgCallbacks, ShapeStyle, ShapeStyleBase}}, transform::state::ResizeLevel};
 
 use web_sys::HtmlCanvasElement;
 use awsm_web::canvas::get_2d_context;
@@ -120,7 +120,7 @@ pub fn render_traces_draw(state:Rc<Draw>, full_list: MutableVecLockRef<Rc<AllTra
                     children.push(render_draw_menu(state.clone(), menu, &resize_info));
                     children.push(render_transform(
                             state.trace.transform.clone(),
-                            true,
+                            ResizeLevel::Full,
                             None as Option<Box<dyn Fn() -> Dom>>
                     ));
                 }
