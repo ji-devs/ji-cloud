@@ -8,6 +8,7 @@
 
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
+use http::StatusCode;
 use paperclip::actix::api_v2_errors;
 use shared::error::{ApiError, EmptyError, MetadataNotFound};
 
@@ -19,9 +20,13 @@ pub use oauth::{GoogleOAuth, OAuth};
 mod storage;
 pub use storage::Storage;
 
+mod user;
+pub use user::{
+    Email, NotFound as UserNotFound, Register, Update as UserUpdate, Username, VerifyEmail,
+};
+
 pub mod event_arc;
 pub use event_arc::EventArc;
-use http::StatusCode;
 
 /// Represents an error returned by the api.
 // mostly used in this module
@@ -221,36 +226,6 @@ impl Into<actix_web::Error> for Refresh {
                 "Resource Not Found".to_owned(),
             )
             .into(),
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: User not Found",
-    code = 500
-)]
-pub enum UserNotFound {
-    UserNotFound,
-    InternalServerError(anyhow::Error),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for UserNotFound {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for UserNotFound {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::UserNotFound => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, "User Not Found".to_owned())
-                    .into()
-            }
-            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -544,105 +519,6 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
     }
 }
 
-#[api_v2_errors(code = 400, code = 409, code = 420, code = 500, code = 501)]
-pub enum Register {
-    InternalServerError(anyhow::Error),
-    Username(RegisterUsername),
-    VerifyEmail(VerifyEmail),
-    Service(Service),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Register {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for Register {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::Username(e) => e.into(),
-            Self::VerifyEmail(e) => e.into(),
-            Self::Service(e) => e.into(),
-        }
-    }
-}
-
-impl From<RegisterUsername> for Register {
-    fn from(err: RegisterUsername) -> Self {
-        Self::Username(err)
-    }
-}
-
-impl From<VerifyEmail> for Register {
-    fn from(err: VerifyEmail) -> Self {
-        Self::VerifyEmail(err)
-    }
-}
-
-impl From<Service> for Register {
-    fn from(err: Service) -> Self {
-        Self::Service(err)
-    }
-}
-
-impl From<Email> for Register {
-    fn from(err: Email) -> Self {
-        Self::VerifyEmail(err.into())
-    }
-}
-
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided username already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username was provided",
-    code = 500,
-    code = 501
-)]
-pub enum RegisterUsername {
-    EmptyUsername,
-    TakenUsername,
-    InternalServerError(anyhow::Error),
-    Service(Service),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for RegisterUsername {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for RegisterUsername {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::EmptyUsername => BasicError::with_message(
-                http::StatusCode::UNPROCESSABLE_ENTITY,
-                "No username was provided".to_owned(),
-            )
-            .into(),
-
-            Self::TakenUsername => BasicError::with_message(
-                http::StatusCode::CONFLICT,
-                "Username already taken".to_owned(),
-            )
-            .into(),
-
-            Self::InternalServerError(e) => ise(e),
-
-            Self::Service(e) => e.into(),
-        }
-    }
-}
-
-impl From<Service> for RegisterUsername {
-    fn from(err: Service) -> Self {
-        Self::Service(err)
-    }
-}
-
 #[api_v2_errors(
     code = 400,
     code = 403,
@@ -779,89 +655,6 @@ impl Into<actix_web::Error> for JigCloneDraft {
 
             Self::InternalServerError(e) => ise(e),
         }
-    }
-}
-
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided email already exists",
-    code = 420,
-    description = "Unprocessable Entity: No email was provided",
-    code = 500,
-    code = 501
-)]
-pub enum Email {
-    InternalServerError(anyhow::Error),
-    TakenEmailBasic,
-    TakenEmailGoogle,
-    EmptyEmail,
-}
-
-impl<T: Into<anyhow::Error>> From<T> for Email {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for Email {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::TakenEmailBasic | Self::TakenEmailGoogle => BasicError::with_message(
-                StatusCode::CONFLICT,
-                "A user with this email already exists".to_owned(),
-            )
-            .into(),
-            Self::EmptyEmail => BasicError::with_message(
-                StatusCode::UNPROCESSABLE_ENTITY,
-                "No email address was provided".to_owned(),
-            )
-            .into(),
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 400,
-    code = 409,
-    description = "Conflict: Another user with the provided username already exists",
-    code = 420,
-    description = "Unprocessable Entity: No username was provided",
-    code = 500,
-    code = 501
-)]
-pub enum VerifyEmail {
-    InternalServerError(anyhow::Error),
-    Email(Email),
-    ServiceSession(ServiceSession),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for VerifyEmail {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for VerifyEmail {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::InternalServerError(e) => ise(e),
-            Self::Email(e) => e.into(),
-            Self::ServiceSession(e) => e.into(),
-        }
-    }
-}
-
-impl From<ServiceSession> for VerifyEmail {
-    fn from(err: ServiceSession) -> Self {
-        Self::ServiceSession(err)
-    }
-}
-
-impl From<Email> for VerifyEmail {
-    fn from(err: Email) -> Self {
-        Self::Email(err)
     }
 }
 
