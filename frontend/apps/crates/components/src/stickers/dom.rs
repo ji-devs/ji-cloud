@@ -12,11 +12,13 @@ use super::{
     state::*,
     sprite::dom::{
         SpriteRawRenderOptions,
+        SpriteRenderOptions,
         render_sticker_sprite, 
         render_sticker_sprite_raw, 
     }, 
     text::dom::{
         TextRawRenderOptions,
+        TextRenderOptions,
         render_sticker_text, 
         render_sticker_text_raw, 
     }
@@ -30,6 +32,47 @@ pub fn mixin_sticker_button(dom:DomBuilder<HtmlElement>) -> DomBuilder<HtmlEleme
         .style("user-select", "none")
         .style("-webkit-user-select", "none")
 }
+
+pub enum StickerRenderOptions {
+    Sprite(SpriteRenderOptions),
+    Text(TextRenderOptions),
+}
+
+
+impl StickerRenderOptions {
+    pub fn new(sticker:&Sticker, base: Option<BaseRenderOptions>) -> Self {
+        match sticker {
+            Sticker::Sprite(_) => Self::Sprite(SpriteRenderOptions { base: base.unwrap_or_default() }),
+            Sticker::Text(_) => Self::Text(TextRenderOptions { base: base.unwrap_or_default() }),
+        }
+    }
+
+    pub fn into_sprite_unchecked(self) -> SpriteRenderOptions {
+        match self {
+            Self::Sprite(inner) => inner,
+            _ => panic!("not a sprite!")
+        }
+    }
+    pub fn into_text_unchecked(self) -> TextRenderOptions {
+        match self {
+            Self::Text(inner) => inner,
+            _ => panic!("not a text!")
+        }
+    }
+
+    pub fn base(&self) -> &BaseRenderOptions {
+        match self {
+            Self::Sprite(inner) => &inner.base,
+            Self::Text(inner) => &inner.base,
+        }
+    }
+}
+
+//Just a placeholder for backwards compatibility
+#[derive(Default)]
+pub struct BaseRenderOptions {
+}
+
 
 pub enum StickerRawRenderOptions {
     Sprite(SpriteRawRenderOptions),
@@ -135,16 +178,21 @@ pub fn render_stickers<T: AsSticker>(stickers:Rc<Stickers<T>>) -> Dom {
         .children_signal_vec(render_stickers_vec(stickers))
     })
 }
+
 pub fn render_stickers_vec<T: AsSticker>(stickers:Rc<Stickers<T>>) -> impl SignalVec<Item = Dom> {
     stickers.list
         .signal_vec_cloned()
         .enumerate()
         .map(clone!(stickers => move |(index, sticker)| {
-            match sticker.as_ref() {
-                Sticker::Sprite(sprite) => render_sticker_sprite(stickers.clone(), index, sprite.clone()),
-                Sticker::Text(text) => render_sticker_text(stickers.clone(), index, text.clone()),
-            }
+            render_sticker(stickers.clone(), index, sticker, None)
         }))
+}
+
+pub fn render_sticker<T: AsSticker>(stickers: Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sticker:T, opts: Option<StickerRenderOptions>) -> Dom {
+    match sticker.as_ref() {
+        Sticker::Sprite(sprite) => render_sticker_sprite(stickers.clone(), index, sprite.clone(), opts.map(|opts| opts.into_sprite_unchecked())),
+        Sticker::Text(text) => render_sticker_text(stickers.clone(), index, text.clone(), opts.map(|opts| opts.into_text_unchecked())),
+    }
 }
 
 pub fn render_stickers_raw(stickers:&[RawSticker], theme_id: ThemeId) -> Dom {

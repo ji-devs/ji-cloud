@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 use futures_signals::{map_ref, signal::{Always, Mutable, ReadOnlyMutable, Signal, SignalExt, always}, signal_vec::SignalVecExt};
 use super::{
     state::{Sprite, width_signal, height_signal},
-    super::{dom::BaseRawRenderOptions, state::{Stickers, AsSticker}},
+    super::{dom::{BaseRawRenderOptions, BaseRenderOptions}, state::{Stickers, AsSticker}},
     actions::load_and_render,
     menu::dom::render_sticker_sprite_menu
 };
@@ -19,11 +19,19 @@ use shared::domain::jig::module::body::{_groups::design::Sprite as RawSprite, Tr
 //code for playing and editing
 
 #[derive(Default)]
+pub struct SpriteRenderOptions {
+    pub base: BaseRenderOptions,
+}
+
+#[derive(Default)]
 pub struct SpriteRawRenderOptions {
     pub base: BaseRawRenderOptions,
 }
 
-pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>) -> Dom {
+pub fn render_sticker_sprite<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, sprite: Rc<Sprite>, opts: Option<SpriteRenderOptions>) -> Dom {
+
+    let opts = opts.unwrap_or_default();
+
     html!("empty-fragment", {
         .child(
             html!("empty-fragment", {

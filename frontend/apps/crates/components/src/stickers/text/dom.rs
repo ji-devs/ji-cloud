@@ -16,18 +16,25 @@ use crate::{text_editor::dom::render_wysiwyg, transform::{
     }};
 use super::{
     state::Text,
-    super::{dom::BaseRawRenderOptions, state::{Stickers, AsSticker}},
+    super::{dom::{BaseRawRenderOptions, BaseRenderOptions}, state::{Stickers, AsSticker}},
     menu::dom::render_sticker_text_menu
 };
 use web_sys::{DomRect, HtmlElement};
 
+#[derive(Default)]
+pub struct TextRenderOptions {
+    pub base: BaseRenderOptions,
+}
 
 #[derive(Default)]
 pub struct TextRawRenderOptions {
     pub base: BaseRawRenderOptions,
 }
 
-pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>) -> Dom {
+pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>, opts: Option<TextRenderOptions>) -> Dom {
+
+    let opts = opts.unwrap_or_default();
+
     let get_visible_signals = || map_ref! {
         let is_editing = text.is_editing.signal(),
         let is_active = stickers.selected_signal(index.clone())
