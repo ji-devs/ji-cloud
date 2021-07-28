@@ -3,8 +3,6 @@
         "origin": [
             "https://sandbox.jigzi.org", 
             "https://jigzi.org", 
-            "https://sandbox.jicloud.org", 
-            "https://jicloud.org", 
             "http://localhost:8080", 
             "http://localhost:8081",
             "http://localhost:4104",

@@ -14,10 +14,8 @@ pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 pub const CORS_ORIGINS: &[&str] = &[
     "https://jigzi.org",
     "https://sandbox.jigzi.org",
-    "https://jicloud.org",
-    "https://sandbox.jicloud.org",
-    "https://api.jicloud.org",
-    "https://api.sandbox.jicloud.org",
+    "https://api.jigzi.org",
+    "https://api.sandbox.jigzi.org",
     "http://localhost:4104",
     "http://localhost:4105",
 ];
@@ -121,8 +119,8 @@ impl RemoteTarget {
     pub fn api_url(&self) -> String {
         match self {
             Self::Local => env_var("LOCAL_API_URL").unwrap_or("http://localhost:8080".to_string()),
-            Self::Sandbox => "https://api.sandbox.jicloud.org".to_string(),
-            Self::Release => "https://api.jicloud.org".to_string(),
+            Self::Sandbox => "https://api.sandbox.jigzi.org".to_string(),
+            Self::Release => "https://api.jigzi.org".to_string(),
         }
     }
 
