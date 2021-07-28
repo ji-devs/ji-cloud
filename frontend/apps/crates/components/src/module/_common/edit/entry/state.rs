@@ -64,7 +64,7 @@ where
     pub(super) raw_loaded: Mutable<bool>,
     pub(super) page_body_switcher: AsyncLoader,
     pub(super) reset_from_history_loader: AsyncLoader,
-    pub(super) audio_mixer: RefCell<Option<AudioMixer>>,
+    pub(super) audio_mixer: AudioMixer, 
     pub(super) on_init_ready: RefCell<Option<Box<dyn Fn()>>>,
 }
 
@@ -157,7 +157,7 @@ where
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
-            audio_mixer: RefCell::new(None),
+            audio_mixer: AudioMixer::new(None), 
             on_init_ready: RefCell::new(None)
         });
 
@@ -204,11 +204,8 @@ where
                     });
                 }
 
-                //let audio_ctx = web_sys::AudioContext::new().unwrap_ji();
-                //For editor we'll just lazy-load
-                let audio_ctx = None;
                 let jig = _self.jig.borrow().clone().unwrap_ji();
-                *_self.audio_mixer.borrow_mut() = Some(AudioMixer::new(audio_ctx, &jig));
+                _self.audio_mixer.set_from_jig(&jig);
 
                 let (raw, init_source) = {
                     if let Some(force_raw) = _self.opts.force_raw.clone() {
@@ -256,7 +253,7 @@ where
                         _self.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            _self.get_audio_mixer(), 
+                            _self.audio_mixer.clone(), 
                             jig_id, 
                             module_id, 
                             jig, 
@@ -293,10 +290,6 @@ where
                 }
             })
             
-    }
-
-    pub fn get_audio_mixer(&self) -> AudioMixer {
-        self.audio_mixer.borrow().as_ref().unwrap_ji().clone()
     }
 
 }

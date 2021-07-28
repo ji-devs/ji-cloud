@@ -85,7 +85,7 @@ where
                         _self.clone(),
                         init_from_raw.clone(),
                         BaseInitFromRawArgs::new(
-                            _self.get_audio_mixer(), 
+                            _self.audio_mixer.clone(), 
                             jig_id, 
                             module_id, 
                             jig, 

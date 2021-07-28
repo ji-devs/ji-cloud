@@ -27,7 +27,10 @@ use std::pin::Pin;
 use std::marker::Unpin;
 use std::task::{Context, Poll};
 use discard::DiscardOnDrop;
-use super::state::*;
+use super::{
+    state::*,
+    loading::dom::render_loading,
+};
 use crate::{
     module::_common::play::prelude::*,
     instructions::player::{
@@ -48,8 +51,8 @@ where
     let sig =
             state.phase.signal_cloned().map(clone!(state => move |phase| {
                 let page_kind = match phase.as_ref() {
-                    Phase::Init | Phase::WaitingIframeRaw(_) => ModulePageKind::GridPlain,
-                    Phase::Playing(_, _) => ModulePageKind::Iframe
+                    Phase::Loading(_) | Phase::WaitingIframeRaw(_) => ModulePageKind::GridPlain,
+                    Phase::Ready(_) => ModulePageKind::Iframe
                 };
 
                 let has_resized_once = Mutable::new(!page_kind.is_resize());
@@ -73,15 +76,15 @@ where
                                         vec![]
                                     } else {
                                         match phase.as_ref() {
+                                            Phase::Loading(_) => {
+                                                vec![render_loading(state.clone())]
+                                            },
                                             Phase::WaitingIframeRaw(on_raw) => {
                                                 vec![render_iframe_wait_raw(state.clone(), on_raw.clone())]
                                             },
-                                            Phase::Playing(base, raw_direct) => {
-                                                vec![render_player(state.clone(), base.clone(), *raw_direct)]
+                                            Phase::Ready(ready) => {
+                                                vec![render_player(state.clone(), ready.base.clone(), ready.is_direct, ready.play_started.clone())]
                                             },
-                                            Phase::Init => {
-                                                vec![super::init::dom::render(state.clone())]
-                                            }
                                         }
                                     }
                                 }))
@@ -137,26 +140,31 @@ where
 
 }
 
-fn render_player<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, base: Rc<Base>, raw_direct: bool) -> Dom
+fn render_player<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, base: Rc<Base>, raw_direct: bool, play_started: Mutable<bool>) -> Dom
 where
     Base: BaseExt + 'static,
     RawData: BodyExt<Mode, Step> + 'static, 
     Mode: ModeExt + 'static,
     Step: StepExt + 'static
 {
-
     let instructions = base.get_instructions();
 
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
-        .apply_if(instructions.is_some(), |dom| {
+        .apply_if(instructions.is_some(), clone!(state, base, play_started => move |dom| {
             dom
-                .child(render_instructions_player(
-                        Rc::new(InstructionsPlayer::new(instructions.unwrap_ji())),
-                        &state.get_audio_mixer()
-                ))
-        })
+                .child_signal(play_started.signal().map(clone!(state, base => move |has_started| {
+                    if has_started {
+                        Some(render_instructions_player(
+                            Rc::new(InstructionsPlayer::new(base.get_instructions().unwrap_ji())),
+                            &state.audio_mixer
+                        ))
+                    } else {
+                        None
+                    }
+                })))
+        }))
 
         //raw_direct generally means "preview window"
         //so there is no jig player to communicate with
@@ -169,10 +177,10 @@ where
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModuleMessage>>() {
                         match msg.data {
                             JigToModuleMessage::Play => {
-                                state.get_audio_mixer().play_all();
+                                state.audio_mixer.play_all();
                             },
                             JigToModuleMessage::Pause => {
-                                state.get_audio_mixer().pause_all();
+                                state.audio_mixer.pause_all();
                             },
                             JigToModuleMessage::TimerDone => {
                             }
@@ -193,7 +201,41 @@ where
                     parent.post_message(&msg.into(), "*");
                 }))
         })
+        .child_signal(play_started.signal().map(clone!(play_started => move |has_started| {
+            if !has_started {
+                Some(html!("module-play-button", {
+                    .event(clone!(base, play_started => move |evt:events::Click| {
+                        start_playback(base.clone(), &play_started);
+                    }))
+                    .after_inserted(clone!(state, base, play_started => move |elem| {
+                        if state.opts.skip_play {
+                            start_playback(base.clone(), &play_started);
+                        }
+                    }))
+                }))
+            } else {
+                
+                if !raw_direct {
+                    let parent = web_sys::window()
+                        .unwrap_ji()
+                        .parent()
+                        .unwrap_ji()
+                        .unwrap_ji();
+                    let msg = IframeAction::new(ModuleToJigMessage::Started);
+                    parent.post_message(&msg.into(), "*");
+                }
+                None
+            }
+        })))
     })
 
+}
+
+fn start_playback<Base>(base: Rc<Base>, play_started:&Mutable<bool>) 
+where
+    Base: BaseExt + 'static,
+{
+    play_started.set_neq(true);
+    Base::play(base);
 }
 

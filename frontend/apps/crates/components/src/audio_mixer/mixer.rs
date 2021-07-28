@@ -18,17 +18,38 @@ pub use awsm_web::audio::{Id, AudioHandle, AudioSource, AudioClipOptions, AudioC
 #[derive(Clone)]
 pub struct AudioMixer {
     inner: Rc<AwsmAudioMixer>,
-    jig: Rc<Jig>
+    feedback: Rc<RefCell<Feedback>>
+}
+
+pub struct Feedback {
+}
+
+impl Feedback {
+    pub fn new_from_jig(jig:&Jig) -> Self {
+        Self {
+        }
+    }
+}
+
+impl Default for Feedback {
+    fn default() -> Self {
+        Self {
+        }
+    }
 }
 
 impl AudioMixer {
-    pub fn new(ctx: Option<AudioContext>, jig: &Jig) -> Self {
+    pub fn new(ctx: Option<AudioContext>) -> Self {
 
         //TODO - populate jig-level effects
         Self {
             inner: Rc::new(AwsmAudioMixer::new(ctx)),
-            jig: Rc::new(jig.clone()),
+            feedback: Rc::new(RefCell::new(Feedback::default())) 
         }
+    }
+
+    pub fn set_from_jig(&self, jig:&Jig) {
+        *self.feedback.borrow_mut() = Feedback::new_from_jig(jig);
     }
 
     /// Oneshots are AudioClips because they drop themselves
