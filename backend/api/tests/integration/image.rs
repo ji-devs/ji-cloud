@@ -264,7 +264,7 @@ async fn browse() -> anyhow::Result<()> {
     // create a new image resource
     let resp = client
         .get(&format!("http://0.0.0.0:{}/v1/image/browse", port))
-        .query(&[("kind", "Canvas")])
+        .query(&[("page", "0"), ("kind", "Canvas")])
         .login()
         .send()
         .await?
