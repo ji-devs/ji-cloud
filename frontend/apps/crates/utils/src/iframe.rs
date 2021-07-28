@@ -104,4 +104,5 @@ pub enum JigToModuleMessage {
 pub enum ModuleToJigMessage {
     AddPoints(u32),
     StartTimer(u32),
+    Started,
 }
