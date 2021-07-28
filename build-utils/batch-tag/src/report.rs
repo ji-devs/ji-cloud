@@ -4,7 +4,8 @@ pub struct Report {
     pub n_to_fix_affiliations:usize,
     pub n_to_fix_age_ranges:usize,
     pub n_fixed_affiliations:usize,
-    pub n_fixed_age_ranges:usize
+    pub n_fixed_age_ranges:usize,
+    pub n_total_images:usize
 }
 
 impl Report {
@@ -14,6 +15,7 @@ impl Report {
             n_to_fix_age_ranges: 0,
             n_fixed_affiliations: 0,
             n_fixed_age_ranges: 0,
+            n_total_images: 0,
         }
     }
 
@@ -27,12 +29,19 @@ impl Report {
             }
         }
 
+    }
+
+    pub fn pre_log(&self) {
+        log::info!("total images to process: {}", self.n_total_images);
         log::info!("total affiliations to fix: {}", self.n_to_fix_affiliations);
         log::info!("total age ranges to fix: {}", self.n_to_fix_age_ranges);
+        log::info!("------- STARTING -------"); 
     }
 
     pub fn final_log(&self) {
-        log::info!("total affiliations fixed: {}", self.n_fixed_affiliations);
-        log::info!("total age ranges fixed: {}", self.n_fixed_age_ranges);
+        log::info!("------- FINISHED -------"); 
+        log::info!("total images processed: {}", self.n_total_images);
+        log::info!("total affiliations fixed: {} out of {}", self.n_fixed_affiliations, self.n_to_fix_affiliations);
+        log::info!("total age ranges fixed: {} out of {}", self.n_fixed_age_ranges, self.n_to_fix_age_ranges);
     }
 }

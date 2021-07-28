@@ -26,8 +26,9 @@ async fn main() {
     ctx.report.write().await.set_from_images(&image_list);
 
     let mut jobs = get_jobs(ctx.clone(), image_list, meta);
-
     let mut futures = FuturesUnordered::new();
+
+    ctx.report.read().await.pre_log();
 
     //See: https://users.rust-lang.org/t/awaiting-futuresunordered/49295/5
     //Idea is we try to have a saturated queue of futures
