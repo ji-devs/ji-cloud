@@ -189,7 +189,8 @@ async fn browse(
     .try_collect()
     .await?;
 
-    let total_count = db::image::filtered_count(db.as_ref(), query.is_published).await?;
+    let total_count =
+        db::image::filtered_count(db.as_ref(), query.is_published, query.kind).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 

@@ -192,11 +192,25 @@ limit 20 offset 20 * $2
     .fetch(db)
 }
 
-pub async fn filtered_count(db: &PgPool, is_published: Option<bool>) -> sqlx::Result<u64> {
-    sqlx::query!(r#"select count(*) as "count!: i64" from image_metadata where publish_at < now() is not distinct from $1 or $1 is null"#, is_published)
-        .fetch_one(db)
-        .await
-        .map(|it| it.count as u64)
+pub async fn filtered_count(
+    db: &PgPool,
+    is_published: Option<bool>,
+    kind: Option<ImageKind>,
+) -> sqlx::Result<u64> {
+    sqlx::query!(
+        r#"
+select count(*) as "count!: i64" 
+from image_metadata
+        inner join image_upload on image_id = id 
+where processing_result is not distinct from true 
+    and (publish_at < now() is not distinct from $1 or $1 is null)
+    and (kind is not distinct from $2 or $2 is null)"#,
+        is_published,
+        kind.map(|it| it as i16),
+    )
+    .fetch_one(db)
+    .await
+    .map(|it| it.count as u64)
 }
 
 pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<ImageMetadata>> {
@@ -219,7 +233,7 @@ from image_metadata
          inner join image_upload on image_id = id
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) USING (id)
-where processing_result is true
+where processing_result is not distinct from true
 order by t.ord
 "#).bind(ids)
     .fetch(db)

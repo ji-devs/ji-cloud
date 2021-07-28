@@ -253,6 +253,34 @@ async fn update_tags() -> anyhow::Result<()> {
     update(&json!({"tags": ["591a2a64-a3a4-11eb-96e7-6bc0e819bc5f", "5b032222-a3a4-11eb-96e7-dbc5742f1640"]})).await
 }
 
+#[actix_rt::test]
+async fn browse() -> anyhow::Result<()> {
+    let app = initialize_server(&[Fixture::User, Fixture::Image], &[]).await;
+
+    let port = app.port();
+
+    let client = reqwest::Client::new();
+
+    // create a new image resource
+    let resp = client
+        .get(&format!("http://0.0.0.0:{}/v1/image/browse", port))
+        .query(&[("kind", "Canvas")])
+        .login()
+        .send()
+        .await?
+        .error_for_status()?;
+
+    assert_eq!(resp.status(), StatusCode::OK);
+
+    let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
+
+    Ok(())
+}
+
 // https://cloud.google.com/storage/docs/performing-resumable-uploads#single-chunk-upload
 #[ignore]
 #[actix_rt::test]
