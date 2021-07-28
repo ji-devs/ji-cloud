@@ -33,7 +33,7 @@ pub struct Opts {
     pub sleep_debug: u64,
 
     /// debug mode 
-    #[structopt(long, parse(try_from_str), default_value = "true")]
+    #[structopt(long, parse(try_from_str), default_value = "false")]
     pub debug: bool,
 }
 

@@ -43,13 +43,16 @@ pub async fn get_image_list(ctx: Arc<Context>, meta: &MetaInfo) -> anyhow::Resul
             page: if page == 0 { None }  else { Some(page) }
         };
 
+        let mut query = serde_qs::to_string(&req).unwrap();
 
-        let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), endpoints::image::Browse::PATH);
+        if !query.is_empty() {
+            query = format!("?{}", query);
+        }
+
+        let url = format!("{}{}{}", ctx.opts.get_remote_target().api_url(), endpoints::image::Browse::PATH, query);
         let resp = client
             .get(&url)
             .header("Authorization", &format!("Bearer {}", ctx.token))
-            //FIXME when https://github.com/ji-devs/ji-cloud/issues/1214 is fixed
-            .json(&req)
             .send()
             .await?
             .error_for_status()?;
@@ -150,9 +153,10 @@ pub async fn fix_image(ctx: Arc<Context>, meta: Arc<MetaInfo>, image: ImageInfo)
             .error_for_status()
             .unwrap();
 
-        let body: serde_json::Value = resp.json().await.unwrap();
-        let body:() = serde_json::from_value(body).unwrap();
-    
+        if !resp.status().is_success() {
+            panic!("error at [{}] affiliations: {} age_ranges: {}", &image.id.0.to_string(), image.has_all_affiliations, image.has_all_age_ranges);
+        }
+
         log::info!("fixed [{}] affiliations: {} age_ranges: {}", &image.id.0.to_string(), image.has_all_affiliations, image.has_all_age_ranges);
     } else {
         log::info!("dry run [{}] affiliations: {} age_ranges: {}", &image.id.0.to_string(), image.has_all_affiliations, image.has_all_age_ranges);
