@@ -13,8 +13,8 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
             (LineKind::CardView, vec![
-                make_button(state.clone(), DisplayMode::Single),
-                make_button(state.clone(), DisplayMode::Double),
+                Some(make_button(state.clone(), DisplayMode::Single)),
+                Some(make_button(state.clone(), DisplayMode::Double)),
             ])
         ]
     }))

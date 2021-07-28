@@ -9,7 +9,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
     render_settings(Rc::new(ModuleSettings {
         lines: vec![
             (LineKind::TimeLimit, vec![
-                SettingsButton::new_click(
+                Some(SettingsButton::new_click(
                     SettingsButtonKind::TimeLimitOff, 
                     clone!(state => move || {
                         state.base.extra.settings.has_time_limit
@@ -19,8 +19,8 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     clone!(state => move || {
                         state.set_has_time_limit(false);
                     }),
-                ),
-                SettingsButton::new_value_click(
+                )),
+                Some(SettingsButton::new_value_click(
                     SettingsButtonKind::TimeLimit,
                     clone!(state => move || {
                         state.base.extra.settings.has_time_limit
@@ -35,7 +35,7 @@ pub fn render(state: Rc<SidebarSettings>) -> Dom {
                     clone!(state => move || {
                         state.set_has_time_limit(true);
                     }),
-                ),
+                )),
             ]),
 
 
