@@ -12,6 +12,8 @@ pub const EVENTARC_AUDITLOG_SERVICE_NAME: &str = "cloudaudit.googleapis.com";
 pub const MAX_SIGNIN_COOKIE: &str = "1209600";
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
 pub const CORS_ORIGINS: &[&str] = &[
+    "https://jigzi.org",
+    "https://sandbox.jigzi.org",
     "https://jicloud.org",
     "https://sandbox.jicloud.org",
     "https://api.jicloud.org",
@@ -147,8 +149,8 @@ impl RemoteTarget {
             Self::Local => {
                 env_var("LOCAL_PAGES_URL").unwrap_or("http://localhost:4104".to_string())
             }
-            Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
-            Self::Release => "https://jicloud.org".to_string(),
+            Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
+            Self::Release => "https://jigzi.org".to_string(),
         }
     }
     pub fn pages_url_iframe(&self) -> String {
@@ -156,8 +158,8 @@ impl RemoteTarget {
             Self::Local => {
                 env_var("LOCAL_PAGES_URL_IFRAME").unwrap_or("http://localhost:4105".to_string())
             }
-            Self::Sandbox => "https://sandbox.jicloud.org".to_string(),
-            Self::Release => "https://jicloud.org".to_string(),
+            Self::Sandbox => "https://sandbox.jigzi.org".to_string(),
+            Self::Release => "https://jigzi.org".to_string(),
         }
     }
 
