@@ -11,7 +11,6 @@ pub const EVENTARC_AUDITLOG_SERVICE_NAME: &str = "cloudaudit.googleapis.com";
 #[deprecated = "use `MAX_SIGNIN_COOKIE_DURATION.whole_seconds()` instead"]
 pub const MAX_SIGNIN_COOKIE: &str = "1209600";
 pub const JSON_BODY_LIMIT: u64 = 1024 * 16; // 16
-pub const COOKIE_DOMAIN: &str = "jicloud.org";
 pub const CORS_ORIGINS: &[&str] = &[
     "https://jicloud.org",
     "https://sandbox.jicloud.org",
