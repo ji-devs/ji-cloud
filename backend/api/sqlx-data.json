@@ -3860,6 +3860,27 @@
       "nullable": []
     }
   },
+  "d8032d2eb89764dbd098df12c400d66030d32259400b2f539d60658605ca7648": {
+    "query": "\nselect count(*) as \"count!: i64\" \nfrom image_metadata\n        inner join image_upload on image_id = id \nwhere processing_result is not distinct from true \n    and (publish_at < now() is not distinct from $1 or $1 is null)\n    and (kind is not distinct from $2 or $2 is null)",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!: i64",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int2"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "da24841a3eb28555d3242508c7be3a7c9f802ef0acb2328578ad0d137453cd44": {
     "query": "\ninsert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public,\n                 direction, display_score, theme, audio_background, audio_feedback_positive, audio_feedback_negative)\nselect display_name,\n       parents,\n       creator_id,\n       author_id,\n       language,\n       description,\n       $2,\n       false,\n       direction,\n       display_score,\n       theme,\n       audio_background,\n       audio_feedback_positive,\n       audio_feedback_negative       \nfrom jig\nwhere id = $1\nreturning id as \"id: JigId\"\n        ",
     "describe": {
@@ -4250,26 +4271,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "f48faeb03b1a3f94308c075c38d25ec0495ded0eb3cd21e20980e0bb5c8e0609": {
-    "query": "select count(*) as \"count!: i64\" from image_metadata where publish_at < now() is not distinct from $1 or $1 is null",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!: i64",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Bool"
-        ]
-      },
-      "nullable": [
-        null
-      ]
     }
   },
   "f4d6632fc60abf4351be966b89b2490a3c3aef6f9f59d9ab4ea2eecc68d8cb72": {
