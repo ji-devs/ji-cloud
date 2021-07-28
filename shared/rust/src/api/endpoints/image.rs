@@ -35,6 +35,8 @@ impl ApiEndpoint for Search {
 }
 
 /// Browse images.
+///
+/// The request should be supplied as a URL query string.
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = ImageBrowseQuery;
