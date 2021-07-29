@@ -8,7 +8,6 @@
 
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
-use http::StatusCode;
 use paperclip::actix::api_v2_errors;
 use shared::error::{ApiError, EmptyError, MetadataNotFound};
 

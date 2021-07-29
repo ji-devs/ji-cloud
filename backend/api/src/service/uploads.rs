@@ -1,14 +1,6 @@
-//! TODO: profile this. load test?
-
-use crate::service::notifications::MessageRequest;
 use crate::{error, service};
-use chrono::Utc;
 use shared::{
-    domain::{
-        animation::AnimationKind,
-        firebase::{MediaProcessedNotification, MessageTarget},
-        image::ImageKind,
-    },
+    domain::{animation::AnimationKind, image::ImageKind},
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::PgPool;
@@ -38,14 +30,13 @@ skip locked
     let kind = match kind {
         Some(row) => row,
         None => {
-            log::info!("image not found in database!");
+            log::info!("Unprocessed image upload not found in database!");
 
             txn.rollback().await?;
             return Ok(false);
         }
     };
 
-    log::info!("downloading image for processing");
     let file = s3
         .download_media_for_processing(
             MediaLibrary::Global,
@@ -68,7 +59,6 @@ skip locked
     };
 
     let processed = tokio::task::spawn_blocking(move || -> Result<_, error::Upload> {
-        log::info!("Running resizer");
         let original = image::load_from_memory(&file).map_err(|_| error::Upload::InvalidMedia)?;
         Ok(crate::image_ops::regenerate_images(&original, kind)?)
     })
@@ -270,21 +260,10 @@ skip locked
 }
 
 pub async fn finalize_upload(
-    fcm: &service::notifications::Client,
+    notifications: &service::notifications::Client,
     library: MediaLibrary,
     id: Uuid,
-    file_kind: FileKind,
 ) -> anyhow::Result<()> {
-    let data = MediaProcessedNotification {
-        library,
-        content_type: file_kind.content_type().to_owned(),
-        processed_at: Utc::now(),
-    };
-    let data = serde_json::to_value(data)?;
-
-    let message = MessageRequest::with_data(MessageTarget::Topic(id.to_string()), data);
-
-    fcm.send_message(message).await?;
-
+    notifications.signal_status_ready(library, &id).await?;
     Ok(())
 }

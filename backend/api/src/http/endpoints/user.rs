@@ -32,8 +32,7 @@ use shared::{
         user::{ChangePasswordRequest, PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
-use sqlx::postgres::PgDatabaseError;
-use sqlx::{Acquire, PgConnection, PgPool};
+use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use uuid::Uuid;
 
 mod color;
