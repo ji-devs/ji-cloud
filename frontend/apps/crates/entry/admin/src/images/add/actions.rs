@@ -1,6 +1,6 @@
 use shared::{
     media::MediaLibrary,
-    domain::image::*,
+    domain::{image::*, meta::*},
     error::*,
     api::{ApiEndpoint, endpoints},
 };
@@ -30,6 +30,18 @@ pub fn on_change(state: Rc<State>, value: String) {
 
 pub fn on_file(state: Rc<State>, file: File) {
     state.loader.load(clone!(state => async move {
+        let meta_resp = api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await.expect_ji("couldn't get meta response!");
+
+        let affiliations = meta_resp.affiliations
+            .iter()
+            .map(|x| x.id)
+            .collect();
+
+        let age_ranges = meta_resp.age_ranges
+            .iter()
+            .map(|x| x.id)
+            .collect();
+
         let req = ImageCreateRequest {
             name: "".to_string(),
             description: "".to_string(),
@@ -37,8 +49,8 @@ pub fn on_file(state: Rc<State>, file: File) {
             publish_at: None,
             tags: Vec::new(),
             styles: Vec::new(),
-            age_ranges: Vec::new(),
-            affiliations: Vec::new(),
+            age_ranges,
+            affiliations,
             categories: Vec::new(),
             kind: state.kind.borrow().clone()
         };
