@@ -30,11 +30,15 @@ export const Landing = (props?:Partial<Args>) => {
 
             <button-google slot="google"></button-google>
             
-            <input-text slot="email" placeholder="${STR_USERNAMEPLACEHOLDER}" mode="text" label="${STR_USERLABEL}" }></input-text>
-            <input-text slot="password" placeholder="${STR_PASSWORDPLACEHOLDER}" mode="passwordHidden" label="${STR_PASSWORD}" ></input-text>
-            <button-text color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-text>
+            <input-wrapper slot="email" mode="text" label="${STR_USERLABEL}">
+                <input placeholder="${STR_USERNAMEPLACEHOLDER}">
+            </input-wrapper>
+            <input-password slot="password" placeholder="${STR_PASSWORDPLACEHOLDER}" label="${STR_PASSWORD}" >
+                <input>
+            </input-password>
+            <button-rect kind="text" color="blue" slot="password-forgot">${STR_FORGOTTEN}</button-rect>
             <button-rect slot="submit" color="red" size="medium">${STR_SUBMIT}</button-rect> 
-            <button-text color="blue" slot="register" weight="normal">${STR_REGISTER}</button-text>
+            <button-rect kind="text" color="blue" slot="register" weight="normal">${STR_REGISTER}</button-rect>
         </page-login-landing>
     
     `

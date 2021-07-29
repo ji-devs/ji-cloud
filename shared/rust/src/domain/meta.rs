@@ -7,12 +7,26 @@ use uuid::Uuid;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 
-/// Wrapper type around [`Uuid`], represents [`Style::id`].
+/// Wrapper type around [`Uuid`], represents [`ImageStyle::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct StyleId(pub Uuid);
+pub struct ImageStyleId(pub Uuid);
+
+/// Wrapper type around [`Uuid`], represents [`AnimationStyle::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationStyleId(pub Uuid);
+
+/// Wrapper type around [`Uuid`], represents [`AudioStyle::id`].
+#[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", sqlx(transparent))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AudioStyleId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`AgeRange::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -35,12 +49,12 @@ pub struct AffiliationId(pub Uuid);
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct SubjectId(pub Uuid);
 
-/// Wrapper type around [`Uuid`], represents [`ContentType::id`].
+/// Wrapper type around [`Uuid`], represents [`Goal::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[cfg_attr(feature = "backend", sqlx(transparent))]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ContentTypeId(pub Uuid);
+pub struct GoalId(pub Uuid);
 
 /// Wrapper type around [`Uuid`], represents [`Tag::id`].
 #[derive(Hash, Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -50,33 +64,51 @@ pub struct ContentTypeId(pub Uuid);
 pub struct TagId(pub Uuid);
 
 into_uuid!(
-    StyleId,
+    ImageStyleId,
+    AnimationStyleId,
     AffiliationId,
     AgeRangeId,
     SubjectId,
-    ContentTypeId,
+    GoalId,
     TagId
 );
 
-/// Represents a style.
+/// Represents an image style.
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct Style {
-    /// The id of the style.
-    pub id: StyleId,
+pub struct ImageStyle {
+    /// The id of the image style.
+    pub id: ImageStyleId,
 
-    /// The style's name.
+    /// The image style's name.
     pub display_name: String,
 
-    /// When the style was created.
+    /// When the image style was created.
     pub created_at: DateTime<Utc>,
 
-    /// When the style was last updated.
+    /// When the image style was last updated.
+    pub updated_at: Option<DateTime<Utc>>,
+}
+
+/// Represents an animation style.
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct AnimationStyle {
+    /// The id of the animation style.
+    pub id: AnimationStyleId,
+
+    /// The animation style's name.
+    pub display_name: String,
+
+    /// When the animation style was created.
+    pub created_at: DateTime<Utc>,
+
+    /// When the animation style was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 
 /// Represents a age range.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AgeRange {
     /// The id of the age range.
@@ -93,7 +125,7 @@ pub struct AgeRange {
 }
 
 /// Represents an affiliation.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Affiliation {
     /// The id of the affiliation.
@@ -126,20 +158,20 @@ pub struct Subject {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-/// Represents a content-type.
-#[derive(Serialize, Deserialize, Debug)]
+/// Represents a goal.
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-pub struct ContentType {
-    /// The id of the content-type.
-    pub id: ContentTypeId,
+pub struct Goal {
+    /// The id of the goal.
+    pub id: GoalId,
 
-    /// The content-type's name.
+    /// The goal's name.
     pub display_name: String,
 
-    /// When the content-type was created.
+    /// When the goal was created.
     pub created_at: DateTime<Utc>,
 
-    /// When the content-type was last updated.
+    /// When the goal was last updated.
     pub updated_at: Option<DateTime<Utc>>,
 }
 
@@ -147,6 +179,9 @@ pub struct ContentType {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct Tag {
+    /// Index of the tag.
+    pub index: i16,
+
     /// The id of the tag.
     pub id: TagId,
 
@@ -164,8 +199,14 @@ pub struct Tag {
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct MetadataResponse {
-    /// All styles the server has.
-    pub styles: Vec<Style>,
+    /// All image styles the server has.
+    pub image_styles: Vec<ImageStyle>,
+
+    /// All animation styles the server has.
+    pub animation_styles: Vec<AnimationStyle>,
+
+    /// All audio...
+    // TODO
 
     /// All age ranges the server has.
     pub age_ranges: Vec<AgeRange>,
@@ -176,8 +217,8 @@ pub struct MetadataResponse {
     /// All subjects the server has.
     pub subjects: Vec<Subject>,
 
-    /// All content types
-    pub content_types: Vec<ContentType>,
+    /// All goals.
+    pub goals: Vec<Goal>,
 
     /// All tags for images.
     pub image_tags: Vec<Tag>,
@@ -190,8 +231,11 @@ pub enum MetaKind {
     /// [`Affiliation`]
     Affiliation,
 
-    /// [`Style`]
-    Style,
+    /// [`ImageStyle`]
+    ImageStyle,
+
+    /// [`AnimationStyle`]
+    AnimationStyle,
 
     /// [`AgeRange`]
     AgeRange,
@@ -202,8 +246,8 @@ pub enum MetaKind {
     /// [`Subject`]
     Subject,
 
-    /// [`ContentType`]
-    ContentType,
+    /// [`Goal`]
+    Goal,
 
     /// [`Tag`]
     Tag,

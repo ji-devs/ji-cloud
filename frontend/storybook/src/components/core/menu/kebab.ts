@@ -24,7 +24,7 @@ export const Kebab = (props?:Args) => {
     return `
     <div style="position: absolute; top: 100px; left: 100px;">
     <menu-kebab ${argsToAttrs(menuProps)}>
-        <div slot="menu-content">
+        <div>
             <div style="width: ${width}px">
             Menu Here
             </div>

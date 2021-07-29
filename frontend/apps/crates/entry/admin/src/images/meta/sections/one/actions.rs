@@ -1,6 +1,7 @@
 use shared::{
     api::{ApiEndpoint, endpoints},
     domain::image::*,
+    domain::image::tag::*,
     domain::meta::*,
     error::EmptyError,
 };
@@ -10,8 +11,9 @@ use super::state::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
+use components::image::tag::ImageTag;
 
-pub fn toggle_style(state: Rc<State>, id: StyleId, flag: bool) {
+pub fn toggle_style(state: Rc<State>, id: ImageStyleId, flag: bool) {
     {
         let mut styles = state.image.styles.lock_mut();
         if flag {
@@ -64,6 +66,27 @@ pub fn toggle_affiliation(state: Rc<State>, id: AffiliationId, flag: bool) {
         state.meta.clone(), 
         ImageUpdateRequest {
             affiliations: Some(state.image.affiliations.lock_ref().iter().map(|x| x.clone()).collect()),
+            ..ImageUpdateRequest::default()
+        }
+    );
+}
+
+
+pub fn toggle_tag(state: Rc<State>, tag_id: TagId, flag: bool) {
+    {
+        let mut tag_ids = state.image.tag_ids.lock_mut();
+        if flag {
+            tag_ids.insert(tag_id);
+        } else {
+            tag_ids.remove(&tag_id);
+        }
+    }
+
+
+    crate::images::meta::actions::save(
+        state.meta.clone(), 
+        ImageUpdateRequest {
+            tags: Some(state.image.tag_ids.lock_ref().iter().map(|x| x.clone()).collect()),
             ..ImageUpdateRequest::default()
         }
     );

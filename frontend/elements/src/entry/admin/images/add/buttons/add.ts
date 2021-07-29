@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
-import "@elements/core/buttons/rectangle";
+import "@elements/core/buttons/rectangle-icon";
 
     const STR_UPLOAD = "Upload image";
 @customElement('button-add')
@@ -33,7 +33,7 @@ export class _ extends LitElement {
           <section>
               <div class="inner-dash">
 
-                    <button-rect color="blue" size="medium" iconBefore="plus">${STR_UPLOAD}</button-rect>
+                    <button-rect-icon color="blue" size="medium" iconBefore="plus">${STR_UPLOAD}</button-rect-icon>
               </div>
           </section>
     `;

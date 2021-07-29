@@ -2,7 +2,7 @@ use futures_signals::signal_vec::MutableVec;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use shared::domain::jig::{Jig, LiteModule, JigId, module::ModuleId, ModuleKind};
 use std::rc::Rc;
-use crate::edit::sidebar::module::state::{Module, State as ModuleState};
+use crate::edit::sidebar::module::state::State as ModuleState;
 use utils::drag::Drag;
 
 //Instead of getting the anchor from the mouse point
@@ -19,7 +19,7 @@ impl State {
     pub fn new(module: Rc<ModuleState>, x: i32, y: i32) -> Self {
         Self {
             module,
-            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y),
+            inner: Drag::new(x, y, ANCHOR_X, ANCHOR_Y, false),
         }
     }
 

@@ -1,62 +1,130 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map';
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
 
 export type TitleKind = ""
+    | 'theme'
     | 'background-image'
+    | 'background-color'
     | 'color'
     | 'overlay'
     | 'text'
     | 'image'
-    | 'audio';
+    | 'audio'
+    | 'video'
+    | 'select'
+    | 'play-settings'
+    | 'instructions';
 
 const STR_LABEL_LOOKUP: {
     [key in TitleKind]: string;
 } = {
     ['']: '',
-    ['background-image']: 'Image',
+    ['select']: 'Select',
+    ['theme']: 'Theme',
+    ['background-image']: 'Background image',
+    ['background-color']: 'Background color',
     ['color']: 'Color',
     ['overlay']: 'Overlay',
     ['text']: 'Text',
     ['image']: 'Image',
     ['audio']: 'Audio',
+    ['video']: 'Video',
+    ['play-settings']: 'Play Settings',
+    ['instructions']: 'Instructions',
 };
 
-@customElement('menu-tab-title')
+const getIcon = (kind:TitleKind):TitleKind => {
+    if(kind === "background-color") {
+        return("color");
+    } else {
+        return(kind);
+    }
+}
+
+@customElement("menu-tab-title")
 export class _ extends LitElement {
-    static get styles() {
-        return [css`
-            :host {
-                display: flex;
-                font-family: Poppins;
-                font-size: 16px;
-                font-weight: 500;
-            }
+  static get styles() {
+    return [
+      css`
+        :host {
+          display: flex;
+          font-family: Poppins;
+          font-size: 16px;
+          font-weight: 500;
+        }
 
-            img-ui {
-                max-width: 24px;
-                max-height: 24px;
-                margin-right: 8px;
-                display: flex;
-            }
-        `];
-    }
+        .highlight {
+          color: var(--main-blue);
+        }
 
-    @property()
-    kind: TitleKind = "";
+        img-ui {
+          max-width: 24px;
+          max-height: 24px;
+          margin-right: 8px;
+          display: flex;
+        }
 
-    @property({type: Boolean})
-    active: boolean = false;
+        .hidden {
+          display: none;
+        }
+      `,
+    ];
+  }
 
-    render() {
-        const label = STR_LABEL_LOOKUP[this.kind];
-        const iconUrl = `module/_common/widgets/sidebar/tab-${this.kind}-icon${this.active ? "-active" : ""}.svg`;
+  onEnter() {
+    this.hover = true;
+  }
 
-        return html`
-            ${this.kind === "" ? nothing : html`
-                <img-ui path="${iconUrl}"></img-ui>
-            `}
-            <div>${label}</div>
-        `;
-    }
+  onLeave() {
+    this.hover = false;
+  }
+
+  @property({ type: Boolean })
+  hover: boolean = false;
+
+  @property()
+  kind: TitleKind = "";
+
+  @property({ type: Boolean, reflect: true })
+  active: boolean = false;
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.addEventListener("mouseenter", this.onEnter);
+    this.addEventListener("mouseleave", this.onLeave);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this.removeEventListener("mouseenter", this.onEnter);
+    this.removeEventListener("mouseleave", this.onLeave);
+  }
+
+  render() {
+    const { kind, active, hover } = this;
+
+    const highlight = active || hover;
+
+    const label = STR_LABEL_LOOKUP[this.kind];
+    const iconUrl = `module/_common/edit/widgets/sidebar/menu-tabs/${getIcon(kind)}.svg`;
+    const iconUrlActive = `module/_common/edit/widgets/sidebar/menu-tabs/${getIcon(kind)}-active.svg`;
+
+    const regularClass = classMap({ hidden: highlight });
+    const activeClass = classMap({ hidden: !highlight });
+
+    const labelClass = classMap({ highlight });
+    return html`
+      ${this.kind === ""
+        ? nothing
+        : html`
+            <img-ui class=${regularClass} path="${iconUrl}"></img-ui>
+            <img-ui class=${activeClass} path="${iconUrlActive}"></img-ui>
+          `}
+      <div class=${labelClass}>${label}</div>
+    `;
+  }
 }

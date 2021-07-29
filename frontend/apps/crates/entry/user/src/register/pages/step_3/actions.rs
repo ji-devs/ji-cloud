@@ -16,8 +16,7 @@ use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use utils::{
     storage,
-    routes::*,
-    fetch::api_with_auth
+    prelude::*
 };
 
 pub fn submit(state: Rc<State>) {
@@ -62,7 +61,7 @@ pub fn submit(state: Rc<State>) {
 
 
     state.register_loader.load(clone!(state => async move {
-        let resp:Result<NewSessionResponse, EmptyError> = api_with_auth(&endpoints::user::PutProfile::PATH, endpoints::user::PutProfile::METHOD, Some(req)).await;
+        let (resp, status):(Result<NewSessionResponse, EmptyError>, u16) = api_with_auth_status(&endpoints::user::PutProfile::PATH, endpoints::user::PutProfile::METHOD, Some(req)).await;
 
         match resp {
             Ok(resp) => {
@@ -71,8 +70,19 @@ pub fn submit(state: Rc<State>) {
                 dominator::routing::go_to_url(&route);
             }, 
             Err(err) => {
-                log::error!("unexpected technical error!");
-                panic!("{:?}", err);
+                let msg = match status {
+                    401 => Some(crate::strings::STR_NOT_AUTHORIZED),
+                    409 => Some(crate::strings::STR_USER_EXISTS),
+                    422 => Some(crate::strings::STR_EMPTY_USERNAME),
+                    _ => None
+                };
+
+                if let Some(msg) = msg {
+                    web_sys::window().unwrap_throw().alert_with_message(msg);
+                } else {
+                    log::error!("unexpected technical error!");
+                    panic!("{:?}", err);
+                }
             }
         }
     }));

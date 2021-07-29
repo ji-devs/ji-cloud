@@ -8,14 +8,27 @@ expression: body
     "id": "0cc03a02-7c83-11eb-9f77-f77f9ad65e9a",
     "body": {
       "memoryGame": {
-        "instructions": {
-          "text": null,
-          "audio": null
-        },
-        "mode": null,
-        "pairs": [],
-        "theme_id": "None"
+        "content": {
+          "base": {
+            "editor_state": {
+              "step": "One",
+              "steps_completed": []
+            },
+            "instructions": {
+              "text": null,
+              "audio": null
+            },
+            "mode": "Duplicate",
+            "pairs": [],
+            "theme": "Jig",
+            "background": null
+          },
+          "player_settings": {
+            "time_limit": null
+          }
+        }
       }
-    }
+    },
+    "is_complete": true
   }
 }

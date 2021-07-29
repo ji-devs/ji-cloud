@@ -5,4 +5,6 @@ pub use crate::{
     routes::*,
     settings::SETTINGS,
     themes::*,
+    math::transform_ext::*,
+    image::ImageExt,
 };

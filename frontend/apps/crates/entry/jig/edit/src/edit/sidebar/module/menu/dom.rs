@@ -80,7 +80,6 @@ impl MenuDom {
         html!("menu-kebab", {
             .property("slot", "menu")
             .child(html!("jig-edit-sidebar-module-menu", {
-                .property("slot", "menu-content")
                 .property("hideAdvancedSection", state.index() == 0)
                 .children(children)
             }))

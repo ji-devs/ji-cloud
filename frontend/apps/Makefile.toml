@@ -75,18 +75,18 @@ set_env APP_NAME ${1}
 cm_run_task build-local-iframe
 '''
 
-[tasks.local-main-apponly]
+[tasks.local-main-no-media]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-local-main-apponly
+cm_run_task build-local-main-no-media
 '''
 
-[tasks.local-iframe-apponly]
+[tasks.local-iframe-with-media]
 script_runner = "@duckscript"
 script = '''
 set_env APP_NAME ${1} 
-cm_run_task build-local-iframe-apponly
+cm_run_task build-local-iframe-with-media
 '''
 
 [tasks.local-mediaserver]
@@ -135,24 +135,24 @@ run_task = {name = [
     "local-build-elements",
     "local-port-iframe",
     "local-prep-files",
-    "local-watch-all",
+    "local-watch-no-media",
 ]}
 
 
-[tasks.build-local-main-apponly]
+[tasks.build-local-main-no-media]
 run_task = {name = [
     "local-build-elements",
     "local-port-main",
     "local-prep-files",
-    "local-watch-apponly",
+    "local-watch-no-media",
 ]}
 
-[tasks.build-local-iframe-apponly]
+[tasks.build-local-iframe-with-media]
 run_task = {name = [
     "local-build-elements",
     "local-port-iframe",
     "local-prep-files",
-    "local-watch-apponly",
+    "local-watch-all",
 ]}
 
 [tasks.local-prep-files]
@@ -177,7 +177,7 @@ run_task = { name = [
     "local-watch-app",
 ], fork = true, parallel = true }
 
-[tasks.local-watch-apponly]
+[tasks.local-watch-no-media]
 run_task = { name = [
     "local-watch-elements",
     "local-watch-app",

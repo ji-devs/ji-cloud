@@ -1,10 +1,12 @@
 [
     {
         "origin": [
-            "https://sandbox.jicloud.org", 
-            "https://jicloud.org", 
+            "https://sandbox.jigzi.org", 
+            "https://jigzi.org", 
             "http://localhost:8080", 
-            "http://localhost:8081"
+            "http://localhost:8081",
+            "http://localhost:4104",
+            "http://localhost:4105"
         ],
         "responseHeader": [
             "Origin", 
@@ -16,7 +18,8 @@
             "Content-Length", 
             "Accept-Encoding", 
             "X-CSRF-Token",
-            "Access-Control-Allow-Credentials"
+            "Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Origin"
         ],
         "method": [
             "GET", 

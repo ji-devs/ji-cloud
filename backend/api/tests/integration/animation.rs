@@ -9,7 +9,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -23,7 +23,8 @@ async fn create() -> anyhow::Result<()> {
             "description": "testest",
             "is_premium": false,
             "publish_at": (),
-            "variant": "Gif",
+            "styles": [],
+            "kind": "Gif",
             "is_looping": false,
         }))
         .send()
@@ -34,6 +35,8 @@ async fn create() -> anyhow::Result<()> {
 
     let body: CreateResponse<AnimationId> = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
@@ -41,7 +44,16 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get_metadata() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::MetaKinds, Fixture::Animation]).await;
+    let app = initialize_server(
+        &[
+            Fixture::User,
+            Fixture::Animation,
+            Fixture::MetaKinds,
+            Fixture::MetaAnimation,
+        ],
+        &[],
+    )
+    .await;
 
     let port = app.port();
 
@@ -60,6 +72,8 @@ async fn get_metadata() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".metadata.updated_at" => "[timestamp]"});
 

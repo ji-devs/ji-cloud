@@ -8,7 +8,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn update_no_modules_changes() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -21,7 +21,6 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
         ))
         .json(&json! {{
             "display_name": "test",
-
         }})
         .login()
         .send()
@@ -40,7 +39,9 @@ async fn update_no_modules_changes() -> anyhow::Result<()> {
 
     let body: JigResponse = resp.json().await?;
 
-    insta::assert_json_snapshot!(body.jig, {".**.updated_at" => "[updated_at]"});
+    app.stop(false).await;
+
+    insta::assert_json_snapshot!(body.jig, {".**.last_edited" => "[last_edited]", ".**.feedback_positive" => "[audio]", ".**.feedback_negative" => "[audio]"});
 
     Ok(())
 }

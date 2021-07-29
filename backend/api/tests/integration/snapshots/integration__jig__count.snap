@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig.rs
+expression: body
+
+---
+{
+  "total_count": 2
+}

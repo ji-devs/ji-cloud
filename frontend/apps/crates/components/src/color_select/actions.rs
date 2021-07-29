@@ -2,9 +2,16 @@ use std::rc::Rc;
 use rgb::RGBA8;
 use shared::{api::{ApiEndpoint, endpoints}, domain::user::{UserColorResponse, UserColorValueRequest}, error::EmptyError};
 
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
 
 use super::state::State;
+
+pub fn set_selected(state: Rc<State>, value: Option<RGBA8>) {
+    if let Some(on_select) = state.on_select.as_ref() {
+        on_select(value.clone());
+    }
+    state.value.set(value);
+}
 
 pub async fn get_user_colors() -> Result<Vec<RGBA8>, EmptyError> {
     let res = api_with_auth::<UserColorResponse, EmptyError, Option<()>>(
@@ -28,7 +35,7 @@ pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyE
     ).await?;
 
     state.user_colors.lock_mut().push_cloned(color.clone());
-    state.value.set(Some(color));
+    set_selected(Rc::clone(&state), Some(color));
 
     Ok(())
 }
@@ -48,19 +55,3 @@ pub async fn delete_user_color(state: Rc<State>, index: usize) {
     }
 }
 
-pub fn hex_to_rgba8(hex: &str) -> RGBA8 {
-    let r = u8::from_str_radix(&hex[1..=2], 16).expect("Invalid color");
-    let g = u8::from_str_radix(&hex[3..=4], 16).expect("Invalid color");
-    let b = u8::from_str_radix(&hex[5..=6], 16).expect("Invalid color");
-    let a = if hex.len() > 7 {
-        u8::from_str_radix(&hex[7..=8], 16).expect("Invalid color")
-    } else {
-        0xFF
-    };
-
-    RGBA8::new(r, g, b, a)
-}
-
-pub fn rgba8_to_hex(rgba8: &RGBA8) -> String {
-    format!("#{:02X}{:02X}{:02X}{:02X}", rgba8.r, rgba8.g, rgba8.b, rgba8.a)
-}

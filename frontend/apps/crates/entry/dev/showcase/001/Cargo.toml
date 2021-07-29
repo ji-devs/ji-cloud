@@ -18,7 +18,7 @@ utils = {path = "../../../../utils"}
 components = {path = "../../../../components"}
 renderer = {path = "../../../../renderer"}
 shared = {path = "../../../../../../../shared/rust"}
-config = {path = "../../../../../../../config/rust"}
+config = {path = "../../../../../../../config/rust", features = ["wasm"]}
 wasm-logger = { version = "0.2.0", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 console_error_panic_hook = { version = "0.1.6", optional = true }
@@ -75,7 +75,7 @@ async-trait = "0.1.50"
 [features]
 default = ["wee_alloc"]
 release = ["utils/release"]
-sandbox = ["utils/sandbox"]
+sandbox = ["quiet", "wasm-logger", "console_error_panic_hook", "utils/sandbox"]
 ts_test = []
 quiet = []
 local = ["wasm-logger", "console_error_panic_hook", "quiet", "utils/local", "components/local", "renderer/local"]

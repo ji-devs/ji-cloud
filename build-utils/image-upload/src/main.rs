@@ -22,17 +22,14 @@ use tokio::time::{delay_for, Duration};
 
 pub struct Credentials {
     pub token:String,
-    pub csrf:String
 }
 
 impl Credentials {
     pub fn new() -> Self {
-        let token = std::env::var("UTILS_TOKEN").expect("Need UTILS_TOKEN in .env");
-        let csrf = std::env::var("UTILS_CSRF").expect("Need UTILS_CSRF in .env");
+        let token = std::env::var("LOCAL_API_AUTH_OVERRIDE").expect("Need LOCAL_API_AUTH_OVERRIDE in .env");
 
         Self {
             token,
-            csrf
         }
     }
 }
@@ -202,8 +199,7 @@ async fn upload_image(opts:Arc<Opts>, credentials:Arc<Credentials>, album_name:A
 
     let request = reqwest::Client::new()
         .post(&url)
-        .header("X-CSRF", &credentials.csrf)
-        .header("Cookie", &format!("X-JWT={}", credentials.token))
+        .header("AUTHORIZATION", &format!("Bearer {}", &credentials.token))
         .json(&req_data);
    
 

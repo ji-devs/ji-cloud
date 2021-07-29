@@ -2,44 +2,63 @@ use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::File;
 use shared::{
+    media::MediaLibrary,
     api::{ApiEndpoint, endpoints}, 
-    domain::{CreateResponse, audio::AudioId},
     error::EmptyError,
+    domain::{
+        CreateResponse,
+        jig::module::body::Audio,
+        audio::AudioId,
+    }
+    
 };
 use super::state::{AudioInputMode, State};
+use futures_signals::signal::Signal;
 
 impl State {
-    //Internal only, prevents callback cycles
-    pub(super) fn set_audio_id(&self, audio_id: Option<AudioId>) {
+    //Internal only - when the audio is changed via recording/uploading
+    //Will call the callbacks
+    pub(super) fn set_audio(&self, audio: Option<Audio>) {
         //Change the mutable for affecting all DOM rendering stuff
         //with _eventual consistency_
-        self.mode.set_neq(match audio_id {
-            Some(audio_id) => AudioInputMode::Stopped(audio_id),
+        self.mode.set_neq(match audio.clone() {
+            Some(audio) => AudioInputMode::Stopped(audio),
             None => AudioInputMode::Empty,
         });
 
-        //Call the callback for precise unskipped updates
-        if let Some(on_change) = &self.on_change {
-            (on_change)(audio_id);
+        //Callbacks for immediate, unskipped updates
+        match audio {
+            Some(audio) => {
+                if let Some(on_add) = &self.callbacks.on_add {
+                    (on_add) (audio);
+                }
+            },
+            None => {
+                if let Some(on_delete) = &self.callbacks.on_delete {
+                    (on_delete) ();
+                }
+            }
         }
     }
 
 
-    //Intended for externally forcing the state
-    //e.g. for undo/redo compatability
-    pub fn set_audio_id_ext(&self, audio_id: Option<AudioId>) {
-        self.mode.set_neq(match audio_id {
-            Some(audio_id) => AudioInputMode::Stopped(audio_id),
+    //Internal only - when the audio is changed via the external signal
+    //Only changes state. 
+    //It's safe and idiomatic to set the external signal from callbacks too
+    //(e.g. the external signal can be driven by a combo of history, current audio, and initial audio)
+    pub(super) fn set_audio_ext(&self, audio: Option<Audio>) {
+        self.mode.set_neq(match audio {
+            Some(audio) => AudioInputMode::Stopped(audio),
             None => AudioInputMode::Empty,
         });
     }
 }
 
-pub async fn file_change(state: Rc<State>, file: File) {
+pub async fn file_change (state: Rc<State>, file: File) {
     state.mode.set(AudioInputMode::Uploading);
     let res = upload_file(file).await;
     if let Ok(audio_id) = res {
-        state.set_audio_id(Some(audio_id));
+        state.set_audio(Some(Audio { id: audio_id, lib: MediaLibrary::User}));
     } else {
         log::error!("Error uploading audio file");
         state.mode.set(AudioInputMode::Empty);

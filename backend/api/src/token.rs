@@ -81,7 +81,7 @@ fn validate_token(
 pub async fn check_login_token(
     db: &PgPool,
     token_string: &str,
-    csrf: &str,
+    csrf: Option<&str>,
     token_key: &[u8; 32],
     min_mask: SessionMask,
 ) -> Result<SessionClaims, actix_web::Error> {
@@ -91,8 +91,10 @@ pub async fn check_login_token(
         .map_err(Into::into)
         .map_err(error::ise)?;
 
-    if claims.csrf != csrf {
-        return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
+    if let Some(s) = csrf {
+        if claims.csrf != s {
+            return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
+        }
     }
 
     let mut txn = db.begin().await.map_err(Into::into).map_err(error::ise)?;

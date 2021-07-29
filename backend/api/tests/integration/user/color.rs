@@ -8,7 +8,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn get_all() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -25,6 +25,8 @@ async fn get_all() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body);
 
     Ok(())
@@ -32,7 +34,7 @@ async fn get_all() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -66,6 +68,8 @@ async fn update() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body);
 
     Ok(())
@@ -73,7 +77,7 @@ async fn update() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -99,6 +103,8 @@ async fn delete() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body);
 
     Ok(())
@@ -106,7 +112,7 @@ async fn delete() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::UserColors]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::UserColors], &[]).await;
 
     let port = app.port();
 
@@ -139,6 +145,8 @@ async fn create() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body);
 

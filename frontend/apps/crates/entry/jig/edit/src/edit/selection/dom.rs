@@ -8,11 +8,13 @@ static MODULE_KINDS:&[ModuleKind] = &[
     ModuleKind::Flashcards,
     ModuleKind::Matching,
     ModuleKind::Memory,
+    ModuleKind::CardQuiz,
     ModuleKind::Poster,
     ModuleKind::TappingBoard,
-    ModuleKind::Tracing,
-    ModuleKind::Video,
-    ModuleKind::VisualQuiz
+    ModuleKind::DragDrop,
+    //ModuleKind::Tracing,
+    //ModuleKind::Video,
+    //ModuleKind::VisualQuiz,
 ];
 
 pub struct SelectionDom {

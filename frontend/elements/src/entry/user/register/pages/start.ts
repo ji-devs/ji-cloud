@@ -78,15 +78,17 @@ export class _ extends LitElement {
           <div class="inside-wrapper">
             <slot name="google"></slot>
             <or-divider slot="divider"></or-divider>
-            <slot name="email"></slot>
-            <div class="spacer"></div>
-            <div class="password-wrapper">
-              <slot name="password"></slot>
-                <password-strength strength="${passwordStrength}"></password-strength>
-              <div>${strengthText(passwordStrength)}</div>
-            </div>
-            <p>&nbsp;</p>
-            <slot name="submit"></slot>
+            <form @submit=${(evt:Event) => { evt.preventDefault(); }}>
+              <slot name="email"></slot>
+              <div class="spacer"></div>
+              <div class="password-wrapper">
+                <slot name="password"></slot>
+                  <password-strength strength="${passwordStrength}"></password-strength>
+                <div>${strengthText(passwordStrength)}</div>
+              </div>
+              <p>&nbsp;</p>
+              <slot name="submit"></slot>
+            </form>
             <p></p>
           </div>
           <slot name="footer"></slot>

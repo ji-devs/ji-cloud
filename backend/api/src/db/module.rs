@@ -9,12 +9,10 @@ use std::cmp;
 pub async fn create(
     pool: &PgPool,
     parent: JigId,
-    body: Option<&ModuleBody>,
+    body: ModuleBody,
 ) -> anyhow::Result<(ModuleId, u16)> {
-    let (kind, body) = match body.map(map_module_contents).transpose()? {
-        Some((kind, body)) => (Some(kind), Some(body)),
-        None => (None, None),
-    };
+    let kind = body.kind();
+    let body = serde_json::to_value(body)?;
 
     sqlx::query!(
         r#"
@@ -23,7 +21,7 @@ values ($1, $2, $3, (select count(*) from jig_module where jig_id = $1))
 returning id, "index"
 "#,
         parent.0,
-        kind.map(|it| it as i16),
+        kind as i16,
         body,
     )
     .fetch_one(pool)
@@ -38,6 +36,7 @@ pub async fn update(
     lookup: ModuleIdOrIndex,
     body: Option<&ModuleBody>,
     new_index: Option<u16>,
+    is_complete: Option<bool>,
 ) -> anyhow::Result<bool> {
     let (id, index) = (lookup.id(), lookup.index());
 
@@ -66,13 +65,15 @@ pub async fn update(
         r#"
 update jig_module
 set contents = coalesce($3, contents),
-    kind = coalesce($4, kind)
+    kind = coalesce($4, kind),
+    is_complete = coalesce($5, is_complete)
 where jig_id = $1 and index = $2
 "#,
         parent_id.0,
         index,
         body.as_ref(),
         kind.map(|it| it as i16),
+        is_complete,
     )
     .execute(&mut txn)
     .await?;
@@ -133,7 +134,15 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
     let kind = body.kind();
 
     let body = match body {
+        ModuleBody::CardQuiz(body) => serde_json::to_value(body)?,
+        ModuleBody::Cover(body) => serde_json::to_value(body)?,
+        ModuleBody::Flashcards(body) => serde_json::to_value(body)?,
+        ModuleBody::Matching(body) => serde_json::to_value(body)?,
         ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
+        ModuleBody::Poster(body) => serde_json::to_value(body)?,
+        ModuleBody::TappingBoard(body) => serde_json::to_value(body)?,
+        ModuleBody::DragDrop(body) => serde_json::to_value(body)?,
+
         _ => anyhow::bail!("Unimplemented body kind: {}", kind.as_str()),
     };
 
@@ -145,8 +154,14 @@ fn transform_response_kind(
     kind: ModuleKind,
 ) -> anyhow::Result<ModuleBody> {
     match kind {
-        ModuleKind::Cover => Ok(ModuleBody::Cover),
+        ModuleKind::CardQuiz => Ok(ModuleBody::CardQuiz(serde_json::from_value(contents)?)),
+        ModuleKind::Cover => Ok(ModuleBody::Cover(serde_json::from_value(contents)?)),
+        ModuleKind::Flashcards => Ok(ModuleBody::Flashcards(serde_json::from_value(contents)?)),
+        ModuleKind::Matching => Ok(ModuleBody::Matching(serde_json::from_value(contents)?)),
         ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
+        ModuleKind::Poster => Ok(ModuleBody::Poster(serde_json::from_value(contents)?)),
+        ModuleKind::TappingBoard => Ok(ModuleBody::TappingBoard(serde_json::from_value(contents)?)),
+        ModuleKind::DragDrop => Ok(ModuleBody::DragDrop(serde_json::from_value(contents)?)),
 
         _ => anyhow::bail!("Unimplemented response kind"),
     }
@@ -164,7 +179,8 @@ pub async fn get(
 select 
     id as "id: ModuleId",
     contents as "body",
-    kind as "kind: ModuleKind"
+    kind as "kind: ModuleKind",
+    is_complete as "is_complete"
 from jig_module
 where jig_id = $1 and (id is not distinct from $2 or index is not distinct from $3)
 "#,
@@ -175,17 +191,16 @@ where jig_id = $1 and (id is not distinct from $2 or index is not distinct from 
     .fetch_optional(pool)
     .await?;
 
-    let map_response = |body, kind| Some(transform_response_kind(body?, kind?));
+    let map_response = |body, kind| transform_response_kind(body, kind);
 
     match module {
         Some(it) => Ok(Some(Module {
             id: it.id,
-            body: map_response(it.body, it.kind)
-                .transpose()
-                .context(anyhow::anyhow!(
-                    "failed to transform module of kind {:?}",
-                    it.kind
-                ))?,
+            body: map_response(it.body, it.kind).context(anyhow::anyhow!(
+                "failed to transform module of kind {:?}",
+                it.kind
+            ))?,
+            is_complete: it.is_complete,
         })),
         None => Ok(None),
     }

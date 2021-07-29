@@ -1,4 +1,3 @@
-use anyhow::Context;
 #[cfg(feature = "db")]
 use sqlx::postgres::PgConnectOptions;
 
@@ -6,6 +5,7 @@ use crate::{
     env::{keys, req_env},
     google::{get_access_token_and_project_id, get_optional_secret},
 };
+use anyhow::Context;
 use config::RemoteTarget;
 use std::str::FromStr;
 use std::{
@@ -64,6 +64,9 @@ pub struct RuntimeSettings {
     /// The code that the pages api runs on.
     pub pages_port: u16,
 
+    /// The port that the media transformation api runs on.
+    pub media_watch_port: u16,
+
     /// When the server started.
     pub epoch: Duration,
 
@@ -94,6 +97,7 @@ impl RuntimeSettings {
         remote_target: RemoteTarget,
         api_port: u16,
         pages_port: u16,
+        media_watch_port: u16,
         bing_search_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
@@ -104,6 +108,7 @@ impl RuntimeSettings {
         Self {
             api_port,
             pages_port,
+            media_watch_port,
             epoch: get_epoch(),
             remote_target,
             bing_search_key,
@@ -120,13 +125,14 @@ impl RuntimeSettings {
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
     ) -> anyhow::Result<Self> {
-        let (api_port, pages_port) = match remote_target {
+        let (api_port, pages_port, media_watch_port) = match remote_target {
             RemoteTarget::Local => (
                 req_env("LOCAL_API_PORT")?.parse()?,
                 req_env("LOCAL_PAGES_PORT")?.parse()?,
+                req_env("LOCAL_MEDIA_TRANSFORM_PORT")?.parse()?,
             ),
 
-            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16),
+            RemoteTarget::Sandbox | RemoteTarget::Release => (8080_u16, 8080_u16, 8080_u16),
         };
 
         assert_eq!(token_secret.len(), 32);
@@ -134,6 +140,7 @@ impl RuntimeSettings {
         Ok(Self {
             api_port,
             pages_port,
+            media_watch_port,
             epoch: get_epoch(),
             remote_target,
             bing_search_key,
@@ -161,7 +168,10 @@ pub struct S3Settings {
     pub endpoint: String,
 
     /// The s3 bucket that should be used for media.
-    pub bucket: String,
+    pub media_bucket: String,
+
+    /// The s3 bucket that should be used for media.
+    pub processing_bucket: String,
 
     /// What's the access key's id?
     pub access_key_id: String,
@@ -190,6 +200,10 @@ pub struct AlgoliaSettings {
     /// If [`None`], indexing and searching will be disabled.
     pub media_index: Option<String>,
 
+    /// The index to use for operations relating to jigs on the algolia client.
+    /// If [`None`], indexing and searching will be disabled.
+    pub jig_index: Option<String>,
+
     /// The key to use for the *frontend* for the algolia client.
     /// This key should be ratelimited, and restricted to a specific set of indecies (the media one- currently actually the "images" one) and any search suggestion indecies.
     pub frontend_search_key: Option<String>,
@@ -217,6 +231,43 @@ pub struct EmailClientSettings {
     /// Is optional. If missing, password resetting will be disabled,
     /// all related routes will return "501 - Not Implemented" and a warning will be emitted.
     pub password_reset_template: Option<String>,
+}
+
+// TODO: unify google services clients' auth tokens and project_id requirements
+
+/// Settings for the Google Cloud Storage client
+#[derive(Clone, Debug)]
+pub struct GoogleCloudStorageSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    pub oauth2_token: String,
+    /// Bucket for processed media.
+    pub media_bucket: String,
+    /// Bucket for raw media uploads.
+    pub processing_bucket: String,
+}
+
+/// Settings for handling Google EventArc triggers
+#[derive(Clone, Debug)]
+pub struct GoogleCloudEventArcSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    pub oauth2_token: String,
+    /// Service name for Google Cloud storage
+    pub storage_service_name: String,
+    /// ID of the GCP project
+    pub project_id: String,
+    /// Topic name for raw media upload event
+    pub media_uploaded_topic: String,
+    /// Topic name for completed media processing event
+    pub media_processed_topic: String,
+}
+
+/// Firebase client, for Firestore
+#[derive(Clone, Debug)]
+pub struct FirebaseSettings {
+    /// Google cloud oauth2 token to authenticate with Google Cloud API.
+    pub oauth2_token: String,
+    /// ID of the GCP project
+    pub project_id: String,
 }
 
 /// Manages access to settings.
@@ -249,6 +300,16 @@ impl SettingsManager {
             },
         }
     }
+    //
+    // fn get_secret_from_env(&self, secret: &str) -> anyhow::Result<Option<String>> {
+    //     match std::env::var(secret) {
+    //         Ok(secret) => Ok(Some(secret)),
+    //         Err(VarError::NotPresent) => Ok(None),
+    //         Err(VarError::NotUnicode(_)) => {
+    //             Err(anyhow::anyhow!("secret `{}` wasn't unicode", secret))
+    //         }
+    //     }
+    // }
 
     /// get a secret that may be optional, required, or in between (optional but warn on missing) depending on `self`'s configuration.
     async fn get_varying_secret(&self, secret: &str) -> anyhow::Result<Option<String>> {
@@ -325,24 +386,40 @@ impl SettingsManager {
             None => self.get_varying_secret(keys::s3::ENDPOINT).await?,
         };
 
-        let bucket = match self.remote_target.s3_bucket() {
+        let media_bucket = match self.remote_target.s3_bucket() {
             Some(bucket) => Some(bucket.to_string()),
-            None => self.get_varying_secret(keys::s3::BUCKET).await?,
+            None => self.get_varying_secret(keys::s3::MEDIA_BUCKET).await?,
+        };
+
+        let processing_bucket = match self.remote_target.s3_processing_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?,
         };
 
         let access_key_id = self.get_varying_secret(keys::s3::ACCESS_KEY).await?;
 
         let secret_access_key = self.get_varying_secret(keys::s3::SECRET).await?;
 
-        match (endpoint, bucket, access_key_id, secret_access_key) {
-            (Some(endpoint), Some(bucket), Some(access_key_id), Some(secret_access_key)) => {
-                Ok(Some(S3Settings {
-                    endpoint,
-                    bucket,
-                    access_key_id,
-                    secret_access_key,
-                }))
-            }
+        match (
+            endpoint,
+            media_bucket,
+            processing_bucket,
+            access_key_id,
+            secret_access_key,
+        ) {
+            (
+                Some(endpoint),
+                Some(media_bucket),
+                Some(processing_bucket),
+                Some(access_key_id),
+                Some(secret_access_key),
+            ) => Ok(Some(S3Settings {
+                endpoint,
+                media_bucket,
+                processing_bucket,
+                access_key_id,
+                secret_access_key,
+            })),
 
             _ => return Ok(None),
         }
@@ -403,6 +480,8 @@ impl SettingsManager {
 
         let media_index = self.get_varying_secret(keys::algolia::MEDIA_INDEX).await?;
 
+        let jig_index = self.get_varying_secret(keys::algolia::JIG_INDEX).await?;
+
         let management_key = self
             .get_varying_secret(keys::algolia::MANAGEMENT_KEY)
             .await?;
@@ -426,6 +505,7 @@ impl SettingsManager {
             backend_search_key,
             management_key,
             media_index,
+            jig_index,
             frontend_search_key,
         }))
     }
@@ -461,6 +541,102 @@ impl SettingsManager {
             signup_verify_template,
             password_reset_template,
         }))
+    }
+
+    /// Load the google cloud storage Client settings
+    pub async fn google_cloud_storage_settings(
+        &self,
+    ) -> anyhow::Result<Option<GoogleCloudStorageSettings>> {
+        let oauth2_token = self.token.clone();
+
+        // buckets are the same as those for S3, but uses the GCS API instead of S3 interop
+        let media_bucket = match self.remote_target.s3_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::MEDIA_BUCKET).await?,
+        };
+
+        let processing_bucket = match self.remote_target.s3_processing_bucket() {
+            Some(bucket) => Some(bucket.to_string()),
+            None => self.get_varying_secret(keys::s3::PROCESSING_BUCKET).await?,
+        };
+
+        match (oauth2_token, media_bucket, processing_bucket) {
+            (Some(oauth2_token), Some(media_bucket), Some(processing_bucket)) => {
+                Ok(Some(GoogleCloudStorageSettings {
+                    oauth2_token,
+                    media_bucket,
+                    processing_bucket,
+                }))
+            }
+
+            _ => return Ok(None),
+        }
+    }
+
+    /// Load the Google Cloud EventArc settings
+    pub async fn google_cloud_eventarc_settings(
+        &self,
+    ) -> anyhow::Result<Option<GoogleCloudEventArcSettings>> {
+        let oauth2_token = self.token.clone();
+
+        let project_id = Some(self.project_id.clone());
+
+        let storage_service_name = Some(config::EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
+
+        let media_uploaded_topic = match self.remote_target.google_eventarc_media_uploaded_topic() {
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => {
+                self.get_varying_secret(keys::event_arc::MEDIA_UPLOADED_TOPIC)
+                    .await?
+            }
+        };
+
+        let media_processed_topic = match self.remote_target.google_eventarc_media_processed_topic()
+        {
+            Some(endpoint) => Some(endpoint.to_string()),
+            None => {
+                self.get_varying_secret(keys::event_arc::MEDIA_PROCESSED_TOPIC)
+                    .await?
+            }
+        };
+
+        match (
+            oauth2_token,
+            project_id,
+            storage_service_name,
+            media_uploaded_topic,
+            media_processed_topic,
+        ) {
+            (
+                Some(oauth2_token),
+                Some(project_id),
+                Some(storage_service_name),
+                Some(media_uploaded_topic),
+                Some(media_processed_topic),
+            ) => Ok(Some(GoogleCloudEventArcSettings {
+                oauth2_token,
+                media_uploaded_topic,
+                media_processed_topic,
+                storage_service_name,
+                project_id,
+            })),
+            _ => Ok(None),
+        }
+    }
+
+    /// Load the settings for firebase
+    pub async fn firebase_settings(&self) -> anyhow::Result<Option<FirebaseSettings>> {
+        let oauth2_token = self.token.clone();
+
+        let project_id = Some(self.project_id.clone());
+
+        match (oauth2_token, project_id) {
+            (Some(oauth2_token), Some(project_id)) => Ok(Some(FirebaseSettings {
+                oauth2_token,
+                project_id,
+            })),
+            _ => Ok(None),
+        }
     }
 
     /// Load the `RuntimeSettings`.

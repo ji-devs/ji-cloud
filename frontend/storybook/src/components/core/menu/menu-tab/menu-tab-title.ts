@@ -30,7 +30,7 @@ MenuTabTitle.argTypes = {
     kind: {
         control: {
             type: 'inline-radio',
-            options: ['background-image', 'color', 'overlay', 'text', 'image', 'audio']
+            options: ['theme', 'background-image', 'background-color', 'color', 'overlay', 'text', 'image', 'audio', 'video', 'select', 'play-settings', 'instructions']
         }
     }
 }

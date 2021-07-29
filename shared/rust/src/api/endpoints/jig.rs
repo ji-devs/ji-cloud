@@ -2,8 +2,8 @@ use crate::{
     api::Method,
     domain::{
         jig::{
-            JigBrowseQuery, JigBrowseResponse, JigCreateRequest, JigId, JigResponse,
-            JigUpdateRequest,
+            JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
+            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateRequest,
         },
         CreateResponse,
     },
@@ -15,7 +15,16 @@ use super::ApiEndpoint;
 /// Endpoints for jig modules.
 pub mod module;
 
+/// Endpoints for jig additional resources.
+pub mod additional_resource;
+
+/// Endpoints for jig drafts.
+pub mod draft;
+
 /// Get a JIG by ID.
+///
+/// # Authorization
+/// * None
 pub struct Get;
 impl ApiEndpoint for Get {
     type Req = ();
@@ -26,6 +35,9 @@ impl ApiEndpoint for Get {
 }
 
 /// Browse jigs.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Browse;
 impl ApiEndpoint for Browse {
     type Req = JigBrowseQuery;
@@ -35,7 +47,23 @@ impl ApiEndpoint for Browse {
     const METHOD: Method = Method::Get;
 }
 
+/// Search for jigs.
+///
+/// # Authorization
+/// * None
+pub struct Search;
+impl ApiEndpoint for Search {
+    type Req = JigSearchQuery;
+    type Res = JigSearchResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig";
+    const METHOD: Method = Method::Get;
+}
+
 /// Create a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigCreateRequest;
@@ -46,6 +74,18 @@ impl ApiEndpoint for Create {
 }
 
 /// Clone a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig`
+///
+/// # Errors
+/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+///
+/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+///
+/// ['NotFound'](http::StatusCode::NOT_FOUND) if the jig does not exist.
+///
+/// ['BadRequest'](http::StatusCode::BAD_REQUEST) if the request is malformed or the jig is a draft.
 pub struct Clone;
 impl ApiEndpoint for Clone {
     type Req = ();
@@ -56,6 +96,9 @@ impl ApiEndpoint for Clone {
 }
 
 /// Update a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`,, or `ManageSelfJig` for owned Jigs
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = JigUpdateRequest;
@@ -66,6 +109,9 @@ impl ApiEndpoint for Update {
 }
 
 /// Delete a JIG.
+///
+/// # Authorization
+/// * One of `Admin`, `AdminJig`, or `ManageSelfJig` for owned Jigs
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();
@@ -73,4 +119,17 @@ impl ApiEndpoint for Delete {
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}";
     const METHOD: Method = Method::Delete;
+}
+
+/// Count of public and published JIGs.
+///
+/// # Authorization
+/// * None
+pub struct Count;
+impl ApiEndpoint for Count {
+    type Req = ();
+    type Res = JigCountResponse;
+    type Err = EmptyError;
+    const PATH: &'static str = "/v1/jig/count";
+    const METHOD: Method = Method::Get;
 }

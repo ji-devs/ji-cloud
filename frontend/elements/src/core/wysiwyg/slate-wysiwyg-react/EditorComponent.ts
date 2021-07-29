@@ -1,6 +1,6 @@
-import React, { ReactElement, useCallback, useState } from "react";
+import React, { ReactElement, FocusEvent } from "react";
 import { Descendant } from "slate";
-import { Editable, Slate } from "slate-react";
+import { Editable, RenderElementProps, RenderLeafProps, Slate } from "slate-react";
 import { Leaf } from "./Leaf";
 import { Element } from "./Element";
 import { EditorBackbone } from "./EditorBackbone";
@@ -9,51 +9,63 @@ interface Props {
     backbone: EditorBackbone;
     value: Descendant[],
     onChange: (value: Descendant[]) => void;
-    onBlur: () => void,
+    onBlur: (e: FocusEvent) => void,
 }
 
-export function EditorComponent(props: Props): ReactElement {
-    const [value, setValue]: [Descendant[], any] = useState(props.value);
+interface State {
+    value: Descendant[]
+}
 
-    const renderElement = useCallback(props => {
-        return React.createElement(Element, {...props});
-    }, []);
+export class EditorComponent extends React.Component<Props, State> {
+    public state = {
+        value: this.props.value
+    };
 
-    const renderLeaf = useCallback(props => {
+    private renderLeaf(props: RenderLeafProps) {
         return React.createElement(Leaf, {...props});
-    }, []);
-
-    const onChange = (value: Descendant[]) => {
-        setValue(value);
-        props.onChange(value);
     }
 
-    return React.createElement(
-        Slate,
-        {
-            editor: props.backbone.editor,
-            value,
-            onChange,
-            children: [React.createElement(
-                Editable,
-                {
-                    key: "Editable",
-                    renderElement,
-                    renderLeaf,
-                    onBlur: props.onBlur,
-                    onKeyDown: event => {
-                        if (!event.ctrlKey) {
-                            return
-                        }
+    private renderElement(props: RenderElementProps) {
+        return React.createElement(Element, {...props});
+    }
 
-                        if(props.backbone.keyMaps.has(event.key)) {
-                            event.preventDefault();
-                            const func = props.backbone.keyMaps.get(event.key)!;
-                            func();
+    private onChange(value: Descendant[]) {
+        this.setState({value});
+        this.props.onChange(value);
+    }
+
+    public setValue(value: Descendant[]) {
+        this.setState({value});
+    }
+
+    public render(): ReactElement {
+        return React.createElement(
+            Slate,
+            {
+                editor: this.props.backbone.editor,
+                value: this.state.value,
+                onChange: (e: any) => this.onChange(e),
+                children: [React.createElement(
+                    Editable,
+                    {
+                        key: "Editable",
+                        renderElement: this.renderElement,
+                        renderLeaf: this.renderLeaf,
+                        onBlur: this.props.onBlur,
+                        onKeyDown: event => {
+                            if (!event.ctrlKey) {
+                                return
+                            }
+    
+                            if(this.props.backbone.keyMaps.has(event.key)) {
+                                event.preventDefault();
+                                const func = this.props.backbone.keyMaps.get(event.key)!;
+                                func();
+                            }
                         }
                     }
-                }
-            )]
-        }
-    );
+                )]
+            }
+        );
+    }
 }

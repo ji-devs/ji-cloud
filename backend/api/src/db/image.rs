@@ -3,56 +3,15 @@ use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use shared::domain::{
     category::CategoryId,
-    image::{Image, ImageId, ImageKind},
-    meta::{AffiliationId, AgeRangeId, StyleId, TagId},
+    image::{ImageId, ImageKind, ImageMetadata},
+    meta::{AffiliationId, AgeRangeId, ImageStyleId, TagId},
 };
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
-pub mod user {
-    use futures::stream::BoxStream;
-    use shared::domain::image::{user::UserImage, ImageId};
-    use sqlx::PgPool;
-
-    pub async fn create(conn: &PgPool) -> sqlx::Result<ImageId> {
-        let id: ImageId = sqlx::query!(
-            r#"
-insert into user_image_library default values
-returning id as "id: ImageId"
-"#,
-        )
-        .fetch_one(conn)
-        .await?
-        .id;
-
-        Ok(id)
-    }
-
-    pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
-        sqlx::query!("delete from user_image_library where id = $1", image.0)
-            .execute(db)
-            .await
-            .map(drop)
-    }
-
-    pub async fn get(db: &PgPool, image: ImageId) -> sqlx::Result<Option<UserImage>> {
-        sqlx::query_as!(
-            UserImage,
-            r#"select id as "id: ImageId" from user_image_library where id = $1"#,
-            image.0
-        )
-        .fetch_optional(db)
-        .await
-    }
-
-    pub fn list(db: &PgPool) -> BoxStream<'_, sqlx::Result<UserImage>> {
-        sqlx::query_as!(
-            UserImage,
-            r#"select id as "id: ImageId" from user_image_library order by created_at desc"#,
-        )
-        .fetch(db)
-    }
-}
+pub mod recent;
+pub mod tag;
+pub mod user;
 
 pub async fn create(
     conn: &mut PgConnection,
@@ -73,9 +32,13 @@ returning id as "id: ImageId"
         publish_at,
         kind as i16,
     )
-    .fetch_one(conn)
+    .fetch_one(&mut *conn)
     .await?
     .id;
+
+    sqlx::query!("insert into image_upload (image_id) values($1)", id.0)
+        .execute(&mut *conn)
+        .await?;
 
     Ok(id)
 }
@@ -85,7 +48,7 @@ pub async fn update_metadata(
     image: ImageId,
     affiliations: Option<&[AffiliationId]>,
     age_ranges: Option<&[AgeRangeId]>,
-    styles: Option<&[StyleId]>,
+    styles: Option<&[ImageStyleId]>,
     categories: Option<&[CategoryId]>,
     tags: Option<&[TagId]>,
 ) -> sqlx::Result<()> {
@@ -168,7 +131,7 @@ where id = $1
     Ok(true)
 }
 
-pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<Image>> {
+pub async fn get_one(db: &PgPool, id: ImageId) -> sqlx::Result<Option<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
@@ -183,9 +146,11 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
 from image_metadata
+         join image_upload on id = image_id
 where id = $1
+  and processing_result is true
 "#)
     .bind(id)
     .fetch_optional(db)
@@ -197,7 +162,7 @@ pub fn list(
     is_published: Option<bool>,
     kind: Option<ImageKind>,
     page: i32,
-) -> BoxStream<'_, sqlx::Result<Image>> {
+) -> BoxStream<'_, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
@@ -212,11 +177,12 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
-from image_metadata
-where 
-    publish_at < now() is not distinct from $1 or $1 is null
-    and kind = $3 is not distinct from $3 or $3 is null
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
+from (image_metadata
+         inner join image_upload on image_id = id)
+where processing_result is not distinct from true 
+    and (publish_at < now() is not distinct from $1 or $1 is null)
+    and (kind is not distinct from $3 or $3 is null) 
 order by coalesce(updated_at, created_at) desc
 limit 20 offset 20 * $2
 "#)
@@ -226,14 +192,28 @@ limit 20 offset 20 * $2
     .fetch(db)
 }
 
-pub async fn filtered_count(db: &PgPool, is_published: Option<bool>) -> sqlx::Result<u64> {
-    sqlx::query!(r#"select count(*) as "count!: i64" from image_metadata where publish_at < now() is not distinct from $1 or $1 is null"#, is_published)
-        .fetch_one(db)
-        .await
-        .map(|it| it.count as u64)
+pub async fn filtered_count(
+    db: &PgPool,
+    is_published: Option<bool>,
+    kind: Option<ImageKind>,
+) -> sqlx::Result<u64> {
+    sqlx::query!(
+        r#"
+select count(*) as "count!: i64" 
+from image_metadata
+        inner join image_upload on image_id = id 
+where processing_result is not distinct from true 
+    and (publish_at < now() is not distinct from $1 or $1 is null)
+    and (kind is not distinct from $2 or $2 is null)"#,
+        is_published,
+        kind.map(|it| it as i16),
+    )
+    .fetch_one(db)
+    .await
+    .map(|it| it.count as u64)
 }
 
-pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Image>> {
+pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<ImageMetadata>> {
     sqlx::query_as(
 r#"
 select id,
@@ -248,9 +228,12 @@ select id,
        array((select row (style_id) from image_style where image_id = id))             as styles,
        array((select row (age_range_id) from image_age_range where image_id = id))     as age_ranges,
        array((select row (affiliation_id) from image_affiliation where image_id = id)) as affiliations,
-       array((select row (tag_id) from image_tag_join where image_id = id)) as tags
+       array((select row (tag_id) from image_tag_join where image_id = id))            as tags
 from image_metadata
-inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)
+         inner join image_upload on image_id = id
+         inner join unnest($1::uuid[])
+    with ordinality t(id, ord) USING (id)
+where processing_result is not distinct from true
 order by t.ord
 "#).bind(ids)
     .fetch(db)
@@ -271,9 +254,14 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     )
     .await?;
 
+    sqlx::query!("delete from image_upload where image_id = $1", image.0)
+        .execute(&mut conn)
+        .await?;
+
     // then drop.
     sqlx::query!("delete from image_metadata where id = $1", image.0)
         .execute(&mut conn)
         .await?;
+
     conn.commit().await
 }

@@ -84,5 +84,5 @@ impl Report {
 
 fn make_link<T: AsRef<str>>(id:T) -> String {
     let id = id.as_ref();
-    format!(r#"=HYPERLINK("https://jicloud.org/admin/image-edit/{}","{}")"#, id, id)
+    format!(r#"=HYPERLINK("https://jigzi.org/admin/image-edit/{}","{}")"#, id, id)
 }

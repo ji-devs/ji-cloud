@@ -11,10 +11,12 @@
 #![warn(clippy::use_self)]
 #![warn(clippy::useless_let_if_seq)]
 
+use std::thread;
+
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
+
 use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
-use std::thread;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -25,6 +27,7 @@ async fn main() -> anyhow::Result<()> {
     let (
         runtime_settings,
         s3,
+        gcs,
         algolia_client,
         algolia_key_store,
         algolia_manager,
@@ -46,6 +49,12 @@ async fn main() -> anyhow::Result<()> {
             .s3_settings()
             .await?
             .map(s3::Client::new)
+            .transpose()?;
+
+        let gcs = settings
+            .google_cloud_storage_settings()
+            .await?
+            .map(service::storage::Client::new)
             .transpose()?;
 
         let algolia_settings = settings.algolia_settings().await?;
@@ -84,6 +93,7 @@ async fn main() -> anyhow::Result<()> {
         (
             runtime_settings,
             s3,
+            gcs,
             algolia_client,
             algolia_key_store,
             algolia_manager,
@@ -109,6 +119,7 @@ async fn main() -> anyhow::Result<()> {
             db_pool,
             runtime_settings,
             s3,
+            gcs,
             algolia_client,
             algolia_key_store,
             jwk_verifier,

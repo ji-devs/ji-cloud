@@ -1,14 +1,14 @@
 import {argsToAttrs} from "@utils/attributes";
-import "@elements/widgets/module-page/iframe";
 import "@elements/module/memory/play/container";
+import "@elements/core/module-page/grid-resize";
 
-import {Sidebar} from "./sections/sidebar";
-import {Main} from "./sections/main";
-import {Ending} from "./sections/ending";
+import {Sidebar} from "./sidebar";
+import {Main} from "./main";
+import {Ending} from "./ending";
 import {mapToString, arrayIndex} from "@utils/array";
 
 export default {
-    title: "Module / Memory / Play"
+    title: "Module / Memory / Play" 
 }
 
 interface Args {
@@ -27,13 +27,17 @@ export const Player = (props?:Partial<Args>) => {
     const {nCards, isEnding} = props;
 
     return `
-    <play-container slot="main">
+
+      <module-page-grid-resize>
+    <memory-container slot="main">
         ${Sidebar({nPairs: nCards/2})}
         ${isEnding 
             ? Ending()
             : Main({nCards})
         }
-    </play-container>`;
+    </memory-container>
+      </module-page-grid-resize>
+    `;
 }
 
 Player.args = DEFAULT_ARGS;

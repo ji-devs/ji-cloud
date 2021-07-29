@@ -11,6 +11,9 @@ mod login;
 mod oauth;
 mod strings;
 mod profile;
+mod email;
+mod password;
+mod debug;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -21,6 +24,8 @@ use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     setup_logger();
+    crate::debug::init();
+
     let settings = utils::settings::init();
 
     let router = router::Router::new();
@@ -32,7 +37,7 @@ pub async fn main_js() {
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
-    if #[cfg(all(feature = "wasm-logger", feature = "console_error_panic_hook", debug_assertions))] {
+    if #[cfg(all(feature = "wasm-logger", feature = "console_error_panic_hook"))] {
         fn setup_logger() {
             wasm_logger::init(wasm_logger::Config::default());
             console_error_panic_hook::set_once();

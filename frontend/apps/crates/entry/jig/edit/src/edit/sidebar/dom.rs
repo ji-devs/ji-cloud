@@ -26,41 +26,66 @@ pub struct SidebarDom {
 }
 
 impl SidebarDom {
-    pub fn render(jig_id: JigId, module_id: Mutable<Option<ModuleId>>) -> Dom {
-        let loader = AsyncLoader::new();
+    pub fn render(jig_id: JigId, route: Mutable<JigEditRoute>) -> Dom {
+        let is_loading = Mutable::new(true);
         let jig = Rc::new(RefCell::new(None));
 
-        loader.load(clone!(jig => async move {
-            if jig_id == JigId(Uuid::from_u128(0)) {
-                *jig.borrow_mut() = Some(debug::get_jig());
-            } else {
-                actions::load_jig(jig_id, jig.clone()).await;
-            }
-        }));
 
-        Dom::with_state(loader, clone!(jig, module_id => move |loader| {
-            html!("empty-fragment", {
-                .property("slot", "sidebar")
-                .child_signal(loader.is_loading().map(clone!(jig, module_id => move |loading| {
-                    if loading {
-                        None
-                    } else {
-                        Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), module_id.clone()))
-                    }
-                })))
-            })
-        }))
+        html!("empty-fragment", {
+            .property("slot", "sidebar")
+            .future(clone!(is_loading, jig, jig_id => async move {
+                if jig_id == JigId(Uuid::from_u128(0)) {
+                    *jig.borrow_mut() = Some(debug::get_jig());
+                } else {
+                    actions::load_jig(jig_id, jig.clone()).await;
+                }
+
+                is_loading.set_neq(false);
+
+            }))
+            .child_signal(is_loading.signal().map(clone!(jig, route => move |loading| {
+                if loading {
+                    None
+                } else {
+                    Some(Self::render_loaded(jig.borrow_mut().take().unwrap_ji(), route.clone()))
+                }
+            })))
+        })
+
 
     }
 
-    fn render_loaded(jig: Jig, module_id: Mutable<Option<ModuleId>>) -> Dom {
-        let state = Rc::new(State::new(jig, module_id));
+    fn render_loaded(jig: Jig, route: Mutable<JigEditRoute>) -> Dom {
+        let state = Rc::new(State::new(jig, route));
 
 
         html!("empty-fragment", {
             .child(html!("jig-edit-sidebar", {
+                .property_signal("collapsed", state.collapsed.signal())
+                .property_signal("isModulePage", state.route.signal_cloned().map(|route| {
+                    matches!(route, JigEditRoute::Landing)
+                }))
                 .property_signal("loading", state.loader.is_loading())
                 .child(HeaderDom::render(state.clone()))
+                .child(html!("jig-edit-sidebar-publish", {
+                    .property("slot", "publish")
+                    .property_signal("publish", state.publish_at.signal_cloned().map(|publish_at| {
+                        publish_at.is_some()
+                    }))
+                    .property_signal("collapsed", state.collapsed.signal())
+                    .property_signal("selected", state.route.signal_cloned().map(|route| {
+                        matches!(route, JigEditRoute::Publish)
+                    }))
+                    .event(clone!(state => move |_ :events::Click| {
+                        actions::navigate_to_publish(state.clone());
+                    }))
+                    .child(html!("menu-kebab", {
+                        .property("slot", "menu")
+                        .child(html!("menu-line", {
+                            .property("icon", "edit")
+                        }))
+                    }))
+                }))
                 .children_signal_vec(state.modules
                     .signal_vec_cloned()
                     .enumerate()

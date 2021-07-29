@@ -8,17 +8,18 @@ use futures_signals::{
     signal_vec::SignalVecExt,
     signal::SignalExt
 };
-use shared::domain::meta::MetadataResponse;
+use shared::domain::meta::{MetadataResponse, TagId};
+use components::image::tag::ImageTag;
 
 pub struct Section1Dom {
 }
 
 impl Section1Dom {
-    pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Dom {
-        let state = Rc::new(State::new(meta_state, image, metadata));
+    pub fn render(meta_state: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, tag_list: Rc<Vec<(ImageTag, TagId)>>) -> Dom {
+        let state = Rc::new(State::new(meta_state, image, metadata, tag_list));
 
         html!("image-meta-section-1", {
-            .children(state.metadata.styles.iter().map(|style| {
+            .children(state.metadata.image_styles.iter().map(|style| {
                 let id = style.id;
                 html!("input-checkbox", {
                     .property("slot", "styles")
@@ -48,6 +49,16 @@ impl Section1Dom {
                     .property_signal("checked", state.affiliation_selected(id.clone()))
                     .event(clone!(state, id => move |evt:events::CustomToggle| {
                         actions::toggle_affiliation(state.clone(), id, evt.value());
+                    }))
+                })
+            }))
+            .children(state.tag_list.iter().map(|(tag, tag_id)| {
+                html!("input-checkbox", {
+                    .property("slot", "tags")
+                    .property("label", tag.STR_DISPLAY_NAME())
+                    .property_signal("checked", state.tag_selected(tag_id.clone()))
+                    .event(clone!(state, tag_id => move |evt:events::CustomToggle| {
+                        actions::toggle_tag(state.clone(), tag_id, evt.value());
                     }))
                 })
             }))

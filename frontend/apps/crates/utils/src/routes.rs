@@ -19,6 +19,7 @@ pub enum Route {
     NoAuth,
     User(UserRoute),
     Admin(AdminRoute),
+    Home,
     Jig(JigRoute),
     Legacy(LegacyRoute),
     Module(ModuleRoute),
@@ -33,7 +34,9 @@ pub enum UserRoute {
     Login,
     Register,
     ContinueRegistration,
-    SendEmailConfirmation,
+    SendEmailConfirmation(String), //the email address
+    VerifyEmail(String), //the token 
+    PasswordReset(String), //the token 
     RegisterComplete,
 }
 
@@ -50,6 +53,7 @@ pub enum AdminRoute {
     Locale,
     ImageSearch(Option<ImageSearchQuery>),
     ImageAdd,
+    ImageTags,
     ImageMeta(ImageId, bool), //flag is for if it's a new image
 }
 
@@ -61,8 +65,15 @@ pub enum LegacyRoute {
 #[derive(Debug, Clone)]
 pub enum JigRoute {
     Gallery,
-    Edit(JigId, Option<ModuleId>),
+    Edit(JigId, JigEditRoute),
     Play(JigId, Option<ModuleId>) 
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum JigEditRoute {
+    Landing,
+    Module(ModuleId),
+    Publish,
 }
 
 #[derive(Debug, Clone)]
@@ -121,6 +132,7 @@ impl Route {
         let json_query = params.get("data");
 
         match paths {
+            [""] => Self::Home,
 			["dev", "showcase", id] => {
                 let page = params.get("page").unwrap_or_default();
                 Self::Dev(DevRoute::Showcase(id.to_string(), page))
@@ -151,7 +163,9 @@ impl Route {
                 }
             }
             ["user", "continue-registration"] => Self::User(UserRoute::ContinueRegistration),
-            ["user", "send-email-confirmation"] => Self::User(UserRoute::SendEmailConfirmation),
+            ["user", "send-email-confirmation", email] => Self::User(UserRoute::SendEmailConfirmation(email.to_string())),
+            ["user", "verify-email", token] => Self::User(UserRoute::VerifyEmail(token.to_string())),
+            ["user", "password-reset", token] => Self::User(UserRoute::PasswordReset(token.to_string())),
             ["user", "register-complete"] => Self::User(UserRoute::RegisterComplete),
             ["admin", "locale"] => Self::Admin(AdminRoute::Locale),
             ["admin", "categories"] => Self::Admin(AdminRoute::Categories),
@@ -164,23 +178,28 @@ impl Route {
                 }
             },
             ["admin", "image-add"] => Self::Admin(AdminRoute::ImageAdd),
+            ["admin", "image-tags"] => Self::Admin(AdminRoute::ImageTags),
             ["admin", "image-meta", id, flag] => {
                 let id = ImageId(Uuid::from_str(id).unwrap_ji());
                 Self::Admin(AdminRoute::ImageMeta(id, bool::from_str(flag).unwrap_ji()))
             },
             ["admin"] => Self::Admin(AdminRoute::Landing),
             ["jig", "edit", "gallery"] => Self::Jig(JigRoute::Gallery),
+            ["jig", "edit", jig_id, "publish"] => Self::Jig(JigRoute::Edit(
+                JigId(Uuid::from_str(jig_id).unwrap_ji()),
+                JigEditRoute::Publish
+            )),
             ["jig", "edit", "debug"] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_u128(0)),
-                    None
+                    JigEditRoute::Landing
             )),
             ["jig", "edit", jig_id] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    None
+                    JigEditRoute::Landing
             )),
             ["jig", "edit", jig_id, module_id] => Self::Jig(JigRoute::Edit(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
+                    JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
             ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
@@ -195,28 +214,28 @@ impl Route {
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", "debug"] => {
                 Self::Module(ModuleRoute::Edit(
-                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_u128(0)),
                         ModuleId(Uuid::from_u128(0)),
                 ))
             },
             ["module", kind, "edit", jig_id, module_id] => {
                 Self::Module(ModuleRoute::Edit(
-                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_str(jig_id).unwrap_ji()),
                         ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
             },
             ["module", kind, "play", "debug"] => {
                 Self::Module(ModuleRoute::Play(
-                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_u128(0)),
                         ModuleId(Uuid::from_u128(0)),
                 ))
             },
             ["module", kind, "play", jig_id, module_id] => {
                 Self::Module(ModuleRoute::Play(
-                        ModuleKind::from_str(kind).expect_throw("unknown module kind!"), 
+                        ModuleKind::from_str(kind).expect_ji("unknown module kind!"), 
                         JigId(Uuid::from_str(jig_id).unwrap_ji()),
                         ModuleId(Uuid::from_str(module_id).unwrap_ji()),
                 ))
@@ -237,6 +256,7 @@ impl From<Route> for String {
 impl From<&Route> for String {
     fn from(route:&Route) -> Self {
         match route {
+            Route::Home => "/".to_string(),
             Route::NoAuth => "/no-auth".to_string(),
 			Route::Dev(route) => {
                 match route {
@@ -253,7 +273,9 @@ impl From<&Route> for String {
                     UserRoute::Register => "/user/register".to_string(),
                     UserRoute::RegisterOauth(_) => "/user/register-oauth".to_string(),
                     UserRoute::LoginOauth(_) => "/user/login-oauth".to_string(),
-                    UserRoute::SendEmailConfirmation => "/user/send-email-confirmation".to_string(),
+                    UserRoute::SendEmailConfirmation(email) => format!("/user/send-email-confirmation/{}", email),
+                    UserRoute::VerifyEmail(token) => format!("/user/verify-email/{}", token),
+                    UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
                     UserRoute::RegisterComplete => "/user/register-complete".to_string(),
                 }
             },
@@ -274,17 +296,18 @@ impl From<&Route> for String {
                         }
                     }
                     AdminRoute::ImageAdd => "/admin/image-add".to_string(),
+                    AdminRoute::ImageTags => "/admin/image-tags".to_string(),
                     AdminRoute::ImageMeta(id, is_new) => format!("/admin/image-meta/{}/{}", id.0.to_string(), is_new),
                 }
             },
             Route::Jig(route) => {
                 match route {
                     JigRoute::Gallery => "/jig/edit/gallery".to_string(),
-                    JigRoute::Edit(jig_id, module_id) => {
-                        if let Some(module_id) = module_id {
-                            format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
-                        } else {
-                            format!("/jig/edit/{}", jig_id.0.to_string())
+                    JigRoute::Edit(jig_id, route) => {
+                        match route {
+                            JigEditRoute::Landing => format!("/jig/edit/{}", jig_id.0.to_string()),
+                            JigEditRoute::Module(module_id) => format!("/jig/edit/{}/{}", jig_id.0.to_string(), module_id.0.to_string()),
+                            JigEditRoute::Publish => format!("/jig/edit/{}/publish", jig_id.0.to_string()),
                         }
                     }
                     JigRoute::Play(jig_id, module_id) => {

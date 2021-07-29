@@ -9,7 +9,6 @@ use std::sync::atomic::{Ordering, AtomicI32};
 use serde::Deserialize;
 use std::sync::{Mutex, MutexGuard};
 use futures_signals::signal::Mutable;
-use crate::math::transform_2d;
 use futures_signals::signal::Signal;
 
 static RESIZE_INFO: Lazy<Mutable<ResizeInfo>> = Lazy::new(|| Mutable::new(ResizeInfo::default()));
@@ -45,11 +44,92 @@ pub fn resize_info_signal() -> impl Signal<Item = ResizeInfo> {
 pub fn get_resize_info() -> ResizeInfo {
     RESIZE_INFO.get_cloned()
 }
+
+
 impl ResizeInfo {
-    pub fn get_element_pos_rem(&self, element:&Element) -> (f64, f64) {
-        let (x, y) = self.get_element_pos_px(element);
+    //given a px value relative to the viewport, get normalized coordinates 
+    pub fn get_px_normalized(&self, x: f64, y: f64) -> (f64, f64) {
+        let x = x / self.width;
+        let y = y / self.height;
+
+        (x, y)
+    }
+
+    //given normalized coordinates, get the current relative value in pixels
+    pub fn get_px_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
+        (x * self.width, y * self.height)
+    }
+    //alias for the above
+    pub fn get_pos_denormalized(&self, x: f64, y: f64) -> (f64, f64) {
+        self.get_px_denormalized(x, y)
+    }
+
+    //given absolute coordinates, get the coordinats within the viewport
+    pub fn get_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
+
+        //need to offset it by content space
+        let x = x - (self.x + self.content_x);
+        let y = y - (self.y + self.content_y);
+
+        (x, y)
+    }
+
+    //given coordinates within the viewport, get absolute coordinats in window 
+    pub fn get_fixed_pos_px(&self, x: f64, y: f64) -> (f64, f64) {
+
+        //need to offset it by content space
+        let x = x + (self.x + self.content_x);
+        let y = y + (self.y + self.content_y);
+
+        (x, y)
+    }
+    //given absolute coordinates, get normalized coordinates within the viewport
+    pub fn get_pos_normalized(&self, x: f64, y: f64) -> (f64, f64) {
+        let (x, y) = self.get_pos_px(x, y);
+        self.get_px_normalized(x, y)
+    }
+    pub fn get_size_denormalized(&self, width: f64, height: f64) -> (f64, f64) {
+        (width * self.width, height * self.height)
+    }
+
+
+    //given current pixel size, get size in relative units
+    pub fn get_size_rem(&self, width: f64, height: f64) -> (f64, f64) {
+        (width / self.scale, height / self.scale)
+    }
+    //given the full size, get current relative size in px
+    pub fn get_size_px(&self, width: f64, height: f64) -> (f64, f64) {
+        (width * self.scale, height * self.scale)
+    }
+    //given original size, get the relative size compared to original full-size
+    pub fn get_size_normalized(&self, width: f64, height: f64) -> (f64, f64) {
+        let (full_width, full_height) = self.full_size();
+
+        (width / full_width, height / full_height)
+    }
+
+    //given normalized coordinates, get the original full-size
+    pub fn get_size_full(&self, width: f64, height: f64) -> (f64, f64) {
+        let (full_width, full_height) = self.full_size();
+
+        (width * full_width, height * full_height)
+    }
+
+    //"rem" really means consistent, 
+    //i.e. relative to our reference artboard size
+    //but we typically express that as css rem units so...
+    pub fn get_pos_rem(&self, x: f64, y: f64) -> (f64, f64) {
+        let (x, y) = self.get_pos_px(x, y);
         let scale = self.scale; 
         (x / scale, y / scale)
+    }
+
+    pub fn get_element_pos_rem(&self, element:&Element) -> (f64, f64) {
+        let rect = element.get_bounding_client_rect();
+        let elem_x = rect.left();
+        let elem_y = rect.top();
+
+        self.get_pos_rem(elem_x, elem_y)
     }
 
     pub fn get_element_pos_px(&self, element:&Element) -> (f64, f64) {
@@ -57,12 +137,13 @@ impl ResizeInfo {
         let rect = element.get_bounding_client_rect();
         let elem_x = rect.left();
         let elem_y = rect.top();
-       
-        //need to offset it by content space
-        let x = elem_x - (self.x + self.content_x);
-        let y = elem_y - (self.y + self.content_y);
+     
+        self.get_pos_px(elem_x, elem_y)
+    }
 
-        (x, y)
+    pub fn full_size(&self) -> (f64, f64) { 
+        let unscale = (1.0 / self.scale);
+        (self.width * unscale, self.height * unscale)
     }
 }
 

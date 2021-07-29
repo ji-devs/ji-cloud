@@ -1,30 +1,29 @@
 import { Editor, Transforms, Text, createEditor, BaseEditor, NodeEntry, Node, Element as SlateElement } from "slate";
 import { ReactEditor, withReact } from "slate-react";
-import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getDefault, getKeyType } from "../wysiwyg-types";
+import { ControllerState, Align, Color, ElementType, Font, FontSize, IndentCount, Weight, getKeyLevel } from "../wysiwyg-types";
 
-export type CustomElement = {
-    children: CustomText[];
-    element: ElementType;
-    align: Align,
-    indentCount: IndentCount,
+export type EditorElement = {
+    children: EditorText[];
+    align?: Align,
+    indentCount?: IndentCount,
 }
-export type CustomText = {
-    text: string;
-    bold: boolean;
-    underline: boolean;
-    italic: boolean;
-    color: Color;
-    highlightColor: Color;
-    fontSize: FontSize;
-    weight: Weight;
-    font: Font;
+export type EditorText = {
+    text?: string;
+    underline?: boolean;
+    italic?: boolean;
+    color?: Color;
+    highlightColor?: Color;
+    fontSize?: FontSize;
+    weight?: Weight;
+    font?: Font;
+    element?: ElementType;
 }
 
 declare module 'slate' {
     interface CustomTypes {
         Editor: BaseEditor & ReactEditor;
-        Element: CustomElement;
-        Text: CustomText;
+        Element: EditorElement;
+        Text: EditorText;
     }
 }
 
@@ -39,7 +38,7 @@ export class EditorBackbone {
 
     public readonly keyMaps = new Map([
         ['u', () => this.toggleMark('underline')],
-        ['b', () => this.toggleMark('bold')],
+        // ['b', () => this.toggleMark('bold')],
         ['i', () => this.toggleMark('italic')],
     ]);
 
@@ -61,45 +60,50 @@ export class EditorBackbone {
     }
 
     getValue<K extends keyof ControllerState>(key: K): ControllerState[K] | undefined {
-        const keyType = getKeyType(key);
+        const keyType = getKeyLevel(key);
         if(keyType === 'element') {
             return (this.getSelectedElement() as any)?.[key];
-        } else {
+        } else if(keyType === "leaf") {
             return (this.getSelectedLeaf() as any)?.[key];
+        } else {
+            throw new Error("Should not be handled on this level");
         }
     }
 
-    getSelectedLeaf(): CustomText | undefined {
+    getSelectedLeaf(): EditorText | undefined {
         if(!this.editor.selection) return;
-        const [fistSelectedElement] = Editor.node(this.editor, this.editor.selection);
-        return fistSelectedElement as CustomText;
+        const iterator = Editor.nodes(this.editor, {
+            at: this.editor.selection,
+            match: n => Text.isText(n),
+        });
+        return (iterator.next().value as any)[0] as Text | undefined;
     }
 
-    getSelectedElement() : CustomElement | undefined {
+    getSelectedElement() : EditorElement | undefined {
         if(!this.editor.selection) return;
         let iterator = Editor.nodes(this.editor, {
             at: this.editor.selection,
             match: n => SlateElement.isElement(n),
         });
-        return (iterator.next().value as any)[0] as CustomElement | undefined;
+        return (iterator.next().value as any)[0] as EditorElement | undefined;
     }
 
-    setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
-        const defaultValue = getDefault(key);
-        let finalValue = value === defaultValue ? undefined : value;
-        const keyType = getKeyType(key);
+    setValue<K extends keyof ControllerState>(key: K, value: ControllerState[K] | undefined) {
+        const keyType = getKeyLevel(key);
         if(keyType === 'element') {
             Transforms.setNodes(
                 this._editor,
-                { [key]: finalValue },
+                { [key]: value },
                 { match: n => Editor.isBlock(this._editor, n) }
             );
-        } else {
+        } else if(keyType === "leaf") {
             Transforms.setNodes(
                 this._editor,
-                {[key]: finalValue},
+                {[key]: value},
                 { match: n => Text.isText(n), split: true }
             );
+        } else {
+            throw new Error("Should not be handled on this level");
         }
     }
 

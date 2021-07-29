@@ -43,11 +43,7 @@ pub async fn finalize(req: CreateSessionOAuthRequest, url_kind: OAuthUrlKind) {
 
         match resp {
             CreateSessionResponse::Login(resp) => {
-                let csrf = resp.csrf;
-
-                storage::save_csrf_token(&csrf);
-                let route:String = Route::User(UserRoute::Profile(ProfileSection::Landing)).into();
-                dominator::routing::go_to_url(&route);
+                crate::login::actions::do_success(&resp.csrf);
             },
             CreateSessionResponse::Register(resp) => {
                 let csrf = resp.csrf;

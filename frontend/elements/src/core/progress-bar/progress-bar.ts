@@ -6,6 +6,9 @@ export type ProgressColor = 'blue' | 'green';
 export class _ extends LitElement {
     static get styles() {
         return [css`
+            :host {
+                height: 24px;
+            }
             :host([color=blue]) {
                 --color: var(--main-blue);
                 --background-color: #c4dbfe;
@@ -17,7 +20,7 @@ export class _ extends LitElement {
             .outer {
                 display: grid;
                 background-color: var(--background-color);
-                height: 24px;
+                height: 100%;
                 border-radius: 12px;
                 grid-template-columns: 24px repeat(99, 1fr);
             }

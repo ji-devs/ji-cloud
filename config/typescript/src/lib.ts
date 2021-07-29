@@ -1,4 +1,4 @@
-
+//TODO - move this into frontend/config as JSON
 export const STAGE_EDIT = {
 	width: 1920,
 	height: 1080,
@@ -43,10 +43,14 @@ export const URL_STORYBOOK_SANDBOX = "https://storybook.sandbox.jicloud.org";
 export const URL_UPLOADS_RELEASE = "https://uploads.jicloud.org";
 export const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jicloud.org";
 
+const getUrl = (envKey:string, fallback: string):string => {
+	const value = (process as any).env[envKey];
+	return value == undefined || value == "" ? fallback : value;
+}
 
 export const getMediaUrl = (isDev:boolean):string => {
         return isDev
-                ? `http://localhost:4102`
+                ? getUrl("LOCAL_MEDIA_URL", "http://localhost:4102")
                 : URL_MEDIA;
 }
 
@@ -57,7 +61,7 @@ export const getMediaUrl_UI = (isDev:boolean):string => {
 
 export const getMediaUrl_UPLOADS = (deployTarget: string | undefined):string => {
         switch(deployTarget) {
-                case "local": return "http://localhost:9000/test-bucket";
+                case "local": return getUrl("LOCAL_UPLOADS_URL", "http://localhost:9000/test-bucket");
                 case "sandbox": return URL_UPLOADS_SANDBOX;
                 case "release": return URL_UPLOADS_RELEASE;
                 default: return "";

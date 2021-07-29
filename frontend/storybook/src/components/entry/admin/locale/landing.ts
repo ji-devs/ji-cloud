@@ -41,16 +41,16 @@ export const Landing = (props?: Partial<Args>) => {
         <locale-select-columns-item slot="hidden-columns">Column C</locale-select-columns-item>
         <locale-select-columns-item slot="hidden-columns">Column D</locale-select-columns-item>
 
-        <button-text slot="move-actions">⇨</button-text>
-        <button-text slot="move-actions">⇦</button-text>
+        <button-rect kind="text" slot="move-actions">⇨</button-rect>
+        <button-rect kind="text" slot="move-actions">⇦</button-rect>
 
 
         <locale-select-columns-item slot="visible-columns" active>Column E (active)</locale-select-columns-item>
         <locale-select-columns-item slot="visible-columns">Column F</locale-select-columns-item>
         <locale-select-columns-item slot="visible-columns">Column G</locale-select-columns-item>
 
-        <button-text slot="sort-actions">⇧</button-text>
-        <button-text slot="sort-actions">⇩</button-text>
+        <button-rect kind="text" slot="sort-actions">⇧</button-rect>
+        <button-rect kind="text" slot="sort-actions">⇩</button-rect>
 
     </locale-select-columns>
     <locale-row slot="rows">
@@ -131,8 +131,8 @@ export const Landing = (props?: Partial<Args>) => {
         </locale-cell>
         <locale-cell>
             <locale-actions-wrapper>
-                <button-text slot="first">Clone</button-text>
-                <button-text slot="second">Delete</button-text>
+                <button-rect kind="text" slot="first">Clone</button-rect>
+                <button-rect kind="text" slot="second">Delete</button-rect>
             </locale-actions-wrapper>
         </locale-cell>
     </locale-row>
@@ -183,8 +183,8 @@ export const Landing = (props?: Partial<Args>) => {
         </locale-cell>
         <locale-cell>
             <locale-actions-wrapper>
-                <button-text slot="first">Clone</button-text>
-                <button-text slot="second">Delete</button-text>
+                <button-rect kind="text" slot="first">Clone</button-rect>
+                <button-rect kind="text" slot="second">Delete</button-rect>
             </locale-actions-wrapper>
         </locale-cell>
     </locale-row>
@@ -227,8 +227,8 @@ export const Landing = (props?: Partial<Args>) => {
         </locale-cell>
         <locale-cell>
             <locale-actions-wrapper>
-                <button-text slot="first">Clone</button-text>
-                <button-text slot="second">Delete</button-text>
+                <button-rect kind="text" slot="first">Clone</button-rect>
+                <button-rect kind="text" slot="second">Delete</button-rect>
             </locale-actions-wrapper>
         </locale-cell>
     </locale-row>
@@ -271,8 +271,8 @@ export const Landing = (props?: Partial<Args>) => {
         </locale-cell>
         <locale-cell>
             <locale-actions-wrapper>
-                <button-text slot="first">Clone</button-text>
-                <button-text slot="second">Delete</button-text>
+                <button-rect kind="text" slot="first">Clone</button-rect>
+                <button-rect kind="text" slot="second">Delete</button-rect>
             </locale-actions-wrapper>
         </locale-cell>
     </locale-row>

@@ -1,16 +1,18 @@
 use shared::{
-    domain::image::*,
+    media::MediaLibrary,
+    domain::{image::*, meta::*},
     error::*,
     api::{ApiEndpoint, endpoints},
 };
 use utils::{
-    fetch::{api_with_auth, api_upload_file},
+    prelude::*,
     routes::*
 };
 use dominator::clone;
 use super::state::*;
 use std::rc::Rc;
 use web_sys::File;
+use components::image::upload::{upload_image};
 
 pub fn on_change(state: Rc<State>, value: String) {
     match value.as_ref() {
@@ -28,14 +30,27 @@ pub fn on_change(state: Rc<State>, value: String) {
 
 pub fn on_file(state: Rc<State>, file: File) {
     state.loader.load(clone!(state => async move {
+        let meta_resp = api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await.expect_ji("couldn't get meta response!");
+
+        let affiliations = meta_resp.affiliations
+            .iter()
+            .map(|x| x.id)
+            .collect();
+
+        let age_ranges = meta_resp.age_ranges
+            .iter()
+            .map(|x| x.id)
+            .collect();
+
         let req = ImageCreateRequest {
             name: "".to_string(),
             description: "".to_string(),
             is_premium: false,
             publish_at: None,
+            tags: Vec::new(),
             styles: Vec::new(),
-            age_ranges: Vec::new(),
-            affiliations: Vec::new(),
+            age_ranges,
+            affiliations,
             categories: Vec::new(),
             kind: state.kind.borrow().clone()
         };
@@ -43,21 +58,28 @@ pub fn on_file(state: Rc<State>, file: File) {
         match api_with_auth::<CreateResponse, MetadataNotFound, _>(endpoints::image::Create::PATH, endpoints::image::Create::METHOD, Some(req)).await {
             Ok(resp) => {
                 let CreateResponse { id} = resp;
-
-                let path = endpoints::image::Upload::PATH.replace("{id}",&id.0.to_string());
-                match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
+               
+                match upload_image(id, MediaLibrary::Global, &file, None).await {
                     Ok(_) => {
                         let route:String = Route::Admin(AdminRoute::ImageMeta(id, true)).into();
                         dominator::routing::go_to_url(&route);
                     },
-                    Err(_) => {
-                        log::error!("error uploading!");
+                    Err(err) => {
+                        if err.is_abort() {
+                            log::info!("aborted!");
+                        } else {
+                            log::error!("got error! {:?}", err);
+                        }
                     }
                 }
             },
             Err(_) => {
-                log::error!("error creating image db!")
+                log::error!("error creating image id!")
             }
         }
     }))
+}
+
+async fn upload_file(file: File, id: ImageId, session_uri: &str) {
+    log::info!("Uploading {} to {}", id.0.to_string(), session_uri);
 }

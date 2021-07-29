@@ -113,6 +113,52 @@ args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest"]
 script_runner = "@shell"
 script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest --platform managed"]
 
+#####################
+## API MEDIA WATCH ##
+#####################
+
+#------Release-----------#
+[tasks.release-api-media-watch]
+run_task = [{name = [
+    "gcloud-configure-docker",
+    "docker-build-release-api-media-watch",
+    "docker-publish-release-api-media-watch",
+    "deploy-release-api-media-watch",
+]}]
+
+[tasks.docker-build-release-api-media-watch]
+command = "docker"
+args = ["build", "-f", "backend/api/Dockerfile", "--target", "release_media_watch", "-t", "gcr.io/ji-cloud/ji-cloud-api-media-watch:latest", "."]
+
+[tasks.docker-publish-release-api-media-watch]
+command = "docker"
+args = ["push", "gcr.io/ji-cloud/ji-cloud-api-media-watch:latest"]
+
+[tasks.deploy-release-api-media-watch]
+script_runner = "@shell"
+script = ["gcloud run deploy ji-cloud-api-media-watch --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api-media-watch:latest --platform managed"]
+
+#------Sandbox-----------#
+[tasks.sandbox-api-media-watch]
+run_task = [{name = [
+    "gcloud-configure-docker",
+    "docker-build-sandbox-api-media-watch",
+    "docker-publish-sandbox-api-media-watch",
+    "deploy-sandbox-api-media-watch",
+]}]
+
+[tasks.docker-build-sandbox-api-media-watch]
+command = "docker"
+args = ["build", "-f", "backend/api/Dockerfile", "--target", "sandbox_media_watch", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest", "."]
+
+[tasks.docker-publish-sandbox-api-media-watch]
+command = "docker"
+args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest"]
+
+[tasks.deploy-sandbox-api-media-watch]
+script_runner = "@shell"
+script = ["gcloud run deploy ji-cloud-api-media-watch-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest --platform managed"]
+
 ###################
 ## Fastly Purge  ##
 ###################

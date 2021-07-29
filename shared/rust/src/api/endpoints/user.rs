@@ -13,15 +13,20 @@ use crate::{
 };
 
 mod colors;
+mod fonts;
 mod profile;
 
 pub use colors::{
     Create as CreateColor, Delete as DeleteColor, Get as GetColors, Update as UpdateColor,
 };
 
-pub use profile::{Get as Profile, Put as PutProfile};
+pub use fonts::{
+    Create as CreateFont, Delete as DeleteFont, Get as GetFonts, Update as UpdateFont,
+};
 
-/// Create a new user
+pub use profile::{Get as Profile, Patch as PatchProfile, Put as PutProfile};
+
+/// Create a new user.
 ///
 /// # Flow
 /// 1. `POST` to this route
@@ -40,7 +45,7 @@ impl ApiEndpoint for Create {
     const METHOD: Method = Method::Post;
 }
 
-/// Verify a user's email
+/// Verify a user's email.
 ///
 /// # Register Flow
 /// 1. [`POST /v1/user`](Create)
@@ -76,7 +81,7 @@ impl ApiEndpoint for VerifyEmail {
     const METHOD: Method = Method::Post;
 }
 
-/// Reset a user's password
+/// Reset a user's password.
 ///
 /// # Flow
 /// 1. `POST` This route.
@@ -92,7 +97,7 @@ impl ApiEndpoint for ResetPassword {
     const METHOD: Method = Method::Post;
 }
 
-/// Change your password
+/// Change your password.
 ///
 /// # Responses
 ///
@@ -120,7 +125,7 @@ impl ApiEndpoint for UserLookup {
     const METHOD: Method = Method::Get;
 }
 
-/// Delete your account
+/// Delete your account.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

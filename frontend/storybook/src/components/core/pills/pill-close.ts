@@ -6,20 +6,19 @@ export default {
 }
 
 interface Args {
-    contents: string,
+    label: string,
     negative: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
-    contents: "hello",
+    label: "hello",
     negative: false
 }
 
 export const PillClose = (props?:Partial<Args>) => {
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
-    const {contents, ...pillProps} = props
 
-    return `<pill-close ${argsToAttrs(pillProps)}>${contents}</pill-close>`;
+    return `<pill-close ${argsToAttrs(props)}></pill-close>`;
 }
 
 PillClose.args = DEFAULT_ARGS;

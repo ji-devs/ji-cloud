@@ -1,170 +1,31 @@
-use crate::{
-    db::{
-        self,
-        meta::{handle_metadata_err, MetaWrapperError},
-        nul_if_empty,
-    },
-    error::{self, ServiceKind},
-    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
-    image_ops::generate_images,
-    s3,
-    service::ServiceData,
-};
 use chrono::{DateTime, Utc};
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, Query, ServiceConfig},
+    web::{Data, Json, Path, Query, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{
     api::{endpoints, ApiEndpoint},
-    domain::{
-        image::{
-            CreateResponse, Image, ImageBrowseResponse, ImageId, ImageKind, ImageResponse,
-            ImageSearchResponse, ImageUpdateRequest,
-        },
-        meta::MetaKind,
+    domain::image::{
+        CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
+        ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
-use uuid::Uuid;
 
-pub mod user {
-    use crate::{
-        db, error, extractor::TokenUser, image_ops::generate_images, s3, service::ServiceData,
-    };
-    use paperclip::actix::{
-        api_v2_operation,
-        web::{Bytes, Data, Json, Path},
-        CreatedJson, NoContent,
-    };
+use crate::{
+    db::{self, meta::handle_metadata_err, nul_if_empty},
+    error::{self, ServiceKind},
+    extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
+    s3, service,
+    service::ServiceData,
+};
 
-    use futures::TryStreamExt;
-    use shared::{
-        api::{endpoints, ApiEndpoint},
-        domain::{
-            image::{
-                user::{UserImage, UserImageListResponse, UserImageResponse},
-                ImageId, ImageKind,
-            },
-            CreateResponse,
-        },
-        media::MediaLibrary,
-        media::{FileKind, PngImageFile},
-    };
-    use sqlx::PgPool;
-
-    /// Create a image in the user's image library.
-    #[api_v2_operation]
-    pub(super) async fn create(
-        db: Data<PgPool>,
-        _claims: TokenUser,
-    ) -> Result<CreatedJson<<endpoints::image::user::Create as ApiEndpoint>::Res>, error::Server>
-    {
-        let id = db::image::user::create(db.as_ref()).await?;
-        Ok(CreatedJson(CreateResponse { id }))
-    }
-
-    /// Upload an image to the user's image library.
-    #[api_v2_operation]
-    pub(super) async fn upload(
-        db: Data<PgPool>,
-        s3: ServiceData<s3::Client>,
-        _claims: TokenUser,
-        Path(id): Path<ImageId>,
-        bytes: Bytes,
-    ) -> Result<NoContent, error::Upload> {
-        let mut txn = db.begin().await?;
-
-        sqlx::query!(
-            r#"select 1 as discard from user_image_library where id = $1 for update"#,
-            id.0
-        )
-        .fetch_optional(&mut txn)
-        .await?
-        .ok_or(error::Upload::ResourceNotFound)?;
-
-        let kind = ImageKind::Sticker;
-
-        let (original, resized, thumbnail) =
-            actix_web::web::block(move || -> Result<_, error::Upload> {
-                let original =
-                    image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-                Ok(generate_images(&original, kind)?)
-            })
-            .await
-            .map_err(error::Upload::blocking_error)?;
-
-        s3.upload_png_images(MediaLibrary::User, id.0, original, resized, thumbnail)
-            .await?;
-
-        sqlx::query!(
-            "update user_image_library set uploaded_at = now() where id = $1",
-            id.0
-        )
-        .execute(&mut txn)
-        .await?;
-
-        txn.commit().await?;
-
-        Ok(NoContent)
-    }
-
-    /// Delete an image from the user's image library.
-    #[api_v2_operation]
-    pub(super) async fn delete(
-        db: Data<PgPool>,
-        _claims: TokenUser,
-        req: Path<ImageId>,
-        s3: ServiceData<s3::Client>,
-    ) -> Result<NoContent, error::Delete> {
-        let image = req.into_inner();
-        db::image::user::delete(&db, image)
-            .await
-            .map_err(super::check_conflict_delete)?;
-
-        let delete = |kind| s3.delete_media(MediaLibrary::User, FileKind::ImagePng(kind), image.0);
-        let ((), (), ()) = futures::future::join3(
-            delete(PngImageFile::Original),
-            delete(PngImageFile::Resized),
-            delete(PngImageFile::Thumbnail),
-        )
-        .await;
-
-        Ok(NoContent)
-    }
-
-    /// Get an image from the user's image library.
-    #[api_v2_operation]
-    pub(super) async fn get(
-        db: Data<PgPool>,
-        _claims: TokenUser,
-        req: Path<ImageId>,
-    ) -> Result<Json<<endpoints::image::user::Get as ApiEndpoint>::Res>, error::NotFound> {
-        let metadata = db::image::user::get(&db, req.into_inner())
-            .await?
-            .ok_or(error::NotFound::ResourceNotFound)?;
-
-        Ok(Json(UserImageResponse { metadata }))
-    }
-
-    /// List images from the user's image library.
-    #[api_v2_operation]
-    pub(super) async fn list(
-        db: Data<PgPool>,
-        _claims: TokenUser,
-    ) -> Result<Json<<endpoints::image::user::List as ApiEndpoint>::Res>, error::Server> {
-        let images: Vec<_> = db::image::user::list(db.as_ref())
-            .err_into::<error::Server>()
-            .and_then(|metadata: UserImage| async { Ok(UserImageResponse { metadata }) })
-            .try_collect()
-            .await?;
-
-        Ok(Json(UserImageListResponse { images }))
-    }
-}
+pub mod recent;
+pub mod tag;
+pub mod user;
 
 /// Create an image in the global image library.
 #[api_v2_operation]
@@ -208,36 +69,45 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: ServiceData<s3::Client>,
+    gcs: ServiceData<service::storage::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     Path(id): Path<ImageId>,
-    bytes: Bytes,
-) -> Result<NoContent, error::Upload> {
+    origin: RequestOrigin,
+    req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,
+) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
-        r#"select kind as "kind: ImageKind" from image_metadata where id = $1 for update"#,
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
         id.0
     )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::Upload::ResourceNotFound)?
-    .kind;
+    .fetch_one(&mut txn)
+    .await?.exists;
 
-    let (original, resized, thumbnail) =
-        actix_web::web::block(move || -> Result<_, error::Upload> {
-            let original =
-                image::load_from_memory(&bytes).map_err(|_| error::Upload::InvalidMedia)?;
-            Ok(generate_images(&original, kind)?)
-        })
-        .await
-        .map_err(error::Upload::blocking_error)?;
+    if !exists {
+        return Err(error::Upload::ResourceNotFound);
+    }
 
-    s3.upload_png_images(MediaLibrary::Global, id.0, original, resized, thumbnail)
+    let upload_content_length = req.into_inner().file_size;
+
+    if let Some(file_limit) = gcs.file_size_limit(&FileKind::ImagePng(PngImageFile::Original)) {
+        if file_limit < upload_content_length {
+            return Err(error::Upload::FileTooLarge);
+        }
+    }
+
+    let resp = gcs
+        .get_url_for_resumable_upload_for_processing(
+            upload_content_length,
+            MediaLibrary::Global,
+            id.0,
+            FileKind::ImagePng(PngImageFile::Original),
+            origin,
+        )
         .await?;
 
     sqlx::query!(
-        "update image_metadata set uploaded_at = now() where id = $1",
+        "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
         id.0
     )
     .execute(&mut txn)
@@ -245,7 +115,7 @@ async fn upload(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(Json(ImageUploadResponse { session_uri: resp }))
 }
 
 /// Get an image from the global image library.
@@ -289,7 +159,7 @@ async fn search(
 
     let images: Vec<_> = db::image::get(db.as_ref(), &ids)
         .err_into::<error::Service>()
-        .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
+        .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
         .try_collect()
         .await?;
 
@@ -315,11 +185,12 @@ async fn browse(
         query.page.unwrap_or(0) as i32,
     )
     .err_into::<error::Server>()
-    .and_then(|metadata: Image| async { Ok(ImageResponse { metadata }) })
+    .and_then(|metadata: ImageMetadata| async { Ok(ImageResponse { metadata }) })
     .try_collect()
     .await?;
 
-    let total_count = db::image::filtered_count(db.as_ref(), query.is_published).await?;
+    let total_count =
+        db::image::filtered_count(db.as_ref(), query.is_published, query.kind).await?;
 
     let pages = (total_count / 20 + (total_count % 20 != 0) as u64) as u32;
 
@@ -416,10 +287,9 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         image::Create::PATH,
         image::Create::METHOD.route().to(create),
     )
-    .service(
-        web::resource(image::Upload::PATH)
-            .app_data(PayloadConfig::default().limit(config::IMAGE_BODY_SIZE_LIMIT))
-            .route(image::Upload::METHOD.route().to(upload)),
+    .route(
+        image::Search::PATH,
+        image::Search::METHOD.route().to(search),
     )
     .route(
         image::Browse::PATH,
@@ -427,16 +297,16 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     )
     .route(image::Get::PATH, image::Get::METHOD.route().to(get_one))
     .route(
-        image::Search::PATH,
-        image::Search::METHOD.route().to(search),
-    )
-    .route(
         image::UpdateMetadata::PATH,
         image::UpdateMetadata::METHOD.route().to(update),
     )
     .route(
         image::Delete::PATH,
         image::Delete::METHOD.route().to(delete),
+    )
+    .route(
+        image::Upload::PATH,
+        image::Upload::METHOD.route().to(upload),
     )
     .route(
         image::user::Create::PATH,
@@ -457,5 +327,43 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
     .route(
         image::user::List::PATH,
         image::user::List::METHOD.route().to(self::user::list),
+    )
+    .route(
+        image::tag::Create::PATH,
+        image::tag::Create::METHOD.route().to(self::tag::create),
+    )
+    .route(
+        image::tag::Update::PATH,
+        image::tag::Update::METHOD.route().to(self::tag::update),
+    )
+    .route(
+        image::tag::Delete::PATH,
+        image::tag::Delete::METHOD.route().to(self::tag::delete),
+    )
+    .route(
+        image::tag::List::PATH,
+        image::tag::List::METHOD.route().to(self::tag::list),
+    )
+    .route(
+        image::recent::Create::PATH,
+        image::recent::Create::METHOD
+            .route()
+            .to(self::recent::create),
+    )
+    .route(
+        image::recent::List::PATH,
+        image::recent::List::METHOD.route().to(self::recent::list),
+    )
+    .route(
+        image::recent::Update::PATH,
+        image::recent::Update::METHOD
+            .route()
+            .to(self::recent::update),
+    )
+    .route(
+        image::recent::Delete::PATH,
+        image::recent::Delete::METHOD
+            .route()
+            .to(self::recent::delete),
     );
 }

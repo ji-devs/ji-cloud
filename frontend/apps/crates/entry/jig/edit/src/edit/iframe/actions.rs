@@ -16,7 +16,7 @@ pub async fn load_module_kind(jig_id: JigId, module_id: ModuleId, module_kind: R
 
     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
         Ok(resp) => {
-            *module_kind.borrow_mut() = resp.module.body.map(|body| body.kind());
+            *module_kind.borrow_mut() = Some(resp.module.body.kind());
         },
         Err(_) => {},
     }

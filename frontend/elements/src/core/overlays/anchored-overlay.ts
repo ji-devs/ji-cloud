@@ -1,10 +1,10 @@
-import { LitElement, html, css, customElement, property } from 'lit-element';
+import { LitElement, html, css, customElement, property, query } from 'lit-element';
 
-export type PositionX = "left-out" | "right-out" | "left-in" | "right-in";
-export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in";
+export type PositionX = "left-out" | "right-out" | "left-in" | "right-in" | "center";
+export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "center";
 
 @customElement("anchored-overlay")
-export class _ extends LitElement {
+export class AnchoredOverlay extends LitElement {
     static get styles() {
         return [
             css`
@@ -12,20 +12,13 @@ export class _ extends LitElement {
                     position: relative;
                     display: inline-block;
                 }
-                :host([backdrop]) .backdrop {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100vh;
-                    width: 100vw;
-                }
                 .overlay {
                     display: none;
                     position: absolute;
                     background-color: #ffffff;
+                    z-index: 1;
                 }
-                :host([open]) .backdrop, :host([open]) .overlay {
+                :host([open]) .overlay {
                     display: block;
                 }
                 :host([positionY=top-out]) .overlay {
@@ -40,6 +33,11 @@ export class _ extends LitElement {
                 :host([positionY=bottom-in]) .overlay {
                     bottom: 0;
                 }
+                :host([positionY=center]) .overlay {
+                    /* from https://stackoverflow.com/a/25776315/5253155 */
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
                 :host([positionX=right-out]) .overlay {
                     left: 100%;
                 }
@@ -52,9 +50,37 @@ export class _ extends LitElement {
                 :host([positionX=left-in]) .overlay {
                     left: 0;
                 }
+                :host([positionX=center]) .overlay {
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+                :host([positionY=center][positionX=center]) .overlay {
+                    /* when both are center but only one transform can be applied */
+                    transform: translate(-50%, -50%);
+                }
             `
         ];
     }
+
+    connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener("mousedown", this.onGlobalMouseDown);
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("mousedown", this.onGlobalMouseDown);
+    }
+    onGlobalMouseDown = (evt: MouseEvent) => {
+        if(this.open && !evt.composedPath().includes(this)) {
+            if (this.autoClose) {
+                this.open = false;
+            }
+            this.dispatchEvent(new Event("close"))
+        }
+    }
+
+    @query(".overlay")
+    overlay!: HTMLElement;
 
     @property({ reflect: true })
     positionY: PositionY = "top-out";
@@ -62,36 +88,17 @@ export class _ extends LitElement {
     @property({ reflect: true })
     positionX: PositionX = "right-out";
 
-    @property({ type: Boolean, reflect: true })
-    backdrop: boolean = true;
-
-    @property()
-    backdropColor = "#00000020";
-
     @property({ type: Boolean })
-    backdropClose: boolean = true;
+    autoClose: boolean = true;
 
     @property({ type: Boolean, reflect: true })
     open: boolean = false;
 
-    private backdropClick() {
-        if (this.backdropClose) {
-            this.open = false;
-            this.dispatchEvent(new CustomEvent("close"));
-        }
-    }
-
     render() {
         return html`
-            <style>
-                .backdrop {
-                    background-color: ${this.backdropColor};
-                }
-            </style>
             <div class="anchor">
                 <slot name="anchor"></slot>
             </div>
-            <div @click="${() => this.backdropClick()}" class="backdrop"></div>
             <div part="overlay" class="overlay">
                 <slot name="overlay"></slot>
             </div>

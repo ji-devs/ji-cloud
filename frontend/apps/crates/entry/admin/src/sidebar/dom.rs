@@ -11,6 +11,7 @@ impl SidebarDom {
                     AdminRoute::Categories => "category", 
                     AdminRoute::Locale => "locale", 
                     AdminRoute::ImageAdd => "image-add", 
+                    AdminRoute::ImageTags => "image-tags", 
                     AdminRoute::ImageMeta(id, is_new) => "image-search", 
                     AdminRoute::ImageSearch(query) => "image-search",
                     _ => ""
@@ -24,6 +25,10 @@ impl SidebarDom {
                     },
                     "image-search" => {
                         let route:String = Route::Admin(AdminRoute::ImageSearch(None)).into();
+                        dominator::routing::go_to_url(&route);
+                    },
+                    "image-tags" => {
+                        let route:String = Route::Admin(AdminRoute::ImageTags).into();
                         dominator::routing::go_to_url(&route);
                     },
                     "jig" => {

@@ -12,7 +12,7 @@ async fn forbidden(
     req: Option<&serde_json::Value>,
     method: Method,
 ) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::UserNoPerms]).await;
+    let app = initialize_server(&[Fixture::UserNoPerms], &[]).await;
 
     let port = app.port();
 
@@ -132,21 +132,24 @@ async fn jig_clone() -> anyhow::Result<()> {
     )
     .await
 }
-#[actix_rt::test]
-async fn jig_delete() -> anyhow::Result<()> {
-    forbidden(
-        "v1/jig/00000000-0000-0000-0000-000000000000",
-        None,
-        Method::DELETE,
-    )
-    .await
-}
+
+// #[actix_rt::test]
+// async fn jig_delete() -> anyhow::Result<()> {
+//     forbidden(
+//         "v1/jig/00000000-0000-0000-0000-000000000000",
+//         None,
+//         Method::DELETE,
+//     )
+//     .await
+// }
 
 #[actix_rt::test]
 async fn module_post() -> anyhow::Result<()> {
+    use shared::domain::jig::module::ModuleCreateRequest;
+
     forbidden(
         "v1/jig/00000000-0000-0000-0000-000000000000/module",
-        None,
+        Some(&serde_json::to_value(ModuleCreateRequest::default())?),
         Method::POST,
     )
     .await
@@ -181,8 +184,9 @@ async fn animation_post() -> anyhow::Result<()> {
             "description": "testest",
             "is_premium": false,
             "publish_at": (),
+            "styles": [],
             "is_looping": false,
-            "variant": "Gif",
+            "kind": "Gif",
         })),
         Method::POST,
     )

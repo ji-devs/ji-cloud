@@ -11,6 +11,7 @@ export class _ extends LitElement {
         css`
         section {
             display: flex;
+            height: 100%;
         }
         .main {
             width: 100%;

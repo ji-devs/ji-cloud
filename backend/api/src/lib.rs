@@ -33,9 +33,9 @@
 pub mod algolia;
 pub mod db;
 mod domain;
-mod error;
+pub mod error;
 mod extractor;
-mod google;
+pub mod google;
 pub mod http;
 mod image_ops;
 pub mod image_search;

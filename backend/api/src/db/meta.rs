@@ -1,16 +1,32 @@
 use shared::domain::meta::{
-    Affiliation, AffiliationId, AgeRange, AgeRangeId, ContentType, ContentTypeId, MetaKind, Style,
-    StyleId, Subject, SubjectId, Tag, TagId,
+    Affiliation, AffiliationId, AgeRange, AgeRangeId, AnimationStyle, AnimationStyleId, Goal,
+    GoalId, ImageStyle, ImageStyleId, MetaKind, Subject, SubjectId, Tag, TagId,
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 use uuid::Uuid;
 
-pub async fn get_style(db: &PgPool) -> sqlx::Result<Vec<Style>> {
+pub async fn get_image_styles(db: &PgPool) -> sqlx::Result<Vec<ImageStyle>> {
     sqlx::query_as!(
-        Style,
+        ImageStyle,
         r#"
-            select id as "id: StyleId", display_name, created_at, updated_at from style
-            order by index
+        select style_id as "id: ImageStyleId", display_name, image_style.created_at, updated_at
+        from image_style
+            left join style on image_style.style_id = style.id
+        order by index
+        "#
+    )
+    .fetch_all(db)
+    .await
+}
+
+pub async fn get_animation_styles(db: &PgPool) -> sqlx::Result<Vec<AnimationStyle>> {
+    sqlx::query_as!(
+        AnimationStyle,
+        r#"
+        select style_id as "id: AnimationStyleId", display_name, animation_style.created_at, updated_at
+        from animation_style
+            left join style on animation_style.style_id = style.id
+        order by index
         "#
     )
     .fetch_all(db)
@@ -53,13 +69,13 @@ pub async fn get_subjects(db: &PgPool) -> sqlx::Result<Vec<Subject>> {
     .await
 }
 
-pub async fn get_content_types(db: &PgPool) -> sqlx::Result<Vec<ContentType>> {
+pub async fn get_goals(db: &PgPool) -> sqlx::Result<Vec<Goal>> {
     sqlx::query_as!(
-        ContentType,
+        Goal,
         r#"
-            select content_type_id as "id: ContentTypeId", display_name, created_at, updated_at from "content_type"
-            order by index
-        "#
+select id as "id: GoalId", display_name, created_at, updated_at from "goal"
+order by index
+"#
     )
     .fetch_all(db)
     .await
@@ -69,7 +85,7 @@ pub async fn get_image_tags(db: &PgPool) -> sqlx::Result<Vec<Tag>> {
     sqlx::query_as!(
         Tag,
         r#"
-        select id as "id: TagId", display_name, created_at, updated_at from "image_tag"
+        select id as "id: TagId", display_name, created_at, updated_at, index from "image_tag"
         order by index
     "#
     )
@@ -104,9 +120,9 @@ pub fn handle_metadata_err(err: sqlx::Error) -> MetaWrapperError {
     let kind = match db_err.constraint() {
         Some("image_affiliation_affiliation_id_fkey") => MetaKind::Affiliation,
         Some("image_age_range_age_range_id_fkey") => MetaKind::AgeRange,
-        Some("image_style_style_id_fkey") => MetaKind::Style,
+        Some("image_style_style_id_fkey") => MetaKind::ImageStyle,
         Some("image_category_category_id_fkey") => MetaKind::Category,
-        Some("jig_content_type_content_type_id_fkey") => MetaKind::ContentType,
+        Some("jig_goal_goal_id_fkey") => MetaKind::Goal,
         Some("image_tag_join_tag_id_fkey") => MetaKind::Tag,
 
         _ => return MetaWrapperError::Sqlx(err),

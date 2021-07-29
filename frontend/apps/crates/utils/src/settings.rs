@@ -5,6 +5,7 @@ use config::RemoteTarget;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use shared::domain::auth::AUTH_COOKIE_NAME;
+use crate::unwrap::UnwrapJiExt;
 
 pub static SETTINGS:OnceCell<Settings> = OnceCell::new();
 
@@ -34,29 +35,16 @@ cfg_if! {
     } 
 }
 
-//These will only be set in the local index.html created via dev-files
-//However they are only called in local mode, so it's fine
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_name = DEV_AUTH)]
-    fn dev_auth() -> bool;
-    #[wasm_bindgen(js_name = API_TOKEN)]
-    fn dev_token() -> String;
-    #[wasm_bindgen(js_name = API_CSRF)]
-    fn dev_csrf() -> String;
-}
-
 fn _init(remote_target:RemoteTarget) -> Settings {
-    let settings = match remote_target {
-        RemoteTarget::Local => Settings::new_local(),
-        RemoteTarget::Sandbox => Settings::new_sandbox(),
-        RemoteTarget::Release => Settings::new_release(),
+    let settings = Settings {
+        remote_target
     };
-
+   
+    /*
     if remote_target == RemoteTarget::Local {
         unsafe {
-            let window = web_sys::window().unwrap_throw();
-            if dev_auth() && !window.location().pathname().unwrap_throw().contains("user/"){
+            let window = web_sys::window().unwrap_ji();
+            if dev_auth() && !window.location().pathname().unwrap_ji().contains("user/"){
 
                 let csrf = dev_csrf();
                 let token = dev_token();
@@ -66,15 +54,16 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 
                 window
                     .document()
-                    .unwrap_throw()
+                    .unwrap_ji()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("{}={}; PATH=/", AUTH_COOKIE_NAME, token));
+                    .set_cookie(&format!("{}={}; Path=/", AUTH_COOKIE_NAME, token));
             } else {
                 log::info!("skipping auth for dev mode");
             }
         }
     }
-    SETTINGS.set(settings.clone()).expect("couldn't set settings!");
+    */
+    SETTINGS.set(settings.clone()).expect_ji("couldn't set settings!");
 
     settings
 }
@@ -83,35 +72,5 @@ fn _init(remote_target:RemoteTarget) -> Settings {
 impl fmt::Debug for Settings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "remote_target is [{:?}]", self.remote_target)
-    }
-}
-
-impl Settings {
-    pub fn new_local() -> Self {
-        Self {
-            remote_target: RemoteTarget::Local,
-        }
-    }
-    pub fn new_sandbox() -> Self {
-        Self {
-            remote_target: RemoteTarget::Sandbox,
-        }
-    }
-    pub fn new_release() -> Self {
-        Self {
-            remote_target: RemoteTarget::Release,
-        }
-    }
-    
-    cfg_if! {
-        if #[cfg(feature = "local")] {
-            pub fn new() -> Self { Self::new_local() }
-        } else if #[cfg(feature = "sandbox")] {
-            pub fn new() -> Self { Self::new_sandbox() }
-        } else if #[cfg(feature = "release")] {
-            pub fn new() -> Self { Self::new_release() }
-        } else {
-            pub fn new() -> Self { unimplemented!() }
-        } 
     }
 }

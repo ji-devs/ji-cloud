@@ -1,8 +1,9 @@
+
 use once_cell::sync::OnceCell;
 use wasm_bindgen::prelude::*;
 use serde::Deserialize;
 use utils::prelude::*;
-use crate::data::state::Mode;
+use shared::domain::jig::module::body::_groups::cards::Mode;
 
 macro_rules! config_path {
     ($e:tt) => { 

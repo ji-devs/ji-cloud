@@ -4,6 +4,7 @@ use super::{
     sidebar::dom::SidebarDom,
     selection::dom::SelectionDom,
     iframe::dom::IframeDom,
+    publish::dom::render as render_publish,
 };
 use shared::domain::jig::{JigId, module::ModuleId};
 use utils::prelude::*;
@@ -13,8 +14,8 @@ pub struct EditPage {
 }
 
 impl EditPage {
-    pub fn render(jig_id: JigId, module_id: Option<ModuleId>) -> Dom {
-        let module_id = Mutable::new(module_id);
+    pub fn render(jig_id: JigId, route: JigEditRoute) -> Dom {
+        let route = Mutable::new(route);
 
         html!("jig-edit-page", {
             /*
@@ -36,15 +37,17 @@ impl EditPage {
                 async {}
             })))
             */
-            .child(SidebarDom::render(jig_id.clone(), module_id.clone()))
-            .child_signal(module_id.signal_cloned().map(clone!(jig_id => move |module_id| {
-                match module_id {
-                    None => {
+            .child(SidebarDom::render(jig_id.clone(), route.clone()))
+            .child_signal(route.signal_cloned().map(clone!(jig_id => move |route| {
+                match route {
+                    JigEditRoute::Landing => {
                         Some(SelectionDom::render())
                     },
-
-                    Some(module_id) => {
+                    JigEditRoute::Module(module_id) => {
                         Some(IframeDom::render(jig_id.clone(), module_id.clone()))
+                    },
+                    JigEditRoute::Publish => {
+                        Some(render_publish(jig_id.clone()))
                     }
                 }
             })))

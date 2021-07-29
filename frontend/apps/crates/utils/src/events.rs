@@ -13,6 +13,13 @@ temp_make_event!(Ended, "ended" => web_sys::Event);
 temp_make_event!(Open, "open" => web_sys::Event);
 temp_make_event!(Close, "close" => web_sys::Event);
 
+temp_make_event!(YoutubePlaying, "youtube-playing" => web_sys::Event);
+temp_make_event!(YoutubePaused, "youtube-paused" => web_sys::Event);
+temp_make_event!(YoutubeBuffering, "youtube-buffering" => web_sys::Event);
+temp_make_event!(YoutubeEnded, "youtube-ended" => web_sys::Event);
+
+temp_make_event!(Updated, "updated" => web_sys::Event);
+
 temp_make_event!(Accept, "accept" => web_sys::Event);
 
 temp_make_event!(Next, "next" => web_sys::Event);
@@ -22,6 +29,8 @@ temp_make_event!(Reset, "reset" => web_sys::Event);
 
 temp_make_event!(ExpandAll, "expand-all" => web_sys::Event);
 temp_make_event!(CollapseAll, "collapse-all" => web_sys::Event);
+
+temp_make_event!(CustomBlur, "custom-blur" => web_sys::Event);
 
 make_custom_event_serde!("module-resize", ModuleResizeEvent, ResizeInfo);
 
@@ -138,19 +147,6 @@ impl GoogleLocation {
     }
 }
 
-
-// #[derive(Deserialize, Debug)]
-// pub struct CustomFileData {
-//     pub file: File,
-// }
-
-// make_custom_event_serde!("custom-file", CustomFile, CustomFileData);
-
-// impl CustomFile {
-//     pub fn file(&self) -> File {
-//         self.file().file
-//     }
-// }
 make_custom_event!(CustomFile, "custom-file");
 
 impl CustomFile {
@@ -158,3 +154,21 @@ impl CustomFile {
         self.detail().unchecked_into()
     }
 }
+
+// Image Load 
+#[derive(Deserialize, Debug)]
+pub struct ImageLoadData {
+    pub width: f64,
+    pub height: f64,
+}
+
+make_custom_event_serde!("image-load", ImageLoad, ImageLoadData);
+
+impl ImageLoad {
+    pub fn size(&self) -> (f64, f64) {
+        let ImageLoadData { width, height} = self.data();
+        (width, height)
+    }
+}
+
+

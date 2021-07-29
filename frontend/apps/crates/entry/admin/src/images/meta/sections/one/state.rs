@@ -7,24 +7,27 @@ use futures_signals::{
 };
 use shared::domain::meta::*;
 use dominator::clone;
+use components::image::tag::ImageTag;
 
 pub struct State {
     pub meta: Rc<MetaState>,
     pub image: Rc<MutableImage>,
-    pub metadata: Rc<MetadataResponse>
+    pub metadata: Rc<MetadataResponse>,
+    pub tag_list: Rc<Vec<(ImageTag, TagId)>>,
 }
 
 
 impl State {
-    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>) -> Self {
+    pub fn new(meta: Rc<MetaState>, image: Rc<MutableImage>, metadata: Rc<MetadataResponse>, tag_list: Rc<Vec<(ImageTag, TagId)>>) -> Self {
         Self {
             meta,
             image,
-            metadata
+            metadata,
+            tag_list,
         }
     }
 
-    pub fn style_selected(&self, id: StyleId) -> impl Signal<Item = bool> {
+    pub fn style_selected(&self, id: ImageStyleId) -> impl Signal<Item = bool> {
         self.image.styles.signal_ref(move |styles| styles.contains(&id))
     }
 
@@ -33,5 +36,9 @@ impl State {
     }
     pub fn affiliation_selected(&self, id: AffiliationId) -> impl Signal<Item = bool> {
         self.image.affiliations.signal_ref(move |affiliations| affiliations.contains(&id))
+    }
+
+    pub fn tag_selected(&self, tag_id: TagId) -> impl Signal<Item = bool> {
+        self.image.tag_ids.signal_ref(move |tag_ids| tag_ids.contains(&tag_id))
     }
 }

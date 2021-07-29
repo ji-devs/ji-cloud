@@ -79,8 +79,14 @@ pub enum ModuleKind {
     /// Video
     Video = 7,
 
-    /// Visual Quiz
-    VisualQuiz = 8,
+    /// Deprecated, next new module should use this slot
+    //VisualQuiz = 8,
+
+    /// Card Quiz
+    CardQuiz = 9,
+
+    /// Drag and Drop
+    DragDrop = 10,
 }
 
 impl ModuleKind {
@@ -94,9 +100,10 @@ impl ModuleKind {
             Self::Memory => "memory",
             Self::Poster => "poster",
             Self::TappingBoard => "tapping-board",
+            Self::DragDrop => "drag-drop",
             Self::Tracing => "tracing",
             Self::Video => "video",
-            Self::VisualQuiz => "visual-quiz",
+            Self::CardQuiz => "card-quiz",
         }
     }
 }
@@ -111,9 +118,10 @@ impl FromStr for ModuleKind {
             "memory" => Self::Memory,
             "poster" => Self::Poster,
             "tapping-board" => Self::TappingBoard,
+            "drag-drop" => Self::DragDrop,
             "tracing" => Self::Tracing,
             "video" => Self::Video,
-            "visual-quiz" => Self::VisualQuiz,
+            "card-quiz" => Self::CardQuiz,
             _ => anyhow::bail!("Invalid ModuleKind: {}", s),
         };
 
@@ -129,7 +137,7 @@ pub struct LiteModule {
     pub id: ModuleId,
 
     /// Which kind of module this is.
-    pub kind: Option<ModuleKind>,
+    pub kind: ModuleKind,
 }
 
 /// Over the wire representation of a module.
@@ -140,15 +148,26 @@ pub struct Module {
     pub id: ModuleId,
 
     /// The module's body.
-    pub body: Option<ModuleBody>,
+    pub body: ModuleBody,
+
+    /// Whether the module is complete or not.
+    pub is_complete: bool,
 }
 
 /// Request to create a new `Module`.
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct ModuleCreateRequest {
     /// The module's body.
-    pub body: Option<ModuleBody>,
+    pub body: ModuleBody,
+}
+
+impl Default for ModuleCreateRequest {
+    fn default() -> Self {
+        ModuleCreateRequest {
+            body: ModuleBody::Cover(body::cover::ModuleData::default()),
+        }
+    }
 }
 
 /// Response for successfully finding a module
@@ -171,6 +190,9 @@ pub struct ModuleUpdateRequest {
     ///
     /// Numbers larger than the parent jig's module count will move it to the *end*.
     pub index: Option<u16>,
+
+    /// Whether the module is complete or not.
+    pub is_complete: Option<bool>,
 }
 
 into_uuid![ModuleId];

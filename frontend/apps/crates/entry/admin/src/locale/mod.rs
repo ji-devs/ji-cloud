@@ -1,5 +1,5 @@
 pub mod dom;
-mod state;
+pub mod state;
 mod components;
 mod db_interface;
 

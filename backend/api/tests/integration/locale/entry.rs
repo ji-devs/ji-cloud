@@ -10,7 +10,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn delete() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
     let port = app.port();
 
@@ -30,7 +30,7 @@ async fn delete() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn get() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
     let port = app.port();
 
@@ -52,7 +52,7 @@ async fn get() -> anyhow::Result<()> {
 }
 
 async fn list(query: &[(&str, &str)]) -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
     let port = app.port();
 
@@ -116,7 +116,7 @@ async fn list_single_bundle_by_bundle() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn create() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
     let port = app.port();
 
@@ -146,6 +146,8 @@ async fn create() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 
     Ok(())
@@ -153,7 +155,7 @@ async fn create() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_in_app() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Locale]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Locale], &[]).await;
 
     let port = app.port();
 

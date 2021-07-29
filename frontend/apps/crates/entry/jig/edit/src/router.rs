@@ -1,4 +1,4 @@
-use utils::routes::{Route, JigRoute, JigPlayMode};
+use utils::routes::{JigEditRoute, JigPlayMode, JigRoute, Route};
 use std::rc::Rc;
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::Url;
@@ -32,7 +32,9 @@ impl Router {
                     Route::Jig(route) => {
                         match route {
                             JigRoute::Gallery => Some(GalleryDom::render()),
-                            JigRoute::Edit(jig_id, module_id) => Some(EditPage::render(jig_id, module_id)),
+                            JigRoute::Edit(jig_id, route) => {
+                                Some(EditPage::render(jig_id, route)) 
+                            },
                             _ => None
                         }
                     },

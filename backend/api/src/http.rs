@@ -1,11 +1,5 @@
-mod cors;
-mod endpoints;
+use std::{net::TcpListener, sync::Arc};
 
-use crate::{
-    error::BasicError,
-    s3,
-    service::{mail, ServiceData},
-};
 use actix_service::Service;
 use actix_web::{dev::Server, HttpResponse};
 use actix_web::{
@@ -20,7 +14,15 @@ use core::{
 use futures::Future;
 use paperclip::actix::{api_v2_operation, NoContent, OpenApiExt};
 use sqlx::postgres::PgPool;
-use std::{net::TcpListener, sync::Arc};
+
+use crate::{
+    error::BasicError,
+    s3, service,
+    service::{mail, ServiceData},
+};
+
+mod cors;
+mod endpoints;
 
 fn log_ise<B: MessageBody, T>(
     request: ServiceRequest,
@@ -66,7 +68,7 @@ pub struct Application {
 }
 
 impl Application {
-    fn new(port: u16, server: Server) -> Self {
+    pub fn new(port: u16, server: Server) -> Self {
         Self {
             port,
             server: Some(server),
@@ -107,6 +109,7 @@ pub async fn build_and_run(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -116,6 +119,7 @@ pub async fn build_and_run(
         pool,
         settings,
         s3,
+        gcs,
         algolia,
         algolia_key_store,
         jwk_verifier,
@@ -130,6 +134,7 @@ pub fn build(
     pool: PgPool,
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
+    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -139,6 +144,7 @@ pub fn build(
     let api_port = settings.api_port;
 
     let s3 = s3.map(ServiceData::new);
+    let gcs = gcs.map(ServiceData::new);
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
     let mail_client = mail_client.map(ServiceData::new);
@@ -150,6 +156,11 @@ pub fn build(
 
         let server = match s3.clone() {
             Some(s3) => server.app_data(s3),
+            None => server,
+        };
+
+        let server = match gcs.clone() {
+            Some(gcs) => server.app_data(gcs),
             None => server,
         };
 
@@ -204,6 +215,7 @@ pub fn build(
             .configure(endpoints::media::configure)
             .configure(endpoints::session::configure)
             .configure(endpoints::locale::configure)
+            .configure(endpoints::additional_resource::configure)
             .route("/", paperclip::actix::web::get().to(no_content_response))
             .with_json_spec_at("/spec.json")
             .build()
@@ -244,6 +256,6 @@ async fn no_content_response() -> NoContent {
     NoContent
 }
 
-fn bad_request_handler() -> actix_web::Error {
+pub fn bad_request_handler() -> actix_web::Error {
     BasicError::new(http::StatusCode::BAD_REQUEST).into()
 }

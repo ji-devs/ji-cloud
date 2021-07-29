@@ -12,18 +12,40 @@ type IconKind = ""
 | "move-up"
 | "paste"
 | "print"
-| "reuse";
+| "reuse"
+| "set-jig-theme";
 
 const STR_LABEL_LOOKUP:any = {
     copy: "Copy",
+    paste: "Paste",
     delete: "Delete",
     duplicate: "Duplicate",
     edit: "Edit",
     ["move-down"]: "Move Down",
     ["move-up"]: "Move Up",
-    ["paste"]: "Paste",
     ["print"]: "Print",
     ["reuse"]: "Reuse",
+    //all stickers
+    ["move-forward"]: "Move forward",
+    ["move-backward"]: "Send backward",
+    ["flip-horizontal"]: "Flip horizontal",
+    ["flip-vertical"]: "Flip vertical",
+    //bg only
+    ["change-background-color"]: "Change background color",
+    ["change-background-image"]: "Change background image",
+    ["remove-background-image"]: "Remove background image",
+    ["remove-overlay"]: "Remove overlay",
+    //image only
+    ["crop"]: "Crop (coming soon!)",
+    ["remove-white"]: "Remove white",
+    ["make-background"]: "Make background",
+    ["play"]: "Play",
+    ["record-sound"]: "Record sound",
+    ["upload-sound"]: "Upload sound",
+    //module publish
+    ["use-content-as"]: "Use content as",
+    //Theme selector
+    ["set-jig-theme"]: "Set JIG theme",
 };
 
 @customElement('menu-line')
@@ -44,12 +66,27 @@ export class _ extends LitElement {
               align-items: center;
           }
 
-          .red {
+          .hover {
+              color: #5590fc;
+          }
+
+          .delete {
             color: #f84f57;
           }
 
     `];
   }
+
+  onEnter() {
+    this.hover = true;
+  }
+
+  onLeave() {
+    this.hover = false;
+  }
+
+  @property({type: Boolean})
+  hover:boolean = false;
 
   @property()
   icon: IconKind = "";
@@ -58,17 +95,24 @@ export class _ extends LitElement {
   customLabel: string = "";
 
   render() {
-    const {icon, customLabel} = this;
+    let {icon, customLabel, hover} = this;
 
+    if(icon === "delete") {
+        hover = false;
+    }
     const label = customLabel !== "" ? customLabel
         : STR_LABEL_LOOKUP[icon]; 
 
-    const labelClasses = classMap({label, red: icon === "delete"});
+    const labelClasses = classMap({label, hover, delete: icon === "delete"});
+
+    const filename = hover ? `${icon}-hover` : icon;
 
     return html`
+
+        <section @mouseenter="${this.onEnter}" @mouseleave="${this.onLeave}">
         <section>
             ${icon === "" ? nothing
-                : html`<div class="img"><img-ui path="core/menus/${icon}.svg" /></div>`
+                : html`<div class="img"><img-ui path="core/menus/${filename}.svg" /></div>`
             }
             <div class="${labelClasses}">${label}</div>
         </section>

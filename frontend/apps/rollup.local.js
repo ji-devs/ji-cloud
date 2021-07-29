@@ -2,6 +2,8 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
+import {getEnv} from "./rollup.common.js";
 
 let {APP_NAME, APP_PORT} = process.env;
 
@@ -28,6 +30,7 @@ const watchPatterns = [
     "../../config/js/dist/**"
 ].map(x => path.resolve(x));
 
+
 export default {
     input: {
         index: `./crates/entry/${APP_NAME}/Cargo.toml`,
@@ -38,7 +41,6 @@ export default {
         sourcemap: true,
     },
     plugins: [
-
         rust({
             serverPath: "/js/",
             debug: true,
@@ -46,7 +48,10 @@ export default {
             cargoArgs: ["--features", "local quiet"],
             watch: true,
         }),
+
         nodeResolve(),
+
+        injectProcessEnv(getEnv()),
 
         serve({
             contentBase: `dist/${APP_NAME}`,

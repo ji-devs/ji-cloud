@@ -2,9 +2,10 @@ import { LitElement, html, css, customElement, property } from 'lit-element';
 import {classMap} from "lit-html/directives/class-map";
 import {nothing} from "lit-html";
 
-export type SECTION = "" | "locale" | "image-add" | "image-search" | "jig" | "category";
+export type SECTION = "" | "locale" | "image-add" | "image-search" | "jig" | "category" | "image-tags";
 
 const STR_IMAGE_ADD = "Add image";
+const STR_IMAGE_TAGS = "Image tags";
 const STR_IMAGE_SEARCH = "Edit images";
 const STR_JIG = "Label JIGs";
 const STR_CATEGORIES = "Edit categories";
@@ -77,7 +78,7 @@ export class _ extends LitElement {
 
   onRoute(route: SECTION) {
       const {categoryLocked, imageLocked, jigLocked} = this;
-      if((route === "category" && categoryLocked) || (route === "jig" && jigLocked) || ((route === "image-add" || route === "image-search") && imageLocked)) {
+      if((route === "category" && categoryLocked) || (route === "jig" && jigLocked) || ((route === "image-add" || route === "image-search" || route === "image-tags") && imageLocked)) {
           return;
       }
       this.dispatchEvent(
@@ -130,6 +131,10 @@ export class _ extends LitElement {
             </div>
             <div class=${classMap({["list-option"]: true, selected: section === "image-search"})} @click=${() => this.onRoute("image-search")}>
                 <p>${STR_IMAGE_SEARCH}</p>
+                ${imageLocked ? html`<img-ui path="entry/admin/sidebar/lock.svg"></img-ui>` : nothing}
+            </div>
+            <div class=${classMap({["list-option"]: true, selected: section === "image-tags"})} @click=${() => this.onRoute("image-tags")}>
+                <p>${STR_IMAGE_TAGS}</p>
                 ${imageLocked ? html`<img-ui path="entry/admin/sidebar/lock.svg"></img-ui>` : nothing}
             </div>
             <div class=${classMap({["list-option"]: true, selected: section === "jig"})} @click=${() => this.onRoute("jig")}>

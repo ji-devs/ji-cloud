@@ -10,6 +10,9 @@ expression: body
     "description": "testest",
     "is_premium": false,
     "publish_at": null,
+    "styles": [
+      "6389ff7c-de76-11ea-b7ab-9b5661dd4f70"
+    ],
     "kind": "Gif",
     "is_looping": false,
     "created_at": "2021-03-04T19:53:08.062618Z",

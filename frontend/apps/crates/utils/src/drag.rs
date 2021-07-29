@@ -12,8 +12,8 @@
  */
 
 use wasm_bindgen::prelude::*;
-use web_sys::Element;
-use std::cell::RefCell;
+use web_sys::{Element, HtmlElement};
+use std::{cell::RefCell, sync::atomic::AtomicBool};
 use dominator::{DomBuilder, Dom, html, events, clone, apply_methods, with_node};
 use futures_signals::{
     map_ref,map_mut,
@@ -26,7 +26,7 @@ use std::marker::Unpin;
 use std::future::Future;
 use std::task::{Context, Poll};
 use shared::domain::jig::ModuleKind;
-use crate::math::*;
+use crate::{math::*, resize::{get_resize_info, resize_info_signal}};
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::SeqCst;
 
@@ -38,11 +38,12 @@ pub struct Drag {
     pos: Mutable<PointI32>,
     mouse_x: AtomicI32,
     mouse_y: AtomicI32,
+    immediate: bool,
 }
 
 impl Drag {
-    pub fn new(mouse_x: i32, mouse_y: i32, anchor_x: f64, anchor_y: f64) -> Self {
-        Self { 
+    pub fn new(mouse_x: i32, mouse_y: i32, anchor_x: f64, anchor_y: f64, immediate: bool) -> Self {
+        let _self = Self { 
             state: Mutable::new(DragState::Waiting(DragWait {
                 anchor: PointF64::new(anchor_x, anchor_y),
                 accum: PointI32::new(0, 0),
@@ -50,10 +51,26 @@ impl Drag {
             pos: Mutable::new(PointI32::new(0, 0)),
             mouse_x: AtomicI32::new(mouse_x),
             mouse_y: AtomicI32::new(mouse_y),
-
+            immediate,
+        };
+        
+        if _self.immediate {
+            _self.update(mouse_x, mouse_y);
         }
-    }
 
+        _self
+    }
+    pub fn new_anchor_element_resize(mouse_x: i32, mouse_y: i32, elem:&HtmlElement, immediate: bool) -> Self {
+
+        let resize_info = get_resize_info();
+
+        let (elem_x, elem_y) = resize_info.get_element_pos_px(&elem);
+
+        let anchor_x = (mouse_x as f64) - elem_x;
+        let anchor_y = (mouse_y as f64) - elem_y;
+
+        Self::new(mouse_x, mouse_y, anchor_x, anchor_y, immediate)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -95,6 +112,12 @@ impl Drag {
             None
         }
     }
+    pub fn get_pos_normalized(&self) -> Option<(f64, f64)> { 
+        self.get_pos().map(|pos| {
+            let resize_info = get_resize_info();
+            resize_info.get_pos_normalized(pos.x as f64, pos.y as f64)
+        })
+    }
 
     pub fn pos_signal(&self) -> impl Signal<Item = Option<PointI32>> {
         map_ref! {
@@ -107,6 +130,16 @@ impl Drag {
                     Some(*pos)
                 }
             }
+        }
+    }
+
+    pub fn pos_normalized_signal(&self) -> impl Signal<Item = Option<(f64, f64)>> {
+        map_ref! {
+            let resize_info = resize_info_signal(),
+            let pos = self.pos_signal()
+                => {
+                    pos.map(|pos| resize_info.get_pos_normalized(pos.x as f64, pos.y as f64))
+                }
         }
     }
 
@@ -166,7 +199,7 @@ impl Drag {
         self.mouse_x.store(mouse.x, SeqCst);
         self.mouse_y.store(mouse.y, SeqCst);
     }
-    pub fn update(&self, x:i32, y:i32) -> Option<PointI32> {
+    pub fn update(&self, x:i32, y:i32) -> Option<(PointI32, PointI32)> {
 
         let prev_mouse = self.get_mouse();
         let next_mouse = PointI32::new(x, y);
@@ -175,7 +208,7 @@ impl Drag {
             DragState::Waiting(wait) => {
                 wait.accum += diff;
                 let next_state = {
-                    if wait.accum.x > MOVE_THRESHHOLD || wait.accum.y > MOVE_THRESHHOLD {
+                    if self.immediate || wait.accum.x.abs() > MOVE_THRESHHOLD || wait.accum.y.abs() > MOVE_THRESHHOLD {
                         self.pos.set(PointI32::new(
                             next_mouse.x - wait.anchor.x as i32, 
                             next_mouse.y - wait.anchor.y as i32
@@ -206,6 +239,6 @@ impl Drag {
             self.pos.set(next_pos);
         }
 
-        next_pos
+        next_pos.map(|next_pos| (next_pos, diff))
     }
 }

@@ -4,12 +4,15 @@ use utils::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
 use super::super::actions::file_change;
+use futures_signals::signal::Signal;
+use shared::domain::jig::module::body::Audio;
 
 
-pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
+pub fn render (state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     if let AudioInputMode::Uploading = mode {
-        html!("button-text", {
+        html!("button-rect", {
             .property("slot", "main-action")
+            .property("kind", "text")
             .text("Cancel")
             .event(clone!(state => move |_: events::Click| {
                 todo!();
@@ -33,8 +36,8 @@ pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddM
                     AudioInputMode::Uploading => panic!("Imposible"),
                 }
             })
-            .event(clone!(state => move |_: events::Click| {
-                match mode {
+            .event(clone!(state, mode => move |_: events::Click| {
+                match mode.clone() {
                     AudioInputMode::Empty => {
                         match add_method {
                             AudioInputAddMethod::Record => {
@@ -55,11 +58,11 @@ pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddM
                             file_change(state.clone(), file).await;
                         }));
                     },
-                    AudioInputMode::Stopped(audio_id) => {
-                        state.mode.set(AudioInputMode::Playing(audio_id));
+                    AudioInputMode::Stopped(audio) => {
+                        state.mode.set(AudioInputMode::Playing(audio));
                     },
-                    AudioInputMode::Playing(audio_id) => {
-                        state.mode.set_neq(AudioInputMode::Stopped(audio_id));
+                    AudioInputMode::Playing(audio) => {
+                        state.mode.set_neq(AudioInputMode::Stopped(audio));
                     },
                     AudioInputMode::Uploading => panic!("Should not be posible"),
                 };

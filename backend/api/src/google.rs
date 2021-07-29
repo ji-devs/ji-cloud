@@ -1,8 +1,8 @@
-use core::settings::GoogleOAuth;
 use std::collections::HashMap;
 
 use anyhow::Context;
 use config::RemoteTarget;
+use core::settings::GoogleOAuth;
 use http::StatusCode;
 use shared::domain::session::OAuthUrlKind;
 

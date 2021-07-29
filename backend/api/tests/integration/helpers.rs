@@ -1,13 +1,14 @@
-use core::settings::RuntimeSettings;
 use std::{collections::HashSet, sync::Mutex};
 
 use chrono::{Duration, Utc};
 use config::RemoteTarget;
+use core::settings::{EmailClientSettings, GoogleCloudStorageSettings, RuntimeSettings};
 use ji_cloud_api::http::Application;
 use rand::Rng;
-use sqlx::{Connection, Executor};
+use sqlx::{Connection, Executor, PgPool};
 
 use crate::fixture::Fixture;
+use crate::service::{Service, TestServicesSettings};
 
 pub trait LoginExt {
     fn login(self) -> Self;
@@ -31,6 +32,8 @@ impl LoginExt for reqwest::RequestBuilder {
 
         self.header("X-CSRF", CSRF)
             .header("Cookie", format!("X-AUTH={}", token))
+        //.header("Authorization", format!("Bearer {}", token)) // PASSED
+        //.query(&[(shared::domain::session::AUTH_QUERY_NAME, token.as_str())]) // PASSED
     }
 }
 
@@ -136,7 +139,9 @@ static DB_URL_MANAGER: once_cell::sync::Lazy<DbManager> = once_cell::sync::Lazy:
 pub static PASETO_KEY: once_cell::sync::Lazy<Box<[u8; 32]>> =
     once_cell::sync::Lazy::new(|| Box::new(generate_paseto_key()));
 
-pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
+pub async fn initialize_server(fixtures: &[Fixture], services: &[Service]) -> Application {
+    let _ = dotenv::dotenv().ok();
+
     log_init();
     let jwk_verifier = ji_cloud_api::jwk::create_verifier("".to_string());
 
@@ -154,9 +159,24 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
             .expect("failed to execute fixture");
     }
 
+    let (mail, s3, gcs, algolia) = match services.is_empty() {
+        true => (None, None, None, None),
+        false => {
+            let settings = TestServicesSettings::new().await;
+            match settings {
+                Ok(s) => s.init_services(services).await,
+                Err(e) => {
+                    log::info!("Error while reading test service settings: {:?}", e);
+                    (None, None, None, None)
+                }
+            }
+        }
+    };
+
     // todo: cache this.
     let settings = RuntimeSettings::new(
         RemoteTarget::Local,
+        0,
         0,
         0,
         None,
@@ -165,10 +185,75 @@ pub async fn initialize_server(fixtures: &[Fixture]) -> Application {
         None,
     );
 
-    let app = ji_cloud_api::http::build(db, settings, None, None, None, jwk_verifier, None)
+    let app = ji_cloud_api::http::build(db, settings, s3, gcs, algolia, None, jwk_verifier, mail)
         .expect("failed to initialize server");
 
     app
+}
+
+// FIXME: is there a cleaner way to get a db connection from the application?
+pub async fn initialize_server_and_get_db(
+    fixtures: &[Fixture],
+    services: &[Service],
+) -> (Application, PgPool) {
+    let _ = dotenv::dotenv().ok();
+
+    log_init();
+    let jwk_verifier = ji_cloud_api::jwk::create_verifier("".to_string());
+
+    let db_name = DB_URL_MANAGER.create().await.expect("failed to create db");
+
+    let db_url = DB_URL_MANAGER.get_url(&db_name);
+
+    let db = ji_cloud_api::db::get_pool(db_url.parse().expect("db url was invalid"))
+        .await
+        .expect("failed to get db");
+
+    for fixture in fixtures {
+        db.execute(fixture.as_query())
+            .await
+            .expect("failed to execute fixture");
+    }
+
+    let (mail, s3, gcs, algolia) = match services.is_empty() {
+        true => (None, None, None, None),
+        false => {
+            let settings = TestServicesSettings::new().await;
+            match settings {
+                Ok(s) => s.init_services(services).await,
+                Err(e) => {
+                    log::info!("Error while reading test service settings: {:?}", e);
+                    (None, None, None, None)
+                }
+            }
+        }
+    };
+
+    // todo: cache this.
+    let settings = RuntimeSettings::new(
+        RemoteTarget::Local,
+        0,
+        0,
+        0,
+        None,
+        None,
+        PASETO_KEY.clone(),
+        None,
+    );
+
+    let app = ji_cloud_api::http::build(
+        db.clone(),
+        settings,
+        s3,
+        gcs,
+        algolia,
+        None,
+        jwk_verifier,
+        mail,
+    )
+    .expect("failed to initialize server");
+
+    (app, db)
 }
 
 pub fn log_init() {

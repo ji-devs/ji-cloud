@@ -1,133 +1,193 @@
-import { LitElement, html, css, customElement, property, query } from 'lit-element';
+import { LitElement, html, customElement, query, property, PropertyValues, css, internalProperty } from 'lit-element';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-
-import { BaseSelection, Descendant, Transforms } from 'slate';
-import { Align, Color, ControllerState, ElementType, Font, FontSize, getDefault, getKeyType, Weight } from './wysiwyg-types';
-import { EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
+import { BaseSelection, Descendant, Point, Transforms } from 'slate';
+import { ControllerState, controlNameList, defaultState, ElementType, getKeyLevel, WysiwygValue } from './wysiwyg-types';
+import { EditorElement, EditorText, EditorBackbone } from './slate-wysiwyg-react/EditorBackbone';
 import { EditorComponent } from './slate-wysiwyg-react/EditorComponent';
+import { baseStyles, getRootStyles } from './styles';
+import { ThemeId, THEMES, TextEditor as TextEditorTheme, TextEditorVariant} from '@elements/_themes/themes';
+import { getThemeVars } from "./wysiwyg-theme";
 
 @customElement("wysiwyg-base")
 export class _ extends LitElement {
-
     static get styles() {
         return [
+            baseStyles,
             css`
-                h1, h2, p {
-                    margin: 0;
-                    font-weight: normal;
-                }
-                h1 {
-                    font-size: 34px;
-                }
-                h2 {
-                    font-size: 23px;
-                }
-                p[p1] {
-                    font-size: 16px;
-                }
-                p[p2] {
-                    font-size: 14px;
+                ::selection {
+                    background-color: #00000020;
                 }
             `,
         ];
     }
 
-    private _font = getDefault('font');
-    public set font(v: Font) {
-        this.reFocus();
-        this.backbone.setValue("font", v);
-        this._font = v;
-    }
+    @property()
+    public theme: ThemeId = "chalkboard";
 
-    private _weight = getDefault('weight');
-    public set weight(v: Weight) {
-        this.reFocus();
-        this.backbone.setValue("weight", v);
-        this._weight = v;
-    }
-
-    private _color = getDefault('color');
-    public set color(v: Color | undefined) {
-        this.reFocus();
-        this.backbone.setValue("color", v);
-        this._color = v;
-    }
-
-    private _highlightColor = getDefault('highlightColor');
-    public set highlightColor(v: Color | undefined) {
-        this.reFocus();
-        this.backbone.setValue("highlightColor", v);
-        this._highlightColor = v;
-    }
-
-    private _indentCount = getDefault('indentCount');
-    public set indentCount(v: number) {
-        this.backbone.setValue("indentCount", v);
-        this._indentCount = v;
-    }
-
-    private _element = getDefault('element');
-    public set element(v: ElementType) {
-        this.backbone.setValue("element", v);
-        this._element = v;
-    }
-
-    private _fontSize = getDefault('fontSize');
-    public set fontSize(v: number) {
-        this.backbone.setValue("fontSize", v);
-        this._fontSize = v;
-    }
-
-    private _bold = getDefault('bold');
-    public set bold(v: boolean) {
-        this.backbone.setValue("bold", v);
-        this._bold = v;
-    }
-
-    private _italic = getDefault('italic');
-    public set italic(v: boolean) {
-        this.backbone.setValue("italic", v);
-        this._italic = v;
-    }
-
-    private _underline = getDefault('underline');
-    public set underline(v: boolean) {
-        this.backbone.setValue("underline", v);
-        this._underline = v;
-    }
-
-    private _align = getDefault('align');
-    public set align(v: Align) {
-        this.backbone.setValue("align", v);
-        this._align = v;
-    }
-
+    public elementDefault?: ElementType;
 
     @query("#editorRoot")
-    editorRoot!: HTMLElement;
+    private editorRoot!: HTMLElement;
 
-    private static baseValue: any[] = [
-        {
-            element: ElementType.P1,
-            children: [{ text: '' }],
-        },
-    ];
+    private componentRef?: EditorComponent;
 
-    private value: Descendant[] = _.baseValue;
+    private backbone = new EditorBackbone;
+
+    private controllerState: ControllerState = this.getDefaultState();
+
+    private _blurSelection?: BaseSelection;
+
+    private createValue(text: string = ""): WysiwygValue {
+        let textNode: EditorText = {
+            text
+        };
+
+        if(this.elementDefault) textNode.element = this.elementDefault;
+
+        let v: WysiwygValue = {
+            version: "0.1.0",
+            content: [
+                {
+                    children: [textNode],
+                },
+            ],
+        };
+
+        return v;
+    }
+
+    @internalProperty()
+    private value: WysiwygValue = this.createValue();
 
     public set valueAsString(v: string) {
-        if (!v) this.value = _.baseValue;
+        if (!v) this.value = this.createValue();
         else this.value = JSON.parse(v);
-        this.reactRender();
+        this.componentRef?.setValue(this.value.content);
     }
     public get valueAsString(): string {
         return JSON.stringify(this.value);
     }
 
-    private backbone = new EditorBackbone;
+    firstUpdated() {
+        this.reactRender();
+    }
 
-    private controlsChange<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
+    updated(changedProperties: PropertyValues) {
+        if (changedProperties.has('theme')) {
+            this.onThemeChange();
+        }
+    }
+
+    createRenderRoot() {
+        // hebrew keyboard only works when delegatesFocus is true
+        return this.attachShadow({ mode: 'open', delegatesFocus: true });
+    }
+
+    render() {
+        return html`
+            ${getRootStyles(this.value)}
+
+            <div id="editorRoot"></div>
+        `;
+    }
+
+    public setTextAtSelection(text: string) {
+        const currentSelection = this.backbone.editor.selection;
+        if(currentSelection) {
+            Transforms.insertText(this.backbone.editor, text, {
+                at: currentSelection,
+            });
+        }
+    }
+
+    // if text is selected delete it otherwise delete the last character just like backspace
+    public triggerBackspace() {
+        const currentSelection = this.backbone.editor.selection;
+        if(currentSelection) {
+            // check if text is actually selected or it's just a cursor
+            const isTextSelection = !Point.equals(currentSelection.anchor, currentSelection.focus);
+            if(isTextSelection) {
+                Transforms.delete(this.backbone.editor, {
+                    at: currentSelection,
+                });
+            } else {
+                this.backbone.editor.deleteBackward('character');
+            }
+        }
+    }
+
+    public selectAll() {
+        const selection = window.getSelection()!;
+        const range = document.createRange();
+        range.selectNodeContents(this.shadowRoot!.querySelector("[contenteditable=true]")!);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    public setControlValue<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
+        this.reFocus();
+
+        const defaultValue = this.getDefault(key);
+        let finalValue = key !== "element" && value === defaultValue ? undefined : value;
+
+        if(getKeyLevel(key) === "root") {
+            let wysiwygValue: any = {...this.value};
+            wysiwygValue[key] = value;
+            this.value = wysiwygValue;
+
+            // if change is in root the event is dispatched right away since we can't rely on slate's onChange event
+            this.triggerValueChangeEvent();
+        } else {
+            this.backbone.setValue(key, finalValue);
+        }
+
+        if(key === "element") {
+            // setting element resets all other values
+            for (const key of controlNameList) {
+                if(key === "element") continue;
+                this.backbone.setValue(key as any, undefined);
+            }
+        }
+    }
+
+    public clearValue() {
+        this.value = JSON.parse(JSON.stringify(this.createValue()));
+        this.componentRef?.setValue(this.value.content);
+    }
+
+    private onThemeChange() {
+        getThemeVars(this.theme).forEach(([key, value]) => {
+            this.style.setProperty(key, value);
+        });
+    }
+
+
+    private getDefaultState(): ControllerState {
+        const entries = controlNameList.map(key => [key, this.getDefault(key)]);
+        return Object.fromEntries(entries);
+    }
+
+    private getDefault<K extends keyof ControllerState>(key: K): ControllerState[K] {
+        const elementType = this.controllerState?.element || this.elementDefault || defaultState.element;
+        const elementName:keyof TextEditorTheme = elementType.toLowerCase() as any;
+
+        const themeInfo = THEMES[this.theme];
+        const themeVariant = themeInfo.textEditor[elementName] as TextEditorVariant;
+
+        switch (key) {
+            case "color":
+                return themeInfo.colors[themeVariant.fontColor] as any;
+            case "font":
+                return themeInfo.fontFamilies[themeVariant.fontFamily] as any;
+            case "fontSize":
+                return themeVariant.fontSize as any;
+            default:
+                return defaultState[key];
+        }
+    }
+
+    private triggerControlsChangeEvent<K extends keyof ControllerState>(key: K, value: ControllerState[K]) {
         if (value === undefined) value = null as any; // serde can't handle undefined only null
         this.dispatchEvent(new CustomEvent("wysiwyg-controls-change", {
             detail: {
@@ -135,120 +195,94 @@ export class _ extends LitElement {
             }
         }));
     }
-    
-    private change(value: Descendant[]) {
-        this.checkForControlsChange();
-        this.checkForValueChangeChange(value);
+
+    private triggerValueChangeEvent() {
+        this.dispatchEvent(new CustomEvent("custom-change", {
+            detail: {
+                value: this.valueAsString
+            }
+        }));
     }
 
-    private checkForValueChangeChange(newValue: Descendant[]) {
+    private onSlateChange(value: Descendant[]) {
+        this.checkForControlsChange();
+        this.checkForValueChangeChange(value as EditorElement[]);
+    }
+
+    private checkForValueChangeChange(newContent: EditorElement[]) {
         const valueAsString = this.valueAsString;
-        if(valueAsString !== JSON.stringify(newValue)) {
-            this.dispatchEvent(new CustomEvent("custom-change", {
-                detail: {
-                    value: valueAsString
-                }
-            }));
+        let newValue = JSON.parse(JSON.stringify(this.value)) as WysiwygValue;
+        newValue.content = newContent;
+        const newValueAsString = JSON.stringify(newValue);
+        if(valueAsString !== newValueAsString) {
+            this.value = newValue;
+            this.triggerValueChangeEvent();
         }
-        this.value = newValue;
     }
 
     private checkForControlsChange() {
         const leaf = this.backbone.getSelectedLeaf();
-        const leafFontSize = leaf?.fontSize || getDefault('fontSize');
-        if(this._fontSize != leafFontSize) {
-            this._fontSize = leafFontSize;
-            this.controlsChange("fontSize", leafFontSize);
-        }
-        const leafBold = leaf?.bold || getDefault('bold');
-        if(this._bold != leafBold) {
-            this._bold = leafBold;
-            this.controlsChange("bold", leafBold);
-        }
-        const leafItalic = leaf?.italic || getDefault('italic');
-        if(this._italic != leafItalic) {
-            this._italic = leafItalic;
-            this.controlsChange("italic", leafItalic);
-        }
-        const leafUnderline = leaf?.underline || getDefault('underline');
-        if(this._underline != leafUnderline) {
-            this._underline = leafUnderline;
-            this.controlsChange("underline", leafUnderline);
-        }
-        const leafWeight = leaf?.weight || getDefault('weight');
-        if(this._weight != leafWeight) {
-            this._weight = leafWeight;
-            this.controlsChange("weight", leafWeight);
-        }
-        const leafFont = leaf?.font || getDefault('font');
-        if(this._font != leafFont) {
-            this._font = leafFont;
-            this.controlsChange("font", leafFont);
-        }
-        const leafColor = leaf?.color || getDefault('color');
-        if(this._color != leafColor) {
-            this._color = leafColor;
-            this.controlsChange("color", leafColor);
-        }
-        const leafHighlightColor = leaf?.highlightColor || getDefault('highlightColor');
-        if(this._highlightColor != leafHighlightColor) {
-            this._highlightColor = leafHighlightColor;
-            this.controlsChange("highlightColor", leafHighlightColor);
-        }
-
         const element = this.backbone.getSelectedElement();
-        const elementAlign = element?.align || getDefault('align');
-        if(this._align != elementAlign) {
-            this._align = elementAlign;
-            this.controlsChange("align", elementAlign);
-        }
-        const elementIndentCount = element?.indentCount || getDefault('indentCount');
-        if(this._indentCount != elementIndentCount) {
-            this._indentCount = elementIndentCount;
-            this.controlsChange("indentCount", elementIndentCount);
-        }
-        const elementElement = element?.element || getDefault('element');
-        if(this._element != elementElement) {
-            this._element = elementElement;
-            this.controlsChange("element", elementElement);
+        const root = this.value;
+
+        for (const key of controlNameList) {
+            const keyLevel = getKeyLevel(key);
+            let node: any = keyLevel === 'element' ? element
+                : keyLevel === "leaf" ? leaf
+                : root;
+
+            const controlValue = node?.[key] || this.getDefault(key);
+            if(this.controllerState[key] != controlValue) {
+                (this.controllerState as any)[key] = controlValue;
+                this.triggerControlsChangeEvent(key, controlValue);
+            }
         }
     }
 
-    public firstUpdated() {
-        this.reactRender();
-    }
-
-    private _blurSelection?: BaseSelection;
-    private onBlur() {
+    private onBlur(e: FocusEvent) {
         this._blurSelection = this.backbone.editor.selection;
-        console.log(this._blurSelection);
+        if(!this.closestPassShadow(e.relatedTarget as Node, "text-editor-controls")) {
+            this.dispatchEvent(new Event("custom-blur"));
+        }
     }
 
     private reFocus() {
         if(this._blurSelection) {
+            (this.shadowRoot!.querySelector("[contenteditable=true]") as HTMLElement).focus();
+
             Transforms.select(this.backbone.editor, this._blurSelection);
         }
     }
 
     private reactRender() {
-        ReactDOM.render(
+        this.componentRef = ReactDOM.render(
             React.createElement(
                 EditorComponent,
                 {
                     backbone: this.backbone,
-                    value: this.value,
-                    onChange: (e) => this.change(e),
-                    onBlur: () => this.onBlur(),
+                    value: this.value.content,
+                    onChange: (e) => this.onSlateChange(e),
+                    onBlur: (e: any) => this.onBlur(e),
                 }
             ),
             this.editorRoot,
         );
     }
 
-    public render() {
-        return html`
-            <div id="editorRoot"></div>
-        `;
+    private closestPassShadow(node: Node | null, selector: string) : HTMLElement | null {
+        if (!node) {
+            return null;
+        }
+        if (node instanceof ShadowRoot) {
+            return this.closestPassShadow(node.host, selector);
+        }
+        if (node instanceof HTMLElement) {
+            if (node.matches(selector)) {
+                return node;
+            } else {
+                return this.closestPassShadow(node.parentNode, selector);
+            }
+        }
+        return this.closestPassShadow(node.parentNode, selector);
     }
-
 }

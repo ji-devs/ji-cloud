@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Bytes, Data, Json, Path, PayloadConfig, ServiceConfig},
+    web::{self, Data, Json, Path, PayloadConfig, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{
@@ -14,12 +14,15 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
+use crate::extractor::RequestOrigin;
+use crate::service::storage;
 use crate::{
     db, error,
     extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope},
     s3,
     service::ServiceData,
 };
+use shared::domain::animation::AnimationUploadResponse;
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {
@@ -74,7 +77,7 @@ async fn create(
         req.is_premium,
         req.is_looping,
         req.publish_at.map(DateTime::<Utc>::from),
-        req.variant,
+        req.kind,
     )
     .await?;
 
@@ -99,44 +102,45 @@ async fn create(
 #[api_v2_operation]
 async fn upload(
     db: Data<PgPool>,
-    s3: ServiceData<s3::Client>,
+    gcs: ServiceData<storage::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     Path(id): Path<AnimationId>,
-    bytes: Bytes,
-) -> Result<NoContent, error::Upload> {
+    origin: RequestOrigin,
+    req: Json<<animation::Upload as ApiEndpoint>::Req>,
+) -> Result<Json<<animation::Upload as ApiEndpoint>::Res>, error::Upload> {
     let mut txn = db.begin().await?;
 
-    let kind = sqlx::query!(
-        r#"select variant as "kind: AnimationKind" from animation where id = $1 for update"#,
+    let exists = sqlx::query!(
+        r#"select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as "exists!""#,
         id.0
     )
-    .fetch_optional(&mut txn)
-    .await?
-    .ok_or(error::Upload::ResourceNotFound)?
-    .kind;
+    .fetch_one(&mut txn)
+    .await?.exists;
 
-    if !matches!(kind, AnimationKind::Gif) {
-        return Err(anyhow::anyhow!("Unimplemented Animation Kind: {:?}", kind).into());
+    if !exists {
+        return Err(error::Upload::ResourceNotFound);
     }
 
-    let validated: Bytes = actix_web::web::block(move || {
-        let _original = image::load_from_memory_with_format(&bytes, image::ImageFormat::Gif)
-            .or(Err(error::Upload::InvalidMedia));
-        Ok(bytes)
-    })
-    .await
-    .map_err(error::Upload::blocking_error)?;
+    let upload_content_length = req.into_inner().file_size;
 
-    s3.upload_media(
-        validated.to_vec(),
-        MediaLibrary::Global,
-        id.0,
-        FileKind::AnimationGif,
-    )
-    .await?;
+    if let Some(file_limit) = gcs.file_size_limit(&FileKind::AnimationGif) {
+        if file_limit < upload_content_length {
+            return Err(error::Upload::FileTooLarge);
+        }
+    }
+
+    let resp = gcs
+        .get_url_for_resumable_upload_for_processing(
+            upload_content_length,
+            MediaLibrary::Global,
+            id.0,
+            FileKind::AnimationGif,
+            origin,
+        )
+        .await?;
 
     sqlx::query!(
-        "update animation set uploaded_at = now() where id = $1",
+        "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1",
         id.0
     )
     .execute(&mut txn)
@@ -144,7 +148,7 @@ async fn upload(
 
     txn.commit().await?;
 
-    Ok(NoContent)
+    Ok(Json(AnimationUploadResponse { session_uri: resp }))
 }
 
 /// Get an animation from the global animation library.

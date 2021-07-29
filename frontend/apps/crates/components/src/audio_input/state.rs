@@ -1,12 +1,17 @@
-use futures_signals::signal::{Mutable};
-use shared::{domain::audio::AudioId};
+use futures_signals::signal::{Signal, SignalExt, Mutable};
+use shared::domain::jig::module::body::Audio;
 use super::recorder::AudioRecorder;
 use super::options::*;
+use super::callbacks::Callbacks;
+use utils::prelude::*;
+use std::cell::RefCell;
+use dominator::clone;
+use std::rc::Rc;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum AudioInputMode {
-    Playing(AudioId),
-    Stopped(AudioId),
+    Playing(Audio),
+    Stopped(Audio),
     Empty,
     Recording,
     Uploading,
@@ -20,28 +25,33 @@ pub enum AudioInputAddMethod {
 }
 
 pub struct State {
-    //on_change is called imperatively for every update
-    //for example, to push to history
-    pub on_change: Option<Box<dyn Fn(Option<AudioId>)>>,
-    //audio_id is a mutable for affecting DOM
-    //intermediate updates can be skipped
+    pub callbacks: Callbacks,
     pub mode: Mutable<AudioInputMode>,
     pub add_method: Mutable<AudioInputAddMethod>,
     pub recorder: AudioRecorder,
+    ext_audio_handle: RefCell<Option<FutureHandle>>,
 }
 
 impl State {
-    pub fn new(opts: AudioInputOptions) -> Self {
-        let mode = match opts.audio_id {
-            Some(audio_id) => AudioInputMode::Stopped(audio_id),
-            None => AudioInputMode::Empty,
-        };
-
-        Self {
-            on_change: opts.on_change,
-            mode: Mutable::new(mode),
+    pub fn new<S>(opts: AudioInputOptions<S>, callbacks: Callbacks) -> Rc<Self>
+    where 
+        S: Signal<Item = Option<Audio>> + 'static
+    {
+        let _self = Rc::new(Self {
+            callbacks, 
+            mode: Mutable::new(AudioInputMode::Empty),
             recorder: AudioRecorder::new(),
             add_method: Mutable::new(AudioInputAddMethod::Record),
-        }
+            ext_audio_handle: RefCell::new(None)
+        });
+
+        *_self.ext_audio_handle.borrow_mut() = opts.ext_audio_signal.map(|sig| {
+            spawn_handle(sig.for_each(clone!(_self => move |ext_audio| {
+                _self.set_audio_ext(ext_audio);
+                async {}
+            })))
+        });
+
+        _self
     }
 }

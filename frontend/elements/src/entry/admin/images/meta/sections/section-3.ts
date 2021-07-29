@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/entry/admin/images/base-page";
 import "@elements/core/titles/ji";
-import "@elements/core/inputs/search";
+import "@elements/core/inputs/composed/search";
 import { nothing } from "lit-html";
 
 const STR_GENERAL_SUMMARY = "General Summary";
@@ -11,6 +11,7 @@ const STR_STYLETITLE = "Image style";
 const STR_USED = "To be used only for";
 const STR_AGE = "Suitable for age";
 const STR_STREAM = "Suitable for jewish stream";
+const STR_TAGS = "Tags (internal use only)";
 
 const STR_CATEGORIES_REPORT = "Categories summary";
 @customElement('image-meta-section-3')
@@ -80,6 +81,10 @@ export class _ extends LitElement {
                     <title-ji color="blue" class="summary-title">${STR_STREAM}</title-ji>
                     <div class="summary">
                         <slot name="stream"></slot>
+                    </div>
+                    <title-ji color="blue" class="summary-title">${STR_TAGS}</title-ji>
+                    <div class="summary">
+                        <slot name="tags"></slot>
                     </div>
                 </card-blue>
         </div>

@@ -8,7 +8,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn create_returns_created() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User]).await;
+    let app = initialize_server(&[Fixture::User], &[]).await;
 
     let port = app.port();
 
@@ -24,6 +24,8 @@ async fn create_returns_created() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::CREATED);
 
     let body: CreateResponse<AudioId> = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".id" => "[id]"});
 

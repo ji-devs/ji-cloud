@@ -1,16 +1,16 @@
 use std::rc::Rc;
 
 use dominator::{Dom, clone, html};
-use futures_signals::signal::SignalExt;
 use utils::events;
 use crate::audio_input::state::{State, AudioInputAddMethod};
-
+use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::jig::module::body::Audio;
 
 pub const STR_OPTION_RECORD: &'static str = "Record";
 pub const STR_OPTION_UPLOAD: &'static str = "Upload a file";
 
 
-pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
+pub fn render (state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
     html!("label", {
         .property("slot", "options")
         .child(html!("input", {
@@ -34,7 +34,7 @@ pub fn render(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
             state.add_method.set(add_method.clone());
 
             // might not be ideal when there's no audio_id already
-            state.set_audio_id(None);
+            state.set_audio(None);
         }))
     })
 }

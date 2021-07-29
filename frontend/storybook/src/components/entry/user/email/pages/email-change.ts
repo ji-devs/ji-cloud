@@ -21,7 +21,9 @@ export const EmailChange = (props?:Partial<Args>) => {
 
     return `
         <page-email-change>
-            <input-text slot="email" label="${STR_EMAIL_LABEL}" helpertext="${STR_EMAIL_HELP}" mode="text"></input-text>
+            <input-wrapper slot="email" label="${STR_EMAIL_LABEL}" hint="${STR_EMAIL_HELP}">
+                <input type="email">
+            </input-wrapper>
             <button-rect slot="submit" color="red">${STR_BUTTON}</button-rect>
         </page-email-change>
     `

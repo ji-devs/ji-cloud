@@ -1,1 +1,9 @@
-export type ModuleKind = "memory" | "poster";
+export type ModuleKind = 
+	"memory" 
+	| "flashcards"
+	| "card-quiz"
+	| "matching"
+	| "poster" 
+	| "tapping-board" 
+	| "drag-drop"
+	| "cover";

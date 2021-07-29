@@ -11,8 +11,8 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
-            :host {
-              font-family: Poppins;
+                :host {
+                    display: inline-block;
             }
 
             .content {
@@ -97,7 +97,7 @@ export class _ extends LitElement {
 
         if(showId !== "" && showId !== "debug") {
             if(sessionStorage.getItem(showId) === "hidden") {
-                console.log("hiding due to storage");
+                //hiding due to storage
                 return nothing;
             }
         }
@@ -123,9 +123,9 @@ function renderClose(onClose: () => any) {
 function renderShowId(showId:string, onClose: () => any) {
     const onClick = () => {
         if(showId === "debug") {
-            console.log("skipping showId action because it's debug");
+            //skipping showId action because it's debug
         } else {
-            console.log(`setting ${showId}`);
+            //setting ${showId}
             sessionStorage.setItem(showId, "hidden");
         }
 

@@ -12,27 +12,18 @@ pub struct LocalePage {
 }
 
 impl LocalePage {
-    pub fn render() -> Dom {
-        let state: Mutable<Option<Rc<State>>> = Mutable::new(None);
-
-        let loader = AsyncLoader::new();
-        loader.load(clone!(state => async move {
-            state.set(Some(Rc::new(State::new().await)));
-        }));
-
-        Dom::with_state(loader, move |loader| {
-            html!("empty-fragment", {
-                .child_signal(loader.is_loading().map(move |loading| {
-                    if loading {
+    pub fn render(state: Rc<LoaderState>) -> Dom {
+        html!("empty-fragment", {
+            .child_signal(state.inner.signal_cloned().map(|state| {
+                match state {
+                    Some(state) => Some(LocaleOuterDom::render(state)),
+                    None => {
                         Some(html!("window-loader-block", {
                             .property("visible", true)
                         }))
-                    } else {
-                        let state: Rc<State> = state.lock_ref().clone().unwrap();
-                        Some(LocaleOuterDom::render(state))
                     }
-                }))
-            })
+                }
+            }))
         })
     }
 }

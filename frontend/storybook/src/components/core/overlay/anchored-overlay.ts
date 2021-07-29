@@ -5,20 +5,20 @@ export default {
 }
 
 interface Args {
-    backdrop: boolean;
+    autoClose: boolean;
     open: boolean;
     positionY: string,
     positionX: string,
 }
 
 const DEFAULT_ARGS:Args = {
-    backdrop: true,
+    autoClose: true,
     open: true,
     positionY: "top-in",
     positionX: "right-out",
 }
 
-export const Overlay = (props?:Args) => {
+export const AnchoredOverlay = (props?:Args) => {
 
     props = props ? {...DEFAULT_ARGS, ...props} : DEFAULT_ARGS;
     const {} = props
@@ -33,18 +33,18 @@ export const Overlay = (props?:Args) => {
     `;
 }
 
-Overlay.args = DEFAULT_ARGS;
-Overlay.argTypes = {
+AnchoredOverlay.args = DEFAULT_ARGS;
+AnchoredOverlay.argTypes = {
     positionY: {
         control: {
             type: 'inline-radio',
-            options: ['top-out', 'top-in', 'bottom-out', 'bottom-in'],
+            options: ['top-out', 'top-in', 'bottom-out', 'bottom-in', 'center'],
         }
     },
     positionX: {
         control: {
             type: 'inline-radio',
-            options: ['left-out', 'left-in', 'right-out', 'right-in'],
+            options: ['left-out', 'left-in', 'right-out', 'right-in', 'center'],
         }
     },
 }

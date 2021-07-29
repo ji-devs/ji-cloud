@@ -1,0 +1,13 @@
+---
+source: tests/integration/user/font.rs
+expression: body
+
+---
+{
+  "names": [
+    "ShesekRegular",
+    "ArchitectsDaughterRegular",
+    "RobotoSlabRegular",
+    "CaveatMedium"
+  ]
+}

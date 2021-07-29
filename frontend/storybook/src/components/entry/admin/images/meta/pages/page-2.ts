@@ -2,7 +2,7 @@ import "@elements/entry/admin/images/meta/pages/landing";
 import "@elements/entry/admin/images/meta/sections/section-2";
 import {Landing} from "./landing";
 import {mapToString} from "@utils/array";
-import {DropdownTree} from "~/components/core/inputs/dropdowns/dropdown-tree"
+import {DropdownTree} from "~/components/core/inputs/composed/dropdown-tree"
 import {ReportTree} from "~/components/core/reports/tree"
 
 export default {

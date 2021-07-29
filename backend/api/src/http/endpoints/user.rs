@@ -2,11 +2,10 @@ use crate::{
     db::{self, user::upsert_profile},
     domain::NoContentClearAuth,
     error,
-    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf},
+    extractor::{SessionDelete, SessionPutProfile, TokenSessionOf, TokenUser},
     service::{mail, ServiceData},
-    token::SessionMask,
+    token::{create_auth_token, SessionMask},
 };
-use crate::{extractor::TokenUser, token::create_auth_token};
 use actix_http::error::BlockingError;
 use actix_web::HttpResponse;
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
@@ -22,8 +21,9 @@ use sendgrid::v3::Email;
 use shared::{
     api::endpoints::{
         user::{
-            ChangePassword, Create, CreateColor, Delete, DeleteColor, GetColors, Profile,
-            PutProfile, ResetPassword, UpdateColor, UserLookup, VerifyEmail,
+            ChangePassword, Create, CreateColor, CreateFont, Delete, DeleteColor, DeleteFont,
+            GetColors, GetFonts, PatchProfile, Profile, PutProfile, ResetPassword, UpdateColor,
+            UpdateFont, UserLookup, VerifyEmail,
         },
         ApiEndpoint,
     },
@@ -32,10 +32,11 @@ use shared::{
         user::{ChangePasswordRequest, PutProfileRequest, UserLookupQuery, VerifyEmailRequest},
     },
 };
-use sqlx::{Acquire, PgConnection, PgPool};
+use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use uuid::Uuid;
 
 mod color;
+mod font;
 
 async fn send_verification_email(
     txn: &mut PgConnection,
@@ -57,7 +58,7 @@ async fn send_verification_email(
         .signup_verify_template()
         .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/verify-email/{}", pages_url, session);
+    let email_link = format!("{}/user/verify-email/{}", pages_url, session);
 
     mail.send_signup_verify(template, Email::new(email_address), email_link)
         .await?;
@@ -85,7 +86,7 @@ async fn send_password_email(
         .password_reset_template()
         .map_err(error::Service::DisabledService)?;
 
-    let email_link = format!("{}/change-pw/{}", pages_url, session);
+    let email_link = format!("{}/user/password-reset/{}", pages_url, session);
 
     mail.send_password_reset(template, Email::new(email_address), email_link)
         .await?;
@@ -127,7 +128,7 @@ async fn create_user(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<Create as ApiEndpoint>::Req>,
-) -> Result<NoContent, error::Service> {
+) -> Result<NoContent, error::Register> {
     let req = req.into_inner();
 
     if req.password.is_empty() {
@@ -136,7 +137,32 @@ async fn create_user(
 
     let mut txn = db.begin().await?;
 
-    // todo: handle duplicate emails
+    // FIXME simplify these queries
+    let exists_basic = sqlx::query!(
+        r#"select exists(select 1 from user_auth_basic where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    let exists_google = sqlx::query!(
+        r#"select exists(select 1 from user_email where email = lower($1)) as "exists!""#,
+        &req.email
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .exists;
+    match (exists_basic, exists_google) {
+        (true, _) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenBasic.into());
+        }
+        (false, true) => {
+            txn.rollback().await?;
+            return Err(error::Email::TakenGoogle.into());
+        }
+        (false, false) => (), // do nothing
+    }
 
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
         .fetch_one(&mut txn)
@@ -158,9 +184,10 @@ async fn create_user(
         user.id,
         req.email,
         &mail,
-        config.remote_target().pages_url(),
+        &config.remote_target().pages_url(),
     )
-    .await?;
+    .await
+    .map_err(error::Register::from)?;
 
     txn.commit().await?;
 
@@ -174,7 +201,7 @@ async fn verify_email(
     mail: ServiceData<mail::Client>,
     db: Data<PgPool>,
     req: Json<<VerifyEmail as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::ServiceSession> {
+) -> Result<HttpResponse, error::VerifyEmail> {
     let req = req.into_inner();
 
     match req {
@@ -209,14 +236,16 @@ where
                 user.user_id,
                 email,
                 &mail,
-                config.remote_target().pages_url(),
+                &config.remote_target().pages_url(),
             )
             .await
             .map_err(|it| match it {
                 error::Service::InternalServerError(it) => {
-                    error::ServiceSession::InternalServerError(it)
+                    error::VerifyEmail::InternalServerError(it)
                 }
-                error::Service::DisabledService(it) => error::ServiceSession::DisabledService(it),
+                error::Service::DisabledService(it) => {
+                    error::ServiceSession::DisabledService(it).into()
+                }
             })?;
 
             txn.commit().await?;
@@ -228,7 +257,6 @@ where
             let mut txn = db.begin().await?;
 
             // todo: make this more future proof and exhaustive.
-            // todo: handle the conflict case?
 
             let user = sqlx::query!(
                 r#"
@@ -245,9 +273,20 @@ returning user_id
                 token,
                 SessionMask::VERIFY_EMAIL.bits(),
             )
-            .fetch_optional(&mut txn)
-            .await?
-            .ok_or(error::ServiceSession::Unauthorized)?;
+            .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
+            .await
+            .map_err(|err| match err {
+                sqlx::Error::Database(err)
+                    if err.downcast_ref::<PgDatabaseError>().constraint()
+                        == Some("user_email_email_key") =>
+                {
+                    error::VerifyEmail::Email(error::Email::TakenBasic)
+                }
+                err => err.into(),
+            })?
+            .ok_or(error::VerifyEmail::ServiceSession(
+                error::ServiceSession::Unauthorized,
+            ))?;
 
             // make sure they can't use the link, now that they're verified.
             db::session::clear_any(&mut txn, user.user_id, SessionMask::VERIFY_EMAIL).await?;
@@ -293,9 +332,9 @@ async fn user_lookup(
         .ok_or(error::UserNotFound::UserNotFound)
 }
 
-fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::Register> {
+fn validate_register_req(req: &PutProfileRequest) -> Result<(), error::UserUpdate> {
     if req.username.is_empty() {
-        return Err(error::Register::EmptyUsername);
+        return Err(error::UserUpdate::Username(error::Username::Empty));
     }
 
     Ok(())
@@ -308,7 +347,7 @@ async fn put_profile(
     db: Data<PgPool>,
     signup_user: TokenSessionOf<SessionPutProfile>,
     req: Json<PutProfileRequest>,
-) -> actix_web::Result<HttpResponse, error::Register> {
+) -> actix_web::Result<HttpResponse, error::UserUpdate> {
     validate_register_req(&req)?;
 
     let mut txn = db.begin().await?;
@@ -346,6 +385,33 @@ async fn put_profile(
     Ok(HttpResponse::Created()
         .cookie(cookie)
         .json(NewSessionResponse { csrf }))
+}
+
+fn validate_patch_profile_req(
+    req: &Json<<PatchProfile as ApiEndpoint>::Req>,
+) -> Result<(), error::UserUpdate> {
+    match &req.username {
+        Some(username) if username.is_empty() => {
+            Err(error::UserUpdate::Username(error::Username::Empty))
+        }
+        _ => Ok(()),
+    }
+}
+
+/// Update your profile.
+#[api_v2_operation]
+async fn patch_profile(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    req: Json<<PatchProfile as ApiEndpoint>::Req>,
+) -> Result<NoContent, error::UserUpdate> {
+    validate_patch_profile_req(&req)?;
+
+    log::info!("reached");
+
+    db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
+
+    Ok(NoContent)
 }
 
 /// Get a user's profile.
@@ -407,7 +473,7 @@ async fn reset_password(
         user_id,
         req.email,
         mail.as_ref(),
-        config.remote_target().pages_url(),
+        &config.remote_target().pages_url(),
     )
     .await?;
 
@@ -514,6 +580,10 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             ChangePassword::METHOD.route().to(put_password),
         )
         .route(PutProfile::PATH, PutProfile::METHOD.route().to(put_profile))
+        .route(
+            PatchProfile::PATH,
+            PatchProfile::METHOD.route().to(patch_profile),
+        )
         .route(UserLookup::PATH, UserLookup::METHOD.route().to(user_lookup))
         .route(Delete::PATH, Delete::METHOD.route().to(delete))
         .route(GetColors::PATH, GetColors::METHOD.route().to(color::get))
@@ -528,5 +598,18 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         .route(
             DeleteColor::PATH,
             DeleteColor::METHOD.route().to(color::delete),
+        )
+        .route(GetFonts::PATH, GetFonts::METHOD.route().to(font::get))
+        .route(
+            UpdateFont::PATH,
+            UpdateFont::METHOD.route().to(font::update),
+        )
+        .route(
+            CreateFont::PATH,
+            CreateFont::METHOD.route().to(font::create),
+        )
+        .route(
+            DeleteFont::PATH,
+            DeleteFont::METHOD.route().to(font::delete),
         );
 }

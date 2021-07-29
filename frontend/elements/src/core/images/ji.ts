@@ -19,6 +19,9 @@ export class _ extends LitElement {
         ];
     }
 
+      @property({type: Boolean})
+      draggable: boolean = true; 
+
     @property({type: Boolean})
     cacheBust:boolean = false;
 
@@ -48,7 +51,7 @@ export class _ extends LitElement {
 
 
     render() {
-        const { lib, size, id, cacheBust } = this;
+        const { lib, size, id, cacheBust, draggable } = this;
 
         let src = imageLib({ lib, size, id });
 
@@ -57,9 +60,9 @@ export class _ extends LitElement {
         }
 
         if (sameOrigin(src)) {
-            return html`<img .src="${src}" @load="${this.onLoad}" ></img>`;
+            return html`<img .draggable=${draggable} .src="${src}" @load="${this.onLoad}" ></img>`;
         } else {
-            return html`<img .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
+            return html`<img .draggable=${draggable} .src="${src}" crossorigin="anonymous" @load="${this.onLoad}" ></img>`;
             }
     }
 }

@@ -5,14 +5,16 @@ import {nothing} from "lit-html";
 export class _ extends LitElement {
   static get styles() {
     return [css`
-        main {
-            position: absolute;
+        section {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             background-color: rgba(255, 255, 255, .7);
             color: grey;
+            display: block;
+            z-index: 1000;
         }
     `]
   }
@@ -22,7 +24,7 @@ export class _ extends LitElement {
 
   render() {
       const {visible} = this;
-      return visible ? html`<main>Loading...</main>` : nothing;
+      return visible ? html`<section>Loading...</section>` : nothing;
   }
 }
 

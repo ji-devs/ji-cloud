@@ -1,10 +1,12 @@
 use std::rc::Rc;
-use futures_signals::signal::Mutable;
+use dominator::clone;
+use futures::future::ready;
+use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 use futures_signals::signal_vec::MutableVec;
 use rgb::RGBA8;
-use utils::prelude::*;
+use utils::{prelude::*, colors::*};
+use wasm_bindgen_futures::spawn_local;
 
-use super::actions::{get_user_colors, hex_to_rgba8};
 
 
 static SYSTEM_COLORS: &'static [&str] = &[
@@ -34,31 +36,39 @@ static SYSTEM_COLORS: &'static [&str] = &[
     "#1a1a1aff",
 ];
 
-
 pub struct State {
-    pub value: Rc<Mutable<Option<RGBA8>>>,
+    pub(super) value: Mutable<Option<RGBA8>>,
+    pub theme_id: ReadOnlyMutable<ThemeId>,
     pub system_colors: Rc<Vec<RGBA8>>,
-    pub theme_colors: Rc<Option<Vec<RGBA8>>>,
+    pub theme_colors: Mutable<Vec<RGBA8>>,
     pub user_colors: Rc<MutableVec<RGBA8>>,
+    pub on_select: Option<Box<dyn Fn(Option<RGBA8>)>>,
 }
 
 impl State {
-    pub async fn new(config: ColorSelectConfig) -> Self {
-        let user_colors = get_user_colors().await.unwrap_ji();
+    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, init_value: Option<RGBA8>, on_select: Option<impl Fn(Option<RGBA8>) + 'static>) -> Self {
         Self {
-            value: config.value.clone(),
+            value: Mutable::new(init_value),
+            theme_id,
             system_colors: Rc::new(SYSTEM_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-            theme_colors: Rc::new(match config.theme {
-                // Some(ThemeId) => Some(THEME_COLORS.iter().map(|c| hex_to_rgba8(*c)).collect()),
-                Some(theme_id) => Some(theme_id.get_colors().iter().map(|c| c.clone()).collect()),
-                None => None,
-            }),
-            user_colors: Rc::new(MutableVec::new_with_values(user_colors)),
+            theme_colors: Mutable::new(vec![]),
+            user_colors: Rc::new(MutableVec::new()),
+            on_select: on_select.map(|f| Box::new(f) as _)
         }
     }
-}
 
-pub struct ColorSelectConfig {
-    pub theme: Option<ThemeId>,
-    pub value: Rc<Mutable<Option<RGBA8>>>,
+    pub fn handle_theme(state: Rc<State>, ) {
+        spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme_id| {
+            state.theme_colors.set(Self::get_theme_colors(theme_id));
+            ready(())
+        })));
+    }
+
+    pub fn set_value(&self, value: Option<RGBA8>) {
+        self.value.set(value);
+    }
+
+    fn get_theme_colors(theme_id: ThemeId) -> Vec<RGBA8> {
+        theme_id.get_colors().iter().map(|c| c.clone()).collect()
+    }
 }

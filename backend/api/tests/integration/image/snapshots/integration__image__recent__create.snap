@@ -1,0 +1,10 @@
+---
+source: tests/integration/image/recent.rs
+expression: body
+
+---
+{
+  "id": "3095d05e-f2c7-11ea-89c3-3b621dd74a1f",
+  "library": "User",
+  "last_used": "[timestamp]"
+}

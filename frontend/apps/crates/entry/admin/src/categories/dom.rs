@@ -153,31 +153,36 @@ impl MenuDom {
         html!("div", {
             .property("slot", "menu-content")
             .children(&mut [
-                html!("button-text", {
+                html!("button-rect", {
+                    .property("kind", "text")
                     .text("add")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::add_category_child(content_state.clone());
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
+                    .property("kind", "text")
                     .text("delete")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::delete_category(content_state.clone());
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
+                    .property("kind", "text")
                     .text("move up")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Up);
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
+                    .property("kind", "text")
                     .text("move down")
                     .event(clone!(content_state => move |evt:events::Click| {
                         actions::move_category(content_state.clone(), actions::Direction::Down);
                     }))
                 }),
-                html!("button-text", {
+                html!("button-rect", {
+                    .property("kind", "text")
                     .text("rename")
                     .event(clone!(content_state => move |evt:events::Click| {
                         //These are only DOM changes

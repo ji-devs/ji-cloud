@@ -1,34 +1,50 @@
-use shared::{
-    api::endpoints::{ApiEndpoint, user::*,},
-    domain::user::UserProfile,
-    error::{
-        auth::RegisterError,
-        EmptyError,
-    }
-};
-use utils::{
-    routes::{Route, UserRoute},
-    fetch::api_with_auth,
-    storage,
-};
-use serde::{Serialize, Deserialize};
-use wasm_bindgen::UnwrapThrowExt;
-use wasm_bindgen_futures::{JsFuture, spawn_local, future_to_promise};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
-use dominator::clone;
 use std::rc::Rc;
-use futures::future::ready;
+
+use dominator::clone;
+use futures::future::join;
+use shared::{
+    api::endpoints::{
+        ApiEndpoint,
+        user::*,
+        meta
+    },
+    domain::{
+        meta::MetadataResponse,
+        user::UserProfile
+    },
+    error::EmptyError
+};
+
+use utils::{fetch::api_with_auth, unwrap::UnwrapJiExt};
 use super::state::State;
 
-pub async fn load_profile(state:Rc<State>) {
+pub fn load_initial_data(state: Rc<State>) {
+    state.loader.load(clone!(state => async move {
+        join(
+            load_profile(Rc::clone(&state)),
+            load_metadata(Rc::clone(&state))
+        ).await;
+    }));
+}
+
+async fn load_profile(state: Rc<State>) {
     let resp:Result<UserProfile, EmptyError> = api_with_auth::< _, _, ()>(&Profile::PATH, Profile::METHOD, None).await;
 
-    match resp {
-        Ok(profile) => {
-            state.status.set(Some(Ok(profile)));
-        }, 
-        Err(_) => {
-            state.status.set(Some(Err(())))
-        }
-    }
+    state.user.fill_from_user(resp.unwrap_ji());
+}
+
+async fn load_metadata(state: Rc<State>) {
+    match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        Err(_) => {},
+        Ok(res) => {
+            state.metadata.set(Some(res));
+        },
+    };
+}
+
+pub fn save_profile(state: Rc<State>) {
+    state.loader.load(clone!(state => async move {
+        let info = state.user.to_update();
+        log::info!("{}", info);
+    }));
 }

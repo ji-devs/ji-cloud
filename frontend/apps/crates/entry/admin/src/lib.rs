@@ -22,28 +22,24 @@ mod page;
 mod pages;
 mod header;
 */
+
 #[wasm_bindgen(start)]
-pub fn main_js() {
+pub async fn main_js() {
     setup_logger();
+
+
     let settings = utils::settings::init();
-    //init dom stuff
 
-    let router = router::Router::new();
-    dominator::append_dom(&dominator::body(), router.render());
-    /*
+    let r = Rc::new(router::Router::new());
 
-    let page = page::Page::new();
+    router::render(r.clone());
 
-    dominator::append_dom(&dominator::body(), page.render());
-	*/
+    std::mem::forget(Box::new(r));
 }
-
-
-
 
 // enable logging and panic hook only during debug builds
 cfg_if! {
-    if #[cfg(all(feature = "wasm-logger", feature = "console_error_panic_hook", debug_assertions))] {
+    if #[cfg(all(feature = "wasm-logger", feature = "console_error_panic_hook"))] {
         fn setup_logger() {
             wasm_logger::init(wasm_logger::Config::default());
             console_error_panic_hook::set_once();

@@ -1,6 +1,6 @@
 use http::StatusCode;
 
-use shared::domain::jig::module::{ModuleBody, ModuleUpdateRequest};
+use shared::domain::jig::module::{body::memory, ModuleBody, ModuleUpdateRequest};
 
 use crate::{
     fixture::Fixture,
@@ -9,7 +9,7 @@ use crate::{
 
 #[actix_rt::test]
 async fn update_empty() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -41,6 +41,8 @@ async fn update_empty() -> anyhow::Result<()> {
 
     let body: serde_json::Value = resp.json().await?;
 
+    app.stop(false).await;
+
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 
     Ok(())
@@ -48,7 +50,7 @@ async fn update_empty() -> anyhow::Result<()> {
 
 #[actix_rt::test]
 async fn update_contents() -> anyhow::Result<()> {
-    let app = initialize_server(&[Fixture::User, Fixture::Jig]).await;
+    let app = initialize_server(&[Fixture::User, Fixture::Jig], &[]).await;
 
     let port = app.port();
 
@@ -61,7 +63,15 @@ async fn update_contents() -> anyhow::Result<()> {
         ))
         .login()
         .json(&ModuleUpdateRequest {
-            body: Some(ModuleBody::MemoryGame(Default::default())),
+            body: Some(
+                ModuleBody::MemoryGame(memory::ModuleData {
+                    content: Some(memory::Content {
+                        ..memory::Content::default()
+                    })
+                })
+            ),
+            is_complete: Some(true),
+
             ..ModuleUpdateRequest::default()
         })
         .send()
@@ -83,6 +93,8 @@ async fn update_contents() -> anyhow::Result<()> {
     assert_eq!(resp.status(), StatusCode::OK);
 
     let body: serde_json::Value = resp.json().await?;
+
+    app.stop(false).await;
 
     insta::assert_json_snapshot!(body, {".**.updated_at" => "[timestamp]"});
 

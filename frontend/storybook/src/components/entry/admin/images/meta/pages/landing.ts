@@ -19,8 +19,8 @@ const STR_NEXT = "Next";
 export const Landing = ({content}) => {
     return `<image-meta-page>
       ${MockJiImage({size: "thumb", slot: "image"})}
-      <button-text slot="replace" color="blue" size="small">${STR_REPLACE}</button-text>
-      <button-text slot="delete" color="blue" size="small">${STR_DELETE}</button-text>
+      <button-rect kind="text" slot="replace" color="blue" size="small">${STR_REPLACE}</button-rect>
+      <button-rect kind="text" slot="delete" color="blue" size="small">${STR_DELETE}</button-rect>
       <input-checkbox label="${STR_PREMIUM}" slot="premium"></input-checkbox>
       <input-text-underline slot="description" label="${STR_IMAGENAME}"></input-text-underline>
       <input-textarea-underline slot="description" label="${STR_DESCRIPTION}"></input-textarea-underline>

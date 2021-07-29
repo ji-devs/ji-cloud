@@ -1,3 +1,11 @@
+//! Contains error types for api operations. Enums are declared with HTTP status codes
+//! indicating the type of error with optional descriptions.
+//!
+//! Casting and handling of:
+//!     * `sqlx::Error` -- database errors generated in database interactions, mostly in `db` module
+//!     * `actix_web::Error` -- server errors, used by actix for error logging
+//!     * `anyhow::Error` -- general intermediate error representation
+
 use actix_web::error::BlockingError;
 use actix_web::HttpResponse;
 use paperclip::actix::api_v2_errors;
@@ -7,6 +15,17 @@ use crate::db::meta::MetaWrapperError;
 
 mod oauth;
 pub use oauth::{GoogleOAuth, OAuth};
+
+mod storage;
+pub use storage::Storage;
+
+mod user;
+pub use user::{
+    Email, NotFound as UserNotFound, Register, Update as UserUpdate, Username, VerifyEmail,
+};
+
+pub mod event_arc;
+pub use event_arc::EventArc;
 
 /// Represents an error returned by the api.
 // mostly used in this module
@@ -94,34 +113,34 @@ impl Into<actix_web::Error> for Server {
 pub enum ServiceKind {
     Algolia,
     S3,
+    GoogleCloudStorage,
+    GoogleEventArc,
     GoogleOAuth,
     Mail,
+    FirebaseCloudMessaging,
+}
+
+impl ServiceKind {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Algolia => "Algolia",
+            Self::S3 => "S3",
+            Self::GoogleCloudStorage => "Google Cloud Storage",
+            Self::GoogleEventArc => "Google EventArc",
+            Self::GoogleOAuth => "Google OAuth",
+            Self::Mail => "Sendgrid Mail",
+            Self::FirebaseCloudMessaging => "Firebase Cloud Messaging",
+        }
+    }
 }
 
 impl Into<actix_web::Error> for ServiceKind {
     fn into(self) -> actix_web::Error {
-        match self {
-            Self::Algolia => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Algolia service is disabled".to_owned(),
-            )
-            .into(),
-            Self::S3 => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "S3 service is disabled".to_owned(),
-            )
-            .into(),
-            Self::GoogleOAuth => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Google OAuth service is disabled".to_owned(),
-            )
-            .into(),
-            Self::Mail => BasicError::with_message(
-                http::StatusCode::NOT_IMPLEMENTED,
-                "Mail service is disabled".to_owned(),
-            )
-            .into(),
-        }
+        BasicError::with_message(
+            http::StatusCode::NOT_IMPLEMENTED,
+            format!("{} is disabled", self.as_str()).to_owned(),
+        )
+        .into()
     }
 }
 
@@ -184,7 +203,6 @@ impl Into<actix_web::Error> for ServiceSession {
 #[derive(Debug)]
 pub enum Refresh {
     InternalServerError(anyhow::Error),
-    DisabledService(ServiceKind),
     PreconditionFailed,
     ResourceNotFound,
 }
@@ -199,7 +217,6 @@ impl Into<actix_web::Error> for Refresh {
     fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
-            Self::DisabledService(s) => s.into(),
             Self::PreconditionFailed => {
                 BasicError::new(http::StatusCode::PRECONDITION_FAILED).into()
             }
@@ -208,36 +225,6 @@ impl Into<actix_web::Error> for Refresh {
                 "Resource Not Found".to_owned(),
             )
             .into(),
-        }
-    }
-}
-
-#[api_v2_errors(
-    code = 401,
-    code = 403,
-    code = 404,
-    description = "Not Found: User not Found",
-    code = 500
-)]
-pub enum UserNotFound {
-    UserNotFound,
-    InternalServerError(anyhow::Error),
-}
-
-impl<T: Into<anyhow::Error>> From<T> for UserNotFound {
-    fn from(e: T) -> Self {
-        Self::InternalServerError(e.into())
-    }
-}
-
-impl Into<actix_web::Error> for UserNotFound {
-    fn into(self) -> actix_web::Error {
-        match self {
-            Self::UserNotFound => {
-                BasicError::with_message(http::StatusCode::NOT_FOUND, "User Not Found".to_owned())
-                    .into()
-            }
-            Self::InternalServerError(e) => ise(e),
         }
     }
 }
@@ -292,7 +279,7 @@ impl Into<actix_web::Error> for NotFound {
     code = 404,
     description = "Not Found: Parent Category Not Found OR category not found",
     code = 420,
-    description = "Unprocessable Entity: Cycle OR OutOfRange"
+    description = "Unprocessable Entity: Cycle OR OutOfRange",
     code = 500
 )]
 pub enum CategoryUpdate {
@@ -347,17 +334,21 @@ impl Into<actix_web::Error> for CategoryUpdate {
     code = 403,
     code = 404,
     description = "Not Found: Resource Not Found",
-    code = 420, description = "Unprocessable Entity: Invalid Content"
+    code = 420,
+    description = "Unprocessable Entity: Invalid Content",
     code = 500
 )]
 #[derive(Debug)]
 pub enum Upload {
     ResourceNotFound,
     InvalidMedia,
+    FileTooLarge,
+    StorageClient(Storage),
     InternalServerError(anyhow::Error),
 }
 
 impl Upload {
+    #[allow(dead_code)]
     pub fn blocking_error(err: BlockingError<Self>) -> Self {
         match err {
             BlockingError::Canceled => anyhow::anyhow!("Thread pool is gone").into(),
@@ -385,7 +376,23 @@ impl Into<actix_web::Error> for Upload {
                 "Invalid Content".to_owned(),
             )
             .into(),
+            Self::FileTooLarge => BasicError::with_message(
+                http::StatusCode::PAYLOAD_TOO_LARGE,
+                "File Exceeds Upload Limit".to_owned(),
+            )
+            .into(),
+            Self::StorageClient(e) => e.into(),
             Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+impl From<Storage> for Upload {
+    fn from(e: Storage) -> Self {
+        match e {
+            Storage::FileTooLarge => Upload::FileTooLarge,
+            Storage::InternalServerError(e) => Upload::InternalServerError(e),
+            e => Upload::StorageClient(e),
         }
     }
 }
@@ -395,7 +402,7 @@ impl Into<actix_web::Error> for Upload {
     code = 401,
     code = 403,
     code = 420,
-    description = "Unprocessable Entity: Metadata not Found"
+    description = "Unprocessable Entity: Metadata not Found",
     code = 500
 )]
 pub enum CreateWithMetadata {
@@ -441,7 +448,7 @@ impl Into<actix_web::Error> for CreateWithMetadata {
     code = 404,
     description = "Not Found: Resource Not Found",
     code = 420,
-    description = "Unprocessable Entity: Metadata not Found"
+    description = "Unprocessable Entity: Metadata not Found",
     code = 500
 )]
 pub enum UpdateWithMetadata {
@@ -513,40 +520,176 @@ impl From<MetaWrapperError> for UpdateWithMetadata {
 
 #[api_v2_errors(
     code = 400,
+    code = 403,
+    code = 404,
+    description = "Not Found: Resource Not Found",
     code = 409,
-    description = "Conflict: Another user with the provided username already exists"
-    code = 420,
-    description = "Unprocessable Entity: No username was provided",
+    description = "Conflict: Another tag with the provided index already exists",
     code = 500
 )]
-pub enum Register {
-    EmptyUsername,
-    TakenUsername,
+pub enum Tag {
+    TakenIndex,
+    ResourceNotFound,
     InternalServerError(anyhow::Error),
 }
 
-impl<T: Into<anyhow::Error>> From<T> for Register {
+impl<T: Into<anyhow::Error>> From<T> for Tag {
     fn from(e: T) -> Self {
         Self::InternalServerError(e.into())
     }
 }
 
-impl Into<actix_web::Error> for Register {
+impl Into<actix_web::Error> for Tag {
     fn into(self) -> actix_web::Error {
         match self {
-            Self::EmptyUsername => BasicError::with_message(
-                http::StatusCode::UNPROCESSABLE_ENTITY,
-                "No username was provided".to_owned(),
+            Self::TakenIndex => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "Tag index already taken".to_owned(),
             )
             .into(),
 
-            Self::TakenUsername => BasicError::with_message(
-                http::StatusCode::CONFLICT,
-                "Username already taken".to_owned(),
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
             )
             .into(),
 
             Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+#[api_v2_errors(
+    code = 400,
+    code = 404,
+    code = 409,
+    description = "Conflict: an image with the same ID already exists for this user",
+    code = 500
+)]
+pub enum UserRecentImage {
+    ResourceNotFound,
+    Conflict,
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for UserRecentImage {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for UserRecentImage {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Image not found in recent images list for user".to_owned(),
+            )
+            .into(),
+
+            Self::Conflict => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "An image with the same ID already exists in recent images list for user"
+                    .to_owned(),
+            )
+            .into(),
+
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+#[api_v2_errors(
+    code = 404,
+    code = 404,
+    code = 409,
+    description = "Conflict: a draft already exists for this jig",
+    code = 500
+)]
+pub enum JigCloneDraft {
+    ResourceNotFound,
+    IsDraft,
+    Conflict,
+    Forbidden,
+    InternalServerError(anyhow::Error),
+}
+
+impl<T: Into<anyhow::Error>> From<T> for JigCloneDraft {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl From<Auth> for JigCloneDraft {
+    fn from(e: Auth) -> Self {
+        match e {
+            Auth::InternalServerError(e) => Self::InternalServerError(e),
+            Auth::Forbidden => Self::Forbidden,
+        }
+    }
+}
+
+impl Into<actix_web::Error> for JigCloneDraft {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
+
+            Self::IsDraft => BasicError::with_message(
+                http::StatusCode::BAD_REQUEST,
+                "Cannot create a draft from a draft".to_owned(),
+            )
+            .into(),
+
+            Self::Conflict => BasicError::with_message(
+                http::StatusCode::CONFLICT,
+                "A draft already exists for this jig".to_owned(),
+            )
+            .into(),
+
+            Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
+
+            Self::InternalServerError(e) => ise(e),
+        }
+    }
+}
+
+#[api_v2_errors(
+    code = 400,
+    code = 409,
+    description = "Conflict: Another user with the provided username already exists",
+    code = 420,
+    description = "Unprocessable Entity: No username was provided",
+    code = 500,
+    code = 501
+)]
+pub enum MediaProcessing {
+    InternalServerError(anyhow::Error),
+    EventArc(EventArc),
+    ResourceNotFound,
+}
+
+impl<T: Into<anyhow::Error>> From<T> for MediaProcessing {
+    fn from(e: T) -> Self {
+        Self::InternalServerError(e.into())
+    }
+}
+
+impl Into<actix_web::Error> for MediaProcessing {
+    fn into(self) -> actix_web::Error {
+        match self {
+            Self::InternalServerError(e) => ise(e),
+
+            Self::EventArc(e) => e.into(),
+
+            Self::ResourceNotFound => BasicError::with_message(
+                http::StatusCode::NOT_FOUND,
+                "Resource Not Found".to_owned(),
+            )
+            .into(),
         }
     }
 }

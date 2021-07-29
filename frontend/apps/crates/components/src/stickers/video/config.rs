@@ -1,0 +1,2 @@
+pub const YOUTUBE_VIDEO_HEIGHT: f64 = 270_f64 * 2_f64;
+pub const YOUTUBE_VIDEO_WIDTH: f64 = 480_f64 * 2_f64;

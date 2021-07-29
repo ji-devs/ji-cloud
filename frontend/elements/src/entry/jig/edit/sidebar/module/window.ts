@@ -1,106 +1,105 @@
-import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
+import { LitElement, html, css, customElement, property, query } from "lit-element";
 import { nothing } from "lit-html";
+import { ModuleKind, moduleKinds } from "@elements/entry/jig/module-types";
 import "@elements/core/images/ui";
-import "@elements/core/inputs/text-pencil";
-import "@elements/core/buttons/icon";
-import "@elements/core/buttons/text";
 
-export type ModuleState = "empty" | "draft" | "complete";
 
+export type ModuleState = "empty" | "draft" | "active" | "complete" | "published";
 const STR_EMPTY = "Drag\nactivity\nhere"
 
 @customElement("jig-edit-sidebar-module-window")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-        css`
-            section {
-                display: block;
-                width: 218px;
-                height: 123px;
-                border-radius: 16px;
-            }
+    static get styles() {
+        return [
+            css`
+                .wrapper {
+                    display: grid;
+                    place-content: center;
+                    width: 218px;
+                    height: 123px;
+                    border-radius: 16px;
+                    box-sizing: border-box;
+                }
+                :host([state=empty]) .wrapper {
+                    background-color: var(--light-blue-5);
+                }
+                :host([state=empty]) .wrapper.drag-over {
+                    background-color: var(--dark-blue-1);
+                }
+                :host([state=draft]) .wrapper {
+                    background-color: var(--light-blue-2);
+                    border: solid 2px #d8e7f9;
+                }
+                :host([state=active]) .wrapper {
+                    background-color: var(--light-blue-5);
+                }
+                :host([state=active]) img-ui {
+                    height: 100px;
+                }
+                :host([state=complete]) {
+                    background-color: #d5f0de;
+                    border: solid 2px #c5e9d2;
+                }
+                :host([state=published]) {
+                    
+                }
 
-            section.thumbnail {
-                border: solid 2px #d8e7f9;
-                background-color: var(--light-blue-2);
-            }
-            section.draft {
-                border: solid 2px #d8e7f9;
-                background-color: var(--light-blue-2);
-            }
-            section.empty {
-                border: solid 0px #d8e7f9;
-                background-color: var(--light-blue-5);
-            }
-            section.complete {
-              border: solid 2px #c5e9d2;
-              background-color: #d5f0de;
-            }
-
-            .contents {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                cursor: pointer;
-            }
-
-            .text {
-                color: white;
-                white-space: pre-wrap;
-                font-size: 14px;
-              font-weight: bold;
-              font-stretch: normal;
-              font-style: normal;
-              line-height: 1.29;
-              letter-spacing: normal;
-              text-align: center;
-              color: var(--white);
-            }
+                .drag-here-text {
+                    color: white;
+                    white-space: pre-wrap;
+                    font-size: 14px;
+                    font-weight: bold;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.29;
+                    letter-spacing: normal;
+                    text-align: center;
+                    color: var(--white);
+                    margin: 0;
+                }
+                .drag-over .drag-here-text {
+                    color: transparent;
+                }
             `,
-    ];
-  }
+        ];
+    }
 
-  @property()
-  state:ModuleState = "draft";
+    @property({reflect: true})
+    state: ModuleState = "draft";
 
-  @property()
-  thumbnail:string = "";
+    @property()
+    activeModuleKind: ModuleKind = "cover";
 
-  render() {
-      const {state, thumbnail} = this;
+    @property()
+    publishedThumbnail: string = "";
 
-      let mainClasses = {main: true} as any;
+    @query(".wrapper")
+    wrapper!: HTMLElement;
 
-      if(thumbnail !== "") {
-          mainClasses.thumbnail = true;
-      } else {
-          mainClasses[state] = true;
-      }
+    dragOver() {
+        this.wrapper.classList.add("drag-over");
+    }
+    dragLeave() {
+        this.wrapper.classList.remove("drag-over");
+    }
 
-      return html`<section class="${classMap(mainClasses)}">
-          ${ thumbnail !== "" ? renderThumbnail(thumbnail)
-                : renderModule(state)
-          }
-          </section>
+    render() {
+        return html`
+            <div class="wrapper" @dragover="${this.dragOver}" @dragleave="${this.dragLeave}">
+                ${
+                    this.state === "empty" ? html`
+                        <p class="drag-here-text">${STR_EMPTY}</p>
+                    `: this.state === "draft" ? html`
+                        <img-ui path="core/buttons/icon/circle-pencil-blue.svg"></img-ui>
+                    ` : this.state === "active" ? html`
+                        <img-ui path="entry/jig/modules/large/${this.activeModuleKind}-hover.svg"></img-ui>
+                    ` : this.state === "complete" ? html`
+                        <img-ui path="core/buttons/icon/circle-check-green.svg"></img-ui>
+                    ` : this.state === "published" ? html`
+                        TODO: <img-ji></img-ji>
+                    `: nothing
+                }
+            </div>
         `;
-  }
-}
-
-function renderThumbnail(thumbnail:string) {
-    return html`<div>TODO: ${thumbnail}</div>`
-}
-
-function renderModule(state:ModuleState) {
-    if(state === "empty") {
-        return html`<div class="contents"><div class="text">${STR_EMPTY}</div></div>`
-    } else {
-        const filename = state === "draft" ? "circle-pencil-blue.svg"
-            : "circle-check-green.svg";
-        
-        const path = `core/buttons/icon/${filename}`;
-        return html`<img-ui class="contents" path="${path}" />`
     }
 }

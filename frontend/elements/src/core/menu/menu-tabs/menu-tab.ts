@@ -13,9 +13,7 @@ export class _ extends LitElement {
                 cursor: pointer
             }
             :host([active]) {
-                /* hard coded color?! Couldn't find color in zeplin */
                 background-color: #e9eff8;
-                color: var(--main-blue);
             }
         `];
     }

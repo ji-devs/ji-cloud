@@ -29,7 +29,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: install google cloud sdk
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@master
         with:
           version: '295.0.0'
           service_account_key: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY }}
@@ -48,7 +48,7 @@ jobs:
           path: ${{github.workspace}}/cargo-make
 
 
-      - name: build and deploy 
+      - name: build and deploy api
         run: cargo make release-api
         
       - name: Notify slack of all status

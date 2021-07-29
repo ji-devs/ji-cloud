@@ -73,6 +73,19 @@ impl MediaLibrary {
     }
 }
 
+impl std::str::FromStr for MediaLibrary {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "global" => Ok(Self::Global),
+            "user" => Ok(Self::User),
+            "web" => Ok(Self::Web),
+            _ => Err(anyhow::anyhow!("media type not recognized")),
+        }
+    }
+}
+
 /// Kinds of media used with the web media library
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[cfg_attr(feature = "backend", derive(paperclip::actix::Apiv2Schema))]
@@ -124,6 +137,36 @@ impl FileKind {
             Self::AudioMp3 => "audio.mp3",
         }
     }
+}
+
+impl std::str::FromStr for FileKind {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "animation.gif" => Ok(Self::AnimationGif),
+            "original.png" => Ok(Self::ImagePng(PngImageFile::Original)),
+            "thumbnail.png" => Ok(Self::ImagePng(PngImageFile::Thumbnail)),
+            "resized.png" => Ok(Self::ImagePng(PngImageFile::Resized)),
+            "audio.mp3" => Ok(Self::AudioMp3),
+            _ => Err(anyhow::anyhow!("media type not recognized")),
+        }
+    }
+}
+
+/// FCM Data Message format for signalling processing completion.
+///
+/// Contains the information necessary to find the media from the GCS project.
+#[derive(Deserialize, Serialize)]
+#[allow(dead_code)]
+pub struct MediaKey {
+    /// Media library the
+    pub media_library: MediaLibrary,
+    /// The id of the media
+    pub id: Uuid,
+    /// The content type of the media.
+    /// The definitions can be found in [`content_type()`](FileKind::content_type).
+    pub content_type: String,
 }
 
 /// gives the key for some media with the given parameters

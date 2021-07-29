@@ -16,7 +16,28 @@ use strum_macros::Display;
 use std::cmp::Ord;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use shared::domain::locale::{Bundle, Entry, EntryStatus, ItemKind, UpdateEntryRequest};
+use dominator::clone;
 
+pub struct LoaderState {
+    pub loader: AsyncLoader,
+    pub inner: Mutable<Option<Rc<State>>> 
+}
+
+impl LoaderState {
+    pub fn new() -> Self {
+        let loader = AsyncLoader::new();
+        let inner = Mutable::new(None);
+
+        loader.load(clone!(inner => async move {
+            inner.set(Some(Rc::new(State::new().await)));
+        }));
+
+        Self {
+            loader,
+            inner
+        }
+    }
+}
 
 pub struct State {
     pub bundles: Mutable<HashMap<Bundle, bool>>,

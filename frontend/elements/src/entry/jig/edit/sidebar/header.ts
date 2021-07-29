@@ -1,59 +1,120 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import { nothing } from "lit-html";
 import "@elements/core/images/ui";
-import "@elements/core/inputs/text-pencil";
 import "@elements/core/buttons/icon";
-import "@elements/core/buttons/text";
+import { collapseStyles } from "../../_common/sidebar-modules/collapse-styles";
 
 
 @customElement("jig-edit-sidebar-header")
 export class _ extends LitElement {
-  static get styles() {
-    return [
-      css`
-      :host {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: 32px 40px 1fr;
-          gap: 0px 0px;
-          grid-template-areas:
-            ". close"
-            "logo gallery"
-            "input input";
-      }
+    static get styles() {
+        return [
+            collapseStyles,
+            css`
+                :host {
+                    padding: 20px;
+                    padding-bottom: 0;
+                    display: block;
 
-      .close {
-        grid-area: close;
-        justify-self: end;
-      }
+                    transition-timing-function: linear;
+                    transition-delay: 0s;
+                    transition-duration: var(--collapsing-phase-duration);
+                }
+                :host([collapsed]) {
+                    padding: 10px;
+                    transition-delay: var(--fading-phase-duration);
+                }
+                .close-wrapper {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-right: -20px;
+                    transition-property: margin-top;
+                    height: 14px;
+                }
+                :host([collapsed]) .close-wrapper {
+                    margin-right: -10px;
+                }
+                :host([isModulePage]) .close {
+                    opacity: 0;
+                    cursor: inherit;
+                }
+                :host([collapsed]) .close {
+                    margin-right: 0px;
+                    transition-property: margin-right;
+                }
+                :host([collapsed]) ::slotted([slot=close]) {
+                    transform: rotate(-180deg);
+                }
+                ::slotted([slot=close]) {
+                    transition: transform .3s;
+                }
+                .logo-nav-wrapper {
+                    margin-top: 16px;
+                    height: 40px;
+                    display: flex;
+                    justify-content: space-between;
+                }
+                .logo {
+                    object-fit: cover;
+                    object-position: 0 0;
+                    overflow: hidden;
+                    height: 40px;
+                    width: 115px;
+                    transition-property: height, width;
+                    transition-duration: var(--collapsing-phase-duration);
+                }
+                :host([collapsed]) .logo {
+                    height: 28px;
+                    width: 50px;
+                    transition-delay: var(--fading-phase-duration);
+                }
+                .divider {
+                    background-color: #5893f9;
+                    height: 12px;
+                    width: 1px;
+                }
+                nav, .settings-preview {
+                    display: flex;
+                    align-items: center;
+                    column-gap: 12px;
+                }
+                .input {
+                    margin: 23px 0;
+                    width: 100%;
+                }
+            `,
+        ];
+    }
 
-      .logo {
-        grid-area: logo;
-      }
+    @property({type: Boolean, reflect: true})
+    collapsed: boolean = false;
 
-      .gallery {
-        grid-area: gallery;
-        justify-self: end;
-        align-self: end;
-      }
+    @property({type: Boolean, reflect: true})
+    isModulePage: boolean = false;
 
-      .input {
-        margin-top: 23px;
-        width: 100%;
-        grid-area: input;
-      }
-      `,
-    ];
-  }
-
-  render() {
-
-    return html`
-        <div class="close"><slot name="close"></slot></div>
-        <img-ui class="logo" path="entry/jig/logo-jigzi.svg"></img-ui>
-        <div class="gallery"><slot name="gallery"></slot></div>
-        <div class="input"><slot name="input"></slot></div>
-    `;
-  }
+    render() {
+        return html`
+            <div class="close-wrapper collapsing-phase">
+                <div class="close collapsing-phase">
+                    <slot name="close"></slot>
+                </div>
+            </div>
+            <div class="logo-nav-wrapper">
+                <img-ui class="logo collapsing-phase" path="entry/jig/logo-jigzi.svg"></img-ui>
+                <nav class="open-only">
+                    <slot name="gallery"></slot>
+                    ${ this.isModulePage ? nothing : (html`
+                        <div class="divider"></div>
+                        <slot name="modules"></slot>
+                    `) }
+                </nav>
+            </div>
+            <div class="input open-only"><slot name="input"></slot></div>
+            <div class="settings-preview open-only">
+                <slot name="settings"></slot>
+                <div class="divider"></div>
+                <slot name="preview"></slot>
+            </div>
+        `;
+    }
 }

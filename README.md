@@ -8,30 +8,51 @@
 
 # Build Status
 
+## Frontend
+
+* [![Entry - App - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Entry%20-%20App%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-entry-app-release.yml)]
+/ 
+[![Entry - App - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Entry%20-%20App%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-entry-app-sandbox.yml)]
+
+* [![Entry - Elements - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Entry%20-%20Elements%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-entry-elements-release.yml)]
+/ 
+[![Entry - Elements - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Entry%20-%20Elements%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-entry-elements-sandbox.yml)]
+
+* [![Module - App - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20App%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-module-app-release.yml)]
+/ 
+[![Module - App - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20App%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-module-app-sandbox.yml)]
+
+* [![Module - Elements - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Elements%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-module-elements-release.yml)]
+/ 
+[![Module - Elements - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Elements%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/frontend-module-elements-sandbox.yml)]
+
 ----
 
-* ![CSS - Release](https://github.com/jewish-interactive/ji-cloud/workflows/CSS%20-%20Release/badge.svg) / ![CSS - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/CSS%20-%20Sandbox/badge.svg)
-* ![Storybook - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Storybook%20-%20Release/badge.svg) / ![Storybook - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Storybook%20-%20Sandbox/badge.svg)
+## Backend
 
-* ![Documentation - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Release/badge.svg) / * ![Documentation - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Sandbox/badge.svg) 
-* ![FastlyPurge- Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Release/badge.svg) / ![FastlyPurge- Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Sandbox/badge.svg)
+* [![Api - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Api%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-api-release.yml)]
+/ 
+[![Api - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Api%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-api-sandbox.yml)]
+
+* [![Media - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Media%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-media-release.yml)]
+/ 
+[![Media - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Media%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-media-sandbox.yml)]
+
+* [![Pages - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-pages-release.yml)]
+/ 
+[![Pages - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-pages-sandbox.yml)]
+
+* [![FastlyPurge- Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-fastly-purge-release.yml)]
+/ 
+[![FastlyPurge- Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/FastlyPurge%20-%20Backend%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/backend-fastly-purge-sandbox.yml)]
 
 ----
-* ![Api - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Api%20-%20Backend%20-%20Release/badge.svg) / ![Api - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Api%20-%20Backend%20-%20Sandbox/badge.svg)
-* ![Pages - Backend - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Release/badge.svg) / ![Pages - Backend - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Pages%20-%20Backend%20-%20Sandbox/badge.svg)
 
-----
+## Internal
+* [![Storybook - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Storybook%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/storybook-release.yml)]
+/ 
+[![Storybook - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Storybook%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/storybook-sandbox.yml)]
 
-* ![Jig - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Jig%20-%20Spa%20-%20Release/badge.svg) / ![Jig - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Jig%20-%20Spa%20-%20Sandbox/badge.svg)
-* ![User - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Spa%20-%20Release/badge.svg) / ![User - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/User%20-%20Spa%20-%20Sandbox/badge.svg)
-* ![Admin - Spa - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Spa%20-%20Release/badge.svg) / ![Admin - Spa - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Admin%20-%20Spa%20-%20Sandbox/badge.svg)
-
-----
-
-* ![Module - Memory - Edit - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Memory%20-%20Edit%20-%20Release/badge.svg) / ![Module - Memory - Edit - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Memory%20-%20Edit%20-%20Sandbox/badge.svg)
-
-* ![Module - Memory - Play - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Memory%20-%20Play%20-%20Release/badge.svg) / ![Module - Memory - Play - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Memory%20-%20Play%20-%20Sandbox/badge.svg)
-
-* ![Module - Poster - Edit - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Poster%20-%20Edit%20-%20Release/badge.svg) / ![Module - Poster - Edit - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Poster%20-%20Edit%20-%20Sandbox/badge.svg)
-
-* ![Module - Poster - Play - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Poster%20-%20Play%20-%20Release/badge.svg) / ![Module - Poster - Play - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Module%20-%20Poster%20-%20Play%20-%20Sandbox/badge.svg)
+* [![Documentation - Release](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Release/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/documentation-release.yml)]
+/ 
+[![Documentation - Sandbox](https://github.com/jewish-interactive/ji-cloud/workflows/Documentation%20-%20Sandbox/badge.svg)](https://github.com/ji-devs/ji-cloud/actions/workflows/documentation-sandbox.yml)]

@@ -1,6 +1,7 @@
 use dominator::{html, clone, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
+use utils::ages::AgeRangeVecExt;
 use utils::prelude::*;
 use super::{actions, state::*};
 use std::rc::Rc;
@@ -30,7 +31,7 @@ impl GalleryDom {
     pub fn render() -> Dom {
         let state = Rc::new(State::new());
 
-        actions::load_jigs(state.clone());
+        actions::load_data(state.clone());
 
         html!("jig-gallery", {
             .child(html!("jig-gallery-create", {
@@ -48,11 +49,16 @@ impl GalleryDom {
             .child(html!("input-search", {
                 .property("slot", "search-input")
                 .property("placeholder", STR_SEARCH)
-                .event(clone!(state => move |_: events::Click| {
-                    actions::load_jigs(state.clone());
+                .event(clone!(state => move |evt: events::CustomSearch| {
+                    let value = evt.query();
+                    if !value.is_empty() {
+                        actions::search_jigs(state.clone(), value);
+                    } else {
+                        actions::load_jigs_regular(state.clone());
+                    }
                 }))
             }))
-            .child(html!("dropdown-select", {
+            .child(html!("input-select", {
                 .property("slot", "filters")
                 .property_signal("value", state.visible_jigs.signal_cloned().map(|visible_jigs| Self::visible_jigs_option_string(&visible_jigs)))
                 .children(VisibleJigs::iter().map(|option| {
@@ -68,7 +74,7 @@ impl GalleryDom {
                         })))
                         .event(clone!(state, option => move |_: events::Click| {
                             state.visible_jigs.set(option.clone());
-                            actions::load_jigs(state.clone());
+                            actions::load_jigs_regular(state.clone());
                         }))
                     })
                 }))
@@ -79,21 +85,24 @@ impl GalleryDom {
             //     .property_signal("visible", state.loader.is_loading())
             // }))
             .children_signal_vec(state.jigs.signal_vec_cloned().map(clone!(state => move |jig| {
+                let jig_ages = jig.age_ranges.clone();
                 html!("jig-gallery-recent", {
                     .property("slot", "recent-items")
                     .property("href", jig.id.0.to_string())
                     .property("draft", "")
-                    .property("label", jig.display_name.clone().unwrap_or_default())
+                    .property("label", jig.display_name.clone())
                     .property("img", "mock/resized/jig-gallery.jpg")
-                    .property("ages", "5-8")
-                    .property("lastedited", "3 W ago")
+                    .property_signal("ages", state.age_ranges.signal_cloned().map(move|age_ranges| {
+                        age_ranges.range_string(&jig_ages)
+                    }))
+                    .property("lastEdited", "???")
                     .children(&mut [
                         html!("menu-line", {
                             .property("slot", "menu-content")
                             .property("icon", "duplicate")
                             .text(STR_DUPLICATE)
                             .event(clone!(state, jig => move |_: events::Click| {
-                                actions::copy_jig(state.clone(), &jig);
+                                actions::copy_jig(state.clone(), &jig.id);
                             }))
                         }),
                         html!("menu-line", {

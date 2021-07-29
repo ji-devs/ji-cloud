@@ -81,17 +81,18 @@ export class _ extends LitElement {
             <slot name="google"></slot>
 
             <or-divider></or-divider>
-            <slot name="email"></slot>
-            <div class="spacer"></div>
-            <slot name="password"> </slot>
-            <slot name="password-forgot"></slot>
 
-            <slot name="submit"></slot>
+            <form @submit=${(evt:Event) => { evt.preventDefault(); }}>
+              <slot name="email"></slot>
+              <div class="spacer"></div>
+              <slot name="password"> </slot>
+              <slot name="password-forgot"></slot>
+
+              <slot name="submit"></slot>
+            </form>
           </div>
 
-            <title-ji color="blue"></title-ji>
-            &nbsp;
-            <slot name="register"></slot>
+            <slot name="footer"></slot>
           </div>
         </base-page>
     `;

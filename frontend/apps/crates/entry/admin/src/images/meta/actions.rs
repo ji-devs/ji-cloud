@@ -1,17 +1,22 @@
+use gloo::timers::future::TimeoutFuture;
 use shared::{
+    media::MediaLibrary,
     api::{ApiEndpoint, endpoints},
-    domain::{Publish, image::*, category::*, meta::*},
+    domain::{Publish, image::*, image::tag::*, category::*, meta::*},
     error::{EmptyError, MetadataNotFound},
 };
-use utils::{routes::*, fetch::{api_with_auth, api_no_auth, api_upload_file, api_with_auth_empty}};
+use utils::{routes::*, prelude::*}; 
 use dominator::clone;
 use super::state::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use web_sys::File;
+use strum::IntoEnumIterator;
+use components::image::upload::{upload_image};
 use super::sections::common::categories::MutableCategory;
+use components::image::tag::ImageTag;
 
-pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>)>>> {
+pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc<Vec<Rc<MutableCategory>>>, Rc<MetadataResponse>, Rc<Vec<(ImageTag, TagId)>>)>>> {
     let ret = Rc::new(RefCell::new(None));
 
     state.loader.load(clone!(state, ret => async move {
@@ -21,9 +26,10 @@ pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc
         match (
             api_with_auth::<ImageResponse, EmptyError, ()>(&path, endpoints::image::Get::METHOD, None).await,
             api_with_auth::<CategoryResponse, EmptyError, _>(&endpoints::category::Get::PATH, endpoints::category::Get::METHOD, Some(cat_req)).await,
-            api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await // here
+            api_no_auth::<MetadataResponse, (), ()>(&endpoints::meta::Get::PATH, endpoints::meta::Get::METHOD, None).await,
+            api_with_auth::<ImageTagListResponse, (), ()>(&endpoints::image::tag::List::PATH, endpoints::image::tag::List::METHOD, None).await
         ) {
-            (Ok(img_resp), Ok(cat_resp), Ok(meta_resp)) => {
+            (Ok(img_resp), Ok(cat_resp), Ok(meta_resp), Ok(tag_list_resp)) => {
 
                 let image:Rc<MutableImage> = Rc::new(img_resp.metadata.into());
 
@@ -36,7 +42,18 @@ pub fn load_initial(state: Rc<State>) -> Rc<RefCell<Option<(Rc<MutableImage>, Rc
 
                 let meta:Rc<MetadataResponse> = Rc::new(meta_resp);
 
-                *ret.borrow_mut() = Some((image, categories, meta));
+                let tag_list:Rc<Vec<(ImageTag, TagId)>> = Rc::new(tag_list_resp.image_tags
+                    .into_iter()
+                    .map(|db_tag| {
+                        let tag = ImageTag::iter().find(|tag| tag.as_index() == db_tag.index).expect_ji(&format!("Tag for {} must exist!", db_tag.display_name));
+                        let tag_id = db_tag.id;
+
+                        (tag, tag_id)
+                    })
+                    .collect()
+                );
+
+                *ret.borrow_mut() = Some((image, categories, meta, tag_list));
                 state.loaded.set(true);
             },
             errors => {
@@ -66,13 +83,19 @@ pub fn save(state: Rc<State>, req:ImageUpdateRequest) {
 pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
     state.loader.load(clone!(state => async move {
 
-        let path = endpoints::image::Upload::PATH.replace("{id}",&state.id.0.to_string());
-        match api_upload_file(&path, &file, endpoints::image::Upload::METHOD).await {
+        match upload_image(state.id, MediaLibrary::Global, &file, None).await {
             Ok(_) => {
+                //Trigger a re-render. 
+                //To debug: this shouldn't be necessary, but it temp fixes!
+                //TimeoutFuture::new(5_000).await;
                 image.id.replace_with(|id| id.clone());
             },
-            Err(_) => {
-                log::error!("error uploading!");
+            Err(err) => {
+                if err.is_abort() {
+                    log::info!("aborted!");
+                } else {
+                    log::error!("got error! {:?}", err);
+                }
             }
         }
     }))

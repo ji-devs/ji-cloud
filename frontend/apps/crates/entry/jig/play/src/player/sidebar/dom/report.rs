@@ -1,0 +1,89 @@
+use std::rc::Rc;
+
+use strum::IntoEnumIterator;
+use dominator::{Dom, clone, events, html, with_node};
+use futures_signals::signal::{Signal, SignalExt};
+use web_sys::HtmlSelectElement;
+
+use crate::player::sidebar::state::ReportType;
+
+use super::super::{
+    state::{State, ReportStatus},
+    actions
+};
+
+const STR_REPORT: &'static str = "Report";
+const STR_REPORT_SENT: &'static str = "Your report has been sent.";
+
+pub fn render(state: Rc<State>) -> impl Signal<Item = Vec<Dom>> {
+    state.report_status.signal_cloned().map(clone!(state => move|report_status| {
+        match report_status {
+            ReportStatus::Default => render_default(Rc::clone(&state)),
+            ReportStatus::Active => render_active(Rc::clone(&state)),
+            ReportStatus::Sent => render_sent(Rc::clone(&state)),
+        }
+    }))
+}
+
+fn render_button(state: Rc<State>) -> Dom {
+    html!("button-rect", {
+        .property("slot", "report")
+        .property("color", "blue")
+        .text(STR_REPORT)
+        .event(clone!(state => move |_: events::Click| {
+            state.report_status.set(ReportStatus::Active);
+        }))
+    })
+}
+
+fn render_default(state: Rc<State>) -> Vec<Dom> {
+    vec![render_button(state)]
+}
+
+fn render_sent(state: Rc<State>) -> Vec<Dom> {
+    vec![
+        render_button(state),
+        html!("span", {
+            .property("slot", "report-sent")
+            .text(STR_REPORT_SENT)
+        })
+    ]
+}
+
+fn render_active(state: Rc<State>) -> Vec<Dom> {
+    vec![
+        html!("jig-play-sidebar-report", {
+            .property("slot", "report")
+            .children(&mut [
+                html!("select" => HtmlSelectElement, {
+                    .with_node!(select => {
+                        .property("slot", "select")
+                        .child(html!("option"))
+                        .children(ReportType::iter().map(|option| {
+                            html!("option", {
+                                .property("value", option.to_value_str())
+                                .text(option.to_locale_str())
+                            })
+                        }))
+                        .event(clone!(state => move |_: events::Change| {
+                            let value = select.value();
+                            if value.is_empty() {
+                                state.report_type.set(None);
+                            } else {
+                                let report_type = ReportType::from_value_str(&value);
+                                state.report_type.set(Some(report_type));
+                            }
+                        }))
+                    })
+                }),
+                html!("button", {
+                    .property("slot", "button")
+                    .text(STR_REPORT)
+                    .event(clone!(state => move |_: events::Click| {
+                        actions::send_report(Rc::clone(&state));
+                    }))
+                }),
+            ])
+        })
+    ]
+}

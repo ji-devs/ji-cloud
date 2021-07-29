@@ -4,6 +4,7 @@
 
 # Frontend 
   - [Pipeline](./frontend/pipeline.md)
+  - [Themes](./frontend/themes.md)
   - [Elements and Stories](./frontend/elements-and-stories.md)
     - [Overview](./frontend/elements-and-stories/overview.md)
     - [How to Compose Elements](./frontend/elements-and-stories/element-composition.md)

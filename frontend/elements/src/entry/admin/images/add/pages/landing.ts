@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/titles/ji";
 import "@elements/core/titles/variants/underlined-title";
-import "@elements/core/inputs/search";
+import "@elements/core/inputs/composed/search";
 import { nothing } from "lit-html";
 import "@elements/entry/admin/images/base-page";
 
@@ -60,6 +60,7 @@ export class _ extends LitElement {
                         </label>
                     </div>
                 </div>
+                <slot></slot>
             </image-page>
         `;
     }

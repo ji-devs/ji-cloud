@@ -10,9 +10,10 @@ select id as "id!",
     uploaded_at,
     0::int2 as "library!: MediaLibrary" -- global
 from image_metadata
+left join image_upload on image_id = id
 union all
 select id as "id!",
-    case variant
+    case kind
         -- GifAnimation
         when 0 then 1
         -- SpritesheetAnimation
@@ -22,7 +23,8 @@ select id as "id!",
     updated_at,
     uploaded_at,
     0::int2 as "library!: MediaLibrary" -- global
-from animation
+from animation_metadata
+left join global_animation_upload on animation_id = id
 union all
 select id as "id!",
     -- PngStickerImage
@@ -32,6 +34,7 @@ select id as "id!",
     uploaded_at,
     1::int2 as "library!: MediaLibrary" -- user
 from user_image_library
+left join user_image_upload on image_id = id
 union all
 select id as "id!",
     -- Mp3Audio

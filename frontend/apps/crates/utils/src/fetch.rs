@@ -1,8 +1,7 @@
 /*
-    There are a few top-level rejections (esp auth-related)
-    Everything else is not a rejection, rather it's always resolved (as ResultResponse)
-
-    ResultResponse is itself divided into Ok/Err - but these are *expected* and recoverable errors
+ 
+   the _status functions return the status without doing side effects
+   the non_status versions do side effects based on the status (e.g. redirect to no-auth page)
 */
 
 use wasm_bindgen::prelude::*;
@@ -13,12 +12,19 @@ use shared::api::{
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
 use shared::domain::auth::CSRF_HEADER_NAME;
-use crate::storage::load_csrf_token; 
+use crate::{
+    storage::load_csrf_token,
+    unwrap::UnwrapJiExt,
+    env::env_var
+};
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
-use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_data , fetch_upload_file_with_headers};
-use web_sys::File;
+use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, fetch_upload_file, fetch_upload_file_abortable, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
+use web_sys::{File, Blob};
 use super::settings::SETTINGS;
+
+pub use awsm_web::loaders::helpers::{spawn_handle, FutureHandle, AbortController};
+
 
 #[derive(Debug)]
 pub enum Error {
@@ -32,6 +38,8 @@ pub enum Error {
 pub const POST:&'static str = "POST";
 pub const GET:&'static str = "GET";
 
+pub type IsAborted = bool;
+
 const DESERIALIZE_ERR:&'static str = "couldn't deserialize error in fetch";
 const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
@@ -39,12 +47,10 @@ const DESERIALIZE_OK:&'static str = "couldn't deserialize ok in fetch";
 
 
 fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option<T>) -> (String, Option<T>) {
-
-    let api_url = SETTINGS.get().unwrap().remote_target.api_url();
-
+    let api_url = SETTINGS.get().unwrap_ji().remote_target.api_url();
     if method == Method::Get {
         if let Some(data) = data {
-            let query = serde_qs::to_string(&data).unwrap_throw();
+            let query = serde_qs::to_string(&data).unwrap_ji();
             let url = format!("{}{}?{}", api_url, endpoint, query);
             (url, None)
         } else {
@@ -57,56 +63,169 @@ fn api_get_query<'a, T: Serialize>(endpoint:&'a str, method:Method, data: Option
     }
 }
 
+//TODO - resumeable uploads
+//https://cloud.google.com/storage/docs/performing-resumable-uploads#resume-upload
+pub async fn upload_file_gcs(url:&str, file:&File, abort_controller: Option<&AbortController>) -> Result<(), awsm_web::errors::Error> {
+    let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn upload_file_gcs_status(url:&str, file:&File, abort_controller: Option<&AbortController>) -> (Result<(), awsm_web::errors::Error>, u16) {
+    match fetch_upload_file_abortable(&url, file, Method::Put.as_str(), abort_controller).await {
+        Ok(res) => {
+            let status = res.status();
+
+            if res.ok() {
+                (Ok(()), status)
+            } else {
+                (Err(awsm_web::errors::Error::Empty), status)
+            }
+        }
+        Err(err) => {
+            (Err(err), 0)
+        }
+    }
+
+}
+
+//TODO - deprecate! All uploads should go through GCS signed urls
 pub async fn api_upload_file(endpoint:&str, file:&File, method:Method) -> Result<(), ()> {
+    let (resp, status) = api_upload_file_status(endpoint, file, method).await;
+
+    side_effect_error(status);
+
+    resp
+
+}
+
+pub async fn api_upload_file_status(endpoint:&str, file:&File, method:Method) -> (Result<(), ()>, u16) {
 
     let (url, _) = api_get_query::<()>(endpoint, method, None);
 
-    let csrf = load_csrf_token().unwrap();
+    let csrf = load_csrf_token().unwrap_or_default();
+    let res = fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap_ji();
 
-    let res = fetch_upload_file_with_headers(&url, file, method.as_str(), true,&vec![(CSRF_HEADER_NAME, &csrf)]).await.unwrap();
+    let status = res.status();
+
     if res.ok() {
-        Ok(())
+        (Ok(()), status)
     } else {
-        side_effect_error(res.status());
-        Err(())
+        (Err(()), status)
     }
 }
 
 pub async fn api_no_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
+    let (resp, status) = api_no_auth_status(endpoint, method, data).await;
 
+    side_effect_error(status);
 
-    let (url, data) = api_get_query(endpoint, method, data);
-
-    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap();
-
-    if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
-    } else {
-        side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
-    }
+    resp 
 }
 
-//really just used for login and registration, but w/e
-pub async fn api_no_auth_with_credentials<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+pub async fn api_no_auth_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
 
 
     let (url, data) = api_get_query(endpoint, method, data);
 
-    let res = fetch_with_data(&url, method.as_str(), true, data).await.unwrap();
+    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap_ji();
+
+    let status = res.status();
 
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
     } else {
-        side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+    }
+}
+
+//used in cases where we have the cookie but not the token
+//really just used for login and registration, to get the token via oauth flow
+pub async fn api_no_auth_with_credentials<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize 
+{
+    let (resp, status) = api_no_auth_with_credentials_status(endpoint, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn api_no_auth_with_credentials_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
+    let (url, data) = api_get_query(endpoint, method, data);
+
+    let res = fetch_with_data(&url, method.as_str(), true, data).await.unwrap_ji();
+
+    let status = res.status();
+
+    if res.ok() {
+        (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
+    } else {
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
     }
 }
 
 pub async fn api_with_token<T, E, Payload>(endpoint: &str, token:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let (resp, status) = api_with_token_status(endpoint, token, method, data).await;
+    
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn api_with_token_status<T, E, Payload>(endpoint: &str, token:&str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    api_with_token_status_abortable(endpoint, token, method, None, data).await.unwrap_ji()
+}
+
+pub async fn api_with_token_status_abortable<T, E, Payload>(endpoint: &str, token:&str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<(Result<T, E>, u16), IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let bearer = format!("Bearer {}", token);
+
+    let (url, data) = api_get_query(endpoint, method, data);
+ 
+    match fetch_with_headers_and_data_abortable(&url, method.as_str(), true, abort_controller, &vec![("Authorization", &bearer)], data).await {
+        Ok(res) => {
+            let status = res.status();
+
+            if res.ok() {
+                Ok((Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status))
+            } else {
+                Ok((Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status))
+            }
+        },
+        Err(err) => {
+            if err.is_abort() {
+                Err(true)
+            } else {
+                panic!("request failed but was not aborted");
+            }
+        }
+    }
+}
+//TODO - get rid of this, use specialization
+pub async fn api_with_token_empty<E, Payload>(endpoint: &str, token: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let (resp, status) = api_with_token_empty_status(endpoint, token, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+pub async fn api_with_token_empty_status<E, Payload>(endpoint: &str, token: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
+where E: DeserializeOwned + Serialize, Payload: Serialize
 {
     let bearer = format!("Bearer {}", token);
 
@@ -114,223 +233,181 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
  
     let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &bearer)], data)
         .await
-        .unwrap();
+        .unwrap_ji();
+
+    let status = res.status();
+
     if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
+        (Ok(()), status)
     } else {
-        side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
     }
 }
 
+pub async fn api_with_auth_abortable<T, E, Payload>(endpoint: &str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<Result<T, E>, IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    api_with_auth_status_abortable(endpoint, method, abort_controller, data).await
+        .map(|res| {
+            let (resp, status) = res;
+
+            side_effect_error(status);
+
+            resp
+        })
+}
 pub async fn api_with_auth<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<T, E> 
 where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().expect_throw("no CSRF / not logged in!");
+    let (resp, status) = api_with_auth_status(endpoint, method, data).await;
+    
+    side_effect_error(status);
 
-    let (url, data) = api_get_query(endpoint, method, data);
-
-    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
-        .await
-        .unwrap_throw();
-
-
-    if res.ok() {
-        Ok(res.json_from_str().await.expect_throw(DESERIALIZE_OK))
-    } else {
-        side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
-    }
+    resp
 }
 
+pub async fn api_with_auth_status<T, E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    api_with_auth_status_abortable(endpoint, method, None, data).await.unwrap_ji()
+}
+
+pub async fn api_with_auth_status_abortable<T, E, Payload>(endpoint: &str, method:Method, abort_controller: Option<&AbortController>, data:Option<Payload>) -> Result<(Result<T, E>, u16), IsAborted>
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+
+    if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
+        api_with_token_status_abortable(endpoint, &token, method, abort_controller, data).await
+    } else {
+        let csrf = load_csrf_token().unwrap_or_default();
+
+        let (url, data) = api_get_query(endpoint, method, data);
+
+        match fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data).await {
+            Ok(res) => {
+                let status = res.status();
+
+                if res.ok() {
+                    Ok((Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status))
+                } else {
+                    Ok((Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status))
+                }
+            },
+            Err(err) => {
+                if err.is_abort() {
+                    Err(true)
+                } else {
+                    panic!("request failed but was not aborted");
+                }
+            }
+        }
+    }
+}
 //TODO - get rid of this, use specialization
 pub async fn api_with_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
 where E: DeserializeOwned + Serialize, Payload: Serialize
 {
-    let csrf = load_csrf_token().unwrap();
-    
+    let (resp, status) = api_with_auth_empty_status(endpoint, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+pub async fn api_with_auth_empty_status<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<(), E> , u16)
+where E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    if let Ok(token) = env_var("LOCAL_API_AUTH_OVERRIDE") {
+        api_with_token_empty_status(endpoint, &token, method, data).await
+    } else {
+        let csrf = load_csrf_token().unwrap_or_default();
+        
+        let (url, data) = api_get_query(endpoint, method, data);
+
+        let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
+            .await
+            .unwrap_ji();
+
+
+        let status = res.status();
+
+        if res.ok() {
+            (Ok(()), status)
+        } else {
+            (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+        }
+    }
+}
+
+//TODO - get rid of this, use specialization
+pub async fn api_no_auth_empty<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> Result<(), E> 
+where E: DeserializeOwned + Serialize, Payload: Serialize {
+    let (resp, status) = api_no_auth_empty_status(endpoint, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+//TODO - get rid of this, use specialization
+pub async fn api_no_auth_empty_status<E, Payload>(endpoint: &str, method:Method, data:Option<Payload>) -> (Result<(), E>, u16)
+where E: DeserializeOwned + Serialize, Payload: Serialize {
+
+
     let (url, data) = api_get_query(endpoint, method, data);
 
-    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![(CSRF_HEADER_NAME, &csrf)], data)
-        .await
-        .unwrap_throw();
+    let res = fetch_with_data(&url, method.as_str(), false, data).await.unwrap_ji();
+
+    let status = res.status();
+
     if res.ok() {
-        Ok(())
+        (Ok(()), status)
     } else {
-        side_effect_error(res.status());
-        Err(res.json_from_str().await.expect_throw(DESERIALIZE_ERR))
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
+    }
+}
+
+
+//really just used with login - see https://datatracker.ietf.org/doc/html/rfc7617#section-2
+pub async fn api_with_basic_token<T, E, Payload>(endpoint: &str, user_id:&str, password:&str, method:Method, data:Option<Payload>) -> Result<T, E> 
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+    let (resp, status) = api_with_basic_token_status(endpoint, user_id, password, method, data).await;
+
+    side_effect_error(status);
+
+    resp
+}
+
+pub async fn api_with_basic_token_status<T, E, Payload>(endpoint: &str, user_id:&str, password:&str, method:Method, data:Option<Payload>) -> (Result<T, E>, u16)
+where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize
+{
+
+    let credentials = format!("{}:{}", user_id, password); 
+    let token = base64::encode(credentials.as_bytes());
+    let basic = format!("Basic {}", token);
+
+    let (url, data) = api_get_query(endpoint, method, data);
+ 
+    let res = fetch_with_headers_and_data(&url, method.as_str(), true, &vec![("Authorization", &basic)], data)
+        .await
+        .unwrap_ji();
+
+    let status = res.status();
+
+    if res.ok() {
+        (Ok(res.json_from_str().await.expect_ji(DESERIALIZE_OK)), status)
+    } else {
+        (Err(res.json_from_str().await.expect_ji(DESERIALIZE_ERR)), status)
     }
 }
 
 fn side_effect_error(status_code:u16) -> bool {
     match status_code {
         403 | 401 => {
-            web_sys::window().unwrap_throw().alert_with_message(crate::strings::STR_AUTH_ALERT);
+            web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
             true
         },
         _ => false
     }
 } 
 
-/**** DEPRECATED BELOW HERE - JUST FOR REFERENCE ***/
-/*
-// unwrap is the usual case, where anything other than a ResultResponse is a panic / dev error
-// Therefore we can treat the ResultResponse itself as a Result
-pub async fn api_with_auth_unwrap<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize>(url: &str, data:Option<Payload>) -> Result<T, E> {
-    //inability to get the token from LocalStorage is almost definitely a programmer error, not a user error
-    //the reason is that requests to these endpoints only happen after the user is signed in
-    //if the session is _invalid_ then it will still be unwrapped though... 
-    //that shouldn't happen unless the user has been inactive long enough for the cookie to
-    //expire though so a hard failure is fine (they'll refresh their screen)
-    //
-
-    let csrf = load_csrf_token().unwrap_throw();
-    
-    let req = get_request_with_headers(&url, &vec![(CSRF_HEADER_NAME, &csrf)], data).map_err(|err| Error::JsValue(err)).unwrap_throw();
-
-    api_fetch_json_req_unwrap(req).await
-}
-// api calls with token (in header)
-
-pub async fn api_with_token_unwrap<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize>(url: &str, token:&str, data:Option<Payload>) -> Result<T, E> {
-
-    let bearer = format!("Bearer {}", token);
-    
-    let req = get_request_with_headers(&url, &vec![("Authorization", &bearer)], data).map_err(|err| Error::JsValue(err)).unwrap_throw();
-
-    api_fetch_json_req_unwrap(req).await
-}
-
-
-pub async fn api_fetch_json_unwrap<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize>(url: &str) -> Result<T, E> {
-    let req = web_sys::Request::new_with_str(url).unwrap_throw();
-    let res = api_fetch_json_req_unwrap(req).await?;
-    Ok(res)
-}
-
-pub async fn api_fetch_json_req_unwrap<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize>(req: web_sys::Request) -> Result<T, E> {
-    let resp: web_sys::Response = api_fetch_request(&req).await.unwrap_throw();
-
-    let promise = resp.json().map_err(|err| Error::JsValue(err)).unwrap_throw();
-
-    let data = JsFuture::from(promise).await.map_err(|err| Error::JsValue(err)).unwrap_throw();
-
-    let resp:ResultResponse<T,E> = serde_wasm_bindgen::from_value(data).map_err(|err| Error::JsValue(err.into())).unwrap_throw();
-    resp.into()
-}
-
-
-// The absolute case, where we want to deal with non-ResultResponse errors 
-// api calls with auth (csrf in header, jwt in cookie)
-pub async fn api_with_auth<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize>(url: &str, data:Option<Payload>) -> Result<ResultResponse<T, E>, Error> {
-    let csrf = load_csrf_token().unwrap_throw();
-    
-    let req = get_request_with_headers(&url, &vec![(CSRF_HEADER_NAME, &csrf)], data).map_err(|err| Error::JsValue(err))?;
-    api_fetch_json_req(req).await
-}
-
-pub async fn api_with_token<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload: Serialize>(url: &str, token:&str, data:Option<Payload>) -> Result<ResultResponse<T, E>, Error> {
-
-    let bearer = format!("Bearer {}", token);
-    
-    let req = get_request_with_headers(&url, &vec![("Authorization", &bearer)], data).map_err(|err| Error::JsValue(err))?;
-
-    api_fetch_json_req(req).await
-}
-
-
-// plain requests
-pub async fn api_fetch_json<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize>(url: &str) -> Result<ResultResponse<T, E>, Error> {
-    let req = web_sys::Request::new_with_str(url).unwrap_throw();
-    let res = api_fetch_json_req(req).await?;
-    Ok(res)
-}
-
-pub async fn api_fetch_json_req<T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize>(req: web_sys::Request) -> Result<ResultResponse<T, E>, Error> {
-    let resp: web_sys::Response = api_fetch_request(&req).await?;
-
-    let promise = resp.json().map_err(|err| Error::JsValue(err))?;
-
-    let data = JsFuture::from(promise).await.map_err(|err| Error::JsValue(err))?;
-
-    serde_wasm_bindgen::from_value(data).map_err(|err| Error::JsValue(err.into()))
-}
-
-pub async fn api_fetch_request(req: &web_sys::Request) -> Result<web_sys::Response, Error> {
-    let promise: Promise = web_sys::window().unwrap_throw().fetch_with_request(&req);
-
-    let resp_value = JsFuture::from(promise).await.unwrap_throw();
-    let resp: web_sys::Response = resp_value.dyn_into().unwrap_throw();
-
-    let status = resp.status();
-
-    if status != 200 {
-        if status == 401 {
-            //Force redirect to /unauthorized page
-            web_sys::window()
-                .unwrap_throw()
-                .location()
-                .set_href("/user/unauthorized")
-                .unwrap_throw();
-
-            //The client won't see this due to redirect
-            Err(Error::AuthForbidden)
-        } else {
-            if let Ok(promise) = resp.json() {
-                if let Ok(bad_status) = JsFuture::from(promise).await {
-                    if let Ok(status) = serde_wasm_bindgen::from_value::<HttpStatus>(bad_status) {
-                        if status.message == "AUTH_COMPLETE_REGISTRATION" {
-                            //Force redirect to /complete-registration page
-                            web_sys::window()
-                                .unwrap_throw()
-                                .location()
-                                .set_href("/user/complete-registration")
-                                .unwrap_throw();
-                            
-                            //The client won't see this due to redirect
-                            return Err(Error::AuthCompleteRegistration)
-                        }
-                    }
-                }
-            }
-            Err(Error::HttpStatusCodeOnly(status))
-        }
-
-    } else {
-        Ok(resp)
-    }
-}
-
-pub fn get_request_with_headers<A: AsRef<str>, B: AsRef<str>>(url: &str, pairs: &[(A, B)], data:Option<impl Serialize>) -> Result<web_sys::Request, JsValue> {
-    
-    let mut req_init = web_sys::RequestInit::new();
-    req_init.method("POST");
-    req_init.credentials(web_sys::RequestCredentials::Include);
-
-    let req = match data {
-        None => {
-            let req = web_sys::Request::new_with_str_and_init(url, &req_init)?;
-
-            req
-        },
-        Some(data) => {
-            let json_str = serde_json::to_string(&data).map_err(|err| JsValue::from_str(&err.to_string()))?;
-            //req_init.mode(web_sys::RequestMode::Cors);
-            req_init.body(Some(&JsValue::from_str(&json_str)));
-            let req = web_sys::Request::new_with_str_and_init(url, &req_init)?;
-
-            req.headers().set("Content-Type", "application/json")?;
-
-            req
-        }
-    };
-
-    let headers = req.headers();
-
-    for (name, value) in pairs.iter() {
-        headers.set(name.as_ref(), value.as_ref())?;
-    }
-    Ok(req)
-}
-
-*/

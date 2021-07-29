@@ -26,8 +26,8 @@ export const PageHeader = (props?:Partial<Args>) => {
             <page-header-link slot="links" kind="about"></page-header-link>
             <button-rect slot="donate" color="green" size="small" bold>Donate</button-rect>
 
-            <button-text slot="user">Sign up</button-text>
-            <button-text slot="user">Login</button-text>
+            <button-rect kind="text" slot="user">Sign up</button-rect>
+            <button-rect kind="text" slot="user">Login</button-rect>
         </page-header>
     `;
 }

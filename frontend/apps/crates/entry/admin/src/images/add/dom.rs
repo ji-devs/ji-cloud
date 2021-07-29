@@ -26,6 +26,7 @@ impl ImageAddPage {
                 let query = ImageSearchQuery {
                     q,
                     page: None, 
+                    tags: Vec::new(),
                     styles: Vec::new(),
                     age_ranges: Vec::new(),
                     affiliations: Vec::new(),

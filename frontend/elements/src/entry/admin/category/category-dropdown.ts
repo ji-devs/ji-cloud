@@ -3,7 +3,7 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
 import "@elements/core/titles/ji";
 import "@elements/core/titles/variants/underlined-title";
-import "@elements/core/inputs/search";
+import "@elements/core/inputs/composed/search";
 @customElement('category-dropdown')
 export class _ extends LitElement {
     static get styles() {
