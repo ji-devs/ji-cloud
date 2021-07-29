@@ -728,8 +728,8 @@ impl Into<actix_web::Error> for JigCode {
             .into(),
 
             Self::AllCodesUsed => BasicError::with_message(
-                http::StatusCode::UNPROCESSABLE_ENTITY,
-                "Maximum number of possible codes exist!".to_owned(),
+                http::StatusCode::SERVICE_UNAVAILABLE,
+                "Maximum number of possible codes taken?".to_owned(),
             )
             .into(),
 

@@ -8,10 +8,10 @@ use crate::{
 };
 
 mod additional_resource;
-mod code;
 mod cover;
 mod draft;
 mod module;
+mod player;
 
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {

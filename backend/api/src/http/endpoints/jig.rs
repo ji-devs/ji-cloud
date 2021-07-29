@@ -24,7 +24,7 @@ use crate::{
     service::ServiceData,
 };
 
-mod code;
+mod player;
 
 /// Create a jig.
 #[api_v2_operation]
@@ -287,38 +287,38 @@ async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res
 }
 
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
-    cfg.route(
-        jig::code::GetJig::PATH,
-        jig::code::GetJig::METHOD
-            .route()
-            .to(code::get_jig_from_code),
-    )
-    .route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
-    .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
-    .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
-    .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
-    .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
-    .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
-    .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
-    .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
-    .route(
-        jig::code::Create::PATH,
-        jig::code::Create::METHOD.route().to(code::create),
-    )
-    .route(
-        jig::code::Get::PATH,
-        jig::code::Get::METHOD.route().to(code::get),
-    )
-    .route(
-        jig::draft::Create::PATH,
-        jig::draft::Create::METHOD.route().to(create_draft),
-    )
-    .route(
-        jig::draft::Get::PATH,
-        jig::draft::Get::METHOD.route().to(get_draft),
-    )
-    .route(
-        jig::draft::Publish::PATH,
-        jig::draft::Publish::METHOD.route().to(publish_draft),
-    );
+    cfg.route(jig::Browse::PATH, jig::Browse::METHOD.route().to(browse))
+        .route(jig::Count::PATH, jig::Count::METHOD.route().to(count))
+        .route(
+            jig::player::Get::PATH,
+            jig::player::Get::METHOD.route().to(player::get),
+        )
+        .route(jig::Get::PATH, jig::Get::METHOD.route().to(get))
+        .route(jig::Clone::PATH, jig::Clone::METHOD.route().to(clone))
+        .route(jig::Create::PATH, jig::Create::METHOD.route().to(create))
+        .route(jig::Search::PATH, jig::Search::METHOD.route().to(search))
+        .route(jig::Update::PATH, jig::Update::METHOD.route().to(update))
+        .route(jig::Delete::PATH, jig::Delete::METHOD.route().to(delete))
+        .route(
+            jig::player::Create::PATH,
+            jig::player::Create::METHOD.route().to(player::create),
+        )
+        .route(
+            jig::player::GetPlayerSessionCode::PATH,
+            jig::player::GetPlayerSessionCode::METHOD
+                .route()
+                .to(player::get_code),
+        )
+        .route(
+            jig::draft::Create::PATH,
+            jig::draft::Create::METHOD.route().to(create_draft),
+        )
+        .route(
+            jig::draft::Get::PATH,
+            jig::draft::Get::METHOD.route().to(get_draft),
+        )
+        .route(
+            jig::draft::Publish::PATH,
+            jig::draft::Publish::METHOD.route().to(publish_draft),
+        );
 }
