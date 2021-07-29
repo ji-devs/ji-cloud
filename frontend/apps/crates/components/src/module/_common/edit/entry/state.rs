@@ -1,5 +1,4 @@
 #![feature(type_alias_impl_trait)]
-#![feature(min_type_alias_impl_trait)]
 use futures_signals::{
     map_ref,
     signal::{self, Mutable, ReadOnlyMutable,  SignalExt, Signal},

@@ -255,7 +255,7 @@ pub trait DomRenderable {
 
 pub trait BaseExt<Step: StepExt> {
     // using these in practice will require
-    // #![feature(min_type_alias_impl_trait)]
+    // #![feature(type_alias_impl_trait)]
     // and the implementor will have
     // type FooSignal = impl Signal<Item = Foo>
     type NextStepAllowedSignal: Signal<Item = bool>;
