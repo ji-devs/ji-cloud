@@ -65,5 +65,8 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigMessage) {
         ModuleToJigMessage::StartTimer(time) => {
             start_timer(Rc::clone(&state), time);
         },
+        //FIXME: Remove / upgrade, this is just a temp placeholder
+        ModuleToJigMessage::Started => {
+        },
     };
 }
