@@ -1,0 +1,14 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+
+---
+{
+  "jig_id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
+  "settings": {
+    "direction": "LeftToRight",
+    "display_score": true,
+    "track_assessments": true,
+    "drag_assist": true
+  }
+}

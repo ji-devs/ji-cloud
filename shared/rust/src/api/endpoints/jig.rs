@@ -22,7 +22,7 @@ pub mod additional_resource;
 pub mod draft;
 
 /// Endpoints for jig codes.
-pub mod code;
+pub mod player;
 
 /// Get a JIG by ID.
 ///

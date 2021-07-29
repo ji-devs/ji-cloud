@@ -19,7 +19,7 @@ use uuid::Uuid;
 
 use crate::error;
 
-pub(crate) mod code;
+pub(crate) mod player;
 
 pub async fn create(
     pool: &PgPool,
