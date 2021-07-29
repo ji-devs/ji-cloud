@@ -2,15 +2,13 @@ use crate::error;
 use chrono_tz::Tz;
 use shared::domain::{
     meta::{AffiliationId, AgeRangeId, SubjectId},
-    user::{OtherUser, PutProfileRequest, UserProfile, UserScope},
+    user::{OtherUser, PatchProfileRequest, PutProfileRequest, UserProfile, UserScope},
 };
-use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
+use sqlx::{PgConnection, PgPool};
 use std::{convert::TryFrom, str::FromStr};
 use uuid::Uuid;
 
 use super::{nul_if_empty, recycle_metadata};
-use crate::error::Username;
-use shared::domain::user::PatchProfileRequest;
 
 pub async fn lookup(
     db: &sqlx::PgPool,

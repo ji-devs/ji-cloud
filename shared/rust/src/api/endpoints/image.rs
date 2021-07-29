@@ -8,7 +8,6 @@ use crate::{
     },
     error::{EmptyError, MetadataNotFound},
 };
-use http::StatusCode;
 
 pub mod recent;
 pub mod tag;
@@ -94,7 +93,17 @@ impl ApiEndpoint for Create {
 
 /// Upload an image.
 ///
-/// _NOTE_: can be used to update the raw data associated with the image.
+/// # Flow:
+/// 1. User requests an upload session URI directly to Google Cloud Storage
+///     a. User uploads to processing bucket
+/// 2. Firestore is notified of `processing = true, ready = false` status at document `uploads/media/global/{id}`
+/// 3. Image is processed and uploaded to the final bucket
+/// 4. Firestore is notified of `processing = true, ready = true` status at document `uploads/media/global/{id}`
+///
+/// # Notes:
+/// * Can be used to update the raw data associated with the image.
+/// * If the client wants to re-upload an image after it has been successfully processed, it must repeat
+/// the entire flow instead of uploading to the same session URI.
 ///
 /// # Errors:
 ///

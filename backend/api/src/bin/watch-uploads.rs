@@ -1,12 +1,5 @@
 //! Media watch and transform service binary
 //!
-//! FIXME(BLOCKED): Right now is triggered by *ALL* upload events to Cloud Storage, including
-//! processed media uploads to the final media bucket! Filtered in the application whether to
-//! handle or not, which means 50%+ of trigger events/requests to this server are useless.
-//!
-//! Other events triggered include:
-//! * cloud container deployments (rare on release, but can be frequent on sandbox)
-//!
 //! https://github.com/meteatamel/cloudrun-tutorial/issues/35
 //!
 //!
@@ -83,7 +76,7 @@ async fn main() -> anyhow::Result<()> {
             .transpose()?;
 
         let notifications = settings
-            .fcm_settings()
+            .firebase_settings()
             .await?
             .map(notifications::Client::new)
             .transpose()?;
@@ -191,7 +184,7 @@ fn build_media_watch(
 async fn process_uploaded_media_trigger(
     db: Data<PgPool>,
     s3: ServiceData<s3::Client>,
-    fcm: ServiceData<notifications::Client>,
+    notifications: ServiceData<notifications::Client>,
     event_arc: ServiceData<event_arc::Client>,
     event: Event,
     _query: Option<Query<audit_log::Query>>,
@@ -228,30 +221,43 @@ async fn process_uploaded_media_trigger(
     // TODO: use gcs instead of S3
     let res = match event_resource.file_kind {
         FileKind::ImagePng(PngImageFile::Original) => match event_resource.library {
-            MediaLibrary::Global => uploads::process_image(&db, &s3, event_resource.id)
-                .await
-                .map_err(|_| Error::NotProcessed)?,
-            MediaLibrary::User => uploads::process_user_image(&db, &s3, event_resource.id)
-                .await
-                .map_err(|_| Error::NotProcessed)?,
+            MediaLibrary::Global => {
+                log::info!("beginning processing...");
+                notifications
+                    .signal_status_processing(MediaLibrary::Global, &event_resource.id)
+                    .await?;
+
+                uploads::process_image(&db, &s3, event_resource.id)
+                    .await
+                    .map_err(|_| Error::NotProcessed)?
+            }
+            MediaLibrary::User => {
+                notifications
+                    .signal_status_processing(MediaLibrary::User, &event_resource.id)
+                    .await?;
+
+                uploads::process_user_image(&db, &s3, event_resource.id)
+                    .await
+                    .map_err(|_| Error::NotProcessed)?
+            }
             _ => return Err(Error::InvalidEventResource),
         },
-        FileKind::AnimationGif => uploads::process_animation(&db, &s3, event_resource.id)
-            .await
-            .map_err(|_| Error::NotProcessed)?,
+        FileKind::AnimationGif => {
+            notifications
+                .signal_status_processing(MediaLibrary::Global, &event_resource.id)
+                .await?;
+
+            uploads::process_animation(&db, &s3, event_resource.id)
+                .await
+                .map_err(|_| Error::NotProcessed)?
+        }
         _ => return Err(Error::InvalidEventResource),
     };
 
     if res == true {
         log::info!("Finalizing upload...");
 
-        uploads::finalize_upload(
-            &fcm,
-            event_resource.library,
-            event_resource.id,
-            event_resource.file_kind,
-        )
-        .await?;
+        uploads::finalize_upload(&notifications, event_resource.library, event_resource.id).await?;
         Ok(Json(()))
     } else {
         Err(Error::NotProcessed)

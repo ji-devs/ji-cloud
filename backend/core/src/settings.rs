@@ -236,6 +236,7 @@ pub struct EmailClientSettings {
 // TODO: unify google services clients' auth tokens and project_id requirements
 
 /// Settings for the Google Cloud Storage client
+#[derive(Clone, Debug)]
 pub struct GoogleCloudStorageSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
     pub oauth2_token: String,
@@ -246,7 +247,7 @@ pub struct GoogleCloudStorageSettings {
 }
 
 /// Settings for handling Google EventArc triggers
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct GoogleCloudEventArcSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
     pub oauth2_token: String,
@@ -260,8 +261,9 @@ pub struct GoogleCloudEventArcSettings {
     pub media_processed_topic: String,
 }
 
-/// Firebase Cloud Message client
-pub struct FirebaseCloudMessageSettings {
+/// Firebase client, for Firestore
+#[derive(Clone, Debug)]
+pub struct FirebaseSettings {
     /// Google cloud oauth2 token to authenticate with Google Cloud API.
     pub oauth2_token: String,
     /// ID of the GCP project
@@ -622,14 +624,14 @@ impl SettingsManager {
         }
     }
 
-    /// Load the settings for firebase cloud messages
-    pub async fn fcm_settings(&self) -> anyhow::Result<Option<FirebaseCloudMessageSettings>> {
+    /// Load the settings for firebase
+    pub async fn firebase_settings(&self) -> anyhow::Result<Option<FirebaseSettings>> {
         let oauth2_token = self.token.clone();
 
         let project_id = Some(self.project_id.clone());
 
         match (oauth2_token, project_id) {
-            (Some(oauth2_token), Some(project_id)) => Ok(Some(FirebaseCloudMessageSettings {
+            (Some(oauth2_token), Some(project_id)) => Ok(Some(FirebaseSettings {
                 oauth2_token,
                 project_id,
             })),
