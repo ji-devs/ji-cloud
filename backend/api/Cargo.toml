@@ -18,7 +18,7 @@ algolia = { git = "https://gitlab.com/izik1/algolia-rs.git", rev = "f5ab9b32121f
 anyhow = "1.0.32"
 chrono = "0.4.13"
 chrono-tz = "0.5.3"
-config = {path = "../../config/rust"}
+#config = {path = "../../config/rust"}
 cloudevents-sdk = { version = "^0.4", features = ["actix"] }
 dotenv = "0.15"
 env_logger = "0.8.2"
@@ -69,7 +69,6 @@ features = [ "runtime-tokio-native-tls", "macros", "postgres", "uuid", "json", "
 path = "../core"
 features = ["db"]
 
-
 [features]
 default = ["listenfd", "core/listenfd"]
 
@@ -89,9 +88,3 @@ opt-level = 3
 once_cell = "1.7.2"
 insta = { version = "1.7.0", features = ["redactions"] }
 yup-oauth2 = "4.1.2"
-
-# for `ext::rusoto_s3` extension. remove once moved to s3 aws-sdk
-[dependencies.hex]
-version = "0.4"
-[dependencies.hmac]
-version = "0.8"
