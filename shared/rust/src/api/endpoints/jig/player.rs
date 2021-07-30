@@ -4,7 +4,6 @@ use crate::{
     domain::jig::player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionCreateRequest},
     error::EmptyError,
 };
-use http::StatusCode;
 
 /// Create a player session from a jig. Requestor needs permissions over the jig.
 ///
