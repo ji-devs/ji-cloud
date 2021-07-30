@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Data, Json, Path, PayloadConfig, ServiceConfig},
+    web::{self, Data, Json, Path, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{
@@ -170,10 +170,9 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         animation::Create::PATH,
         animation::Create::METHOD.route().to(create),
     )
-    .service(
-        web::resource(animation::Upload::PATH)
-            .app_data(PayloadConfig::default().limit(config::ANIMATION_BODY_SIZE_LIMIT))
-            .route(animation::Upload::METHOD.route().to(upload)),
+    .route(
+        animation::Upload::PATH,
+        animation::Upload::METHOD.route().to(upload),
     )
     .route(
         animation::Get::PATH,
