@@ -20,12 +20,12 @@ use crate::{
 ///
 /// The code is computed with the following procedure:
 ///
-/// 0. Converting the jig's UUID into a slice of 16 bytes == 8 words,
-/// 1. XOR all eight words together into an accumulator `acc`,
+/// 0. Converting the jig's UUID into a slice of 16 bytes, or 8 words.
+/// 1. XOR all eight words together into an accumulator `acc`.
 /// 2. Clamping to within the digit range requirement. For n = 4 digits with a range of `[0000, 9999]`,
 /// this is done as `code = abs(acc % 10000)`.
 /// 3. If the code is unique, stop.
-///     * Else there already exists a different player session with the same code. Rehash as `code_(i+1) = (code_i + 2*k) % 10000` where `k` is the # of attempts.
+///     * Else there already exists a different player session with the same code. Rehash as `code_(i+1) = clamp(code_i + 2.pow(k))` where `k` is the # of attempts.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = JigPlayerSessionCreateRequest;
