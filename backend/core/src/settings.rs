@@ -1,12 +1,19 @@
 #[cfg(feature = "db")]
 use sqlx::postgres::PgConnectOptions;
 
+#[allow(unused_imports)]
+use crate::config::{
+    DB_INSTANCE_RELEASE, DB_INSTANCE_SANDBOX, EVENTARC_AUDITLOG_SERVICE_NAME, REMOTE_DB_NAME,
+    REMOTE_DB_USER, SQL_PROXY_PORT,
+};
+
 use crate::{
     env::{keys, req_env},
     google::{get_access_token_and_project_id, get_optional_secret},
 };
+
 use anyhow::Context;
-use config::RemoteTarget;
+use shared::config::RemoteTarget;
 use std::str::FromStr;
 use std::{
     convert::TryInto,
@@ -449,17 +456,17 @@ impl SettingsManager {
         let db_pass = self.get_secret(keys::db::PASSWORD).await?;
 
         let opts = PgConnectOptions::new()
-            .username(config::REMOTE_DB_USER)
+            .username(REMOTE_DB_USER)
             .password(&db_pass)
-            .database(config::REMOTE_DB_NAME);
+            .database(REMOTE_DB_NAME);
 
         if sql_proxy {
-            Ok(opts.host("localhost").port(config::SQL_PROXY_PORT))
+            Ok(opts.host("localhost").port(SQL_PROXY_PORT))
         } else {
             let instance_connection = std::env::var(keys::db::INSTANCE_CONNECTION_NAME).unwrap_or(
                 match self.remote_target {
-                    RemoteTarget::Sandbox => config::DB_INSTANCE_SANDBOX.to_string(),
-                    RemoteTarget::Release => config::DB_INSTANCE_RELEASE.to_string(),
+                    RemoteTarget::Sandbox => DB_INSTANCE_SANDBOX.to_string(),
+                    RemoteTarget::Release => DB_INSTANCE_RELEASE.to_string(),
                     _ => unreachable!(),
                 },
             );
@@ -581,7 +588,7 @@ impl SettingsManager {
 
         let project_id = Some(self.project_id.clone());
 
-        let storage_service_name = Some(config::EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
+        let storage_service_name = Some(EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
 
         let media_uploaded_topic = match self.remote_target.google_eventarc_media_uploaded_topic() {
             Some(endpoint) => Some(endpoint.to_string()),

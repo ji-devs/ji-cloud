@@ -4,15 +4,18 @@ use actix_web::{
     HttpRequest, HttpResponse,
 };
 use chrono::{Duration, Utc};
-use config::RemoteTarget;
-use core::settings::{GoogleOAuth, RuntimeSettings};
 use paperclip::actix::api_v2_operation;
 use reqwest::Url;
-use shared::domain::session::{
-    CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse, GetOAuthUrlServiceKind,
-    NewSessionResponse, OAuthUrlKind,
-};
 use sqlx::{postgres::PgDatabaseError, PgPool};
+
+use core::settings::{GoogleOAuth, RuntimeSettings};
+use shared::{
+    config::RemoteTarget,
+    domain::session::{
+        CreateSessionOAuthRequest, CreateSessionResponse, GetOAuthUrlResponse,
+        GetOAuthUrlServiceKind, NewSessionResponse, OAuthUrlKind,
+    },
+};
 
 use crate::{
     db, error,
