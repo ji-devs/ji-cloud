@@ -2,6 +2,7 @@
 
 pub mod additional_resource;
 pub mod module;
+pub mod player;
 
 use std::{fmt, str::FromStr};
 

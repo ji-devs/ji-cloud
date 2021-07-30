@@ -267,6 +267,26 @@
       "nullable": []
     }
   },
+  "0acd9b24dcc288f70653f737d3e28f3b025aba62d42e915b74876248ad2f3791": {
+    "query": "select index as \"index!: i16\" from jig_player_session where jig_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "index!: i16",
+          "type_info": "Int2"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "0d33ddd6d34bf4755b8ff298de37d678fc3d79222c8d193dc06d1e8fe25b2354": {
     "query": "insert into user_email (user_id, email) values ($1, $2::text)",
     "describe": {
@@ -3095,6 +3115,23 @@
       ]
     }
   },
+  "94e4420ec0b6dd0d9c27c6070baeda5e14f7c4fb45aa6c9a343b1448d84f9f8b": {
+    "query": "\ninsert into jig_player_session (jig_id, index, direction, display_score, track_assessments, drag_assist)\nvalues ($1, $2, $3, $4, $5, $6)\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2",
+          "Int2",
+          "Bool",
+          "Bool",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "95cc52570b87e1413c93a9588cee5f081824028c269803aba12a578cada7395b": {
     "query": "select user_id from user_auth_basic where user_id <> $1 and email = $2 for update",
     "describe": {
@@ -3369,6 +3406,70 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "ab4b6465897568f3fd6c16ac0bc72c4fa307ea7dd8894c09f6870bfec6562bf9": {
+    "query": "\nselect jig_id as \"id: JigId\",\n       direction as \"direction: TextDirection\",\n       display_score, \n       track_assessments, \n       drag_assist\nfrom jig_player_session \nwhere index = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: JigId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "direction: TextDirection",
+          "type_info": "Int2"
+        },
+        {
+          "ordinal": 2,
+          "name": "display_score",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 3,
+          "name": "track_assessments",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "drag_assist",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "ae89aec9ddc826f2803836a31e377f0ac8c6ca56c9ae51e18a16934595b054a4": {
+    "query": "select exists(select 1 from jig_player_session where jig_id=$1) as \"exists!\"",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "exists!",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
     }
   },
   "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8": {
