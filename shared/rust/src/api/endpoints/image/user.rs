@@ -46,15 +46,25 @@ impl ApiEndpoint for Create {
 }
 
 /// Upload an image to the user image library.
-/// Note: can be used to update the raw data associated with the image.
+/// # Flow:
 ///
-/// Errors:
+/// 1. User requests an upload session URI directly to Google Cloud Storage
+///     a. User uploads to processing bucket
+/// 2. Firestore is notified of `processing = true, ready = false` status at document `uploads/media/user/{id}`
+/// 3. Animation is processed and uploaded to the final bucket
+/// 4. Firestore is notified of `processing = true, ready = true` status at document `uploads/media/user/{id}`
 ///
-/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// # Notes:
 ///
-/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * Can be used to update the raw data associated with the image.
+/// * If the client wants to re-upload an image after it has been successfully processed, it must repeat
+/// the entire flow instead of uploading to the same session URI.
 ///
-/// * [`Unimplemented`](http::StatusCode::UNIMPLEMENTED) when the s3/gcs service is disabled.
+/// # Errors:
+///
+/// * [`401 - Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`403 - Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`501 - NotImplemented`](http::StatusCode::NOT_IMPLEMENTED) when the s3/gcs service is disabled.
 pub struct Upload;
 impl ApiEndpoint for Upload {
     // raw bytes

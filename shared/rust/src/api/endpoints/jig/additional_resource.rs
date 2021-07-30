@@ -40,7 +40,7 @@ impl ApiEndpoint for Get {
 ///
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the request is missing/invalid.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
 pub struct Create;
 impl ApiEndpoint for Create {
     type Req = AdditionalResourceCreateRequest;
@@ -61,7 +61,7 @@ impl ApiEndpoint for Create {
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
-/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Update;
 impl ApiEndpoint for Update {
     type Req = AdditionalResourceUpdateRequest;
@@ -82,7 +82,7 @@ impl ApiEndpoint for Update {
 /// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 /// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
 /// * [`NotFound`](http::StatusCode::NOT_FOUND) if the additional resource or parent jig does not exist.
-/// * [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
 pub struct Delete;
 impl ApiEndpoint for Delete {
     type Req = ();

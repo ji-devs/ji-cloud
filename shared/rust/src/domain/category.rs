@@ -142,7 +142,8 @@ pub struct NewCategoryResponse {
 /// All fields are optional, any field that is [`None`] will not be updated.
 ///
 /// # Errors
-/// [`UpdateError::OutOfRange`](crate::error::category::UpdateError::OutOfRange) if the given index is past the end of the parent.
+///
+/// * [`UpdateError::OutOfRange`](crate::error::category::UpdateError::OutOfRange) if the given index is past the end of the parent.
 pub struct UpdateCategoryRequest {
     /// If [`Some`] change the category's name to this name
     pub name: Option<String>,

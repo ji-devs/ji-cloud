@@ -23,7 +23,7 @@ pub struct UserRecentImageResponse {
 }
 
 /// Request to add an entry to the recent user images list,
-/// see ['recent::Create'](crate::endpoints::image::recent::Create).
+/// see ['recent::Create'](crate::api::endpoints::image::recent::Create).
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserRecentImageCreateRequest {
@@ -35,7 +35,7 @@ pub struct UserRecentImageCreateRequest {
 }
 
 /// Query to list a user's recent images,
-/// see ['recent::List'](crate::endpoints::image::recent::List).
+/// see ['recent::List'](crate::api::endpoints::image::recent::List).
 ///
 /// This query is optional.
 #[derive(Serialize, Deserialize, Debug)]
@@ -46,7 +46,7 @@ pub struct UserRecentImageListRequest {
 }
 
 /// Response for listing a user's recent images,
-/// see ['recent::List'](crate::endpoints::image::recent::List).
+/// see ['recent::List'](crate::api::endpoints::image::recent::List).
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct UserRecentImageListResponse {
