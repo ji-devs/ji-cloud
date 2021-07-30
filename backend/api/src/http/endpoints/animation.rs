@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use paperclip::actix::{
     api_v2_operation,
-    web::{self, Data, Json, Path, ServiceConfig},
+    web::{Data, Json, Path, ServiceConfig},
     CreatedJson, NoContent,
 };
 use shared::{

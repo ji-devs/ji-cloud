@@ -1,10 +1,10 @@
 use std::{collections::HashSet, sync::Mutex};
 
 use chrono::{Duration, Utc};
-use config::RemoteTarget;
 use core::settings::{EmailClientSettings, GoogleCloudStorageSettings, RuntimeSettings};
 use ji_cloud_api::http::Application;
 use rand::Rng;
+use shared::config::RemoteTarget;
 use sqlx::{Connection, Executor, PgPool};
 
 use crate::fixture::Fixture;

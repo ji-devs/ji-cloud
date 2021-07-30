@@ -10,7 +10,7 @@ pub(crate) mod module;
 pub(crate) mod session;
 pub(crate) mod user;
 
-use config::DB_POOL_CONNECTIONS;
+use core::config::DB_POOL_CONNECTIONS;
 use shared::domain::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, AnimationStyleId, GoalId, ImageStyleId, SubjectId, TagId},
