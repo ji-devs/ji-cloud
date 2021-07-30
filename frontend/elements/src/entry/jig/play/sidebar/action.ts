@@ -16,6 +16,7 @@ export class _ extends LitElement {
                     background-color: transparent;
                     border-radius: 50%;
                     cursor: pointer;
+                    background-color: #ffffff;
                 }
                 button:hover {
                     background-color: #f7f7f7;

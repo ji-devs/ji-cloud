@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::jig::{Jig, JigId, module::ModuleId};
-use serde::{Serialize, Deserialize};
+use utils::routes::JigPlayerSettings;
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;
@@ -18,11 +18,12 @@ pub struct State {
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
-
+    pub paused: Mutable<bool>,
+    pub player_settings: JigPlayerSettings
 }
 
 impl State {
-    pub fn new(jig_id: JigId, module_id: Option<ModuleId>) -> Self {
+    pub fn new(jig_id: JigId, _module_id: Option<ModuleId>, player_settings: JigPlayerSettings) -> Self {
         Self {
             is_teacher: true,
             jig_id,
@@ -34,6 +35,8 @@ impl State {
             points: Mutable::new(0),
             // background_music: Mutable::new(None),
             iframe: Rc::new(RefCell::new(None)),
+            paused: Mutable::new(false),
+            player_settings,
         }
     }
 }

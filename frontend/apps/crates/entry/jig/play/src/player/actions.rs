@@ -28,7 +28,6 @@ pub fn start_timer(state: Rc<State>, time: u32) {
 
     spawn_local(timer.time.signal().for_each(clone!(state => move|time| {
         if time == 0 {
-            state.timer.set(None);
             sent_iframe_message(Rc::clone(&state), JigToModuleMessage::TimerDone);
         }
         async {}
@@ -37,7 +36,27 @@ pub fn start_timer(state: Rc<State>, time: u32) {
     state.timer.set(Some(timer));
 }
 
+pub fn toggle_paused(state: Rc<State>) {
+    let paused = !state.paused.get();
 
+    // set state to paused
+    state.paused.set(paused);
+
+    // pause timer if exists
+    match &*state.timer.lock_ref() {
+        None => {},
+        Some(timer) => {
+            *timer.paused.borrow_mut() = paused;
+        },
+    }
+
+    // let iframe know that paused
+    let iframe_message = match paused {
+        true => JigToModuleMessage::Play,
+        false => JigToModuleMessage::Pause,
+    };
+    sent_iframe_message(Rc::clone(&state), iframe_message);
+}
 
 pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
     let iframe_origin: String = Route::Home.into();
@@ -65,8 +84,18 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigMessage) {
         ModuleToJigMessage::StartTimer(time) => {
             start_timer(Rc::clone(&state), time);
         },
-        //FIXME: Remove / upgrade, this is just a temp placeholder
         ModuleToJigMessage::Started => {
+            
         },
+    };
+}
+
+pub fn reload_iframe(state: Rc<State>) {
+    match &*state.iframe.borrow() {
+        None => {},
+        Some(iframe) => {
+            iframe.set_src(&iframe.src());
+            state.timer.set(None);
+        }
     };
 }

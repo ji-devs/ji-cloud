@@ -100,9 +100,11 @@ impl HeaderDom {
                 }),
                 html!("jig-edit-sidebar-preview-button", {
                     .property("slot", "preview")
-                    .event(clone!(sidebar_state => move |_: events::Click| {
-                        log::info!("Preview");
-                    }))
+                    .apply(|dom| {
+                        // TODO: take JigPlayerSettings from jig
+                        let route: String = Route::Jig(JigRoute::Play(sidebar_state.jig.id, None, JigPlayerSettings::default())).into();
+                        dom.property("href", route)
+                    })
                 }),
             ])
         })

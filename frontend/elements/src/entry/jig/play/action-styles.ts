@@ -11,6 +11,11 @@ export const actionStyles = css`
         background-color: var(--dark-blue-8);
         box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     }
+    .action.huge {
+        height: 108px;
+        width: 108px;
+        padding: 30px;
+    }
     .action.large {
         height: 62px;
         width: 62px;
