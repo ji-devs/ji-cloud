@@ -1,11 +1,13 @@
-use config::RemoteTarget;
-use core::env::req_env;
-use core::settings::{EmailClientSettings, GoogleCloudStorageSettings};
+use core::{
+    env::req_env,
+    settings::{EmailClientSettings, GoogleCloudStorageSettings},
+};
 use futures::future::Remote;
 use ji_cloud_api::{
     s3,
     service::{mail, storage},
 };
+use shared::config::RemoteTarget;
 use std::hash::Hash;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]

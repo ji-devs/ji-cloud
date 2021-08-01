@@ -747,13 +747,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "cfg-if 1.0.0",
-]
-
-[[package]]
 name = "console"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -824,13 +817,13 @@ dependencies = [
  "anyhow",
  "base64 0.13.0",
  "chrono",
- "config",
  "hex",
  "listenfd",
  "log",
  "reqwest",
  "sentry",
  "serde",
+ "shared",
  "sqlx",
  "yup-oauth2",
 ]
@@ -1749,13 +1742,10 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "cloudevents-sdk",
- "config",
  "core",
  "dotenv",
  "env_logger",
  "futures",
- "hex",
- "hmac 0.8.1",
  "http",
  "image",
  "insta",
@@ -3335,6 +3325,7 @@ dependencies = [
  "actix-web",
  "anyhow",
  "base64 0.13.0",
+ "cfg-if 1.0.0",
  "chrono",
  "chrono-tz",
  "csv",

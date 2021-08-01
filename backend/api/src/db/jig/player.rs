@@ -1,5 +1,5 @@
 use crate::error;
-use config::JIG_PLAYER_SESSION_CODE_MAX;
+use core::config::JIG_PLAYER_SESSION_CODE_MAX;
 use shared::domain::jig::player::JigPlayerSettings;
 use shared::domain::jig::{JigId, TextDirection};
 use sqlx::postgres::PgDatabaseError;
