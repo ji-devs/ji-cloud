@@ -3,23 +3,16 @@ use std::cell::RefCell;
 use shared::domain::jig::module::body::Instructions;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
-    error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::{Body, ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
+    error::EmptyError,
+    domain::jig::{*, module::{*, body::{ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
 };
 use dominator::{clone, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{self, Mutable, ReadOnlyMutable,  SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    CancelableFutureHandle, 
-};
+use futures_signals::signal::Mutable;
+use utils::languages::LANGUAGE_CODE_EN;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
-use dominator_helpers::{
-    signals::OptionSignal,
-    futures::AsyncLoader,
-};
-use utils::{settings::SETTINGS, prelude::*, iframe::*};
+use dominator_helpers::futures::AsyncLoader;
+use utils::{prelude::*, iframe::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 use uuid::Uuid;
@@ -103,7 +96,7 @@ where
                         goals: Vec::new(),
                         creator_id: None,
                         author_id: None,
-                        language: String::from("en"),
+                        language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
                         publish_at: None,
                         additional_resources: Vec::new(),

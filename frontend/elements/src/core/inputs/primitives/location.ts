@@ -18,6 +18,14 @@ export class _ extends LitElement {
     @property()
     placeholder: string = "";
 
+    set locationAsString(v: string) {
+        if(v) {
+            this.value = JSON.parse(v)?.input;
+        } else {
+            this.value = "";
+        }
+    }
+
     private autoComplete: any;
 
     onLocation(data: {input: string, place: any} | null) {

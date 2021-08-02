@@ -25,5 +25,6 @@ pub mod clipboard;
 pub mod env;
 pub mod fonts;
 pub mod screenshot;
+pub mod languages;
 
 pub(crate) mod strings;

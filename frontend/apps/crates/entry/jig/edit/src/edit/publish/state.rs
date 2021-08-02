@@ -3,13 +3,10 @@ use std::collections::HashMap;
 use shared::domain::{category::{Category, CategoryId}, jig::JigId, meta::{AgeRange, Goal}};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
+use utils::languages::{LANGUAGES, Language};
 
 use super::publish_jig::PublishJig;
 
-const STR_LANGUAGE_ENGLISH: &'static str = "English";
-const STR_LANGUAGE_HEBREW: &'static str = "Hebrew";
-
-pub type Language = (&'static str, &'static str);
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -33,10 +30,7 @@ impl State {
             ages: Mutable::new(None),
             jig: PublishJig::new_empty(jig_id),
             submission_tried: Mutable::new(false),
-            languages: vec![
-                ("en", STR_LANGUAGE_ENGLISH),
-                ("he", STR_LANGUAGE_HEBREW),
-            ],
+            languages: LANGUAGES.clone(),
         }
     }
 }

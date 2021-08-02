@@ -2,7 +2,7 @@ use std::rc::Rc;
 use dominator::{Dom, clone, html, with_node};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}, signal_vec::SignalVecExt};
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
-use utils::{events, unwrap::UnwrapJiExt};
+use utils::{events, languages::{LANGUAGES, Language}, unwrap::UnwrapJiExt};
 use web_sys::{HtmlElement, HtmlInputElement};
 
 use crate::profile::{change_password, dom::options_popup::PopupCallbacks, state::ActivePopup};
@@ -130,7 +130,7 @@ impl ProfilePage {
                 html!("input-wrapper", {
                     .property("slot", "location")
                     .child(html!("input-location", {
-                        .property_signal("value", state.user.location.signal_cloned().map(|location| {
+                        .property_signal("locationAsString", state.user.location.signal_cloned().map(|location| {
                             location.unwrap_or_default()
                                 .as_str()
                                 .unwrap_or_default()
@@ -149,11 +149,18 @@ impl ProfilePage {
                 }),
                 html!("input-select", {
                     .property("slot", "preferred-language")
-                    .children(&mut [
+                    .property_signal("value", state.user.language.signal_cloned().map(|code| {
+                        Language::code_to_display_name(&code)
+                    }))
+                    .children(LANGUAGES.iter().map(|lang| {
                         html!("li-check", {
-                            .text("English")
+                            .text(lang.display_name())
+                            .event(clone!(state => move |_: events::Click| {
+                                state.user.language.set(lang.code().to_string());
+                                actions::save_profile(Rc::clone(&state));
+                            }))
                         })
-                    ])
+                    }))
                 }),
                 html!("input-wrapper", {
                     .property("slot", "school-organization")
@@ -207,11 +214,25 @@ impl ProfilePage {
                 html!("empty-fragment", {
                     .style("display", "contents")
                     .property("slot", "relevant-subjects")
-                    .children_signal_vec(state.user.subjects.signal_vec_cloned().map(|subject| {
+                    .children_signal_vec(state.user.subjects.signal_vec_cloned().map(clone!(state => move|subject_id| {
                         html!("pill-close", {
-                            .property("label", subject.0.to_string())
+                            .property("label", subject_id.0.to_string())
+                            .property_signal("label", state.metadata.signal_ref(clone!(subject_id => move |metadata| {
+                                match metadata {
+                                    None => String::new(),
+                                    Some(metadata) => {
+                                        metadata
+                                            .subjects
+                                            .iter()
+                                            .find(|subject| subject.id == subject_id)
+                                            .unwrap_ji()
+                                            .display_name
+                                            .clone()
+                                    }
+                                }
+                            })))
                         })
-                    }))
+                    })))
                 }),
                 html!("button-rect", {
                     .property("kind", "outline")
@@ -226,11 +247,25 @@ impl ProfilePage {
                 html!("empty-fragment", {
                     .style("display", "contents")
                     .property("slot", "affiliations")
-                    .children_signal_vec(state.user.affiliations.signal_vec_cloned().map(|affiliation| {
+                    .children_signal_vec(state.user.affiliations.signal_vec_cloned().map(clone!(state => move|affiliation_id| {
                         html!("pill-close", {
-                            .property("label", affiliation.0.to_string())
+                            .property("label", affiliation_id.0.to_string())
+                            .property_signal("label", state.metadata.signal_ref(clone!(affiliation_id => move |metadata| {
+                                match metadata {
+                                    None => String::new(),
+                                    Some(metadata) => {
+                                        metadata
+                                            .affiliations
+                                            .iter()
+                                            .find(|affiliation| affiliation.id == affiliation_id)
+                                            .unwrap_ji()
+                                            .display_name
+                                            .clone()
+                                    }
+                                }
+                            })))
                         })
-                    }))
+                    })))
                 }),
                 html!("button-rect", {
                     .property("kind", "outline")
