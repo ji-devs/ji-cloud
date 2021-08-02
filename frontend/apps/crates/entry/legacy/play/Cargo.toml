@@ -14,6 +14,7 @@ crate-type = ["cdylib"]
 [dependencies]
 # Common deps
 legacy = {path = "../_common"}
+components = {path = "../../../components"}
 utils = {path = "../../../utils"}
 shared = {path = "../../../../../../shared/rust"}
 config = {path = "../../../../../../config/rust", features = ["wasm"]}
