@@ -83,7 +83,7 @@ where
                                                 vec![render_iframe_wait_raw(state.clone(), on_raw.clone())]
                                             },
                                             Phase::Ready(ready) => {
-                                                vec![render_player(state.clone(), ready.base.clone(), ready.is_direct, ready.play_started.clone())]
+                                                vec![render_player(state.clone(), ready.base.clone(), ready.jig_player, ready.play_started.clone())]
                                             },
                                         }
                                     }
@@ -140,7 +140,7 @@ where
 
 }
 
-fn render_player<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, base: Rc<Base>, raw_direct: bool, play_started: Mutable<bool>) -> Dom
+fn render_player<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>, base: Rc<Base>, jig_player: bool, play_started: Mutable<bool>) -> Dom
 where
     Base: BaseExt + 'static,
     RawData: BodyExt<Mode, Step> + 'static, 
@@ -148,11 +148,12 @@ where
     Step: StepExt + 'static
 {
     let instructions = base.get_instructions();
+    let is_screenshot = utils::screenshot::is_screenshot_url();
 
     html!("empty-fragment", {
         .property("slot", "main")
         .child(Base::render(base.clone()))
-        .apply_if(instructions.is_some(), clone!(state, base, play_started => move |dom| {
+        .apply_if(instructions.is_some() && !is_screenshot, clone!(state, base, play_started => move |dom| {
             dom
                 .child_signal(play_started.signal().map(clone!(state, base => move |has_started| {
                     if has_started {
@@ -166,12 +167,7 @@ where
                 })))
         }))
 
-        //raw_direct generally means "preview window"
-        //so there is no jig player to communicate with
-        //just show the player and that's it
-        //also, in this case, we already got the init event with the raw data
-        //so bypass the bootstrapping cycle for that reason too
-        .apply_if(!raw_direct, |dom| {
+        .apply_if(jig_player, |dom| {
             dom
                 .global_event(clone!(state, base => move |evt:dominator_helpers::events::Message| {
                     if let Ok(msg) = evt.try_serde_data::<IframeAction<JigToModuleMessage>>() {
@@ -201,32 +197,35 @@ where
                     parent.post_message(&msg.into(), "*");
                 }))
         })
-        .child_signal(play_started.signal().map(clone!(play_started => move |has_started| {
-            if !has_started {
-                Some(html!("module-play-button", {
-                    .event(clone!(base, play_started => move |evt:events::Click| {
-                        start_playback(base.clone(), &play_started);
-                    }))
-                    .after_inserted(clone!(state, base, play_started => move |elem| {
-                        if state.opts.skip_play {
+
+        .apply_if(!is_screenshot, |dom| {
+            dom.child_signal(play_started.signal().map(clone!(play_started => move |has_started| {
+                if !has_started {
+                    Some(html!("module-play-button", {
+                        .event(clone!(base, play_started => move |evt:events::Click| {
                             start_playback(base.clone(), &play_started);
-                        }
+                        }))
+                        .after_inserted(clone!(state, base, play_started => move |elem| {
+                            if state.opts.skip_play {
+                                start_playback(base.clone(), &play_started);
+                            }
+                        }))
                     }))
-                }))
-            } else {
-                
-                if !raw_direct {
-                    let parent = web_sys::window()
-                        .unwrap_ji()
-                        .parent()
-                        .unwrap_ji()
-                        .unwrap_ji();
-                    let msg = IframeAction::new(ModuleToJigMessage::Started);
-                    parent.post_message(&msg.into(), "*");
+                } else {
+                    
+                    if jig_player {
+                        let parent = web_sys::window()
+                            .unwrap_ji()
+                            .parent()
+                            .unwrap_ji()
+                            .unwrap_ji();
+                        let msg = IframeAction::new(ModuleToJigMessage::Started);
+                        parent.post_message(&msg.into(), "*");
+                    }
+                    None
                 }
-                None
-            }
-        })))
+            })))
+        })
     })
 
 }

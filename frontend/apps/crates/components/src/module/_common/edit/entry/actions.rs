@@ -11,9 +11,10 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
 };
+use wasm_bindgen_futures::spawn_local;
 use super::base::state::*;
 use super::choose::state::*;
-use utils::prelude::*;
+use utils::{prelude::*, screenshot::call_screenshot_service};
 use dominator_helpers::futures::AsyncLoader;
 use std::future::Future;
 use dominator::clone;
@@ -111,9 +112,14 @@ where
     Step: StepExt + 'static
 {
     Box::new(move |raw_data:RawData| {
+        spawn_local(async move {
+            call_screenshot_service(jig_id, module_id).await;
+        });
+
         if !skip_for_debug {
             save(raw_data, save_loader.clone(), jig_id, module_id);
         }
+
     })
 }
 
@@ -137,8 +143,11 @@ where
         });
         api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
         log::info!("SAVED!");
+        call_screenshot_service(jig_id, module_id).await;
+        log::info!("GENERATED SCREENSHOT!");
     });
 }
+
 //doesn't compile, gotta box for now: https://github.com/rust-lang/rust/issues/65442
 //pub type HistoryUndoRedoFn<RawData> = impl Fn(Option<RawData>);
 //pub fn history_on_undo_redo<Main, Mode, RawData>(state:Rc<State<Main, Mode, RawData>>) -> HistoryUndoRedoFn<RawData> 

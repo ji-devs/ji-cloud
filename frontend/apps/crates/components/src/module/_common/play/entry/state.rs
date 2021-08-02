@@ -135,8 +135,8 @@ where
 
             _self.audio_mixer.set_from_jig(&jig);
 
-            let raw_source = match _self.phase.get_cloned().loading_kind_unchecked() {
-                LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw)),
+            let (raw_source_player) = match _self.phase.get_cloned().loading_kind_unchecked() {
+                LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
                     _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
                         Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
@@ -151,7 +151,7 @@ where
 
                                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                                     base, 
-                                    is_direct: true,
+                                    jig_player: false,
                                     play_started: Mutable::new(false)
                                 })));
                             }));
@@ -168,7 +168,7 @@ where
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
                             let body = resp.module.body;
-                            Some((body.try_into().unwrap_ji(), InitSource::Load))
+                            Some((body.try_into().unwrap_ji(), InitSource::Load, true))
                         },
                         Err(_) => {
                             panic!("error loading module!")
@@ -177,7 +177,7 @@ where
                 }
             };
 
-            if let Some((raw, init_source)) = raw_source {
+            if let Some((raw, init_source, jig_player)) = raw_source_player {
 
                 let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
@@ -188,7 +188,7 @@ where
 
                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                     base, 
-                    is_direct: false,
+                    jig_player,
                     play_started: Mutable::new(false)
                 })));
             }
@@ -232,7 +232,7 @@ pub enum Phase <RawData, Base>
 
 pub struct Ready<Base> {
     pub base: Rc<Base>, 
-    pub is_direct: bool,
+    pub jig_player: bool,
     pub play_started: Mutable<bool>,
 }
 
