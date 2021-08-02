@@ -3,19 +3,12 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::future::join;
 use shared::{
-    api::endpoints::{
-        ApiEndpoint,
-        user::*,
-        meta
-    },
-    domain::{
-        meta::MetadataResponse,
-        user::UserProfile
-    },
+    api::endpoints::{ApiEndpoint, meta, user},
+    domain::{meta::MetadataResponse, user::{PatchProfileRequest, UserProfile}},
     error::EmptyError
 };
 
-use utils::{fetch::api_with_auth, unwrap::UnwrapJiExt};
+use utils::{fetch::api_with_auth, prelude::api_with_auth_empty, unwrap::UnwrapJiExt};
 use super::state::State;
 
 pub fn load_initial_data(state: Rc<State>) {
@@ -28,7 +21,7 @@ pub fn load_initial_data(state: Rc<State>) {
 }
 
 async fn load_profile(state: Rc<State>) {
-    let resp:Result<UserProfile, EmptyError> = api_with_auth::< _, _, ()>(&Profile::PATH, Profile::METHOD, None).await;
+    let resp:Result<UserProfile, EmptyError> = api_with_auth::< _, _, ()>(&user::Profile::PATH, user::Profile::METHOD, None).await;
 
     state.user.fill_from_user(resp.unwrap_ji());
 }
@@ -45,6 +38,10 @@ async fn load_metadata(state: Rc<State>) {
 pub fn save_profile(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let info = state.user.to_update();
-        log::info!("{}", info);
+
+        match api_with_auth_empty::<EmptyError, PatchProfileRequest>(user::PatchProfile::PATH, user::PatchProfile::METHOD, Some(info)).await {
+            Err(_) => {},
+            Ok(_) => {},
+        };
     }));
 }

@@ -25,6 +25,7 @@ import "@elements/core/overlays/dialog-overlay";
 import "@elements/core/pills/pill-close";
 import "@elements/core/lists/list-vertical";
 import "@elements/core/lists/list-horizontal";
+import "@elements/core/lists/li-check";
 import "@elements/core/images/ji";
 import "@elements/core/images/ui";
 import "@elements/core/window/window-loader-block";

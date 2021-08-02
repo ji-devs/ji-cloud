@@ -1,5 +1,5 @@
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
-use shared::domain::{meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId}, user::UserProfile};
+use shared::domain::{meta::{AffiliationId, AgeRangeId, MetadataResponse, SubjectId}, user::{PatchProfileRequest, UserProfile}};
 use dominator_helpers::futures::AsyncLoader;
 use uuid::Uuid;
 
@@ -83,9 +83,19 @@ impl ProfilePageUser {
         self.affiliations.lock_mut().replace(user.affiliations);
     }
 
-    pub fn to_update(&self) -> String {
-        // TODO: Make this right
-        format!("{:?}", self)
+    pub fn to_update(&self) -> PatchProfileRequest {
+        PatchProfileRequest {
+            given_name: Some(self.given_name.get_cloned()),
+            family_name: Some(self.family_name.get_cloned()),
+            language: Some(self.language.get_cloned()),
+            // locale: Some(self.locale.get_cloned()),
+            organization: Some(self.organization.get_cloned()),
+            subjects: Some(self.subjects.lock_ref().to_vec()),
+            age_ranges: Some(self.age_ranges.lock_ref().to_vec()),
+            affiliations: Some(self.affiliations.lock_ref().to_vec()),
+            location: Some(self.location.get_cloned()),
+            ..Default::default()
+        }
     }
 
 }

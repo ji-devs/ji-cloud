@@ -37,7 +37,7 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     domain::jig::{*, module::{*, body::{ModeExt, Body}}},
 };
-use utils::{settings::SETTINGS, prelude::*};
+use utils::{languages::LANGUAGE_CODE_EN, prelude::*, settings::SETTINGS};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 use std::collections::HashSet;
@@ -190,7 +190,7 @@ where
                         goals: Vec::new(),
                         creator_id: None,
                         author_id: None,
-                        language: String::from("en"),
+                        language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
                         publish_at: None,
                         additional_resources: Vec::new(),
