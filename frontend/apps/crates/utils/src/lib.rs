@@ -24,5 +24,6 @@ pub mod ages;
 pub mod clipboard;
 pub mod env;
 pub mod fonts;
+pub mod screenshot;
 
 pub(crate) mod strings;
