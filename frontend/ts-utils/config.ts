@@ -1,15 +1,16 @@
-const constants = require("../config/constants");
+// @ts-ignore
+import * as constants from "../config/constants";
 
 const {
-        URL_MEDIA, 
-        URL_UPLOADS_RELEASE, 
+        URL_MEDIA,
         URL_UPLOADS_SANDBOX,
+        URL_UPLOADS_RELEASE,
         STAGE_PLAYER, 
         STAGE_EDIT, 
         STAGE_LEGACY,
 } = constants;
 
-//Re-exports
+//re-exports
 export {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY};
 
 const getUrl = (envKey:string, fallback: string):string => {
