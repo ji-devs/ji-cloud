@@ -9,7 +9,7 @@ use shared::domain::{
             ModuleBody, ModuleId,
         },
         AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
-        LiteModule, ModuleKind, TextDirection,
+        JigPlayerSettings, LiteModule, ModuleKind, TextDirection,
     },
     meta::{AffiliationId, AgeRangeId, GoalId},
     user::UserScope,
@@ -32,7 +32,7 @@ pub async fn create(
     publish_at: Option<DateTime<Utc>>,
     language: &str,
     description: &str,
-    direction: &TextDirection,
+    default_player_settings: &JigPlayerSettings,
 ) -> Result<JigId, CreateJigError> {
     let mut transaction = pool.begin().await?;
 
@@ -40,8 +40,8 @@ pub async fn create(
         // language=SQL
         r#"
 insert into jig
-    (display_name, creator_id, author_id, publish_at, language, description, direction)
-values ($1, $2, $2, $3, $4, $5, $6)
+    (display_name, creator_id, author_id, publish_at, language, description, direction, display_score, track_assessments, drag_assist)
+values ($1, $2, $2, $3, $4, $5, $6, $7, $8, $9)
 returning id
 "#,
         display_name,
@@ -49,7 +49,10 @@ returning id
         publish_at,
         language,
         description,
-        (*direction) as i16,
+        default_player_settings.direction as i16,
+        default_player_settings.display_score,
+        default_player_settings.track_assessments,
+        default_player_settings.drag_assist,
     )
     .fetch_one(&mut transaction)
     .await?;
@@ -62,7 +65,7 @@ returning id
     let default_modules = [(
         ModuleKind::Cover,
         serde_json::to_value(ModuleBody::Cover(cover::ModuleData::default()))?,
-        // should NEVER error as long as ModuleBody::Cover doesn't break during serialization
+        // should never error as long as ModuleBody::Cover doesn't break during serialization
     )];
 
     // todo: batch
@@ -105,7 +108,7 @@ impl From<serde_json::Error> for CreateJigError {
 }
 
 pub async fn get_by_ids(db: &PgPool, ids: &[Uuid]) -> sqlx::Result<Vec<Jig>> {
-    let v = sqlx::query!(
+    let v = sqlx::query!( //language=SQL
 r#"
 select
     id as "id: JigId",
@@ -119,6 +122,8 @@ select
     is_public,
     direction as "direction: TextDirection",
     display_score,
+    track_assessments,
+    drag_assist,
     theme as "theme: ThemeId",
     audio_background as "audio_background!: Option<AudioBackground>",
     array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
@@ -159,8 +164,12 @@ order by t.ord
             description: row.description,
             last_edited: row.updated_at,
             is_public: row.is_public,
-            direction: row.direction,
-            display_score: row.display_score,
+            default_player_settings: JigPlayerSettings {
+                direction: row.direction,
+                display_score: row.display_score,
+                track_assessments: row.track_assessments,
+                drag_assist: row.drag_assist,
+            },
             theme: row.theme,
             age_ranges: row.age_ranges.into_iter().map(|(it,)| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it,)| it).collect(),
@@ -189,7 +198,7 @@ order by t.ord
 }
 
 pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
-    let jig = sqlx::query!(
+    let jig = sqlx::query!( //language=SQL
         r#"
 select  
     id as "id: JigId",
@@ -203,6 +212,8 @@ select
     is_public,
     direction as "direction: TextDirection",
     display_score,
+    track_assessments,
+    drag_assist,
     theme as "theme: ThemeId",
     audio_background as "audio_background!: Option<AudioBackground>",
     array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
@@ -241,8 +252,12 @@ where id = $1"#,
             description: row.description,
             last_edited: row.updated_at,
             is_public: row.is_public,
-            direction: row.direction,
-            display_score: row.display_score,
+            default_player_settings: JigPlayerSettings {
+                direction: row.direction,
+                display_score: row.display_score,
+                track_assessments: row.track_assessments,
+                drag_assist: row.drag_assist,
+            },
             theme: row.theme,
             age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
@@ -269,10 +284,9 @@ pub async fn update(
     publish_at: Option<Option<DateTime<Utc>>>,
     language: Option<&str>,
     description: Option<&str>,
-    is_public: Option<bool>,
-    direction: Option<TextDirection>,
-    display_score: Option<bool>,
-    theme: Option<ThemeId>,
+    is_public: Option<&bool>,
+    default_player_settings: Option<&JigPlayerSettings>,
+    theme: Option<&ThemeId>,
     audio_background: Option<Option<AudioBackground>>,
     audio_effects: Option<AudioEffects>,
 ) -> Result<(), error::UpdateWithMetadata> {
@@ -288,11 +302,14 @@ pub async fn update(
         return Err(error::UpdateWithMetadata::ResourceNotFound);
     }
 
+    // update non-trivial fields, e.g.:
+    //  Option<Option<_>>, maps to a nullable column
+    //  Option<HashSet<_>>, maps to an array[] column
     if let Some(publish_at) = publish_at {
         sqlx::query!(
             r#"
 update jig
-set publish_at = $2, updated_at = now()
+set publish_at = $2
 where id = $1 and $2 is distinct from publish_at"#,
             id.0,
             publish_at
@@ -305,7 +322,7 @@ where id = $1 and $2 is distinct from publish_at"#,
         sqlx::query!(
             r#"
 update jig
-set audio_background = $2, updated_at = now()
+set audio_background = $2
 where id = $1 and $2 is distinct from audio_background
             "#,
             id.0,
@@ -320,8 +337,7 @@ where id = $1 and $2 is distinct from audio_background
             r#"
 update jig
 set audio_feedback_positive = $2,
-    audio_feedback_negative = $3,
-    updated_at = now()
+    audio_feedback_negative = $3
 where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)
             "#,
             id.0,
@@ -340,7 +356,34 @@ where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negativ
         .await?;
     }
 
+    if let Some(settings) = default_player_settings {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update jig 
+set direction = $2,
+    display_score = $3,
+    track_assessments = $4,
+    drag_assist = $5
+where id = $1 and 
+    (($2 is distinct from direction) or 
+     ($3 is distinct from display_score) or
+     ($4 is distinct from track_assessments) or 
+     ($5 is distinct from drag_assist))
+            "#,
+            id.0,
+            settings.direction as i16,
+            settings.display_score,
+            settings.track_assessments,
+            settings.drag_assist,
+        )
+        .execute(&mut transaction)
+        .await?;
+    }
+
+    // update trivial fields
     sqlx::query!(
+        //language=SQL
         r#"
 update jig
 set display_name     = coalesce($2, display_name),
@@ -348,19 +391,14 @@ set display_name     = coalesce($2, display_name),
     language         = coalesce($4, language),
     description      = coalesce($5, description),
     is_public        = coalesce($6, is_public),
-    direction        = coalesce($7, direction),
-    display_score    = coalesce($8, display_score),
-    theme            = coalesce($9, theme),
-    updated_at       = now()
+    theme            = coalesce($7, theme)
 where id = $1
   and (($2::text is not null and $2 is distinct from display_name) or
        ($3::uuid is not null and $3 is distinct from author_id) or
        ($4::text is not null and $4 is distinct from language) or
        ($5::text is not null and $5 is distinct from description) or
        ($6::bool is not null and $6 is distinct from is_public) or
-       ($7::smallint is not null and $7 is distinct from direction) or
-       ($8::bool is not null and $8 is distinct from display_score) or
-       ($9::smallint is not null and $9 is distinct from theme))
+       ($7::smallint is not null and $7 is distinct from theme))
 "#,
         id.0,
         display_name,
@@ -368,9 +406,7 @@ where id = $1
         language,
         description,
         is_public,
-        direction.map(|it| it as i16),
-        display_score,
-        theme.map(|it| it as i16),
+        theme.map(|it| *it as i16),
     )
     .execute(&mut transaction)
     .await?;
@@ -427,7 +463,7 @@ pub async fn list(
     page: i32,
 ) -> sqlx::Result<Vec<Jig>> {
     log::info!("{:?}", author_id);
-    sqlx::query!(
+    sqlx::query!( //language=SQL
         r#"
 select  
     id as "id: JigId",
@@ -441,6 +477,8 @@ select
     is_public,
     direction as "direction: TextDirection",
     display_score,
+    track_assessments,
+    drag_assist,
     theme as "theme: ThemeId",
     audio_background as "audio_background!: Option<AudioBackground>",
     array(select row(unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>", -- TODO: fix ugly!
@@ -486,8 +524,12 @@ limit 20 offset 20 * $2
             description: row.description,
             last_edited: row.updated_at,
             is_public: row.is_public,
-            direction: row.direction,
-            display_score: row.display_score,
+            default_player_settings: JigPlayerSettings {
+                direction: row.direction,
+                display_score: row.display_score,
+                track_assessments: row.track_assessments,
+                drag_assist: row.drag_assist,
+            },
             theme: row.theme,
             age_ranges: row.age_ranges.into_iter().map(|(it, )| it).collect(),
             affiliations: row.affiliations.into_iter().map(|(it, )| it).collect(),
@@ -544,9 +586,11 @@ pub async fn clone(
     }
 
     let new_id = sqlx::query!(
+        //language=SQL
         r#"
-insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score, theme,
-                 audio_background, audio_feedback_positive, audio_feedback_negative)
+insert into jig (display_name, parents, creator_id, author_id, language, description, direction, display_score,
+                 track_assessments, drag_assist, theme, audio_background, audio_feedback_positive,
+                 audio_feedback_negative)
 select display_name,
        array_append(parents, id),
        $2 as creator_id,
@@ -555,6 +599,8 @@ select display_name,
        description,
        direction,
        display_score,
+       track_assessments,
+       drag_assist,
        theme,
        audio_background,
        audio_feedback_positive,
@@ -670,10 +716,11 @@ pub async fn create_draft(db: &PgPool, live_id: JigId) -> Result<JigId, error::J
         return Err(error::JigCloneDraft::IsDraft);
     }
 
-    let draft_id = sqlx::query!(
+    let draft_id = sqlx::query!( //language=SQL
         r#"
 insert into jig (display_name, parents, creator_id, author_id, language, description, publish_at, is_public,
-                 direction, display_score, theme, audio_background, audio_feedback_positive, audio_feedback_negative)
+                 direction, display_score, track_assessments, drag_assist,theme, audio_background,
+                 audio_feedback_positive, audio_feedback_negative)
 select display_name,
        parents,
        creator_id,
@@ -684,6 +731,8 @@ select display_name,
        false,
        direction,
        display_score,
+       track_assessments,
+       drag_assist,
        theme,
        audio_background,
        audio_feedback_positive,

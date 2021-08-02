@@ -1,28 +1,28 @@
 //! Types for JIGs.
 
 pub mod additional_resource;
-pub mod module;
-pub mod player;
+pub use additional_resource::AdditionalResourceId;
 
-use std::{fmt, str::FromStr};
+pub mod module;
+// avoid breaking Changes
+pub use module::{LiteModule, Module, ModuleKind};
+
+pub mod player;
+pub use player::{JigPlayerSettings, TextDirection};
+
+use chrono::{DateTime, Utc};
+#[cfg(feature = "backend")]
+use paperclip::actix::Apiv2Schema;
+use serde::{Deserialize, Serialize};
+use std::{collections::HashSet, fmt, str::FromStr};
+use uuid::Uuid;
 
 use super::{
     category::CategoryId,
     meta::{AffiliationId, AgeRangeId, GoalId},
     Publish,
 };
-use chrono::{DateTime, Utc};
-#[cfg(feature = "backend")]
-use paperclip::actix::Apiv2Schema;
-use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
-use uuid::Uuid;
-
-// avoid breaking Changes
-pub use module::{LiteModule, Module, ModuleKind};
-
 use crate::domain::jig::module::body::ThemeId;
-pub use additional_resource::AdditionalResourceId;
 
 /// Wrapper type around [`Uuid`], represents the ID of a JIG.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
@@ -130,9 +130,9 @@ pub struct JigCreateRequest {
     #[serde(default)]
     pub description: String,
 
-    /// Text direction for the jig.
+    /// Default player settings for this jig.
     #[serde(default)]
-    pub direction: TextDirection,
+    pub default_player_settings: JigPlayerSettings,
 }
 
 /// The over-the-wire representation of a JIG.
@@ -186,11 +186,8 @@ pub struct Jig {
     /// Whether the jig is public or not.
     pub is_public: bool,
 
-    /// Text direction for the jig.
-    pub direction: TextDirection,
-
-    /// Whether to display the score for this jig.
-    pub display_score: bool,
+    /// Default player settings for this jig.
+    pub default_player_settings: JigPlayerSettings,
 
     /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
     pub theme: ThemeId,
@@ -337,15 +334,10 @@ pub struct JigUpdateRequest {
     #[serde(default)]
     pub is_public: Option<bool>,
 
-    /// Text direction for the jig.
+    /// Default player settings for this jig.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
-    pub direction: Option<TextDirection>,
-
-    /// Whether to display the score for this jig.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    pub display_score: Option<bool>,
+    pub default_player_settings: Option<JigPlayerSettings>,
 
     /// Theme for this jig, identified by `[ThemeId](jig::module::body::ThemeId)`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -475,24 +467,6 @@ pub struct JigSearchResponse {
 pub struct JigDraftResponse {
     /// The ID of the jig
     pub id: JigId,
-}
-
-/// Sets text direction for the jig
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
-#[cfg_attr(feature = "backend", derive(sqlx::Type))]
-#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
-#[repr(i16)]
-pub enum TextDirection {
-    /// left to right
-    LeftToRight = 0,
-    /// right to left
-    RightToLeft = 1,
-}
-
-impl Default for TextDirection {
-    fn default() -> Self {
-        Self::LeftToRight
-    }
 }
 
 /// Response for total count of public and published jig.
