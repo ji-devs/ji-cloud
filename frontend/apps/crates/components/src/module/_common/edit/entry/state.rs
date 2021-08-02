@@ -58,6 +58,7 @@ where
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
+    pub(super) screenshot_loader: Rc<AsyncLoader>,
     pub(super) save_loader: Rc<AsyncLoader>,
     pub(super) history: RefCell<Option<Rc<HistoryStateImpl<RawData>>>>,
     pub(super) raw_loaded: Mutable<bool>,
@@ -153,6 +154,7 @@ where
             history: RefCell::new(None),
             raw_loaded: Mutable::new(false),
             raw_loader: AsyncLoader::new(),
+            screenshot_loader: Rc::new(AsyncLoader::new()),
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
@@ -230,6 +232,7 @@ where
                     raw.clone(),
                     super::actions::save_history(
                         _self.opts.skip_save_for_debug,
+                        _self.screenshot_loader.clone(),
                         _self.save_loader.clone(),
                         _self.opts.jig_id.clone(),
                         _self.opts.module_id.clone(),

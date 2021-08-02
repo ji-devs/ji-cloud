@@ -187,6 +187,15 @@ impl RemoteTarget {
         }
     }
 
+    pub const fn cloud_functions_url(&self) -> &'static str {
+        match self {
+            Self::Local | Self::Sandbox => {
+                "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net"
+            }
+            Self::Release => "https://europe-west1-ji-cloud.cloudfunctions.net",
+        }
+    }
+
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::Local => "local",
