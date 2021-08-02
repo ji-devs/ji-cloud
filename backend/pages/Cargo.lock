@@ -683,13 +683,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "cfg-if 1.0.0",
-]
-
-[[package]]
 name = "const_fn"
 version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1451,7 +1444,6 @@ dependencies = [
  "actix-web",
  "anyhow",
  "askama",
- "config",
  "core",
  "dotenv",
  "env_logger",
@@ -1460,6 +1452,7 @@ dependencies = [
  "openssl",
  "sentry",
  "serde",
+ "shared",
 ]
 
 [[package]]

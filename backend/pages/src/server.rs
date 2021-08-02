@@ -6,7 +6,7 @@ use actix_web::{
     dev::{MessageBody, Service, ServiceRequest, ServiceResponse},
     web,
 };
-use config::JSON_BODY_LIMIT;
+use core::config::JSON_BODY_LIMIT;
 use core::{
     http::{get_addr, get_tcp_fd},
     settings::RuntimeSettings,
