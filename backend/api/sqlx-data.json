@@ -1,41 +1,5 @@
 {
   "db": "PostgreSQL",
-  "029540ace163666c276ac5f1a3f9eff2b277c6d73d35cbc20cab7d0b3ce73698": {
-    "query": "\n        select style_id as \"id: AnimationStyleId\", display_name, animation_style.created_at, updated_at\n        from animation_style\n            left join style on animation_style.style_id = style.id\n        order by index\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: AnimationStyleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "query": "delete from web_media_library_url where media_url = $1",
     "describe": {
@@ -713,42 +677,6 @@
       "nullable": []
     }
   },
-  "1d33e48e1daaebfebb7323de5637b8a1102d4874c0fa7e3101e08310c21894b9": {
-    "query": "\n        select style_id as \"id: ImageStyleId\", display_name, image_style.created_at, updated_at\n        from image_style\n            left join style on image_style.style_id = style.id\n        order by index\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: ImageStyleId",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "display_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "created_at",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "updated_at",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "1d746c9230859f4c45b71571b3a4c3884929165504fb9f95b622e8ec907487de": {
     "query": "select language from user_profile where user_id = $1",
     "describe": {
@@ -1180,6 +1108,42 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "3ad66986079ea2df21f1a6af0c50510d362a19addcf3bc0f62b8f3948ea14cf8": {
+    "query": "\nwith cte as (\n    select distinct style_id as id\n    from animation_style\n)\nselect id as \"id: AnimationStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: AnimationStyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
   "3cfa772cac043b6accabfde5a1fd872956182b08d67b5a9ab2e35a6bb95405b3": {
@@ -4090,6 +4054,42 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
+    "query": "\nwith cte as (\n    select distinct style_id as id\n    from image_style\n)\nselect id as \"id: ImageStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: ImageStyleId",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "display_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
   "e3385b6d93728cc62d0995e839f0148aaba5e572c06049512a4f31d44f03c269": {
