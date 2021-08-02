@@ -1,4 +1,16 @@
-const {URL_MEDIA, URL_UPLOADS_RELEASE, URL_UPLOADS_SANDBOX} = require("../config/constants");
+const constants = require("../config/constants");
+
+const {
+        URL_MEDIA, 
+        URL_UPLOADS_RELEASE, 
+        URL_UPLOADS_SANDBOX,
+        STAGE_PLAYER, 
+        STAGE_EDIT, 
+        STAGE_LEGACY,
+} = constants;
+
+//Re-exports
+export {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY};
 
 const getUrl = (envKey:string, fallback: string):string => {
 	const value = (process as any).env[envKey];
