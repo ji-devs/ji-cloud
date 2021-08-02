@@ -11,6 +11,7 @@ mod additional_resource;
 mod cover;
 mod draft;
 mod module;
+mod player;
 
 #[actix_rt::test]
 async fn create_default() -> anyhow::Result<()> {

@@ -25,7 +25,8 @@ pub struct AdditionalResource {
 }
 
 /// Request to create a new `AdditionalResource`.
-/// [`CreateAdditionalResource`](crate::api::endpoints::user::CreateAdditionalResource)
+///
+/// [`CreateAdditionalResource`](crate::api::endpoints::jig::CreateAdditionalResource)
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct AdditionalResourceCreateRequest {

@@ -57,15 +57,12 @@ impl ApiEndpoint for Create {
 /// Standard + [`UserScope::Admin`](crate::domain::user::UserScope)
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the request is missing/invalid.
-///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
-///
-/// [`Conflict`](http::StatusCode::CONFLICT) if the requested `index` is already occupied.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the request is missing/invalid.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
+/// * [`Conflict`](http::StatusCode::CONFLICT) if the requested `index` is already occupied.
 pub struct Update;
 
 impl ApiEndpoint for Update {
@@ -82,13 +79,11 @@ impl ApiEndpoint for Update {
 /// Standard + [`UserScope::Admin`](crate::domain::user::UserScope)
 ///
 /// # Errors
-/// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
 ///
-/// [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
-///
-/// [`InvalidRequest`](http::StatusCode::INVALID_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
-///
-/// [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
+/// * [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
+/// * [`Forbidden`](http::StatusCode::FORBIDDEN) if the user does not have sufficient permission to perform the action.
+/// * [`BadRequest`](http::StatusCode::BAD_REQUEST) if the given `id` is not a [`Uuid`](uuid::Uuid) or the request is missing/invalid.
+/// * [`NotFound`](http::StatusCode::NOT_FOUND) if the image tag does not exist.
 pub struct Delete;
 
 impl ApiEndpoint for Delete {

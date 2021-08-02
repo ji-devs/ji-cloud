@@ -80,6 +80,7 @@ export class _ extends LitElement {
                 }
                 .bottom {
                     display: grid;
+                    overflow: hidden;
                 }
                 .actions {
                     grid-column: 1;

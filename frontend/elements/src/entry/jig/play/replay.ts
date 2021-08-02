@@ -7,13 +7,16 @@ export class _ extends LitElement {
         return [
             actionStyles,
             css`
+                .action img-ui {
+                    width: 60px;
+                }
             `,
         ];
     }
 
     render() {
         return html`
-            <button class="action small">
+            <button class="action huge">
                 <img-ui path="entry/jig/play/replay.svg"></img-ui>
             </button>
         `;

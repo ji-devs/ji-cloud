@@ -23,7 +23,9 @@ impl Router {
                 match route {
                     Route::Jig(route) => {
                         match route {
-                            JigRoute::Play(jig_id, module_id) => Some(player_render(Rc::new(PlayerState::new(jig_id, module_id)))),
+                            JigRoute::Play(jig_id, module_id, player_settings) => {
+                                Some(player_render(Rc::new(PlayerState::new(jig_id, module_id, player_settings))))
+                            },
                             _ => None
                         }
                     },

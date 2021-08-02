@@ -40,7 +40,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <button class="action small">
+            <button class="action large">
                 <img-ui path="entry/jig/play/music.svg"></img-ui>
             </button>
         `;

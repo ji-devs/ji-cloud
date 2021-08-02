@@ -1,12 +1,5 @@
 use std::sync::Arc;
 
-use crate::{
-    error,
-    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
-    image_ops::MediaKind,
-    s3,
-    service::ServiceData,
-};
 use actix_web::web::Path;
 use paperclip::actix::{
     api_v2_operation,
@@ -14,19 +7,29 @@ use paperclip::actix::{
     CreatedJson, NoContent,
 };
 use sha2::Digest as _;
-use shared::{
-    api::{endpoints, ApiEndpoint},
-    domain::media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
-    media::{FileKind, PngImageFile},
-};
-use shared::{
-    domain::{image::ImageKind, Base64},
-    media::MediaLibrary,
-};
 use sqlx::PgPool;
 use url::Url;
 use uuid::Uuid;
 
+use crate::{
+    error,
+    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
+    image_ops::MediaKind,
+    s3,
+    service::ServiceData,
+};
+use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::{
+        image::ImageKind,
+        media::{UrlCreatedResponse, WebMediaMetadataResponse, WebMediaUrlCreateRequest},
+        Base64,
+    },
+    media::{FileKind, MediaLibrary, PngImageFile},
+};
+
+#[inline]
 const fn max(a: usize, b: usize) -> usize {
     if a > b {
         a
@@ -44,10 +47,7 @@ pub async fn create(
 ) -> Result<CreatedJson<UrlCreatedResponse>, error::Server> {
     let url = request.into_inner().url;
 
-    const MAX_RESPONSE_SIZE: usize = max(
-        config::ANIMATION_BODY_SIZE_LIMIT,
-        config::IMAGE_BODY_SIZE_LIMIT,
-    );
+    const MAX_RESPONSE_SIZE: usize = max(ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT);
 
     let url_string = url.to_string();
 

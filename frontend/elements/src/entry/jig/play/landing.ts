@@ -5,6 +5,14 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                /*
+                    z-index layers:
+                    1) iframe
+                    2) controls
+                    3) pause overlay
+                    4) play pause button
+                    5) dialog
+                */
                 :host {
                     display: block;
                     height: 100vh;
@@ -15,21 +23,31 @@ export class _ extends LitElement {
                     height: 100%;
                     width: 100%;
                 }
-                ::slotted([slot=iframe]), .overlay {
+                ::slotted([slot=iframe]),
+                .controls,
+                :host([paused]) .paused-backdrop,
+                .play-pause-button-layer,
+                ::slotted(dialog-overlay) {
                     grid-column: 1;
                     grid-row: 1;
                     height: 100%;
                     width: 100%;
                     border: 0;
                 }
-                .overlay {
+                ::slotted([slot=iframe]) {
                     z-index: 1;
-                    pointer-events: none;
-                    display: grid;
-                    grid-template-columns: 0px 1fr 170px;
-                    grid-template-rows: 1fr 100px;
                 }
-                .overlay ::slotted(*) {
+                .controls, .play-pause-button-layer {
+                    display: grid;
+                    grid-template-columns: 0px 1fr auto;
+                    grid-template-rows: 1fr 100px;
+                    box-sizing: border-box;
+                }
+                .controls {
+                    z-index: 2;
+                    pointer-events: none;
+                }
+                .controls ::slotted(*) {
                     pointer-events: all;
                 }
                 .sidebar {
@@ -37,52 +55,89 @@ export class _ extends LitElement {
                     grid-row: 1 / -1;
                     z-index: 2;
                 }
-                .side-bar {
+                .indicators {
                     grid-column: 3;
                     grid-row: 1;
                     display: grid;
                     grid-gap: 16px;
-                    justify-items: center;
+                    justify-items: end;
                     align-content: start;
-                    padding: 32px;
-                }
-                .side-bar .replay-background {
-                    display: flex;
-                    justify-content: space-between;
-                    column-gap: 12px;
+                    padding-right: 32px;
+                    padding-top: 24px;
                 }
                 .bottom-bar {
                     grid-row: 2;
                     grid-column: 1 / -1;
                     display: grid;
-                    grid-template-columns: auto 450px auto;
+                    grid-template-columns: 62px 450px 62px;
                     align-items: center;
                     justify-content: center;
                     grid-gap: 16px;
+                }
+                .bottom-right {
+                    grid-row: 2;
+                    grid-column: 3;
+                    display: flex;
+                    column-gap: 40px;
+                    align-items: center;
+                    padding-right: 32px;
+                }
+                .bottom-right ::slotted([slot=background]) {
+                    margin-right: 102px;
+                }
+                :host([paused]) .paused-backdrop, ::slotted(dialog-overlay) {
+                    background-color: #00000080;
+                }
+                :host([paused]) .paused-backdrop {
+                    z-index: 3;
+                }
+                .play-pause-button-layer {
+                    z-index: 4;
+                    pointer-events: none;
+                }
+                .play-pause-button-layer ::slotted([slot=play-pause-button]) {
+                    pointer-events: all;
+                }
+                :host([paused]) .play-pause-button-layer {
+                    pointer-events: all;
+                }
+                ::slotted(dialog-overlay){
+                    z-index: 5;
                 }
             `,
         ];
     }
 
+    @property({ type: Boolean, reflect: true })
+    paused: boolean = false;
+
     render() {
         return html`
             <main>
                 <slot name="iframe"></slot>
-                <div class="overlay">
+                <div class="controls">
                     <div class="sidebar">
                         <slot name="sidebar"></slot>
                     </div>
-                    <div class="side-bar">
-                        <slot name="play-pause-button"></slot>
-                        <div class="replay-background">
-                            <slot name="replay-background"></slot>
-                        </div>
+                    <div class="indicators">
                         <slot name="indicators"></slot>
                     </div>
                     <div class="bottom-bar">
-                        <slot name="progress"></slot>
+                        <span class="back"><slot name="back"></slot></span>
+                        <span class="progress"><slot name="progress"></slot></span>
+                        <span class="forward"><slot name="forward"></slot></span>
+                    </div>
+                    <div class="bottom-right">
+                        <slot name="background"></slot>
                     </div>
                 </div>
+                <div class="paused-backdrop"></div>
+                <div class="play-pause-button-layer">
+                    <div class="bottom-right">
+                        <slot name="play-pause-button"></slot>
+                    </div>
+                </div>
+                <slot name="dialog"></slot>
             </main>
         `;
     }

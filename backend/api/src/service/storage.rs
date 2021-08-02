@@ -1,14 +1,21 @@
 //! Google Cloud Storage
+use std::ops::Deref;
 
 use crate::error;
 use crate::extractor::RequestOrigin;
 use anyhow::Context;
-use core::settings::GoogleCloudStorageSettings;
 use http::StatusCode;
 use reqwest::{self, header};
-use shared::media::{self, FileKind, MediaLibrary, PngImageFile};
-use std::ops::Deref;
 use uuid::Uuid;
+
+use core::{
+    config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT},
+    settings::GoogleCloudStorageSettings,
+};
+use shared::{
+    config::CORS_ORIGINS,
+    media::{self, FileKind, MediaLibrary, PngImageFile},
+};
 
 pub struct Client {
     oauth2_token: String,
@@ -58,7 +65,7 @@ impl Client {
             .header(header::CONTENT_LENGTH, "0");
 
         let req = match origin.origin {
-            Some(origin) if config::CORS_ORIGINS.contains(&origin.deref()) => {
+            Some(origin) if CORS_ORIGINS.contains(&origin.deref()) => {
                 req.header(header::ORIGIN, origin)
             }
             _ => req,
@@ -136,8 +143,8 @@ impl Client {
 
     pub fn file_size_limit(&self, file_kind: &FileKind) -> Option<usize> {
         match file_kind {
-            FileKind::AnimationGif => Some(config::ANIMATION_BODY_SIZE_LIMIT),
-            FileKind::ImagePng(PngImageFile::Original) => Some(config::IMAGE_BODY_SIZE_LIMIT),
+            FileKind::AnimationGif => Some(ANIMATION_BODY_SIZE_LIMIT),
+            FileKind::ImagePng(PngImageFile::Original) => Some(IMAGE_BODY_SIZE_LIMIT),
             _ => unimplemented!("File type size limit undefined!"),
         }
     }

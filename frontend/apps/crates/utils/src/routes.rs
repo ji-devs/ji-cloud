@@ -3,11 +3,9 @@ use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
     jig::{JigId, module::ModuleId, ModuleKind}, 
-    search::CreateSearchKeyResponse, 
 };
-use crate::firebase::FirebaseUserInfo;
 use serde::{Serialize, Deserialize};
-use std::str::FromStr;
+use std::{fmt::Debug, str::FromStr};
 use uuid::Uuid;
 use super::unwrap::*;
 
@@ -66,7 +64,28 @@ pub enum LegacyRoute {
 pub enum JigRoute {
     Gallery,
     Edit(JigId, JigEditRoute),
-    Play(JigId, Option<ModuleId>) 
+    Play(JigId, Option<ModuleId>, JigPlayerSettings) 
+}
+
+// TODO: replace this with the shared version once that's ready
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(default)]
+pub struct JigPlayerSettings {
+    pub direction: shared::domain::jig::TextDirection,
+    pub display_score: bool,
+    pub assessment_mode: bool,
+    pub drag_assist: bool,
+}
+
+impl Default for JigPlayerSettings {
+    fn default() -> Self {
+        Self {
+            display_score: true,
+            direction: shared::domain::jig::TextDirection::default(),
+            assessment_mode: bool::default(),
+            drag_assist: bool::default(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -201,15 +220,22 @@ impl Route {
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
                     JigEditRoute::Module(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
             )),
-            ["jig", "play", jig_id] => Self::Jig(JigRoute::Play(
+            ["jig", "play", jig_id] => {
+                let search: JigPlayerSettings = serde_json::from_str(&json_query.unwrap_or_default()).unwrap_or_default();
+                Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    None
-            )),
-            ["jig", "play", jig_id, module_id] => Self::Jig(JigRoute::Play(
+                    None,
+                    search
+                ))
+            },
+            ["jig", "play", jig_id, module_id] => {
+                let search: JigPlayerSettings = serde_json::from_str(&json_query.unwrap_or_default()).unwrap_or_default();
+                Self::Jig(JigRoute::Play(
                     JigId(Uuid::from_str(jig_id).unwrap_ji()),
-                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji()))
-            )),
-                    
+                    Some(ModuleId(Uuid::from_str(module_id).unwrap_ji())),
+                    search
+                ))
+            },
             ["legacy", "play", jig_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), None)),
             ["legacy", "play", jig_id, module_id] => Self::Legacy(LegacyRoute::Play(jig_id.to_string(), Some(module_id.to_string()))),
             ["module", kind, "edit", "debug"] => {
@@ -310,11 +336,14 @@ impl From<&Route> for String {
                             JigEditRoute::Publish => format!("/jig/edit/{}/publish", jig_id.0.to_string()),
                         }
                     }
-                    JigRoute::Play(jig_id, module_id) => {
+                    JigRoute::Play(jig_id, module_id, player_settings) => {
+                        let data = serde_json::to_string(&player_settings).unwrap_or_default();
+                        let query = JsonQuery { data };
+                        let query = serde_qs::to_string(&query).unwrap_ji();
                         if let Some(module_id) = module_id {
-                            format!("/jig/play/{}/{}", jig_id.0.to_string(), module_id.0.to_string())
+                            format!("/jig/play/{}/{}?{}", jig_id.0.to_string(), module_id.0.to_string(), query)
                         } else {
-                            format!("/jig/play/{}", jig_id.0.to_string())
+                            format!("/jig/play/{}?{}", jig_id.0.to_string(), query)
                         }
                     }
                 }

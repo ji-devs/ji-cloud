@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
 use anyhow::Context;
-use config::RemoteTarget;
 use core::settings::GoogleOAuth;
 use http::StatusCode;
-use shared::domain::session::OAuthUrlKind;
+use shared::{config::RemoteTarget, domain::session::OAuthUrlKind};
+use std::collections::HashMap;
 
 use crate::error;
 

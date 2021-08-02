@@ -10,6 +10,8 @@ use std::{
 };
 use tokio::{sync::RwLock, task::JoinHandle};
 
+use core::config::{JWK_ISSUER_URL, JWK_URL};
+
 #[derive(Debug, Deserialize)]
 struct KeyResponse {
     keys: Vec<JwkKey>,
@@ -47,7 +49,7 @@ impl JwkKeys {
 const FALLBACK_TIMEOUT: Duration = Duration::from_secs(60);
 
 async fn fetch_keys_for_config() -> anyhow::Result<JwkKeys> {
-    let http_response = reqwest::get(config::JWK_URL).await?;
+    let http_response = reqwest::get(JWK_URL).await?;
     let now = Instant::now();
     let max_age = get_max_age(&http_response).unwrap_or(FALLBACK_TIMEOUT);
     let resp: KeyResponse = http_response.json().await?;
@@ -255,8 +257,5 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 
 #[must_use]
 pub fn create_verifier(audience: String) -> Arc<JwkVerifier> {
-    Arc::new(JwkVerifier::new(
-        config::JWK_ISSUER_URL.to_owned(),
-        audience,
-    ))
+    Arc::new(JwkVerifier::new(JWK_ISSUER_URL.to_owned(), audience))
 }

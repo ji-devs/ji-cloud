@@ -1,0 +1,8 @@
+---
+source: tests/integration/jig/player.rs
+expression: body
+
+---
+{
+  "index": 7904
+}

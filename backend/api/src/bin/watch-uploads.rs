@@ -25,8 +25,8 @@ use actix_web::{
 };
 use anyhow::Context;
 use cloudevents::Event;
-use config::JSON_BODY_LIMIT;
 use core::{
+    config::JSON_BODY_LIMIT,
     http::{get_addr, get_tcp_fd},
     settings::{self, RuntimeSettings, SettingsManager},
 };
