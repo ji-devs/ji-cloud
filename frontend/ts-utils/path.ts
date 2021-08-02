@@ -1,4 +1,4 @@
-import {getMediaUrl, getMediaUrl_UI, getMediaUrl_UPLOADS} from "@project-config";
+import {getMediaUrl, getMediaUrl_UI, getMediaUrl_UPLOADS} from "./config";
 
 const isDev = process.env["NODE_ENV"] === "development";
 const deployTarget = process.env["DEPLOY_TARGET"] || process.env["STORYBOOK_DEPLOY_TARGET"];

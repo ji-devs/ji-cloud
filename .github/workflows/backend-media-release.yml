@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'config/**'
     - 'shared/**'
     - 'backend/_core/rust/**'
     - 'backend/api/**'

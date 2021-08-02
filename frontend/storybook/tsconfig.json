@@ -3,8 +3,7 @@
         "baseUrl": "./",
         "paths": {
             "@utils/*": ["../ts-utils/*"],
-            "@frontend-config/*": ["../config/*"],
-            "@project-config/*": ["../../config/typescript/src/lib"],
+            "@config/*": ["../config/*"],
             "@elements/*": ["../elements/src/*"],
             "~/*": ["./src/*"]
         },

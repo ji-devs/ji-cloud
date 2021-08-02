@@ -200,8 +200,6 @@ script = ["npm run build:watch"]
 run_task = {name = [
     "npm-install-app",
     "npm-install-build-utils",
-    "npm-install-config",
-    "config-build"
 ]}
 
 [tasks.npm-install-app]
@@ -212,13 +210,3 @@ script = ["npm install"]
 script_runner = "@shell"
 script = ["npm install"]
 cwd = "../build-utils"
-
-[tasks.npm-install-config]
-script_runner = "@shell"
-script = ["npm install"]
-cwd = "../../config/typescript"
-
-[tasks.config-build]
-script_runner = "@shell"
-script = ["npm run build"]
-cwd = "../../config/typescript"

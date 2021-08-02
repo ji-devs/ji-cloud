@@ -8,7 +8,6 @@ FROM ekidd/rust-musl-builder:latest AS api-builder
 
 RUN mkdir -p ./backend/api
 COPY ./shared ./shared
-COPY ./config/rust ./config/rust
 COPY ./backend/core ./backend/core
 COPY ./backend/api ./backend/api
 

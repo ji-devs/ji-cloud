@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'config/**'
     - 'frontend/core/js/**'
     - 'frontend/storybook/**'
     - 'frontend/elements/**'

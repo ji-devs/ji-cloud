@@ -8,8 +8,7 @@ edition = "2018"
 
 [dependencies]
 utils = {path = "../utils"}
-shared = {path = "../../../../shared/rust"}
-config = {path = "../../../../config/rust", features = ["wasm"]}
+shared = {path = "../../../../shared/rust", features = ["wasm"]}
 chrono = { version = "0.4.19", features = ["wasmbind"] }
 futures = "0.3.16"
 itertools = "0.10.1"

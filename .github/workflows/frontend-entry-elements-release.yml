@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'config/**'
     - 'frontend/config/**'
     - 'frontend/ts-utils/**'
     - 'frontend/elements/**'

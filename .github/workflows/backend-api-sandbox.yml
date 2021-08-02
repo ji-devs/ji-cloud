@@ -4,7 +4,6 @@ on:
   push:
     branches: [ sandbox ]
     paths:
-    - 'config/**'
     - 'shared/**'
     - 'backend/core/**'
     - 'backend/api/**'

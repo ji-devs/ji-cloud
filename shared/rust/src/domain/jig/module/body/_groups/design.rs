@@ -1,5 +1,3 @@
-use std::convert::TryFrom;
-
 use crate::domain::jig::module::body::{Background, Image, Instructions, ThemeChoice, Transform};
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;

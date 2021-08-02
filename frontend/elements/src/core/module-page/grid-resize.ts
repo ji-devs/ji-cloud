@@ -3,7 +3,7 @@ import { nothing } from "lit-html";
 import { BgBlue } from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
 import {classMap} from "lit-html/directives/class-map";
-import {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY} from "@project-config";
+import {STAGE_PLAYER, STAGE_EDIT, STAGE_LEGACY} from "@utils/config";
 import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
 
 @customElement('module-page-grid-resize')

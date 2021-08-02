@@ -1,5 +1,4 @@
 use super::settings::SETTINGS;
-use config::MEDIA_UI_PATH;
 use shared::{
     media::{media_key,MediaLibrary, FileKind, PngImageFile},
     domain::image::ImageId,
@@ -9,7 +8,7 @@ use wasm_bindgen::prelude::*;
 use crate::unwrap::UnwrapJiExt;
 
 pub fn ui<T: AsRef<str>>(path:T) -> String {
-    media_url(&format!("{}/{}", MEDIA_UI_PATH, path.as_ref()))
+    media_url(&format!("ui/{}", path.as_ref()))
 }
 
 pub fn audio_lib_url(library_kind: MediaLibrary, id:AudioId) -> String {

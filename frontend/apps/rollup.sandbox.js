@@ -3,7 +3,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import {getEnv} from "./rollup.common.js";
 
-const {URL_FRONTEND_SANDBOX} = require("../../config/typescript");
+const {URL_FRONTEND_SANDBOX} = require("../config/constants");
 
 let {APP_NAME} = process.env;
 

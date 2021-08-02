@@ -11,12 +11,12 @@ actix-files = "0.4.0"
 actix-web = "3.0.0"
 anyhow = "1.0.32"
 askama = "0.10.3"
-config = {path = "../../config/rust"}
 core = {path = "../core"}
 dotenv = "0.15"
 listenfd = {version = "0.3", optional = true }
 log = "0.4"
 env_logger = "0.8.2"
+shared = {path = "../../shared/rust", features = ["backend"]}
 
 [features]
 default = ["listenfd", "core/listenfd"]

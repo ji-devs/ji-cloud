@@ -3,7 +3,6 @@ name: Api - Backend - PR
 on:
   pull_request:
     paths:
-    - 'config/**'
     - 'shared/**'
     - 'backend/core/**'
     - 'backend/api/**'
