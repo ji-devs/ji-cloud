@@ -3,7 +3,6 @@ name: Pages - Backend - PR
 on:
   pull_request:
     paths:
-    - 'config/**'
     - 'shared/**'
     - 'backend/core/**'
     - 'backend/pages/**'

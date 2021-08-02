@@ -10,11 +10,7 @@
                     },
                     {
                         "rootPathSuffix": "../config",
-                        "rootPathPrefix": "@frontend-config"
-                    },
-                    {
-                        "rootPathSuffix": "../../config/typescript/src/lib",
-                        "rootPathPrefix": "@project-config"
+                        "rootPathPrefix": "@config"
                     },
                     {
                         "rootPathSuffix": "../elements/src",

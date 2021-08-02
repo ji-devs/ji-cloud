@@ -33,8 +33,7 @@ export function createConfig(target) {
         // alias({
         //     entries: {
         //         "@utils": path.resolve(projectRootDir, "./.ts-output/frontend/ts-utils"),
-        //         "@frontend-config": path.resolve(projectRootDir, "../config"),
-        //         "@project-config": path.resolve(projectRootDir, "./.ts-output/config/typescript/src/lib"),
+        //         "@config": path.resolve(projectRootDir, "../config"),
         //         "@elements": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src"),
         //         "@bundles": path.resolve(projectRootDir, "./.ts-output/frontend/elements/src/_bundles")
         //     }

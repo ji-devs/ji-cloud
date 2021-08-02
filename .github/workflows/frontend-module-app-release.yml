@@ -4,7 +4,6 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'config/**'
     - 'shared/**'
     - 'frontend/config/**'
     - 'frontend/apps/crates/components/**'

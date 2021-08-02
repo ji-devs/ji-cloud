@@ -27,9 +27,9 @@ url = { version = "2.1.1", features = ["serde"] }
 uuid = { version = "0.8.1", features = ["serde"] }
 
 # from `config`
-#cfg-if = "1.0.0"
-#wasm-bindgen = { version = "0.2.74", features = ["nightly"], optional = true}
-#js-sys = { version = "0.3.51", optional = true }
+cfg-if = "1.0.0"
+wasm-bindgen = { version = "0.2.74", features = ["nightly"], optional = true}
+js-sys = { version = "0.3.51", optional = true }
 
 [dependencies.sqlx]
 version = "0.4.0"
@@ -39,4 +39,4 @@ optional = true
 
 [features]
 backend = ["sqlx", "actix-web", "paperclip"]
-#wasm = ["wasm-bindgen", "js-sys"] # from `config`
+wasm = ["wasm-bindgen", "js-sys"]

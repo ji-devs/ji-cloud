@@ -4,8 +4,7 @@
     "outDir": "./.ts-output",
     "paths": {
         "@utils/*": ["../ts-utils/*"],
-        "@frontend-config/*": ["../config/*"],
-        "@project-config": ["../../config/typescript/src/lib"],
+        "@config/*": ["../config/*"],
         "@elements/*": ["./src/*"],
         "@bundles/*": ["./src/_bundles/*"],
         "tslib": ["./node_modules/tslib/tslib.d.ts"]

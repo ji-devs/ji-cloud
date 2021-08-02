@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement, property} from 'lit-element';
 import {nothing} from "lit-html";
 import {BgBlue} from "@elements/_styles/bg";
 import { startResizer, setResizeOnStyle, setResizeOnDocumentRoot } from "@utils/resize";
-import {STAGE_PLAYER, STAGE_LEGACY} from "@project-config";
+import {STAGE_PLAYER, STAGE_LEGACY} from "@utils/config";
 import { loadAllFonts, loadFonts } from '@elements/_themes/themes';
 import { classMap } from 'lit-html/directives/class-map';
 
