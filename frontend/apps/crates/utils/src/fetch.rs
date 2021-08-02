@@ -12,11 +12,7 @@ use shared::api::{
 use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen_futures::JsFuture;
 use shared::domain::auth::CSRF_HEADER_NAME;
-use crate::{
-    storage::load_csrf_token,
-    unwrap::UnwrapJiExt,
-    env::env_var
-};
+use crate::{env::env_var, routes::Route, storage::load_csrf_token, unwrap::UnwrapJiExt};
 use js_sys::Promise;
 use wasm_bindgen::JsCast;
 use awsm_web::loaders::fetch::{fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, fetch_upload_file, fetch_upload_file_abortable, fetch_with_data , fetch_upload_blob_with_headers, fetch_upload_file_with_headers};
@@ -406,7 +402,8 @@ where T: DeserializeOwned + Serialize, E: DeserializeOwned + Serialize, Payload:
 fn side_effect_error(status_code:u16) -> bool {
     match status_code {
         403 | 401 => {
-            web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
+            Route::NoAuth.redirect();
+            //web_sys::window().unwrap_ji().alert_with_message(crate::strings::STR_AUTH_ALERT);
             true
         },
         _ => false
