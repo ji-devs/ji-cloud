@@ -115,7 +115,8 @@ async fn publish_draft() -> anyhow::Result<()> {
 
     assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
-    let resp = client // check that is a draft
+    // validate draft update
+    let resp = client
         .get(&format!(
             "http://0.0.0.0:{}/v1/jig/d52b9ff8-cd74-11eb-8dc1-b760927dc672",
             port

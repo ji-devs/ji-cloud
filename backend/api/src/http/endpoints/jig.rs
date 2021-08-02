@@ -150,7 +150,6 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
     let jig = db::jig::get(&db, path.into_inner())
