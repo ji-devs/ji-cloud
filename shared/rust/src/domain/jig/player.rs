@@ -37,8 +37,11 @@ impl Default for JigPlayerSettings {
 #[repr(i16)]
 pub enum TextDirection {
     /// left to right
+    #[serde(rename = "ltr")]
     LeftToRight = 0,
+
     /// right to left
+    #[serde(rename = "rtl")]
     RightToLeft = 1,
 }
 
