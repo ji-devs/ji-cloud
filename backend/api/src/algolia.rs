@@ -658,9 +658,7 @@ impl Client {
         goals: &[GoalId],
         author: Option<Uuid>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
-        let mut filters = algolia::filter::AndFilter {
-            filters: vec![Box::new(media_filter(MediaGroupKind::Image, false))],
-        };
+        let mut filters = algolia::filter::AndFilter { filters: vec![] };
 
         if let Some(author) = author {
             filters.filters.push(Box::new(CommonFilter {

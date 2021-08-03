@@ -458,7 +458,7 @@ pub struct JigSearchResponse {
     pub pages: u32,
 
     /// The total number of jigs found
-    pub total_image_count: u64,
+    pub total_jig_count: u64,
 }
 
 /// Response for successfully finding the draft of a jig.
