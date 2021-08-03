@@ -34,8 +34,11 @@ impl ApiEndpoint for Create {
 ///
 /// # Flow (register)
 /// 1. [`GET /v1/session/oauth/url/{service}/{kind}`](GetOAuthUrl)
+///     * Returns the access token as a cookie + csrf token, in addition to any user profile info
+///     given by the OAuth provider.
 /// 2. `POST /v1/session/oauth` (this route) with the token
 /// 3. [`PUT /v1/user/me/profile`](super::user::PutProfile)
+///     * Optionally include the user profile information returned in #1
 pub struct CreateOAuth;
 impl ApiEndpoint for CreateOAuth {
     type Req = CreateSessionOAuthRequest;
