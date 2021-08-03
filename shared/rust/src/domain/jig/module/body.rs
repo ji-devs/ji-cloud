@@ -84,6 +84,7 @@ impl Body {
             super::ModuleKind::Flashcards => Self::Flashcards(flashcards::ModuleData::default()),
             super::ModuleKind::Matching => Self::Matching(matching::ModuleData::default()),
             super::ModuleKind::Poster => Self::Poster(poster::ModuleData::default()),
+            super::ModuleKind::Video => Self::Video(video::ModuleData::default()),
             super::ModuleKind::TappingBoard => {
                 Self::TappingBoard(tapping_board::ModuleData::default())
             }
@@ -147,6 +148,7 @@ pub trait BodyExt<Mode: ModeExt, Step: StepExt>:
             ModuleKind::Flashcards => Ok(Body::Flashcards(self.convert_to_flashcards()?)),
             ModuleKind::CardQuiz => Ok(Body::CardQuiz(self.convert_to_card_quiz()?)),
             ModuleKind::Poster => Ok(Body::Poster(self.convert_to_poster()?)),
+            ModuleKind::Video => Ok(Body::Video(self.convert_to_video()?)),
             ModuleKind::TappingBoard => Ok(Body::TappingBoard(self.convert_to_tapping_board()?)),
             ModuleKind::DragDrop => Ok(Body::DragDrop(self.convert_to_drag_drop()?)),
             ModuleKind::Cover => Ok(Body::Cover(self.convert_to_cover()?)),
@@ -198,6 +200,10 @@ pub trait BodyConvert {
     /// Cover
     fn convert_to_cover(&self) -> Result<cover::ModuleData, &'static str> {
         Err("cannot convert to cover!")
+    }
+    /// Video
+    fn convert_to_video(&self) -> Result<video::ModuleData, &'static str> {
+        Err("cannot convert to video!")
     }
 }
 
