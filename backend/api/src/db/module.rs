@@ -136,12 +136,13 @@ fn map_module_contents(body: &ModuleBody) -> anyhow::Result<(ModuleKind, serde_j
     let body = match body {
         ModuleBody::CardQuiz(body) => serde_json::to_value(body)?,
         ModuleBody::Cover(body) => serde_json::to_value(body)?,
+        ModuleBody::DragDrop(body) => serde_json::to_value(body)?,
         ModuleBody::Flashcards(body) => serde_json::to_value(body)?,
         ModuleBody::Matching(body) => serde_json::to_value(body)?,
         ModuleBody::MemoryGame(body) => serde_json::to_value(body)?,
         ModuleBody::Poster(body) => serde_json::to_value(body)?,
         ModuleBody::TappingBoard(body) => serde_json::to_value(body)?,
-        ModuleBody::DragDrop(body) => serde_json::to_value(body)?,
+        ModuleBody::Video(body) => serde_json::to_value(body)?,
 
         _ => anyhow::bail!("Unimplemented body kind: {}", kind.as_str()),
     };
@@ -156,12 +157,13 @@ fn transform_response_kind(
     match kind {
         ModuleKind::CardQuiz => Ok(ModuleBody::CardQuiz(serde_json::from_value(contents)?)),
         ModuleKind::Cover => Ok(ModuleBody::Cover(serde_json::from_value(contents)?)),
+        ModuleKind::DragDrop => Ok(ModuleBody::DragDrop(serde_json::from_value(contents)?)),
         ModuleKind::Flashcards => Ok(ModuleBody::Flashcards(serde_json::from_value(contents)?)),
         ModuleKind::Matching => Ok(ModuleBody::Matching(serde_json::from_value(contents)?)),
         ModuleKind::Memory => Ok(ModuleBody::MemoryGame(serde_json::from_value(contents)?)),
         ModuleKind::Poster => Ok(ModuleBody::Poster(serde_json::from_value(contents)?)),
         ModuleKind::TappingBoard => Ok(ModuleBody::TappingBoard(serde_json::from_value(contents)?)),
-        ModuleKind::DragDrop => Ok(ModuleBody::DragDrop(serde_json::from_value(contents)?)),
+        ModuleKind::Video => Ok(ModuleBody::Video(serde_json::from_value(contents)?)),
 
         _ => anyhow::bail!("Unimplemented response kind"),
     }
