@@ -20,7 +20,7 @@ pub struct ModuleData {
 impl Default for ModuleData {
     fn default() -> Self {
         Self {
-            content: Some(Content::default())
+            content: Some(Content::default()),
         }
     }
 }
