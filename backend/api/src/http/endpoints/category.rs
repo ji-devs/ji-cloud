@@ -1,21 +1,22 @@
-use crate::{
-    db,
-    error::{self, BasicError},
-    extractor::ScopeManageCategory,
-    extractor::TokenUser,
-    extractor::TokenUserWithScope,
-};
 use paperclip::actix::{
     api_v2_errors, api_v2_operation,
     web::{self, Data, Json, Query, ServiceConfig},
     CreatedJson, NoContent,
 };
-use shared::api::endpoints::{category, ApiEndpoint};
-use shared::domain::category::{
-    CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
-    NewCategoryResponse, UpdateCategoryRequest,
+use shared::{
+    api::endpoints::{category, ApiEndpoint},
+    domain::category::{
+        CategoryId, CategoryResponse, CategoryTreeScope, CreateCategoryRequest, GetCategoryRequest,
+        NewCategoryResponse, UpdateCategoryRequest,
+    },
 };
 use sqlx::PgPool;
+
+use crate::{
+    db,
+    error::{self, BasicError},
+    extractor::{ScopeManageCategory, TokenUserWithScope},
+};
 
 #[api_v2_errors(
     code = 400,

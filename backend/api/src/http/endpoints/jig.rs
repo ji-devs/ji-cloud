@@ -225,7 +225,7 @@ async fn search(
     Ok(Json(JigSearchResponse {
         jigs,
         pages,
-        total_image_count: total_hits,
+        total_jig_count: total_hits,
     }))
 }
 
