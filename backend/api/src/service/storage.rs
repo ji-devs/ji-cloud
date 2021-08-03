@@ -87,15 +87,25 @@ impl Client {
             }
             // StatusCode::UNAUTHORIZED => Err(error::Storage::InvalidGrant),
             _ => {
-                let err = resp
-                    .json::<UploadUrlErrorResponse>()
-                    .await
-                    .with_context(|| {
-                        anyhow::anyhow!(
-                            "Failed to parse resumable upload URL from {}",
-                            stringify!(UploadUrlErrorResponse)
-                        )
-                    })?;
+                // FIXME
+                log::warn!(
+                    "{:?}",
+                    resp.json::<serde_json::Value>()
+                        .await
+                        .expect("debug error decode!")
+                );
+
+                // let err = resp
+                //     .json::<UploadUrlErrorResponse>()
+                //     .await
+                //     .with_context(|| {
+                //         anyhow::anyhow!(
+                //             "Failed to parse resumable upload URL from {}",
+                //             stringify!(UploadUrlErrorResponse)
+                //         )
+                //     })?;
+
+                let err = anyhow::anyhow!("see logs...");
 
                 Err(err.into())
             }
