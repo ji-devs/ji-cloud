@@ -38,8 +38,7 @@ pub mod user {
     use crate::{
         db, error,
         extractor::{RequestOrigin, TokenUser},
-        s3,
-        service::{self, ServiceData},
+        service::{s3, storage, GcpAccessKeyStore, ServiceData},
     };
 
     /// Create a audio file in the user's audio library.
@@ -57,8 +56,8 @@ pub mod user {
     #[api_v2_operation]
     pub(super) async fn upload(
         db: Data<PgPool>,
-        gcp_key_store: ServiceData<service::GcpAccessKeyStore>,
-        gcs: ServiceData<service::storage::Client>,
+        gcp_key_store: ServiceData<GcpAccessKeyStore>,
+        gcs: ServiceData<storage::Client>,
         _claims: TokenUser,
         Path(id): Path<AudioId>,
         origin: RequestOrigin,

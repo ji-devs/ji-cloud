@@ -6,7 +6,11 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn process_image(db: &PgPool, s3: &crate::s3::Client, id: Uuid) -> anyhow::Result<bool> {
+pub async fn process_image(
+    db: &PgPool,
+    s3: &crate::service::s3::Client,
+    id: Uuid,
+) -> anyhow::Result<bool> {
     log::info!("Processing image {}", id);
 
     let mut txn = db.begin().await?;
@@ -94,7 +98,7 @@ skip locked
 
 pub async fn process_user_image(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &crate::service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;
@@ -178,7 +182,7 @@ skip locked
 
 pub async fn process_animation(
     db: &PgPool,
-    s3: &crate::s3::Client,
+    s3: &crate::service::s3::Client,
     id: Uuid,
 ) -> anyhow::Result<bool> {
     let mut txn = db.begin().await?;

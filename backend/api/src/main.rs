@@ -16,7 +16,8 @@ use std::thread;
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
 
-use ji_cloud_api::{algolia, db, http, jwk, logger, s3, service};
+use ji_cloud_api::service::s3;
+use ji_cloud_api::{algolia, db, http, jwk, logger, service};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

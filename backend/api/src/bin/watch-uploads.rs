@@ -36,10 +36,10 @@ use core::{
 use ji_cloud_api::{
     db, error,
     http::{bad_request_handler, Application},
-    logger, s3,
+    logger,
     service::{
         event_arc::{self, audit_log, EventResource, EventSource},
-        notifications, uploads, GcpAccessKeyStore, ServiceData,
+        notifications, s3, uploads, GcpAccessKeyStore, ServiceData,
     },
 };
 use shared::media::{FileKind, MediaLibrary, PngImageFile};

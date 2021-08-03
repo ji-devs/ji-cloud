@@ -1,6 +1,6 @@
 use image::{
-    gif::GifDecoder, imageops::FilterType, AnimationDecoder, DynamicImage, GenericImageView,
-    ImageOutputFormat,
+    codecs::gif::GifDecoder, imageops::FilterType, AnimationDecoder, DynamicImage,
+    GenericImageView, ImageOutputFormat,
 };
 use shared::domain::{animation::AnimationKind, audio::AudioKind, image::ImageKind};
 use shared::media::MediaKind as SharedMediaKind;
