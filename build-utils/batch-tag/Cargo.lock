@@ -46,7 +46,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cfg-if",
- "config",
  "csv",
  "dotenv",
  "futures",
@@ -150,13 +149,6 @@ dependencies = [
  "textwrap",
  "unicode-width",
  "vec_map",
-]
-
-[[package]]
-name = "config"
-version = "0.1.0"
-dependencies = [
- "cfg-if",
 ]
 
 [[package]]
@@ -1035,6 +1027,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64",
+ "cfg-if",
  "chrono",
  "chrono-tz",
  "csv",

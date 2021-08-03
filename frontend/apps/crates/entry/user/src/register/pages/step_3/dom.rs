@@ -1,6 +1,7 @@
 use dominator::{Dom, html, clone, with_node};
 use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal_vec::{SignalVec, SignalVecExt};
+use std::ops::Deref;
 use std::rc::Rc;
 use super::{state::*, actions};
 use web_sys::HtmlInputElement;
@@ -22,8 +23,11 @@ impl Step3Page {
         let meta_options:Mutable<Option<MetaOptions>> = Mutable::new(None);
 
         html!("page-register-step3", {
-            .future(clone!(meta_options => async move {
-                meta_options.set(Some(MetaOptions::load().await.unwrap_throw()));
+            .future(clone!(state, meta_options => async move {
+                let meta = MetaOptions::load().await.unwrap_throw();
+                state.set_from_meta(&meta);
+
+                meta_options.set(Some(meta));
             }))
             .children_signal_vec(Self::get_children(meta_options, state))
         })
@@ -40,6 +44,7 @@ impl Step3Page {
                             html!("input-checkbox", {
                                 .property("slot", "ages")
                                 .property("label", label)
+                                .property("checked", state.age_ranges.borrow().contains(id))
                                 .event(clone!(state, id => move |evt:events::CustomToggle| {
                                     if evt.value() {
                                         state.age_ranges.borrow_mut().insert(id.clone());
@@ -55,6 +60,7 @@ impl Step3Page {
                             html!("input-checkbox", {
                                 .property("slot", "affiliations")
                                 .property("label", label)
+                                .property("checked", state.affiliations.borrow().contains(id))
                                 .event(clone!(state, id => move |evt:events::CustomToggle| {
                                     if evt.value() {
                                         state.affiliations.borrow_mut().insert(id.clone());

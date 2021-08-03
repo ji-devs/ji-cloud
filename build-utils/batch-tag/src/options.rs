@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 use std::path::{Path, PathBuf};
-use config::RemoteTarget;
+use shared::config::RemoteTarget;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "batch tags", about = "A little util to run ad-hoc batch tag stuff")]
@@ -33,7 +33,7 @@ pub struct Opts {
     pub sleep_debug: u64,
 
     /// debug mode 
-    #[structopt(long, parse(try_from_str), default_value = "false")]
+    #[structopt(long, parse(try_from_str), default_value = "true")]
     pub debug: bool,
 }
 
