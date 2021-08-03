@@ -1,11 +1,10 @@
 use dominator::{Dom, clone, html, with_node};
-use shared::domain::jig::Jig;
+use shared::domain::jig::{Jig, JigPlayerSettings};
 use web_sys::HtmlInputElement;
 use std::rc::Rc;
 use futures_signals::signal::SignalExt;
 use super::super::{state::State as SidebarState, actions as sidebar_actions};
 use utils::prelude::*;
-
 const STR_MY_JIGS:&'static str = "My JIGs";
 const STR_SEARCH_PLACEHOLDER:&'static str = "My JIG’s name";
 

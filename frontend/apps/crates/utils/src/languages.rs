@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 
 #[derive(Clone, Debug)]
-pub struct Language (&'static str, &'static str);
+pub struct Language (pub &'static str, pub &'static str);
 
 pub const LANGUAGE_CODE_EN: &'static str = "en";
 pub const LANGUAGE_CODE_HE: &'static str = "he";
