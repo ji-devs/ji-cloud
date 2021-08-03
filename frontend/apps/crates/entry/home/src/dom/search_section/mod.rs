@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use dominator::{html, Dom, clone};
-use utils::{events, unwrap::UnwrapJiExt};
+use utils::{events, unwrap::UnwrapJiExt, languages::Language};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 
 use crate::state::HomePageMode;
@@ -70,7 +70,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             .search_options
                             .languages
                             .iter()
-                            .map(|(lang_id, lang_label)| {
+                            .map(|Language(lang_id, lang_label)| {
                                 html!("li-check", {
                                     .text(lang_label)
                                     .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang_id => move |selected_language| {
@@ -122,7 +122,7 @@ fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
             .search_options
             .languages
             .iter()
-            .find(|(lang_code, _)| match &selected_language {
+            .find(|Language(lang_code, _)| match &selected_language {
                 Some(selected_language) => lang_code == &selected_language,
                 None => false,
             });
