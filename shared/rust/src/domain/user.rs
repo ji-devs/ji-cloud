@@ -236,7 +236,7 @@ pub struct PutProfileRequest {
 }
 
 /// Request for [`PatchProfile`](crate::api::endpoints::user::PatchProfile)
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 #[cfg_attr(feature = "backend", openapi(empty))]
 pub struct PatchProfileRequest {

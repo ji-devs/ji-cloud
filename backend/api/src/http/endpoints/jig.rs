@@ -63,7 +63,7 @@ async fn create(
         req.publish_at.map(DateTime::<Utc>::from),
         &language,
         &req.description,
-        &req.direction,
+        &req.default_player_settings,
     )
     .await
     .map_err(|e| match e {
@@ -135,10 +135,9 @@ async fn update(
         req.publish_at.map(|it| it.map(DateTime::<Utc>::from)),
         req.language.as_deref(),
         req.description.as_deref(),
-        req.is_public,
-        req.direction,
-        req.display_score,
-        req.theme,
+        req.is_public.as_ref(),
+        req.default_player_settings.as_ref(),
+        req.theme.as_ref(),
         req.audio_background,
         req.audio_effects,
     )
@@ -151,7 +150,6 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: TokenUser,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::Get as ApiEndpoint>::Res>, error::NotFound> {
     let jig = db::jig::get(&db, path.into_inner())

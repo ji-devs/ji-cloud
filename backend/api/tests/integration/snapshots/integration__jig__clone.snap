@@ -33,8 +33,12 @@ expression: body
     "description": "test description",
     "last_edited": "[last_edited]",
     "is_public": false,
-    "direction": "LeftToRight",
-    "display_score": false,
+    "default_player_settings": {
+      "direction": "LeftToRight",
+      "display_score": false,
+      "track_assessments": false,
+      "drag_assist": false
+    },
     "theme": "Blank",
     "audio_background": null,
     "audio_effects": {

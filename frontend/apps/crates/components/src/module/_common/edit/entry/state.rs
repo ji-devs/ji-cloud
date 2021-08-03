@@ -37,7 +37,7 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     domain::jig::{*, module::{*, body::{ModeExt, Body}}},
 };
-use utils::{settings::SETTINGS, prelude::*};
+use utils::{languages::LANGUAGE_CODE_EN, prelude::*, settings::SETTINGS};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 use std::collections::HashSet;
@@ -58,6 +58,7 @@ where
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
+    pub(super) screenshot_loader: Rc<AsyncLoader>,
     pub(super) save_loader: Rc<AsyncLoader>,
     pub(super) history: RefCell<Option<Rc<HistoryStateImpl<RawData>>>>,
     pub(super) raw_loaded: Mutable<bool>,
@@ -153,6 +154,7 @@ where
             history: RefCell::new(None),
             raw_loaded: Mutable::new(false),
             raw_loader: AsyncLoader::new(),
+            screenshot_loader: Rc::new(AsyncLoader::new()),
             save_loader: Rc::new(AsyncLoader::new()),
             page_body_switcher: AsyncLoader::new(),
             reset_from_history_loader: AsyncLoader::new(),
@@ -188,18 +190,17 @@ where
                         goals: Vec::new(),
                         creator_id: None,
                         author_id: None,
-                        language: String::from("en"),
+                        language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
                         publish_at: None,
                         additional_resources: Vec::new(),
                         description: String::from("debug"),
                         last_edited: None,
                         is_public: false,
-                        direction: TextDirection::default(),
-                        display_score: false,
                         theme: ThemeId::default(),
                         audio_background: None,
-                        audio_effects: AudioEffects::default() 
+                        audio_effects: AudioEffects::default(),
+                        default_player_settings: JigPlayerSettings::default(),
                     });
                 }
 
@@ -230,6 +231,7 @@ where
                     raw.clone(),
                     super::actions::save_history(
                         _self.opts.skip_save_for_debug,
+                        _self.screenshot_loader.clone(),
                         _self.save_loader.clone(),
                         _self.opts.jig_id.clone(),
                         _self.opts.module_id.clone(),

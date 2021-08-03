@@ -2046,6 +2046,7 @@ dependencies = [
  "htmlescape",
  "itertools 0.10.1",
  "js-sys",
+ "lazy_static",
  "log",
  "once_cell",
  "rgb",

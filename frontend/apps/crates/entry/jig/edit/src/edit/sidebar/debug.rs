@@ -1,4 +1,4 @@
-use shared::domain::jig::{AudioEffects, Jig, JigId, LiteModule, ModuleKind, TextDirection, module::ModuleId};
+use shared::domain::jig::{AudioEffects, Jig, JigId, LiteModule, JigPlayerSettings, ModuleKind, TextDirection, module::ModuleId};
 use utils::themes::ThemeId;
 use uuid::Uuid;
 use cfg_if::cfg_if;
@@ -39,11 +39,10 @@ pub fn get_jig() -> Jig {
         description: String::new(),
         last_edited: None,
         is_public: false,
-        direction: TextDirection::LeftToRight,
-        display_score: true,
         theme: ThemeId::Chalkboard,
         audio_background: None,
         audio_effects: AudioEffects::default(),
+        default_player_settings: JigPlayerSettings::default(),
     }
 
 }

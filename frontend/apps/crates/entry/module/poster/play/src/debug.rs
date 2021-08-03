@@ -40,9 +40,7 @@ pub static SETTINGS:OnceCell<DebugSettings> = OnceCell::new();
 
 const IMAGE_UUID:&'static str = "e84dd7fe-c92d-11eb-8c82-cfd1d3fd13ff";
 
-pub const DEBUG_TEXT:&'static str = r#" 
-[{"children":[{"text":"Hello World","element":"H1"}]},{"children":[{"element":"H1","text":"This is a Test"}]}]
-"#;
+pub const DEBUG_TEXT:&'static str = "Hello World!";
 
 #[derive(Debug, Default)]
 pub struct DebugSettings {
@@ -80,7 +78,11 @@ impl DebugSettings {
                                 },
                                 stickers: init_data.stickers.iter().map(|init| {
                                     match init {
-                                        InitSticker::Text => Sticker::Text(Text::new(DEBUG_TEXT.to_string())),
+                                        InitSticker::Text => {
+                                            let value = components::text_editor::state::State::text_to_value(DEBUG_TEXT);
+                                            let text = Text::new(value);
+                                            Sticker::Text(text)
+                                        },
                                         InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                             id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()), 
                                             lib: MediaLibrary::Global

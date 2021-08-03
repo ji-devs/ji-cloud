@@ -2,8 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{Jig, JigId, module::ModuleId};
-use utils::routes::JigPlayerSettings;
+use shared::domain::jig::{Jig, JigId, JigPlayerSettings, module::ModuleId};
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;

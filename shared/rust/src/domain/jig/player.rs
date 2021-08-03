@@ -1,12 +1,12 @@
 //! Types for Jig short codes for sharing
 
-use super::{JigId, TextDirection};
+use super::JigId;
 #[cfg(feature = "backend")]
 use paperclip::actix::Apiv2Schema;
 use serde::{Deserialize, Serialize};
 
 /// Settings for the player session.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "backend", derive(Apiv2Schema))]
 pub struct JigPlayerSettings {
     /// Text direction, left-to-right or right-to-left
@@ -17,6 +17,35 @@ pub struct JigPlayerSettings {
     pub track_assessments: bool,
     /// Whether or not to enable drag assist
     pub drag_assist: bool,
+}
+
+impl Default for JigPlayerSettings {
+    fn default() -> Self {
+        Self {
+            direction: TextDirection::default(),
+            display_score: false,
+            track_assessments: false,
+            drag_assist: false,
+        }
+    }
+}
+
+/// Sets text direction for the jig
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+#[repr(i16)]
+pub enum TextDirection {
+    /// left to right
+    LeftToRight = 0,
+    /// right to left
+    RightToLeft = 1,
+}
+
+impl Default for TextDirection {
+    fn default() -> Self {
+        Self::LeftToRight
+    }
 }
 
 /// Request to create a player session for a jig.

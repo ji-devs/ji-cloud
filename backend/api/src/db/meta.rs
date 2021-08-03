@@ -9,10 +9,13 @@ pub async fn get_image_styles(db: &PgPool) -> sqlx::Result<Vec<ImageStyle>> {
     sqlx::query_as!(
         ImageStyle,
         r#"
-        select style_id as "id: ImageStyleId", display_name, image_style.created_at, updated_at
-        from image_style
-            left join style on image_style.style_id = style.id
-        order by index
+with cte as (
+    select distinct style_id as id
+    from image_style
+)
+select id as "id: ImageStyleId", display_name, created_at, updated_at
+from cte inner join style using (id)
+order by index
         "#
     )
     .fetch_all(db)
@@ -23,10 +26,13 @@ pub async fn get_animation_styles(db: &PgPool) -> sqlx::Result<Vec<AnimationStyl
     sqlx::query_as!(
         AnimationStyle,
         r#"
-        select style_id as "id: AnimationStyleId", display_name, animation_style.created_at, updated_at
-        from animation_style
-            left join style on animation_style.style_id = style.id
-        order by index
+with cte as (
+    select distinct style_id as id
+    from animation_style
+)
+select id as "id: AnimationStyleId", display_name, created_at, updated_at
+from cte inner join style using (id)
+order by index
         "#
     )
     .fetch_all(db)

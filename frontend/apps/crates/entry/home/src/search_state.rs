@@ -14,14 +14,8 @@ use shared::{
     },
     error::EmptyError
 };
-use utils::prelude::*;
+use utils::{languages::{LANGUAGES, Language}, prelude::*};
 
-
-const STR_LANGUAGE_ENGLISH: &'static str = "English";
-const STR_LANGUAGE_HEBREW: &'static str = "Hebrew";
-
-
-pub type Language = (&'static str, &'static str);
 
 
 #[derive(Debug)]
@@ -77,10 +71,7 @@ impl SearchOptions {
             affiliations: Mutable::new(vec![]),
             categories: Mutable::new(vec![]),
             category_label_lookup: Mutable::new(HashMap::new()),
-            languages: Rc::new(vec![
-                ("en", STR_LANGUAGE_ENGLISH),
-                ("he", STR_LANGUAGE_HEBREW),
-            ]),
+            languages: Rc::new(LANGUAGES.clone()),
         }
     }
 

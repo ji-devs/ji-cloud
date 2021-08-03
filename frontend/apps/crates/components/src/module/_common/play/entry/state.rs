@@ -3,23 +3,16 @@ use std::cell::RefCell;
 use shared::domain::jig::module::body::Instructions;
 use shared::{
     api::endpoints::{ApiEndpoint, self, jig::module::*},
-    error::{EmptyError, MetadataNotFound},
-    domain::jig::{*, module::{*, body::{Body, ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
+    error::EmptyError,
+    domain::jig::{*, module::{*, body::{ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
 };
 use dominator::{clone, Dom};
-use futures_signals::{
-    map_ref,
-    signal::{self, Mutable, ReadOnlyMutable,  SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-    CancelableFutureHandle, 
-};
+use futures_signals::signal::Mutable;
+use utils::languages::LANGUAGE_CODE_EN;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
-use dominator_helpers::{
-    signals::OptionSignal,
-    futures::AsyncLoader,
-};
-use utils::{settings::SETTINGS, prelude::*, iframe::*};
+use dominator_helpers::futures::AsyncLoader;
+use utils::{prelude::*, iframe::*};
 use std::marker::PhantomData;
 use crate::audio_mixer::AudioMixer;
 use uuid::Uuid;
@@ -103,18 +96,17 @@ where
                         goals: Vec::new(),
                         creator_id: None,
                         author_id: None,
-                        language: String::from("en"),
+                        language: String::from(LANGUAGE_CODE_EN),
                         categories: Vec::new(),
                         publish_at: None,
                         additional_resources: Vec::new(),
                         description: String::from("debug"),
                         last_edited: None,
                         is_public: false,
-                        direction: TextDirection::default(),
-                        display_score: false,
                         theme: ThemeId::default(),
                         audio_background: None,
-                        audio_effects: AudioEffects::default() 
+                        audio_effects: AudioEffects::default(),
+                        default_player_settings: JigPlayerSettings::default(),
                     })
                 } else {
                     let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
@@ -135,8 +127,8 @@ where
 
             _self.audio_mixer.set_from_jig(&jig);
 
-            let raw_source = match _self.phase.get_cloned().loading_kind_unchecked() {
-                LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw)),
+            let (raw_source_player) = match _self.phase.get_cloned().loading_kind_unchecked() {
+                LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
                     _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
                         Rc::new(Box::new(clone!(init_from_raw, _self => move |raw| {
@@ -151,7 +143,7 @@ where
 
                                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                                     base, 
-                                    is_direct: true,
+                                    jig_player: false,
                                     play_started: Mutable::new(false)
                                 })));
                             }));
@@ -168,7 +160,7 @@ where
                     match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
                             let body = resp.module.body;
-                            Some((body.try_into().unwrap_ji(), InitSource::Load))
+                            Some((body.try_into().unwrap_ji(), InitSource::Load, true))
                         },
                         Err(_) => {
                             panic!("error loading module!")
@@ -177,7 +169,7 @@ where
                 }
             };
 
-            if let Some((raw, init_source)) = raw_source {
+            if let Some((raw, init_source, jig_player)) = raw_source_player {
 
                 let (jig_id, module_id, jig) = (
                     _self.opts.jig_id.clone(),
@@ -188,7 +180,7 @@ where
 
                 _self.phase.set(Rc::new(Phase::Ready(Ready {
                     base, 
-                    is_direct: false,
+                    jig_player,
                     play_started: Mutable::new(false)
                 })));
             }
@@ -232,7 +224,7 @@ pub enum Phase <RawData, Base>
 
 pub struct Ready<Base> {
     pub base: Rc<Base>, 
-    pub is_direct: bool,
+    pub jig_player: bool,
     pub play_started: Mutable<bool>,
 }
 

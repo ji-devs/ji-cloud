@@ -179,7 +179,7 @@ fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                     if state.player_settings.display_score {
                         dom = dom.property_signal("score", state.points.signal());
                     };
-                    if !state.player_settings.assessment_mode {
+                    if !state.player_settings.track_assessments {
                         dom = dom.child(
                             html!("jig-play-replay", {
                                 .property("slot", "actions")
@@ -218,7 +218,7 @@ fn render_time_up_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
                     .property("autoClose", false)
                     .child(html!("jig-play-time-up-popup", {
                         .apply(|mut dom| {
-                            if !state.player_settings.assessment_mode {
+                            if !state.player_settings.track_assessments {
                                 dom = dom.child(
                                     html!("jig-play-replay", {
                                         .property("slot", "actions")

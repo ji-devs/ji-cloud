@@ -1,9 +1,9 @@
 use std::rc::Rc;
 use dominator::{Dom, clone, html};
 use futures_signals::{map_ref, signal::{Signal, SignalExt}};
-use utils::events;
+use utils::{events, languages::Language};
 
-use super::super::state::{Language, State};
+use super::super::state::State;
 
 
 const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";
@@ -31,7 +31,7 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-fn render_language((lang_code, land_label): &Language, state: Rc<State>) -> Dom {
+fn render_language(Language(lang_code, land_label): &Language, state: Rc<State>) -> Dom {
     html!("li-check", {
         .text(&land_label)
         .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
@@ -45,7 +45,7 @@ fn render_language((lang_code, land_label): &Language, state: Rc<State>) -> Dom 
 
 fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
     state.jig.language.signal_cloned().map(clone!(state => move |selected_language| {
-        match state.languages.iter().find(|(lang_code, _)| lang_code == &selected_language) {
+        match state.languages.iter().find(|Language(lang_code, _)| lang_code == &selected_language) {
             Some(lang) => lang.1,
             None => ""
         }

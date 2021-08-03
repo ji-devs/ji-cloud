@@ -17,29 +17,29 @@ pub enum RemoteTarget {
     Sandbox,
     Release,
 }
-// FIXME temp
+
 cfg_if::cfg_if! {
- if #[cfg(feature = "wasm")] {
-     use wasm_bindgen::prelude::*;
+    if #[cfg(feature = "wasm")] {
+    use wasm_bindgen::prelude::*;
 
-     #[wasm_bindgen(inline_js = "export function process_env_var(key) { const value = process.env[key]; return value == undefined ? '' : value; }")]
-     extern "C" {
-         #[wasm_bindgen(catch)]
-         fn process_env_var(key:&str) -> Result<String, JsValue>;
-     }
+    #[wasm_bindgen(inline_js = "export function process_env_var(key) { const value = process.env[key]; return value == undefined ? '' : value; }")]
+    extern "C" {
+        #[wasm_bindgen(catch)]
+        fn process_env_var(key:&str) -> Result<String, JsValue>;
+    }
 
-     pub fn env_var(key: &str) -> Result<String, VarError> {
-         process_env_var(key)
-             .map_err(|_| {
-                 VarError::NotPresent
-             })
-             .and_then(|var| if var.is_empty() { Err(VarError::NotPresent) } else { Ok(var) })
-     }
- } else {
-     pub fn env_var(key: &str) -> Result<String, VarError> {
-         std::env::var(key)
-     }
- }
+    pub fn env_var(key: &str) -> Result<String, VarError> {
+        process_env_var(key)
+            .map_err(|_| {
+                VarError::NotPresent
+            })
+            .and_then(|var| if var.is_empty() { Err(VarError::NotPresent) } else { Ok(var) })
+    }
+    } else {
+        pub fn env_var(key: &str) -> Result<String, VarError> {
+            std::env::var(key)
+        }
+    }
 }
 
 impl RemoteTarget {
@@ -184,6 +184,15 @@ impl RemoteTarget {
             Self::Local
             | Self::Sandbox => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I&libraries=places",
             Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCU1HygSZgK4L3qPdRmrV-dTnS1GBBiqyE&libraries=places"
+        }
+    }
+
+    pub const fn cloud_functions_url(&self) -> &'static str {
+        match self {
+            Self::Local | Self::Sandbox => {
+                "https://europe-west1-ji-cloud-developer-sandbox.cloudfunctions.net"
+            }
+            Self::Release => "https://europe-west1-ji-cloud.cloudfunctions.net",
         }
     }
 

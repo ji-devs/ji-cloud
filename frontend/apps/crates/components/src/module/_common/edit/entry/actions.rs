@@ -11,9 +11,10 @@ use shared::{
     error::{EmptyError, MetadataNotFound},
     media::MediaLibrary
 };
+use wasm_bindgen_futures::spawn_local;
 use super::base::state::*;
 use super::choose::state::*;
-use utils::prelude::*;
+use utils::{prelude::*, screenshot::call_screenshot_service};
 use dominator_helpers::futures::AsyncLoader;
 use std::future::Future;
 use dominator::clone;
@@ -104,7 +105,7 @@ where
 pub type HistoryStateImpl<RawData> = HistoryState<RawData, Box<dyn Fn(RawData)>, Box<dyn Fn(RawData)>>;
 //pub type HistorySaveFn<RawData> = impl Fn(RawData);
 
-pub fn save_history<RawData, Mode, Step>(skip_for_debug: bool, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
+pub fn save_history<RawData, Mode, Step>(skip_for_debug: bool, screenshot_loader: Rc<AsyncLoader>, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId) -> Box<dyn Fn(RawData)>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
@@ -112,12 +113,19 @@ where
 {
     Box::new(move |raw_data:RawData| {
         if !skip_for_debug {
-            save(raw_data, save_loader.clone(), jig_id, module_id);
+            save(raw_data, screenshot_loader.clone(), save_loader.clone(), jig_id, module_id);
+        } else {
+            //TODO - remove this! Is just here for debugging!
+            screenshot_loader.load(async move {
+                log::info!("DEBUGGING - SCREENSHOT!");
+                call_screenshot_service(jig_id, module_id, RawData::kind()).await;
+            });
         }
+
     })
 }
 
-pub fn save<RawData, Mode, Step>(raw_data: RawData, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
+pub fn save<RawData, Mode, Step>(raw_data: RawData, screenshot_loader: Rc<AsyncLoader>, save_loader: Rc<AsyncLoader>, jig_id: JigId, module_id: ModuleId)
 where
     RawData: BodyExt<Mode, Step> + 'static ,
     Mode: ModeExt + 'static,
@@ -125,7 +133,6 @@ where
 {
     save_loader.load(async move {
         let body = raw_data.as_body(); 
-        log::info!("SAVING...");
         let path = Update::PATH
             .replace("{id}",&jig_id.0.to_string())
             .replace("{module_id}",&module_id.0.to_string());
@@ -136,9 +143,13 @@ where
             body: Some(body), 
         });
         api_with_auth_empty::<EmptyError, _>(&path, Update::METHOD, req).await; //.expect_ji("error saving module!");
-        log::info!("SAVED!");
+
+        screenshot_loader.load(async move {
+            call_screenshot_service(jig_id, module_id, RawData::kind()).await;
+        });
     });
 }
+
 //doesn't compile, gotta box for now: https://github.com/rust-lang/rust/issues/65442
 //pub type HistoryUndoRedoFn<RawData> = impl Fn(Option<RawData>);
 //pub fn history_on_undo_redo<Main, Mode, RawData>(state:Rc<State<Main, Mode, RawData>>) -> HistoryUndoRedoFn<RawData> 
