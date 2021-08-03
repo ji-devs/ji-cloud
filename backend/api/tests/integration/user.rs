@@ -381,7 +381,10 @@ async fn basic_auth_flow() -> anyhow::Result<()> {
     let body = resp.json::<CreateSessionResponse>().await?;
 
     let csrf = match body {
-        CreateSessionResponse::Register(resp) => resp.csrf,
+        CreateSessionResponse::Register {
+            response,
+            oauth_profile,
+        } => response.csrf,
         _ => {
             return Err(anyhow::anyhow!(
                 "invalid session response to create a user profile!"
