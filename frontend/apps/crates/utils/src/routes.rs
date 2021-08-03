@@ -2,7 +2,7 @@ use web_sys::Url;
 use wasm_bindgen::prelude::*;
 use shared::domain::{
     image::{ImageId, ImageSearchQuery}, 
-    jig::{JigId, module::ModuleId, ModuleKind}, 
+    jig::{JigId, JigPlayerSettings, module::ModuleId, ModuleKind}, 
 };
 use serde::{Serialize, Deserialize};
 use std::{fmt::Debug, str::FromStr};
@@ -65,27 +65,6 @@ pub enum JigRoute {
     Gallery,
     Edit(JigId, JigEditRoute),
     Play(JigId, Option<ModuleId>, JigPlayerSettings) 
-}
-
-// TODO: replace this with the shared version once that's ready
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(default)]
-pub struct JigPlayerSettings {
-    pub direction: shared::domain::jig::TextDirection,
-    pub display_score: bool,
-    pub assessment_mode: bool,
-    pub drag_assist: bool,
-}
-
-impl Default for JigPlayerSettings {
-    fn default() -> Self {
-        Self {
-            display_score: true,
-            direction: shared::domain::jig::TextDirection::default(),
-            assessment_mode: bool::default(),
-            drag_assist: bool::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

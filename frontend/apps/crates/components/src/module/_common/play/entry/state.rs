@@ -103,11 +103,10 @@ where
                         description: String::from("debug"),
                         last_edited: None,
                         is_public: false,
-                        direction: TextDirection::default(),
-                        display_score: false,
                         theme: ThemeId::default(),
                         audio_background: None,
-                        audio_effects: AudioEffects::default() 
+                        audio_effects: AudioEffects::default(),
+                        default_player_settings: JigPlayerSettings::default(),
                     })
                 } else {
                     let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
