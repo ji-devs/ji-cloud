@@ -103,6 +103,5 @@ pub enum JigToModuleMessage {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigMessage {
     AddPoints(u32),
-    StartTimer(u32),
-    Started,
+    Start(Option<u32>),
 }
