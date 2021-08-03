@@ -42,7 +42,7 @@ async fn create() -> anyhow::Result<()> {
         .json(&serde_json::json!({
             "jig_id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
             "settings": {
-                "direction": "RightToLeft",
+                "direction": "rtl",
                 "display_score": false,
                 "track_assessments": false,
                 "drag_assist": false,

@@ -21,7 +21,7 @@ expression: body
     "last_edited": "[time_stamp]",
     "is_public": true,
     "default_player_settings": {
-      "direction": "LeftToRight",
+      "direction": "ltr",
       "display_score": false,
       "track_assessments": false,
       "drag_assist": false
