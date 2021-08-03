@@ -81,11 +81,10 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigMessage) {
             let mut points = state.points.lock_mut();
             *points += amount;
         },
-        ModuleToJigMessage::StartTimer(time) => {
-            start_timer(Rc::clone(&state), time);
-        },
-        ModuleToJigMessage::Started => {
-            
+        ModuleToJigMessage::Start(time) => {
+            if let Some(time) = time {
+                start_timer(Rc::clone(&state), time);
+            }
         },
     };
 }
