@@ -111,7 +111,7 @@ where
                 } else {
                     let path = endpoints::jig::Get::PATH.replace("{id}",&_self.opts.jig_id.0.to_string());
 
-                    match api_with_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
+                    match api_no_auth::<JigResponse, EmptyError, ()>(&path, endpoints::jig::Get::METHOD, None).await {
                         Ok(resp) => {
                             Some(resp.jig)
                         },
@@ -157,7 +157,7 @@ where
                         .replace("{id}",&_self.opts.jig_id.0.to_string())
                         .replace("{module_id}",&_self.opts.module_id.0.to_string());
 
-                    match api_with_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
+                    match api_no_auth::<ModuleResponse, EmptyError, ()>(&path, Get::METHOD, None).await {
                         Ok(resp) => {
                             let body = resp.module.body;
                             Some((body.try_into().unwrap_ji(), InitSource::Load, true))

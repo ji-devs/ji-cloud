@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::{api::{ApiEndpoint, endpoints::jig}, domain::jig::JigResponse, error::EmptyError};
-use utils::{iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage}, prelude::{SETTINGS, api_with_auth}, routes::Route, unwrap::UnwrapJiExt};
+use utils::{iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage}, prelude::{SETTINGS, api_no_auth}, routes::Route, unwrap::UnwrapJiExt};
 use wasm_bindgen_futures::spawn_local;
 use super::{timer::Timer, state::State};
 
@@ -12,7 +12,7 @@ pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         let path = jig::Get::PATH.replace("{id}", &state.jig_id.0.to_string());
 
-        match api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::Get::METHOD, None).await {
+        match api_no_auth::<JigResponse, EmptyError, ()>(&path, jig::Get::METHOD, None).await {
             Ok(resp) => {
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
                 state.jig.set(Some(resp.jig));
