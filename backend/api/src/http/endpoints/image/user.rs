@@ -1,12 +1,3 @@
-use crate::extractor::RequestOrigin;
-use crate::service::storage;
-use crate::{
-    db, error,
-    extractor::TokenUser,
-    s3,
-    service::{GcpAccessKeyStore, ServiceData},
-};
-
 use futures::TryStreamExt;
 use paperclip::actix::{
     api_v2_operation,
@@ -26,6 +17,12 @@ use shared::{
     media::{FileKind, PngImageFile},
 };
 use sqlx::PgPool;
+
+use crate::{
+    db, error,
+    extractor::{RequestOrigin, TokenUser},
+    service::{s3, storage, ServiceData},
+};
 
 /// Create a image in the user's image library.
 #[api_v2_operation]

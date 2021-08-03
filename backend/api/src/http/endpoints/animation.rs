@@ -7,7 +7,10 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::animation, ApiEndpoint},
     domain::{
-        animation::{AnimationId, AnimationKind, AnimationResponse, AnimationUploadResponse},
+        animation::{
+            AnimationId, AnimationKind, AnimationResponse, AnimationUploadRequest,
+            AnimationUploadResponse,
+        },
         CreateResponse,
     },
     media::{FileKind, MediaLibrary},
@@ -15,8 +18,8 @@ use shared::{
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
 use crate::extractor::{RequestOrigin, ScopeManageAnimation, TokenUser, TokenUserWithScope};
-use crate::service::{storage, GcpAccessKeyStore, ServiceData};
-use crate::{db, error, s3};
+use crate::service::{s3, storage, GcpAccessKeyStore, ServiceData};
+use crate::{db, error};
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
     match err {

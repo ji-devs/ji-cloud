@@ -42,7 +42,6 @@ pub mod image_search;
 pub mod jwk;
 pub mod logger;
 pub(crate) mod more_futures;
-pub mod s3;
 pub mod service;
 pub mod token;
 

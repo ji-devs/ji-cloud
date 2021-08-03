@@ -1,24 +1,13 @@
 use std::sync::Arc;
 
 use actix_web::web::Path;
+use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use paperclip::actix::{
     api_v2_operation,
     web::{Bytes, Data, Json, ServiceConfig},
     CreatedJson, NoContent,
 };
 use sha2::Digest as _;
-use sqlx::PgPool;
-use url::Url;
-use uuid::Uuid;
-
-use crate::{
-    error,
-    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
-    image_ops::MediaKind,
-    s3,
-    service::ServiceData,
-};
-use core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
@@ -27,6 +16,16 @@ use shared::{
         Base64,
     },
     media::{FileKind, MediaLibrary, PngImageFile},
+};
+use sqlx::PgPool;
+use url::Url;
+use uuid::Uuid;
+
+use crate::{
+    error,
+    extractor::{ScopeAdmin, TokenUser, TokenUserWithScope},
+    image_ops::MediaKind,
+    service::{s3, ServiceData},
 };
 
 #[inline]
