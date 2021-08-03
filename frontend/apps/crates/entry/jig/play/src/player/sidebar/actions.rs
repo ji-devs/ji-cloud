@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
 use shared::{api::{ApiEndpoint, endpoints::meta}, domain::meta::MetadataResponse, error::EmptyError};
-use utils::prelude::api_with_auth;
+use utils::prelude::api_no_auth;
 use wasm_bindgen_futures::spawn_local;
 
 use crate::player::sidebar::state::ReportStatus;
@@ -31,7 +31,7 @@ pub fn send_report(state: Rc<State>) {
 
 pub fn load_ages(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
-        match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        match api_no_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
             Err(e) => {},
             Ok(res) => {
                 state.all_ages.set(res.age_ranges);
