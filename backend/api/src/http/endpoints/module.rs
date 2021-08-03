@@ -85,7 +85,6 @@ async fn update(
 #[api_v2_operation]
 async fn get(
     db: Data<PgPool>,
-    _claims: TokenUser,
     path: web::Path<(JigId, ModuleId)>,
 ) -> Result<Json<<module::Get as ApiEndpoint>::Res>, error::NotFound> {
     let (parent_id, module) = path.into_inner();

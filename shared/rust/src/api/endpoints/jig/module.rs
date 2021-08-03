@@ -12,7 +12,7 @@ use super::ApiEndpoint;
 /// Get a Module by index.
 ///
 /// # Authorization
-/// Standard
+/// No authorization required.
 ///
 /// # Errors
 /// [`Unauthorized`](http::StatusCode::UNAUTHORIZED) if authorization is not valid.
@@ -30,7 +30,7 @@ impl ApiEndpoint for Get {
 /// Create a Module.
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope).
 ///
 /// # Errors
 ///
@@ -49,7 +49,7 @@ impl ApiEndpoint for Create {
 /// Update a Module.
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope).
 ///
 /// # Errors
 ///
@@ -69,7 +69,7 @@ impl ApiEndpoint for Update {
 /// Delete a Module.
 ///
 /// # Authorization
-/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope)
+/// Standard + [`UserScope::ManageJig`](crate::domain::user::UserScope).
 ///
 /// # Errors
 ///
