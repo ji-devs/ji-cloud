@@ -78,7 +78,7 @@ pub struct Step2Data {
 }
 
 impl Step2Data {
-    fn debug() -> Self {
+    pub fn debug() -> Self {
         Self {
             step_1: Step1Data::debug(),
             location_json: None,
