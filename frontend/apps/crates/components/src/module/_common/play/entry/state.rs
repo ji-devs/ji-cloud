@@ -325,5 +325,10 @@ pub trait DomRenderable {
 
 pub trait BaseExt: DomRenderable {
     fn play(state: Rc<Self>) {}
-    fn get_instructions(&self) -> Option<Instructions>;
+    fn get_instructions(&self) -> Option<Instructions> {
+        None
+    }
+    fn get_timer_seconds(&self) -> Option<u32> {
+        None
+    }
 }

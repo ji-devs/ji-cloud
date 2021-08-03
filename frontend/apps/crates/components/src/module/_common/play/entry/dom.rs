@@ -219,7 +219,7 @@ where
                             .parent()
                             .unwrap_ji()
                             .unwrap_ji();
-                        let msg = IframeAction::new(ModuleToJigMessage::Started);
+                        let msg = IframeAction::new(ModuleToJigMessage::Start(base.get_timer_seconds()));
                         parent.post_message(&msg.into(), "*");
                     }
                     None
