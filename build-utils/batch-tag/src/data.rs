@@ -17,6 +17,7 @@ impl From<MetadataResponse> for MetaInfo {
             let all_list = [
                 "All",
                 "All ages",
+                "Show me everything",
             ];
 
             all_list.contains(&x)

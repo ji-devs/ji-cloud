@@ -8,11 +8,14 @@ use std::{
 
 pub async fn get_meta(ctx: Arc<Context>) -> anyhow::Result<MetaInfo>  {
     let client = reqwest::Client::new();
-    
+   
+    if(ctx.opts.verbose) {
+        log::info!("[verbose] getting meta");
+    }
+
     let url = format!("{}{}", ctx.opts.get_remote_target().api_url(), endpoints::meta::Get::PATH);
     let resp = client
         .get(&url)
-        .header("Authorization", &format!("Bearer {}", ctx.token))
         .send()
         .await?
         .error_for_status()?;
@@ -26,7 +29,9 @@ pub async fn get_meta(ctx: Arc<Context>) -> anyhow::Result<MetaInfo>  {
 }
 
 pub async fn get_image_list(ctx: Arc<Context>, meta: &MetaInfo) -> anyhow::Result<Vec<ImageInfo>>  {
-
+    if(ctx.opts.verbose) {
+        log::info!("[verbose] getting image list");
+    }
     let mut list:Vec<ImageInfo> = Vec::new();
 
 
@@ -62,6 +67,10 @@ pub async fn get_image_list(ctx: Arc<Context>, meta: &MetaInfo) -> anyhow::Resul
 
         if page == 0 {
             total_pages = body.pages;
+        }
+
+        if(ctx.opts.verbose) {
+            log::info!("[verbose] getting images for page #{} / {}", page+1, total_pages); 
         }
 
         ctx.report.write().await.n_total_images += body.images.len();
