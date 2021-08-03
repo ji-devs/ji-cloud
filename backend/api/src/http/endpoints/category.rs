@@ -53,7 +53,6 @@ impl Into<actix_web::Error> for CreateError {
 #[api_v2_operation]
 async fn get_categories(
     db: Data<PgPool>,
-    _claims: TokenUser,
     req: Option<Query<<category::Get as ApiEndpoint>::Req>>,
 ) -> actix_web::Result<Json<<category::Get as ApiEndpoint>::Res>, error::Server> {
     let req = req.map_or_else(GetCategoryRequest::default, Query::into_inner);
