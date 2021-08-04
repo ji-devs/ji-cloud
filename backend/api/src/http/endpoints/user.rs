@@ -407,8 +407,6 @@ async fn patch_profile(
 ) -> Result<NoContent, error::UserUpdate> {
     validate_patch_profile_req(&req)?;
 
-    log::info!("reached");
-
     db::user::update_profile(&*db, claims.0.user_id, req.into_inner()).await?;
 
     Ok(NoContent)

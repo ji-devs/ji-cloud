@@ -33,6 +33,7 @@ select user_id as "id",
     user_email.email::text                                                              as "email!",
     given_name,
     family_name,
+    profile_image,
     language,
     locale,
     opt_into_edu_resources,
@@ -47,8 +48,8 @@ select user_id as "id",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
     array(select age_range_id from user_age_range where user_age_range.user_id = "user".id) as "age_ranges!: Vec<Uuid>"
 from "user"
-inner join user_profile on "user".id = user_profile.user_id
-inner join user_email using(user_id)
+    inner join user_profile on "user".id = user_profile.user_id
+    inner join user_email using(user_id)
 where id = $1"#,
         id
     )
@@ -66,6 +67,7 @@ where id = $1"#,
         email: row.email,
         given_name: row.given_name,
         family_name: row.family_name,
+        profile_image: row.profile_image,
         language: row.language,
         locale: row.locale,
         opt_into_edu_resources: row.opt_into_edu_resources,
@@ -102,28 +104,31 @@ pub async fn upsert_profile(
     user_id: Uuid,
 ) -> Result<(), error::UserUpdate> {
     sqlx::query!(
+        //language=SQL
         r#"
 insert into user_profile
-    (user_id, username, over_18, given_name, family_name, language, locale, timezone, opt_into_edu_resources, organization, location) 
+    (user_id, username, over_18, given_name, family_name, profile_image, language, locale, timezone, opt_into_edu_resources, organization, location) 
 values 
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 on conflict (user_id) do update
 set
     over_18 = $3,
     given_name = $4,
     family_name = $5,
-    language = $6,
-    locale = $7,
-    timezone = $8,
-    opt_into_edu_resources = $9,
-    organization = $10,
-    location = $11
+    profile_image = $6,
+    language = $7,
+    locale = $8,
+    timezone = $9,
+    opt_into_edu_resources = $10,
+    organization = $11,
+    location = $12
 "#,
         user_id,
         &req.username,
         req.over_18,
         &req.given_name,
         &req.family_name,
+        req.profile_image.as_deref(),
         &req.language,
         &req.locale,
         req.timezone.name(),
@@ -202,6 +207,21 @@ set location = $2
 where user_id = $1 and location is distinct from $2"#,
             user_id,
             location
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    if let Some(profile_image) = req.profile_image {
+        sqlx::query!(
+            //language=SQL
+            r#"
+update user_profile
+set profile_image = $2
+where user_id = $1 and profile_image is distinct from $2
+        "#,
+            user_id,
+            profile_image
         )
         .execute(&mut txn)
         .await?;

@@ -104,6 +104,9 @@ pub struct UserProfile {
     /// The user's family name (last name)
     pub family_name: String,
 
+    /// URL to the user's profile image.
+    pub profile_image: Option<String>,
+
     /// The user's preferred language.
     pub language: String,
 
@@ -195,6 +198,11 @@ pub struct PutProfileRequest {
     /// The user's family name / "last name".
     pub family_name: String,
 
+    /// URL to the user's profile image.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<String>,
+
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
     pub language: String,
@@ -243,28 +251,49 @@ pub struct PatchProfileRequest {
     /// The user's username.
     ///
     /// This must be unique.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
 
     /// Is the user >= 18 yeas old?
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub over_18: Option<bool>,
 
     /// The user's given name / "first name".
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub given_name: Option<String>,
 
     /// The user's family name / "last name".
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub family_name: Option<String>,
+
+    /// URL to the user's profile image.
+    #[serde(default)]
+    #[serde(deserialize_with = "super::deserialize_optional_field")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile_image: Option<Option<String>>,
 
     // todo: create a struct that enforces format like `en_us`
     /// the language the user prefers to communicate with.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub language: Option<String>,
 
     /// The locale that should be used for the user.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
 
     /// the timezone that the user uses.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timezone: Option<chrono_tz::Tz>,
 
     /// Does the user want educational resources sent to them?
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub opt_into_edu_resources: Option<bool>,
 
     /// The organization that the user belongs to.
