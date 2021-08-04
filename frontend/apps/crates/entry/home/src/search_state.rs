@@ -42,6 +42,13 @@ impl SearchSelected {
     }
 
     pub fn set_from_profile(&self, profile: &UserProfile) {
+        let mut affiliations = self.affiliations.lock_mut();
+        if profile.affiliations.len() > 0 {
+            affiliations.clear();
+            affiliations.extend(profile.affiliations.clone());
+        }
+
+
         let mut age_ranges = self.age_ranges.lock_mut();
         if profile.age_ranges.len() > 0 {
             age_ranges.clear();
