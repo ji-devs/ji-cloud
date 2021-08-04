@@ -103,7 +103,6 @@ async fn hash_password(pass: String) -> anyhow::Result<String> {
             .hash_password(
                 pass.as_bytes(),
                 None,
-                None,
                 crate::ARGON2_DEFAULT_PARAMS,
                 salt.as_salt(),
             )
