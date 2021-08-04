@@ -18,6 +18,9 @@ export class _ extends LitElement {
     static get styles() {
         return [css`
             :host {
+                display: contents;
+            }
+            a {
                 box-sizing: border-box;
                 border-top: solid 6px transparent;
                 display: grid;
@@ -28,8 +31,10 @@ export class _ extends LitElement {
                 justify-content: space-between;
                 cursor: pointer;
                 font-weight: 500;
+                text-decoration: none;
+                color: inherit;
             }
-            :host([active]) {
+            :host([active]) a {
                 border-color: #fd7076;
                 color: var(--dark-red-1);
             }
@@ -39,14 +44,19 @@ export class _ extends LitElement {
     @property()
     kind: Kind = "home";
 
-    @property({ type: Boolean })
+    @property()
+    href: string = "";
+
+    @property({ type: Boolean, reflect: true })
     active: boolean = false;
 
     render() {
         const path = `core/page-header/nav-icon-${this.kind}${this.active ? '-active' : ''}.svg`;
         return html`
-            <img-ui path="${path}"></img-ui>
-            <span>${STR_LABEL_LOOKUP[this.kind]}</span>
+            <a href=${this.href}>
+                <img-ui path="${path}"></img-ui>
+                <span>${STR_LABEL_LOOKUP[this.kind]}</span>
+            </a>
         `;
     }
 }

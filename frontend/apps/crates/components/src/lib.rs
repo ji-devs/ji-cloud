@@ -39,3 +39,5 @@ pub mod theme_selector;
 pub mod collision;
 #[cfg(feature = "firebase")]
 pub mod firebase;
+#[cfg(feature = "page_header")]
+pub mod page_header;

@@ -8,9 +8,11 @@ export default {
 }
 
 interface Args {
+    loggedIn: boolean,
 }
 
 const DEFAULT_ARGS:Args = {
+    loggedIn: false,
 }
 
 export const PageHeader = (props?:Partial<Args>) => {
@@ -26,8 +28,13 @@ export const PageHeader = (props?:Partial<Args>) => {
             <page-header-link slot="links" kind="about"></page-header-link>
             <button-rect slot="donate" color="green" size="small" bold>Donate</button-rect>
 
-            <button-rect kind="text" slot="user">Sign up</button-rect>
-            <button-rect kind="text" slot="user">Login</button-rect>
+            ${ props.loggedIn ? `
+                <page-header-profile name="Someone" slot="user"></page-header-profile>
+            ` : `
+                <button-rect kind="text" slot="user">Sign up</button-rect>
+                <button-rect kind="text" slot="user">Login</button-rect>
+            `}
+
         </page-header>
     `;
 }

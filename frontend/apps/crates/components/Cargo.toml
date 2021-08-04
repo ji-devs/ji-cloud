@@ -99,6 +99,7 @@ theme_selector = []
 module_groups_cards = []
 collision = []
 firebase = []
+page_header = []
 
 default = ["all"]
 all= [
@@ -124,4 +125,5 @@ all= [
     "module_groups_cards",
     "collision",
     "firebase",
+    "page_header"
 ]

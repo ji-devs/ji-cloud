@@ -2,6 +2,8 @@ use std::rc::Rc;
 use dominator::{html, Dom, clone};
 use futures_signals::signal::SignalExt;
 
+use components::page_header;
+
 use super::state::{State, HomePageMode};
 
 
@@ -13,6 +15,7 @@ mod footer;
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("home-full", {
+        .child(page_header::dom::render(Rc::new(page_header::state::State::new())))
         .children(&mut [
             search_section::render(state.clone()),
             html!("empty-fragment", {
