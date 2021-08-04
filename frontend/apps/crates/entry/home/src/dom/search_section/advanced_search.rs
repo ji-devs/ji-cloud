@@ -105,8 +105,11 @@ fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let available_goals = state.search_options.goals.signal_cloned() => {
             let mut output = vec![];
             selected_goals.iter().for_each(|goal_id| {
-                let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
-                output.push(goal.display_name.clone());
+                // only search list if already populated
+                if available_goals.len() > 0 {
+                    let goal = available_goals.iter().find(|goal| goal.id == *goal_id).unwrap_ji();
+                    output.push(goal.display_name.clone());
+                }
             });
             output.join(", ")
         }
@@ -120,8 +123,11 @@ fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
         let available_affiliations = state.search_options.affiliations.signal_cloned() => {
             let mut output = vec![];
             selected_affiliations.iter().for_each(|affiliation_id| {
-                let affiliation = available_affiliations.iter().find(|affiliation| affiliation.id == *affiliation_id).unwrap_ji();
-                output.push(affiliation.display_name.clone());
+                // only search list if already populated
+                if available_affiliations.len() > 0 {
+                    let affiliation = available_affiliations.iter().find(|affiliation| affiliation.id == *affiliation_id).unwrap_ji();
+                    output.push(affiliation.display_name.clone());
+                }
             });
             output.join(", ")
         }
