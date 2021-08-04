@@ -63,11 +63,13 @@ pub fn regenerate_images(
         let new_image = match kind {
             ImageKind::Canvas => original.resize_exact(width, height, FilterType::Nearest),
 
-            ImageKind::Sticker if width <= original.width() && height <= original.height() => {
+            ImageKind::Sticker if (width <= original.width() && height <= original.height()) => {
                 original.clone()
             }
 
             ImageKind::Sticker => original.resize(width, height, FilterType::Nearest),
+
+            ImageKind::UserProfile => original.resize(width, height, FilterType::Nearest),
         };
 
         let mut buffer = Vec::new();
