@@ -27,6 +27,8 @@ pub enum ImageKind {
     Canvas = 0,
     /// The image is a sticker.
     Sticker = 1,
+    /// The image is a user profile picture
+    UserProfile = 2,
 }
 
 impl ImageKind {
@@ -39,6 +41,7 @@ impl ImageKind {
         match self {
             Self::Canvas => (1920, 1080),
             Self::Sticker => (1440, 810),
+            Self::UserProfile => (256, 256),
         }
     }
 
@@ -48,6 +51,7 @@ impl ImageKind {
         match self {
             Self::Canvas => "Canvas",
             Self::Sticker => "Sticker",
+            Self::UserProfile => "UserProfile",
         }
     }
 }
