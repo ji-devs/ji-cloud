@@ -2,10 +2,16 @@ use dominator::{html, Dom, clone};
 use shared::domain::jig::module::ModuleId;
 use std::rc::Rc;
 use utils::events;
-use crate::edit::sidebar::{actions::duplicate_module, copy_paste_module::{copy_module, paste_module}, module::{
+use crate::edit::sidebar::{
+    actions::duplicate_module,
+    copy_paste_module::{copy_module, paste_module},
+    module::{
         state::State as ModuleState,
         actions::{self, MoveTarget},
-    }, state::State as SidebarState};
+    },
+    state::State as SidebarState,
+    settings::state::ActiveSettingsPopup,
+};
 use super::state::*;
 
 
@@ -126,7 +132,8 @@ pub fn item_edit_settings(state: Rc<State>, sidebar_state: Rc<SidebarState>) -> 
         .property("icon", "edit")
         .event(clone!(state => move |_:events::Click| {
             state.close_menu();
-            sidebar_state.settings_shown.set(true);
+            // sidebar_state.settings_shown.set(true);
+            sidebar_state.settings.active_popup.set(Some(ActiveSettingsPopup::Main))
         }))
     })
 }

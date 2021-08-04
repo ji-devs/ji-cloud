@@ -85,6 +85,9 @@ export class _ extends LitElement {
   @property({reflect: true})
   state:STATE= "idle";
 
+  @property({ type: Boolean })
+  hasMenu: boolean = true;
+
   @property({type: Boolean, reflect: true})
   hover:boolean = false;
 
@@ -116,7 +119,7 @@ export class _ extends LitElement {
                   <img-ui class=${imageClass} path="${themeIconPath(theme, false)}"></img-ui>
                   <img-ui class=${imageHoverClass} path="${themeIconPath(theme, true)}"></img-ui>
                   <div class="label">${THEMES[theme].label.en}</div>
-                  ${state === "selected" ? renderMenu() : nothing}
+                  ${state === "selected" && this.hasMenu ? renderMenu() : nothing}
               </div>
           </section>
       `

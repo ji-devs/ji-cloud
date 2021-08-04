@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use dominator_helpers::{temp_make_event, make_custom_event_serde, make_custom_event};
-use web_sys::{File, DomRect};
+use shared::domain::jig::TextDirection;
 use super::resize::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -172,3 +172,17 @@ impl ImageLoad {
 }
 
 
+
+// Custom Direction 
+#[derive(Deserialize, Debug)]
+pub struct CustomDirectionData {
+    pub direction: TextDirection,
+}
+
+make_custom_event_serde!("custom-direction", CustomDirection, CustomDirectionData);
+
+impl CustomDirection {
+    pub fn direction(&self) -> TextDirection {
+        self.data().direction
+    }
+}

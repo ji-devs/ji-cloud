@@ -53,6 +53,12 @@ export class _ extends LitElement {
             this.direction = "rtl";
         else
             this.direction = "ltr";
+
+        this.dispatchEvent(new CustomEvent("custom-direction", {
+            detail: {
+                direction: this.direction
+            }
+        }))
     }
 
     render() {

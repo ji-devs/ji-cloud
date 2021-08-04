@@ -9,6 +9,10 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                popup-body {
+                    width: 424px;
+                    display: block;
+                }
                 .settings {
                     padding: 0 32px 44px 32px;
                 }

@@ -1,4 +1,5 @@
-use shared::{api::endpoints::{ApiEndpoint, self}, domain::jig::{Jig, JigId, JigResponse, JigUpdateRequest, module::ModuleId}, error::EmptyError};
+use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use shared::{api::endpoints::{ApiEndpoint, self}, domain::jig::{Jig, JigId, JigPlayerSettings, JigResponse, JigUpdateRequest, module::ModuleId}, error::EmptyError};
 use std::rc::Rc;
 use std::cell::RefCell;
 use dominator::clone;
@@ -59,4 +60,24 @@ pub fn duplicate_module(state: Rc<State>, module_id: &ModuleId) {
         let module = super::module_cloner::clone_module(&state.jig.id, &module_id, &state.jig.id).await.unwrap_ji();
         state.modules.lock_mut().push_cloned(Rc::new(Some(module)));
     }));
+}
+
+
+pub fn player_settings_change_signal(state: Rc<State>) -> impl Signal<Item = JigPlayerSettings> {
+    let sig = map_ref! {
+        let direction = state.settings.direction.signal_cloned(),
+        let display_score = state.settings.display_score.signal(),
+        let track_assessments = state.settings.track_assessments.signal(),
+        let drag_assist = state.settings.drag_assist.signal()
+        => ( direction.clone(), display_score.clone(), track_assessments.clone(), drag_assist.clone())
+    };
+
+    sig.map(|(direction, display_score, track_assessments, drag_assist)| {
+        JigPlayerSettings {
+            direction: direction.clone(),
+            display_score: display_score.clone(),
+            track_assessments: track_assessments.clone(),
+            drag_assist: drag_assist.clone(),
+        }
+    })
 }

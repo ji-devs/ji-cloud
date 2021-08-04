@@ -9,7 +9,8 @@ use std::{
 };
 use super::{
     module::state::State as ModuleState,
-    dragging::state::State as DragState
+    dragging::state::State as DragState,
+    settings::state::State as SettingsState,
 };
 use utils::{drag::Drag, math::PointI32, routes::JigEditRoute};
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
@@ -25,7 +26,7 @@ pub struct State {
     pub publish_at: Mutable<Option<DateTime<Utc>>>,
     pub modules: MutableVec<Rc<Option<LiteModule>>>,
     pub collapsed: Mutable<bool>,
-    pub settings_shown: Mutable<bool>,
+    pub settings: Rc<SettingsState>,
     pub drag: Mutable<Option<Rc<DragState>>>,
     pub drag_target_index: Mutable<Option<usize>>,
     pub loader: AsyncLoader,
@@ -50,7 +51,7 @@ impl State {
             publish_at: Mutable::new(jig.publish_at.clone()),
             modules: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
-            settings_shown: Mutable::new(false),
+            settings: Rc::new(SettingsState::new(&jig)),
             drag: Mutable::new(None),
             drag_target_index: Mutable::new(None),
             loader: AsyncLoader::new(),

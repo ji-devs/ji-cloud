@@ -32,6 +32,10 @@ export class _ extends LitElement {
                     color: var(--dark-gray-5);
                     font-weight: 300;
                 }
+                ::slotted(button-icon[slot=close]) {
+                    width: 12px;
+                    height: 12px;
+                }
                 ::slotted([slot=heading]) {
                     color: #fd7076;
                     font-size: 24px;

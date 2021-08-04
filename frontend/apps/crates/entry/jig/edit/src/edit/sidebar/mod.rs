@@ -9,3 +9,4 @@ pub(super) mod dragging;
 pub(super) mod menu;
 pub(super) mod module_cloner;
 pub(super) mod copy_paste_module;
+pub(super) mod settings;
