@@ -16,7 +16,6 @@ pub fn load_jig(state: Rc<State>) {
             Ok(resp) => {
                 // state.active_module.set(Some(resp.jig.modules[0].clone()));
                 state.jig.set(Some(resp.jig));
-                state.active_module.set(1);
             },
             Err(_) => {},
         }
