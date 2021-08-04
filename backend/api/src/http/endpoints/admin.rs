@@ -23,12 +23,11 @@ use shared::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::service::s3;
 use crate::{
     db, error,
     extractor::{ScopeAdmin, TokenUserWithScope},
     image_ops::{regenerate_images, MediaKind},
-    service::ServiceData,
+    service::{s3, ServiceData},
     token::{create_auth_token, SessionMask},
 };
 
