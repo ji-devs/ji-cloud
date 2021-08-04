@@ -16,7 +16,6 @@ use std::thread;
 use anyhow::Context;
 use core::settings::{self, SettingsManager};
 
-use ji_cloud_api::service::s3;
 use ji_cloud_api::{algolia, db, http, jwk, logger, service};
 
 #[tokio::main]
@@ -50,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
         let s3 = settings
             .s3_settings()
             .await?
-            .map(s3::Client::new)
+            .map(service::s3::Client::new)
             .transpose()?;
 
         let gcp_key_store = settings

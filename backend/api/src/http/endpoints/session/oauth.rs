@@ -131,15 +131,6 @@ async fn handle_google_oauth(
 
     let claims: IdentityClaims = jwks.verify_oauth(&tokens.id_token, 3).await?;
 
-    let profile = OAuthUserProfile {
-        email: claims.email.clone(),
-        name: claims.name,
-        profile_picture: claims.profile_picture,
-        given_name: claims.given_name,
-        family_name: claims.family_name,
-        locale: claims.locale,
-    };
-
     let mut txn = db.begin().await?;
 
     let google_auth = sqlx::query!(
@@ -215,6 +206,15 @@ async fn handle_google_oauth(
     let response = NewSessionResponse { csrf };
 
     let response = if !mask.contains(SessionMask::GENERAL) {
+        let profile = OAuthUserProfile {
+            email: claims.email.clone(),
+            name: claims.name,
+            profile_picture: claims.profile_picture,
+            given_name: claims.given_name,
+            family_name: claims.family_name,
+            locale: claims.locale,
+        };
+
         CreateSessionResponse::Register {
             response,
             oauth_profile: Some(profile),
