@@ -270,7 +270,6 @@ impl AudioFeedbackNegative {
     }
 }
 
-
 /// Positive Audio Feedback
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
