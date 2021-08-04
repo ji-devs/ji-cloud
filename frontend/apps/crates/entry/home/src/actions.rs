@@ -2,7 +2,7 @@ use std::rc::Rc;
 use dominator::clone;
 use futures::join;
 use futures_signals::signal_vec::MutableVec;
-use shared::{api::{ApiEndpoint, endpoints::{jig, user::Profile}}, domain::{jig::{JigSearchQuery, JigSearchResponse}, user::UserProfile}, error::EmptyError};
+use shared::{api::{ApiEndpoint, endpoints::{jig, user::Profile}}, domain::{jig::{JigCountResponse, JigSearchQuery, JigSearchResponse}, user::UserProfile}, error::EmptyError};
 use utils::prelude::*;
 use crate::state::HomePageMode;
 
@@ -11,10 +11,21 @@ use super::state::State;
 pub fn fetch_data(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
         join!(
+            fetch_total_jigs_count(Rc::clone(&state)),
             fetch_metadata(Rc::clone(&state)),
             fetch_profile(Rc::clone(&state)),
         );
     }));
+}
+
+
+async fn fetch_total_jigs_count(state: Rc<State>) {
+    match api_no_auth::<JigCountResponse, EmptyError, ()>(jig::Count::PATH, jig::Count::METHOD, None).await {
+        Err(_) => {},
+        Ok(res) => {
+            state.total_jigs_count.set(res.total_count);
+        },
+    };
 }
 
 

@@ -27,6 +27,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 HomePageMode::Search(_, _) => "results",
             }
         }))
+        .property_signal("resultsCount", state.total_jigs_count.signal().map(|x| x as f64))
         .child(html!("home-search-section-help", {
             .property("slot", "help")
         }))

@@ -19,6 +19,7 @@ pub struct State {
     pub whats_new: Vec<WhatsNewItem>,
     pub parents_testimonials: Vec<Testimonial>,
     pub teachers_testimonials: Vec<Testimonial>,
+    pub total_jigs_count: Mutable<u64>,
 }
 
 impl State {
@@ -33,6 +34,7 @@ impl State {
             whats_new: Self::get_whats_new(),
             parents_testimonials: Self::get_parents_testimonials(),
             teachers_testimonials: Self::get_teachers_testimonials(),
+            total_jigs_count: Mutable::new(0),
         }
     }
 
