@@ -1,4 +1,5 @@
 import { LitElement, html, css, customElement, property } from 'lit-element';
+import { ifDefined } from 'lit-html/directives/if-defined';
 
 export type Color = "red" | "blue" | "green";
 export type Size = "small" | "medium" | "large";
@@ -60,13 +61,13 @@ export class _ extends LitElement {
                     font-style: italic;
                 }
 
-                :host([size=small]:not([kind=text])) {
+                :host([size=small]:not([kind=text])) .inner {
                     padding: 8px 22px;
                 }
-                :host([size=medium]:not([kind=text])) {
+                :host([size=medium]:not([kind=text])) .inner {
                     padding: 12px 24px;
                 }
-                :host([size=large]:not([kind=text])) {
+                :host([size=large]:not([kind=text])) .inner {
                     padding: 16px 40px;
                 }
 
@@ -82,9 +83,10 @@ export class _ extends LitElement {
                     color: var(--light-gray-4);
                 }
 
-                button {
+                button, a {
                     all: inherit;
-                    display: contents;
+                    /* not sure why but color is not inherited with all */
+                    color: inherit;
                 }
             `
         ];
@@ -111,24 +113,37 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     submit: boolean = false;
 
+    @property()
+    href?: string;
+
+    @property()
+    target?: string;
+
     connectedCallback() {
         super.connectedCallback();
         this.addEventListener("click", this.onClick, true);
     }
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.removeEventListener("click", this.onClick);
-    }
-    onClick(e: MouseEvent) {
+    private onClick(e: MouseEvent) {
         if(this.disabled)
             e.stopPropagation();
     }
 
-    render() {
+    private renderButton() {
         return html`
-            <button type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
+            <button class="inner" type="${this.submit ? 'submit' : 'button' }" ?disabled="${this.disabled}">
                 <slot></slot>
             </button>
         `;
+    }
+    private renderLink() {
+        return html`
+            <a class="inner" href=${this.href!} @click=${this.onClick} target=${ifDefined(this.target as any)}>
+                <slot></slot>
+            </a>
+        `;
+    }
+
+    render() {
+        return this.href === undefined ? this.renderButton() : this.renderLink();
     }
 }

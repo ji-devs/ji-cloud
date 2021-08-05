@@ -13,6 +13,8 @@ interface Args {
     italic: boolean,
     submit: boolean,
     disabled: boolean,
+    href: string,
+    target: string,
 
     contents: string,
 }
@@ -25,6 +27,8 @@ const DEFAULT_ARGS:Args = {
     italic: false,
     submit: false,
     disabled: false,
+    href: "",
+    target: "",
 
     contents: "Submit",
 }
