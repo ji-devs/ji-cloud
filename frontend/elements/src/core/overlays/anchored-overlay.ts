@@ -15,6 +15,8 @@ export class AnchoredOverlay extends LitElement {
                 .overlay {
                     position: fixed;
                     z-index: 1;
+                    max-height: 200px;
+                    overflow: auto;
                 }
             `
         ];
@@ -123,6 +125,12 @@ export class AnchoredOverlay extends LitElement {
                 break;
         }
         this.overlay.style.setProperty("left", `${left}px`);
+
+        let maxHeight = window.innerHeight - top;
+        this.overlay.style.setProperty("max-height", `${maxHeight}px`);
+
+        let maxWidth = window.innerWidth - top;
+        this.overlay.style.setProperty("max-width", `${maxWidth}px`);
     }
 
     render() {
