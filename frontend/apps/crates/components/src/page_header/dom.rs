@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use dominator::{Dom, html, routing::go_to_url};
+use dominator::{Dom, html};
 use futures_signals::signal::SignalExt;
 use shared::domain::user::UserProfile;
-use utils::{events, routes::{JigRoute, ProfileSection, Route, UserRoute}};
+use utils::routes::{JigRoute, ProfileSection, Route, UserRoute};
 
 use crate::page_header::state::LoggedInState;
 
@@ -65,13 +65,14 @@ pub fn render(state: Rc<State>) -> Dom {
 
 fn render_logged_in(user: &UserProfile) -> Vec<Dom> {
     vec![
-        html!("page-header-profile", {
+        html!("a", {
             .property("slot", "user")
-            .style("cursor", "pointer")
-            .property("name", &user.given_name)
-            .event(|_: events::Click| {
-                go_to_url(&Route::User(UserRoute::Profile(ProfileSection::Landing)).to_string());
-            })
+            .property("href", &Route::User(UserRoute::Profile(ProfileSection::Landing)).to_string())
+            .style("text-decoration", "none")
+            .child(html!("page-header-profile", {
+                .style("cursor", "pointer")
+                .property("name", &user.given_name)
+            }))
         })
     ]
 }
@@ -82,19 +83,15 @@ fn render_logged_out() -> Vec<Dom> {
             .property("slot", "user")
             .property("kind", "text")
             .property("color", "black")
+            .property("href", &Route::User(UserRoute::Register).to_string())
             .text(STR_SIGN_UP)
-            .event(|_: events::Click| {
-                go_to_url(&Route::User(UserRoute::Register).to_string());
-            })
         }),
         html!("button-rect", {
             .property("slot", "user")
             .property("kind", "text")
             .property("color", "black")
+            .property("href", &Route::User(UserRoute::Login).to_string())
             .text(STR_LOGIN)
-            .event(|_: events::Click| {
-                go_to_url(&Route::User(UserRoute::Login).to_string());
-            })
         })
     ]
 }
