@@ -38,18 +38,19 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "affiliation")
                 .property("label", STR_AFFILIATION_LABEL)
                 .property("placeholder", STR_AFFILIATION_PLACEHOLDER)
+                .property("multiple", true)
                 .visible_signal(state.is_logged_in.signal().map(|is_logged_in| {
                     !is_logged_in
                 }))
                 .property_signal("value", affiliation_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.affiliations.signal_cloned().map(clone!(state => move|affiliations| {
                     affiliations.iter().map(|affiliation| {
-                        html!("li-check", {
+                        html!("input-select-option", {
                             .text(&affiliation.display_name)
                             .property_signal("selected", state.search_selected.affiliations.signal_cloned().map(clone!(affiliation => move |affiliations| {
                                 affiliations.contains(&affiliation.id)
                             })))
-                            .event(clone!(state, affiliation => move |_: events::Click| {
+                            .event(clone!(state, affiliation => move |_: events::CustomSelectedChange| {
                                 let mut affiliations = state.search_selected.affiliations.lock_mut();
                                 match affiliations.contains(&affiliation.id) {
                                     true => affiliations.remove(&affiliation.id),
@@ -65,15 +66,16 @@ pub fn render(state: Rc<State>) -> Dom {
                 .property("slot", "goal")
                 .property("label", STR_GOAL_LABEL)
                 .property("placeholder", STR_GOAL_PLACEHOLDER)
+                .property("multiple", true)
                 .property_signal("value", goal_value_signal(state.clone()))
                 .children_signal_vec(state.search_options.goals.signal_cloned().map(clone!(state => move|goals| {
                     goals.iter().map(|goal| {
-                        html!("li-check", {
+                        html!("input-select-option", {
                             .text(&goal.display_name)
                             .property_signal("selected", state.search_selected.goals.signal_cloned().map(clone!(goal => move |goals| {
                                 goals.contains(&goal.id)
                             })))
-                            .event(clone!(state, goal => move |_: events::Click| {
+                            .event(clone!(state, goal => move |_: events::CustomSelectedChange| {
                                 let mut goals = state.search_selected.goals.lock_mut();
                                 match goals.contains(&goal.id) {
                                     true => goals.remove(&goal.id),

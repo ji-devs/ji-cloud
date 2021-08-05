@@ -32,7 +32,7 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
         let mut category_label_lookup = HashMap::new();
         get_categories_labels(&categories, &mut category_label_lookup, "");
         state.categories.set(Some(categories));
-        log::info!("{:?}", category_label_lookup);
+
         state.category_label_lookup.set(Some(category_label_lookup));
 
         let meta = meta.unwrap_ji();

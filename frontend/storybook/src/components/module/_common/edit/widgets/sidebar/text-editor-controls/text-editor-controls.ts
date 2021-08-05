@@ -21,14 +21,14 @@ export const TextEditorControls = (props?:Partial<Args>) => {
         <text-editor-controls ${argsToAttrs(props)} style="width: 492px">
             <text-editor-controls-insert-button slot="insert-button"></text-editor-controls-insert-button>
             <input-select slot="font" label="Font" value="Arial">
-                <li-check selected>Options</li-check>
+                <input-select-option selected>Options</input-select-option>
             </input-select>
             <text-editor-controls-button slot="h1" kind="h1"></text-editor-controls-button>
             <text-editor-controls-button slot="h2" kind="h2"></text-editor-controls-button>
             <text-editor-controls-button slot="p1" kind="p1"></text-editor-controls-button>
             <text-editor-controls-button slot="p2" kind="p2"></text-editor-controls-button>
             <input-select slot="weight" label="Weight" value="Normal">
-                <li-check selected>Options</li-check>
+                <input-select-option selected>Options</input-select-option>
             </input-select>
             <text-editor-controls-input-number slot="font-size"></text-editor-controls-input-number>
             <text-editor-controls-button slot="bold" kind="bold"></text-editor-controls-button>

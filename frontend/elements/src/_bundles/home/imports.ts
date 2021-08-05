@@ -1,8 +1,8 @@
 import "@elements/core/images/ui";
 import "@elements/core/images/ji";
-import "@elements/core/inputs/old/select";
-import "@elements/core/lists/li-check";
-import "@elements/core/lists/li-check-collection";
+import "@elements/core/inputs/composed/select/select";
+import "@elements/core/inputs/composed/select/option";
+import "@elements/core/inputs/composed/select/option-group";
 import "@elements/core/page-header/page-header";
 import "@elements/core/page-header/page-header-link";
 import "@elements/core/page-header/page-header-profile";

@@ -62,7 +62,7 @@ impl GalleryDom {
                 .property("slot", "filters")
                 .property_signal("value", state.visible_jigs.signal_cloned().map(|visible_jigs| Self::visible_jigs_option_string(&visible_jigs)))
                 .children(VisibleJigs::iter().map(|option| {
-                    html!("li-check", {
+                    html!("input-select-option", {
                         .property("value", &option.to_string())
                         .text(Self::visible_jigs_option_string(&option))
                         .property_signal("selected", state.visible_jigs.signal_cloned().map(clone!(state, option => move |visible_jigs| {
@@ -72,9 +72,11 @@ impl GalleryDom {
                                 false
                             }
                         })))
-                        .event(clone!(state, option => move |_: events::Click| {
-                            state.visible_jigs.set(option.clone());
-                            actions::load_jigs_regular(state.clone());
+                        .event(clone!(state, option => move |evt: events::CustomSelectedChange| {
+                            if evt.selected() {
+                                state.visible_jigs.set(option.clone());
+                                actions::load_jigs_regular(state.clone());
+                            }
                         }))
                     })
                 }))

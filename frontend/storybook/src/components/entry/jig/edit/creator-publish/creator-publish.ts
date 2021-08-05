@@ -4,7 +4,7 @@ import "@elements/entry/jig/edit/publish/add-resource-method";
 import "@elements/core/inputs/composed/switch";
 import "@elements/core/inputs/old/text";
 import "@elements/core/inputs/old/textarea";
-import "@elements/core/inputs/old/select";
+import "@elements/core/inputs/composed/select/select";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/pills/pill-close";
 

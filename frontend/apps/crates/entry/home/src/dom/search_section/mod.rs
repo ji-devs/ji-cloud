@@ -44,15 +44,16 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
                 html!("home-search-section-select", {
                     .property("slot", "age")
+                    .property("multiple", true)
                     .property_signal("value", age_value_signal(state.clone()))
                     .children_signal_vec(state.search_options.age_ranges.signal_cloned().map(clone!(state => move|age_ranges| {
                         age_ranges.iter().map(|age_range| {
-                            html!("li-check", {
+                            html!("input-select-option", {
                                 .text(&age_range.display_name)
                                 .property_signal("selected", state.search_selected.age_ranges.signal_cloned().map(clone!(age_range => move |age_ranges| {
                                     age_ranges.contains(&age_range.id)
                                 })))
-                                .event(clone!(state, age_range => move |_: events::Click| {
+                                .event(clone!(state, age_range => move |_: events::CustomSelectedChange| {
                                     let mut age_ranges = state.search_selected.age_ranges.lock_mut();
                                     match age_ranges.contains(&age_range.id) {
                                         true => age_ranges.remove(&age_range.id),
@@ -72,7 +73,7 @@ pub fn render(state: Rc<State>) -> Dom {
                             .languages
                             .iter()
                             .map(|lang| {
-                                html!("li-check", {
+                                html!("input-select-option", {
                                     .text(lang.display_name())
                                     .property_signal("selected", state.search_selected.language.signal_cloned().map(clone!(lang => move |selected_language| {
                                         match selected_language {
@@ -80,8 +81,10 @@ pub fn render(state: Rc<State>) -> Dom {
                                             None => false,
                                         }
                                     })))
-                                    .event(clone!(state, lang => move |_: events::Click| {
-                                        state.search_selected.language.set(Some(lang.code().to_string()));
+                                    .event(clone!(state, lang => move |evt: events::CustomSelectedChange| {
+                                        if evt.selected() {
+                                            state.search_selected.language.set(Some(lang.code().to_string()));
+                                        }
                                     }))
                                 })
                             })

@@ -14,6 +14,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "age")
         .property("label", STR_AGE_LABEL)
         .property("placeholder", STR_AGE_PLACEHOLDER)
+        .property("multiple", true)
         .property_signal("value", age_value_signal(state.clone()))
         .property_signal("error", {
             (map_ref! {
@@ -41,12 +42,12 @@ pub fn render(state: Rc<State>) -> Dom {
 
 fn render_age(age: &AgeRange, state: Rc<State>) -> Dom {
     let age_id = age.id.clone();
-    html!("li-check", {
+    html!("input-select-option", {
         .text(&age.display_name)
         .property_signal("selected", state.jig.age_ranges.signal_cloned().map(clone!(age_id => move |ages| {
             ages.contains(&age_id)
         })))
-        .event(clone!(state => move |_: events::Click| {
+        .event(clone!(state => move |_: events::CustomSelectedChange| {
             let mut ages = state.jig.age_ranges.lock_mut();
             if ages.contains(&age_id) {
                 ages.remove(&age_id);

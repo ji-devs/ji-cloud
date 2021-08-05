@@ -1,5 +1,5 @@
 export function withSlot(slot:string, html:string):string {
-    const getInsertPos = ():number => {
+    const getInsertPos = ():any => {
         for(let i = 1; i < html.length; i++) {
             if(!isNaN(html[i] as any)) {
                 return i;

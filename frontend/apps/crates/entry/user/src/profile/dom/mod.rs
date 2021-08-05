@@ -153,9 +153,9 @@ impl ProfilePage {
                         Language::code_to_display_name(&code)
                     }))
                     .children(LANGUAGES.iter().map(|lang| {
-                        html!("li-check", {
+                        html!("input-select-option", {
                             .text(lang.display_name())
-                            .event(clone!(state => move |_: events::Click| {
+                            .event(clone!(state => move |_: events::CustomSelectedChange| {
                                 state.user.language.set(lang.code().to_string());
                                 actions::save_profile(Rc::clone(&state));
                             }))

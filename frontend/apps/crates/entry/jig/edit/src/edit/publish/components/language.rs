@@ -32,13 +32,15 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn render_language(Language(lang_code, land_label): &Language, state: Rc<State>) -> Dom {
-    html!("li-check", {
+    html!("input-select-option", {
         .text(&land_label)
         .property_signal("selected", state.jig.language.signal_cloned().map(clone!(lang_code => move |selected_lang| {
             lang_code == &selected_lang
         })))
-        .event(clone!(state, lang_code => move |_: events::Click| {
-            state.jig.language.set(lang_code.to_string());
+        .event(clone!(state, lang_code => move |evt: events::CustomSelectedChange| {
+            if evt.selected() {
+                state.jig.language.set(lang_code.to_string());
+            }
         }))
     })
 }

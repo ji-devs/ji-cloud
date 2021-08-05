@@ -14,6 +14,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "goal")
         .property("label", STR_TEACHING_GOAL_LABEL)
         .property("placeholder", STR_TEACHING_GOAL_PLACEHOLDER)
+        .property("multiple", true)
         .property_signal("value", goal_value_signal(state.clone()))
         .property_signal("error", {
             (map_ref! {
@@ -41,12 +42,12 @@ pub fn render(state: Rc<State>) -> Dom {
 
 fn render_goal(goal: &Goal, state: Rc<State>) -> Dom {
     let goal_id = goal.id.clone();
-    html!("li-check", {
+    html!("input-select-option", {
         .text(&goal.display_name)
         .property_signal("selected", state.jig.goals.signal_cloned().map(clone!(goal_id => move |goals| {
             goals.contains(&goal_id)
         })))
-        .event(clone!(state => move |_: events::Click| {
+        .event(clone!(state => move |_: events::CustomSelectedChange| {
             let mut goals = state.jig.goals.lock_mut();
             if goals.contains(&goal_id) {
                 goals.remove(&goal_id);

@@ -186,3 +186,17 @@ impl CustomDirection {
         self.data().direction
     }
 }
+
+// Custom Selected 
+#[derive(Deserialize, Debug)]
+pub struct CustomSelectedChangeData {
+    pub selected: bool,
+}
+
+make_custom_event_serde!("custom-selected", CustomSelectedChange, CustomSelectedChangeData);
+
+impl CustomSelectedChange {
+    pub fn selected(&self) -> bool {
+        self.data().selected
+    }
+}

@@ -5,19 +5,17 @@ import "@elements/core/overlays/anchored-overlay";
 export class _ extends LitElement {
     static get styles() {
         return [css`
-            anchored-overlay {
-                width: 100%;
-            }
-            anchored-overlay::part(overlay) {
-                box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.08);
-                padding: 16px 0;
-                border-radius: 10px;
-            }
             .anchor {
                 cursor: pointer;
                 display: flex;
                 justify-content: space-between;
-                padding: 0 22px;
+                padding: 0 10px;
+            }
+            .value {
+                color: var(--dark-gray-6);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             .anchor img-ui {
                 width: 30px;
@@ -25,6 +23,18 @@ export class _ extends LitElement {
             }
             :host([open]) .anchor img-ui {
                 transform: rotate(180deg);
+            }
+            base-select {
+                display: block;
+            }
+            base-select::part(anchored-overlay) {
+                display: block;
+            }
+            base-select::part(anchored-overlay_overlay) {
+                border-radius: 0 0 14px 14px;
+                box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+                background-color: white;
+                padding-bottom: 14px;
             }
         `];
     }
@@ -35,25 +45,32 @@ export class _ extends LitElement {
     @property({ type: Boolean, reflect: true })
     open: boolean = false;
 
-    toggleOpen() {
-        this.open = !this.open;
-    }
+    @property({ type: Boolean })
+    multiple: boolean = false;
 
-    onClose() {
-        this.open = false;
+    private onBaseOpenChange(e: CustomEvent) {
+        this.open = e.detail.open;
     }
 
     render() {
         return html`
-            <anchored-overlay tabindex="0" positionY="bottom-out" positionX="left-in" ?open="${this.open}" @close="${this.onClose}">
-                <div class="anchor" @click="${this.toggleOpen}" slot="anchor">
-                    ${this.value}
-                    <img-ui path="core/_common/chevron-down-blue.svg"></img-ui>
+            <style>
+                base-select::part(anchored-overlay_overlay) {
+                    width: ${this.clientWidth}px;
+                }
+            </style>
+
+            <base-select
+                ?multiple=${this.multiple}
+                ?open=${this.open}
+                @custom-open-change="${this.onBaseOpenChange}"
+            >
+                <div slot="anchor" class="anchor">
+                    <div class="value">${this.value}</div>
+                    <img-ui slot="icon" class="icon" path="core/_common/chevron-down-blue.svg"></img-ui>
                 </div>
-                <div slot="overlay">
-                    <slot></slot>
-                </div>
-            </anchored-overlay>
+                <slot></slot>
+            </base-select>
         `;
     }
 }
