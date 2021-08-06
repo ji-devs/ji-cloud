@@ -1,15 +1,14 @@
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use std::rc::Rc;
-use dominator::{html, Dom, clone};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::categories_select;
 
-use crate::{
-    actions::search,
-    state::State
-};
-
+use crate::{actions::search, state::State};
 
 const STR_SEARCH: &'static str = "Search";
 const STR_ADVANCED: &'static str = "Advanced";
@@ -18,9 +17,7 @@ const STR_GOAL_PLACEHOLDER: &'static str = "Select from the list";
 const STR_AFFILIATION_LABEL: &'static str = "Affiliation";
 const STR_AFFILIATION_PLACEHOLDER: &'static str = "Select one or more from the list";
 
-
 pub fn render(state: Rc<State>) -> Dom {
-
     html!("home-search-section-advanced", {
         .property("slot", "advanced")
         .children(&mut [
@@ -61,7 +58,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     }).collect()
                 })).to_signal_vec())
             }),
-    
+
             html!("input-select", {
                 .property("slot", "goal")
                 .property("label", STR_GOAL_LABEL)
@@ -86,9 +83,9 @@ pub fn render(state: Rc<State>) -> Dom {
                     }).collect()
                 })).to_signal_vec())
             }),
-    
+
             categories_select::render(state.clone()),
-    
+
             html!("button-rect", {
                 .property("slot", "search-button")
                 .property("color", "blue")
@@ -115,7 +112,7 @@ fn goal_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             });
             output.join(", ")
         }
-        
+
     }
 }
 
@@ -133,6 +130,6 @@ fn affiliation_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             });
             output.join(", ")
         }
-        
+
     }
 }

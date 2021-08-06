@@ -1,10 +1,20 @@
-use std::rc::Rc;
+use crate::state::HomePageMode;
 use dominator::clone;
 use futures::join;
 use futures_signals::signal_vec::MutableVec;
-use shared::{api::{ApiEndpoint, endpoints::{jig, user::Profile}}, domain::{jig::{JigCountResponse, JigSearchQuery, JigSearchResponse}, user::UserProfile}, error::EmptyError};
+use shared::{
+    api::{
+        endpoints::{jig, user::Profile},
+        ApiEndpoint,
+    },
+    domain::{
+        jig::{JigCountResponse, JigSearchQuery, JigSearchResponse},
+        user::UserProfile,
+    },
+    error::EmptyError,
+};
+use std::rc::Rc;
 use utils::prelude::*;
-use crate::state::HomePageMode;
 
 use super::state::State;
 
@@ -18,16 +28,20 @@ pub fn fetch_data(state: Rc<State>) {
     }));
 }
 
-
 async fn fetch_total_jigs_count(state: Rc<State>) {
-    match api_no_auth::<JigCountResponse, EmptyError, ()>(jig::Count::PATH, jig::Count::METHOD, None).await {
-        Err(_) => {},
+    match api_no_auth::<JigCountResponse, EmptyError, ()>(
+        jig::Count::PATH,
+        jig::Count::METHOD,
+        None,
+    )
+    .await
+    {
+        Err(_) => {}
         Ok(res) => {
             state.total_jigs_count.set(res.total_count);
-        },
+        }
     };
 }
-
 
 async fn fetch_metadata(state: Rc<State>) {
     state.search_options.populate_options().await;
@@ -43,20 +57,20 @@ async fn fetch_metadata(state: Rc<State>) {
 }
 
 async fn fetch_profile(state: Rc<State>) {
-    let (result, status) = api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None).await;
-    match status  {
+    let (result, status) =
+        api_with_auth_status::<UserProfile, EmptyError, ()>(&Profile::PATH, Profile::METHOD, None)
+            .await;
+    match status {
         403 | 401 => {
             //not logged in
         }
-        _ => {
-            match result {
-                Err(_) => {},
-                Ok(profile) => {
-                    state.is_logged_in.set(true);
-                    state.search_selected.set_from_profile(&profile);
-                }
+        _ => match result {
+            Err(_) => {}
+            Ok(profile) => {
+                state.is_logged_in.set(true);
+                state.search_selected.set_from_profile(&profile);
             }
-        }
+        },
     };
 }
 

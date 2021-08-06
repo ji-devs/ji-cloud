@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use dominator::{html, Dom};
+use std::rc::Rc;
 
 use super::super::state::State;
 

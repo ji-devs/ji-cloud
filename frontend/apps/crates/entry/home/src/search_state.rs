@@ -1,23 +1,27 @@
-use std::{collections::{HashMap, HashSet}, rc::Rc};
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use futures::join;
 use futures_signals::signal::Mutable;
 use shared::{
     api::{
+        endpoints::{category, meta},
         ApiEndpoint,
-        endpoints::{category, meta}
     },
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::JigSearchQuery,
         meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Goal, GoalId, MetadataResponse},
-        user::UserProfile
+        user::UserProfile,
     },
-    error::EmptyError
+    error::EmptyError,
 };
-use utils::{languages::{LANGUAGES, Language}, prelude::*};
-
-
+use utils::{
+    languages::{Language, LANGUAGES},
+    prelude::*,
+};
 
 #[derive(Debug)]
 pub struct SearchSelected {
@@ -48,7 +52,6 @@ impl SearchSelected {
             affiliations.extend(profile.affiliations.clone());
         }
 
-
         let mut age_ranges = self.age_ranges.lock_mut();
         if profile.age_ranges.len() > 0 {
             age_ranges.clear();
@@ -65,7 +68,12 @@ impl SearchSelected {
         JigSearchQuery {
             q: self.query.lock_ref().to_owned(),
             age_ranges: self.age_ranges.lock_ref().to_owned().into_iter().collect(),
-            affiliations: self.affiliations.lock_ref().to_owned().into_iter().collect(),
+            affiliations: self
+                .affiliations
+                .lock_ref()
+                .to_owned()
+                .into_iter()
+                .collect(),
             categories: self.categories.lock_ref().to_owned().into_iter().collect(),
             goals: self.goals.lock_ref().to_owned().into_iter().collect(),
             page: Some(0),
@@ -96,14 +104,17 @@ impl SearchOptions {
     }
 
     pub async fn populate_options(&self) {
-        let _ = join!(
-            self.load_metadata(),
-            self.load_categories()
-        );
+        let _ = join!(self.load_metadata(), self.load_categories());
     }
-    
+
     async fn load_metadata(&self) -> Result<(), EmptyError> {
-        match api_no_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+        match api_no_auth::<MetadataResponse, EmptyError, ()>(
+            meta::Get::PATH,
+            meta::Get::METHOD,
+            None,
+        )
+        .await
+        {
             Err(e) => Err(e),
             Ok(res) => {
                 // only set values if they're not set yet from the profile
@@ -117,17 +128,23 @@ impl SearchOptions {
                     self.goals.set(res.goals);
                 }
                 Ok(())
-            },
+            }
         }
     }
 
     async fn load_categories(&self) -> Result<(), EmptyError> {
         let req = GetCategoryRequest {
-            ids: Vec::new(), 
-            scope: Some(CategoryTreeScope::Decendants)
+            ids: Vec::new(),
+            scope: Some(CategoryTreeScope::Decendants),
         };
 
-        match api_no_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(category::Get::PATH, category::Get::METHOD, Some(req)).await {
+        match api_no_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(
+            category::Get::PATH,
+            category::Get::METHOD,
+            Some(req),
+        )
+        .await
+        {
             Err(e) => Err(e),
             Ok(res) => {
                 let mut category_label_lookup = HashMap::new();
@@ -137,7 +154,7 @@ impl SearchOptions {
                     self.categories.set(res.categories);
                 }
                 Ok(())
-            },
+            }
         }
     }
 

@@ -1,29 +1,27 @@
-use utils::routes::Route;
-use std::rc::Rc;
-use futures_signals::signal::SignalExt;
+use super::dom;
+use super::state::State;
 use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::SignalExt;
 use std::cell::RefCell;
-use super::state::State;
-use super::dom;
+use std::rc::Rc;
+use utils::routes::Route;
 
 pub struct Router {
     loader: AsyncLoader,
-    app: RefCell<Option<Rc<State>>>
+    app: RefCell<Option<Rc<State>>>,
 }
 
 impl Router {
     pub fn new() -> Self {
         Self {
             loader: AsyncLoader::new(),
-            app: RefCell::new(None)
+            app: RefCell::new(None),
         }
     }
 }
 
-
 pub fn render(state: Rc<Router>) {
-
     state.clone().loader.load(
         dominator::routing::url()
             .signal_ref(|url| Route::from_url(&url))
@@ -39,6 +37,6 @@ pub fn render(state: Rc<Router>) {
                     _ => {}
                 };
                 async {}
-            }))
+            })),
     );
 }

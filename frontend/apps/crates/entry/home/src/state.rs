@@ -1,13 +1,9 @@
-use std::{
-    rc::Rc,
-    iter
-};
+use std::{iter, rc::Rc};
 
+use super::search_state::{SearchOptions, SearchSelected};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{signal::Mutable, signal_vec::MutableVec};
 use shared::domain::jig::Jig;
-use super::search_state::{SearchOptions, SearchSelected};
-
 
 pub struct State {
     pub loader: AsyncLoader,
@@ -44,7 +40,9 @@ impl State {
             image_lib: String::from("mock"),
             search_term: String::from("Chanukah"),
             jigs_count: 355 as u32,
-        }).take(5).collect()
+        })
+        .take(5)
+        .collect()
     }
 
     fn get_whats_new() -> Vec<WhatsNewItem> {
@@ -74,15 +72,13 @@ impl State {
             paragraph: String::from("I want to tell you, because of JI, my children are learning Hebrew and English simultaneously. For my children, you are not only teaching two children, you are also saving their souls. I reaffirm that they have achieved educational rehabilitation, thanks to JI."),
         }).take(5).collect()
     }
-
 }
 
 #[derive(Clone)]
 pub enum HomePageMode {
     Home,
-    Search(String, Rc<MutableVec<Jig>>)
+    Search(String, Rc<MutableVec<Jig>>),
 }
-
 
 #[derive(Clone)]
 pub struct QuickSearch {
@@ -92,7 +88,6 @@ pub struct QuickSearch {
     pub jigs_count: u32,
 }
 
-
 #[derive(Clone)]
 pub struct WhatsNewItem {
     pub image_id: String,
@@ -101,7 +96,6 @@ pub struct WhatsNewItem {
     pub paragraph: String,
     pub link: String,
 }
-
 
 #[derive(Clone)]
 pub struct Testimonial {

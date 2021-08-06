@@ -1,23 +1,25 @@
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use std::rc::Rc;
-use dominator::{html, Dom, clone};
-use utils::{events, unwrap::UnwrapJiExt, languages::Language};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use utils::{events, unwrap::UnwrapJiExt};
+use web_sys::HtmlInputElement;
 
 use crate::state::HomePageMode;
 
 use super::super::{
+    actions::{fetch_data, search},
     state::State,
-    actions::{fetch_data, search}
 };
 
-
-mod categories_select;
 mod advanced_search;
+mod categories_select;
 
 const STR_ALL_LANGUAGES: &'static str = "All languages";
 
 pub fn render(state: Rc<State>) -> Dom {
-
     fetch_data(state.clone());
 
     html!("home-search-section", {
@@ -34,13 +36,15 @@ pub fn render(state: Rc<State>) -> Dom {
         .child(html!("home-search-bar", {
             .property("slot", "search-bar")
             .children(&mut [
-                html!("input", {
-                    .property("slot", "query")
-                    .property("placeholder", "search")
-                    .event(clone!(state => move |evt: events::Input| {
-                        let v = evt.value();
-                        state.search_selected.query.set(v.unwrap_or_default())
-                    }))
+                html!("input" => HtmlInputElement, {
+                    .with_node!(elem => {
+                        .property("slot", "query")
+                        .property("placeholder", "search")
+                        .event(clone!(state => move |_: events::Input| {
+                            let v = elem.value();
+                            state.search_selected.query.set(v)
+                        }))
+                    })
                 }),
                 html!("home-search-section-select", {
                     .property("slot", "age")
@@ -105,7 +109,6 @@ pub fn render(state: Rc<State>) -> Dom {
     })
 }
 
-
 fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
     map_ref! {
         let selected_ages = state.search_selected.age_ranges.signal_cloned(),
@@ -124,19 +127,23 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
 }
 
 fn language_value_signal(state: Rc<State>) -> impl Signal<Item = &'static str> {
-    state.search_selected.language.signal_cloned().map(clone!(state => move |selected_language| {
-        let lang = state
-            .search_options
-            .languages
-            .iter()
-            .find(|lang| match &selected_language {
-                Some(selected_language) => lang.code() == selected_language,
-                None => false,
-            });
+    state
+        .search_selected
+        .language
+        .signal_cloned()
+        .map(clone!(state => move |selected_language| {
+            let lang = state
+                .search_options
+                .languages
+                .iter()
+                .find(|lang| match &selected_language {
+                    Some(selected_language) => lang.code() == selected_language,
+                    None => false,
+                });
 
-        match lang {
-            Some(lang) => lang.display_name(),
-            None => STR_ALL_LANGUAGES
-        }
-    }))
+            match lang {
+                Some(lang) => lang.display_name(),
+                None => STR_ALL_LANGUAGES
+            }
+        }))
 }
