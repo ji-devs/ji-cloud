@@ -55,6 +55,8 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
         .property("slot", "colors")
         .property("positionY", "top-in")
+        .property("positionX", "right-out")
+        .property("styled", true)
         .property_signal("open", color_state.select_for.signal_cloned().map(|select_for| select_for.is_some()))
         .event(clone!(color_state => move |_: events::Close| {
             color_state.select_for.set(None);
@@ -65,6 +67,9 @@ pub fn render(state: Rc<State>) -> Dom {
             .children(&mut [
                 html!("text-editor-controls-button", {
                     .property("kind", "color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Text))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Text));
                         let color = { state.controls.lock_ref().color.clone() };
@@ -73,6 +78,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
                 html!("text-editor-controls-button", {
                     .property("kind", "highlight-color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Highlight))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Highlight));
                         let color = { state.controls.lock_ref().highlight_color.clone() };
@@ -81,6 +89,9 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
                 html!("text-editor-controls-button", {
                     .property("kind", "box-color")
+                    .property_signal("active", color_state.select_for.signal_cloned().map(|select_for| {
+                        matches!(select_for, Some(ColorSelectFor::Box))
+                    }))
                     .event(clone!(state, color_state => move |_: events::Click| {
                         color_state.select_for.set(Some(ColorSelectFor::Box));
                         let color = { state.controls.lock_ref().box_color.clone() };
@@ -89,10 +100,7 @@ pub fn render(state: Rc<State>) -> Dom {
                 }),
             ])
         }))
-        .child(html!("text-editor-controls-overlay-shadow", {
-            .property("slot", "overlay")
-            .child(color_select::dom::render(color_state.picker.clone(), None))
-        }))
+        .child(color_select::dom::render(color_state.picker.clone(), Some("overlay")))
     })
 }
 

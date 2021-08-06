@@ -17,6 +17,7 @@ pub fn render(state: Rc<State>) -> Dom {
     html!("anchored-overlay", {
         .property("positionY", "bottom-out")
         .property("positionX", "left-in")
+        .property("styled", true)
         .property("slot", "actions")
         .property_signal("open", info_open_signal(Rc::clone(&state)))
         .event(clone!(state => move |_: events::Close| {

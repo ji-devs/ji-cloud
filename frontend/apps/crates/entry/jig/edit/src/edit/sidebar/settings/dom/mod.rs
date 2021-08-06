@@ -25,6 +25,7 @@ pub fn render(state: Rc<State>) -> Dom {
         .property("slot", "settings")
         .property("positionX", "right-out")
         .property("positionY", "top-in")
+        .property("styled", true)
         .property_signal("open", state.active_popup.signal_cloned().map(|x| x.is_some()))
         .event(clone!(state => move |_: events::Close| {
             state.active_popup.set(None);

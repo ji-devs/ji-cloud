@@ -15,4 +15,7 @@ export const scrollbarStyles = css`
         border-radius: 3px;
         background-color: #d3d4dd;
     }
+    .scrollbar::-webkit-scrollbar-button {
+        background-color: transparent;
+    }
 `;

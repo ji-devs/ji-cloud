@@ -1,5 +1,7 @@
+import { scrollbarStyles } from '@elements/_styles/scrollbar';
 import { LitElement, html, css, customElement, property, query, PropertyValues } from 'lit-element';
 import { nothing } from 'lit-html';
+import { classMap } from 'lit-html/directives/class-map';
 
 export type PositionX = "left-out" | "right-out" | "left-in" | "right-in" | "center";
 export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "center";
@@ -8,6 +10,7 @@ export type PositionY = "top-out" | "bottom-out" | "top-in" | "bottom-in" | "cen
 export class AnchoredOverlay extends LitElement {
     static get styles() {
         return [
+            scrollbarStyles,
             css`
                 :host {
                     display: inline-block;
@@ -15,8 +18,13 @@ export class AnchoredOverlay extends LitElement {
                 .overlay {
                     position: fixed;
                     z-index: 1;
-                    max-height: 200px;
                     overflow: auto;
+                    box-sizing: border-box;
+                }
+                :host([styled]) .overlay {
+                    border-radius: 16px;
+                    box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
+                    background-color: #ffffff;
                 }
             `
         ];
@@ -59,6 +67,12 @@ export class AnchoredOverlay extends LitElement {
 
     @property({ type: Boolean, reflect: true })
     open: boolean = false;
+
+    // normally we try to stay away from styling a low level primitive like this,
+    // but since doing this separately on each implementation is hard, since :part and ::slotted can't be combined, I've decided to provide this as an option here.
+    // another option would be to create a new styled version that uses this implementation inside, like we do for select.
+    @property({ type: Boolean, reflect: true })
+    styled: boolean = false;
 
     updated(propertyValues: PropertyValues) {
         if(propertyValues.has("open"))
@@ -134,12 +148,17 @@ export class AnchoredOverlay extends LitElement {
     }
 
     render() {
+        const overlayClasses = classMap({
+            "overlay": true,
+            "scrollbar": this.styled
+        });
+
         return html`
             <div class="anchor">
                 <slot name="anchor"></slot>
             </div>
             ${ this.open ? html`
-                <div part="overlay" class="overlay">
+                <div part="overlay" class=${overlayClasses}>
                     <slot name="overlay"></slot>
                 </div>
             ` : nothing }

@@ -26,7 +26,6 @@ import "@elements/core/buttons/icon";
 
 import "@elements/module/_common/edit/widgets/text-editor-controls/text-editor-controls";
 import "@elements/module/_common/edit/widgets/text-editor-controls/button";
-import "@elements/module/_common/edit/widgets/text-editor-controls/overlay-shadow";
 import "@elements/module/_common/edit/widgets/text-editor-controls/input-number";
 import "@elements/module/_common/edit/widgets/text-editor-controls/insert-button";
 import "@elements/core/inputs/composed/select/select";
