@@ -16,6 +16,7 @@ pub fn render(state: Rc<State>, query: String, jigs: Rc<MutableVec<Jig>>) -> Dom
         .child(
             html!("home-search-results-section", {
                 .property("slot", "sections")
+                .property_signal("resultsCount", jigs.signal_vec_cloned().len().map(|len| len as u32))
                 .children_signal_vec(jigs.signal_vec_cloned().map(clone!(state => move |jig| {
                     render_result(state.clone(), &jig)
                 })))
