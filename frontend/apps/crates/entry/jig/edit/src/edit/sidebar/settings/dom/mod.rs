@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use dominator::{Dom, class, clone, html, pseudo};
+use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::SignalExt;
 use utils::events;
 
@@ -11,12 +11,11 @@ use super::state::State;
 pub const STR_BACK_TO_SETTINGS: &'static str = "Back to JIG settings";
 
 mod background;
+mod feedback;
 mod main;
 mod themes;
-mod feedback;
 
 pub fn render(state: Rc<State>) -> Dom {
-
     html!("anchored-overlay", {
         .class(class! {
             .pseudo!("::part(overlay)", {
@@ -52,5 +51,4 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         })))
     })
-
 }

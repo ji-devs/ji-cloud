@@ -1,29 +1,33 @@
 // use shared::{api::endpoints::{ApiEndpoint, self}, domain::{CreateResponse, jig::{self::*, module::body::cover::ModuleData}, jig::module::*}, error::{EmptyError, MetadataNotFound}};
-use shared::{
-    api::endpoints::{ApiEndpoint, self},
-    error::{EmptyError, MetadataNotFound},
-    domain::{
-        CreateResponse,
-        jig::*,
-        jig::module::{*, body::cover::ModuleData}
-    },
-};
-use std::rc::Rc;
 use super::state::State;
-use utils::{prelude::*, drag::Drag};
 use crate::edit::sidebar::dragging::state::State as DragState;
 use dominator::clone;
+use shared::{
+    api::endpoints::{self, ApiEndpoint},
+    domain::{jig::module::*, jig::*, CreateResponse},
+    error::EmptyError,
+};
 use std::convert::TryInto;
+use std::rc::Rc;
+use utils::prelude::*;
 
-pub async fn update_module(jig_id: &JigId, module_id: &ModuleId, req: ModuleUpdateRequest) -> Result<(), EmptyError> {
+pub async fn update_module(
+    jig_id: &JigId,
+    module_id: &ModuleId,
+    req: ModuleUpdateRequest,
+) -> Result<(), EmptyError> {
     let path = endpoints::jig::module::Update::PATH
         .replace("{id}", &jig_id.0.to_string())
         .replace("{module_id}", &module_id.0.to_string());
-    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, Some(req)).await
+    api_with_auth_empty::<EmptyError, _>(&path, endpoints::jig::module::Update::METHOD, Some(req))
+        .await
 }
 
-pub fn mouse_down(state: Rc<State>, x: i32, y:i32) {
-    state.sidebar.drag.set(Some(Rc::new(DragState::new(state.clone(), x, y))));
+pub fn mouse_down(state: Rc<State>, x: i32, y: i32) {
+    state
+        .sidebar
+        .drag
+        .set(Some(Rc::new(DragState::new(state.clone(), x, y))));
 }
 
 pub fn edit(state: Rc<State>) {
@@ -33,7 +37,8 @@ pub fn edit(state: Rc<State>) {
         state.sidebar.collapsed.set(true);
 
         let jig_id = state.sidebar.jig.id;
-        let url:String = Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
+        let url: String =
+            Route::Jig(JigRoute::Edit(jig_id, JigEditRoute::Module(module_id))).into();
         log::info!("{}", url);
 
         /* this will cause a full refresh - but preserves history
@@ -43,7 +48,7 @@ pub fn edit(state: Rc<State>) {
     }
 }
 
-pub fn delete(state:Rc<State>) {
+pub fn delete(state: Rc<State>) {
     let index = state.index;
 
     state.sidebar.loader.load(clone!(state => async move {
@@ -60,8 +65,12 @@ pub fn delete(state:Rc<State>) {
         }
     }));
 }
-pub fn add_empty_module_after(state:Rc<State>) {
-    state.sidebar.modules.lock_mut().insert_cloned(state.index + 1, Rc::new(None));
+pub fn add_empty_module_after(state: Rc<State>) {
+    state
+        .sidebar
+        .modules
+        .lock_mut()
+        .insert_cloned(state.index + 1, Rc::new(None));
 }
 pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
     state.sidebar.loader.load(clone!(state => async move {
@@ -100,7 +109,7 @@ pub fn assign_kind(state: Rc<State>, kind: ModuleKind) {
 pub enum MoveTarget {
     Up,
     Down,
-    Any(usize)
+    Any(usize),
 }
 pub fn move_index(state: Rc<State>, move_target: MoveTarget) {
     state.sidebar.loader.load(clone!(state => async move {

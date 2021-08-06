@@ -1,28 +1,23 @@
-use dominator::{html, clone, Dom};
-use shared::domain::jig::{JigId, module::ModuleId, module::ModuleKind};
+use dominator::{clone, html, Dom};
+use shared::domain::jig::{module::ModuleId, module::ModuleKind, JigId};
 use utils::prelude::*;
-use dominator_helpers::futures::AsyncLoader;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt},
-    signal_vec::{MutableVec, SignalVecExt},
-};
-use std::rc::Rc;
-use std::cell::RefCell;
-use super::actions;
 
-pub struct IframeDom {
-}
+use super::actions;
+use futures_signals::signal::{Mutable, SignalExt};
+use std::cell::RefCell;
+use std::rc::Rc;
+
+pub struct IframeDom {}
 
 impl IframeDom {
     pub fn render(jig_id: JigId, module_id: ModuleId) -> Dom {
         let is_loading = Mutable::new(true);
-        let module_kind:Rc<RefCell<Option<ModuleKind>>> = Rc::new(RefCell::new(None));
+        let module_kind: Rc<RefCell<Option<ModuleKind>>> = Rc::new(RefCell::new(None));
 
         html!("iframe" => web_sys::HtmlIFrameElement, {
             .property("allow", "autoplay; fullscreen")
             .property("slot", "main")
-            .future(clone!(jig_id, module_id, module_kind, is_loading => async move { 
+            .future(clone!(jig_id, module_id, module_kind, is_loading => async move {
                 actions::load_module_kind(jig_id, module_id, module_kind).await;
                 is_loading.set_neq(false);
             }))
@@ -45,6 +40,5 @@ impl IframeDom {
                 }
             })))
         })
-
     }
 }

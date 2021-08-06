@@ -1,19 +1,22 @@
-use std::rc::Rc;
+use super::{actions, sidebar};
+use dominator::{clone, events, html, with_node, Dom};
 use dominator_helpers::{events::Message, signals::DefaultSignal};
 use futures_signals::map_ref;
+use futures_signals::signal::{Signal, SignalExt};
 use js_sys::Reflect;
-use utils::{iframe::{IframeAction, ModuleToJigMessage}, prelude::SETTINGS, routes::{ModuleRoute, Route}, unwrap::UnwrapJiExt};
-use futures_signals::signal::{SignalExt, Signal};
-use dominator::{Dom, clone, events, html, with_node};
+use std::rc::Rc;
+use utils::{
+    iframe::{IframeAction, ModuleToJigMessage},
+    prelude::SETTINGS,
+    routes::{ModuleRoute, Route},
+    unwrap::UnwrapJiExt,
+};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlIFrameElement};
-use super::{actions, sidebar};
 
 use super::state::State;
 
-
 pub fn render(state: Rc<State>) -> Dom {
-
     actions::load_jig(state.clone());
 
     html!("jig-play-landing", {
@@ -137,13 +140,16 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn ten_sec_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state.timer.signal_cloned().map(|timer| {
-        DefaultSignal::new(false, timer.map(|timer| {
-            timer.time.signal().map(|time| {
-                time == 10
-            })
-        }))
-    }).flatten()
+    state
+        .timer
+        .signal_cloned()
+        .map(|timer| {
+            DefaultSignal::new(
+                false,
+                timer.map(|timer| timer.time.signal().map(|time| time == 10)),
+            )
+        })
+        .flatten()
 }
 
 fn progress_signal(state: Rc<State>) -> impl Signal<Item = u32> {
@@ -151,7 +157,8 @@ fn progress_signal(state: Rc<State>) -> impl Signal<Item = u32> {
         let active_module = state.active_module.signal(),
         let jig = state.jig.signal_cloned() =>
             (*active_module, jig.clone())
-    }).map(move|(active_module_index, jig)| {
+    })
+    .map(move |(active_module_index, jig)| {
         match jig {
             None => 0,
             Some(jig) => {
@@ -162,11 +169,10 @@ fn progress_signal(state: Rc<State>) -> impl Signal<Item = u32> {
                 let current_progress = current_progress + step_percent;
                 log::info!("{}", current_progress);
                 current_progress.round() as u32
-            },
+            }
         }
     })
 }
-
 
 fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
     state.active_module.signal().map(clone!(state => move |_| {
@@ -196,15 +202,17 @@ fn render_done_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {
     }))
 }
 
-
 fn time_up_signal(state: Rc<State>) -> impl Signal<Item = bool> {
-    state.timer.signal_cloned().map(|timer| {
-        DefaultSignal::new(false, timer.map(|timer| {
-            timer.time.signal().map(|time| {
-                time == 0
-            })
-        }))
-    }).flatten()
+    state
+        .timer
+        .signal_cloned()
+        .map(|timer| {
+            DefaultSignal::new(
+                false,
+                timer.map(|timer| timer.time.signal().map(|time| time == 0)),
+            )
+        })
+        .flatten()
 }
 
 fn render_time_up_popup(state: Rc<State>) -> impl Signal<Item = Option<Dom>> {

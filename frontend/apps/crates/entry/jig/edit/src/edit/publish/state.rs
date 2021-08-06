@@ -1,12 +1,15 @@
 use std::collections::HashMap;
 
-use shared::domain::{category::{Category, CategoryId}, jig::JigId, meta::{AgeRange, Goal}};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use utils::languages::{LANGUAGES, Language};
+use shared::domain::{
+    category::{Category, CategoryId},
+    jig::JigId,
+    meta::{AgeRange, Goal},
+};
+use utils::languages::{Language, LANGUAGES};
 
 use super::publish_jig::PublishJig;
-
 
 pub struct State {
     pub loader: AsyncLoader,

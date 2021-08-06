@@ -3,7 +3,11 @@ use std::iter::FromIterator;
 
 use futures_signals::signal::Mutable;
 use shared::domain::Publish;
-use shared::domain::{category::CategoryId, jig::{Jig, JigId, JigUpdateRequest}, meta::{AgeRangeId, GoalId}};
+use shared::domain::{
+    category::CategoryId,
+    jig::{Jig, JigId, JigUpdateRequest},
+    meta::{AgeRangeId, GoalId},
+};
 
 pub struct PublishJig {
     pub id: JigId,
@@ -31,7 +35,6 @@ impl From<Jig> for PublishJig {
         }
     }
 }
-
 
 impl PublishJig {
     pub fn new_empty(jig_id: JigId) -> Self {

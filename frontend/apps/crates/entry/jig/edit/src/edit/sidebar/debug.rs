@@ -1,7 +1,8 @@
-use shared::domain::jig::{AudioEffects, Jig, JigId, LiteModule, JigPlayerSettings, ModuleKind, TextDirection, module::ModuleId};
+use shared::domain::jig::{
+    module::ModuleId, AudioEffects, Jig, JigId, JigPlayerSettings, LiteModule, ModuleKind,
+};
 use utils::themes::ThemeId;
 use uuid::Uuid;
-use cfg_if::cfg_if;
 
 pub fn get_jig() -> Jig {
     let module_id = ModuleId(Uuid::from_u128(0));
@@ -12,19 +13,19 @@ pub fn get_jig() -> Jig {
         modules: vec![
             LiteModule {
                 id: module_id,
-                kind: ModuleKind::Cover
+                kind: ModuleKind::Cover,
             },
             LiteModule {
                 id: module_id,
-                kind: ModuleKind::Memory
+                kind: ModuleKind::Memory,
             },
             LiteModule {
                 id: module_id,
-                kind: ModuleKind::Memory
+                kind: ModuleKind::Memory,
             },
             LiteModule {
                 id: module_id,
-                kind: ModuleKind::TappingBoard
+                kind: ModuleKind::TappingBoard,
             },
         ],
         age_ranges: Vec::new(),
@@ -44,5 +45,4 @@ pub fn get_jig() -> Jig {
         audio_effects: AudioEffects::default(),
         default_player_settings: JigPlayerSettings::default(),
     }
-
 }

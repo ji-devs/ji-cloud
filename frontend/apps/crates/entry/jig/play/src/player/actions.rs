@@ -1,12 +1,20 @@
 use std::rc::Rc;
 
+use super::{state::State, timer::Timer};
 use dominator::clone;
 use futures_signals::signal::SignalExt;
-use shared::{api::{ApiEndpoint, endpoints::jig}, domain::jig::JigResponse, error::EmptyError};
-use utils::{iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage}, prelude::{SETTINGS, api_no_auth}, routes::Route, unwrap::UnwrapJiExt};
+use shared::{
+    api::{endpoints::jig, ApiEndpoint},
+    domain::jig::JigResponse,
+    error::EmptyError,
+};
+use utils::{
+    iframe::{IframeAction, JigToModuleMessage, ModuleToJigMessage},
+    prelude::{api_no_auth, SETTINGS},
+    routes::Route,
+    unwrap::UnwrapJiExt,
+};
 use wasm_bindgen_futures::spawn_local;
-use super::{timer::Timer, state::State};
-
 
 pub fn load_jig(state: Rc<State>) {
     state.loader.load(clone!(state => async move {
@@ -43,10 +51,10 @@ pub fn toggle_paused(state: Rc<State>) {
 
     // pause timer if exists
     match &*state.timer.lock_ref() {
-        None => {},
+        None => {}
         Some(timer) => {
             *timer.paused.borrow_mut() = paused;
-        },
+        }
     }
 
     // let iframe know that paused
@@ -60,7 +68,8 @@ pub fn toggle_paused(state: Rc<State>) {
 pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
     let iframe_origin: String = Route::Home.into();
     let iframe_origin = unsafe {
-        SETTINGS.get_unchecked()
+        SETTINGS
+            .get_unchecked()
             .remote_target
             .spa_iframe(&iframe_origin)
     };
@@ -69,8 +78,11 @@ pub fn sent_iframe_message(state: Rc<State>, data: JigToModuleMessage) {
         None => todo!(),
         Some(iframe) => {
             let m = IframeAction::new(data);
-            let _ = iframe.content_window().unwrap_ji().post_message(&m.into(), &iframe_origin);
-        },
+            let _ = iframe
+                .content_window()
+                .unwrap_ji()
+                .post_message(&m.into(), &iframe_origin);
+        }
     };
 }
 
@@ -79,18 +91,18 @@ pub fn on_iframe_message(state: Rc<State>, message: ModuleToJigMessage) {
         ModuleToJigMessage::AddPoints(amount) => {
             let mut points = state.points.lock_mut();
             *points += amount;
-        },
+        }
         ModuleToJigMessage::Start(time) => {
             if let Some(time) = time {
                 start_timer(Rc::clone(&state), time);
             }
-        },
+        }
     };
 }
 
 pub fn reload_iframe(state: Rc<State>) {
     match &*state.iframe.borrow() {
-        None => {},
+        None => {}
         Some(iframe) => {
             iframe.set_src(&iframe.src());
             state.timer.set(None);

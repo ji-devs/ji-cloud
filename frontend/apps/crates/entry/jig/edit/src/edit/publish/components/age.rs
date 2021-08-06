@@ -1,7 +1,10 @@
-use std::rc::Rc;
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use shared::domain::meta::AgeRange;
+use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::State;
@@ -35,7 +38,7 @@ pub fn render(state: Rc<State>) -> Dom {
                     }).collect()
                 },
             }
-            
+
         })).to_signal_vec())
     })
 }
@@ -52,7 +55,7 @@ fn render_age(age: &AgeRange, state: Rc<State>) -> Dom {
             if ages.contains(&age_id) {
                 ages.remove(&age_id);
             } else {
-                ages.insert(age_id); 
+                ages.insert(age_id);
             }
         }))
     })
@@ -71,6 +74,6 @@ fn age_value_signal(state: Rc<State>) -> impl Signal<Item = String> {
             }
             output.join(", ")
         }
-        
+
     }
 }

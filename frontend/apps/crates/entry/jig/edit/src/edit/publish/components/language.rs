@@ -1,10 +1,12 @@
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use std::rc::Rc;
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
 use utils::{events, languages::Language};
 
 use super::super::state::State;
-
 
 const STR_LANGUAGE_LABEL: &'static str = "Language of instructions";
 const STR_LANGUAGE_PLACEHOLDER: &'static str = "Select language";

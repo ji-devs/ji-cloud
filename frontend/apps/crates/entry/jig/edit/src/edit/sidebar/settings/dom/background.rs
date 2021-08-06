@@ -1,11 +1,15 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 
+use crate::edit::sidebar::settings::{
+    actions::{self, set_active_popup},
+    dom::STR_BACK_TO_SETTINGS,
+    state::ActiveSettingsPopup,
+};
 use futures_signals::signal::SignalExt;
-use utils::{events, jig::AudioBackgroundExt};
 use shared::domain::jig::AudioBackground;
-use crate::edit::sidebar::settings::{actions::{self, set_active_popup}, dom::STR_BACK_TO_SETTINGS, state::ActiveSettingsPopup};
+use utils::{events, jig::AudioBackgroundExt};
 
 use super::super::state::State;
 

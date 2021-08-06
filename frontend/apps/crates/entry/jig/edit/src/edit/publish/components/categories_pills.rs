@@ -1,7 +1,7 @@
-use std::rc::Rc;
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::category::CategoryId;
+use std::rc::Rc;
 use utils::unwrap::UnwrapJiExt;
 
 use super::super::state::State;

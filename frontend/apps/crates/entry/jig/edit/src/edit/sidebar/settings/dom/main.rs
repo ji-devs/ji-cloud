@@ -1,18 +1,20 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::jig::TextDirection;
 use utils::events;
 
-use crate::edit::sidebar::settings::{actions::{set_active_popup, update_jig_settings}, state::{ActiveSettingsPopup, FeedbackTab}};
+use crate::edit::sidebar::settings::{
+    actions::{set_active_popup, update_jig_settings},
+    state::{ActiveSettingsPopup, FeedbackTab},
+};
 
 use super::super::state::State;
 
 const STR_DISPLAY_SCORE: &'static str = "Display score";
 const STR_ASSESSMENT_MODE: &'static str = "Assessment mode";
 const STR_DRAG_ASSIST: &'static str = "Drag & Drop assist";
-
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("jig-settings", {

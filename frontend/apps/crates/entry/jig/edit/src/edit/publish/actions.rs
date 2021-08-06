@@ -3,15 +3,15 @@ use std::{collections::HashMap, rc::Rc};
 use dominator::clone;
 use futures::join;
 use shared::{
-    api::endpoints::{ApiEndpoint, category, jig, meta},
+    api::endpoints::{category, jig, meta, ApiEndpoint},
     domain::{
         category::{Category, CategoryId, CategoryResponse, CategoryTreeScope, GetCategoryRequest},
         jig::{Jig, JigId, JigResponse, JigUpdateRequest},
-        meta::MetadataResponse
+        meta::MetadataResponse,
     },
-    error::{EmptyError, MetadataNotFound}
+    error::{EmptyError, MetadataNotFound},
 };
-use utils::prelude::{UnwrapJiExt, api_with_auth, api_with_auth_empty};
+use utils::prelude::{api_with_auth, api_with_auth_empty, UnwrapJiExt};
 
 use super::state::State;
 
@@ -41,7 +41,11 @@ pub fn load_data(state: Rc<State>, jig_id: JigId) {
     }));
 }
 
-fn get_categories_labels(categories: &Vec<Category>, lookup: &mut HashMap<CategoryId, String>, base_name: &str) {
+fn get_categories_labels(
+    categories: &Vec<Category>,
+    lookup: &mut HashMap<CategoryId, String>,
+    base_name: &str,
+) {
     for category in categories {
         let name = format!("{}{}", base_name, category.name);
         lookup.insert(category.id.clone(), name.clone());
@@ -55,40 +59,36 @@ async fn load_jig(jig_id: JigId) -> Result<Jig, EmptyError> {
     let path = jig::Get::PATH.replace("{id}", &jig_id.0.to_string());
 
     match api_with_auth::<JigResponse, EmptyError, ()>(&path, jig::Get::METHOD, None).await {
-        Ok(resp) => {
-            Ok(resp.jig)
-        },
+        Ok(resp) => Ok(resp.jig),
         Err(e) => Err(e),
     }
 }
 
-
 async fn load_categories() -> Result<Vec<Category>, EmptyError> {
     let req = GetCategoryRequest {
-        ids: Vec::new(), 
-        scope: Some(CategoryTreeScope::Decendants)
+        ids: Vec::new(),
+        scope: Some(CategoryTreeScope::Decendants),
     };
 
-    match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(category::Get::PATH, category::Get::METHOD, Some(req)).await {
-        Ok(resp) => {
-            Ok(resp.categories)
-        },
+    match api_with_auth::<CategoryResponse, EmptyError, GetCategoryRequest>(
+        category::Get::PATH,
+        category::Get::METHOD,
+        Some(req),
+    )
+    .await
+    {
+        Ok(resp) => Ok(resp.categories),
         Err(e) => Err(e),
     }
 }
 
 fn form_invalid(state: Rc<State>) -> bool {
     state.jig.display_name.lock_ref().is_empty()
-    ||
-    state.jig.description.lock_ref().is_empty()
-    ||
-    state.jig.language.lock_ref().is_empty()
-    ||
-    state.jig.age_ranges.lock_ref().is_empty()
-    ||
-    state.jig.goals.lock_ref().is_empty()
-    ||
-    state.jig.categories.lock_ref().is_empty()
+        || state.jig.description.lock_ref().is_empty()
+        || state.jig.language.lock_ref().is_empty()
+        || state.jig.age_ranges.lock_ref().is_empty()
+        || state.jig.goals.lock_ref().is_empty()
+        || state.jig.categories.lock_ref().is_empty()
 }
 
 pub fn save_jig(state: Rc<State>) {
@@ -113,8 +113,14 @@ pub fn save_jig(state: Rc<State>) {
 }
 
 pub async fn load_metadata() -> Result<MetadataResponse, EmptyError> {
-    match api_with_auth::<MetadataResponse, EmptyError, ()>(meta::Get::PATH, meta::Get::METHOD, None).await {
+    match api_with_auth::<MetadataResponse, EmptyError, ()>(
+        meta::Get::PATH,
+        meta::Get::METHOD,
+        None,
+    )
+    .await
+    {
         Ok(res) => Ok(res),
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }

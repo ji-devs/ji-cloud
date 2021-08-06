@@ -1,22 +1,13 @@
-use futures_signals::{
-    signal_vec::MutableVec,
-    signal::{Mutable, Signal, SignalExt}
-};
-use std::{
-    rc::Rc,
-    cell::RefCell,
-    collections::HashMap
-};
-use super::{
-    module::state::State as ModuleState,
-    dragging::state::State as DragState,
-    settings::state::State as SettingsState,
-};
-use utils::{drag::Drag, math::PointI32, routes::JigEditRoute};
+use super::{dragging::state::State as DragState, settings::state::State as SettingsState};
 use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
-use shared::domain::jig::{Jig, LiteModule, JigId, module::ModuleId, ModuleKind};
-use web_sys::DomRect;
-use wasm_bindgen::prelude::*;
+use futures_signals::{
+    signal::{Mutable, Signal, SignalExt},
+    signal_vec::MutableVec,
+};
+use shared::domain::jig::{Jig, LiteModule};
+use std::rc::Rc;
+use utils::{math::PointI32, routes::JigEditRoute};
+
 use chrono::{DateTime, Utc};
 
 pub struct State {
@@ -34,8 +25,8 @@ pub struct State {
 
 impl State {
     pub fn new(jig: Jig, route: Mutable<JigEditRoute>) -> Self {
-
-        let mut modules: Vec<Rc<Option<LiteModule>>> = jig.modules
+        let mut modules: Vec<Rc<Option<LiteModule>>> = jig
+            .modules
             .iter()
             .map(|module| Rc::new(Some(module.clone().into())))
             .collect();
@@ -57,19 +48,16 @@ impl State {
             loader: AsyncLoader::new(),
             jig,
         }
-
     }
 
     //There's probably a way of making this simpler
     //But in any case, the signature is what matters :P
     pub fn drag_target_pos_signal(&self) -> impl Signal<Item = Option<PointI32>> {
-        self.drag.signal_cloned().map(|drag| {
-            OptionSignal::new(
-                drag.map(|drag| drag.inner.pos_signal())
-            )
-        })
-        .flatten()
-        .map(|x| x.and_then(|x| x))
+        self.drag
+            .signal_cloned()
+            .map(|drag| OptionSignal::new(drag.map(|drag| drag.inner.pos_signal())))
+            .flatten()
+            .map(|x| x.and_then(|x| x))
     }
 
     /*
@@ -78,7 +66,7 @@ impl State {
             .borrow()
             .iter()
             .map(|(index, module)| {
-                //This must exist since it's added before the module 
+                //This must exist since it's added before the module
                 //is added to drag_targets
                 let elem = module.elem.borrow();
                 let elem = elem.as_ref().unwrap_throw();
@@ -89,4 +77,3 @@ impl State {
     }
     */
 }
-

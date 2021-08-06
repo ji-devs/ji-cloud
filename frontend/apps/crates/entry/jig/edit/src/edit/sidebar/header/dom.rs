@@ -1,17 +1,16 @@
-use dominator::{Dom, clone, html, with_node};
-use web_sys::HtmlInputElement;
-use std::rc::Rc;
-use futures_signals::signal::SignalExt;
 use crate::edit::sidebar::actions::player_settings_change_signal;
+use dominator::{clone, html, with_node, Dom};
+use futures_signals::signal::SignalExt;
+use std::rc::Rc;
+use web_sys::HtmlInputElement;
 
-use super::super::{state::State as SidebarState, actions as sidebar_actions, settings};
+use super::super::{actions as sidebar_actions, settings, state::State as SidebarState};
 use utils::prelude::*;
 
-const STR_MY_JIGS:&'static str = "My JIGs";
-const STR_SEARCH_PLACEHOLDER:&'static str = "My JIG’s name";
+const STR_MY_JIGS: &'static str = "My JIGs";
+const STR_SEARCH_PLACEHOLDER: &'static str = "My JIG’s name";
 
-pub struct HeaderDom {
-}
+pub struct HeaderDom {}
 
 impl HeaderDom {
     pub fn render(sidebar_state: Rc<SidebarState>) -> Dom {
@@ -79,9 +78,9 @@ impl HeaderDom {
     }
 }
 /*
-    <jig-edit-sidebar-header slot="header">
-        <button-icon slot="close" icon="x"></button-icon>
-        <button-text slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
-        <input-text-pencil slot="input"></input-text-pencil>
-    </jig-edit-sidebar-header>
-    */
+<jig-edit-sidebar-header slot="header">
+    <button-icon slot="close" icon="x"></button-icon>
+    <button-text slot="gallery" color="blue" weight="medium">${STR_MY_JIGS}</button-text>
+    <input-text-pencil slot="input"></input-text-pencil>
+</jig-edit-sidebar-header>
+*/

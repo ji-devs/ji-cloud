@@ -1,14 +1,16 @@
-use std::rc::Rc;
-use dominator::{Dom, clone, html};
-use futures_signals::{map_ref, signal::{Signal, SignalExt}};
+use dominator::{clone, html, Dom};
+use futures_signals::{
+    map_ref,
+    signal::{Signal, SignalExt},
+};
 use shared::domain::category::Category;
+use std::rc::Rc;
 use utils::{events, unwrap::UnwrapJiExt};
 
 use super::super::state::State;
 
 const STR_CATEGORIES_LABEL: &'static str = "Categories";
 const STR_CATEGORIES_PLACEHOLDER: &'static str = "Select one or more";
-
 
 pub fn render(state: Rc<State>) -> Dom {
     html!("input-select", {
@@ -34,7 +36,6 @@ pub fn render(state: Rc<State>) -> Dom {
             }
         })).to_signal_vec())
     })
-    
 }
 
 fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {
@@ -51,7 +52,7 @@ fn render_categories(state: Rc<State>, categories: &Vec<Category>) -> Vec<Dom> {
                     if categories.contains(&category_id) {
                         categories.remove(&category_id);
                     } else {
-                        categories.insert(category_id); 
+                        categories.insert(category_id);
                     }
                 }))
             })

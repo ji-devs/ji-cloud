@@ -1,27 +1,32 @@
-use dominator::{html, Dom, clone};
-use shared::domain::jig::Jig;
-use std::rc::Rc;
-use crate::edit::sidebar::state::State as SidebarState;
-use super::{
-    state::*,
-    actions
-};
+use dominator::{clone, html, Dom};
+
 use super::super::menu::{dom as MenuDom, state::State as MenuState};
+use super::{actions, state::*};
+use crate::edit::sidebar::state::State as SidebarState;
 use futures_signals::signal::SignalExt;
-use utils::prelude::*;
-use shared::domain::jig::{ModuleKind, LiteModule};
+use shared::domain::jig::{LiteModule, ModuleKind};
+use std::rc::Rc;
 use std::str::FromStr;
+use utils::prelude::*;
 use wasm_bindgen::prelude::*;
-pub struct ModuleDom {
-}
+pub struct ModuleDom {}
 
 impl ModuleDom {
-    pub fn render(sidebar_state: Rc<SidebarState>, index: usize, drag_target_index: Option<usize>, total_len:usize, module: Rc<Option<LiteModule>>) -> Dom {
-        let state = Rc::new(State::new(sidebar_state.clone(), index, total_len, module.clone()));
+    pub fn render(
+        sidebar_state: Rc<SidebarState>,
+        index: usize,
+        drag_target_index: Option<usize>,
+        total_len: usize,
+        module: Rc<Option<LiteModule>>,
+    ) -> Dom {
+        let state = Rc::new(State::new(
+            sidebar_state.clone(),
+            index,
+            total_len,
+            module.clone(),
+        ));
 
         let is_filler = Some(index) == drag_target_index;
-
-
 
         html!("empty-fragment", {
             .property("slot", if index == 0 { "cover-module" } else { "modules" })
@@ -48,7 +53,7 @@ impl ModuleDom {
                 .property("index", index as u32)
                 .property_signal("collapsed", state.sidebar.collapsed.signal())
                 .property("lastBottomDecoration", index == total_len-1)
-                .event(clone!(state => move |evt:events::MouseDown| {
+                .event(clone!(state => move |_evt:events::MouseDown| {
                     // TODO:
                     // actions::mouse_down(state.clone(), evt.x(), evt.y());
                 }))
@@ -61,20 +66,20 @@ impl ModuleDom {
                             if data_transfer.types().index_of(&JsValue::from_str("module_kind"), 0) != -1 {
                                 if state.module.is_none() {
                                     evt.prevent_default();
-                                } 
+                                }
                             }
                         }
 
                     }))
                     .event(clone!(state => move |evt:events::Drop| {
                         if let Some(data_transfer) = evt.data_transfer() {
-                            if let Some(module_kind) = data_transfer.get_data("module_kind").ok() { 
+                            if let Some(module_kind) = data_transfer.get_data("module_kind").ok() {
                                 let kind:ModuleKind = ModuleKind::from_str(&module_kind).unwrap_ji();
                                 actions::assign_kind(state.clone(), kind);
                             }
                         }
                     }))
-                    .event(clone!(state => move |evt:events::Click| {
+                    .event(clone!(state => move |_evt:events::Click| {
                         actions::edit(state.clone());
                     }))
                 }))
@@ -82,8 +87,8 @@ impl ModuleDom {
                     *state.elem.borrow_mut() = Some(dom);
                     //*state.sidebar.drag_targets.borrow_mut().
                 }))
-                .after_removed(clone!(state => move |dom| {
-                    *state.elem.borrow_mut() = None; 
+                .after_removed(clone!(state => move |_dom| {
+                    *state.elem.borrow_mut() = None;
                 }))
                 .apply(clone!(state, sidebar_state, module => move |dom| {
                     let menu_state = Rc::new(MenuState::new());
@@ -121,7 +126,7 @@ impl ModuleDom {
                 .child(html!("button-icon", {
                     .property("icon", "gears")
                     .property("slot", "add")
-                    .event(clone!(state => move |evt:events::Click| {
+                    .event(clone!(state => move |_evt:events::Click| {
                         actions::add_empty_module_after(state.clone())
                     }))
                 }))

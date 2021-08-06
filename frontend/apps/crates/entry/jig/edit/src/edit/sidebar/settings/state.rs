@@ -2,7 +2,10 @@ use std::{collections::HashSet, iter::FromIterator};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::jig::{AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId, JigPlayerSettings, JigUpdateRequest, TextDirection};
+use shared::domain::jig::{
+    AudioBackground, AudioEffects, AudioFeedbackNegative, AudioFeedbackPositive, Jig, JigId,
+    JigPlayerSettings, JigUpdateRequest, TextDirection,
+};
 use utils::themes::ThemeId;
 
 pub struct State {
@@ -24,8 +27,12 @@ impl State {
         Self {
             theme: Mutable::new(jig.theme),
             background_audio: Mutable::new(jig.audio_background.clone()),
-            feedback_positive: Mutable::new(HashSet::from_iter(jig.audio_effects.feedback_positive.iter().cloned())),
-            feedback_negative: Mutable::new(HashSet::from_iter(jig.audio_effects.feedback_negative.iter().cloned())),
+            feedback_positive: Mutable::new(HashSet::from_iter(
+                jig.audio_effects.feedback_positive.iter().cloned(),
+            )),
+            feedback_negative: Mutable::new(HashSet::from_iter(
+                jig.audio_effects.feedback_negative.iter().cloned(),
+            )),
             direction: Mutable::new(jig.default_player_settings.direction),
             display_score: Mutable::new(jig.default_player_settings.display_score),
             track_assessments: Mutable::new(jig.default_player_settings.track_assessments),
@@ -59,7 +66,6 @@ impl State {
             feedback_negative: self.feedback_negative.get_cloned(),
         }
     }
-
 }
 
 #[derive(Clone, Debug)]
@@ -73,5 +79,5 @@ pub enum ActiveSettingsPopup {
 #[derive(Clone, Debug, PartialEq)]
 pub enum FeedbackTab {
     Positive,
-    Negative
+    Negative,
 }

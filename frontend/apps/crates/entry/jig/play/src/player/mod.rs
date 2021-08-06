@@ -1,5 +1,5 @@
-pub mod dom;
-pub mod state;
-pub mod sidebar;
-mod timer;
 mod actions;
+pub mod dom;
+pub mod sidebar;
+pub mod state;
+mod timer;

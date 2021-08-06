@@ -1,15 +1,13 @@
-use dominator::{html, clone, Dom};
+use super::{actions, state::*};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use futures_signals::signal_vec::SignalVecExt;
-use utils::ages::AgeRangeVecExt;
-use utils::prelude::*;
-use super::{actions, state::*};
 use std::rc::Rc;
 use strum::IntoEnumIterator;
+use utils::ages::AgeRangeVecExt;
+use utils::prelude::*;
 
-
-pub struct GalleryDom {
-}
+pub struct GalleryDom {}
 
 const STR_DELETE: &'static str = "Delete";
 const STR_DUPLICATE: &'static str = "Duplicate";
@@ -17,7 +15,6 @@ const STR_SEARCH: &'static str = "Search";
 const STR_SHOW_JIG_ALL: &'static str = "Show all my JIGs";
 const STR_SHOW_JIG_PUBLISHED: &'static str = "Show published Jigs";
 const STR_SHOW_JIG_DRAFT: &'static str = "Show drafts";
-
 
 impl GalleryDom {
     fn visible_jigs_option_string(visible_jigs: &VisibleJigs) -> &'static str {

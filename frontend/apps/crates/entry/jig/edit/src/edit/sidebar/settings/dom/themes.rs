@@ -1,10 +1,17 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
-use utils::{events, themes::{THEME_IDS, ThemeIdExt}};
+use utils::{
+    events,
+    themes::{ThemeIdExt, THEME_IDS},
+};
 
-use crate::edit::sidebar::settings::{actions::{set_active_popup, update_jig_settings}, dom::STR_BACK_TO_SETTINGS, state::ActiveSettingsPopup};
+use crate::edit::sidebar::settings::{
+    actions::{set_active_popup, update_jig_settings},
+    dom::STR_BACK_TO_SETTINGS,
+    state::ActiveSettingsPopup,
+};
 
 use super::super::state::State;
 

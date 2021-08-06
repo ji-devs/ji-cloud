@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
 use dominator_helpers::futures::AsyncLoader;
-use serde::{Serialize, Deserialize};
+use futures_signals::signal::Mutable;
+use serde::{Deserialize, Serialize};
 use shared::domain::meta::AgeRange;
 use strum_macros::EnumIter;
-use futures_signals::signal::Mutable;
 use utils::unwrap::UnwrapJiExt;
 
 use super::super::state::State as PlayerState;
@@ -14,7 +14,6 @@ const STR_REPORT_TYPE_COPYRIGHT: &'static str = "Copyright Infringement";
 const STR_REPORT_TYPE_SPAM: &'static str = "Spam";
 const STR_REPORT_TYPE_PRIVACY: &'static str = "Privacy";
 const STR_REPORT_TYPE_OTHER: &'static str = "Other";
-
 
 pub struct State {
     pub active_popup: Mutable<ActivePopup>,
@@ -55,7 +54,6 @@ pub enum ReportStatus {
     Active,
     Sent,
 }
-
 
 #[derive(Serialize, Deserialize, EnumIter, Debug)]
 pub enum ReportType {

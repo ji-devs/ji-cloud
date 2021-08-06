@@ -1,17 +1,13 @@
-use dominator::{html, clone, Dom};
-use futures_signals::signal::{Mutable, SignalExt};
 use super::{
+    iframe::dom::IframeDom, publish::dom::render as render_publish, selection::dom::SelectionDom,
     sidebar::dom::SidebarDom,
-    selection::dom::SelectionDom,
-    iframe::dom::IframeDom,
-    publish::dom::render as render_publish,
 };
-use shared::domain::jig::{JigId, module::ModuleId};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::{Mutable, SignalExt};
+use shared::domain::jig::JigId;
 use utils::prelude::*;
-use wasm_bindgen::prelude::*;
 
-pub struct EditPage {
-}
+pub struct EditPage {}
 
 impl EditPage {
     pub fn render(jig_id: JigId, route: JigEditRoute) -> Dom {

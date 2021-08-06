@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use futures_signals::signal::{Mutable, SignalExt, from_stream};
+use futures_signals::signal::{from_stream, Mutable, SignalExt};
 use gloo::timers::future::IntervalStream;
 use wasm_bindgen_futures::spawn_local;
 
@@ -34,9 +34,7 @@ impl Timer {
             }
         });
 
-        let future = signal.for_each(|_| {
-            async {}
-        });
+        let future = signal.for_each(|_| async {});
 
         spawn_local(future);
     }
