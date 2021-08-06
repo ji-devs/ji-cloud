@@ -1,19 +1,18 @@
 use std::rc::Rc;
 
-use dominator::{Dom, html};
+use dominator::{html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::user::UserProfile;
 use utils::routes::{JigRoute, ProfileSection, Route, UserRoute};
 
 use crate::page_header::state::LoggedInState;
 
-use super::{state::State, actions};
+use super::{actions, state::State};
 
 const STR_SIGN_UP: &'static str = "Sign up";
 const STR_LOGIN: &'static str = "Login";
 
 pub fn render(state: Rc<State>) -> Dom {
-
     actions::fetch_profile(Rc::clone(&state));
 
     html!("page-header", {
@@ -64,17 +63,15 @@ pub fn render(state: Rc<State>) -> Dom {
 }
 
 fn render_logged_in(user: &UserProfile) -> Vec<Dom> {
-    vec![
-        html!("a", {
-            .property("slot", "user")
-            .property("href", &Route::User(UserRoute::Profile(ProfileSection::Landing)).to_string())
-            .style("text-decoration", "none")
-            .child(html!("page-header-profile", {
-                .style("cursor", "pointer")
-                .property("name", &user.given_name)
-            }))
-        })
-    ]
+    vec![html!("a", {
+        .property("slot", "user")
+        .property("href", &Route::User(UserRoute::Profile(ProfileSection::Landing)).to_string())
+        .style("text-decoration", "none")
+        .child(html!("page-header-profile", {
+            .style("cursor", "pointer")
+            .property("name", &user.given_name)
+        }))
+    })]
 }
 
 fn render_logged_out() -> Vec<Dom> {
@@ -92,6 +89,6 @@ fn render_logged_out() -> Vec<Dom> {
             .property("color", "black")
             .property("href", &Route::User(UserRoute::Login).to_string())
             .text(STR_LOGIN)
-        })
+        }),
     ]
 }

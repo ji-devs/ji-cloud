@@ -23,12 +23,8 @@ pub fn font_from_css(font: &String) -> Font {
     let font = font.split_at(font.len() - 1);
     let font = font.0.split_at(1).1;
 
-    font.split("\", \"")
-        .collect::<Vec<&str>>()
-        .join(", ")
+    font.split("\", \"").collect::<Vec<&str>>().join(", ")
 }
-
-
 
 #[cfg(test)]
 mod tests {

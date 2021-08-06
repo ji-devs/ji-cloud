@@ -1,14 +1,11 @@
+use super::super::actions::file_change;
+use crate::audio_input::state::{AudioInputAddMethod, AudioInputMode, State};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use dominator::{Dom, clone, html};
 use utils::prelude::*;
 use wasm_bindgen_futures::spawn_local;
-use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
-use super::super::actions::file_change;
-use futures_signals::signal::Signal;
-use shared::domain::jig::module::body::Audio;
 
-
-pub fn render (state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
+pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     if let AudioInputMode::Uploading = mode {
         html!("button-rect", {
             .property("slot", "main-action")

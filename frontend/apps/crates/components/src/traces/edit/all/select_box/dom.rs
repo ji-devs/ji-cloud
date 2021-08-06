@@ -1,31 +1,23 @@
-use dominator::{html, Dom, clone, svg, class, with_node};
+use dominator::{clone, html, with_node, Dom};
 use std::rc::Rc;
-use utils::{
-    math::{vec2, quat, BoundsF64}, 
-    prelude::*, 
-    resize::{ResizeInfo, resize_info_signal}
-};
-use wasm_bindgen::prelude::*;
+use utils::{prelude::*, resize::ResizeInfo};
+
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt, ReadOnlyMutable},
-    signal_vec::SignalVecExt,
+    signal::{ReadOnlyMutable, SignalExt},
 };
-use shared::domain::jig::module::body::Transform;
-use super::{
-    super::trace::state::*,
-    menu::dom::render_menu
-};
-use crate::traces::{
-    edit::state::*,
-    utils::TraceExt
-};
+
+use super::{super::trace::state::*, menu::dom::render_menu};
+use crate::traces::edit::state::*;
 
 //see https://www.loom.com/share/c9ec53482ad94a97bff74d143a5a8cd2
-pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<usize>>, trace: &AllTrace, resize_info:&ResizeInfo) -> Dom {
-
+pub fn render_select_box(
+    state: Rc<TracesEdit>,
+    index: ReadOnlyMutable<Option<usize>>,
+    trace: &AllTrace,
+    resize_info: &ResizeInfo,
+) -> Dom {
     let select_box = trace.select_box.clone();
-
 
     let get_selected_signal = clone!(state, index => move || {
         map_ref! {
@@ -75,10 +67,10 @@ pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<us
         */
         //can get rid of this nesting with dominator update
         .child(html!("empty-fragment", {
-            
+
             .child_signal(
                 select_box
-                    .menu_pos_signal(get_selected_signal()) 
+                    .menu_pos_signal(get_selected_signal())
                     .map(clone!(state, select_box => move |pos| {
                         pos.map(|pos| {
                             html!("drag-container", {
@@ -90,7 +82,7 @@ pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<us
                                 .child(html!("menu-container", {
                                     .child(render_menu(state.clone(), index.clone()))
                                 }))
-                                .event(clone!(select_box => move |evt:events::Close| {
+                                .event(clone!(select_box => move |_evt:events::Close| {
                                     log::info!("GOT CLOSE!");
                                     select_box.menu_pos.set(None);
                                 }))
@@ -114,7 +106,7 @@ pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<us
                         .property("icon", "circle-kebab-grey")
                         .style("display", "block")
                         .with_node!(elem => {
-                            .event(clone!(select_box => move |evt:events::Click| {
+                            .event(clone!(select_box => move |_evt:events::Click| {
                                 let dom_rect = elem.get_bounding_client_rect();
                                 let x = dom_rect.x();
                                 let y = dom_rect.y();
@@ -127,6 +119,4 @@ pub fn render_select_box(state: Rc<TracesEdit>, index: ReadOnlyMutable<Option<us
         })))
 
     })
-
-
 }

@@ -1,26 +1,19 @@
-use dominator::{html, Dom, clone, svg, class};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use utils::{prelude::*, resize::{resize_info_signal, ResizeInfo}, math::bounds::BoundsF64};
-use wasm_bindgen::prelude::*;
-use futures_signals::{
-    map_ref,
-    signal::{Signal, SignalExt, ReadOnlyMutable},
-    signal_vec::{self, SignalVec, SignalVecExt},
-};
+use utils::resize::{resize_info_signal, ResizeInfo};
+
 use crate::traces::{
-    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks}, 
-    edit::state::*,
-    utils::*
+    svg::{self, ShapeStyle, ShapeStyleBase, SvgCallbacks},
+    utils::*,
+};
+use futures_signals::{
+    signal::SignalExt,
+    signal_vec,
 };
 
-use shared::domain::jig::module::body::{Transform, _groups::design::{Trace, TraceShape}};
-use web_sys::{SvgElement, HtmlCanvasElement};
-use awsm_web::canvas::get_2d_context;
-use once_cell::sync::Lazy;
-use std::fmt::Write;
+use shared::domain::jig::module::body::_groups::design::{Trace, TraceShape};
 
-pub fn render_traces_hint(traces: Vec<Trace>) -> Dom { 
-
+pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
     let traces = Rc::new(traces);
 
     let mask_children = resize_info_signal()
@@ -30,9 +23,9 @@ pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
                 .map(move |trace| {
                     let style = ShapeStyle::new(ShapeStyleBase::Mask);
                     let callbacks = SvgCallbacks::new(
-                        None::<fn()>, 
-                        None::<fn(web_sys::SvgElement)>, 
-                        None::<fn(web_sys::SvgElement)>, 
+                        None::<fn()>,
+                        None::<fn(web_sys::SvgElement)>,
+                        None::<fn(web_sys::SvgElement)>,
                     );
                     render_trace_hint(&style, &resize_info, &trace, callbacks)
                 })
@@ -45,34 +38,47 @@ pub fn render_traces_hint(traces: Vec<Trace>) -> Dom {
             svg::render_masks(
                 mask_children,
                 signal_vec::always(Vec::new()),
-                |x, y| {
+                |_x, _y| {
                 },
-                |x, y| {
+                |_x, _y| {
                 },
-                |x, y| {
+                |_x, _y| {
                 },
             )
         )
     })
 }
 
-pub fn render_trace_hint(style: &ShapeStyle, resize_info:&ResizeInfo, trace:&Trace, callbacks: SvgCallbacks) -> Dom {
-
-    let transform_size = trace.calc_size(resize_info)
+pub fn render_trace_hint(
+    style: &ShapeStyle,
+    resize_info: &ResizeInfo,
+    trace: &Trace,
+    callbacks: SvgCallbacks,
+) -> Dom {
+    let transform_size = trace
+        .calc_size(resize_info)
         .map(|size| (&trace.transform, size));
 
-
     match trace.shape {
-
         TraceShape::Path(ref path) => {
             svg::render_path(&style, &resize_info, transform_size, &path, callbacks)
-        },
+        }
 
-        TraceShape::Rect(width, height) => {
-            svg::render_rect(&style, &resize_info, transform_size, width, height, callbacks)
-        }
-        TraceShape::Ellipse(radius_x, radius_y) => {
-            svg::render_ellipse(&style, &resize_info, transform_size, radius_x, radius_y, callbacks)
-        }
+        TraceShape::Rect(width, height) => svg::render_rect(
+            &style,
+            &resize_info,
+            transform_size,
+            width,
+            height,
+            callbacks,
+        ),
+        TraceShape::Ellipse(radius_x, radius_y) => svg::render_ellipse(
+            &style,
+            &resize_info,
+            transform_size,
+            radius_x,
+            radius_y,
+            callbacks,
+        ),
     }
 }

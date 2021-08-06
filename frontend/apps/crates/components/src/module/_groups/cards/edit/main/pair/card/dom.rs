@@ -1,31 +1,29 @@
-use dominator::{html, Dom, clone, with_node};
+use dominator::{clone, html, Dom};
 use std::rc::Rc;
-use std::cell::RefCell;
+
 use utils::prelude::*;
 use wasm_bindgen::prelude::*;
-use web_sys::HtmlElement;
-use js_sys::Reflect;
-use futures_signals::{
-    map_ref,
-    signal::{self, Mutable, ReadOnlyMutable, SignalExt},
-    signal_vec::SignalVecExt,
-};
-use dominator_helpers::signals::EitherSignal;
+
+use super::state::*;
 use crate::{
     image::search::types::*,
-    tooltip::state::{State as TooltipState, TooltipData, TooltipConfirm, MoveStrategy, Placement},
     module::_groups::cards::{
+        edit::{config, state::*},
         lookup,
-        edit::{
-            config,
-            state::*,
-        }
-    }
+    },
 };
-use super::state::*;
-use shared::domain::jig::module::body::{ModeExt, _groups::cards::{Mode, Step}};
+use dominator_helpers::signals::EitherSignal;
+use futures_signals::{
+    map_ref,
+    signal::{self, SignalExt},
+};
+use js_sys::Reflect;
+use shared::domain::jig::module::body::{
+    ModeExt,
+    _groups::cards::{Mode, Step},
+};
 
-pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>) -> Dom {
+pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>) -> Dom {
     html!("main-card", {
         .property("slot", state.side.as_str_id())
         .property("side", state.side.as_str_id())
@@ -35,9 +33,9 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
         .property_signal("theme", state.base.theme_id_str_signal())
         .property("mode", state.base.mode.as_str_id())
 
-        .event(clone!(state => move |evt:events::Click| {
+        .event(clone!(state => move |_evt:events::Click| {
             if let Some(input_ref) = state.input_ref.borrow().as_ref() {
-                Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
+                let _  = Reflect::set(input_ref, &JsValue::from_str("editing"), &JsValue::from_bool(true));
                 state.editing_active.set_neq(true);
             }
 
@@ -59,7 +57,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
                                             (value.len(), *theme_id)
                                         }
                                 };
-                                
+
                                 let mode = state.base.mode.clone();
 
                                 sig.map(move |(len, theme_id)| {
@@ -71,7 +69,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
                             .property("constrainWidth", config::CARD_TEXT_LIMIT_WIDTH)
                             .property("constrainHeight", config::CARD_TEXT_LIMIT_HEIGHT)
                             .event(clone!(state => move |evt:events::CustomInput| {
-                                let index = state.index.get().unwrap_or_default();
+                                let _index = state.index.get().unwrap_or_default();
                                 let value = evt.value();
 
                                 if state.base.mode == Mode::Duplicate {
@@ -86,7 +84,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
                             .event(clone!(state => move |evt:events::CustomToggle| {
                                 state.editing_active.set_neq(evt.value());
                             }))
-                            .event(clone!(state, data => move |evt:events::Reset| {
+                            .event(clone!(state, data => move |_evt:events::Reset| {
                                 //Just need to change the linked pair
                                 //without affecting history
                                 if state.base.mode == Mode::Duplicate {
@@ -116,12 +114,12 @@ pub fn render<RawData: RawDataExt, E: ExtraExt> (state:Rc<MainCard<RawData, E>>)
                                             }
 
                                         }))
-                                        .event(clone!(state => move |evt:events::DragLeave| {
+                                        .event(clone!(state => move |_evt:events::DragLeave| {
                                             state.editing_active.set_neq(false);
                                         }))
                                         .event(clone!(state => move |evt:events::Drop| {
                                             if let Some(data_transfer) = evt.data_transfer() {
-                                                if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() { 
+                                                if let Some(data) = data_transfer.get_data(IMAGE_SEARCH_DATA_TRANSFER).ok() {
                                                     let data:ImageDataTransfer = serde_json::from_str(&data).unwrap_ji();
                                                     let index = state.index.get().unwrap_or_default();
                                                     state.replace_card_image(index, state.side, data.image);

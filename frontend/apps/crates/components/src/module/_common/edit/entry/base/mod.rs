@@ -1,4 +1,4 @@
-pub mod state;
+pub mod actions;
 pub mod dom;
 pub mod nav;
-pub mod actions;
+pub mod state;

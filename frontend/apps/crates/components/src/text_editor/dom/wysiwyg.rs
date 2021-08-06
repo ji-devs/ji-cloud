@@ -1,12 +1,12 @@
-use dominator::{Dom, clone, html};
+use crate::text_editor::font_css_converter::font_from_css;
+use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 use utils::prelude::*;
-use crate::text_editor::font_css_converter::font_from_css;
 
 use super::super::{
-    wysiwyg_types::{WysiwygControlsChange, ControlsChange},
     state::State,
+    wysiwyg_types::{ControlsChange, WysiwygControlsChange},
 };
 
 pub fn render(state: Rc<State>) -> Dom {

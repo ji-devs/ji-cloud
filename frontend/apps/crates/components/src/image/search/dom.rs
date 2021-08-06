@@ -1,13 +1,13 @@
-use dominator::{Dom, html, clone};
-use utils::prelude::*;
-use std::rc::Rc;
-use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use super::{
-    state::{State, BACKGROUND_NAME},
     actions::{get_background_id, search, upload_file},
+    state::{State, BACKGROUND_NAME},
     types::*,
 };
+use dominator::{clone, html, Dom};
+use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::{domain::jig::module::body::Image, media::MediaLibrary};
+use std::rc::Rc;
+use utils::prelude::*;
 
 pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
     html!("empty-fragment", {
@@ -25,7 +25,6 @@ pub fn render(state: Rc<State>, slot: Option<&str>) -> Dom {
         })))
     })
 }
-
 
 pub fn render_loaded(state: Rc<State>) -> Dom {
     state.loader.load(clone!(state => async move {
@@ -47,7 +46,7 @@ pub fn render_loaded(state: Rc<State>) -> Dom {
                 .event(clone!(image => move |evt: events::DragStart| {
                     if let Some(data_transfer) = evt.data_transfer() {
                         let data = ImageDataTransfer {
-                            image: Image { 
+                            image: Image {
                                 id: image.id.clone(),
                                 //TODO - this should change if the library has changed
                                 lib: MediaLibrary::Global
@@ -170,7 +169,7 @@ fn render_filters(state: Rc<State>) -> Dom {
                                 search(state.clone());
                             }))
                         })
-                        
+
                     })
                 }))
         )

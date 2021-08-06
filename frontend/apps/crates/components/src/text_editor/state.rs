@@ -1,22 +1,24 @@
+use std::cell::RefCell;
 use std::future::ready;
 use std::rc::Rc;
-use std::cell::RefCell;
 
 use dominator::clone;
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
+use js_sys::Reflect;
 use utils::{
     fonts::font_families_iter,
-    themes::{ThemeId, ThemeIdExt}
+    themes::{ThemeId, ThemeIdExt},
 };
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
-use js_sys::Reflect;
-use strum::IntoEnumIterator;
-use super::wysiwyg_types::{ControlsState, ControlsChange, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT};
-use super::dom::text_editor_controls::color_controls::ColorState;
+
 use super::callbacks::Callbacks;
+use super::dom::text_editor_controls::color_controls::ColorState;
+use super::wysiwyg_types::{
+    ControlsChange, ControlsState, ElementType, BOLD_WEIGHT, REGULAR_WEIGHT,
+};
 
 pub struct State {
     pub controls: Mutable<ControlsState>,
@@ -28,11 +30,14 @@ pub struct State {
     pub callbacks: Callbacks,
 }
 
-pub const ELEMENT_DEFAULT_KEY:&'static str = "elementDefault";
-
+pub const ELEMENT_DEFAULT_KEY: &'static str = "elementDefault";
 
 impl State {
-    pub fn new(theme_id: ReadOnlyMutable<ThemeId>, value: Option<String>, callbacks: Callbacks) -> Rc<Self> {
+    pub fn new(
+        theme_id: ReadOnlyMutable<ThemeId>,
+        value: Option<String>,
+        callbacks: Callbacks,
+    ) -> Rc<Self> {
         let _self = Rc::new(Self {
             controls: Mutable::new(ControlsState::new()),
             wysiwyg_ref: Mutable::new(None),
@@ -40,7 +45,7 @@ impl State {
             callbacks,
             value: RefCell::new(value),
             theme_id,
-            color_state: RefCell::new(None) 
+            color_state: RefCell::new(None),
         });
 
         *_self.color_state.borrow_mut() = Some(Rc::new(ColorState::new(_self.clone())));
@@ -63,11 +68,8 @@ impl State {
 
     pub fn select_all(&self) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
-            let select_all_method = Reflect::get(
-                &wysiwyg_ref,
-                &JsValue::from_str("selectAll")
-            )
-                .unwrap();
+            let select_all_method =
+                Reflect::get(&wysiwyg_ref, &JsValue::from_str("selectAll")).unwrap();
             let select_all_method = select_all_method.dyn_ref::<js_sys::Function>().unwrap();
             let _ = select_all_method.call0(&wysiwyg_ref);
         }
@@ -79,37 +81,40 @@ impl State {
                 let _ = Reflect::set(
                     &wysiwyg_ref,
                     &JsValue::from_str("valueAsString"),
-                    &JsValue::from_str(&value)
+                    &JsValue::from_str(&value),
                 );
-            },
+            }
             None => {
-                let reset_value_method = Reflect::get(
-                    &wysiwyg_ref,
-                    &JsValue::from_str("clearValue")
-                ).unwrap();
+                let reset_value_method =
+                    Reflect::get(&wysiwyg_ref, &JsValue::from_str("clearValue")).unwrap();
                 let reset_value_method = reset_value_method.dyn_ref::<js_sys::Function>().unwrap();
                 let _ = reset_value_method.call0(&wysiwyg_ref);
-            },
+            }
         };
     }
 
     fn handle_fonts(state: Rc<State>) {
-        spawn_local(state.theme_id.signal_cloned().for_each(clone!(state => move |theme| {
-            let mut fonts: Vec<String> = Vec::from(theme.get_text_editor_fonts());
-            let mut static_fonts: Vec<String> = font_families_iter().map(|font_family| {
-                font_family.to_string()
-            }).collect();
-            fonts.append(&mut static_fonts);
-            state.fonts.set(fonts);
-            ready(())
-        })));
+        spawn_local(
+            state
+                .theme_id
+                .signal_cloned()
+                .for_each(clone!(state => move |theme| {
+                    let mut fonts: Vec<String> = Vec::from(theme.get_text_editor_fonts());
+                    let mut static_fonts: Vec<String> = font_families_iter().map(|font_family| {
+                        font_family.to_string()
+                    }).collect();
+                    fonts.append(&mut static_fonts);
+                    state.fonts.set(fonts);
+                    ready(())
+                })),
+        );
     }
 
     pub(super) fn set_wysiwyg_ref(&self, wysiwyg_ref: HtmlElement) {
         let _ = Reflect::set(
             &wysiwyg_ref,
             &JsValue::from_str(ELEMENT_DEFAULT_KEY),
-            &JsValue::from_str(&ElementType::P1.to_string())
+            &JsValue::from_str(&ElementType::P1.to_string()),
         );
 
         self.update_wysiwyg_value(&wysiwyg_ref);
@@ -143,12 +148,11 @@ impl State {
     pub(super) fn set_control_value(&self, control: ControlsChange) {
         if let Some(wysiwyg_ref) = &self.wysiwyg_ref.lock_ref().as_ref() {
             let (key, value) = control.to_js_key_value();
-            let set_control_value_method = Reflect::get(
-                &wysiwyg_ref,
-                &JsValue::from_str("setControlValue")
-            )
+            let set_control_value_method =
+                Reflect::get(&wysiwyg_ref, &JsValue::from_str("setControlValue")).unwrap();
+            let set_control_value_method = set_control_value_method
+                .dyn_ref::<js_sys::Function>()
                 .unwrap();
-            let set_control_value_method = set_control_value_method.dyn_ref::<js_sys::Function>().unwrap();
             let _ = set_control_value_method.call2(&wysiwyg_ref, &key, &value);
         }
     }

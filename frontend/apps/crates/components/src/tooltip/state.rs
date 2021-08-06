@@ -1,19 +1,16 @@
+use super::callbacks::*;
+use std::rc::Rc;
 use utils::math::BoundsF64;
 use web_sys::HtmlElement;
-use std::rc::Rc;
-use super::callbacks::*;
 
 pub struct State {
     pub data: TooltipData,
-    pub target: TooltipTarget
+    pub target: TooltipTarget,
 }
 
 impl State {
     pub fn new(target: TooltipTarget, data: TooltipData) -> Self {
-        Self {
-            data,
-            target
-        }
+        Self { data, target }
     }
 }
 
@@ -30,7 +27,7 @@ pub enum Placement {
     RightEnd,
     Left,
     LeftStart,
-    LeftEnd
+    LeftEnd,
 }
 
 impl Placement {
@@ -38,16 +35,16 @@ impl Placement {
         match self {
             Self::Top => "top",
             Self::TopStart => "top-start",
-            Self::TopEnd=> "top-end",
+            Self::TopEnd => "top-end",
             Self::Bottom => "bottom",
             Self::BottomStart => "bottom-start",
-            Self::BottomEnd=> "bottom-end",
+            Self::BottomEnd => "bottom-end",
             Self::Right => "right",
             Self::RightStart => "right-start",
-            Self::RightEnd=> "rightend",
+            Self::RightEnd => "rightend",
             Self::Left => "left",
             Self::LeftStart => "left-start",
-            Self::LeftEnd=> "left-end",
+            Self::LeftEnd => "left-end",
         }
     }
 }
@@ -63,18 +60,17 @@ pub enum TooltipData {
     Bubble(Rc<TooltipBubble>),
 }
 
-
 pub struct TooltipError {
-    pub placement:Placement, 
-    pub slot: Option<String>, 
-    pub body: String, 
+    pub placement: Placement,
+    pub slot: Option<String>,
+    pub body: String,
     pub max_width: Option<f64>,
     pub callbacks: TooltipErrorCallbacks,
 }
 
 pub struct TooltipConfirm {
-    pub placement:Placement, 
-    pub slot: Option<String>, 
+    pub placement: Placement,
+    pub slot: Option<String>,
     pub header: String,
     pub confirm_label: String,
     pub cancel_label: String,
@@ -83,9 +79,9 @@ pub struct TooltipConfirm {
 }
 
 pub struct TooltipBubble {
-    pub placement:Placement, 
-    pub slot: Option<String>, 
-    pub body: String, 
+    pub placement: Placement,
+    pub slot: Option<String>,
+    pub body: String,
     pub max_width: Option<f64>,
 }
 
@@ -93,7 +89,7 @@ pub struct TooltipBubble {
 pub enum MoveStrategy {
     None,
     Destroy,
-    Track
+    Track,
 }
 
 impl MoveStrategy {
@@ -101,7 +97,7 @@ impl MoveStrategy {
         match self {
             Self::None => "",
             Self::Destroy => "destroy",
-            Self::Track => "track"
+            Self::Track => "track",
         }
     }
 }

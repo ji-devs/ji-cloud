@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::*;
-use crate::tooltip::state::{State as TooltipState};
+use crate::tooltip::state::State as TooltipState;
 use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 
 pub struct Callbacks {
     //this is passed to the JS custom element
@@ -9,10 +9,10 @@ pub struct Callbacks {
     pub set_tooltip_error: Box<dyn Fn(Option<Rc<TooltipState>>)>,
     pub replace_list: Box<dyn Fn(Vec<String>)>,
 
-    pub get_placeholder: Box<dyn Fn(usize) -> Option<String>>
+    pub get_placeholder: Box<dyn Fn(usize) -> Option<String>>,
 }
 
-// Example: 
+// Example:
 // state.app.limit_text(crate::config::SINGLE_LIST_CHAR_LIMIT, text)
 
 impl Callbacks {

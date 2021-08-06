@@ -1,8 +1,12 @@
-use std::rc::Rc;
 use rgb::RGBA8;
-use shared::{api::{ApiEndpoint, endpoints}, domain::user::{UserColorResponse, UserColorValueRequest}, error::EmptyError};
+use shared::{
+    api::{endpoints, ApiEndpoint},
+    domain::user::{UserColorResponse, UserColorValueRequest},
+    error::EmptyError,
+};
+use std::rc::Rc;
 
-use utils::{prelude::*, colors::*};
+use utils::prelude::*;
 
 use super::state::State;
 
@@ -18,21 +22,21 @@ pub async fn get_user_colors() -> Result<Vec<RGBA8>, EmptyError> {
         &endpoints::user::GetColors::PATH,
         endpoints::user::GetColors::METHOD,
         None,
-    ).await?;
+    )
+    .await?;
 
     Ok(res.colors)
 }
 
 pub async fn add_user_color(state: Rc<State>, color: RGBA8) -> Result<(), EmptyError> {
-    let req = UserColorValueRequest {
-        color,
-    };
+    let req = UserColorValueRequest { color };
 
     api_with_auth::<UserColorResponse, EmptyError, UserColorValueRequest>(
         &endpoints::user::CreateColor::PATH,
         endpoints::user::CreateColor::METHOD,
         Some(req),
-    ).await?;
+    )
+    .await?;
 
     state.user_colors.lock_mut().push_cloned(color.clone());
     set_selected(Rc::clone(&state), Some(color));
@@ -45,13 +49,13 @@ pub async fn delete_user_color(state: Rc<State>, index: usize) {
         &endpoints::user::DeleteColor::PATH.replace("{index}", &index.to_string()),
         endpoints::user::DeleteColor::METHOD,
         None,
-    ).await;
+    )
+    .await;
 
     match res {
         Err(_) => {}
         Ok(_) => {
             state.user_colors.lock_mut().remove(index);
-        },
+        }
     }
 }
-

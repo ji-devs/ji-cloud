@@ -1,26 +1,25 @@
-use std::rc::Rc;
-use dominator::{Dom, html, clone};
 use super::super::super::state::State;
+use crate::{
+    color_select::{self, state::State as ColorPickerState},
+    text_editor::wysiwyg_types::ControlsChange,
+};
+use dominator::{clone, html, Dom};
 use futures_signals::signal::Mutable;
-use utils::{prelude::*, colors::*};
 use futures_signals::signal::SignalExt;
 use rgb::RGBA8;
-use crate::{color_select::{
-    self,
-    state::State as ColorPickerState,
-}, text_editor::wysiwyg_types::ControlsChange};
+use std::rc::Rc;
+use utils::{colors::*, prelude::*};
 
 pub struct ColorState {
     pub select_for: Mutable<Option<ColorSelectFor>>,
     pub picker: Rc<ColorPickerState>,
 }
 
-
 impl ColorState {
-    pub fn new(state:Rc<State>) -> Self {
+    pub fn new(state: Rc<State>) -> Self {
         let picker = Rc::new(ColorPickerState::new(
             (*state).theme_id.clone(),
-            None, 
+            None,
             Some(clone!(state => move |color| {
                 let color = rgba8_to_hex_optional(&color);
                 let select_for = {
@@ -33,7 +32,7 @@ impl ColorState {
                     Some(ColorSelectFor::Box) => {state.set_control_value(ControlsChange::BoxColor(color))},
                     None => {}
                 };
-            }))
+            })),
         ));
 
         Self {
@@ -41,7 +40,6 @@ impl ColorState {
             picker,
         }
     }
-    
 }
 
 #[derive(Clone, Copy)]
@@ -97,7 +95,6 @@ pub fn render(state: Rc<State>) -> Dom {
         }))
     })
 }
-
 
 fn hex_to_rgba8_optional(color: &Option<String>) -> Option<RGBA8> {
     match color {

@@ -1,7 +1,7 @@
-use wasm_bindgen::prelude::*;
-use crate::tooltip::state::{State as TooltipState};
 use super::dom::ColumnSide;
+use crate::tooltip::state::State as TooltipState;
 use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 
 pub struct Callbacks {
     //this is passed to the JS custom element
@@ -15,7 +15,7 @@ pub struct Callbacks {
     pub get_header: Box<dyn Fn(ColumnSide) -> String>,
 }
 
-// Example: 
+// Example:
 // state.app.limit_text(crate::config::SINGLE_LIST_CHAR_LIMIT, text)
 
 impl Callbacks {

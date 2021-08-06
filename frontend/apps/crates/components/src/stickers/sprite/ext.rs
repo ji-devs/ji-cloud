@@ -13,7 +13,7 @@ impl SpriteExt for Sprite {
             transform: Transform::identity(),
             effects: Vec::new(),
             flip_horizontal: false,
-            flip_vertical: false
+            flip_vertical: false,
         }
     }
 }

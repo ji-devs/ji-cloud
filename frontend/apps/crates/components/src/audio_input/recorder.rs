@@ -1,7 +1,6 @@
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::File;
-use serde::{Serialize, Deserialize};
-
 
 #[derive(Serialize, Deserialize)]
 struct RecorderConfig {
@@ -37,7 +36,7 @@ pub struct AudioRecorder {
 impl AudioRecorder {
     pub fn new() -> Self {
         let config = RecorderConfig {
-            wasm_url: "https://unpkg.com/vmsg@0.3.0/vmsg.wasm".to_string()
+            wasm_url: "https://unpkg.com/vmsg@0.3.0/vmsg.wasm".to_string(),
         };
         let config = serde_wasm_bindgen::to_value(&config).unwrap();
         Self {

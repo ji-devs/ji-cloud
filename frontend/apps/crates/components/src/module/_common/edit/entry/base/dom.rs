@@ -5,27 +5,22 @@ mod regular;
 use regular::*;
 
 use super::state::*;
+use dominator::Dom;
 use std::rc::Rc;
-use dominator::{html, clone, Dom, with_node};
-use serde::{Serialize, de::DeserializeOwned};
-use std::collections::HashSet;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
+
+use shared::domain::jig::{
+    module::{
+        body::{BodyExt, ModeExt, StepExt},
+        ModuleId,
+    },
+    JigId,
 };
-use wasm_bindgen::prelude::*;
-use crate::module::_common::edit::header::controller::dom::ControllerDom;
-use super::super::actions::HistoryStateImpl;
-use shared::domain::jig::{JigId, module::{ModuleKind, ModuleId, body::{BodyExt, ModeExt, StepExt}}};
-use utils::{prelude::*, iframe::{IframeInit, EmptyMessage}}; 
-use dominator_helpers::events::Message;
 
 pub fn render<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>(
     is_preview: bool,
     jig_id: JigId,
     module_id: ModuleId,
-    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>
+    state: Rc<AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>>,
 ) -> Vec<Dom>
 where
     RawData: BodyExt<Mode, Step> + 'static,
@@ -42,7 +37,7 @@ where
         vec![
             render_preview_header(RawData::kind(), state.clone()),
             render_preview_main(RawData::kind(), jig_id, module_id, state.clone()),
-            render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone())
+            render_preview_overlay(RawData::kind(), jig_id, module_id, state.clone()),
         ]
     } else {
         vec![

@@ -1,66 +1,69 @@
-use std::rc::Rc;
-use std::cell::RefCell;
+use crate::audio_mixer::AudioMixer;
+use dominator::{clone, Dom};
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
 use shared::domain::jig::module::body::Instructions;
 use shared::{
-    api::endpoints::{ApiEndpoint, self, jig::module::*},
+    api::endpoints::{self, jig::module::*, ApiEndpoint},
+    domain::jig::{
+        module::{
+            body::{BodyExt, ModeExt, StepExt, ThemeChoice, ThemeId},
+            *,
+        },
+        *,
+    },
     error::EmptyError,
-    domain::jig::{*, module::{*, body::{ThemeId, ThemeChoice, ModeExt, BodyExt, StepExt}}},
 };
-use dominator::{clone, Dom};
-use futures_signals::signal::Mutable;
-use utils::languages::LANGUAGE_CODE_EN;
+use std::cell::RefCell;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
-use dominator_helpers::futures::AsyncLoader;
-use utils::{prelude::*, iframe::*};
 use std::marker::PhantomData;
-use crate::audio_mixer::AudioMixer;
+use std::rc::Rc;
+use utils::languages::LANGUAGE_CODE_EN;
+use utils::{iframe::*, prelude::*};
 use uuid::Uuid;
 
-pub struct GenericState <RawData, Mode, Step, Base> 
+pub struct GenericState<RawData, Mode, Step, Base>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Base: BaseExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
     pub(super) phase: Mutable<Rc<Phase<RawData, Base>>>,
     pub(super) jig: RefCell<Option<Jig>>,
     pub(super) opts: StateOpts<RawData>,
     pub(super) raw_loader: AsyncLoader,
     pub(super) page_body_switcher: AsyncLoader,
-    pub(super) audio_mixer: AudioMixer, 
+    pub(super) audio_mixer: AudioMixer,
     phantom: PhantomData<(Mode, Step)>,
 }
 
-impl <RawData, Mode, Step, Base> GenericState <RawData, Mode, Step, Base> 
+impl<RawData, Mode, Step, Base> GenericState<RawData, Mode, Step, Base>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Base: BaseExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
     pub fn new<InitFromRawFn, InitFromRawOutput>(
-        opts: StateOpts<RawData>, 
-        init_from_raw: InitFromRawFn, 
+        opts: StateOpts<RawData>,
+        init_from_raw: InitFromRawFn,
     ) -> Rc<Self>
     where
-        InitFromRawFn: Fn(InitFromRawArgs<RawData, Mode, Step>) -> InitFromRawOutput + Clone + 'static,
+        InitFromRawFn:
+            Fn(InitFromRawArgs<RawData, Mode, Step>) -> InitFromRawOutput + Clone + 'static,
         InitFromRawOutput: Future<Output = Rc<Base>>,
-        <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug
+        <RawData as TryFrom<ModuleBody>>::Error: std::fmt::Debug,
     {
-
-
         let loading_kind = {
-            let direct_data = opts.force_raw
-                .as_ref()
-                .and_then(|data| {
-                    if opts.force_raw_even_in_iframe || !should_get_iframe_data() {
-                        Some(data.clone())
-                    } else {
-                        None
-                    }
-                });
+            let direct_data = opts.force_raw.as_ref().and_then(|data| {
+                if opts.force_raw_even_in_iframe || !should_get_iframe_data() {
+                    Some(data.clone())
+                } else {
+                    None
+                }
+            });
 
             match direct_data {
                 Some(data) => LoadingKind::Direct(data),
@@ -81,7 +84,7 @@ where
             raw_loader: AsyncLoader::new(),
             page_body_switcher: AsyncLoader::new(),
             audio_mixer: AudioMixer::new(None),
-            phantom: PhantomData
+            phantom: PhantomData,
         });
 
         _self.raw_loader.load(clone!(_self, init_from_raw => async move {
@@ -127,7 +130,7 @@ where
 
             _self.audio_mixer.set_from_jig(&jig);
 
-            let (raw_source_player) = match _self.phase.get_cloned().loading_kind_unchecked() {
+            let raw_source_player = match _self.phase.get_cloned().loading_kind_unchecked() {
                 LoadingKind::Direct(raw) => Some((raw.clone(), InitSource::ForceRaw, false)),
                 LoadingKind::Iframe => {
                     _self.phase.set(Rc::new(Phase::WaitingIframeRaw(
@@ -194,13 +197,13 @@ where
 pub struct StateOpts<RawData> {
     pub jig_id: JigId,
     pub module_id: ModuleId,
-    pub force_raw: Option<RawData>, 
+    pub force_raw: Option<RawData>,
     pub force_raw_even_in_iframe: bool,
     pub skip_load_jig: bool,
     pub skip_play: bool,
 }
 
-impl <RawData> StateOpts<RawData> {
+impl<RawData> StateOpts<RawData> {
     pub fn new(jig_id: JigId, module_id: ModuleId) -> Self {
         Self {
             jig_id,
@@ -215,43 +218,38 @@ impl <RawData> StateOpts<RawData> {
 
 pub type RawDirect = bool;
 
-pub enum Phase <RawData, Base> 
-{
+pub enum Phase<RawData, Base> {
     Loading(LoadingKind<RawData>),
     WaitingIframeRaw(Rc<Box<dyn Fn(RawData)>>),
     Ready(Ready<Base>),
 }
 
 pub struct Ready<Base> {
-    pub base: Rc<Base>, 
+    pub base: Rc<Base>,
     pub jig_player: bool,
     pub play_started: Mutable<bool>,
 }
 
-impl <RawData, Base> Phase <RawData, Base> 
-{
+impl<RawData, Base> Phase<RawData, Base> {
     pub fn waiting_iframe_raw(&self) -> bool {
         match self {
-            Self::Loading(kind) => {
-                match kind {
-                    LoadingKind::Iframe => true,
-                    _ => false,
-                }
+            Self::Loading(kind) => match kind {
+                LoadingKind::Iframe => true,
+                _ => false,
             },
-            _ => false
+            _ => false,
         }
     }
 
     pub fn loading_kind_unchecked(&self) -> &LoadingKind<RawData> {
         match self {
             Self::Loading(kind) => kind,
-            _ => panic!("not loading kind!")
+            _ => panic!("not loading kind!"),
         }
     }
 }
 
-pub enum LoadingKind <RawData> 
-{
+pub enum LoadingKind<RawData> {
     Direct(RawData),
     Remote,
     Iframe,
@@ -260,45 +258,42 @@ pub enum LoadingKind <RawData>
 pub enum InitSource {
     ForceRaw,
     Load,
-    IframeData
+    IframeData,
 }
-pub struct InitFromRawArgs<RawData, Mode, Step> 
+pub struct InitFromRawArgs<RawData, Mode, Step>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
-    pub audio_mixer: AudioMixer, 
-    pub jig_id: JigId, 
-    pub module_id: ModuleId, 
-    pub jig: Jig, 
+    pub audio_mixer: AudioMixer,
+    pub jig_id: JigId,
+    pub module_id: ModuleId,
+    pub jig: Jig,
     pub raw: RawData,
     pub source: InitSource,
     pub theme_id: ThemeId,
-    phantom: PhantomData<(Mode, Step)>
+    phantom: PhantomData<(Mode, Step)>,
 }
 
-impl <RawData, Mode, Step> InitFromRawArgs <RawData, Mode, Step> 
+impl<RawData, Mode, Step> InitFromRawArgs<RawData, Mode, Step>
 where
     RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
     pub fn new(
-        audio_mixer: AudioMixer, 
-        jig_id: JigId, 
-        module_id: ModuleId, 
-        jig: Jig, 
+        audio_mixer: AudioMixer,
+        jig_id: JigId,
+        module_id: ModuleId,
+        jig: Jig,
         raw: RawData,
         source: InitSource,
     ) -> Self {
-
         let theme_id = match raw.get_theme() {
-            Some(theme_choice) => {
-                match theme_choice {
-                    ThemeChoice::Jig => jig.theme.clone(),
-                    ThemeChoice::Override(theme_id) => theme_id
-                }
+            Some(theme_choice) => match theme_choice {
+                ThemeChoice::Jig => jig.theme.clone(),
+                ThemeChoice::Override(theme_id) => theme_id,
             },
             None => {
                 log::warn!("this shouldn't happen! playing a module with no theme id...");
@@ -314,7 +309,7 @@ where
             jig,
             raw,
             source,
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 }
@@ -324,7 +319,7 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt: DomRenderable {
-    fn play(state: Rc<Self>) {}
+    fn play(_state: Rc<Self>) {}
     fn get_instructions(&self) -> Option<Instructions> {
         None
     }

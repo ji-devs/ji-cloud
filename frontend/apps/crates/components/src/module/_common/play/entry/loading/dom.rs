@@ -1,18 +1,17 @@
 use super::super::state::*;
+use dominator::{html, Dom};
 use std::rc::Rc;
-use dominator::{html, clone, Dom};
-use utils::prelude::*;
-use shared::domain::jig::module::body::{ModeExt, BodyExt, StepExt};
-use web_sys::AudioContext;
-use crate::audio_mixer::AudioMixer;
 
+use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
-pub fn render_loading<RawData, Mode, Step, Base> (state:Rc<GenericState<RawData, Mode, Step, Base>>) -> Dom
+pub fn render_loading<RawData, Mode, Step, Base>(
+    _state: Rc<GenericState<RawData, Mode, Step, Base>>,
+) -> Dom
 where
     Base: BaseExt + 'static,
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
-    Step: StepExt + 'static
+    Step: StepExt + 'static,
 {
     //TODO - make this a custom element
     html!("div", {

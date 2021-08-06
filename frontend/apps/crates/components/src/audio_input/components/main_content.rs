@@ -1,18 +1,15 @@
 use std::rc::Rc;
 
-use dominator::{Dom, clone, html};
-use futures_signals::signal::{SignalExt, from_stream};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::{from_stream, SignalExt};
 use gloo_timers::future::IntervalStream;
 use utils::events;
 use wasm_bindgen_futures::spawn_local;
-use shared::domain::jig::module::body::Audio;
 
-use crate::audio_input::state::{State, AudioInputMode, AudioInputAddMethod};
 use super::{super::actions::file_change, player};
-use futures_signals::signal::Signal;
+use crate::audio_input::state::{AudioInputAddMethod, AudioInputMode, State};
 
-
-pub fn render (state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
+pub fn render(state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAddMethod) -> Dom {
     match mode {
         AudioInputMode::Playing(audio) => player::dom::render(state.clone(), audio),
         AudioInputMode::Stopped(_) => render_input_icon("success"),
@@ -22,7 +19,7 @@ pub fn render (state: Rc<State>, mode: AudioInputMode, add_method: AudioInputAdd
     }
 }
 
-fn render_start (state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
+fn render_start(state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
     match add_method {
         AudioInputAddMethod::Record => render_input_icon("record"),
         AudioInputAddMethod::Upload => {
@@ -39,7 +36,7 @@ fn render_start (state: Rc<State>, add_method: AudioInputAddMethod) -> Dom {
                     });
                 }))
             })
-        },
+        }
     }
 }
 

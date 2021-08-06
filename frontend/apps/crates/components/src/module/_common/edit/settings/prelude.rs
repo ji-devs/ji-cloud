@@ -1,9 +1,6 @@
 pub use super::{
-    button::{
-        dom::*,
-        state::*
-    },
-    line::state::*,
+    button::{dom::*, state::*},
     dom::*,
+    line::state::*,
     state::*,
 };

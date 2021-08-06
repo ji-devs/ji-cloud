@@ -1,42 +1,32 @@
-use std::rc::Rc;
-use futures_signals::signal::{Mutable, SignalExt};
-use dominator::clone;
 use crate::{
-    backgrounds::actions::Layer,
+    color_select::state::State as ColorPickerState,
     image::search::{
-        state::{State as ImageSearchState, ImageSearchOptions},
-        callbacks::Callbacks as ImageSearchCallbacks
+        callbacks::Callbacks as ImageSearchCallbacks,
+        state::{ImageSearchOptions, State as ImageSearchState},
     },
-    color_select::state::{State as ColorPickerState},
+    module::_groups::cards::edit::state::*,
     theme_selector::state::{ThemeSelector, ThemeSelectorCallbacks},
-    module::_groups::cards::edit::{
-        state::*,
-        config,
-        strings
-    }
 };
-use shared::domain::jig::module::body::{Background, Image};
+use dominator::clone;
+use futures_signals::signal::Mutable;
+use shared::domain::jig::module::body::Background;
+use std::rc::Rc;
 
 pub struct Step2<RawData: RawDataExt, E: ExtraExt> {
     pub base: Rc<CardsBase<RawData, E>>,
     pub tab: Mutable<Tab>,
 }
 
-
-impl <RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
+impl<RawData: RawDataExt, E: ExtraExt> Step2<RawData, E> {
     pub fn new(base: Rc<CardsBase<RawData, E>>) -> Rc<Self> {
         let kind = match base.debug.step2_tab {
             Some(kind) => kind,
-            None => TabKind::Theme
+            None => TabKind::Theme,
         };
 
         let tab = Mutable::new(Tab::new(base.clone(), kind));
 
-
-        Rc::new(Self {
-            base,
-            tab, 
-        })
+        Rc::new(Self { base, tab })
     }
 }
 
@@ -65,38 +55,46 @@ pub enum Tab {
 }
 
 impl Tab {
-    pub fn new<RawData: RawDataExt, E: ExtraExt>(base: Rc<CardsBase<RawData, E>>, kind:TabKind) -> Self {
+    pub fn new<RawData: RawDataExt, E: ExtraExt>(
+        base: Rc<CardsBase<RawData, E>>,
+        kind: TabKind,
+    ) -> Self {
         match kind {
             TabKind::Theme => {
-                let callbacks = ThemeSelectorCallbacks::new(
-                    clone!(base => move |theme| {
-                        base.set_theme(theme);
-                    })
+                let callbacks = ThemeSelectorCallbacks::new(clone!(base => move |theme| {
+                    base.set_theme(theme);
+                }));
+                let state = ThemeSelector::new(
+                    base.jig_id,
+                    base.jig_theme_id.clone(),
+                    base.theme_id.clone(),
+                    callbacks,
                 );
-                let state = ThemeSelector::new(base.jig_id, base.jig_theme_id.clone(), base.theme_id.clone(), callbacks);
                 Self::Theme(Rc::new(state))
-            },
+            }
             TabKind::Image => {
                 let opts = ImageSearchOptions {
                     background_only: Some(true),
-                    upload: true, 
-                    filters: true, 
+                    upload: true,
+                    filters: true,
                 };
 
-                let callbacks = ImageSearchCallbacks::new(
-                    Some(clone!(base => move |image| {
-                        base.set_bg(Background::Image(image));
-                    }))
-                );
+                let callbacks = ImageSearchCallbacks::new(Some(clone!(base => move |image| {
+                    base.set_bg(Background::Image(image));
+                })));
                 let state = ImageSearchState::new(opts, callbacks);
 
                 Self::Image(Rc::new(state))
-            },
+            }
 
             TabKind::Color => {
-                let state = ColorPickerState::new(base.theme_id.clone(), None, Some(clone!(base => move |color| {
-                    base.set_bg(Background::Color(color));
-                })));
+                let state = ColorPickerState::new(
+                    base.theme_id.clone(),
+                    None,
+                    Some(clone!(base => move |color| {
+                        base.set_bg(Background::Color(color));
+                    })),
+                );
                 Self::Color(Rc::new(state))
             }
         }

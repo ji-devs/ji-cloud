@@ -1,25 +1,29 @@
-use dominator::{html, Dom, DomBuilder, clone, with_node, apply_methods};
+use dominator::{apply_methods, clone, html, with_node, Dom, DomBuilder};
 use dominator_helpers::signals::{DefaultSignal, DomRectSignal};
-use std::{borrow::BorrowMut, rc::Rc};
-use utils::{math::{BoundsF64, transform_signals}, prelude::*, resize::resize_info_signal};
-use wasm_bindgen::prelude::*;
+use std::rc::Rc;
+use utils::{math::transform_signals, prelude::*, resize::resize_info_signal};
+
+use super::{
+    super::{
+        dom::{BaseRawRenderOptions, BaseRenderOptions},
+        state::{AsSticker, Stickers},
+    },
+    menu::dom::render_sticker_text_menu,
+    state::Text,
+};
+use crate::{
+    text_editor::dom::render_wysiwyg,
+    transform::{
+        dom::render_transform,
+        state::{ResizeLevel, TransformState},
+    },
+};
 use futures_signals::{
     map_ref,
-    signal::{self, always, Always, Signal, Mutable, ReadOnlyMutable, SignalExt},
-    signal_vec::SignalVecExt,
+    signal::{Mutable, ReadOnlyMutable, SignalExt},
 };
-use shared::domain::jig::module::body::{_groups::design::Text as RawText, Transform};
-use crate::{text_editor::dom::render_wysiwyg, transform::{
-    dom::render_transform,
-    events::Move as TransformMove,
-    state::{TransformState, Action as TransformAction, ResizeLevel},
-}};
-use super::{
-    state::Text,
-    super::{dom::{BaseRawRenderOptions, BaseRenderOptions}, state::{Stickers, AsSticker}},
-    menu::dom::render_sticker_text_menu
-};
-use web_sys::{DomRect, HtmlElement};
+use shared::domain::jig::module::body::_groups::design::Text as RawText;
+use web_sys::HtmlElement;
 
 #[derive(Default)]
 pub struct TextRenderOptions {
@@ -31,27 +35,35 @@ pub struct TextRawRenderOptions {
     pub base: BaseRawRenderOptions,
 }
 
-pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, text: Rc<Text>, opts: Option<TextRenderOptions>) -> Dom {
+pub fn render_sticker_text<T: AsSticker>(
+    stickers: Rc<Stickers<T>>,
+    index: ReadOnlyMutable<Option<usize>>,
+    text: Rc<Text>,
+    opts: Option<TextRenderOptions>,
+) -> Dom {
+    let _opts = opts.unwrap_or_default();
 
-    let opts = opts.unwrap_or_default();
-
-    let get_visible_signals = || map_ref! {
-        let is_editing = text.is_editing.signal(),
-        let is_active = stickers.selected_signal(index.clone())
-            => {
-                (*is_active, *is_editing)
-            }
+    let get_visible_signals = || {
+        map_ref! {
+            let is_editing = text.is_editing.signal(),
+            let is_active = stickers.selected_signal(index.clone())
+                => {
+                    (*is_active, *is_editing)
+                }
+        }
     };
 
-    fn apply_transform<A: AsRef<HtmlElement>>(dom:DomBuilder<A>, transform: &TransformState) -> DomBuilder<A> {
-        dom
-                .style("position", "absolute")
-                .style_signal("transform", transform.rotation_matrix_string_signal())
-                .style_signal("top", transform.y_px_signal().map(|x| format!("{}px", x)))
-                .style_signal("left", transform.x_px_signal().map(|x| format!("{}px", x)))
-                //the text determines transform size, not the other way around
-                //.style_signal("width", transform.width_px_signal().map(|x| format!("{}px", x)))
-                //.style_signal("height", transform.height_px_signal().map(|x| format!("{}px", x)))
+    fn apply_transform<A: AsRef<HtmlElement>>(
+        dom: DomBuilder<A>,
+        transform: &TransformState,
+    ) -> DomBuilder<A> {
+        dom.style("position", "absolute")
+            .style_signal("transform", transform.rotation_matrix_string_signal())
+            .style_signal("top", transform.y_px_signal().map(|x| format!("{}px", x)))
+            .style_signal("left", transform.x_px_signal().map(|x| format!("{}px", x)))
+        //the text determines transform size, not the other way around
+        //.style_signal("width", transform.width_px_signal().map(|x| format!("{}px", x)))
+        //.style_signal("height", transform.height_px_signal().map(|x| format!("{}px", x)))
     }
 
     html!("empty-fragment", {
@@ -78,7 +90,7 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
                     .property_signal("theme", text.editor.theme_id.signal_cloned().map(|theme_id| theme_id.as_str_id()))
                     .style("cursor", "pointer")
                     .apply(|dom| apply_transform(dom, &text.transform))
-                    .event(clone!(index, stickers, text => move |evt:events::Click| {
+                    .event(clone!(index, stickers, text => move |_evt:events::Click| {
                         if let Some(index) = index.get_cloned() {
                             let value = text.value.get_cloned();
 
@@ -116,17 +128,22 @@ pub fn render_sticker_text<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOn
     })
 }
 
-
-
 //The parent part is a bit weird, but helpful for creating generic containers like StickerOutline
 //The idea is that the sticker sets styles on the parent and then appends itself
 //So the parent gets transformed etc.
-pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<TextRawRenderOptions>) -> Dom {
-    const COORDS_IN_CENTER:bool = true;
+pub fn render_sticker_text_raw(
+    text: &RawText,
+    theme_id: ThemeId,
+    opts: Option<TextRawRenderOptions>,
+) -> Dom {
+    const COORDS_IN_CENTER: bool = true;
 
     let opts = opts.unwrap_or_default();
 
-    let parent = opts.base.parent.unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
+    let parent = opts
+        .base
+        .parent
+        .unwrap_or_else(|| DomBuilder::new_html("empty-fragment"));
 
     let size = opts.base.size.unwrap_or_else(|| Mutable::new(None));
 
@@ -142,14 +159,14 @@ pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<T
     });
 
     let x_signal = transform_signals::x_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
     let y_signal = transform_signals::y_px(
-        COORDS_IN_CENTER, 
-        get_transform_signal(), 
-        size.signal_cloned(), 
+        COORDS_IN_CENTER,
+        get_transform_signal(),
+        size.signal_cloned(),
     );
 
     let mixin = opts.base.mixin;
@@ -192,7 +209,10 @@ pub fn render_sticker_text_raw(text: &RawText, theme_id: ThemeId, opts: Option<T
     })
 }
 
-fn mixin_measured_text(dom:DomBuilder<HtmlElement>, mut on_size: impl FnMut((f64, f64)) + 'static) -> DomBuilder<HtmlElement> {
+fn mixin_measured_text(
+    dom: DomBuilder<HtmlElement>,
+    mut on_size: impl FnMut((f64, f64)) + 'static,
+) -> DomBuilder<HtmlElement> {
     apply_methods!(dom, {
         .with_node!(elem => {
             .future(

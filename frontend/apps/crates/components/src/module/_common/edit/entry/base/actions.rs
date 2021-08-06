@@ -1,15 +1,11 @@
 use super::state::*;
-use dominator::clone;
-use futures_signals::{
-    map_ref,
-    signal::{Mutable, SignalExt, Signal},
-    signal_vec::{MutableVec, SignalVecExt, SignalVec},
-};
+
 use shared::domain::jig::module::body::{BodyExt, ModeExt, StepExt};
 
-impl <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> AppBase <RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay> 
+impl<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
+    AppBase<RawData, Mode, Step, Base, Main, Sidebar, Header, Footer, Overlay>
 where
-    RawData: BodyExt<Mode, Step> + 'static, 
+    RawData: BodyExt<Mode, Step> + 'static,
     Mode: ModeExt + 'static,
     Step: StepExt + 'static,
     Base: BaseExt<Step> + 'static,
@@ -33,7 +29,7 @@ where
 
                 self.history.push_modify(|raw| {
                     raw.set_editor_state_step(to);
-                    raw.insert_editor_state_step_completed(from);   
+                    raw.insert_editor_state_step_completed(from);
                 });
             }
             self.step.set_neq(to);

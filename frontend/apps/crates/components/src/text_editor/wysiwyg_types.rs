@@ -1,10 +1,10 @@
 // this file needs to be in sync with frontend\elements\src\core\wysiwyg\wysiwyg-types.ts
 
-use serde::{ Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 
-use strum_macros::{EnumIter, Display};
 use dominator_helpers::make_custom_event_serde;
+use strum_macros::{Display, EnumIter};
 
 use super::font_css_converter::font_to_css;
 
@@ -15,7 +15,6 @@ pub enum ElementType {
     P1,
     P2,
 }
-
 
 #[derive(Clone, Debug, Display, EnumIter, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -54,7 +53,7 @@ impl ControlsState {
     // maybe take from js default
     pub fn new() -> Self {
         Self {
-            font: super::config::DEFAULT_FONT_FAMILY.to_string(), 
+            font: super::config::DEFAULT_FONT_FAMILY.to_string(),
             element: ElementType::P1,
             weight: REGULAR_WEIGHT,
             align: Align::Left,
@@ -99,23 +98,17 @@ impl ControlsChange {
             Self::IndentCount(indent_count) => JsValue::from_f64(*indent_count as f64),
             Self::Italic(italic) => JsValue::from_bool(*italic),
             Self::Underline(underline) => JsValue::from_bool(*underline),
-            Self::Color(color) => {
-                match color {
-                    Some(color) => JsValue::from_str(&color),
-                    None => JsValue::UNDEFINED,
-                }
+            Self::Color(color) => match color {
+                Some(color) => JsValue::from_str(&color),
+                None => JsValue::UNDEFINED,
             },
-            Self::HighlightColor(highlight_color) => {
-                match highlight_color {
-                    Some(highlight_color) => JsValue::from_str(&highlight_color),
-                    None => JsValue::UNDEFINED,
-                }
+            Self::HighlightColor(highlight_color) => match highlight_color {
+                Some(highlight_color) => JsValue::from_str(&highlight_color),
+                None => JsValue::UNDEFINED,
             },
-            Self::BoxColor(highlight_color) => {
-                match highlight_color {
-                    Some(box_color) => JsValue::from_str(&box_color),
-                    None => JsValue::UNDEFINED,
-                }
+            Self::BoxColor(highlight_color) => match highlight_color {
+                Some(box_color) => JsValue::from_str(&box_color),
+                None => JsValue::UNDEFINED,
             },
         };
 
@@ -123,21 +116,23 @@ impl ControlsChange {
     }
 }
 
-make_custom_event_serde!("wysiwyg-controls-change", WysiwygControlsChange, ControlsChange);
+make_custom_event_serde!(
+    "wysiwyg-controls-change",
+    WysiwygControlsChange,
+    ControlsChange
+);
 
 impl WysiwygControlsChange {
     pub fn value(&self) -> ControlsChange {
-
         log::info!("{:#?}", self.detail());
 
         self.detail().into_serde().unwrap()
     }
 }
 
-
-pub fn enum_variant_to_string<T: ?Sized>(v: &T) -> String 
+pub fn enum_variant_to_string<T: ?Sized>(v: &T) -> String
 where
-    T: Serialize
+    T: Serialize,
 {
     let s = serde_json::to_string(&v).unwrap();
     let chars = s.chars();

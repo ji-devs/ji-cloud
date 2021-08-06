@@ -1,13 +1,17 @@
-use dominator::{html, Dom, clone};
+use super::{
+    super::super::state::{AsSticker, Stickers},
+    super::state::Video,
+};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::ReadOnlyMutable;
 use std::rc::Rc;
 use utils::prelude::*;
-use futures_signals::signal::ReadOnlyMutable;
-use super::{
-    super::state::Video,
-    super::super::state::{Stickers, AsSticker}
-};
 
-pub fn render_sticker_video_menu<T: AsSticker>(stickers:Rc<Stickers<T>>, index: ReadOnlyMutable<Option<usize>>, video: Rc<Video>) -> Dom {
+pub fn render_sticker_video_menu<T: AsSticker>(
+    stickers: Rc<Stickers<T>>,
+    index: ReadOnlyMutable<Option<usize>>,
+    video: Rc<Video>,
+) -> Dom {
     html!("div", {
         .children(&mut [
             html!("menu-line", {

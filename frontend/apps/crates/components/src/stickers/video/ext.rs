@@ -1,5 +1,8 @@
 use regex::Regex;
-use shared::domain::jig::module::body::{Transform, _groups::design::{Video, VideoHost, YoutubeUrl}};
+use shared::domain::jig::module::body::{
+    Transform,
+    _groups::design::{Video, VideoHost, YoutubeUrl},
+};
 use utils::prelude::*;
 
 pub trait VideoExt {
@@ -7,16 +10,14 @@ pub trait VideoExt {
 }
 
 impl VideoExt for Video {
-    /// Create a new Video 
+    /// Create a new Video
     fn new(host: VideoHost) -> Self {
         Self {
             host,
-            transform: Transform::identity()
+            transform: Transform::identity(),
         }
     }
 }
-
-
 
 const REGULAR_URL_BASE: &'static str = "https://www.youtube.com/watch?v=";
 const SHARE_URL_BASE: &'static str = "https://youtu.be/";
@@ -24,7 +25,7 @@ const EMBED_IFRAME_BASE: &'static str = "<iframe ";
 const EMBED_URL_BASE: &'static str = "https://www.youtube.com/embed/";
 
 fn get_id_from_url(url: &str) -> Result<&str, ()> {
-    let id ;
+    let id;
     if is_id(url) {
         return Ok(url);
     } else if url.starts_with(REGULAR_URL_BASE) {
@@ -63,7 +64,6 @@ fn is_id(id: &str) -> bool {
     let regex = Regex::new(r"^[\w|_|\-]{11}$").unwrap();
     regex.is_match(id)
 }
-
 
 pub trait YoutubeUrlExt {
     fn try_from(text: String) -> Result<YoutubeUrl, ()>;
@@ -105,7 +105,7 @@ mod tests {
             r#"<iframe width='560' height='315' src='https://www.youtube.com/embed/UQosz5VNsjY?start=58' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>"#,
             r#"<iframe src="https://www.youtube.com/embed/UQosz5VNsjY"></iframe>"#,
             "https://www.youtube.com/embed/UQosz5VNsjY",
-            "UQosz5VNsjY"
+            "UQosz5VNsjY",
         ];
 
         for url in valid_url_vec {

@@ -1,17 +1,16 @@
-use std::{cell::RefCell, collections::{HashSet}, rc::Rc};
-use futures_signals::signal::Mutable;
-use futures_signals::signal_vec::MutableVec;
-use dominator::clone;
-use dominator_helpers::futures::AsyncLoader;
-use shared::{media::MediaLibrary, domain::{image::*, meta::*}};
 use super::actions::{get_styles, get_tag_id_lookup};
-use utils::prelude::*;
 use super::callbacks::Callbacks;
 use crate::image::tag::ImageTag;
+use dominator::clone;
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
+use futures_signals::signal_vec::MutableVec;
+use shared::domain::{image::*, meta::*};
 use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
+use utils::prelude::*;
 
 pub const BACKGROUND_NAME: &'static str = "Background";
-
 
 pub struct State {
     pub image_list: MutableVec<ImageMetadata>,
@@ -25,7 +24,7 @@ pub struct State {
     pub styles: Rc<RefCell<Option<Vec<ImageStyle>>>>,
     pub tag_id_lookup: Rc<RefCell<Option<HashMap<ImageTag, TagId>>>>,
     pub selected_styles: Rc<RefCell<HashSet<ImageStyleId>>>,
-    pub callbacks: Callbacks
+    pub callbacks: Callbacks,
 }
 
 impl State {
@@ -34,8 +33,10 @@ impl State {
         let tag_id_lookup = Rc::new(RefCell::new(None));
         let selected_styles = HashSet::new();
 
-        if image_search_options.background_only.is_some() && image_search_options.background_only.unwrap_ji() {
-            //TODO - ImageSearchOptions should just use like Vec<ImageTag> 
+        if image_search_options.background_only.is_some()
+            && image_search_options.background_only.unwrap_ji()
+        {
+            //TODO - ImageSearchOptions should just use like Vec<ImageTag>
             //and then at query time get the id via tag_id_lookup
             //this is old:
             //let style_id = get_background_id(&styles);
@@ -65,10 +66,9 @@ impl State {
     }
 }
 
-
 // if some: control is visible and the some value is the default, if none: the control is not visible
 pub struct ImageSearchOptions {
     pub background_only: Option<bool>,
-    pub upload: bool, 
-    pub filters: bool, 
+    pub upload: bool,
+    pub filters: bool,
 }
